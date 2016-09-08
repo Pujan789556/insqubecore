@@ -8,6 +8,11 @@ application/logs/*
 !application/logs/index.html
 !application/logs/.htaccess
 
+
+# DB Reference Folder
+# --------------------------
+.db
+
 # Third party Reference
 # --------------------------
 __third-party-integrations

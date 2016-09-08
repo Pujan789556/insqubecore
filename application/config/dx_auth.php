@@ -47,7 +47,7 @@ $config['phpass_hash_strength'] = 8;
 |
 */
 
-$config['DX_table_prefix'] = '';
+$config['DX_table_prefix'] = 'auth_';
 $config['DX_users_table'] = 'users';
 $config['DX_user_profile_table'] = 'user_profile';
 $config['DX_user_temp_table'] = 'user_temp';
