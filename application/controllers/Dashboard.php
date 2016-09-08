@@ -22,6 +22,7 @@ class Dashboard extends MY_Controller
 	
 	function index()
 	{
+
 		$sess_data = $this->session->userdata();
 
 		$this->template->render([

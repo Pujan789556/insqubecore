@@ -82,8 +82,6 @@ class Template {
 	 *
 	 * Loads the template file and sets the default template.
 	 *
-	 * @uses	CI_Lang::$is_loaded
-	 *
 	 * @param	array	$config	Calendar options
 	 * @return	void
 	 */
@@ -109,7 +107,7 @@ class Template {
 	 * Accepts an associative array as input, containing display preferences
 	 *
 	 * @param	array	config preferences
-	 * @return	CI_Calendar
+	 * @return	Template
 	 */
 	public function initialize($config = array())
 	{
