@@ -8,14 +8,9 @@ class Dashboard extends MY_Controller
 	{
 		parent::__construct();
 		
+		// Form Validation
 		$this->load->library('Form_validation');		
 
-		// Check logged in?
-		if ( !$this->dx_auth->is_logged_in())
-		{
-			$this->dx_auth->deny_access('login');
-		}
-	
 		// Set Template for this controller
         $this->template->set_template('dashboard');
 	}
@@ -23,12 +18,12 @@ class Dashboard extends MY_Controller
 	function index()
 	{
 
-		$sess_data = $this->session->userdata();
+		// echo '<pre>';print_r($this->data);exit;
+		// $sess_data = $this->session->userdata();
 
-		$this->template->render([
-				        	'site_title' => 'Welcome',
-				        	'sess_data' => $sess_data
-				    	]);
+		$this->data['site_title'] = 'Welcome';
+
+		$this->template->render($this->data);
 	}
 
 }

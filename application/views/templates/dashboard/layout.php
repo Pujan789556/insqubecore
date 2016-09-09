@@ -43,7 +43,17 @@
                 /**
                  * Templete Section: Sidebar
                  */
-                echo isset($__section_sidebar) ? $__section_sidebar : '';
+                // echo isset($__section_sidebar) ? $__section_sidebar : '';
+                ?>
+                <?php 
+                /**
+                 * Templete Section: Header View
+                 * 
+                 * Section Data will be available to this view
+                 * 
+                 * Load Directly
+                 */
+                $this->load->view('templates/dashboard/_sidebar');
                 ?>
             </aside>
 
