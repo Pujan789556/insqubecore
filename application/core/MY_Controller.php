@@ -14,6 +14,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class MY_Controller extends CI_Controller
 {
 	/**
+	 * Controller Data
+	 * 
+	 * This data is passed into view for further procession
+	 * 
+	 * @var array
+	 */
+	public $data = [];
+
+
+	/**
 	 * Class constructor
 	 */
 	public function __construct()
@@ -21,14 +31,52 @@ class MY_Controller extends CI_Controller
 		parent::__construct();
 
 		/**
-		 * Define Theme
-		 */ 
-		define('THEME_URL', site_url('public/themes/AdminLTE-2.3.6/'));
+		 * Check logged in if the controller is not Auth
+		 */
+		$this->_check_logged_in();
 
 		/**
-		 * Check Login?
-		 */
+		 * Define Theme
+		 */ 
+		define('THEME_URL', site_url('public/themes/AdminLTE-2.3.6/'));	
+
+		/**
+		 * Active Primary Navigation Data
+		 */	
+		$this->active_nav_primary();
 	}
+
+	/**
+	 * Build Primary Navigation Data
+	 * 
+	 * This will build left sidebar active navigation control data
+	 * 
+	 * @return void
+	 */
+	public function active_nav_primary()
+	{
+		$this->data['_nav_primary'] = [
+			'level_0' => $this->router->fetch_class(),
+			'level_1' => $this->router->fetch_method()
+		];
+	}
+
+	/**
+	 * Check if user is logged in?
+	 * 
+	 * @return void
+	 */
+	public function _check_logged_in()
+	{
+		$controller = $this->router->fetch_class();
+
+		if ($controller !== 'auth' && !$this->dx_auth->is_logged_in() )
+		{
+			$this->dx_auth->deny_access('login');
+		}
+	}
+
+
 
 	/**
 	 *  @TODO: Add Authorization/Authentication Related Functions
