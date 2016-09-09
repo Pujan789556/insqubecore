@@ -211,7 +211,7 @@ class Template {
 	private function _set_http_code($code = 200)
 	{
 		$this->_http_code = $code;
-		http_response_code ( $this->_http_code );
+		set_status_header($code); // using CI standard method
 	}
 
 	/**
