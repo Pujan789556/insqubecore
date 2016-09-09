@@ -89,7 +89,7 @@ $autoload['drivers'] = array();
 |
 |	$autoload['helper'] = array('url', 'file');
 */
-$autoload['helper'] = array('url', 'form', 'insqb_db');
+$autoload['helper'] = array('url', 'form', 'insqube', 'insqube_db');
 
 /*
 | -------------------------------------------------------------------
