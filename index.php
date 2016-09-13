@@ -317,6 +317,18 @@ define('MAIL_DRIVER', ENVIRONMENT === 'development' ? 'log' : 'default');
 
 	define('VIEWPATH', $view_folder.DIRECTORY_SEPARATOR);
 
+
+/*
+ * --------------------------------------------------------------------
+ * MEDIA FOLDER
+ * --------------------------------------------------------------------
+ *
+ * Define media upload path outside the codebase 
+ * This is helpful separating codebase (different versions) and media
+ */
+$insqube_media_folder = realpath( BASEPATH . '../../insqube-media' );
+define('MEDIAPATH', $insqube_media_folder.DIRECTORY_SEPARATOR);
+
 /*
  * --------------------------------------------------------------------
  * LOAD THE BOOTSTRAP FILE
