@@ -83,3 +83,21 @@ defined('EXIT_USER_INPUT')     OR define('EXIT_USER_INPUT', 7); // invalid user 
 defined('EXIT_DATABASE')       OR define('EXIT_DATABASE', 8); // database error
 defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
+
+
+/*
+|--------------------------------------------------------------------------
+| CACHE DURATIONS
+|--------------------------------------------------------------------------
+|
+| Cache durations: 	
+| 		1 hour 	= 1 * 60 * 60 	= 3600 
+| 		1 day  	= 24 * 60 * 60 	= 86400 (default) 
+| 		1 week 	= 86400 * 7  	= 604800 
+| 		1 month = 86400 * 30 	= 2592000
+|
+*/
+define('CACHE_DURATION_HR', 3600);
+define('CACHE_DURATION_DAY', 86400);
+define('CACHE_DURATION_WEEK', 604800);
+define('CACHE_DURATION_MONTH', 2592000);
