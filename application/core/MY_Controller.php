@@ -22,6 +22,14 @@ class MY_Controller extends CI_Controller
 	 */
 	public $data = [];
 
+	/**
+	 * Application Settings from DB
+	 * 
+	 * @var object
+	 */
+	public $settings;
+
+	// --------------------------------------------------------------------
 
 	/**
 	 * Class constructor
@@ -44,7 +52,15 @@ class MY_Controller extends CI_Controller
 		 * Active Primary Navigation Data
 		 */	
 		$this->active_nav_primary();
+
+		/**
+		 * App Settings
+		 */
+		$this->load->model('setting_model');
+		$this->_app_settings();
 	}
+
+	// --------------------------------------------------------------------
 
 	/**
 	 * Build Primary Navigation Data
@@ -61,6 +77,8 @@ class MY_Controller extends CI_Controller
 		];
 	}
 
+	// --------------------------------------------------------------------
+
 	/**
 	 * Check if user is logged in?
 	 * 
@@ -74,6 +92,21 @@ class MY_Controller extends CI_Controller
 		{
 			$this->dx_auth->deny_access('login');
 		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set Application Settings from DB
+	 * 
+	 * @return void
+	 */
+	private function _app_settings()
+	{
+		/**
+         * Get Cached Result, If no, cache the query result
+         */
+        $this->settings = $this->setting_model->get(['id' => 1]);
 	}
 
 
