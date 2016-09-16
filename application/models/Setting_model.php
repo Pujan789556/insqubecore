@@ -9,8 +9,8 @@ class Setting_model extends MY_Model
 
     public $fillable = [	
     	// If you want, you can set an array with the fields that can be filled by insert/update
-    	'organization', 'address', 'per_page', 'flag_offline', 'offline_message', 
-    	'admin_email', 'from_email', 'replyto_email', 'noreply_email'
+    	'logo', 'organization', 'address', 'per_page', 'flag_offline', 'offline_message', 
+    	'admin_email', 'from_email', 'replyto_email', 'noreply_email', 'website'
     ]; 
 
     public $protected = ['id']; // ...Or you can set an array with the fields that cannot be filled by insert/update
@@ -76,7 +76,12 @@ class Setting_model extends MY_Model
 				'field' => 'noreply_email',
 		        'label' => 'No-reply Email',
 		        'rules' => 'trim|required|valid_email'
-			]
+			],
+            [
+                'field' => 'website',
+                'label' => 'Website',
+                'rules' => 'trim|valid_url|prep_url'
+            ]
 		]	
 	];
 
