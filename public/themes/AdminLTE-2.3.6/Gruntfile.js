@@ -63,6 +63,9 @@ module.exports = function (grunt) {
           "dist/css/skins/skin-red-light.min.css": "build/less/skins/skin-red-light.less",
           "dist/css/skins/skin-purple-light.min.css": "build/less/skins/skin-purple-light.less",
           "dist/css/skins/_all-skins.min.css": "build/less/skins/_all-skins.less"
+
+          // On/Off Switch (added by IP Bastola)
+          "dist/css/switch.min.css": "build/less/switch.less"
         }
       }
     },
