@@ -66,15 +66,30 @@ class MY_Controller extends CI_Controller
 	 * Build Primary Navigation Data
 	 * 
 	 * This will build left sidebar active navigation control data
+	 * The nav data can be set from the child controler to pass custom nav data.
+	 * 
+	 * The default data will be as:
+	 * 	level_0 : controller name (module)
+	 * 	level_1 : method name
+	 * 
+	 * The multiple nav levels help us to build the multi-level sidebar menu
 	 * 
 	 * @return void
 	 */
-	public function active_nav_primary()
+	public function active_nav_primary($nav_data = [])
 	{
-		$this->data['_nav_primary'] = [
-			'level_0' => $this->router->fetch_class(),
-			'level_1' => $this->router->fetch_method()
-		];
+		if( !empty($nav_data))
+		{
+			$this->data['_nav_primary'] = $nav_data;
+		}
+		else
+		{
+			$this->data['_nav_primary'] = [
+				'level_0' => $this->router->fetch_class(),
+				'level_1' => $this->router->fetch_method()
+			];
+		}
+			
 	}
 
 	// --------------------------------------------------------------------
