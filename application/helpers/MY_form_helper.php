@@ -33,6 +33,26 @@ if ( ! function_exists('form_email'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('form_url'))
+{
+	/**
+	 * URL Input Field
+	 *
+	 * @param	mixed
+	 * @param	string
+	 * @param	mixed
+	 * @return	string
+	 */
+	function form_url($data = '', $value = '', $extra = '')
+	{
+		is_array($data) OR $data = array('name' => $data);
+		$data['type'] = 'url';
+		return form_input($data, $value, $extra);
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('form_switch'))
 {
 	/**
