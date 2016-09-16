@@ -24,6 +24,7 @@ $( document ).ajaxError(function( event, request, settings ) {
             var InsQube = {
                 imagePreview: imagePreview,                
                 imagePopup: imagePopup,
+                liveSearch: liveSearch,
                 options: {},                
                 save: save,
                 subscribe: subscribe,
@@ -42,6 +43,28 @@ $( document ).ajaxError(function( event, request, settings ) {
             }
 
             /**
+             * Live Table/DOM Search
+             */
+            function liveSearch(f, options){
+                var $f = $(f),
+                opts = {
+                    rows : '#live-searchable tr.searchable' 
+                };
+
+                // Extends Options
+                opts = $.extend({}, opts, options);
+
+                var $rows = $(opts.rows),
+                    val = $.trim($f.val()).replace(/ +/g, ' ').toLowerCase();
+
+               // Search Filter 
+                $rows.show().filter(function() {
+                    var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                    return !~text.indexOf(val);
+                }).hide();
+            }
+
+            /**
              * Default Ajax Form Save
              */
              function save(form, callback){
@@ -54,7 +77,11 @@ $( document ).ajaxError(function( event, request, settings ) {
                     contentType: false,
                     processData: false,
                     success:function(r){  
-                        // Toastr the message 
+                        
+                        // Clear Toastr 
+                        toastr.clear();
+
+                        // Show message
                         if(r.status === 'success'){
                             toastr.success(r.message);
                         }else{
@@ -203,11 +230,48 @@ $( document ).ajaxError(function( event, request, settings ) {
         $btn = $('[type="submit"]', $this);
     $btn.button('loading');
     InsQube.save(this, function(r){
+
         // reload form?
         if( typeof r.reloadForm !== 'undefined' && r.reloadForm){
             var container = $this.data('pc'); 
-            $('#'+container).html(r.form);
+            $(container).html(r.form);
         }
+
+        if(r.status === 'success')
+        {
+            // Do we want to replace certain section on success?
+            if( typeof r.updateSection !== 'undefined' && r.updateSection === true){                
+                var dt = r.updateSectionData;
+                $(dt.box)[dt.method](dt.html);
+            }
+            // What about Edit Form Dialog?
+            if( typeof r.hideBootbox !== 'undefined' && r.hideBootbox === true){
+                bootbox.hideAll();
+            }
+        }
+
         $btn.button('reset');
     })
  });
+
+/**
+ * Ajax: Edit Form Dialog (using bootbox)
+ */
+ $(document).on('click', '.trg-dialog-edit', function(e){
+    e.preventDefault();
+    var $this = $(this),
+        url = $this.data('url'),
+        title = $this.data('title');
+
+        // Get FORM
+        $.getJSON(url, function(r){
+            if( typeof r.html !== 'undefined' && r.html){
+                bootbox.dialog({
+                    title: title,
+                    message: r.html
+                });
+            }
+        });
+ });
+
+

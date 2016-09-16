@@ -11,3 +11,17 @@
  .ins-img-ip{
  	cursor: pointer;
  }
+
+	
+
+ /* Small Devices, Tablets */
+@media only screen and (max-width : 767px) {
+
+	/*-- box-tools --*/
+	 .box-header>.box-tools{
+	 	position: relative;
+	 	right: inherit;
+	 	top: inherit;
+	 	margin-top:10px;
+	 }
+}

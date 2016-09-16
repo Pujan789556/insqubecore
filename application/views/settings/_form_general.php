@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <?php echo form_open_multipart( $this->uri->uri_string(), 
                                 [
                                     'class' => 'form-horizontal form-iqb-general',
-                                    'data-pc' => 'tab-general-settings' // parent container ID
+                                    'data-pc' => '#tab-general-settings' // parent container ID
                                 ]); ?>
     <div class="form-group">
         <label for="logo" class="col-sm-2 control-label">Logo</label>
