@@ -9,6 +9,7 @@
  */
 $nav_level_0      = $_nav_primary['level_0'];
 $nav_level_1      = $_nav_primary['level_1'];
+$nav_level_2      = isset($_nav_primary['level_2']) ? $_nav_primary['level_2'] : NULL;
 
 ?>
 <!-- sidebar: style can be found in sidebar.less -->
@@ -49,6 +50,21 @@ $nav_level_1      = $_nav_primary['level_1'];
                         <i class="fa fa-cog"></i> <span>Settings</span>
                   </a>
             </li>
+            <?php if( $this->dx_auth->is_admin() ):?>
+                  <li class="treeview <?php echo set_menu_active($nav_level_0, 'master_setup');?>">
+                        <a href="#">
+                              <i class="fa fa-gears"></i>
+                              <span>Master Setup</span>
+                              <span class="pull-right-container">
+                                    <i class="fa fa-angle-left pull-right"></i>
+                              </span>
+                        </a>
+                        <ul class="treeview-menu">
+                              <li class="<?php echo set_menu_active($nav_level_1, 'districts');?>"><a href="<?php echo site_url('districts');?>"><i class="fa fa-circle-o"></i> Districts</a></li>
+                        </ul>
+                  </li>
+            <?php endif; ?>
+
             <li class="treeview">
                   <a href="#">
                         <i class="fa fa-files-o"></i>
