@@ -35,7 +35,7 @@ class Setting_model extends MY_Model
 			[
 				'field' => 'organization',
 		        'label' => 'Organization Name',
-		        'rules' => 'required|trim|max_length[100]'
+		        'rules' => 'trim|required|max_length[100]'
 			],
 			[
 				'field' => 'address',
