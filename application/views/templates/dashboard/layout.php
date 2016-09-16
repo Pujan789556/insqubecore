@@ -116,11 +116,20 @@
         <script src="<?php echo THEME_URL; ?>plugins/slimScroll/jquery.slimscroll.min.js"></script>
 
         <!-- AdminLTE for demo purposes -->
-        <script src="<?php echo THEME_URL; ?>dist/js/demo.js"></script>
+        <!-- <script src="<?php echo THEME_URL; ?>dist/js/demo.js"></script> -->
+
+        <!-- Toastr -->
+        <script src="<?php echo THEME_URL; ?>plugins/toastr/toastr.min.js"></script>
+
+        <!-- bootbox (for alert, confirm) -->
+        <script src="<?php echo THEME_URL; ?>plugins/bootbox/bootbox.min.js"></script>
+
+        <!-- Insqube App -->
+        <script src="<?php echo base_url()?>public/app/js/insqube.js"></script>
 
         <script>
         $(function () {
-            $('input').iCheck({
+            $('input.icheck').iCheck({
                 checkboxClass: 'icheckbox_square-blue',
                 radioClass: 'iradio_square-blue',
                 increaseArea: '20%' // optional
