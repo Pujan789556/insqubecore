@@ -1,5 +1,8 @@
-/*
+/**
  * InsQube
+ *
+ *  Depends on: jQuery, Bootstrap, Toastr, Bootbox
+ * 
  * Copyright InsQube
  * Authors: IP Bastola
  * All Rights Reserved.
@@ -19,8 +22,9 @@ $( document ).ajaxError(function( event, request, settings ) {
         return (function () {
             
             var InsQube = {
-                imagePreview: imagePreview,
-                options: {},
+                imagePreview: imagePreview,                
+                imagePopup: imagePopup,
+                options: {},                
                 save: save,
                 subscribe: subscribe,
                 version: '1.0.0'
@@ -145,6 +149,21 @@ $( document ).ajaxError(function( event, request, settings ) {
                 }
             }
 
+            /**
+             * Popup Image into Bootbox alert (as a gallery preview)
+             */
+             function imagePopup(img, title){
+                var $img = $(img),
+                src = $img.data('src') ? $img.data('src') :  $img.attr('src');
+                html = '<div class="text-center"><img src="'+ src +'" class="thumbnail img-responsive" style="display:inline-block"></div>';
+
+                bootbox.alert({ 
+                    // size: 'large',
+                    title: title ? title : 'Preview Image',
+                    message: html
+                });
+             }
+
            
 
             ///////////////////////////
@@ -158,7 +177,6 @@ $( document ).ajaxError(function( event, request, settings ) {
             function getUniqueId() {
               return Math.round(new Date().getTime() + (Math.random() * 100));
             }
-
 
             function getDefaults() {
                 return {                    
@@ -177,7 +195,7 @@ $( document ).ajaxError(function( event, request, settings ) {
 
 
 /**
- * General Form Submission Handline
+ * General Form Submission Handling
  */
  $(document).on('submit', '.form-iqb-general', function(e){
     e.preventDefault();
@@ -187,7 +205,7 @@ $( document ).ajaxError(function( event, request, settings ) {
     InsQube.save(this, function(r){
         // reload form?
         if( typeof r.reloadForm !== 'undefined' && r.reloadForm){
-            var container = $this.data('parent-container');
+            var container = $this.data('pc'); 
             $('#'+container).html(r.form);
         }
         $btn.button('reset');

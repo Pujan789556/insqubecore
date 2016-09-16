@@ -1,0 +1,13 @@
+/**
+ * InsQube Styles
+ */
+/*-- Image Select Preview Box Container--*/
+.ins-img-ipb{
+	margin-top:10px;
+}
+	.ins-img-ipb > img{max-height: 100px;} 
+
+ /* -- Instant Image Preview Box*/
+ .ins-img-ip{
+ 	cursor: pointer;
+ }
