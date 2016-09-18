@@ -81,4 +81,19 @@ if ( ! function_exists('form_switch'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('field_compulsary_text'))
+{
+	/**
+	 * Get Compulsory Text on Form Label
+	 * 
+	 * @param bool $flag If true, we return the compulsory text
+	 * @return string
+	 */
+	function field_compulsary_text( $flag = false )
+	{
+		return $flag ? '<span class="text-red" title="This field is compulsory.">*</span>' : '';
+	}
+}
+
+// ------------------------------------------------------------------------
 
