@@ -66,7 +66,7 @@
                     echo isset($__section_content_header) ? $__section_content_header : '';
                     ?>
                 </section>
-                <section class="content">
+                <section class="content" id="iqb-primary-content">
                     <?php 
                     /**
                      * Templete Section: Content
