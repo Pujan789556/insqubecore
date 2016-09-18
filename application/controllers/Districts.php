@@ -23,13 +23,15 @@ class Districts extends MY_Controller
 			'name' => 'name_en',
 	        'label' => 'Name (EN)',
 	        '_id' 	=> 'name_en',
-	        '_type' => 'text'
+	        '_type' => 'text',
+	        '_required' => true
 		],
 		[
 			'name' => 'name_np',
 	        'label' => 'Name (NP)',
 	        '_id' 	=> 'name_np',
-	        '_type'	=> 'text'
+	        '_type'	=> 'text',
+	        '_required' => false
 		]	
 	];
 

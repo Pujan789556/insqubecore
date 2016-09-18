@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     
     <?php foreach($form_elements as $element):?>        
         <div class="form-group <?php echo form_error($element['name']) ? 'has-error' : '';?>">
-            <label for="<?php echo $element['_id'] ?>" class="col-sm-2 control-label"><?php echo $element['label']?></label>
+            <label for="<?php echo $element['_id'] ?>" class="col-sm-2 control-label"><?php echo $element['label'] . field_compulsary_text( $element['_required']);?></label>
             <div class="col-sm-10">
                 <?php 
                 /**
