@@ -22,7 +22,7 @@
         $this->load->view('templates/dashboard/_meta');
         ?>
     </head>
-    <body class="hold-transition skin-green-light sidebar-mini">
+    <body class="hold-transition skin-black-light sidebar-mini">
         <div class="wrapper">
             <header class="main-header">
                 <?php 
