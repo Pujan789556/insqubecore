@@ -82,11 +82,9 @@ $( document ).ajaxError(function( event, request, settings ) {
                         toastr.clear();
 
                         // Show message
-                        if(r.status === 'success'){
-                            toastr.success(r.message);
-                        }else{
-                            toastr.error(r.message);
-                        }
+                        // NOTE: r.status must be one of the toastr method [success|error|info|warning]
+                        toastr[r.status](r.message);
+                       
 
                         // Callback if any
                         if (callback && typeof(callback) === "function") {
@@ -228,6 +226,13 @@ $( document ).ajaxError(function( event, request, settings ) {
     e.preventDefault();
     var $this = $(this),
         $btn = $('[type="submit"]', $this);
+
+    if(!$btn.length){
+        // Find Primary button from Bootbox Model
+        $btn = $('.bootbox .modal-footer').find('button[data-bb-handler="primary"]');    
+        $btn.attr('data-loading-text', 'Saving...');       
+    }
+
     $btn.button('loading');
     InsQube.save(this, function(r){
 
@@ -261,14 +266,29 @@ $( document ).ajaxError(function( event, request, settings ) {
     e.preventDefault();
     var $this = $(this),
         url = $this.data('url'),
-        title = $this.data('title');
+        title = $this.data('title'),
+        form = $this.data('form');
 
         // Get FORM
         $.getJSON(url, function(r){
-            if( typeof r.html !== 'undefined' && r.html){
+            if( typeof r.form !== 'undefined' && r.form){
                 bootbox.dialog({
                     title: title,
-                    message: r.html
+                    message: r.form,
+                    buttons:{
+                        primary: {
+                            label: "Save",
+                            className: 'btn-primary',
+                            callback: function(e){
+                                $(form).trigger('submit');
+                                return false;
+                            }
+                        },
+                        cancel: {
+                            label: "Cancel",
+                            className: 'btn-default'
+                        }
+                    }
                 });
             }
         });
