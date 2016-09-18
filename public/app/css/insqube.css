@@ -12,6 +12,11 @@
  	cursor: pointer;
  }
 
+ /*-- Row Action Triggers --*/
+ .ins-action .action+.action{
+ 	margin-left:5px;
+ }
+
 	
 
  /* Small Devices, Tablets */

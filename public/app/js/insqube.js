@@ -294,4 +294,51 @@ $( document ).ajaxError(function( event, request, settings ) {
         });
  });
 
+ /**
+ * Ajax: Delete Record (using bootbox)
+ */
+ $(document).on('click', '.trg-row-delete', function(e){
+    e.preventDefault();
+    var $this = $(this),
+        url = $this.data('url'),
+        title = $this.data('title') || '<i class="fa fa-warning"></i>&nbsp;<strong>Confirmation Required!</strong>',
+        message = $this.data('message') || 'Are you sure you want to <strong>DELETE</strong> this record?<br/><strong>It cannot be UNDONE!</strong>';
+
+    bootbox.confirm({
+        className: 'modal-danger',
+        title: title,
+        message: message,
+        buttons: {
+            confirm: {className:'btn-outline'}
+        },
+        callback: function(yes){
+            if(yes){
+                $.getJSON(url, function(r){
+                    // Clear Toastr 
+                    toastr.clear();
+
+                    // Show message
+                    // NOTE: r.status must be one of the toastr method [success|error|info|warning]
+                    toastr[r.status](r.message);
+
+                    // remove row if success
+                    if(r.status === 'success'){
+                        $(r.rowId).fadeOut('slow', function(){
+                            $(this).remove();
+                        });
+                    }
+                });
+            }
+        }
+    });        
+ });
+
+
+
+/**
+ * Initialize Tooltip
+ */
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
 
