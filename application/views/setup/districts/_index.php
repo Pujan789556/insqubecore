@@ -9,11 +9,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="col-xs-12">
 		<div class="box">
 			<div class="box-header">
-				<h3 class="box-title">Manage Districts</h3>
-				<div class="box-tools">
-					<div class="input-group input-group-sm col-sm-6 col-sm-offset-6">
-						<span class="input-group-addon"><i class="fa fa-search"></i></span>
-						<input type="search" name="live_search" class="form-control pull-right" placeholder="Search" onkeyup="InsQube.liveSearch(this)">						
+				<div class="row">
+					<div class="col-sm-6">
+						<div class="input-group input-group-sm">
+							<span class="input-group-addon"><i class="fa fa-search"></i></span>
+							<input type="search" name="live_search" class="form-control pull-right" placeholder="Search" onkeyup="InsQube.liveSearch(this)">						
+						</div>
 					</div>
 				</div>
 			</div>

@@ -88,7 +88,7 @@ class Districts extends MY_Controller
 							'content_header', 
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Master Setup <small>Districts</small>',
+								'content_header' => 'Manage Districts',
 								'breadcrumbs' => ['Master Setup' => NULL, 'Districts' => NULL]
 						])
 						->partial('content', 'setup/districts/_index', compact('records'))
@@ -159,13 +159,13 @@ class Districts extends MY_Controller
 		}
 
 
-		$html = $this->load->view('setup/districts/_form', 
+		$form = $this->load->view('setup/districts/_form', 
 			[
 				'form_elements' => $this->form_elements,
 				'record' 		=> $record
 			], TRUE);
 
 		// Return HTML 
-		$this->template->json(compact('html'));
+		$this->template->json(compact('form'));
 	}
 }

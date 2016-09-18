@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <?php foreach($form_elements as $element):?>        
         <div class="form-group <?php echo form_error($element['name']) ? 'has-error' : '';?>">
             <label for="<?php echo $element['_id'] ?>" class="col-sm-2 control-label"><?php echo $element['label']?></label>
-            <div class="col-sm-10 col-md-6">
+            <div class="col-sm-10">
                 <?php 
                 /**
                  * Load Form Element
@@ -58,10 +58,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <?php if(form_error($element_config['name'])):?><span class="help-block"><?php echo form_error($element_config['name']); ?></span><?php endif?>
             </div>
         </div>
-    <?php endforeach?>
-    <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10 col-md-6">
-            <button type="submit" class="btn btn-danger" data-loading-text="Saving...">Submit</button>
-        </div>
-    </div>
+    <?php endforeach?>   
+    <button type="submit" class="hide">Submit</button> 
 <?php echo form_close();?>
