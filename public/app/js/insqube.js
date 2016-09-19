@@ -13,7 +13,15 @@
  * Ajax Error Reporting
  */
 $( document ).ajaxError(function( event, request, settings ) {
-    toastr.error('Something went wrong with the server. Please contact administrator for further support.');
+    var message = '<strong>Oops!</strong><br/>Something went wrong with the server. Please contact administrator for further support.';
+    toastr.clear(); // remove older toast
+    try {
+        var json = $.parseJSON(request.responseText);
+        if(typeof json.error !== 'undefined'){
+            message = json.error === 'not_found' ? '<strong>Oops!</strong><br/>The content you are looking for was NOT FOUND.' : json.error;
+        }        
+    }catch(err) { }    
+    toastr.error(message);
 });
 
 /* global define */
@@ -233,6 +241,8 @@ $( document ).ajaxError(function( event, request, settings ) {
         $btn.attr('data-loading-text', 'Saving...');       
     }
 
+    console.log('hi submit');
+
     $btn.button('loading');
     InsQube.save(this, function(r){
 
@@ -267,12 +277,14 @@ $( document ).ajaxError(function( event, request, settings ) {
     var $this = $(this),
         url = $this.data('url'),
         title = $this.data('title'),
-        form = $this.data('form');
+        form = $this.data('form'),
+        size = $this.data('box-size') ? $this.data('box-size') : '';
 
         // Get FORM
         $.getJSON(url, function(r){
             if( typeof r.form !== 'undefined' && r.form){
                 bootbox.dialog({
+                    size: size,
                     title: title,
                     message: r.form,
                     buttons:{
@@ -289,6 +301,12 @@ $( document ).ajaxError(function( event, request, settings ) {
                             className: 'btn-default'
                         }
                     }
+                });
+
+                // checkbox Beautify
+                $('input.icheck').iCheck({
+                    checkboxClass: 'icheckbox_square-blue',
+                    radioClass: 'iradio_square-blue'
                 });
             }
         });
@@ -322,7 +340,7 @@ $( document ).ajaxError(function( event, request, settings ) {
                     toastr[r.status](r.message);
 
                     // remove row if success
-                    if(r.status === 'success'){
+                    if(r.status === 'success' && r.removeRow == true ){
                         $(r.rowId).fadeOut('slow', function(){
                             $(this).remove();
                         });
@@ -336,9 +354,8 @@ $( document ).ajaxError(function( event, request, settings ) {
 
 
 /**
- * Initialize Tooltip
+ * Global Initialize Tooltip ( works well on dynamic content)
  */
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
-
+$('body').tooltip({
+    selector: '[data-toggle="tooltip"]'
+});
