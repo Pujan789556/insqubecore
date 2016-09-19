@@ -19,7 +19,7 @@ class Activity {
 	/**
 	 * Current Activity Object
 	 *
-	 * @var string
+	 * @var object
 	 */
 	private $_activity = NULL;
 
@@ -58,7 +58,7 @@ class Activity {
 	/**
 	 * Class constructor
 	 *
-	 * @param	array	$config	Calendar options
+	 * @param	array	$config	Activity options
 	 * @return	void
 	 */
 	public function __construct( $activity = NULL )
@@ -77,9 +77,9 @@ class Activity {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Initialize the user preferences
+	 * Initialize the activity params
 	 *
-	 * Accepts an associative array as input, containing display preferences
+	 * Accepts an associative array as input, containing activity preferences
 	 *
 	 * @param	array	config preferences
 	 * @return	Activity
@@ -112,12 +112,12 @@ class Activity {
 	public function save($data)
 	{
 		// Load Models
-		$this->ci->load->model('activities/activities');
+		$this->ci->load->model('activity_model');
 
 		// Validate module and action
 		if( $this->_before_save($data) )
 		{
-			return $this->ci->activities->save($data);
+			return $this->ci->activity_model->insert($data);
 		}
 		return FALSE;
 	}
@@ -145,8 +145,9 @@ class Activity {
 		}
 
 		// Valid module (action)
-		$action = $data['action'];
-		if( $valid && array_key_exists($action, $configs[$module]['_actions']))
+		$action = isset($data['action']) ? $data['action'] : NULL;
+
+		if( !empty($action) && $valid && array_key_exists($action, $configs[$module]['_actions']))
 		{
 			$valid = TRUE;
 		}
