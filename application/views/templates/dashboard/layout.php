@@ -126,15 +126,5 @@
 
         <!-- Insqube App -->
         <script src="<?php echo base_url()?>public/app/js/insqube.js"></script>
-
-        <script>
-        $(function () {
-            $('input.icheck').iCheck({
-                checkboxClass: 'icheckbox_square-blue',
-                radioClass: 'iradio_square-blue',
-                increaseArea: '20%' // optional
-            });
-        });
-        </script>
     </body>
 </html>

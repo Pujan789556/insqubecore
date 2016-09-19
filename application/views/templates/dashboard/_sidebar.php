@@ -68,8 +68,7 @@ $nav_level_2      = isset($_nav_primary['level_2']) ? $_nav_primary['level_2'] :
                                           </span>
                                     </a>
                                     <ul class="treeview-menu">
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'roles');?>"><a href="<?php echo site_url('roles');?>"><i class="fa fa-circle-o"></i> Roles</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'permissions');?>"><a href="<?php echo site_url('permissions');?>"><i class="fa fa-circle-o"></i> Permissions</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'roles');?>"><a href="<?php echo site_url('roles');?>"><i class="fa fa-circle-o"></i> Roles &amp; Permissions</a></li>    
                                     </ul>
                               </li>
                         </ul>
