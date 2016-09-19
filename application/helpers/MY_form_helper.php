@@ -97,3 +97,21 @@ if ( ! function_exists('field_compulsary_text'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('permission_text'))
+{
+	/**
+	 * Get Permission into Formatted text
+	 * 
+	 * Example: create.user --> Create user
+	 * 
+	 * @param string $permission Permission String
+	 * @return string
+	 */
+	function permission_text( $permission )
+	{
+		return ucfirst(str_replace('.', ' ', $permission));
+	}
+}
+
+// ------------------------------------------------------------------------
+

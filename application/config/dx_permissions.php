@@ -18,21 +18,39 @@
 | permission matrix assigned to Roles
 |
 */
-$config['DX_permissions']['user'] = [
-	'create.user',
-	'edit.user',
-	'delete.user',
-	'ban.user'
-];
-$config['DX_permissions']['role'] = [
-	'create.role',
-	'edit.role',
-	'delete.role',
-	'assign.to.user'
-];
-$config['DX_permissions']['permission'] = [
-	'create.permision',
-	'edit.permission',
-	'delete.permission',
-	'assign.to.role'
+$config['DX_permissions'] = [
+
+	/**
+	 * User Module
+	 */
+	'users'  => [
+		'create.user',
+		'edit.user',
+		'delete.user',
+		'ban.user'
+	],
+
+	/**
+	 * Role Module
+	 */
+	'roles' => [
+		'create.role',
+		'edit.role',
+		'delete.role',
+		'assign.to.user'
+	],
+
+	/**
+	 * District Module
+	 */
+	'districts' => [
+		'edit.district'
+	],
+
+	/**
+	 * Setting Module
+	 */
+	'settings' => [
+		'edit.setting'
+	]
 ];
