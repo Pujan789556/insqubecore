@@ -59,7 +59,8 @@ class Districts extends MY_Controller
         // Setup Navigation        
 		$this->active_nav_primary([
 			'level_0' => 'master_setup',
-			'level_1' => $this->router->fetch_class()
+			'level_1' => 'general',
+			'level_2' => $this->router->fetch_class()
 		]);
 
 		// Load Model

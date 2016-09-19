@@ -60,7 +60,18 @@ $nav_level_2      = isset($_nav_primary['level_2']) ? $_nav_primary['level_2'] :
                               </span>
                         </a>
                         <ul class="treeview-menu">
-                              <li class="<?php echo set_menu_active($nav_level_1, 'districts');?>"><a href="<?php echo site_url('districts');?>"><i class="fa fa-circle-o"></i> Districts</a></li>
+                              <li class="<?php echo set_menu_active($nav_level_1, 'general');?>">
+                                    <a href="#"><i class="fa fa-circle-o"></i> General
+                                          <span class="pull-right-container">
+                                                <i class="fa fa-angle-left pull-right"></i>
+                                          </span>
+                                    </a>
+                                    <ul class="treeview-menu">
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'countries');?>"><a href="<?php echo site_url('countries');?>"><i class="fa fa-circle-o"></i> Countries</a></li> 
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'districts');?>"><a href="<?php echo site_url('districts');?>"><i class="fa fa-circle-o"></i> Districts</a></li>    
+                                    </ul>
+                              </li>
+
                               <li class="<?php echo set_menu_active($nav_level_1, 'security');?>">
                                     <a href="#"><i class="fa fa-circle-o"></i> Security
                                           <span class="pull-right-container">
