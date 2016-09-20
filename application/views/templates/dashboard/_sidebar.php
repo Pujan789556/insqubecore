@@ -47,13 +47,13 @@ $nav_level_2      = isset($_nav_primary['level_2']) ? $_nav_primary['level_2'] :
             </li>
             <li class="<?php echo set_menu_active($nav_level_0, 'settings');?>">
                   <a href="<?php echo site_url('settings');?>">
-                        <i class="fa fa-cog"></i> <span>Settings</span>
+                        <i class="fa fa-cog"></i> <span>Application Settings</span>
                   </a>
             </li>
             <?php if( $this->dx_auth->is_admin() ):?>
                   <li class="treeview <?php echo set_menu_active($nav_level_0, 'master_setup');?>">
                         <a href="#">
-                              <i class="fa fa-gears"></i>
+                              <i class="fa fa-server"></i>
                               <span>Master Setup</span>
                               <span class="pull-right-container">
                                     <i class="fa fa-angle-left pull-right"></i>
@@ -61,25 +61,26 @@ $nav_level_2      = isset($_nav_primary['level_2']) ? $_nav_primary['level_2'] :
                         </a>
                         <ul class="treeview-menu">
                               <li class="<?php echo set_menu_active($nav_level_1, 'general');?>">
-                                    <a href="#"><i class="fa fa-circle-o"></i> General
+                                    <a href="#"><i class="fa fa-arrow-circle-o-down"></i> General
                                           <span class="pull-right-container">
                                                 <i class="fa fa-angle-left pull-right"></i>
                                           </span>
                                     </a>
                                     <ul class="treeview-menu">
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'countries');?>"><a href="<?php echo site_url('countries');?>"><i class="fa fa-circle-o"></i> Countries</a></li> 
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'districts');?>"><a href="<?php echo site_url('districts');?>"><i class="fa fa-circle-o"></i> Districts</a></li>    
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'countries');?>"><a href="<?php echo site_url('countries');?>"><i class="fa fa-globe"></i> Countries</a></li> 
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'districts');?>"><a href="<?php echo site_url('districts');?>"><i class="fa fa-circle-o"></i> Districts</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'branches');?>"><a href="<?php echo site_url('branches');?>"><i class="fa fa-circle-o"></i> Branches</a></li>    
                                     </ul>
                               </li>
 
                               <li class="<?php echo set_menu_active($nav_level_1, 'security');?>">
-                                    <a href="#"><i class="fa fa-circle-o"></i> Security
+                                    <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Security
                                           <span class="pull-right-container">
                                                 <i class="fa fa-angle-left pull-right"></i>
                                           </span>
                                     </a>
                                     <ul class="treeview-menu">
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'roles');?>"><a href="<?php echo site_url('roles');?>"><i class="fa fa-circle-o"></i> Roles &amp; Permissions</a></li>    
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'roles');?>"><a href="<?php echo site_url('roles');?>"><i class="fa fa-lock"></i> Roles &amp; Permissions</a></li>    
                                     </ul>
                               </li>
                         </ul>

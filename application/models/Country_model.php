@@ -39,12 +39,12 @@ class Country_model extends MY_Model
             [
                 'field' => 'alpha2',
                 'label' => 'Country Code (alpha 2)',
-                'rules' => 'trim|required|alpha|exact_length[2]'
+                'rules' => 'trim|required|alpha|exact_length[2]|is_unique[master_countries.alpha2]'
             ],
             [
                 'field' => 'alpha3',
                 'label' => 'Country Code (alpha 3)',
-                'rules' => 'trim|required|alpha|exact_length[3]'
+                'rules' => 'trim|required|alpha|exact_length[3]|is_unique[master_countries.alpha3]'
             ],
             [
                 'field' => 'dial_code',
@@ -73,7 +73,39 @@ class Country_model extends MY_Model
 	 */
     public function __construct()
     {
-        parent::__construct();      
+        parent::__construct();  
+
+        // Before Create/Update Callbacks           
+        $this->before_create[] = 'capitalize_codes';
+        $this->before_update[] = 'capitalize_codes'; 
+    }
+
+    // ----------------------------------------------------------------
+
+    public function capitalize_codes($data)
+    {
+        $code_cols = array('alpha2', 'alpha3', 'currency_code');
+        foreach($code_cols as $col)
+        {
+            if( isset($data[$col]) && !empty($data[$col]) )
+            {
+                $data[$col] = strtoupper($data[$col]);
+            }
+        }
+        return $data;        
+    }
+
+    // ----------------------------------------------------------------
+
+    public function check_duplicate($where, $id=NULL)
+    {
+        if( $id )
+        {
+            $this->db->where('id !=', $id);
+        }
+        // $where is array ['key' => $value]
+        return $this->db->where($where)
+                        ->count_all_results($this->table);
     }
 
     

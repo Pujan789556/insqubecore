@@ -141,6 +141,12 @@ class Countries extends MY_Controller
 		 */
 		if( $this->input->post() )
 		{
+			// Update Validation Rule on Update
+			$this->country_model->rules['insert'][1]['rules'] = 'trim|required|alpha|exact_length[2]|callback_check_duplicate_alpha2';
+
+			$this->country_model->rules['insert'][2]['rules'] = 'trim|required|alpha|exact_length[3]|callback_check_duplicate_alpha3';
+
+
 			// Now Update Data
         	$done = $this->country_model->from_form()->update(NULL, $id);
         	$view = '';
@@ -197,4 +203,48 @@ class Countries extends MY_Controller
 		// Return HTML 
 		$this->template->json(compact('form'));
 	}
+
+	// --------------------------------------------------------------------
+
+    /**
+     * Check Duplicate Callback: Alpha2
+     * 
+     * @param string $alpha2 
+     * @param integer|null $id 
+     * @return bool
+     */	
+    public function check_duplicate_alpha2($alpha2, $id=NULL){
+
+    	$alpha2 = strtoupper( $alpha2 ? $alpha2 : $this->input->post('alpha2') );
+    	$id   = $id ? (int)$id : (int)$this->input->post('id');
+
+        if( $this->country_model->check_duplicate(['alpha2' => $alpha2], $id))
+        {
+            $this->form_validation->set_message('check_duplicate_alpha2', 'The %s already exists.');
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Check Duplicate Callback: Alpha3
+     * 
+     * @param string $alpha2 
+     * @param integer|null $id 
+     * @return bool
+     */	
+    public function check_duplicate_alpha3($alpha3, $id=NULL){
+
+    	$alpha3 = strtoupper( $alpha3 ? $alpha3 : $this->input->post('alpha3') );
+    	$id   = $id ? (int)$id : (int)$this->input->post('id');
+
+        if( $this->country_model->check_duplicate(['alpha3' => $alpha3], $id))
+        {
+            $this->form_validation->set_message('check_duplicate_alpha3', 'The %s already exists.');
+            return FALSE;
+        }
+        return TRUE;
+    }
 }
