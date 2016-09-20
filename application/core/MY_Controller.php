@@ -85,8 +85,8 @@ class MY_Controller extends CI_Controller
 		else
 		{
 			$this->data['_nav_primary'] = [
-				'level_0' => $this->router->fetch_class(),
-				'level_1' => $this->router->fetch_method()
+				'level_0' => $this->router->class,
+				'level_1' => $this->router->method
 			];
 		}
 			

@@ -88,7 +88,7 @@ class Countries extends MY_Controller
 		$this->active_nav_primary([
 			'level_0' => 'master_setup',
 			'level_1' => 'general',
-			'level_2' => $this->router->fetch_class()
+			'level_2' => $this->router->class
 		]);
 
 		// Load Model
