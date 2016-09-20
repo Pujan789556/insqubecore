@@ -138,11 +138,12 @@ class Role_model extends MY_Model
 	// 	return $this->db->get($this->_table);
 	// }
 	
-	// function get_role_by_id($role_id)
-	// {
-	// 	$this->db->where('id', $role_id);
-	// 	return $this->db->get($this->_table);
-	// }
+	// Required by DX_auth Library
+	function get_role_by_id($role_id)
+	{
+		$this->db->where('id', $role_id);
+		return $this->db->get($this->table);
+	}
 	
 	// function create_role($name, $parent_id = 0)
 	// {

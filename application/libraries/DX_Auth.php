@@ -267,7 +267,7 @@ class DX_Auth
 	function _get_role_data($role_id)
 	{
 		// Load models
-		$this->ci->load->model('dx_auth/roles', 'roles');
+		$this->ci->load->model('dx_auth/role_model', 'role_model');
 		$this->ci->load->model('dx_auth/permissions', 'permissions');
 	
 		// Clear return value
@@ -280,7 +280,7 @@ class DX_Auth
 		/* Get role_name, parent_roles_id and parent_roles_name */
 		
 		// Get role query from role id
-		$query = $this->ci->roles->get_role_by_id($role_id);
+		$query = $this->ci->role_model->get_role_by_id($role_id);
 		
 		// Check if role exist
 		if ($query->num_rows() > 0)
@@ -311,7 +311,7 @@ class DX_Auth
 				// Get all parent id
 				while ($finished == FALSE)
 				{
-					$i_query = $this->ci->roles->get_role_by_id($parent_id);
+					$i_query = $this->ci->role_model->get_role_by_id($parent_id);
 					
 					// If role exist
 					if ($i_query->num_rows() > 0)
