@@ -9,7 +9,7 @@ class Setting_model extends MY_Model
 
     public $fillable = [	
     	// If you want, you can set an array with the fields that can be filled by insert/update
-    	'logo', 'organization', 'address', 'per_page', 'flag_offline', 'offline_message', 
+    	'logo', 'organization', 'address', 'pan_no', 'per_page', 'flag_offline', 'offline_message', 
     	'admin_email', 'from_email', 'replyto_email', 'noreply_email', 'website'
     ]; 
 
@@ -42,6 +42,11 @@ class Setting_model extends MY_Model
 		        'label' => 'Headquarter Full Address',
 		        'rules' => 'trim|required',
 			],
+            [
+                'field' => 'pan_no',
+                'label' => 'PAN Number',
+                'rules' => 'trim|required',
+            ],
 			[
 				'field' => 'per_page',
 		        'label' => 'Pagination Limit',

@@ -22,6 +22,12 @@ class Settings extends MY_Controller
 	        '_type'	=> 'textarea'
 		],
 		[
+			'name' => 'pan_no',
+	        'label' => 'PAN Number',
+	        '_id' 	=> 'pan_no',
+	        '_type'	=> 'text'
+		],
+		[
 			'name' => 'per_page',
 	        'label' => 'Pagination Limit',
 	        '_id' 	=> 'per_page',

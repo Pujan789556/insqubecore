@@ -9,6 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             'class' => 'form-horizontal form-iqb-general',
                             'data-pc' => '.bootbox-body' // parent container ID
                         ], 
+                        // Hidden Fields
                         isset($record) ? ['id' => $record->id] : []); ?>
     
     <?php foreach($form_elements as $element):?>        
