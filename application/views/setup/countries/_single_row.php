@@ -11,8 +11,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->dial_code;?></td>
 	<td><?php echo $record->currency_code;?></td>
 	<td><?php echo $record->currency_name;?></td>
-	<td>
-		<a href="#" title="Edit" class="trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Edit Country' data-url="<?php echo site_url('countries/edit/' . $record->id);?>" data-form=".form-iqb-general" data-toggle="tooltip">
+	<td class="ins-action">
+		<a href="#" title="Edit" class="trg-dialog-edit action" data-title='<i class="fa fa-pencil-square-o"></i> Edit Country' data-url="<?php echo site_url('countries/edit/' . $record->id);?>" data-form=".form-iqb-general" data-toggle="tooltip">
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
 		</a>

@@ -14,8 +14,9 @@
 
  /*-- Row Action Triggers --*/
  .ins-action .action+.action{
- 	margin-left:5px;
+ 	margin-left:10px;
  }
+ .ins-action .action .fa{font-size: 1.5em;}
 
 	
 
