@@ -25,7 +25,7 @@ class DX_Auth
 	var $_auth_error;	// Contain user error when login
 	var $_captcha_image;
 	
-	function DX_Auth()
+	function __construct()
 	{
 		$this->ci =& get_instance();
 
