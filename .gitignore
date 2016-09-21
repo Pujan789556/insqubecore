@@ -9,15 +9,21 @@ application/logs/*
 !application/logs/.htaccess
 
 
-
 # Test Controller & Other Local Files
-# ----------------------------------
+# --------------------------------------
 info.php
+random.php
 application/controllers/Test.php
 
-# DB Reference Folder
+
+# Environment Config
 # --------------------------
+.env
+
+# DB, Wiki Docs Reference Folder
+# --------------------------------
 .db
+.wiki
 
 # Third party Reference
 # --------------------------
