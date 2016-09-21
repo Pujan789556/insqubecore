@@ -8,8 +8,11 @@ application/logs/*
 !application/logs/index.html
 !application/logs/.htaccess
 
-# Test Controller
-# --------------------------
+
+
+# Test Controller & Other Local Files
+# ----------------------------------
+info.php
 application/controllers/Test.php
 
 # DB Reference Folder
