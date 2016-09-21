@@ -133,9 +133,9 @@ class Setting_model extends MY_Model
     	if($this->delete_cache_on_save === TRUE)
         {
         	// it will prefix mc_ on the supplied name 
-        	// which becomes "mc_settings_one" and that was set by 
+        	// which becomes "mc_master_settings_one" and that was set by 
         	// get() function above
-        	$this->delete_cache('settings_one'); 
+        	$this->delete_cache('master_settings_one'); 
         }       
         return TRUE;
     }
