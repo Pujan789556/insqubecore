@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://insqube.dev/';
+$config['base_url'] = APP_URL;
 
 /*
 |--------------------------------------------------------------------------
@@ -314,7 +314,7 @@ $config['cache_query_string'] = FALSE;
 | https://codeigniter.com/user_guide/libraries/encryption.html
 |
 */
-$config['encryption_key'] = 'rtZgfF6PcPWy9Tkkzvc8giWu(k9p!L@+vPrBUTrwHt3JdujZZulKWOZSHsFORuu2Ff^5nTMdrLk8lLp6c7ryoxR7';
+$config['encryption_key'] = APP_KEY;
 
 /*
 |--------------------------------------------------------------------------
@@ -367,7 +367,7 @@ $config['encryption_key'] = 'rtZgfF6PcPWy9Tkkzvc8giWu(k9p!L@+vPrBUTrwHt3JdujZZul
 | except for 'cookie_prefix' and 'cookie_httponly', which are ignored here.
 |
 */
-$config['sess_driver'] = 'database';
+$config['sess_driver'] = SESSION_DRIVER;
 $config['sess_cookie_name'] = 'ci_session';
 $config['sess_expiration'] = 7200;
 $config['sess_save_path'] = 'ci_sessions'; // sess_driver = database, sess_save_path = <db_session_table_name>

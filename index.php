@@ -53,7 +53,54 @@
  *
  * NOTE: If you change these, also change the error_reporting() code below
  */
-	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
+
+function ___environment_defaults()
+{    
+    $environment_file = './.env';
+
+    if(!file_exists($environment_file))
+    {
+    	header('HTTP/1.1 503 Service Unavailable.', TRUE, 503);
+		echo 'The application environment file not found.';
+		exit(1); // EXIT_ERROR
+    }
+
+    $data = file($environment_file);
+    $data = array_filter($data, function($value){
+        $value = trim($value);
+        if(!empty($value)) return $value;
+    }); // remove empty lines
+
+    /**
+     * @TODO: Cache Data
+     * 	Cache the data so that every time you have a server request,
+     * 	you don't have to read it from file.		
+     */
+    
+    foreach($data as $d)
+    {
+        $pair 		= explode('=', $d);
+        $constant 	= strtoupper(trim($pair[0]));
+        $value 		= trim(isset($pair[1]) ? $pair[1] : '');
+
+        // convert true/false into boolean
+        if(strtolower($value) == 'true')
+        {
+            $value = TRUE;
+        }
+        else if(strtolower($value) == 'false')
+        {
+            $value = FALSE;
+        }
+
+        // Define constants
+        define($constant, $value);
+    }
+}
+___environment_defaults();
+define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : APP_ENV);
+
+
 
 /*
  *---------------------------------------------------------------
@@ -88,18 +135,6 @@ switch (ENVIRONMENT)
 		echo 'The application environment is not set correctly.';
 		exit(1); // EXIT_ERROR
 }
-
-/*
- *---------------------------------------------------------------
- * MAIL SETTINGS
- *---------------------------------------------------------------
- *
- * Log emails on local/development environments
- * 
- * @added_by IP Bastola
- */
-define('MAIL_DRIVER', ENVIRONMENT === 'development' ? 'log' : 'default');
-
 
 /*
  *---------------------------------------------------------------

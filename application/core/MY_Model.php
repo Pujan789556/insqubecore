@@ -139,7 +139,7 @@ class MY_Model extends CI_Model
     /** end relationships variables */
 
     /*caching*/
-    public $cache_driver = 'memcached';
+    public $cache_driver = CACHE_DRIVER;
     public $cache_prefix = 'mc';
     protected $_cache = array();
     public $delete_cache_on_save = FALSE;
