@@ -25,15 +25,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
 		</a>	
-		<a href="#" 
+		<a href="<?php echo site_url('branches/details/' . $record->id);?>" 
 			data-toggle="tooltip"
-			title="View branch" 
-			class="trg-dialog-edit action" 
-			data-title='<i class="fa fa-building-o"></i> View Branch' 
-			data-url="<?php echo site_url('branches/details/' . $record->id);?>" 
-			data-form=".form-iqb-general">
-			<i class="fa fa-eye"></i>
-			<span class="hidden-xs">View</span>
+			title="View branch details." 
+			class="action">
+			<i class="fa fa-building-o"></i>
+			<span class="hidden-xs">Details</span>
 		</a>		
 		<a href="#" 
 			title="Delete" 

@@ -169,6 +169,7 @@ class Branches extends MY_Controller
 	 */
 	private function _save($action, $record = NULL)
 	{
+
 		// Valid action?
 		if( !in_array($action, array('add', 'edit')))
 		{
@@ -187,6 +188,7 @@ class Branches extends MY_Controller
 		{
 			$done = FALSE;
 			
+			$contact_data = get_contact_data_from_form();
 
 			// Insert or Update?
 			if($action === 'add')
@@ -271,6 +273,11 @@ class Branches extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Delete a Branch
+	 * @param integer $id 
+	 * @return json
+	 */
 	public function delete($id)
 	{
 		// Valid Record ?
@@ -284,7 +291,7 @@ class Branches extends MY_Controller
 		// Admin Constraint?
 		$done = $this->branch_model->delete($record->id);
 
-		// @TODO: elete Branch Contact Address as well
+		// @TODO: Delete Branch Contact Address as well
 
 		if($done)
 		{
@@ -329,4 +336,24 @@ class Branches extends MY_Controller
 
     // --------------------------------------------------------------------
 
+    public function details($id)
+    {
+    	$id = (int)$id;
+		$record = $this->branch_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+		$this->data['site_title'] = 'Branch Details | ' . $record->name;
+		$this->template->partial(
+							'content_header', 
+							'templates/_common/_content_header',
+							[
+								'content_header' => 'Branch Details <small>' . $record->name . '</small>',
+								'breadcrumbs' => ['Branches' => 'branches', 'Details' => NULL]
+						])
+						->partial('content', 'setup/branches/_details', compact('record'))
+						->render($this->data);
+
+    }
 }

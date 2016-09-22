@@ -9,7 +9,7 @@ class Branch_model extends MY_Model
 
     public $fillable = [	
     	// If you want, you can set an array with the fields that can be filled by insert/update
-    	'name', 'code'
+    	'name', 'code', 'contacts'
     ]; 
 
     public $protected = ['id']; // ...Or you can set an array with the fields that cannot be filled by insert/update
@@ -58,6 +58,14 @@ class Branch_model extends MY_Model
         // Before Create/Update Callbacks           
         $this->before_create[] = 'capitalize_code';
         $this->before_update[] = 'capitalize_code'; 
+
+        // Get Contact JSON Data 
+        $this->before_create[] = 'prepare_contact_data';
+        $this->before_update[] = 'prepare_contact_data'; 
+
+
+        // Merge Contact Validation Rules
+        $this->rules['insert'] = array_merge($this->rules['insert'], get_contact_form_validation_rules());
     }
 
     // ----------------------------------------------------------------
@@ -73,6 +81,14 @@ class Branch_model extends MY_Model
             }
         }
         return $data;        
+    }
+
+    // ----------------------------------------------------------------
+
+    public function prepare_contact_data($data)
+    {
+        $data['contacts'] = get_contact_data_from_form();
+        return $data;
     }
 
     // ----------------------------------------------------------------

@@ -108,6 +108,28 @@ class Country_model extends MY_Model
                         ->count_all_results($this->table);
     }
 
+    // --------------------------------------------------------------------
+
+    public function dropdown( $column='alpha2' )
+    {
+        $countries = [];
+        if( in_array($column, array('alpha2', 'alpha3')))
+        {
+            /**
+             * Cache Names:
+             *      alpha2: mc_master_countries_alpha2
+             *      alpha3: mc_master_countries_alpha3
+             */
+            $this->_select = "`name`, `{$column}`";
+            $records = $this->set_cache($column)->get_all();
+
+            foreach($records as $record)
+            {
+                $countries[$record->{$column}] = $record->name;
+            }
+        }
+        return $countries;
+    }
     
 	// --------------------------------------------------------------------
 
@@ -116,10 +138,18 @@ class Country_model extends MY_Model
      */
     public function _prep_after_write()
     {
+        $cache_names = [
+            'master_countries_all',
+            'master_countries_alpha2',
+            'master_countries_alpha3'
+        ];
     	if($this->delete_cache_on_save === TRUE)
         {
         	// cache name without prefix
-        	$this->delete_cache('master_countries_all'); 
+            foreach($cache_names as $cache)
+            {
+                $this->delete_cache($cache);     
+            }
         }       
         return TRUE;
     }
