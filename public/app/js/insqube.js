@@ -57,13 +57,24 @@ $( document ).ajaxError(function( event, request, settings ) {
                 var $f = $(f),
                 opts = {
                     rows : '#live-searchable tr.searchable' 
-                };
+                },
+                $btn_clear = $(f).next('.live-search-clear');
 
                 // Extends Options
                 opts = $.extend({}, opts, options);
-
                 var $rows = $(opts.rows),
                     val = $.trim($f.val()).replace(/ +/g, ' ').toLowerCase();
+
+                // Clear Action
+                if($btn_clear.length && val != ''){
+                    $btn_clear.fadeIn();
+
+                    $btn_clear.on('click', function(e){
+                        e.preventDefault();
+                        $f.val('').trigger('keyup');
+                        $btn_clear.fadeOut();
+                    });
+                }                
 
                // Search Filter 
                 $rows.show().filter(function() {

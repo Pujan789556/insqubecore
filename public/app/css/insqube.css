@@ -18,7 +18,71 @@
  }
  .ins-action .action .fa{font-size: 1.5em;}
 
-	
+/*-- Rounded Button --*/
+.btn-round{
+	border-radius: 24px; 
+}
+
+/*-- Circular Button --*/
+.btn-circle {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 1.428571429;
+  border-radius: 15px;
+}
+.btn-circle.btn-lg {
+  width: 50px;
+  height: 50px;
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.33;
+  border-radius: 25px;
+}
+.btn-circle.btn-xl {
+  width: 70px;
+  height: 70px;
+  padding: 10px 16px;
+  font-size: 24px;
+  line-height: 1.33;
+  border-radius: 35px;
+}
+
+/* -- Live Search -- */
+.live-search-search{
+	position: absolute;
+	left: 20px;
+    top: 10px;	
+}
+.live-search-clear{
+	position: absolute;
+    right: 22px;
+    top: 8px;
+    display: none;	
+    cursor: pointer;
+}
+.live-search-search+.live-search{
+	padding-left:20px;
+	padding-right: 16px;
+}
+
+/*.live-search:active+.live-search-clear,
+.live-search:focus+.live-search-clear{
+	display: inline;
+}*/
+
+
+
+/*----------------------------------*/
+/* -- AdminLTE Customization -- 	*/
+/*----------------------------------*/
+.box-header.gray{
+	background: #f4f4f5;
+    border-bottom: 1px solid #cdcdcd;
+}
+
 
  /* Small Devices, Tablets */
 @media only screen and (max-width : 767px) {
