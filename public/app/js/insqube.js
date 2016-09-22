@@ -66,15 +66,18 @@ $( document ).ajaxError(function( event, request, settings ) {
                     val = $.trim($f.val()).replace(/ +/g, ' ').toLowerCase();
 
                 // Clear Action
-                if($btn_clear.length && val != ''){
-                    $btn_clear.fadeIn();
-
-                    $btn_clear.on('click', function(e){
-                        e.preventDefault();
-                        $f.val('').trigger('keyup');
+                if($btn_clear.length){
+                    if(val != ''){
+                        $btn_clear.fadeIn();
+                        $btn_clear.on('click', function(e){
+                            e.preventDefault();
+                            $f.val('').trigger('keyup');
+                            $btn_clear.fadeOut();
+                        });
+                    }else{
                         $btn_clear.fadeOut();
-                    });
-                }                
+                    }                    
+                }
 
                // Search Filter 
                 $rows.show().filter(function() {
@@ -368,5 +371,6 @@ $( document ).ajaxError(function( event, request, settings ) {
  * Global Initialize Tooltip ( works well on dynamic content)
  */
 $('body').tooltip({
-    selector: '[data-toggle="tooltip"]'
+    selector: '[data-toggle="tooltip"]',
+    container: 'body'
 });

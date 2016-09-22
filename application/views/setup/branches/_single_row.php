@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-url="<?php echo site_url('branches/edit/' . $record->id);?>" 
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>
-			<span class="hidden-xs hide">Edit</span>
+			<span class="hidden-xs">Edit</span>
 		</a>	
 		<a href="#" 
 			data-toggle="tooltip"
@@ -32,8 +32,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-title='<i class="fa fa-building-o"></i> View Branch' 
 			data-url="<?php echo site_url('branches/details/' . $record->id);?>" 
 			data-form=".form-iqb-general">
-			<i class="fa fa-building-o"></i>
-			<span class="hidden-xs hide">View</span>
+			<i class="fa fa-eye"></i>
+			<span class="hidden-xs">View</span>
 		</a>		
 		<a href="#" 
 			title="Delete" 
@@ -41,7 +41,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			class="trg-row-delete action"
 			data-url="<?php echo site_url('branches/delete/' . $record->id);?>">
 				<i class="fa fa-trash-o"></i>
-				<span class="hidden-xs hide">Delete</span>
+				<span class="hidden-xs">Delete</span>
 		</a>
 	</td>
 </tr>

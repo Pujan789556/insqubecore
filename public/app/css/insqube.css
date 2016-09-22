@@ -52,9 +52,10 @@
 
 /* -- Live Search -- */
 .live-search-search{
-	position: absolute;
-	left: 20px;
-    top: 10px;	
+  position: absolute;
+  left: 20px;
+  top: 10px;	
+  color:#999;
 }
 .live-search-clear{
 	position: absolute;

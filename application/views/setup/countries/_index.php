@@ -7,13 +7,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div class="row">
 	<div class="col-xs-12">
 		<div class="box">
-			<div class="box-header">
+			<div class="box-header gray">
 				<div class="row">
 					<div class="col-sm-6">
-						<div class="input-group input-group-sm">
-							<span class="input-group-addon"><i class="fa fa-search"></i></span>
-							<input type="search" name="live_search" class="form-control pull-right" placeholder="Search" onkeyup="InsQube.liveSearch(this)">						
-						</div>
+						<?php
+						/**
+						 * Load Live Search UI
+						 */
+						$this->load->view('templates/_common/_live_search');
+						?>
 					</div>
 				</div>
 			</div>
