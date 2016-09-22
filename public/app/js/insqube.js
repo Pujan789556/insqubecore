@@ -317,6 +317,12 @@ $( document ).ajaxError(function( event, request, settings ) {
                     }
                 });
 
+                // Focus on First Input Element on Bootbox Form Dialog Load
+                $('.bootbox[role="dialog"]').on("shown.bs.modal", function() {
+                    $('.bootbox-body :input:enabled:visible:first', $(this)).focus();
+                });
+
+
                 // checkbox Beautify
                 $('input.icheck').iCheck({
                     checkboxClass: 'icheckbox_square-blue',
