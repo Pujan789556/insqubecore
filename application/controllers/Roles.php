@@ -271,6 +271,12 @@ class Roles extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Delete a Role
+	 * 
+	 * @param integer $id 
+	 * @return json
+	 */
 	public function delete($id)
 	{
 		// Valid Record ?
@@ -382,6 +388,14 @@ class Roles extends MY_Controller
 
     // --------------------------------------------------------------------
 
+    /**
+     * Manage Permissions
+     * 
+     * Manage permissions per role basis
+     * 
+     * @param integer $id Role ID
+     * @return json
+     */
     public function permissions($id)
     {
     	// Valid Record ?
@@ -392,11 +406,12 @@ class Roles extends MY_Controller
 			$this->template->render_404();
 		}
 
-    	$this->load->config('dx_permissions');    	
-    	$all_permissions = $this->config->item('DX_permissions');
-
+    	$this->load->config('dx_permissions');
     	if( $this->input->post() )
 		{
+			// All permissions
+			$all_permissions = $this->_get_all_permissions(); 
+			
 			// Get all Permissions
 			$post_data = [];
 			foreach($all_permissions as $module => $actions)
@@ -407,10 +422,10 @@ class Roles extends MY_Controller
 				}
 			}
 
-			if( !empty($post_data) && $this->_valid_permissions($post_data))
+			if( $this->_valid_permissions($post_data))
 			{
 				// Validate Permissions
-				$json_permissions = json_encode($post_data);
+				$json_permissions = $post_data ? json_encode($post_data) : NULL;
 
 				// Let's Update the Permissions
 				if( $this->role_model->update(['permissions' => $json_permissions], $record->id) )
@@ -438,20 +453,34 @@ class Roles extends MY_Controller
 		}
 
     	// Let's load the form
+    	$permission_configs = $this->config->item('DX_permissions');
 		$json_data['form'] = $this->load->view('setup/roles/_form_permissions', 
 			[
 				'record' 			=> $record,
-				'all_permissions' 	=> $all_permissions
+				'permission_configs' 	=> $permission_configs
 			], TRUE);
 
 		// Return HTML 
 		$this->template->json($json_data);
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Valid Permissions?
+     * 
+     * Permission Validation Method
+     * This method will check submitted permissions against config permissions
+     * 
+     * @param array $permissions 
+     * @return boolean
+     */
     private function _valid_permissions($permissions)
     {
-    	// $this->load->config('dx_permissions');    	
-    	$all_permissions = $this->config->item('DX_permissions');
+    	// Extract All Original Permission
+    	$all_permissions = $this->_get_all_permissions();
+    	
+    	// Check passed permissions against original permissions
     	foreach($permissions as $module => $actions)
     	{
     		$master_actions = $all_permissions[$module];
@@ -468,4 +497,58 @@ class Roles extends MY_Controller
     	return TRUE;
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Get All Permissions
+     * 
+     * Returns all the config permissions
+     * 	
+     * @return array
+     */
+    private function _get_all_permissions()
+    {
+    	$permission_configs = $this->config->item('DX_permissions');
+
+    	$all_permission_data = [];
+    	foreach($permission_configs as $section=>$modules)
+    	{
+    		foreach($modules as $module=>$actions)
+    		{
+    			$all_permission_data[$module] = $actions;
+    		}    		
+    	}  
+    	return $all_permission_data;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Revoke All Permissions
+     * 
+     * Reset all role permissions i.e. It will clear out all permissions assigned to 
+     * all roles
+     * 
+     * @return json
+     */
+    public function revoke_all_permissions()
+    {
+    	if($this->role_model->update(['permissions' => NULL]))
+    	{
+    		$data = [
+				'status' 	=> 'success',
+				'message' 	=> 'Successfully revoked all role-permissions!'
+			];
+
+			// @TODO: Log activity
+    	}
+    	else
+    	{
+    		$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be updated!'
+			];
+		}
+		return $this->template->json($data);
+	}
 }

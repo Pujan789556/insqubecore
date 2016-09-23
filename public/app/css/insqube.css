@@ -69,19 +69,48 @@
 	padding-right: 16px;
 }
 
-/*.live-search:active+.live-search-clear,
-.live-search:focus+.live-search-clear{
-	display: inline;
-}*/
+
+/* -- Bootbox Styles --*/
+.bootbox.modal-default {
+    background: #ecf0f5;
+}
+.bootbox.modal-default .modal-header,
+.bootbox.modal-default .modal-footer {
+    background-color: #f9fafc;
+    border-color: rgba(210, 214, 222, 0.43);
+}
+
+
 
 
 
 /*----------------------------------*/
 /* -- AdminLTE Customization -- 	*/
 /*----------------------------------*/
+.box.box-bordered{
+    border-left: 1px solid #e9ebf0;
+    border-right: 1px solid #e9ebf0;
+    border-bottom: 1px solid #e9ebf0;
+}
+.box.box-solid.box-bordered{
+    border-top: 1px solid #e9ebf0;
+}
 .box-header.gray{
 	background: #f9fafc;
   border-bottom: 1px solid #d2d6de;
+}
+.box-body.gray{
+  background-color:#f9fafc;
+}
+.box-header.with-border.border-dark{
+  border-color:rgb(210, 214, 222);
+}
+h4.box-title{
+  font-size: 16px !important;
+}
+
+.box-body > .box:last-child{
+  margin-bottom: 0px;
 }
 
 

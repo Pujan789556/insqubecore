@@ -21,36 +21,71 @@
 $config['DX_permissions'] = [
 
 	/**
-	 * User Module
+	 * Group: General Components
 	 */
-	'users'  => [
-		'create.user',
-		'edit.user',
-		'delete.user',
-		'ban.user'
+	'General Permissions' => [
+		/**
+		 * Branch Module
+		 */
+		'branches'  => [
+			'create.branch',
+			'edit.branch',
+			'delete.branch'
+		],
+
+		/**
+		 * Country Module
+		 */
+		'countries'  => [
+			'edit.country'
+		],
+
+		/**
+		 * Department Module
+		 */
+		'departments'  => [
+			'create.department',
+			'edit.department',
+			'delete.department'
+		],
+
+		/**
+		 * District Module
+		 */
+		'districts' => [
+			'edit.district'
+		],
 	],
 
 	/**
-	 * Role Module
+	 * Group: Security Components
 	 */
-	'roles' => [
-		'create.role',
-		'edit.role',
-		'delete.role',
-		'assign.to.user'
-	],
+	'Security Permissions' =>[
+		/**
+		 * User Module
+		 */
+		'users'  => [
+			'create.user',
+			'edit.user',
+			'delete.user',
+			'ban.user'
+		],
 
-	/**
-	 * District Module
-	 */
-	'districts' => [
-		'edit.district'
-	],
+		/**
+		 * Role Module
+		 */
+		'roles' => [
+			'create.role',
+			'edit.role',
+			'delete.role',
+			'assign.to.user'
+		],
 
-	/**
-	 * Setting Module
-	 */
-	'settings' => [
-		'edit.setting'
-	]
+		/**
+		 * Setting Module
+		 */
+		'settings' => [
+			'edit.setting'
+		]
+	]		
 ];

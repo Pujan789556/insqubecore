@@ -255,8 +255,6 @@ $( document ).ajaxError(function( event, request, settings ) {
         $btn.attr('data-loading-text', 'Saving...');       
     }
 
-    console.log('hi submit');
-
     $btn.button('loading');
     InsQube.save(this, function(r){
 
@@ -298,6 +296,7 @@ $( document ).ajaxError(function( event, request, settings ) {
         $.getJSON(url, function(r){
             if( typeof r.form !== 'undefined' && r.form){
                 bootbox.dialog({
+                    className: 'modal-default',
                     size: size,
                     title: title,
                     message: r.form,
@@ -335,40 +334,52 @@ $( document ).ajaxError(function( event, request, settings ) {
  /**
  * Ajax: Delete Record (using bootbox)
  */
- $(document).on('click', '.trg-row-delete', function(e){
+ $(document).on('click', '.trg-row-action, .trg-dialog-action', function(e){
     e.preventDefault();
     var $this = $(this),
         url = $this.data('url'),
         title = $this.data('title') || '<i class="fa fa-warning"></i>&nbsp;<strong>Confirmation Required!</strong>',
-        message = $this.data('message') || 'Are you sure you want to <strong>DELETE</strong> this record?<br/><strong>It cannot be UNDONE!</strong>';
+        message = $this.data('message') || 'Are you sure you want to <strong>DELETE</strong> this record?<br/><strong>It cannot be UNDONE!</strong>',
+        confirm = $this.data('confirm');
 
-    bootbox.confirm({
-        className: 'modal-danger',
-        title: title,
-        message: message,
-        buttons: {
-            confirm: {className:'btn-outline'}
-        },
-        callback: function(yes){
-            if(yes){
-                $.getJSON(url, function(r){
-                    // Clear Toastr 
-                    toastr.clear();
+    if(confirm === true){
+        bootbox.confirm({
+            className: 'modal-danger',
+            title: title,
+            message: message,
+            buttons: {
+                confirm: {className:'btn-outline'}
+            },
+            callback: function(yes){
+                if(yes){
+                    do_action();
+                }
+            }
+        });  
+    }else{
+        // Directly do action
+        do_action();
+    }  
 
-                    // Show message
-                    // NOTE: r.status must be one of the toastr method [success|error|info|warning]
-                    toastr[r.status](r.message);
+    // Do Action
+    function do_action()
+    {
+        $.getJSON(url, function(r){
+            // Clear Toastr 
+            toastr.clear();
 
-                    // remove row if success
-                    if(r.status === 'success' && r.removeRow == true ){
-                        $(r.rowId).fadeOut('slow', function(){
-                            $(this).remove();
-                        });
-                    }
+            // Show message
+            // NOTE: r.status must be one of the toastr method [success|error|info|warning]
+            toastr[r.status](r.message);
+
+            // remove row if success
+            if(r.status === 'success' && typeof r.removeRow !== 'undefined' && r.removeRow == true ){
+                $(r.rowId).fadeOut('slow', function(){
+                    $(this).remove();
                 });
             }
-        }
-    });        
+        });
+    };
  });
 
 

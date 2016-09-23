@@ -28,7 +28,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<a href="#" 
 			title="Delete" 
 			data-toggle="tooltip"
-			class="trg-row-delete action"
+			class="trg-row-action action"
+			data-confirm="true"
 			data-url="<?php echo site_url('departments/delete/' . $record->id);?>">
 				<i class="fa fa-trash-o"></i>
 				<span class="hidden-xs">Delete</span>

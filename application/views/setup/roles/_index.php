@@ -17,10 +17,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						$this->load->view('templates/_common/_live_search');
 						?>
 					</div>					
-					<div class="col-sm-6">
+					<div class="col-sm-6 master-actions text-right">
 						<a href="#" title="Add new role"
-							class="btn btn-success btn-round pull-right trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New Role' data-url="<?php echo site_url('roles/add/');?>" data-form=".form-iqb-general"
+							class="btn btn-success btn-round trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New Role' data-url="<?php echo site_url('roles/add/');?>" data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
+						<a href="#" 
+							title="Revoke all permissions"
+							data-confirm="true"
+							class="btn btn-danger btn-round trg-dialog-action" 	
+							data-message="Are you sure you want to do this?<br/>All permissions for all roles will be cleared out."						
+							data-url="<?php echo site_url('roles/revoke_all_permissions/');?>"
+						><i class="fa fa-undo"></i> Revoke All</a>
 					</div>
 				</div>
 			</div>
