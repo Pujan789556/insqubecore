@@ -48,7 +48,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     return '<a href="tel:'.$phone.'">'.$phone.'</a>';
                 }, explode(',', $contact->phones));
 
-                echo '<i class="fa fa-phone margin-r-5"></i>' . implode(' | ', $phones) ;
+                echo '<p><i class="fa fa-phone margin-r-5"></i>' . implode(' | ', $phones) . '</p>';
             }
 
             // Fax
@@ -60,22 +60,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     return '<a href="fax:'.$number.'">'.$number.'</a>';
                 }, explode(',', $contact->fax));
 
-                echo '<br/><i class="fa fa-fax margin-r-5"></i>' . implode(' | ', $fax);
+                echo '<p><i class="fa fa-fax margin-r-5"></i>' . implode(' | ', $fax) . '</p>';
             }
 
             // Mobile
             if($contact->mobile){
-                echo '<br/><i class="fa fa-phone margin-r-5"></i>' . '<a href="tel:'.$contact->mobile.'" target="_blank">'.$contact->mobile.'</a>';
+                echo '<p><i class="fa fa-phone margin-r-5"></i>' . '<a href="tel:'.$contact->mobile.'" target="_blank">'.$contact->mobile.'</a></p>';
             }
 
             // Email
             if($contact->email){
-                echo '<br/><i class="fa fa-envelope-o margin-r-5"></i>' . mailto($contact->email);
+                echo '<p><i class="fa fa-envelope-o margin-r-5"></i>' . mailto($contact->email) . '</p>';
             }
 
             // Web
             if($contact->web){
-                echo '<br/><i class="fa fa-link margin-r-5"></i>' . anchor($contact->web, '', 'target="_blank"');
+                echo '<p><i class="fa fa-link margin-r-5"></i>' . anchor($contact->web, '', 'target="_blank"') . '</p>';
             }
             ?>
         </address>

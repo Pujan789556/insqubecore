@@ -69,8 +69,16 @@
 	padding-right: 16px;
 }
 
+/* -- consecutive button gaps -- */
+.btn+.btn{
+  margin-left: 10px;
+}
 
+
+
+/*---------------------*/
 /* -- Bootbox Styles --*/
+/*---------------------*/
 .bootbox.modal-default {
     background: #ecf0f5;
 }
@@ -79,8 +87,6 @@
     background-color: #f9fafc;
     border-color: rgba(210, 214, 222, 0.43);
 }
-
-
 
 
 
@@ -113,15 +119,23 @@ h4.box-title{
   margin-bottom: 0px;
 }
 
-
- /* Small Devices, Tablets */
+/*----------------------*/
+ /* -- Media Queries -- */
+ /*----------------------*/
 @media only screen and (max-width : 767px) {
 
-	/*-- box-tools --*/
-	 .box-header>.box-tools{
-	 	position: relative;
-	 	right: inherit;
-	 	top: inherit;
-	 	margin-top:10px;
-	 }
+  /*-- box-tools --*/
+  .box-header>.box-tools{
+    position: relative;
+    right: inherit;
+    top: inherit;
+    margin-top:10px;
+  }
+
+  /* -- Master Action -- */
+  .master-actions{
+    margin-top:10px;
+  }
+
+
 }

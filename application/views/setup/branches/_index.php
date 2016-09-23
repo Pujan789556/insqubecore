@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						$this->load->view('templates/_common/_live_search');
 						?>
 					</div>					
-					<div class="col-sm-6">
+					<div class="col-sm-6 master-actions">
 						<a href="#" title="Add new role"
 							class="btn btn-success btn-round pull-right trg-dialog-edit" 
 							data-title='<i class="fa fa-pencil-square-o"></i> Add New Branch' 
