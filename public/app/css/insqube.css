@@ -114,9 +114,8 @@
 h4.box-title{
   font-size: 16px !important;
 }
-
-.box-body > .box:last-child{
-  margin-bottom: 0px;
+.box-body > :last-child{
+  margin-bottom: 0;
 }
 
 /*----------------------*/
