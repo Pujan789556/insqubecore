@@ -33,6 +33,26 @@ if ( ! function_exists('form_email'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('form_date'))
+{
+	/**
+	 * Email Input Field
+	 *
+	 * @param	mixed
+	 * @param	string
+	 * @param	mixed
+	 * @return	string
+	 */
+	function form_date($data = '', $value = '', $extra = '')
+	{
+		is_array($data) OR $data = array('name' => $data);
+		$data['type'] = 'date';
+		return form_input($data, $value, $extra);
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('form_url'))
 {
 	/**
