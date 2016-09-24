@@ -35,6 +35,34 @@ if ( ! function_exists('set_menu_active'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('str_to_nepdate'))
+{
+	/**
+	 * String to Nepali Date
+	 * 
+	 * Converts into Date Structure from 8-char Nepali Date.
+	 * 
+	 *	Eg. 20500401  to 2050/04/01
+	 * 
+	 * @param string $str Nepali Date string
+	 * @param string $separater seperator / or - or .
+	 * @return string
+	 */
+	function str_to_nepdate( $str, $separater = '/' )
+	{
+		$date = [];
+		$parts = str_split($str, 4);
+		$date[] = $parts[0]; // year
+		$mmdd = str_split($parts[1], 2);
+
+		$date = array_merge($date, $mmdd);
+
+		return implode($separater, $date);
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('get_contact_form_fields'))
 {
 	/**
