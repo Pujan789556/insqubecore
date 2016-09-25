@@ -84,49 +84,49 @@ if ( ! function_exists('get_contact_form_fields'))
 
 		return [
 			[
-				'name' 		=> 'contacts[contact_name][]',
+				'name' 		=> 'contacts[contact_name]',
 		        'label' 	=> 'Contact Name',
 		        '_key' 		=> 'contact_name',
 		        '_type' 	=> 'text',
 		        '_required' => true
 			],
 			[
-				'name' 		=> 'contacts[address1][]',
+				'name' 		=> 'contacts[address1]',
 		        'label' 	=> 'Address 1',
 		        '_key' 		=> 'address1',
 		        '_type' 	=> 'text',
 		        '_required' => true
 			],
 			[
-				'name' 		=> 'contacts[address2][]',
+				'name' 		=> 'contacts[address2]',
 		        'label' 	=> 'Address 2',
 		        '_key' 		=> 'address1',
 		        '_type' 	=> 'text',
 		        '_required' => false
 			],
 			[
-				'name' 		=> 'contacts[city][]',
+				'name' 		=> 'contacts[city]',
 		        'label' 	=> 'City',
 		        '_key' 		=> 'city',
 		        '_type' 	=> 'text',
 		        '_required' => true
 			],
 			[
-				'name' 		=> 'contacts[state][]',
+				'name' 		=> 'contacts[state]',
 		        'label' 	=> 'State/Province',
 		        '_key' 		=> 'state',
 		        '_type' 	=> 'text',
 		        '_required' => false
 			],
 			[
-				'name' 		=> 'contacts[zip][]',
+				'name' 		=> 'contacts[zip]',
 		        'label' 	=> 'Zip/Postal Code',
 		        '_key' 		=> 'zip',
 		        '_type' 	=> 'text',
 		        '_required' => false
 			],
 			[
-				'name' 		=> 'contacts[country][]',
+				'name' 		=> 'contacts[country]',
 		        'label' 	=> 'Country',
 		        '_key' 		=> 'country',
 		        '_type'		=> 'dropdown',
@@ -135,7 +135,7 @@ if ( ! function_exists('get_contact_form_fields'))
 		        '_required' => true
 			],
 			[
-				'name' 		=> 'contacts[phones][]',
+				'name' 		=> 'contacts[phones]',
 		        'label' 	=> 'Phone(s)',
 		        '_key' 		=> 'phones',
 		        '_type' 	=> 'text',
@@ -143,7 +143,7 @@ if ( ! function_exists('get_contact_form_fields'))
 		        '_help_text' => 'Comma separated list without std-code. eg. 1 4412345, 1 5512345' 
 			],	
 			[
-				'name' 		=> 'contacts[fax][]',
+				'name' 		=> 'contacts[fax]',
 		        'label' 	=> 'Fax(es)',
 		        '_key' 		=> 'fax',
 		        '_type' 	=> 'text',
@@ -151,21 +151,21 @@ if ( ! function_exists('get_contact_form_fields'))
 		        '_help_text' => 'Comma separated list without std-code. eg. 1 4412345, 1 5512345' 
 			],	
 			[
-				'name' 		=> 'contacts[mobile][]',
+				'name' 		=> 'contacts[mobile]',
 		        'label' 	=> 'Mobile',
 		        '_key' 		=> 'mobile',
 		        '_type' 	=> 'text',
 		        '_required' => false
 			],	
 			[
-				'name' 		=> 'contacts[email][]',
+				'name' 		=> 'contacts[email]',
 		        'label' 	=> 'Email',
 		        '_key' 		=> 'email',
 		        '_type' 	=> 'text',
 		        '_required' => false
 			],	
 			[
-				'name' 		=> 'contacts[web][]',
+				'name' 		=> 'contacts[web]',
 		        'label' 	=> 'Website',
 		        '_key' 		=> 'web',
 		        '_type' 	=> 'text',
@@ -193,62 +193,62 @@ if ( ! function_exists('get_contact_form_validation_rules'))
 	{
 		return [
 			[
-                'field'     => 'contacts[contact_name][]',
+                'field'     => 'contacts[contact_name]',
                 'label'     => 'Contact Name',
                 'rules'     => 'trim|required|max_length[100]'
             ],
             [
-                'field'     => 'contacts[address1][]',
+                'field'     => 'contacts[address1]',
                 'label'     => 'Address 1',
                 'rules'     => 'trim|required|max_length[50]'
             ],
             [
-                'field'     => 'contacts[address2][]',
+                'field'     => 'contacts[address2]',
                 'label'     => 'Address 2',
                 'rules'     => 'trim|max_length[50]'
             ],
             [
-                'field'     => 'contacts[city][]',
+                'field'     => 'contacts[city]',
                 'label'     => 'City',
                 'rules'     => 'trim|required|max_length[50]'
             ],
             [
-                'field'     => 'contacts[state][]',
+                'field'     => 'contacts[state]',
                 'label'     => 'State/Province',
                 'rules'     => 'trim|max_length[50]'
             ],
             [
-                'field'     => 'contacts[zip][]',
+                'field'     => 'contacts[zip]',
                 'label'     => 'Zip/Postal Code',
                 'rules'     => 'trim|max_length[20]'
             ],
             [
-                'field'     => 'contacts[country][]',
+                'field'     => 'contacts[country]',
                 'label'     => 'Country',
                 'rules'     => 'trim|required|alpha|exact_length[2]'
             ],
             [
-                'field'     => 'contacts[phones][]',
+                'field'     => 'contacts[phones]',
                 'label'     => 'Phone(s)',
                 'rules'     => 'trim|max_length[50]'
             ],  
             [
-                'field'     => 'contacts[fax][]',
+                'field'     => 'contacts[fax]',
                 'label'     => 'Fax(es)',
                 'rules'     => 'trim|max_length[20]' 
             ],  
             [
-                'field'     => 'contacts[mobile][]',
+                'field'     => 'contacts[mobile]',
                 'label'     => 'Mobile',
                 'rules'     => 'trim|max_length[10]'
             ],  
             [
-                'field'     => 'contacts[email][]',
+                'field'     => 'contacts[email]',
                 'label'     => 'Email',
                 'rules'     => 'trim|valid_email|max_length[80]'
             ],  
             [
-                'field'     => 'contacts[web][]',
+                'field'     => 'contacts[web]',
                 'label'     => 'Website',
                 'rules'     => 'trim|valid_url|prep_url|max_length[255]'
             ]
@@ -269,7 +269,7 @@ if ( ! function_exists('get_contact_data_from_form'))
 	 * @param bool  $single Is it single address format?
 	 * @return array
 	 */
-	function get_contact_data_from_form( $json = TRUE, $single_address = TRUE )
+	function get_contact_data_from_form( $json = TRUE)
 	{
 		$CI =& get_instance();	
 		$contact_data = NULL;
@@ -281,27 +281,8 @@ if ( ! function_exists('get_contact_data_from_form'))
 		$CI->form_validation->set_rules($rules);
         if($CI->form_validation->run())
         {
-        	$post_data = $CI->input->post('contacts');
-        	foreach($post_data as $key=>$values)
-        	{
-        		$i = 0;
-        		foreach($values as $value)
-        		{
-        			if( in_array($key, $contact_fields))
-        			{
-        				$contact_data[$i][$key]  = $value;
-	        			$i++;
-        			}	        			
-        		}
-        	}
+        	$contact_data = $CI->input->post('contacts');        	
         }
-
-        // If we are to store single contact as a JSON Object, Get the first Array
-        if( $contact_data && $single_address)
-        {
-        	$contact_data = $contact_data[0];
-        }
-
         return $json && !empty($contact_data) ? json_encode($contact_data) : $contact_data;
 	}
 }
