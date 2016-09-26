@@ -64,10 +64,7 @@ class Departments extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('department_model');
-
-		// Load Activitis Library
-		$this->load->library('activity');    
+		$this->load->model('department_model');		  
 	}
 	
 	// --------------------------------------------------------------------

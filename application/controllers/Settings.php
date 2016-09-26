@@ -131,7 +131,7 @@ class Settings extends MY_Controller
             if( $status === 'success')
             {
             	// Now Update Data
-	        	$done = $this->setting_model->from_form(NULL, ['logo' => $new_logo ? $new_logo : $old_logo])->update(NULL, 1);	
+	        	$done = $this->setting_model->from_form(NULL, ['logo' => $new_logo ? $new_logo : $old_logo])->update(NULL, 1) && $this->setting_model->log_activity(1, 'E');	
 
 				// Validation Error?
 				if(!$done)

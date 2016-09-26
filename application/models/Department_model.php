@@ -58,6 +58,9 @@ class Department_model extends MY_Model
         // Before Create/Update Callbacks           
         $this->before_create[] = 'capitalize_code';
         $this->before_update[] = 'capitalize_code'; 
+
+        // After Create Callback
+        $this->after_create[] = 'log_activity';
     }
 
     // ----------------------------------------------------------------
@@ -106,17 +109,25 @@ class Department_model extends MY_Model
 
     // ----------------------------------------------------------------
     
+    /**
+     * Log Activity
+     * 
+     * Log activities
+     *      Available Activities: Create|Edit|Delete
+     * 
+     * @param integer $id 
+     * @param string $action 
+     * @return bool
+     */
     public function log_activity($id, $action = 'C')
-    {
-        return TRUE;
-
-      //    $action = is_string($action) ? $action : 'C';
-      //    // Save Activity Log
-            // $activity_log = [
-            //  'module' => 'department',
-            //  'module_id' => $id,
-            //  'action' => $action
-            // ];
-            // return $this->activity->save($activity_log);     
+    {        
+        $action = is_string($action) ? $action : 'C';
+        // Save Activity Log
+        $activity_log = [
+            'module' => 'department',
+            'module_id' => $id,
+            'action' => $action
+        ];
+        return $this->activity->save($activity_log);     
     }
 }

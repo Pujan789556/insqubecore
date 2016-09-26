@@ -64,10 +64,7 @@ class Branches extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('branch_model');
-
-		// Load Activitis Library
-		$this->load->library('activity');    
+		$this->load->model('branch_model');		    
 	}
 	
 	// --------------------------------------------------------------------
@@ -188,16 +185,11 @@ class Branches extends MY_Controller
 		{
 			$done = FALSE;
 			
-			$contact_data = get_contact_data_from_form();
-
 			// Insert or Update?
 			if($action === 'add')
 			{
-				// @TODO: First Add Contact Data and Use it to insert 
-				// into branch table
-				$done = $this->branch_model->from_form()->insert();
-
 				// @NOTE: Activity Log will be automatically inserted
+				$done = $this->branch_model->from_form()->insert();				
 			}
 			else
 			{

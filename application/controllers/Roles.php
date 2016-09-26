@@ -64,10 +64,7 @@ class Roles extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('dx_auth/role_model');
-
-		// Load Activitis Library
-		$this->load->library('activity');    
+		$this->load->model('dx_auth/role_model');		
 	}
 	
 	// --------------------------------------------------------------------
@@ -428,7 +425,7 @@ class Roles extends MY_Controller
 				$json_permissions = $post_data ? json_encode($post_data) : NULL;
 
 				// Let's Update the Permissions
-				if( $this->role_model->update(['permissions' => $json_permissions], $record->id) )
+				if( $this->role_model->update(['permissions' => $json_permissions], $record->id) && $this->role_model->log_activity($record->id, 'P'))
 				{
 					$status = 'success';
 					$message = 'Successfully updated.';
@@ -533,7 +530,7 @@ class Roles extends MY_Controller
      */
     public function revoke_all_permissions()
     {
-    	if($this->role_model->update(['permissions' => NULL]))
+    	if($this->role_model->update(['permissions' => NULL]) && $this->role_model->log_activity(NULL, 'R'))
     	{
     		$data = [
 				'status' 	=> 'success',

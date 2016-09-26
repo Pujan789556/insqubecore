@@ -147,9 +147,8 @@ class Countries extends MY_Controller
 			$this->country_model->rules['insert'][2]['rules'] = 'trim|required|alpha|exact_length[3]|callback_check_duplicate_alpha3';
 
 
-			// Now Update Data
-        	$done = $this->country_model->from_form()->update(NULL, $id);
-        	$view = '';
+			// Now Update Data & Log Activity
+        	$done = $this->country_model->from_form()->update(NULL, $id) && $this->country_model->log_activity($record->id, 'E');
 
         	if(!$done)
 			{

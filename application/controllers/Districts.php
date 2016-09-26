@@ -116,7 +116,7 @@ class Districts extends MY_Controller
 		if( $this->input->post() )
 		{
 			// Now Update Data
-        	$done = $this->district_model->from_form()->update(NULL, $id);
+        	$done = $this->district_model->from_form()->update(NULL, $id) && $this->district_model->log_activity($record->id, 'E');
         	$view = '';
 
         	if(!$done)

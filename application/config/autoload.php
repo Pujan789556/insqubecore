@@ -58,7 +58,7 @@ $autoload['packages'] = array();
 |
 |	$autoload['libraries'] = array('user_agent' => 'ua');
 */
-$autoload['libraries'] = array('DX_Auth', 'template');
+$autoload['libraries'] = array('DX_Auth', 'template', 'activity');
 
 /*
 | -------------------------------------------------------------------

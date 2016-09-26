@@ -55,7 +55,7 @@ class Role_model extends MY_Model
 		$this->table = $this->_prefix.$this->config->item('DX_roles_table');
 
 		// After Create Callback
-		// $this->after_create[] = 'log_activity';		
+		$this->after_create[] = 'log_activity';		
 	}
 
 	// ----------------------------------------------------------------
@@ -117,18 +117,26 @@ class Role_model extends MY_Model
 
     // ----------------------------------------------------------------
     
-    public function log_activity($id, $action = 'C')
-    {
-    	return TRUE;
-
-	  //   	$action = is_string($action) ? $action : 'C';
-	  //   	// Save Activity Log
-			// $activity_log = [
-			// 	'module' => 'role',
-			// 	'module_id' => $id,
-			// 	'action' => $action
-			// ];
-			// return $this->activity->save($activity_log);		
+    /**
+     * Log Activity
+     * 
+     * Log activities
+     *      Available Activities: Create|Edit|Delete|Assign
+     * 
+     * @param integer $id 
+     * @param string $action 
+     * @return bool
+     */
+    public function log_activity($id=NULL, $action = 'C')
+    {        
+        $action = is_string($action) ? $action : 'C';
+        // Save Activity Log
+        $activity_log = [
+            'module' => 'role',
+            'module_id' => $id,
+            'action' => $action
+        ];
+        return $this->activity->save($activity_log);     
     }
 
 	

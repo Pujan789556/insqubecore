@@ -71,4 +71,28 @@ class District_model extends MY_Model
         }       
         return TRUE;
     }
+
+    // ----------------------------------------------------------------
+    
+    /**
+     * Log Activity
+     * 
+     * Log activities
+     *      Available Activities: Edit
+     * 
+     * @param integer $id 
+     * @param string $action 
+     * @return bool
+     */
+    public function log_activity($id, $action = 'E')
+    {        
+        $action = is_string($action) ? $action : 'E';
+        // Save Activity Log
+        $activity_log = [
+            'module' => 'district',
+            'module_id' => $id,
+            'action' => $action
+        ];
+        return $this->activity->save($activity_log);     
+    }
 }

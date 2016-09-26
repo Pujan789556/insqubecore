@@ -63,6 +63,9 @@ class Branch_model extends MY_Model
         $this->before_create[] = 'prepare_contact_data';
         $this->before_update[] = 'prepare_contact_data'; 
 
+        // After Create Callback
+        $this->after_create[] = 'log_activity';
+
 
         // Merge Contact Validation Rules
         $this->rules['insert'] = array_merge($this->rules['insert'], get_contact_form_validation_rules());
@@ -122,17 +125,25 @@ class Branch_model extends MY_Model
 
     // ----------------------------------------------------------------
     
+    /**
+     * Log Activity
+     * 
+     * Log activities
+     *      Available Activities: Create|Edit|Delete
+     * 
+     * @param integer $id 
+     * @param string $action 
+     * @return bool
+     */
     public function log_activity($id, $action = 'C')
-    {
-        return TRUE;
-
-      //    $action = is_string($action) ? $action : 'C';
-      //    // Save Activity Log
-            // $activity_log = [
-            //  'module' => 'department',
-            //  'module_id' => $id,
-            //  'action' => $action
-            // ];
-            // return $this->activity->save($activity_log);     
+    {        
+        $action = is_string($action) ? $action : 'C';
+        // Save Activity Log
+        $activity_log = [
+            'module' => 'branch',
+            'module_id' => $id,
+            'action' => $action
+        ];
+        return $this->activity->save($activity_log);     
     }
 }
