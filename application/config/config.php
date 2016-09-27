@@ -370,7 +370,7 @@ $config['encryption_key'] = APP_KEY;
 $config['sess_driver'] = SESSION_DRIVER;
 $config['sess_cookie_name'] = 'ci_session';
 $config['sess_expiration'] = 7200;
-$config['sess_save_path'] = 'ci_sessions'; // sess_driver = database, sess_save_path = <db_session_table_name>
+$config['sess_save_path'] = SESSION_SAVE_PATH; 
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 300;
 $config['sess_regenerate_destroy'] = FALSE;
