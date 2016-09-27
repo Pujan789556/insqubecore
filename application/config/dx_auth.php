@@ -157,8 +157,8 @@ $config['DX_forgot_password_expire'] = 900;
 |
 */
 
-$config['DX_recaptcha_public_key'] = '6LcNO9ISAAAAAHcRoGVQp1ZG56RDNdnwH3MyuBqU'; 
-$config['DX_recaptcha_private_key'] = '6LcNO9ISAAAAAIMeF9o2YIlAovWwvi2T-qArp0DE';
+$config['DX_recaptcha_public_key'] = '6LdbwQcUAAAAAH6o8yH2HjJ1vo868641ehtHusjR'; 
+$config['DX_recaptcha_private_key'] = '6LdbwQcUAAAAAJtZ-WUR3R8nmX0DVfHHp_ZqT45R';
 
 
 /*
