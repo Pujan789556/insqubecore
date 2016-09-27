@@ -1,6 +1,7 @@
 /**
  * InsQube Styles
  */
+ .pointer{cursor:pointer;}
 /*-- Image Select Preview Box Container--*/
 .ins-img-ipb{
 	margin-top:10px;

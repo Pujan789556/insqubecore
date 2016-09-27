@@ -107,6 +107,16 @@ class Branch_model extends MY_Model
                         ->count_all_results($this->table);
     }
 
+    /**
+     * Get Dropdown List
+     */
+    public function dropdown()
+    {
+        return $this->set_cache('dropdown')
+                        ->as_dropdown('name')
+                        ->order_by('name', 'asc')
+                        ->get_all();
+    }
     
 	// --------------------------------------------------------------------
 
@@ -115,10 +125,17 @@ class Branch_model extends MY_Model
      */
     public function _prep_after_write()
     {
+        $cache_names = [
+            'master_branches_all',
+            'master_branches_dropdown'
+        ];
     	if($this->delete_cache_on_save === TRUE)
         {
         	// cache name without prefix
-        	$this->delete_cache('master_branches_all'); 
+            foreach($cache_names as $cache)
+            {
+                $this->delete_cache($cache);     
+            }
         }       
         return TRUE;
     }

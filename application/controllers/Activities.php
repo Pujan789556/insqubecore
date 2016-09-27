@@ -56,29 +56,6 @@ class Activities extends MY_Controller
 		/**
 		 * Paginated Record List
 		 */
-		// $records = $this->activity_model->set_cache('all')->get_all();
-		// $records = $this->activity_model->all();
-		// $total = count($records);
-
-		// if($total = $this->settings->per_page+1)
-		// {
-		// 	$next_id = $records[$total-1]->id;
-		// }
-
-		// // echo $this->db->last_query();
-		// // echo '<pre>'; print_r($records);exit;
-
-		// $records = $records ? $records : [];
-		// $this->template->partial(
-		// 					'content_header', 
-		// 					'templates/_common/_content_header',
-		// 					[
-		// 						'content_header' => 'Explore Activities',
-		// 						'breadcrumbs' => ['Master Setup' => NULL, 'Activities' => NULL]
-		// 				])
-		// 				->partial('content', 'activities/_index', compact('records'))
-		// 				->render($this->data);
-
 		$this->page();
 	}
 
@@ -97,6 +74,7 @@ class Activities extends MY_Controller
 		$records = $records ? $records : [];
 		$total = count($records);
 		// echo $total;exit;
+		// echo $this->db->last_query();exit;
 
 		/**
 		 * Grab Next ID or Reset It 
