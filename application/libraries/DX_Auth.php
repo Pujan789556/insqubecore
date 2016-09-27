@@ -186,10 +186,12 @@ class DX_Auth
     	 */
     	$email_data = [
     		'mailtype' 	=> 'html',
-    		'from' 		=> [ 
-    			'email' => $from, 
-    			'name' => $this->ci->config->item('DX_website_name')
-			], 
+    		
+    		// From Email and From Name will be From Site Settings Data
+   //  		'from' 		=> [ 
+   //  			'email' => $from, 
+   //  			'name' => $this->ci->settings->organization
+			// ], 
     		'to' 		=> $to,
     		'subject' 	=> $subject,
     		'message' 	=> $message
@@ -232,9 +234,10 @@ class DX_Auth
 		if ( ! empty($data))
 		{
 			// Load model
-			$this->ci->load->model('dx_auth/users', 'users');
+			// $this->ci->load->model('dx_auth/users', 'users');
+			$this->ci->load->model('user_model');
 			// Update record
-			$this->ci->users->set_user($user_id, $data);
+			$this->ci->user_model->set_user($user_id, $data);
 		}
 	}
 	
@@ -814,10 +817,10 @@ class DX_Auth
 	function is_username_available($username)
 	{
 		// Load Models
-		$this->ci->load->model('dx_auth/users', 'users');
+		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 
-		$users = $this->ci->users->check_username($username);
+		$users = $this->ci->user_model->check_username($username);
 		$temp = $this->ci->user_temp->check_username($username);
 		
 		return $users->num_rows() + $temp->num_rows() == 0;
@@ -827,10 +830,10 @@ class DX_Auth
 	function is_email_available($email)
 	{
 		// Load Models
-		$this->ci->load->model('dx_auth/users', 'users');
+		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 
-		$users = $this->ci->users->check_email($email);
+		$users = $this->ci->user_model->check_email($email);
 		$temp = $this->ci->user_temp->check_email($email);
 		
 		return $users->num_rows() + $temp->num_rows() == 0;
@@ -857,7 +860,7 @@ class DX_Auth
 	function login($login, $password, $remember = TRUE)
 	{
 		// Load Models
-		$this->ci->load->model('dx_auth/users', 'users');
+		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 		$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');
 			
@@ -881,7 +884,7 @@ class DX_Auth
 			}
 		
 			// Get user query
-			if ($query = $this->ci->users->$get_user_function($login) AND $query->num_rows() == 1)
+			if ($query = $this->ci->user_model->$get_user_function($login) AND $query->num_rows() == 1)
 			{
 				// Get user record
 				$row = $query->row();
@@ -910,7 +913,7 @@ class DX_Auth
 						if ($row->newpass)
 						{
 							// Clear any Reset Passwords
-							$this->ci->users->clear_newpass($row->id); 
+							$this->ci->user_model->clear_newpass($row->id); 
 						}
 						
 						if ($remember)
@@ -975,7 +978,7 @@ class DX_Auth
 	function register($username, $password, $email)
 	{		
 		// Load Models
-		$this->ci->load->model('dx_auth/users', 'users');
+		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 
 		$this->ci->load->helper('url');
@@ -1009,7 +1012,7 @@ class DX_Auth
 		else
 		{				
 			// Create user 
-			$insert = $this->ci->users->create_user($new_user);
+			$insert = $this->ci->user_model->create_user($new_user);
 			// Trigger event
 			$this->user_activated($this->ci->db->insert_id());				
 		}
@@ -1028,7 +1031,7 @@ class DX_Auth
 			{
 				// Create email
 				$from = $this->ci->config->item('DX_webmaster_email');
-				$subject = sprintf($this->ci->lang->line('auth_activate_subject'), $this->ci->config->item('DX_website_name'));
+				$subject = sprintf($this->ci->lang->line('auth_activate_subject'), $this->ci->settings->organization);
 
 				// Activation Link
 				$new_user['activate_url'] = site_url($this->ci->config->item('DX_activate_uri')."{$new_user['username']}/{$new_user['activation_key']}");
@@ -1046,7 +1049,7 @@ class DX_Auth
 				{
 					// Create email
 					$from = $this->ci->config->item('DX_webmaster_email');
-					$subject = sprintf($this->ci->lang->line('auth_account_subject'), $this->ci->config->item('DX_website_name')); 
+					$subject = sprintf($this->ci->lang->line('auth_account_subject'), $this->ci->settings->organization); 
 					
 					// Trigger event and get email content
 					$this->sending_account_email($new_user, $message);
@@ -1068,12 +1071,12 @@ class DX_Auth
 		if ($login)
 		{
 			// Load Model
-			$this->ci->load->model('dx_auth/users', 'users');
+			$this->ci->load->model('user_model');
 			// Load Helper
 			$this->ci->load->helper('url');
 
 			// Get login and check if it's exist 
-			if ($query = $this->ci->users->get_login($login) AND $query->num_rows() == 1)
+			if ($query = $this->ci->user_model->get_login($login) AND $query->num_rows() == 1)
 			{
 				// Get User data
 				$row = $query->row();
@@ -1095,7 +1098,7 @@ class DX_Auth
 					$data['key'] = md5(rand().microtime());
 
 					// Create new password (but it haven't activated yet)
-					$this->ci->users->newpass($row->id, $encode, $data['key']);
+					$this->ci->user_model->newpass($row->id, $encode, $data['key']);
 
 					// Create reset password link to be included in email
 					$data['reset_password_uri'] = site_url($this->ci->config->item('DX_reset_password_uri')."{$row->username}/{$data['key']}");
@@ -1130,7 +1133,7 @@ class DX_Auth
 	function reset_password($username, $key = '')
 	{
 		// Load Models
-		$this->ci->load->model('dx_auth/users', 'users');
+		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_autologin', 'user_autologin');
 		
 		// Default return value
@@ -1140,12 +1143,12 @@ class DX_Auth
 		$user_id = 0;
 		
 		// Get user id
-		if ($query = $this->ci->users->get_user_by_username($username) AND $query->num_rows() == 1)
+		if ($query = $this->ci->user_model->get_user_by_username($username) AND $query->num_rows() == 1)
 		{
 			$user_id = $query->row()->id;
 			
 			// Try to activate new password
-			if ( ! empty($username) AND ! empty($key) AND $this->ci->users->activate_newpass($user_id, $key) AND $this->ci->db->affected_rows() > 0 )
+			if ( ! empty($username) AND ! empty($key) AND $this->ci->user_model->activate_newpass($user_id, $key) AND $this->ci->db->affected_rows() > 0 )
 			{
 				// Clear previously setup new password and keys
 				$this->ci->user_autologin->clear_keys($user_id);
@@ -1159,7 +1162,7 @@ class DX_Auth
 	function activate($username, $key = '')
 	{		
 		// Load Models
-		$this->ci->load->model('dx_auth/users', 'users');
+		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 		
 		// Default return value
@@ -1184,7 +1187,7 @@ class DX_Auth
 			unset($row['activation_key']);
 
 			// Create user
-			if ($this->ci->users->create_user($row))
+			if ($this->ci->user_model->create_user($row))
 			{
 				// Trigger event
 				$this->user_activated($this->ci->db->insert_id());	
@@ -1202,13 +1205,13 @@ class DX_Auth
 	function change_password($old_pass, $new_pass)
 	{
 		// Load Models
-		$this->ci->load->model('dx_auth/users', 'users');
+		$this->ci->load->model('user_model');
 		
 		// Default return value
 		$result = FAlSE;
 
 		// Search current logged in user in database
-		if ($query = $this->ci->users->get_user_by_id($this->ci->session->userdata('DX_user_id')) AND $query->num_rows() > 0)
+		if ($query = $this->ci->user_model->get_user_by_id($this->ci->session->userdata('DX_user_id')) AND $query->num_rows() > 0)
 		{
 			// Get current logged in user
 			$row = $query->row();
@@ -1226,7 +1229,7 @@ class DX_Auth
 				$hashed_password = $hasher->HashPassword($new_pass);
 
 				// Replace old password with new password
-				$this->ci->users->change_password($this->ci->session->userdata('DX_user_id'), $hashed_password);
+				$this->ci->user_model->change_password($this->ci->session->userdata('DX_user_id'), $hashed_password);
 				
 				// Trigger event
 				$this->user_changed_password($this->ci->session->userdata('DX_user_id'), $hashed_password);
@@ -1245,13 +1248,13 @@ class DX_Auth
 	function cancel_account($password)
 	{
 		// Load Models
-		$this->ci->load->model('dx_auth/users', 'users');
+		$this->ci->load->model('user_model');
 		
 		// Default return value
 		$result = FAlSE;
 		
 		// Search current logged in user in database
-		if ($query = $this->ci->users->get_user_by_id($this->ci->session->userdata('DX_user_id')) AND $query->num_rows() > 0)
+		if ($query = $this->ci->user_model->get_user_by_id($this->ci->session->userdata('DX_user_id')) AND $query->num_rows() > 0)
 		{
 			// Get current logged in user
 			$row = $query->row();
@@ -1268,7 +1271,7 @@ class DX_Auth
 				$this->user_canceling_account($this->ci->session->userdata('DX_user_id'));
 
 				// Delete user
-				$result = $this->ci->users->delete_user($this->ci->session->userdata('DX_user_id'));
+				$result = $this->ci->user_model->delete_user($this->ci->session->userdata('DX_user_id'));
 				
 				// Force logout
 				$this->logout();
@@ -1429,12 +1432,12 @@ class DX_Auth
 		
 		// Create content	
 		$content = sprintf($this->ci->lang->line('auth_account_content'), 
-			$this->ci->config->item('DX_website_name'), 
+			$this->ci->settings->organization, 
 			$data['username'], 
 			$data['email'], 
 			$data['password'], 
 			site_url($this->ci->config->item('DX_login_uri')),
-			$this->ci->config->item('DX_website_name'));
+			$this->ci->settings->organization);
 	}
 	
 	// This event occurs right before dx auth send activation email
@@ -1445,13 +1448,13 @@ class DX_Auth
 	{
 		// Create content
 		$content = sprintf($this->ci->lang->line('auth_activate_content'), 
-			$this->ci->config->item('DX_website_name'), 
+			$this->ci->settings->organization, 
 			$data['activate_url'],
 			$this->ci->config->item('DX_email_activation_expire') / 60 / 60,
 			$data['username'], 
 			$data['email'],
 			$data['password'],
-			$this->ci->config->item('DX_website_name'));
+			$this->ci->settings->organization);
 	}
 	
 	// This event occurs right before dx auth send forgot password request email
@@ -1462,12 +1465,12 @@ class DX_Auth
 	{
 		// Create content
 		$content = sprintf($this->ci->lang->line('auth_forgot_password_content'), 
-			$this->ci->config->item('DX_website_name'), 
+			$this->ci->settings->organization, 
 			$data['reset_password_uri'],
 			$data['password'],
 			$data['key'],
-			$this->ci->config->item('DX_webmaster_email'),
-			$this->ci->config->item('DX_website_name'));
+			$this->ci->settings->from_email,
+			$this->ci->settings->organization);
 	}
 	
 }
