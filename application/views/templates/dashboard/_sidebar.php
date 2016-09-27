@@ -82,12 +82,19 @@ $nav_level_2      = isset($_nav_primary['level_2']) ? $_nav_primary['level_2'] :
                                           </span>
                                     </a>
                                     <ul class="treeview-menu">
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'roles');?>"><a href="<?php echo site_url('roles');?>"><i class="fa fa-lock"></i> Roles &amp; Permissions</a></li>    
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'roles');?>"><a href="<?php echo site_url('roles');?>"><i class="fa fa-lock"></i> Roles &amp; Permissions</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'users');?>"><a href="<?php echo site_url('users');?>"><i class="fa fa-users"></i> Users</a></li>    
                                     </ul>
                               </li>
                         </ul>
                   </li>
             <?php endif; ?>
+
+            <li class="<?php echo set_menu_active($nav_level_0, 'activities');?>">
+                  <a href="<?php echo site_url('activities');?>">
+                        <i class="fa fa-history"></i> <span>Activities</span>
+                  </a>
+            </li>
       </ul>
 </section>
 <!-- /.sidebar -->

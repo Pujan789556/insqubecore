@@ -179,6 +179,9 @@ class Activity {
 		{
 			return $this->$method();
 		}
+		else{
+			return $this->_statement_common();
+		}
 		return '';
 	}
 
@@ -195,15 +198,29 @@ class Activity {
 	 */
 	private function _statement_common( $fullstop = TRUE )
 	{
+		$action_base_uri = $this->_module_config['_uri'];
+		$anchor = '';
 		$action = $this->_module_config['_actions'][$this->_activity->action];
-		$anchor = site_url(  $this->_module_config['_actions']['_uri'] . $this->_activity->module_id, 
-							"{$this->activity->module} ( {$this->_activity->module_id} )" );
+
+		// If this is a recordwise action
+		if($this->_activity->module_id)
+		{	
+			// eg. <a href="roles/...">role</a>
+			$anchor = anchor( 
+						site_url( $action_base_uri . $this->_activity->module_id), 
+						"{$this->_activity->module}");
+		}
+		else
+		{
+			// Else, linke to module on the whole statement
+			$action = anchor(site_url( $action_base_uri ), $action);
+		}			
 
 		$statement = "$action $anchor";
 
 		$statement = $fullstop ? $statement . '.' : $statement;
 
-		return $statement;
+		return $statement;		
 	}
 
 	// --------------------------------------------------------------------
@@ -238,7 +255,7 @@ class Activity {
 
 		// Check for extra
 		// Assigned
-		if($action == 'A')
+		if($this->_activity->action == 'A')
 		{
 			// Statement:: assigned <role> to <user>
 			// ref_anchor holds user_id			
@@ -255,36 +272,7 @@ class Activity {
 
 	// --------------------------------------------------------------------
 
-	/**
-	 * Get Permission Activity Statement
-	 * 
-	 * 	Format: <action> permission [ to <role> ]	
-	 * 
-	 * @return string
-	 */
-	private function _statement_permission(  )
-	{		
 		
-		$statement = $this->_statement_common( FALSE );
-
-		$extra_string = '.';
-
-		// Check for extra
-		// Assigned
-		if($action == 'A')
-		{
-			// Statement:: assigned <permission> to <role>
-			// ref_anchor holds role_id			
-			$role_id = $this->_activity->extra ? (int)$this->_activity->extra : '';
-			if( $role_id )
-			{
-				$extra_string = ' to role ( ' . anchor('roles/'. $role_id, $role_id ) . ' ).';
-			}
-		}
-		$statement .= $extra_string;
-		
-		return $statement;
-	}
 
 	// --------------------------------------------------------------------
 

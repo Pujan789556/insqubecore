@@ -33,7 +33,8 @@ $( document ).ajaxError(function( event, request, settings ) {
                 imagePreview: imagePreview,                
                 imagePopup: imagePopup,
                 liveSearch: liveSearch,
-                options: {},                
+                load: load,
+                options: {},           
                 save: save,
                 subscribe: subscribe,
                 version: '1.0.0'
@@ -87,6 +88,38 @@ $( document ).ajaxError(function( event, request, settings ) {
             }
 
             /**
+             * Load ajax content
+             */
+            function load(a, callback)
+            {
+                 var $a = $(a),
+                 $box = $($a.data('box')), // html box to load content
+                 method = $a.data('method') ? $a.data('method') : 'html', // method to render html|append|prepend|after|before
+                 self_destruct = $a.data('self-destruct'),
+                 $loader_box = $($a.data('loader-box'))
+                 url = $a.data('url');
+                 $a.button('loading');
+                $.getJSON(url, function(r){
+                    if(r.status === 'success' && typeof r.html !== 'undefined' ){
+                        $box[method](r.html);
+
+                        // Self Destruct on Success?
+                        if(self_destruct){
+                            $loader_box.fadeOut('fast', function(){
+                                $loader_box.remove();
+                            });
+                        }
+
+                        // Callback if any
+                        if (callback && typeof(callback) === "function") {
+                            callback(a,r);
+                        }  
+                    }
+                    $a.button('reset');
+                });
+            }
+
+            /**
              * Default Ajax Form Save
              */
              function save(form, callback){
@@ -105,8 +138,7 @@ $( document ).ajaxError(function( event, request, settings ) {
 
                         // Show message
                         // NOTE: r.status must be one of the toastr method [success|error|info|warning]
-                        toastr[r.status](r.message);
-                       
+                        toastr[r.status](r.message);                       
 
                         // Callback if any
                         if (callback && typeof(callback) === "function") {

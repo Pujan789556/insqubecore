@@ -24,10 +24,25 @@ class Activity_model extends MY_Model
 
 	function __construct()
 	{
-		parent::__construct();		
+        // User Relationship
+        $this->has_one['user'] = array('local_key'=>'created_by', 'foreign_key'=>'id', 'foreign_model'=>'User_model');
+
+        parent::__construct();
 	}
 
 	// --------------------------------------------------------------------
 
+
+    public function all($params = array())
+    {
+        if(!empty($params))
+        {
+            $this->where($params);
+        }
+        return $this->with_user('fields:username')
+                    ->order_by('id', 'desc')
+                    ->limit($this->settings->per_page+1)
+                    ->get_all();
+    }
 
 }
