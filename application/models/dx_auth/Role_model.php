@@ -58,6 +58,19 @@ class Role_model extends MY_Model
 		$this->after_create[] = 'log_activity';		
 	}
 
+	// --------------------------------------------------------------------
+
+    /**
+     * Get Dropdown List
+     */
+    public function dropdown()
+    {
+        return $this->set_cache('dropdown')
+                        ->as_dropdown('name')
+                        ->order_by('name', 'asc')
+                        ->get_all();
+    }
+
 	// ----------------------------------------------------------------
 
 	public function check_duplicate($name, $id=NULL)
@@ -107,10 +120,17 @@ class Role_model extends MY_Model
      */
     public function _prep_after_write()
     {
+    	$cache_names = [
+            'auth_roles_all',
+            'auth_roles_dropdown'
+        ];
     	if($this->delete_cache_on_save === TRUE)
         {
         	// cache name without prefix
-        	$this->delete_cache('auth_roles_all'); 
+            foreach($cache_names as $cache)
+            {
+                $this->delete_cache($cache);     
+            }
         }       
         return TRUE;
     }

@@ -814,26 +814,26 @@ class DX_Auth
 	}
 	
 	// Check if username is available to use, by making sure there is no same username in the database
-	function is_username_available($username)
+	function is_username_available($username, $id = NULL)
 	{
 		// Load Models
 		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 
-		$users = $this->ci->user_model->check_username($username);
+		$users = $this->ci->user_model->check_username($username, $id);
 		$temp = $this->ci->user_temp->check_username($username);
 		
 		return $users->num_rows() + $temp->num_rows() == 0;
 	}
 	
 	// Check if email is available to use, by making sure there is no same email in the database
-	function is_email_available($email)
+	function is_email_available($email, $id = NULL)
 	{
 		// Load Models
 		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 
-		$users = $this->ci->user_model->check_email($email);
+		$users = $this->ci->user_model->check_email($email, $id);
 		$temp = $this->ci->user_temp->check_email($email);
 		
 		return $users->num_rows() + $temp->num_rows() == 0;
@@ -975,7 +975,7 @@ class DX_Auth
 		$this->ci->session->sess_destroy();		
 	}
 
-	function register($username, $password, $email)
+	function register($username, $password, $email, $extra_data = [])
 	{		
 		// Load Models
 		$this->ci->load->model('user_model');
@@ -984,7 +984,7 @@ class DX_Auth
 		$this->ci->load->helper('url');
 		
 		// Default return value
-		$result = FALSE;
+		$insert = FALSE;
 
 		// Hash password using phpass
 		$hasher = new PasswordHash(
@@ -1000,6 +1000,14 @@ class DX_Auth
 			'last_ip'					=> $this->ci->input->ip_address()
 		);
 
+		// Do we have extra data?
+		if( !empty( $extra_data) )
+		{
+			// Remove Vitals
+			unset($extra_data['username'], $extra_data['password'], $extra_data['email']);
+			$new_user = !empty( $extra_data) ? array_merge($new_user, $extra_data) : $new_user;
+		}
+
 		// Do we need to send email to activate user
 		if ($this->ci->config->item('DX_email_activation'))
 		{
@@ -1013,16 +1021,19 @@ class DX_Auth
 		{				
 			// Create user 
 			$insert = $this->ci->user_model->create_user($new_user);
-			// Trigger event
-			$this->user_activated($this->ci->db->insert_id());				
+
+			// Trigger event 
+			// 		This event is not needed as we are creating profile as JSON data in same table
+			// 		with Next Wizard Call
+			// $this->user_activated($this->ci->db->insert_id());				
 		}
 		
 		if ($insert)
 		{
 			// Replace password with blank text for email.
-			$new_user['password'] = '**********(you should know it)';
+			$new_user['password'] = $password;
 			
-			$result = $new_user;
+			// $result = $new_user;
 			
 			// Send email based on config
 		
@@ -1060,7 +1071,7 @@ class DX_Auth
 			}
 		}
 		
-		return $result;
+		return $insert; // newly created user ID or False
 	}
 
 	function forgot_password($login)

@@ -84,7 +84,7 @@ $config['DX_salt'] = '';
 |
 */
  
-$config['DX_email_activation'] = TRUE; 
+$config['DX_email_activation'] = FALSE; 
 $config['DX_email_activation_expire'] = 60*60*24*2; 
 $config['DX_email_account_details'] = TRUE; 
 
