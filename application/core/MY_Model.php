@@ -426,17 +426,19 @@ class MY_Model extends CI_Model
             $data = $this->trigger('before_create',$data);
             if($this->_database->insert($this->table, $data))
             {
-                $this->_prep_after_write();
                 $id = $this->_database->insert_id();
-                $return = $this->trigger('after_create',$id);
-                return $return;
+                $this->_prep_after_write();                
+
+                // Pefrom after_create callbacks
+                $this->trigger('after_create',$id);
+                return $id;
             }
             return FALSE;
         }
         // else...
         else
         {
-            $return = array();
+            $return_ids = array();
             foreach($data as $row)
             {
                 if($this->timestamps !== FALSE)
@@ -446,16 +448,16 @@ class MY_Model extends CI_Model
                 $row = $this->trigger('before_create',$row);
                 if($this->_database->insert($this->table,$row))
                 {
-                    $return[] = $this->_database->insert_id();
+                    $return_ids[] = $this->_database->insert_id();
                 }
             }
             $this->_prep_after_write();
-            $after_create = array();
-            foreach($return as $id)
+            foreach($return_ids as $id)
             {
-                $after_create[] = $this->trigger('after_create', $id);
+                // Pefrom after_create callbacks
+                $this->trigger('after_create', $id);
             }
-            return $after_create;
+            return $return_ids;
         }
         return FALSE;
     }
