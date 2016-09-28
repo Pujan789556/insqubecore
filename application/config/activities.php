@@ -86,6 +86,22 @@ $config['insqb_activity_types'] = [
 		'_actions' => [
 			'E' => 'edited' 
 	]],
+
+	/**
+	 * Activities related to User
+	 */
+	'user' => [
+		'_uri' => 'users/',
+		'_table' => 'auth_users',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited', 
+			'D' => 'deleted',
+			'A' => 'assigned',  // assigned <role> to <user>
+			'T' => 'updated contact',  // updated contact of <user>
+			'P' => 'updated profile',  // updated profile of <user>
+			'O' => 'uploaded document(s)',  // uploaded documents of <user>
+	]],
 	
 ];
 

@@ -107,6 +107,8 @@ class Branch_model extends MY_Model
                         ->count_all_results($this->table);
     }
 
+    // --------------------------------------------------------------------
+
     /**
      * Get Dropdown List
      */
