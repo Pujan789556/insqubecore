@@ -132,13 +132,13 @@ $( document ).ajaxError(function( event, request, settings ) {
                     contentType: false,
                     processData: false,
                     success:function(r){  
-                        
-                        // Clear Toastr 
-                        toastr.clear();
-
                         // Show message
                         // NOTE: r.status must be one of the toastr method [success|error|info|warning]
-                        toastr[r.status](r.message);                       
+                        if(typeof r.status !== 'undefined' && typeof r.message !== 'undefined'){
+                            // Clear Toastr 
+                            toastr.clear();
+                            toastr[r.status](r.message);  
+                        }                                             
 
                         // Callback if any
                         if (callback && typeof(callback) === "function") {
@@ -296,12 +296,13 @@ $( document ).ajaxError(function( event, request, settings ) {
             $(container).html(r.form);
         }
 
-        if(r.status === 'success')
+        if(typeof r.status !== 'undefined' && r.status === 'success')
         {
             // Do we want to replace certain section on success?
             if( typeof r.updateSection !== 'undefined' && r.updateSection === true){                
                 var dt = r.updateSectionData;
                 $(dt.box)[dt.method](dt.html);
+                console.log(dt);
             }
             // What about Edit Form Dialog?
             if( typeof r.hideBootbox !== 'undefined' && r.hideBootbox === true){
