@@ -90,15 +90,15 @@ $( document ).ajaxError(function( event, request, settings ) {
             /**
              * Load ajax content
              */
-            function load(a, callback)
-            {
-                 var $a = $(a),
-                 $box = $($a.data('box')), // html box to load content
-                 method = $a.data('method') ? $a.data('method') : 'html', // method to render html|append|prepend|after|before
-                 self_destruct = $a.data('self-destruct'),
-                 $loader_box = $($a.data('loader-box'))
-                 url = $a.data('url');
-                 $a.button('loading');
+            function load(e, a, callback){
+                e.preventDefault();
+                var $a = $(a),
+                $box = $($a.data('box')), // html box to load content
+                method = $a.data('method') ? $a.data('method') : 'html', // method to render html|append|prepend|after|before
+                self_destruct = $a.data('self-destruct'),
+                $loader_box = $a.data('loader-box') ? $($a.data('loader-box')) : null,
+                url = $a.data('url');
+                $a.button('loading');
                 $.getJSON(url, function(r){
                     if(r.status === 'success' && typeof r.html !== 'undefined' ){
                         $box[method](r.html);
@@ -117,6 +117,7 @@ $( document ).ajaxError(function( event, request, settings ) {
                     }
                     $a.button('reset');
                 });
+                return false;
             }
 
             /**
