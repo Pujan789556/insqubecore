@@ -9,7 +9,8 @@ class User_model extends MY_Model
 
     public $fillable = [	
     	// If you want, you can set an array with the fields that can be filled by insert/update
-    	// 'name', 'description', 'permissions'
+    	'role_id', 'branch_id', 'username', 'password', 'email', 'scope', 'contact', 'profile', 'docs', 
+    	'banned', 'ban_reason', 'newpass', 'newpass_key', 'newpass_time', 'last_ip', 'last_login'
     ]; 
 
     public $protected = ['id']; // ...Or you can set an array with the fields that cannot be filled by insert/update
@@ -32,7 +33,34 @@ class User_model extends MY_Model
 		$this->_roles_table = $this->_prefix.$this->config->item('DX_roles_table');
 
 		parent::__construct();
+
+		// After Create Callback
+        $this->after_create[] = 'log_activity';
 	}
+
+	// ----------------------------------------------------------------
+
+	/**
+     * Delete Cache on Update
+     */
+    public function _prep_after_write()
+    {
+    	$cache_names = [
+            'auth_users_all'
+        ];
+    	if($this->delete_cache_on_save === TRUE)
+        {
+        	// cache name without prefix
+            foreach($cache_names as $cache)
+            {
+                $this->delete_cache($cache);     
+            }
+        }       
+        return TRUE;
+    }
+
+    // ----------------------------------------------------------------
+
 
 	// General function
 	
@@ -91,17 +119,29 @@ class User_model extends MY_Model
 		return $this->db->get($this->table);
 	}
 	
-	function check_username($username)
+	function check_username($username, $id=NULL)
 	{
 		$this->db->select('1', FALSE);
 		$this->db->where('LOWER(username)=', strtolower($username));
+
+		// Edit mode (id supplied)?
+		if( $id )
+		{
+			$this->db->where('id !=', $id);
+		}
 		return $this->db->get($this->table);
 	}
 
-	function check_email($email)
+	function check_email($email, $id=NULL)
 	{
 		$this->db->select('1', FALSE);
 		$this->db->where('LOWER(email)=', strtolower($email));
+
+		// Edit mode (id supplied)?
+		if( $id )
+		{
+			$this->db->where('id !=', $id);
+		}
 		return $this->db->get($this->table);
 	}
 		
@@ -135,12 +175,8 @@ class User_model extends MY_Model
 
 	function create_user($data)
 	{
-		// $data['created'] = date('Y-m-d H:i:s', time());
-
-		// Timestamps and Creators
-		timestamp_create($data);
-		
-		return $this->db->insert($this->table, $data);
+		// echo '<pre>'; print_r($data);exit;
+		return $this->insert($data);
 	}
 
 	function get_user_field($user_id, $fields)
@@ -205,5 +241,57 @@ class User_model extends MY_Model
 		$this->db->where('id', $user_id);
 		return $this->db->update($this->table);
 	}
+
+	// ----------------------------------------------------------------
+    
+    /**
+     * Log Activity
+     * 
+     * Log activities
+     *      Available Activities: Create|Edit|Delete
+     * 
+     * @param integer $id 
+     * @param string $action 
+     * @return bool
+     */
+    public function log_activity($id, $action = 'C')
+    {        
+        $action = is_string($action) ? $action : 'C';
+        // Save Activity Log
+        $activity_log = [
+            'module' => 'user',
+            'module_id' => $id,
+            'action' => $action
+        ];
+        return $this->activity->save($activity_log);     
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Update User's Contact
+     * 
+     * @param integer $id 
+     * @param array $data 
+     * @return bool
+     */
+    public function update_contact($id, $data)
+    {
+    	return $this->update($data, $id) && $this->log_activity($id, 'T');
+    }
+
+    // ----------------------------------------------------------------
+    
+    /**
+     * Update User's Profile
+     * 
+     * @param integer $id 
+     * @param array $data 
+     * @return bool
+     */
+    public function update_profile($id, $data)
+    {
+    	return $this->update($data, $id) && $this->log_activity($id, 'P');
+    }
 	
 }
