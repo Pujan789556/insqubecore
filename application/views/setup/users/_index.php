@@ -18,16 +18,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						?>
 					</div>					
 					<div class="col-sm-6 master-actions text-right">
-						<a href="#" title="Add new role"
-							class="btn btn-success btn-round trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New User' data-url="<?php echo site_url('users/add/');?>" data-form=".form-iqb-general"
-						><i class="ion-plus-circled"></i> Add</a>
 						<a href="#" 
-							title="Revoke all permissions"
-							data-confirm="true"
-							class="btn btn-danger btn-round trg-dialog-action" 	
-							data-message="Are you sure you want to do this?<br/>All permissions for all roles will be cleared out."						
-							data-url="<?php echo site_url('users/revoke_all_permissions/');?>"
-						><i class="fa fa-undo"></i> Revoke All</a>
+							title="Add New User"
+							data-toggle="tooltip"
+							class="btn btn-success btn-round trg-dialog-edit" 
+							data-size="large"
+							data-title='<i class="fa fa-pencil-square-o"></i> Add New User'
+							data-url="<?php echo site_url('users/add/');?>" 
+							data-form=".form-iqb-general"
+						><i class="ion-plus-circled"></i> Add</a>
+
+						<a href="javascript:;" 
+							title="Refresh"
+							data-toggle="tooltip"
+							class="btn btn-primary btn-round" 
+							data-url="<?php echo site_url($this->router->class);?>"
+							data-method="html"
+							data-box="#iqb-data-list"
+							data-self-destruct="false"
+							data-loader-box="false"
+							onclick="return InsQube.load(event, this)"
+						><i class="ion-refresh"></i> Refresh</a>						
 					</div>
 				</div>
 			</div>

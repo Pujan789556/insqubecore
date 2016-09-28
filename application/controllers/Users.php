@@ -21,7 +21,7 @@ class Users extends MY_Controller
 	private $rules = [
 
 		/**
-		 * Basic Validation Rules
+		 * Register New User
 		 */
 		'basic' => [
 			[
@@ -81,13 +81,66 @@ class Users extends MY_Controller
 		],
 
 		/**
-		 * Profile Validation Rules
+		 * Edit Basic Information
+		 */
+		'edit-basic' => [			
+			[
+				'field' => 'role_id',
+		        'label' => 'Application Role',
+		        'rules' => 'trim|required|integer|max_length[8]',
+		        '_type' 	=> 'dropdown',
+		        '_required' => true
+			],
+			[
+				'field' => 'branch_id',
+		        'label' => 'Branch',
+		        'rules' => 'trim|required|integer|max_length[11]',
+		        '_type' 	=> 'dropdown',
+		        '_required' => true
+			],
+
+			/**
+			 * Scope: local/branch/global
+			 */
+			[
+				'field' => 'scope[scope]',
+				'label' => 'Scope',
+				'rules' => 'trim|required|alpha|in_list[local,branch,global]',
+				'_type' 	=> 'dropdown',
+				'_data' 	=> ['local'=>'local', 'branch' => 'branch', 'global' => 'global'],
+		        '_required' => true
+			]
+		],
+
+		/**
+		 * Change Password
+		 */
+		'change-password' => [
+			[
+				'field' => 'password',
+				'label' => 'Password',
+				'rules' => 'trim|required|min_length[4]|max_length[20]|matches[confirm_password]',
+				'_type' 	=> 'password',
+		        '_required' => true
+			],
+			[
+				'field' => 'confirm_password',
+				'label' => 'Confirm Password',
+				'rules' => 'trim|required',
+				'_type' 	=> 'password',
+		        '_required' => true
+			]
+		],
+
+		/**
+		 * User Profile
 		 */
 		'profile' => [
 			[
 				'field' => 'profile[name]',
 		        'label' => 'Full Name',
 		        'rules' => 'trim|required|max_length[100]',
+		        '_key' 		=> 'name', // Json Key Name
 		        '_type' 	=> 'text',
 		        '_required' => true
 			],
@@ -95,6 +148,7 @@ class Users extends MY_Controller
 				'field' => 'profile[gender]',
 		        'label' => 'Gender',
 		        'rules' => 'trim|required|alpha|in_list[male,female,other]',
+		        '_key' 		=> 'gender', // Json Key Name
 		        '_type' 	=> 'dropdown',
 		        '_data'		=> ['male' => 'Male', 'female' => 'Female', 'other' => 'Other'],
 		        '_required' => true
@@ -103,6 +157,7 @@ class Users extends MY_Controller
 				'field' => 'profile[designation]',
 		        'label' => 'Designation',
 		        'rules' => 'trim|required|max_length[100]',
+		        '_key' 		=> 'designation', // Json Key Name
 		        '_type' 	=> 'text',
 		        '_required' => true
 			],
@@ -110,6 +165,7 @@ class Users extends MY_Controller
 				'field' => 'profile[dob]',
 				'label' => 'Date of Birth',
 				'rules' => 'trim|required|valid_date',
+				'_key' 		=> 'dob', // Json Key Name
 				'_type' 	=> 'date',
 		        '_required' => true
 			],
@@ -117,6 +173,7 @@ class Users extends MY_Controller
 				'field' => 'profile[salary]',
 		        'label' => 'Salary',
 		        'rules' => 'trim|decimal|max_length[10]',
+		        '_key' 		=> 'salary', // Json Key Name
 		        '_type' 	=> 'text',
 		        '_required' => false
 			]
@@ -152,7 +209,6 @@ class Users extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('dx_auth/role_model');
 		$this->load->model('user_model');		
 	}
 	
@@ -172,7 +228,20 @@ class Users extends MY_Controller
 		 */
 		// this will generate cache name: mc_auth_roles_all
 		$records = $this->user_model->set_cache('all')->get_all();
-	
+		$next_id = 0;
+		$data = [
+			'records' => $records,
+			'next_id' => $next_id
+		];
+		if ( $this->input->is_ajax_request() ) 
+		{
+			$html = $this->load->view('setup/users/_list', $data, TRUE);
+			$this->template->json([
+				'status' => 'success',
+				'html'   => $html
+			]);
+		}
+
 		$this->template->partial(
 							'content_header', 
 							'templates/_common/_content_header',
@@ -180,15 +249,14 @@ class Users extends MY_Controller
 								'content_header' => 'Manage Users',
 								'breadcrumbs' => ['Master Setup' => NULL, 'Users' => NULL]
 						])
-						->partial('content', 'setup/users/_index', compact('records'))
+						->partial('content', 'setup/users/_index', $data)
 						->render($this->data);
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Edit a Role
-	 * 
+	 * Edit User's Basic Information
 	 * 
 	 * @param integer $id 
 	 * @return void
@@ -197,21 +265,174 @@ class Users extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->role_model->get($id);
+		$record = $this->user_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
 		}
 
-		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record);
-		
+		// Validation RUles
+		$rules = $this->rules['edit-basic'];
+
+		/**
+		 * Update Validation Rule if Scope is branch
+		 */
+		$scope = $this->input->post('scope');
+		if($scope['scope'] === 'branch')
+		{
+			$rules[] = [
+				'field' => 'scope[list][]',
+				'label' => 'Branches',
+				'rules' => 'trim|required|integer',
+			];
+		}
+
+		$this->form_validation->set_rules($rules);
+		if( $this->input->post() && $this->form_validation->run() )
+		{
+			$data = $this->input->post();
+
+			$data = [
+				'role_id' => $this->input->post('role_id'),
+				'branch_id' => $this->input->post('branch_id')
+			];
+
+			// Scope
+			$scope = $this->input->post('scope');
+			if($scope['scope'] !== 'branch')
+			{
+				// Reset scope list
+				unset($scope['list']);
+			}
+			$data['scope'] = json_encode($scope);
+
+			// Update Basic Information
+			if($this->user_model->update_basic($id, $data))
+			{
+				$status = 'success';
+				$message = "User's contact updated successfully.";
+			}
+			else
+			{
+				$status = 'error';
+				$message = "Could not update user's contact.";
+			}
+
+			$return_data = [
+				'status' 		=> $status,
+				'message' 		=> $message,
+				'hideBootbox' 	=> $status === 'success'
+			];
+			return $this->template->json($return_data);
+		}		
+
+		// required models
+		$this->load->model('dx_auth/role_model');
+		$this->load->model('branch_model');
 
 		// No form Submitted?
+		$json_data = [
+			'reloadForm' => true
+		];
 		$json_data['form'] = $this->load->view('setup/users/_form', 
 			[
-				'form_elements' => $this->form_elements,
-				'record' 		=> $record
+				'form_title' 	=> 'Basic Information',
+				'action_url'	=> site_url('users/edit/'. $record->id),
+				'form_elements' => $rules,
+				'record' 		=> $record,
+				'form_record'   => $record,
+				'roles' 		=> $this->role_model->dropdown(),
+				'branches' 		=> $this->branch_model->dropdown()
+
+			], TRUE);
+
+		// Return HTML 
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Change User's Password
+	 * 
+	 * @param integer $id 
+	 * @return void
+	 */
+	public function change_password($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->user_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		// Validation RUles
+		$rules = $this->rules['change-password'];
+
+		/**
+		 * Update Validation Rule if Scope is branch
+		 */
+		$scope = $this->input->post('scope');
+		if($scope['scope'] === 'branch')
+		{
+			$rules[] = [
+				'field' => 'scope[list][]',
+				'label' => 'Branches',
+				'rules' => 'trim|required|integer',
+			];
+		}
+
+		$this->form_validation->set_rules($rules);
+		if( $this->input->post() && $this->form_validation->run() )
+		{
+			
+			// Success
+			$password = $this->input->post('password');
+
+			$hasher = new PasswordHash(
+					$this->config->item('phpass_hash_strength'),
+					$this->config->item('phpass_hash_portable'));
+
+			// Hash new password using phpass
+			$hashed_password = $hasher->HashPassword($password);
+
+			// Replace old password with new password
+			if($this->user_model->change_password($id, $hashed_password))
+			{
+				// Trigger event
+				$this->dx_auth->user_changed_password($id, $hashed_password);
+
+				$status = 'success';
+				$message = "User's password updated successfully.";
+			}
+			else
+			{
+				$status = 'error';
+				$message = "Could not change user's password.";
+			}
+
+			$return_data = [
+				'status' 		=> $status,
+				'message' 		=> $message,
+				'hideBootbox' 	=> $status === 'success'
+			];
+			return $this->template->json($return_data);
+		}		
+
+		// No form Submitted?
+		$json_data = [
+			'reloadForm' => true
+		];
+		$json_data['form'] = $this->load->view('setup/users/_form', 
+			[
+				'form_title' 	=> 'Change Password - ' . $record->username,
+				'action_url'	=> site_url('users/change_password/'. $record->id),
+				'form_elements' => $rules,
+				'record' 		=> $record,
+				'form_record'   => $record
+
 			], TRUE);
 
 		// Return HTML 
@@ -290,7 +511,10 @@ class Users extends MY_Controller
 		}
 
 		
-		// No form Submitted?		
+		// No form Submitted?	
+
+		// required models
+		$this->load->model('dx_auth/role_model');	
 		$this->load->model('branch_model');
 		$json_data['form'] = $this->load->view('setup/users/_form', 
 			[
@@ -309,6 +533,18 @@ class Users extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Update User's Contact
+	 * 
+	 * Supports wizard on User Creation. When user is created first time and 
+	 * contact wizard is loaded for the first time, we show some toastr message
+	 * and reload the user list on the background
+	 * 
+	 * @param integer $id 
+	 * @param bool $next_wizard 
+	 * @param bool $first_time 
+	 * @return void
+	 */
 	public function update_contact($id, $next_wizard = FALSE, $first_time = FALSE)
 	{
 		// Valid Record ?
@@ -372,7 +608,14 @@ class Users extends MY_Controller
 		$this->_load_contact_form($record, $next_wizard);
 		
 	}
-
+		/**
+		 * Sub-function to load Contact Form for update_contact function
+		 * 
+		 * @param object $record 
+		 * @param bool $next_wizard 
+		 * @param tbool $first_time 
+		 * @return void
+		 */
 		private function _load_contact_form($record, $next_wizard = FALSE, $first_time = FALSE)
 		{
 			// If it is loaded for the first time, its coming from add function
@@ -402,7 +645,6 @@ class Users extends MY_Controller
 											[
 												'action_url'	=> site_url('users/update_contact/' . $record->id),
 												'record' => $record,
-												'form_record'   => $contact_record,
 												'next_wizard' 	=> $next_wizard
 											], TRUE)
 			];
@@ -411,6 +653,17 @@ class Users extends MY_Controller
 			$this->template->json($json_data);
 		}
 
+	// --------------------------------------------------------------------
+
+	/**
+	 * Update User's Profile
+	 * 
+	 * Supports wizard on user creation.
+	 * 
+	 * @param integer $id 
+	 * @param bool $next_wizard 
+	 * @return void
+	 */	
 	public function update_profile($id, $next_wizard = FALSE)
 	{
 		// Valid Record ?
@@ -469,6 +722,13 @@ class Users extends MY_Controller
 		
 	}
 
+		/**
+		 * Sub-function to load Profile Form for update_profile function
+		 * 
+		 * @param object $record 
+		 * @param bool $next_wizard 
+		 * @return void
+		 */
 		private function _load_profile_form($record, $next_wizard = FALSE)
 		{
 			// Contact Record
@@ -476,7 +736,7 @@ class Users extends MY_Controller
 
 			$json_data = [
 				'reloadForm' => true,
-				'form' => $this->load->view('setup/users/_form', 
+				'form' => $this->load->view('setup/users/_form_profile', 
 											[
 												'form_title' 	=> 'User Profile',
 												'action_url'	=> site_url('users/update_profile/' . $record->id),

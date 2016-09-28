@@ -12,11 +12,6 @@ if (isset($record) )
     $hidden['id'] = $record->id;
 }
 ?>
-<style>
-.select2-dropdown .select2-search__field:focus, .select2-search--inline .select2-search__field:focus{
-    border:none;
-}
-</style>
 <?php echo form_open( $action_url,  
                         [
                             'class' => 'form-horizontal form-iqb-general',
@@ -42,26 +37,7 @@ if (isset($record) )
                         'placeholder'   => $element['label']
                     );
 
-                    $value = '';
-                    // For Basic Form with Scope
-                    if($element['field'] == 'scope[scope]')
-                    {
-                        $scope_list = [];
-                        if(set_value($element['field']))
-                        {
-                            $value = set_value($element['field']);
-                        }
-                        else if(isset($record))
-                        {
-                            $scope = json_decode($record->scope); 
-                            $value = $scope ? $scope->scope : '';
-                            $scope_list = isset($scope->list) ? $scope->list : []; 
-                        }                        
-                    }                    
-                    else if($element['_type'] != 'password')
-                    {
-                        $value = set_value($element['field']) ? set_value($element['field'], '', FALSE) : ( isset($form_record) ? $form_record->{$element['field']} : '' );
-                    }                    
+                    $value = set_value($element['field']) ? set_value($element['field'], '', FALSE) : ( isset($form_record) ? $form_record->{$element['_key']} : '' );                   
 
                     switch($element['_type'])
                     {
@@ -118,49 +94,7 @@ if (isset($record) )
                     <?php if(form_error($element_config['name'])):?><span class="help-block"><?php echo form_error($element_config['name']); ?></span><?php endif?>
                 </div>
             </div>
-
-            <?php 
-            if($element_config['name'] == 'scope[scope]'):
-                $branch_config = [
-                    'name' => 'scope[list][]',
-                    'multiple' => 'multiple',
-                    'class'     => 'form-control select-multiple',
-                    'id'        => 'select-multiple',
-                    'data-placeholder' => 'Select branch(es)',
-                    'style'     => 'width:100%'
-                ];
-            ?>
-                <div class="form-group <?php echo form_error($branch_config['name']) ? 'has-error' : '';?>" id="scope-list" style="display:<?php echo $value == 'branch' ? 'block' : 'none';?>">
-                    <div class="col-sm-10 col-sm-offset-2">
-                        <label>Select Branch(es)<?php echo field_compulsary_text(true);?></label>
-                        <?php 
-
-                        echo form_dropdown($branch_config, $branches, $scope_list);?>  
-                        <?php if(form_error($branch_config['name'])):?><span class="help-block"><?php echo form_error($branch_config['name']); ?></span><?php endif?>                      
-                    </div>
-                </div>
-            <?php endif?>
-
         <?php endforeach?>  
     </div>     
     <button type="submit" class="hide">Submit</button> 
 <?php echo form_close();?>
-
-<!-- Select2 -->
-<script>    
-    $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
-        //Initialize Select2 Elements
-        $(".select-multiple").select2();
-
-        $('select[name="scope[scope]"]').on('change', function(e){
-            var v = $(this).val(),
-            $list = $('#select-multiple');
-            if(v === 'branch'){
-                $('#scope-list').fadeIn();
-            }else{
-                $('#scope-list').fadeOut();
-                $list.val('').trigger('change'); // reset the list
-            }
-        });
-    });
-</script>

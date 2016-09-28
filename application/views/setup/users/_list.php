@@ -10,14 +10,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<th>Username</th>
 		<th>Fullname</th>
 		<th>Actions</th>
-	</tr>					
+	</tr>	
 	<?php
 	/**
-	 * Load Rows from View
+	 * Load Rows & Next Link (if any)
 	 */ 
-	foreach($records as $record)
-	{
-		$this->load->view('setup/users/_single_row', compact('record'));
-	}
-	?>				
+	$this->load->view('setup/users/_rows');	
+	?>			
 </table>

@@ -239,7 +239,7 @@ class User_model extends MY_Model
 	{
 		$this->db->set('password', $new_pass);
 		$this->db->where('id', $user_id);
-		return $this->db->update($this->table);
+		return $this->db->update($this->table) && $this->log_activity($user_id, 'H');;
 	}
 
 	// ----------------------------------------------------------------
@@ -264,6 +264,20 @@ class User_model extends MY_Model
             'action' => $action
         ];
         return $this->activity->save($activity_log);     
+    }
+
+     // ----------------------------------------------------------------
+
+    /**
+     * Update User's Basic Information
+     * 
+     * @param integer $id 
+     * @param array $data 
+     * @return bool
+     */
+    public function update_basic($id, $data)
+    {
+    	return $this->update($data, $id) && $this->log_activity($id, 'B');
     }
 
     // ----------------------------------------------------------------
