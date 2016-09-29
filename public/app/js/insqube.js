@@ -303,7 +303,6 @@ $( document ).ajaxError(function( event, request, settings ) {
             if( typeof r.updateSection !== 'undefined' && r.updateSection === true){                
                 var dt = r.updateSectionData;
                 $(dt.box)[dt.method](dt.html);
-                console.log(dt);
             }
             // What about Edit Form Dialog?
             if( typeof r.hideBootbox !== 'undefined' && r.hideBootbox === true){

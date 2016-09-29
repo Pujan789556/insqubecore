@@ -270,7 +270,7 @@ class DX_Auth
 	function _get_role_data($role_id)
 	{
 		// Load models
-		$this->ci->load->model('dx_auth/role_model', 'role_model');
+		$this->ci->load->model('role_model');
 		$this->ci->load->model('dx_auth/permissions', 'permissions');
 	
 		// Clear return value

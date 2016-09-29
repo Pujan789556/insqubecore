@@ -13,30 +13,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Districts extends MY_Controller
 {
-	/**
-	 * Validation Rules
-	 * 
-	 * @var array
-	 */
-	private $form_elements = [
-		[
-			'name' => 'name_en',
-	        'label' => 'Name (EN)',
-	        '_id' 	=> 'name_en',
-	        '_type' => 'text',
-	        '_required' => true
-		],
-		[
-			'name' => 'name_np',
-	        'label' => 'Name (NP)',
-	        '_id' 	=> 'name_np',
-	        '_type'	=> 'text',
-	        '_required' => false
-		]	
-	];
-
-	// --------------------------------------------------------------------
-
 	function __construct()
 	{
 		parent::__construct();
@@ -153,7 +129,7 @@ class Districts extends MY_Controller
 				'form' 	  		=> $status === 'error' 
 									? 	$this->load->view('setup/districts/_form', 
 											[
-												'form_elements' => $this->form_elements,
+												'form_elements' => $this->district_model->rules['insert'],
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -164,7 +140,7 @@ class Districts extends MY_Controller
 
 		$form = $this->load->view('setup/districts/_form', 
 			[
-				'form_elements' => $this->form_elements,
+				'form_elements' => $this->district_model->rules['insert'],
 				'record' 		=> $record
 			], TRUE);
 

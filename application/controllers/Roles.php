@@ -13,30 +13,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Roles extends MY_Controller
 {
-	/**
-	 * Validation Rules
-	 * 
-	 * @var array
-	 */
-	private $form_elements = [
-		[
-			'name' 		=> 'name',
-	        'label' 	=> 'Name',
-	        '_id' 		=> 'name',
-	        '_type' 	=> 'text',
-	        '_required' => true
-		],
-		[
-			'name' 		=> 'description',
-	        'label' 	=> 'Description',
-	        '_id' 		=> 'description',
-	        '_type'		=> 'text',
-	        '_required' => false
-		]	
-	];
-
-	// --------------------------------------------------------------------
-
 	function __construct()
 	{
 		parent::__construct();
@@ -64,7 +40,7 @@ class Roles extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('dx_auth/role_model');		
+		$this->load->model('role_model');		
 	}
 	
 	// --------------------------------------------------------------------
@@ -121,7 +97,7 @@ class Roles extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/roles/_form', 
 			[
-				'form_elements' => $this->form_elements,
+				'form_elements' => $this->role_model->rules['insert'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -147,7 +123,7 @@ class Roles extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/roles/_form', 
 			[
-				'form_elements' => $this->form_elements,
+				'form_elements' => $this->role_model->rules['insert'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -255,7 +231,7 @@ class Roles extends MY_Controller
 				'form' 	  		=> $status === 'error' 
 									? 	$this->load->view('setup/roles/_form', 
 											[
-												'form_elements' => $this->form_elements,
+												'form_elements' => $this->role_model->rules['insert'],
 												'record' 		=> $record
 											], TRUE)
 									: 	null

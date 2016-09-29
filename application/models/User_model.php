@@ -36,7 +36,26 @@ class User_model extends MY_Model
 
 		// After Create Callback
         $this->after_create[] = 'log_activity';
+
+        // User Relationship
+        $this->has_one['role'] = array('local_key'=>'role_id', 'foreign_key'=>'id', 'foreign_model'=>'Role_model');
+        $this->has_one['branch'] = array('local_key'=>'branch_id', 'foreign_key'=>'id', 'foreign_model'=>'Branch_model');
 	}
+
+	// ----------------------------------------------------------------
+
+	public function all($params = array())
+    {
+        if(!empty($params))
+        {
+            $this->where($params);
+        }
+        return $this->with_role('fields:name')
+        			->with_branch('fields:name')
+                    // ->order_by('id', 'desc')
+                    ->limit($this->settings->per_page+1)
+                    ->get_all();
+    }
 
 	// ----------------------------------------------------------------
 
@@ -192,12 +211,12 @@ class User_model extends MY_Model
 		return $this->db->update($this->table, $data);
 	}
 	
-	function delete_user($user_id)
-	{
-		$this->db->where('id', $user_id);
-		$this->db->delete($this->table);
-		return $this->db->affected_rows() > 0;
-	}
+	// function delete_user($user_id)
+	// {
+	// 	$this->db->where('id', $user_id);
+	// 	$this->db->delete($this->table);
+	// 	return $this->db->affected_rows() > 0;
+	// }
 	
 	// Forgot password function
 
@@ -265,6 +284,45 @@ class User_model extends MY_Model
         ];
         return $this->activity->save($activity_log);     
     }
+
+    // ----------------------------------------------------------------
+	
+	/**
+	 * Delete User
+	 * 
+	 * @param integer|null $id 
+	 * @return bool
+	 */
+	public function delete_user($id = NULL)
+	{
+		// Disable DB Debug for transaction to work
+		$this->db->db_debug = FALSE;
+
+		$status = TRUE;
+
+		// Use automatic transaction
+		$this->db->trans_start();
+			
+			parent::delete($id);
+
+		$this->db->trans_complete();
+
+		if ($this->db->trans_status() === FALSE)
+		{
+	        // get_allenerate an error... or use the log_message() function to log your error
+			$status = FALSE;
+		}
+		else
+		{
+			$this->log_activity($id, 'D');
+		}
+
+		// Enable db_debug if on development environment
+		$this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+		// return result/status
+		return $status;
+	}	
 
      // ----------------------------------------------------------------
 

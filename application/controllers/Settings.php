@@ -3,82 +3,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Settings extends MY_Controller
 {
-	/**
-	 * Validation Rules
-	 * 
-	 * @var array
-	 */
-	private $form_elements = [
-		[
-			'name' => 'organization',
-	        'label' => 'Organization Name',
-	        '_id' 	=> 'organization',
-	        '_type' => 'text'
-		],
-		[
-			'name' => 'address',
-	        'label' => 'Headquarter Full Address',
-	        '_id' 	=> 'address',
-	        '_type'	=> 'textarea'
-		],
-		[
-			'name' => 'pan_no',
-	        'label' => 'PAN Number',
-	        '_id' 	=> 'pan_no',
-	        '_type'	=> 'text'
-		],
-		[
-			'name' => 'per_page',
-	        'label' => 'Pagination Limit',
-	        '_id' 	=> 'per_page',
-	        '_type'	=> 'dropdown',
-	        '_data' => ['10' => '10', '20' => '20', '50' => '50', '100' => '100']
-		],
-		[
-			'name' => 'flag_offline',
-	        'label' => 'Set Offline',
-	        '_id' 	=> 'flag_offline',
-	        '_type' => 'switch',
-	        '_data' => '1'
-		],
-		[
-			'name' => 'offline_message',
-	        'label' => 'Offline Message',
-	        '_id' 	=> 'offline_message',
-	        '_type'	=> 'textarea'
-		],
-		[
-			'name' => 'admin_email',
-	        'label' => 'Administrator Email',
-	        '_id'	=> 'admin_email',
-	        '_type'	=> 'email'
-		],
-		[
-			'name' => 'from_email',
-	        'label' => 'From Email',
-	        '_id'	=> 'from_email',
-	        '_type'	=> 'email'
-		],
-		[
-			'name' => 'replyto_email',
-	        'label' => 'Reply-to Email',
-	        '_id'  	=> 'replyto_email',
-	        '_type'	=> 'email'
-		],
-		[
-			'name' => 'noreply_email',
-	        'label' => 'No-reply Email',
-	        '_id' 	=> 'noreply_email',
-	        '_type'	=> 'email'
-		],
-		[
-			'name' => 'website',
-	        'label' => 'Website',
-	        '_id' 	=> 'website',
-	        '_type'	=> 'text'
-		]	
-	];
-
 	function __construct()
 	{
 		parent::__construct();
@@ -164,7 +88,7 @@ class Settings extends MY_Controller
 									: $this->settings;
 
 			$view = $this->load->view('settings/_form_general', [
-								'form_elements' => $this->form_elements,
+								'form_elements' => $this->setting_model->rules['insert'],
 								'record' 		=> $record
 							], TRUE);
 
@@ -189,7 +113,7 @@ class Settings extends MY_Controller
 						])
 						->partial('content', 'settings/_index', 
 							[
-								'form_elements' => $this->form_elements,
+								'form_elements' => $this->setting_model->rules['insert'],
 								'record' 		=> $this->settings
 							])
 						->render($this->data);

@@ -33,13 +33,16 @@ class Role_model extends MY_Model
 		'insert' => [
 			[
 				'field' => 'name',
-		        'label' => 'Name',
-		        'rules' => 'trim|required|max_length[30]|is_unique[auth_roles.name]'
+		        'label' => 'Role Name',
+		        'rules' => 'trim|required|max_length[30]|is_unique[auth_roles.name]',
+		        '_type'     => 'text',
+                '_required' => true
 			],
 			[
 				'field' => 'description',
 		        'label' => 'Description',
 		        'rules' => 'trim|max_length[255]',
+		        '_type'     => 'text'
 			]
 		]	
 	];
@@ -104,6 +107,10 @@ class Role_model extends MY_Model
 		{
 	        // get_allenerate an error... or use the log_message() function to log your error
 			$status = FALSE;
+		}
+		else
+		{
+			$this->log_activity($id, 'D');
 		}
 
 		// Enable db_debug if on development environment

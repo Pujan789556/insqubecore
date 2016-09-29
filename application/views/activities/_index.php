@@ -16,7 +16,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						 */
 						$this->load->view('templates/_common/_live_search');
 						?>
-					</div>										
+					</div>					
 				</div>
 			</div>
 			<!-- /.box-header -->

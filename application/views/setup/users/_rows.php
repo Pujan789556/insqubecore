@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Load Rows from View
- */ 
+ */
 foreach($records as $record)
 {
 	$this->load->view('setup/users/_single_row', compact('record'));

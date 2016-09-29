@@ -227,7 +227,8 @@ class Users extends MY_Controller
 		 * Normal Form Render
 		 */
 		// this will generate cache name: mc_auth_roles_all
-		$records = $this->user_model->set_cache('all')->get_all();
+		// $records = $this->user_model->set_cache('all')->get_all();
+		$records = $this->user_model->all();
 		$next_id = 0;
 		$data = [
 			'records' => $records,
@@ -327,7 +328,7 @@ class Users extends MY_Controller
 		}		
 
 		// required models
-		$this->load->model('dx_auth/role_model');
+		$this->load->model('role_model');
 		$this->load->model('branch_model');
 
 		// No form Submitted?
@@ -514,7 +515,7 @@ class Users extends MY_Controller
 		// No form Submitted?	
 
 		// required models
-		$this->load->model('dx_auth/role_model');	
+		$this->load->model('role_model');	
 		$this->load->model('branch_model');
 		$json_data['form'] = $this->load->view('setup/users/_form', 
 			[
@@ -798,120 +799,7 @@ class Users extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Save a Record
-	 * 
-	 * @param string $action [add|edit]
-	 * @param object|null $record Record Object or NULL
-	 * @return array
-	 */
-	private function _save($action, $record = NULL)
-	{
-		return [];
-
-		// Valid action?
-		if( !in_array($action, array('add', 'edit')))
-		{
-			return [
-				'status' => 'error',
-				'message' => 'Invalid action!'
-			];
-		}
-
-		/**
-		 * Form Submitted?
-		 */
-		$return_data = [];
-
-		if( $this->input->post() )
-		{
-			$done = FALSE;
-			
-
-			// Insert or Update?
-			if($action === 'add')
-			{
-				$done = $this->role_model->from_form()->insert();
-
-				// @NOTE: Activity Log will be automatically inserted
-			}
-			else
-			{
-				// Update Validation Rule on Update
-				$this->role_model->rules['insert'][0]['rules'] = 'trim|required|max_length[30]|callback_check_duplicate';
-				
-				
-				// Now Update Data
-				$extra_data = $this->_admin_role_edit_constraint($record->id);
-	        	$done = $this->role_model->from_form(NULL, $extra_data)->update(NULL, $record->id) && $this->role_model->log_activity($record->id, 'E');
-			}
-			
-
-        	if(!$done)
-			{
-				$status = 'error';
-				$message = 'Validation Error.';				
-			}
-			else
-			{
-				$status = 'success';
-				$message = 'Successfully Updated.';				
-			}
-
-			// Success HTML
-			$success_html = '';
-			if($status === 'success' )
-			{
-				if($action === 'add')
-				{
-					$records = $this->role_model->set_cache('all')->get_all();
-					$success_html = $this->load->view('setup/users/_list', ['records' => $records], TRUE);
-				}
-				else
-				{
-					// Get Updated Record
-					$record = $this->role_model->get($record->id);
-					$success_html = $this->load->view('setup/users/_single_row', ['record' => $record], TRUE);
-				}
-			}
-
-			$return_data = [
-				'status' 		=> $status,
-				'message' 		=> $message,
-				'reloadForm' 	=> $status === 'error',
-				'hideBootbox' 	=> $status === 'success',
-				'updateSection' => $status === 'success',
-				'updateSectionData'	=> $status === 'success' 
-										? 	[
-												'box' 	=> $action === 'add' 
-															? '#iqb-data-list' 
-															: '#_data-row-' . $record->id,
-												'html' 	=> $success_html,
-
-												//
-												// How to Work with success html?
-												// Jquery Method 	html|replaceWith|append|prepend etc.
-												// 
-												'method' 	=> $action === 'add' ? 'html' : 'replaceWith'
-											]
-										: NULL,
-				'form' 	  		=> $status === 'error' 
-									? 	$this->load->view('setup/users/_form', 
-											[
-												'form_elements' => $this->form_elements,
-												'record' 		=> $record
-											], TRUE)
-									: 	null
-
-			];
-		}
-
-		return $return_data;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Delete a Role
+	 * Delete a User
 	 * 
 	 * @param integer $id 
 	 * @return json
@@ -920,7 +808,7 @@ class Users extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->role_model->get($id);
+		$record = $this->user_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -928,9 +816,9 @@ class Users extends MY_Controller
 
 		// Admin Constraint?
 		$done = false;
-		if( !$this->_admin_role_delete_constraint($record->id) )
+		if( !$this->_admin_user_delete_constraint($record->id) )
 		{
-			$done = $this->role_model->delete($record->id);
+			$done = $this->user_model->delete_user($record->id);
 
 			if($done)
 			{
@@ -961,42 +849,19 @@ class Users extends MY_Controller
 
 	// --------------------------------------------------------------------
 
-	/**
-	 * Restrict Admin Role Modification
-	 * 
-	 * Admin role name can not be changed as it is associated with dx_auth 
-	 * is_admin method. Only description can be changed if this role is being 
-	 * edited.
-	 * 
-	 * @param type $id 
-	 * @return type
-	 */
-	function _admin_role_edit_constraint($id)
-    {
-    	$id = (int)$id;
-    	$data = NULL;
-    	if( $id === 2)
-    	{
-			$data['name'] = 'Admin';
-    	}
-    	return $data;
-    }
-
-    // --------------------------------------------------------------------
-
     /**
-	 * Restrict Admin Role Deletion
+	 * Restrict Admin Deletion
 	 * 
-	 * Admin Role cannot be deleted.
+	 * Admin User Can't be deleted.
 	 * 
 	 * @param type $id 
 	 * @return type
 	 */
-	function _admin_role_delete_constraint($id)
+	function _admin_user_delete_constraint($id)
     {
     	$id = (int)$id;
     	$data = NULL;
-    	if( $id === 2)
+    	if( $id === 1)
     	{
 			return TRUE;
     	}
@@ -1004,169 +869,4 @@ class Users extends MY_Controller
     }
     
     // --------------------------------------------------------------------
-
-    
-    /**
-     * Manage Permissions
-     * 
-     * Manage permissions per role basis
-     * 
-     * @param integer $id Role ID
-     * @return json
-     */
-    public function permissions($id)
-    {
-    	// Valid Record ?
-		$id = (int)$id;
-		$record = $this->role_model->get($id);
-		if(!$record)
-		{
-			$this->template->render_404();
-		}
-
-    	$this->load->config('dx_permissions');
-    	if( $this->input->post() )
-		{
-			// All permissions
-			$all_permissions = $this->_get_all_permissions(); 
-			
-			// Get all Permissions
-			$post_data = [];
-			foreach($all_permissions as $module => $actions)
-			{
-				if($this->input->post($module))
-				{
-					$post_data[$module] = $this->input->post($module);
-				}
-			}
-
-			if( $this->_valid_permissions($post_data))
-			{
-				// Validate Permissions
-				$json_permissions = $post_data ? json_encode($post_data) : NULL;
-
-				// Let's Update the Permissions
-				if( $this->role_model->update(['permissions' => $json_permissions], $record->id) && $this->role_model->log_activity($record->id, 'P'))
-				{
-					$status = 'success';
-					$message = 'Successfully updated.';
-				}
-				else
-				{
-					$status = 'error';
-					$message = 'Could not be updated.';
-				}
-			}
-			else
-			{
-				$status = 'error';
-				$message = 'Invalid permissions.';
-			}
-
-			$this->template->json([
-				'status' => $status,
-				'message' => $message,
-				'hideBootbox' => $status === 'success' // Hide bootbox on Success
-			]);
-		}
-
-    	// Let's load the form
-    	$permission_configs = $this->config->item('DX_permissions');
-		$json_data['form'] = $this->load->view('setup/users/_form_permissions', 
-			[
-				'record' 			=> $record,
-				'permission_configs' 	=> $permission_configs
-			], TRUE);
-
-		// Return HTML 
-		$this->template->json($json_data);
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Valid Permissions?
-     * 
-     * Permission Validation Method
-     * This method will check submitted permissions against config permissions
-     * 
-     * @param array $permissions 
-     * @return boolean
-     */
-    private function _valid_permissions($permissions)
-    {
-    	// Extract All Original Permission
-    	$all_permissions = $this->_get_all_permissions();
-    	
-    	// Check passed permissions against original permissions
-    	foreach($permissions as $module => $actions)
-    	{
-    		$master_actions = $all_permissions[$module];
-
-    		// Check the difference against master actions
-    		$diff = array_diff($actions, $master_actions);
-    		
-    		if( !empty($diff) )
-    		{
-    			// We have a problem
-    			return FALSE;
-    		}
-    	}
-    	return TRUE;
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Get All Permissions
-     * 
-     * Returns all the config permissions
-     * 	
-     * @return array
-     */
-    private function _get_all_permissions()
-    {
-    	$permission_configs = $this->config->item('DX_permissions');
-
-    	$all_permission_data = [];
-    	foreach($permission_configs as $section=>$modules)
-    	{
-    		foreach($modules as $module=>$actions)
-    		{
-    			$all_permission_data[$module] = $actions;
-    		}    		
-    	}  
-    	return $all_permission_data;
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Revoke All Permissions
-     * 
-     * Reset all role permissions i.e. It will clear out all permissions assigned to 
-     * all roles
-     * 
-     * @return json
-     */
-    public function revoke_all_permissions()
-    {
-    	if($this->role_model->update(['permissions' => NULL]) && $this->role_model->log_activity(NULL, 'R'))
-    	{
-    		$data = [
-				'status' 	=> 'success',
-				'message' 	=> 'Successfully revoked all role-permissions!'
-			];
-
-			// @TODO: Log activity
-    	}
-    	else
-    	{
-    		$data = [
-				'status' 	=> 'error',
-				'message' 	=> 'Could not be updated!'
-			];
-		}
-		return $this->template->json($data);
-	}
 }

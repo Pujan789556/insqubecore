@@ -35,57 +35,78 @@ class Setting_model extends MY_Model
 			[
 				'field' => 'organization',
 		        'label' => 'Organization Name',
-		        'rules' => 'trim|required|max_length[100]'
+		        'rules' => 'trim|required|max_length[100]',
+                '_type' => 'text',
+                '_required' => true
 			],
 			[
 				'field' => 'address',
 		        'label' => 'Headquarter Full Address',
 		        'rules' => 'trim|required',
+                '_type' => 'textarea',
+                '_required' => true
 			],
             [
                 'field' => 'pan_no',
                 'label' => 'PAN Number',
                 'rules' => 'trim|required',
+                '_type' => 'text',
+                '_required' => true
             ],
 			[
 				'field' => 'per_page',
 		        'label' => 'Pagination Limit',
-		        'rules' => 'trim|required|integer|in_list[10,20,50,100]'
+		        'rules' => 'trim|required|integer|in_list[10,20,50,100]',
+                '_type' => 'dropdown',
+                '_data' => ['5' => '5', '10' => '10', '20' => '20', '50' => '50', '100' => '100'],
+                '_required' => true
 			],
 			[
 				'field' => 'flag_offline',
 		        'label' => 'Set Offline',
-		        'rules' => 'trim|integer'
+		        'rules' => 'trim|integer',
+                '_type' => 'switch',
+                '_data' => '1'
 			],
 			[
 				'field' => 'offline_message',
 		        'label' => 'Offline Message',
-		        'rules' => 'trim|required'
+		        'rules' => 'trim|required',
+                '_type' => 'textarea'
 			],
 			[
 				'field' => 'admin_email',
 		        'label' => 'Administrator Email',
-		        'rules' => 'trim|required|valid_email'
+		        'rules' => 'trim|required|valid_email',
+                '_type' => 'email',
+                '_required' => true
 			],
 			[
 				'field' => 'from_email',
 		        'label' => 'From Email',
-		        'rules' => 'trim|required|valid_email'
+		        'rules' => 'trim|required|valid_email',
+                '_type' => 'email',
+                '_required' => true
 			],
 			[
 				'field' => 'replyto_email',
 		        'label' => 'Reply-to Email',
-		        'rules' => 'trim|required|valid_email'
+		        'rules' => 'trim|required|valid_email',
+                '_type' => 'email',
+                '_required' => true
 			],
 			[
 				'field' => 'noreply_email',
 		        'label' => 'No-reply Email',
-		        'rules' => 'trim|required|valid_email'
+		        'rules' => 'trim|required|valid_email',
+                '_type' => 'email',
+                '_required' => true
 			],
             [
                 'field' => 'website',
                 'label' => 'Website',
-                'rules' => 'trim|valid_url|prep_url'
+                'rules' => 'trim|valid_url|prep_url',
+                '_type' => 'url',
             ]
 		]	
 	];

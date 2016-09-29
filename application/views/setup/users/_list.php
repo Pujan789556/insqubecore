@@ -8,6 +8,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<tr>
 		<th>ID</th>
 		<th>Username</th>
+		<th>Role</th>
+		<th>Branch</th>
 		<th>Fullname</th>
 		<th>Actions</th>
 	</tr>	

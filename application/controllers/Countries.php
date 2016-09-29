@@ -13,58 +13,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Countries extends MY_Controller
 {
-	/**
-	 * Validation Rules
-	 * 
-	 * @var array
-	 */
-	private $form_elements = [
-		[
-			'name' => 'name',
-	        'label' => 'Country Name',
-	        '_id' 	=> 'name',
-	        '_type' => 'text',
-	        '_required' => true
-		],
-        [
-            'name' => 'alpha2',
-            'label' => 'Country Code (alpha 2)',
-            '_id' 	=> 'alpha2',
-	        '_type' => 'text',
-	        '_required' => true
-        ],
-        [
-            'name' => 'alpha3',
-            'label' => 'Country Code (alpha 3)',
-            '_id' 	=> 'alpha3',
-	        '_type' => 'text',
-	        '_required' => true
-        ],
-        [
-            'name' => 'dial_code',
-            'label' => 'Dialing Code',
-            '_id' 	=> 'dial_code',
-	        '_type' => 'text',
-	        '_required' => true
-        ],
-        [
-            'name' => 'currency_code',
-            'label' => 'Currency Code',
-            '_id' 	=> 'dial_code',
-	        '_type' => 'text',
-	        '_required' => false
-        ],
-        [
-            'name' => 'currency_name',
-            'label' => 'Currency Name',
-            '_id' 	=> 'currency_name',
-	        '_type' => 'text',
-	        '_required' => false
-        ]
-	];
-
-	// --------------------------------------------------------------------
-
 	function __construct()
 	{
 		parent::__construct();
@@ -184,7 +132,7 @@ class Countries extends MY_Controller
 				'form' 	  		=> $status === 'error' 
 									? 	$this->load->view('setup/countries/_form', 
 											[
-												'form_elements' => $this->form_elements,
+												'form_elements' => $this->country_model->rules['insert'],
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -195,7 +143,7 @@ class Countries extends MY_Controller
 
 		$form = $this->load->view('setup/countries/_form', 
 			[
-				'form_elements' => $this->form_elements,
+				'form_elements' => $this->country_model->rules['insert'],
 				'record' 		=> $record
 			], TRUE);
 

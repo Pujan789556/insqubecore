@@ -34,12 +34,16 @@ class Branch_model extends MY_Model
 			[
 				'field' => 'name',
 		        'label' => 'Branch Name',
-		        'rules' => 'trim|required|max_length[30]'
+		        'rules' => 'trim|required|max_length[30]',
+                '_type'     => 'text',
+                '_required' => true
 			],
             [
                 'field' => 'code',
                 'label' => 'Branch Code',
-                'rules' => 'trim|required|alpha|max_length[3]|is_unique[master_branches.code]|strtoupper'
+                'rules' => 'trim|required|alpha|max_length[3]|is_unique[master_branches.code]|strtoupper',
+                '_type'     => 'text',
+                '_required' => true
             ]	
 		]	
 	];
@@ -64,11 +68,7 @@ class Branch_model extends MY_Model
         $this->before_update[] = 'prepare_contact_data'; 
 
         // After Create Callback
-        $this->after_create[] = 'log_activity';
-
-
-        // Merge Contact Validation Rules
-        $this->rules['insert'] = array_merge($this->rules['insert'], get_contact_form_validation_rules());
+        $this->after_create[] = 'log_activity';        
     }
 
     // ----------------------------------------------------------------
@@ -123,7 +123,7 @@ class Branch_model extends MY_Model
 	// --------------------------------------------------------------------
 
     /**
-     * Delete Cache on Update
+     * Delete Cache on Update/Delete Records
      */
     public function _prep_after_write()
     {
@@ -140,6 +140,39 @@ class Branch_model extends MY_Model
             }
         }       
         return TRUE;
+    }
+
+    // ----------------------------------------------------------------
+    
+    public function delete($id = NULL)
+    {
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+
+        $status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+            
+            parent::delete($id);
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE)
+        {
+            // get_allenerate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+        else
+        {
+            $this->log_activity($id, 'D');
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $status;
     }
 
     // ----------------------------------------------------------------

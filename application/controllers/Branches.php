@@ -13,30 +13,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Branches extends MY_Controller
 {
-	/**
-	 * Validation Rules
-	 * 
-	 * @var array
-	 */
-	private $form_elements = [
-		[
-			'name' 		=> 'name',
-	        'label' 	=> 'Branch Name',
-	        '_id' 		=> 'name',
-	        '_type' 	=> 'text',
-	        '_required' => true
-		],
-		[
-			'name' 		=> 'code',
-	        'label' 	=> 'Branch Code',
-	        '_id' 		=> 'code',
-	        '_type'		=> 'text',
-	        '_required' => true
-		]	
-	];
-
-	// --------------------------------------------------------------------
-
 	function __construct()
 	{
 		parent::__construct();
@@ -121,7 +97,7 @@ class Branches extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/branches/_form', 
 			[
-				'form_elements' => $this->form_elements,
+				'form_elements' => $this->branch_model->rules['insert'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -147,7 +123,7 @@ class Branches extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/branches/_form', 
 			[
-				'form_elements' => $this->form_elements,
+				'form_elements' => $this->branch_model->rules['insert'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -185,20 +161,22 @@ class Branches extends MY_Controller
 		{
 			$done = FALSE;
 			
+			$val_rules = array_merge($this->branch_model->rules['insert'], get_contact_form_validation_rules());
+
 			// Insert or Update?
 			if($action === 'add')
 			{
 				// @NOTE: Activity Log will be automatically inserted
-				$done = $this->branch_model->from_form()->insert();				
+				$done = $this->branch_model->from_form($val_rules)->insert();				
 			}
 			else
 			{
 				// Update Validation Rule on Update
-				$this->branch_model->rules['insert'][1]['rules'] = 'trim|required|max_length[5]|callback_check_duplicate';
+				$val_rules[1]['rules'] = 'trim|required|max_length[5]|callback_check_duplicate';
 				
 				
 				// Now Update Data
-				$done = $this->branch_model->from_form()->update(NULL, $record->id) && $this->branch_model->log_activity($record->id, 'E');
+				$done = $this->branch_model->from_form($val_rules)->update(NULL, $record->id) && $this->branch_model->log_activity($record->id, 'E');
 			}			
 
         	if(!$done)
@@ -252,7 +230,7 @@ class Branches extends MY_Controller
 				'form' 	  		=> $status === 'error' 
 									? 	$this->load->view('setup/branches/_form', 
 											[
-												'form_elements' => $this->form_elements,
+												'form_elements' => $this->branch_model->rules['insert'],
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -280,11 +258,8 @@ class Branches extends MY_Controller
 			$this->template->render_404();
 		}
 
-		// Admin Constraint?
 		$done = $this->branch_model->delete($record->id);
-
-		// @TODO: Delete Branch Contact Address as well
-
+		
 		if($done)
 		{
 			$data = [

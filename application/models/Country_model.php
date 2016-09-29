@@ -34,32 +34,42 @@ class Country_model extends MY_Model
 			[
 				'field' => 'name',
 		        'label' => 'Country Name',
-		        'rules' => 'trim|required|max_length[80]'
+		        'rules' => 'trim|required|max_length[80]',
+                '_type' => 'text',
+                '_required' => true
 			],
             [
                 'field' => 'alpha2',
                 'label' => 'Country Code (alpha 2)',
-                'rules' => 'trim|required|alpha|exact_length[2]|is_unique[master_countries.alpha2]'
+                'rules' => 'trim|required|alpha|exact_length[2]|is_unique[master_countries.alpha2]',
+                '_type' => 'text',
+                '_required' => true
             ],
             [
                 'field' => 'alpha3',
                 'label' => 'Country Code (alpha 3)',
-                'rules' => 'trim|required|alpha|exact_length[3]|is_unique[master_countries.alpha3]'
+                'rules' => 'trim|required|alpha|exact_length[3]|is_unique[master_countries.alpha3]',
+                '_type' => 'text',
+                '_required' => true
             ],
             [
                 'field' => 'dial_code',
                 'label' => 'Dialing Code',
-                'rules' => 'trim|required|max_length[20]'
+                'rules' => 'trim|required|max_length[20]',
+                '_type' => 'text',
+                '_required' => true
             ],
             [
                 'field' => 'currency_code',
                 'label' => 'Currency Code',
-                'rules' => 'trim|exact_length[3]'
+                'rules' => 'trim|exact_length[3]',
+                '_type' => 'text'
             ],
             [
                 'field' => 'currency_name',
                 'label' => 'Currency Name',
-                'rules' => 'trim|max_length[40]'
+                'rules' => 'trim|max_length[40]',
+                '_type' => 'text'
             ]		
 		]	
 	];

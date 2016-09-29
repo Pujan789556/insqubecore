@@ -6,8 +6,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
-	<td><a href="#" title="Edit" class="trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Edit Basic Information' data-url="<?php echo site_url('users/edit/' . $record->id);?>" data-form=".form-iqb-general"><?php echo $record->username;?></a></td>
-	<td></td>
+	<td><?php echo $record->username;?></td>
+	<td><?php echo $record->role->name;?></td>
+	<td><?php echo $record->branch->name;?></td>
+	<td>
+		<?php
+		$profile = $record->profile ? json_decode($record->profile) : NULL;
+		 echo $profile ? $profile->name : '';?>
+	</td>
 	<td class="ins-action">
 		<a href="#" 
 			title="Edit Basic Information" 
@@ -16,8 +22,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-url="<?php echo site_url('users/edit/' . $record->id);?>" 
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>
-			<span class="hidden-xs">Edit</span>
-		</a>
+			<span>Basic</span></a>
 		<a href="#" 
 			title="Edit Contact" 
 			class="trg-dialog-edit action" 
@@ -25,8 +30,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-url="<?php echo site_url('users/update_contact/' . $record->id);?>" 
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>
-			<span class="hidden-xs">Contact</span>
-		</a>
+			<span>Contact</span></a>
+
 		<a href="#" 
 			title="Edit Profile" 
 			class="trg-dialog-edit action" 
@@ -34,9 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-url="<?php echo site_url('users/update_profile/' . $record->id);?>" 
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>
-			<span class="hidden-xs">Profile</span>
-		</a>
-
+			<span>Profile</span></a>
 		<a href="#" 
 			title="Change Password" 
 			class="trg-dialog-edit action" 
@@ -44,8 +47,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-url="<?php echo site_url('users/change_password/' . $record->id);?>" 
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>
-			<span class="hidden-xs">Password</span>
-		</a>
+			<span>Password</span></a>
+
+		<a href="<?php echo site_url('users/details/' . $record->id);?>" 
+			data-toggle="tooltip"
+			title="View user details." 
+			class="action">
+			<i class="fa fa-user"></i>
+			<span>Details</span></a>
 
 		<?php // disable for Admin Role ?>
 		<a href="#" 
@@ -55,7 +64,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-confirm="true"
 			data-url="<?php echo site_url('users/delete/' . $record->id);?>">
 				<i class="fa fa-trash-o"></i>
-				<span class="hidden-xs">Delete</span>
-		</a>
+				<span>Delete</span></a>
 	</td>
 </tr>

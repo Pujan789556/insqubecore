@@ -13,30 +13,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Departments extends MY_Controller
 {
-	/**
-	 * Validation Rules
-	 * 
-	 * @var array
-	 */
-	private $form_elements = [
-		[
-			'name' 		=> 'name',
-	        'label' 	=> 'Department Name',
-	        '_id' 		=> 'name',
-	        '_type' 	=> 'text',
-	        '_required' => true
-		],
-		[
-			'name' 		=> 'code',
-	        'label' 	=> 'Department Code',
-	        '_id' 		=> 'code',
-	        '_type'		=> 'text',
-	        '_required' => true
-		]	
-	];
-
-	// --------------------------------------------------------------------
-
 	function __construct()
 	{
 		parent::__construct();
@@ -121,7 +97,7 @@ class Departments extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/departments/_form', 
 			[
-				'form_elements' => $this->form_elements,
+				'form_elements' => $this->department_model->rules['insert'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -147,7 +123,7 @@ class Departments extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/departments/_form', 
 			[
-				'form_elements' => $this->form_elements,
+				'form_elements' => $this->department_model->rules['insert'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -253,7 +229,7 @@ class Departments extends MY_Controller
 				'form' 	  		=> $status === 'error' 
 									? 	$this->load->view('setup/departments/_form', 
 											[
-												'form_elements' => $this->form_elements,
+												'form_elements' => $this->department_model->rules['insert'],
 												'record' 		=> $record
 											], TRUE)
 									: 	null

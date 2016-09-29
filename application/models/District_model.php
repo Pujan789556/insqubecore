@@ -34,12 +34,16 @@ class District_model extends MY_Model
 			[
 				'field' => 'name_en',
 		        'label' => 'Name (EN)',
-		        'rules' => 'trim|required|max_length[80]'
+		        'rules' => 'trim|required|max_length[80]',
+                '_type' => 'text',
+                '_required' => true
 			],
 			[
 				'field' => 'name_np',
 		        'label' => 'Name (NP)',
 		        'rules' => 'trim|max_length[80]',
+                '_type' => 'text',
+                '_required' => true
 			]
 		]	
 	];
