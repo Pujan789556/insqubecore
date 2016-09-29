@@ -89,6 +89,19 @@
     border-color: rgba(210, 214, 222, 0.43);
 }
 
+.bootbox.modal-image-preview{
+  background: rgba(0,0,0,0.91);
+}
+.bootbox.modal-image-preview > .modal-dialog > .modal-content > *{
+  background:#000;
+  border-color:#000;
+  color: #bbb;
+}
+.bootbox.modal-image-preview .close{
+  color: #aaa;
+  opacity: 0.45;
+}
+
 
 
 /*----------------------------------*/

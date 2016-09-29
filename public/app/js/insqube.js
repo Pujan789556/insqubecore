@@ -235,12 +235,22 @@ $( document ).ajaxError(function( event, request, settings ) {
              function imagePopup(img, title){
                 var $img = $(img),
                 src = $img.data('src') ? $img.data('src') :  $img.attr('src');
-                html = '<div class="text-center"><img src="'+ src +'" class="thumbnail img-responsive" style="display:inline-block"></div>';
+                html = '<div class="text-center"><img src="'+ src +'" class="img-responsive" style="display:inline-block"></div>';
 
                 bootbox.alert({ 
-                    // size: 'large',
+                    size: 'large',
+                    className: 'modal-image-preview',
                     title: title ? title : 'Preview Image',
-                    message: html
+                    message: html,
+                    backdrop: false,
+                    closeButton: false,
+                    buttons: {
+                        ok : {
+                            label: "Close",
+                            className: 'btn-outline'
+                        }
+                    }
+                    // buttons: false // No close buttons
                 });
              }
 
