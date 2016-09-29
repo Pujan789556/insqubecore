@@ -63,6 +63,29 @@ if ( ! function_exists('str_to_nepdate'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('is_assoc'))
+{
+    /**
+     * Is Associative Array?
+     * 
+     * Check if the supplied array is an associative array.
+     * 
+     * @param array $array 
+     * @return bool
+     */
+    function is_assoc(array $array)
+    {
+        // Keys of the array
+        $keys = array_keys($array);
+
+        // If the array keys of the keys match the keys, then the array must
+        // not be associative (e.g. the keys array looked like {0:0, 1:1...}).
+        return array_keys($keys) !== $keys;
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('get_contact_form_fields'))
 {
 	/**
