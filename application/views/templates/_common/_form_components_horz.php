@@ -26,9 +26,25 @@ foreach($form_elements as $element):?>
                 'class'         => 'form-control',
                 'placeholder'   => $element['label']
             );
-            $value = set_value($element['field']) 
-                    ? set_value($element['field'], '', FALSE) 
-                    : ( isset($form_record) ? $form_record->{$element['field']} : '' );
+
+            $value = '';
+            if(set_value($element['field']))
+            {
+                $value = set_value($element['field'], '', FALSE);
+            }
+            else if( isset($form_record) )
+            {
+                // Regular Form Field
+                if( isset( $form_record->{$element['field']} ) )
+                {
+                    $value = $form_record->{$element['field']};
+                }
+                // Json Object Key
+                else if( isset($form_record->{$element['_key']}) )
+                {
+                    $value = $form_record->{$element['_key']};
+                }
+            }
 
             switch($element['_type'])
             {

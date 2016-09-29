@@ -209,7 +209,10 @@ class Users extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('user_model');		
+		$this->load->model('user_model');
+
+		// Image Path
+        $this->_upload_path = MEDIAPATH . 'users/';  
 	}
 	
 	// --------------------------------------------------------------------
@@ -229,7 +232,7 @@ class Users extends MY_Controller
 		// this will generate cache name: mc_auth_roles_all
 		// $records = $this->user_model->set_cache('all')->get_all();
 		$records = $this->user_model->all();
-		$next_id = 0;
+		$next_id = NULL;
 		$data = [
 			'records' => $records,
 			'next_id' => $next_id
@@ -624,8 +627,10 @@ class Users extends MY_Controller
 			$first_time_data = [];
 			if($first_time)
 			{
-				$records = $this->user_model->set_cache('all')->get_all();
-				$list_html = $this->load->view('setup/users/_list', ['records' => $records], TRUE);
+				$records = $this->user_model->all();
+				$list_html = $this->load->view('setup/users/_list', 
+					['records' => $records, 'next_id' => NULL], TRUE);
+
 				$first_time_data = [
 					'status' 		=> 'success',
 					'message' 		=> "User created successfully. Let's update contact for him/her",
@@ -674,6 +679,9 @@ class Users extends MY_Controller
 		{
 			$this->template->render_404();
 		}
+
+		// Load media helper
+		$this->load->helper('insqube_media');  
 		
 		// If called from Previous Wizard Form, Load form
 		if($next_wizard)
@@ -688,25 +696,42 @@ class Users extends MY_Controller
 		$this->form_validation->set_rules($rules);
 		if( $this->input->post() && $this->form_validation->run() )
 		{
+			// Extract Old Profile Picture if any
+			$profile = $record->profile ? json_decode($record->profile) : NULL;
+			$picture = $profile->picture ?? NULL;
 
-			// @TODO: Upload Profile Image Here
-			$data = [];
+			/**
+			 * Upload Image If any?
+			 */   
+			$upload_result 	= $this->_upload_profile_picture($picture);   
+			$status 		= $upload_result['status'];
+			$message 		= $upload_result['message'];
+			$files 			= $upload_result['files'];
 
-			$data['profile'] = $this->input->post('profile');
-			$data['profile'] = json_encode($data['profile']);
-			
-			// Let's update profile
-			if($this->user_model->update_profile($id, $data))
-			{
-				$status = 'success';
-				$message = "User's profile updated successfully.";
+			if( $status === 'success' || $status === 'no_file_selected')
+            {
+            	// Let's Update Rest of the Data
+				$data = [];
+
+				$data['profile'] = $this->input->post('profile');
+				// Get New Profile Picture
+            	$picture = $status === 'success' ? $files[0] : $picture;
+            	$data['profile']['picture'] = $picture;
+
+				$data['profile'] = json_encode($data['profile']);
+				
+				// Let's update profile
+				if($this->user_model->update_profile($id, $data))
+				{
+					$status = 'success';
+					$message = "User's profile updated successfully.";
+				}
+				else
+				{
+					$status = 'error';
+					$message = "Could not update user's profile.";
+				}
 			}
-			else
-			{
-				$status = 'error';
-				$message = "Could not update user's profile.";
-			}
-
 			$return_data = [
 				'status' 		=> $status,
 				'message' 		=> $message,
@@ -722,6 +747,26 @@ class Users extends MY_Controller
 		$this->_load_profile_form($record, $next_wizard);
 		
 	}
+
+		private function _upload_profile_picture( $old_picture = NULL )
+		{
+			$options = [
+				'config' => [
+					'encrypt_name' => TRUE,
+	                'upload_path' => $this->_upload_path,
+	                'allowed_types' => 'gif|jpg|png',
+	                'max_size' => '2048'
+				],
+				'form_field' => 'picture',
+
+				'create_thumb' => TRUE,
+
+				// Delete Old file
+				'old_files' => $old_picture ? [$old_picture] : [],
+				'delete_old' => TRUE
+			];
+			return upload_insqube_media($options);
+		}
 
 		/**
 		 * Sub-function to load Profile Form for update_profile function

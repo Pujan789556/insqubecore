@@ -35,8 +35,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         'form_elements' => $form_elements,
         'form_record'   => $record,
         'grid_form_control' => 'col-sm-10 col-md-6'
-      ]);
-      ?>
+    ]);
+    ?>
     
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10 col-md-6">

@@ -36,7 +36,7 @@ class Settings extends MY_Controller
 	function index()
 	{
 		// Image Helper 
-		$this->load->helper('image');
+		$this->load->helper('insqube_media');
 
 		/**
 		 * Form Submitted?
@@ -45,43 +45,36 @@ class Settings extends MY_Controller
 		{
 			/**
 			 * Upload Image If any?
-			 */
-            // Upload Status and Related Variables
-			list($old_logo, $new_logo, $status, $message) = $this->_upload_logo();
-            
+			 */          
+			$upload_result 	= $this->_upload_logo();   
+			$status 		= $upload_result['status'];
+			$message 		= $upload_result['message'];
+			$files 			= $upload_result['files'];
+
             /**
              * Update Data
              */
-            if( $status === 'success')
+            if( $status === 'success' || $status === 'no_file_selected')
             {
+            	// Get New Logo
+            	$new_logo = $status === 'success' ? $files[0] : $this->settings->logo;
+
             	// Now Update Data
-	        	$done = $this->setting_model->from_form(NULL, ['logo' => $new_logo ? $new_logo : $old_logo])->update(NULL, 1) && $this->setting_model->log_activity(1, 'E');	
+	        	$done = $this->setting_model->from_form(NULL, ['logo' => $new_logo])->update(NULL, 1) && $this->setting_model->log_activity(1, 'E');	
 
 				// Validation Error?
 				if(!$done)
 				{
 					$status = 'error';
-					$message = 'Validation Error.';		
-
-					// Delete New Upload If we have any Validation Error
-					if( $new_logo )
-					{
-						delete_image($this->_upload_path . $new_logo);
-					}						
+					$message = 'Validation Error.';						
 				}
 				else
 				{
-					// Delete Old Logo if New Logo Uploaded & Updated on Database?
-					if( $new_logo )
-					{
-						$old_image = $this->_upload_path . $old_logo;						
-						// Delete image and its thumbnails as well
-						delete_image($old_image);
-					}
 					$status = 'success';
 					$message = 'Successfully Updated.';
 				}
-            }		
+            }
+            	
 
 			$record = $status === 'success' 
 									? $this->setting_model->get(['id' => 1]) 
@@ -119,44 +112,24 @@ class Settings extends MY_Controller
 						->render($this->data);
 	}
 
-	private function _upload_logo()
+	function _upload_logo( )
 	{
-		/**
-		 * Upload Image If any?
-		 */
-        $old_logo = $this->settings->logo;
-        $new_logo = '';
-        $status = 'success';
-        $message = '';
-        if( isset($_FILES['logo']['name']) && !empty($_FILES['logo']['name']) )
-        {
-        	$config = array(
-                'encrypt_name' => TRUE,
+		$options = [
+			'config' => [
+				'encrypt_name' => TRUE,
                 'upload_path' => $this->_upload_path,
                 'allowed_types' => 'gif|jpg|png',
                 'max_size' => '2048'
-            );
-            $this->load->library('upload', $config);
+			],
+			'form_field' => 'logo',
 
-        	if( $this->upload->do_upload('logo'))
-            {
-            	$uploaded = $this->upload->data();	  
-            	$new_logo =  $uploaded['file_name']; 
+			'create_thumb' => TRUE,
 
-            	/**
-            	 * Generate Thumbnail
-            	 */
-            	$this->load->library('image_lib');	            	
-            	create_thumbnail( $uploaded['full_path'] );   	
-            }
-            else
-            {
-            	$status = 'error';
-            	$message = $this->upload->display_errors();	            	
-            }            	
-        }
-
-        return [$old_logo, $new_logo, $status, $message];
+			// Delete Old file
+			'old_files' => [$this->settings->logo],
+			'delete_old' => TRUE
+		];
+		return upload_insqube_media($options);
 	}
 
 }
