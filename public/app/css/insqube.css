@@ -13,6 +13,11 @@
  	cursor: pointer;
  }
 
+ /* -- No image icon --*/
+ i.img-alt{
+    font-size: 4em;
+ }
+
  /*-- Row Action Triggers --*/
  .ins-action .action+.action{
  	margin-left:10px;
@@ -90,7 +95,7 @@
 }
 
 .bootbox.modal-image-preview{
-  background: rgba(0,0,0,0.91);
+  background: rgba(0,0,0,0.81);
 }
 .bootbox.modal-image-preview > .modal-dialog > .modal-content > *{
   background:#000;

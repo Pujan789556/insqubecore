@@ -37,7 +37,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             echo implode(', ', $ct_state_zip) . '<br/>';
             echo get_country_name($contact->country);
            
-           echo '<hr/>';
+            if( $contact->phones || $contact->fax || $contact->mobile || $contact->web || $contact->email)
+            {
+                echo '<hr/>'; 
+            }
 
             // Phones
             if($contact->phones)

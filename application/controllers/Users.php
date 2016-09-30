@@ -933,5 +933,36 @@ class Users extends MY_Controller
 		return $this->template->json($data);
 	}
 
+	// --------------------------------------------------------------------
+
+    /**
+     * View User Details
+     * 
+     * @param integer $id 
+     * @return void
+     */
+    public function details($id)
+    {
+    	$id = (int)$id;
+		$record = $this->user_model->row($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+		// Load media helper
+		$this->load->helper('insqube_media');  
+		$this->data['site_title'] = 'User Details | ' . $record->username;
+		$this->template->partial(
+							'content_header', 
+							'templates/_common/_content_header',
+							[
+								'content_header' => 'User Details <small>' . $record->username . '</small>',
+								'breadcrumbs' => ['Users' => 'users', 'Details' => NULL]
+						])
+						->partial('content', 'setup/users/_details', compact('record'))
+						->render($this->data);
+
+    }
+
 	// --------------------------------------------------------------------    
 }

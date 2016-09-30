@@ -315,6 +315,12 @@ class Branches extends MY_Controller
 
     // --------------------------------------------------------------------
 
+    /**
+     * View Branch Details
+     * 
+     * @param integer $id 
+     * @return void
+     */
     public function details($id)
     {
     	$id = (int)$id;

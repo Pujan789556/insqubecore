@@ -22,7 +22,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                       data-src="<?php echo base_url()?>media/settings/<?php echo $record->logo?>"
                       onclick="InsQube.imagePopup(this)">
                 <?php else:?>
-                <i class="ion-ios-flower-outline" style="font-size:4em"></i>
+                <i class="ion-ios-flower-outline text-muted img-alt"></i>
                 <?php endif?>
             </p>
         </div>

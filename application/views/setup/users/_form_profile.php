@@ -34,9 +34,9 @@ if (isset($record) )
                           title="Click here to view large"
                           class="thumbnail ins-img-ip" 
                           data-src="<?php echo base_url()?>media/users/<?php echo $form_record->picture?>"
-                          onclick="InsQube.imagePopup(this)">
+                          onclick="InsQube.imagePopup(this, 'Profile Picture')">
                     <?php else:?>
-                    <i class="ion-ios-flower-outline" style="font-size:4em"></i>
+                    <i class="ion-ios-person-outline text-muted img-alt"></i>
                     <?php endif?>
                 </p>
             </div>

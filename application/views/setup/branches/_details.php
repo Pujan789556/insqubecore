@@ -7,18 +7,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div class="row">
 	<div class="col-md-3">
 
-		<div class="box box-widget widget-user">
-			<div class="pad bg-aqua-active">				
-				<h3 class="widget-user-username"><?php echo $record->name;?></h3>
-				<h5 class="widget-user-desc"><?php echo $record->code;?></h5>
-			</div>
-			<div class="box-footer no-padding">
-				<ul class="nav nav-stacked">
-					<li><a href="#">Projects <span class="pull-right badge bg-blue">31</span></a></li>
-					<li><a href="#">Tasks <span class="pull-right badge bg-aqua">5</span></a></li>
-					<li><a href="#">Completed Projects <span class="pull-right badge bg-green">12</span></a></li>
-					<li><a href="#">Followers <span class="pull-right badge bg-red">842</span></a></li>
-				</ul>
+		<div class="box box-primary">
+			<div class="box-body box-profile">				
+				<h3 class="profile-username text-center"><?php echo $record->name;?></h3>
+				<h5 class="text-muted text-center"><?php echo $record->code;?></h5>
+			
+				<ul class="list-group list-group-unbordered">
+					<li class="list-group-item">
+						<b>Annual Target</b> <a class="pull-right">1,322</a>
+					</li>
+					<li class="list-group-item">
+						<b>Total Sales</b> <a class="pull-right">543</a>
+					</li>
+					<li class="list-group-item">
+						<b>Staffs</b> <a class="pull-right">13,287</a>
+					</li>
+				</ul>			
 			</div>
 		</div>
 
