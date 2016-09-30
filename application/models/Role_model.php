@@ -51,7 +51,7 @@ class Role_model extends MY_Model
      * Protect Default Records?
      */
     public static $protect_default = TRUE;
-    public static $protect_max_id = 2; // Prevent first 2 records from deletion.
+    public static $protect_max_id = 20; // Prevent first 2 records from deletion.
 
 	// --------------------------------------------------------------------
 

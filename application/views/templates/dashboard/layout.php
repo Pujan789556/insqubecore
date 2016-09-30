@@ -96,9 +96,7 @@
                 ?>
             </aside><div class="control-sidebar-bg"></div>
 
-        </div>
-
-        
+        </div>        
 
         <!-- jQuery 2.2.3 -->
         <script src="<?php echo THEME_URL; ?>plugins/jQuery/jquery-2.2.3.min.js"></script>
@@ -114,9 +112,6 @@
 
         <!-- SlimScroll 1.3.0 -->
         <script src="<?php echo THEME_URL; ?>plugins/slimScroll/jquery.slimscroll.min.js"></script>
-
-        <!-- AdminLTE for demo purposes -->
-        <!-- <script src="<?php echo THEME_URL; ?>dist/js/demo.js"></script> -->
 
         <!-- Toastr -->
         <script src="<?php echo THEME_URL; ?>plugins/toastr/toastr.min.js"></script>
