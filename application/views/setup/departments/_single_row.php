@@ -25,14 +25,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
 		</a>		
-		<a href="#" 
-			title="Delete" 
-			data-toggle="tooltip"
-			class="trg-row-action action"
-			data-confirm="true"
-			data-url="<?php echo site_url('departments/delete/' . $record->id);?>">
-				<i class="fa fa-trash-o"></i>
-				<span class="hidden-xs">Delete</span>
-		</a>
+		
+		<?php if(safe_to_delete( 'Department_model', $record->id )):?>		
+			<a href="#" 
+				title="Delete" 
+				data-toggle="tooltip"
+				class="trg-row-action action"
+				data-confirm="true"
+				data-url="<?php echo site_url('departments/delete/' . $record->id);?>">
+					<i class="fa fa-trash-o"></i>
+					<span class="hidden-xs">Delete</span>
+			</a>
+		<?php endif?>
 	</td>
 </tr>

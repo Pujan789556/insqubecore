@@ -258,6 +258,18 @@ class Branches extends MY_Controller
 			$this->template->render_404();
 		}
 
+		$data = [
+			'status' 	=> 'error',
+			'message' 	=> 'You cannot delete the default records.'
+		];
+		/**
+		 * Safe to Delete?
+		 */
+		if( !safe_to_delete( 'Branch_model', $id ) )
+		{
+			return $this->template->json($data);
+		}
+
 		$done = $this->branch_model->delete($record->id);
 		
 		if($done)

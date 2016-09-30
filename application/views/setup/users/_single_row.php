@@ -40,6 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>
 			<span>Profile</span></a>
+
 		<a href="#" 
 			title="Change Password" 
 			class="trg-dialog-edit action" 
@@ -56,14 +57,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<i class="fa fa-user"></i>
 			<span>Details</span></a>
 
-		<?php // disable for Admin Role ?>
-		<a href="#" 
-			title="Delete" 
-			data-toggle="tooltip"
-			class="trg-row-action action"
-			data-confirm="true"
-			data-url="<?php echo site_url('users/delete/' . $record->id);?>">
-				<i class="fa fa-trash-o"></i>
-				<span>Delete</span></a>
+		<?php if(safe_to_delete( 'User_model', $record->id )):?>
+			<a href="#" 
+				title="Delete" 
+				data-toggle="tooltip"
+				class="trg-row-action action"
+				data-confirm="true"
+				data-url="<?php echo site_url('users/delete/' . $record->id);?>">
+					<i class="fa fa-trash-o"></i>
+					<span>Delete</span></a>
+		<?php endif?>
 	</td>
 </tr>

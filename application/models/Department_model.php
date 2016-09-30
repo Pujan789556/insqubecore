@@ -48,6 +48,12 @@ class Department_model extends MY_Model
 		]	
 	];
 
+    /**
+     * Protect Default Records?
+     */
+    public static $protect_default = TRUE;
+    public static $protect_max_id = 12; // Prevent first 12 records from deletion.
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -115,6 +121,12 @@ class Department_model extends MY_Model
     
     public function delete($id = NULL)
     {
+        $id = intval($id);
+        if( !safe_to_delete( get_class(), $id ) )
+        {
+            return FALSE;
+        } 
+
         // Disable DB Debug for transaction to work
         $this->db->db_debug = FALSE;
 

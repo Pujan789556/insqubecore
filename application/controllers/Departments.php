@@ -247,9 +247,22 @@ class Departments extends MY_Controller
 		// Valid Record ?
 		$id = (int)$id;
 		$record = $this->department_model->get($id);
-		if(!$record)
+
+		if( !$record )
 		{
 			$this->template->render_404();
+		}
+
+		$data = [
+			'status' 	=> 'error',
+			'message' 	=> 'You cannot delete the default records.'
+		];
+		/**
+		 * Safe to Delete?
+		 */
+		if( !safe_to_delete( 'Department_model', $id ) )
+		{
+			return $this->template->json($data);
 		}
 
 		// Admin Constraint?

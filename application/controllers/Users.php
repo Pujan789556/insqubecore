@@ -859,59 +859,39 @@ class Users extends MY_Controller
 			$this->template->render_404();
 		}
 
-		// Admin Constraint?
-		$done = false;
-		if( !$this->_admin_user_delete_constraint($record->id) )
+		$data = [
+			'status' 	=> 'error',
+			'message' 	=> 'You cannot delete the default records.'
+		];
+		/**
+		 * Safe to Delete?
+		 */
+		if( !safe_to_delete( 'User_model', $id ) )
 		{
-			$done = $this->user_model->delete_user($record->id);
-
-			if($done)
-			{
-				$data = [
-					'status' 	=> 'success',
-					'message' 	=> 'Successfully deleted!',
-					'removeRow' => true,
-					'rowId'		=> '#_data-row-'.$record->id
-				];
-			}
-			else
-			{
-				$data = [
-					'status' 	=> 'error',
-					'message' 	=> 'Could not be deleted. It might have references to other module(s)/component(s).'
-				];
-			}
+			return $this->template->json($data);
 		}
-		else{
+
+
+		$done = $this->user_model->delete_user($record->id);
+		if($done)
+		{
 			$data = [
-				'status' => 'error',
-				'message' => 'You can not delete Admin Role.'
+				'status' 	=> 'success',
+				'message' 	=> 'Successfully deleted!',
+				'removeRow' => true,
+				'rowId'		=> '#_data-row-'.$record->id
+			];
+		}
+		else
+		{
+			$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be deleted. It might have references to other module(s)/component(s).'
 			];
 		}
 
 		return $this->template->json($data);
 	}
 
-	// --------------------------------------------------------------------
-
-    /**
-	 * Restrict Admin Deletion
-	 * 
-	 * Admin User Can't be deleted.
-	 * 
-	 * @param type $id 
-	 * @return type
-	 */
-	function _admin_user_delete_constraint($id)
-    {
-    	$id = (int)$id;
-    	$data = NULL;
-    	if( $id === 1)
-    	{
-			return TRUE;
-    	}
-    	return FALSE;
-    }
-    
-    // --------------------------------------------------------------------
+	// --------------------------------------------------------------------    
 }

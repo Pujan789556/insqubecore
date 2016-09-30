@@ -22,6 +22,12 @@ class User_model extends MY_Model
      */
     public $delete_cache_on_save = TRUE;
 
+    /**
+     * Protect Default Records?
+     */
+    public static $protect_default = TRUE;
+    public static $protect_max_id = 1; // Prevent Admin user from being Delete
+
     // -------------------------------------------------------------------------
 
 	function __construct()
@@ -295,6 +301,12 @@ class User_model extends MY_Model
 	 */
 	public function delete_user($id = NULL)
 	{
+		$id = intval($id);
+        if( !safe_to_delete( get_class(), $id ) )
+        {
+            return FALSE;
+        } 
+
 		// Disable DB Debug for transaction to work
 		$this->db->db_debug = FALSE;
 

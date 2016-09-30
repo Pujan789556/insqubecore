@@ -47,6 +47,12 @@ class Role_model extends MY_Model
 		]	
 	];
 
+	/**
+     * Protect Default Records?
+     */
+    public static $protect_default = TRUE;
+    public static $protect_max_id = 2; // Prevent first 2 records from deletion.
+
 	// --------------------------------------------------------------------
 
 	function __construct()
@@ -91,6 +97,12 @@ class Role_model extends MY_Model
 	
 	public function delete($id = NULL)
 	{
+		$id = intval($id);
+        if( !safe_to_delete( get_class(), $id ) )
+        {
+            return FALSE;
+        } 
+        
 		// Disable DB Debug for transaction to work
 		$this->db->db_debug = FALSE;
 

@@ -16,8 +16,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-url="<?php echo site_url('roles/edit/' . $record->id);?>" 
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>
-			<span class="hidden-xs">Edit</span>
-		</a>
+			<span class="hidden-xs">Edit</span></a>
 
 		<a href="#" 
 			title="Manage Role Permissions" 
@@ -28,18 +27,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			class="trg-dialog-edit action"
 			data-url="<?php echo site_url('roles/permissions/' . $record->id);?>">
 				<i class="fa fa-lock"></i>
-				<span class="hidden-xs">Permission</span>
-		</a>
+				<span class="hidden-xs">Permission</span></a>
 
-		<?php // disable for Admin Role ?>
-		<a href="#" 
-			title="Delete" 
-			data-toggle="tooltip"
-			class="trg-row-action action"
-			data-confirm="true"
-			data-url="<?php echo site_url('roles/delete/' . $record->id);?>">
-				<i class="fa fa-trash-o"></i>
-				<span class="hidden-xs">Delete</span>
-		</a>
+		<?php if(safe_to_delete( 'Role_model', $record->id )):?>		
+			<a href="#" 
+				title="Delete" 
+				data-toggle="tooltip"
+				class="trg-row-action action"
+				data-confirm="true"
+				data-url="<?php echo site_url('roles/delete/' . $record->id);?>">
+					<i class="fa fa-trash-o"></i>
+					<span class="hidden-xs">Delete</span></a>
+		<?php endif?>
 	</td>
 </tr>

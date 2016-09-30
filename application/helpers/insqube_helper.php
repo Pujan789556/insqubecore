@@ -14,6 +14,39 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @link		
  */
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('safe_to_delete'))
+{
+    /**
+     * Prevent Default Data Deletion
+     * 
+     * The application might have different tables coming up with default data installed
+     * to work properly. So we have to prevent these data from accidental deletion.
+     * 
+     * @param string $model Model Name
+     * @param integer|null $del_id Record ID to delete
+     * @return bool
+     */
+    function safe_to_delete( string $model, int $del_id = 0 )
+    {
+    	$model = ucfirst($model);    	
+    	if( ! class_exists($model) )
+    	{
+    		return FALSE;
+    	}
+
+    	$flag 	= $model::$protect_default ?? FALSE;
+    	$max_id = $model::$protect_max_id ?? 0;
+    	
+        $safe = TRUE;
+        if( $flag == TRUE AND $max_id != 0 AND $del_id != 0 AND $max_id >= $del_id )
+        {
+            $safe = FALSE;
+        }
+        return $safe;
+    }
+}
 
 // ------------------------------------------------------------------------
 

@@ -48,6 +48,12 @@ class Branch_model extends MY_Model
 		]	
 	];
 
+    /**
+     * Protect Default Records?
+     */
+    public static $protect_default = TRUE;
+    public static $protect_max_id = 28; // Prevent first 28 records from deletion.
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -68,7 +74,7 @@ class Branch_model extends MY_Model
         $this->before_update[] = 'prepare_contact_data'; 
 
         // After Create Callback
-        $this->after_create[] = 'log_activity';        
+        $this->after_create[] = 'log_activity';           
     }
 
     // ----------------------------------------------------------------
@@ -146,6 +152,12 @@ class Branch_model extends MY_Model
     
     public function delete($id = NULL)
     {
+        $id = intval($id);
+        if( !safe_to_delete( get_class(), $id ) )
+        {
+            return FALSE;
+        } 
+
         // Disable DB Debug for transaction to work
         $this->db->db_debug = FALSE;
 
