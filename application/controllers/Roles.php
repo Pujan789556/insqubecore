@@ -119,7 +119,6 @@ class Roles extends MY_Controller
 		// Form Submitted? Save the data
 		$json_data = $this->_save('add');
 
-		
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/roles/_form', 
 			[
@@ -156,10 +155,9 @@ class Roles extends MY_Controller
 		 */
 		$return_data = [];
 
-		if( $this->input->post() )
+		if( $this->input->post() )		
 		{
-			$done = FALSE;
-			
+			$done = FALSE;			
 
 			// Insert or Update?
 			if($action === 'add')
@@ -237,6 +235,8 @@ class Roles extends MY_Controller
 									: 	null
 
 			];
+
+			$this->template->json($return_data);
 		}
 
 		return $return_data;

@@ -8,6 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->id;?></td>
 	<td><?php echo $record->username;?></td>
 	<td><?php echo $record->role->name;?></td>
+	<td><?php echo $record->department->name;?></td>
 	<td><?php echo $record->branch->name;?></td>
 	<td>
 		<?php

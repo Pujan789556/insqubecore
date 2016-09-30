@@ -95,7 +95,11 @@ if (isset($record) )
                             {
                                 $_dropdown_list = [''=>'Select ...'] + $branches;
                             }
-                            elseif($element_config['name'] == 'role_id')
+                            else if($element_config['name'] == 'department_id')
+                            {
+                                $_dropdown_list = [''=>'Select ...'] + $departments;
+                            }
+                            else if($element_config['name'] == 'role_id')
                             {
                                 $_dropdown_list = [''=>'Select ...'] + $roles;
                             }

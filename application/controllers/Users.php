@@ -66,6 +66,13 @@ class Users extends MY_Controller
 		        '_type' 	=> 'dropdown',
 		        '_required' => true
 			],
+			[
+				'field' => 'department_id',
+		        'label' => 'Department',
+		        'rules' => 'trim|required|integer|max_length[11]',
+		        '_type' 	=> 'dropdown',
+		        '_required' => true
+			],
 
 			/**
 			 * Scope: local/branch/global
@@ -94,6 +101,13 @@ class Users extends MY_Controller
 			[
 				'field' => 'branch_id',
 		        'label' => 'Branch',
+		        'rules' => 'trim|required|integer|max_length[11]',
+		        '_type' 	=> 'dropdown',
+		        '_required' => true
+			],
+			[
+				'field' => 'department_id',
+		        'label' => 'Department',
 		        'rules' => 'trim|required|integer|max_length[11]',
 		        '_type' 	=> 'dropdown',
 		        '_required' => true
@@ -298,7 +312,8 @@ class Users extends MY_Controller
 
 			$data = [
 				'role_id' => $this->input->post('role_id'),
-				'branch_id' => $this->input->post('branch_id')
+				'branch_id' => $this->input->post('branch_id'),
+				'department_id' => $this->input->post('department_id')
 			];
 
 			// Scope
@@ -311,10 +326,26 @@ class Users extends MY_Controller
 			$data['scope'] = json_encode($scope);
 
 			// Update Basic Information
+			$r = [];
 			if($this->user_model->update_basic($id, $data))
 			{
 				$status = 'success';
 				$message = "User's contact updated successfully.";
+
+				// Reload Row: Get updated record
+				$record = $this->user_model->row($id);
+				$r = [
+					'updateSection' => true,
+					'updateSectionData'	=> [
+						'box' 	=> '#_data-row-' . $record->id,
+						'html' 	=> $this->load->view('setup/users/_single_row', ['record' => $record], TRUE),
+						//
+						// How to Work with success html?
+						// Jquery Method 	html|replaceWith|append|prepend etc.
+						// 
+						'method' 	=> 'replaceWith'
+					]
+				];
 			}
 			else
 			{
@@ -322,7 +353,7 @@ class Users extends MY_Controller
 				$message = "Could not update user's contact.";
 			}
 
-			$return_data = [
+			$return_data = $r + [
 				'status' 		=> $status,
 				'message' 		=> $message,
 				'hideBootbox' 	=> $status === 'success'
@@ -333,6 +364,7 @@ class Users extends MY_Controller
 		// required models
 		$this->load->model('role_model');
 		$this->load->model('branch_model');
+		$this->load->model('department_model');
 
 		// No form Submitted?
 		$json_data = [
@@ -346,7 +378,8 @@ class Users extends MY_Controller
 				'record' 		=> $record,
 				'form_record'   => $record,
 				'roles' 		=> $this->role_model->dropdown(),
-				'branches' 		=> $this->branch_model->dropdown()
+				'branches' 		=> $this->branch_model->dropdown(),
+				'departments'	=> $this->department_model->dropdown()
 
 			], TRUE);
 
@@ -520,6 +553,7 @@ class Users extends MY_Controller
 		// required models
 		$this->load->model('role_model');	
 		$this->load->model('branch_model');
+		$this->load->model('department_model');
 		$json_data['form'] = $this->load->view('setup/users/_form', 
 			[
 				'form_title' 	=> 'Basic Information',
@@ -528,7 +562,8 @@ class Users extends MY_Controller
 				'record' 		=> $record,
 				'form_record'   => NULL,
 				'roles' 		=> $this->role_model->dropdown(),
-				'branches' 		=> $this->branch_model->dropdown()
+				'branches' 		=> $this->branch_model->dropdown(),
+				'departments'	=> $this->department_model->dropdown()
 			], TRUE);
 
 		// Return HTML 
@@ -747,7 +782,12 @@ class Users extends MY_Controller
 		$this->_load_profile_form($record, $next_wizard);
 		
 	}
-
+		/**
+		 * Sub-function: Upload Profile Picture
+		 * 
+		 * @param string|null $old_picture 
+		 * @return array
+		 */
 		private function _upload_profile_picture( $old_picture = NULL )
 		{
 			$options = [

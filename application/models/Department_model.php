@@ -101,6 +101,18 @@ class Department_model extends MY_Model
                         ->count_all_results($this->table);
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Dropdown List
+     */
+    public function dropdown()
+    {
+        return $this->set_cache('dropdown')
+                        ->as_dropdown('name')
+                        ->order_by('name', 'asc')
+                        ->get_all();
+    }
     
 	// --------------------------------------------------------------------
 
@@ -109,13 +121,20 @@ class Department_model extends MY_Model
      */
     public function _prep_after_write()
     {
-    	if($this->delete_cache_on_save === TRUE)
+        $cache_names = [
+            'master_departments_all',
+            'master_departments_dropdown'
+        ];
+        if($this->delete_cache_on_save === TRUE)
         {
-        	// cache name without prefix
-        	$this->delete_cache('master_departments_all'); 
+            // cache name without prefix
+            foreach($cache_names as $cache)
+            {
+                $this->delete_cache($cache);     
+            }
         }       
         return TRUE;
-    }
+    }    
 
     // ----------------------------------------------------------------
     

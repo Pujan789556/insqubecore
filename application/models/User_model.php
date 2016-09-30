@@ -9,7 +9,7 @@ class User_model extends MY_Model
 
     public $fillable = [	
     	// If you want, you can set an array with the fields that can be filled by insert/update
-    	'role_id', 'branch_id', 'username', 'password', 'email', 'scope', 'contact', 'profile', 'docs', 
+    	'role_id', 'branch_id', 'department_id', 'username', 'password', 'email', 'scope', 'contact', 'profile', 'docs', 
     	'banned', 'ban_reason', 'newpass', 'newpass_key', 'newpass_time', 'last_ip', 'last_login'
     ]; 
 
@@ -46,6 +46,7 @@ class User_model extends MY_Model
         // User Relationship
         $this->has_one['role'] = array('local_key'=>'role_id', 'foreign_key'=>'id', 'foreign_model'=>'Role_model');
         $this->has_one['branch'] = array('local_key'=>'branch_id', 'foreign_key'=>'id', 'foreign_model'=>'Branch_model');
+        $this->has_one['department'] = array('local_key'=>'department_id', 'foreign_key'=>'id', 'foreign_model'=>'Department_model');
 	}
 
 	// ----------------------------------------------------------------
@@ -58,9 +59,27 @@ class User_model extends MY_Model
         }
         return $this->with_role('fields:name')
         			->with_branch('fields:name')
+        			->with_department('fields:name')
                     // ->order_by('id', 'desc')
                     ->limit($this->settings->per_page+1)
                     ->get_all();
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Single Row on Basic Information Edit
+     * 
+     * @param int $id 
+     * @return object
+     */
+	public function row($id)
+    {
+        return $this->where('id', $id)
+        			->with_role('fields:name')
+        			->with_branch('fields:name')
+        			->with_department('fields:name')
+                    ->get();
     }
 
 	// ----------------------------------------------------------------
