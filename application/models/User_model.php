@@ -60,7 +60,6 @@ class User_model extends MY_Model
         return $this->with_role('fields:name')
         			->with_branch('fields:name')
         			->with_department('fields:name')
-                    // ->order_by('id', 'desc')
                     ->limit($this->settings->per_page+1)
                     ->get_all();
     }

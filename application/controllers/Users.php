@@ -18,7 +18,7 @@ class Users extends MY_Controller
 	 * 
 	 * @var array
 	 */
-	private $rules = [
+	private $_rules = [
 
 		/**
 		 * Register New User
@@ -194,6 +194,40 @@ class Users extends MY_Controller
 		]	
 	];
 
+	/**
+	 * Filter Configuration
+	 */
+	private $_filters = [
+			[
+				'field' => 'role_id',
+		        'label' => 'Application Role',
+		        'rules' => 'trim|integer|max_length[8]',
+		        '_type' 	=> 'dropdown',
+		        '_required' => true
+			],
+			[
+				'field' => 'branch_id',
+		        'label' => 'Branch',
+		        'rules' => 'trim|integer|max_length[11]',
+		        '_type' 	=> 'dropdown',
+		        '_required' => true
+			],
+			[
+				'field' => 'department_id',
+		        'label' => 'Department',
+		        'rules' => 'trim|integer|max_length[11]',
+		        '_type' 	=> 'dropdown',
+		        '_required' => true
+			],
+			[
+				'field' => 'keywords',
+		        'label' => 'Name/Username',
+		        'rules' => 'trim|max_length[80]',
+		        '_type' 	=> 'dropdown',
+		        '_required' => true
+			],
+	];
+
 	// --------------------------------------------------------------------
 
 	function __construct()
@@ -240,35 +274,125 @@ class Users extends MY_Controller
 	 */
 	function index()
 	{
+		$this->page();
+	}
+
+	/**
+	 * Paginate Data List
+	 * 
+	 * @param integer $next_id 
+	 * @return void
+	 */
+	function page( $next_id = 0, $refresh = FALSE )
+	{
+		// If request is coming from refresh method, reset nextid
+		$next_id = $refresh === FALSE ? (int)$next_id : 0;
+
+		// Prepare Params
+		$params = array();
+		if( $next_id )
+		{
+			$params = ['id >=' => $next_id];
+		}
+
+		$records = $this->user_model->all($params);
+		$records = $records ? $records : [];
+		$total = count($records);
+		
 		/**
-		 * Normal Form Render
+		 * Grab Next ID or Reset It 
 		 */
-		// this will generate cache name: mc_auth_roles_all
-		// $records = $this->user_model->set_cache('all')->get_all();
-		$records = $this->user_model->all();
-		$next_id = NULL;
+		if($total == $this->settings->per_page+1)
+		{
+			$next_id = $records[$total-1]->id;
+			unset($records[$total-1]); // remove last record
+		}
+		else
+		{
+			$next_id = NULL;
+		}
+
 		$data = [
 			'records' => $records,
 			'next_id' => $next_id
 		];
+
 		if ( $this->input->is_ajax_request() ) 
-		{
-			$html = $this->load->view('setup/users/_list', $data, TRUE);
+		{	
+
+			$view = $refresh === FALSE ? 'setup/users/_rows' : 'setup/users/_list';
+			$html = $this->load->view($view, $data, TRUE);
 			$this->template->json([
 				'status' => 'success',
 				'html'   => $html
 			]);
 		}
 
+		/**
+		 * Filter Configurations
+		 */		
+		$filters = $this->_get_filters();
+		$data['filters'] = $filters;
+
 		$this->template->partial(
 							'content_header', 
-							'templates/_common/_content_header',
+							'setup/users/_index_header',
 							[
 								'content_header' => 'Manage Users',
 								'breadcrumbs' => ['Master Setup' => NULL, 'Users' => NULL]
 						])
 						->partial('content', 'setup/users/_index', $data)
 						->render($this->data);
+	}
+
+		private function _get_filters()
+		{
+			$this->load->model('role_model');
+			$this->load->model('branch_model');
+			$this->load->model('department_model');
+
+			$select = ['' => 'Select ...'];
+			$filters = [
+				[
+					'field' => 'role_id',
+			        'label' => 'Application Role',
+			        'rules' => 'trim|integer|max_length[8]',
+			        '_type' 	=> 'dropdown',
+			        '_data' 	=> $select + $this->role_model->dropdown(),
+			        '_required' => true
+				],
+				[
+					'field' => 'branch_id',
+			        'label' => 'Branch',
+			        'rules' => 'trim|integer|max_length[11]',
+			        '_type' 	=> 'dropdown',
+			        '_data' 	=> $select + $this->branch_model->dropdown(),
+			        '_required' => true
+				],
+				[
+					'field' => 'department_id',
+			        'label' => 'Department',
+			        'rules' => 'trim|integer|max_length[11]',
+			        '_type' 	=> 'dropdown',
+			        '_data' 	=> $select + $this->department_model->dropdown(),
+			        '_required' => true
+				],
+				[
+					'field' => 'keywords',
+			        'label' => 'Name/Username',
+			        'rules' => 'trim|max_length[80]',
+			        '_type' 	=> 'text',
+			        '_required' => true
+				]
+			];
+
+			return $filters;
+		}
+
+	// @TODO: Refactor code once you done with index() and page()
+	function refresh()
+	{
+		$this->page(0, TRUE);		
 	}
 
 	// --------------------------------------------------------------------
@@ -290,7 +414,7 @@ class Users extends MY_Controller
 		}
 
 		// Validation RUles
-		$rules = $this->rules['edit-basic'];
+		$rules = $this->_rules['edit-basic'];
 
 		/**
 		 * Update Validation Rule if Scope is branch
@@ -406,7 +530,7 @@ class Users extends MY_Controller
 		}
 
 		// Validation RUles
-		$rules = $this->rules['change-password'];
+		$rules = $this->_rules['change-password'];
 
 		/**
 		 * Update Validation Rule if Scope is branch
@@ -496,7 +620,7 @@ class Users extends MY_Controller
 		];
 
 		// Validation RUles
-		$rules = $this->rules['basic'];
+		$rules = $this->_rules['basic'];
 
 		/**
 		 * Update Validation Rule if Scope is branch
@@ -558,7 +682,7 @@ class Users extends MY_Controller
 			[
 				'form_title' 	=> 'Basic Information',
 				'action_url'	=> site_url('users/add/'),
-				'form_elements' => $this->rules['basic'],
+				'form_elements' => $this->_rules['basic'],
 				'record' 		=> $record,
 				'form_record'   => NULL,
 				'roles' 		=> $this->role_model->dropdown(),
@@ -727,7 +851,7 @@ class Users extends MY_Controller
 		/**
 		 * Perform Validation
 		 */
-		$rules = $this->rules['profile'];
+		$rules = $this->_rules['profile'];
 		$this->form_validation->set_rules($rules);
 		if( $this->input->post() && $this->form_validation->run() )
 		{
@@ -826,7 +950,7 @@ class Users extends MY_Controller
 											[
 												'form_title' 	=> 'User Profile',
 												'action_url'	=> site_url('users/update_profile/' . $record->id),
-												'form_elements' => $this->rules['profile'],
+												'form_elements' => $this->_rules['profile'],
 												'record' 		=> $record,
 												'form_record'   => $profile_record,
 												'next_wizard' 	=> $next_wizard

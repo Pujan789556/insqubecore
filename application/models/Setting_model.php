@@ -56,9 +56,9 @@ class Setting_model extends MY_Model
 			[
 				'field' => 'per_page',
 		        'label' => 'Pagination Limit',
-		        'rules' => 'trim|required|integer|in_list[10,20,50,100]',
+		        'rules' => 'trim|required|integer|in_list[2,5,10,20,50,100]',
                 '_type' => 'dropdown',
-                '_data' => ['5' => '5', '10' => '10', '20' => '20', '50' => '50', '100' => '100'],
+                '_data' => ['2' =>'2', '5' => '5', '10' => '10', '20' => '20', '50' => '50', '100' => '100'],
                 '_required' => true
 			],
 			[

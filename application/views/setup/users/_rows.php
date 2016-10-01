@@ -20,7 +20,7 @@ if($next_id):
 	$loader_box_id = '__next-loader-'.$next_id;
 ?>	
 	<tr id="<?php echo $loader_box_id;?>">
-		<td colspan="4" class="text-center pointer"
+		<td colspan="7" class="text-center pointer"
 			data-loading-text="Loading ..."
 			data-url="<?php echo $next_url;?>"
 			data-method="append"
