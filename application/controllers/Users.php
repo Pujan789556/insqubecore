@@ -1112,7 +1112,7 @@ class Users extends MY_Controller
     public function details($id)
     {
     	$id = (int)$id;
-		$record = $this->user_model->row($id);
+		$record = $this->user_model->details($id);
 		if(!$record)
 		{
 			$this->template->render_404();

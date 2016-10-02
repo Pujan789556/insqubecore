@@ -129,6 +129,23 @@ class User_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get Details of a Single Record
+     * 
+     * @param int $id 
+     * @return object
+     */
+	public function details($id)
+    {
+		return $this->with_role('fields:name')	
+					->with_branch('fields:name')
+					->with_department('fields:name')
+					->limit($this->settings->per_page+1)
+					->get(['id' => $id]);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Single Row on Basic Information Edit
      * 
      * @param int $id 
