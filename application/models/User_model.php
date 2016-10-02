@@ -51,17 +51,59 @@ class User_model extends MY_Model
 
 	// ----------------------------------------------------------------
 
-	public function all($params = array())
+	/**
+	 * Get Data Rows
+	 * 
+	 * For data listing purpose
+	 * 
+	 * @param type|array $params 
+	 * @return type
+	 */
+	public function rows($params = array())
     {
+    	$this->db->select('U.id, U.username, U.profile, R.name as role_name, B.name as branch_name, D.name as department_name')
+    			 ->from($this->table . ' as U')
+    			 ->join('auth_roles R', 'U.role_id = R.id')
+    			 ->join('master_branches B', 'U.branch_id = B.id')
+    			 ->join('master_departments D', 'U.department_id = D.id');
+
+
         if(!empty($params))
         {
-            $this->where($params);
+            // $this->where($params);
+
+            $next_id = $params['next_id'] ?? NULL;
+            if( $next_id )
+            {
+            	$this->db->where(['U.id >=' => $next_id]);
+            }
+
+            $role_id = $params['role_id'] ?? NULL;
+            if( $role_id )
+            {
+            	$this->db->where(['U.role_id' =>  $role_id]);
+            }
+
+            $branch_id = $params['branch_id'] ?? NULL;
+            if( $branch_id )
+            {
+            	$this->db->where(['U.branch_id' => $branch_id]);
+            }
+
+           	$department_id = $params['department_id'] ?? NULL;
+            if( $department_id )
+            {
+            	$this->db->where(['U.department_id' => $department_id]);
+            }
+
+            $keywords = $params['keywords'] ?? '';
+            if( $keywords )
+            {
+            	$this->db->like('U.username', $keywords, 'after');  
+            }
         }
-        return $this->with_role('fields:name')
-        			->with_branch('fields:name')
-        			->with_department('fields:name')
-                    ->limit($this->settings->per_page+1)
-                    ->get_all();
+        return $this->db->limit($this->settings->per_page+1)
+                    ->get()->result();
     }
 
     // ----------------------------------------------------------------
@@ -74,11 +116,14 @@ class User_model extends MY_Model
      */
 	public function row($id)
     {
-        return $this->where('id', $id)
-        			->with_role('fields:name')
-        			->with_branch('fields:name')
-        			->with_department('fields:name')
-                    ->get();
+    	$this->db->select('U.id, U.username, U.profile, R.name as role_name, B.name as branch_name, D.name as department_name')
+    			 ->from($this->table . ' as U')
+    			 ->join('auth_roles R', 'U.role_id = R.id')
+    			 ->join('master_branches B', 'U.branch_id = B.id')
+    			 ->join('master_departments D', 'U.department_id = D.id');
+
+        return $this->db->where('U.id', $id)
+                    ->get()->row();
     }
 
     // ----------------------------------------------------------------

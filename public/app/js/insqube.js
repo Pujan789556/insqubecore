@@ -34,8 +34,9 @@ $( document ).ajaxError(function( event, request, settings ) {
                 imagePopup: imagePopup,
                 liveSearch: liveSearch,
                 load: load,
-                options: {},           
-                save: save,
+                options: {},     
+                postData: postData,      
+                postForm: postForm,
                 subscribe: subscribe,
                 version: '1.0.0'
             };
@@ -97,9 +98,27 @@ $( document ).ajaxError(function( event, request, settings ) {
                 method = $a.data('method') ? $a.data('method') : 'html', // method to render html|append|prepend|after|before
                 self_destruct = $a.data('self-destruct'),
                 $loader_box = $a.data('loader-box') ? $($a.data('loader-box')) : null,
-                url = $a.data('url');
+                url = $a.data('url'),
+                
+                // For filter next page type of loading
+                load_method = $a.data('load-method') ? $a.data('load-method'): 'get',
+                form = $a.data('post-form') ? $a.data('post-form') : null;
+
                 $a.button('loading');
-                $.getJSON(url, function(r){
+
+                if(load_method == 'post'){
+                    var formData = new FormData($(form)[0]);
+                    postData(url, formData, function(r){
+                        _after_load(r);
+                    });
+                }else{
+                    $.getJSON(url, function(r){                        
+                        _after_load(r);
+                    }).error(function() { $a.button('reset'); });
+                }
+
+                function _after_load(r)
+                {
                     if(r.status === 'success' && typeof r.html !== 'undefined' ){
                         $box[method](r.html);
 
@@ -116,19 +135,33 @@ $( document ).ajaxError(function( event, request, settings ) {
                         }  
                     }
                     $a.button('reset');
-                });
+                }
+
+
+                    
                 return false;
             }
 
             /**
              * Default Ajax Form Save
              */
-             function save(form, callback){
-                var formData = new FormData(form);
+             function postForm(form, callback)
+             {
+                var formData = new FormData(form),
+                    url = $(form).attr('action');
+                postData(url, formData, callback);
+                return false;
+             }
+
+            /**
+             * Default Ajax Post
+             */
+            function postData(url, data, callback)
+            {
                 $.ajax({
                     type:'POST',
-                    url: $(form).attr('action'),
-                    data:formData,
+                    url: url,
+                    data:data,
                     cache:false,
                     contentType: false,
                     processData: false,
@@ -153,13 +186,13 @@ $( document ).ajaxError(function( event, request, settings ) {
                         }                   
                     }
                 });
-                return false;
-             }
+            }
 
              /**
               * Image Preview on Image Select
               */
-            function imagePreview(e, a, options) {
+            function imagePreview(e, a, options) 
+            {
                 var files = e.target.files,
                 yo = this,
                 $a = $(a),
@@ -232,7 +265,8 @@ $( document ).ajaxError(function( event, request, settings ) {
             /**
              * Popup Image into Bootbox alert (as a gallery preview)
              */
-             function imagePopup(img, title){
+             function imagePopup(img, title)
+             {
                 var $img = $(img),
                 src = $img.data('src') ? $img.data('src') :  $img.attr('src');
                 html = '<div class="text-center"><img src="'+ src +'" class="img-responsive" style="display:inline-block"></div>';
@@ -260,17 +294,52 @@ $( document ).ajaxError(function( event, request, settings ) {
             // Internal Function
             ///////////////////////////
 
-            function getOptions() {
+            function getOptions() 
+            {
                 return $.extend({}, getDefaults(), InsQube.options);
             }
 
-            function getUniqueId() {
+            function getUniqueId() 
+            {
               return Math.round(new Date().getTime() + (Math.random() * 100));
             }
 
-            function getDefaults() {
+            function getDefaults() 
+            {
                 return {                    
                 };
+            }
+
+            function postData(url, data, callback)
+            {
+                $.ajax({
+                    type:'POST',
+                    url: url,
+                    data:data,
+                    cache:false,
+                    contentType: false,
+                    processData: false,
+                    success:function(r){  
+                        // Show message
+                        // NOTE: r.status must be one of the toastr method [success|error|info|warning]
+                        if(typeof r.status !== 'undefined' && typeof r.message !== 'undefined'){
+                            // Clear Toastr 
+                            toastr.clear();
+                            toastr[r.status](r.message);  
+                        }                                             
+
+                        // Callback if any
+                        if (callback && typeof(callback) === "function") {
+                            callback(r);
+                        }                    
+                    },
+                    error: function(r){    
+                        // Callback if any
+                        if (callback && typeof(callback) === "function") {
+                            callback(r);
+                        }                   
+                    }
+                });
             }
 
         })();
@@ -299,7 +368,7 @@ $( document ).ajaxError(function( event, request, settings ) {
     }
 
     $btn.button('loading');
-    InsQube.save(this, function(r){
+    InsQube.postForm(this, function(r){
 
         // reload form?
         if( typeof r.reloadForm !== 'undefined' && r.reloadForm){
@@ -425,6 +494,26 @@ $( document ).ajaxError(function( event, request, settings ) {
     };
  });
 
+
+/**
+ * Search Filter
+ */
+ $(document).on('submit', '.form-iqb-filter', function(e){
+    e.preventDefault();
+    var $this = $(this),
+        $btn = $('[type="submit"]', $this),
+        $box = $($this.data('box')),
+        method = $this.data('method');    
+
+    $btn.button('loading');
+    InsQube.postForm(this, function(r){
+        if(typeof r.status !== 'undefined' && r.status === 'success' && typeof r.html != 'undefined'){
+            $box[method](r.html);
+        }
+        $btn.button('reset');
+    });
+    return false;
+ });
 
 
 /**

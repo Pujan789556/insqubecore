@@ -287,18 +287,26 @@ class Users extends MY_Controller
 	{
 		// If request is coming from refresh method, reset nextid
 		$next_id = $refresh === FALSE ? (int)$next_id : 0;
-
-		// Prepare Params
+		
 		$params = array();
 		if( $next_id )
 		{
-			$params = ['id >=' => $next_id];
+			$params = ['next_id' => $next_id];
 		}
 
-		$records = $this->user_model->all($params);
+		/**
+		 * Extract Filter Elements
+		 */	
+		$filter_data = $this->_get_filter_data( );	
+		if( $filter_data['status'] === 'success' )
+		{
+			$params = array_merge($params, $filter_data['data']);
+		}
+	
+		$records = $this->user_model->rows($params);		
 		$records = $records ? $records : [];
 		$total = count($records);
-		
+
 		/**
 		 * Grab Next ID or Reset It 
 		 */
@@ -331,8 +339,8 @@ class Users extends MY_Controller
 		/**
 		 * Filter Configurations
 		 */		
-		$filters = $this->_get_filters();
-		$data['filters'] = $filters;
+		$data['filters'] = $this->_get_filter_elements();
+		$data['filter_url'] = site_url('users/filter/');
 
 		$this->template->partial(
 							'content_header', 
@@ -345,7 +353,7 @@ class Users extends MY_Controller
 						->render($this->data);
 	}
 
-		private function _get_filters()
+		private function _get_filter_elements()
 		{
 			$this->load->model('role_model');
 			$this->load->model('branch_model');
@@ -354,7 +362,7 @@ class Users extends MY_Controller
 			$select = ['' => 'Select ...'];
 			$filters = [
 				[
-					'field' => 'role_id',
+					'field' => 'filter_role',
 			        'label' => 'Application Role',
 			        'rules' => 'trim|integer|max_length[8]',
 			        '_type' 	=> 'dropdown',
@@ -362,7 +370,7 @@ class Users extends MY_Controller
 			        '_required' => true
 				],
 				[
-					'field' => 'branch_id',
+					'field' => 'filter_branch',
 			        'label' => 'Branch',
 			        'rules' => 'trim|integer|max_length[11]',
 			        '_type' 	=> 'dropdown',
@@ -370,7 +378,7 @@ class Users extends MY_Controller
 			        '_required' => true
 				],
 				[
-					'field' => 'department_id',
+					'field' => 'filter_department',
 			        'label' => 'Department',
 			        'rules' => 'trim|integer|max_length[11]',
 			        '_type' 	=> 'dropdown',
@@ -378,7 +386,7 @@ class Users extends MY_Controller
 			        '_required' => true
 				],
 				[
-					'field' => 'keywords',
+					'field' => 'filter_keywords',
 			        'label' => 'Name/Username',
 			        'rules' => 'trim|max_length[80]',
 			        '_type' 	=> 'text',
@@ -389,10 +397,46 @@ class Users extends MY_Controller
 			return $filters;
 		}
 
+		private function _get_filter_data()
+		{
+			$data = ['status' => 'empty'];
+
+			if( $this->input->post() )
+			{
+				$rules = $this->_get_filter_elements();
+				$this->form_validation->set_rules($rules);
+				if( $this->form_validation->run() )
+				{	
+					$data['data'] = [
+						'role_id' => $this->input->post('filter_role') ?? NULL,
+						'branch_id' => $this->input->post('filter_branch') ?? NULL,
+						'department_id' => $this->input->post('filter_department') ?? NULL,
+						'keywords' 	=> $this->input->post('filter_keywords') ?? ''
+					];
+					$data['status'] = 'success';
+				}
+				else
+				{
+					$data = [
+						'status' 	=> 'error',
+						'message' 	=> validation_errors()
+					];
+
+					$this->template->json($data);
+				}
+			}
+			return $data;
+		}
+
 	// @TODO: Refactor code once you done with index() and page()
 	function refresh()
 	{
 		$this->page(0, TRUE);		
+	}
+
+	function filter()
+	{
+		$this->page(0, TRUE);
 	}
 
 	// --------------------------------------------------------------------

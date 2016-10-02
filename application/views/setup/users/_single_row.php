@@ -7,9 +7,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
 	<td><?php echo $record->username;?></td>
-	<td><?php echo $record->role->name;?></td>
-	<td><?php echo $record->department->name;?></td>
-	<td><?php echo $record->branch->name;?></td>
+	<td><?php echo $record->role_name;?></td>
+	<td><?php echo $record->department_name;?></td>
+	<td><?php echo $record->branch_name;?></td>
 	<td>
 		<?php
 		$profile = $record->profile ? json_decode($record->profile) : NULL;

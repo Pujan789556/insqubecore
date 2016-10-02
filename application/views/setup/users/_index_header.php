@@ -21,6 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		<a href="javascript:;" 
 			title="Refresh"
+			id="btn-refresh"
 			data-toggle="tooltip"
 			class="btn btn-primary btn-round" 
 			data-url="<?php echo site_url($this->router->class);?>/refresh"
