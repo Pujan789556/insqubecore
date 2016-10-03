@@ -12,6 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<th>Department</th>
 		<th>Branch</th>
 		<th>Fullname</th>
+		<th>Banned</th>
 		<th>Actions</th>
 	</tr>	
 	<?php

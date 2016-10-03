@@ -103,6 +103,8 @@ $config['insqb_activity_types'] = [
 			'T' => 'updated contact',  // updated contact of <user>
 			'P' => 'updated profile',  // updated profile of <user>
 			'O' => 'uploaded document(s)',  // uploaded documents of <user>
+			'X' => 'banned', // banned <user>
+			'U' => 'unbanned' // unbanned <user>
 	]],
 	
 ];

@@ -428,7 +428,6 @@ class Users extends MY_Controller
 			return $data;
 		}
 
-	// @TODO: Refactor code once you done with index() and page()
 	function refresh()
 	{
 		$this->page(0, TRUE);		
@@ -1100,6 +1099,84 @@ class Users extends MY_Controller
 
 		return $this->template->json($data);
 	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Ban a User
+	 * 
+	 * @param integer $id 
+	 * @return json
+	 */
+	public function ban($id)
+	{
+		return $this->_ban_unban($id, 'ban');
+	}
+
+	/**
+	 * UnBan a User
+	 * 
+	 * @param integer $id 
+	 * @return json
+	 */
+	public function unban($id)
+	{
+		return $this->_ban_unban($id, 'unban');
+	}
+
+		private function _ban_unban($id, $action)
+		{
+			// Valid Record ?
+			$id = (int)$id;
+			$record = $this->user_model->get($id);
+			if(!$record)
+			{
+				$this->template->render_404();
+			}
+
+			$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'You cannot perform this action on the default records.'
+			];
+			/**
+			 * Safe to Delete?
+			 */
+			if( !safe_to_delete( 'User_model', $id ) )
+			{
+				return $this->template->json($data);
+			}
+
+			if( $action === 'ban')
+			{
+				$done = $this->user_model->ban_user($record->id);
+			}
+			else
+			{
+				$done = $this->user_model->unban_user($record->id);
+			}
+
+			
+			if($done)
+			{
+				$record = $this->user_model->row($id);				
+				$data = [
+					'status' 	=> 'success',
+					'message' 	=> "Successfully performed the action ($action)!",
+					'reloadRow' => true,
+					'row' 		=> $this->load->view('setup/users/_single_row', ['record' => $record], TRUE),
+					'rowId'		=> '#_data-row-'.$record->id
+				];
+			}
+			else
+			{
+				$data = [
+					'status' 	=> 'error',
+					'message' 	=> "Could not perform the action ($action)."
+				];
+			}
+
+			return $this->template->json($data);
+		}
 
 	// --------------------------------------------------------------------
 

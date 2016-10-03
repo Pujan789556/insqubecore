@@ -61,7 +61,7 @@ class User_model extends MY_Model
 	 */
 	public function rows($params = array())
     {
-    	$this->db->select('U.id, U.username, U.profile, R.name as role_name, B.name as branch_name, D.name as department_name')
+    	$this->db->select('U.id, U.username, U.banned, U.profile, R.name as role_name, B.name as branch_name, D.name as department_name')
     			 ->from($this->table . ' as U')
     			 ->join('auth_roles R', 'U.role_id = R.id')
     			 ->join('master_branches B', 'U.branch_id = B.id')
@@ -116,7 +116,7 @@ class User_model extends MY_Model
      */
 	public function row($id)
     {
-    	$this->db->select('U.id, U.username, U.profile, R.name as role_name, B.name as branch_name, D.name as department_name')
+    	$this->db->select('U.id, U.username, U.banned, U.profile, R.name as role_name, B.name as branch_name, D.name as department_name')
     			 ->from($this->table . ' as U')
     			 ->join('auth_roles R', 'U.role_id = R.id')
     			 ->join('master_branches B', 'U.branch_id = B.id')
@@ -267,22 +267,36 @@ class User_model extends MY_Model
 		return $this->db->get($this->table);
 	}
 		
-	function ban_user($user_id, $reason = NULL)
+	function ban_user($id, $reason = NULL)
 	{
+		$id = intval($id);
+        if( !safe_to_delete( get_class(), $id ) )
+        {
+            return FALSE;
+        } 
+
 		$data = array(
 			'banned' 			=> 1,
 			'ban_reason' 	=> $reason
 		);
-		return $this->set_user($user_id, $data);
+		return $this->update($data, $id) && $this->log_activity($id, 'X');
+		// return $this->set_user($user_id, $data);
 	}
 	
-	function unban_user($user_id)
+	function unban_user($id)
 	{
+		$id = intval($id);
+        if( !safe_to_delete( get_class(), $id ) )
+        {
+            return FALSE;
+        } 
+
 		$data = array(
 			'banned' 			=> 0,
 			'ban_reason' 	=> NULL
 		);
-		return $this->set_user($user_id, $data);
+		return $this->update($data, $id) && $this->log_activity($id, 'U');
+		// return $this->set_user($user_id, $data);
 	}
 		
 	function set_role($user_id, $role_id)

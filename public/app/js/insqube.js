@@ -135,10 +135,7 @@ $( document ).ajaxError(function( event, request, settings ) {
                         }  
                     }
                     $a.button('reset');
-                }
-
-
-                    
+                }                    
                 return false;
             }
 
@@ -484,12 +481,21 @@ $( document ).ajaxError(function( event, request, settings ) {
             // NOTE: r.status must be one of the toastr method [success|error|info|warning]
             toastr[r.status](r.message);
 
-            // remove row if success
-            if(r.status === 'success' && typeof r.removeRow !== 'undefined' && r.removeRow == true ){
-                $(r.rowId).fadeOut('slow', function(){
-                    $(this).remove();
-                });
-            }
+            if( r.status === 'success')
+            {
+                // remove row if success
+                if( typeof r.removeRow !== 'undefined' && r.removeRow == true ){
+                    $(r.rowId).fadeOut('slow', function(){
+                        $(this).remove();
+                    });
+                }
+
+                // What if we have to reload the action row?
+                if( typeof r.reloadRow !== 'undefined' && r.reloadRow == true ){
+                    $(r.rowId).replaceWith(r.row);
+                    console.log('yeas called');
+                }
+            }                
         });
     };
  });
