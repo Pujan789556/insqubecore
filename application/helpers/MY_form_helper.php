@@ -91,6 +91,9 @@ if ( ! function_exists('form_switch'))
 		$switch_type = isset($data['switch-type']) ? $data['switch-type'] : 'switch-primary';
 		$id = isset($data['id']) ? $data['id'] : '_chkbx_'. mt_rand(1000,999999);
 
+		// update id attribute
+		$data['id'] = $id;
+
 		$output = 	'<div class="switch '.$switch_type.'">' .
 						form_checkbox($data, $value, $checked, $extra) .
 						'<label class="switch-label" for="'.$id.'"></label>'.
