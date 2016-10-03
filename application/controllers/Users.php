@@ -345,10 +345,7 @@ class Users extends MY_Controller
 		$this->template->partial(
 							'content_header', 
 							'setup/users/_index_header',
-							[
-								'content_header' => 'Manage Users',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Users' => NULL]
-						])
+							['content_header' => 'Manage Users'])
 						->partial('content', 'setup/users/_index', $data)
 						->render($this->data);
 	}
@@ -428,11 +425,23 @@ class Users extends MY_Controller
 			return $data;
 		}
 
+	/**
+	 * Refresh The Module
+	 * 
+	 * Simply reload the first page
+	 * 
+	 * @return type
+	 */
 	function refresh()
 	{
 		$this->page(0, TRUE);		
 	}
 
+	/**
+	 * Filter the Data
+	 * 
+	 * @return type
+	 */
 	function filter()
 	{
 		$this->page(0, TRUE);

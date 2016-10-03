@@ -145,23 +145,6 @@ class User_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    /**
-     * Single Row on Basic Information Edit
-     * 
-     * @param int $id 
-     * @return object
-     */
-	// public function details($id)
- //    {
- //        return $this->where('id', $id)
- //        			->with_role('fields:name')
- //        			->with_branch('fields:name')
- //        			->with_department('fields:name')
- //                    ->get();
- //    }
-
-	// ----------------------------------------------------------------
-
 	/**
      * Delete Cache on Update
      */
