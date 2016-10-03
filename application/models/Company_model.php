@@ -1,15 +1,15 @@
 <?php 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Agent_model extends MY_Model
+class Company_model extends MY_Model
 {
-	public $table = 'master_agents'; // you MUST mention the table name
+	public $table = 'master_companies'; // you MUST mention the table name
 
     public $primary_key = 'id'; // you MUST mention the primary key
 
     public $fillable = [	
     	// If you want, you can set an array with the fields that can be filled by insert/update
-    	'name', 'picture', 'ud_code', 'bs_code', 'commission_group', 'active', 'type', 'contact'
+    	'name', 'picture', 'ud_code', 'pan_no', 'active', 'type', 'contact'
     ]; 
 
     public $protected = ['id']; // ...Or you can set an array with the fields that cannot be filled by insert/update
@@ -33,41 +33,33 @@ class Agent_model extends MY_Model
 		'insert' => [
 			[
 				'field' => 'name',
-		        'label' => 'Agent Name',
+		        'label' => 'Company Name',
 		        'rules' => 'trim|required|max_length[80]',
                 '_type'     => 'text',
                 '_required' => true
 			],
             [
                 'field' => 'ud_code',
-                'label' => 'Agent UD Code',
+                'label' => 'Company UD Code',
                 'rules' => 'trim|integer|max_length[15]',
                 '_type'     => 'text',
                 '_required' => false
             ],
             [
-                'field' => 'bs_code',
-                'label' => 'Agent BS Code',
-                'rules' => 'trim|max_length[15]',
+                'field' => 'pan_no',
+                'label' => 'Company Pan No',
+                'rules' => 'trim|max_length[20]',
                 '_type'     => 'text',
                 '_required' => false
             ],
             [
                 'field' => 'type',
-                'label' => 'Agent Type',
-                'rules' => 'trim|required|integer|exact_length[1]|in_list[1,2,3]',
+                'label' => 'Company Type',
+                'rules' => 'trim|required|alpha|exact_length[1]|in_list[B,L,R]',
                 '_type'     => 'dropdown',
-                '_data'     => [ '' => 'Select...', '1' => 'Individual', '2' => 'Company'],
+                '_data'     => [ '' => 'Select...', 'B' => 'Type B', 'L' => 'Type L', 'R' => 'Type R'],
                 '_required' => true
-            ],
-            [
-                'field' => 'commission_group',
-                'label' => 'Commission Group',
-                'rules' => 'trim|required|integer|exact_length[1]|in_list[1,2,3]',
-                '_type'     => 'dropdown',
-                '_data'     => [ '' => 'Select...', '1' => 'Commission Group 1', '2' => 'Commission Group 2', '3' => 'Commission Group 3'],
-                '_required' => true
-            ],            
+            ],          
             [
                 'field' => 'active',
                 'label' => 'Is Active?',
@@ -82,8 +74,8 @@ class Agent_model extends MY_Model
     /**
      * Protect Default Records?
      */
-    public static $protect_default = FALSE;
-    public static $protect_max_id = 0; 
+    public static $protect_default = TRUE;
+    public static $protect_max_id = 86; // First 86; i.e. imported old data 
 
 	// --------------------------------------------------------------------
 
@@ -127,47 +119,46 @@ class Agent_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('A.id, A.name, A.ud_code, A.bs_code, A.type, A.active, A.commission_group')
-                 ->from($this->table . ' as A');
-
+        $this->db->select('C.id, C.name, C.ud_code, C.pan_no, C.type, C.active')
+                 ->from($this->table . ' as C');
 
         if(!empty($params))
         {
             $next_id = $params['next_id'] ?? NULL;
             if( $next_id )
             {
-                $this->db->where(['A.id >=' => $next_id]);
+                $this->db->where(['C.id >=' => $next_id]);
             }
 
             $ud_code = $params['ud_code'] ?? NULL;
             if( $ud_code )
             {
-                $this->db->where(['A.ud_code' =>  $ud_code]);
+                $this->db->where(['C.ud_code' =>  $ud_code]);
             }
 
             $type = $params['type'] ?? NULL;
             if( $type )
             {
-                $this->db->where(['A.type' =>  $type]);
+                $this->db->where(['C.type' =>  $type]);
             }
 
             $active = $params['active'];
             $active = $active === '' ? NULL : $active; // to work with 0 value
-            if( $active !== NULL ) 
+            if( $active !== NULL )
             {
-                $this->db->where(['A.active' =>  $active]);
+                $this->db->where(['C.active' =>  $active]);
             }
 
-            $commission_group = $params['commission_group'] ?? NULL;
-            if( $commission_group )
+            $pan_no = $params['pan_no'] ?? NULL;
+            if( $pan_no )
             {
-                $this->db->where(['A.commission_group' =>  $commission_group]);
+                $this->db->where(['C.pan_no' =>  $pan_no]);
             }
 
             $keywords = $params['keywords'] ?? '';
             if( $keywords )
             {
-                $this->db->like('A.name', $keywords, 'after');  
+                $this->db->like('C.name', $keywords, 'after');  
             }
         }
         return $this->db->limit($this->settings->per_page+1)
@@ -194,7 +185,7 @@ class Agent_model extends MY_Model
     public function _prep_after_write()
     {
         $cache_names = [
-            'master_agents_all',
+            'master_companies_all',
         ];
     	if($this->delete_cache_on_save === TRUE)
         {
@@ -263,7 +254,7 @@ class Agent_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'agent',
+            'module' => 'company',
             'module_id' => $id,
             'action' => $action
         ];

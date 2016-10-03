@@ -43,6 +43,18 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to Company
+	 */
+	'company' => [
+		'_uri' => 'company/',
+		'_table' => 'master_companies',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited', 
+			'D' => 'deleted'
+	]],
+
+	/**
 	 * Activities related to Country
 	 */
 	'country' => [
