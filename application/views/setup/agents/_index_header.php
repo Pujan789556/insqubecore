@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Users: Content Header
+ * Agents: Content Header
  */
 ?>
 <div class="row">
@@ -10,12 +10,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</div>
 	<div class="col-sm-4 master-actions text-right">
 		<a href="#" 
-			title="Add New User"
+			title="Add New Agent"
 			data-toggle="tooltip"
 			class="btn btn-success btn-round trg-dialog-edit" 
 			data-size="large"
-			data-title='<i class="fa fa-pencil-square-o"></i> Add New User'
-			data-url="<?php echo site_url('users/add/');?>" 
+			data-title='<i class="fa fa-pencil-square-o"></i> Add New Agent'
+			data-url="<?php echo site_url('agents/add/');?>" 
 			data-form=".form-iqb-general"
 		><i class="ion-plus-circled"></i> Add</a>
 

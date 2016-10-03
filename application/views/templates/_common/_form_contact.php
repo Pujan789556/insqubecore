@@ -29,7 +29,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 );
                 $value = set_value($element['name']) 
                         ? set_value($element['name'], '', FALSE) 
-                        : ( isset($contact_record) ? $contact_record->{$element['_key']} : '' );
+                        : ( isset($contact_record) ? ($contact_record->{$element['_key']} ?? '') : '' );
 
                 switch($element['_type'])
                 {

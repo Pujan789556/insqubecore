@@ -70,8 +70,14 @@ foreach($form_elements as $element):?>
 
                 case 'dropdown':
                     // Let's check if we have default value
-                    $value = $value ? $value : ($element['_default'] ?? '');
+                    $value = isset($value) ? $value : ($element['_default'] ?? '');
                     echo form_dropdown($element_config, $element['_data'], $value);
+                    break;
+
+                case 'checkbox':
+                    $element_config['class'] = 'icheck'; // Add icheck style
+                    $checked = $element['_default'] == $value;
+                    echo form_checkbox($element_config, $value, $checked);
                     break;
 
                 case 'switch':

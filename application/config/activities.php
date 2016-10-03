@@ -19,6 +19,18 @@
 $config['insqb_activity_types'] = [
 
 	/**
+	 * Activities related to Agent
+	 */
+	'agent' => [
+		'_uri' => 'agents/',
+		'_table' => 'master_agents',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited', 
+			'D' => 'deleted'
+	]],
+
+	/**
 	 * Activities related to Branches
 	 */
 	'branch' => [

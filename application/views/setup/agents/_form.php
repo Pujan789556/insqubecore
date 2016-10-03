@@ -1,39 +1,32 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : User Profile
+ * Form : Agent
  */
-
-$hidden = [
-    'next_wizard' => isset($next_wizard) && $next_wizard ? 1 : 0
-];
-if (isset($record) )
-{
-    $hidden['id'] = $record->id;
-}
 ?>
-<?php echo form_open_multipart( $action_url,  
+<?php echo form_open( $this->uri->uri_string(), 
                         [
                             'class' => 'form-horizontal form-iqb-general',
+                            'id'    => '__testform',
                             'data-pc' => '.bootbox-body' // parent container ID
                         ], 
                         // Hidden Fields
-                        $hidden); ?>
+                        isset($record) ? ['id' => $record->id] : []); ?>
     <div class="box-header with-border">
-        <h3 class="box-title"><?php echo $form_title?></h3>
+      <h3 class="box-title">Basic Information</h3>
     </div>
-    <div class="box-body">    
+    <div class="box-body">
         <div class="form-group">
             <label for="logo" class="col-sm-2 control-label">Profile Picture</label>
             <div class="col-sm-10 col-md-6">
                 <input type="file" id="picture" name="picture" onchange="InsQube.imagePreview(event,this,{multi: false, pc: 'picture-preview'})">
                 <p id="picture-preview" class="ins-img-ipb">
-                    <?php if(isset($form_record->picture)  && !empty($form_record->picture) ):?>
+                    <?php if(isset($record->picture)  && !empty($record->picture) ):?>
                         <img 
-                          src="<?php echo base_url()?>media/users/<?php echo thumbnail_name($form_record->picture);?>"
+                          src="<?php echo base_url()?>media/agents/<?php echo thumbnail_name($record->picture);?>"
                           title="Click here to view large"
                           class="thumbnail ins-img-ip" 
-                          data-src="<?php echo base_url()?>media/users/<?php echo $form_record->picture?>"
+                          data-src="<?php echo base_url()?>media/agents/<?php echo $record->picture?>"
                           onclick="InsQube.imagePopup(this, 'Profile Picture')">
                     <?php else:?>
                     <i class="ion-ios-person-outline text-muted img-alt"></i>
@@ -47,9 +40,17 @@ if (isset($record) )
          */
         $this->load->view('templates/_common/_form_components_horz', [
             'form_elements' => $form_elements,
-            'form_record'   => $form_record
+            'form_record'   => $record
         ]);
-        ?>        
-    </div>     
+        ?>
+    </div>
+    
+    <?php 
+    /**
+     * Contact Form
+     */
+    $contact_record = isset($record) && !empty($record->contact) ? json_decode($record->contact) : NULL;
+    $this->load->view('templates/_common/_form_contact', compact('contact_record'));
+    ?>
     <button type="submit" class="hide">Submit</button> 
 <?php echo form_close();?>

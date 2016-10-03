@@ -1,24 +1,24 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Users:  Data List
+* Agents:  Data List
 */
 ?>
 <table class="table table-hover" id="live-searchable">
 	<tr>
 		<th>ID</th>
-		<th>Username</th>
-		<th>Role</th>
-		<th>Department</th>
-		<th>Branch</th>
-		<th>Fullname</th>
-		<th>Banned</th>
+		<th>Name</th>
+		<th>UD Code</th>
+		<th>BS Code</th>
+		<th>Type</th>
+		<th>Commission Group</th>
+		<th>Active</th>
 		<th>Actions</th>
 	</tr>	
 	<?php
 	/**
 	 * Load Rows & Next Link (if any)
 	 */ 
-	$this->load->view('setup/users/_rows');	
+	$this->load->view('setup/agents/_rows');	
 	?>			
 </table>

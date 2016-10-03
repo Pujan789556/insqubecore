@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* User: Index View
+* Agents: Index View
 */
 ?>
 <div class="row">
@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						/**
 						 * Load Live Search UI
 						 */
-						$this->load->view('setup/users/_search_filters');
+						$this->load->view('setup/agents/_search_filters');
 						?>
 					</div>										
 				</div>
@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */ 
-				$this->load->view('setup/users/_list');
+				$this->load->view('setup/agents/_list');
 				?>				
 			</div>
 			<!-- /.box-body -->
