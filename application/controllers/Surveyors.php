@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Companies Controller
+ * Surveyors Controller
  * 
  * This controller falls under "Master Setup" category.
  *  
@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Companies extends MY_Controller
+class Surveyors extends MY_Controller
 {
 	function __construct()
 	{
@@ -30,7 +30,7 @@ class Companies extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Companies';
+        $this->data['site_title'] = 'Master Setup | Surveyors';
 
         // Setup Navigation        
 		$this->active_nav_primary([
@@ -40,10 +40,10 @@ class Companies extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('company_model');	
+		$this->load->model('surveyor_model');	
 
 		// Image Path
-        $this->_upload_path = MEDIAPATH . 'companies/';	    
+        $this->_upload_path = MEDIAPATH . 'surveyors/';	    
 	}
 	
 	// --------------------------------------------------------------------
@@ -86,7 +86,7 @@ class Companies extends MY_Controller
 			$params = array_merge($params, $filter_data['data']);
 		}
 	
-		$records = $this->company_model->rows($params);		
+		$records = $this->surveyor_model->rows($params);		
 		$records = $records ? $records : [];
 		$total = count($records);
 
@@ -111,7 +111,7 @@ class Companies extends MY_Controller
 		if ( $this->input->is_ajax_request() ) 
 		{	
 
-			$view = $refresh === FALSE ? 'setup/companies/_rows' : 'setup/companies/_list';
+			$view = $refresh === FALSE ? 'setup/surveyors/_rows' : 'setup/surveyors/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$ajax_data = [
 				'status' => 'success',
@@ -129,13 +129,13 @@ class Companies extends MY_Controller
 		 * Filter Configurations
 		 */		
 		$data['filters'] = $this->_get_filter_elements();
-		$data['filter_url'] = site_url('companies/filter/');
+		$data['filter_url'] = site_url('surveyors/filter/');
 
 		$this->template->partial(
 							'content_header', 
-							'setup/companies/_index_header',
-							['content_header' => 'Manage Company'])
-						->partial('content', 'setup/companies/_index', $data)
+							'setup/surveyors/_index_header',
+							['content_header' => 'Manage Surveyor'])
+						->partial('content', 'setup/surveyors/_index', $data)
 						->render($this->data);
 	}
 
@@ -144,27 +144,13 @@ class Companies extends MY_Controller
 			$select = ['' => 'Select ...'];
 			$filters = [
 				[
-	                'field' => 'filter_ud_code',
-	                'label' => 'Company UD Code',
-	                'rules' => 'trim|integer|max_length[15]',
-	                '_type'     => 'text',
-	                '_required' => false
-	            ],	            
-	            [
 	                'field' => 'filter_type',
-	                'label' => 'Company Type',
-	                'rules' => 'trim|alpha|exact_length[1]|in_list[B,L,R]',
+	                'label' => 'Surveyor Type',
+	                'rules' => 'trim|integer|exact_length[1]|in_list[1,2]',
 	                '_type'     => 'dropdown',
-	                '_data'     => [ '' => 'Select...', 'B' => 'Type B', 'L' => 'Type L', 'R' => 'Type R'],
+	                '_data'     => [ '' => 'Select...', '1' => 'Individual', '2' => 'Company'],
 	                '_required' => false
-	            ],
-	            [
-	                'field' => 'filter_pan_no',
-	                'label' => 'Commission Group',
-	                'rules' => 'trim|max_length[20]',
-	                '_type'     => 'text',
-	                '_required' => false
-	            ],
+	            ],	           
 	            [
 	                'field' => 'filter_active',
 	                'label' => 'Is Active?',
@@ -175,7 +161,7 @@ class Companies extends MY_Controller
 	            ],
 	            [
 					'field' => 'filter_keywords',
-			        'label' => 'Company Name',
+			        'label' => 'Surveyor Name',
 			        'rules' => 'trim|max_length[80]',
 	                '_type'     => 'text',
 	                '_required' => false
@@ -195,9 +181,7 @@ class Companies extends MY_Controller
 				if( $this->form_validation->run() )
 				{	
 					$data['data'] = [
-						'ud_code' 			=> $this->input->post('filter_ud_code') ?? NULL,
 						'type' 				=> $this->input->post('filter_type') ?? NULL,
-						'pan_no' 	=> $this->input->post('filter_pan_no') ?? NULL,
 						'active' 			=> $this->input->post('filter_active') ?? NULL,
 						'keywords' 			=> $this->input->post('filter_keywords') ?? ''
 					];
@@ -253,7 +237,7 @@ class Companies extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->company_model->get($id);
+		$record = $this->surveyor_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -264,9 +248,9 @@ class Companies extends MY_Controller
 		
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/companies/_form', 
+		$json_data['form'] = $this->load->view('setup/surveyors/_form', 
 			[
-				'form_elements' => $this->company_model->rules['insert'],
+				'form_elements' => $this->surveyor_model->rules['insert'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -290,9 +274,9 @@ class Companies extends MY_Controller
 
 		
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/companies/_form', 
+		$json_data['form'] = $this->load->view('setup/surveyors/_form', 
 			[
-				'form_elements' => $this->company_model->rules['insert'],
+				'form_elements' => $this->surveyor_model->rules['insert'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -347,17 +331,17 @@ class Companies extends MY_Controller
 
         	if( $status === 'success' || $status === 'no_file_selected')
             {
-            	$val_rules = array_merge($this->company_model->rules['insert'], get_contact_form_validation_rules());
+            	$val_rules = array_merge($this->surveyor_model->rules['insert'], get_contact_form_validation_rules());
 
 				// Insert or Update?
 				if($action === 'add')
 				{
-					$done = $this->company_model->from_form($val_rules, ['picture' => $picture])->insert();				
+					$done = $this->surveyor_model->from_form($val_rules, ['picture' => $picture])->insert();				
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->company_model->from_form($val_rules, ['picture' => $picture])->update(NULL, $record->id) && $this->company_model->log_activity($record->id, 'E');
+					$done = $this->surveyor_model->from_form($val_rules, ['picture' => $picture])->update(NULL, $record->id) && $this->surveyor_model->log_activity($record->id, 'E');
 				}			
 
 	        	if(!$done)
@@ -388,8 +372,8 @@ class Companies extends MY_Controller
 					else
 					{
 						// Get Updated Record
-						$record = $this->company_model->get($record->id);
-						$success_html = $this->load->view('setup/companies/_single_row', ['record' => $record], TRUE);
+						$record = $this->surveyor_model->get($record->id);
+						$success_html = $this->load->view('setup/surveyors/_single_row', ['record' => $record], TRUE);
 					}
 				}
             }
@@ -412,9 +396,9 @@ class Companies extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error' 
-									? 	$this->load->view('setup/companies/_form', 
+									? 	$this->load->view('setup/surveyors/_form', 
 											[
-												'form_elements' => $this->company_model->rules['insert'],
+												'form_elements' => $this->surveyor_model->rules['insert'],
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -426,7 +410,7 @@ class Companies extends MY_Controller
 	}
 
 		/**
-		 * Sub-function: Upload Company Profile Picture
+		 * Sub-function: Upload Surveyor Profile Picture
 		 * 
 		 * @param string|null $old_picture 
 		 * @return array
@@ -454,7 +438,7 @@ class Companies extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Delete a Company
+	 * Delete a Surveyor
 	 * @param integer $id 
 	 * @return json
 	 */
@@ -462,7 +446,7 @@ class Companies extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->company_model->get($id);
+		$record = $this->surveyor_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -475,12 +459,12 @@ class Companies extends MY_Controller
 		/**
 		 * Safe to Delete?
 		 */
-		if( !safe_to_delete( 'Company_model', $id ) )
+		if( !safe_to_delete( 'Surveyor_model', $id ) )
 		{
 			return $this->template->json($data);
 		}
 
-		$done = $this->company_model->delete($record->id);
+		$done = $this->surveyor_model->delete($record->id);
 		
 		if($done)
 		{
@@ -504,7 +488,7 @@ class Companies extends MY_Controller
 	// --------------------------------------------------------------------
 
     /**
-     * View Company Details
+     * View Surveyor Details
      * 
      * @param integer $id 
      * @return void
@@ -512,7 +496,7 @@ class Companies extends MY_Controller
     public function details($id)
     {
     	$id = (int)$id;
-		$record = $this->company_model->get($id);
+		$record = $this->surveyor_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -521,15 +505,15 @@ class Companies extends MY_Controller
 		// Load media helper
 		$this->load->helper('insqube_media'); 
 		
-		$this->data['site_title'] = 'Company Details | ' . $record->name;
+		$this->data['site_title'] = 'Surveyor Details | ' . $record->name;
 		$this->template->partial(
 							'content_header', 
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Company Details <small>' . $record->name . '</small>',
-								'breadcrumbs' => ['Companies' => 'companies', 'Details' => NULL]
+								'content_header' => 'Surveyor Details <small>' . $record->name . '</small>',
+								'breadcrumbs' => ['Surveyors' => 'surveyors', 'Details' => NULL]
 						])
-						->partial('content', 'setup/companies/_details', compact('record'))
+						->partial('content', 'setup/surveyors/_details', compact('record'))
 						->render($this->data);
 
     }

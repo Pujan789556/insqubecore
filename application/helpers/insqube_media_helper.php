@@ -91,6 +91,7 @@ if ( ! function_exists('upload_insqube_media'))
         // We must have "upload_path" Set
         if( empty($form_field) OR !isset($config['upload_path']) OR !is_dir($config['upload_path']))
         {
+            $message = !empty($form_field) ? 'Invalid upload path!' : $message;
             return ['status' => $status, 'message' => $message, 'files' => []];
         }
 

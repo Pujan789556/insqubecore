@@ -112,6 +112,18 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to Surveyor
+	 */
+	'surveyor' => [
+		'_uri' => 'surveyors/',
+		'_table' => 'master_surveyors',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited', 
+			'D' => 'deleted'
+	]],
+
+	/**
 	 * Activities related to User
 	 */
 	'user' => [

@@ -153,9 +153,9 @@ class Agents extends MY_Controller
 	            [
 	                'field' => 'filter_type',
 	                'label' => 'Agent Type',
-	                'rules' => 'trim|integer|exact_length[1]|in_list[1,2,3]',
+	                'rules' => 'trim|integer|exact_length[1]|in_list[1,2]',
 	                '_type'     => 'dropdown',
-	                '_data'     => [ '' => 'Select...', '1' => 'Type 1', '2' => 'Type 2', '3' => 'Type 3'],
+	                '_data'     => [ '' => 'Select...', '1' => 'Individual', '2' => 'Company'],
 	                '_required' => false
 	            ],
 	            [
@@ -171,7 +171,7 @@ class Agents extends MY_Controller
 	                'label' => 'Is Active?',
 	                'rules' => 'trim|integer|exact_length[1]',
 	                '_type'     => 'dropdown',
-	                '_data'     => [ '' => 'Select...', '0' => 'Inactive', '1' => 'Active'],
+	                '_data'     => [ '' => 'Select...', '0' => 'Not Active', '1' => 'Active'],
 	                '_required' => false
 	            ],
 	            [
