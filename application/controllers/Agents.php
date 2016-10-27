@@ -360,6 +360,9 @@ class Agents extends MY_Controller
 					if($action === 'add')
 					{
 						$done = $this->agent_model->insert($data, TRUE); // No Validation on Model
+
+						// Activity Log
+						$done ? $this->agent_model->log_activity($done, 'C'): '';
 					}
 					else
 					{

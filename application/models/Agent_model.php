@@ -15,7 +15,7 @@ class Agent_model extends MY_Model
 
     protected $before_insert = ['prepare_contact_data'];
     protected $before_update = ['prepare_contact_data'];
-    protected $after_insert  = ['clear_cache', 'log_activity'];
+    protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
