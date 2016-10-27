@@ -3,9 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Activities Controller
- * 
+ *
  * This controller is used to explore user activities.
- *  
+ *
  * @category 	Activity
  */
 
@@ -15,7 +15,7 @@ class Activities extends MY_Controller
 {
 	/**
 	 * Validation Rules
-	 * 
+	 *
 	 * @var array
 	 */
 	private $form_elements = [];
@@ -25,7 +25,7 @@ class Activities extends MY_Controller
 	function __construct()
 	{
 		parent::__construct();
-		
+
 		// Only Admin Can access this controller
 		if( !$this->dx_auth->is_admin() )
 		{
@@ -41,14 +41,14 @@ class Activities extends MY_Controller
        // Load Model
 		$this->load->model('activity_model');
 	}
-	
+
 	// --------------------------------------------------------------------
 
 	/**
 	 * Default Method
-	 * 
+	 *
 	 * Render the settings
-	 * 
+	 *
 	 * @return type
 	 */
 	function index()
@@ -67,7 +67,7 @@ class Activities extends MY_Controller
 		$params = array();
 		if($next_id)
 		{
-			$params = ['id <=' => $next_id];
+			$params = ['A.id <=' => $next_id];
 		}
 
 		$records = $this->activity_model->all($params);
@@ -77,7 +77,7 @@ class Activities extends MY_Controller
 		// echo $this->db->last_query();exit;
 
 		/**
-		 * Grab Next ID or Reset It 
+		 * Grab Next ID or Reset It
 		 */
 		if($total == $this->settings->per_page+1)
 		{
@@ -94,7 +94,7 @@ class Activities extends MY_Controller
 			'next_id' => $next_id
 		];
 
-		if ( $this->input->is_ajax_request() ) 
+		if ( $this->input->is_ajax_request() )
 		{
 			$html = $this->load->view('activities/_rows', $data, TRUE);
 			$this->template->json([
@@ -104,7 +104,7 @@ class Activities extends MY_Controller
 		}
 
 		$this->template->partial(
-							'content_header', 
+							'content_header',
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Explore Activities',
@@ -114,5 +114,5 @@ class Activities extends MY_Controller
 						->render($this->data);
 	}
 
-	
+
 }

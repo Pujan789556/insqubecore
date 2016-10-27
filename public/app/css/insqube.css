@@ -7,13 +7,15 @@
 .ins-img-ipb{
 	margin-top:10px;
 }
-	.ins-img-ipb > img{max-height: 100px;} 
+	.ins-img-ipb > img{max-height: 100px;}
 
  /* -- Instant Image Preview Box*/
  .ins-img-ip{
  	cursor: pointer;
  }
 
+ /* -- Data List Box -- */
+#iqb-data-list, .iqb-data-list{min-height: 400px;}
  /* -- No image icon --*/
  i.img-alt{
     font-size: 4em;
@@ -27,7 +29,7 @@
 
 /*-- Rounded Button --*/
 .btn-round{
-	border-radius: 24px; 
+	border-radius: 24px;
 }
 
 /*-- Circular Button --*/
@@ -61,14 +63,14 @@
 .live-search-search{
   position: absolute;
   left: 20px;
-  top: 10px;	
+  top: 10px;
   color:#999;
 }
 .live-search-clear{
 	position: absolute;
     right: 22px;
     top: 8px;
-    display: none;	
+    display: none;
     cursor: pointer;
 }
 .live-search-search+.live-search{

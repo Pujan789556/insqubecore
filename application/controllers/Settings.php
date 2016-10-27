@@ -6,7 +6,7 @@ class Settings extends MY_Controller
 	function __construct()
 	{
 		parent::__construct();
-		
+
 		// Only Admin Can access this controller
 		if( !$this->dx_auth->is_admin() )
 		{
@@ -14,8 +14,8 @@ class Settings extends MY_Controller
 		}
 
 		// Form Validation
-		$this->load->library('Form_validation');				
-	
+		$this->load->library('Form_validation');
+
 		// Set Template for this controller
         $this->template->set_template('dashboard');
 
@@ -23,19 +23,19 @@ class Settings extends MY_Controller
         $this->data['site_title'] = 'Settings';
 
         // Image Path
-        $this->_upload_path = MEDIAPATH . 'settings/';       
+        $this->_upload_path = MEDIAPATH . 'settings/';
 	}
-	
+
 	/**
 	 * Default Method
-	 * 
+	 *
 	 * Render the settings
-	 * 
+	 *
 	 * @return type
 	 */
 	function index()
 	{
-		// Image Helper 
+		// Image Helper
 		$this->load->helper('insqube_media');
 
 		/**
@@ -45,8 +45,8 @@ class Settings extends MY_Controller
 		{
 			/**
 			 * Upload Image If any?
-			 */          
-			$upload_result 	= $this->_upload_logo();   
+			 */
+			$upload_result 	= $this->_upload_logo();
 			$status 		= $upload_result['status'];
 			$message 		= $upload_result['message'];
 			$files 			= $upload_result['files'];
@@ -60,13 +60,18 @@ class Settings extends MY_Controller
             	$new_logo = $status === 'success' ? $files[0] : $this->settings->logo;
 
             	// Now Update Data
-	        	$done = $this->setting_model->from_form(NULL, ['logo' => $new_logo])->update(NULL, 1) && $this->setting_model->log_activity(1, 'E');	
+	        	// $done = $this->setting_model->from_form(NULL, ['logo' => $new_logo])->update(NULL, 1) && $this->setting_model->log_activity(1, 'E');
+            	$data = $this->input->post();
+            	$data['logo'] = $new_logo;
+
+	        	$done = $this->setting_model->update(1, $data) && $this->setting_model->log_activity(1, 'E');
+
 
 				// Validation Error?
-				if(!$done)
+				if( !$done )
 				{
 					$status = 'error';
-					$message = 'Validation Error.';						
+					$message = 'Validation Error.';
 				}
 				else
 				{
@@ -74,14 +79,15 @@ class Settings extends MY_Controller
 					$message = 'Successfully Updated.';
 				}
             }
-            	
 
-			$record = $status === 'success' 
-									? $this->setting_model->get(['id' => 1]) 
+
+
+			$record = $status === 'success'
+									? $this->setting_model->get(['id' => 1])
 									: $this->settings;
 
 			$view = $this->load->view('settings/_form_general', [
-								'form_elements' => $this->setting_model->rules['insert'],
+								'form_elements' => $this->setting_model->validation_rules,
 								'record' 		=> $record
 							], TRUE);
 
@@ -98,15 +104,15 @@ class Settings extends MY_Controller
 		 * Normal Form Render
 		 */
 		$this->template->partial(
-							'content_header', 
+							'content_header',
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Settings',
 								'breadcrumbs' => ['Settings' => NULL]
 						])
-						->partial('content', 'settings/_index', 
+						->partial('content', 'settings/_index',
 							[
-								'form_elements' => $this->setting_model->rules['insert'],
+								'form_elements' => $this->setting_model->validation_rules,
 								'record' 		=> $this->settings
 							])
 						->render($this->data);

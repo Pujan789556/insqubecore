@@ -1,17 +1,17 @@
-<?php 
+<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * InsQube General Helper Functions
  *
  * 	This will have general helper functions required
- * 
- * 
+ *
+ *
  * @package		InsQube
  * @subpackage	Helpers
  * @category	Helpers
  * @author		IP Bastola <ip.bastola@gmail.com>
- * @link		
+ * @link
  */
 
 // ------------------------------------------------------------------------
@@ -20,17 +20,17 @@ if ( ! function_exists('safe_to_delete'))
 {
     /**
      * Prevent Default Data Deletion
-     * 
+     *
      * The application might have different tables coming up with default data installed
      * to work properly. So we have to prevent these data from accidental deletion.
-     * 
+     *
      * @param string $model Model Name
      * @param integer|null $del_id Record ID to delete
      * @return bool
      */
     function safe_to_delete( string $model, int $del_id = 0 )
     {
-    	$model = ucfirst($model);    	
+    	$model = ucfirst($model);
     	if( ! class_exists($model) )
     	{
     		return FALSE;
@@ -38,7 +38,7 @@ if ( ! function_exists('safe_to_delete'))
 
     	$flag 	= $model::$protect_default ?? FALSE;
     	$max_id = $model::$protect_max_id ?? 0;
-    	
+
         $safe = TRUE;
         if( $flag == TRUE AND $max_id != 0 AND $del_id != 0 AND $max_id >= $del_id )
         {
@@ -54,7 +54,7 @@ if ( ! function_exists('set_menu_active'))
 {
 	/**
 	 * Set navigation menu active
-	 * 
+	 *
 	 * @param string $nav_src supplied nav menu
 	 * @param string $nav_dstn nav menu to compare against
 	 * @param string $css_class CSS Class to return if active
@@ -72,11 +72,11 @@ if ( ! function_exists('str_to_nepdate'))
 {
 	/**
 	 * String to Nepali Date
-	 * 
+	 *
 	 * Converts into Date Structure from 8-char Nepali Date.
-	 * 
+	 *
 	 *	Eg. 20500401  to 2050/04/01
-	 * 
+	 *
 	 * @param string $str Nepali Date string
 	 * @param string $separater seperator / or - or .
 	 * @return string
@@ -100,10 +100,10 @@ if ( ! function_exists('is_assoc'))
 {
     /**
      * Is Associative Array?
-     * 
+     *
      * Check if the supplied array is an associative array.
-     * 
-     * @param array $array 
+     *
+     * @param array $array
      * @return bool
      */
     function is_assoc(array $array)
@@ -123,18 +123,18 @@ if ( ! function_exists('get_contact_form_fields'))
 {
 	/**
 	 * Get Contact Form Fields
-	 * 
+	 *
 	 * We are using contacts as JSON Column on corresponding tables.
 	 * So, we need to have a common point to manage form fields, formatting
 	 * and display of contact cards
-	 * 
+	 *
 	 * @param string $css_class CSS Class to return if active
 	 * @return array
 	 */
 	function get_contact_form_fields(  )
 	{
 		// Country Dropdown
-		$CI =& get_instance();	
+		$CI =& get_instance();
 		$CI->load->model('country_model');
 		$countries = $CI->country_model->dropdown();
 
@@ -156,7 +156,7 @@ if ( ! function_exists('get_contact_form_fields'))
 			[
 				'name' 		=> 'contacts[address2]',
 		        'label' 	=> 'Address 2',
-		        '_key' 		=> 'address1',
+		        '_key' 		=> 'address2',
 		        '_type' 	=> 'text',
 		        '_required' => false
 			],
@@ -196,37 +196,37 @@ if ( ! function_exists('get_contact_form_fields'))
 		        '_key' 		=> 'phones',
 		        '_type' 	=> 'text',
 		        '_required' => false,
-		        '_help_text' => 'Comma separated list without std-code. eg. 1 4412345, 1 5512345' 
-			],	
+		        '_help_text' => 'Comma separated list without std-code. eg. 1 4412345, 1 5512345'
+			],
 			[
 				'name' 		=> 'contacts[fax]',
 		        'label' 	=> 'Fax(es)',
 		        '_key' 		=> 'fax',
 		        '_type' 	=> 'text',
 		        '_required' => false,
-		        '_help_text' => 'Comma separated list without std-code. eg. 1 4412345, 1 5512345' 
-			],	
+		        '_help_text' => 'Comma separated list without std-code. eg. 1 4412345, 1 5512345'
+			],
 			[
 				'name' 		=> 'contacts[mobile]',
 		        'label' 	=> 'Mobile',
 		        '_key' 		=> 'mobile',
 		        '_type' 	=> 'text',
 		        '_required' => false
-			],	
+			],
 			[
 				'name' 		=> 'contacts[email]',
 		        'label' 	=> 'Email',
 		        '_key' 		=> 'email',
 		        '_type' 	=> 'text',
 		        '_required' => false
-			],	
+			],
 			[
 				'name' 		=> 'contacts[web]',
 		        'label' 	=> 'Website',
 		        '_key' 		=> 'web',
 		        '_type' 	=> 'text',
 		        '_required' => false
-			]	
+			]
 		];
 	}
 }
@@ -237,11 +237,11 @@ if ( ! function_exists('get_contact_form_validation_rules'))
 {
 	/**
 	 * Get Contact Form Validation Rules
-	 * 
+	 *
 	 * We are using contacts as JSON Column on corresponding tables.
 	 * So, we need to have a common point to manage form fields, formatting
 	 * and display of contact cards
-	 * 
+	 *
 	 * @param void
 	 * @return array
 	 */
@@ -287,22 +287,22 @@ if ( ! function_exists('get_contact_form_validation_rules'))
                 'field'     => 'contacts[phones]',
                 'label'     => 'Phone(s)',
                 'rules'     => 'trim|max_length[50]'
-            ],  
+            ],
             [
                 'field'     => 'contacts[fax]',
                 'label'     => 'Fax(es)',
-                'rules'     => 'trim|max_length[20]' 
-            ],  
+                'rules'     => 'trim|max_length[20]'
+            ],
             [
                 'field'     => 'contacts[mobile]',
                 'label'     => 'Mobile',
                 'rules'     => 'trim|max_length[10]'
-            ],  
+            ],
             [
                 'field'     => 'contacts[email]',
                 'label'     => 'Email',
                 'rules'     => 'trim|valid_email|max_length[80]'
-            ],  
+            ],
             [
                 'field'     => 'contacts[web]',
                 'label'     => 'Website',
@@ -318,16 +318,16 @@ if ( ! function_exists('get_contact_data_from_form'))
 {
 	/**
 	 * Get contact data from form post
-	 * 
+	 *
 	 * Returns the multiple contact arrays if we have multiple contacts
-	 * 
+	 *
 	 * @param bool 	$json 	Return JSON Data?
 	 * @param bool  $single Is it single address format?
 	 * @return array
 	 */
 	function get_contact_data_from_form( $json = TRUE)
 	{
-		$CI =& get_instance();	
+		$CI =& get_instance();
 		$contact_data = NULL;
 
 		$contact_fields = ['contact_name', 'address1', 'address2', 'city', 'state', 'zip', 'country', 'phones', 'fax', 'mobile', 'email', 'web'];
@@ -337,7 +337,7 @@ if ( ! function_exists('get_contact_data_from_form'))
 		$CI->form_validation->set_rules($rules);
         if($CI->form_validation->run())
         {
-        	$contact_data = $CI->input->post('contacts');        	
+        	$contact_data = $CI->input->post('contacts');
         }
         return $json && !empty($contact_data) ? json_encode($contact_data) : $contact_data;
 	}
@@ -349,27 +349,27 @@ if ( ! function_exists('get_contact_widget'))
 {
 	/**
 	 * Get Single Contact Widget Box
-	 * 
+	 *
 	 * Get the contact widget html
 	 * Format:
-	 * 
+	 *
 	 * 		address1
 	 * 		address2
 	 * 		city, state, zip
 	 * 		country
-	 * 
+	 *
 	 * 		Tel:
 	 * 		Fax:
 	 * 		Mobile:
 	 * 		Email:
 	 * 		Web:
-	 * 
-	 * @param JSON $contact Single JSON Contact Object 
+	 *
+	 * @param JSON $contact Single JSON Contact Object
 	 * @return html
 	 */
 	function get_contact_widget( $contact )
 	{
-		$CI =& get_instance();	
+		$CI =& get_instance();
 		$data = ['contact' => json_decode($contact) ];
 		return $CI->load->view('templates/_common/_widget_contact', $data, TRUE);
 	}
@@ -381,14 +381,14 @@ if ( ! function_exists('get_country_name'))
 {
 	/**
 	 * Get country name from code (alpha2|alpha3)
-	 * 
+	 *
 	 * @param string $code country code in alpha2 or alpha3 format
 	 * @param string $column code column alpha2|alpha3
 	 * @return string
 	 */
 	function get_country_name( $code, $column='alpha2' )
 	{
-		$CI =& get_instance();	
+		$CI =& get_instance();
 		$CI->load->model('country_model');
 		$countries = $CI->country_model->dropdown($column);
 		return array_key_exists($code, $countries) ? $countries[$code] : '';

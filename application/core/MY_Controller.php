@@ -15,16 +15,16 @@ class MY_Controller extends CI_Controller
 {
 	/**
 	 * Controller Data
-	 * 
+	 *
 	 * This data is passed into view for further procession
-	 * 
+	 *
 	 * @var array
 	 */
 	public $data = [];
 
 	/**
 	 * Application Settings from DB
-	 * 
+	 *
 	 * @var object
 	 */
 	public $settings;
@@ -45,12 +45,12 @@ class MY_Controller extends CI_Controller
 
 		/**
 		 * Define Theme
-		 */ 
-		define('THEME_URL', site_url('public/themes/AdminLTE-2.3.6/'));	
+		 */
+		define('THEME_URL', site_url('public/themes/AdminLTE-2.3.6/'));
 
 		/**
 		 * Active Primary Navigation Data
-		 */	
+		 */
 		$this->active_nav_primary();
 
 		/**
@@ -64,16 +64,16 @@ class MY_Controller extends CI_Controller
 
 	/**
 	 * Build Primary Navigation Data
-	 * 
+	 *
 	 * This will build left sidebar active navigation control data
 	 * The nav data can be set from the child controler to pass custom nav data.
-	 * 
+	 *
 	 * The default data will be as:
 	 * 	level_0 : controller name (module)
 	 * 	level_1 : method name
-	 * 
+	 *
 	 * The multiple nav levels help us to build the multi-level sidebar menu
-	 * 
+	 *
 	 * @return void
 	 */
 	public function active_nav_primary($nav_data = [])
@@ -89,14 +89,14 @@ class MY_Controller extends CI_Controller
 				'level_1' => $this->router->method
 			];
 		}
-			
+
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Check if user is logged in?
-	 * 
+	 *
 	 * @return void
 	 */
 	public function _check_logged_in()
@@ -113,7 +113,7 @@ class MY_Controller extends CI_Controller
 
 	/**
 	 * Set Application Settings from DB
-	 * 
+	 *
 	 * @return void
 	 */
 	private function _app_settings()

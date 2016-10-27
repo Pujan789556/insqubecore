@@ -3,9 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * District Controller
- * 
+ *
  * This controller falls under "Master Setup" category.
- *  
+ *
  * @category 	Master Setup
  */
 
@@ -16,7 +16,7 @@ class Countries extends MY_Controller
 	function __construct()
 	{
 		parent::__construct();
-		
+
 		// Only Admin Can access this controller
 		if( !$this->dx_auth->is_admin() )
 		{
@@ -24,15 +24,15 @@ class Countries extends MY_Controller
 		}
 
 		// Form Validation
-		$this->load->library('Form_validation');				
-	
+		$this->load->library('Form_validation');
+
 		// Set Template for this controller
         $this->template->set_template('dashboard');
 
         // Basic Data
         $this->data['site_title'] = 'Master Setup | Countries';
 
-        // Setup Navigation        
+        // Setup Navigation
 		$this->active_nav_primary([
 			'level_0' => 'master_setup',
 			'level_1' => 'general',
@@ -41,16 +41,16 @@ class Countries extends MY_Controller
 
 		// Load Model
 		$this->load->model('country_model');
-    
+
 	}
-	
+
 	// --------------------------------------------------------------------
 
 	/**
 	 * Default Method
-	 * 
+	 *
 	 * Render the settings
-	 * 
+	 *
 	 * @return type
 	 */
 	function index()
@@ -59,10 +59,10 @@ class Countries extends MY_Controller
 		 * Normal Form Render
 		 */
 		// this will generate cache name: mc_master_countries_all
-		$records = $this->country_model->set_cache('all')->get_all();
-	
+		$records = $this->country_model->get_all();
+
 		$this->template->partial(
-							'content_header', 
+							'content_header',
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Countries',
@@ -78,7 +78,7 @@ class Countries extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->country_model->get($id);
+		$record = $this->country_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -90,38 +90,49 @@ class Countries extends MY_Controller
 		if( $this->input->post() )
 		{
 			// Update Validation Rule on Update
-			$this->country_model->rules['insert'][1]['rules'] = 'trim|required|alpha|exact_length[2]|callback_check_duplicate_alpha2';
+			$rules = $this->country_model->validation_rules;
+			$rules[1]['rules'] = 'trim|required|alpha|exact_length[2]|callback_check_duplicate_alpha2';
 
-			$this->country_model->rules['insert'][2]['rules'] = 'trim|required|alpha|exact_length[3]|callback_check_duplicate_alpha3';
+			$rules[2]['rules'] = 'trim|required|alpha|exact_length[3]|callback_check_duplicate_alpha3';
 
+			$this->form_validation->set_rules($rules);
 
-			// Now Update Data & Log Activity
-        	$done = $this->country_model->from_form()->update(NULL, $id) && $this->country_model->log_activity($record->id, 'E');
-
-        	if(!$done)
+			if( $this->form_validation->run() === TRUE)
 			{
-				$status = 'error';
-				$message = 'Validation Error.';				
+				$data = $this->input->post();
+
+				// Now Update Data & Log Activity
+	        	$done = $this->country_model->update($id, $data, TRUE) && $this->country_model->log_activity($record->id, 'E');
+
+	        	if(!$done)
+				{
+					$status = 'error';
+					$message = 'Could not Update.';
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+					$record = $this->country_model->find($id);
+				}
 			}
 			else
 			{
-				$status = 'success';
-				$message = 'Successfully Updated.';
-				$record = $this->country_model->get($id);
-			}	
-			
+				$status = 'error';
+				$message = 'Validation Error.';
+			}
 
-			$row = $status === 'success' 
+			$row = $status === 'success'
 						? $this->load->view('setup/countries/_single_row', compact('record'), TRUE)
 						: '';
-			
+
 			$this->template->json([
 				'status' 		=> $status,
 				'message' 		=> $message,
 				'reloadForm' 	=> $status === 'error',
 				'hideBootbox' 	=> $status === 'success',
 				'updateSection' => $status === 'success',
-				'updateSectionData'	=> $status === 'success' 
+				'updateSectionData'	=> $status === 'success'
 										? 	[
 												'box' => '#_data-row-' . $record->id,
 												'html' 		=> $row,
@@ -129,10 +140,10 @@ class Countries extends MY_Controller
 												'method' 	=> 'replaceWith'
 											]
 										: NULL,
-				'form' 	  		=> $status === 'error' 
-									? 	$this->load->view('setup/countries/_form', 
+				'form' 	  		=> $status === 'error'
+									? 	$this->load->view('setup/countries/_form',
 											[
-												'form_elements' => $this->country_model->rules['insert'],
+												'form_elements' => $this->country_model->validation_rules,
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -141,13 +152,13 @@ class Countries extends MY_Controller
 		}
 
 
-		$form = $this->load->view('setup/countries/_form', 
+		$form = $this->load->view('setup/countries/_form',
 			[
-				'form_elements' => $this->country_model->rules['insert'],
+				'form_elements' => $this->country_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
-		// Return HTML 
+		// Return HTML
 		$this->template->json(compact('form'));
 	}
 
@@ -155,11 +166,11 @@ class Countries extends MY_Controller
 
     /**
      * Check Duplicate Callback: Alpha2
-     * 
-     * @param string $alpha2 
-     * @param integer|null $id 
+     *
+     * @param string $alpha2
+     * @param integer|null $id
      * @return bool
-     */	
+     */
     public function check_duplicate_alpha2($alpha2, $id=NULL){
 
     	$alpha2 = strtoupper( $alpha2 ? $alpha2 : $this->input->post('alpha2') );
@@ -177,11 +188,11 @@ class Countries extends MY_Controller
 
     /**
      * Check Duplicate Callback: Alpha3
-     * 
-     * @param string $alpha2 
-     * @param integer|null $id 
+     *
+     * @param string $alpha2
+     * @param integer|null $id
      * @return bool
-     */	
+     */
     public function check_duplicate_alpha3($alpha3, $id=NULL){
 
     	$alpha3 = strtoupper( $alpha3 ? $alpha3 : $this->input->post('alpha3') );
