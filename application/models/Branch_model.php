@@ -1,52 +1,44 @@
-<?php 
+<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Branch_model extends MY_Model
 {
-	public $table = 'master_branches'; // you MUST mention the table name
+    protected $table_name = 'master_branches';
 
-    public $primary_key = 'id'; // you MUST mention the primary key
+    protected $set_created = true;
 
-    public $fillable = [	
-    	// If you want, you can set an array with the fields that can be filled by insert/update
-    	'name', 'code', 'contacts'
-    ]; 
+    protected $set_modified = true;
 
-    public $protected = ['id']; // ...Or you can set an array with the fields that cannot be filled by insert/update
+    protected $log_user = true;
 
-    /**
-     * Delete cache on save
-     * 
-     * @var boolean
-     */
-    public $delete_cache_on_save = TRUE;
+    protected $protected_attributes = ['id'];
+
+    protected $before_insert = ['capitalize_code', 'prepare_contact_data'];
+    protected $before_update = ['capitalize_code', 'prepare_contact_data'];
+    protected $after_insert  = ['clear_cache'];
+    protected $after_update  = ['clear_cache'];
+    protected $after_delete  = ['clear_cache'];
 
 
-    /**
-     * Validation Rules
-     * 
-     * We can use model to directly save the form data
-     * 
-     * @var array
-     */
-    public  $rules = [
-		'insert' => [
-			[
-				'field' => 'name',
-		        'label' => 'Branch Name',
-		        'rules' => 'trim|required|max_length[30]',
-                '_type'     => 'text',
-                '_required' => true
-			],
-            [
-                'field' => 'code',
-                'label' => 'Branch Code',
-                'rules' => 'trim|required|alpha|max_length[3]|is_unique[master_branches.code]|strtoupper',
-                '_type'     => 'text',
-                '_required' => true
-            ]	
-		]	
-	];
+    protected $fields = ["id", "name", "code", "contacts", "created_at", "created_by", "updated_at", "updated_by"];
+
+    protected $validation_rules = [
+        [
+            'field' => 'name',
+            'label' => 'Branch Name',
+            'rules' => 'trim|required|max_length[30]',
+            '_type'     => 'text',
+            '_required' => true
+        ],
+        [
+            'field' => 'code',
+            'label' => 'Branch Code',
+            'rules' => 'trim|required|alpha|max_length[3]|is_unique[master_branches.code]|strtoupper',
+            '_type'     => 'text',
+            '_required' => true
+        ]
+    ];
+
 
     /**
      * Protect Default Records?
@@ -58,23 +50,28 @@ class Branch_model extends MY_Model
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @return void
 	 */
     public function __construct()
     {
-        parent::__construct();  
+        parent::__construct();
+    }
 
-        // Before Create/Update Callbacks           
-        $this->before_create[] = 'capitalize_code';
-        $this->before_update[] = 'capitalize_code'; 
+    // ----------------------------------------------------------------
 
-        // Get Contact JSON Data 
-        $this->before_create[] = 'prepare_contact_data';
-        $this->before_update[] = 'prepare_contact_data'; 
-
-        // After Create Callback
-        $this->after_create[] = 'log_activity';           
+    public function get_all()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('branches_all');
+        if(!$list)
+        {
+            $list = parent::find_all();
+            $this->write_cache($list, 'branches_all', CACHE_DURATION_DAY);
+        }
+        return $list;
     }
 
     // ----------------------------------------------------------------
@@ -89,7 +86,7 @@ class Branch_model extends MY_Model
                 $data[$col] = strtoupper($data[$col]);
             }
         }
-        return $data;        
+        return $data;
     }
 
     // ----------------------------------------------------------------
@@ -110,7 +107,7 @@ class Branch_model extends MY_Model
         }
         // $where is array ['key' => $value]
         return $this->db->where($where)
-                        ->count_all_results($this->table);
+                        ->count_all_results($this->table_name);
     }
 
     // --------------------------------------------------------------------
@@ -120,43 +117,45 @@ class Branch_model extends MY_Model
      */
     public function dropdown()
     {
-        return $this->set_cache('dropdown')
-                        ->as_dropdown('name')
-                        ->order_by('name', 'asc')
-                        ->get_all();
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $records = $this->get_all();
+        $list = [];
+        foreach($records as $record)
+        {
+            $list["{$record->id}"] = $record->name;
+        }
+        return $list;
     }
-    
+
 	// --------------------------------------------------------------------
 
     /**
      * Delete Cache on Update/Delete Records
      */
-    public function _prep_after_write()
+    public function clear_cache()
     {
         $cache_names = [
-            'master_branches_all',
-            'master_branches_dropdown'
+            'branches_all'
         ];
-    	if($this->delete_cache_on_save === TRUE)
+    	// cache name without prefix
+        foreach($cache_names as $cache)
         {
-        	// cache name without prefix
-            foreach($cache_names as $cache)
-            {
-                $this->delete_cache($cache);     
-            }
-        }       
+            $this->delete_cache($cache);
+        }
         return TRUE;
     }
 
     // ----------------------------------------------------------------
-    
+
     public function delete($id = NULL)
     {
         $id = intval($id);
         if( !safe_to_delete( get_class(), $id ) )
         {
             return FALSE;
-        } 
+        }
 
         // Disable DB Debug for transaction to work
         $this->db->db_debug = FALSE;
@@ -165,14 +164,14 @@ class Branch_model extends MY_Model
 
         // Use automatic transaction
         $this->db->trans_start();
-            
+
             parent::delete($id);
 
         $this->db->trans_complete();
 
         if ($this->db->trans_status() === FALSE)
         {
-            // get_allenerate an error... or use the log_message() function to log your error
+            // generate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
         else
@@ -188,19 +187,19 @@ class Branch_model extends MY_Model
     }
 
     // ----------------------------------------------------------------
-    
+
     /**
      * Log Activity
-     * 
+     *
      * Log activities
      *      Available Activities: Create|Edit|Delete
-     * 
-     * @param integer $id 
-     * @param string $action 
+     *
+     * @param integer $id
+     * @param string $action
      * @return bool
      */
     public function log_activity($id, $action = 'C')
-    {        
+    {
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
@@ -208,6 +207,6 @@ class Branch_model extends MY_Model
             'module_id' => $id,
             'action' => $action
         ];
-        return $this->activity->save($activity_log);     
+        return $this->activity->save($activity_log);
     }
 }
