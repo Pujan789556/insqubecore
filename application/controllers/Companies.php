@@ -3,9 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Companies Controller
- * 
+ *
  * This controller falls under "Master Setup" category.
- *  
+ *
  * @category 	Master Setup
  */
 
@@ -16,7 +16,7 @@ class Companies extends MY_Controller
 	function __construct()
 	{
 		parent::__construct();
-		
+
 		// Only Admin Can access this controller
 		if( !$this->dx_auth->is_admin() )
 		{
@@ -24,15 +24,15 @@ class Companies extends MY_Controller
 		}
 
 		// Form Validation
-		$this->load->library('Form_validation');				
-	
+		$this->load->library('Form_validation');
+
 		// Set Template for this controller
         $this->template->set_template('dashboard');
 
         // Basic Data
         $this->data['site_title'] = 'Master Setup | Companies';
 
-        // Setup Navigation        
+        // Setup Navigation
 		$this->active_nav_primary([
 			'level_0' => 'master_setup',
 			'level_1' => 'general',
@@ -40,19 +40,19 @@ class Companies extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('company_model');	
+		$this->load->model('company_model');
 
 		// Image Path
-        $this->_upload_path = MEDIAPATH . 'companies/';	    
+        $this->_upload_path = MEDIAPATH . 'companies/';
 	}
-	
+
 	// --------------------------------------------------------------------
 
 	/**
 	 * Default Method
-	 * 
+	 *
 	 * Render the settings
-	 * 
+	 *
 	 * @return type
 	 */
 	function index()
@@ -62,15 +62,15 @@ class Companies extends MY_Controller
 
 	/**
 	 * Paginate Data List
-	 * 
-	 * @param integer $next_id 
+	 *
+	 * @param integer $next_id
 	 * @return void
 	 */
 	function page( $next_id = 0, $refresh = FALSE, $ajax_extra = [] )
 	{
 		// If request is coming from refresh method, reset nextid
 		$next_id = $refresh === FALSE ? (int)$next_id : 0;
-		
+
 		$params = array();
 		if( $next_id )
 		{
@@ -79,19 +79,19 @@ class Companies extends MY_Controller
 
 		/**
 		 * Extract Filter Elements
-		 */	
-		$filter_data = $this->_get_filter_data( );	
+		 */
+		$filter_data = $this->_get_filter_data( );
 		if( $filter_data['status'] === 'success' )
 		{
 			$params = array_merge($params, $filter_data['data']);
 		}
-	
-		$records = $this->company_model->rows($params);		
+
+		$records = $this->company_model->rows($params);
 		$records = $records ? $records : [];
 		$total = count($records);
 
 		/**
-		 * Grab Next ID or Reset It 
+		 * Grab Next ID or Reset It
 		 */
 		if($total == $this->settings->per_page+1)
 		{
@@ -108,8 +108,8 @@ class Companies extends MY_Controller
 			'next_id' => $next_id
 		];
 
-		if ( $this->input->is_ajax_request() ) 
-		{	
+		if ( $this->input->is_ajax_request() )
+		{
 
 			$view = $refresh === FALSE ? 'setup/companies/_rows' : 'setup/companies/_list';
 			$html = $this->load->view($view, $data, TRUE);
@@ -127,12 +127,12 @@ class Companies extends MY_Controller
 
 		/**
 		 * Filter Configurations
-		 */		
+		 */
 		$data['filters'] = $this->_get_filter_elements();
 		$data['filter_url'] = site_url('companies/filter/');
 
 		$this->template->partial(
-							'content_header', 
+							'content_header',
 							'setup/companies/_index_header',
 							['content_header' => 'Manage Company'])
 						->partial('content', 'setup/companies/_index', $data)
@@ -149,7 +149,7 @@ class Companies extends MY_Controller
 	                'rules' => 'trim|integer|max_length[15]',
 	                '_type'     => 'text',
 	                '_required' => false
-	            ],	            
+	            ],
 	            [
 	                'field' => 'filter_type',
 	                'label' => 'Company Type',
@@ -193,7 +193,7 @@ class Companies extends MY_Controller
 				$rules = $this->_get_filter_elements();
 				$this->form_validation->set_rules($rules);
 				if( $this->form_validation->run() )
-				{	
+				{
 					$data['data'] = [
 						'ud_code' 			=> $this->input->post('filter_ud_code') ?? NULL,
 						'type' 				=> $this->input->post('filter_type') ?? NULL,
@@ -218,19 +218,19 @@ class Companies extends MY_Controller
 
 	/**
 	 * Refresh The Module
-	 * 
+	 *
 	 * Simply reload the first page
-	 * 
+	 *
 	 * @return type
 	 */
 	function refresh()
 	{
-		$this->page(0, TRUE);		
+		$this->page(0, TRUE);
 	}
 
 	/**
 	 * Filter the Data
-	 * 
+	 *
 	 * @return type
 	 */
 	function filter()
@@ -244,16 +244,16 @@ class Companies extends MY_Controller
 
 	/**
 	 * Edit a Recrod
-	 * 
-	 * 
-	 * @param integer $id 
+	 *
+	 *
+	 * @param integer $id
 	 * @return void
 	 */
 	public function edit($id)
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->company_model->get($id);
+		$record = $this->company_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -261,16 +261,16 @@ class Companies extends MY_Controller
 
 		// Form Submitted? Save the data
 		$json_data = $this->_save('edit', $record);
-		
+
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/companies/_form', 
+		$json_data['form'] = $this->load->view('setup/companies/_form',
 			[
-				'form_elements' => $this->company_model->rules['insert'],
+				'form_elements' => $this->company_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
-		// Return HTML 
+		// Return HTML
 		$this->template->json($json_data);
 	}
 
@@ -278,7 +278,7 @@ class Companies extends MY_Controller
 
 	/**
 	 * Add a new Record
-	 * 
+	 *
 	 * @return void
 	 */
 	public function add()
@@ -288,15 +288,15 @@ class Companies extends MY_Controller
 		// Form Submitted? Save the data
 		$json_data = $this->_save('add');
 
-		
+
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/companies/_form', 
+		$json_data['form'] = $this->load->view('setup/companies/_form',
 			[
-				'form_elements' => $this->company_model->rules['insert'],
+				'form_elements' => $this->company_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
-		// Return HTML 
+		// Return HTML
 		$this->template->json($json_data);
 	}
 
@@ -304,7 +304,7 @@ class Companies extends MY_Controller
 
 	/**
 	 * Save a Record
-	 * 
+	 *
 	 * @param string $action [add|edit]
 	 * @param object|null $record Record Object or NULL
 	 * @return array
@@ -322,7 +322,7 @@ class Companies extends MY_Controller
 		}
 
 		// Load media helper
-		$this->load->helper('insqube_media'); 
+		$this->load->helper('insqube_media');
 
 		/**
 		 * Form Submitted?
@@ -331,68 +331,86 @@ class Companies extends MY_Controller
 
 		if( $this->input->post() )
 		{
-			$done = FALSE;			 
+			$done = FALSE;
 
 			// Extract Old Profile Picture if any
 			$picture = $record->picture ?? NULL;
 
-			/**
-			 * Upload Image If any?
-			 */   
-			$upload_result 	= $this->_upload_profile_picture($picture);   
-			$status 		= $upload_result['status'];
-			$message 		= $upload_result['message'];
-			$files 			= $upload_result['files'];
-			$picture = $status === 'success' ? $files[0] : $picture;
+			$rules = array_merge($this->company_model->validation_rules, get_contact_form_validation_rules());
+            $this->form_validation->set_rules($rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		/**
+				 * Upload Image If any?
+				 */
+				$upload_result 	= $this->_upload_profile_picture($picture);
+				$status 		= $upload_result['status'];
+				$message 		= $upload_result['message'];
+				$files 			= $upload_result['files'];
+				$picture = $status === 'success' ? $files[0] : $picture;
 
-        	if( $status === 'success' || $status === 'no_file_selected')
-            {
-            	$val_rules = array_merge($this->company_model->rules['insert'], get_contact_form_validation_rules());
+	        	if( $status === 'success' || $status === 'no_file_selected')
+	            {
+	            	$data = $this->input->post();
+        			$data['picture'] = $picture;
 
-				// Insert or Update?
-				if($action === 'add')
-				{
-					$done = $this->company_model->from_form($val_rules, ['picture' => $picture])->insert();				
-				}
-				else
-				{
-					// Now Update Data
-					$done = $this->company_model->from_form($val_rules, ['picture' => $picture])->update(NULL, $record->id) && $this->company_model->log_activity($record->id, 'E');
-				}			
 
-	        	if(!$done)
-				{
-					$status = 'error';
-					$message = 'Validation Error.';				
-				}
-				else
-				{
-					$status = 'success';
-					$message = 'Successfully Updated.';		
-				}
-
-				// Success HTML
-				$success_html = '';
-				$return_extra = [];
-				if($status === 'success' )
-				{
+            		// Insert or Update?
 					if($action === 'add')
 					{
-						// Refresh the list page and close bootbox
-						return $this->page(0, TRUE, [
-								'message' => $message,
-								'status'  => $status,
-								'hideBootbox' => true
-							]);
+						$done = $this->company_model->insert($data, TRUE); // No Validation on Model
+
+						// Activity Log
+						$done ? $this->company_model->log_activity($done, 'C'): '';
 					}
 					else
 					{
-						// Get Updated Record
-						$record = $this->company_model->get($record->id);
-						$success_html = $this->load->view('setup/companies/_single_row', ['record' => $record], TRUE);
+						// Now Update Data
+						$done = $this->company_model->update($record->id, $data, TRUE) && $this->company_model->log_activity($record->id, 'E');
 					}
+
+		        	if(!$done)
+					{
+						$status = 'error';
+						$message = 'Could not update.';
+					}
+					else
+					{
+						$status = 'success';
+						$message = 'Successfully Updated.';
+					}
+	            }
+        	}
+        	else
+        	{
+        		$status = 'error';
+				$message = 'Validation Error.';
+        	}
+
+        	// Success HTML
+			$success_html = '';
+			$return_extra = [];
+			if($status === 'success' )
+			{
+				if($action === 'add')
+				{
+					// Refresh the list page and close bootbox
+					return $this->page(0, TRUE, [
+							'message' => $message,
+							'status'  => $status,
+							'hideBootbox' => true
+						]);
 				}
-            }
+				else
+				{
+					// Get Updated Record
+					$record = $this->company_model->find($record->id);
+					$success_html = $this->load->view('setup/companies/_single_row', ['record' => $record], TRUE);
+				}
+			}
+
+
+
 
 			$return_data = [
 				'status' 		=> $status,
@@ -400,21 +418,21 @@ class Companies extends MY_Controller
 				'reloadForm' 	=> $status === 'error',
 				'hideBootbox' 	=> $status === 'success',
 				'updateSection' => $status === 'success',
-				'updateSectionData'	=> $status === 'success' 
+				'updateSectionData'	=> $status === 'success'
 										? 	[
 												'box' 	=> '#_data-row-' . $record->id,
 												'html' 	=> $success_html,
 												//
 												// How to Work with success html?
 												// Jquery Method 	html|replaceWith|append|prepend etc.
-												// 
+												//
 												'method' 	=> 'replaceWith'
 											]
 										: NULL,
-				'form' 	  		=> $status === 'error' 
-									? 	$this->load->view('setup/companies/_form', 
+				'form' 	  		=> $status === 'error'
+									? 	$this->load->view('setup/companies/_form',
 											[
-												'form_elements' => $this->company_model->rules['insert'],
+												'form_elements' => $this->company_model->validation_rules,
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -427,8 +445,8 @@ class Companies extends MY_Controller
 
 		/**
 		 * Sub-function: Upload Company Profile Picture
-		 * 
-		 * @param string|null $old_picture 
+		 *
+		 * @param string|null $old_picture
 		 * @return array
 		 */
 		private function _upload_profile_picture( $old_picture = NULL )
@@ -455,14 +473,14 @@ class Companies extends MY_Controller
 
 	/**
 	 * Delete a Company
-	 * @param integer $id 
+	 * @param integer $id
 	 * @return json
 	 */
 	public function delete($id)
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->company_model->get($id);
+		$record = $this->company_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -481,9 +499,20 @@ class Companies extends MY_Controller
 		}
 
 		$done = $this->company_model->delete($record->id);
-		
+
 		if($done)
 		{
+			/**
+			 * Delete Media if any
+			 */
+			if($record->picture)
+			{
+				// Load media helper
+				$this->load->helper('insqube_media');
+
+				delete_insqube_document($this->_upload_path . $record->picture);
+			}
+
 			$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
@@ -505,25 +534,25 @@ class Companies extends MY_Controller
 
     /**
      * View Company Details
-     * 
-     * @param integer $id 
+     *
+     * @param integer $id
      * @return void
      */
     public function details($id)
     {
     	$id = (int)$id;
-		$record = $this->company_model->get($id);
+		$record = $this->company_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
 		}
 
 		// Load media helper
-		$this->load->helper('insqube_media'); 
-		
+		$this->load->helper('insqube_media');
+
 		$this->data['site_title'] = 'Company Details | ' . $record->name;
 		$this->template->partial(
-							'content_header', 
+							'content_header',
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Company Details <small>' . $record->name . '</small>',
