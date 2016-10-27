@@ -1,95 +1,97 @@
-<?php 
+<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class District_model extends MY_Model
 {
-	public $table = 'master_districts'; // you MUST mention the table name
+    protected $table_name = 'master_districts';
 
-    public $primary_key = 'id'; // you MUST mention the primary key
+    protected $set_created = true;
 
-    public $fillable = [	
-    	// If you want, you can set an array with the fields that can be filled by insert/update
-    	'name_en', 'name_np'
-    ]; 
+    protected $set_modified = true;
 
-    public $protected = ['id']; // ...Or you can set an array with the fields that cannot be filled by insert/update
+    protected $log_user = true;
 
-    /**
-     * Delete cache on save
-     * 
-     * @var boolean
-     */
-    public $delete_cache_on_save = TRUE;
+    protected $protected_attributes = ['id'];
 
+    protected $after_update  = ['clear_cache'];
 
-    /**
-     * Validation Rules
-     * 
-     * We can use model to directly save the form data
-     * 
-     * @var array
-     */
-    public  $rules = [
-		'insert' => [
-			[
-				'field' => 'name_en',
-		        'label' => 'Name (EN)',
-		        'rules' => 'trim|required|max_length[80]',
-                '_type' => 'text',
-                '_required' => true
-			],
-			[
-				'field' => 'name_np',
-		        'label' => 'Name (NP)',
-		        'rules' => 'trim|max_length[80]',
-                '_type' => 'text',
-                '_required' => true
-			]
-		]	
-	];
+    protected $fields = ["id", "name_en", "name_np", "created_at", "created_by", "updated_at", "updated_by"];
+
+    protected $validation_rules = [
+        [
+            'field' => 'name_en',
+            'label' => 'Name (EN)',
+            'rules' => 'trim|required|max_length[80]',
+            '_type' => 'text',
+            '_required' => true
+        ],
+        [
+            'field' => 'name_np',
+            'label' => 'Name (NP)',
+            'rules' => 'trim|max_length[80]',
+            '_type' => 'text',
+            '_required' => true
+        ]
+    ];
+
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @return void
 	 */
     public function __construct()
     {
-        parent::__construct();      
+        parent::__construct();
     }
 
-    
+    // ----------------------------------------------------------------
+
+    public function get_all()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('districts_all');
+        if(!$list)
+        {
+            $list = parent::find_all();
+            $this->write_cache($list, 'districts_all', CACHE_DURATION_DAY);
+        }
+        return $list;
+    }
+
 	// --------------------------------------------------------------------
 
     /**
      * Delete Cache on Update
      */
-    public function _prep_after_write()
+    public function clear_cache()
     {
     	if($this->delete_cache_on_save === TRUE)
         {
         	// cache name without prefix
-        	$this->delete_cache('master_districts_all'); 
-        }       
+        	$this->delete_cache('districts_all');
+        }
         return TRUE;
     }
 
     // ----------------------------------------------------------------
-    
+
     /**
      * Log Activity
-     * 
+     *
      * Log activities
      *      Available Activities: Edit
-     * 
-     * @param integer $id 
-     * @param string $action 
+     *
+     * @param integer $id
+     * @param string $action
      * @return bool
      */
     public function log_activity($id, $action = 'E')
-    {        
+    {
         $action = is_string($action) ? $action : 'E';
         // Save Activity Log
         $activity_log = [
@@ -97,6 +99,6 @@ class District_model extends MY_Model
             'module_id' => $id,
             'action' => $action
         ];
-        return $this->activity->save($activity_log);     
+        return $this->activity->save($activity_log);
     }
 }

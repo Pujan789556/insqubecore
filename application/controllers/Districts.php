@@ -3,9 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * District Controller
- * 
+ *
  * This controller falls under "Master Setup" category.
- *  
+ *
  * @category 	Master Setup
  */
 
@@ -16,7 +16,7 @@ class Districts extends MY_Controller
 	function __construct()
 	{
 		parent::__construct();
-		
+
 		// Only Admin Can access this controller
 		if( !$this->dx_auth->is_admin() )
 		{
@@ -24,15 +24,15 @@ class Districts extends MY_Controller
 		}
 
 		// Form Validation
-		$this->load->library('Form_validation');				
-	
+		$this->load->library('Form_validation');
+
 		// Set Template for this controller
         $this->template->set_template('dashboard');
 
         // Basic Data
         $this->data['site_title'] = 'Master Setup | Districts';
 
-        // Setup Navigation        
+        // Setup Navigation
 		$this->active_nav_primary([
 			'level_0' => 'master_setup',
 			'level_1' => 'general',
@@ -41,16 +41,16 @@ class Districts extends MY_Controller
 
 		// Load Model
 		$this->load->model('district_model');
-    
+
 	}
-	
+
 	// --------------------------------------------------------------------
 
 	/**
 	 * Default Method
-	 * 
+	 *
 	 * Render the settings
-	 * 
+	 *
 	 * @return type
 	 */
 	function index()
@@ -59,12 +59,12 @@ class Districts extends MY_Controller
 		 * Normal Form Render
 		 */
 		// this will generate cache name: mc_master_districts_all
-		$records = $this->district_model->set_cache('all')->get_all();
+		$records = $this->district_model->get_all();
 		// echo $this->db->last_query();
 		// echo '<pre>'; print_r($records);exit;
 
 		$this->template->partial(
-							'content_header', 
+							'content_header',
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Districts',
@@ -80,7 +80,7 @@ class Districts extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->district_model->get($id);
+		$record = $this->district_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -92,33 +92,36 @@ class Districts extends MY_Controller
 		if( $this->input->post() )
 		{
 			// Now Update Data
-        	$done = $this->district_model->from_form()->update(NULL, $id) && $this->district_model->log_activity($record->id, 'E');
         	$view = '';
 
-        	if(!$done)
-			{
-				$status = 'error';
-				$message = 'Validation Error.';				
-			}
+        	$data = $this->input->post();
+        	if( $this->district_model->update($id, $data) )
+        	{
+        		// Update Record
+        		$this->district_model->log_activity($record->id, 'E');
+
+        		$status = 'success';
+				$message = 'Successfully Updated.';
+				$record = $this->district_model->find($id);
+        	}
 			else
 			{
-				$status = 'success';
-				$message = 'Successfully Updated.';
-				$record = $this->district_model->get($id);
-			}	
-			
+				$status = 'error';
+				$message = 'Validation Error.';
+			}
 
-			$row = $status === 'success' 
+
+			$row = $status === 'success'
 						? $this->load->view('setup/districts/_single_row', compact('record'), TRUE)
 						: '';
-			
+
 			$this->template->json([
 				'status' 		=> $status,
 				'message' 		=> $message,
 				'reloadForm' 	=> $status === 'error',
 				'hideBootbox' 	=> $status === 'success',
 				'updateSection' => $status === 'success',
-				'updateSectionData'	=> $status === 'success' 
+				'updateSectionData'	=> $status === 'success'
 										? 	[
 												'box' => '#_dst-row-' . $record->id,
 												'html' 		=> $row,
@@ -126,10 +129,10 @@ class Districts extends MY_Controller
 												'method' 	=> 'replaceWith'
 											]
 										: NULL,
-				'form' 	  		=> $status === 'error' 
-									? 	$this->load->view('setup/districts/_form', 
+				'form' 	  		=> $status === 'error'
+									? 	$this->load->view('setup/districts/_form',
 											[
-												'form_elements' => $this->district_model->rules['insert'],
+												'form_elements' => $this->district_model->validation_rules,
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -138,13 +141,13 @@ class Districts extends MY_Controller
 		}
 
 
-		$form = $this->load->view('setup/districts/_form', 
+		$form = $this->load->view('setup/districts/_form',
 			[
-				'form_elements' => $this->district_model->rules['insert'],
+				'form_elements' => $this->district_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
-		// Return HTML 
+		// Return HTML
 		$this->template->json(compact('form'));
 	}
 }
