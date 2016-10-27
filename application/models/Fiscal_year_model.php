@@ -1,53 +1,52 @@
-<?php 
+<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Fiscal_year_model extends MY_Model
 {
-	public $table = 'master_fiscal_yrs'; // you MUST mention the table name
 
-    public $primary_key = 'id'; // you MUST mention the primary key
+    protected $table_name = 'master_fiscal_yrs';
 
-    public $fillable = [	
-    	// If you want, you can set an array with the fields that can be filled by insert/update
-    	'name', 'code'
-    ]; 
+    protected $set_created = true;
 
-    public $protected = ['id']; // ...Or you can set an array with the fields that cannot be filled by insert/update
+    protected $set_modified = true;
 
-    /**
-     * Delete cache on save
-     * 
-     * @var boolean
-     */
-    public $delete_cache_on_save = TRUE;
+    protected $log_user = true;
 
+    protected $protected_attributes = ['id'];
 
-    /**
-     * Validation Rules
-     * 
-     * We can use model to directly save the form data
-     * 
-     * @var array
-     */
-    public  $rules = [
-		'insert' => [			
-		]	
-	];
+    protected $after_update  = ['clear_cache'];
+
+    protected $fields = ["id", "code_np", "code_en", "starts_at_en", "ends_at_en", "starts_at_np", "ends_at_np", "created_at", "created_by", "updated_at", "updated_by"];
+
+    protected $validation_rules = [];
+
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @return void
 	 */
     public function __construct()
     {
-        parent::__construct();  
+        parent::__construct();
+    }
 
-        // Before Create/Update Callbacks           
-        // $this->before_create[] = 'capitalize_code';
-        // $this->before_update[] = 'capitalize_code'; 
+    // ----------------------------------------------------------------
+
+    public function get_all()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('fiscal_yrs_all');
+        if(!$list)
+        {
+            $list = parent::find_all();
+            $this->write_cache($list, 'fiscal_yrs_all', CACHE_DURATION_MONTH);
+        }
+        return $list;
     }
 
     // ----------------------------------------------------------------
@@ -63,24 +62,24 @@ class Fiscal_year_model extends MY_Model
                         ->count_all_results($this->table);
     }
 
-    
+
 	// --------------------------------------------------------------------
 
     /**
      * Delete Cache on Update
      */
-    public function _prep_after_write()
+    public function clear_cache()
     {
     	if($this->delete_cache_on_save === TRUE)
         {
         	// cache name without prefix
-        	$this->delete_cache('master_fiscal_yrs_all'); 
-        }       
+        	$this->delete_cache('fiscal_yrs_all');
+        }
         return TRUE;
     }
 
     // ----------------------------------------------------------------
-    
+
     public function log_activity($id, $action = 'C')
     {
         return TRUE;
@@ -88,10 +87,10 @@ class Fiscal_year_model extends MY_Model
       //    $action = is_string($action) ? $action : 'C';
       //    // Save Activity Log
             // $activity_log = [
-            //  'module' => 'department',
+            //  'module' => 'fiscal_year',
             //  'module_id' => $id,
             //  'action' => $action
             // ];
-            // return $this->activity->save($activity_log);     
+            // return $this->activity->save($activity_log);
     }
 }

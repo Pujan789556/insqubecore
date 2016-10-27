@@ -3,9 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Fiscal_years Controller
- * 
+ *
  * This controller falls under "Master Setup" category.
- *  
+ *
  * @category 	Master Setup
  */
 
@@ -15,7 +15,7 @@ class Fiscal_years extends MY_Controller
 {
 	/**
 	 * Validation Rules
-	 * 
+	 *
 	 * @var array
 	 */
 	private $form_elements = [];
@@ -25,7 +25,7 @@ class Fiscal_years extends MY_Controller
 	function __construct()
 	{
 		parent::__construct();
-		
+
 		// Only Admin Can access this controller
 		if( !$this->dx_auth->is_admin() )
 		{
@@ -33,15 +33,15 @@ class Fiscal_years extends MY_Controller
 		}
 
 		// Form Validation
-		// $this->load->library('Form_validation');				
-	
+		// $this->load->library('Form_validation');
+
 		// Set Template for this controller
         $this->template->set_template('dashboard');
 
         // Basic Data
         $this->data['site_title'] = 'Master Setup | Fiscal year';
 
-        // Setup Navigation        
+        // Setup Navigation
 		$this->active_nav_primary([
 			'level_0' => 'master_setup',
 			'level_1' => 'general',
@@ -52,16 +52,16 @@ class Fiscal_years extends MY_Controller
 		$this->load->model('fiscal_year_model');
 
 		// Load Activitis Library
-		$this->load->library('activity');    
+		$this->load->library('activity');
 	}
-	
+
 	// --------------------------------------------------------------------
 
 	/**
 	 * Default Method
-	 * 
+	 *
 	 * Render the settings
-	 * 
+	 *
 	 * @return type
 	 */
 	function index()
@@ -70,10 +70,10 @@ class Fiscal_years extends MY_Controller
 		 * Normal Form Render
 		 */
 		// this will generate cache name: mc_master_fiscal_yrs_all
-		$records = $this->fiscal_year_model->set_cache('all')->get_all();
+		$records = $this->fiscal_year_model->get_all();
 		$records = $records ? $records : [];
 		$this->template->partial(
-							'content_header', 
+							'content_header',
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Fiscal year',
@@ -83,5 +83,5 @@ class Fiscal_years extends MY_Controller
 						->render($this->data);
 	}
 
-	
+
 }
