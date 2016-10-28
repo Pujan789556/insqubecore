@@ -3,9 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Surveyors Controller
- * 
+ *
  * This controller falls under "Master Setup" category.
- *  
+ *
  * @category 	Master Setup
  */
 
@@ -16,7 +16,7 @@ class Surveyors extends MY_Controller
 	function __construct()
 	{
 		parent::__construct();
-		
+
 		// Only Admin Can access this controller
 		if( !$this->dx_auth->is_admin() )
 		{
@@ -24,15 +24,15 @@ class Surveyors extends MY_Controller
 		}
 
 		// Form Validation
-		$this->load->library('Form_validation');				
-	
+		$this->load->library('Form_validation');
+
 		// Set Template for this controller
         $this->template->set_template('dashboard');
 
         // Basic Data
         $this->data['site_title'] = 'Master Setup | Surveyors';
 
-        // Setup Navigation        
+        // Setup Navigation
 		$this->active_nav_primary([
 			'level_0' => 'master_setup',
 			'level_1' => 'general',
@@ -40,19 +40,19 @@ class Surveyors extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('surveyor_model');	
+		$this->load->model('surveyor_model');
 
 		// Image Path
-        $this->_upload_path = MEDIAPATH . 'surveyors/';	    
+        $this->_upload_path = MEDIAPATH . 'surveyors/';
 	}
-	
+
 	// --------------------------------------------------------------------
 
 	/**
 	 * Default Method
-	 * 
+	 *
 	 * Render the settings
-	 * 
+	 *
 	 * @return type
 	 */
 	function index()
@@ -62,15 +62,15 @@ class Surveyors extends MY_Controller
 
 	/**
 	 * Paginate Data List
-	 * 
-	 * @param integer $next_id 
+	 *
+	 * @param integer $next_id
 	 * @return void
 	 */
 	function page( $next_id = 0, $refresh = FALSE, $ajax_extra = [] )
 	{
 		// If request is coming from refresh method, reset nextid
 		$next_id = $refresh === FALSE ? (int)$next_id : 0;
-		
+
 		$params = array();
 		if( $next_id )
 		{
@@ -79,19 +79,19 @@ class Surveyors extends MY_Controller
 
 		/**
 		 * Extract Filter Elements
-		 */	
-		$filter_data = $this->_get_filter_data( );	
+		 */
+		$filter_data = $this->_get_filter_data( );
 		if( $filter_data['status'] === 'success' )
 		{
 			$params = array_merge($params, $filter_data['data']);
 		}
-	
-		$records = $this->surveyor_model->rows($params);		
+
+		$records = $this->surveyor_model->rows($params);
 		$records = $records ? $records : [];
 		$total = count($records);
 
 		/**
-		 * Grab Next ID or Reset It 
+		 * Grab Next ID or Reset It
 		 */
 		if($total == $this->settings->per_page+1)
 		{
@@ -108,8 +108,8 @@ class Surveyors extends MY_Controller
 			'next_id' => $next_id
 		];
 
-		if ( $this->input->is_ajax_request() ) 
-		{	
+		if ( $this->input->is_ajax_request() )
+		{
 
 			$view = $refresh === FALSE ? 'setup/surveyors/_rows' : 'setup/surveyors/_list';
 			$html = $this->load->view($view, $data, TRUE);
@@ -127,12 +127,12 @@ class Surveyors extends MY_Controller
 
 		/**
 		 * Filter Configurations
-		 */		
+		 */
 		$data['filters'] = $this->_get_filter_elements();
 		$data['filter_url'] = site_url('surveyors/filter/');
 
 		$this->template->partial(
-							'content_header', 
+							'content_header',
 							'setup/surveyors/_index_header',
 							['content_header' => 'Manage Surveyor'])
 						->partial('content', 'setup/surveyors/_index', $data)
@@ -150,7 +150,7 @@ class Surveyors extends MY_Controller
 	                '_type'     => 'dropdown',
 	                '_data'     => [ '' => 'Select...', '1' => 'Individual', '2' => 'Company'],
 	                '_required' => false
-	            ],	           
+	            ],
 	            [
 	                'field' => 'filter_active',
 	                'label' => 'Is Active?',
@@ -179,7 +179,7 @@ class Surveyors extends MY_Controller
 				$rules = $this->_get_filter_elements();
 				$this->form_validation->set_rules($rules);
 				if( $this->form_validation->run() )
-				{	
+				{
 					$data['data'] = [
 						'type' 				=> $this->input->post('filter_type') ?? NULL,
 						'active' 			=> $this->input->post('filter_active') ?? NULL,
@@ -202,19 +202,19 @@ class Surveyors extends MY_Controller
 
 	/**
 	 * Refresh The Module
-	 * 
+	 *
 	 * Simply reload the first page
-	 * 
+	 *
 	 * @return type
 	 */
 	function refresh()
 	{
-		$this->page(0, TRUE);		
+		$this->page(0, TRUE);
 	}
 
 	/**
 	 * Filter the Data
-	 * 
+	 *
 	 * @return type
 	 */
 	function filter()
@@ -228,16 +228,16 @@ class Surveyors extends MY_Controller
 
 	/**
 	 * Edit a Recrod
-	 * 
-	 * 
-	 * @param integer $id 
+	 *
+	 *
+	 * @param integer $id
 	 * @return void
 	 */
 	public function edit($id)
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->surveyor_model->get($id);
+		$record = $this->surveyor_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -245,16 +245,16 @@ class Surveyors extends MY_Controller
 
 		// Form Submitted? Save the data
 		$json_data = $this->_save('edit', $record);
-		
+
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/surveyors/_form', 
+		$json_data['form'] = $this->load->view('setup/surveyors/_form',
 			[
-				'form_elements' => $this->surveyor_model->rules['insert'],
+				'form_elements' => $this->surveyor_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
-		// Return HTML 
+		// Return HTML
 		$this->template->json($json_data);
 	}
 
@@ -262,7 +262,7 @@ class Surveyors extends MY_Controller
 
 	/**
 	 * Add a new Record
-	 * 
+	 *
 	 * @return void
 	 */
 	public function add()
@@ -272,15 +272,15 @@ class Surveyors extends MY_Controller
 		// Form Submitted? Save the data
 		$json_data = $this->_save('add');
 
-		
+
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/surveyors/_form', 
+		$json_data['form'] = $this->load->view('setup/surveyors/_form',
 			[
-				'form_elements' => $this->surveyor_model->rules['insert'],
+				'form_elements' => $this->surveyor_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
-		// Return HTML 
+		// Return HTML
 		$this->template->json($json_data);
 	}
 
@@ -288,7 +288,7 @@ class Surveyors extends MY_Controller
 
 	/**
 	 * Save a Record
-	 * 
+	 *
 	 * @param string $action [add|edit]
 	 * @param object|null $record Record Object or NULL
 	 * @return array
@@ -306,7 +306,7 @@ class Surveyors extends MY_Controller
 		}
 
 		// Load media helper
-		$this->load->helper('insqube_media'); 
+		$this->load->helper('insqube_media');
 
 		/**
 		 * Form Submitted?
@@ -315,68 +315,88 @@ class Surveyors extends MY_Controller
 
 		if( $this->input->post() )
 		{
-			$done = FALSE;			 
+			$done = FALSE;
 
 			// Extract Old Profile Picture if any
 			$picture = $record->picture ?? NULL;
 
+
 			/**
-			 * Upload Image If any?
-			 */   
-			$upload_result 	= $this->_upload_profile_picture($picture);   
-			$status 		= $upload_result['status'];
-			$message 		= $upload_result['message'];
-			$files 			= $upload_result['files'];
-			$picture = $status === 'success' ? $files[0] : $picture;
+			 * Validate Post before Uploading Picture
+			 */
+			$rules = array_merge($this->surveyor_model->validation_rules, get_contact_form_validation_rules());
+			$this->form_validation->set_rules($rules);
 
-        	if( $status === 'success' || $status === 'no_file_selected')
-            {
-            	$val_rules = array_merge($this->surveyor_model->rules['insert'], get_contact_form_validation_rules());
+			if( $this->form_validation->run() === TRUE )
+			{
+				/**
+				 * Upload Image If any?
+				 */
+				$upload_result 	= $this->_upload_profile_picture($picture);
+				$status 		= $upload_result['status'];
+				$message 		= $upload_result['message'];
+				$files 			= $upload_result['files'];
+				$picture = $status === 'success' ? $files[0] : $picture;
 
-				// Insert or Update?
-				if($action === 'add')
-				{
-					$done = $this->surveyor_model->from_form($val_rules, ['picture' => $picture])->insert();				
-				}
-				else
-				{
-					// Now Update Data
-					$done = $this->surveyor_model->from_form($val_rules, ['picture' => $picture])->update(NULL, $record->id) && $this->surveyor_model->log_activity($record->id, 'E');
-				}			
+	        	if( $status === 'success' || $status === 'no_file_selected')
+	            {
 
-	        	if(!$done)
-				{
-					$status = 'error';
-					$message = 'Validation Error.';				
-				}
-				else
-				{
-					$status = 'success';
-					$message = 'Successfully Updated.';		
-				}
+	            	$data = $this->input->post();
+	            	$data['picture'] = $picture;
 
-				// Success HTML
-				$success_html = '';
-				$return_extra = [];
-				if($status === 'success' )
-				{
+	            	// Insert or Update?
 					if($action === 'add')
 					{
-						// Refresh the list page and close bootbox
-						return $this->page(0, TRUE, [
-								'message' => $message,
-								'status'  => $status,
-								'hideBootbox' => true
-							]);
+						$done = $this->surveyor_model->insert($data, TRUE); // No Validation on Model
+
+						// Activity Log
+						$done ? $this->surveyor_model->log_activity($done, 'C'): '';
 					}
 					else
 					{
-						// Get Updated Record
-						$record = $this->surveyor_model->get($record->id);
-						$success_html = $this->load->view('setup/surveyors/_single_row', ['record' => $record], TRUE);
+						// Now Update Data
+						$done = $this->surveyor_model->update($record->id, $data, TRUE) && $this->surveyor_model->log_activity($record->id, 'E');
 					}
-				}
-            }
+
+		        	if(!$done)
+					{
+						$status = 'error';
+						$message = 'Could not update.';
+					}
+					else
+					{
+						$status = 'success';
+						$message = 'Successfully Updated.';
+					}
+
+					// Success HTML
+					$success_html = '';
+					$return_extra = [];
+					if($status === 'success' )
+					{
+						if($action === 'add')
+						{
+							// Refresh the list page and close bootbox
+							return $this->page(0, TRUE, [
+									'message' => $message,
+									'status'  => $status,
+									'hideBootbox' => true
+								]);
+						}
+						else
+						{
+							// Get Updated Record
+							$record = $this->surveyor_model->find($record->id);
+							$success_html = $this->load->view('setup/surveyors/_single_row', ['record' => $record], TRUE);
+						}
+					}
+	            }
+			}
+			else
+			{
+				$status = 'error';
+				$message = 'Validation Error.';
+			}
 
 			$return_data = [
 				'status' 		=> $status,
@@ -384,21 +404,21 @@ class Surveyors extends MY_Controller
 				'reloadForm' 	=> $status === 'error',
 				'hideBootbox' 	=> $status === 'success',
 				'updateSection' => $status === 'success',
-				'updateSectionData'	=> $status === 'success' 
+				'updateSectionData'	=> $status === 'success'
 										? 	[
 												'box' 	=> '#_data-row-' . $record->id,
 												'html' 	=> $success_html,
 												//
 												// How to Work with success html?
 												// Jquery Method 	html|replaceWith|append|prepend etc.
-												// 
+												//
 												'method' 	=> 'replaceWith'
 											]
 										: NULL,
-				'form' 	  		=> $status === 'error' 
-									? 	$this->load->view('setup/surveyors/_form', 
+				'form' 	  		=> $status === 'error'
+									? 	$this->load->view('setup/surveyors/_form',
 											[
-												'form_elements' => $this->surveyor_model->rules['insert'],
+												'form_elements' => $this->surveyor_model->validation_rules,
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -411,8 +431,8 @@ class Surveyors extends MY_Controller
 
 		/**
 		 * Sub-function: Upload Surveyor Profile Picture
-		 * 
-		 * @param string|null $old_picture 
+		 *
+		 * @param string|null $old_picture
 		 * @return array
 		 */
 		private function _upload_profile_picture( $old_picture = NULL )
@@ -439,14 +459,14 @@ class Surveyors extends MY_Controller
 
 	/**
 	 * Delete a Surveyor
-	 * @param integer $id 
+	 * @param integer $id
 	 * @return json
 	 */
 	public function delete($id)
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->surveyor_model->get($id);
+		$record = $this->surveyor_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -465,9 +485,20 @@ class Surveyors extends MY_Controller
 		}
 
 		$done = $this->surveyor_model->delete($record->id);
-		
+
 		if($done)
 		{
+			/**
+			 * Delete Media if any
+			 */
+			if($record->picture)
+			{
+				// Load media helper
+				$this->load->helper('insqube_media');
+
+				delete_insqube_document($this->_upload_path . $record->picture);
+			}
+
 			$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
@@ -489,25 +520,25 @@ class Surveyors extends MY_Controller
 
     /**
      * View Surveyor Details
-     * 
-     * @param integer $id 
+     *
+     * @param integer $id
      * @return void
      */
     public function details($id)
     {
     	$id = (int)$id;
-		$record = $this->surveyor_model->get($id);
+		$record = $this->surveyor_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
 		}
 
 		// Load media helper
-		$this->load->helper('insqube_media'); 
-		
+		$this->load->helper('insqube_media');
+
 		$this->data['site_title'] = 'Surveyor Details | ' . $record->name;
 		$this->template->partial(
-							'content_header', 
+							'content_header',
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Surveyor Details <small>' . $record->name . '</small>',
