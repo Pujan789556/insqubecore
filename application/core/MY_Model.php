@@ -1381,8 +1381,9 @@ class MY_Model
             // build cache name with prefix
             $cache_name = $this->cache_prefix . '_' . $cache_name;
             $this->cache->{$this->cache_driver}->delete($cache_name);
+            return TRUE;
         }
-        return $this;
+        return FALSE;
     }
 
     //--------------------------------------------------------------------

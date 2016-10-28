@@ -3,8 +3,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Setting_model extends MY_Model
 {
-
-
     protected $table_name = 'master_settings';
 
     protected $set_created = true;
@@ -127,11 +125,11 @@ class Setting_model extends MY_Model
     	/**
          * Get Cached Result, If no, cache the query result
          */
-        $record = $this->get_cache('settings');
+        $record = $this->get_cache('master_settings');
         if(!$record)
         {
             $record = parent::find_by($where);
-            $this->write_cache($record, 'settings', CACHE_DURATION_DAY);
+            $this->write_cache($record, 'master_settings', CACHE_DURATION_DAY);
         }
         return $record;
     }
@@ -143,8 +141,7 @@ class Setting_model extends MY_Model
      */
     public function clear_cache()
     {
-        parent::delete_cache('settings');
-        return TRUE;
+        return $this->delete_cache('master_settings');
     }
 
     /**

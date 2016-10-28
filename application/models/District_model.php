@@ -70,12 +70,8 @@ class District_model extends MY_Model
      */
     public function clear_cache()
     {
-    	if($this->delete_cache_on_save === TRUE)
-        {
-        	// cache name without prefix
-        	$this->delete_cache('districts_all');
-        }
-        return TRUE;
+    	// cache name without prefix
+        return $this->delete_cache('districts_all');
     }
 
     // ----------------------------------------------------------------

@@ -43,44 +43,57 @@ class Settings extends MY_Controller
 		 */
 		if( $this->input->post() )
 		{
+
 			/**
-			 * Upload Image If any?
+			 * Validate Post before uploading any Media
 			 */
-			$upload_result 	= $this->_upload_logo();
-			$status 		= $upload_result['status'];
-			$message 		= $upload_result['message'];
-			$files 			= $upload_result['files'];
+			$rules = $this->setting_model->validation_rules;
+			$this->form_validation->set_rules($rules);
 
-            /**
-             * Update Data
-             */
-            if( $status === 'success' || $status === 'no_file_selected')
-            {
-            	// Get New Logo
-            	$new_logo = $status === 'success' ? $files[0] : $this->settings->logo;
+			if( $this->form_validation->run() === TRUE )
+			{
+				/**
+				 * Upload Image If any?
+				 */
+				$upload_result 	= $this->_upload_logo();
+				$status 		= $upload_result['status'];
+				$message 		= $upload_result['message'];
+				$files 			= $upload_result['files'];
 
-            	// Now Update Data
-	        	// $done = $this->setting_model->from_form(NULL, ['logo' => $new_logo])->update(NULL, 1) && $this->setting_model->log_activity(1, 'E');
-            	$data = $this->input->post();
-            	$data['logo'] = $new_logo;
+	            /**
+	             * Update Data
+	             */
+	            if( $status === 'success' || $status === 'no_file_selected')
+	            {
+	            	// Get New Logo
+	            	$new_logo = $status === 'success' ? $files[0] : $this->settings->logo;
 
-	        	$done = $this->setting_model->update(1, $data) && $this->setting_model->log_activity(1, 'E');
+	            	// Now Update Data
+		        	// $done = $this->setting_model->from_form(NULL, ['logo' => $new_logo])->update(NULL, 1) && $this->setting_model->log_activity(1, 'E');
+	            	$data = $this->input->post();
+	            	$data['logo'] = $new_logo;
 
-
-				// Validation Error?
-				if( !$done )
-				{
-					$status = 'error';
-					$message = 'Validation Error.';
-				}
-				else
-				{
-					$status = 'success';
-					$message = 'Successfully Updated.';
-				}
-            }
+		        	$done = $this->setting_model->update(1, $data, TRUE) && $this->setting_model->log_activity(1, 'E');
 
 
+					// Validation Error?
+					if( !$done )
+					{
+						$status = 'error';
+						$message = 'Could not update.';
+					}
+					else
+					{
+						$status = 'success';
+						$message = 'Successfully Updated.';
+					}
+	            }
+			}
+			else
+			{
+				$status = 'error';
+				$message = 'Validation Error.';
+			}
 
 			$record = $status === 'success'
 									? $this->setting_model->get(['id' => 1])
