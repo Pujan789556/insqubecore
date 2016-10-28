@@ -3,48 +3,42 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Role_model extends MY_Model
 {
-	public $table; // you MUST mention the table name
+	protected $set_created = true;
 
-    public $primary_key = 'id'; // you MUST mention the primary key
+    protected $set_modified = true;
 
-    public $fillable = [	
-    	// If you want, you can set an array with the fields that can be filled by insert/update
-    	'name', 'description', 'permissions'
-    ]; 
+    protected $log_user = true;
 
-    public $protected = ['id']; // ...Or you can set an array with the fields that cannot be filled by insert/update
+    protected $protected_attributes = ['id'];
 
-    /**
-     * Delete cache on save
-     * 
-     * @var boolean
-     */
-    public $delete_cache_on_save = TRUE;
+    protected $after_insert  = ['clear_cache'];
+    protected $after_update  = ['clear_cache'];
+    protected $after_delete  = ['clear_cache'];
+
+    protected $fields = ["id", "name", "description", "permissions", "created_at", "created_by", "updated_at", "updated_by"];
 
 
     /**
      * Validation Rules
-     * 
+     *
      * We can use model to directly save the form data
-     * 
+     *
      * @var array
      */
-    public  $rules = [
-		'insert' => [
-			[
-				'field' => 'name',
-		        'label' => 'Role Name',
-		        'rules' => 'trim|required|max_length[30]|is_unique[auth_roles.name]',
-		        '_type'     => 'text',
-                '_required' => true
-			],
-			[
-				'field' => 'description',
-		        'label' => 'Description',
-		        'rules' => 'trim|max_length[255]',
-		        '_type'     => 'text'
-			]
-		]	
+    protected  $validation_rules = [
+		[
+			'field' => 'name',
+	        'label' => 'Role Name',
+	        'rules' => 'trim|required|max_length[30]|is_unique[auth_roles.name]',
+	        '_type'     => 'text',
+            '_required' => true
+		],
+		[
+			'field' => 'description',
+	        'label' => 'Description',
+	        'rules' => 'trim|max_length[255]',
+	        '_type'     => 'text'
+		]
 	];
 
 	/**
@@ -57,15 +51,29 @@ class Role_model extends MY_Model
 
 	function __construct()
 	{
-		parent::__construct();
-		
+
 		// Setup Table ( Using Dx_auth Config to Setup Table Name)
 		$this->_prefix = $this->config->item('DX_table_prefix');
-		$this->table = $this->_prefix.$this->config->item('DX_roles_table');
+		$this->table_name = $this->_prefix.$this->config->item('DX_roles_table');
 
-		// After Create Callback
-		$this->after_create[] = 'log_activity';		
+		parent::__construct();
 	}
+
+	// ----------------------------------------------------------------
+
+    public function get_all()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('roles_all');
+        if(!$list)
+        {
+            $list = parent::find_all();
+            $this->write_cache($list, 'roles_all', CACHE_DURATION_DAY);
+        }
+        return $list;
+    }
 
 	// --------------------------------------------------------------------
 
@@ -74,10 +82,13 @@ class Role_model extends MY_Model
      */
     public function dropdown()
     {
-        return $this->set_cache('dropdown')
-                        ->as_dropdown('name')
-                        ->order_by('name', 'asc')
-                        ->get_all();
+    	$records = $this->get_all();
+        $list = [];
+        foreach($records as $record)
+        {
+            $list["{$record->id}"] = $record->name;
+        }
+        return $list;
     }
 
 	// ----------------------------------------------------------------
@@ -90,19 +101,19 @@ class Role_model extends MY_Model
 		}
 		$name = ucfirst(strtolower($name));
 		return $this->db->where('name' , $name)
-						->count_all_results($this->table);
+						->count_all_results($this->table_name);
 	}
 
 	// ----------------------------------------------------------------
-	
+
 	public function delete($id = NULL)
 	{
 		$id = intval($id);
         if( !safe_to_delete( get_class(), $id ) )
         {
             return FALSE;
-        } 
-        
+        }
+
 		// Disable DB Debug for transaction to work
 		$this->db->db_debug = FALSE;
 
@@ -110,7 +121,7 @@ class Role_model extends MY_Model
 
 		// Use automatic transaction
 		$this->db->trans_start();
-			
+
 			parent::delete($id);
 
 		$this->db->trans_complete();
@@ -130,44 +141,40 @@ class Role_model extends MY_Model
 
 		// return result/status
 		return $status;
-	}	
+	}
 
 	// ----------------------------------------------------------------
 
 	/**
      * Delete Cache on Update
      */
-    public function _prep_after_write()
+    public function clear_cache()
     {
     	$cache_names = [
-            'auth_roles_all',
-            'auth_roles_dropdown'
+            'roles_all'
         ];
-    	if($this->delete_cache_on_save === TRUE)
+    	// cache name without prefix
+        foreach($cache_names as $cache)
         {
-        	// cache name without prefix
-            foreach($cache_names as $cache)
-            {
-                $this->delete_cache($cache);     
-            }
-        }       
+            $this->delete_cache($cache);
+        }
         return TRUE;
     }
 
     // ----------------------------------------------------------------
-    
+
     /**
      * Log Activity
-     * 
+     *
      * Log activities
      *      Available Activities: Create|Edit|Delete|Assign
-     * 
-     * @param integer $id 
-     * @param string $action 
+     *
+     * @param integer $id
+     * @param string $action
      * @return bool
      */
     public function log_activity($id=NULL, $action = 'C')
-    {        
+    {
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
@@ -175,36 +182,16 @@ class Role_model extends MY_Model
             'module_id' => $id,
             'action' => $action
         ];
-        return $this->activity->save($activity_log);     
+        return $this->activity->save($activity_log);
     }
 
-	
-	// function get_all()
-	// {
-	// 	$this->db->order_by('id', 'asc');
-	// 	return $this->db->get($this->_table);
-	// }
-	
+
+
+
 	// Required by DX_auth Library
 	function get_role_by_id($role_id)
 	{
 		$this->db->where('id', $role_id);
-		return $this->db->get($this->table);
+		return $this->db->get($this->table_name);
 	}
-	
-	// function create_role($name, $parent_id = 0)
-	// {
-	// 	$data = array(
-	// 		'name' => $name,
-	// 		'parent_id' => $parent_id
-	// 	);
-            
-	// 	$this->db->insert($this->_table, $data);
-	// }
-	
-	// function delete_role($role_id)
-	// {
-	// 	$this->db->where('id', $role_id);
-	// 	$this->db->delete($this->_table);		
-	// }
 }

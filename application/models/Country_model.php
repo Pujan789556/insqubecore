@@ -121,15 +121,15 @@ class Country_model extends MY_Model
     public function dropdown( $column='alpha2' )
     {
         $records = $this->get_all();
-        $countries = [];
+        $list = [];
         if( in_array($column, array('alpha2', 'alpha3')))
         {
             foreach($records as $record)
             {
-                $countries[$record->{$column}] = $record->name;
+                $list[$record->{$column}] = $record->name;
             }
         }
-        return $countries;
+        return $list;
     }
 
 	// --------------------------------------------------------------------
