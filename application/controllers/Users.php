@@ -3,9 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Users Controller
- * 
+ *
  * This controller falls under "Master Setup" category.
- *  
+ *
  * @category 	Master Setup
  */
 
@@ -15,7 +15,7 @@ class Users extends MY_Controller
 {
 	/**
 	 * Validation Rules
-	 * 
+	 *
 	 * @var array
 	 */
 	private $_rules = [
@@ -90,7 +90,7 @@ class Users extends MY_Controller
 		/**
 		 * Edit Basic Information
 		 */
-		'edit-basic' => [			
+		'edit-basic' => [
 			[
 				'field' => 'role_id',
 		        'label' => 'Application Role',
@@ -191,7 +191,7 @@ class Users extends MY_Controller
 		        '_type' 	=> 'text',
 		        '_required' => false
 			]
-		]	
+		]
 	];
 
 	/**
@@ -233,7 +233,7 @@ class Users extends MY_Controller
 	function __construct()
 	{
 		parent::__construct();
-		
+
 		// Only Admin Can access this controller
 		if( !$this->dx_auth->is_admin() )
 		{
@@ -241,15 +241,15 @@ class Users extends MY_Controller
 		}
 
 		// Form Validation
-		$this->load->library('Form_validation');				
-	
+		$this->load->library('Form_validation');
+
 		// Set Template for this controller
         $this->template->set_template('dashboard');
 
         // Basic Data
         $this->data['site_title'] = 'Master Setup | Users';
 
-        // Setup Navigation        
+        // Setup Navigation
 		$this->active_nav_primary([
 			'level_0' => 'master_setup',
 			'level_1' => 'security',
@@ -260,16 +260,16 @@ class Users extends MY_Controller
 		$this->load->model('user_model');
 
 		// Image Path
-        $this->_upload_path = MEDIAPATH . 'users/';  
+        $this->_upload_path = MEDIAPATH . 'users/';
 	}
-	
+
 	// --------------------------------------------------------------------
 
 	/**
 	 * Default Method
-	 * 
+	 *
 	 * Render the settings
-	 * 
+	 *
 	 * @return type
 	 */
 	function index()
@@ -279,15 +279,15 @@ class Users extends MY_Controller
 
 	/**
 	 * Paginate Data List
-	 * 
-	 * @param integer $next_id 
+	 *
+	 * @param integer $next_id
 	 * @return void
 	 */
 	function page( $next_id = 0, $refresh = FALSE )
 	{
 		// If request is coming from refresh method, reset nextid
 		$next_id = $refresh === FALSE ? (int)$next_id : 0;
-		
+
 		$params = array();
 		if( $next_id )
 		{
@@ -296,19 +296,19 @@ class Users extends MY_Controller
 
 		/**
 		 * Extract Filter Elements
-		 */	
-		$filter_data = $this->_get_filter_data( );	
+		 */
+		$filter_data = $this->_get_filter_data( );
 		if( $filter_data['status'] === 'success' )
 		{
 			$params = array_merge($params, $filter_data['data']);
 		}
-	
-		$records = $this->user_model->rows($params);		
+
+		$records = $this->user_model->rows($params);
 		$records = $records ? $records : [];
 		$total = count($records);
 
 		/**
-		 * Grab Next ID or Reset It 
+		 * Grab Next ID or Reset It
 		 */
 		if($total == $this->settings->per_page+1)
 		{
@@ -325,8 +325,8 @@ class Users extends MY_Controller
 			'next_id' => $next_id
 		];
 
-		if ( $this->input->is_ajax_request() ) 
-		{	
+		if ( $this->input->is_ajax_request() )
+		{
 
 			$view = $refresh === FALSE ? 'setup/users/_rows' : 'setup/users/_list';
 			$html = $this->load->view($view, $data, TRUE);
@@ -338,12 +338,12 @@ class Users extends MY_Controller
 
 		/**
 		 * Filter Configurations
-		 */		
+		 */
 		$data['filters'] = $this->_get_filter_elements();
 		$data['filter_url'] = site_url('users/filter/');
 
 		$this->template->partial(
-							'content_header', 
+							'content_header',
 							'setup/users/_index_header',
 							['content_header' => 'Manage Users'])
 						->partial('content', 'setup/users/_index', $data)
@@ -403,7 +403,7 @@ class Users extends MY_Controller
 				$rules = $this->_get_filter_elements();
 				$this->form_validation->set_rules($rules);
 				if( $this->form_validation->run() )
-				{	
+				{
 					$data['data'] = [
 						'role_id' => $this->input->post('filter_role') ?? NULL,
 						'branch_id' => $this->input->post('filter_branch') ?? NULL,
@@ -427,19 +427,19 @@ class Users extends MY_Controller
 
 	/**
 	 * Refresh The Module
-	 * 
+	 *
 	 * Simply reload the first page
-	 * 
+	 *
 	 * @return type
 	 */
 	function refresh()
 	{
-		$this->page(0, TRUE);		
+		$this->page(0, TRUE);
 	}
 
 	/**
 	 * Filter the Data
-	 * 
+	 *
 	 * @return type
 	 */
 	function filter()
@@ -451,15 +451,15 @@ class Users extends MY_Controller
 
 	/**
 	 * Edit User's Basic Information
-	 * 
-	 * @param integer $id 
+	 *
+	 * @param integer $id
 	 * @return void
 	 */
 	public function edit($id)
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->user_model->get($id);
+		$record = $this->user_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -484,7 +484,7 @@ class Users extends MY_Controller
 		$this->form_validation->set_rules($rules);
 		if( $this->input->post() && $this->form_validation->run() )
 		{
-			$data = $this->input->post();
+			// $data = $this->input->post();
 
 			$data = [
 				'role_id' => $this->input->post('role_id'),
@@ -518,7 +518,7 @@ class Users extends MY_Controller
 						//
 						// How to Work with success html?
 						// Jquery Method 	html|replaceWith|append|prepend etc.
-						// 
+						//
 						'method' 	=> 'replaceWith'
 					]
 				];
@@ -535,7 +535,7 @@ class Users extends MY_Controller
 				'hideBootbox' 	=> $status === 'success'
 			];
 			return $this->template->json($return_data);
-		}		
+		}
 
 		// required models
 		$this->load->model('role_model');
@@ -546,7 +546,7 @@ class Users extends MY_Controller
 		$json_data = [
 			'reloadForm' => true
 		];
-		$json_data['form'] = $this->load->view('setup/users/_form', 
+		$json_data['form'] = $this->load->view('setup/users/_form',
 			[
 				'form_title' 	=> 'Basic Information',
 				'action_url'	=> site_url('users/edit/'. $record->id),
@@ -559,7 +559,7 @@ class Users extends MY_Controller
 
 			], TRUE);
 
-		// Return HTML 
+		// Return HTML
 		$this->template->json($json_data);
 	}
 
@@ -567,15 +567,15 @@ class Users extends MY_Controller
 
 	/**
 	 * Change User's Password
-	 * 
-	 * @param integer $id 
+	 *
+	 * @param integer $id
 	 * @return void
 	 */
 	public function change_password($id)
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->user_model->get($id);
+		$record = $this->user_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -583,24 +583,10 @@ class Users extends MY_Controller
 
 		// Validation RUles
 		$rules = $this->_rules['change-password'];
-
-		/**
-		 * Update Validation Rule if Scope is branch
-		 */
-		$scope = $this->input->post('scope');
-		if($scope['scope'] === 'branch')
-		{
-			$rules[] = [
-				'field' => 'scope[list][]',
-				'label' => 'Branches',
-				'rules' => 'trim|required|integer',
-			];
-		}
-
 		$this->form_validation->set_rules($rules);
 		if( $this->input->post() && $this->form_validation->run() )
 		{
-			
+
 			// Success
 			$password = $this->input->post('password');
 
@@ -632,13 +618,13 @@ class Users extends MY_Controller
 				'hideBootbox' 	=> $status === 'success'
 			];
 			return $this->template->json($return_data);
-		}		
+		}
 
 		// No form Submitted?
 		$json_data = [
 			'reloadForm' => true
 		];
-		$json_data['form'] = $this->load->view('setup/users/_form', 
+		$json_data['form'] = $this->load->view('setup/users/_form',
 			[
 				'form_title' 	=> 'Change Password - ' . $record->username,
 				'action_url'	=> site_url('users/change_password/'. $record->id),
@@ -648,7 +634,7 @@ class Users extends MY_Controller
 
 			], TRUE);
 
-		// Return HTML 
+		// Return HTML
 		$this->template->json($json_data);
 	}
 
@@ -656,12 +642,12 @@ class Users extends MY_Controller
 
 	/**
 	 * Add a User
-	 * 
+	 *
 	 * 	Wizard Flow:
 	 * 		basic -> contact -> profile -> docs
-	 * 
+	 *
 	 * This is the first wizard method to add user.
-	 * 
+	 *
 	 * @return void
 	 */
 	public function add()
@@ -705,7 +691,7 @@ class Users extends MY_Controller
 				unset($data['scope']['list']);
 			}
 			$data['scope'] = json_encode($data['scope']);
-			
+
 			// Let's Create/Register the User
 			$user_id = $this->dx_auth->register($username, $password, $email, $data);
 
@@ -723,14 +709,14 @@ class Users extends MY_Controller
 			}
 		}
 
-		
-		// No form Submitted?	
+
+		// No form Submitted?
 
 		// required models
-		$this->load->model('role_model');	
+		$this->load->model('role_model');
 		$this->load->model('branch_model');
 		$this->load->model('department_model');
-		$json_data['form'] = $this->load->view('setup/users/_form', 
+		$json_data['form'] = $this->load->view('setup/users/_form',
 			[
 				'form_title' 	=> 'Basic Information',
 				'action_url'	=> site_url('users/add/'),
@@ -742,7 +728,7 @@ class Users extends MY_Controller
 				'departments'	=> $this->department_model->dropdown()
 			], TRUE);
 
-		// Return HTML 
+		// Return HTML
 		$this->template->json($json_data);
 	}
 
@@ -750,21 +736,21 @@ class Users extends MY_Controller
 
 	/**
 	 * Update User's Contact
-	 * 
-	 * Supports wizard on User Creation. When user is created first time and 
+	 *
+	 * Supports wizard on User Creation. When user is created first time and
 	 * contact wizard is loaded for the first time, we show some toastr message
 	 * and reload the user list on the background
-	 * 
-	 * @param integer $id 
-	 * @param bool $next_wizard 
-	 * @param bool $first_time 
+	 *
+	 * @param integer $id
+	 * @param bool $next_wizard
+	 * @param bool $first_time
 	 * @return void
 	 */
 	public function update_contact($id, $next_wizard = FALSE, $first_time = FALSE)
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->user_model->get($id);
+		$record = $this->user_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -774,7 +760,7 @@ class Users extends MY_Controller
 		if($next_wizard)
 		{
 			return $this->_load_contact_form($record, TRUE, $first_time);
-		}		
+		}
 
 		/**
 		 * Perform Validation
@@ -814,32 +800,32 @@ class Users extends MY_Controller
 			];
 			return $this->template->json($return_data);
 		}
-		
+
 
 		// Update next_wizard if we have form validation failed
 		$next_wizard = $this->input->post('next_wizard');
-		
-		// Load Form		
+
+		// Load Form
 		$this->_load_contact_form($record, $next_wizard);
-		
+
 	}
 		/**
 		 * Sub-function to load Contact Form for update_contact function
-		 * 
-		 * @param object $record 
-		 * @param bool $next_wizard 
-		 * @param tbool $first_time 
+		 *
+		 * @param object $record
+		 * @param bool $next_wizard
+		 * @param tbool $first_time
 		 * @return void
 		 */
 		private function _load_contact_form($record, $next_wizard = FALSE, $first_time = FALSE)
 		{
 			// If it is loaded for the first time, its coming from add function
-			// in this case, we have to insert the user list in our list table
+			// in this case, we simply refresh the data table
 			$first_time_data = [];
 			if($first_time)
 			{
-				$records = $this->user_model->all();
-				$list_html = $this->load->view('setup/users/_list', 
+				$records = $this->user_model->rows();
+				$list_html = $this->load->view('setup/users/_list',
 					['records' => $records, 'next_id' => NULL], TRUE);
 
 				$first_time_data = [
@@ -858,15 +844,15 @@ class Users extends MY_Controller
 
 			$json_data = $first_time_data + [
 				'reloadForm' => true,
-				'form' => $this->load->view('setup/users/_form_contact', 
+				'form' => $this->load->view('setup/users/_form_contact',
 											[
 												'action_url'	=> site_url('users/update_contact/' . $record->id),
 												'record' => $record,
 												'next_wizard' 	=> $next_wizard
 											], TRUE)
 			];
-			
-			// Return HTML 
+
+			// Return HTML
 			$this->template->json($json_data);
 		}
 
@@ -874,31 +860,31 @@ class Users extends MY_Controller
 
 	/**
 	 * Update User's Profile
-	 * 
+	 *
 	 * Supports wizard on user creation.
-	 * 
-	 * @param integer $id 
-	 * @param bool $next_wizard 
+	 *
+	 * @param integer $id
+	 * @param bool $next_wizard
 	 * @return void
-	 */	
+	 */
 	public function update_profile($id, $next_wizard = FALSE)
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->user_model->get($id);
+		$record = $this->user_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
 		}
 
 		// Load media helper
-		$this->load->helper('insqube_media');  
-		
+		$this->load->helper('insqube_media');
+
 		// If called from Previous Wizard Form, Load form
 		if($next_wizard)
 		{
 			$this->_load_profile_form($record, TRUE);
-		}		
+		}
 
 		/**
 		 * Perform Validation
@@ -913,8 +899,8 @@ class Users extends MY_Controller
 
 			/**
 			 * Upload Image If any?
-			 */   
-			$upload_result 	= $this->_upload_profile_picture($picture);   
+			 */
+			$upload_result 	= $this->_upload_profile_picture($picture);
 			$status 		= $upload_result['status'];
 			$message 		= $upload_result['message'];
 			$files 			= $upload_result['files'];
@@ -930,7 +916,7 @@ class Users extends MY_Controller
             	$data['profile']['picture'] = $picture;
 
 				$data['profile'] = json_encode($data['profile']);
-				
+
 				// Let's update profile
 				if($this->user_model->update_profile($id, $data))
 				{
@@ -953,15 +939,15 @@ class Users extends MY_Controller
 
 		// Update next_wizard if we have form validation failed
 		$next_wizard = $this->input->post('next_wizard');
-		
-		// Load Form		
+
+		// Load Form
 		$this->_load_profile_form($record, $next_wizard);
-		
+
 	}
 		/**
 		 * Sub-function: Upload Profile Picture
-		 * 
-		 * @param string|null $old_picture 
+		 *
+		 * @param string|null $old_picture
 		 * @return array
 		 */
 		private function _upload_profile_picture( $old_picture = NULL )
@@ -986,9 +972,9 @@ class Users extends MY_Controller
 
 		/**
 		 * Sub-function to load Profile Form for update_profile function
-		 * 
-		 * @param object $record 
-		 * @param bool $next_wizard 
+		 *
+		 * @param object $record
+		 * @param bool $next_wizard
 		 * @return void
 		 */
 		private function _load_profile_form($record, $next_wizard = FALSE)
@@ -998,7 +984,7 @@ class Users extends MY_Controller
 
 			$json_data = [
 				'reloadForm' => true,
-				'form' => $this->load->view('setup/users/_form_profile', 
+				'form' => $this->load->view('setup/users/_form_profile',
 											[
 												'form_title' 	=> 'User Profile',
 												'action_url'	=> site_url('users/update_profile/' . $record->id),
@@ -1008,17 +994,17 @@ class Users extends MY_Controller
 												'next_wizard' 	=> $next_wizard
 											], TRUE)
 			];
-			
-			// Return HTML 
+
+			// Return HTML
 			$this->template->json($json_data);
 		}
 
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Callback: Check Username
-	 * 
-	 * @param string $username 
+	 *
+	 * @param string $username
 	 * @return bool
 	 */
 	function username_check($username)
@@ -1031,7 +1017,7 @@ class Users extends MY_Controller
 		{
 			$this->form_validation->set_message('username_check', 'Username already exist. Please choose another username.');
 		}
-				
+
 		return $result;
 	}
 
@@ -1039,8 +1025,8 @@ class Users extends MY_Controller
 
 	/**
 	 * Callback: Check Email
-	 * 
-	 * @param email $email 
+	 *
+	 * @param email $email
 	 * @return bool
 	 */
 	function email_check($email)
@@ -1053,7 +1039,7 @@ class Users extends MY_Controller
 		{
 			$this->form_validation->set_message('email_check', 'Email is already used by another user. Please choose another email address.');
 		}
-				
+
 		return $result;
 	}
 
@@ -1061,15 +1047,15 @@ class Users extends MY_Controller
 
 	/**
 	 * Delete a User
-	 * 
-	 * @param integer $id 
+	 *
+	 * @param integer $id
 	 * @return json
 	 */
 	public function delete($id)
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->user_model->get($id);
+		$record = $this->user_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -1091,6 +1077,18 @@ class Users extends MY_Controller
 		$done = $this->user_model->delete_user($record->id);
 		if($done)
 		{
+			/**
+			 * Delete Media if any
+			 */
+			$profile = $record->profile ? json_decode($record->profile) : NULL;
+			if(isset($profile->picture) && $profile->picture != '' )
+			{
+				// Load media helper
+				$this->load->helper('insqube_media');
+
+				delete_insqube_document($this->_upload_path . $profile->picture);
+			}
+
 			$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
@@ -1113,8 +1111,8 @@ class Users extends MY_Controller
 
 	/**
 	 * Ban a User
-	 * 
-	 * @param integer $id 
+	 *
+	 * @param integer $id
 	 * @return json
 	 */
 	public function ban($id)
@@ -1124,8 +1122,8 @@ class Users extends MY_Controller
 
 	/**
 	 * UnBan a User
-	 * 
-	 * @param integer $id 
+	 *
+	 * @param integer $id
 	 * @return json
 	 */
 	public function unban($id)
@@ -1137,7 +1135,7 @@ class Users extends MY_Controller
 		{
 			// Valid Record ?
 			$id = (int)$id;
-			$record = $this->user_model->get($id);
+			$record = $this->user_model->find($id);
 			if(!$record)
 			{
 				$this->template->render_404();
@@ -1164,10 +1162,10 @@ class Users extends MY_Controller
 				$done = $this->user_model->unban_user($record->id);
 			}
 
-			
+
 			if($done)
 			{
-				$record = $this->user_model->row($id);				
+				$record = $this->user_model->row($id);
 				$data = [
 					'status' 	=> 'success',
 					'message' 	=> "Successfully performed the action ($action)!",
@@ -1191,8 +1189,8 @@ class Users extends MY_Controller
 
     /**
      * View User Details
-     * 
-     * @param integer $id 
+     *
+     * @param integer $id
      * @return void
      */
     public function details($id)
@@ -1204,10 +1202,10 @@ class Users extends MY_Controller
 			$this->template->render_404();
 		}
 		// Load media helper
-		$this->load->helper('insqube_media');  
+		$this->load->helper('insqube_media');
 		$this->data['site_title'] = 'User Details | ' . $record->username;
 		$this->template->partial(
-							'content_header', 
+							'content_header',
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'User Details <small>' . $record->username . '</small>',
@@ -1218,5 +1216,5 @@ class Users extends MY_Controller
 
     }
 
-	// --------------------------------------------------------------------    
+	// --------------------------------------------------------------------
 }

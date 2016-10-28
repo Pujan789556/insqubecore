@@ -1,26 +1,26 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class User_model extends MY_Model 
+class User_model extends MY_Model
 {
-	public $table; // you MUST mention the table name
 
-    public $primary_key = 'id'; // you MUST mention the primary key
+	// protected $table_name = 'auth_users';
 
-    public $fillable = [	
-    	// If you want, you can set an array with the fields that can be filled by insert/update
-    	'role_id', 'branch_id', 'department_id', 'username', 'password', 'email', 'scope', 'contact', 'profile', 'docs', 
-    	'banned', 'ban_reason', 'newpass', 'newpass_key', 'newpass_time', 'last_ip', 'last_login'
-    ]; 
+    protected $set_created = true;
 
-    public $protected = ['id']; // ...Or you can set an array with the fields that cannot be filled by insert/update
+    protected $set_modified = true;
 
-    /**
-     * Delete cache on save
-     * 
-     * @var boolean
-     */
-    public $delete_cache_on_save = TRUE;
+    protected $log_user = true;
+
+    protected $protected_attributes = ['id'];
+
+    protected $after_insert  = ['clear_cache'];
+    protected $after_update  = ['clear_cache'];
+    protected $after_delete  = ['clear_cache'];
+
+
+    protected $fields = ["id", "role_id", "branch_id", "department_id", "username", "password", "email", "scope", "contact", "profile", "docs", "banned", "ban_reason", "newpass", "newpass_key", "newpass_time", "last_ip", "last_login", "created_at", "created_by", "updated_at", "updated_by"];
+
 
     /**
      * Protect Default Records?
@@ -34,35 +34,27 @@ class User_model extends MY_Model
 	{
 		// Other stuff
 		$this->_prefix = $this->config->item('DX_table_prefix');
-		$this->table = $this->_prefix.$this->config->item('DX_users_table');
+		$this->table_name = $this->_prefix.$this->config->item('DX_users_table');
 
 		$this->_roles_table = $this->_prefix.$this->config->item('DX_roles_table');
 
 		parent::__construct();
-
-		// After Create Callback
-        $this->after_create[] = 'log_activity';
-
-        // User Relationship
-        $this->has_one['role'] = array('local_key'=>'role_id', 'foreign_key'=>'id', 'foreign_model'=>'Role_model');
-        $this->has_one['branch'] = array('local_key'=>'branch_id', 'foreign_key'=>'id', 'foreign_model'=>'Branch_model');
-        $this->has_one['department'] = array('local_key'=>'department_id', 'foreign_key'=>'id', 'foreign_model'=>'Department_model');
 	}
 
 	// ----------------------------------------------------------------
 
 	/**
 	 * Get Data Rows
-	 * 
+	 *
 	 * For data listing purpose
-	 * 
-	 * @param type|array $params 
+	 *
+	 * @param type|array $params
 	 * @return type
 	 */
 	public function rows($params = array())
     {
     	$this->db->select('U.id, U.username, U.banned, U.profile, R.name as role_name, B.name as branch_name, D.name as department_name')
-    			 ->from($this->table . ' as U')
+    			 ->from($this->table_name . ' as U')
     			 ->join('auth_roles R', 'U.role_id = R.id')
     			 ->join('master_branches B', 'U.branch_id = B.id')
     			 ->join('master_departments D', 'U.department_id = D.id');
@@ -70,8 +62,6 @@ class User_model extends MY_Model
 
         if(!empty($params))
         {
-            // $this->where($params);
-
             $next_id = $params['next_id'] ?? NULL;
             if( $next_id )
             {
@@ -99,7 +89,7 @@ class User_model extends MY_Model
             $keywords = $params['keywords'] ?? '';
             if( $keywords )
             {
-            	$this->db->like('U.username', $keywords, 'after');  
+            	$this->db->like('U.username', $keywords, 'after');
             }
         }
         return $this->db->limit($this->settings->per_page+1)
@@ -110,14 +100,14 @@ class User_model extends MY_Model
 
     /**
      * Single Row on Basic Information Edit
-     * 
-     * @param int $id 
+     *
+     * @param int $id
      * @return object
      */
 	public function row($id)
     {
     	$this->db->select('U.id, U.username, U.banned, U.profile, R.name as role_name, B.name as branch_name, D.name as department_name')
-    			 ->from($this->table . ' as U')
+    			 ->from($this->table_name . ' as U')
     			 ->join('auth_roles R', 'U.role_id = R.id')
     			 ->join('master_branches B', 'U.branch_id = B.id')
     			 ->join('master_departments D', 'U.department_id = D.id');
@@ -130,17 +120,20 @@ class User_model extends MY_Model
 
     /**
      * Get Details of a Single Record
-     * 
-     * @param int $id 
+     *
+     * @param int $id
      * @return object
      */
 	public function details($id)
     {
-		return $this->with_role('fields:name')	
-					->with_branch('fields:name')
-					->with_department('fields:name')
-					->limit($this->settings->per_page+1)
-					->get(['id' => $id]);
+    	$this->db->select('U.id, U.username, U.banned, U.profile, U.contact, R.name as role_name, B.name as branch_name, D.name as department_name')
+    			 ->from($this->table_name . ' as U')
+    			 ->join('auth_roles R', 'U.role_id = R.id')
+    			 ->join('master_branches B', 'U.branch_id = B.id')
+    			 ->join('master_departments D', 'U.department_id = D.id');
+
+        return $this->db->where('U.id', $id)
+                    ->get()->row();
     }
 
     // ----------------------------------------------------------------
@@ -148,19 +141,16 @@ class User_model extends MY_Model
 	/**
      * Delete Cache on Update
      */
-    public function _prep_after_write()
+    public function clear_cache()
     {
     	$cache_names = [
             'auth_users_all'
         ];
-    	if($this->delete_cache_on_save === TRUE)
+    	// cache name without prefix
+        foreach($cache_names as $cache)
         {
-        	// cache name without prefix
-            foreach($cache_names as $cache)
-            {
-                $this->delete_cache($cache);     
-            }
-        }       
+            $this->delete_cache($cache);
+        }
         return TRUE;
     }
 
@@ -168,62 +158,62 @@ class User_model extends MY_Model
 
 
 	// General function
-	
+
 	// function get_all($offset = 0, $row_count = 0)
 	// {
-	// 	$users_table = $this->table;
+	// 	$users_table = $this->table_name;
 	// 	$roles_table = $this->_roles_table;
-		
+
 	// 	if ($offset >= 0 AND $row_count > 0)
 	// 	{
 	// 		$this->db->select("$users_table.*", FALSE);
 	// 		$this->db->select("$roles_table.name AS role_name", FALSE);
 	// 		$this->db->join($roles_table, "$roles_table.id = $users_table.role_id");
 	// 		$this->db->order_by("$users_table.id", "ASC");
-			
-	// 		$query = $this->db->get($this->table, $row_count, $offset); 
+
+	// 		$query = $this->db->get($this->table_name, $row_count, $offset);
 	// 	}
 	// 	else
 	// 	{
-	// 		$query = $this->db->get($this->table);
+	// 		$query = $this->db->get($this->table_name);
 	// 	}
-		
+
 	// 	return $query;
 	// }
 
 	function get_user_by_id($user_id)
 	{
 		$this->db->where('id', $user_id);
-		return $this->db->get($this->table);
+		return $this->db->get($this->table_name);
 	}
 
 	function get_user_by_username($username)
 	{
 		$this->db->where('username', $username);
-		return $this->db->get($this->table);
+		return $this->db->get($this->table_name);
 	}
-	
+
 	function get_user_by_email($email)
 	{
 		$this->db->where('email', $email);
-		return $this->db->get($this->table);
+		return $this->db->get($this->table_name);
 	}
-	
+
 	function get_login($login)
 	{
 		$this->db->where('username', $login);
 		$this->db->or_where('email', $login);
-		return $this->db->get($this->table);
+		return $this->db->get($this->table_name);
 	}
-	
+
 	function check_ban($user_id)
 	{
 		$this->db->select('1', FALSE);
 		$this->db->where('id', $user_id);
 		$this->db->where('banned', '1');
-		return $this->db->get($this->table);
+		return $this->db->get($this->table_name);
 	}
-	
+
 	function check_username($username, $id=NULL)
 	{
 		$this->db->select('1', FALSE);
@@ -234,7 +224,7 @@ class User_model extends MY_Model
 		{
 			$this->db->where('id !=', $id);
 		}
-		return $this->db->get($this->table);
+		return $this->db->get($this->table_name);
 	}
 
 	function check_email($email, $id=NULL)
@@ -247,41 +237,40 @@ class User_model extends MY_Model
 		{
 			$this->db->where('id !=', $id);
 		}
-		return $this->db->get($this->table);
+		return $this->db->get($this->table_name);
 	}
-		
+
 	function ban_user($id, $reason = NULL)
 	{
 		$id = intval($id);
         if( !safe_to_delete( get_class(), $id ) )
         {
             return FALSE;
-        } 
+        }
 
 		$data = array(
 			'banned' 			=> 1,
 			'ban_reason' 	=> $reason
 		);
-		return $this->update($data, $id) && $this->log_activity($id, 'X');
-		// return $this->set_user($user_id, $data);
+		return $this->update($id, $data, TRUE) && $this->log_activity($id, 'X');
 	}
-	
+
 	function unban_user($id)
 	{
 		$id = intval($id);
         if( !safe_to_delete( get_class(), $id ) )
         {
             return FALSE;
-        } 
+        }
 
 		$data = array(
 			'banned' 			=> 0,
 			'ban_reason' 	=> NULL
 		);
-		return $this->update($data, $id) && $this->log_activity($id, 'U');
+		return $this->update($id, $data, TRUE) && $this->log_activity($id, 'U');
 		// return $this->set_user($user_id, $data);
 	}
-		
+
 	function set_role($user_id, $role_id)
 	{
 		$data = array(
@@ -294,30 +283,23 @@ class User_model extends MY_Model
 
 	function create_user($data)
 	{
-		// echo '<pre>'; print_r($data);exit;
-		return $this->insert($data);
+		return $this->insert($data, TRUE);
 	}
 
 	function get_user_field($user_id, $fields)
 	{
 		$this->db->select($fields);
 		$this->db->where('id', $user_id);
-		return $this->db->get($this->table);
+		return $this->db->get($this->table_name);
 	}
 
 	function set_user($user_id, $data)
 	{
 		$this->db->where('id', $user_id);
-		return $this->db->update($this->table, $data);
+		return $this->db->update($this->table_name, $data);
 	}
-	
-	// function delete_user($user_id)
-	// {
-	// 	$this->db->where('id', $user_id);
-	// 	$this->db->delete($this->table);
-	// 	return $this->db->affected_rows() > 0;
-	// }
-	
+
+
 	// Forgot password function
 
 	function newpass($user_id, $pass, $key)
@@ -338,8 +320,8 @@ class User_model extends MY_Model
 		$this->db->set('newpass_time', NULL);
 		$this->db->where('id', $user_id);
 		$this->db->where('newpass_key', $key);
-		
-		return $this->db->update($this->table);
+
+		return $this->db->update($this->table_name);
 	}
 
 	function clear_newpass($user_id)
@@ -351,30 +333,30 @@ class User_model extends MY_Model
 		);
 		return $this->set_user($user_id, $data);
 	}
-	
+
 	// Change password function
 
 	function change_password($user_id, $new_pass)
 	{
 		$this->db->set('password', $new_pass);
 		$this->db->where('id', $user_id);
-		return $this->db->update($this->table) && $this->log_activity($user_id, 'H');;
+		return $this->db->update($this->table_name) && $this->log_activity($user_id, 'H');;
 	}
 
 	// ----------------------------------------------------------------
-    
+
     /**
      * Log Activity
-     * 
+     *
      * Log activities
      *      Available Activities: Create|Edit|Delete
-     * 
-     * @param integer $id 
-     * @param string $action 
+     *
+     * @param integer $id
+     * @param string $action
      * @return bool
      */
     public function log_activity($id, $action = 'C')
-    {        
+    {
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
@@ -382,15 +364,15 @@ class User_model extends MY_Model
             'module_id' => $id,
             'action' => $action
         ];
-        return $this->activity->save($activity_log);     
+        return $this->activity->save($activity_log);
     }
 
     // ----------------------------------------------------------------
-	
+
 	/**
 	 * Delete User
-	 * 
-	 * @param integer|null $id 
+	 *
+	 * @param integer|null $id
 	 * @return bool
 	 */
 	public function delete_user($id = NULL)
@@ -399,7 +381,7 @@ class User_model extends MY_Model
         if( !safe_to_delete( get_class(), $id ) )
         {
             return FALSE;
-        } 
+        }
 
 		// Disable DB Debug for transaction to work
 		$this->db->db_debug = FALSE;
@@ -408,7 +390,7 @@ class User_model extends MY_Model
 
 		// Use automatic transaction
 		$this->db->trans_start();
-			
+
 			parent::delete($id);
 
 		$this->db->trans_complete();
@@ -428,48 +410,48 @@ class User_model extends MY_Model
 
 		// return result/status
 		return $status;
-	}	
+	}
 
      // ----------------------------------------------------------------
 
     /**
      * Update User's Basic Information
-     * 
-     * @param integer $id 
-     * @param array $data 
+     *
+     * @param integer $id
+     * @param array $data
      * @return bool
      */
-    public function update_basic($id, $data)
+    public function update_basic($id, $data, $skip_validation=TRUE)
     {
-    	return $this->update($data, $id) && $this->log_activity($id, 'B');
+    	return $this->update($id, $data,  $skip_validation) && $this->log_activity($id, 'B');
     }
 
     // ----------------------------------------------------------------
 
     /**
      * Update User's Contact
-     * 
-     * @param integer $id 
-     * @param array $data 
+     *
+     * @param integer $id
+     * @param array $data
      * @return bool
      */
-    public function update_contact($id, $data)
+    public function update_contact($id, $data, $skip_validation=TRUE)
     {
-    	return $this->update($data, $id) && $this->log_activity($id, 'T');
+    	return $this->update($id, $data, $skip_validation) && $this->log_activity($id, 'T');
     }
 
     // ----------------------------------------------------------------
-    
+
     /**
      * Update User's Profile
-     * 
-     * @param integer $id 
-     * @param array $data 
+     *
+     * @param integer $id
+     * @param array $data
      * @return bool
      */
-    public function update_profile($id, $data)
+    public function update_profile($id, $data, $skip_validation=TRUE)
     {
-    	return $this->update($data, $id) && $this->log_activity($id, 'P');
+    	return $this->update($id, $data, $skip_validation) && $this->log_activity($id, 'P');
     }
-	
+
 }
