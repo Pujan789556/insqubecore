@@ -35,6 +35,70 @@ class Fiscal_year_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Get Current Fiscal Year
+     *
+     * Get the current fiscal year based on the date today.
+     * We cache the data for a 6 hours. On every six hours, it is refreshed
+     * automatically on the next call.
+     *
+     * @param void
+     * @return object
+     */
+    public function get_current_fiscal_year( $today = NULL )
+    {
+        $record = NULL;
+
+        /**
+         * Caching Strategy
+         *
+         * On a new day start, we add anohter cache variable to tell that this is a new
+         * cache for the next day for the first quarter of the day.
+         * Any request to this method will first check the existance of this variable.
+         * If no variable is found, a fresh cache is created along with this variable.
+         *
+         * For other quarters, we don't need this monitoring variable.
+         */
+        $hour = (int)date('H');
+        if( $hour <= 6 )
+        {
+            // Check for monotoring Variable
+            $flag_fresh_fiscal_yr = $this->get_cache('flag_fresh_fiscal_yr');
+            if( !$flag_fresh_fiscal_yr )
+            {
+                // Delete cache first
+                $this->delete_cache('fiscal_yr_current');
+
+                // Get the record and set cache
+                $record = $this->_get_current_fiscal_year($today);
+                $this->write_cache($record, 'fiscal_yr_current', CACHE_DURATION_6HRS);
+                $this->write_cache('y', 'flag_fresh_fiscal_yr', CACHE_DURATION_6HRS);
+            }
+
+        }
+
+        /**
+         * Regular Case
+         * Get Cached Result, If no, cache the query result
+         */
+        if(!$record)
+        {
+            $record = $this->_get_current_fiscal_year($today);
+            $this->write_cache($record, 'fiscal_yr_current', CACHE_DURATION_6HRS);
+        }
+        return $record;
+    }
+        private function _get_current_fiscal_year( $today = NULL )
+        {
+            $today = $today ?? date('Y-m-d');
+            return $this->db->from($this->table_name)
+                            ->where('starts_at_en <=', $today)
+                            ->where('ends_at_en >=', $today)
+                            ->get()->row();
+        }
+
+    // ----------------------------------------------------------------
+
     public function get_all()
     {
         /**

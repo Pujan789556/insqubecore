@@ -29,6 +29,13 @@ class MY_Controller extends CI_Controller
 	 */
 	public $settings;
 
+	/**
+	 * Application's Current Fiscal Year from DB
+	 *
+	 * @var object
+	 */
+	public $current_fiscal_year;
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -58,6 +65,7 @@ class MY_Controller extends CI_Controller
 		 */
 		$this->load->model('setting_model');
 		$this->_app_settings();
+		$this->_app_fiscal_year();
 	}
 
 	// --------------------------------------------------------------------
@@ -122,6 +130,22 @@ class MY_Controller extends CI_Controller
          * Get Cached Result, If no, cache the query result
          */
         $this->settings = $this->setting_model->get(['id' => 1]);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set Current Fiscal Year From DB
+	 *
+	 * @return void
+	 */
+	private function _app_fiscal_year()
+	{
+		/**
+         * Get Cached Result, If no, cache the query result
+         */
+		$this->load->model('fiscal_year_model');
+        $this->current_fiscal_year = $this->fiscal_year_model->get_current_fiscal_year();
 	}
 
 
