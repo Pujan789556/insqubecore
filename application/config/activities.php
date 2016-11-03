@@ -26,7 +26,7 @@ $config['insqb_activity_types'] = [
 		'_table' => 'master_agents',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited', 
+			'E' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -38,7 +38,19 @@ $config['insqb_activity_types'] = [
 		'_table' => 'master_branches',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited', 
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
+	/**
+	 * Activities related to Branches
+	 */
+	'branch_target' => [
+		'_uri' => 'branches/targets/',
+		'_table' => 'master_branch_targets',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -50,7 +62,7 @@ $config['insqb_activity_types'] = [
 		'_table' => 'master_companies',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited', 
+			'E' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -61,7 +73,7 @@ $config['insqb_activity_types'] = [
 		'_uri' => 'countries/',
 		'_table' => 'master_countries',
 		'_actions' => [
-			'E' => 'edited' 
+			'E' => 'edited'
 	]],
 
 	/**
@@ -72,7 +84,7 @@ $config['insqb_activity_types'] = [
 		'_table' => 'master_departments',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited', 
+			'E' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -83,7 +95,7 @@ $config['insqb_activity_types'] = [
 		'_uri' => 'districts/',
 		'_table' => 'master_districts',
 		'_actions' => [
-			'E' => 'edited' 
+			'E' => 'edited'
 	]],
 
 	/**
@@ -94,7 +106,7 @@ $config['insqb_activity_types'] = [
 		'_table' => 'auth_roles',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited', 
+			'E' => 'edited',
 			'D' => 'deleted',
 			'A' => 'assigned',  // assigned <role> to <user>
 			'P' => 'updated permissions to ',  // assigned permission to <role>
@@ -108,7 +120,7 @@ $config['insqb_activity_types'] = [
 		'_uri' => 'settings/',
 		'_table' => 'master_settings',
 		'_actions' => [
-			'E' => 'edited' 
+			'E' => 'edited'
 	]],
 
 	/**
@@ -119,7 +131,7 @@ $config['insqb_activity_types'] = [
 		'_table' => 'master_surveyors',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited', 
+			'E' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -131,7 +143,7 @@ $config['insqb_activity_types'] = [
 		'_table' => 'auth_users',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited', 
+			'E' => 'edited',
 			'D' => 'deleted',
 			'A' => 'assigned',  // assigned <role> to <user>
 			'B' => 'updated basdic information', // of <user>
@@ -142,6 +154,6 @@ $config['insqb_activity_types'] = [
 			'X' => 'banned', // banned <user>
 			'U' => 'unbanned' // unbanned <user>
 	]],
-	
+
 ];
 

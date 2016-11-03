@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class MY_Form_validation extends CI_Form_validation {
 
-	
+
 
 	/**
 	 * Initialize Form_Validation class
@@ -32,7 +32,7 @@ class MY_Form_validation extends CI_Form_validation {
 
 	/**
 	 * Valid Date
-	 * 
+	 *
 	 * 	Format: yyyy-mm-dd
 	 *
 	 * @param	string
@@ -52,7 +52,7 @@ class MY_Form_validation extends CI_Form_validation {
 
 	/**
 	 * Valid Time
-	 * 
+	 *
 	 * 	Format: H:i:s
 	 *
 	 * @param	string
@@ -72,7 +72,7 @@ class MY_Form_validation extends CI_Form_validation {
 
 	/**
 	 * Valid Datetme
-	 * 
+	 *
 	 * 	Format: yyyy-mm-dd hh:mm:ss
 	 *
 	 * @param	string
@@ -85,9 +85,27 @@ class MY_Form_validation extends CI_Form_validation {
 		{
 			$date = $date_time[0];
 			$time = $date_time[1];
-			
+
 			return ($this->valid_date($date) && $this->valid_time($time)) ? TRUE : FALSE;
-		}		
+		}
 		return FALSE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Prep Decimal
+	 *
+	 * @param	string
+	 * @return	string
+	 */
+	public function prep_decimal($str = '')
+	{
+		if( is_float($str) )
+		{
+			return $str;
+		}
+		$str = number_format($str, 2, '.', '');
+		return $str;
 	}
 }

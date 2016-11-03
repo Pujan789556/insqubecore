@@ -113,6 +113,22 @@ class Fiscal_year_model extends MY_Model
         return $list;
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Dropdown List
+     */
+    public function dropdown()
+    {
+        $records = $this->get_all();
+        $list = [];
+        foreach($records as $record)
+        {
+            $list["{$record->id}"] = $record->code_np . " ({$record->code_en})";
+        }
+        return $list;
+    }
+
     // ----------------------------------------------------------------
 
     public function check_duplicate($where, $id=NULL)
@@ -134,10 +150,14 @@ class Fiscal_year_model extends MY_Model
      */
     public function clear_cache()
     {
-    	if($this->delete_cache_on_save === TRUE)
+    	$cache_names = [
+            'fiscal_yrs_all',
+            'fiscal_yr_current'
+        ];
+        // cache name without prefix
+        foreach($cache_names as $cache)
         {
-        	// cache name without prefix
-        	$this->delete_cache('fiscal_yrs_all');
+            $this->delete_cache($cache);
         }
         return TRUE;
     }

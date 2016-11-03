@@ -10,7 +10,7 @@
 $nav_level_0      = $_nav_primary['level_0'];
 $nav_level_1      = $_nav_primary['level_1'];
 $nav_level_2      = isset($_nav_primary['level_2']) ? $_nav_primary['level_2'] : NULL;
-
+$nav_level_3      = isset($_nav_primary['level_3']) ? $_nav_primary['level_3'] : NULL;
 ?>
 <!-- sidebar: style can be found in sidebar.less -->
 <section class="sidebar">
@@ -26,7 +26,7 @@ $nav_level_2      = isset($_nav_primary['level_2']) ? $_nav_primary['level_2'] :
             </div>
       </div>
       <!-- search form -->
-      
+
       <form action="#" method="get" class="sidebar-form">
             <div class="input-group">
                   <input type="text" name="q" class="form-control" placeholder="Search...">
@@ -72,9 +72,24 @@ $nav_level_2      = isset($_nav_primary['level_2']) ? $_nav_primary['level_2'] :
                                           <li class="<?php echo set_menu_active($nav_level_2, 'surveyors');?>"><a href="<?php echo site_url('surveyors');?>"><i class="fa fa-circle-o"></i> Surveyors</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'fiscal_years');?>"><a href="<?php echo site_url('fiscal_years');?>"><i class="fa fa-circle-o"></i> Fiscal Years</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'departments');?>"><a href="<?php echo site_url('departments');?>"><i class="fa fa-circle-o"></i> Departments</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'countries');?>"><a href="<?php echo site_url('countries');?>"><i class="fa fa-globe"></i> Countries</a></li> 
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'countries');?>"><a href="<?php echo site_url('countries');?>"><i class="fa fa-globe"></i> Countries</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'districts');?>"><a href="<?php echo site_url('districts');?>"><i class="fa fa-circle-o"></i> Districts</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'branches');?>"><a href="<?php echo site_url('branches');?>"><i class="fa fa-circle-o"></i> Branches</a></li>    
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'branches');?>">
+                                                <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Branches
+                                                      <span class="pull-right-container">
+                                                            <i class="fa fa-angle-left pull-right"></i>
+                                                      </span>
+                                                </a>
+                                                <ul class="treeview-menu">
+                                                      <li class="<?php echo set_menu_active($nav_level_3, 'index');?>">
+                                                            <a href="<?php echo site_url('branches');?>" title="Manage Branches">
+                                                                  <i class="fa fa-circle-o"></i> Manage Branches</a>
+                                                      </li>
+                                                      <li class="<?php echo set_menu_active($nav_level_3, 'targets');?>">
+                                                            <a href="<?php echo site_url('branches/targets');?>" title="Manage branch-wise targets"><i class="fa fa-circle-o"></i> Targets</a>
+                                                      </li>
+                                                </ul>
+                                          </li>
                                     </ul>
                               </li>
 
@@ -86,7 +101,7 @@ $nav_level_2      = isset($_nav_primary['level_2']) ? $_nav_primary['level_2'] :
                                     </a>
                                     <ul class="treeview-menu">
                                           <li class="<?php echo set_menu_active($nav_level_2, 'roles');?>"><a href="<?php echo site_url('roles');?>"><i class="fa fa-lock"></i> Roles &amp; Permissions</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'users');?>"><a href="<?php echo site_url('users');?>"><i class="fa fa-users"></i> Users</a></li>    
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'users');?>"><a href="<?php echo site_url('users');?>"><i class="fa fa-users"></i> Users</a></li>
                                     </ul>
                               </li>
                         </ul>

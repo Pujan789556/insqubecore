@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // --------------------------------------------------------------
 
 /**
- * Check if this is current Fiscal Year
+ * Check if this is Current Fiscal Year
  */
 $flag_current_fiscal_year = $this->current_fiscal_year->starts_at_en == $record->starts_at_en && $this->current_fiscal_year->ends_at_en == $record->ends_at_en;
 

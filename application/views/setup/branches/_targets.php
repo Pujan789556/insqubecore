@@ -18,10 +18,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						?>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
-						<a href="#" title="Add new role"
+						<a href="#" title="Add new Branch Targets"
 							class="btn btn-success btn-round trg-dialog-edit"
-							data-title='<i class="fa fa-pencil-square-o"></i> Add New Branch'
-							data-url="<?php echo site_url('branches/add/');?>"
+							data-box-size="large"
+							data-title='<i class="fa fa-pencil-square-o"></i> Add New Branch Targets'
+							data-url="<?php echo site_url('branches/add_targets/');?>"
 							data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
 					</div>
@@ -33,7 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/branches/_list');
+				$this->load->view('setup/branches/_list_targets');
 				?>
 			</div>
 			<!-- /.box-body -->
