@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->name_en;?></td>
 	<td><?php echo $record->name_np;?></td>
 	<td><?php echo $record->code;?></td>
-	<td><?php echo $record->parent_name;?></td>
+	<td><?php echo $record->parent_name ?? '-';?></td>
 	<td class="ins-action">
 		<a href="#"
 			data-toggle="tooltip"

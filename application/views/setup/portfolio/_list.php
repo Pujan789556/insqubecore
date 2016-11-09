@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<th>Name (EN)</th>
 		<th>Name (NP)</th>
 		<th>Code</th>
-		<th>Parent</th>
+		<th>Parent Portfolio</th>
 		<th>Actions</th>
 	</tr>
 	<?php
