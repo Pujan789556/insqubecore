@@ -92,6 +92,17 @@ $nav_level_3      = isset($_nav_primary['level_3']) ? $_nav_primary['level_3'] :
                                           </li>
                                     </ul>
                               </li>
+                              <li class="<?php echo set_menu_active($nav_level_1, 'portfolio');?>">
+                                    <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Portfolio
+                                          <span class="pull-right-container">
+                                                <i class="fa fa-angle-left pull-right"></i>
+                                          </span>
+                                    </a>
+                                    <ul class="treeview-menu">
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'portfolio');?>"><a href="<?php echo site_url('portfolio');?>"><i class="fa fa-circle-o"></i> Manage Portfolio</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'policies');?>"><a href="<?php echo site_url('policies');?>"><i class="fa fa-circle-o"></i> Poicies</a></li>
+                                    </ul>
+                              </li>
 
                               <li class="<?php echo set_menu_active($nav_level_1, 'security');?>">
                                     <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Security

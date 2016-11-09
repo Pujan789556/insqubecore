@@ -99,6 +99,18 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to Portfolio
+	 */
+	'portfolio' => [
+		'_uri' => 'portfolio/',
+		'_table' => 'master_portfolio',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
+	/**
 	 * Activities related to Roles
 	 */
 	'role' => [

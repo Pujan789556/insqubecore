@@ -1,23 +1,23 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form Horizontal Components 
- * 
+ * Form Horizontal Components
+ *
  * This is for regular form fields, But no array/json form fields
- * 
- * Required Variable: 
- *      $form_elements      
+ *
+ * Required Variable:
+ *      $form_elements
  *      $form_record
- *      $grid_label = 'col-sm-2'    
+ *      $grid_label = 'col-sm-2'
  *      $grid_form_control = 'col-sm-10'
  */
 $grid_label = $grid_label ?? 'col-sm-2';
 $grid_form_control = $grid_form_control ?? 'col-sm-10';
-foreach($form_elements as $element):?>        
+foreach($form_elements as $element):?>
     <div class="form-group <?php echo form_error($element['field']) ? 'has-error' : '';?>">
         <label for="" class="<?php echo $grid_label; ?> control-label"><?php echo $element['label'] . field_compulsary_text( $element['_required'] ?? FALSE );?></label>
         <div class="<?php echo $grid_form_control; ?>">
-            <?php 
+            <?php
             /**
              * Load Form Element
              */
@@ -70,7 +70,7 @@ foreach($form_elements as $element):?>
 
                 case 'dropdown':
                     // Let's check if we have default value
-                    $value = isset($value) ? $value : ($element['_default'] ?? '');
+                    $value = isset($value) && $value != '' ? $value : ($element['_default'] ?? '');
                     echo form_dropdown($element_config, $element['_data'], $value);
                     break;
 
