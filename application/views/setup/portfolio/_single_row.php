@@ -15,7 +15,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-toggle="tooltip"
 			title="Edit portfolio"
 			class="trg-dialog-edit action"
-			data-title='<i class="fa fa-pencil-square-o"></i> Edit Department'
+			data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio'
 			data-url="<?php echo site_url('portfolio/edit/' . $record->id);?>"
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>

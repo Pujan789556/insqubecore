@@ -13,14 +13,12 @@ class Branch_target_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    // protected $before_insert = ['capitalize_code', 'prepare_contact_data'];
-    // protected $before_update = ['capitalize_code', 'prepare_contact_data'];
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "fiscal_yr_id", "branch_id", "target_total", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "fiscal_yr_id", "branch_id", "target_total", "target_details", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -124,8 +122,9 @@ class Branch_target_model extends MY_Model
 
     public function get_list_by_fiscal_year($fiscal_yr_id)
     {
-        return $this->db->select('BT.id, BT.fiscal_yr_id, BT.branch_id, BT.target_total')
+        return $this->db->select('BT.id, BT.fiscal_yr_id, BT.branch_id, BT.target_total, BT.target_details, B.name as branch_name')
                         ->from($this->table_name . ' BT')
+                        ->join('master_branches B', 'B.id = BT.branch_id')
                         ->where('BT.fiscal_yr_id', $fiscal_yr_id)
                         ->get()->result();
     }
@@ -142,14 +141,6 @@ class Branch_target_model extends MY_Model
                 $data[$col] = strtoupper($data[$col]);
             }
         }
-        return $data;
-    }
-
-    // ----------------------------------------------------------------
-
-    public function prepare_contact_data($data)
-    {
-        $data['contacts'] = get_contact_data_from_form();
         return $data;
     }
 

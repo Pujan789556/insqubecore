@@ -633,6 +633,198 @@ class Branches extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
+	 * Edit Branch Targets for Specific Fiscal Year
+	 *
+	 *
+	 * @param integer $fiscal_yr_id
+	 * @return void
+	 */
+	public function target_details($fiscal_yr_id)
+	{
+		$this->load->model('branch_target_model');
+		$this->load->model('portfolio_model');
+
+		// Valid Record ?
+		$fiscal_yr_id 	= (int)$fiscal_yr_id;
+		$record 		= $this->branch_target_model->get_row_single($fiscal_yr_id);
+		$targets 		= $this->branch_target_model->get_list_by_fiscal_year($fiscal_yr_id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		$this->data['site_title'] = 'Branch Target Details | Fiscal Year ' . $record->code_np;
+
+		$branches = $this->branch_model->dropdown();
+		$partial_data = [
+			'branches' 		=> $branches,
+			'targets' 		=> $targets,
+			'record' 		=> $record,
+			'portfolio'		=> $this->portfolio_model->dropdown_parent()
+		];
+		$this->template->partial(
+							'content_header',
+							'templates/_common/_content_header',
+							[
+								'content_header' => 'Branch Target Details <small> Fiscal Year ' . $record->code_np . '</small>',
+								'breadcrumbs' => ['Master Setup' => NULL, 'Branch Targets' => 'branches/targets', 'Target Details' => NULL]
+						])
+						->partial('content', 'setup/branches/_target_details', $partial_data)
+						->render($this->data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Save Target details for Specific Branch for Specific Fiscal Year
+	 *
+	 * @param integer $target_id
+	 * @return json
+	 */
+	public function save_target_details($target_id)
+	{
+		$this->load->model('branch_target_model');
+		$this->load->model('portfolio_model');
+
+		// Valid Record ?
+		$target_id = (int)$target_id;
+		$record = $this->branch_target_model->find($target_id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Form Submitted?
+		 */
+		$return_data = [];
+
+		if( $this->input->post() )
+		{
+			$done = FALSE;
+
+			$rules = [
+		        [
+		            'field' => 'portfolio_ids[]',
+		            'label' => 'Portfolio',
+		            'rules' => 'trim|required|integer|max_length[11]',
+		            '_type'     => 'text',
+		            '_required' => true
+		        ],
+		        [
+		            'field' => 'portfolio_target[]',
+		            'label' => 'Portfolio-wise Target',
+		            'rules' => 'trim|required|prep_decimal|decimal|max_length[14]',
+		            '_type'     => 'text',
+		            '_required' => true
+		        ]
+		    ];
+
+
+			$this->form_validation->set_rules($rules);
+			if( $this->form_validation->run() === TRUE )
+			{
+
+
+				$portfolio_ids = $this->input->post('portfolio_ids');
+				$portfolio_target = $this->input->post('portfolio_target');
+
+				$data = [];
+
+				$i = 0;
+				foreach( $portfolio_ids as $portfolio_id)
+				{
+					$data[] = ['portfolio' => $portfolio_id, 'target' => $portfolio_target[$i]];
+					$i++;
+				}
+
+				$data['target_details'] = json_encode($data);
+
+				$done = $this->branch_target_model->update($target_id, $data, TRUE) && $this->branch_target_model->log_activity($target_id, 'E');
+
+
+				if(!$done)
+				{
+					$status = 'error';
+					$message = 'Could not update.';
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+				}
+			}
+			else
+			{
+				$status = 'error';
+				$message = 'Validation Error.';
+			}
+
+			// Success HTML
+			// $success_html = '';
+			// if($status === 'success' )
+			// {
+			// 	if($action === 'add')
+			// 	{
+			// 		$records = $this->branch_target_model->get_row_list();
+			// 		$success_html = $this->load->view('setup/branches/_list_targets', ['records' => $records], TRUE);
+			// 	}
+			// 	else
+			// 	{
+			// 		// Get Updated Record
+			// 		$record = $this->branch_target_model->get_row_single($fiscal_yr_id);
+			// 		$success_html = $this->load->view('setup/branches/_single_row_targets', ['record' => $record], TRUE);
+			// 	}
+			// }
+
+			// $rules 				= $this->branch_target_model->validation_rules;
+			// $rules[0]['_data'] 	= ['' => 'Select...'] + $this->fiscal_year_model->dropdown();
+			// $targets 			= $record ? $this->branch_target_model->get_list_by_fiscal_year($record->fiscal_yr_id) : NULL;
+
+			// $return_data = [
+			// 	'status' 		=> $status,
+			// 	'message' 		=> $message,
+			// 	'reloadForm' 	=> $status === 'error',
+			// 	'hideBootbox' 	=> $status === 'success',
+			// 	'updateSection' => $status === 'success',
+			// 	'updateSectionData'	=> $status === 'success'
+			// 							? 	[
+			// 									'box' 	=> $action === 'add'
+			// 												? '#iqb-data-list'
+			// 												: '#_data-row-' . $record->fiscal_yr_id,
+			// 									'html' 	=> $success_html,
+
+			// 									//
+			// 									// How to Work with success html?
+			// 									// Jquery Method 	html|replaceWith|append|prepend etc.
+			// 									//
+			// 									'method' 	=> $action === 'add' ? 'html' : 'replaceWith'
+			// 								]
+			// 							: NULL,
+			// 	'form' 	  		=> $status === 'error'
+			// 						? 	$this->load->view('setup/branches/_form_targets',
+			// 								[
+			// 									'form_elements' => $rules,
+			// 									'record' 		=> $record,
+			// 									'action' 		=> $action,
+			// 									'targets' 		=> $targets
+			// 								], TRUE)
+			// 						: 	null
+
+			// ];
+		}
+
+		$return_data = [
+			'status' => $status,
+			'message' => validation_errors() ? validation_errors() : $message
+		];
+
+		$this->template->json($return_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Delete Targets of a Specific Fiscal Year
 	 * @param integer $id
 	 * @return json
