@@ -8,10 +8,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="col-md-3">
 
 		<div class="box box-primary">
-			<div class="box-body box-profile">				
+			<div class="box-body box-profile">
 				<h3 class="profile-username text-center"><?php echo $record->name;?></h3>
 				<h5 class="text-muted text-center"><?php echo $record->code;?></h5>
-			
+				<p class="text-center">Established on <?php echo $record->estd?></p>
 				<ul class="list-group list-group-unbordered">
 					<li class="list-group-item">
 						<b>Annual Target</b> <a class="pull-right">1,322</a>
@@ -22,11 +22,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<li class="list-group-item">
 						<b>Staffs</b> <a class="pull-right">13,287</a>
 					</li>
-				</ul>			
+				</ul>
 			</div>
 		</div>
 
-		
+
 		<!-- About Me Box -->
 		<div class="box box-primary">
 			<?php
@@ -52,15 +52,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			</ul>
 			<div class="tab-content">
 				<div class="active tab-pane" id="activity">
-					
+
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="timeline">
-					
+
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="settings">
-					
+
 				</div>
 				<!-- /.tab-pane -->
 			</div>

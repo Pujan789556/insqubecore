@@ -20,7 +20,7 @@ class Branch_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "name", "code", "contacts", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "name", "code", "estd", "contacts", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -36,7 +36,14 @@ class Branch_model extends MY_Model
             'rules' => 'trim|required|alpha|max_length[3]|is_unique[master_branches.code]|strtoupper',
             '_type'     => 'text',
             '_required' => true
-        ]
+        ],
+        [
+            'field' => 'estd',
+            'label' => 'Estlablished',
+            'rules' => 'trim|required|max_length[20]',
+            '_type'     => 'text',
+            '_required' => true
+        ],
     ];
 
 

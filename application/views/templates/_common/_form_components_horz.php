@@ -40,7 +40,7 @@ foreach($form_elements as $element):?>
                     $value = $form_record->{$element['field']};
                 }
                 // Json Object Key
-                else if( isset($form_record->{$element['_key']}) )
+                else if( isset($element['_key']) &&  isset($form_record->{$element['_key']}) )
                 {
                     $value = $form_record->{$element['_key']};
                 }
