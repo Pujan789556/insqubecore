@@ -655,12 +655,51 @@ class Branches extends MY_Controller
 
 		$this->data['site_title'] = 'Branch Target Details | Fiscal Year ' . $record->code_np;
 
+		/**
+		 * Master Portfolio Array Structure
+		 *
+		 * 	[
+		 * 		'12' => [
+		 * 			'id' => '12',
+		 * 			'name' => 'Agriculture',
+		 * 			'parent_id' => '0',
+		 * 			'children' = [
+		 * 				'22' => ['id' => '22', 'name' => 'Cattle', 'parent_id' => '12'],
+		 * 				'29' => ['id' => '29', 'name' => 'Fish', 'parent_id' => '12']
+		 * 			]
+		 * 		],
+		 * 		'13' => [
+		 * 			'id' => '13',
+		 * 			'name' => 'Aviation',
+		 * 			'parent_id' => '0'
+		 * 		]
+		 * 	]
+		 */
+		$portfolio_list = $this->portfolio_model->get_all();
+		$portfolio = [];
+		foreach($portfolio_list as $p)
+		{
+			$single = [
+				'id' 			=> $p->id,
+				'name' 			=> $p->name_en,
+				'parent_id' 	=> $p->parent_id
+			];
+			if($p->parent_id == '0')
+			{
+				$portfolio["{$p->id}"] = $single;
+			}
+			else
+			{
+				$portfolio["{$p->parent_id}"]['children']["{$p->id}"] = $single;
+			}
+		}
+
 		$branches = $this->branch_model->dropdown();
 		$partial_data = [
 			'branches' 		=> $branches,
 			'targets' 		=> $targets,
 			'record' 		=> $record,
-			'portfolio'		=> $this->portfolio_model->dropdown_parent()
+			'portfolio'		=> $portfolio
 		];
 		$this->template->partial(
 							'content_header',
@@ -670,6 +709,7 @@ class Branches extends MY_Controller
 								'breadcrumbs' => ['Master Setup' => NULL, 'Branch Targets' => 'branches/targets', 'Target Details' => NULL]
 						])
 						->partial('content', 'setup/branches/_target_details', $partial_data)
+						->partial('dynamic_js', 'setup/branches/_target_js')
 						->render($this->data);
 	}
 
@@ -717,6 +757,27 @@ class Branches extends MY_Controller
 		            'rules' => 'trim|required|prep_decimal|decimal|max_length[14]',
 		            '_type'     => 'text',
 		            '_required' => true
+		        ],
+		        [
+		            'field' => 'child_portfolio_ids[]',
+		            'label' => 'Sub Portfolio',
+		            'rules' => 'trim|required|integer|max_length[11]',
+		            '_type'     => 'text',
+		            '_required' => true
+		        ],
+		        [
+		            'field' => 'parent_ids[]',
+		            'label' => 'Parent Portfolio',
+		            'rules' => 'trim|required|integer|max_length[11]',
+		            '_type'     => 'text',
+		            '_required' => true
+		        ],
+		        [
+		            'field' => 'child_portfolio_target[]',
+		            'label' => 'Sub-Portfolio-wise Target',
+		            'rules' => 'trim|required|prep_decimal|decimal|max_length[14]',
+		            '_type'     => 'text',
+		            '_required' => true
 		        ]
 		    ];
 
@@ -729,14 +790,44 @@ class Branches extends MY_Controller
 				$portfolio_ids = $this->input->post('portfolio_ids');
 				$portfolio_target = $this->input->post('portfolio_target');
 
+				$child_portfolio_ids 	= $this->input->post('child_portfolio_ids');
+				$parent_ids 			= $this->input->post('parent_ids');
+				$child_portfolio_target = $this->input->post('child_portfolio_target');
+
+
 				$data = [];
 
 				$i = 0;
 				foreach( $portfolio_ids as $portfolio_id)
 				{
 					$data[] = ['portfolio' => $portfolio_id, 'target' => $portfolio_target[$i]];
+
+					// Let's Check if it has children
+					$j = 0;
+					foreach($parent_ids as $parent_id)
+					{
+						if( $parent_id == $portfolio_id )
+						{
+							$data[$i]['children'][] = ['portfolio' => $child_portfolio_ids[$j], 'target' => $child_portfolio_target[$j]];
+						}
+						$j++;
+					}
+
 					$i++;
 				}
+
+				/**
+				 * JSON Structure in Database (Target Details)
+				 *
+				 * 	[{
+				 * 		"portfolio" : "12",
+				 * 		"target" : "500.98",
+				 * 		"children" : [{"portfolio":"22", "target": "300"}, {"portfolio":"29", "target": "200"}]
+				 * 	},{
+				 * 		"portfolio" : "13",
+				 * 		"target" : "479"
+				 * }]
+				 */
 
 				$data['target_details'] = json_encode($data);
 
@@ -759,59 +850,6 @@ class Branches extends MY_Controller
 				$status = 'error';
 				$message = 'Validation Error.';
 			}
-
-			// Success HTML
-			// $success_html = '';
-			// if($status === 'success' )
-			// {
-			// 	if($action === 'add')
-			// 	{
-			// 		$records = $this->branch_target_model->get_row_list();
-			// 		$success_html = $this->load->view('setup/branches/_list_targets', ['records' => $records], TRUE);
-			// 	}
-			// 	else
-			// 	{
-			// 		// Get Updated Record
-			// 		$record = $this->branch_target_model->get_row_single($fiscal_yr_id);
-			// 		$success_html = $this->load->view('setup/branches/_single_row_targets', ['record' => $record], TRUE);
-			// 	}
-			// }
-
-			// $rules 				= $this->branch_target_model->validation_rules;
-			// $rules[0]['_data'] 	= ['' => 'Select...'] + $this->fiscal_year_model->dropdown();
-			// $targets 			= $record ? $this->branch_target_model->get_list_by_fiscal_year($record->fiscal_yr_id) : NULL;
-
-			// $return_data = [
-			// 	'status' 		=> $status,
-			// 	'message' 		=> $message,
-			// 	'reloadForm' 	=> $status === 'error',
-			// 	'hideBootbox' 	=> $status === 'success',
-			// 	'updateSection' => $status === 'success',
-			// 	'updateSectionData'	=> $status === 'success'
-			// 							? 	[
-			// 									'box' 	=> $action === 'add'
-			// 												? '#iqb-data-list'
-			// 												: '#_data-row-' . $record->fiscal_yr_id,
-			// 									'html' 	=> $success_html,
-
-			// 									//
-			// 									// How to Work with success html?
-			// 									// Jquery Method 	html|replaceWith|append|prepend etc.
-			// 									//
-			// 									'method' 	=> $action === 'add' ? 'html' : 'replaceWith'
-			// 								]
-			// 							: NULL,
-			// 	'form' 	  		=> $status === 'error'
-			// 						? 	$this->load->view('setup/branches/_form_targets',
-			// 								[
-			// 									'form_elements' => $rules,
-			// 									'record' 		=> $record,
-			// 									'action' 		=> $action,
-			// 									'targets' 		=> $targets
-			// 								], TRUE)
-			// 						: 	null
-
-			// ];
 		}
 
 		$return_data = [

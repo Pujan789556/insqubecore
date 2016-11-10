@@ -20,6 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<?php echo form_open( 'branches/save_target_details/'. $target->id,
                     [
                         'class' => 'form-iqb-general form-horizontal',
+                        'id' 	=> 'target-form-' . $target->id,
                         'data-pc' => '#target-dtl-box-'. $target->id // parent container ID
                     ],
                     // Hidden Fields
@@ -27,24 +28,70 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<div class="box-body" id="target-dtl-box-<?php echo $target->id?>">
 
 					<div class="form-group">
-		                <label class="col-sm-4 control-label">
+		                <label class="col-sm-3 control-label">
 		                    Total Target
 		                </label>
-		                <div class="col-sm-8">
+		                <div class="col-sm-9">
 		                    <p class="form-control-static"><?php echo $target->target_total?></p>
 		                </div>
 		            </div>
 
 					<?php
 
-					// Do we have from Database?
+					/**
+					 * JSON Structure in Database (Target Details)
+					 *
+					 * 	[{
+					 * 		"portfolio" : "12",
+					 * 		"target" : "500.98",
+					 * 		"children" : [{"portfolio":"22", "target": "300"}, {"portfolio":"29", "target": "200"}]
+					 * 	},{
+					 * 		"portfolio" : "13",
+					 * 		"target" : "479"
+					 * }]
+					 *
+					 * ------------------------------------------------------------------------------------
+					 *
+					 * Master Portfolio Array Structure
+					 *
+					 * 	[
+					 * 		'12' => [
+					 * 			'id' => '12',
+					 * 			'name' => 'Agriculture',
+					 * 			'parent_id' => '0',
+					 * 			'children' = [
+					 * 				'22' => ['id' => '22', 'name' => 'Cattle', 'parent_id' => '12'],
+					 * 				'29' => ['id' => '29', 'name' => 'Fish', 'parent_id' => '12']
+					 * 			]
+					 * 		],
+					 * 		'13' => [
+					 * 			'id' => '13',
+					 * 			'name' => 'Aviation',
+					 * 			'parent_id' => '0'
+					 * 		]
+					 * 	]
+					 */
+
+					// Create Array Structure from DB
 					$target_details = $target->target_details ? json_decode($target->target_details) : NULL;
 					$list_data_db = [];
 					if($target_details)
 					{
-						foreach($target_details as $t_dtl)
+						foreach($target_details as $t)
 						{
-							$list_data_db["{$t_dtl->portfolio}"]['target'] = $t_dtl->target;
+							$single = [
+								'id' => $t->portfolio,
+								'target' => $t->target
+							];
+							$list_data_db["{$t->portfolio}"] = $single;
+
+							// Let's check if we have children
+							$children = $t->children ?? [];
+							foreach($children as $child)
+							{
+								$single = ['id' => $child->portfolio, 'target' => $child->target];
+								$list_data_db["{$t->portfolio}"]['children']["{$child->portfolio}"] = $single;
+							}
 						}
 					}
 
@@ -52,33 +99,64 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					// This is required if any porfolio is deleted or disabled, or added new one
 					// Those changed one will not be reflectetd on JSON field Above
 					$list_data = [];
-					foreach($portfolio as $portfolio_id=>$portfolio_name)
-					{
-						$list_data["{$portfolio_id}"]['target'] 	= $list_data_db["{$portfolio_id}"]['target'] ?? '';
-						$list_data["{$portfolio_id}"]['name'] 	= $portfolio_name;
-					}
-
-
-					// Do we have value from post?
 					$i = 0;
-					foreach($portfolio as $portfolio_id=>$portfolio_name)
+					foreach($portfolio as $portfolio_id=>$p)
 					{
+						$list_data["{$portfolio_id}"] = $p;
+						$list_data["{$portfolio_id}"]['target'] = $list_data_db["{$portfolio_id}"]['target'] ?? '';
+
+						// Do we have value from post?
 						$target_name = "portfolio_target[$i]";
 						if(set_value($target_name))
 		                {
-		                    $list_data["{$portfolio_id}"]['target'] 	= set_value($target_name, '', FALSE);
+		                    $list_data["{$portfolio_id}"]['target'] = set_value($target_name, '', FALSE);
 		                }
 		                $i++;
+
+						$children = $p['children'] ?? [];
+						$j = 0;
+						foreach($children as $child_id=>$c)
+						{
+							$list_data["{$portfolio_id}"]['children']["{$child_id}"] = $c;
+							$list_data["{$portfolio_id}"]['children']["{$child_id}"]['target'] = $list_data_db["{$portfolio_id}"]['children']["{$child_id}"]['target'] ?? '';
+
+							// Do we have value from post?
+							$target_name = "child_portfolio_target[$j]";
+							if(set_value($target_name))
+			                {
+			                    $list_data["{$portfolio_id}"]['children']["{$child_id}"]['target'] = set_value($target_name, '', FALSE);
+			                }
+			                $j++;
+						}
 					}
+
 					foreach($list_data as $portfolio_id=>$p_data):?>
 						<div class="form-group <?php echo form_error('portfolio_target[]') ? 'has-error' : '';?>">
 							<?php echo form_hidden('portfolio_ids[]', $portfolio_id);?>
-	                        <label for="" class="col-sm-4 control-label"><?php echo ucwords($p_data['name']) . field_compulsary_text( TRUE )?></label>
-	                        <div class="col-sm-8">
-	                        	<input type="number" step="0.01" name="portfolio_target[]" class="form-control" placeholder="Enter portfolio target total..." value="<?php echo $p_data['target'];?>">
+	                        <label for="" class="col-sm-3 control-label"><?php echo ucwords($p_data['name']) . field_compulsary_text( TRUE )?></label>
+	                        <div class="col-sm-9">
+	                        	<input type="number" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>" step="0.01" name="portfolio_target[]" class="form-control _target-parent _target" placeholder="Enter portfolio target total..." value="<?php echo $p_data['target'];?>">
 		                            <?php if(form_error("portfolio_target[]")):?><span class="help-block"><?php echo form_error("portfolio_target[]"); ?></span><?php endif?>
+
+		                            <?php
+		                            /**
+		                             * Do we have children?
+		                             */
+		                            $children = $p_data['children'] ?? [];
+		                            foreach($children as $child_id=>$c):
+
+		                            	echo form_hidden('child_portfolio_ids[]', $child_id);
+		                            	echo form_hidden('parent_ids[]', $c['parent_id']);
+		                            ?>
+		                            	<div class="row form-inline margin-t-10">
+		                            		<label class="control-label col-sm-4"><?php echo $c['name'];?></label>
+		                            		<input type="number" step="0.01" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>" name="child_portfolio_target[]" class="form-control _target-child _target" placeholder="Enter portfolio target total..." value="<?php echo $c['target'];?>">
+		                            		<?php if(form_error("child_portfolio_target[]")):?><span class="help-block"><?php echo form_error("child_portfolio_target[]"); ?></span><?php endif?>
+		                            	</div>
+		                        	<?php endforeach;?>
+		                        	<div class="math" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>"></div>
 	                        </div>
-	                    </div>
+	                    </div><hr/>
                 	<?php  endforeach; ?>
 				</div>
 
