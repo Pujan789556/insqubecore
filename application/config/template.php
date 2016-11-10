@@ -31,11 +31,11 @@ $config['templates']['default'] = array(
 	'sections' => [
 		'header',
 		'body',
-		'footer' 
+		'footer'
 	],
 
 	// Section Prefix
-	// The template variable will have this prefix 
+	// The template variable will have this prefix
 	// E.g. for above sections, you will have the following variables available:
 	// 	$__section_header, $__section_body, & $__section_footer
 	'prefix' => '__section'
@@ -59,11 +59,11 @@ $config['templates']['login'] = array(
 	'sections' => [
 		'header',
 		'body',
-		'footer' 
+		'footer'
 	],
 
 	// Section Prefix
-	// The template variable will have this prefix 
+	// The template variable will have this prefix
 	// E.g. for above sections, you will have the following variables available:
 	// 	$__section_header, $__section_body, & $__section_footer
 	'prefix' => '__section'
@@ -89,9 +89,10 @@ $config['templates']['dashboard'] = array(
 		'content_header',
 		'content',
 		'footer',
-		'control_sidebar'
+		'control_sidebar',
+		'dynamic_js'
 	],
 
-	// Section Prefix	
+	// Section Prefix
 	'prefix' => '__section'
 );

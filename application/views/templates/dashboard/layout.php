@@ -15,7 +15,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <?php 
+        <?php
         /**
          * Load Meta View
          */
@@ -25,12 +25,12 @@
     <body class="hold-transition skin-black-light sidebar-mini">
         <div class="wrapper">
             <header class="main-header">
-                <?php 
+                <?php
                 /**
                  * Templete Section: Header View
-                 * 
+                 *
                  * Section Data will be available to this view
-                 * 
+                 *
                  * Load Directly
                  */
                 $this->load->view('templates/dashboard/_header');
@@ -39,18 +39,18 @@
             </header>
 
             <aside class="main-sidebar">
-                <?php 
+                <?php
                 /**
                  * Templete Section: Sidebar
                  */
                 // echo isset($__section_sidebar) ? $__section_sidebar : '';
                 ?>
-                <?php 
+                <?php
                 /**
                  * Templete Section: Header View
-                 * 
+                 *
                  * Section Data will be available to this view
-                 * 
+                 *
                  * Load Directly
                  */
                 $this->load->view('templates/dashboard/_sidebar');
@@ -59,7 +59,7 @@
 
             <div class="content-wrapper">
                 <section class="content-header">
-                    <?php 
+                    <?php
                     /**
                      * Templete Section: Content Header
                      */
@@ -67,7 +67,7 @@
                     ?>
                 </section>
                 <section class="content" id="iqb-primary-content">
-                    <?php 
+                    <?php
                     /**
                      * Templete Section: Content
                      */
@@ -77,10 +77,10 @@
             </div>
 
             <footer class="main-footer">
-                <?php 
+                <?php
                 /**
                  * Templete Section: Footer (Common View)
-                 * 
+                 *
                  * Load Directly
                  */
                 $this->load->view('templates/_common/_footer');
@@ -88,7 +88,7 @@
             </footer>
 
             <aside class="control-sidebar control-sidebar-dark">
-                <?php 
+                <?php
                 /**
                  * Templete Section: Control Sidebar
                  */
@@ -96,7 +96,7 @@
                 ?>
             </aside><div class="control-sidebar-bg"></div>
 
-        </div>        
+        </div>
 
         <!-- jQuery 2.2.3 -->
         <script src="<?php echo THEME_URL; ?>plugins/jQuery/jquery-2.2.3.min.js"></script>
@@ -121,5 +121,14 @@
 
         <!-- Insqube App -->
         <script src="<?php echo base_url()?>public/app/js/insqube.js"></script>
+
+        <?php
+        /**
+         * Templete Section: Dynamic JS
+         *
+         * This section will have dynamic javascript required by specific module
+         */
+        echo isset($__section_dynamic_js) ? $__section_dynamic_js : '';
+        ?>
     </body>
 </html>
