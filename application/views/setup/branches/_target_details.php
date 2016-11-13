@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="col-sm-6" id="target-<?php echo $target->id?>">
 		<div class="box box-default box-solid collapsed-box">
 			<div class="box-header with-border">
-				<h3 class="box-title"><?php echo $target->branch_name;?> <small><strong>NRS: <?php echo $target->target_total?></strong></small></h3>
+				<h3 class="box-title"><?php echo $target->branch_name;?></h3>
 				<div class="box-tools pull-right">
 					<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
 					</button>
@@ -29,15 +29,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 					<div class="form-group">
 		                <label class="col-sm-3 control-label">
-		                    Total Target
+		                    Total Target<?php echo field_compulsary_text( TRUE )?>
 		                </label>
 		                <div class="col-sm-9">
-		                    <p class="form-control-static"><?php echo $target->target_total?></p>
+		                    <input type="number" step="0.01" data-target="<?php echo $target->id; ?>" name="target_total" class="form-control _target _target-total" placeholder="Enter target total..." value="<?php echo set_value('target_total') ? set_value('target_total') : $target->target_total;?>">
+		                            <?php if(form_error("target_total")):?><span class="help-block"><?php echo form_error("target_total"); ?></span><?php endif?>
+
+                            <div class="math" data-target="<?php echo $target->id;?>"></div>
+
 		                </div>
 		            </div>
 
 					<?php
-
 					/**
 					 * JSON Structure in Database (Target Details)
 					 *
@@ -135,7 +138,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							<?php echo form_hidden('portfolio_ids[]', $portfolio_id);?>
 	                        <label for="" class="col-sm-3 control-label"><?php echo ucwords($p_data['name']) . field_compulsary_text( TRUE )?></label>
 	                        <div class="col-sm-9">
-	                        	<input type="number" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>" step="0.01" name="portfolio_target[]" class="form-control _target-parent _target" placeholder="Enter portfolio target total..." value="<?php echo $p_data['target'];?>">
+	                        	<input type="number" data-target="<?php echo $target->id; ?>" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>" step="0.01" name="portfolio_target[]" class="form-control _target-parent _target" placeholder="Enter portfolio target total..." value="<?php echo $p_data['target'];?>">
 		                            <?php if(form_error("portfolio_target[]")):?><span class="help-block"><?php echo form_error("portfolio_target[]"); ?></span><?php endif?>
 
 		                            <?php
@@ -150,7 +153,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		                            ?>
 		                            	<div class="row form-inline margin-t-10">
 		                            		<label class="control-label col-sm-4"><?php echo $c['name'];?></label>
-		                            		<input type="number" step="0.01" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>" name="child_portfolio_target[]" class="form-control _target-child _target" placeholder="Enter portfolio target total..." value="<?php echo $c['target'];?>">
+		                            		<input type="number" step="0.01" data-target="<?php echo $target->id; ?>" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>" name="child_portfolio_target[]" class="form-control _target-child _target" placeholder="Enter portfolio target total..." value="<?php echo $c['target'];?>">
 		                            		<?php if(form_error("child_portfolio_target[]")):?><span class="help-block"><?php echo form_error("child_portfolio_target[]"); ?></span><?php endif?>
 		                            	</div>
 		                        	<?php endforeach;?>

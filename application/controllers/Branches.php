@@ -744,6 +744,13 @@ class Branches extends MY_Controller
 			$done = FALSE;
 
 			$rules = [
+				[
+		            'field' => 'target_total',
+		            'label' => 'Total Target',
+		            'rules' => 'trim|required|prep_decimal|decimal|max_length[14]',
+		            '_type'     => 'text',
+		            '_required' => true
+		        ],
 		        [
 		            'field' => 'portfolio_ids[]',
 		            'label' => 'Portfolio',
@@ -828,10 +835,12 @@ class Branches extends MY_Controller
 				 * 		"target" : "479"
 				 * }]
 				 */
+				$post_data = [
+					'target_total'   	=> $this->input->post('target_total'),
+					'target_details' 	=> json_encode($data)
+				];
 
-				$data['target_details'] = json_encode($data);
-
-				$done = $this->branch_target_model->update($target_id, $data, TRUE) && $this->branch_target_model->log_activity($target_id, 'E');
+				$done = $this->branch_target_model->update($target_id, $post_data, TRUE) && $this->branch_target_model->log_activity($target_id, 'E');
 
 
 				if(!$done)
