@@ -26,7 +26,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     // Hidden Fields
                     ['id' => $target->id]);?>
 				<div class="box-body" id="target-dtl-box-<?php echo $target->id?>">
-
 					<div class="form-group">
 		                <label class="col-sm-3 control-label">
 		                    Total Target<?php echo field_compulsary_text( TRUE )?>
@@ -139,25 +138,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	                        <label for="" class="col-sm-3 control-label"><?php echo ucwords($p_data['name']) . field_compulsary_text( TRUE )?></label>
 	                        <div class="col-sm-9">
 	                        	<input type="number" data-target="<?php echo $target->id; ?>" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>" step="0.01" name="portfolio_target[]" class="form-control _target-parent _target" placeholder="Enter portfolio target total..." value="<?php echo $p_data['target'];?>">
-		                            <?php if(form_error("portfolio_target[]")):?><span class="help-block"><?php echo form_error("portfolio_target[]"); ?></span><?php endif?>
+	                            <?php if(form_error("portfolio_target[]")):?><span class="help-block"><?php echo form_error("portfolio_target[]"); ?></span><?php endif?>
+	                            <div class="math clearfix" data-target="<?php echo $target->id;?>"></div>
 
-		                            <?php
-		                            /**
-		                             * Do we have children?
-		                             */
-		                            $children = $p_data['children'] ?? [];
-		                            foreach($children as $child_id=>$c):
+	                            <?php
+	                            /**
+	                             * Do we have children?
+	                             */
+	                            $children = $p_data['children'] ?? [];
+	                            foreach($children as $child_id=>$c):
 
-		                            	echo form_hidden('child_portfolio_ids[]', $child_id);
-		                            	echo form_hidden('parent_ids[]', $c['parent_id']);
-		                            ?>
-		                            	<div class="row form-inline margin-t-10">
-		                            		<label class="control-label col-sm-4"><?php echo $c['name'];?></label>
-		                            		<input type="number" step="0.01" data-target="<?php echo $target->id; ?>" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>" name="child_portfolio_target[]" class="form-control _target-child _target" placeholder="Enter portfolio target total..." value="<?php echo $c['target'];?>">
-		                            		<?php if(form_error("child_portfolio_target[]")):?><span class="help-block"><?php echo form_error("child_portfolio_target[]"); ?></span><?php endif?>
-		                            	</div>
-		                        	<?php endforeach;?>
-		                        	<div class="math" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>"></div>
+	                            	echo form_hidden('child_portfolio_ids[]', $child_id);
+	                            	echo form_hidden('parent_ids[]', $c['parent_id']);
+	                            ?>
+	                            	<div class="row form-inline margin-t-10">
+	                            		<label class="control-label col-sm-4"><?php echo $c['name'];?></label>
+	                            		<input type="number" step="0.01" data-target="<?php echo $target->id; ?>" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>" name="child_portfolio_target[]" class="form-control _target-child _target" placeholder="Enter portfolio target total..." value="<?php echo $c['target'];?>">
+	                            		<?php if(form_error("child_portfolio_target[]")):?><span class="help-block"><?php echo form_error("child_portfolio_target[]"); ?></span><?php endif?>
+	                            	</div>
+	                        	<?php endforeach;?>
+	                        	<div class="math" data-portfolio-target="<?php echo $portfolio_id . $target->id;?>"></div>
 	                        </div>
 	                    </div><hr/>
                 	<?php  endforeach; ?>
