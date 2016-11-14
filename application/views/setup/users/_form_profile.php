@@ -12,28 +12,28 @@ if (isset($record) )
     $hidden['id'] = $record->id;
 }
 ?>
-<?php echo form_open_multipart( $action_url,  
+<?php echo form_open_multipart( $action_url,
                         [
                             'class' => 'form-horizontal form-iqb-general',
                             'data-pc' => '.bootbox-body' // parent container ID
-                        ], 
+                        ],
                         // Hidden Fields
                         $hidden); ?>
     <div class="box-header with-border">
         <h3 class="box-title"><?php echo $form_title?></h3>
     </div>
-    <div class="box-body">    
+    <div class="box-body">
         <div class="form-group">
             <label for="logo" class="col-sm-2 control-label">Profile Picture</label>
             <div class="col-sm-10 col-md-6">
                 <input type="file" id="picture" name="picture" onchange="InsQube.imagePreview(event,this,{multi: false, pc: 'picture-preview'})">
                 <p id="picture-preview" class="ins-img-ipb">
                     <?php if(isset($form_record->picture)  && !empty($form_record->picture) ):?>
-                        <img 
-                          src="<?php echo base_url()?>media/users/<?php echo thumbnail_name($form_record->picture);?>"
+                        <img
+                          src="<?php echo INSQUBE_MEDIA_URL?>users/<?php echo thumbnail_name($form_record->picture);?>"
                           title="Click here to view large"
-                          class="thumbnail ins-img-ip" 
-                          data-src="<?php echo base_url()?>media/users/<?php echo $form_record->picture?>"
+                          class="thumbnail ins-img-ip"
+                          data-src="<?php echo INSQUBE_MEDIA_URL?>users/<?php echo $form_record->picture?>"
                           onclick="InsQube.imagePopup(this, 'Profile Picture')">
                     <?php else:?>
                     <i class="ion-ios-person-outline text-muted img-alt"></i>
@@ -41,7 +41,7 @@ if (isset($record) )
                 </p>
             </div>
         </div>
-        <?php 
+        <?php
         /**
          * Load Form Components
          */
@@ -49,7 +49,7 @@ if (isset($record) )
             'form_elements' => $form_elements,
             'form_record'   => $form_record
         ]);
-        ?>        
-    </div>     
-    <button type="submit" class="hide">Submit</button> 
+        ?>
+    </div>
+    <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>

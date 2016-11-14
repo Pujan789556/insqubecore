@@ -43,7 +43,7 @@ class Agents extends MY_Controller
 		$this->load->model('agent_model');
 
 		// Image Path
-        $this->_upload_path = MEDIAPATH . 'agents/';
+        $this->_upload_path = INSQUBE_MEDIA_PATH . 'agents/';
 	}
 
 	// --------------------------------------------------------------------

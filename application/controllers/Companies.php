@@ -43,7 +43,7 @@ class Companies extends MY_Controller
 		$this->load->model('company_model');
 
 		// Image Path
-        $this->_upload_path = MEDIAPATH . 'companies/';
+        $this->_upload_path = INSQUBE_MEDIA_PATH . 'companies/';
 	}
 
 	// --------------------------------------------------------------------

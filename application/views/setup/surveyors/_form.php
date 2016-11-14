@@ -4,12 +4,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Surveyor
  */
 ?>
-<?php echo form_open( $this->uri->uri_string(), 
+<?php echo form_open( $this->uri->uri_string(),
                         [
                             'class' => 'form-horizontal form-iqb-general',
                             'id'    => '__testform',
                             'data-pc' => '.bootbox-body' // parent container ID
-                        ], 
+                        ],
                         // Hidden Fields
                         isset($record) ? ['id' => $record->id] : []); ?>
     <div class="box-header with-border">
@@ -22,11 +22,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <input type="file" id="picture" name="picture" onchange="InsQube.imagePreview(event,this,{multi: false, pc: 'picture-preview'})">
                 <p id="picture-preview" class="ins-img-ipb">
                     <?php if(isset($record->picture)  && !empty($record->picture) ):?>
-                        <img 
-                          src="<?php echo base_url()?>media/surveyors/<?php echo thumbnail_name($record->picture);?>"
+                        <img
+                          src="<?php echo INSQUBE_MEDIA_URL?>surveyors/<?php echo thumbnail_name($record->picture);?>"
                           title="Click here to view large"
-                          class="thumbnail ins-img-ip" 
-                          data-src="<?php echo base_url()?>media/surveyors/<?php echo $record->picture?>"
+                          class="thumbnail ins-img-ip"
+                          data-src="<?php echo INSQUBE_MEDIA_URL?>surveyors/<?php echo $record->picture?>"
                           onclick="InsQube.imagePopup(this, 'Profile Picture')">
                     <?php else:?>
                     <i class="ion-ios-person-outline text-muted img-alt"></i>
@@ -34,7 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </p>
             </div>
         </div>
-        <?php 
+        <?php
         /**
          * Load Form Components
          */
@@ -44,13 +44,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         ]);
         ?>
     </div>
-    
-    <?php 
+
+    <?php
     /**
      * Contact Form
      */
     $contact_record = isset($record) && !empty($record->contact) ? json_decode($record->contact) : NULL;
     $this->load->view('templates/_common/_form_contact', compact('contact_record'));
     ?>
-    <button type="submit" class="hide">Submit</button> 
+    <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>

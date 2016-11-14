@@ -747,7 +747,7 @@ class Branches extends MY_Controller
 				[
 		            'field' => 'target_total',
 		            'label' => 'Total Target',
-		            'rules' => 'trim|required|prep_decimal|decimal|max_length[14]',
+		            'rules' => 'trim|required|prep_decimal|decimal|max_length[14]|callback_check_target_math',
 		            '_type'     => 'text',
 		            '_required' => true
 		        ],
@@ -792,37 +792,6 @@ class Branches extends MY_Controller
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
-
-
-				$portfolio_ids = $this->input->post('portfolio_ids');
-				$portfolio_target = $this->input->post('portfolio_target');
-
-				$child_portfolio_ids 	= $this->input->post('child_portfolio_ids');
-				$parent_ids 			= $this->input->post('parent_ids');
-				$child_portfolio_target = $this->input->post('child_portfolio_target');
-
-
-				$data = [];
-
-				$i = 0;
-				foreach( $portfolio_ids as $portfolio_id)
-				{
-					$data[] = ['portfolio' => $portfolio_id, 'target' => $portfolio_target[$i]];
-
-					// Let's Check if it has children
-					$j = 0;
-					foreach($parent_ids as $parent_id)
-					{
-						if( $parent_id == $portfolio_id )
-						{
-							$data[$i]['children'][] = ['portfolio' => $child_portfolio_ids[$j], 'target' => $child_portfolio_target[$j]];
-						}
-						$j++;
-					}
-
-					$i++;
-				}
-
 				/**
 				 * JSON Structure in Database (Target Details)
 				 *
@@ -837,7 +806,7 @@ class Branches extends MY_Controller
 				 */
 				$post_data = [
 					'target_total'   	=> $this->input->post('target_total'),
-					'target_details' 	=> json_encode($data)
+					'target_details' 	=> $this->_get_target_details_formatted(TRUE)
 				];
 
 				$done = $this->branch_target_model->update($target_id, $post_data, TRUE) && $this->branch_target_model->log_activity($target_id, 'E');
@@ -868,6 +837,100 @@ class Branches extends MY_Controller
 
 		$this->template->json($return_data);
 	}
+		/**
+		 * Check Target Math
+		 *
+		 * Check if Target Total = SUM(portfolio_targets) && Portfolio Target = SUM(sub_portfolio_targets)
+		 * @return type
+		 */
+		public function check_target_math()
+		{
+			$target_total = $this->input->post('target_total');
+
+			$target_details = $this->_get_target_details_formatted();
+
+			// Check Target Total ( = SUM(parent portfolio target) )
+			$parent_total = 0;
+			foreach($target_details as $t)
+			{
+				$parent_total += $t['target'];
+
+				// Check Portfolio Total ( = SUM(child portfolio target) )
+				$children = $t['children'] ?? [];
+				$child_total = 0;
+				$portfolio_total = $t['target'];
+				foreach($children as $c)
+				{
+					$child_total += $c['target'];
+				}
+
+				if( !empty($children) && $child_total != $portfolio_total)
+				{
+					$this->form_validation->set_message('check_target_math', 'The target distribution is invalid (portfolio total != sum(children_portfolio) ).');
+		            return FALSE;
+				}
+
+			}
+			if( $target_total != $parent_total)
+			{
+				$this->form_validation->set_message('check_target_math', 'The target distribution is invalid (target total != sum(parent_portfolio) ).');
+	            return FALSE;
+			}
+	        return TRUE;
+		}
+
+		/**
+		 * Get Formatted Target Details Data
+		 *
+		 * @param bool $json Should we return on JSON Format or Array?
+		 * @return json|array
+		 */
+		private function _get_target_details_formatted($json = FALSE)
+		{
+			/**
+			 * JSON Structure in Database (Target Details)
+			 *
+			 * 	[{
+			 * 		"portfolio" : "12",
+			 * 		"target" : "500.98",
+			 * 		"children" : [{"portfolio":"22", "target": "300"}, {"portfolio":"29", "target": "200"}]
+			 * 	},{
+			 * 		"portfolio" : "13",
+			 * 		"target" : "479"
+			 * }]
+			 */
+
+			$portfolio_ids = $this->input->post('portfolio_ids');
+			$portfolio_target = $this->input->post('portfolio_target');
+
+			$child_portfolio_ids 	= $this->input->post('child_portfolio_ids');
+			$parent_ids 			= $this->input->post('parent_ids');
+			$child_portfolio_target = $this->input->post('child_portfolio_target');
+
+
+			$data = [];
+
+			$i = 0;
+			foreach( $portfolio_ids as $portfolio_id)
+			{
+				$data[] = ['portfolio' => $portfolio_id, 'target' => $portfolio_target[$i]];
+
+				// Let's Check if it has children
+				$j = 0;
+				foreach($parent_ids as $parent_id)
+				{
+					if( $parent_id == $portfolio_id )
+					{
+						$data[$i]['children'][] = ['portfolio' => $child_portfolio_ids[$j], 'target' => $child_portfolio_target[$j]];
+					}
+					$j++;
+				}
+
+				$i++;
+			}
+
+			return $json ? json_encode($data) : $data;
+		}
 
 	// --------------------------------------------------------------------
 
@@ -927,6 +990,4 @@ class Branches extends MY_Controller
 		}
 		return $this->template->json($data);
 	}
-
-
 }

@@ -8,15 +8,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="col-md-3">
 
 		<div class="box box-primary">
-			<div class="box-body box-profile">	
+			<div class="box-body box-profile">
 
 				<?php if( $record->picture ):?>
-					<img 
-						class="profile-user-img img-responsive img-circle ins-img-ip" 
+					<img
+						class="profile-user-img img-responsive img-circle ins-img-ip"
 						title="View large"
-						src="<?php echo base_url()?>media/surveyors/<?php echo thumbnail_name($record->picture);?>" 
+						src="<?php echo INSQUBE_MEDIA_URL?>surveyors/<?php echo thumbnail_name($record->picture);?>"
 						alt="User profile picture"
-						data-src="<?php echo base_url()?>media/surveyors/<?php echo $record->picture?>"
+						data-src="<?php echo INSQUBE_MEDIA_URL?>surveyors/<?php echo $record->picture?>"
                       	onclick="InsQube.imagePopup(this, 'Profile Picture')">
 				<?php else:?>
 					<p class="text-center img-circle profile-user-img">
@@ -24,15 +24,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </p>
                 <?php endif?>
 
-							
+
 				<h3 class="profile-username text-center"><?php echo  $record->name;?></h3>
 
 				<ul class="list-group list-group-unbordered">
 					<li class="list-group-item">
 						<b>Type</b> <span class="pull-right"><?php echo $record->type == '1' ? 'Individual' : 'Compamy';?></span>
-					</li>					
+					</li>
 					<li class="list-group-item">
-						<b>Active?</b> 
+						<b>Active?</b>
 						<span class="pull-right">
 						<?php
 						if($record->active)
@@ -44,25 +44,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							$active_str = '<i class="fa fa-circle-thin" title="Not Active" data-toggle="tooltip"></i>';
 						}
 						echo $active_str;
-						?>	
+						?>
 						</span>
 					</li>
-				</ul>	
+				</ul>
 			</div>
-		</div>		
-		
+		</div>
+
 		<!-- About Me Box -->
 		<div class="box box-primary">
 			<?php
 			/**
 			 * Contact Widget
 			 */
-			echo get_contact_widget($record->contact);			
+			echo get_contact_widget($record->contact);
 			?>
 			<div class="box-footer">
-				<a href="#" class="btn btn-primary btn-block"><i class="fa fa-pencil-square-o margin-r-5"></i><b>Edit Contact</b></a>	
+				<a href="#" class="btn btn-primary btn-block"><i class="fa fa-pencil-square-o margin-r-5"></i><b>Edit Contact</b></a>
 			</div>
-			
+
 		</div>
 		<!-- /.box -->
 	</div>
@@ -81,15 +81,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			</ul>
 			<div class="tab-content">
 				<div class="active tab-pane" id="activity">
-					
+
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="timeline">
-					
+
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="settings">
-					
+
 				</div>
 				<!-- /.tab-pane -->
 			</div>

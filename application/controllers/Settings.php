@@ -23,7 +23,7 @@ class Settings extends MY_Controller
         $this->data['site_title'] = 'Settings';
 
         // Image Path
-        $this->_upload_path = MEDIAPATH . 'settings/';
+        $this->_upload_path = INSQUBE_MEDIA_PATH . 'settings/';
 	}
 
 	/**

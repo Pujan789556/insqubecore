@@ -43,7 +43,7 @@ class Surveyors extends MY_Controller
 		$this->load->model('surveyor_model');
 
 		// Image Path
-        $this->_upload_path = MEDIAPATH . 'surveyors/';
+        $this->_upload_path = INSQUBE_MEDIA_PATH . 'surveyors/';
 	}
 
 	// --------------------------------------------------------------------

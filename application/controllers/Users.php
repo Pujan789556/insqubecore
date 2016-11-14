@@ -260,7 +260,7 @@ class Users extends MY_Controller
 		$this->load->model('user_model');
 
 		// Image Path
-        $this->_upload_path = MEDIAPATH . 'users/';
+        $this->_upload_path = INSQUBE_MEDIA_PATH . 'users/';
 	}
 
 	// --------------------------------------------------------------------

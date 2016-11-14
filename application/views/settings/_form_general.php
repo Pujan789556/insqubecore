@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Settings : General
  */
 ?>
-<?php echo form_open_multipart( $this->uri->uri_string(), 
+<?php echo form_open_multipart( $this->uri->uri_string(),
                                 [
                                     'class' => 'form-horizontal form-iqb-general',
                                     'data-pc' => '#tab-general-settings' // parent container ID
@@ -15,11 +15,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <input type="file" id="logo" name="logo" onchange="InsQube.imagePreview(event,this,{multi: false, pc: 'logo-preview'})">
             <p id="logo-preview" class="ins-img-ipb">
                 <?php if($record->logo):?>
-                    <img 
-                      src="<?php echo base_url()?>media/settings/<?php echo thumbnail_name($record->logo);?>"
+                    <img
+                      src="<?php echo INSQUBE_MEDIA_URL?>settings/<?php echo thumbnail_name($record->logo);?>"
                       title="Click here to view large"
-                      class="thumbnail ins-img-ip" 
-                      data-src="<?php echo base_url()?>media/settings/<?php echo $record->logo?>"
+                      class="thumbnail ins-img-ip"
+                      data-src="<?php echo INSQUBE_MEDIA_URL?>settings/<?php echo $record->logo?>"
                       onclick="InsQube.imagePopup(this)">
                 <?php else:?>
                 <i class="ion-ios-flower-outline text-muted img-alt"></i>
@@ -27,7 +27,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             </p>
         </div>
     </div>
-    <?php 
+    <?php
     /**
      * Load Form Components
      */
@@ -37,7 +37,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         'grid_form_control' => 'col-sm-10 col-md-6'
     ]);
     ?>
-    
+
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10 col-md-6">
             <button type="submit" class="btn btn-danger" data-loading-text="Saving...">Submit</button>

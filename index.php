@@ -55,7 +55,7 @@
  */
 
 function ___environment_defaults()
-{    
+{
     $environment_file = './.env';
 
     if(!file_exists($environment_file))
@@ -74,9 +74,9 @@ function ___environment_defaults()
     /**
      * @TODO: Cache Data
      * 	Cache the data so that every time you have a server request,
-     * 	you don't have to read it from file.		
+     * 	you don't have to read it from file.
      */
-    
+
     foreach($data as $d)
     {
         $pair 		= explode('=', $d);
@@ -352,17 +352,6 @@ switch (ENVIRONMENT)
 
 	define('VIEWPATH', $view_folder.DIRECTORY_SEPARATOR);
 
-
-/*
- * --------------------------------------------------------------------
- * MEDIA FOLDER
- * --------------------------------------------------------------------
- *
- * Define media upload path outside the codebase 
- * This is helpful separating codebase (different versions) and media
- */
-$insqube_media_folder = realpath( BASEPATH . '../../insqube-media' );
-define('MEDIAPATH', $insqube_media_folder.DIRECTORY_SEPARATOR);
 
 /*
  * --------------------------------------------------------------------
