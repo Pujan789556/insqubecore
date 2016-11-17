@@ -19,6 +19,7 @@ application/controllers/Test.php
 # Environment Config
 # --------------------------
 .env
+.env-dev
 
 # DB, Wiki Docs Reference Folder
 # --------------------------------
