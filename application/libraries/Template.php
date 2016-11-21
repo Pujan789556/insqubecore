@@ -30,40 +30,48 @@ class Template {
 	private $_http_code;
 
 	/**
-	 * Default Template Tame
+	 * Default Template Name
 	 *
 	 * @var string
 	 */
 	private $_default = 'default';
 
 	/**
+	 * Template Layout Name (To set dynamically)
+	 *
+	 * @var string
+	 */
+	private $_layout = null;
+
+
+	/**
 	 * Output Method
 	 *
 	 * @var string 	html | json
 	 */
-	public $method = 'html';	
+	public $method = 'html';
 
 	/**
 	 * Section Related Data
-	 * 
+	 *
 	 * This array holds the following information:
 	 * 	Section Name
 	 * 	Partial Name to Render
 	 * 	Data To Supply to this Partial
 	 *
-	 * @var array data 
+	 * @var array data
 	 */
-	protected $_sections = [];	
+	protected $_sections = [];
 
 	/**
 	 * Template Data
-	 * 
+	 *
 	 * All data passed through partial are stored in this array
 	 * This is required if we need to return json
 	 *
-	 * @var array data 
+	 * @var array data
 	 */
-	protected $_data = [];	
+	protected $_data = [];
 
 
 	// --------------------------------------------------------------------
@@ -87,7 +95,7 @@ class Template {
 	 */
 	public function __construct($config = array())
 	{
-		$this->CI =& get_instance();		
+		$this->CI =& get_instance();
 
 		// Initialize the template
 		$this->initialize($config);
@@ -131,7 +139,7 @@ class Template {
 
 	/**
 	 * Set the default template
-	 * 
+	 *
 	 * @param	string	template name
 	 * @return	Template
 	 */
@@ -140,7 +148,7 @@ class Template {
 		if( array_key_exists($template, $this->_templates))
 		{
 			$this->_default = $template;
-		}		
+		}
 		else
 		{
 			$this->_set_default();
@@ -185,6 +193,7 @@ class Template {
 		return $this;
 	}
 
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -203,9 +212,39 @@ class Template {
 
 	// --------------------------------------------------------------------
 
+
+	/**
+	 * Set the layout of the template (Master - View)
+	 *
+	 * @param	string	layout name
+	 * @return	Template
+	 */
+	public function set_layout($layout = '')
+	{
+		$this->_layout = $layout;
+
+		return $this;
+	}
+
+	// --------------------------------------------------------------------
+
+
+	/**
+	 * Get the layout of the current template (Master - View)
+	 *
+	 * @param	void
+	 * @return	String
+	 */
+	public function get_layout()
+	{
+		return $this->_layout ?? $this->_templates[$this->_default]['layout'];
+	}
+
+	// --------------------------------------------------------------------
+
 	/**
 	 * Set HTTP Status Code
-	 * @param type|int $code 
+	 * @param type|int $code
 	 * @return void
 	 */
 	private function _set_http_code($code = 200)
@@ -216,7 +255,7 @@ class Template {
 
 	/**
 	 * Renders a Templates
-	 * 
+	 *
 	 * @param array
 	 * @param integer HTTP Response Code
 	 * @return type
@@ -225,10 +264,10 @@ class Template {
 	{
 		// Build Raw Data
 		$this->_build_data($data);
-		
+
 		/**
 		 *  Do we have an AJAX request?
-		 */ 
+		 */
 		$method = $this->get_method();
 		if( $method == 'json' )
 		{
@@ -236,23 +275,24 @@ class Template {
 		}
 
 		// Set HTTP status Code
-		$this->_set_http_code($http_code);	
+		$this->_set_http_code($http_code);
 
 		/**
-		 * Render Layout and its Partials 
+		 * Render Layout and its Partials
 		 */
-		$view = $this->_templates[$this->_default]['path'];
-		$this->CI->load->view($view, $this->_data);
+		$layout 		= $this->get_layout();
+		$master_view 	= rtrim($this->_templates[$this->_default]['path']) . DIRECTORY_SEPARATOR . $layout;
+		$this->CI->load->view($master_view, $this->_data);
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Renders 404 
-	 * 
+	 * Renders 404
+	 *
 	 * Renders 404 view on regular http request.
 	 * If ajax request, send json string instead.
-	 * 
+	 *
 	 * @param string $view the 404 view
 	 * @return void
 	 */
@@ -260,7 +300,7 @@ class Template {
 	{
 		/**
 		 *  Do we have an AJAX request?
-		 */ 
+		 */
 		$method = $this->get_method();
 		if( $method == 'json' )
 		{
@@ -276,10 +316,10 @@ class Template {
 
 	/**
 	 * Set Partial
-	 * 
-	 * @param string $section 
-	 * @param string $view 
-	 * @param array $data 
+	 *
+	 * @param string $section
+	 * @param string $view
+	 * @param array $data
 	 * @return Object Template
 	 */
 	public function partial($section, $view, $data=[])
@@ -292,7 +332,7 @@ class Template {
 		}
 
 		// Build Raw Data
-		$this->_build_data($data);		
+		$this->_build_data($data);
 
 		return $this;
 	}
@@ -300,8 +340,8 @@ class Template {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Validate Section 
-	 * @param string $section 
+	 * Validate Section
+	 * @param string $section
 	 * @return boolean
 	 */
 	private function _valid_section($section)
@@ -313,7 +353,7 @@ class Template {
 
 	/**
 	 * Output JSON Data
-	 * @param array $data 
+	 * @param array $data
 	 * @return json
 	 */
 	public function json($data = [], $http_code = 200)
@@ -325,7 +365,7 @@ class Template {
 		}
 
 		// Send Output as JSON
-		$this->_output_json($this->_data, $http_code);		
+		$this->_output_json($this->_data, $http_code);
 	}
 
 	// --------------------------------------------------------------------
@@ -337,13 +377,13 @@ class Template {
 		echo json_encode($data);
 		exit(0);
 	}
-	
+
 	// --------------------------------------------------------------------
 
 	/**
 	 * Build Raw Data Array
-	 * 
-	 * @param array $data 
+	 *
+	 * @param array $data
 	 * @return voic
 	 */
 	private function _build_data($data = [])
@@ -361,8 +401,8 @@ class Template {
 
 	/**
 	 * Build Section Data Array
-	 * 
-	 * @param array $data 
+	 *
+	 * @param array $data
 	 * @return voic
 	 */
 	private function _section_data($section, $view, $data=[])

@@ -53,7 +53,10 @@ $config['templates']['default'] = array(
 $config['templates']['login'] = array(
 
 	// Template Path (relative to views folder)
-	'path' => 'templates/login/layout',
+	'path' => 'templates/login',
+
+	// Default Layout Name
+	'layout' => 'layout',
 
 	// Sections
 	'sections' => [
@@ -80,7 +83,10 @@ $config['templates']['login'] = array(
 $config['templates']['dashboard'] = array(
 
 	// Template Path (relative to views folder)
-	'path' => 'templates/dashboard/layout',
+	'path' => 'templates/dashboard',
+
+	// Default Layout Name
+	'layout' => 'layout',
 
 	// Sections
 	'sections' => [
