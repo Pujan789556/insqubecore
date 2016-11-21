@@ -342,7 +342,9 @@ class Users extends MY_Controller
 		$data['filters'] = $this->_get_filter_elements();
 		$data['filter_url'] = site_url('users/filter/');
 
-		$this->template->partial(
+		$this->template
+						->set_layout('layout-advanced-filters')
+						->partial(
 							'content_header',
 							'setup/users/_index_header',
 							['content_header' => 'Manage Users'])
@@ -363,31 +365,28 @@ class Users extends MY_Controller
 			        'label' => 'Application Role',
 			        'rules' => 'trim|integer|max_length[8]',
 			        '_type' 	=> 'dropdown',
-			        '_data' 	=> $select + $this->role_model->dropdown(),
-			        '_required' => true
+			        '_data' 	=> $select + $this->role_model->dropdown()
 				],
 				[
 					'field' => 'filter_branch',
 			        'label' => 'Branch',
 			        'rules' => 'trim|integer|max_length[11]',
 			        '_type' 	=> 'dropdown',
-			        '_data' 	=> $select + $this->branch_model->dropdown(),
-			        '_required' => true
+			        '_data' 	=> $select + $this->branch_model->dropdown()
 				],
 				[
 					'field' => 'filter_department',
 			        'label' => 'Department',
 			        'rules' => 'trim|integer|max_length[11]',
 			        '_type' 	=> 'dropdown',
-			        '_data' 	=> $select + $this->department_model->dropdown(),
-			        '_required' => true
+			        '_data' 	=> $select + $this->department_model->dropdown()
+
 				],
 				[
 					'field' => 'filter_keywords',
 			        'label' => 'Name/Username',
 			        'rules' => 'trim|max_length[80]',
-			        '_type' 	=> 'text',
-			        '_required' => true
+			        '_type' 	=> 'text'
 				]
 			];
 

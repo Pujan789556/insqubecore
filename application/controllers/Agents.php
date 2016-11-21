@@ -131,7 +131,9 @@ class Agents extends MY_Controller
 		$data['filters'] = $this->_get_filter_elements();
 		$data['filter_url'] = site_url('agents/filter/');
 
-		$this->template->partial(
+		$this->template
+						->set_layout('layout-advanced-filters')
+						->partial(
 							'content_header',
 							'setup/agents/_index_header',
 							['content_header' => 'Manage Agent'])

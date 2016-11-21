@@ -6,27 +6,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <div class="row">
 	<div class="col-xs-12">
-		<div class="box">
-			<div class="box-header gray">				
-				<div class="row">
-					<div class="col-xs-12">
-						<?php
-						/**
-						 * Load Live Search UI
-						 */
-						$this->load->view('setup/companies/_search_filters');
-						?>
-					</div>										
-				</div>
-			</div>
-			<!-- /.box-header -->
+		<?php
+		/**
+		 * Search Filters
+		 */
+		$this->load->view('templates/_common/_advanced_search_filter_general');
+		?>
+		<div class="box box-solid">
 			<div class="box-body table-responsive no-padding" id="iqb-data-list">
 				<?php
 				/**
 				 * Load Rows from View
-				 */ 
+				 */
 				$this->load->view('setup/companies/_list');
-				?>				
+				?>
 			</div>
 			<!-- /.box-body -->
 		</div>

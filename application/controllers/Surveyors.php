@@ -131,7 +131,9 @@ class Surveyors extends MY_Controller
 		$data['filters'] = $this->_get_filter_elements();
 		$data['filter_url'] = site_url('surveyors/filter/');
 
-		$this->template->partial(
+		$this->template
+						->set_layout('layout-advanced-filters')
+						->partial(
 							'content_header',
 							'setup/surveyors/_index_header',
 							['content_header' => 'Manage Surveyor'])

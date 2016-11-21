@@ -131,7 +131,9 @@ class Companies extends MY_Controller
 		$data['filters'] = $this->_get_filter_elements();
 		$data['filter_url'] = site_url('companies/filter/');
 
-		$this->template->partial(
+		$this->template
+						->set_layout('layout-advanced-filters')
+						->partial(
 							'content_header',
 							'setup/companies/_index_header',
 							['content_header' => 'Manage Company'])
