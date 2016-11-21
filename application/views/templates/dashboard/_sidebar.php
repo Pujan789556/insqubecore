@@ -100,7 +100,6 @@ $nav_level_3      = isset($_nav_primary['level_3']) ? $_nav_primary['level_3'] :
                                     </a>
                                     <ul class="treeview-menu">
                                           <li class="<?php echo set_menu_active($nav_level_2, 'portfolio');?>"><a href="<?php echo site_url('portfolio');?>"><i class="fa fa-circle-o"></i> Manage Portfolio</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'policies');?>"><a href="<?php echo site_url('policies');?>"><i class="fa fa-circle-o"></i> Poicies</a></li>
                                     </ul>
                               </li>
 
@@ -122,6 +121,17 @@ $nav_level_3      = isset($_nav_primary['level_3']) ? $_nav_primary['level_3'] :
             <li class="<?php echo set_menu_active($nav_level_0, 'activities');?>">
                   <a href="<?php echo site_url('activities');?>">
                         <i class="fa fa-history"></i> <span>Activities</span>
+                  </a>
+            </li>
+
+            <li class="<?php echo set_menu_active($nav_level_0, 'customers');?>">
+                  <a href="<?php echo site_url('customers');?>">
+                        <i class="fa fa-users"></i> <span>Customers</span>
+                  </a>
+            </li>
+            <li class="<?php echo set_menu_active($nav_level_0, 'policies');?>">
+                  <a href="<?php echo site_url('policies');?>">
+                        <i class="fa fa-certificate"></i> <span>Policies</span>
                   </a>
             </li>
       </ul>

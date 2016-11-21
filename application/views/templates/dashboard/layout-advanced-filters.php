@@ -1,7 +1,12 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Dashboard Layout
+ * Dashboard Layout : Advanced Filters
+ *
+ * This layout will have advance search filters UI.
+ *
+ * Usage Example: Agents, Companies List View
+ *
  */
 
 // ---------------------------------------------------------------
@@ -66,7 +71,7 @@
                     echo isset($__section_content_header) ? $__section_content_header : '';
                     ?>
                 </section>
-                <section class="content" id="iqb-primary-content">
+                <section class="content pad-t-0" id="iqb-primary-content">
                     <?php
                     /**
                      * Templete Section: Content
