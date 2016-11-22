@@ -77,6 +77,18 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Customers related to Agent
+	 */
+	'customer' => [
+		'_uri' => 'customers/',
+		'_table' => 'dt_customers',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
+	/**
 	 * Activities related to Departments
 	 */
 	'department' => [
