@@ -2,7 +2,7 @@
  * InsQube
  *
  *  Depends on: jQuery, Bootstrap, Toastr, Bootbox
- * 
+ *
  * Copyright InsQube
  * Authors: IP Bastola
  * All Rights Reserved.
@@ -19,8 +19,8 @@ $( document ).ajaxError(function( event, request, settings ) {
         var json = $.parseJSON(request.responseText);
         if(typeof json.error !== 'undefined'){
             message = json.error === 'not_found' ? '<strong>Oops!</strong><br/>The content you are looking for was NOT FOUND.' : json.error;
-        }        
-    }catch(err) { }    
+        }
+    }catch(err) { }
     toastr.error(message);
 });
 
@@ -28,14 +28,14 @@ $( document ).ajaxError(function( event, request, settings ) {
 ; (function (define) {
     define(['jquery'], function ($) {
         return (function () {
-            
+
             var InsQube = {
-                imagePreview: imagePreview,                
+                imagePreview: imagePreview,
                 imagePopup: imagePopup,
                 liveSearch: liveSearch,
                 load: load,
-                options: {},     
-                postData: postData,      
+                options: {},
+                postData: postData,
                 postForm: postForm,
                 subscribe: subscribe,
                 version: '1.0.0'
@@ -58,7 +58,7 @@ $( document ).ajaxError(function( event, request, settings ) {
             function liveSearch(f, options){
                 var $f = $(f),
                 opts = {
-                    rows : '#live-searchable tr.searchable' 
+                    rows : '#live-searchable tr.searchable'
                 },
                 $btn_clear = $(f).next('.live-search-clear');
 
@@ -78,10 +78,10 @@ $( document ).ajaxError(function( event, request, settings ) {
                         });
                     }else{
                         $btn_clear.fadeOut();
-                    }                    
+                    }
                 }
 
-               // Search Filter 
+               // Search Filter
                 $rows.show().filter(function() {
                     var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
                     return !~text.indexOf(val);
@@ -99,7 +99,7 @@ $( document ).ajaxError(function( event, request, settings ) {
                 self_destruct = $a.data('self-destruct'),
                 $loader_box = $a.data('loader-box') ? $($a.data('loader-box')) : null,
                 url = $a.data('url'),
-                
+
                 // For filter next page type of loading
                 load_method = $a.data('load-method') ? $a.data('load-method'): 'get',
                 form = $a.data('post-form') ? $a.data('post-form') : null;
@@ -112,7 +112,7 @@ $( document ).ajaxError(function( event, request, settings ) {
                         _after_load(r);
                     });
                 }else{
-                    $.getJSON(url, function(r){                        
+                    $.getJSON(url, function(r){
                         _after_load(r);
                     }).error(function() { $a.button('reset'); });
                 }
@@ -132,10 +132,10 @@ $( document ).ajaxError(function( event, request, settings ) {
                         // Callback if any
                         if (callback && typeof(callback) === "function") {
                             callback(a,r);
-                        }  
+                        }
                     }
                     $a.button('reset');
-                }                    
+                }
                 return false;
             }
 
@@ -162,25 +162,25 @@ $( document ).ajaxError(function( event, request, settings ) {
                     cache:false,
                     contentType: false,
                     processData: false,
-                    success:function(r){  
+                    success:function(r){
                         // Show message
                         // NOTE: r.status must be one of the toastr method [success|error|info|warning]
                         if(typeof r.status !== 'undefined' && typeof r.message !== 'undefined'){
-                            // Clear Toastr 
+                            // Clear Toastr
                             toastr.clear();
-                            toastr[r.status](r.message);  
-                        }                                             
+                            toastr[r.status](r.message);
+                        }
 
                         // Callback if any
                         if (callback && typeof(callback) === "function") {
                             callback(r);
-                        }                    
+                        }
                     },
-                    error: function(r){    
+                    error: function(r){
                         // Callback if any
                         if (callback && typeof(callback) === "function") {
                             callback(r);
-                        }                   
+                        }
                     }
                 });
             }
@@ -188,14 +188,14 @@ $( document ).ajaxError(function( event, request, settings ) {
              /**
               * Image Preview on Image Select
               */
-            function imagePreview(e, a, options) 
+            function imagePreview(e, a, options)
             {
                 var files = e.target.files,
                 yo = this,
                 $a = $(a),
                 opts = {
                     pc : '', // image preview container
-                    multi : true 
+                    multi : true
                 },
                 $previewBox;
 
@@ -205,10 +205,10 @@ $( document ).ajaxError(function( event, request, settings ) {
                 // Create Preview Container if none
                 var pc;
                 if(!opts.pc){
-                    pc = $a.data('preview-container');                    
+                    pc = $a.data('preview-container');
                     if( !pc ){
                         pc = '_preview_' + getUniqueId();
-                        $a.attr('data-preview-container', pc);                     
+                        $a.attr('data-preview-container', pc);
                     }
                     opts.pc = pc;
                 }
@@ -218,7 +218,7 @@ $( document ).ajaxError(function( event, request, settings ) {
                     // Create One
                     $previewBox = $('<div id="'+opts.pc+'"></div>');
                     $a.after($previewBox);
-                }                
+                }
 
                 // Loop through the FileList and render image files as thumbnails.
                 for (var i = 0, f; f = files[i]; i++) {
@@ -243,14 +243,14 @@ $( document ).ajaxError(function( event, request, settings ) {
                                 class : 'thumbnail',
                                 title : escape(theFile.name),
                                 src   : e.target.result
-                            });                            
+                            });
 
                             // append or HTML
                             if(opts.multi){
                                 $image.appendTo($previewBox);
                             }else{
                                 $previewBox.html($image);
-                            }                            
+                            }
                         };
                     })(f);
 
@@ -268,7 +268,7 @@ $( document ).ajaxError(function( event, request, settings ) {
                 src = $img.data('src') ? $img.data('src') :  $img.attr('src');
                 html = '<div class="text-center"><img src="'+ src +'" class="img-responsive" style="display:inline-block"></div>';
 
-                bootbox.alert({ 
+                bootbox.alert({
                     size: 'large',
                     className: 'modal-image-preview',
                     title: title ? title : 'Preview Image',
@@ -285,25 +285,25 @@ $( document ).ajaxError(function( event, request, settings ) {
                 });
              }
 
-           
+
 
             ///////////////////////////
             // Internal Function
             ///////////////////////////
 
-            function getOptions() 
+            function getOptions()
             {
                 return $.extend({}, getDefaults(), InsQube.options);
             }
 
-            function getUniqueId() 
+            function getUniqueId()
             {
               return Math.round(new Date().getTime() + (Math.random() * 100));
             }
 
-            function getDefaults() 
+            function getDefaults()
             {
-                return {                    
+                return {
                 };
             }
 
@@ -316,25 +316,25 @@ $( document ).ajaxError(function( event, request, settings ) {
                     cache:false,
                     contentType: false,
                     processData: false,
-                    success:function(r){  
+                    success:function(r){
                         // Show message
                         // NOTE: r.status must be one of the toastr method [success|error|info|warning]
                         if(typeof r.status !== 'undefined' && typeof r.message !== 'undefined'){
-                            // Clear Toastr 
+                            // Clear Toastr
                             toastr.clear();
-                            toastr[r.status](r.message);  
-                        }                                             
+                            toastr[r.status](r.message);
+                        }
 
                         // Callback if any
                         if (callback && typeof(callback) === "function") {
                             callback(r);
-                        }                    
+                        }
                     },
-                    error: function(r){    
+                    error: function(r){
                         // Callback if any
                         if (callback && typeof(callback) === "function") {
                             callback(r);
-                        }                   
+                        }
                     }
                 });
             }
@@ -360,8 +360,8 @@ $( document ).ajaxError(function( event, request, settings ) {
 
     if(!$btn.length){
         // Find Primary button from Bootbox Model
-        $btn = $('.bootbox .modal-footer').find('button[data-bb-handler="primary"]');    
-        $btn.attr('data-loading-text', 'Saving...');       
+        $btn = $('.bootbox .modal-footer').find('button[data-bb-handler="primary"]');
+        $btn.attr('data-loading-text', 'Saving...');
     }
 
     $btn.button('loading');
@@ -369,16 +369,27 @@ $( document ).ajaxError(function( event, request, settings ) {
 
         // reload form?
         if( typeof r.reloadForm !== 'undefined' && r.reloadForm){
-            var container = $this.data('pc'); 
+            var container = $this.data('pc');
             $(container).html(r.form);
+
+            // checkbox Beautify if any
+            $('input.icheck').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue'
+            });
         }
 
         if(typeof r.status !== 'undefined' && r.status === 'success')
         {
             // Do we want to replace certain section on success?
-            if( typeof r.updateSection !== 'undefined' && r.updateSection === true){                
-                var dt = r.updateSectionData;
-                $(dt.box)[dt.method](dt.html);
+            if( typeof r.updateSection !== 'undefined' && r.updateSection === true){
+                var dt = r.updateSectionData,
+                    // html can be returned directly from response
+                    html = (dt.html !== 'undefined' && typeof dt.html == 'string' &&  dt.html != '') ?
+                            dt.html :
+                            ((r.html !== 'undefined' && typeof r.html == 'string' && r.html != '') ? r.html : 'No section data found!');
+
+                $(dt.box)[dt.method](html);
             }
             // What about Edit Form Dialog?
             if( typeof r.hideBootbox !== 'undefined' && r.hideBootbox === true){
@@ -464,17 +475,17 @@ $( document ).ajaxError(function( event, request, settings ) {
                     do_action();
                 }
             }
-        });  
+        });
     }else{
         // Directly do action
         do_action();
-    }  
+    }
 
     // Do Action
     function do_action()
     {
         $.getJSON(url, function(r){
-            // Clear Toastr 
+            // Clear Toastr
             toastr.clear();
 
             // Show message
@@ -495,7 +506,7 @@ $( document ).ajaxError(function( event, request, settings ) {
                     $(r.rowId).replaceWith(r.row);
                     console.log('yeas called');
                 }
-            }                
+            }
         });
     };
  });
@@ -509,7 +520,7 @@ $( document ).ajaxError(function( event, request, settings ) {
     var $this = $(this),
         $btn = $('[type="submit"]', $this),
         $box = $($this.data('box')),
-        method = $this.data('method');    
+        method = $this.data('method');
 
     $btn.button('loading');
     InsQube.postForm(this, function(r){
