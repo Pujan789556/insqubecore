@@ -16,7 +16,7 @@ require_once('phpass-0.3/PasswordHash.php');
  * @license		MIT License Copyright (c) 2008 Erick Hartanto
  * @credits		http://dexcell.shinsengumiteam.com/dx_auth/general/credits.html
  */
- 
+
 class DX_Auth
 {
 	// Private
@@ -24,7 +24,7 @@ class DX_Auth
 	var $_ban_reason;
 	var $_auth_error;	// Contain user error when login
 	var $_captcha_image;
-	
+
 	function __construct()
 	{
 		$this->ci =& get_instance();
@@ -34,16 +34,16 @@ class DX_Auth
 		// Load required library
 		$this->ci->load->library('Session');
 		$this->ci->load->database();
-		
+
 		// Load DX Auth config
 		$this->ci->load->config('dx_auth');
-		
-		// Load DX Auth language		
+
+		// Load DX Auth language
 		$this->ci->lang->load('dx_auth');
-		
+
 		// Load DX Auth event
 		//$this->ci->load->library('DX_Auth_Event');
-		
+
 		// Initialize
 		$this->_init();
 	}
@@ -54,15 +54,15 @@ class DX_Auth
 	{
 		// When we load this library, auto Login any returning users
 		$this->autologin();
-		
+
 		// Init helper config variable
 		$this->email_activation = $this->ci->config->item('DX_email_activation');
-		
+
 		$this->allow_registration = $this->ci->config->item('DX_allow_registration');
 		$this->captcha_registration = $this->ci->config->item('DX_captcha_registration');
-		
+
 		$this->captcha_login = $this->ci->config->item('DX_captcha_login');
-		
+
 		// URIs
 		$this->banned_uri = $this->ci->config->item('DX_banned_uri');
 		$this->deny_uri = $this->ci->config->item('DX_deny_uri');
@@ -72,33 +72,33 @@ class DX_Auth
 		$this->activate_uri = $this->ci->config->item('DX_activate_uri');
 		$this->forgot_password_uri = $this->ci->config->item('DX_forgot_password_uri');
 		$this->reset_password_uri = $this->ci->config->item('DX_reset_password_uri');
-		$this->change_password_uri = $this->ci->config->item('DX_change_password_uri');	
-		$this->cancel_account_uri = $this->ci->config->item('DX_cancel_account_uri');	
-		
+		$this->change_password_uri = $this->ci->config->item('DX_change_password_uri');
+		$this->cancel_account_uri = $this->ci->config->item('DX_cancel_account_uri');
+
 		// Forms view
 		$this->login_view = $this->ci->config->item('DX_login_view');
 		$this->register_view = $this->ci->config->item('DX_register_view');
 		$this->forgot_password_view = $this->ci->config->item('DX_forgot_password_view');
 		$this->change_password_view = $this->ci->config->item('DX_change_password_view');
 		$this->cancel_account_view = $this->ci->config->item('DX_cancel_account_view');
-		
+
 		// Pages view
 		$this->deny_view = $this->ci->config->item('DX_deny_view');
 		$this->banned_view = $this->ci->config->item('DX_banned_view');
 		$this->logged_in_view = $this->ci->config->item('DX_logged_in_view');
-		$this->logout_view = $this->ci->config->item('DX_logout_view');		
-		
+		$this->logout_view = $this->ci->config->item('DX_logout_view');
+
 		$this->register_success_view = $this->ci->config->item('DX_register_success_view');
 		$this->activate_success_view = $this->ci->config->item('DX_activate_success_view');
 		$this->forgot_password_success_view = $this->ci->config->item('DX_forgot_password_success_view');
 		$this->reset_password_success_view = $this->ci->config->item('DX_reset_password_success_view');
 		$this->change_password_success_view = $this->ci->config->item('DX_change_password_success_view');
-		
+
 		$this->register_disabled_view = $this->ci->config->item('DX_register_disabled_view');
 		$this->activate_failed_view = $this->ci->config->item('DX_activate_failed_view');
 		$this->reset_password_failed_view = $this->ci->config->item('DX_reset_password_failed_view');
 	}
-	
+
 	function _gen_pass($len = 8)
 	{
 		// No Zero (for user clarity);
@@ -111,7 +111,7 @@ class DX_Auth
 		}
 
 		return $str;
-	}	
+	}
 
 	/*
 	* Function: _encode
@@ -121,7 +121,7 @@ class DX_Auth
 	function _encode($password)
 	{
 		$majorsalt = $this->ci->config->item('DX_salt');
-		
+
 		// if PHP5
 		if (function_exists('str_split'))
 		{
@@ -150,19 +150,19 @@ class DX_Auth
 		// and finally returns the encrypted password
 		return md5($majorsalt);
 	}
-	
-	function _array_in_array($needle, $haystack) 
+
+	function _array_in_array($needle, $haystack)
 	{
 	    // Make sure $needle is an array for foreach
-	    if( ! is_array($needle)) 
+	    if( ! is_array($needle))
 			{
 				$needle = array($needle);
 			}
-	    
+
 			// For each value in $needle, return TRUE if in $haystack
 	    foreach ($needle as $pin)
 			{
-				if (in_array($pin, $haystack)) 
+				if (in_array($pin, $haystack))
 					return TRUE;
 			}
 	    // Return FALSE if none of the values from $needle are found in $haystack
@@ -171,34 +171,34 @@ class DX_Auth
 
 	/**
 	 * Send email using email helper function
-	 * 
+	 *
 	 * Using email helper function lets check your email on log file if your
 	 * development environment has not email sending facility
-	 * 
+	 *
 	 * @author 	IP Bastola
 	 */
 	function _email($to, $from, $subject, $message)
 	{
-		// Load helper 
+		// Load helper
 		$this->ci->load->helper('email');
 		/**
     	 * Prepare Email Data
     	 */
     	$email_data = [
     		'mailtype' 	=> 'html',
-    		
+
     		// From Email and From Name will be From Site Settings Data
-   //  		'from' 		=> [ 
-   //  			'email' => $from, 
+   //  		'from' 		=> [
+   //  			'email' => $from,
    //  			'name' => $this->ci->settings->organization
-			// ], 
+			// ],
     		'to' 		=> $to,
     		'subject' 	=> $subject,
     		'message' 	=> $message
     	];
 
     	// echo '<pre>'; print_r($email_data); echo '</pre>';
-    	send_email($email_data);		
+    	send_email($email_data);
 	}
 
 	function _email_ORIGINAL($to, $from, $subject, $message)
@@ -215,22 +215,22 @@ class DX_Auth
 
 		return $email->send();
 	}
-	
+
 	// Set last ip and last login function when user login
 	function _set_last_ip_and_last_login($user_id)
 	{
 		$data = array();
-		
+
 		if ($this->ci->config->item('DX_login_record_ip'))
-		{	
+		{
 			$data['last_ip'] = $this->ci->input->ip_address();
 		}
-		
+
 		if ($this->ci->config->item('DX_login_record_time'))
 		{
 			$data['last_login'] = date('Y-m-d H:i:s', time());
 		}
-		
+
 		if ( ! empty($data))
 		{
 			// Load model
@@ -240,14 +240,14 @@ class DX_Auth
 			$this->ci->user_model->set_user($user_id, $data);
 		}
 	}
-	
+
 	// Increase login attempt
 	function _increase_login_attempt()
-	{		
+	{
 		if ($this->ci->config->item('DX_count_login_attempts') AND ! $this->is_max_login_attempts_exceeded())
 		{
 			// Load model
-			$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');		
+			$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');
 			// Increase login attempts for current IP
 			$this->ci->login_attempts->increase_attempt($this->ci->input->ip_address());
 		}
@@ -259,69 +259,83 @@ class DX_Auth
 		if ($this->ci->config->item('DX_count_login_attempts'))
 		{
 			// Load model
-			$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');		
+			$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');
 			// Clear login attempts for current IP
 			$this->ci->login_attempts->clear_attempts($this->ci->input->ip_address());
 		}
 	}
-		
+
 	// Get role data from database by id, used in _set_session() function
 	// $parent_roles_id, $parent_roles_name is an array.
 	function _get_role_data($role_id)
 	{
 		// Load models
 		$this->ci->load->model('role_model');
+		$record = $this->ci->role_model->find($role_id);
+
+		// Format Role Permissions into PHP Object
+		$record->permissions = $record->permissions ? json_decode($record->permissions) : NULL;
+
+		return $record;
+	}
+
+	function _get_role_data_ORIGINAL($role_id)
+	{
+		return FALSE;
+
+		// Load models
+		$this->ci->load->model('role_model');
 		$this->ci->load->model('dx_auth/permissions', 'permissions');
-	
+
 		// Clear return value
 		$role_name = '';
 		$parent_roles_id = array();
 		$parent_roles_name = array();
 		$permission = array();
 		$parent_permissions = array();
-		
+
 		/* Get role_name, parent_roles_id and parent_roles_name */
-		
+
 		// Get role query from role id
 		$query = $this->ci->role_model->get_role_by_id($role_id);
-		
+
 		// Check if role exist
 		if ($query->num_rows() > 0)
 		{
 			// Get row
-			$role = $query->row();		
-	
+			$role = $query->row();
+
 			// Get role name
 			$role_name = $role->name;
-			
-			/* 
+
+			/*
 				Code below will search if user role_id have parent_id > 0 (which mean role_id have parent role_id)
 				and do it recursively until parent_id reach 0 (no parent) or parent_id not found.
-				
+
 				If anyone have better approach than this code, please let me know.
 			*/
-			
+
 			// Check if role has parent id
 			if ($role->parent_id > 0)
-			{							
+			{
 				// Add to result array
 				$parent_roles_id[] = $role->parent_id;
-				
+
 				// Set variable used in looping
 				$finished = FALSE;
-				$parent_id = $role->parent_id;				
+				$parent_id = $role->parent_id;
 
 				// Get all parent id
 				while ($finished == FALSE)
 				{
 					$i_query = $this->ci->role_model->get_role_by_id($parent_id);
-					
+
 					// If role exist
 					if ($i_query->num_rows() > 0)
 					{
 						// Get row
 						$i_role = $i_query->row();
-						
+
 						// Check if role doesn't have parent
 						if ($i_role->parent_id == 0)
 						{
@@ -334,45 +348,45 @@ class DX_Auth
 						{
 							// Change parent id for next looping
 							$parent_id = $i_role->parent_id;
-							
+
 							// Add to result array
 							$parent_roles_id[] = $parent_id;
 							$parent_roles_name[] = $i_role->name;
 						}
 					}
 					else
-					{	
+					{
 						// Remove latest parent_roles_id since parent_id not found
 						array_pop($parent_roles_id);
 						// Stop looping
 						$finished = TRUE;
 					}
-				}			
+				}
 			}
 		}
-		
+
 		/* End of Get role_name, parent_roles_id and parent_roles_name */
-		
+
 		/* Get user and parents permission */
-		
+
 		// Get user role permission
 		$permission = $this->ci->permissions->get_permission_data($role_id);
-		
+
 		// Get user role parent permissions
 		if ( ! empty($parent_roles_id))
 		{
 			$parent_permissions = $this->ci->permissions->get_permissions_data($parent_roles_id);
 		}
-		
+
 		/* End of Get user and parents permission */
-		
+
 		// Set return value
 		$data['role_name'] = $role_name;
 		$data['parent_roles_id'] = $parent_roles_id;
 		$data['parent_roles_name'] = $parent_roles_name;
 		$data['permission'] = $permission;
 		$data['parent_permissions'] = $parent_permissions;
-		
+
 		return $data;
 	}
 
@@ -381,13 +395,13 @@ class DX_Auth
 	function _create_autologin($user_id)
 	{
 		$result = FALSE;
-		
+
 		// User wants to be remembered
 		$user = array(
 			'key_id' => substr(md5(uniqid(rand().$this->ci->input->cookie($this->ci->config->item('sess_cookie_name')))), 0, 16),
 			'user_id' => $user_id
 		);
-		
+
 		// Load Models
 		$this->ci->load->model('dx_auth/user_autologin', 'user_autologin');
 
@@ -408,19 +422,19 @@ class DX_Auth
 	function autologin()
 	{
 		$result = FALSE;
-		
+
 		if ($auto = $this->ci->input->cookie($this->ci->config->item('DX_autologin_cookie_name')) AND ! $this->ci->session->userdata('DX_logged_in'))
 		{
 			// Extract data
 			$auto = unserialize($auto);
-			
+
 			if (isset($auto['key_id']) AND $auto['key_id'] AND $auto['user_id'])
 			{
-				// Load Models				
+				// Load Models
 				$this->ci->load->model('dx_auth/user_autologin', 'user_autologin');
 
 				// Get key
-				$query = $this->ci->user_autologin->get_key($auto['key_id'], $auto['user_id']);								
+				$query = $this->ci->user_autologin->get_key($auto['key_id'], $auto['user_id']);
 
 				if ($result = $query->row())
 				{
@@ -428,15 +442,15 @@ class DX_Auth
 					$this->_set_session($result);
 					// Renew users cookie to prevent it from expiring
 					$this->_auto_cookie($auto);
-					
+
 					// Set last ip and last login
 					$this->_set_last_ip_and_last_login($auto['user_id']);
-					
+
 					$result = TRUE;
 				}
 			}
 		}
-		
+
 		return $result;
 	}
 
@@ -451,7 +465,7 @@ class DX_Auth
 			$this->ci->load->model('dx_auth/user_autologin', 'user_autologin');
 
 			// Extract data
-			$auto = unserialize($auto);			
+			$auto = unserialize($auto);
 
 			// Delete db entry
 			$this->ci->user_autologin->delete_key($auto['key_id'], $auto['user_id']);
@@ -465,18 +479,18 @@ class DX_Auth
 	{
 		// Get role data
 		$role_data = $this->_get_role_data($data->role_id);
-	
+
 		// Set session data array
-		$user = array(						
+		$user = array(
 			'DX_user_id'						=> $data->id,
 			'DX_username'						=> $data->username,
-			'DX_role_id'						=> $data->role_id,			
-			'DX_role_name'					=> $role_data['role_name'],
-			'DX_parent_roles_id'		=> $role_data['parent_roles_id'],	// Array of parent role_id
-			'DX_parent_roles_name'	=> $role_data['parent_roles_name'], // Array of parent role_name
-			'DX_permission'					=> $role_data['permission'],
-			'DX_parent_permissions'	=> $role_data['parent_permissions'],			
-			'DX_logged_in'					=> TRUE
+			'DX_email'							=> $data->email,   			// added by IP
+			'DX_role_id'						=> $data->role_id,
+			'DX_branch_id'						=> $data->branch_id,  		// added by IP
+			'DX_department_id'					=> $data->department_id, 	// added by IP
+			'DX_role_name'						=> $role_data->name,		// Modified by IP
+			'DX_permission'						=> $role_data->permissions,
+			'DX_logged_in'						=> TRUE
 		);
 
 		$this->ci->session->set_userdata($user);
@@ -497,9 +511,9 @@ class DX_Auth
 	}
 
 	/* End of Auto login related function */
-	
+
 	/* Helper function */
-	
+
 	function check_uri_permissions($allow = TRUE)
 	{
 		// First check if user already logged in or not
@@ -518,16 +532,16 @@ class DX_Auth
 				{
 					$action = $controller.'index/';
 				}
-				
+
 				// Get URI permissions from role and all parents
 				// Note: URI permissions is saved in 'uri' key
 				$roles_allowed_uris = $this->get_permissions_value('uri');
-				
+
 				// Variable to determine if URI found
 				$have_access = ! $allow;
 				// Loop each roles URI permissions
 				foreach ($roles_allowed_uris as $allowed_uris)
-				{										
+				{
 					if ($allowed_uris != NULL)
 					{
 						// Check if user allowed to access URI
@@ -539,15 +553,15 @@ class DX_Auth
 						}
 					}
 				}
-				
+
 				// Trigger event
 				$this->checked_uri_permissions($this->get_user_id(), $have_access);
-				
+
 				if ( ! $have_access)
 				{
 					// User didn't have previlege to access current URI, so we show user 403 forbidden access
 					$this->deny_access();
-				}				
+				}
 			}
 		}
 		else
@@ -556,7 +570,7 @@ class DX_Auth
 			$this->deny_access('login');
 		}
 	}
-	
+
 	/*
 		Get permission value from specified key.
 		Call this function only when user is logged in already.
@@ -568,10 +582,10 @@ class DX_Auth
 	{
 		// Default return value
 		$result = NULL;
-	
+
 		// Get current user permission
 		$permission = $this->ci->session->userdata('DX_permission');
-		
+
 		// Check if key is in user permission array
 		if (array_key_exists($key, $permission))
 		{
@@ -584,8 +598,8 @@ class DX_Auth
 			{
 				// Get current user parent permissions
 				$parent_permissions = $this->ci->session->userdata('DX_parent_permissions');
-				
-				// Check parent permissions array				
+
+				// Check parent permissions array
 				foreach ($parent_permissions as $permission)
 				{
 					if (array_key_exists($key, $permission))
@@ -596,37 +610,37 @@ class DX_Auth
 				}
 			}
 		}
-		
+
 		// Trigger event
 		$this->got_permission_value($this->get_user_id(), $key);
-		
+
 		return $result;
 	}
-	
+
 	/*
 		Get permissions value from specified key.
 		Call this function only when user is logged in already.
 		This will get user permission, and it's parents permissions.
-				
+
 		$array_key = 'default'. Array ordered using 0, 1, 2 as array key.
 		$array_key = 'role_id'. Array ordered using role_id as array key.
 		$array_key = 'role_name'. Array ordered using role_name as array key.
-		
+
 		Returning array of value if permission found, otherwise returning NULL.
 	*/
 	function get_permissions_value($key, $array_key = 'default')
 	{
 		$result = array();
-		
+
 		$role_id = $this->ci->session->userdata('DX_role_id');
 		$role_name = $this->ci->session->userdata('DX_role_name');
-		
+
 		$parent_roles_id = $this->ci->session->userdata('DX_parent_roles_id');
 		$parent_roles_name = $this->ci->session->userdata('DX_parent_roles_name');
-		
+
 		// Get current user permission
 		$value = $this->get_permission_value($key, FALSE);
-		
+
 		if ($array_key == 'role_id')
 		{
 			$result[$role_id] = $value;
@@ -639,10 +653,10 @@ class DX_Auth
 		{
 			array_push($result, $value);
 		}
-		
+
 		// Get current user parent permissions
 		$parent_permissions = $this->ci->session->userdata('DX_parent_permissions');
-		
+
 		$i = 0;
 		foreach ($parent_permissions as $permission)
 		{
@@ -650,7 +664,7 @@ class DX_Auth
 			{
 				$value = $permission[$key];
 			}
-			
+
 			if ($array_key == 'role_id')
 			{
 				// It's safe to use $parents_roles_id[$i] because array order is same with permission array
@@ -660,25 +674,25 @@ class DX_Auth
 			{
 				// It's safe to use $parents_roles_name[$i] because array order is same with permission array
 				$result[$parent_roles_name[$i]] = $value;
-			}			
+			}
 			else
 			{
 				array_push($result, $value);
 			}
-			
+
 			$i++;
 		}
-		
+
 		// Trigger event
 		$this->got_permissions_value($this->get_user_id(), $key);
-		
+
 		return $result;
 	}
 
 	function deny_access($uri = 'deny')
 	{
 		$this->ci->load->helper('url');
-	
+
 		if ($uri == 'login')
 		{
 			redirect($this->ci->config->item('DX_login_uri'), 'location');
@@ -690,20 +704,32 @@ class DX_Auth
 		else
 		{
 			// Set flash message so that the deny method displays the message
-			// else if I came across using /auth/deny, it will simply show the 
+			// else if I came across using /auth/deny, it will simply show the
 			// same message creating confusion
 			$this->ci->session->set_flashdata('auth_flag_access_deny', TRUE); // added by IP
 
 			// now redirect to deny location
-			redirect($this->ci->config->item('DX_deny_uri'), 'location');			
+			redirect($this->ci->config->item('DX_deny_uri'), 'location');
 		}
 		exit;
 	}
-	
+
 	// Get user id
 	function get_user_id()
 	{
 		return $this->ci->session->userdata('DX_user_id');
+	}
+
+	// Get branch id
+	function get_branch_id()
+	{
+		return $this->ci->session->userdata('DX_branch_id');
+	}
+
+	// Get department id
+	function get_department_id()
+	{
+		return $this->ci->session->userdata('DX_department_id');
 	}
 
 	// Get username string
@@ -711,25 +737,31 @@ class DX_Auth
 	{
 		return $this->ci->session->userdata('DX_username');
 	}
-	
+
+	// Get email string
+	function get_email()
+	{
+		return $this->ci->session->userdata('DX_email');
+	}
+
 	// Get user role id
 	function get_role_id()
 	{
 		return $this->ci->session->userdata('DX_role_id');
 	}
-	
+
 	// Get user role name
 	function get_role_name()
 	{
 		return $this->ci->session->userdata('DX_role_name');
 	}
-	
+
 	// Check is user is has admin privilege
 	function is_admin()
 	{
 		return strtolower($this->ci->session->userdata('DX_role_name')) == 'admin';
 	}
-	
+
 	// Check if user has $roles privilege
 	// If $use_role_name TRUE then $roles is name such as 'admin', 'editor', 'etc'
 	// else $roles is role_id such as 0, 1, 2
@@ -738,10 +770,10 @@ class DX_Auth
 	{
 		// Default return value
 		$result = FALSE;
-	
+
 		// Build checking array
 		$check_array = array();
-		
+
 		if ($check_parent)
 		{
 			// Add parent roles into check array
@@ -754,7 +786,7 @@ class DX_Auth
 				$check_array = $this->ci->session->userdata('DX_parent_roles_id');
 			}
 		}
-		
+
 		// Add current role into check array
 		if ($use_role_name)
 		{
@@ -764,13 +796,13 @@ class DX_Auth
 		{
 			array_push($check_array, $this->ci->session->userdata('DX_role_id'));
 		}
-		
+
 		// If $roles not array then we add it into an array
 		if ( ! is_array($roles))
 		{
 			$roles = array($roles);
 		}
-		
+
 		if ($use_role_name)
 		{
 			// Convert check array into lowercase since we want case insensitive checking
@@ -778,20 +810,20 @@ class DX_Auth
 			{
 				$check_array[$i] = strtolower($check_array[$i]);
 			}
-		
+
 			// Convert roles into lowercase since we want insensitive checking
 			for ($i = 0; $i < count($roles); $i++)
 			{
 				$roles[$i] = strtolower($roles[$i]);
 			}
 		}
-		
+
 		// Check if roles exist in check_array
 		if ($this->_array_in_array($roles, $check_array))
 		{
 			$result = TRUE;
 		}
-		
+
 		return $result;
 	}
 
@@ -806,13 +838,13 @@ class DX_Auth
 	{
 		return $this->_banned;
 	}
-	
+
 	// Get ban reason, call this only after calling login() and returning FALSE
 	function get_ban_reason()
 	{
 		return $this->_ban_reason;
 	}
-	
+
 	// Check if username is available to use, by making sure there is no same username in the database
 	function is_username_available($username, $id = NULL)
 	{
@@ -822,10 +854,10 @@ class DX_Auth
 
 		$users = $this->ci->user_model->check_username($username, $id);
 		$temp = $this->ci->user_temp->check_username($username);
-		
+
 		return $users->num_rows() + $temp->num_rows() == 0;
 	}
-	
+
 	// Check if email is available to use, by making sure there is no same email in the database
 	function is_email_available($email, $id = NULL)
 	{
@@ -835,38 +867,38 @@ class DX_Auth
 
 		$users = $this->ci->user_model->check_email($email, $id);
 		$temp = $this->ci->user_temp->check_email($email);
-		
+
 		return $users->num_rows() + $temp->num_rows() == 0;
-	}			
-	
+	}
+
 	// Check if login attempts bigger than max login attempts specified in config
 	function is_max_login_attempts_exceeded()
 	{
 		$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');
-		
+
 		return ($this->ci->login_attempts->check_attempts($this->ci->input->ip_address())->num_rows() >= $this->ci->config->item('DX_max_login_attempts'));
 	}
-	
+
 	function get_auth_error()
 	{
 		return $this->_auth_error;
 	}
-	
+
 	/* End of Helper function */
-	
+
 	/* Main function */
 
-	// $login is username or email or both depending on setting in config file	
+	// $login is username or email or both depending on setting in config file
 	function login($login, $password, $remember = TRUE)
 	{
 		// Load Models
 		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 		$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');
-			
+
 		// Default return value
 		$result = FALSE;
-				
+
 		if ( ! empty($login) AND ! empty($password))
 		{
 			// Get which function to use based on config
@@ -877,12 +909,12 @@ class DX_Auth
 			else if ($this->ci->config->item('DX_login_using_email'))
 			{
 				$get_user_function = 'get_user_by_email';
-			}			
+			}
 			else
 			{
 				$get_user_function = 'get_user_by_username';
 			}
-		
+
 			// Get user query
 			if ($query = $this->ci->user_model->$get_user_function($login) AND $query->num_rows() == 1)
 			{
@@ -893,41 +925,41 @@ class DX_Auth
 				$hasher = new PasswordHash(
 						$this->ci->config->item('phpass_hash_strength'),
 						$this->ci->config->item('phpass_hash_portable'));
-				if ($hasher->CheckPassword($password, $row->password)) 
-				{		
+				if ($hasher->CheckPassword($password, $row->password))
+				{
 					// password ok
 
 					// Check if user is banned or not
 					if ($row->banned > 0)
 					{
 						// Set user as banned
-						$this->_banned = TRUE;					
+						$this->_banned = TRUE;
 						// Set ban reason
 						$this->_ban_reason = $row->ban_reason;
 					}
 					else
 					{
-						// Log in user 
-						$this->_set_session($row); 												
-						
+						// Log in user
+						$this->_set_session($row);
+
 						if ($row->newpass)
 						{
 							// Clear any Reset Passwords
-							$this->ci->user_model->clear_newpass($row->id); 
+							$this->ci->user_model->clear_newpass($row->id);
 						}
-						
+
 						if ($remember)
 						{
 							// Create auto login if user want to be remembered
 							$this->_create_autologin($row->id);
-						}						
-						
+						}
+
 						// Set last ip and last login
 						$this->_set_last_ip_and_last_login($row->id);
-						
+
 						// Clear login attempts
 						$this->_clear_login_attempts();
-						
+
 						// Trigger event
 						$this->user_logged_in($row->id);
 
@@ -941,7 +973,7 @@ class DX_Auth
 					$this->_increase_login_attempt();
 					// Set error message
 					$this->_auth_error = $this->ci->lang->line('auth_login_incorrect_password');
-				}				
+				}
 			}
 			// Check if login is still not activated
 			elseif ($query = $this->ci->user_temp->$get_user_function($login) AND $query->num_rows() == 1)
@@ -965,24 +997,24 @@ class DX_Auth
 	{
 		// Trigger event
 		$this->user_logging_out($this->ci->session->userdata('DX_user_id'));
-	
+
 		// Delete auto login
 		if ($this->ci->input->cookie($this->ci->config->item('DX_autologin_cookie_name'))) {
 			$this->_delete_autologin();
 		}
-		
+
 		// Destroy session
-		$this->ci->session->sess_destroy();		
+		$this->ci->session->sess_destroy();
 	}
 
 	function register($username, $password, $email, $extra_data = [])
-	{		
+	{
 		// Load Models
 		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 
 		$this->ci->load->helper('url');
-		
+
 		// Default return value
 		$insert = FALSE;
 
@@ -993,8 +1025,8 @@ class DX_Auth
 		$hashed_password = $hasher->HashPassword($password);
 
 		// New user array
-		$new_user = array(			
-			'username'					=> $username,			
+		$new_user = array(
+			'username'					=> $username,
 			'password'					=> $hashed_password,
 			'email'						=> $email,
 			'last_ip'					=> $this->ci->input->ip_address()
@@ -1013,30 +1045,30 @@ class DX_Auth
 		{
 			// Add activation key to user array
 			$new_user['activation_key'] = md5(rand().microtime());
-			
+
 			// Create temporary user in database which means the user still unactivated.
 			$insert = $this->ci->user_temp->create_temp($new_user);
 		}
 		else
-		{				
-			// Create user 
+		{
+			// Create user
 			$insert = $this->ci->user_model->create_user($new_user);
 
-			// Trigger event 
+			// Trigger event
 			// 		This event is not needed as we are creating profile as JSON data in same table
 			// 		with Next Wizard Call
-			// $this->user_activated($this->ci->db->insert_id());				
+			// $this->user_activated($this->ci->db->insert_id());
 		}
-		
+
 		if ($insert)
 		{
 			// Replace password with blank text for email.
 			$new_user['password'] = $password;
-			
+
 			// $result = $new_user;
-			
+
 			// Send email based on config
-		
+
 			// Check if user need to activate it's account using email
 			if ($this->ci->config->item('DX_email_activation'))
 			{
@@ -1046,7 +1078,7 @@ class DX_Auth
 
 				// Activation Link
 				$new_user['activate_url'] = site_url($this->ci->config->item('DX_activate_uri')."{$new_user['username']}/{$new_user['activation_key']}");
-				
+
 				// Trigger event and get email content
 				$this->sending_activation_email($new_user, $message);
 
@@ -1055,22 +1087,22 @@ class DX_Auth
 			}
 			else
 			{
-				// Check if need to email account details						
-				if ($this->ci->config->item('DX_email_account_details')) 
+				// Check if need to email account details
+				if ($this->ci->config->item('DX_email_account_details'))
 				{
 					// Create email
 					$from = $this->ci->config->item('DX_webmaster_email');
-					$subject = sprintf($this->ci->lang->line('auth_account_subject'), $this->ci->settings->organization); 
-					
+					$subject = sprintf($this->ci->lang->line('auth_account_subject'), $this->ci->settings->organization);
+
 					// Trigger event and get email content
 					$this->sending_account_email($new_user, $message);
 
 					// Send email with account details
-					$this->_email($email, $from, $subject, $message);														
+					$this->_email($email, $from, $subject, $message);
 				}
 			}
 		}
-		
+
 		return $insert; // newly created user ID or False
 	}
 
@@ -1078,7 +1110,7 @@ class DX_Auth
 	{
 		// Default return value
 		$result = FALSE;
-	
+
 		if ($login)
 		{
 			// Load Model
@@ -1086,18 +1118,18 @@ class DX_Auth
 			// Load Helper
 			$this->ci->load->helper('url');
 
-			// Get login and check if it's exist 
+			// Get login and check if it's exist
 			if ($query = $this->ci->user_model->get_login($login) AND $query->num_rows() == 1)
 			{
 				// Get User data
 				$row = $query->row();
-				
+
 				// Check if there is already new password created but waiting to be activated for this login
 				if ( ! $row->newpass_key)
 				{
 					// Appearantly there is no password created yet for this login, so we create new password
 					$data['password'] = $this->_gen_pass();
-					
+
 					// Generate password hash
 					$hasher = new PasswordHash(
 						$this->ci->config->item('phpass_hash_strength'),
@@ -1113,17 +1145,17 @@ class DX_Auth
 
 					// Create reset password link to be included in email
 					$data['reset_password_uri'] = site_url($this->ci->config->item('DX_reset_password_uri')."{$row->username}/{$data['key']}");
-					
+
 					// Create email
 					$from = $this->ci->config->item('DX_webmaster_email');
-					$subject = $this->ci->lang->line('auth_forgot_password_subject'); 
-					
+					$subject = $this->ci->lang->line('auth_forgot_password_subject');
+
 					// Trigger event and get email content
 					$this->sending_forgot_password_email($data, $message);
 
 					// Send instruction email
 					$this->_email($row->email, $from, $subject, $message);
-					
+
 					$result = TRUE;
 				}
 				else
@@ -1137,7 +1169,7 @@ class DX_Auth
 				$this->_auth_error = $this->ci->lang->line('auth_username_or_email_not_exist');
 			}
 		}
-		
+
 		return $result;
 	}
 
@@ -1146,24 +1178,24 @@ class DX_Auth
 		// Load Models
 		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_autologin', 'user_autologin');
-		
+
 		// Default return value
 		$result = FALSE;
-		
+
 		// Default user_id set to none
 		$user_id = 0;
-		
+
 		// Get user id
 		if ($query = $this->ci->user_model->get_user_by_username($username) AND $query->num_rows() == 1)
 		{
 			$user_id = $query->row()->id;
-			
+
 			// Try to activate new password
 			if ( ! empty($username) AND ! empty($key) AND $this->ci->user_model->activate_newpass($user_id, $key) AND $this->ci->db->affected_rows() > 0 )
 			{
 				// Clear previously setup new password and keys
 				$this->ci->user_autologin->clear_keys($user_id);
-				
+
 				$result = TRUE;
 			}
 		}
@@ -1171,14 +1203,14 @@ class DX_Auth
 	}
 
 	function activate($username, $key = '')
-	{		
+	{
 		// Load Models
 		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
-		
+
 		// Default return value
 		$result = FALSE;
-				
+
 		if ($this->ci->config->item('DX_email_activation'))
 		{
 			// Delete user whose account expired (not activated until expired time)
@@ -1188,7 +1220,7 @@ class DX_Auth
 		// Activate user
 		if ($query = $this->ci->user_temp->activate_user($username, $key) AND $query->num_rows() > 0)
 		{
-			// Get user 
+			// Get user
 			$row = $query->row_array();
 
 			$del = $row['id'];
@@ -1201,11 +1233,11 @@ class DX_Auth
 			if ($this->ci->user_model->create_user($row))
 			{
 				// Trigger event
-				$this->user_activated($this->ci->db->insert_id());	
-				
+				$this->user_activated($this->ci->db->insert_id());
+
 				// Delete user from temp
-				$this->ci->user_temp->delete_user($del);		
-								
+				$this->ci->user_temp->delete_user($del);
+
 				$result = TRUE;
 			}
 		}
@@ -1217,7 +1249,7 @@ class DX_Auth
 	{
 		// Load Models
 		$this->ci->load->model('user_model');
-		
+
 		// Default return value
 		$result = FAlSE;
 
@@ -1232,7 +1264,7 @@ class DX_Auth
 					$this->ci->config->item('phpass_hash_strength'),
 					$this->ci->config->item('phpass_hash_portable'));
 
-			if ($hasher->CheckPassword($old_pass, $row->password)) 
+			if ($hasher->CheckPassword($old_pass, $row->password))
 			{
 				// Success
 
@@ -1241,29 +1273,29 @@ class DX_Auth
 
 				// Replace old password with new password
 				$this->ci->user_model->change_password($this->ci->session->userdata('DX_user_id'), $hashed_password);
-				
+
 				// Trigger event
 				$this->user_changed_password($this->ci->session->userdata('DX_user_id'), $hashed_password);
-				
+
 				$result = TRUE;
 			}
-			else 
+			else
 			{
 				$this->_auth_error = $this->ci->lang->line('auth_incorrect_old_password');
 			}
 		}
-		
+
 		return $result;
 	}
-	
+
 	function cancel_account($password)
 	{
 		// Load Models
 		$this->ci->load->model('user_model');
-		
+
 		// Default return value
 		$result = FAlSE;
-		
+
 		// Search current logged in user in database
 		if ($query = $this->ci->user_model->get_user_by_id($this->ci->session->userdata('DX_user_id')) AND $query->num_rows() > 0)
 		{
@@ -1276,14 +1308,14 @@ class DX_Auth
 					$this->ci->config->item('phpass_hash_strength'),
 					$this->ci->config->item('phpass_hash_portable'));
 
-			if ($hasher->CheckPassword($password, $row->password)) 
+			if ($hasher->CheckPassword($password, $row->password))
 			{
 				// Trigger event
 				$this->user_canceling_account($this->ci->session->userdata('DX_user_id'));
 
 				// Delete user
 				$result = $this->ci->user_model->delete_user($this->ci->session->userdata('DX_user_id'));
-				
+
 				// Force logout
 				$this->logout();
 			}
@@ -1292,81 +1324,81 @@ class DX_Auth
 				$this->_auth_error = $this->ci->lang->line('auth_incorrect_password');
 			}
 		}
-		
+
 		return $result;
 	}
-	
+
 	/* End of main function */
 
-	
-	/* Recaptcha function */		
-		
+
+	/* Recaptcha function */
+
 	function get_recaptcha_reload_link($text = 'Get another CAPTCHA')
 	{
 		return '<a href="javascript:Recaptcha.reload()">'.$text.'</a>';
 	}
-		
+
 	function get_recaptcha_switch_image_audio_link($switch_image_text = 'Get an image CAPTCHA', $switch_audio_text = 'Get an audio CAPTCHA')
 	{
 		return '<div class="recaptcha_only_if_image"><a href="javascript:Recaptcha.switch_type(\'audio\')">'.$switch_audio_text.'</a></div>
 			<div class="recaptcha_only_if_audio"><a href="javascript:Recaptcha.switch_type(\'image\')">'.$switch_image_text.'</a></div>';
 	}
-	
+
 	function get_recaptcha_label($image_text = 'Enter the words above', $audio_text = 'Enter the numbers you hear')
 	{
 		return '<span class="recaptcha_only_if_image">'.$image_text.'</span>
 			<span class="recaptcha_only_if_audio">'.$audio_text.'</span>';
 	}
-	
+
 	// Get captcha image
 	function get_recaptcha_image()
 	{
 		return '<div id="recaptcha_image"></div>';
 	}
-	
-	// Get captcha input box 
+
+	// Get captcha input box
 	// IMPORTANT: You should at least use this function when showing captcha even for testing, otherwise reCAPTCHA image won't show up
 	// because reCAPTCHA javascript will try to find input type with id="recaptcha_response_field" and name="recaptcha_response_field"
 	function get_recaptcha_input()
 	{
 		return '<input type="text" class="form-control" id="recaptcha_response_field" name="recaptcha_response_field" placeholder="Enter code above" />';
 	}
-	
+
 	// Get recaptcha javascript and non javasript html
 	// IMPORTANT: you should put call this function the last, after you are using some of get_recaptcha_xxx function above.
 	function get_recaptcha_html()
 	{
 		// Load reCAPTCHA helper function
 		$this->ci->load->helper('recaptcha');
-		
+
 		// Add custom theme so we can get only image
 		$options = "<script>
 			var RecaptchaOptions = {
 				 theme: 'custom',
 				 custom_theme_widget: 'recaptcha_widget'
 			};
-			</script>";					
-			
+			</script>";
+
 		// Get reCAPTCHA javascript and non javascript HTML
 		$html = recaptcha_get_html($this->ci->config->item('DX_recaptcha_public_key'));
-		
+
 		return $options.$html;
 	}
-	
+
 	// Check if entered captcha code match with the image.
 	// Use this in callback function in your form validation
 	function is_recaptcha_match()
 	{
 		$this->ci->load->helper('recaptcha');
-		
+
 		$resp = recaptcha_check_answer($this->ci->config->item('DX_recaptcha_private_key'),
-			$_SERVER["REMOTE_ADDR"],				
+			$_SERVER["REMOTE_ADDR"],
 			$_POST["recaptcha_challenge_field"],
 			$_POST["recaptcha_response_field"]);
-			
+
 		return $resp->is_valid;
 	}
-		
+
 	/* End of Recaptcha function */
 
 
@@ -1377,111 +1409,111 @@ class DX_Auth
 
 
 
-	// If DX_email_activation in config is TRUE, 
+	// If DX_email_activation in config is TRUE,
 	// this event occurs after user succesfully activated using specified key in their email.
-	// If DX_email_activation in config is FALSE, 
-	// this event occurs right after user succesfully registered.	
+	// If DX_email_activation in config is FALSE,
+	// this event occurs right after user succesfully registered.
 	function user_activated($user_id)
 	{
 		// Load models
 		$this->ci->load->model('dx_auth/user_profile', 'user_profile');
-		
+
 		// Create user profile
 		$this->ci->user_profile->create_profile($user_id);
 	}
-	
+
 	// This event occurs right after user login
 	function user_logged_in($user_id)
 	{
 	}
-	
+
 	// This event occurs right before user logout
 	function user_logging_out($user_id)
 	{
 	}
-	
+
 	// This event occurs right after user change password
 	function user_changed_password($user_id, $new_password)
 	{
 	}
-	
+
 	// This event occurs right before user account is canceled
 	function user_canceling_account($user_id)
 	{
 		// Load models
 		$this->ci->load->model('dx_auth/user_profile', 'user_profile');
-		
+
 		// Delete user profile
 		$this->ci->user_profile->delete_profile($user_id);
 	}
-	
+
 	// This event occurs when check_uri_permissions() function in DX_Auth is called
 	// after checking if user role is allowed or not to access URI, this event will be triggered
 	// $allowed is result of the check before, it's possible to alter the value since it's passed by reference
 	function checked_uri_permissions($user_id, &$allowed)
-	{	
+	{
 	}
-	
-	// This event occurs when get_permission_value() function in DX_Auth is called	
+
+	// This event occurs when get_permission_value() function in DX_Auth is called
 	function got_permission_value($user_id, $key)
-	{	
+	{
 	}
-	
-	// This event occurs when get_permissions_value() function in DX_Auth is called	
+
+	// This event occurs when get_permissions_value() function in DX_Auth is called
 	function got_permissions_value($user_id, $key)
-	{	
+	{
 	}
-	
+
 	// This event occurs right before dx auth send email with account details
 	// $data is an array, containing username, password, email and last ip
-	// $content is email content, passed by reference	
+	// $content is email content, passed by reference
 	// You can customize email content here
 	function sending_account_email($data, &$content)
 	{
 		// Load helper
 		$this->ci->load->helper('url');
-		
-		// Create content	
-		$content = sprintf($this->ci->lang->line('auth_account_content'), 
-			$this->ci->settings->organization, 
-			$data['username'], 
-			$data['email'], 
-			$data['password'], 
+
+		// Create content
+		$content = sprintf($this->ci->lang->line('auth_account_content'),
+			$this->ci->settings->organization,
+			$data['username'],
+			$data['email'],
+			$data['password'],
 			site_url($this->ci->config->item('DX_login_uri')),
 			$this->ci->settings->organization);
 	}
-	
+
 	// This event occurs right before dx auth send activation email
 	// $data is an array, containing username, password, email, last ip, activation_key, activate_url
-	// $content is email content, passed by reference	
+	// $content is email content, passed by reference
 	// You can customize email content here
 	function sending_activation_email($data, &$content)
 	{
 		// Create content
-		$content = sprintf($this->ci->lang->line('auth_activate_content'), 
-			$this->ci->settings->organization, 
+		$content = sprintf($this->ci->lang->line('auth_activate_content'),
+			$this->ci->settings->organization,
 			$data['activate_url'],
 			$this->ci->config->item('DX_email_activation_expire') / 60 / 60,
-			$data['username'], 
+			$data['username'],
 			$data['email'],
 			$data['password'],
 			$this->ci->settings->organization);
 	}
-	
+
 	// This event occurs right before dx auth send forgot password request email
 	// $data is an array, containing password, key, and reset_password_uri
-	// $content is email content, passed by reference	
+	// $content is email content, passed by reference
 	// You can customize email content here
 	function sending_forgot_password_email($data, &$content)
 	{
 		// Create content
-		$content = sprintf($this->ci->lang->line('auth_forgot_password_content'), 
-			$this->ci->settings->organization, 
+		$content = sprintf($this->ci->lang->line('auth_forgot_password_content'),
+			$this->ci->settings->organization,
 			$data['reset_password_uri'],
 			$data['password'],
 			$data['key'],
 			$this->ci->settings->from_email,
 			$this->ci->settings->organization);
 	}
-	
+
 }

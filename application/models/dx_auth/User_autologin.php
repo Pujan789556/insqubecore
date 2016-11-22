@@ -10,7 +10,7 @@ class User_autologin extends CI_Model
 		// Other stuff
 		$this->_prefix = $this->config->item('DX_table_prefix');
 		$this->_table = $this->_prefix.$this->config->item('DX_user_autologin');
-		$this->_users_table = $this->_prefix.$this->config->item('DX_users_table');		
+		$this->_users_table = $this->_prefix.$this->config->item('DX_users_table');
 	}
 
 	function store_key($key, $user_id)
@@ -29,16 +29,29 @@ class User_autologin extends CI_Model
 	{
 		$auto_table = $this->_table;
 		$users_table = $this->_users_table;
-		
+
+		/**
+		 * Old Code
+		 *
 		$this->db->select("$users_table.id");
 		$this->db->select("$users_table.username");
 		$this->db->select("$users_table.role_id");
-		$this->db->from($users_table);		
+		$this->db->from($users_table);
 		$this->db->join($auto_table, "$auto_table.user_id = $users_table.id");
 		$this->db->where("$users_table.id", $user_id);
 		$this->db->where("$auto_table.key_id", md5($key));
-		
+
 		return $this->db->get();
+		*/
+
+		return $this->db->select('U.id, U.username, U.email, U.role_id, U.branch_id, U.department_id,')
+						->from($users_table . ' U')
+						->join($auto_table . ' A', 'A.user_id = U.id')
+						->where('U.id', $user_id)
+						->where('A.key_id', md5($key))
+						->get();
+
+
 	}
 
 	function delete_key($key, $user_id)
@@ -47,7 +60,7 @@ class User_autologin extends CI_Model
 			'key_id' 	=> md5($key),
 			'user_id' => $user_id
 		);
-		
+
 		$this->db->where($data);
 		return $this->db->delete($this->_table);
 	}
