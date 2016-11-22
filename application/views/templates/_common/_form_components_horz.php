@@ -80,6 +80,22 @@ foreach($form_elements as $element):?>
                     echo form_checkbox($element_config, $value, $checked);
                     break;
 
+
+                case 'radio':
+                    $element_config['class'] = 'icheck'; // Add icheck style
+                    $radio_data = $element['_data'];
+                    foreach($radio_data as $key=>$label_text)
+                    {
+                        $checked = $key == $value;
+                        $element_config['id'] = 'radio-' . $key;
+                        echo '<div class="radio-inline"><label for="radio-'.$key.'">' .
+                                form_radio($element_config, $key, $checked) .
+                                $label_text .
+                             '</label></div>';
+                    }
+                    break;
+
+
                 case 'switch':
                     $element_config['class'] = 'switch-checkbox';
                     $element_config['switch-type'] = 'switch-primary';

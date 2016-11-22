@@ -8,9 +8,9 @@
  * Active Primary Navigation Data
  */
 $nav_level_0      = $_nav_primary['level_0'];
-$nav_level_1      = $_nav_primary['level_1'];
-$nav_level_2      = isset($_nav_primary['level_2']) ? $_nav_primary['level_2'] : NULL;
-$nav_level_3      = isset($_nav_primary['level_3']) ? $_nav_primary['level_3'] : NULL;
+$nav_level_1      = $_nav_primary['level_1'] ?? NULL;
+$nav_level_2      = $_nav_primary['level_2'] ?? NULL;
+$nav_level_3      = $_nav_primary['level_3'] ?? NULL;
 ?>
 <!-- sidebar: style can be found in sidebar.less -->
 <section class="sidebar">
