@@ -146,7 +146,7 @@ class Customers extends MY_Controller
 				[
 	                'field' => 'filter_code',
 	                'label' => 'Customer Code',
-	                'rules' => 'trim|alpha|max_length[12]',
+	                'rules' => 'trim|alpha_numeric|max_length[12]',
 	                '_type'     => 'text',
 	            ],
 	            [

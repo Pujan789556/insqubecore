@@ -161,7 +161,6 @@ class Customer_model extends MY_Model
             if( $keywords )
             {
                 $this->db->like('C.full_name', $keywords, 'after');
-                $this->db->or_like('C.owner_full_name', $keywords, 'after');
             }
         }
         return $this->db->limit($this->settings->per_page+1)

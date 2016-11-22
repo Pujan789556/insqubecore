@@ -87,7 +87,21 @@ $config['DX_permissions'] = [
 		'settings' => [
 			'edit.setting'
 		]
-	]	
+	],
+
+	/**
+	 * Group: Customers
+	 */
+	'Customer Permissions' => [
+		/**
+		 * Customer Module
+		 */
+		'customers'  => [
+			'create.customer',
+			'edit.customer',
+			'delete.customer'
+		],
+	],
 ];
 
 
@@ -100,11 +114,11 @@ $config['DX_permissions'] = [
 |	A way to extend user scope from local to multibranch to global.
 |
 |	### Why?
-|		- For example, A user need to entry underwrite for nearby branch if that branch connectivity is lost. 
-|		He will need a multi-branch scope i.e. this user will have a special permission (`scope.to.branch`) enabled. 
+|		- For example, A user need to entry underwrite for nearby branch if that branch connectivity is lost.
+|		He will need a multi-branch scope i.e. this user will have a special permission (`scope.to.branch`) enabled.
 |		This scope has one more pre-requisite - one should have multiple branches assigned.
 |
-|		- For Department Head, he/she needs to veiw report app-wise rather than branch-wise. 
+|		- For Department Head, he/she needs to veiw report app-wise rather than branch-wise.
 | 		In this case, the scope is 'global'.
 |
 |	### Structure
@@ -112,7 +126,7 @@ $config['DX_permissions'] = [
 |		- Default Scope: local
 |		- Data Structure
 |			```json
-|			{scope:local, default:primary_branch_code}  
+|			{scope:local, default:primary_branch_code}
 |			{scope:global, default:primary_branch_code}
 |			{scope:branch, default:primary_branch_code, branches:[branch_code1, branch_code2, ...]}
 |			```
@@ -122,22 +136,22 @@ $config['DX_permissions'] = [
 $config['DX_user_scope'] = [
 	/**
 	 * Default Scope.
-	 * 
+	 *
 	 * Role permissions shall apply to his only primary_branch
 	 */
 	'local',
-	
+
 	/**
 	 * Scope to branch
-	 * 
+	 *
 	 * When this permissions is assigned to a user, he/she will have all the permissions (inherited from his Role)
 	 * available to all ASSIGNED BRANCH(es) including his primary branch.
 	 */
-	'branch',   	
+	'branch',
 
 	/**
 	 * Scope to global
-	 * 
+	 *
 	 * When this permissions is assigned to a user, he/she will have all the permissions (inherited from his Role)
 	 * available to ALL BRANCH(es) including his primary branch.
 	 */

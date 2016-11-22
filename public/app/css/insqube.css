@@ -5,6 +5,7 @@
  .margin-t-10{margin-top:10px;}
  .margin-t-0{margin-top:0px !important;}
  .pad-t-0{padding-top:0px !important;}
+ .no-border-b{border-bottom: none !important;}
 
 /*-- Image Select Preview Box Container--*/
 .ins-img-ipb{

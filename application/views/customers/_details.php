@@ -36,11 +36,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 				<ul class="list-group list-group-unbordered">
 					<li class="list-group-item">
-						<b>Type</b> <span class="pull-right"><?php echo $record->type == 'I' ? 'Individual' : 'Compamy';?></span>
-					</li>
-					<li class="list-group-item">
 						<b>Code</b> <span class="pull-right"><?php echo $record->code?></span>
 					</li>
+					<li class="list-group-item">
+						<b>Type</b> <span class="pull-right"><?php echo $record->type == 'I' ? 'Individual' : 'Compamy';?></span>
+					</li>
+					<?php if($record->type == 'C'):?>
+						<li class="list-group-item">
+							<b>Company Reg. No.</b> <span class="pull-right"><?php echo $record->company_reg_no?></span>
+						</li>
+					<?php endif?>
+					<li class="list-group-item no-border-b">
+						<b>PAN</b> <span class="pull-right"><?php echo $record->pan?></span>
+					</li>
+
 				</ul>
 			</div>
 		</div>
