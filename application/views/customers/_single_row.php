@@ -30,19 +30,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
 			<i class="fa fa-pencil-square-o margin-r-5"></i><i class="fa fa-caret-down"></i></button>
 			<ul class="dropdown-menu pull-right" role="menu">
-				<li>
-					<a href="#"
-						title="Edit Basic Information"
-						class="trg-dialog-edit"
-						data-box-size="large"
-						data-title='<i class="fa fa-pencil-square-o"></i> Edit Basic Information'
-						data-url="<?php echo site_url('customers/edit/' . $record->id);?>"
-						data-form=".form-iqb-general">
-						<i class="fa fa-pencil-square-o"></i>
-						<span>Edit Customer Info</span></a>
-				</li>
+				<?php if( $this->dx_auth->is_authorized('customers', 'edit.customer') ): ?>
+					<li>
+						<a href="#"
+							title="Edit Basic Information"
+							class="trg-dialog-edit"
+							data-box-size="large"
+							data-title='<i class="fa fa-pencil-square-o"></i> Edit Basic Information'
+							data-url="<?php echo site_url('customers/edit/' . $record->id);?>"
+							data-form=".form-iqb-general">
+							<i class="fa fa-pencil-square-o"></i>
+							<span>Edit Customer Info</span></a>
+					</li>
+				<?php endif;?>
 
-				<?php if(safe_to_delete( 'Customer_model', $record->id )):?>
+				<?php if($this->dx_auth->is_authorized('customers', 'delete.customer') && safe_to_delete( 'Customer_model', $record->id )):?>
 					<li class="divider"></li>
 					<li>
 						<a href="#"

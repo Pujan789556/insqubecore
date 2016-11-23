@@ -17,7 +17,13 @@ $( document ).ajaxError(function( event, request, settings ) {
     toastr.clear(); // remove older toast
     try {
         var json = $.parseJSON(request.responseText);
-        if(typeof json.error !== 'undefined'){
+        if(typeof json.auth_message !== 'undefined'){
+                message = json.auth_message;
+        }
+        if(typeof json.message !== 'undefined'){
+                message = json.message;
+        }
+        else if(typeof json.error !== 'undefined'){
             message = json.error === 'not_found' ? '<strong>Oops!</strong><br/>The content you are looking for was NOT FOUND.' : json.error;
         }
     }catch(err) { }

@@ -17,12 +17,6 @@ class Customers extends MY_Controller
 	{
 		parent::__construct();
 
-		// Only Admin Can access this controller
-		if( !$this->dx_auth->is_admin() )
-		{
-			$this->dx_auth->deny_access();
-		}
-
 		// Form Validation
 		$this->load->library('Form_validation');
 
@@ -66,6 +60,15 @@ class Customers extends MY_Controller
 	 */
 	function page( $next_id = 0, $refresh = FALSE, $ajax_extra = [] )
 	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('customers', 'explore.customer') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+
 		// If request is coming from refresh method, reset nextid
 		$next_id = $refresh === FALSE ? (int)$next_id : 0;
 
@@ -261,6 +264,14 @@ class Customers extends MY_Controller
 	 */
 	public function edit($id)
 	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('customers', 'edit.customer') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
 		// Valid Record ?
 		$id = (int)$id;
 		$record = $this->customer_model->find($id);
@@ -293,6 +304,14 @@ class Customers extends MY_Controller
 	 */
 	public function add()
 	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('customers', 'add.customer') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
 		$record = NULL;
 
 		// Form Submitted? Save the data
@@ -503,9 +522,9 @@ class Customers extends MY_Controller
 			'message' 	=> 'You cannot delete the default records.'
 		];
 		/**
-		 * Safe to Delete?
+		 * Safe to Delete? && Permission Granted to do So?
 		 */
-		if( !safe_to_delete( 'Customer_model', $id ) )
+		if( !safe_to_delete( 'Customer_model', $id ) || !$this->dx_auth->is_authorized('customers', 'delete.customer'))
 		{
 			return $this->template->json($data);
 		}
@@ -552,6 +571,14 @@ class Customers extends MY_Controller
      */
     public function details($id)
     {
+    	/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('customers', 'explore.customer') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
     	$id = (int)$id;
 		$record = $this->customer_model->find($id);
 		if(!$record)

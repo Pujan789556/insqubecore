@@ -28,7 +28,8 @@ $config['DX_permissions'] = [
 		 * Branch Module
 		 */
 		'branches'  => [
-			'create.branch',
+			'explore.branch',
+			'add.branch',
 			'edit.branch',
 			'delete.branch'
 		],
@@ -37,6 +38,7 @@ $config['DX_permissions'] = [
 		 * Country Module
 		 */
 		'countries'  => [
+			'explore.country',
 			'edit.country'
 		],
 
@@ -44,7 +46,8 @@ $config['DX_permissions'] = [
 		 * Department Module
 		 */
 		'departments'  => [
-			'create.department',
+			'explore.department',
+			'add.department',
 			'edit.department',
 			'delete.department'
 		],
@@ -53,6 +56,7 @@ $config['DX_permissions'] = [
 		 * District Module
 		 */
 		'districts' => [
+			'explore.district',
 			'edit.district'
 		],
 	],
@@ -65,7 +69,8 @@ $config['DX_permissions'] = [
 		 * User Module
 		 */
 		'users'  => [
-			'create.user',
+			'explore.user',
+			'add.user',
 			'edit.user',
 			'delete.user',
 			'ban.user'
@@ -75,7 +80,8 @@ $config['DX_permissions'] = [
 		 * Role Module
 		 */
 		'roles' => [
-			'create.role',
+			'explore.role',
+			'add.role',
 			'edit.role',
 			'delete.role',
 			'assign.to.user'
@@ -97,7 +103,8 @@ $config['DX_permissions'] = [
 		 * Customer Module
 		 */
 		'customers'  => [
-			'create.customer',
+			'explore.customer',
+			'add.customer',
 			'edit.customer',
 			'delete.customer'
 		],

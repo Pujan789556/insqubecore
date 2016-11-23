@@ -45,12 +45,15 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                         <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                   </a>
             </li>
-            <li class="<?php echo set_menu_active($nav_level_0, 'settings');?>">
-                  <a href="<?php echo site_url('settings');?>">
-                        <i class="fa fa-cog"></i> <span>Application Settings</span>
-                  </a>
-            </li>
+
             <?php if( $this->dx_auth->is_admin() ):?>
+
+                  <li class="<?php echo set_menu_active($nav_level_0, 'settings');?>">
+                        <a href="<?php echo site_url('settings');?>">
+                              <i class="fa fa-cog"></i> <span>Application Settings</span>
+                        </a>
+                  </li>
+
                   <li class="treeview <?php echo set_menu_active($nav_level_0, 'master_setup');?>">
                         <a href="#">
                               <i class="fa fa-server"></i>

@@ -489,7 +489,7 @@ class DX_Auth
 			'DX_branch_id'						=> $data->branch_id,  		// added by IP
 			'DX_department_id'					=> $data->department_id, 	// added by IP
 			'DX_role_name'						=> $role_data->name,		// Modified by IP
-			'DX_permission'						=> $role_data->permissions,
+			'DX_permissions'					=> $role_data->permissions,
 			'DX_logged_in'						=> TRUE
 		);
 
@@ -756,6 +756,12 @@ class DX_Auth
 		return $this->ci->session->userdata('DX_role_name');
 	}
 
+	// Get user permissions
+	function get_permissions()
+	{
+		return $this->ci->session->userdata('DX_permissions');
+	}
+
 	// Check is user is has admin privilege
 	function is_admin()
 	{
@@ -837,6 +843,13 @@ class DX_Auth
 	function is_banned()
 	{
 		return $this->_banned;
+	}
+
+	// Check if user has the permission?
+	function is_authorized($module, $action)
+	{
+		$permissions = $this->get_permissions()->{$module} ?? NULL;
+		return ( !empty($permissions) && in_array($action, $permissions)) ? TRUE : FALSE;
 	}
 
 	// Get ban reason, call this only after calling login() and returning FALSE

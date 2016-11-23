@@ -11,15 +11,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<h1 style="margin:0; font-size:24px;"><?php echo $content_header; ?></h1>
 			</div>
 			<div class="col-sm-4 master-actions text-right">
-				<a href="#"
-					title="Add New Customer"
-					data-toggle="tooltip"
-					class="btn btn-success btn-round trg-dialog-edit"
-					data-box-size="large"
-					data-title='<i class="fa fa-pencil-square-o"></i> Add New Customer'
-					data-url="<?php echo site_url('customers/add/');?>"
-					data-form=".form-iqb-general"
-				><i class="ion-plus-circled"></i> Add</a>
+				<?php if( $this->dx_auth->is_authorized('customers', 'add.customer') ): ?>
+					<a href="#"
+						title="Add New Customer"
+						data-toggle="tooltip"
+						class="btn btn-success btn-round trg-dialog-edit"
+						data-box-size="large"
+						data-title='<i class="fa fa-pencil-square-o"></i> Add New Customer'
+						data-url="<?php echo site_url('customers/add/');?>"
+						data-form=".form-iqb-general"
+					><i class="ion-plus-circled"></i> Add</a>
+				<?php endif?>
 
 				<a href="javascript:;"
 					title="Refresh"
