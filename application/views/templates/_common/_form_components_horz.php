@@ -27,6 +27,20 @@ foreach($form_elements as $element):?>
                 'placeholder'   => $element['label']
             );
 
+            /**
+             * Set Element ID if Set
+             */
+            if( isset($element['_id']) && $element['_id'] != '' )
+            {
+                $element_config['id'] = $element['_id'];
+            }
+
+            /**
+             * What About if We have any Extra Attributes?
+             */
+            $extra_attributes = $element['_extra_attributes'] ?? '';
+
+
             $value = '';
             if(set_value($element['field']))
             {
@@ -49,35 +63,35 @@ foreach($form_elements as $element):?>
             switch($element['_type'])
             {
                 case 'text':
-                    echo form_input($element_config, $value);
+                    echo form_input($element_config, $value, $extra_attributes);
                     break;
 
                 case 'email':
-                    echo form_email($element_config, $value);
+                    echo form_email($element_config, $value, $extra_attributes);
                     break;
 
                 case 'date':
-                        echo form_date($element_config, $value);
+                        echo form_date($element_config, $value, $extra_attributes);
                         break;
 
                 case 'url':
-                    echo form_url($element_config, $value);
+                    echo form_url($element_config, $value, $extra_attributes);
                     break;
 
                 case 'textarea':
-                    echo form_textarea($element_config, $value);
+                    echo form_textarea($element_config, $value, $extra_attributes);
                     break;
 
                 case 'dropdown':
                     // Let's check if we have default value
                     $value = isset($value) && $value != '' ? $value : ($element['_default'] ?? '');
-                    echo form_dropdown($element_config, $element['_data'], $value);
+                    echo form_dropdown($element_config, $element['_data'], $value, $extra_attributes);
                     break;
 
                 case 'checkbox':
                     $element_config['class'] = 'icheck'; // Add icheck style
                     $checked = $element['_default'] == $value;
-                    echo form_checkbox($element_config, $value, $checked);
+                    echo form_checkbox($element_config, $value, $checked, $extra_attributes);
                     break;
 
 
@@ -89,7 +103,7 @@ foreach($form_elements as $element):?>
                         $checked = $key == $value;
                         $element_config['id'] = 'radio-' . $key;
                         echo '<div class="radio-inline"><label for="radio-'.$key.'">' .
-                                form_radio($element_config, $key, $checked) .
+                                form_radio($element_config, $key, $checked, $extra_attributes) .
                                 $label_text .
                              '</label></div>';
                     }
