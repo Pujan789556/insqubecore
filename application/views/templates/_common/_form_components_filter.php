@@ -8,15 +8,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 foreach($filters as $element):?>
     <div class="form-group">
-        <label for="" class=""><?php echo $element['label'] . field_compulsary_text( $element['_required'] ?? FALSE );?></label> <span class="clearfix"></span>
+        <?php
+        /**
+         * Label Extra Information Such as tooltip etc
+         */
+        $label_extra = $element['_label_extra'] ?? '';
+        ?>
+        <label for="" <?php echo $label_extra?>><?php echo $element['label'] . field_compulsary_text( $element['_required'] ?? FALSE );?></label> <span class="clearfix"></span>
         <?php
         /**
          * Load Form Element
          */
         $element_config = array(
             'name'          => $element['field'],
-            'class'         => 'form-control',
-            'placeholder'   => $element['label']
+            'class'         => 'form-control'
         );
 
         /**
