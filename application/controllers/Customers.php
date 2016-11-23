@@ -136,6 +136,7 @@ class Customers extends MY_Controller
 							'customers/_index_header',
 							['content_header' => 'Manage Customers'])
 						->partial('content', 'customers/_index', $data)
+						->partial('dynamic_js', 'customers/_customer_js')
 						->render($this->data);
 	}
 
@@ -144,23 +145,49 @@ class Customers extends MY_Controller
 			$select = ['' => 'Select ...'];
 			$filters = [
 				[
+	                'field' => 'filter_type',
+	                'label' => 'Customer Type',
+	                'rules' => 'trim|alpha|exact_length[1]|in_list[I,C]',
+	                '_id'       => 'filter-type',
+	                '_type'     => 'dropdown',
+	                '_data'     => [ '' => 'Select...', 'I' => 'Individual', 'C' => 'Company'],
+	            ],
+				[
 	                'field' => 'filter_code',
 	                'label' => 'Customer Code',
 	                'rules' => 'trim|alpha_numeric|max_length[12]',
 	                '_type'     => 'text',
 	            ],
 	            [
-	                'field' => 'filter_type',
-	                'label' => 'Customer Type',
-	                'rules' => 'trim|alpha|exact_length[1]|in_list[I,C]',
-	                '_type'     => 'dropdown',
-	                '_data'     => [ '' => 'Select...', 'I' => 'Individual', 'C' => 'Company'],
-	            ],
+		            'field' => 'filter_company_reg_no',
+		            'label' => 'Company Reg Number',
+		            'rules' => 'trim|max_length[20]',
+		            '_type'     => 'text',
+		            '_extra_attributes' => ['data-hideonload' => 'yes'],
+		            '_required' => false
+		        ],
+		        [
+		            'field' => 'filter_citizenship_no',
+		            'label' => 'Citizenship Number',
+		            'rules' => 'trim|max_length[20]',
+		            '_type'     => 'text',
+		            '_extra_attributes' => ['data-hideonload' =>'yes'],
+		            '_required' => false
+		        ],
+		        [
+		            'field' => 'filter_passport_no',
+		            'label' => 'Passport Number',
+		            'rules' => 'trim|alpha_dash|max_length[20]',
+		            '_type'     => 'text',
+		            '_extra_attributes' => ['data-hideonload' =>'yes'],
+		            '_required' => false
+		        ],
 	            [
 					'field' => 'filter_keywords',
-			        'label' => 'Customer Name',
+			        'label' => 'Kyewords <i class="fa fa-info-circle"></i>',
 			        'rules' => 'trim|max_length[80]',
-	                '_type'     => 'text'
+	                '_type'     => 'text',
+	                '_label_extra' => 'data-toggle="tooltip" data-title="Customer Name, PAN, Citizenship, Passport etc..."'
 				],
 			];
 			return $filters;
@@ -179,6 +206,9 @@ class Customers extends MY_Controller
 					$data['data'] = [
 						'code' 				=> $this->input->post('filter_code') ?? NULL,
 						'type' 				=> $this->input->post('filter_type') ?? NULL,
+						'company_reg_no' 	=> $this->input->post('filter_company_reg_no') ?? NULL,
+						'citizenship_no' 	=> $this->input->post('filter_citizenship_no') ?? NULL,
+						'passport_no' 		=> $this->input->post('filter_passport_no') ?? NULL,
 						'keywords' 			=> $this->input->post('filter_keywords') ?? ''
 					];
 					$data['status'] = 'success';
@@ -541,6 +571,7 @@ class Customers extends MY_Controller
 								'breadcrumbs' => ['Customers' => 'customers', 'Details' => NULL]
 						])
 						->partial('content', 'customers/_details', compact('record'))
+						->partial('dynamic_js', 'customers/_customer_js')
 						->render($this->data);
 
     }

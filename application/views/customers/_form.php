@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     </div>
     <div class="box-body">
         <div class="form-group">
-            <label for="logo" class="col-sm-2 control-label">Profile Picture</label>
+            <label for="logo" class="col-sm-2 control-label">Customer Picture</label>
             <div class="col-sm-10 col-md-6">
                 <input type="file" id="picture" name="picture" onchange="InsQube.imagePreview(event,this,{multi: false, pc: 'picture-preview'})">
                 <p id="picture-preview" class="ins-img-ipb">
@@ -59,17 +59,36 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 (function($){
 
     var $regbox = $('input[type="text"][name="company_reg_no"]').closest('.form-group'),
-    initial_type = $("input[type=radio][name=type]:checked").val();
-    if(typeof initial_type === 'undefined' || initial_type === 'I'){
+        $ctznbox = $('input[type="text"][name="citizenship_no"]').closest('.form-group'),
+        $ppbox = $('input[type="text"][name="passport_no"]').closest('.form-group'),
+        initial_type = $("input[type=radio][name=type]:checked").val();
+    if(typeof initial_type === 'undefined'){
         $regbox.hide();
+        $ctznbox.hide();
+        $ppbox.hide();
+    }
+    else if(initial_type === 'I'){
+        $regbox.hide();
+    }else{
+        $ctznbox.hide();
+        $ppbox.hide();
     }
 
     $('input[type=radio][name=type]').on('ifChanged', function() {
       console.log(this.value)
       if (this.value == 'C') {
           $regbox.fadeIn();
+          $ctznbox.fadeOut(function(){
+            $('input[type="text"][name="citizenship_no"]').val('');
+          });
+          $ppbox.fadeOut(function(){
+            $('input[type="text"][name="passport_no"]').val('');
+          });
       }
       else {
+
+        $ctznbox.fadeIn();
+        $ppbox.fadeIn();
         $regbox.fadeOut(function(){
           $('input[type="text"][name="company_reg_no"]').val('');
         });

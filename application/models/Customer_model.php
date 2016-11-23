@@ -13,13 +13,13 @@ class Customer_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['prepare_contact_data', 'prepare_customer_defaults'];
-    protected $before_update = ['prepare_contact_data'];
+    protected $before_insert = ['prepare_contact_data', 'prepare_customer_defaults', 'prepare_customer_fts_data'];
+    protected $before_update = ['prepare_contact_data', 'prepare_customer_fts_data'];
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "branch_id", "code", "type", "pan", "full_name", "picture", "profession", "contact", "company_reg_no", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "branch_id", "code", "type", "pan", "full_name", "picture", "profession", "contact", "company_reg_no", "citizenship_no", "passport_no", "fts", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -36,6 +36,20 @@ class Customer_model extends MY_Model
             'field' => 'company_reg_no',
             'label' => 'Company Reg Number',
             'rules' => 'trim|max_length[20]',
+            '_type'     => 'text',
+            '_required' => false
+        ],
+        [
+            'field' => 'citizenship_no',
+            'label' => 'Citizenship Number',
+            'rules' => 'trim|max_length[20]',
+            '_type'     => 'text',
+            '_required' => false
+        ],
+        [
+            'field' => 'passport_no',
+            'label' => 'Passport Number',
+            'rules' => 'trim|alpha_dash|max_length[20]',
             '_type'     => 'text',
             '_required' => false
         ],
@@ -124,6 +138,56 @@ class Customer_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Prepare Customer Full Text Search Data
+     *
+     * Build Full text Search data from all the revelant columns
+     *
+     * Before Insert/Update Trigger to generate customer code and branch_id
+     *
+     * @param array $data
+     * @return array
+     */
+    public function prepare_customer_fts_data($data)
+    {
+        $contact_arr = $data['contacts'];
+
+        $dt = $data;
+        unset($dt['code']); // we have  separate field to filter
+        unset($dt['contacts']);
+        unset($dt['contact']);
+        unset($dt['updated_at']);
+        unset($dt['updated_by']);
+        unset($dt['created_at']);
+        unset($dt['created_by']);
+
+        $fts_data = [];
+        foreach($dt as $key=>$val)
+        {
+            if($val){
+                if($key == 'type')
+                {
+                    $fts_data []= $val == 'C' ? 'Company' : 'Individual';
+                }else{
+                    $fts_data [] =  $val;
+                }
+            }
+        }
+
+        foreach($contact_arr as $key=>$val)
+        {
+            if($val){
+                $fts_data [] =  $val;
+            }
+        }
+        $fts_data = implode(' ', $fts_data);
+
+        $data['fts'] = $fts_data;
+
+        return $data;
+    }
+    // ----------------------------------------------------------------
+
+    /**
      * Get Data Rows
      *
      * Get the filtered resulte set for listing purpose
@@ -133,7 +197,7 @@ class Customer_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('C.id, C.code, C.full_name, C.type, C.profession')
+        $this->db->select('C.id, C.code, C.pan, C.full_name, C.type, C.profession, C.company_reg_no, C.citizenship_no, C.passport_no, C.contact')
                  ->from($this->table_name . ' as C');
 
 
@@ -148,7 +212,7 @@ class Customer_model extends MY_Model
             $code = $params['code'] ?? NULL;
             if( $code )
             {
-                $this->db->where(['C.code' =>  $code]);
+                $this->db->like('LOWER(C.code)', strtolower($code), 'after');
             }
 
             $type = $params['type'] ?? NULL;
@@ -157,10 +221,29 @@ class Customer_model extends MY_Model
                 $this->db->where(['C.type' =>  $type]);
             }
 
+            $company_reg_no = $params['company_reg_no'] ?? NULL;
+            if( $company_reg_no )
+            {
+                $this->db->where(['C.company_reg_no' =>  $company_reg_no]);
+            }
+
+            $citizenship_no = $params['citizenship_no'] ?? NULL;
+            if( $citizenship_no )
+            {
+                $this->db->where(['C.citizenship_no' =>  $citizenship_no]);
+            }
+
+            $passport_no = $params['passport_no'] ?? NULL;
+            if( $passport_no )
+            {
+                $this->db->where(['C.passport_no' =>  $passport_no]);
+            }
+
             $keywords = $params['keywords'] ?? '';
             if( $keywords )
             {
-                $this->db->like('C.full_name', $keywords, 'after');
+                $this->db->where("MATCH ( C.`fts` ) AGAINST ( '{$keywords}*' IN BOOLEAN MODE)", NULL);
+                // $this->db->like('C.full_name', $keywords, 'after');
             }
         }
         return $this->db->limit($this->settings->per_page+1)

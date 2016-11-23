@@ -45,6 +45,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						<li class="list-group-item">
 							<b>Company Reg. No.</b> <span class="pull-right"><?php echo $record->company_reg_no?></span>
 						</li>
+					<?php else:?>
+						<li class="list-group-item">
+							<b>Citizenship No.</b> <span class="pull-right"><?php echo $record->citizenship_no?></span>
+						</li>
+						<li class="list-group-item">
+							<b>Passport No.</b> <span class="pull-right"><?php echo $record->passport_no?></span>
+						</li>
 					<?php endif?>
 					<li class="list-group-item no-border-b">
 						<b>PAN</b> <span class="pull-right"><?php echo $record->pan?></span>

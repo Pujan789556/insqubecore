@@ -7,8 +7,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <table class="table table-hover" id="live-searchable">
 	<tr>
 		<th>ID</th>
-		<th>Customer Code</th>
-		<th>Full Name</th>
+		<th>Customer Name</th>
+		<th>Contact</th>
 		<th>Type</th>
 		<th>Profession/Expertise</th>
 		<th>Actions</th>
