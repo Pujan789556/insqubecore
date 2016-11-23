@@ -30,7 +30,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
 			<i class="fa fa-pencil-square-o margin-r-5"></i><i class="fa fa-caret-down"></i></button>
 			<ul class="dropdown-menu pull-right" role="menu">
-				<?php if( $this->dx_auth->is_authorized('customers', 'edit.customer') ): ?>
+				<?php if( $this->dx_auth->is_admin() || $this->dx_auth->is_authorized('customers', 'edit.customer') ): ?>
 					<li>
 						<a href="#"
 							title="Edit Basic Information"
@@ -44,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					</li>
 				<?php endif;?>
 
-				<?php if($this->dx_auth->is_authorized('customers', 'delete.customer') && safe_to_delete( 'Customer_model', $record->id )):?>
+				<?php if( ($this->dx_auth->is_admin() || $this->dx_auth->is_authorized('customers', 'delete.customer')) && safe_to_delete( 'Customer_model', $record->id )):?>
 					<li class="divider"></li>
 					<li>
 						<a href="#"
