@@ -63,7 +63,7 @@ class Customers extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('customers', 'explore.customer') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('customers', 'explore.customer') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -187,7 +187,7 @@ class Customers extends MY_Controller
 		        ],
 	            [
 					'field' => 'filter_keywords',
-			        'label' => 'Kyewords <i class="fa fa-info-circle"></i>',
+			        'label' => 'Keywords <i class="fa fa-info-circle"></i>',
 			        'rules' => 'trim|max_length[80]',
 	                '_type'     => 'text',
 	                '_label_extra' => 'data-toggle="tooltip" data-title="Customer Name, PAN, Citizenship, Passport etc..."'
@@ -267,7 +267,7 @@ class Customers extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('customers', 'edit.customer') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('customers', 'edit.customer') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -307,7 +307,7 @@ class Customers extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('customers', 'add.customer') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('customers', 'add.customer') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -509,6 +509,14 @@ class Customers extends MY_Controller
 	 */
 	public function delete($id)
 	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('customers', 'delete.customer') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
 		// Valid Record ?
 		$id = (int)$id;
 		$record = $this->customer_model->find($id);
@@ -522,9 +530,9 @@ class Customers extends MY_Controller
 			'message' 	=> 'You cannot delete the default records.'
 		];
 		/**
-		 * Safe to Delete? && Permission Granted to do So?
+		 * Safe to Delete?
 		 */
-		if( !safe_to_delete( 'Customer_model', $id ) || !$this->dx_auth->is_authorized('customers', 'delete.customer'))
+		if( !safe_to_delete( 'Customer_model', $id ) )
 		{
 			return $this->template->json($data);
 		}
