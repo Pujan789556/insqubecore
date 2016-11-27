@@ -455,7 +455,7 @@ class Agents extends MY_Controller
 				'config' => [
 					'encrypt_name' => TRUE,
 	                'upload_path' => $this->_upload_path,
-	                'allowed_types' => 'gif|jpg|png',
+	                'allowed_types' => 'gif|jpg|jpeg|png',
 	                'max_size' => '2048'
 				],
 				'form_field' => 'picture',
