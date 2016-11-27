@@ -484,11 +484,12 @@ class DX_Auth
 		$user = array(
 			'DX_user_id'						=> $data->id,
 			'DX_username'						=> $data->username,
-			'DX_email'							=> $data->email,   			// added by IP
+			'DX_email'							=> $data->email,   				// added by IP
 			'DX_role_id'						=> $data->role_id,
-			'DX_branch_id'						=> $data->branch_id,  		// added by IP
-			'DX_department_id'					=> $data->department_id, 	// added by IP
-			'DX_role_name'						=> $role_data->name,		// Modified by IP
+			'DX_branch_id'						=> $data->branch_id,  			// added by IP
+			'DX_department_id'					=> $data->department_id, 		// added by IP
+			'DX_scope' 							=> json_decode($data->scope), 	// added by IP
+			'DX_role_name'						=> $role_data->name,			// Modified by IP
 			'DX_permissions'					=> $role_data->permissions,
 			'DX_logged_in'						=> TRUE
 		);
@@ -761,6 +762,69 @@ class DX_Auth
 	{
 		return $this->ci->session->userdata('DX_permissions');
 	}
+
+	// Get user scope
+	function get_scope()
+	{
+		return $this->ci->session->userdata('DX_scope');
+	}
+
+	// Get user's scope name : local|branch|global
+	function get_scope_name()
+	{
+		$scope = $this->get_scope();
+		return $scope->scope;
+	}
+
+	// Get user's scope list if scope is branch
+	function get_scope_list()
+	{
+		$scope = $this->get_scope();
+		return $scope->list ?? NULL;
+	}
+
+	// --------------------------------------------------------------------
+
+    /**
+     * Apply User Scope on Queries
+     *
+     * We develop query according to User's Scope.
+     * For example, if user has branch scope, he will be able to pull data from
+     * multiple branches that he/she has been assigned.
+     *
+     * @param string $table_alias
+     * @return void
+     */
+    function apply_user_scope($table_alias)
+    {
+    	$scope_field = "{$table_alias}.branch_id";
+        $scope = $this->get_scope_name();
+
+        if( $scope === 'local')
+        {
+            // ONLY DATA FROM MY BRANCH
+            $this->ci->db->where($scope_field, $this->get_branch_id());
+        }
+        else if( $scope === 'branch')
+        {
+            $branch_list = [$this->get_branch_id()];
+            $scope_list = $this->get_scope_list();
+            $branch_list = $scope_list ? array_unique( array_merge($branch_list, $scope_list) ) : $branch_list;
+
+            // If single branch, It's easy
+            if( count($branch_list) === 1 )
+            {
+                $branch_id = $branch_list[0];
+                $this->ci->db->where($scope_field, $branch_id);
+            }
+            else
+            {
+                $this->ci->db->where_in($scope_field, $branch_list);
+            }
+        }
+    }
+
+    // --------------------------------------------------------------------
 
 	// Check is user is has admin privilege
 	function is_admin()

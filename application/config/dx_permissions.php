@@ -109,6 +109,21 @@ $config['DX_permissions'] = [
 			'delete.customer'
 		],
 	],
+
+	/**
+	 * Group: Customers
+	 */
+	'Policy Permissions' => [
+		/**
+		 * Customer Module
+		 */
+		'policies'  => [
+			'explore.policy',
+			'add.policy',
+			'edit.policy',
+			'delete.policy'
+		],
+	],
 ];
 
 
