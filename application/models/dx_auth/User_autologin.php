@@ -44,7 +44,7 @@ class User_autologin extends CI_Model
 		return $this->db->get();
 		*/
 
-		return $this->db->select('U.id, U.username, U.email, U.role_id, U.branch_id, U.department_id,')
+		return $this->db->select('U.id, U.username, U.email, U.role_id, U.branch_id, U.department_id, U.scope')
 						->from($users_table . ' U')
 						->join($auto_table . ' A', 'A.user_id = U.id')
 						->where('U.id', $user_id)
