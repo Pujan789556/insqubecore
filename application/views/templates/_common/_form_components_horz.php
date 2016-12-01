@@ -85,7 +85,8 @@ foreach($form_elements as $element):?>
                 case 'dropdown':
                     // Let's check if we have default value
                     $value = isset($value) && $value != '' ? $value : ($element['_default'] ?? '');
-                    echo form_dropdown($element_config, $element['_data'], $value, $extra_attributes);
+                    $dropdown_data = $element['_data'] ?? ['' => 'Select...'];
+                    echo form_dropdown($element_config, $dropdown_data, $value, $extra_attributes);
                     break;
 
                 case 'checkbox':
