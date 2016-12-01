@@ -362,13 +362,14 @@ $( document ).ajaxError(function( event, request, settings ) {
  $(document).on('submit', '.form-iqb-general', function(e){
     e.preventDefault();
     var $this = $(this),
-        $btn = $('[type="submit"]', $this);
 
-    if(!$btn.length){
         // Find Primary button from Bootbox Model
         $btn = $('.bootbox .modal-footer').find('button[data-bb-handler="primary"]');
-        $btn.attr('data-loading-text', 'Saving...');
+
+    if(!$btn.length){
+        $btn = $('[type="submit"]', $this);
     }
+    $btn.attr('data-loading-text', 'Saving...');
 
     $btn.button('loading');
     InsQube.postForm(this, function(r){
