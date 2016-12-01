@@ -1325,18 +1325,18 @@ class MY_Model
      * Write Cache
      *
      * @param mixed $data
-     * @param string $cache_name
+     * @param string $key
      * @param int|int $duration Default duration is 5 minutes
      * @return boolean
      */
-    protected function write_cache($data, $cache_name, int $duration = 300)
+    protected function write_cache($data, $key, int $duration = 300)
     {
         if(!empty($data))
         {
             $this->load->driver('cache');
 
-            $cache_name = $this->cache_prefix . '_' . $cache_name;
-            $this->cache->{$this->cache_driver}->save($cache_name, $data, $duration);
+            $key = $this->cache_prefix . '_' . $key;
+            $this->cache->{$this->cache_driver}->save($key, $data, $duration);
             return TRUE;
         }
         return FALSE;
@@ -1347,18 +1347,18 @@ class MY_Model
     /**
      * Delete Cache
      *
-     * @param string $cache_name
+     * @param string $key
      * @return this
      */
-    public function get_cache($cache_name)
+    public function get_cache($key)
     {
-        if(!empty($cache_name))
+        if(!empty($key))
         {
             $this->load->driver('cache');
 
             // build cache name with prefix
-            $cache_name = $this->cache_prefix . '_' . $cache_name;
-            $data = $this->cache->{$this->cache_driver}->get($cache_name);
+            $key = $this->cache_prefix . '_' . $key;
+            $data = $this->cache->{$this->cache_driver}->get($key);
             return $data;
         }
         return FALSE;
@@ -1369,21 +1369,65 @@ class MY_Model
     /**
      * Delete Cache
      *
-     * @param string $cache_name
+     * @param array|string $key
      * @return this
      */
-    public function delete_cache($cache_name = NULL)
+    public function delete_cache($patterns = NULL)
     {
-        if(!empty($cache_name))
+        if(empty($patterns))
         {
-            $this->load->driver('cache');
-
-            // build cache name with prefix
-            $cache_name = $this->cache_prefix . '_' . $cache_name;
-            $this->cache->{$this->cache_driver}->delete($cache_name);
-            return TRUE;
+            return FALSE;
         }
-        return FALSE;
+
+        $this->load->driver('cache');
+
+        /**
+         * Let's Build the Keys
+         */
+        $keys = [];
+        if( is_string($patterns) )
+        {
+            /**
+             * Check if We have a key pattern instead of key name
+             */
+            $key = $this->cache_prefix . '_' . $patterns;
+            if( substr($key, -1) === '*'  && $this->cache_driver === 'redis')
+            {
+                $keys = $this->cache->{$this->cache_driver}->keys($key);
+            }
+            else
+            {
+                $keys = [$key];
+            }
+        }
+        else if(is_array($patterns))
+        {
+            foreach($patterns as $key)
+            {
+                /**
+                 * Check if We have a key pattern instead of key name
+                 */
+                $key = $this->cache_prefix . '_' . $key;
+                if( substr($key, -1) === '*'  && $this->cache_driver === 'redis')
+                {
+                    $keys = array_merge($keys, $this->cache->{$this->cache_driver}->keys($key));
+                }
+                else
+                {
+                    $keys[] = $key;
+                }
+            }
+        }
+        $keys = array_unique($keys);
+
+        /**
+         * Let's Delete Each Keys
+         */
+        foreach( $keys as $key)
+        {
+            $this->cache->{$this->cache_driver}->delete($key);
+        }
+        return TRUE;
     }
 
     //--------------------------------------------------------------------
