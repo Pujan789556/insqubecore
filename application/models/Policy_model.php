@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "code", "branch_id", "customer_id", "portfolio_id", "sold_by", "type", "object_id", "object_ref", "start_date", "end_date", "status", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "code", "branch_id", "customer_id", "portfolio_id", "sold_by", "type", "object_id", "start_date", "end_date", "flag_has_agent", "status", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -123,7 +123,14 @@ class Policy_model extends MY_Model
                 '_data'     => $select + $this->user_model->dropdown($role_id, $branch_id),
                 '_required' => true
             ],
-
+            [
+                'field' => 'flag_has_agent',
+                'label' => 'Do you have agent?',
+                'rules' => 'trim|alpha|exact_length[1]|in_list[Y,N]',
+                '_type'     => 'dropdown',
+                '_data'     => [ '' => 'Select...', 'Y' => 'Yes', 'N' => 'No'],
+                '_required' => true
+            ],
         ];
     }
 
