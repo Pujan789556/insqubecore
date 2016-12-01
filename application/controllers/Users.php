@@ -186,46 +186,12 @@ class Users extends MY_Controller
 			[
 				'field' => 'profile[salary]',
 		        'label' => 'Salary',
-		        'rules' => 'trim|decimal|max_length[10]',
+		        'rules' => 'trim|prep_decimal|decimal|max_length[10]',
 		        '_key' 		=> 'salary', // Json Key Name
 		        '_type' 	=> 'text',
 		        '_required' => false
 			]
 		]
-	];
-
-	/**
-	 * Filter Configuration
-	 */
-	private $_filters = [
-			[
-				'field' => 'role_id',
-		        'label' => 'Application Role',
-		        'rules' => 'trim|integer|max_length[8]',
-		        '_type' 	=> 'dropdown',
-		        '_required' => true
-			],
-			[
-				'field' => 'branch_id',
-		        'label' => 'Branch',
-		        'rules' => 'trim|integer|max_length[11]',
-		        '_type' 	=> 'dropdown',
-		        '_required' => true
-			],
-			[
-				'field' => 'department_id',
-		        'label' => 'Department',
-		        'rules' => 'trim|integer|max_length[11]',
-		        '_type' 	=> 'dropdown',
-		        '_required' => true
-			],
-			[
-				'field' => 'keywords',
-		        'label' => 'Name/Username',
-		        'rules' => 'trim|max_length[80]',
-		        '_type' 	=> 'dropdown',
-		        '_required' => true
-			],
 	];
 
 	// --------------------------------------------------------------------
