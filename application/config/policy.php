@@ -2,9 +2,33 @@
 
 /*
 | -------------------------------------------------------------------
-| Portfolio Related Configuration
+| Policy Related Configurations
 | -------------------------------------------------------------------
 */
+
+/*
+|--------------------------------------------------------------------------
+| Policy Duration List
+|--------------------------------------------------------------------------
+|
+| List of durations in terms of PHP Relative Time Format. These duration are
+| specified by Beema Samiti
+|
+*/
+$config['PC_policy_duration_list'] = [
+
+	'+1 week' 		=> 'One Week',
+	'+1 month'		=> 'One Month',
+	'+2 months'		=> 'Two Months',
+	'+3 months' 	=> 'Three Months',
+	'+4 months' 	=> 'Four Months',
+	'+5 months'		=> 'Five Months',
+	'+6 months' 	=> 'Six Months',
+	'+7 months'		=> 'Seven Months',
+	'+8 months'		=> 'Eight Months',
+	'+1 year' 		=> 'One Year',
+];
+
 
 /*
 |--------------------------------------------------------------------------

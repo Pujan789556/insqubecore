@@ -17,8 +17,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						data-toggle="tooltip"
 						class="btn btn-success btn-round trg-dialog-edit"
 						data-box-size="large"
-						data-title='<i class="fa fa-pencil-square-o"></i> Add New Policy'
-						data-url="<?php echo site_url('policies/add/');?>"
+						data-title='<i class="fa fa-pencil-square-o"></i> Add New Policy (Wizard) - Step 1'
+						data-url="<?php echo site_url('policies/wizard/');?>"
 						data-form=".form-iqb-general"
 					><i class="ion-plus-circled"></i> Add</a>
 				<?php endif?>

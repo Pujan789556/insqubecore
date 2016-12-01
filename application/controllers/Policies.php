@@ -34,6 +34,10 @@ class Policies extends MY_Controller
 		// Load Model
 		$this->load->model('policy_model');
 
+		// Policy Configuration/Helper
+		$this->load->config('policy');
+		$this->load->helper('policy');
+
 		// Image Path
         $this->_upload_path = INSQUBE_MEDIA_PATH . 'policies/';
 	}
@@ -145,44 +149,53 @@ class Policies extends MY_Controller
 
 		private function _get_filter_elements()
 		{
+			$this->load->model('portfolio_model');
+
 			$select = ['' => 'Select ...'];
 			$filters = [
 				[
 	                'field' => 'filter_type',
-	                'label' => 'Customer Type',
-	                'rules' => 'trim|alpha|exact_length[1]|in_list[I,C]',
+	                'label' => 'Policy Type',
+	                'rules' => 'trim|alpha|exact_length[1]|in_list[N,R]',
 	                '_id'       => 'filter-type',
 	                '_type'     => 'dropdown',
-	                '_data'     => [ '' => 'Select...', 'I' => 'Individual', 'C' => 'Company'],
-	            ],
-				[
-	                'field' => 'filter_code',
-	                'label' => 'Customer Code',
-	                'rules' => 'trim|alpha_numeric|max_length[12]',
-	                '_type'     => 'text',
+	                '_data'     => [ '' => 'Select...', 'N' => 'New', 'R' => 'Renewal'],
 	            ],
 	            [
-		            'field' => 'filter_company_reg_no',
-		            'label' => 'Company Reg Number',
+	                'field' => 'filter_status',
+	                'label' => 'Policy Status',
+	                'rules' => 'trim|alpha|exact_length[1]|in_list[D,A,E]',
+	                '_id'       => 'filter-status',
+	                '_type'     => 'dropdown',
+	                '_data'     => [ '' => 'Select...', 'D' => 'Draft', 'A' => 'Active', 'E' => 'Expired'],
+	            ],
+				[
+	                'field' => 'filter_portfolio_id',
+	                'label' => 'Portfolio',
+	                'rules' => 'trim|integer|max_length[11]',
+	                '_id'       => 'filter-status',
+	                '_type'     => 'dropdown',
+	                '_data'     => $select + $this->portfolio_model->dropdown_parent(),
+	            ],
+	            [
+		            'field' => 'filter_code',
+		            'label' => 'Policy Code',
 		            'rules' => 'trim|max_length[20]',
 		            '_type'     => 'text',
-		            '_extra_attributes' => ['data-hideonload' => 'yes'],
 		            '_required' => false
 		        ],
 		        [
-		            'field' => 'filter_citizenship_no',
-		            'label' => 'Citizenship Number',
-		            'rules' => 'trim|max_length[20]',
-		            '_type'     => 'text',
-		            '_extra_attributes' => ['data-hideonload' =>'yes'],
+		            'field' => 'filter_start_date',
+		            'label' => 'Policy Start Date',
+		            'rules' => 'trim|valid_date',
+		            '_type'     => 'date',
 		            '_required' => false
 		        ],
 		        [
-		            'field' => 'filter_passport_no',
-		            'label' => 'Passport Number',
-		            'rules' => 'trim|alpha_dash|max_length[20]',
-		            '_type'     => 'text',
-		            '_extra_attributes' => ['data-hideonload' =>'yes'],
+		            'field' => 'filter_end_date',
+		            'label' => 'Policy Start Date',
+		            'rules' => 'trim|valid_date',
+		            '_type'     => 'date',
 		            '_required' => false
 		        ],
 	            [
@@ -282,6 +295,40 @@ class Policies extends MY_Controller
 
 		// Form Submitted? Save the data
 		$json_data = $this->_save('edit', $record);
+
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('policies/_form',
+			[
+				'form_elements' => $this->policy_model->validation_rules,
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Policy Wizard
+	 *
+	 * @return void
+	 */
+	public function wizard()
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('policies', 'add.policy') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		$record = NULL;
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('add');
 
 
 		// No form Submitted?
@@ -474,8 +521,31 @@ class Policies extends MY_Controller
 		return $return_data;
 	}
 
+	// --------------------------------------------------------------------
+
+	/**
+     * Callback : Valid Date Range
+     *
+     * Check Start Date < End Date
+     *
+     * @param string $str
+     * @return bool
+     */
+    public function valid_duration($str)
+    {
+    	$start_date = strtotime($this->input->post('start_date'));
+    	$end_date 	= strtotime($this->input->post('end_date'));
+
+    	if( $start_date >= $end_date )
+    	{
+    		$this->form_validation->set_message('valid_date_range', 'The "End Date" must be greater than "Start Date".');
+            return FALSE;
+    	}
+        return TRUE;
+    }
+
 		/**
-		 * Sub-function: Upload Customer Profile Picture
+		 * Sub-function: Upload Policy Profile Picture
 		 *
 		 * @param string|null $old_picture
 		 * @return array
@@ -503,7 +573,7 @@ class Policies extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Delete a Customer
+	 * Delete a Policy
 	 * @param integer $id
 	 * @return json
 	 */
@@ -532,7 +602,7 @@ class Policies extends MY_Controller
 		/**
 		 * Safe to Delete?
 		 */
-		if( !safe_to_delete( 'Customer_model', $id ) )
+		if( !safe_to_delete( 'Policy_model', $id ) )
 		{
 			return $this->template->json($data);
 		}
@@ -572,7 +642,7 @@ class Policies extends MY_Controller
 	// --------------------------------------------------------------------
 
     /**
-     * View Customer Details
+     * View Policy Details
      *
      * @param integer $id
      * @return void
@@ -597,12 +667,12 @@ class Policies extends MY_Controller
 		// Load media helper
 		$this->load->helper('insqube_media');
 
-		$this->data['site_title'] = 'Customer Details | ' . $record->full_name;
+		$this->data['site_title'] = 'Policy Details | ' . $record->full_name;
 		$this->template->partial(
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Customer Details <small>' . $record->full_name . '</small>',
+								'content_header' => 'Policy Details <small>' . $record->full_name . '</small>',
 								'breadcrumbs' => ['Policies' => 'policies', 'Details' => NULL]
 						])
 						->partial('content', 'policies/_details', compact('record'))

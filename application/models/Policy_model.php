@@ -13,7 +13,7 @@ class Policy_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    // protected $before_insert = ['prepare_contact_data', 'prepare_customer_defaults', 'prepare_customer_fts_data'];
+    protected $before_insert = ['prepare_policy_defaults'];
     // protected $before_update = ['prepare_contact_data', 'prepare_customer_fts_data'];
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
@@ -21,60 +21,7 @@ class Policy_model extends MY_Model
 
     protected $fields = [ "id", "code", "branch_id", "customer_id", "portfolio_id", "sold_by", "type", "object_id", "object_ref", "start_date", "end_date", "status", "created_at", "created_by", "updated_at", "updated_by"];
 
-    protected $validation_rules = [
-        [
-            'field' => 'type',
-            'label' => 'Customer Type',
-            'rules' => 'trim|required|alpha|exact_length[1]|in_list[I,C]',
-            '_type'     => 'radio',
-            '_data'     => [ 'I' => 'Individual', 'C' => 'Company'],
-            '_required' => true
-        ],
-
-        // If type is Company
-        [
-            'field' => 'company_reg_no',
-            'label' => 'Company Reg Number',
-            'rules' => 'trim|max_length[20]',
-            '_type'     => 'text',
-            '_required' => false
-        ],
-        [
-            'field' => 'citizenship_no',
-            'label' => 'Citizenship Number',
-            'rules' => 'trim|max_length[20]',
-            '_type'     => 'text',
-            '_required' => false
-        ],
-        [
-            'field' => 'passport_no',
-            'label' => 'Passport Number',
-            'rules' => 'trim|alpha_dash|max_length[20]',
-            '_type'     => 'text',
-            '_required' => false
-        ],
-        [
-            'field' => 'full_name',
-            'label' => 'Full Name',
-            'rules' => 'trim|required|max_length[80]',
-            '_type'     => 'text',
-            '_required' => true
-        ],
-        [
-            'field' => 'pan',
-            'label' => 'PAN',
-            'rules' => 'trim|alpha_dash|max_length[20]',
-            '_type'     => 'text',
-            '_required' => false
-        ],
-        [
-            'field' => 'profession',
-            'label' => 'Profession / Field of Experties',
-            'rules' => 'trim|max_length[50]',
-            '_type'     => 'text',
-            '_required' => false
-        ]
-    ];
+    protected $validation_rules = [];
 
 
     /**
@@ -93,98 +40,124 @@ class Policy_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+
+        // Policy Configuration/Helper
+        $this->load->config('policy');
+        $this->load->helper('policy');
+
+        // Set validation rules
+        $this->set_validation_rules();
+
+
     }
 
 
     // ----------------------------------------------------------------
 
-    /**
-     * Prepare Contact Data
-     *
-     * Before Insert/Update Trigger to Get Contact Data From Contact Form
-     *
-     * @param array $data
-     * @return array
-     */
-    public function prepare_contact_data($data)
+    public function set_validation_rules()
     {
-        $data['contact'] = get_contact_data_from_form();
-        return $data;
+        $this->load->model('portfolio_model');
+        $this->load->model('user_model');
+        $select = ['' => 'Select ...'];
+
+        /**
+         * List all marketing staffs of this branch
+         */
+        $role_id = 7;
+        $branch_id = $this->dx_auth->is_admin() ? NULL : $this->dx_auth->get_branch_id();
+
+        $this->validation_rules = [
+            [
+                'field' => 'type',
+                'label' => 'Policy Type',
+                'rules' => 'trim|alpha|exact_length[1]|in_list[N,R]',
+                '_type'     => 'dropdown',
+                '_data'     => [ '' => 'Select...', 'N' => 'New', 'R' => 'Renewal'],
+                '_required' => true
+            ],
+            [
+                'field' => 'customer_id',
+                'label' => 'Customer',
+                'rules' => 'trim|required|intger|max_length[11]',
+                '_type'     => 'text',
+                '_required' => false
+            ],
+            [
+                'field' => 'portfolio_id',
+                'label' => 'Portfolio',
+                'rules' => 'trim|required|intger|max_length[11]',
+                '_type'     => 'dropdown',
+                '_id'       => 'portfolio',
+                '_data'     => $select + $this->portfolio_model->dropdown_parent(),
+                '_required' => false
+            ],
+            [
+                'field' => 'object_id',
+                'label' => 'Policy Object',
+                'rules' => 'trim|required|integer|max_length[11]',
+                '_type'     => 'dropdown',
+                '_id'       => 'dd-po', // dropdown policy object
+                '_required' => true
+            ],
+            [
+                'field' => 'start_date',
+                'label' => 'Policy Start Date',
+                'rules' => 'trim|required|valid_date',
+                '_type'     => 'date',
+                '_required' => false
+            ],
+            [
+                'field' => 'duration',
+                'label' => 'Policy Duration',
+                'rules' => 'trim|required|valid_date|callback_valid_duration',
+                '_type'     => 'dropdown',
+                '_data'     => $select + get_policy_duration_list(),
+                '_default'  => '+1 year',
+                '_required' => false
+            ],
+            [
+                'field' => 'sold_by',
+                'label' => 'Marketing Staff',
+                'rules' => 'trim|required|intger|max_length[11]',
+                '_type'     => 'dropdown',
+                '_data'     => $select + $this->user_model->dropdown($role_id, $branch_id),
+                '_required' => true
+            ],
+
+        ];
     }
 
     // ----------------------------------------------------------------
 
     /**
-     * Prepare Customer Defaults
+     * Prepare Policy Defaults
      *
-     * Generate customer code and branch id before inserting.
-     * These are non changable values.
+     * Build policy default data before inserting into database.
+     *
+     * Default Data:
+     *  code - random at this point
+     *  branch_id - current user's branch id
+     *  object_ref - policy object reference according to portfolio
+     *  status - Draft by default
+     *
      *
      * Before Insert Trigger to generate customer code and branch_id
      *
      * @param array $data
      * @return array
      */
-    public function prepare_customer_defaults($data)
+    public function prepare_policy_defaults($data)
     {
         $this->load->library('Token');
 
-        $data['code']       = $this->token->generate(12);
-        $data['branch_id']  = $this->dx_auth->get_branch_id();
+        $data['code']           = $this->token->generate(20);
+        $data['branch_id']      = $this->dx_auth->get_branch_id();
+        $data['object_ref']     = get_policy_object_reference();
 
         return $data;
     }
 
-    // ----------------------------------------------------------------
 
-    /**
-     * Prepare Customer Full Text Search Data
-     *
-     * Build Full text Search data from all the revelant columns
-     *
-     * Before Insert/Update Trigger to generate customer code and branch_id
-     *
-     * @param array $data
-     * @return array
-     */
-    public function prepare_customer_fts_data($data)
-    {
-        $contact_arr = $data['contacts'];
-
-        $dt = $data;
-        unset($dt['code']); // we have  separate field to filter
-        unset($dt['contacts']);
-        unset($dt['contact']);
-        unset($dt['updated_at']);
-        unset($dt['updated_by']);
-        unset($dt['created_at']);
-        unset($dt['created_by']);
-
-        $fts_data = [];
-        foreach($dt as $key=>$val)
-        {
-            if($val){
-                if($key == 'type')
-                {
-                    $fts_data []= $val == 'C' ? 'Company' : 'Individual';
-                }else{
-                    $fts_data [] =  $val;
-                }
-            }
-        }
-
-        foreach($contact_arr as $key=>$val)
-        {
-            if($val){
-                $fts_data [] =  $val;
-            }
-        }
-        $fts_data = implode(' ', $fts_data);
-
-        $data['fts'] = $fts_data;
-
-        return $data;
-    }
     // ----------------------------------------------------------------
 
     /**
@@ -197,7 +170,7 @@ class Policy_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('P.id, P.code, P.branch_id, P.customer_id, P.portfolio_id, P.sold_by, P.type, P.object_id, P.object_ref, P.start_date, P.end_date, P.status')
+        $this->db->select('P.id, P.code, P.branch_id, P.customer_id, P.portfolio_id, P.sold_by, P.type, P.object_id,  P.start_date, P.end_date, P.status')
                  ->from($this->table_name . ' as P');
 
         /**
