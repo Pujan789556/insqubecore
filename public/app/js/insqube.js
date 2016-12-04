@@ -547,3 +547,15 @@ $('body').tooltip({
     selector: '[data-toggle="tooltip"]',
     container: 'body'
 });
+
+/**
+ * Multiple Bootbox Opened?
+ * Make the next opened bootbox scrollable (vertical) upon closing this
+ */
+$(document).on('hidden.bs.modal', '.bootbox[role="dialog"]', function(){
+    // Do we have another bootbox opened?
+    $bootbox = $('.bootbox');
+    if($bootbox.length  ){
+        $('body').addClass('modal-open');
+    }
+});
