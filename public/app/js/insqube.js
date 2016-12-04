@@ -400,7 +400,9 @@ $( document ).ajaxError(function( event, request, settings ) {
             }
             // What about Edit Form Dialog?
             if( typeof r.hideBootbox !== 'undefined' && r.hideBootbox === true){
-                bootbox.hideAll();
+                // Close the bootbox if any
+                var $bootbox = $this.closest('.bootbox');
+                $('button[data-bb-handler="cancel"]', $bootbox).trigger('click');
             }
         }
 

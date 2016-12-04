@@ -10,6 +10,12 @@
 
  .hr-medium{margin-top:10px; margin-bottom: 10px;}
 
+ /* -- Selectable Component -- */
+.selectable:hover{
+  background-color: #0073b7 !important;
+  color: #fff;
+}
+
 /*-- Image Select Preview Box Container--*/
 .ins-img-ipb{
 	margin-top:10px;
