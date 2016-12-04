@@ -3,15 +3,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Advanced Search Filter: General
 *
-* Variables Required: $filter_url, $filters
+* Variables Required: $filter_url, $filters, $data_box
 */
+$data_box = $data_box ?? '#iqb-data-list';
 ?>
 <div class="box box-solid no-margin ins-box-filter">
 	<?php echo form_open( $filter_url,
             [
             	'id'  => '_form-iqub-filter',
                 'class' => 'form-inline form-iqb-filter',
-                'data-box' => '#iqb-data-list', // Filter Result Box
+                'data-box' => $data_box, // Filter Result Box
                 'data-method' => 'html'
             ]);?>
 		<div class="box-body">
