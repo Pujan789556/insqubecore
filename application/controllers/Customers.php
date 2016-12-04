@@ -52,13 +52,21 @@ class Customers extends MY_Controller
 		$this->page();
 	}
 
+
+	// --------------------------------------------------------------------
+	// SEARCH/FILTER - FUNCTIONS
+	// --------------------------------------------------------------------
+
+
 	/**
 	 * Paginate Data List
 	 *
 	 * @param integer $next_id
 	 * @return void
 	 */
-	function page( $next_id = 0, $refresh = FALSE, $ajax_extra = [] )
+
+	// $layout, $from_widget, $next_id, $ajax_extra
+	function page( $layout='f', $from_widget='n', $next_id = 0, $ajax_extra = [] )
 	{
 		/**
 		 * Check Permissions
@@ -68,51 +76,45 @@ class Customers extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
-
 		// If request is coming from refresh method, reset nextid
-		$next_id = $refresh === FALSE ? (int)$next_id : 0;
-
-		$params = array();
-		if( $next_id )
-		{
-			$params = ['next_id' => $next_id];
-		}
+		$next_id = (int)$next_id;
+		$next_url_base = 'customers/page/r/'.$from_widget;
 
 		/**
-		 * Extract Filter Elements
+		 * Get Search Result
 		 */
-		$filter_data = $this->_get_filter_data( );
-		if( $filter_data['status'] === 'success' )
-		{
-			$params = array_merge($params, $filter_data['data']);
-		}
-
-		$records = $this->customer_model->rows($params);
-		$records = $records ? $records : [];
-		$total = count($records);
+		$data = $this->_get_filter_data( $next_url_base, $next_id );
 
 		/**
-		 * Grab Next ID or Reset It
+		 * Widget Specific Data
 		 */
-		if($total == $this->settings->per_page+1)
+		$data['_flag__show_widget_row'] = $from_widget === 'y';
+
+		/**
+		 * Find View
+		 */
+		if($layout === 'f') // Full Layout
 		{
-			$next_id = $records[$total-1]->id;
-			unset($records[$total-1]); // remove last record
+			$view = $from_widget === 'y' ? 'customers/_find_widget' : 'customers/_index';
+
+			$data = array_merge($data, [
+				'filters' 		=> $this->_get_filter_elements(),
+				'filter_url' 	=> site_url('customers/page/l/' . $from_widget ),
+				'data_box' 		=> '#iqb-customer-data-list',
+			]);
+		}
+		else if($layout === 'l')
+		{
+			$view = 'customers/_list';
 		}
 		else
 		{
-			$next_id = NULL;
+			$view = 'customers/_rows';
 		}
-
-		$data = [
-			'records' => $records,
-			'next_id' => $next_id
-		];
 
 		if ( $this->input->is_ajax_request() )
 		{
 
-			$view = $refresh === FALSE ? 'customers/_rows' : 'customers/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$ajax_data = [
 				'status' => 'success',
@@ -126,12 +128,6 @@ class Customers extends MY_Controller
 			$this->template->json($ajax_data);
 		}
 
-		/**
-		 * Filter Configurations
-		 */
-		$data['filters'] = $this->_get_filter_elements();
-		$data['filter_url'] = site_url('customers/filter/');
-
 		$this->template
 						->set_layout('layout-advanced-filters')
 						->partial(
@@ -142,6 +138,7 @@ class Customers extends MY_Controller
 						->partial('dynamic_js', 'customers/_customer_js')
 						->render($this->data);
 	}
+
 
 		private function _get_filter_elements()
 		{
@@ -196,9 +193,9 @@ class Customers extends MY_Controller
 			return $filters;
 		}
 
-		private function _get_filter_data()
+		private function _get_filter_data( $next_url_base, $next_id = 0)
 		{
-			$data = ['status' => 'empty'];
+			$params = [];
 
 			if( $this->input->post() )
 			{
@@ -206,7 +203,7 @@ class Customers extends MY_Controller
 				$this->form_validation->set_rules($rules);
 				if( $this->form_validation->run() )
 				{
-					$data['data'] = [
+					$params = [
 						'code' 				=> $this->input->post('filter_code') ?? NULL,
 						'type' 				=> $this->input->post('filter_type') ?? NULL,
 						'company_reg_no' 	=> $this->input->post('filter_company_reg_no') ?? NULL,
@@ -214,7 +211,6 @@ class Customers extends MY_Controller
 						'passport_no' 		=> $this->input->post('filter_passport_no') ?? NULL,
 						'keywords' 			=> $this->input->post('filter_keywords') ?? ''
 					];
-					$data['status'] = 'success';
 				}
 				else
 				{
@@ -226,8 +222,42 @@ class Customers extends MY_Controller
 					$this->template->json($data);
 				}
 			}
+
+			$next_id = (int)$next_id;
+			if( $next_id )
+			{
+				$params = ['next_id' => $next_id];
+			}
+
+			/**
+			 * Get Search Result
+			 */
+			$records = $this->customer_model->rows($params);
+			$records = $records ? $records : [];
+			$total = count($records);
+
+			/**
+			 * Grab Next ID or Reset It
+			 */
+			if($total == $this->settings->per_page+1)
+			{
+				$next_id = $records[$total-1]->id;
+				unset($records[$total-1]); // remove last record
+			}
+			else
+			{
+				$next_id = NULL;
+			}
+
+			$data = [
+				'records' => $records,
+				'next_id'  => $next_id,
+				'next_url' => $next_id ? site_url( rtrim($next_url_base, '/\\') . '/' . $next_id ) : NULL
+			];
 			return $data;
 		}
+
+	// --------------------------------------------------------------------
 
 	/**
 	 * Refresh The Module
@@ -241,6 +271,8 @@ class Customers extends MY_Controller
 		$this->page(0, TRUE);
 	}
 
+	// --------------------------------------------------------------------
+
 	/**
 	 * Filter the Data
 	 *
@@ -252,7 +284,7 @@ class Customers extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
-
+	// CRUD - FUNCTIONS
 	// --------------------------------------------------------------------
 
 	/**
@@ -285,7 +317,7 @@ class Customers extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('customers/_form',
+		$json_data['form'] = $this->load->view('customers/_form_box',
 			[
 				'form_elements' => $this->customer_model->validation_rules,
 				'record' 		=> $record
@@ -302,7 +334,7 @@ class Customers extends MY_Controller
 	 *
 	 * @return void
 	 */
-	public function add()
+	public function add( $from_widget='n' )
 	{
 		/**
 		 * Check Permissions
@@ -315,11 +347,11 @@ class Customers extends MY_Controller
 		$record = NULL;
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add');
+		$json_data = $this->_save('add', NULL, $from_widget);
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('customers/_form',
+		$json_data['form'] = $this->load->view('customers/_form_box',
 			[
 				'form_elements' => $this->customer_model->validation_rules,
 				'record' 		=> $record
@@ -336,9 +368,10 @@ class Customers extends MY_Controller
 	 *
 	 * @param string $action [add|edit]
 	 * @param object|null $record Record Object or NULL
+	 * @param char 	$from_widget
 	 * @return array
 	 */
-	private function _save($action, $record = NULL)
+	private function _save($action, $record = NULL, $from_widget='n')
 	{
 
 		// Valid action?
@@ -423,17 +456,24 @@ class Customers extends MY_Controller
 			{
 				if($action === 'add')
 				{
+					$record = $this->customer_model->find($done);
+					$single_row = $from_widget === 'y' ? 'customers/_single_row_widget' : 'customers/_single_row';
+					$html = $this->load->view($single_row, ['record' => $record], TRUE);
+
 					// Refresh the list page and close bootbox
-					return $this->page(0, TRUE, [
-							'message' => $message,
-							'status'  => $status,
-							'updateSection' => true,
-							'updateSectionData' => [
-								'box' => '#iqb-data-list',
-								'method' => 'html'
-							],
-							'hideBootbox' => true
-						]);
+					$ajax_data = [
+						'message' => $message,
+						'status'  => $status,
+						'updateSection' => true,
+						'updateSectionData' => [
+							'box' 		=> '#search-result-customer',
+							'method' 	=> 'prepend',
+							'html'		=> $html
+						],
+						'hideBootbox' => true
+					];
+					return $this->template->json($ajax_data);
+
 				}
 				else
 				{
@@ -569,6 +609,9 @@ class Customers extends MY_Controller
 		return $this->template->json($data);
 	}
 
+
+	// --------------------------------------------------------------------
+	// DETAILS EXPLORATION
 	// --------------------------------------------------------------------
 
     /**

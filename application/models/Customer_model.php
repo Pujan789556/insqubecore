@@ -206,7 +206,7 @@ class Customer_model extends MY_Model
             $next_id = $params['next_id'] ?? NULL;
             if( $next_id )
             {
-                $this->db->where(['C.id >=' => $next_id]);
+                $this->db->where(['C.id <=' => $next_id]);
             }
 
             $code = $params['code'] ?? NULL;
@@ -246,8 +246,10 @@ class Customer_model extends MY_Model
                 // $this->db->like('C.full_name', $keywords, 'after');
             }
         }
-        return $this->db->limit($this->settings->per_page+1)
-                    ->get()->result();
+        return $this->db
+                        ->order_by('C.id', 'desc')
+                        ->limit($this->settings->per_page+1)
+                        ->get()->result();
     }
 
 

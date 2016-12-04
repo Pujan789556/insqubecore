@@ -68,16 +68,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</li>
 			</ul>
 		</div>
-
-
-
-
-
-
-
-
-
-
-
 	</td>
 </tr>

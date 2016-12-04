@@ -7,24 +7,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Load Rows from View
  */
+$_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 foreach($records as $record)
 {
-	$this->load->view('customers/_single_row', compact('record'));
+	$single_row = $_flag__show_widget_row ? 'customers/_single_row_widget' : 'customers/_single_row';
+	$this->load->view($single_row, compact('record'));
 }
 
 /**
  * Next Link?
  */
 if($next_id):
-	$next_url = site_url('customers/page/'.$next_id);
-	$loader_box_id = '__next-loader-'.$next_id;
+	// $next_url = site_url('customers/page/'.$next_id);
+	$loader_box_id = '__next-loader-customer-'.$next_id;
 ?>
 	<tr id="<?php echo $loader_box_id;?>">
 		<td colspan="8" class="text-center pointer filter-next-page-trigger"
 			data-loading-text="Loading ..."
 			data-url="<?php echo $next_url;?>"
 			data-method="append"
-			data-box="#live-searchable"
+			data-box="#search-result-customer"
 			data-self-destruct="true"
 			data-loader-box="#<?php echo $loader_box_id;?>"
 			data-load-method="post"

@@ -7,8 +7,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <?php echo form_open( $this->uri->uri_string(),
                         [
                             'class' => 'form-horizontal form-iqb-general',
-                            'id'    => '__testform',
-                            'data-pc' => '.bootbox-body' // parent container ID
+                            // 'id'    => '__testform',
+                            'data-pc' => '#form-box-customer' // parent container ID
                         ],
                         // Hidden Fields
                         isset($record) ? ['id' => $record->id] : []); ?>
@@ -74,25 +74,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         $ppbox.hide();
     }
 
+    // Toggle fields according to type
     $('input[type=radio][name=type]').on('ifChanged', function() {
-      console.log(this.value)
-      if (this.value == 'C') {
-          $regbox.fadeIn();
-          $ctznbox.fadeOut(function(){
-            $('input[type="text"][name="citizenship_no"]').val('');
-          });
-          $ppbox.fadeOut(function(){
-            $('input[type="text"][name="passport_no"]').val('');
-          });
-      }
-      else {
-
-        $ctznbox.fadeIn();
-        $ppbox.fadeIn();
-        $regbox.fadeOut(function(){
-          $('input[type="text"][name="company_reg_no"]').val('');
-        });
-      }
+        if (this.value == 'C') {
+            $regbox.fadeIn();
+            $ctznbox.fadeOut(function(){
+                $('input[type="text"][name="citizenship_no"]').val('');
+            });
+            $ppbox.fadeOut(function(){
+                $('input[type="text"][name="passport_no"]').val('');
+            });
+        }
+        else {
+            $ctznbox.fadeIn();
+            $ppbox.fadeIn();
+            $regbox.fadeOut(function(){
+                $('input[type="text"][name="company_reg_no"]').val('');
+            });
+        }
     });
+
+    // Fullname copy to Contact Field
+    $('input[name="full_name"]').on('keyup', function(){
+        $('input[name="contacts[contact_name]"]').val($(this).val());
+    });
+
 })(jQuery);
 </script>
