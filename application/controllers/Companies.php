@@ -125,9 +125,7 @@ class Companies extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('companies/page/l/' ),
-				'data_box' 		=> '#iqb-company-data-list',
-				'filter_form_id'=> '_form-iqb-company-filter'
+				'filter_url' 	=> site_url('companies/page/l/' )
 			]);
 		}
 		else if($layout === 'l')
@@ -421,11 +419,17 @@ class Companies extends MY_Controller
 				if($action === 'add')
 				{
 					// Refresh the list page and close bootbox
-					return $this->page(0, TRUE, [
+					return $this->page('l', 0, [
 							'message' => $message,
 							'status'  => $status,
-							'hideBootbox' => true
+							'hideBootbox' => true,
+							'updateSection' => true,
+							'updateSectionData' => [
+								'box' 		=> '#_iqb-data-list-box-company',
+								'method' 	=> 'html'
+							],
 						]);
+
 				}
 				else
 				{

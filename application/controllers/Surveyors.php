@@ -402,6 +402,11 @@ class Surveyors extends MY_Controller
 							return $this->page(0, TRUE, [
 									'message' => $message,
 									'status'  => $status,
+									'updateSection' => true,
+									'updateSectionData' => [
+										'box' => '#_iqb-data-list-box-surveyor',
+										'method' => 'html'
+									],
 									'hideBootbox' => true
 								]);
 						}

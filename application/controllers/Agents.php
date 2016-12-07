@@ -427,10 +427,15 @@ class Agents extends MY_Controller
 				if($action === 'add')
 				{
 					// Refresh the list page and close bootbox
-					return $this->page(0, TRUE, [
+					return $this->page('l', 0, [
 							'message' => $message,
 							'status'  => $status,
-							'hideBootbox' => true
+							'hideBootbox' => true,
+							'updateSection' => true,
+							'updateSectionData' => [
+								'box' 		=> '#_iqb-data-list-box-agent',
+								'method' 	=> 'html'
+							],
 						]);
 				}
 				else

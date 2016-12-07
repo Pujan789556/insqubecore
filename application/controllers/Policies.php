@@ -502,7 +502,7 @@ class Policies extends MY_Controller
 							'status'  => $status,
 							'updateSection' => true,
 							'updateSectionData' => [
-								'box' => '#iqb-data-list',
+								'box' => '#_iqb-data-list-box-policy',
 								'method' => 'html'
 							],
 							'hideBootbox' => true
