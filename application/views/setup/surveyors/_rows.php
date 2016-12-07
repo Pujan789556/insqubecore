@@ -16,22 +16,21 @@ foreach($records as $record)
  * Next Link?
  */
 if($next_id):
-	$next_url = site_url('surveyors/page/'.$next_id);
-	$loader_box_id = '__next-loader-'.$next_id;
-?>	
+	$loader_box_id = '__next-loader-surveyor-'.$next_id;
+?>
 	<tr id="<?php echo $loader_box_id;?>">
 		<td colspan="5" class="text-center pointer filter-next-page-trigger"
 			data-loading-text="Loading ..."
 			data-url="<?php echo $next_url;?>"
 			data-method="append"
-			data-box="#live-searchable"
+			data-box="#search-result-surveyor"
 			data-self-destruct="true"
 			data-loader-box="#<?php echo $loader_box_id;?>"
 			data-load-method="post"
-			data-post-form="#_form-iqub-filter"
+			data-post-form="#<?php echo $DOM_FilterFormId?>"
 			onclick="return InsQube.load(event,this)"
 		>
 			<span class="text-blue">Load More Result<br/> <i class="fa fa-angle-down"></i></span>
 		</td>
 	</tr>
-<?php endif;?>	
+<?php endif;?>

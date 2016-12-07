@@ -17,6 +17,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
 	<td>
+		<?php if($record->picture):?>
+			<img class="thumbnail" style="width:100px; float:left; margin-right:10px;" src="<?php echo INSQUBE_MEDIA_URL?>customers/<?php echo thumbnail_name($record->picture);?>" alt="<?php echo $record->full_name;?>">
+		<?php endif;?>
 		<strong><?php echo $record->full_name;?></strong>
 		<br/>
 		Code: <strong><?php echo $record->code;?></strong><br/>

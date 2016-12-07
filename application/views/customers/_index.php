@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		$this->load->view('templates/_common/_advanced_search_filter_general');
 		?>
 		<div class="box box-solid">
-			<div class="box-body table-responsive no-padding" id="iqb-customer-data-list">
+			<div class="box-body table-responsive no-padding" id="<?php echo $DOM_DataListBoxId?>">
 				<?php
 				/**
 				 * Load Rows from View

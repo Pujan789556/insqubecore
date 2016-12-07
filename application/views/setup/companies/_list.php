@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Company:  Data List
 */
 ?>
-<table class="table table-hover" id="live-searchable">
+<table class="table table-hover" id="search-result-company">
 	<tr>
 		<th>ID</th>
 		<th>Name</th>
@@ -13,11 +13,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<th>Type</th>
 		<th>Active</th>
 		<th>Actions</th>
-	</tr>	
+	</tr>
 	<?php
 	/**
 	 * Load Rows & Next Link (if any)
-	 */ 
-	$this->load->view('setup/companies/_rows');	
-	?>			
+	 */
+	$this->load->view('setup/companies/_rows');
+	?>
 </table>

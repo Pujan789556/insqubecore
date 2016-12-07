@@ -30,7 +30,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					class="btn btn-primary btn-round"
 					data-url="<?php echo site_url($this->router->class);?>/refresh"
 					data-method="html"
-					data-box="#iqb-customer-data-list"
+					data-box="#<?php echo $DOM_DataListBoxId?>"
 					data-self-destruct="false"
 					data-loader-box="false"
 					onclick="return InsQube.load(event, this)"

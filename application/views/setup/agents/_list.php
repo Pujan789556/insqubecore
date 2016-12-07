@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Agents:  Data List
 */
 ?>
-<table class="table table-hover" id="live-searchable">
+<table class="table table-hover" id="search-result-agent">
 	<tr>
 		<th>ID</th>
 		<th>Name</th>
@@ -14,11 +14,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<th>Commission Group</th>
 		<th>Active</th>
 		<th>Actions</th>
-	</tr>	
+	</tr>
 	<?php
 	/**
 	 * Load Rows & Next Link (if any)
-	 */ 
-	$this->load->view('setup/agents/_rows');	
-	?>			
+	 */
+	$this->load->view('setup/agents/_rows');
+	?>
 </table>

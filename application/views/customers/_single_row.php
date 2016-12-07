@@ -9,6 +9,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
 	<td>
+		<?php if($record->picture):?>
+			<img class="thumbnail ins-img-ip" style="width:100px; float:left; margin-right:10px;" src="<?php echo INSQUBE_MEDIA_URL?>customers/<?php echo thumbnail_name($record->picture);?>" alt="<?php echo $record->full_name;?>" data-src="<?php echo INSQUBE_MEDIA_URL?>customers/<?php echo $record->picture?>"
+              	onclick="InsQube.imagePopup(this, 'Customer Picture')" title="Click here to view large" data-toggle="tooltip">
+		<?php endif;?>
 		<a href="<?php echo site_url('customers/details/' . $record->id);?>"
 						title="View customer details.">
 						<?php echo $record->full_name;?></a>

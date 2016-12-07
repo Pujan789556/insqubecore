@@ -66,10 +66,10 @@ class Surveyors extends MY_Controller
 	 * @param integer $next_id
 	 * @return void
 	 */
-	function page( $next_id = 0, $refresh = FALSE, $ajax_extra = [] )
+	function page( $layout='f', $next_id = 0,  $ajax_extra = [] )
 	{
 		// If request is coming from refresh method, reset nextid
-		$next_id = $refresh === FALSE ? (int)$next_id : 0;
+		$next_id = (int)$next_id;
 
 		$params = array();
 		if( $next_id )
@@ -103,15 +103,41 @@ class Surveyors extends MY_Controller
 			$next_id = NULL;
 		}
 
+		// DOM Data
+		$dom_data = [
+			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-surveyor', 		// List box ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-surveyor' 			// Filter Form ID
+		];
+
 		$data = [
 			'records' => $records,
-			'next_id' => $next_id
-		];
+			'next_id' => $next_id,
+			'next_url' => $next_id ? site_url( 'surveyors/page/r/' . $next_id ) : NULL
+		] + $dom_data;
+
+		/**
+		 * Find View
+		 */
+		if($layout === 'f') // Full Layout
+		{
+			$view = 'setup/surveyors/_index';
+
+			$data = array_merge($data, [
+				'filters' 		=> $this->_get_filter_elements(),
+				'filter_url' 	=> site_url('surveyors/page/l/' )
+			]);
+		}
+		else if($layout === 'l')
+		{
+			$view = 'setup/surveyors/_list';
+		}
+		else
+		{
+			$view = 'setup/surveyors/_rows';
+		}
 
 		if ( $this->input->is_ajax_request() )
 		{
-
-			$view = $refresh === FALSE ? 'setup/surveyors/_rows' : 'setup/surveyors/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$ajax_data = [
 				'status' => 'success',
@@ -125,18 +151,12 @@ class Surveyors extends MY_Controller
 			$this->template->json($ajax_data);
 		}
 
-		/**
-		 * Filter Configurations
-		 */
-		$data['filters'] = $this->_get_filter_elements();
-		$data['filter_url'] = site_url('surveyors/filter/');
-
 		$this->template
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
 							'setup/surveyors/_index_header',
-							['content_header' => 'Manage Surveyor'])
+							['content_header' => 'Manage Surveyor'] + $dom_data)
 						->partial('content', 'setup/surveyors/_index', $data)
 						->render($this->data);
 	}
@@ -211,7 +231,7 @@ class Surveyors extends MY_Controller
 	 */
 	function refresh()
 	{
-		$this->page(0, TRUE);
+		$this->page('l');
 	}
 
 	/**
@@ -221,7 +241,7 @@ class Surveyors extends MY_Controller
 	 */
 	function filter()
 	{
-		$this->page(0, TRUE);
+		$this->page('l');
 	}
 
 	// --------------------------------------------------------------------

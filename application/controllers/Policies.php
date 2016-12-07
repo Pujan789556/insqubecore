@@ -62,7 +62,7 @@ class Policies extends MY_Controller
 	 * @param integer $next_id
 	 * @return void
 	 */
-	function page( $next_id = 0, $refresh = FALSE, $ajax_extra = [] )
+	function page( $layout='f', $next_id = 0,  $ajax_extra = [] )
 	{
 		/**
 		 * Check Permissions
@@ -74,7 +74,7 @@ class Policies extends MY_Controller
 
 
 		// If request is coming from refresh method, reset nextid
-		$next_id = $refresh === FALSE ? (int)$next_id : 0;
+		$next_id = (int)$next_id;
 
 		$params = array();
 		if( $next_id )
@@ -108,15 +108,41 @@ class Policies extends MY_Controller
 			$next_id = NULL;
 		}
 
+		// DOM Data
+		$dom_data = [
+			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-policy', 		// List box ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-policy' 			// Filter Form ID
+		];
+
 		$data = [
 			'records' => $records,
-			'next_id' => $next_id
-		];
+			'next_id' => $next_id,
+			'next_url' => $next_id ? site_url( 'policies/page/r/' . $next_id ) : NULL
+		] + $dom_data;
+
+		/**
+		 * Find View
+		 */
+		if($layout === 'f') // Full Layout
+		{
+			$view = 'policies/_index';
+
+			$data = array_merge($data, [
+				'filters' 		=> $this->_get_filter_elements(),
+				'filter_url' 	=> site_url('policies/page/l/' )
+			]);
+		}
+		else if($layout === 'l')
+		{
+			$view = 'policies/_list';
+		}
+		else
+		{
+			$view = 'policies/_rows';
+		}
 
 		if ( $this->input->is_ajax_request() )
 		{
-
-			$view = $refresh === FALSE ? 'policies/_rows' : 'policies/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$ajax_data = [
 				'status' => 'success',
@@ -141,7 +167,7 @@ class Policies extends MY_Controller
 						->partial(
 							'content_header',
 							'policies/_index_header',
-							['content_header' => 'Manage Policies'])
+							['content_header' => 'Manage Policies'] + $dom_data)
 						->partial('content', 'policies/_index', $data)
 						->partial('dynamic_js', 'policies/_customer_js')
 						->render($this->data);
@@ -251,7 +277,7 @@ class Policies extends MY_Controller
 	 */
 	function refresh()
 	{
-		$this->page(0, TRUE);
+		$this->page('l');
 	}
 
 	/**
@@ -261,7 +287,7 @@ class Policies extends MY_Controller
 	 */
 	function filter()
 	{
-		$this->page(0, TRUE);
+		$this->page('l');
 	}
 
 	// --------------------------------------------------------------------

@@ -76,19 +76,30 @@ class Customers extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
+		// Load media helper
+		$this->load->helper('insqube_media');
+
 		// If request is coming from refresh method, reset nextid
 		$next_id = (int)$next_id;
 		$next_url_base = 'customers/page/r/'.$from_widget;
+
+		// DOM Data
+		$dom_data = [
+			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-customer', 		// List box ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-customer' 			// Filter Form ID
+		];
 
 		/**
 		 * Get Search Result
 		 */
 		$data = $this->_get_filter_data( $next_url_base, $next_id );
-
+		$data = array_merge($data, $dom_data);
+		// echo $this->db->last_query();exit;
 		/**
 		 * Widget Specific Data
 		 */
 		$data['_flag__show_widget_row'] = $from_widget === 'y';
+
 
 		/**
 		 * Find View
@@ -99,8 +110,7 @@ class Customers extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('customers/page/l/' . $from_widget ),
-				'data_box' 		=> '#iqb-customer-data-list',
+				'filter_url' 	=> site_url('customers/page/l/' . $from_widget )
 			]);
 		}
 		else if($layout === 'l')
@@ -133,7 +143,7 @@ class Customers extends MY_Controller
 						->partial(
 							'content_header',
 							'customers/_index_header',
-							['content_header' => 'Manage Customers'])
+							['content_header' => 'Manage Customers'] + $dom_data)
 						->partial('content', 'customers/_index', $data)
 						->partial('dynamic_js', 'customers/_customer_js')
 						->render($this->data);
@@ -226,7 +236,7 @@ class Customers extends MY_Controller
 			$next_id = (int)$next_id;
 			if( $next_id )
 			{
-				$params = ['next_id' => $next_id];
+				$params['next_id'] = $next_id;
 			}
 
 			/**
@@ -268,7 +278,7 @@ class Customers extends MY_Controller
 	 */
 	function refresh()
 	{
-		$this->page(0, TRUE);
+		$this->page('l', 'n');
 	}
 
 	// --------------------------------------------------------------------
@@ -280,7 +290,7 @@ class Customers extends MY_Controller
 	 */
 	function filter()
 	{
-		$this->page(0, TRUE);
+		$this->page('l', 'n');
 	}
 
 	// --------------------------------------------------------------------

@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy:  Data List
 */
 ?>
-<table class="table table-hover" id="live-searchable">
+<table class="table table-hover" id="search-result-policy">
 	<tr>
 		<?php if( $this->dx_auth->is_admin() ): ?>
 			<th>ID</th>

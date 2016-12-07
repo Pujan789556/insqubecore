@@ -58,6 +58,7 @@ class Policy_model extends MY_Model
     {
         $this->load->model('portfolio_model');
         $this->load->model('user_model');
+        $this->load->model('agent_model');
         $select = ['' => 'Select ...'];
 
         /**
@@ -67,70 +68,133 @@ class Policy_model extends MY_Model
         $branch_id = $this->dx_auth->is_admin() ? NULL : $this->dx_auth->get_branch_id();
 
         $this->validation_rules = [
-            [
-                'field' => 'type',
-                'label' => 'Policy Type',
-                'rules' => 'trim|alpha|exact_length[1]|in_list[N,R]',
-                '_type'     => 'dropdown',
-                '_data'     => [ '' => 'Select...', 'N' => 'New', 'R' => 'Renewal'],
-                '_required' => true
+
+            /**
+             * Customer Information
+             */
+            'customer' => [
+                [
+                    'field' => 'customer_id',
+                    'label' => 'Customer',
+                    'rules' => 'trim|required|intger|max_length[11]',
+                    '_type'     => 'hidden',
+                    '_id'       => 'customer-id',
+                    '_required' => false
+                ],
+                [
+                    'field' => 'customer_name',
+                    'label' => 'Customer',
+                    'rules' => 'trim|required',
+                    '_id'       => 'customer-name',
+                    '_type'     => 'hidden',
+                    '_required' => false
+                ],
             ],
-            [
-                'field' => 'customer_id',
-                'label' => 'Customer',
-                'rules' => 'trim|required|intger|max_length[11]',
-                '_type'     => 'text',
-                '_required' => false
+
+            /**
+             * Portfolio Information
+             */
+            'portfolio' => [
+                [
+                    'field' => 'type',
+                    'label' => 'Policy Type',
+                    'rules' => 'trim|alpha|exact_length[1]|in_list[N,R]',
+                    '_type'     => 'dropdown',
+                    '_data'     => [ '' => 'Select...', 'N' => 'New', 'R' => 'Renewal'],
+                    '_required' => true
+                ],
+                [
+                    'field' => 'portfolio_id',
+                    'label' => 'Portfolio',
+                    'rules' => 'trim|required|intger|max_length[11]',
+                    '_type'     => 'dropdown',
+                    '_id'       => 'portfolio',
+                    '_data'     => $select + $this->portfolio_model->dropdown_parent(),
+                    '_required' => false
+                ]
             ],
-            [
-                'field' => 'portfolio_id',
-                'label' => 'Portfolio',
-                'rules' => 'trim|required|intger|max_length[11]',
-                '_type'     => 'dropdown',
-                '_id'       => 'portfolio',
-                '_data'     => $select + $this->portfolio_model->dropdown_parent(),
-                '_required' => false
+
+            /**
+             * Policy Object Information
+             */
+            'object' => [
+                [
+                    'field' => 'object_id',
+                    'label' => 'Policy Object',
+                    'rules' => 'trim|required|integer|max_length[11]',
+                    '_type'     => 'hidden',
+                    '_id'       => 'object-id', // dropdown policy object
+                    '_required' => true
+                ],
+                [
+                    'field' => 'object_name',
+                    'label' => 'Policy Object',
+                    'rules' => 'trim|required',
+                    '_type'     => 'hidden',
+                    '_id'       => 'object-name', // dropdown policy object
+                    '_required' => true
+                ],
             ],
-            [
-                'field' => 'object_id',
-                'label' => 'Policy Object',
-                'rules' => 'trim|required|integer|max_length[11]',
-                '_type'     => 'dropdown',
-                '_id'       => 'dd-po', // dropdown policy object
-                '_required' => true
+
+            /**
+             * Policy Duration Information
+             */
+            'duration' => [
+                [
+                    'field' => 'start_date',
+                    'label' => 'Policy Start Date',
+                    'rules' => 'trim|required|valid_date',
+                    '_type'     => 'date',
+                    '_required' => false
+                ],
+                [
+                    'field' => 'duration',
+                    'label' => 'Policy Duration',
+                    'rules' => 'trim|required|valid_date|callback_valid_duration',
+                    '_type'     => 'dropdown',
+                    '_data'     => $select + get_policy_duration_list(),
+                    '_default'  => '+1 year',
+                    '_required' => false
+                ],
             ],
-            [
-                'field' => 'start_date',
-                'label' => 'Policy Start Date',
-                'rules' => 'trim|required|valid_date',
-                '_type'     => 'date',
-                '_required' => false
+
+            /**
+             * Marketing Staff Information
+             */
+            'staff' => [
+                [
+                    'field' => 'sold_by',
+                    'label' => 'Marketing Staff',
+                    'rules' => 'trim|required|intger|max_length[11]',
+                    '_type'     => 'dropdown',
+                    '_data'     => $select + $this->user_model->dropdown($role_id, $branch_id),
+                    '_required' => true
+                ]
             ],
-            [
-                'field' => 'duration',
-                'label' => 'Policy Duration',
-                'rules' => 'trim|required|valid_date|callback_valid_duration',
-                '_type'     => 'dropdown',
-                '_data'     => $select + get_policy_duration_list(),
-                '_default'  => '+1 year',
-                '_required' => false
-            ],
-            [
-                'field' => 'sold_by',
-                'label' => 'Marketing Staff',
-                'rules' => 'trim|required|intger|max_length[11]',
-                '_type'     => 'dropdown',
-                '_data'     => $select + $this->user_model->dropdown($role_id, $branch_id),
-                '_required' => true
-            ],
-            [
-                'field' => 'flag_has_agent',
-                'label' => 'Do you have agent?',
-                'rules' => 'trim|alpha|exact_length[1]|in_list[Y,N]',
-                '_type'     => 'dropdown',
-                '_data'     => [ '' => 'Select...', 'Y' => 'Yes', 'N' => 'No'],
-                '_required' => true
-            ],
+
+            /**
+             * Agent Information
+             */
+            'agent' => [
+                [
+                    'field' => 'flag_has_agent',
+                    'label' => 'Agent Apply?',
+                    'rules' => 'trim|required|alpha|exact_length[1]|in_list[Y,N]',
+                    '_type'     => 'dropdown',
+                    '_data'     => [ '' => 'Select...', 'Y' => 'Yes', 'N' => 'No'],
+                    '_required' => true
+                ],
+                [
+                    'field' => 'agent_id',
+                    'label' => 'Agent Name',
+                    'rules' => 'trim|required|intger|max_length[11]',
+                    '_id'       => 'agent-id',
+                    '_type'     => 'dropdown',
+                    '_data'     => $select + $this->agent_model->dropdown(true),
+                    '_required' => true
+                ]
+            ]
+
         ];
     }
 

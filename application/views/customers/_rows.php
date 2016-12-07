@@ -30,7 +30,7 @@ if($next_id):
 			data-self-destruct="true"
 			data-loader-box="#<?php echo $loader_box_id;?>"
 			data-load-method="post"
-			data-post-form="#_form-iqub-filter"
+			data-post-form="#<?php echo $DOM_FilterFormId?>"
 			onclick="return InsQube.load(event,this)"
 		>
 			<span class="text-blue">Load More Result<br/> <i class="fa fa-angle-down"></i></span>

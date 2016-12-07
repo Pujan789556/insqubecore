@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 ?>
-<div class="box no-margin">
+<div class="box box-solid no-margin">
 	<div class="box-header no-border gray">
 		<div class="row">
 			<div class="col-sm-8">
@@ -35,8 +35,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $this->load->view('templates/_common/_advanced_search_filter_general');
 ?>
 
-<div class="box box-solid">
-	<div class="box-body table-responsive no-padding" id="iqb-customer-data-list" data-widget="search">
+<div class="box box-solid no-margin">
+	<div class="box-body table-responsive no-padding" id="<?php echo $DOM_DataListBoxId?>" data-widget="search">
 		<?php
 		/**
 		 * Load Rows from View

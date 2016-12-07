@@ -249,10 +249,10 @@ class Users extends MY_Controller
 	 * @param integer $next_id
 	 * @return void
 	 */
-	function page( $next_id = 0, $refresh = FALSE )
+	function page( $layout='f', $next_id = 0,  $ajax_extra = [] )
 	{
 		// If request is coming from refresh method, reset nextid
-		$next_id = $refresh === FALSE ? (int)$next_id : 0;
+		$next_id = (int)$next_id;
 
 		$params = array();
 		if( $next_id )
@@ -286,15 +286,42 @@ class Users extends MY_Controller
 			$next_id = NULL;
 		}
 
+		// DOM Data
+		$dom_data = [
+			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-user', 		// List box ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-user' 			// Filter Form ID
+		];
+
 		$data = [
 			'records' => $records,
-			'next_id' => $next_id
-		];
+			'next_id' => $next_id,
+			'next_url' => $next_id ? site_url( 'users/page/r/' . $next_id ) : NULL
+		] + $dom_data;
+
+		/**
+		 * Find View
+		 */
+		if($layout === 'f') // Full Layout
+		{
+			$view = 'setup/users/_index';
+
+			$data = array_merge($data, [
+				'filters' 		=> $this->_get_filter_elements(),
+				'filter_url' 	=> site_url('users/page/l/' )
+			]);
+		}
+		else if($layout === 'l')
+		{
+			$view = 'setup/users/_list';
+		}
+		else
+		{
+			$view = 'setup/users/_rows';
+		}
+
 
 		if ( $this->input->is_ajax_request() )
 		{
-
-			$view = $refresh === FALSE ? 'setup/users/_rows' : 'setup/users/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$this->template->json([
 				'status' => 'success',
@@ -302,18 +329,13 @@ class Users extends MY_Controller
 			]);
 		}
 
-		/**
-		 * Filter Configurations
-		 */
-		$data['filters'] = $this->_get_filter_elements();
-		$data['filter_url'] = site_url('users/filter/');
 
 		$this->template
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
 							'setup/users/_index_header',
-							['content_header' => 'Manage Users'])
+							['content_header' => 'Manage Users'] + $dom_data)
 						->partial('content', 'setup/users/_index', $data)
 						->render($this->data);
 	}
@@ -399,7 +421,7 @@ class Users extends MY_Controller
 	 */
 	function refresh()
 	{
-		$this->page(0, TRUE);
+		$this->page('l');
 	}
 
 	/**
@@ -409,7 +431,7 @@ class Users extends MY_Controller
 	 */
 	function filter()
 	{
-		$this->page(0, TRUE);
+		$this->page('l');
 	}
 
 	// --------------------------------------------------------------------

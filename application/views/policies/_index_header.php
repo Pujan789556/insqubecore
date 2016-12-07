@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						data-toggle="tooltip"
 						class="btn btn-success btn-round trg-dialog-edit"
 						data-box-size="large"
-						data-title='<i class="fa fa-pencil-square-o"></i> Add New Policy (Wizard) - Step 1'
+						data-title='<i class="fa fa-pencil-square-o"></i> Add New Policy'
 						data-url="<?php echo site_url('policies/wizard/');?>"
 						data-form=".form-iqb-general"
 					><i class="ion-plus-circled"></i> Add</a>
@@ -30,7 +30,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					class="btn btn-primary btn-round"
 					data-url="<?php echo site_url($this->router->class);?>/refresh"
 					data-method="html"
-					data-box="#iqb-data-list"
+					data-box="#<?php echo $DOM_DataListBoxId?>"
 					data-self-destruct="false"
 					data-loader-box="false"
 					onclick="return InsQube.load(event, this)"

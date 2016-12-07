@@ -162,24 +162,31 @@ class Agent_model extends MY_Model
     /**
      * Get Dropdown List
      */
-    public function dropdown()
+    public function dropdown($flag_active_only = false)
     {
+        $cache_name = $flag_active_only ? 'agent_dropdown_active' : 'agent_dropdown';
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('agent_dropdown');
+        $list = $this->get_cache($cache_name);
         if(!$list)
         {
-            $records = $this->db->select('id, name')
-                                ->from($this->table_name)
-                                ->get()->result();
+            $this->db->select('id, name')
+                        ->from($this->table_name);
+
+            if($flag_active_only)
+            {
+                $this->db->where('active', 1);
+            }
+
+            $records = $this->db->get()->result();
             $list = [];
             foreach($records as $record)
             {
                 $list["{$record->id}"] = $record->name;
             }
 
-            $this->write_cache($list, 'agent_dropdown', CACHE_DURATION_DAY);
+            $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
         }
 
         return $list;
@@ -193,6 +200,7 @@ class Agent_model extends MY_Model
     public function clear_cache($data=null)
     {
         $cache_names = [
+            'agent_dropdown_active',
             'agent_dropdown',
         ];
     	// cache name without prefix

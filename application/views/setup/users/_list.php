@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Users:  Data List
 */
 ?>
-<table class="table table-hover" id="live-searchable">
+<table class="table table-hover" id="search-result-user">
 	<tr>
 		<th>ID</th>
 		<th>Username</th>
@@ -14,11 +14,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<th>Fullname</th>
 		<th>Banned</th>
 		<th>Actions</th>
-	</tr>	
+	</tr>
 	<?php
 	/**
 	 * Load Rows & Next Link (if any)
-	 */ 
-	$this->load->view('setup/users/_rows');	
-	?>			
+	 */
+	$this->load->view('setup/users/_rows');
+	?>
 </table>

@@ -197,7 +197,7 @@ class Customer_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('C.id, C.code, C.pan, C.full_name, C.type, C.profession, C.company_reg_no, C.citizenship_no, C.passport_no, C.contact')
+        $this->db->select('C.id, C.code, C.pan, C.full_name, C.picture, C.type, C.profession, C.company_reg_no, C.citizenship_no, C.passport_no, C.contact')
                  ->from($this->table_name . ' as C');
 
 
