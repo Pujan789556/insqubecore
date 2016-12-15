@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<h1 style="margin:0; font-size:24px;">Find Customer</h1>
 			</div>
 			<div class="col-sm-4 master-actions text-right">
-				<?php if( $this->dx_auth->is_admin() || $this->dx_auth->is_authorized('customers', 'add.customer') ): ?>
+				<?php if( $this->dx_auth->is_authorized('customers', 'add.customer') ): ?>
 					<a href="#"
 						title="Add New Customer"
 						data-toggle="tooltip"

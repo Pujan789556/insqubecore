@@ -73,6 +73,9 @@ class Settings extends MY_Controller
 	            	$data = $this->input->post();
 	            	$data['logo'] = $new_logo;
 
+	            	// Offline checkbox
+	            	$data['flag_offline'] = $data['flag_offline'] ?? 0;
+
 		        	$done = $this->setting_model->update(1, $data, TRUE) && $this->setting_model->log_activity(1, 'E');
 
 

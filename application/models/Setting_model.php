@@ -50,9 +50,9 @@ class Setting_model extends MY_Model
             [
                 'field' => 'flag_offline',
                 'label' => 'Set Offline',
-                'rules' => 'trim|integer',
+                'rules' => 'trim|integer|in_list[1]',
                 '_type' => 'switch',
-                '_data' => '1'
+                '_value' => '1'
             ],
             [
                 'field' => 'offline_message',

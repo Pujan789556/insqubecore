@@ -66,7 +66,8 @@ $( document ).ajaxError(function( event, request, settings ) {
                 opts = {
                     rows : '#live-searchable tr.searchable'
                 },
-                $btn_clear = $(f).next('.live-search-clear');
+                $btn_clear = $(f).next('.live-search-clear'),
+                options = options ? options : $f.data('options');
 
                 // Extends Options
                 opts = $.extend({}, opts, options);
@@ -398,6 +399,16 @@ $( document ).ajaxError(function( event, request, settings ) {
 
                 $(dt.box)[dt.method](html);
             }
+
+            // What if we have multiple sections to update
+            if(typeof r.multipleUpdate !== 'undefined'){
+                for(var i = 0; i < r.multipleUpdate.length; i++) {
+                    var section = r.multipleUpdate[i];
+                    $(section.box)[section.method](section.html);
+                }
+            }
+
+
             // What about Edit Form Dialog?
             if( typeof r.hideBootbox !== 'undefined' && r.hideBootbox === true){
                 // Close the bootbox if any
@@ -513,7 +524,14 @@ $( document ).ajaxError(function( event, request, settings ) {
                 // What if we have to reload the action row?
                 if( typeof r.reloadRow !== 'undefined' && r.reloadRow == true ){
                     $(r.rowId).replaceWith(r.row);
-                    console.log('yeas called');
+                }
+
+                // What if we have multiple sections to update
+                if(typeof r.multipleUpdate !== 'undefined'){
+                    for(var i = 0; i < r.multipleUpdate.length; i++) {
+                        var section = r.multipleUpdate[i];
+                        $(section.box)[section.method](section.html);
+                    }
                 }
             }
         });

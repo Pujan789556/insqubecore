@@ -826,6 +826,18 @@ class DX_Auth
 
     // --------------------------------------------------------------------
 
+	// Check if this item belongs to me
+	function belongs_to_me( $branch_id )
+	{
+		$branch_list 	= [$this->get_branch_id()];
+        $scope_list 	= $this->get_scope_list();
+        $branch_list 	= $scope_list ? array_unique( array_merge($branch_list, $scope_list) ) : $branch_list;
+
+		return $this->is_admin() OR in_array($branch_id, $branch_list);
+	}
+
+    // --------------------------------------------------------------------
+
 	// Check is user is has admin privilege
 	function is_admin()
 	{
@@ -912,6 +924,12 @@ class DX_Auth
 	// Check if user has the permission?
 	function is_authorized($module, $action)
 	{
+		if($this->is_admin())
+		{
+			return TRUE;
+		}
+
+		// Check permissions for non-admin user
 		$permissions = $this->get_permissions()->{$module} ?? NULL;
 		return ( !empty($permissions) && in_array($action, $permissions)) ? TRUE : FALSE;
 	}

@@ -15,7 +15,18 @@ $grid_label = $grid_label ?? 'col-sm-2';
 $grid_form_control = $grid_form_control ?? 'col-sm-10';
 foreach($form_elements as $element):?>
     <div class="form-group <?php echo form_error($element['field']) ? 'has-error' : '';?>">
-        <label for="" class="<?php echo $grid_label; ?> control-label"><?php echo $element['label'] . field_compulsary_text( $element['_required'] ?? FALSE );?></label>
+        <label for="" class="<?php echo $grid_label; ?> control-label">
+            <?php
+            if( !in_array($element['_type'], ['checkbox', 'radio']))
+            {
+                echo $element['label'] . field_compulsary_text( $element['_required'] ?? FALSE );
+            }
+            else
+            {
+                echo '&nbsp;';
+            }
+            ?>
+        </label>
         <div class="<?php echo $grid_form_control; ?>">
             <?php
             /**
@@ -91,13 +102,20 @@ foreach($form_elements as $element):?>
 
                 case 'checkbox':
                     $element_config['class'] = 'icheck'; // Add icheck style
-                    $checked = $element['_default'] == $value;
-                    echo form_checkbox($element_config, $value, $checked, $extra_attributes);
+                    // unset placeholder
+                    unset($element_config['placeholder']);
+                    $checked = $element['_value'] == $value;
+                    echo '<label>';
+                        echo form_checkbox($element_config, $element['_value'], $checked, $extra_attributes);
+                        echo $element['label'];
+                    echo '</label>';
                     break;
 
 
                 case 'radio':
                     $element_config['class'] = 'icheck'; // Add icheck style
+                    // unset placeholder
+                    unset($element_config['placeholder']);
                     $radio_data = $element['_data'];
                     foreach($radio_data as $key=>$label_text)
                     {
@@ -114,7 +132,10 @@ foreach($form_elements as $element):?>
                 case 'switch':
                     $element_config['class'] = 'switch-checkbox';
                     $element_config['switch-type'] = 'switch-primary';
-                    echo form_switch($element_config, $element['_data'], set_value($element['field']) || $record->{$element['field']});
+                    // unset placeholder
+                    unset($element_config['placeholder']);
+                    $checked = $element['_value'] == $value;
+                    echo form_switch($element_config, $element['_value'], $checked);
                     break;
             }
             ?>

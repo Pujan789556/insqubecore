@@ -26,10 +26,14 @@ echo form_open( $this->uri->uri_string(),
                   $customer_id = set_value('customer_id', '', FALSE) ?? ($record->customer_id ?? '');
                   $customer_name = set_value('customer_name', '', FALSE) ?? ($record->customer_name ?? '');
                   ?>
-                  <p class="form-control-static">
-                      <span id="customer-text" data-fillable-text="customer-text" class="margin-r-5"><?php echo $customer_name;?></span>
-                      <a href="#" id="_find-customer" class=""><i class="fa fa-search"></i> Find Customer...</a>
-                  </p>
+                  <div class="form-inline">
+                      <div class="form-group">
+                          <div class="input-group">
+                              <span id="customer-text" data-fillable-text="customer-text" class="form-control" style="min-width: 100px" readonly><?php echo $customer_name;?></span>
+                              <a href="#" id="_find-customer" class="input-group-addon" data-toggle="tooltip" title="Find Customer"><i class="fa fa-filter"></i>...</a>
+                          </div>
+                      </div>
+                  </div>
                   <input type="hidden" id="customer-name" name="customer_name" value="<?php echo $customer_name;?>">
                   <input type="hidden" id="customer-id" name="customer_id" value="<?php echo $customer_id;?>">
                   <?php if(form_error('customer_id')):?><p class="help-block"><?php echo form_error('customer_id'); ?></p><?php endif?>
