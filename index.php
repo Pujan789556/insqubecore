@@ -68,7 +68,10 @@ function ___environment_defaults()
     $data = file($environment_file);
     $data = array_filter($data, function($value){
         $value = trim($value);
-        if(!empty($value)) return $value;
+        // if line start from #, we take it as comment
+        if(!empty($value) && substr($value, 0, 1) !== '#'){
+        	return $value;
+        }
     }); // remove empty lines
 
     /**
