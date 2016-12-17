@@ -41,7 +41,7 @@ class Users extends MY_Controller
 			[
 				'field' => 'password',
 				'label' => 'Password',
-				'rules' => 'trim|required|min_length[4]|max_length[20]|matches[confirm_password]',
+				'rules' => 'trim|required|min_length[4]|max_length[40]|matches[confirm_password]',
 				'_type' 	=> 'password',
 		        '_required' => true
 			],
@@ -133,7 +133,7 @@ class Users extends MY_Controller
 			[
 				'field' => 'password',
 				'label' => 'Password',
-				'rules' => 'trim|required|min_length[4]|max_length[20]|matches[confirm_password]',
+				'rules' => 'trim|required|min_length[4]|max_length[40]|matches[confirm_password]',
 				'_type' 	=> 'password',
 		        '_required' => true
 			],

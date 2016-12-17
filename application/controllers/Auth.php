@@ -7,27 +7,27 @@ class Auth extends MY_Controller
 	var $min_username = 4;
 	var $max_username = 20;
 	var $min_password = 4;
-	var $max_password = 20;
+	var $max_password = 40;
 
 	function __construct()
 	{
 		parent::__construct();
-		
+
 		// Form Validation
 		$this->load->library('Form_validation');
-	
+
 		// Set Template for this controller
         $this->template->set_template('login');
 	}
-	
+
 	function index()
 	{
 		$this->login();
 	}
 
-	
+
 	/* Callback function */
-	
+
 	function username_check($username)
 	{
 		$result = $this->dx_auth->is_username_available($username);
@@ -35,7 +35,7 @@ class Auth extends MY_Controller
 		{
 			$this->form_validation->set_message('username_check', 'Username already exist. Please choose another username.');
 		}
-				
+
 		return $result;
 	}
 
@@ -46,25 +46,25 @@ class Auth extends MY_Controller
 		{
 			$this->form_validation->set_message('email_check', 'Email is already used by another user. Please choose another email address.');
 		}
-				
+
 		return $result;
 	}
 
-	
+
 	function recaptcha_check()
 	{
-		$result = $this->dx_auth->is_recaptcha_match();		
+		$result = $this->dx_auth->is_recaptcha_match();
 		if ( ! $result)
 		{
 			$this->form_validation->set_message('recaptcha_check', 'Your confirmation code does not match the one in the image. Try again.');
 		}
-		
+
 		return $result;
 	}
-	
+
 	/* End of Callback function */
-	
-	
+
+
 	function login()
 	{
 
@@ -74,7 +74,7 @@ class Auth extends MY_Controller
 		}
 
 		$val = $this->form_validation;
-			
+
 		// Set form validation rules
 		$val->set_rules('username', 'Username', 'trim|required');
 		$val->set_rules('password', 'Password', 'trim|required');
@@ -90,7 +90,7 @@ class Auth extends MY_Controller
 			// This is because the limitation of reCAPTCHA, not DX Auth library
 			$val->set_rules('recaptcha_response_field', 'Confirmation Code', 'trim|required|callback_recaptcha_check');
 		}
-			
+
 		if ($val->run() AND $this->dx_auth->login($val->set_value('username'), $val->set_value('password'), $val->set_value('remember')))
 		{
 			// Redirect to homepage
@@ -109,21 +109,21 @@ class Auth extends MY_Controller
 				$this->banned();
 			}
 			else
-			{						
+			{
 				// Default is we don't show captcha until max login attempts eceeded
 				$data['show_captcha'] = FALSE;
 
-			
+
 				// Show captcha if login attempts exceed max attempts in config
 				if ($this->dx_auth->is_max_login_attempts_exceeded())
 				{
-					// Create catpcha						
+					// Create catpcha
 					// $this->dx_auth->captcha();
-					
+
 					// Set view data to show captcha on view file
 					$data['show_captcha'] = TRUE;
 				}
-				
+
 				// Load login page view
 				// $this->load->view($this->dx_auth->login_view, $data);
 				$this->template->partial('body', $this->dx_auth->login_view, $data)
@@ -134,16 +134,16 @@ class Auth extends MY_Controller
 			}
 		}
 	}
-	
+
 	function logout()
 	{
 		$this->dx_auth->logout();
 
-		// redirect 
-		redirect('');		
+		// redirect
+		redirect('');
 	}
-	
-	
+
+
 	function register()
 	{
 		// Check logged in?
@@ -162,13 +162,13 @@ class Auth extends MY_Controller
 		$data = [];
 
 		$val = $this->form_validation;
-			
+
 		// Set form validation rules
 		$val->set_rules('username', 'Username', 'trim|required|min_length['.$this->min_username.']|max_length['.$this->max_username.']|callback_username_check|alpha_dash');
 		$val->set_rules('password', 'Password', 'trim|required|min_length['.$this->min_password.']|max_length['.$this->max_password.']|matches[confirm_password]');
 		$val->set_rules('confirm_password', 'Confirm Password', 'trim|required');
 		$val->set_rules('email', 'Email', 'trim|required|valid_email|callback_email_check');
-		
+
 		// Is registration using captcha
 		if ($this->dx_auth->captcha_registration)
 		{
@@ -180,19 +180,19 @@ class Auth extends MY_Controller
 
 		// Run form validation and register user if it's pass the validation
 		if ($val->run() AND $this->dx_auth->register($val->set_value('username'), $val->set_value('password'), $val->set_value('email')))
-		{	
+		{
 			// Set success message accordingly
 			if ($this->dx_auth->email_activation)
 			{
 				$data['auth_message'] = '<strong>Congratulations!</strong><br/><br/>You have successfully registered. Please check your email address to activate your account.';
 			}
 			else
-			{					
+			{
 				$data['auth_message'] = '<strong>Congratulations!</strong><br/><br/>You have successfully registered. '.anchor(site_url($this->dx_auth->login_uri), 'Login');
 			}
 
 			$data['alert_type'] = 'success';
-			
+
 			// Load registration success page
 			// $this->load->view($this->dx_auth->register_success_view, $data);
 			$view = $this->dx_auth->register_success_view;
@@ -205,8 +205,8 @@ class Auth extends MY_Controller
 
 		// Render form
     	$this->template->partial(
-        					'body', 
-        					$view, 
+        					'body',
+        					$view,
     						$data
 						)
         				->render([
@@ -214,7 +214,7 @@ class Auth extends MY_Controller
 				        	'page_title' => 'Register'
 				    	]);
 	}
-	
+
 	function activate()
 	{
 		if ( $this->dx_auth->is_logged_in())
@@ -227,7 +227,7 @@ class Auth extends MY_Controller
 		$key = $this->uri->segment(4);
 
 		// Activate user
-		if ($this->dx_auth->activate($username, $key)) 
+		if ($this->dx_auth->activate($username, $key))
 		{
 			$data['auth_message'] = '<strong>Congratulations!</strong><br/><br/>Your account have been successfully activated. '.anchor(site_url($this->dx_auth->login_uri), 'Login');
 			$data['alert_type'] = 'success';
@@ -245,8 +245,8 @@ class Auth extends MY_Controller
 
 		// Render form
     	$this->template->partial(
-        					'body', 
-        					$view, 
+        					'body',
+        					$view,
     						$data
 						)
         				->render([
@@ -254,7 +254,7 @@ class Auth extends MY_Controller
 				        	'page_title' => 'Register'
 				    	]);
 	}
-	
+
 	function forgot_password()
 	{
 		// Check logged in?
@@ -264,7 +264,7 @@ class Auth extends MY_Controller
 		}
 
 		$val = $this->form_validation;
-		
+
 		// Set form validation rules
 		$val->set_rules('login', 'Username or Email address', 'trim|required');
 
@@ -277,8 +277,8 @@ class Auth extends MY_Controller
 
 			// Render form
 	        $this->template->partial(
-	        					'body', 
-	        					$this->dx_auth->forgot_password_success_view, 
+	        					'body',
+	        					$this->dx_auth->forgot_password_success_view,
 	    						$data
 							)
 	        				->render([
@@ -293,17 +293,17 @@ class Auth extends MY_Controller
 
 			// Render form
 	        $this->template->partial(
-	        					'body', 
-	        					$this->dx_auth->forgot_password_view, 
+	        					'body',
+	        					$this->dx_auth->forgot_password_view,
 	    						[]
 							)
 	        				->render([
 					        	'site_title' => 'Account Recovery',
 					        	'page_title' => 'Forgot Your Account?'
 					    	]);
-		}	
+		}
 	}
-	
+
 	function reset_password()
 	{
 		// Check logged in?
@@ -341,8 +341,8 @@ class Auth extends MY_Controller
 		}
 
 		$this->template->partial(
-        					'body', 
-        					$view, 
+        					'body',
+        					$view,
     						$data
 						)
         				->render([
@@ -350,7 +350,7 @@ class Auth extends MY_Controller
 				        	'page_title' => $page_title
 				    	]);
 	}
-	
+
 	function change_password()
 	{
 		// Check logged in?
@@ -360,12 +360,12 @@ class Auth extends MY_Controller
 		}
 
 		$val = $this->form_validation;
-			
+
 		// Set form validation
 		$val->set_rules('old_password', 'Old Password', 'trim|required|min_length['.$this->min_password.']|max_length['.$this->max_password.']');
 		$val->set_rules('new_password', 'New Password', 'trim|required|min_length['.$this->min_password.']|max_length['.$this->max_password.']|matches[confirm_new_password]');
 		$val->set_rules('confirm_new_password', 'Confirm new Password', 'trim|required');
-		
+
 		// Validate rules and change password
 		if ($val->run() AND $this->dx_auth->change_password($val->set_value('old_password'), $val->set_value('new_password')))
 		{
@@ -382,16 +382,16 @@ class Auth extends MY_Controller
 
 		// Render form
     	$this->template->partial(
-        					'body', 
-        					$view, 
+        					'body',
+        					$view,
     						$data
 						)
         				->render([
 				        	'site_title' => 'Change Password',
 				        	'page_title' => 'Change Password'
-				    	]);		
-	}	
-	
+				    	]);
+	}
+
 	function cancel_account()
 	{
 		// Check logged in?
@@ -401,10 +401,10 @@ class Auth extends MY_Controller
 		}
 
 		$val = $this->form_validation;
-			
+
 		// Set form validation rules
 		$val->set_rules('password', 'Password', "trim|required");
-		
+
 		// Validate rules and change password
 		if ($val->run() AND $this->dx_auth->cancel_account($val->set_value('password')))
 		{
@@ -414,7 +414,7 @@ class Auth extends MY_Controller
 
 		// Render form
     	$this->template->partial(
-        					'body', 
+        					'body',
         					$this->dx_auth->cancel_account_view
 						)
         				->render([
@@ -425,13 +425,13 @@ class Auth extends MY_Controller
 
 	/**
 	 * Show Banned Message
-	 * 
+	 *
 	 * This function will yield banned message only if
 	 * when user supplies the login credentials and "login"
 	 * method identifies it is banned.
-	 * 
+	 *
 	 * When you directly call this method, it yields 404
-	 * 
+	 *
 	 * @return mixed
 	 */
 	function banned()
@@ -442,8 +442,8 @@ class Auth extends MY_Controller
 		}
 
 		$this->template->partial(
-        					'body', 
-        					$this->dx_auth->banned_view, 
+        					'body',
+        					$this->dx_auth->banned_view,
     						[
     							'auth_message' => 'Your account has been temporarily banned. <br/> This may be due to excessive login attempts or some other unauthorized actvities from your network. <br/><br/>Please contact Administrator for further assistance.<br/><br/>Thank you.',
     							'alert_type' => 'danger'
@@ -458,13 +458,13 @@ class Auth extends MY_Controller
 
 	/**
 	 * Show Access Denied Message
-	 * 
+	 *
 	 * This function will yield banned message only if
 	 * when user supplies the login credentials and "login"
 	 * method identifies it is banned.
-	 * 
+	 *
 	 * When you directly call this method, it yields 404
-	 * 
+	 *
 	 * @return mixed
 	 */
 	function deny()
@@ -485,8 +485,8 @@ class Auth extends MY_Controller
 
 		// Render regular deny message
 		$this->template->partial(
-        					'body', 
-        					$this->dx_auth->deny_view, 
+        					'body',
+        					$this->dx_auth->deny_view,
     						[
     							'auth_message' => '<strong>OOPS!</strong><br/><br/>You do not have sufficient permission to view this resource.<br/><br/> Go to your ' . anchor('dashboard', 'Dashboard'),
     							'alert_type' => 'danger'
@@ -505,7 +505,7 @@ class Auth extends MY_Controller
 		{
 			echo 'My role: '.$this->dx_auth->get_role_name().'<br/>';
 			echo 'My permission: <br/>';
-			
+
 			if ($this->dx_auth->get_permission_value('edit') != NULL AND $this->dx_auth->get_permission_value('edit'))
 			{
 				echo 'Edit is allowed';
@@ -514,9 +514,9 @@ class Auth extends MY_Controller
 			{
 				echo 'Edit is not allowed';
 			}
-			
+
 			echo '<br/>';
-			
+
 			if ($this->dx_auth->get_permission_value('delete') != NULL AND $this->dx_auth->get_permission_value('delete'))
 			{
 				echo 'Delete is allowed';
