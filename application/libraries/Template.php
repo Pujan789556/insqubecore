@@ -268,11 +268,11 @@ class Template {
 		/**
 		 *  Do we have an AJAX request?
 		 */
-		$method = $this->get_method();
-		if( $method == 'json' )
-		{
-			$this->json([], $http_code);
-		}
+		// $method = $this->get_method();
+		// if( $method == 'json' )
+		// {
+		// 	$this->json([], $http_code);
+		// }
 
 		// Set HTTP status Code
 		$this->_set_http_code($http_code);
@@ -296,7 +296,7 @@ class Template {
 	 * @param string $view the 404 view
 	 * @return void
 	 */
-	public function render_404( $view='' )
+	public function render_404( $view='', $message='' )
 	{
 		/**
 		 *  Do we have an AJAX request?
@@ -304,11 +304,11 @@ class Template {
 		$method = $this->get_method();
 		if( $method == 'json' )
 		{
-			$this->_output_json(['error' => 'not_found'], 404);
+			$this->_output_json(['error' => 'not_found', 'message' => $message], 404);
 		}
 		else
 		{
-			show_404( $view );
+			show_404( $view, $message );
 		}
 	}
 
