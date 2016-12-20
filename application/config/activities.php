@@ -111,6 +111,18 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to Object
+	 */
+	'object' => [
+		'_uri' => 'objects/',
+		'_table' => 'dt_policy_objects',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
+	/**
 	 * Activities related to Portfolio
 	 */
 	'portfolio' => [

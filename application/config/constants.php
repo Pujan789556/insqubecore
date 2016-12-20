@@ -103,3 +103,12 @@ define('CACHE_DURATION_HALF_DAY', 43200);
 define('CACHE_DURATION_DAY', 86400);
 define('CACHE_DURATION_WEEK', 604800);
 define('CACHE_DURATION_MONTH', 2592000);
+
+/*
+|--------------------------------------------------------------------------
+| APPLICATION SPECIFIC GENERAL CONSTANTS
+|--------------------------------------------------------------------------
+|
+|
+*/
+define('IQB_BLANK_SELECT', ['' => 'Select...']);

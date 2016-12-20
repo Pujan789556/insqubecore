@@ -29,44 +29,11 @@ $config['PC_policy_duration_list'] = [
 	'+1 year' 		=> 'One Year',
 ];
 
-
-/*
-|--------------------------------------------------------------------------
-| Policy Object - Motor - Vehicle Types
-|--------------------------------------------------------------------------
-|
-| List of Vehicle Types
-|
-*/
-$config['PO_motor__vehicle_types'] = [
-
-	'mc' 	=> 'Motorcycle',
-	'pv'  	=> 'Private Vehicle',
-	'cv'  	=> 'Commercial Vehicle'
-];
-
-
-/*
-|--------------------------------------------------------------------------
-| Policy Object - Motor - Sub-type list of Commercial Vehicle
-|--------------------------------------------------------------------------
-|
-| List of Commercial Vehicle Types
-|
-*/
-$config['PO_motor__commercial_vehicle_sub_types'] = [
-
-	'gcg' 	=> 'Goods Carrier - General',
-	'gct'  	=> 'Goods Carrier - Tanker',
-	'pc'  	=> 'Passenger Carrier - General',
-	'pco' 	=> 'Passenger Carrier - Office/School Usage',
-	'tx' 	=> 'Taxi',
-	'tm'	=> 'Tempo (e-rikshaw, tempo, tricycle)',
-	'af' 	=> 'Agriculture & Forestry',
-	'tt'	=> 'Tractor & Power Triller',
-	'ce'	=> 'Construction Equipment Vehicle'
-];
-
+/**
+ * ========================================================================
+ * 	MOTOR PORTFOLIO
+ *  ========================================================================
+ */
 
 /*
 |--------------------------------------------------------------------------
