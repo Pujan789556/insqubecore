@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <?php echo form_open( $this->uri->uri_string(),
                         [
                             'class' => 'form-horizontal form-iqb-general',
-                            // 'id'    => '__testform',
+                            'id'    => '_form-customer',
                             'data-pc' => '#form-box-customer' // parent container ID
                         ],
                         // Hidden Fields

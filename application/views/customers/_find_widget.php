@@ -21,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						data-box-size="large"
 						data-title='<i class="fa fa-pencil-square-o"></i> Add New Customer'
 						data-url="<?php echo site_url('customers/add/y');?>"
-						data-form=".form-iqb-general"
+						data-form="#_form-customer"
 					><i class="ion-plus-circled"></i> Add</a>
 				<?php endif?>
 			</div>

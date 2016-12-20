@@ -559,6 +559,25 @@ $( document ).ajaxError(function( event, request, settings ) {
     return false;
  });
 
+/**
+ * Popover Initialization
+ *
+ *      1. Popover From DOM
+ */
+ $(document).on('click', '.preview-dom', function(e){
+    e.preventDefault();
+    var $this = $(this),
+        content = $($this.data('dom')).html(),
+        title = $this.data('title') ? $this.data('title') : $this.attr('title');
+    bootbox.alert({
+        className: 'modal-default',
+        size: 'large',
+        title: title,
+        message: content,
+        backdrop: false,
+        closeButton: false
+    });
+ });
 
 /**
  * Global Initialize Tooltip ( works well on dynamic content)

@@ -81,19 +81,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<div class="nav-tabs-custom">
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#activity" data-toggle="tab">Summary</a></li>
-				<li><a href="#timeline" data-toggle="tab">Policies</a></li>
+				<li><a href="#tab-policy" data-toggle="tab">Policies</a></li>
+				<li><a href="#tab-object" data-toggle="tab">Objects</a></li>
 				<li><a href="#targets" data-toggle="tab">Invoices</a></li>
 				<li><a href="#settings" data-toggle="tab">Documents</a></li>
 				<li><a href="#settings" data-toggle="tab">Claims</a></li>
 				<li><a href="#settings" data-toggle="tab">Reports</a></li>
 			</ul>
 			<div class="tab-content">
-				<div class="active tab-pane" id="activity">
+				<div class="active tab-pane" id="tab-policy">
 
 				</div>
 				<!-- /.tab-pane -->
-				<div class="tab-pane" id="timeline">
-
+				<div class="tab-pane" id="tab-object">
+					<?php
+					/**
+					 * Load Rows from View
+					 */
+					$this->load->view('objects/_list_widget', ['records' => $objects, 'customer_record' => $record]);
+					?>
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="settings">

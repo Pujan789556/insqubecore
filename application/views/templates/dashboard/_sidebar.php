@@ -137,6 +137,11 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                         <i class="fa fa-certificate"></i> <span>Policies</span>
                   </a>
             </li>
+            <li class="<?php echo set_menu_active($nav_level_0, 'objects');?>">
+                  <a href="<?php echo site_url('objects');?>">
+                        <i class="fa fa-certificate"></i> <span>Objects</span>
+                  </a>
+            </li>
       </ul>
 </section>
 <!-- /.sidebar -->

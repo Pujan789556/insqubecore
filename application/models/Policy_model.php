@@ -98,9 +98,9 @@ class Policy_model extends MY_Model
                 [
                     'field' => 'type',
                     'label' => 'Policy Type',
-                    'rules' => 'trim|alpha|exact_length[1]|in_list[N,R]',
+                    'rules' => 'trim|alpha|exact_length[1]|in_list[N,R,E]',
                     '_type'     => 'dropdown',
-                    '_data'     => [ '' => 'Select...', 'N' => 'New', 'R' => 'Renewal'],
+                    '_data'     => [ '' => 'Select...', 'N' => 'New', 'R' => 'Renewal', 'E' => 'Endorsement'],
                     '_required' => true
                 ],
                 [
@@ -108,7 +108,7 @@ class Policy_model extends MY_Model
                     'label' => 'Portfolio',
                     'rules' => 'trim|required|intger|max_length[11]',
                     '_type'     => 'dropdown',
-                    '_id'       => 'portfolio',
+                    '_id'       => '_portfolio-id',
                     '_data'     => $select + $this->portfolio_model->dropdown_parent(),
                     '_required' => false
                 ]

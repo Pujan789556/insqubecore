@@ -135,7 +135,7 @@ foreach($form_elements as $element):?>
                     // unset placeholder
                     unset($element_config['placeholder']);
                     $checked = $element['_value'] == $value;
-                    echo form_switch($element_config, $element['_value'], $checked);
+                    echo form_switch($element_config, $element['_value'], $checked, $extra_attributes);
                     break;
             }
             ?>

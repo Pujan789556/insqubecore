@@ -647,6 +647,17 @@ class Customers extends MY_Controller
 			$this->template->render_404();
 		}
 
+		// Helpers
+		$this->load->helper('object');
+
+		// Prepare Data
+		$this->load->model('object_model');
+		$data = [
+			'record' 		=> $record,
+			'objects' 		=> $this->object_model->get_by_customer($record->id)
+		];
+
+
 		// Load media helper
 		$this->load->helper('insqube_media');
 
@@ -658,7 +669,7 @@ class Customers extends MY_Controller
 								'content_header' => 'Customer Details <small>' . $record->full_name . '</small>',
 								'breadcrumbs' => ['Customers' => 'customers', 'Details' => NULL]
 						])
-						->partial('content', 'customers/_details', compact('record'))
+						->partial('content', 'customers/_details', $data)
 						->partial('dynamic_js', 'customers/_customer_js')
 						->render($this->data);
 

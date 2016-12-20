@@ -16,6 +16,11 @@
   color: #fff;
 }
 
+/* -- Bootstrap Popover Sizes -- */
+.popover-large{
+  max-width: 500px !important;
+}
+
 /*-- Image Select Preview Box Container--*/
 .ins-img-ipb{
 	margin-top:10px;
