@@ -21,6 +21,9 @@
 <!-- Toastr -->
 <script src="<?php echo THEME_URL; ?>plugins/toastr/toastr.min.js"></script>
 
+<!-- Bootstrap Datepicker -->
+<script src="<?php echo THEME_URL; ?>plugins/datepicker/js/bootstrap-datepicker.min.js"></script>
+
 <!-- bootbox (for alert, confirm) -->
 <script src="<?php echo THEME_URL; ?>plugins/bootbox/bootbox.min.js"></script>
 

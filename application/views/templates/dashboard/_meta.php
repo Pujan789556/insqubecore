@@ -18,6 +18,9 @@
 <!-- Select2 -->
 <link rel="stylesheet" href="<?php echo THEME_URL; ?>plugins/select2/select2.min.css">
 
+<!-- Datepicker -->
+<link rel="stylesheet" href="<?php echo THEME_URL; ?>plugins/datepicker/css/bootstrap-datepicker.min.css">
+
 <!-- Theme style -->
 <link rel="stylesheet" href="<?php echo THEME_URL; ?>dist/css/AdminLTE.min.css">
 

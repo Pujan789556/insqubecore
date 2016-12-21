@@ -70,6 +70,11 @@ foreach($form_elements as $element):?>
                     $value = $form_record->{$element['_key']};
                 }
             }
+            else
+            {
+                // Let's check if we have default value
+                $value = $element['_default'] ?? '';
+            }
 
             switch($element['_type'])
             {
@@ -82,7 +87,10 @@ foreach($form_elements as $element):?>
                     break;
 
                 case 'date':
-                        echo form_date($element_config, $value, $extra_attributes);
+                        echo    '<div class="input-group date">' .
+                                    form_input($element_config, $value, $extra_attributes) .
+                                    '<span class="input-group-addon"><i class="fa fa-calendar pointer"></i></span>' .
+                                '</div>';
                         break;
 
                 case 'url':
@@ -94,8 +102,6 @@ foreach($form_elements as $element):?>
                     break;
 
                 case 'dropdown':
-                    // Let's check if we have default value
-                    $value = isset($value) && $value != '' ? $value : ($element['_default'] ?? '');
                     $dropdown_data = $element['_data'] ?? ['' => 'Select...'];
                     echo form_dropdown($element_config, $dropdown_data, $value, $extra_attributes);
                     break;
