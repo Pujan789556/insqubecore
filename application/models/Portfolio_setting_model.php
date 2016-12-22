@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Branch_target_model extends MY_Model
+class Portfolio_setting_model extends MY_Model
 {
-    protected $table_name = 'master_branch_targets';
+    protected $table_name = 'master_portfolio_settings';
 
     protected $set_created = true;
 
@@ -18,41 +18,41 @@ class Branch_target_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "fiscal_yr_id", "branch_id", "target_total", "target_details", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "fiscal_yr_id", "portfolio_id", "agent_commission", "direct_discount", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
             'field' => 'fiscal_yr_id',
             'label' => 'Fiscal Year',
-            'rules' => 'trim|required|integer|max_length[3]|callback__cb_targets_check_duplicate',
+            'rules' => 'trim|required|integer|max_length[3]|callback__cb_settings_check_duplicate',
             '_type'     => 'dropdown',
             '_default'  => '',
             '_required' => true
         ],
         [
-            'field' => 'branch_id[]',
-            'label' => 'Branch',
+            'field' => 'portfolio_id[]',
+            'label' => 'Portfolio',
             'rules' => 'trim|required|integer|max_length[11]',
             '_type'     => 'text',
             '_required' => true
         ],
         [
-            'field' => 'target_total[]',
-            'label' => 'Total Target',
-            'rules' => 'trim|required|prep_decimal|decimal|max_length[14]',
+            'field' => 'agent_commission[]',
+            'label' => 'Agent Commission(%)',
+            'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
             '_type'     => 'text',
             '_required' => true
         ],
         [
-            'field' => 'target_ids[]',
-            'label' => 'Target IDs',
-            'rules' => 'trim|integer|max_length[11]',
+            'field' => 'direct_discount[]',
+            'label' => 'Direct Discount(%)',
+            'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
             '_type'     => 'text',
             '_required' => true
         ],
         [
-            'field' => 'target_ids[]',
-            'label' => 'Targets',
+            'field' => 'setting_ids[]',
+            'label' => 'Settings',
             'rules' => 'trim|integer|max_length[11]',
             '_type'     => 'hidden',
             '_required' => true
@@ -78,7 +78,6 @@ class Branch_target_model extends MY_Model
         parent::__construct();
     }
 
-
     // ----------------------------------------------------------------
 
     public function get_row_list()
@@ -86,15 +85,15 @@ class Branch_target_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('branch_targets_list');
+        $list = $this->get_cache('portfolio_setting_list');
         if(!$list)
         {
-            $list = $this->db->select('BT.fiscal_yr_id, FY.code_en, FY.code_np')
-                                ->from($this->table_name . ' BT')
-                                ->join('master_fiscal_yrs FY', 'FY.id = BT.fiscal_yr_id')
-                                ->group_by('BT.fiscal_yr_id')
+            $list = $this->db->select('PS.fiscal_yr_id, FY.code_en, FY.code_np')
+                                ->from($this->table_name . ' PS')
+                                ->join('master_fiscal_yrs FY', 'FY.id = PS.fiscal_yr_id')
+                                ->group_by('PS.fiscal_yr_id')
                                 ->get()->result();
-            $this->write_cache($list, 'branch_targets_list', CACHE_DURATION_DAY);
+            $this->write_cache($list, 'portfolio_setting_list', CACHE_DURATION_DAY);
         }
         return $list;
     }
@@ -103,10 +102,10 @@ class Branch_target_model extends MY_Model
 
     public function get_row_single($fiscal_yr_id)
     {
-        return $this->db->select('BT.fiscal_yr_id, FY.code_en, FY.code_np')
-                                ->from($this->table_name . ' BT')
-                                ->join('master_fiscal_yrs FY', 'FY.id = BT.fiscal_yr_id')
-                                ->where('BT.fiscal_yr_id', $fiscal_yr_id)
+        return $this->db->select('PS.fiscal_yr_id, FY.code_en, FY.code_np')
+                                ->from($this->table_name . ' PS')
+                                ->join('master_fiscal_yrs FY', 'FY.id = PS.fiscal_yr_id')
+                                ->where('PS.fiscal_yr_id', $fiscal_yr_id)
                                 ->get()->row();
     }
 
@@ -114,25 +113,25 @@ class Branch_target_model extends MY_Model
 
     public function get_list_by_fiscal_year($fiscal_yr_id)
     {
-        return $this->db->select('BT.id, BT.fiscal_yr_id, BT.branch_id, BT.target_total, BT.target_details, B.name as branch_name')
-                        ->from($this->table_name . ' BT')
-                        ->join('master_branches B', 'B.id = BT.branch_id')
-                        ->where('BT.fiscal_yr_id', $fiscal_yr_id)
+        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, P.name_en as portfolio_name')
+                        ->from($this->table_name . ' PS')
+                        ->join('master_portfolio P', 'P.id = PS.portfolio_id')
+                        ->where('PS.fiscal_yr_id', $fiscal_yr_id)
                         ->get()->result();
     }
+
     // ----------------------------------------------------------------
 
-    public function check_duplicate($where, $target_ids=NULL)
+    public function check_duplicate($where, $setting_ids=NULL)
     {
-        if( $target_ids )
+        if( $setting_ids )
         {
-            $this->db->where_not_in('id', $target_ids);
+            $this->db->where_not_in('id', $setting_ids);
         }
         // $where is array ['key' => $value]
         return $this->db->where($where)
                         ->count_all_results($this->table_name);
     }
-
 
     // --------------------------------------------------------------------
 
@@ -142,7 +141,8 @@ class Branch_target_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'branch_targets_list'
+            'branch_targets_all',
+            'portfolio_setting_list'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)
@@ -208,7 +208,7 @@ class Branch_target_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'branch_target',
+            'module' => 'portfolio_setting',
             'module_id' => $id,
             'action' => $action
         ];

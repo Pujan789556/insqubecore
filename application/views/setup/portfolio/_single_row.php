@@ -22,6 +22,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<span class="hidden-xs">Edit</span>
 		</a>
 
+		<a href="#"
+			data-toggle="tooltip"
+			title="Edit Policy Object Attributes"
+			class="trg-dialog-edit action"
+			data-title='<i class="fa fa-pencil-square-o"></i> Edit Policy Object Attributes'
+			data-url="<?php echo site_url('portfolio/po_attributes/' . $record->id);?>"
+			data-form=".form-iqb-general">
+			<i class="fa fa-pencil-square-o"></i>
+			<span class="hidden-xs">Attributes</span>
+		</a>
+
 		<?php if(safe_to_delete( 'Portfolio_model', $record->id )):?>
 			<a href="#"
 				title="Delete"

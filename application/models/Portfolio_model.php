@@ -19,7 +19,7 @@ class Portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "parent_id", "code", "name_en", "name_np", "commission", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "parent_id", "code", "name_en", "name_np", "commission", "po_attributes", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [

@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Branch: Targets : Index View
+* Portfolio: Settings : Index View
 */
 ?>
 <div class="row">
@@ -18,11 +18,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						?>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
-						<a href="#" title="Add new Branch Targets"
+						<a href="#" title="Add New Portfolio Settings"
 							class="btn btn-success btn-round trg-dialog-edit"
 							data-box-size="large"
-							data-title='<i class="fa fa-pencil-square-o"></i> Add New Branch Targets'
-							data-url="<?php echo site_url('branches/add_targets/');?>"
+							data-title='<i class="fa fa-pencil-square-o"></i> Add New Portfolio Settings'
+							data-url="<?php echo site_url('portfolio/add_settings/');?>"
 							data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
 					</div>
@@ -34,7 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/branches/_list_targets');
+				$this->load->view('setup/portfolio/_list_settings');
 				?>
 			</div>
 			<!-- /.box-body -->

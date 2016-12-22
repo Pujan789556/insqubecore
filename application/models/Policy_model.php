@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "code", "branch_id", "customer_id", "portfolio_id", "sold_by", "type", "object_id", "start_date", "end_date", "flag_has_agent", "status", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "code", "branch_id", "customer_id", "portfolio_id", "sold_by", "object_id", "start_date", "end_date", "flag_has_agent", "status", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -96,14 +96,6 @@ class Policy_model extends MY_Model
              */
             'portfolio' => [
                 [
-                    'field' => 'type',
-                    'label' => 'Policy Type',
-                    'rules' => 'trim|alpha|exact_length[1]|in_list[N,R,E]',
-                    '_type'     => 'dropdown',
-                    '_data'     => [ '' => 'Select...', 'N' => 'New', 'R' => 'Renewal', 'E' => 'Endorsement'],
-                    '_required' => true
-                ],
-                [
                     'field' => 'portfolio_id',
                     'label' => 'Portfolio',
                     'rules' => 'trim|required|intger|max_length[11]',
@@ -111,6 +103,21 @@ class Policy_model extends MY_Model
                     '_id'       => '_portfolio-id',
                     '_data'     => $select + $this->portfolio_model->dropdown_parent(),
                     '_required' => false
+                ]
+            ],
+
+            /**
+             * Policy Package Information
+             */
+            'package' => [
+                [
+                    'field' => 'policy_package',
+                    'label' => 'Policy Package',
+                    'rules' => 'trim|required|alpha|max_length[10]',
+                    '_type'     => 'dropdown',
+                    '_id'       => '_policy-package-id',
+                    '_data'     => IQB_BLANK_SELECT,
+                    '_required' => true
                 ]
             ],
 
@@ -144,7 +151,9 @@ class Policy_model extends MY_Model
                     'field' => 'start_date',
                     'label' => 'Policy Start Date',
                     'rules' => 'trim|required|valid_date',
-                    '_type'     => 'date',
+                    '_type'             => 'date',
+                    '_default'          => date('Y-m-d'),
+                    '_extra_attributes' => 'data-provide="datepicker-inline"',
                     '_required' => false
                 ],
                 [
@@ -166,6 +175,8 @@ class Policy_model extends MY_Model
                     'field' => 'sold_by',
                     'label' => 'Marketing Staff',
                     'rules' => 'trim|required|intger|max_length[11]',
+                    '_id'       => '_marketing-staff',
+                    '_extra_attributes' => 'style="width:100%; display:block"',
                     '_type'     => 'dropdown',
                     '_data'     => $select + $this->user_model->dropdown($role_id, $branch_id),
                     '_required' => true
@@ -188,7 +199,8 @@ class Policy_model extends MY_Model
                     'field' => 'agent_id',
                     'label' => 'Agent Name',
                     'rules' => 'trim|required|intger|max_length[11]',
-                    '_id'       => 'agent-id',
+                    '_id'       => '_agent-id',
+                    '_extra_attributes' => 'style="width:100%; display:block"',
                     '_type'     => 'dropdown',
                     '_data'     => $select + $this->agent_model->dropdown(true),
                     '_required' => true
@@ -241,7 +253,7 @@ class Policy_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('P.id, P.code, P.branch_id, P.customer_id, P.portfolio_id, P.sold_by, P.type, P.object_id,  P.start_date, P.end_date, P.status')
+        $this->db->select('P.id, P.code, P.branch_id, P.customer_id, P.portfolio_id, P.sold_by, P.object_id,  P.start_date, P.end_date, P.status')
                  ->from($this->table_name . ' as P');
 
         /**

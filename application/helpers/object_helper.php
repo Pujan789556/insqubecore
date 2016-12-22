@@ -104,6 +104,36 @@ if ( ! function_exists('_PO_attribute_form'))
 }
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('_PO_policy_package_dropdown'))
+{
+	/**
+	 * Get Policy Packages for Portfolio
+	 *
+	 * Dropdown list of packages of specified portfolio
+	 *
+	 * @param integer $portfolio_id  Portfolio ID
+	 * @return	string
+	 */
+	function _PO_policy_package_dropdown( $portfolio_id )
+	{
+		$dropdown = [];
+		switch ($portfolio_id)
+		{
+			// Motor
+			case 6:
+				$dropdown = _PO_MOTOR_policy_package_dropdown();
+				break;
+
+			default:
+				# code...
+				break;
+		}
+		return $dropdown;
+	}
+}
+// ------------------------------------------------------------------------
+
+
 
 
 
@@ -491,6 +521,32 @@ if ( ! function_exists('_PO_MOTOR_row_snippet'))
 	{
 		$CI =& get_instance();
 		return $CI->load->view('objects/snippets/_row_motor', ['record' => $record], TRUE);
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_PO_MOTOR_policy_package_dropdown'))
+{
+	/**
+	 * Get Policy Packages - Motor
+	 *
+	 * Motor Policy Packages
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	bool
+	 */
+	function _PO_MOTOR_policy_package_dropdown( $flag_blank_select = true)
+	{
+		$dropdown = [
+			'tp' 	=> 'Third Party',
+			'cp'  	=> 'Comprehensive',
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
 	}
 }
 // ------------------------------------------------------------------------

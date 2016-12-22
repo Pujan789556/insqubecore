@@ -102,7 +102,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           </span>
                                     </a>
                                     <ul class="treeview-menu">
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'portfolio');?>"><a href="<?php echo site_url('portfolio');?>"><i class="fa fa-circle-o"></i> Manage Portfolio</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'portfolio');?>"><a href="<?php echo site_url('portfolio');?>"><i class="fa fa-circle-o"></i> Manage Portfolio</a></li><li class="<?php echo set_menu_active($nav_level_2, 'settings');?>"><a href="<?php echo site_url('portfolio/settings');?>"><i class="fa fa-circle-o"></i> Portfolio Settings</a></li>
                                     </ul>
                               </li>
 

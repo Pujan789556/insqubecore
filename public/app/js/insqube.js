@@ -597,4 +597,7 @@ $(document).on('hidden.bs.modal', '.bootbox[role="dialog"]', function(){
     if($bootbox.length  ){
         $('body').addClass('modal-open');
     }
+
+    // Destroy all tooltip if any on modal
+    $('body').tooltip('destroy');
 });

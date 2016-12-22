@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Customer: Subscription View
+* Object: Widget List View
 */
 ?>
 <div class="row">
@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								class="btn btn-success btn-round trg-dialog-edit pull-right"
 								data-box-size="large"
 								data-title='<i class="fa fa-pencil-square-o"></i> Add New Object'
-								data-url="<?php echo site_url('objects/add/' . $customer_record->id);?>"
+								data-url="<?php echo site_url($add_url);?>"
 								data-form="#_form-object"
 							><i class="ion-plus-circled"></i> Add</a>
 						<?php endif?>

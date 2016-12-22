@@ -37,11 +37,14 @@ class Policies extends MY_Controller
 		// Policy Configuration/Helper
 		$this->load->config('policy');
 		$this->load->helper('policy');
+		$this->load->helper('object');
 
 		// Image Path
         $this->_upload_path = INSQUBE_MEDIA_PATH . 'policies/';
 	}
 
+	// --------------------------------------------------------------------
+	// SEARCH OPERATIONS
 	// --------------------------------------------------------------------
 
 	/**
@@ -291,7 +294,39 @@ class Policies extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+	// CRUD HELPER - FUNCTIONS
+	// --------------------------------------------------------------------
 
+		/**
+		 * Get Policy Packages for Portfolio
+		 *
+		 * Get the policy packages for specified portfolio
+		 *
+		 * @param integer $portfolio_id
+		 * @param string 	$method 	Return Method
+		 * @return mixed
+		 */
+		public function gppp($portfolio_id)
+		{
+			// Valid Record ?
+			$portfolio_id = (int)$portfolio_id;
+
+			$options = _PO_policy_package_dropdown($portfolio_id);
+
+			if( !empty($options))
+			{
+				$this->template->json([
+					'status' => 'success',
+					'options' => $options
+				]);
+			}
+			$this->template->render_404('', 'Incorrect Portfolio');
+		}
+
+
+
+	// --------------------------------------------------------------------
+	// CRUD OPERATIONS
 	// --------------------------------------------------------------------
 
 	/**

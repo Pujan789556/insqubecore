@@ -98,7 +98,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					/**
 					 * Load Rows from View
 					 */
-					$this->load->view('objects/_list_widget', ['records' => $objects, 'customer_record' => $record]);
+					$this->load->view('objects/_list_widget', [
+						'records' 			=> $objects,
+						'customer_record' 	=> $record,
+						'portfolio_record' 	=> NULL,
+						'add_url' 			=> 'objects/add/' . $record->id
+					]);
 					?>
 				</div>
 				<!-- /.tab-pane -->

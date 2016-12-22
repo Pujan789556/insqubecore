@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Customer
  */
 ?>
-<?php echo form_open( $this->uri->uri_string(),
+<?php echo form_open( $action_url,
                         [
                             'class' => 'form-horizontal form-iqb-general',
                             'id'    => '_form-object',
@@ -17,7 +17,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     </div>
     <div class="box-body">
         <?php
-        if($action == 'add')
+        /**
+         * Object Form is Called From Two Places
+         *
+         * a. Customer Object Tab
+         *      In this case, you can create object of any portfolio. So you must choose portfolio first.
+         *
+         * b. Pollicy Add Form (Add Widget)
+         *      In this case, you have both the customer and portfolio selected. You will only need the object
+         *      attributes of specified portfolio
+         */
+        if($action == 'add' && $from_widget === 'n')
         {
             /**
              * Load Form Components
@@ -29,11 +39,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
         else
         {
+            if($from_widget === 'y')
+            {
+                echo form_hidden('portfolio_id', $portfolio_record->id);
+                $portfolio_name = $portfolio_record->name_en;
+            }
             ?>
             <div class="form-group">
                 <label class="col-sm-2 control-label">Portfolio</label>
                 <div class="col-sm-10">
-                    <p class="form-control-static"><?php echo $record->portfolio_name;?></p>
+                    <p class="form-control-static"><?php echo $portfolio_name ?? $record->portfolio_name;?></p>
                 </div>
             </div>
             <?php
@@ -56,7 +71,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
 
-<?php if($action == 'add'):?>
+<?php if($action == 'add' && $from_widget === 'n'):?>
     <script type="text/javascript">
     (function($){
         var portfolio = $('#_object-portfolio-id').val();
@@ -91,3 +106,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     })(jQuery);
     </script>
 <?php endif;?>
+
+<script type="text/javascript">
+    // Datepicker
+    $('.input-group.date').datepicker({
+        autoclose: true,
+        todayHighlight: true,
+        format: 'yyyy-mm-dd'
+    });
+</script>

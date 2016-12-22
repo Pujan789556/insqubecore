@@ -149,6 +149,19 @@ $config['insqb_activity_types'] = [
 			'R' => 'revoked all permissions from all roles.'
 	]],
 
+
+	/**
+	 * Activities related to Portfolio Settings
+	 */
+	'portfolio_setting' => [
+		'_uri' => 'portfolio/settings/',
+		'_table' => 'master_portfolio_settings',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
 	/**
 	 * Activities related to Setting
 	 */

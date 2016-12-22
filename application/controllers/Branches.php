@@ -75,6 +75,9 @@ class Branches extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+    // CRUD OPERATIONS
+    // --------------------------------------------------------------------
+
 
 	/**
 	 * Edit a Branch
@@ -332,6 +335,9 @@ class Branches extends MY_Controller
 
 
     // --------------------------------------------------------------------
+    // DATA EXPLORE FUNCTIONS
+    // --------------------------------------------------------------------
+
 
     /**
      * View Branch Details
@@ -361,10 +367,7 @@ class Branches extends MY_Controller
     }
 
     // --------------------------------------------------------------------
-
-
-    // --------------------------------------------------------------------
-    // MANAGE TARGETS
+    // TARGETS EXPLORE AND CRUD OPERATIONS
     // --------------------------------------------------------------------
 
 
@@ -394,8 +397,6 @@ class Branches extends MY_Controller
 						->partial('content', 'setup/branches/_targets', compact('records'))
 						->render($this->data);
   	}
-
-  	// --------------------------------------------------------------------
 
   	// --------------------------------------------------------------------
 
@@ -629,6 +630,29 @@ class Branches extends MY_Controller
 
 		return $return_data;
 	}
+
+	// --------------------------------------------------------------------
+
+	/**
+     * Callback - Check Setting Duplicate
+     *
+     * @param string $code
+     * @param integer|null $id
+     * @return bool
+     */
+    public function _cb_targets_check_duplicate($fiscal_yr_id, $id=NULL)
+    {
+    	$this->load->model('branch_target_model');
+    	$fiscal_yr_id = strtoupper( $fiscal_yr_id ? $fiscal_yr_id : $this->input->post('fiscal_yr_id') );
+    	$target_ids = $this->input->post('target_ids');
+
+        if( $this->branch_target_model->check_duplicate(['fiscal_yr_id' => $fiscal_yr_id], $target_ids))
+        {
+            $this->form_validation->set_message('_cb_targets_check_duplicate', 'The %s already exists.');
+            return FALSE;
+        }
+        return TRUE;
+    }
 
 	// --------------------------------------------------------------------
 

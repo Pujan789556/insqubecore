@@ -202,9 +202,11 @@ class Objects extends MY_Controller
 			$this->template->render_404('', 'Please select customer first.');
 		}
 		$data = [
-			'records' 			=> $this->object_model->get_by_customer($customer_record->id),
-			'customer_record' 	=> $customer_record,
-			'_flag__show_widget_row' => TRUE
+			'records' 					=> $this->object_model->get_by_customer($customer_record->id),
+			'customer_record' 			=> $customer_record,
+			'portfolio_record' 		 	=> $portfolio_record,
+			'add_url' 					=> 'objects/add/' . $customer_id . '/y/' . $portfolio_id,
+			'_flag__show_widget_row' 	=> TRUE
 		];
 		$html = $this->load->view('objects/_find_widget', $data, TRUE);
 		$ajax_data = [
@@ -340,8 +342,9 @@ class Objects extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
-	// CRUD - FUNCTIONS
+	// CRUD OPERATIONS
 	// --------------------------------------------------------------------
+
 
 	/**
 	 * Edit a Recrod
@@ -378,22 +381,24 @@ class Objects extends MY_Controller
 			$this->template->render_404();
 		}
 
+		/**
+		 * Prepare Common Form Data to pass to form view
+		 */
+		$action_url = 'objects/edit/' . $record->id;
+		$form_data = [
+			'form_elements' 	=> [],
+			'record' 			=> $record,
+			'portfolio_record' 	=> NULL,
+			'action' 			=> 'edit',
+			'action_url' 		=> $action_url,
+			'from_widget' 		=> 'no',
 
-		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $customer_record, $record);
+			// Attribute Elements
+			'html_form_attribute_components' => $this->gaf($record->portfolio_id, 'html', json_decode($record->attributes))
+		];
 
-
-		// No form Submitted?
-		$json_data['form'] = $this->load->view('objects/_form_box',
-			[
-				'form_elements' 					=> [],
-				'html_form_attribute_components'	=> $this->gaf($record->portfolio_id, 'html', json_decode($record->attributes)),
-				'record' 		=> $record,
-				'action' 		=> 'edit'
-			], TRUE);
-
-		// Return HTML
-		$this->template->json($json_data);
+		// Form Submitted? Save the data else load the form
+		$this->_save($customer_record, $form_data);
 	}
 
 	// --------------------------------------------------------------------
@@ -401,9 +406,18 @@ class Objects extends MY_Controller
 	/**
 	 * Add a new Record
 	 *
+	 * Object Form is Called From Two Places
+     *
+     * a. Customer Object Tab
+     *      In this case, you can create object of any portfolio. So you must choose portfolio first.
+     *
+     * b. Pollicy Add Form (Add Widget)
+     *      In this case, you have both the customer and portfolio selected. You will only need the object
+     *      attributes of specified portfolio
+	 *
 	 * @return void
 	 */
-	public function add( $customer_id, $from_widget='n' )
+	public function add( $customer_id, $from_widget='n', $portfolio_id = 0 )
 	{
 		/**
 		 * Check Permissions
@@ -411,6 +425,12 @@ class Objects extends MY_Controller
 		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('objects', 'add.object') )
 		{
 			$this->dx_auth->deny_access();
+		}
+
+		// Valid From Widget Param?
+		if( !in_array($from_widget, ['y','n']) )
+		{
+			$this->template->render_404();
 		}
 
 		// Valid Customer Record ?
@@ -422,61 +442,48 @@ class Objects extends MY_Controller
 			$this->template->render_404();
 		}
 
-
 		$record = NULL;
 
-		// Form Submitted? Save the data
-		$json_data = $this->_save('add', $customer_record, NULL, $from_widget);
-
-
-		// No form Submitted?
-		$json_data['form'] = $this->load->view('objects/_form_box',
-			[
-				'form_elements' => $this->object_model->validation_rules,
-				'record' 		=> $record,
-				'action' 		=> 'add'
-			], TRUE);
-
-		// Return HTML
-		$this->template->json($json_data);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Get Attribute Form
-	 *
-	 * @param integer $portfolio_id Portfolio ID
-	 * @param string 	$method 	Return Method
-	 * @param object 	$attributes 	Attribute Object
-	 * @return json
-	 */
-	public function gaf( $portfolio_id, $method  = 'json', $attributes = NULL )
-	{
-		// Valid Record ?
+		$portfolio_record = NULL;
 		$portfolio_id = (int)$portfolio_id;
-
-		$form_elements = _PO_validation_rules($portfolio_id);
-		$form_partial = _PO_attribute_form($portfolio_id);
-
-		// echo '<pre>'; print_r($attributes);exit;
-
-		// No form Submitted?
-		$html = $this->load->view($form_partial,
-			[
-				'form_elements' => $form_elements,
-				'record' 		=> $attributes
-			], TRUE);
-
-		if($method === 'html')
+		if($portfolio_id)
 		{
-			return $html;
+			$this->load->model('portfolio_model');
+			$portfolio_record = $this->portfolio_model->find($portfolio_id);
 		}
 
-		// Return HTML
-		$this->template->json(['html' => $html]);
+		// If from widget, we must need portfolio
+		if( $from_widget === 'y' && !$portfolio_record )
+		{
+			$this->template->render_404('', 'Please select a portfolio before creating an object.');
+		}
 
+		// If coming from widget, we only need object attributes
+		$html_form_attribute_components = '';
+		if($from_widget === 'y')
+		{
+			$html_form_attribute_components = $this->gaf($portfolio_id, 'html');
+		}
+
+		/**
+		 * Prepare Common Form Data to pass to form view
+		 */
+		$action_url = 'objects/add/' . $customer_id . '/' . $from_widget . '/' . $portfolio_id;
+		$form_data = [
+			'form_elements' 	=> $from_widget === 'n' ? $this->object_model->validation_rules : [],
+			'record' 			=> $record,
+			'portfolio_record' 	=> $portfolio_record,
+			'action' 			=> 'add',
+			'action_url' 		=> $action_url,
+			'from_widget' 		=> $from_widget,
+
+			'html_form_attribute_components' => $html_form_attribute_components
+		];
+
+		// Form Submitted? Save the data else load the form
+		$this->_save($customer_record, $form_data);
 	}
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -488,7 +495,157 @@ class Objects extends MY_Controller
 	 * @param char 	$from_widget
 	 * @return array
 	 */
-	private function _save($action, $customer_record, $record = NULL, $from_widget='n')
+	private function _save($customer_record, $form_data)
+	{
+		// Valid action?
+		$action = $form_data['action'];
+		if( !in_array($action, array('add', 'edit')))
+		{
+			return [
+				'status' => 'error',
+				'message' => 'Invalid action!'
+			];
+		}
+
+		// Load media helper
+		// $this->load->helper('insqube_media');
+
+		/**
+		 * Form Submitted?
+		 */
+		if( $this->input->post() )
+		{
+			$from_widget = $form_data['from_widget'];
+			$record = $form_data['record'];
+
+			if($action === 'add')
+			{
+				$portfolio_id = (int)$this->input->post('portfolio_id');
+				$v_rules = $from_widget === 'n' ? $this->object_model->validation_rules : [];
+			}
+			else
+			{
+				$portfolio_id = (int)$record->portfolio_id;
+				$v_rules = []; // Only attributes validation rule is required
+			}
+
+			$done 		= FALSE;
+			$v_rules 	= array_merge($v_rules, _PO_validation_rules($portfolio_id));
+            $this->form_validation->set_rules($v_rules);
+
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$object_data = [];
+        		$data = $this->input->post();
+
+        		if($action === 'add')
+				{
+					$object_data = [
+						'portfolio_id' => $portfolio_id
+					];
+				}
+        		$object_data['attributes'] = json_encode($data['object']);
+
+        		// Insert or Update?
+				if($action === 'add')
+				{
+					$done = $this->object_model->insert($object_data, TRUE); // No Validation on Model
+
+					if($done)
+					{
+						// Insert Relation Data
+						$rel_data = [
+							'customer_id' 	=> $customer_record->id,
+							'object_id' 	=> $done
+						];
+						$this->load->model('rel_customer_policy_object_model');
+						$this->rel_customer_policy_object_model->insert($rel_data, TRUE);
+
+						// Activity Log
+						$this->object_model->log_activity($done, 'C');
+					}
+				}
+				else
+				{
+					// Now Update Data
+					$done = $this->object_model->update($record->id, $object_data, TRUE) && $this->object_model->log_activity($record->id, 'E');
+				}
+
+	        	if(!$done)
+				{
+					$status = 'error';
+					$message = 'Could not update.';
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+				}
+        	}
+        	else
+        	{
+        		$status = 'error';
+				$message = 'Validation Error.';
+        	}
+
+        	// Success HTML
+			$success_html = '';
+			$return_extra = [];
+			if($status === 'success' )
+			{
+				$ajax_data = [
+					'message' => $message,
+					'status'  => $status,
+					'updateSection' => true,
+					'hideBootbox' => true
+				];
+
+				$record = $this->object_model->row($action === 'add' ? $done : $record->id);
+				$single_row = ($action === 'add' && $from_widget === 'y') ? 'objects/_single_row_widget' : 'objects/_single_row';
+				$html = $this->load->view($single_row, ['record' => $record], TRUE);
+
+				if($action === 'add')
+				{
+					$ajax_data['updateSectionData'] = [
+						'box' 		=> '#search-result-object',
+						'method' 	=> 'prepend',
+						'html'		=> $html
+					];
+				}
+				else
+				{
+					$ajax_data['updateSectionData']  = [
+						'box' 		=> '#_data-row-object-' . $record->id,
+						'method' 	=> 'replaceWith',
+						'html'		=> $html
+					];
+				}
+				return $this->template->json($ajax_data);
+			}
+			else
+			{
+				$attributes = $record ? json_decode($record->attributes) : NULL;
+				$form_data['html_form_attribute_components'] = $this->gaf($portfolio_id, 'html', $attributes);
+
+				return $this->template->json([
+					'status' 		=> $status,
+					'message' 		=> $message,
+					'reloadForm' 	=> true,
+					'form' 			=> $this->load->view('objects/_form', $form_data, TRUE)
+				]);
+			}
+		}
+
+
+		/**
+		 * Render The Form
+		 */
+		$json_data = [
+			'form' => $this->load->view('objects/_form_box', $form_data, TRUE)
+		];
+		$this->template->json($json_data);
+	}
+	private function _save_OLD($action, $customer_record, $record = NULL, $from_widget='n', $portfolio_record = NULL, $form_data)
 	{
 
 		// Valid action?
@@ -506,8 +663,6 @@ class Objects extends MY_Controller
 		/**
 		 * Form Submitted?
 		 */
-		$return_data = [];
-
 		if( $this->input->post() )
 		{
 
@@ -634,7 +789,14 @@ class Objects extends MY_Controller
 			}
 		}
 
-		return $return_data;
+
+		/**
+		 * Render The Form
+		 */
+		$json_data = [
+			'form' => $this->load->view('objects/_form_box', $form_data, TRUE)
+		];
+		$this->template->json($json_data);
 	}
 
 	// --------------------------------------------------------------------
@@ -738,6 +900,50 @@ class Objects extends MY_Controller
 		}
 		return $this->template->json($data);
 	}
+
+
+	// --------------------------------------------------------------------
+	// CRUD HELPER - FUNCTIONS
+	// --------------------------------------------------------------------
+
+
+		/**
+		 * Get Attribute Form
+		 *
+		 * @param integer $portfolio_id Portfolio ID
+		 * @param string 	$method 	Return Method
+		 * @param object 	$attributes 	Attribute Object
+		 * @return json
+		 */
+		public function gaf( $portfolio_id, $method  = 'json', $attributes = NULL )
+		{
+			// Valid Record ?
+			$portfolio_id = (int)$portfolio_id;
+
+			$form_elements = _PO_validation_rules($portfolio_id);
+			$form_partial = _PO_attribute_form($portfolio_id);
+
+			// echo '<pre>'; print_r($attributes);exit;
+
+			// No form Submitted?
+			$html = $this->load->view($form_partial,
+				[
+					'form_elements' => $form_elements,
+					'record' 		=> $attributes
+				], TRUE);
+
+			if($method === 'html')
+			{
+				return $html;
+			}
+
+			// Return HTML
+			$this->template->json(['html' => $html]);
+
+		}
+
+	// --------------------------------------------------------------------
+
 
 
 	// --------------------------------------------------------------------
