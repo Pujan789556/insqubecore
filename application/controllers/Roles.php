@@ -84,8 +84,13 @@ class Roles extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
+        if($id === 2) // Can not edit Admin Role
+        {
+            $this->template->render_404('', 'You can not edit Admin Role.');
+        }
+
 		$record = $this->role_model->find($id);
-		if(!$record)
+		if(!$record) // Can not edit Admin Role
 		{
 			$this->template->render_404();
 		}
@@ -267,6 +272,11 @@ class Roles extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
+        if($id === 2) // Can not edit Admin Role
+        {
+            $this->template->render_404('', 'You can not delete Admin Role.');
+        }
+
 		$record = $this->role_model->find($id);
 		if(!$record)
 		{

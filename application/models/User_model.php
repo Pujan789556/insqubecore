@@ -253,21 +253,46 @@ class User_model extends MY_Model
 
 	function get_user_by_username($username)
 	{
-		$this->db->where('username', $username);
-		return $this->db->get($this->table_name);
+        return $this->db->select('U.*, R.name as role_name, B.code as branch_code, D.code as department_code')
+                        ->from($this->table_name . ' U')
+                        ->join($this->_roles_table . ' R', 'R.id = U.role_id')
+                        ->join('master_branches B', 'B.id = U.branch_id')
+                        ->join('master_departments D', 'D.id = U.department_id')
+                        ->where('U.username', $username)
+                        ->get();
+
+		// $this->db->where('username', $username);
+		// return $this->db->get($this->table_name);
 	}
 
 	function get_user_by_email($email)
 	{
-		$this->db->where('email', $email);
-		return $this->db->get($this->table_name);
+        return $this->db->select('U.*, R.name as role_name, B.code as branch_code, D.code as department_code')
+                        ->from($this->table_name . ' U')
+                        ->join($this->_roles_table . ' R', 'R.id = U.role_id')
+                        ->join('master_branches B', 'B.id = U.branch_id')
+                        ->join('master_departments D', 'D.id = U.department_id')
+                        ->where('U.email', $email)
+                        ->get();
+
+		// $this->db->where('email', $email);
+		// return $this->db->get($this->table_name);
 	}
 
 	function get_login($login)
 	{
-		$this->db->where('username', $login);
-		$this->db->or_where('email', $login);
-		return $this->db->get($this->table_name);
+        return $this->db->select('U.*, R.name as role_name, B.code as branch_code, D.code as department_code')
+                        ->from($this->table_name . ' U')
+                        ->join($this->_roles_table . ' R', 'R.id = U.role_id')
+                        ->join('master_branches B', 'B.id = U.branch_id')
+                        ->join('master_departments D', 'D.id = U.department_id')
+                        ->where('U.username', $login)
+                        ->or_where('U.email', $login)
+                        ->get();
+
+		// $this->db->where('username', $login);
+		// $this->db->or_where('email', $login);
+		// return $this->db->get($this->table_name);
 	}
 
 	function check_ban($user_id)

@@ -44,12 +44,22 @@ class User_autologin extends CI_Model
 		return $this->db->get();
 		*/
 
-		return $this->db->select('U.id, U.username, U.email, U.role_id, U.branch_id, U.department_id, U.scope')
-						->from($users_table . ' U')
-						->join($auto_table . ' A', 'A.user_id = U.id')
-						->where('U.id', $user_id)
+		return $this->db->select('U.id, U.username, U.email, U.role_id, U.branch_id, U.department_id, U.scope, R.name as role_name, B.code as branch_code, D.code as department_code')
+                        ->from($users_table . ' U')
+                        ->join($auto_table . ' A', 'A.user_id = U.id')
+                        ->join('auth_roles R', 'R.id = U.role_id')
+                        ->join('master_branches B', 'B.id = U.branch_id')
+                        ->join('master_departments D', 'D.id = U.department_id')
+                        ->where('U.id', $user_id)
 						->where('A.key_id', md5($key))
-						->get();
+                        ->get();
+
+		// return $this->db->select('U.id, U.username, U.email, U.role_id, U.branch_id, U.department_id, U.scope')
+		// 				->from($users_table . ' U')
+		// 				->join($auto_table . ' A', 'A.user_id = U.id')
+		// 				->where('U.id', $user_id)
+		// 				->where('A.key_id', md5($key))
+		// 				->get();
 
 
 	}

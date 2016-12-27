@@ -487,6 +487,8 @@ class DX_Auth
 			'DX_email'							=> $data->email,   				// added by IP
 			'DX_role_id'						=> $data->role_id,
 			'DX_branch_id'						=> $data->branch_id,  			// added by IP
+			'DX_branch_code'					=> $data->branch_code,  			// added by IP
+			'DX_department_code'				=> $data->department_code,  			// added by IP
 			'DX_department_id'					=> $data->department_id, 		// added by IP
 			'DX_scope' 							=> json_decode($data->scope), 	// added by IP
 			'DX_role_name'						=> $role_data->name,			// Modified by IP
@@ -727,10 +729,22 @@ class DX_Auth
 		return $this->ci->session->userdata('DX_branch_id');
 	}
 
+	// Get branch code
+	function get_branch_code()
+	{
+		return $this->ci->session->userdata('DX_branch_code');
+	}
+
 	// Get department id
 	function get_department_id()
 	{
 		return $this->ci->session->userdata('DX_department_id');
+	}
+
+	// Get department id
+	function get_department_code()
+	{
+		return $this->ci->session->userdata('DX_department_code');
 	}
 
 	// Get username string
