@@ -560,6 +560,15 @@ $( document ).ajaxError(function( event, request, settings ) {
  });
 
 /**
+ * Datepicker Filter
+ */
+$('.input-group.date').datepicker({
+    autoclose: true,
+    todayHighlight: true,
+    format: 'yyyy-mm-dd'
+});
+
+/**
  * Popover Initialization
  *
  *      1. Popover From DOM

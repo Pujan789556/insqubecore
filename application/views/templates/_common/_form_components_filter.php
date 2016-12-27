@@ -37,7 +37,8 @@ foreach($filters as $element):?>
          */
         $extra_attributes = $element['_extra_attributes'] ?? '';
 
-        $value = '';
+        // Let's check if we have default value (might have on date fields)
+        $value = $element['_default'] ?? '';
 
         switch($element['_type'])
         {
@@ -49,9 +50,16 @@ foreach($filters as $element):?>
                 echo form_email($element_config, $value, $extra_attributes);
                 break;
 
+            // case 'date':
+            //         echo form_date($element_config, $value, $extra_attributes);
+            //         break;
+
             case 'date':
-                    echo form_date($element_config, $value, $extra_attributes);
-                    break;
+                echo    '<div class="input-group date">' .
+                            form_input($element_config, $value, $extra_attributes) .
+                            '<span class="input-group-addon"><i class="fa fa-calendar pointer"></i></span>' .
+                        '</div>';
+                break;
 
             case 'url':
                 echo form_url($element_config, $value, $extra_attributes);

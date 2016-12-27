@@ -80,8 +80,8 @@
 /* -- Live Search/Filters -- */
 .ins-box-filter .box-body, .ins-box-filter .box-footer{background: #827f7e; color: #fff; border-radius: 0;}
 .ins-box-filter .box-footer{border-color: #989695}
-.ins-box-filter .form-control{border:2px solid #807e7d; border-radius: 4px;}
-.ins-box-filter .form-control:focus{border-color: #3c8dbc;}
+/*.ins-box-filter .form-control{border:2px solid #807e7d; border-radius: 4px;}
+.ins-box-filter .form-control:focus{border-color: #3c8dbc;}*/
 .live-search-search{
   position: absolute;
   left: 20px;
