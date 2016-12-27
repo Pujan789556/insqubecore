@@ -33,7 +33,7 @@ if ( ! function_exists('_PO_row_snippet'))
 		switch ($record->portfolio_id)
 		{
 			// Motor
-			case 6:
+			case IQB_MASTER_PORTFOLIO_MOTOR:
 				$snippet = _PO_MOTOR_row_snippet($record);
 				break;
 
@@ -62,7 +62,7 @@ if ( ! function_exists('_PO_validation_rules'))
 		switch ($portfolio_id)
 		{
 			// Motor
-			case 6:
+			case IQB_MASTER_PORTFOLIO_MOTOR:
 				$v_rules = _PO_MOTOR_validation_rules();
 				break;
 
@@ -91,7 +91,7 @@ if ( ! function_exists('_PO_attribute_form'))
 		switch ($portfolio_id)
 		{
 			// Motor
-			case 6:
+			case IQB_MASTER_PORTFOLIO_MOTOR:
 				$attribute_form = 'objects/forms/_form_object_motor';
 				break;
 
@@ -120,7 +120,7 @@ if ( ! function_exists('_PO_policy_package_dropdown'))
 		switch ($portfolio_id)
 		{
 			// Motor
-			case 6:
+			case IQB_MASTER_PORTFOLIO_MOTOR:
 				$dropdown = _PO_MOTOR_policy_package_dropdown();
 				break;
 
@@ -156,9 +156,9 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 
 		// Validation Rules on Form Post Change on interdependent components
 		$post = $CI->input->post();
-		$v_type = $post ? ($post['v_type'] ?? '') : '';
-		$v_sub_type_rules = $v_type == 'cv' ? 'trim|required|alpha' : 'trim|alpha';
-
+		$object = $post['object'] ?? NULL;
+		$sub_portfolio 		= $object['sub_portfolio'] ?? '';
+		$cvc_type_rules 	= $sub_portfolio == 'CVC' ? 'trim|required|alpha' : 'trim|alpha';
 		return [
 			[
 		        'field' => 'object[ownership]',
@@ -171,24 +171,24 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 		        '_required' => true
 		    ],
 		    [
-		        'field' => 'object[v_type]',
-		        '_key' => 'v_type',
-		        'label' => 'Vehicle Type',
+		        'field' => 'object[sub_portfolio]',
+		        '_key' => 'sub_portfolio',
+		        'label' => 'Sub-Portfolio',
 		        'rules' => 'trim|required|alpha',
-		        '_id' 		=> '_motor-vehicle-type',
+		        '_id' 		=> '_motor-sub-portfolio',
 		        '_type'     => 'dropdown',
-		        '_data' 	=> _PO_MOTOR_vehicle_type_dropdown( ),
+		        '_data' 	=> _PO_MOTOR_sub_portfolio_dropdown( ),
 		        '_required' => true,
-		        '_extra_attributes' 	=> 'onchange="_po_motor_change_v_type(this)"'
+		        '_extra_attributes' 	=> 'onchange="_po_motor_change_sub_portfolio(this)"'
 		    ],
 		    [
-		        'field' => 'object[v_sub_type]',
-		        '_key' => 'v_sub_type',
-		        'label' => 'Vehicle Sub Type',
-		        'rules' => $v_sub_type_rules,
-		        '_id' 		=> '_motor-vehicle-sub-type',
+		        'field' => 'object[cvc_type]',
+		        '_key' => 'cvc_type',
+		        'label' => 'Commercial Vehicle Type',
+		        'rules' => $cvc_type_rules,
+		        '_id' 		=> '_motor-vehicle-cvc-type',
 		        '_type'     => 'dropdown',
-		        '_data' 	=> _PO_MOTOR_vehicle_sub_type_dropdown(),
+		        '_data' 	=> _PO_MOTOR_CVC_type_dropdown(),
 		        '_required' => true
 		    ],
 
@@ -400,24 +400,22 @@ if ( ! function_exists('_PO_MOTOR_vehicle_status_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_PO_MOTOR_vehicle_type_dropdown'))
+if ( ! function_exists('_PO_MOTOR_sub_portfolio_dropdown'))
 {
 	/**
-	 * Get Policy Object - Motor - Vehicle Type
+	 * Get Policy Object - Motor - Sub Portfolio List
 	 *
-	 * Motor Vehicle type dropdown
+	 * Motor Sub-portfolio Dorpdown
 	 *
 	 * @param bool $flag_blank_select 	Whether to append blank select
 	 * @return	bool
 	 */
-	function _PO_MOTOR_vehicle_type_dropdown( $flag_blank_select = true)
+	function _PO_MOTOR_sub_portfolio_dropdown( $flag_blank_select = true)
 	{
-		$dropdown = [
-			'mc' 	=> 'Motorcycle',
-			'pv'  	=> 'Private Vehicle',
-			'cv'  	=> 'Commercial Vehicle'
-		];
+		$CI =& get_instance();
+		$CI->load->model('portfolio_model');
 
+		$dropdown = $CI->portfolio_model->dropdown_children(IQB_MASTER_PORTFOLIO_MOTOR, 'code');
 		if($flag_blank_select)
 		{
 			$dropdown = IQB_BLANK_SELECT + $dropdown;
@@ -427,18 +425,18 @@ if ( ! function_exists('_PO_MOTOR_vehicle_type_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_PO_MOTOR_vehicle_sub_type_dropdown'))
+if ( ! function_exists('_PO_MOTOR_CVC_type_dropdown'))
 {
 	/**
-	 * Get Policy Object - Motor - Vehicle Sub Type
+	 * Get Policy Object - Motor - Commercial Vehicle Dropdown
 	 *
-	 * Motor Vehicle Sub type dropdown
+	 * Motor - Commercial Vehicle Dropdown
 	 *
 	 * @param bool $flag_blank_select 	Whether to append blank select
 	 * @param bool $sub_type Return Sub Type instead of primary type
 	 * @return	bool
 	 */
-	function _PO_MOTOR_vehicle_sub_type_dropdown( $flag_blank_select = true )
+	function _PO_MOTOR_CVC_type_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 			'gcg' 	=> 'Goods Carrier - Truck',

@@ -14,7 +14,7 @@ $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 		<strong><?php echo $attributes->engine_capacity;?> <?php echo $attributes->ec_unit;?></strong>
 		<span id="_text-ref-<?php echo $record->id?>" class="hide">
 			<?php echo $attributes->make;?>, <?php echo $attributes->model;?>,
-			<?php echo $attributes->reg_no;?>,<?php echo $attributes->engine_no;?>, <?php echo $attributes->chasis_no;?>
+			<?php echo $attributes->reg_no;?>, <?php echo $attributes->engine_no;?>, <?php echo $attributes->chasis_no;?>
 		</span>
 		<span id="_popover-motor-<?php echo $record->id?>" class="hide">
 			<?php

@@ -10,23 +10,23 @@ $this->load->view('templates/_common/_form_components_horz', [
 ?>
 <script type="text/javascript">
 
-function _po_motor_change_v_type(d){
+function _po_motor_change_sub_portfolio(d){
     var $this = $(d),
         v = $this.val();
-    if(v == 'cv')
+    if(v == 'CVC')
     {
         $('#_motor-vehicle-df').closest('.form-group').hide();
-        $('#_motor-vehicle-sub-type').closest('.form-group').show();
-    }else if(v == 'mc'){
-        $('#_motor-vehicle-sub-type').closest('.form-group').hide();
+        $('#_motor-vehicle-cvc-type').closest('.form-group').show();
+    }else if(v == 'MCY'){
+        $('#_motor-vehicle-cvc-type').closest('.form-group').hide();
         $('#_motor-vehicle-df').closest('.form-group').show();
     }else{
-        $('#_motor-vehicle-sub-type').closest('.form-group').hide();
+        $('#_motor-vehicle-cvc-type').closest('.form-group').hide();
         $('#_motor-vehicle-df').closest('.form-group').hide();
     }
 }
 
 (function($){
-    _po_motor_change_v_type('#_motor-vehicle-type');
+    _po_motor_change_sub_portfolio('#_motor-sub-portfolio');
 })(jQuery);
 </script>
