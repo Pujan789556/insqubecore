@@ -3,12 +3,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Customers:  Single Row
 */
+$select_json = [
+	'fields' => [
+		['id' => 'customer-id', 'val' => $record->id],
+		['id' => 'customer-text', 'val' => $record->full_name]
+	],
+	'html' => [
+		['id' => '_text-ref-customer', 'val' => $record->full_name]
+	]
+];
+
 ?>
 <tr class="selectable pointer"
-	data-id="<?php echo $record->id?>"
-	data-id-box="#customer-id"
-	data-text-box="#customer-text"
-	data-text-box-ref="#_text-ref-<?php echo $record->id?>"
+	data-selectable='<?php echo json_encode($select_json)?>'
 	title="Select this customer."
 	onclick="__do_select(this)"
 	id="_data-row-<?php echo $record->id;?>">

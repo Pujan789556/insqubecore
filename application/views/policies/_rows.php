@@ -9,15 +9,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 foreach($records as $record)
 {
-	$this->load->view('customers/_single_row', compact('record'));
+	$this->load->view('policies/_single_row', compact('record'));
 }
 
 /**
  * Next Link?
  */
 if($next_id):
-	$next_url = site_url('customers/page/'.$next_id);
-	$loader_box_id = '__next-loader-'.$next_id;
+	$loader_box_id = '__next-loader-policy-'.$next_id;
 ?>
 	<tr id="<?php echo $loader_box_id;?>">
 		<td colspan="8" class="text-center pointer filter-next-page-trigger"

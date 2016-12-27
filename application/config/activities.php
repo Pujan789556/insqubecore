@@ -123,6 +123,18 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to Policy
+	 */
+	'policy' => [
+		'_uri' => 'policies/',
+		'_table' => 'dt_policies',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
+	/**
 	 * Activities related to Portfolio
 	 */
 	'portfolio' => [

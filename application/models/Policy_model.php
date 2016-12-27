@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "code", "branch_id", "customer_id", "portfolio_id", "sold_by", "object_id", "start_date", "end_date", "flag_has_agent", "status", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "code", "branch_id", "customer_id", "portfolio_id", "policy_package", "sold_by", "object_id", "issue_date", "start_date", "end_date", "flag_dc", "status", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -47,13 +47,18 @@ class Policy_model extends MY_Model
 
         // Set validation rules
         $this->set_validation_rules();
-
-
     }
 
 
     // ----------------------------------------------------------------
 
+    /**
+     * Set Validation Rules
+     *
+     * Set multi section Validation Rule for Policy Creation/Edit
+     *
+     * @return array
+     */
     public function set_validation_rules()
     {
         $this->load->model('portfolio_model');
@@ -67,6 +72,20 @@ class Policy_model extends MY_Model
         $role_id = 7;
         $branch_id = $this->dx_auth->is_admin() ? NULL : $this->dx_auth->get_branch_id();
 
+        /**
+         * If posted and Direct Discount Checked, We don't need agent
+         */
+
+        $agent_validation = 'trim|required|integer|max_length[11]';
+        if($this->input->post())
+        {
+            $flag_dc = $this->input->post('flag_dc');
+            if($flag_dc == 'D')
+            {
+                $agent_validation = 'trim|integer|max_length[11]';
+            }
+        }
+
         $this->validation_rules = [
 
             /**
@@ -76,18 +95,18 @@ class Policy_model extends MY_Model
                 [
                     'field' => 'customer_id',
                     'label' => 'Customer',
-                    'rules' => 'trim|required|intger|max_length[11]',
+                    'rules' => 'trim|required|integer|max_length[11]',
                     '_type'     => 'hidden',
                     '_id'       => 'customer-id',
-                    '_required' => false
+                    '_required' => true
                 ],
                 [
                     'field' => 'customer_name',
                     'label' => 'Customer',
                     'rules' => 'trim|required',
-                    '_id'       => 'customer-name',
+                    '_id'       => 'customer-text',
                     '_type'     => 'hidden',
-                    '_required' => false
+                    '_required' => true
                 ],
             ],
 
@@ -98,18 +117,12 @@ class Policy_model extends MY_Model
                 [
                     'field' => 'portfolio_id',
                     'label' => 'Portfolio',
-                    'rules' => 'trim|required|intger|max_length[11]',
+                    'rules' => 'trim|required|integer|max_length[11]',
                     '_type'     => 'dropdown',
                     '_id'       => '_portfolio-id',
                     '_data'     => $select + $this->portfolio_model->dropdown_parent(),
-                    '_required' => false
-                ]
-            ],
-
-            /**
-             * Policy Package Information
-             */
-            'package' => [
+                    '_required' => true
+                ],
                 [
                     'field' => 'policy_package',
                     'label' => 'Policy Package',
@@ -138,7 +151,7 @@ class Policy_model extends MY_Model
                     'label' => 'Policy Object',
                     'rules' => 'trim|required',
                     '_type'     => 'hidden',
-                    '_id'       => 'object-name', // dropdown policy object
+                    '_id'       => 'object-text', // dropdown policy object
                     '_required' => true
                 ],
             ],
@@ -147,6 +160,15 @@ class Policy_model extends MY_Model
              * Policy Duration Information
              */
             'duration' => [
+                [
+                    'field' => 'issue_date',
+                    'label' => 'Policy Issue Date',
+                    'rules' => 'trim|required|valid_date',
+                    '_type'             => 'date',
+                    '_default'          => date('Y-m-d'),
+                    '_extra_attributes' => 'data-provide="datepicker-inline"',
+                    '_required' => false
+                ],
                 [
                     'field' => 'start_date',
                     'label' => 'Policy Start Date',
@@ -159,7 +181,7 @@ class Policy_model extends MY_Model
                 [
                     'field' => 'duration',
                     'label' => 'Policy Duration',
-                    'rules' => 'trim|required|valid_date|callback_valid_duration',
+                    'rules' => 'trim|required|callback__cb_valid_policy_duration',
                     '_type'     => 'dropdown',
                     '_data'     => $select + get_policy_duration_list(),
                     '_default'  => '+1 year',
@@ -168,37 +190,32 @@ class Policy_model extends MY_Model
             ],
 
             /**
-             * Marketing Staff Information
+             * Sales Info - Marketing Staff, Agent Info, Commission or Direct Discount
              */
-            'staff' => [
+            'sales' => [
                 [
                     'field' => 'sold_by',
                     'label' => 'Marketing Staff',
-                    'rules' => 'trim|required|intger|max_length[11]',
+                    'rules' => 'trim|required|integer|max_length[11]',
                     '_id'       => '_marketing-staff',
                     '_extra_attributes' => 'style="width:100%; display:block"',
                     '_type'     => 'dropdown',
                     '_data'     => $select + $this->user_model->dropdown($role_id, $branch_id),
                     '_required' => true
-                ]
-            ],
-
-            /**
-             * Agent Information
-             */
-            'agent' => [
+                ],
                 [
-                    'field' => 'flag_has_agent',
-                    'label' => 'Agent Apply?',
-                    'rules' => 'trim|required|alpha|exact_length[1]|in_list[Y,N]',
-                    '_type'     => 'dropdown',
-                    '_data'     => [ '' => 'Select...', 'Y' => 'Yes', 'N' => 'No'],
+                    'field' => 'flag_dc',
+                    'label' => 'Direct Discount or Agent Commission',
+                    'rules' => 'trim|required|alpha|exact_length[1]|in_list[D,C]',
+                    '_id'       => '_flag-dc',
+                    '_type'     => 'radio',
+                    '_data'     => [ 'C' => 'Agent Commission', 'D' => 'Direct Discount'],
                     '_required' => true
                 ],
                 [
                     'field' => 'agent_id',
                     'label' => 'Agent Name',
-                    'rules' => 'trim|required|intger|max_length[11]',
+                    'rules' => $agent_validation,
                     '_id'       => '_agent-id',
                     '_extra_attributes' => 'style="width:100%; display:block"',
                     '_type'     => 'dropdown',
@@ -208,6 +225,32 @@ class Policy_model extends MY_Model
             ]
 
         ];
+    }
+
+    // ----------------------------------------------------------------
+
+    public function get_validation_rule($action)
+    {
+        // Valid action?
+        if( !in_array($action, array('add', 'edit')))
+        {
+            return FALSE;
+        }
+
+        $v_rules = [];
+        if ($action === 'add')
+        {
+            // Merge All Sections and return
+            foreach($this->validation_rules as $section=>$rules)
+            {
+                $v_rules = array_merge($v_rules, $rules);
+            }
+        }
+        else
+        {
+
+        }
+        return $v_rules;
     }
 
     // ----------------------------------------------------------------
@@ -232,10 +275,28 @@ class Policy_model extends MY_Model
     public function prepare_policy_defaults($data)
     {
         $this->load->library('Token');
+        $this->load->model('portfolio_model');
+        $this->load->model('fiscal_year_model');
 
-        $data['code']           = $this->token->generate(20);
+        $portfolio_id   = $data['portfolio_id'];
+        $portfolio_code = $this->portfolio_model->get_code($portfolio_id);
+
+        $fy_record      = $this->fiscal_year_model->get_current_fiscal_year();
+        $fy_code_np     = $fy_record->code_np;
+
+        /**
+         * Policy Code - Draft One
+         *
+         * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
+         */
+        $policy_code = 'DRAFT/' . $this->dx_auth->get_branch_code() . '/' . $portfolio_code . '/' . strtoupper($this->token->generate(10)) . '/' . $fy_code_np;
+        $data['code']           = $policy_code;
+
+        // Branch ID
         $data['branch_id']      = $this->dx_auth->get_branch_id();
-        $data['object_ref']     = get_policy_object_reference();
+
+        // End Date
+        $data['end_date']  = date('Y-m-d', strtotime( $data['duration'], strtotime($data['start_date']) ) );
 
         return $data;
     }
@@ -253,8 +314,9 @@ class Policy_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('P.id, P.code, P.branch_id, P.customer_id, P.portfolio_id, P.sold_by, P.object_id,  P.start_date, P.end_date, P.status')
-                 ->from($this->table_name . ' as P');
+        $this->db->select('P.id, P.code, P.branch_id, P.customer_id, P.portfolio_id, P.sold_by, P.object_id,  P.start_date, P.end_date, P.status, PRT.name_en as portfolio_name')
+                 ->from($this->table_name . ' as P')
+                 ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id');
 
         /**
          * Apply User Scope
@@ -267,7 +329,7 @@ class Policy_model extends MY_Model
             $next_id = $params['next_id'] ?? NULL;
             if( $next_id )
             {
-                $this->db->where(['P.id >=' => $next_id]);
+                $this->db->where(['P.id <=' => $next_id]);
             }
 
             $code = $params['code'] ?? NULL;
@@ -308,7 +370,8 @@ class Policy_model extends MY_Model
             // }
         }
         return $this->db->limit($this->settings->per_page+1)
-                    ->get()->result();
+                        ->order_by('P.id', 'desc')
+                        ->get()->result();
     }
 
     // --------------------------------------------------------------------
@@ -319,7 +382,7 @@ class Policy_model extends MY_Model
     public function clear_cache($data=null)
     {
         $cache_names = [
-            'customer_dropdown',
+
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)
@@ -385,7 +448,7 @@ class Policy_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'customer',
+            'module' => 'policy',
             'module_id' => $id,
             'action' => $action
         ];

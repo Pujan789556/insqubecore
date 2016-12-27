@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy:  Single Row
 */
 ?>
-<tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
+<tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-policy-<?php echo $record->id;?>">
 	<?php if( $this->dx_auth->is_admin() ): ?>
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
@@ -13,9 +13,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						title="View policy details.">
 						<?php echo $record->code;?></a>
 	</td>
-	<td><?php echo $record->type == 'N' ? 'Fresh' : 'Renewal';?></td>
-	<td><?php echo $record->start_dat . ' - ' . $record->end_date;?></td>
-	<td><?php echo $record->status;?></td>
+	<td><?php echo $record->portfolio_name;?></td>
+
+	<!-- <td><?php echo $record->type == 'N' ? 'Fresh' : 'Renewal';?></td> -->
+	<td><?php echo $record->start_date . ' - ' . $record->end_date;?></td>
+	<td><?php echo get_policy_status_text($record->status);?></td>
 
 	<td class="ins-action">
 		<div class="btn-group">

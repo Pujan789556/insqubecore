@@ -114,14 +114,14 @@ if ( ! function_exists('_PO_policy_package_dropdown'))
 	 * @param integer $portfolio_id  Portfolio ID
 	 * @return	string
 	 */
-	function _PO_policy_package_dropdown( $portfolio_id )
+	function _PO_policy_package_dropdown( $portfolio_id, $flag_blank_select = true )
 	{
 		$dropdown = [];
 		switch ($portfolio_id)
 		{
 			// Motor
 			case IQB_MASTER_PORTFOLIO_MOTOR:
-				$dropdown = _PO_MOTOR_policy_package_dropdown();
+				$dropdown = _PO_MOTOR_policy_package_dropdown($flag_blank_select);
 				break;
 
 			default:

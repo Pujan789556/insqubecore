@@ -196,7 +196,7 @@ class Policies extends MY_Controller
 	                'rules' => 'trim|alpha|exact_length[1]|in_list[D,A,E]',
 	                '_id'       => 'filter-status',
 	                '_type'     => 'dropdown',
-	                '_data'     => [ '' => 'Select...', 'D' => 'Draft', 'A' => 'Active', 'E' => 'Expired'],
+	                '_data'     => get_policy_status_dropdown(),
 	            ],
 				[
 	                'field' => 'filter_portfolio_id',
@@ -222,7 +222,7 @@ class Policies extends MY_Controller
 		        ],
 		        [
 		            'field' => 'filter_end_date',
-		            'label' => 'Policy Start Date',
+		            'label' => 'Policy End Date',
 		            'rules' => 'trim|valid_date',
 		            '_type'     => 'date',
 		            '_required' => false
@@ -354,53 +354,24 @@ class Policies extends MY_Controller
 			$this->template->render_404();
 		}
 
-		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record);
-
-
-		// No form Submitted?
-		$json_data['form'] = $this->load->view('policies/_form',
-			[
-				'form_elements' => $this->policy_model->validation_rules,
-				'record' 		=> $record
-			], TRUE);
-
-		// Return HTML
-		$this->template->json($json_data);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Policy Wizard
-	 *
-	 * @return void
-	 */
-	public function wizard()
-	{
-		/**
-		 * Check Permissions
-		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('policies', 'add.policy') )
-		{
-			$this->dx_auth->deny_access();
-		}
-
-		$record = NULL;
+		$form_data = [
+			'form_elements' => $this->policy_model->validation_rules,
+			'record' 		=> $record
+		];
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add');
+		$this->_save('edit', $form_data);
 
 
-		// No form Submitted?
-		$json_data['form'] = $this->load->view('policies/_form',
-			[
-				'form_elements' => $this->policy_model->validation_rules,
-				'record' 		=> $record
-			], TRUE);
+		// // No form Submitted?
+		// $json_data['form'] = $this->load->view('policies/_form',
+		// 	[
+		// 		'form_elements' => $this->policy_model->validation_rules,
+		// 		'record' 		=> $record
+		// 	], TRUE);
 
-		// Return HTML
-		$this->template->json($json_data);
+		// // Return HTML
+		// $this->template->json($json_data);
 	}
 
 	// --------------------------------------------------------------------
@@ -420,21 +391,24 @@ class Policies extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
-		$record = NULL;
+		$form_data = [
+			'form_elements' => $this->policy_model->validation_rules,
+			'record' 		=> NULL
+		];
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add');
+		$this->_save('add', $form_data);
 
 
-		// No form Submitted?
-		$json_data['form'] = $this->load->view('policies/_form',
-			[
-				'form_elements' => $this->policy_model->validation_rules,
-				'record' 		=> $record
-			], TRUE);
+		// // No form Submitted?
+		// $json_data['form'] = $this->load->view('policies/_form',
+		// 	[
+		// 		'form_elements' => $this->policy_model->validation_rules,
+		// 		'record' 		=> $record
+		// 	], TRUE);
 
-		// Return HTML
-		$this->template->json($json_data);
+		// // Return HTML
+		// $this->template->json($json_data);
 	}
 
 	// --------------------------------------------------------------------
@@ -446,7 +420,7 @@ class Policies extends MY_Controller
 	 * @param object|null $record Record Object or NULL
 	 * @return array
 	 */
-	private function _save($action, $record = NULL)
+	private function _save($action, $form_data)
 	{
 
 		// Valid action?
@@ -458,65 +432,48 @@ class Policies extends MY_Controller
 			];
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
-
 		/**
 		 * Form Submitted?
 		 */
 		$return_data = [];
+		$record = $form_data['record'];
 
 		if( $this->input->post() )
 		{
 			$done = FALSE;
 
-			// Extract Old Profile Picture if any
-			$picture = $record->picture ?? NULL;
 
-			$rules = array_merge($this->policy_model->validation_rules, get_contact_form_validation_rules());
-            $this->form_validation->set_rules($rules);
+			// These Rules are Sectioned, We need to merge Together
+			$v_rules = $this->policy_model->get_validation_rule($action);
+            $this->form_validation->set_rules($v_rules);
 			if($this->form_validation->run() === TRUE )
         	{
-        		/**
-				 * Upload Image If any?
-				 */
-				$upload_result 	= $this->_upload_profile_picture($picture);
-				$status 		= $upload_result['status'];
-				$message 		= $upload_result['message'];
-				$files 			= $upload_result['files'];
-				$picture = $status === 'success' ? $files[0] : $picture;
+        		$data = $this->input->post();
 
-				if( $status === 'success' || $status === 'no_file_selected')
-	            {
-	            	$data = $this->input->post();
-        			$data['picture'] = $picture;
+        		// Insert or Update?
+				if($action === 'add')
+				{
+					$done = $this->policy_model->insert($data, TRUE); // No Validation on Model
 
+					// Activity Log
+					$done ? $this->policy_model->log_activity($done, 'C'): '';
+				}
+				else
+				{
+					// Now Update Data
+					$done = $this->policy_model->update($record->id, $data, TRUE) && $this->policy_model->log_activity($record->id, 'E');
+				}
 
-            		// Insert or Update?
-					if($action === 'add')
-					{
-						$done = $this->policy_model->insert($data, TRUE); // No Validation on Model
-
-						// Activity Log
-						$done ? $this->policy_model->log_activity($done, 'C'): '';
-					}
-					else
-					{
-						// Now Update Data
-						$done = $this->policy_model->update($record->id, $data, TRUE) && $this->policy_model->log_activity($record->id, 'E');
-					}
-
-		        	if(!$done)
-					{
-						$status = 'error';
-						$message = 'Could not update.';
-					}
-					else
-					{
-						$status = 'success';
-						$message = 'Successfully Updated.';
-					}
-	            }
+	        	if(!$done)
+				{
+					$status = 'error';
+					$message = 'Could not update.';
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+				}
         	}
         	else
         	{
@@ -524,82 +481,86 @@ class Policies extends MY_Controller
 				$message = 'Validation Error.';
         	}
 
-        	// Success HTML
-			$success_html = '';
-			$return_extra = [];
+
 			if($status === 'success' )
 			{
+
+				$ajax_data = [
+					'message' => $message,
+					'status'  => $status,
+					'updateSection' => true,
+					'hideBootbox' => true
+				];
+
+				$record = $this->policy_model->row($action === 'add' ? $done : $record->id);
+				$single_row = 'policies/_single_row';
+				$html = $this->load->view($single_row, ['record' => $record], TRUE);
+
 				if($action === 'add')
 				{
-					// Refresh the list page and close bootbox
-					return $this->page(0, TRUE, [
-							'message' => $message,
-							'status'  => $status,
-							'updateSection' => true,
-							'updateSectionData' => [
-								'box' => '#_iqb-data-list-box-policy',
-								'method' => 'html'
-							],
-							'hideBootbox' => true
-						]);
+					$ajax_data['updateSectionData'] = [
+						'box' 		=> '#search-result-policy',
+						'method' 	=> 'prepend',
+						'html'		=> $html
+					];
 				}
 				else
 				{
-					// Get Updated Record
-					$record = $this->policy_model->find($record->id);
-					$success_html = $this->load->view('policies/_single_row', ['record' => $record], TRUE);
+					$ajax_data['updateSectionData']  = [
+						'box' 		=> '#_data-row-policy-' . $record->id,
+						'method' 	=> 'replaceWith',
+						'html'		=> $html
+					];
 				}
+				return $this->template->json($ajax_data);
 			}
+			else
+			{
 
-			$return_data = [
-				'status' 		=> $status,
-				'message' 		=> $message,
-				'reloadForm' 	=> $status === 'error',
-				'hideBootbox' 	=> $status === 'success',
-				'updateSection' => $status === 'success',
-				'updateSectionData'	=> $status === 'success'
-										? 	[
-												'box' 	=> '#_data-row-' . $record->id,
-												'html' 	=> $success_html,
-												//
-												// How to Work with success html?
-												// Jquery Method 	html|replaceWith|append|prepend etc.
-												//
-												'method' 	=> 'replaceWith'
-											]
-										: NULL,
-				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('policies/_form',
-											[
-												'form_elements' => $this->policy_model->validation_rules,
-												'record' 		=> $record
-											], TRUE)
-									: 	null
+				// Policy Package of Portfolio if supplied
+				$portfolio_id = (int)$this->input->post('portfolio_id');
+				if($portfolio_id )
+				{
+					$form_data['form_elements']['portfolio'][1]['_data'] = _PO_policy_package_dropdown($portfolio_id);
+				}
 
-			];
+
+
+				return $this->template->json([
+					'status' 		=> $status,
+					'message' 		=> $message,
+					'reloadForm' 	=> true,
+					'form' 			=> $this->load->view('policies/_form', $form_data, TRUE)
+				]);
+			}
 		}
 
-		return $return_data;
+		/**
+		 * Render The Form
+		 */
+		$json_data = [
+			'form' => $this->load->view('policies/_form_box', $form_data, TRUE)
+		];
+		$this->template->json($json_data);
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-     * Callback : Valid Date Range
+     * Callback : Valid Duration
      *
      * Check Start Date < End Date
      *
      * @param string $str
      * @return bool
      */
-    public function valid_duration($str)
+    public function _cb_valid_policy_duration($str)
     {
-    	$start_date = strtotime($this->input->post('start_date'));
-    	$end_date 	= strtotime($this->input->post('end_date'));
+    	$duration_list = get_policy_duration_list();
 
-    	if( $start_date >= $end_date )
+    	if( !array_key_exists($str, $duration_list) )
     	{
-    		$this->form_validation->set_message('valid_date_range', 'The "End Date" must be greater than "Start Date".');
+    		$this->form_validation->set_message('_cb_valid_policy_duration', 'Please select a valid duration.');
             return FALSE;
     	}
         return TRUE;
