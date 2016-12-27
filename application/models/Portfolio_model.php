@@ -19,7 +19,7 @@ class Portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "parent_id", "code", "name_en", "name_np", "commission", "po_attributes", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "parent_id", "code", "name_en", "name_np", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -51,14 +51,6 @@ class Portfolio_model extends MY_Model
             '_type'     => 'text',
             '_required' => true
         ],
-        [
-            'field' => 'commission',
-            'label' => 'Agent Commission',
-            'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
-            '_type'     => 'text',
-            '_required' => true
-        ]
-
     ];
 
 
@@ -105,11 +97,25 @@ class Portfolio_model extends MY_Model
 
     public function find($id)
     {
-        return $this->db->select('L1.*, L2.name_en as parent_name')
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var = 'portfolio_s_'.$id;
+        $record = $this->get_cache($cache_var);
+        if(!$record)
+        {
+            $record = $this->db->select('L1.id, L1.code, L1.parent_id, L1.name_en, L1.name_np, L2.name_en as parent_name')
                              ->from($this->table_name . ' L1')
                              ->join($this->table_name . ' L2', 'L1.parent_id = L2.id', 'left')
                              ->where('L1.id', $id)
                              ->get()->row();
+
+            if($record)
+            {
+                $this->write_cache($record, $cache_var, CACHE_DURATION_DAY);
+            }
+        }
+        return $record;
     }
 
 
@@ -143,7 +149,7 @@ class Portfolio_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function dropdown_parent()
+    public function dropdown_parent($field='id')
     {
         /**
          * Get Cached Result, If no, cache the query result
@@ -151,7 +157,7 @@ class Portfolio_model extends MY_Model
         $list = $this->get_cache('portfolio_parent_all');
         if(!$list)
         {
-            $records = $this->db->select('id, name_en')
+            $records = $this->db->select('id, code, name_en')
                              ->from($this->table_name)
                              ->where('parent_id', '0')
                              ->get()->result();
@@ -159,7 +165,8 @@ class Portfolio_model extends MY_Model
             $list = [];
             foreach($records as $record)
             {
-                $list["{$record->id}"] = $record->name_en;
+                $column = $record->{$field};
+                $list["{$column}"] = $record->name_en;
             }
             if(!empty($list))
             {
@@ -169,21 +176,40 @@ class Portfolio_model extends MY_Model
         return $list;
     }
 
-    // --------------------------------------------------------------------
+    // ----------------------------------------------------------------
 
-    /**
-     * Get Dropdown List
-     */
-    public function dropdown()
+    public function get_code($id)
+    {
+        $record = $this->find($id);
+        return $record ? $record->code : '';
+    }
+
+    // ----------------------------------------------------------------
+
+    public function dropdown_children($parent_id, $field='id')
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $records = $this->get_all();
-        $list = [];
-        foreach($records as $record)
+        $cache_var = 'portfolio_children_' . $parent_id . '_' . $field;
+        $list = $this->get_cache($cache_var);
+        if(!$list)
         {
-            $list["{$record->id}"] = $record->name;
+            $records = $this->db->select('id, code, name_en')
+                             ->from($this->table_name)
+                             ->where('parent_id', $parent_id)
+                             ->get()->result();
+
+            $list = [];
+            foreach($records as $record)
+            {
+                $column = $record->{$field};
+                $list["{$column}"] = $record->name_en;
+            }
+            if(!empty($list))
+            {
+                $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
+            }
         }
         return $list;
     }
@@ -197,7 +223,9 @@ class Portfolio_model extends MY_Model
     {
         $cache_names = [
             'portfolio_all',
-            'portfolio_parent_all'
+            'portfolio_parent_all',
+            'portfolio_children_*',
+            'portfolio_s_*'
         ];
         // cache name without prefix
         foreach($cache_names as $cache)

@@ -51,14 +51,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <div class="row">
             <?php
             $i = 0;
+            $setting_fields = [
+                'agent_commission'  => ['label' => 'Agent Commission(%)'],
+                'direct_discount'   => ['label' => 'Direct Discount(%)'],
+                'policy_base_no'    => ['label' => 'Policy Base Number']
+            ];
+
             foreach($portfolios as $portfolio_id=>$portfolio_name):
-
-                $_field_name_agent_commission = "agent_commission[$i]";
-                $_value_agent_commission = '';
-
-                $_field_name_direct_discount = "direct_discount[$i]";
-                $_value_direct_discount = '';
-
 
                 $setting_id = '';
                 if($action === 'edit')
@@ -67,8 +66,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     {
                         if( $t->portfolio_id == $portfolio_id)
                         {
-                            $_value_agent_commission   = $t->agent_commission;
-                            $_value_direct_discount   = $t->direct_discount;
+                            $setting_fields['agent_commission']['values'][$i] = $t->agent_commission;
+                            $setting_fields['direct_discount']['values'][$i] = $t->direct_discount;
+                            $setting_fields['policy_base_no']['values'][$i] = $t->policy_base_no;
+
                             $setting_id      = $t->id;
                             break;
                         }
@@ -77,30 +78,41 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
 
                 echo form_hidden('portfolio_id[]', $portfolio_id);
-
-                // Do we have value from form post?
-                if( set_value($_field_name_agent_commission) )
-                {
-                    $_value_agent_commission = set_value($_field_name_agent_commission, '', FALSE);
-                }
-                if( set_value($_field_name_direct_discount) )
-                {
-                    $_value_direct_discount = set_value($_field_name_direct_discount, '', FALSE);
-                }
                 ?>
                 <div class="col-sm-6">
-                    <div class="form-group <?php echo (form_error('agent_commission[]') != '' OR form_error('direct_discount[]') != '') ? 'has-error' : '';?>">
-                        <label for="" class="control-label"><?php echo ucwords($portfolio_name) . field_compulsary_text( TRUE )?></label>
-                        <div class="row form-inline">
-                            <div class="cox-xs-12">
-                                <div class="form-group">
-                                    <input data-toggle="tooltip" title="Agent commission(%)" type="number" step="0.1" name="agent_commission[]" class="form-control" placeholder="Agent commission(%)" value="<?php echo $_value_agent_commission;?>">
 
-                                    <input data-toggle="tooltip" title="Direct discount(%)" type="number" step="0.1" name="direct_discount[]" class="form-control" placeholder="Direct discount(%)" value="<?php echo $_value_direct_discount;?>">
-                                    <?php if(form_error("agent_commission[]")):?><span class="help-block"><?php echo form_error("agent_commission[]"); ?></span><?php endif?>
-                                    <?php if(form_error("direct_discount[]")):?><span class="help-block"><?php echo form_error("direct_discount[]"); ?></span><?php endif?>
+                    <div class="box box-solid">
+                        <div class="box-header gray"><h3 class="box-title"><?php echo ucwords($portfolio_name)?></h3></div>
+                        <div class="box-body">
+
+                            <?php foreach($setting_fields as $field_name => $details):?>
+
+                                <?php
+                                $label = $details['label'];
+                                $values = $details['values'] ?? [];
+                                $input_name = "{$field_name}[]";
+                                $input_value = $values["{$i}"] ?? '';
+
+                                // From Form Submission
+                                if( set_value("{$field_name}[$i]") )
+                                {
+                                    $input_value = set_value("{$field_name}[$i]");
+                                }
+
+                                ?>
+                                <div class="form-group <?php echo form_error("{$input_name}") ? 'has-error' : '';?>">
+                                    <label><?php echo $label . field_compulsary_text( TRUE )?></label>
+                                    <input
+                                        data-toggle="tooltip"
+                                        title="<?php echo $label;?>"
+                                        type="text"
+                                        name="<?php echo $input_name;?>"
+                                        class="form-control"
+                                        placeholder="<?php echo $label;?>"
+                                        value="<?php echo $input_value;?>">
+                                    <?php if(form_error("{$input_name}")):?><span class="help-block"><?php echo form_error("{$input_name}"); ?></span><?php endif?>
                                 </div>
-                            </div>
+                            <?php endforeach?>
                         </div>
                     </div>
                 </div>

@@ -18,7 +18,7 @@ class Portfolio_setting_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "fiscal_yr_id", "portfolio_id", "agent_commission", "direct_discount", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "fiscal_yr_id", "portfolio_id", "agent_commission", "direct_discount", "policy_base_no", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -47,6 +47,13 @@ class Portfolio_setting_model extends MY_Model
             'field' => 'direct_discount[]',
             'label' => 'Direct Discount(%)',
             'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+            '_type'     => 'text',
+            '_required' => true
+        ],
+        [
+            'field' => 'policy_base_no[]',
+            'label' => 'Policy Base Number',
+            'rules' => 'trim|required|integer|max_length[11]',
             '_type'     => 'text',
             '_required' => true
         ],
@@ -113,7 +120,7 @@ class Portfolio_setting_model extends MY_Model
 
     public function get_list_by_fiscal_year($fiscal_yr_id)
     {
-        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, P.name_en as portfolio_name')
+        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, P.name_en as portfolio_name')
                         ->from($this->table_name . ' PS')
                         ->join('master_portfolio P', 'P.id = PS.portfolio_id')
                         ->where('PS.fiscal_yr_id', $fiscal_yr_id)

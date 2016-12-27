@@ -109,6 +109,19 @@ define('CACHE_DURATION_MONTH', 2592000);
 | APPLICATION SPECIFIC GENERAL CONSTANTS
 |--------------------------------------------------------------------------
 |
-|
 */
 define('IQB_BLANK_SELECT', ['' => 'Select...']);
+
+
+/*
+|--------------------------------------------------------------------------
+| PARENT PORTFOLIO CONSTANTS
+|--------------------------------------------------------------------------
+|
+*/
+define('IQB_MASTER_PORTFOLIO_AGRICULTURE',  1);
+define('IQB_MASTER_PORTFOLIO_ENGINEERING',  2);
+define('IQB_MASTER_PORTFOLIO_FIRE',         3);
+define('IQB_MASTER_PORTFOLIO_MARINE',       4);
+define('IQB_MASTER_PORTFOLIO_MISC',         5);
+define('IQB_MASTER_PORTFOLIO_MOTOR',        6);
