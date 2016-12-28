@@ -1,10 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Customers:  Single Row
+* Object:  Single Row
 */
-$attributes = $record->attributes ? json_decode($record->attributes) : NULL;
-$select_text = implode(', ', [$attributes->make, $attributes->model, $attributes->reg_no, $attributes->engine_no, $attributes->chasis_no]);
+$select_text = _PO_select_text($record);
 $select_json = [
 	'fields' => [
 		['id' => 'object-id', 'val' => $record->id],

@@ -33,6 +33,7 @@ class Policies extends MY_Controller
 
 		// Load Model
 		$this->load->model('policy_model');
+		$this->load->model('object_model');
 
 		// Policy Configuration/Helper
 		$this->load->config('policy');
@@ -232,7 +233,7 @@ class Policies extends MY_Controller
 			        'label' => 'Keywords <i class="fa fa-info-circle"></i>',
 			        'rules' => 'trim|max_length[80]',
 	                '_type'     => 'text',
-	                '_label_extra' => 'data-toggle="tooltip" data-title="Customer Name, PAN, Citizenship, Passport etc..."'
+	                '_label_extra' => 'data-toggle="tooltip" title="Customer Name, PAN, Citizenship, Passport etc..."'
 				],
 			];
 			return $filters;
@@ -338,40 +339,74 @@ class Policies extends MY_Controller
 	 */
 	public function edit($id)
 	{
-		/**
-		 * Check Permissions
-		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('policies', 'edit.policy') )
-		{
-			$this->dx_auth->deny_access();
-		}
 
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->policy_model->find($id);
+		$record = $this->policy_model->row($id);
 		if(!$record)
 		{
 			$this->template->render_404();
 		}
 
+		// echo '<pre>'; print_r($record);exit;
+
+		/**
+		 * Check Permissions
+		 *
+		 * Editable Status
+		 * 		draft | unverified
+		 *
+		 * Editable Permissions Are
+		 * 		edit.draft.policy | edit.unverified.policy
+		 */
+		$editable_status 		= [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED];
+
+		// Editable Status?
+		if( !in_array($record->status, $editable_status) )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		// Editable Permissions ?
+		$__flag_authorized 		= FALSE;
+		if(
+			$this->dx_auth->is_admin()
+
+			||
+
+			( $record->status === IQB_POLICY_STATUS_DRAFT &&  $this->dx_auth->is_authorized('policies', 'edit.draft.policy') )
+
+			||
+
+			( $record->status === IQB_POLICY_STATUS_UNVERIFIED &&  $this->dx_auth->is_authorized('policies', 'edit.unverified.policy') )
+
+		)
+		{
+			$__flag_authorized = TRUE;
+		}
+
+		if( !$__flag_authorized )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+
+		// Validation Rule
+		$v_rules = $this->policy_model->validation_rules;
+
+		// Update Policy Package Data
+		$v_rules['portfolio'][1]['_data'] = _PO_policy_package_dropdown($record->portfolio_id);
+
+		// Object Details
+		$object_record = $this->object_model->row($record->object_id);
+		$record->object_name = _PO_select_text($object_record);
 		$form_data = [
-			'form_elements' => $this->policy_model->validation_rules,
+			'form_elements' => $v_rules,
 			'record' 		=> $record
 		];
 
 		// Form Submitted? Save the data
 		$this->_save('edit', $form_data);
-
-
-		// // No form Submitted?
-		// $json_data['form'] = $this->load->view('policies/_form',
-		// 	[
-		// 		'form_elements' => $this->policy_model->validation_rules,
-		// 		'record' 		=> $record
-		// 	], TRUE);
-
-		// // Return HTML
-		// $this->template->json($json_data);
 	}
 
 	// --------------------------------------------------------------------
@@ -398,17 +433,6 @@ class Policies extends MY_Controller
 
 		// Form Submitted? Save the data
 		$this->_save('add', $form_data);
-
-
-		// // No form Submitted?
-		// $json_data['form'] = $this->load->view('policies/_form',
-		// 	[
-		// 		'form_elements' => $this->policy_model->validation_rules,
-		// 		'record' 		=> $record
-		// 	], TRUE);
-
-		// // Return HTML
-		// $this->template->json($json_data);
 	}
 
 	// --------------------------------------------------------------------

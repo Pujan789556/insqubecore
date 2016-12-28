@@ -17,6 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // ------------------------------------------------------------------------
 // GENERAL OBJECT HELPERS
 // ------------------------------------------------------------------------
+
 if ( ! function_exists('_PO_row_snippet'))
 {
 	/**
@@ -35,6 +36,38 @@ if ( ! function_exists('_PO_row_snippet'))
 			// Motor
 			case IQB_MASTER_PORTFOLIO_MOTOR:
 				$snippet = _PO_MOTOR_row_snippet($record);
+				break;
+
+			default:
+				# code...
+				break;
+		}
+		return $snippet;
+	}
+}
+// ------------------------------------------------------------------------
+
+
+if ( ! function_exists('_PO_select_text'))
+{
+	/**
+	 * Get Policy Object  - Selection Text or Summary Text
+	 *
+	 * Useful while add/edit-ing a policy or whenever we need to
+	 * show the object summary from object attribute
+	 *
+	 *
+	 * @param object $record 	Object Record
+	 * @return	string
+	 */
+	function _PO_select_text( $record )
+	{
+		$snippet = '';
+		switch ($record->portfolio_id)
+		{
+			// Motor
+			case IQB_MASTER_PORTFOLIO_MOTOR:
+				$snippet = _PO_MOTOR_select_text($record);
 				break;
 
 			default:
@@ -519,6 +552,30 @@ if ( ! function_exists('_PO_MOTOR_row_snippet'))
 	{
 		$CI =& get_instance();
 		return $CI->load->view('objects/snippets/_row_motor', ['record' => $record], TRUE);
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_PO_MOTOR_select_text'))
+{
+	/**
+	 * Get Policy Object - Motor - Selection Text or Summary Text
+	 *
+	 * Useful while add/edit-ing a policy or whenever we need to
+	 * show the object summary from object attribute
+	 *
+	 * @param bool $record 	Object Record
+	 * @return	html
+	 */
+	function _PO_MOTOR_select_text( $record )
+	{
+		$attributes = $record->attributes ? json_decode($record->attributes) : NULL;
+		$select_text = '';
+		if($attributes)
+		{
+			$select_text = implode(', ', [$attributes->make, $attributes->model, $attributes->reg_no, $attributes->engine_no, $attributes->chasis_no]);
+		}
+		return $select_text;
 	}
 }
 

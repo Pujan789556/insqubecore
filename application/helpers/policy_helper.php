@@ -13,6 +13,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @link
  */
 
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| POLICY STATUS CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_POLICY_STATUS_DRAFT')  		OR define('IQB_POLICY_STATUS_DRAFT', 		'D');
+defined('IQB_POLICY_STATUS_UNVERIFIED')  	OR define('IQB_POLICY_STATUS_UNVERIFIED', 	'U');
+defined('IQB_POLICY_STATUS_VERIFIED')  		OR define('IQB_POLICY_STATUS_VERIFIED', 	'V');
+defined('IQB_POLICY_STATUS_PAID')  			OR define('IQB_POLICY_STATUS_PAID', 		'P');
+defined('IQB_POLICY_STATUS_ACTIVE')  		OR define('IQB_POLICY_STATUS_ACTIVE', 		'A');
+defined('IQB_POLICY_STATUS_CANCELED') 	 	OR define('IQB_POLICY_STATUS_CANCELED', 	'C');
+defined('IQB_POLICY_STATUS_EXPIRED')  		OR define('IQB_POLICY_STATUS_EXPIRED', 		'E');
 
 // ------------------------------------------------------------------------
 
@@ -43,7 +57,146 @@ if ( ! function_exists('get_policy_status_dropdown'))
 	 */
 	function get_policy_status_dropdown( $flag_blank_select = true )
 	{
-		$dropdown = ['D' => 'Draft', 'A' => 'Active', 'E' => 'Expired'];
+		$dropdown = [
+
+			/**
+			 * Policy Status - Draft
+			 *
+			 * This is a newly created Debit Note.
+			 * One can edit/delete or make a final draft that can be verified.
+			 *
+			 * Action Allowed
+			 * 		1. Edit
+			 * 		2. Delete
+			 * 		3. Send to Verify
+			 * 		4. Generate Schedule (Marked: Draft)
+			 *
+			 * Upper Status Level: Verifiable
+			 */
+			IQB_POLICY_STATUS_DRAFT => 'Draft',
+
+			/**
+			 * Policy Status - Unverified
+			 *
+			 * This is a final draft of Debit Note.
+			 * Now, only Verifier User can Edit this note if changes are to be made
+			 *
+			 * Action Allowed
+			 * 		1. Edit
+			 * 		2. Verify
+			 * 		3. Revert to Draft
+			 * 		4. Generate Schedule (Marked: Unverified)
+			 *
+			 * Upper Status Level: Verified
+			 * Lower Status Level: Draft
+			 */
+			IQB_POLICY_STATUS_UNVERIFIED => 'Unverified',
+
+			/**
+			 * Policy Status - Verified
+			 *
+			 * This is a verified of Debit Note.
+			 * Now, you can proceed for making payment of this policy OR back to unverified
+			 *
+			 * Action Allowed
+			 * 		1. Make Payment
+			 * 		2. Un-verify
+			 * 		3. Generate Schedule (Marked: Verified)
+			 *
+			 * Upper Status Level: Paid
+			 * Lower Status Level: Unverified
+			 */
+			IQB_POLICY_STATUS_VERIFIED => 'Verified',
+
+			/**
+			 * Policy Status - Paid
+			 *
+			 * This is verified-paid Debit Note.
+			 * Once you make payment, you can now generate payment receipt.
+			 * When this status is made, you have "Policy Number" generated and stored in database.
+			 *
+			 * Now, you can issue invoice, get final policy schedule.
+			 *
+			 * Generate Invoice
+			 * 		Once you make request generat Invoice, A fresh Invoice is generated along with its original PDF.
+			 * 		The first time you download/print, it will have status updated as "Printed". The next time onward,
+			 * 		the invoice will have "Duplicate Copy" marked.
+			 *
+			 * 		Upon this action completion, The Policy will be final and status upgraded to "Active".
+			 *
+			 * @TODO: Policy Cancelation
+			 * 		What happens when you cancel a policy?
+			 * 		- in transactional amount & its distribution - RI, Commissions etc, invoices and other related place
+			 *
+			 * Action Allowed
+			 * 		1. Generate Invoice
+			 * 		2. Print Receipt
+			 * 		3. Cancel Policy
+			 * 		4. Generate Schedule (Marked: Paid)
+			 *
+			 * Upper Status Level: Active | Cancel
+			 * Lower Status Level: Verified
+			 */
+			IQB_POLICY_STATUS_PAID => 'Paid',
+
+			/**
+			 * Policy Status - Active
+			 *
+			 * This is Final Policy.
+			 * You can now print Invoice, Print Receipt, print Policy Schedule or Cancel Policy.
+			 *
+			 * @TODO: Policy Cancelation
+			 * 		What do you if you have to cancel policy at this stage?
+			 *
+			 * Action Allowed
+			 * 		1. Print Invoice
+			 * 		2. Print Receipt
+			 * 		3. Cancel Policy
+			 * 		4. Generate Schedule (Final Schedule)
+			 *
+			 * Upper Status Level: Canceled|Expired
+			 * Lower Status Level: Paid
+			 */
+			IQB_POLICY_STATUS_ACTIVE => 'Active',
+
+			/**
+			 * Policy Status - Canceled
+			 *
+			 * This is a canceled policy.
+			 * You have to undo all the previous transactions to get to this status.
+			 *
+			 * @TODO: To be discussed with the stakeholder and finalized its business process
+			 *
+			 * Action Allowed
+			 * 		3. Generate Schedule (Marked: Canceled)
+			 *
+			 * Upper Status Level: -
+			 * Lower Status Level: Active
+			 */
+			IQB_POLICY_STATUS_CANCELED => 'Canceled',
+
+			/**
+			 * Policy Status - Expired
+			 *
+			 * This status is automatically upgraded when a policy expires.
+			 * It will be done by cron-job.
+			 *
+			 * You can now renew this policy.
+			 *
+			 * Tasks carried while upgrading to this status
+			 * 		1. Set Status Flag to "Expired"
+			 * 		2. Send followup notification to client regarding this expiry
+			 * 		3. Create a followup notification to marketing agent who brought
+			 * 			this policy.
+			 *
+			 * Action Allowed
+			 * 		3. Renew This Policy
+			 *
+			 * Upper Status Level: -
+			 * Lower Status Level: Active
+			 */
+			IQB_POLICY_STATUS_EXPIRED => 'Expired'
+		];
 
 		if($flag_blank_select)
 		{

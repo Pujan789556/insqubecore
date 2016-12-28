@@ -43,8 +43,17 @@ echo form_open( $this->uri->uri_string(),
                   <label class="col-sm-2 control-label">Customer<?php echo field_compulsary_text( TRUE )?></label>
                   <div class="col-sm-10">
                       <?php
-                      $customer_id = set_value('customer_id', '', FALSE) ?? ($record->customer_id ?? '');
-                      $customer_name = set_value('customer_name', '', FALSE) ?? ($record->customer_name ?? '');
+                      $customer_id = $record->customer_id ?? '';
+                      if(set_value('customer_id', '', FALSE))
+                      {
+                        $customer_id = set_value('customer_id', '', FALSE);
+                      }
+
+                      $customer_name = $record->customer_name ?? '';
+                      if(set_value('customer_name', '', FALSE))
+                      {
+                        $customer_name = set_value('customer_name', '', FALSE);
+                      }
                       ?>
                       <span id="_text-ref-customer" class="mrg-r-5 text-purple" readonly><?php echo $customer_name;?></span>
                       <a href="#" id="_find-customer" class="btn btn-sm btn-round bg-purple" data-toggle="tooltip" title="Find Customer"><i class="fa fa-filter"></i>...</a>
@@ -68,8 +77,17 @@ echo form_open( $this->uri->uri_string(),
                   <label class="col-sm-2 control-label">Policy Object<?php echo field_compulsary_text( TRUE )?></label>
                   <div class="col-sm-10">
                       <?php
-                      $object_id = set_value('object_id', '', FALSE) ?? ($record->object_id ?? '');
-                      $object_name = set_value('object_name', '', FALSE) ?? ($record->object_name ?? '');
+                      $object_id = $record->object_id ?? '';
+                      if(set_value('object_id', '', FALSE))
+                      {
+                        $object_id = set_value('object_id', '', FALSE);
+                      }
+
+                      $object_name = $record->object_name ?? '';
+                      if(set_value('object_name', '', FALSE))
+                      {
+                        $object_name = set_value('object_name', '', FALSE);
+                      }
                       ?>
                       <span id="_text-ref-object" class="mrg-r-5 text-purple" readonly><?php echo $object_name;?></span>
                       <a href="#" id="_find-object" class="btn btn-sm btn-round bg-purple" data-toggle="tooltip" title="Find Policy Object"><i class="fa fa-filter"></i>...</a>
