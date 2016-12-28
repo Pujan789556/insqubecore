@@ -296,20 +296,58 @@ class Template {
 	 * @param string $view the 404 view
 	 * @return void
 	 */
-	public function render_404( $view='', $message='' )
+	public function render_404( $view='', $message=null )
 	{
 		/**
 		 *  Do we have an AJAX request?
 		 */
 		$method = $this->get_method();
+
 		if( $method == 'json' )
 		{
-			$this->_output_json(['error' => 'not_found', 'message' => $message], 404);
+			$message = $message ?? $this->_404_message($method);
+			$this->_output_json(['error' => 'not_found', 'message' => $message, 'title' => $this->_404_title()], 404);
 		}
 		else
 		{
-			show_404( $view, $message );
+			show_404( $view );
 		}
+	}
+
+	private function _404_message( $method )
+	{
+		if($method == 'html')
+		{
+			$message = 	'साथी माफ गर्नुहोला। तपाईंले खोजेको कुरो पाइएन जस्तो छ । कताबाट एता आइपुग्नुभो कुन्नि ?' .  '<br/>' .
+					'एक फेर IT को साथीहरुलाई यो कुरो पुर्याम न । '. '<br/>' .
+					'तेसो गरे कसो होला ?' . '<br/>' . '<br/>' .
+					'Dashboard मा जानु पर्ने हो भने ' . anchor('', 'यहाँँ क्लिक गरम् त') . ' !' . '<br/>' . '<br/>' .
+					'धन्यवाद !';
+		}
+		else
+		{
+			$message = 	'साथी माफ गर्नुहोला। तपाईंले खोजेको कुरो पाइएन जस्तो छ ।' .  '<br/>' .
+						'कताबाट एता आइपुग्नुभो कुन्नि ?' .  '<br/>' .
+						'एक फेर IT को साथीहरुलाई यो कुरो पुर्याम न । ' .  '<br/>' .
+						'तेसो गरे कसो होला ?' .  '<br/>' .
+						'धन्यवाद !';
+		}
+
+		return $message;
+	}
+
+	private function _404_title()
+	{
+		$funny_headings = [
+			'कुरो अलि मिलेन जस्तो छ !',
+			'हैट कता पो आइपुगिएछ ?',
+			'मजाक गर्नुको नि सीमा हुन्छ के !',
+			'लु यो चैं अलि भएन ल !',
+			'जे मन लाग्यो त्यै गर्ने अनि खोज्या काँ पाइन्छ त !',
+			'खोज्या कुरो पाइएन भन्या के !'
+		];
+		$heading = $funny_headings[array_rand($funny_headings)];
+		return $heading;
 	}
 
 	// --------------------------------------------------------------------

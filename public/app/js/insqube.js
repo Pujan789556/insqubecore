@@ -10,13 +10,26 @@
  */
 
  /**
+  * Toastr Options
+  */
+  toastr.options = {
+    "progressBar" : true,
+    "preventDuplicates" : true
+  };
+
+ /**
  * Ajax Error Reporting
  */
 $( document ).ajaxError(function( event, request, settings ) {
-    var message = '<strong>Oops!</strong><br/>Something went wrong with the server. Please contact administrator for further support.';
+    var message = '<strong>Oops!</strong><br/>Something went wrong with the server. Please contact administrator for further support.',
+    title       = 'OOPS!';
     toastr.clear(); // remove older toast
+
     try {
         var json = $.parseJSON(request.responseText);
+        if(typeof json.title !== 'undefined'){
+                title = json.title;
+        }
         if(typeof json.auth_message !== 'undefined'){
                 message = json.auth_message;
         }
@@ -27,7 +40,7 @@ $( document ).ajaxError(function( event, request, settings ) {
             message = json.error === 'not_found' ? '<strong>Oops!</strong><br/>The content you are looking for was NOT FOUND.' : json.error;
         }
     }catch(err) { }
-    toastr.error(message);
+    toastr.error(message, title);
 });
 
 /* global define */
