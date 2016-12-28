@@ -704,25 +704,27 @@ class Policies extends MY_Controller
 		}
 
     	$id = (int)$id;
-		$record = $this->policy_model->find($id);
+		$record = $this->policy_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
 		}
 
+		// echo '<pre>'; print_r($record);exit;
+
 		// Load media helper
 		$this->load->helper('insqube_media');
 
-		$this->data['site_title'] = 'Policy Details | ' . $record->full_name;
+		$this->data['site_title'] = 'Policy Details | ' . $record->code;
 		$this->template->partial(
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Policy Details <small>' . $record->full_name . '</small>',
+								'content_header' => 'Policy Details <small>' . $record->code . '</small>',
 								'breadcrumbs' => ['Policies' => 'policies', 'Details' => NULL]
 						])
 						->partial('content', 'policies/_details', compact('record'))
-						->partial('dynamic_js', 'policies/_customer_js')
+						// ->partial('dynamic_js', 'policies/_customer_js')
 						->render($this->data);
 
     }
