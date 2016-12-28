@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Customer: Snippet : Contact Card
+* Agent: Snippet : Contact Card
 */
 
 /**

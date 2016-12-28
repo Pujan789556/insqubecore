@@ -152,6 +152,11 @@
 .box-body.gray{
   background-color:#f9fafc;
 }
+.box-header.with-border{
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+}
+.box.box-solid.box-bordered .box-header.with-border:first-child{border-top:0px}
 .box-header.with-border.border-dark{
   border-color:rgb(210, 214, 222);
 }

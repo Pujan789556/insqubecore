@@ -7,19 +7,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div class="row">
 	<div class="col-md-3">
 
-		<?php
-		/**
-		 * Profile Card
-		 */
-		$this->load->view('customers/snippets/_profile_card', ['record' => $record]);
-		?>
+		<div class="box box-primary">
+			<?php
+			/**
+			 * Profile Card
+			 */
+			$this->load->view('customers/snippets/_profile_card', ['record' => $record]);
+			?>
+		</div>
 
-		<?php
-		/**
-		 * Contact Widget
-		 */
-		$this->load->view('customers/snippets/_contact_card', ['record' => $record]);
-		?>
+		<div class="box box-primary">
+			<?php
+			/**
+			 * Contact Widget
+			 */
+			$this->load->view('customers/snippets/_contact_card', ['record' => $record]);
+			?>
+		</div>
 	</div>
 	<!-- /.col -->
 	<div class="col-md-9">

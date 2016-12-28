@@ -21,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *      Web:
  */
 ?>
-<div class="box-header with-border">
+<div class="box-header with-border border-dark gray">
     <h3 class="box-title">Contact Address</h3>
 </div>
 <div class="box-body">

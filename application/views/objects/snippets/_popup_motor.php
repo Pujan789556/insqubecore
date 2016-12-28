@@ -22,10 +22,10 @@ if($attributes)
 }
 ?>
 <?php if($formatted_attriutes):?>
-	<table class="table table-responsive">
+	<table class="table table-responsive no-margin no-border">
 		<?php foreach($formatted_attriutes as $key=>$value):?>
 			<tr>
-				<td><?php echo $key?></td>
+				<td><strong><?php echo $key?></strong></td>
 				<td><?php echo $value?></td>
 			</tr>
 		<?php endforeach;?>

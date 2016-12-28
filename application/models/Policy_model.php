@@ -388,12 +388,14 @@ class Policy_model extends MY_Model
         return $this->db->select(  "P.*, PRT.name_en as portfolio_name,
                             C.code as customer_code, C.full_name as customer_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no,
                             O.attributes as object_attributes,
-                            A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.contact as agent_contact
+                            A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type,
+                            U.username as sales_staff_username, U.profile as sales_staff_profile
                             ")
                      ->from($this->table_name . ' as P')
                      ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
                      ->join('dt_customers C', 'C.id = P.customer_id')
                      ->join('dt_policy_objects O', 'O.id = P.object_id')
+                     ->join('auth_users U', 'U.id = P.sold_by')
                      ->join('rel_agent_policy RAP', 'RAP.policy_id = P.id', 'left')
                      ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
                      ->where('P.id', $id)

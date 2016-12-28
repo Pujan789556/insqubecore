@@ -190,14 +190,6 @@ class Agents extends MY_Controller
 	                '_required' => false
 	            ],
 	            [
-	                'field' => 'filter_commission_group',
-	                'label' => 'Commission Group',
-	                'rules' => 'trim|integer|exact_length[1]|in_list[1,2,3]',
-	                '_type'     => 'dropdown',
-	                '_data'     => [ '' => 'Select...', '1' => 'Commission Group 1', '2' => 'Commission Group 2', '3' => 'Commission Group 3'],
-	                '_required' => false
-	            ],
-	            [
 	                'field' => 'filter_active',
 	                'label' => 'Is Active?',
 	                'rules' => 'trim|integer|exact_length[1]',

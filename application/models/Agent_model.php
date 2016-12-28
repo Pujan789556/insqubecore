@@ -19,7 +19,7 @@ class Agent_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "name", "picture", "ud_code", "bs_code", "commission_group", "active", "type", "contact", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "name", "picture", "ud_code", "bs_code", "active", "type", "contact", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -49,14 +49,6 @@ class Agent_model extends MY_Model
             'rules' => 'trim|required|integer|exact_length[1]|in_list[1,2]',
             '_type'     => 'dropdown',
             '_data'     => [ '' => 'Select...', '1' => 'Individual', '2' => 'Company'],
-            '_required' => true
-        ],
-        [
-            'field' => 'commission_group',
-            'label' => 'Commission Group',
-            'rules' => 'trim|required|integer|exact_length[1]|in_list[1,2,3]',
-            '_type'     => 'dropdown',
-            '_data'     => [ '' => 'Select...', '1' => 'Commission Group 1', '2' => 'Commission Group 2', '3' => 'Commission Group 3'],
             '_required' => true
         ],
         [
@@ -111,7 +103,7 @@ class Agent_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('A.id, A.name, A.ud_code, A.bs_code, A.type, A.active, A.commission_group')
+        $this->db->select('A.id, A.name, A.ud_code, A.bs_code, A.type, A.active')
                  ->from($this->table_name . ' as A');
 
 
@@ -140,12 +132,6 @@ class Agent_model extends MY_Model
             if( $active !== NULL )
             {
                 $this->db->where(['A.active' =>  $active]);
-            }
-
-            $commission_group = $params['commission_group'] ?? NULL;
-            if( $commission_group )
-            {
-                $this->db->where(['A.commission_group' =>  $commission_group]);
             }
 
             $keywords = $params['keywords'] ?? '';
