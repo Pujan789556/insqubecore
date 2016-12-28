@@ -119,9 +119,47 @@ $config['DX_permissions'] = [
 		 */
 		'policies'  => [
 			'explore.policy',
+
+			/**
+			 * CRUD Permissions
+			 */
 			'add.policy',
-			'edit.policy',
-			'delete.policy'
+			'edit.draft.policy',
+			'edit.unverified.policy',
+			'delete.draft.policy', // You can't delete other policy, It should be on draft status
+
+			/**
+			 * Status Upgrade/Downgrade Permissions
+			 */
+			'status.to.draft',
+			'status.to.unverified',
+			'status.to.verified',
+			'status.to.paid',
+			'status.to.active',
+			'status.to.cancel',
+
+			/**
+			 * Policy Schedule Generation
+			 */
+			'generate.policy.schedule',
+
+			/**
+			 * Payment Related Permissions
+			 */
+			'make.policy.payment',
+			'print.policy.payment.receipt',
+
+			/**
+			 * Invoice Related Permissions
+			 */
+			'generate.policy.invoice',
+			'print.policy.invoice',
+
+			/**
+			 * Followup Related Permissions
+			 */
+			'send.followup.notification',
+
 		],
 	],
 ];
