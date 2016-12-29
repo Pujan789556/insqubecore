@@ -146,6 +146,13 @@ class Auth extends MY_Controller
 
 	function register()
 	{
+		/**
+		 * Let's Disable Registeration
+		 */
+		$this->template->render_404();
+		exit(1);
+
+
 		// Check logged in?
 		if ( $this->dx_auth->is_logged_in())
 		{
@@ -441,18 +448,31 @@ class Auth extends MY_Controller
 			$this->template->render_404();
 		}
 
+		$banned_data = [
+			'title' 		=> 'Account Banned',
+			'auth_message' => 'Your account has been temporarily banned. <br/> This may be due to excessive login attempts or some other unauthorized actvities from your network. <br/><br/>Please contact Administrator for further assistance.<br/><br/>Thank you.',
+			'alert_type' => 'danger'
+		];
+
+		/**
+		 * Check if this is an AJAX Request
+		 */
+		if(  $this->input->is_ajax_request() )
+		{
+			$this->template->json($banned_data, 403);
+			exit(1);
+		}
+
+
 		$this->template->partial(
         					'body',
         					$this->dx_auth->banned_view,
-    						[
-    							'auth_message' => 'Your account has been temporarily banned. <br/> This may be due to excessive login attempts or some other unauthorized actvities from your network. <br/><br/>Please contact Administrator for further assistance.<br/><br/>Thank you.',
-    							'alert_type' => 'danger'
-    						]
+    						$banned_data
 						)
         				->render([
 				        	'site_title' => 'Account Banned',
 				        	'page_title' => 'Account Banned'
-				    	]);
+				    	], 403);
 	}
 
 
@@ -483,48 +503,30 @@ class Auth extends MY_Controller
 			$this->template->render_404();
 		}
 
+		$deny_data = [
+			'title' 		=> 'Permission Denied',
+			'auth_message' 	=> 'You do not have sufficient permission to view this resource and/or perform this action.<br/><br/> Go to your ' . anchor('dashboard', 'Dashboard'),
+			'alert_type' 	=> 'danger'
+		];
+
+		/**
+		 * Check if this is an AJAX Request
+		 */
+		if(  $this->input->is_ajax_request() )
+		{
+			$this->template->json($deny_data, 403);
+			exit(1);
+		}
+
 		// Render regular deny message
 		$this->template->partial(
         					'body',
         					$this->dx_auth->deny_view,
-    						[
-    							'auth_message' => '<strong>OOPS!</strong><br/><br/>You do not have sufficient permission to view this resource.<br/><br/> Go to your ' . anchor('dashboard', 'Dashboard'),
-    							'alert_type' => 'danger'
-    						]
+    						$deny_data
 						)
         				->render([
 				        	'site_title' => 'Permission Denied',
 				        	'page_title' => 'Permission Denied'
 				    	], 403);
-	}
-
-	// Example how to get permissions you set permission in /backend/custom_permissions/
-	function custom_permissions()
-	{
-		if ($this->dx_auth->is_logged_in())
-		{
-			echo 'My role: '.$this->dx_auth->get_role_name().'<br/>';
-			echo 'My permission: <br/>';
-
-			if ($this->dx_auth->get_permission_value('edit') != NULL AND $this->dx_auth->get_permission_value('edit'))
-			{
-				echo 'Edit is allowed';
-			}
-			else
-			{
-				echo 'Edit is not allowed';
-			}
-
-			echo '<br/>';
-
-			if ($this->dx_auth->get_permission_value('delete') != NULL AND $this->dx_auth->get_permission_value('delete'))
-			{
-				echo 'Delete is allowed';
-			}
-			else
-			{
-				echo 'Delete is not allowed';
-			}
-		}
 	}
 }
