@@ -81,8 +81,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 ?>
                 <div class="col-sm-6">
 
-                    <div class="box box-solid">
-                        <div class="box-header gray"><h3 class="box-title"><?php echo ucwords($portfolio_name)?></h3></div>
+                    <div class="box box-solid box-bordered">
+                        <div class="box-header bg-gray-light"><h3 class="box-title"><?php echo ucwords($portfolio_name)?></h3></div>
                         <div class="box-body">
 
                             <?php foreach($setting_fields as $field_name => $details):?>

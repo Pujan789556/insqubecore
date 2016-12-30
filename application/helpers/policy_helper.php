@@ -215,10 +215,38 @@ if ( ! function_exists('get_policy_status_text'))
 	 *
 	 * @return	mixed
 	 */
-	function get_policy_status_text( $key )
+	function get_policy_status_text( $key, $formatted = FALSE )
 	{
 		$list = get_policy_status_dropdown();
-		return $list[$key] ?? NULL;
+
+		$text = $list[$key];
+
+		if($formatted)
+		{
+			if($key === IQB_POLICY_STATUS_ACTIVE )
+			{
+				// Green
+				$css_class = 'text-green';
+			}
+			else if( $key === IQB_POLICY_STATUS_EXPIRED )
+			{
+				// Gray
+				$css_class = 'text-gray';
+			}
+			else if( $key === IQB_POLICY_STATUS_CANCELED )
+			{
+				// Red
+				$css_class = 'text-red';
+			}
+			else
+			{
+				// Red
+				$css_class = 'text-orange';
+			}
+
+			$text = '<strong class="'.$css_class.'">'.$text.'</strong>';
+		}
+		return $text;
 	}
 }
 

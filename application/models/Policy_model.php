@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "code", "policy_no", "branch_id", "customer_id", "portfolio_id", "policy_package", "sold_by", "object_id", "issue_date", "start_date", "duration", "end_date", "flag_dc", "status", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "code", "policy_no", "branch_id", "customer_id", "portfolio_id", "policy_package", "sold_by", "object_id", "issue_date", "start_date", "duration", "end_date", "flag_dc", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -462,7 +462,8 @@ class Policy_model extends MY_Model
      *
      * Tasks that are to be performed after policy is created are
      *      1. Add Agent Policy Relation if supplied
-     *      2. @TODO: Find other tasks
+     *      2. Add Default Policy Cost Data
+     *      3. @TODO: Find other tasks
      *
      * $arr_record structure
      *  'fields'  contains the fields and values that were used while inserting
@@ -628,11 +629,20 @@ class Policy_model extends MY_Model
 
     public function delete($id = NULL)
     {
+        // Safe to Delete?
         $id = intval($id);
         if( !safe_to_delete( get_class(), $id ) )
         {
             return FALSE;
         }
+
+        // Check the Record Status
+        $record = $this->policy_model->find($id);
+        if(!$record || $record->status !== IQB_POLICY_STATUS_DRAFT )
+        {
+            return FALSE;
+        }
+
 
         // Disable DB Debug for transaction to work
         $this->db->db_debug = FALSE;

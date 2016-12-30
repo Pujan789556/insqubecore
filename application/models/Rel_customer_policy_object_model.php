@@ -15,7 +15,7 @@ class Rel_customer_policy_object_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "customer_id", "object_id", "flag_current", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "customer_id", "object_id", "flag_current", "data", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 

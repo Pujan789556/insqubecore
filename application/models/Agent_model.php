@@ -157,7 +157,7 @@ class Agent_model extends MY_Model
         $list = $this->get_cache($cache_name);
         if(!$list)
         {
-            $this->db->select('id, name')
+            $this->db->select('id, name, ud_code, bs_code')
                         ->from($this->table_name);
 
             if($flag_active_only)
@@ -169,7 +169,7 @@ class Agent_model extends MY_Model
             $list = [];
             foreach($records as $record)
             {
-                $list["{$record->id}"] = $record->name;
+                $list["{$record->id}"] = implode(' - ', [$record->ud_code, $record->name, $record->bs_code]);
             }
 
             $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);

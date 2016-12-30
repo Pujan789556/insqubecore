@@ -348,8 +348,6 @@ class Policies extends MY_Controller
 			$this->template->render_404();
 		}
 
-		// echo '<pre>'; print_r($record);exit;
-
 		/**
 		 * Check Permissions
 		 *
@@ -620,19 +618,14 @@ class Policies extends MY_Controller
 
 	/**
 	 * Delete a Policy
+	 *
+	 * Only Draft Version of a Policy can be deleted.
+	 *
 	 * @param integer $id
 	 * @return json
 	 */
 	public function delete($id)
 	{
-		/**
-		 * Check Permissions
-		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('policies', 'delete.policy') )
-		{
-			$this->dx_auth->deny_access();
-		}
-
 		// Valid Record ?
 		$id = (int)$id;
 		$record = $this->policy_model->find($id);
@@ -640,6 +633,42 @@ class Policies extends MY_Controller
 		{
 			$this->template->render_404();
 		}
+
+		/**
+		 * Check Permissions
+		 *
+		 * Deletable Status
+		 * 		draft
+		 *
+		 * Deletable Permission
+		 * 		delete.draft.policy
+		 */
+		$editable_status 		= [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED];
+
+		// Deletable Status?
+		if( $record->status !== IQB_POLICY_STATUS_DRAFT )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		// Deletable Permission ?
+		$__flag_authorized 		= FALSE;
+		if(
+			$this->dx_auth->is_admin()
+
+			||
+
+			$this->dx_auth->is_authorized('policies', 'delete.draft.policy')
+		)
+		{
+			$__flag_authorized = TRUE;
+		}
+
+		if( !$__flag_authorized )
+		{
+			$this->dx_auth->deny_access();
+		}
+
 
 		$data = [
 			'status' 	=> 'error',
@@ -658,21 +687,21 @@ class Policies extends MY_Controller
 		if($done)
 		{
 			/**
-			 * Delete Media if any
+			 * @TODO: Delete all related media
 			 */
-			if($record->picture)
-			{
-				// Load media helper
-				$this->load->helper('insqube_media');
+			// if($record->picture)
+			// {
+			// 	// Load media helper
+			// 	$this->load->helper('insqube_media');
 
-				delete_insqube_document($this->_upload_path . $record->picture);
-			}
+			// 	delete_insqube_document($this->_upload_path . $record->picture);
+			// }
 
 			$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
 				'removeRow' => true,
-				'rowId'		=> '#_data-row-'.$record->id
+				'rowId'		=> '#_data-row-policy-'.$record->id
 			];
 		}
 		else

@@ -367,11 +367,13 @@ if ( ! function_exists('get_contact_widget'))
 	 * @param JSON $contact Single JSON Contact Object
 	 * @return html
 	 */
-	function get_contact_widget( $contact )
+	function get_contact_widget( $contact, $snippet_only = false )
 	{
 		$CI =& get_instance();
 		$data = ['contact' => json_decode($contact) ];
-		return $CI->load->view('templates/_common/_widget_contact', $data, TRUE);
+
+        $view = $snippet_only ? 'templates/_common/_widget_contact_snippet' : 'templates/_common/_widget_contact';
+		return $CI->load->view( $view, $data, TRUE);
 	}
 }
 

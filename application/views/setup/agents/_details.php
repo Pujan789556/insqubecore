@@ -14,25 +14,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div class="row">
 	<div class="col-md-3">
 
-		<div class="box box-primary">
-			<?php
-			/**
-			 * Profile Card
-			 */
-			$this->load->view('setup/agents/snippets/_profile_card', ['record' => $record]);
-			?>
-		</div>
-
 		<!-- About Me Box -->
-		<div class="box box-primary">
-			<?php
-			/**
-			 * Contact Widget
-			 */
-			$this->load->view('setup/agents/snippets/_contact_card', ['record' => $record]);
-			?>
+		<?php
+		/**
+		 * Profile Card
+		 */
+		$this->load->view('setup/agents/snippets/_profile_card', ['record' => $record]);
 
-		</div>
+		/**
+		 * Contact Widget
+		 */
+		echo get_contact_widget($record->contact);
+		?>
 		<!-- /.box -->
 	</div>
 	<!-- /.col -->

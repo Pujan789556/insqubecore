@@ -21,14 +21,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *      Web:
  */
 ?>
-<div class="box-header with-border border-dark gray">
-    <h3 class="box-title">Contact Address</h3>
-</div>
-<div class="box-body">
-    <?php
-    /**
-     * Load Contact Snippet
-     */
-    $this->load->view('templates/_common/_widget_contact_snippet');
-    ?>
+<div class="box box-solid box-bordered">
+    <div class="box-header with-border">
+        <h3 class="box-title"><i class="ion-ios-location margin-r-5"></i>Contact Address</h3>
+    </div>
+    <div class="box-body">
+        <?php
+        /**
+         * Load Contact Snippet
+         */
+        $this->load->view('templates/_common/_widget_contact_snippet');
+        ?>
+    </div>
 </div>

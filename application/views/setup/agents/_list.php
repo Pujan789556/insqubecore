@@ -11,7 +11,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<th>UD Code</th>
 		<th>BS Code</th>
 		<th>Type</th>
-		<th>Commission Group</th>
 		<th>Active</th>
 		<th>Actions</th>
 	</tr>
