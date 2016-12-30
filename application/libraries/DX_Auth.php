@@ -948,6 +948,19 @@ class DX_Auth
 		return ( !empty($permissions) && in_array($action, $permissions)) ? TRUE : FALSE;
 	}
 
+	// Check if user any of the permissions
+	function is_authorized_any($module, $actions)
+	{
+		if($this->is_admin())
+		{
+			return TRUE;
+		}
+
+		// Check permissions for non-admin user
+		$permissions = $this->get_permissions()->{$module} ?? NULL;
+		return ( !empty($permissions) && !empty(array_intersect($actions, $permissions)) ) ? TRUE : FALSE;
+	}
+
 	// Get ban reason, call this only after calling login() and returning FALSE
 	function get_ban_reason()
 	{

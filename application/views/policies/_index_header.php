@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						data-box-size="large"
 						data-title='<i class="fa fa-pencil-square-o"></i> Add New Policy'
 						data-url="<?php echo site_url('policies/add/');?>"
-						data-form=".form-iqb-general"
+						data-form="#_form-policy"
 					><i class="ion-plus-circled"></i> Add</a>
 				<?php endif?>
 

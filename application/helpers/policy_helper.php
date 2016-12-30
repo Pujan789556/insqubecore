@@ -15,21 +15,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // ------------------------------------------------------------------------
 
-/*
-|--------------------------------------------------------------------------
-| POLICY STATUS CONSTANTS
-|--------------------------------------------------------------------------
-*/
-defined('IQB_POLICY_STATUS_DRAFT')  		OR define('IQB_POLICY_STATUS_DRAFT', 		'D');
-defined('IQB_POLICY_STATUS_UNVERIFIED')  	OR define('IQB_POLICY_STATUS_UNVERIFIED', 	'U');
-defined('IQB_POLICY_STATUS_VERIFIED')  		OR define('IQB_POLICY_STATUS_VERIFIED', 	'V');
-defined('IQB_POLICY_STATUS_PAID')  			OR define('IQB_POLICY_STATUS_PAID', 		'P');
-defined('IQB_POLICY_STATUS_ACTIVE')  		OR define('IQB_POLICY_STATUS_ACTIVE', 		'A');
-defined('IQB_POLICY_STATUS_CANCELED') 	 	OR define('IQB_POLICY_STATUS_CANCELED', 	'C');
-defined('IQB_POLICY_STATUS_EXPIRED')  		OR define('IQB_POLICY_STATUS_EXPIRED', 		'E');
-
-// ------------------------------------------------------------------------
-
 if ( ! function_exists('get_policy_duration_list'))
 {
 	/**
@@ -213,9 +198,9 @@ if ( ! function_exists('get_policy_status_text'))
 	/**
 	 * Get Policy Status Text
 	 *
-	 * @return	mixed
+	 * @return	string
 	 */
-	function get_policy_status_text( $key, $formatted = FALSE )
+	function get_policy_status_text( $key, $formatted = FALSE, $sentence = FALSE )
 	{
 		$list = get_policy_status_dropdown();
 

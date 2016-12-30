@@ -22,7 +22,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <h3 class="widget-user-username"><?php echo  $record->full_name;?></h3>
         <h5 class="widget-user-desc"><?php echo  $record->profession;?></h5>
     </div>
-    <div class="box-footer no-padding">
+    <div class="box-footer">
         <table class="table table-condensed no-margin no-border">
             <tbody>
                 <tr>

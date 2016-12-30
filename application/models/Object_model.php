@@ -67,6 +67,46 @@ class Object_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Is Object Editable?
+     *
+     * @param integer $id
+     * @return boolean
+     */
+    public function is_editable($id)
+    {
+        /**
+         * Is object editable?
+         * --------------------
+         *
+         * If the object is currently assigned to a policy which is not editable,
+         * you can not edit this object
+         */
+
+        /**
+         * Find the latest policy of the current object owenr for this object.
+         * If we dont have any object, We are GOOD. Else, check the editable status.
+         */
+        $_flag_editable  = TRUE;
+        $record = $this->db->select('P.id, P.status')
+                            ->from($this->table_name . ' as O')
+                            ->join('dt_policies P', 'P.object_id = O.id')
+                            ->join('rel_customer_policy_object R', 'R.object_id = O.id')
+                            ->where('O.id', $id)
+                            ->where('R.flag_current', 1)
+                            ->order_by('P.id', 'desc')
+                            ->get()->row();
+
+        if($record && !in_array($record->status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED]))
+        {
+            $_flag_editable  = FALSE;
+        }
+
+        return $_flag_editable;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Get Single Row Data for Specific ID
      *
      * @param integer $id

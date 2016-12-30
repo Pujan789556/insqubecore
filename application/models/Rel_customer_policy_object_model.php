@@ -41,6 +41,26 @@ class Rel_customer_policy_object_model extends MY_Model
 	// --------------------------------------------------------------------
 
     /**
+     * Valid Object Owner?
+     *
+     * Checks to make sure that the object and customer relation exists
+     *
+     * @param int $object_id
+     * @param int $customer_id
+     * @return boolean
+     */
+    public function valid_object_owner($object_id, $customer_id)
+    {
+
+        return $this->db->where('customer_id', $customer_id)
+                        ->where('object_id', $object_id)
+                        ->count_all_results($this->table_name);
+    }
+
+    // --------------------------------------------------------------------
+
+
+    /**
      * Delete Cache on Update
      */
     public function clear_cache()

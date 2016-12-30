@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Customers:  Single Row
 */
 ?>
-<tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
+<tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-customer-<?php echo $record->id;?>">
 	<?php if( $this->dx_auth->is_admin() ): ?>
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
@@ -44,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							data-box-size="large"
 							data-title='<i class="fa fa-pencil-square-o"></i> Edit Basic Information'
 							data-url="<?php echo site_url('customers/edit/' . $record->id);?>"
-							data-form=".form-iqb-general">
+							data-form="#_form-customer">
 							<i class="fa fa-pencil-square-o"></i>
 							<span>Edit Customer Info</span></a>
 					</li>

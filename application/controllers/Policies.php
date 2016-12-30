@@ -40,6 +40,9 @@ class Policies extends MY_Controller
 		$this->load->helper('policy');
 		$this->load->helper('object');
 
+		// Media Helper
+		$this->load->helper('insqube_media');
+
 		// Image Path
         $this->_upload_path = INSQUBE_MEDIA_PATH . 'policies/';
 	}
@@ -337,7 +340,7 @@ class Policies extends MY_Controller
 	 * @param integer $id
 	 * @return void
 	 */
-	public function edit($id)
+	public function edit($id, $from_widget = 'n')
 	{
 
 		// Valid Record ?
@@ -404,7 +407,7 @@ class Policies extends MY_Controller
 		];
 
 		// Form Submitted? Save the data
-		$this->_save('edit', $form_data);
+		$this->_save('edit', $form_data, $from_widget);
 	}
 
 	// --------------------------------------------------------------------
@@ -442,11 +445,20 @@ class Policies extends MY_Controller
 	 * @param object|null $record Record Object or NULL
 	 * @return array
 	 */
-	private function _save($action, $form_data)
+	private function _save($action, $form_data, $from_widget = 'n')
 	{
 
 		// Valid action?
 		if( !in_array($action, array('add', 'edit')))
+		{
+			return [
+				'status' => 'error',
+				'message' => 'Invalid action!'
+			];
+		}
+
+		// Valid "from" ?
+		if( !in_array($from_widget, array('y', 'n')))
 		{
 			return [
 				'status' => 'error',
@@ -464,9 +476,10 @@ class Policies extends MY_Controller
 		{
 			$done = FALSE;
 
-
 			// These Rules are Sectioned, We need to merge Together
+			$this->policy_model->set_validation_rules($action); // set rules according to action
 			$v_rules = $this->policy_model->get_validation_rule($action);
+
             $this->form_validation->set_rules($v_rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -514,12 +527,11 @@ class Policies extends MY_Controller
 					'hideBootbox' => true
 				];
 
-				$record = $this->policy_model->row($action === 'add' ? $done : $record->id);
-				$single_row = 'policies/_single_row';
-				$html = $this->load->view($single_row, ['record' => $record], TRUE);
-
 				if($action === 'add')
 				{
+					$record = $this->policy_model->row($done);
+					$html = $this->load->view('policies/_single_row', ['record' => $record], TRUE);
+
 					$ajax_data['updateSectionData'] = [
 						'box' 		=> '#search-result-policy',
 						'method' 	=> 'prepend',
@@ -528,8 +540,20 @@ class Policies extends MY_Controller
 				}
 				else
 				{
+					/**
+					 * Widget or Row?
+					 */
+					$record = $from_widget === 'n'
+								? $this->policy_model->row($record->id)
+								: $this->policy_model->get($record->id);
+
+					$view = $from_widget === 'n'
+									? 'policies/_single_row'
+									: 'policies/tabs/_tab_overview';
+
+					$html = $this->load->view($view, ['record' => $record], TRUE);
 					$ajax_data['updateSectionData']  = [
-						'box' 		=> '#_data-row-policy-' . $record->id,
+						'box' 		=> $from_widget === 'n' ? '#_data-row-policy-' . $record->id : '#tab-policy-overview-inner',
 						'method' 	=> 'replaceWith',
 						'html'		=> $html
 					];
@@ -545,8 +569,6 @@ class Policies extends MY_Controller
 				{
 					$form_data['form_elements']['portfolio'][1]['_data'] = _PO_policy_package_dropdown($portfolio_id);
 				}
-
-
 
 				return $this->template->json([
 					'status' 		=> $status,
@@ -583,6 +605,37 @@ class Policies extends MY_Controller
     	if( !array_key_exists($str, $duration_list) )
     	{
     		$this->form_validation->set_message('_cb_valid_policy_duration', 'Please select a valid duration.');
+            return FALSE;
+    	}
+        return TRUE;
+    }
+    // --------------------------------------------------------------------
+
+	/**
+     * Callback : Valid Object Owner
+     *
+     * Edit Mode Callback Validation Function
+     * Check if object belongs to supplied customer
+     *
+     * @param string $str
+     * @return bool
+     */
+    public function _cb_valid_object_owner($object_id)
+    {
+    	$object_id 		= (int)$object_id;
+    	$customer_id 	= (int)$this->input->post('customer_id');
+    	$message = 'The selected Object does not belong to the selected Customer.';
+
+    	if( !$object_id OR !$customer_id)
+    	{
+    		$this->form_validation->set_message('_cb_valid_object_owner', $message);
+            return FALSE;
+    	}
+
+    	$this->load->model('rel_customer_policy_object_model');
+    	if( !$this->rel_customer_policy_object_model->valid_object_owner($object_id, $customer_id) )
+    	{
+    		$this->form_validation->set_message('_cb_valid_object_owner', $message);
             return FALSE;
     	}
         return TRUE;
@@ -740,9 +793,6 @@ class Policies extends MY_Controller
 		}
 
 		// echo '<pre>'; print_r($record);exit;
-
-		// Load media helper
-		$this->load->helper('insqube_media');
 
 		$this->data['site_title'] = 'Policy Details | ' . $record->code;
 		$this->template->partial(

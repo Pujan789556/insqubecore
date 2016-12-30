@@ -39,7 +39,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
         else
         {
-            if($from_widget === 'y')
+            // Only on add from widget
+            if($from_widget === 'y' && $action === 'add')
             {
                 echo form_hidden('portfolio_id', $portfolio_record->id);
                 $portfolio_name = $portfolio_record->name_en;

@@ -59,7 +59,7 @@ class Policy_model extends MY_Model
      *
      * @return array
      */
-    public function set_validation_rules()
+    public function set_validation_rules($action='add')
     {
         $this->load->model('portfolio_model');
         $this->load->model('user_model');
@@ -75,7 +75,6 @@ class Policy_model extends MY_Model
         /**
          * If posted and Direct Discount Checked, We don't need agent
          */
-
         $agent_validation = 'trim|required|integer|max_length[11]';
         if($this->input->post())
         {
@@ -84,6 +83,17 @@ class Policy_model extends MY_Model
             {
                 $agent_validation = 'trim|integer|max_length[11]';
             }
+        }
+
+        /**
+         * Callback Validation on Edit
+         *
+         *      Cases 1. Customer - Object Relation
+         */
+        $object_validation = 'trim|required|integer|max_length[11]';
+        if($action === 'edit')
+        {
+            $object_validation = 'trim|required|integer|max_length[11]|callback__cb_valid_object_owner';
         }
 
         $this->validation_rules = [
@@ -141,7 +151,7 @@ class Policy_model extends MY_Model
                 [
                     'field' => 'object_id',
                     'label' => 'Policy Object',
-                    'rules' => 'trim|required|integer|max_length[11]',
+                    'rules' => $object_validation,
                     '_type'     => 'hidden',
                     '_id'       => 'object-id', // dropdown policy object
                     '_required' => true
@@ -388,7 +398,7 @@ class Policy_model extends MY_Model
         return $this->db->select(  "P.*, PRT.name_en as portfolio_name,
                             C.code as customer_code, C.full_name as customer_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no,
                             O.attributes as object_attributes,
-                            A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type,
+                            A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type,
                             U.username as sales_staff_username, U.profile as sales_staff_profile
                             ")
                      ->from($this->table_name . ' as P')

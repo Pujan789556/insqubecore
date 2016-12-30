@@ -304,7 +304,7 @@ class Customers extends MY_Controller
 	 * @param integer $id
 	 * @return void
 	 */
-	public function edit($id)
+	public function edit($id, $from_widget = 'n')
 	{
 		/**
 		 * Check Permissions
@@ -323,7 +323,7 @@ class Customers extends MY_Controller
 		}
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record);
+		$json_data = $this->_save('edit', $record, $from_widget);
 
 
 		// No form Submitted?
@@ -386,6 +386,15 @@ class Customers extends MY_Controller
 
 		// Valid action?
 		if( !in_array($action, array('add', 'edit')))
+		{
+			return [
+				'status' => 'error',
+				'message' => 'Invalid action!'
+			];
+		}
+
+		// Valid "from" ?
+		if( !in_array($from_widget, array('y', 'n')))
 		{
 			return [
 				'status' => 'error',
@@ -464,61 +473,54 @@ class Customers extends MY_Controller
 			$return_extra = [];
 			if($status === 'success' )
 			{
+				$ajax_data = [
+					'message' => $message,
+					'status'  => $status,
+					'updateSection' => true,
+					'hideBootbox' => true
+				];
+
 				if($action === 'add')
 				{
 					$record = $this->customer_model->find($done);
 					$single_row = $from_widget === 'y' ? 'customers/_single_row_widget' : 'customers/_single_row';
 					$html = $this->load->view($single_row, ['record' => $record], TRUE);
 
-					// Refresh the list page and close bootbox
-					$ajax_data = [
-						'message' => $message,
-						'status'  => $status,
-						'updateSection' => true,
-						'updateSectionData' => [
-							'box' 		=> '#search-result-customer',
-							'method' 	=> 'prepend',
-							'html'		=> $html
-						],
-						'hideBootbox' => true
+					$ajax_data['updateSectionData'] = [
+						'box' 		=> '#search-result-customer',
+						'method' 	=> 'prepend',
+						'html'		=> $html
 					];
-					return $this->template->json($ajax_data);
-
 				}
 				else
 				{
-					// Get Updated Record
+					/**
+					 * Widget or Row?
+					 */
 					$record = $this->customer_model->find($record->id);
-					$success_html = $this->load->view('customers/_single_row', ['record' => $record], TRUE);
+					$view 	= $from_widget === 'n' ? 'customers/_single_row' : 'customers/snippets/_widget_profile';
+					$html 	= $this->load->view($view , ['record' => $record], TRUE);
+
+					$ajax_data['updateSectionData'] = [
+						'box' 		=> $from_widget === 'n' ? '#_data-row-customer-' . $record->id : '#iqb-widget-customer-profile',
+						'method' 	=> 'replaceWith',
+						'html'		=> $html
+					];
 				}
+				return $this->template->json($ajax_data);
 			}
 
-			$return_data = [
+			// Form
+			return $this->template->json([
 				'status' 		=> $status,
 				'message' 		=> $message,
-				'reloadForm' 	=> $status === 'error',
-				'hideBootbox' 	=> $status === 'success',
-				'updateSection' => $status === 'success',
-				'updateSectionData'	=> $status === 'success'
-										? 	[
-												'box' 	=> '#_data-row-' . $record->id,
-												'html' 	=> $success_html,
-												//
-												// How to Work with success html?
-												// Jquery Method 	html|replaceWith|append|prepend etc.
-												//
-												'method' 	=> 'replaceWith'
-											]
-										: NULL,
-				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('customers/_form',
-											[
-												'form_elements' => $this->customer_model->validation_rules,
-												'record' 		=> $record
-											], TRUE)
-									: 	null
-
-			];
+				'reloadForm' 	=> true,
+				'form' 			=> $this->load->view('customers/_form',
+									[
+										'form_elements' => $this->customer_model->validation_rules,
+										'record' 		=> $record
+									], TRUE)
+			]);
 		}
 
 		return $return_data;

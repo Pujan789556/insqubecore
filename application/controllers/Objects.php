@@ -355,7 +355,7 @@ class Objects extends MY_Controller
 	 * @param integer $id
 	 * @return void
 	 */
-	public function edit($id)
+	public function edit($id, $from_widget = 'n')
 	{
 		/**
 		 * Check Permissions
@@ -373,6 +373,21 @@ class Objects extends MY_Controller
 			$this->template->render_404();
 		}
 
+
+		/**
+		 * Is object editable?
+		 * --------------------
+		 *
+		 * If the object is currently assigned to a policy which is not editable,
+		 * you can not edit this object
+		 */
+		if(!$this->object_model->is_editable($record->id))
+		{
+			$this->template->json(['status' => 'error', 'title' => 'Operatiion Not Permitted.', 'message' => 'This object is not editable.'], 404);
+		}
+
+
+
 		// Valid Customer Record ?
 		$this->load->model('customer_model');
 		$customer_record = $this->customer_model->find($record->customer_id);
@@ -384,14 +399,14 @@ class Objects extends MY_Controller
 		/**
 		 * Prepare Common Form Data to pass to form view
 		 */
-		$action_url = 'objects/edit/' . $record->id;
+		$action_url = 'objects/edit/' . $record->id . '/' . $from_widget;
 		$form_data = [
 			'form_elements' 	=> [],
 			'record' 			=> $record,
 			'portfolio_record' 	=> NULL,
 			'action' 			=> 'edit',
 			'action_url' 		=> $action_url,
-			'from_widget' 		=> 'no',
+			'from_widget' 		=> $from_widget,
 
 			// Attribute Elements
 			'html_form_attribute_components' => $this->gaf($record->portfolio_id, 'html', json_decode($record->attributes))
@@ -498,8 +513,9 @@ class Objects extends MY_Controller
 	private function _save($customer_record, $form_data)
 	{
 		// Valid action?
-		$action = $form_data['action'];
-		if( !in_array($action, array('add', 'edit')))
+		$action 		= $form_data['action'];
+		$from_widget 	= $form_data['from_widget'];
+		if( !in_array($action, array('add', 'edit')) || !in_array($from_widget, ['y', 'n'])  )
 		{
 			return [
 				'status' => 'error',
@@ -515,9 +531,8 @@ class Objects extends MY_Controller
 		 */
 		if( $this->input->post() )
 		{
-			$from_widget = $form_data['from_widget'];
-			$record = $form_data['record'];
 
+			$record = $form_data['record'];
 			if($action === 'add')
 			{
 				$portfolio_id = (int)$this->input->post('portfolio_id');
@@ -600,12 +615,12 @@ class Objects extends MY_Controller
 					'hideBootbox' => true
 				];
 
-				$record = $this->object_model->row($action === 'add' ? $done : $record->id);
-				$single_row = ($action === 'add' && $from_widget === 'y') ? 'objects/_single_row_widget' : 'objects/_single_row';
-				$html = $this->load->view($single_row, ['record' => $record], TRUE);
-
+				$record 	= $this->object_model->row($action === 'add' ? $done : $record->id);
 				if($action === 'add')
 				{
+					$single_row = $from_widget === 'y' ? 'objects/_single_row_widget' : 'objects/_single_row';
+					$html = $this->load->view($single_row, ['record' => $record], TRUE);
+
 					$ajax_data['updateSectionData'] = [
 						'box' 		=> '#search-result-object',
 						'method' 	=> 'prepend',
@@ -614,8 +629,14 @@ class Objects extends MY_Controller
 				}
 				else
 				{
+					/**
+					 * From Widget or List
+					 */
+					$single_row = $from_widget === 'y' ? 'objects/snippets/_object_card' : 'objects/_single_row';
+					$html = $this->load->view($single_row, ['record' => $record, '__flag_object_editable' => TRUE], TRUE);
+
 					$ajax_data['updateSectionData']  = [
-						'box' 		=> '#_data-row-object-' . $record->id,
+						'box' 		=> $from_widget === 'n' ? '#_data-row-object-' . $record->id : '#iqb-object-card',
 						'method' 	=> 'replaceWith',
 						'html'		=> $html
 					];

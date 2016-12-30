@@ -125,3 +125,17 @@ define('IQB_MASTER_PORTFOLIO_FIRE',         3);
 define('IQB_MASTER_PORTFOLIO_MARINE',       4);
 define('IQB_MASTER_PORTFOLIO_MISC',         5);
 define('IQB_MASTER_PORTFOLIO_MOTOR',        6);
+
+/*
+|--------------------------------------------------------------------------
+| POLICY STATUS CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_POLICY_STATUS_DRAFT')          OR define('IQB_POLICY_STATUS_DRAFT',        'D');
+defined('IQB_POLICY_STATUS_UNVERIFIED')     OR define('IQB_POLICY_STATUS_UNVERIFIED',   'U');
+defined('IQB_POLICY_STATUS_VERIFIED')       OR define('IQB_POLICY_STATUS_VERIFIED',     'V');
+defined('IQB_POLICY_STATUS_PAID')           OR define('IQB_POLICY_STATUS_PAID',         'P');
+defined('IQB_POLICY_STATUS_ACTIVE')         OR define('IQB_POLICY_STATUS_ACTIVE',       'A');
+defined('IQB_POLICY_STATUS_CANCELED')       OR define('IQB_POLICY_STATUS_CANCELED',     'C');
+defined('IQB_POLICY_STATUS_EXPIRED')        OR define('IQB_POLICY_STATUS_EXPIRED',      'E');
+

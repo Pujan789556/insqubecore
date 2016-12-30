@@ -187,7 +187,7 @@ $('#_portfolio-id').on('change', function(e){
 // Customer Finder
 $('#_find-customer').on('click', function(e){
     e.preventDefault();
-    $.getJSON('customers/page/f/y', function(r){
+    $.getJSON('<?php echo base_url()?>customers/page/f/y', function(r){
         if( typeof r.html !== 'undefined' && r.html != '' ){
             bootbox.dialog({
                 className: 'modal-default',
@@ -216,7 +216,7 @@ $('#_find-object').on('click', function(e){
         toastr.error('Please select customer and portfolio first.');
         return false;
     }
-    var url = 'objects/find/'+c + '/'+ p;
+    var url = '<?php echo base_url()?>objects/find/'+c + '/'+ p;
 
     $.getJSON(url, function(r){
         if( typeof r.html !== 'undefined' && r.html != '' ){

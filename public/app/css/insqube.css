@@ -101,10 +101,25 @@
 }
 
 /* -- consecutive button gaps -- */
-.btn+.btn{
+.btn+.btn, .action+.action{
   margin-left: 10px;
 }
+.action+.action.narrow{
+  margin-left: 5px;
+}
+.action.divider{
+  width: 0px;
+  height: 100%;
+  border-left: 1px solid #ccc;
+}
 
+/* -- Policy Detail - Tab Action Row -- */
+.iqb-row-action{
+    margin-top: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
 
 
 /*---------------------*/
@@ -163,9 +178,11 @@
 h4.box-title{
   font-size: 16px !important;
 }
+.box-body > div{margin-bottom: 10px;}
 .box > :last-child, .box-body > :last-child, .box-footer > :last-child{
   margin-bottom: 0;
 }
+
 
 /*----------------------*/
  /* -- Media Queries -- */
