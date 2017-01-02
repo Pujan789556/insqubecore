@@ -166,6 +166,34 @@ if ( ! function_exists('_PO_policy_package_dropdown'))
 }
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('_PO_premium_defaults'))
+{
+	/**
+	 * Get Policy Premium Defaults
+	 *
+	 * Get default policy premium defaults for given policy object
+	 *
+	 * @param bool $record 	Object Record
+	 * @return	mixed
+	 */
+	function _PO_premium_defaults( $record )
+	{
+		$premium = '';
+		switch ($record->portfolio_id)
+		{
+			// Motor
+			case IQB_MASTER_PORTFOLIO_MOTOR:
+				$premium = _PO_MOTOR_premium_defaults($record);
+				break;
+
+			default:
+				# code...
+				break;
+		}
+		return $premium;
+	}
+}
+// ------------------------------------------------------------------------
 
 
 
@@ -207,7 +235,7 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 		        'field' => 'object[sub_portfolio]',
 		        '_key' => 'sub_portfolio',
 		        'label' => 'Sub-Portfolio',
-		        'rules' => 'trim|required|alpha',
+		        'rules' => 'trim|required|alpha|in_list[MCY,PVC,CVC]',
 		        '_id' 		=> '_motor-sub-portfolio',
 		        '_type'     => 'dropdown',
 		        '_data' 	=> _PO_MOTOR_sub_portfolio_dropdown( ),
@@ -605,6 +633,25 @@ if ( ! function_exists('_PO_MOTOR_policy_package_dropdown'))
 	}
 }
 // ------------------------------------------------------------------------
+
+if ( ! function_exists('_PO_MOTOR_premium_defaults'))
+{
+	/**
+	 * Get Policy Premium Defaults - Motor
+	 *
+	 * Get default policy premium defaults for given motor object
+	 *
+	 * @param bool $record 	Object Record
+	 * @return	mixed
+	 */
+	function _PO_MOTOR_premium_defaults( $record )
+	{
+
+	}
+}
+// ------------------------------------------------------------------------
+
+
 
 
 

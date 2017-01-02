@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "code", "policy_no", "branch_id", "customer_id", "portfolio_id", "policy_package", "sold_by", "object_id", "issue_date", "start_date", "duration", "end_date", "flag_dc", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_no", "branch_id", "customer_id", "portfolio_id", "policy_package", "sold_by", "object_id", "issue_date", "start_date", "duration", "end_date", "flag_dc", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -423,6 +423,7 @@ class Policy_model extends MY_Model
      *      3. Add Branch ID
      *      4. Add End Date
      *      5. Add Status = Draft
+     *      6. Add Fiscal Year
      *
      * @param array $data
      * @return array
@@ -461,6 +462,9 @@ class Policy_model extends MY_Model
         // Status
         $data['status'] = IQB_POLICY_STATUS_DRAFT;
 
+        // Fiscal Year
+        $data['fiscal_yr_id'] = $fy_record->id;
+
         return $data;
     }
 
@@ -472,7 +476,7 @@ class Policy_model extends MY_Model
      *
      * Tasks that are to be performed after policy is created are
      *      1. Add Agent Policy Relation if supplied
-     *      2. Add Default Policy Cost Data
+     *      2. Add Premium Based on Portfolio and Object Details
      *      3. @TODO: Find other tasks
      *
      * $arr_record structure
@@ -503,6 +507,7 @@ class Policy_model extends MY_Model
                 [fields] => Array
                     (
                         [portfolio_id] => 6
+                        [fiscal_yr_id] => x
                         [policy_package] => tp
                         [customer_name] => Sonam Singh
                         [customer_id] => 15
@@ -531,6 +536,11 @@ class Policy_model extends MY_Model
         if($id !== NULL)
         {
             $fields = $arr_record['fields'];
+
+            /**
+             * TASK 1: Add agent relation
+             * --------------------------
+             */
             if( isset($fields['flag_dc']) && $fields['flag_dc'] === 'C')
             {
                 // Get the agent id
@@ -542,6 +552,12 @@ class Policy_model extends MY_Model
                 $this->load->model('rel_agent_policy_model');
                 return $this->rel_agent_policy_model->insert($relation_data, TRUE);
             }
+
+            /**
+             * TASK 2: Add Defualt Premium
+             * ----------------------------
+             */
+
         }
         return FALSE;
     }

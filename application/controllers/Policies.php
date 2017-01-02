@@ -799,7 +799,7 @@ class Policies extends MY_Controller
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Policy Details <small>' . $record->code . '</small>',
+								'content_header' => 'Policy -' . $record->code,
 								'breadcrumbs' => ['Policies' => 'policies', 'Details' => NULL]
 						])
 						->partial('content', 'policies/_details', compact('record'))

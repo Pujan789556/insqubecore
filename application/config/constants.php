@@ -128,6 +128,19 @@ define('IQB_MASTER_PORTFOLIO_MOTOR',        6);
 
 /*
 |--------------------------------------------------------------------------
+| MOTOR PORTFOLIO - SUB-PORTFOLIO LIST
+|--------------------------------------------------------------------------
+|
+| WARNING: Should be exactly same as in database, add here if you add in db
+|
+*/
+define('IQB_SUB_PORTFOLIO_MOTORCYCLE',          'MCY');
+define('IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE',     'PVC');
+define('IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE',  'CVC');
+
+
+/*
+|--------------------------------------------------------------------------
 | POLICY STATUS CONSTANTS
 |--------------------------------------------------------------------------
 */

@@ -42,6 +42,9 @@ class Portfolio extends MY_Controller
 
 		// Load Model
 		$this->load->model('portfolio_model');
+
+		// Helper
+		$this->load->helper('object');
 	}
 
 	// --------------------------------------------------------------------
@@ -341,7 +344,12 @@ class Portfolio extends MY_Controller
     // PORTFOLIO SETTINGS EXPLORE AND CRUD OPERATIONS
     // --------------------------------------------------------------------
 
-
+    /**
+     * Portfolio Settings
+     *
+     * List of all portfolio settings fiscal-year-wise
+     * @return void
+     */
     public function settings()
     {
     	// Site Meta
@@ -631,6 +639,6 @@ class Portfolio extends MY_Controller
         return TRUE;
     }
 
-    // --------------------------------------------------------------------
+	// --------------------------------------------------------------------
 
 }

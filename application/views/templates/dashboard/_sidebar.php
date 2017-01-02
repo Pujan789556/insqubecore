@@ -102,7 +102,26 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           </span>
                                     </a>
                                     <ul class="treeview-menu">
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'portfolio');?>"><a href="<?php echo site_url('portfolio');?>"><i class="fa fa-circle-o"></i> Manage Portfolio</a></li><li class="<?php echo set_menu_active($nav_level_2, 'settings');?>"><a href="<?php echo site_url('portfolio/settings');?>"><i class="fa fa-circle-o"></i> Portfolio Settings</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'portfolio');?>"><a href="<?php echo site_url('portfolio');?>"><i class="fa fa-circle-o"></i> Manage Portfolio</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'settings');?>"><a href="<?php echo site_url('portfolio/settings');?>"><i class="fa fa-circle-o"></i> Portfolio Settings</a></li>
+
+
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'tariff');?>">
+                                                <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Tarrif
+                                                      <span class="pull-right-container">
+                                                            <i class="fa fa-angle-left pull-right"></i>
+                                                      </span>
+                                                </a>
+                                                <ul class="treeview-menu">
+                                                      <li class="<?php echo set_menu_active($nav_level_3, 'motor');?>">
+                                                            <a href="<?php echo site_url('tariff/motor');?>">
+                                                                  <i class="fa fa-circle-o"></i> Motor
+                                                            </a>
+                                                      </li>
+                                                </ul>
+                                          </li>
+
                                     </ul>
                               </li>
 

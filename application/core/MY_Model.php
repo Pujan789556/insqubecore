@@ -569,7 +569,6 @@ class MY_Model
             $data['batch'] = true;
             $data = $this->trigger('before_insert', ['method' => 'insert_batch', 'fields' => $data] );
             unset($data['batch']);
-
             return $this->db->insert_batch($this->table_name, $data);
         } else {
             return FALSE;
@@ -1251,32 +1250,64 @@ class MY_Model
      *
      * @return array
      */
-    public function created_on($row)
+    public function created_on($data)
     {
-        if (empty($row['fields']))
+        if (empty($data['fields']))
         {
             return null;
         }
+        $method         = $data['method'] ?? NULL;
+        $rows           = $data['fields'];
+        $batch          = $rows['batch'] ?? NULL;
+        $formatted_data = [];
 
-        $row = $row['fields'];
-
-        // Created_on
-        if (! array_key_exists($this->created_field, $row))
+        /**
+         * Let's modify this method to work with Batch Insert
+         */
+        if($method === 'insert_batch' && $batch == TRUE )
         {
-            $row[$this->created_field] = $this->set_date();
+            // Remove batch flag the rows
+            unset($rows['batch']);
+
+            /**
+             * Row contains batch data
+             */
+            foreach ($rows as $row)
+            {
+                $formatted_data[] = $this->_created_on($row);
+            }
+
+            // Add batch flag for other trigger
+            $formatted_data['batch'] = $batch;
+        }
+        else
+        {
+            // Sigle Row, Simply add created_on defaults
+            $formatted_data = $this->_created_on($rows);
         }
 
-        // Created by
-        if ($this->log_user && ! array_key_exists($this->created_by_field, $row) && is_object($this->dx_auth))
-        {
-            // If you're here because of an error with $this->dx_auth
-            // not being available, it's likely due to you not using
-            // the AuthTrait and/or setting log_user after model is instantiated.
-            $row[$this->created_by_field] = (int)$this->dx_auth->get_user_id();
-        }
+        return $formatted_data;
+    }
 
-        return $row;
-    } // end created_on()
+        private function _created_on($row)
+        {
+            // Created_on
+            if (! array_key_exists($this->created_field, $row))
+            {
+                $row[$this->created_field] = $this->set_date();
+            }
+
+            // Created by
+            if ($this->log_user && ! array_key_exists($this->created_by_field, $row) && is_object($this->dx_auth))
+            {
+                // If you're here because of an error with $this->dx_auth
+                // not being available, it's likely due to you not using
+                // the AuthTrait and/or setting log_user after model is instantiated.
+                $row[$this->created_by_field] = (int)$this->dx_auth->get_user_id();
+            }
+
+            return $row;
+        }// end created_on()
 
     //--------------------------------------------------------------------
 
