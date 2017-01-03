@@ -58,8 +58,8 @@ class Tariff extends MY_Controller
 	 */
 	function index()
 	{
-		// I don't know what to show at this moment, so let's 404
-		$this->template->render_404();
+		// Let's Render Motor Tariff as Default
+        redirect('tariff/motor');
 
 	}
 
@@ -513,13 +513,25 @@ class Tariff extends MY_Controller
 							'age2_max' => $tariff['age']['age2_max'][$i],
 							'rate2' => $tariff['age']['rate2'][$i]
 						],
+						'third_party' => $tariff['third_party'][$i]
                 	];
 
                 	$tariff_data[] = $single_tarrif;
                 }
 
                 $post_data['tariff'] = json_encode($tariff_data);
-                $post_data['dr_disabled_friendly'] = $data['dr_disabled_friendly'];
+
+                // Disabled Friendly Discount Rate
+                $post_data['dr_mcy_disabled_friendly'] = $data['dr_mcy_disabled_friendly'];
+
+                // Private Hire - Private Vehicle
+                $post_data['rate_pvc_on_hire'] = $data['rate_pvc_on_hire'];
+
+                // Commercial Vehicle : Personal Use
+                $post_data['dr_cvc_on_personal_use'] = $data['dr_cvc_on_personal_use'];
+
+                // Towing Premium Amount
+                $post_data['pramt_towing'] = $data['pramt_towing'];
 
                 /**
                  * No Claim Discount
@@ -576,6 +588,15 @@ class Tariff extends MY_Controller
                  * Risk Group
                  */
                 $post_data['riks_group'] = json_encode($data['riks_group']);
+
+                /**
+                 * Trailer/Trolly Tarrif
+                 */
+                $post_data['trolly_tariff'] = json_encode($data['trolly_tariff']);
+
+                // Activate Tariff
+	            $post_data['active'] = $data['active'] ?? 0;
+
 
                 $done = $this->tariff_motor_model->update($record->id, $post_data, TRUE);
 

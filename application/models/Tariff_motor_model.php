@@ -18,7 +18,7 @@ class Tariff_motor_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "sub_portfolio", "cvc_type", "fiscal_yr_id", "ownership", "tariff", "no_claim_discount", "dr_disabled_friendly", "dr_voluntary_excess", "pramt_compulsory_excess", "additional_premium", "riks_group", "active", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "sub_portfolio", "cvc_type", "fiscal_yr_id", "ownership", "tariff", "no_claim_discount", "dr_mcy_disabled_friendly", "rate_pvc_on_hire", "dr_cvc_on_personal_use", "dr_voluntary_excess", "pramt_compulsory_excess", "additional_premium", "riks_group", "pramt_towing", "trolly_tariff", "active", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -56,6 +56,16 @@ class Tariff_motor_model extends MY_Model
     {
         $this->validation_rules = [
 
+            'active' => [
+                [
+                    'field' => 'active',
+                    'label' => 'Activate Tariff',
+                    'rules' => 'trim|integer|in_list[1]',
+                    '_type' => 'switch',
+                    '_value' => '1'
+                ]
+            ],
+
             /**
              * JSON : Tarrif
              * --------------
@@ -79,7 +89,14 @@ class Tariff_motor_model extends MY_Model
              *          base_fragment: xxx,
              *          base_fragment_rate: yyy,
              *          rest_fragment_rate: zzz
-             *
+             *      },
+             *      age: {
+             *          age1_min: xxx,
+             *          age1_max: yyy,
+             *          rate1: zzz,
+             *          age2_min: aa,
+             *          age2_max: bb,
+             *          rate2:ccc
              *      },
              *      third_party: 4000               // Third party Premium
              *  },{
@@ -87,17 +104,16 @@ class Tariff_motor_model extends MY_Model
              *  }]
              */
             'tariff' => [
-
                 [
                     'field' => 'tariff[ec_min][]',
-                    'label' => 'Min Engine Capacity (CC|KW|TON)',
+                    'label' => 'Default Min (CC|KW|TON)',
                     'rules' => 'trim|required|integer|max_length[5]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 [
                     'field' => 'tariff[ec_max][]',
-                    'label' => 'Max Engine Capacity (CC|KW|TON)',
+                    'label' => 'Default Max (CC|KW|TON)',
                     'rules' => 'trim|required|integer|max_length[5]',
                     '_type'     => 'text',
                     '_required' => true
@@ -106,35 +122,35 @@ class Tariff_motor_model extends MY_Model
                 // Default Rate
                 [
                     'field' => 'tariff[rate][age][]',
-                    'label' => 'Default Age Max(years)',
+                    'label' => 'Default Age Max (yrs)',
                     'rules' => 'trim|required|integer|max_length[5]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 [
                     'field' => 'tariff[rate][rate][]',
-                    'label' => 'Rate on Total Price(%)',
+                    'label' => 'Default Premium Rate(%)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 [
                     'field' => 'tariff[rate][minus_amount][]',
-                    'label' => 'To Minus Amount (Rs)',
+                    'label' => 'Default To-Minus-Amount (Rs)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 [
                     'field' => 'tariff[rate][ec_threshold][]',
-                    'label' => 'Engine Capacity Threshold (CC|KW|TON)',
+                    'label' => 'Default Threshold (CC|KW|TON)',
                     'rules' => 'trim|required|integer|max_length[5]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 [
                     'field' => 'tariff[rate][cost_per_ec_above][]',
-                    'label' => 'Cost per Engine Capacity Above Threshold (Rs)',
+                    'label' => 'Premium per Above Threshold (Rs)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
                     '_type'     => 'text',
                     '_required' => true
@@ -216,6 +232,15 @@ class Tariff_motor_model extends MY_Model
                     '_type'     => 'text',
                     '_required' => true
                 ],
+
+                // Third Party Amount
+                [
+                    'field' => 'tariff[third_party][]',
+                    'label' => 'Third Party Premium (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
             ],
 
             /**
@@ -248,15 +273,50 @@ class Tariff_motor_model extends MY_Model
             ],
 
             // Disable Friendly Discount
-            'dr_disabled_friendly' => [
+            'dr_mcy_disabled_friendly' => [
                 [
-                    'field' => 'dr_disabled_friendly',
+                    'field' => 'dr_mcy_disabled_friendly',
                     'label' => 'Disable Friendly Discount (%)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
                     '_type'     => 'text',
                     '_required' => true
                 ]
             ],
+
+            // Private Vehicle - Private Hire Rate
+            'rate_pvc_on_hire' => [
+                [
+                    'field' => 'rate_pvc_on_hire',
+                    'label' => 'Private Hire (%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
+            ],
+
+
+            // Commercial Vehicle - Discount on Personal Use
+            'dr_cvc_on_personal_use' => [
+                [
+                    'field' => 'dr_cvc_on_personal_use',
+                    'label' => 'Discount on Personal Use (%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
+            ],
+
+            // Vehicle - Towing Premium Amount
+            'pramt_towing' => [
+                [
+                    'field' => 'pramt_towing',
+                    'label' => 'Towing Premium Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
+            ],
+
 
             /**
              * JSON : Voluntary Excess
@@ -392,6 +452,50 @@ class Tariff_motor_model extends MY_Model
                     '_type'     => 'text',
                     '_required' => true
                 ]
+            ],
+
+
+            /**
+             * JSON : Trolly/Trailer Tarrif
+             * ----------------------------
+             *
+             * Structure:
+             *  {
+             *      rate: 0.123,
+             *      minus_amount: 0.12,
+             *      third_party: 500,
+             *      compulsory_excess: 400
+             *  }
+             */
+            'trolly_tariff' => [
+                [
+                    'field' => 'trolly_tariff[rate]',
+                    'label' => 'Premium Rate (%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'trolly_tariff[minus_amount]',
+                    'label' => 'To Minus Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'trolly_tariff[third_party]',
+                    'label' => 'Third Party Premium (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'trolly_tariff[compulsory_excess]',
+                    'label' => 'Compulsory Excess (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
             ]
         ];
     }
@@ -427,7 +531,7 @@ class Tariff_motor_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('pf_tarrif_motor_list');
+        $list = $this->get_cache('tarrif_motor_index_list');
         if(!$list)
         {
             $list = $this->db->select('PTM.fiscal_yr_id, FY.code_en, FY.code_np')
@@ -435,7 +539,7 @@ class Tariff_motor_model extends MY_Model
                                 ->join('master_fiscal_yrs FY', 'FY.id = PTM.fiscal_yr_id')
                                 ->group_by('PTM.fiscal_yr_id')
                                 ->get()->result();
-            $this->write_cache($list, 'pf_tarrif_motor_list', CACHE_DURATION_DAY);
+            $this->write_cache($list, 'tarrif_motor_index_list', CACHE_DURATION_DAY);
         }
         return $list;
     }
@@ -493,7 +597,7 @@ class Tariff_motor_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'pf_tarrif_motor_list'
+            'tarrif_motor_index_list'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

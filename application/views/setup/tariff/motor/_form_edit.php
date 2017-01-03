@@ -3,11 +3,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Form : Department
  */
-$close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
+$anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">' .
                          '<a href="#" onclick=\'$(this).closest(".box-body").remove()\'>Remove</a>' .
                      '</div></div>' .
                  '</div>';
 ?>
+<style type="text/css">
+.remove-row{margin-top: 10px; margin-bottom: 10px; border-top:1px solid #ccc;}
+.box-body.with-bordered{border: 1px solid #eee;}
+</style>
 <?php echo form_open( $this->uri->uri_string(),
                         [
                             'class' => 'form-iqb-general',
@@ -35,12 +39,26 @@ $close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
             <p class="form-control-static"><?php echo $record->cvc_type ? _PO_MOTOR_CVC_type_dropdown(FALSE)[$record->cvc_type] : '-'?></p>
             </div>
         </div>
+
+        <?php
+        /**
+         * Activate Tariff
+         *
+         * Load Form Components
+         */
+        $active = $form_elements['active'];
+        $this->load->view('templates/_common/_form_components_horz', [
+                'form_elements'     => $active,
+                'form_record'       => $record
+        ]);
+        ?>
+
     </div>
 
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-          <h4 class="box-title">Tariff Details</h4>
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
+            <h4 class="box-title">Tariff Details</h4>
         </div>
         <?php
         /**
@@ -50,6 +68,7 @@ $close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
 
         $partial_form_elements = $form_elements['tariff'];
         $i = 0;
+        $__box_id = '_tariff-box';
         if($tariff)
         {
             foreach($tariff as $single_tarrif)
@@ -79,74 +98,110 @@ $close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
 
                 $i++;
 
-                if($i > 1)
+                $form_data = [
+                    'form_elements'     => $partial_form_elements,
+                    'form_record'       => NULL,
+                    'inline_grid_width' => 'col-sm-6 col-md-4'
+                ];
+                if($i === 1)
                 {
-                    echo '<hr/><div class="box-body">';
+                    $form_data['__box_id'] = $__box_id;
                 }
                 else
                 {
-                    echo '<div class="box-body" id="_tariff-box">';
+                    $form_data['__show_remove'] = TRUE;
                 }
 
-                    /**
-                     * Load These Elements
-                     */
-                    $this->load->view('templates/_common/_form_components_inline', [
-                        'form_elements' => $partial_form_elements,
-                        'form_record'   => NULL,
-                        'inline_grid_width' => 'col-sm-6 col-md-4'
-                    ]);
+                /**
+                 * Load These Elements
+                 */
+                $this->load->view('setup/tariff/motor/_form_edit_inline', $form_data);
 
-                if($i > 1)
-                {
-                    echo $close_anchor;
-                }
-                else{
-                    echo '</div>';
-                }
             }
         }
         else
         {
-            echo '<div class="box-body" id="_tariff-box">';
-
-                $this->load->view('templates/_common/_form_components_inline', [
-                    'form_elements' => $partial_form_elements,
-                    'form_record'   => NULL,
-                    'inline_grid_width' => 'col-sm-6 col-md-4'
-                ]);
-            echo '</div>';
+            $this->load->view('setup/tariff/motor/_form_edit_inline', [
+                'form_elements'     => $partial_form_elements,
+                'form_record'       => NULL,
+                'inline_grid_width' => 'col-sm-6 col-md-4',
+                '__box_id'          => $__box_id,
+                '__show_remove'     => FALSE
+            ]);
         }
         ?>
-        <div class="box-footer bg-gray-light">
-            <a href="#" onclick="duplicate('#_tariff-box', 'box-body')">Add More</a>
+        <div class="box-footer bg-info">
+            <a href="#" class="btn bg-teal" onclick="__duplicate_configs('#<?php echo $__box_id?>', this)">Add More</a>
         </div>
     </div>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-          <h4 class="box-title">Disable Friendly Discount (Motorcycle Only)t</h4>
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
+            <h4 class="box-title">Disable Friendly Discount (Motorcycle Only)</h4>
+            <a href="#" class="pull-right btn btn-default btn-sm" onclick="__zerofill('.box-config', this)">Fill Zero</a>
         </div>
-        <div class="box-body">
+        <div class="box-body bg-gray-light">
             <?php
             /**
              * Load Form Components
              */
-            $dr_disabled_friendly = $form_elements['dr_disabled_friendly'];
+            $dr_mcy_disabled_friendly = $form_elements['dr_mcy_disabled_friendly'];
             $this->load->view('templates/_common/_form_components_inline', [
-                'form_elements' => $dr_disabled_friendly,
-                'form_record'   => $record,
-                'inline_grid_width' => 'col-sm-6 col-md-4'
+                    'form_elements'     => $dr_mcy_disabled_friendly,
+                    'form_record'       => $record,
+                    'inline_grid_width' => 'col-sm-6 col-md-4'
             ]);
             ?>
+            <p class="small text-warning">नोटः माथि (१) सरकारी बाहेक तथा (२) दुवैमा अपाङ्ग मैत्री तीन पाङ्ग्रे मोटरसाइकलको हकमा, माथि उल्लिखित सवै बीमादरमा २५% छुट हुने छ ।</p>
         </div>
     </div>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
+            <h4 class="box-title">Private Hire (Private Vehicle Only)</h4>
+            <a href="#" class="pull-right btn btn-default btn-sm" onclick="__zerofill('.box-config', this)">Fill Zero</a>
+        </div>
+        <div class="box-body bg-gray-light">
+            <?php
+            /**
+             * Load Form Components
+             */
+            $rate_pvc_on_hire = $form_elements['rate_pvc_on_hire'];
+            $this->load->view('templates/_common/_form_components_inline', [
+                    'form_elements'     => $rate_pvc_on_hire,
+                    'form_record'       => $record,
+                    'inline_grid_width' => 'col-sm-6 col-md-4'
+            ]);
+            ?>
+            <p class="small text-warning">कुनै व्यक्ति वा संस्थाको निजी सवारी साधन अर्को व्यक्ति वा संस्थाको निजी प्रयोगको लागि भाडा (प्राइभेट हायर) मा दिइएको भएमा उल्लिखित बीमाशुल्कदरमा १०% थप गरी दर कायम गर्नु पर्नेछ ।</p>
+        </div>
+    </div>
+
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
+          <h4 class="box-title">Discount on Personal Use (Commercial Vehicle Only)</h4>
+          <a href="#" class="pull-right btn btn-default btn-sm" onclick="__zerofill('.box-config', this)">Fill Zero</a>
+        </div>
+        <div class="box-body bg-gray-light">
+            <?php
+            /**
+             * Load Form Components
+             */
+            $dr_cvc_on_personal_use = $form_elements['dr_cvc_on_personal_use'];
+            $this->load->view('templates/_common/_form_components_inline', [
+                    'form_elements'     => $dr_cvc_on_personal_use,
+                    'form_record'       => $record,
+                    'inline_grid_width' => 'col-sm-6 col-md-4'
+            ]);
+            ?>
+            <p class="small text-warning">निजी प्रयोेजनको लागि प्रयोग गर्ने सवारी साधनको ब्यापक बीमा गर्दा शुरु बीमाशुल्कको २५ प्रतिशत छुटहुनेछ ।</p>
+        </div>
+    </div>
+
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
           <h4 class="box-title">No Claim Discount</h4>
         </div>
-
         <?php
         /**
          * Load Form Components
@@ -155,6 +210,7 @@ $close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
 
         $partial_form_elements = $form_elements['no_claim_discount'];
         $i = 0;
+        $__box_id = '_no-claim-discount-box';
         if($no_claim_discount)
         {
             foreach($no_claim_discount as $single_tarrif)
@@ -170,53 +226,46 @@ $close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
 
                 $i++;
 
-                if($i > 1)
+                $form_data = [
+                    'form_elements'     => $partial_form_elements,
+                    'form_record'       => NULL,
+                    'inline_grid_width' => 'col-sm-6 col-md-4'
+                ];
+                if($i === 1)
                 {
-                    echo '<hr/><div class="box-body">';
+                    $form_data['__box_id'] = $__box_id;
                 }
                 else
                 {
-                    echo '<div class="box-body" id="_no-claim-discount-box">';
+                    $form_data['__show_remove'] = TRUE;
                 }
-
-                    /**
-                     * Load These Elements
-                     */
-                    $this->load->view('templates/_common/_form_components_inline', [
-                        'form_elements' => $partial_form_elements,
-                        'form_record'   => NULL,
-                        'inline_grid_width' => 'col-sm-6 col-md-4'
-                    ]);
-
-                if($i > 1)
-                {
-                    echo $close_anchor;
-                }
-                else{
-                    echo '</div>';
-                }
+                /**
+                 * Load These Elements
+                 */
+                $this->load->view('setup/tariff/motor/_form_edit_inline', $form_data);
             }
         }
         else
         {
-            echo '<div class="box-body" id="_no-claim-discount-box">';
-                $this->load->view('templates/_common/_form_components_inline', [
-                    'form_elements' => $partial_form_elements,
-                    'form_record'   => NULL,
-                    'inline_grid_width' => 'col-sm-6 col-md-4'
-                ]);
-            echo '</div>';
+            $this->load->view('setup/tariff/motor/_form_edit_inline', [
+                'form_elements'     => $partial_form_elements,
+                'form_record'       => NULL,
+                'inline_grid_width' => 'col-sm-6 col-md-4',
+                '__box_id'          => $__box_id,
+                '__show_remove'     => FALSE
+            ]);
         }
         ?>
-        <div class="box-footer bg-gray-light">
-            <a href="#" onclick="duplicate('#_no-claim-discount-box', 'box-body')">Add More</a>
+        <div class="box-footer bg-info">
+            <a href="#" class="btn bg-teal" onclick="__duplicate_configs('#<?php echo $__box_id?>', this)">Add More</a>
         </div>
     </div>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
           <h4 class="box-title">Voluntary Excess Discount</h4>
         </div>
+
         <?php
         /**
          * Load Form Components
@@ -225,6 +274,7 @@ $close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
 
         $partial_form_elements = $form_elements['dr_voluntary_excess'];
         $i = 0;
+        $__box_id = '_dr-voluntary-excess';
         if($dr_voluntary_excess)
         {
             foreach($dr_voluntary_excess as $single_tarrif)
@@ -239,53 +289,43 @@ $close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
                 }
 
                 $i++;
-
-                if($i > 1)
+                $form_data = [
+                    'form_elements'     => $partial_form_elements,
+                    'form_record'       => NULL,
+                    'inline_grid_width' => 'col-sm-6 col-md-4'
+                ];
+                if($i === 1)
                 {
-                    echo '<hr/><div class="box-body">';
+                    $form_data['__box_id'] = $__box_id;
                 }
                 else
                 {
-                    echo '<div class="box-body" id="_no-dr-voluntary-excess">';
+                    $form_data['__show_remove'] = TRUE;
                 }
-
-                    /**
-                     * Load These Elements
-                     */
-                    $this->load->view('templates/_common/_form_components_inline', [
-                        'form_elements' => $partial_form_elements,
-                        'form_record'   => NULL,
-                        'inline_grid_width' => 'col-sm-6 col-md-4'
-                    ]);
-
-                if($i > 1)
-                {
-                    echo $close_anchor;
-                }
-                else{
-                    echo '</div>';
-                }
+                /**
+                 * Load These Elements
+                 */
+                $this->load->view('setup/tariff/motor/_form_edit_inline', $form_data);
             }
         }
         else
         {
-            echo '<div class="box-body" id="_no-dr-voluntary-excess">';
-                $this->load->view('templates/_common/_form_components_inline', [
-                    'form_elements' => $partial_form_elements,
-                    'form_record'   => NULL,
-                    'inline_grid_width' => 'col-sm-6 col-md-4'
-                ]);
-            echo '</div>';
+            $this->load->view('setup/tariff/motor/_form_edit_inline', [
+                'form_elements'     => $partial_form_elements,
+                'form_record'       => NULL,
+                'inline_grid_width' => 'col-sm-6 col-md-4',
+                '__box_id'          => $__box_id,
+                '__show_remove'     => FALSE
+            ]);
         }
         ?>
-
-        <div class="box-footer bg-gray-light">
-            <a href="#" onclick="duplicate('#_no-dr-voluntary-excess', 'box-body')">Add More</a>
+        <div class="box-footer bg-info">
+            <a href="#" class="btn bg-teal" onclick="__duplicate_configs('#<?php echo $__box_id?>', this)">Add More</a>
         </div>
     </div>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
           <h4 class="box-title">Compulsory Excess Amount</h4>
         </div>
         <?php
@@ -296,6 +336,7 @@ $close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
 
         $partial_form_elements = $form_elements['pramt_compulsory_excess'];
         $i = 0;
+        $__box_id = '_prmt-compulsory-excess';
         if($pramt_compulsory_excess)
         {
             foreach($pramt_compulsory_excess as $single_tarrif)
@@ -310,55 +351,81 @@ $close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
                 }
 
                 $i++;
-
-                if($i > 1)
+                $form_data = [
+                    'form_elements'     => $partial_form_elements,
+                    'form_record'       => NULL,
+                    'inline_grid_width' => 'col-sm-6 col-md-4'
+                ];
+                if($i === 1)
                 {
-                    echo '<hr/><div class="box-body">';
+                    $form_data['__box_id'] = $__box_id;
                 }
                 else
                 {
-                    echo '<div class="box-body" id="_no-prmt-compulsory-excess">';
+                    $form_data['__show_remove'] = TRUE;
                 }
-
-                    /**
-                     * Load These Elements
-                     */
-                    $this->load->view('templates/_common/_form_components_inline', [
-                        'form_elements' => $partial_form_elements,
-                        'form_record'   => NULL,
-                        'inline_grid_width' => 'col-sm-6 col-md-4'
-                    ]);
-
-                if($i > 1)
-                {
-                    echo $close_anchor;
-                }
-                else{
-                    echo '</div>';
-                }
+                /**
+                 * Load These Elements
+                 */
+                $this->load->view('setup/tariff/motor/_form_edit_inline', $form_data);
             }
         }
         else
         {
-            echo '<div class="box-body" id="_no-prmt-compulsory-excess">';
-                $this->load->view('templates/_common/_form_components_inline', [
-                    'form_elements' => $partial_form_elements,
-                    'form_record'   => NULL,
-                    'inline_grid_width' => 'col-sm-6 col-md-4'
-                ]);
-            echo '</div>';
+            $this->load->view('setup/tariff/motor/_form_edit_inline', [
+                'form_elements'     => $partial_form_elements,
+                'form_record'       => NULL,
+                'inline_grid_width' => 'col-sm-6 col-md-4',
+                '__box_id'          => $__box_id,
+                '__show_remove'     => FALSE
+            ]);
         }
         ?>
-        <div class="box-footer bg-gray-light">
-            <a href="#" onclick="duplicate('#_no-prmt-compulsory-excess', 'box-body')">Add More</a>
+        <div class="box-footer bg-info">
+            <a href="#" class="btn bg-teal" onclick="__duplicate_configs('#<?php echo $__box_id?>', this)">Add More</a>
         </div>
     </div>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-          <h4 class="box-title">Additional Premium</h4>
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
+            <h4 class="box-title">Trolly/Trailer Tariff (ट्रेलर/ट्रलीको बीमाशुल्क दर)</h4>
+            <a href="#" class="pull-right btn btn-default btn-sm" onclick="__zerofill('.box-config', this)">Fill Zero</a>
         </div>
-        <div class="box-body">
+        <div class="box-body bg-gray-light">
+            <?php
+            /**
+             * Load Form Components
+             */
+            $trolly_tariff = $record->trolly_tariff ? json_decode($record->trolly_tariff, TRUE) : NULL;
+
+            $partial_form_elements = $form_elements['trolly_tariff'];
+            if($trolly_tariff)
+            {
+                foreach($trolly_tariff as $key=>$value)
+                {
+                    // Field Name
+                    $field_name = 'trolly_tariff['.$key . ']';
+                    // Search for the Keys
+                    $index = array_search($field_name, array_column($partial_form_elements, 'field'));
+                    $partial_form_elements[$index]['_default'] = $value;
+                }
+            }
+
+            $this->load->view('templates/_common/_form_components_inline', [
+                'form_elements'     => $partial_form_elements,
+                'form_record'       => NULL,
+                'inline_grid_width' => 'col-sm-6 col-md-4'
+            ]);
+            ?>
+        </div>
+    </div>
+
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
+          <h4 class="box-title">Additional Premium (अतिरिक्त बीमाशुल्कदर - १. मोटर बीमालेख अन्तर्गतको दुर्घटना बीमाको बीमाशुल्क दर)</h4>
+          <a href="#" class="pull-right btn btn-default btn-sm" onclick="__zerofill('.box-config', this)">Fill Zero</a>
+        </div>
+        <div class="box-body bg-gray-light">
             <?php
             /**
              * Load Form Components
@@ -379,19 +446,19 @@ $close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
             }
 
             $this->load->view('templates/_common/_form_components_inline', [
-                'form_elements' => $partial_form_elements,
-                'form_record'   => NULL,
+                'form_elements'     => $partial_form_elements,
+                'form_record'       => NULL,
                 'inline_grid_width' => 'col-sm-6 col-md-4'
             ]);
             ?>
         </div>
     </div>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-          <h4 class="box-title">Risk Group</h4>
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
+          <h4 class="box-title">Risk Group (Pool) (अतिरिक्त बीमाशुल्कदर - २. जोखिम समूहको बीमाशुल्क दर)</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body bg-gray-light">
             <?php
             /**
              * Load Form Components
@@ -411,28 +478,65 @@ $close_anchor = '<div class="row"><div class="col-xs-12 text-right">' .
                 }
             }
             $this->load->view('templates/_common/_form_components_inline', [
-                'form_elements' => $partial_form_elements,
-                'form_record'   => null,
+                'form_elements'     => $partial_form_elements,
+                'form_record'       => null,
                 'inline_grid_width' => 'col-sm-6 col-md-4'
             ]);
             ?>
         </div>
     </div>
 
-
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
+          <h4 class="box-title">Towing Premium Amount(Private &amp; Commercial Vehicles) (अतिरिक्त बीमाशुल्कदर - ३. दुर्घटना भई सडकबाट बाहिर गएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमाशुल्क दर)</h4>
+          <a href="#" class="pull-right btn btn-default btn-sm" onclick="__zerofill('.box-config', this)">Fill Zero</a>
+        </div>
+        <div class="box-body bg-gray-light">
+            <?php
+            /**
+             * Load Form Components
+             */
+            $pramt_towing = $form_elements['pramt_towing'];
+            $this->load->view('templates/_common/_form_components_inline', [
+                    'form_elements'     => $pramt_towing,
+                    'form_record'       => $record,
+                    'inline_grid_width' => 'col-sm-6 col-md-4'
+            ]);
+            ?>
+        </div>
+    </div>
 
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
+
 <script type="text/javascript">
-    function duplicate(src, box_classes)
+
+    /**
+     * Duplicate Configuration Group
+     */
+    function __zerofill(src, a)
     {
-        var html = '<hr/>' + $(src).html() + '<div class="row"><div class="col-xs-12 text-right">' +
-                                        '<a href="#" onclick=\'$(this).closest(".box-body").remove()\'>Remove</a>' +
-                                    '</div></div>';
-         $("<div/>")   // creates a div element
-             // .attr("id", "someID")  // adds the id
-             .addClass(box_classes)   // add a class
-             .html(html)
-             .insertAfter(src);
+        var $box = $(a).closest(src);
+        $('input', $box).val(0);
+    }
+
+    /**
+     * Duplicate Configuration Group
+     */
+    function __duplicate_configs(src, a)
+    {
+        var $src = $(src),
+        html = '<div class="box-body bg-gray-light box-removable">' +
+                    '<div class="box box-solid box-bordered">' +
+                        '<div class="box-body">' +
+                            $src.html() +
+                        '</div>' +
+                        '<div class="box-footer text-right">' +
+                            '<a href="#" class="btn btn-danger btn-sm" onclick="$(this).closest(\'.box-removable\').fadeOut(\'fast\', function(){$(this).remove()})">Remove</a>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+
+        $(html).insertBefore($(a).closest('.box-footer'));
     }
 </script>
