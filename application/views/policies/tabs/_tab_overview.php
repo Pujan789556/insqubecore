@@ -32,17 +32,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			* Customer Overview
 			*/
 			$customer_record = (object)[
-						'id' 		=> $record->customer_id,
-				'full_name' => $record->customer_name,
-					'picture' 	=> $record->customer_picture,
-						'code' 		=> $record->customer_code,
-						'type' 		=> $record->customer_type,
-				'company_reg_no' => $record->company_reg_no,
-				'citizenship_no' => $record->citizenship_no,
-				'passport_no' => $record->passport_no,
-						'pan' 		=> $record->customer_pan,
-				'profession' => $record->customer_profession,
-					'contact' 	=> $record->customer_contact
+				'id' 				=> $record->customer_id,
+				'full_name' 		=> $record->customer_name,
+				'picture' 			=> $record->customer_picture,
+				'code' 				=> $record->customer_code,
+				'type' 				=> $record->customer_type,
+				'company_reg_no' 	=> $record->company_reg_no,
+				'citizenship_no' 	=> $record->citizenship_no,
+				'passport_no' 		=> $record->passport_no,
+				'pan' 				=> $record->customer_pan,
+				'profession' 		=> $record->customer_profession,
+				'contact' 			=> $record->customer_contact
 			];
 			/**
 			* Customer Widget

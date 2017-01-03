@@ -333,84 +333,6 @@ class Policies extends MY_Controller
 	// CRUD OPERATIONS
 	// --------------------------------------------------------------------
 
-	/**
-	 * Edit a Recrod
-	 *
-	 *
-	 * @param integer $id
-	 * @return void
-	 */
-	public function edit($id, $from_widget = 'n')
-	{
-
-		// Valid Record ?
-		$id = (int)$id;
-		$record = $this->policy_model->row($id);
-		if(!$record)
-		{
-			$this->template->render_404();
-		}
-
-		/**
-		 * Check Permissions
-		 *
-		 * Editable Status
-		 * 		draft | unverified
-		 *
-		 * Editable Permissions Are
-		 * 		edit.draft.policy | edit.unverified.policy
-		 */
-		$editable_status 		= [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED];
-
-		// Editable Status?
-		if( !in_array($record->status, $editable_status) )
-		{
-			$this->dx_auth->deny_access();
-		}
-
-		// Editable Permissions ?
-		$__flag_authorized 		= FALSE;
-		if(
-			$this->dx_auth->is_admin()
-
-			||
-
-			( $record->status === IQB_POLICY_STATUS_DRAFT &&  $this->dx_auth->is_authorized('policies', 'edit.draft.policy') )
-
-			||
-
-			( $record->status === IQB_POLICY_STATUS_UNVERIFIED &&  $this->dx_auth->is_authorized('policies', 'edit.unverified.policy') )
-
-		)
-		{
-			$__flag_authorized = TRUE;
-		}
-
-		if( !$__flag_authorized )
-		{
-			$this->dx_auth->deny_access();
-		}
-
-
-		// Validation Rule
-		$v_rules = $this->policy_model->validation_rules;
-
-		// Update Policy Package Data
-		$v_rules['portfolio'][1]['_data'] = _PO_policy_package_dropdown($record->portfolio_id);
-
-		// Object Details
-		$object_record = $this->object_model->row($record->object_id);
-		$record->object_name = _PO_select_text($object_record);
-		$form_data = [
-			'form_elements' => $v_rules,
-			'record' 		=> $record
-		];
-
-		// Form Submitted? Save the data
-		$this->_save('edit', $form_data, $from_widget);
-	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Add a new Record
@@ -434,6 +356,50 @@ class Policies extends MY_Controller
 
 		// Form Submitted? Save the data
 		$this->_save('add', $form_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Edit a Recrod
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function edit($id, $from_widget = 'n')
+	{
+
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->policy_model->row($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Check Editable?
+		 */
+		$this->__check_editable($record);
+
+
+		// Validation Rule
+		$v_rules = $this->policy_model->validation_rules;
+
+		// Update Policy Package Data
+		$v_rules['portfolio'][1]['_data'] = _PO_policy_package_dropdown($record->portfolio_id);
+
+		// Object Details
+		$object_record = $this->object_model->row($record->object_id);
+		$record->object_name = _PO_select_text($object_record);
+		$form_data = [
+			'form_elements' => $v_rules,
+			'record' 		=> $record
+		];
+
+		// Form Submitted? Save the data
+		$this->_save('edit', $form_data, $from_widget);
 	}
 
 	// --------------------------------------------------------------------
@@ -589,6 +555,128 @@ class Policies extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+
+	/**
+	 * Update Policy Premium
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function update_premium($id, $from_widget = 'n')
+	{
+
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->policy_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Check Editable?
+		 */
+		$this->__check_editable($record);
+
+		/**
+		 *  Let's Load The Premium Form For this Record
+		 */
+		$object = new StdClass();
+		$object->attributes 	= $record->object_attributes;
+		$object->id 			= $record->object_id;
+		$object->portfolio_id 	= $record->portfolio_id;
+
+		// Let's get the premium goodies for given portfolio
+		$premium_goodies = _PO_premium_goodies($object, $record->fiscal_yr_id);
+		$_form = 'policies/premium/_form_' . $record->portfolio_code;
+
+		// Let's render the form
+        $json_data['form'] = $this->load->view($_form,
+            [
+                'form_elements'         => $premium_goodies['validation_rules'],
+                'record'                => $record,
+                'object' 				=> $object,
+                'tariff_record' 		=> $premium_goodies['tariff_record']
+            ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+
+		// echo '<pre>'; print_r($premium_rules);exit;
+
+		// // Validation Rule
+		// $v_rules = $this->policy_model->validation_rules;
+
+		// // Update Policy Package Data
+		// $v_rules['portfolio'][1]['_data'] = _PO_policy_package_dropdown($record->portfolio_id);
+
+		// // Object Details
+		// $object_record = $this->object_model->row($record->object_id);
+		// $record->object_name = _PO_select_text($object_record);
+		// $form_data = [
+		// 	'form_elements' => $v_rules,
+		// 	'record' 		=> $record
+		// ];
+
+		// // Form Submitted? Save the data
+		// $this->_save('edit', $form_data, $from_widget);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Check if record is editable
+	 *
+	 * @return mixed
+	 */
+	private function __check_editable($record)
+	{
+		/**
+		 * Check Permissions
+		 *
+		 * Editable Status
+		 * 		draft | unverified
+		 *
+		 * Editable Permissions Are
+		 * 		edit.draft.policy | edit.unverified.policy
+		 */
+		$editable_status 		= [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED];
+
+		// Editable Status?
+		if( !in_array($record->status, $editable_status) )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		// Editable Permissions ?
+		$__flag_authorized 		= FALSE;
+		if(
+			$this->dx_auth->is_admin()
+
+			||
+
+			( $record->status === IQB_POLICY_STATUS_DRAFT &&  $this->dx_auth->is_authorized('policies', 'edit.draft.policy') )
+
+			||
+
+			( $record->status === IQB_POLICY_STATUS_UNVERIFIED &&  $this->dx_auth->is_authorized('policies', 'edit.unverified.policy') )
+
+		)
+		{
+			$__flag_authorized = TRUE;
+		}
+
+		if( !$__flag_authorized )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		return $__flag_authorized;
+	}
+
+	// --------------------------------------------------------------------
+
 
 	/**
      * Callback : Valid Duration

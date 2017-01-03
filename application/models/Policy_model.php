@@ -395,7 +395,7 @@ class Policy_model extends MY_Model
      */
     public function get($id)
     {
-        return $this->db->select(  "P.*, PRT.name_en as portfolio_name,
+        return $this->db->select(  "P.*, PRT.name_en as portfolio_name, PRT.code as portfolio_code,
                             C.code as customer_code, C.full_name as customer_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no,
                             O.attributes as object_attributes,
                             A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type,

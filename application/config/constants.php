@@ -119,12 +119,12 @@ define('IQB_BLANK_SELECT', ['' => 'Select...']);
 |--------------------------------------------------------------------------
 |
 */
-define('IQB_MASTER_PORTFOLIO_AGRICULTURE',  1);
-define('IQB_MASTER_PORTFOLIO_ENGINEERING',  2);
-define('IQB_MASTER_PORTFOLIO_FIRE',         3);
-define('IQB_MASTER_PORTFOLIO_MARINE',       4);
-define('IQB_MASTER_PORTFOLIO_MISC',         5);
-define('IQB_MASTER_PORTFOLIO_MOTOR',        6);
+define('IQB_MASTER_PORTFOLIO_AGRICULTURE_ID',  1);
+define('IQB_MASTER_PORTFOLIO_ENGINEERING_ID',  2);
+define('IQB_MASTER_PORTFOLIO_FIRE_ID',         3);
+define('IQB_MASTER_PORTFOLIO_MARINE_ID',       4);
+define('IQB_MASTER_PORTFOLIO_MISC_ID',         5);
+define('IQB_MASTER_PORTFOLIO_MOTOR_ID',        6);
 
 /*
 |--------------------------------------------------------------------------
@@ -134,9 +134,9 @@ define('IQB_MASTER_PORTFOLIO_MOTOR',        6);
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_MOTORCYCLE',          'MCY');
-define('IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE',     'PVC');
-define('IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE',  'CVC');
+define('IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE',          'MCY');
+define('IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE',     'PVC');
+define('IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE',  'CVC');
 
 
 /*

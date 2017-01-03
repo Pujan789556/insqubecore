@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 switch ($record->portfolio_id)
 {
 	// Motor
-	case IQB_MASTER_PORTFOLIO_MOTOR:
+	case IQB_MASTER_PORTFOLIO_MOTOR_ID:
 		$this->load->view('objects/snippets/_popup_motor', ['record' => $record]);
 		break;
 

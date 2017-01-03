@@ -422,7 +422,7 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
 
     <div class="box box-solid box-bordered box-config">
         <div class="box-header with-border bg-teal">
-          <h4 class="box-title">Additional Premium (अतिरिक्त बीमाशुल्कदर - १. मोटर बीमालेख अन्तर्गतको दुर्घटना बीमाको बीमाशुल्क दर)</h4>
+          <h4 class="box-title">Motor Accident Premium (अतिरिक्त बीमाशुल्कदर - १. मोटर बीमालेख अन्तर्गतको दुर्घटना बीमाको बीमाशुल्क दर)</h4>
           <a href="#" class="pull-right btn btn-default btn-sm" onclick="__zerofill('.box-config', this)">Fill Zero</a>
         </div>
         <div class="box-body bg-gray-light">
@@ -430,15 +430,15 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
             /**
              * Load Form Components
              */
-            $additional_premium = $record->additional_premium ? json_decode($record->additional_premium, TRUE) : NULL;
+            $accident_premium = $record->accident_premium ? json_decode($record->accident_premium, TRUE) : NULL;
 
-            $partial_form_elements = $form_elements['additional_premium'];
-            if($additional_premium)
+            $partial_form_elements = $form_elements['accident_premium'];
+            if($accident_premium)
             {
-                foreach($additional_premium as $key=>$value)
+                foreach($accident_premium as $key=>$value)
                 {
                     // Field Name
-                    $field_name = 'additional_premium['.$key . ']';
+                    $field_name = 'accident_premium['.$key . ']';
                     // Search for the Keys
                     $index = array_search($field_name, array_column($partial_form_elements, 'field'));
                     $partial_form_elements[$index]['_default'] = $value;

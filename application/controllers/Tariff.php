@@ -214,7 +214,7 @@ class Tariff extends MY_Controller
                      */
                     $batch_data[] = [
                         'fiscal_yr_id'  => $fiscal_yr_id,
-                        'sub_portfolio' => IQB_SUB_PORTFOLIO_MOTORCYCLE,
+                        'sub_portfolio' => IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE,
                         'ownership'     => $ownership,
                         'cvc_type'      => NULL
                     ];
@@ -227,7 +227,7 @@ class Tariff extends MY_Controller
                      */
                     $batch_data[] = [
                         'fiscal_yr_id'  => $fiscal_yr_id,
-                        'sub_portfolio' => IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE,
+                        'sub_portfolio' => IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE,
                         'ownership'     => $ownership,
                         'cvc_type'      => NULL
                     ];
@@ -242,7 +242,7 @@ class Tariff extends MY_Controller
                     {
                         $batch_data[] = [
                             'fiscal_yr_id'  => $fiscal_yr_id,
-                            'sub_portfolio' => IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE,
+                            'sub_portfolio' => IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE,
                             'ownership'     => $ownership,
                             'cvc_type'      => $cvc_type
                         ];
@@ -580,9 +580,9 @@ class Tariff extends MY_Controller
                 $post_data['pramt_compulsory_excess'] = json_encode($pramt_compulsory_excess_data);
 
                 /**
-                 * Additional Premium
+                 * Motor Accident Premium
                  */
-                $post_data['additional_premium'] = json_encode($data['additional_premium']);
+                $post_data['accident_premium'] = json_encode($data['accident_premium']);
 
                 /**
                  * Risk Group

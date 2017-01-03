@@ -34,7 +34,7 @@ if ( ! function_exists('_PO_row_snippet'))
 		switch ($record->portfolio_id)
 		{
 			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR:
+			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
 				$snippet = _PO_MOTOR_row_snippet($record);
 				break;
 
@@ -66,7 +66,7 @@ if ( ! function_exists('_PO_select_text'))
 		switch ($record->portfolio_id)
 		{
 			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR:
+			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
 				$snippet = _PO_MOTOR_select_text($record);
 				break;
 
@@ -95,7 +95,7 @@ if ( ! function_exists('_PO_validation_rules'))
 		switch ($portfolio_id)
 		{
 			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR:
+			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
 				$v_rules = _PO_MOTOR_validation_rules();
 				break;
 
@@ -124,7 +124,7 @@ if ( ! function_exists('_PO_attribute_form'))
 		switch ($portfolio_id)
 		{
 			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR:
+			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
 				$attribute_form = 'objects/forms/_form_object_motor';
 				break;
 
@@ -153,7 +153,7 @@ if ( ! function_exists('_PO_policy_package_dropdown'))
 		switch ($portfolio_id)
 		{
 			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR:
+			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
 				$dropdown = _PO_MOTOR_policy_package_dropdown($flag_blank_select);
 				break;
 
@@ -166,31 +166,34 @@ if ( ! function_exists('_PO_policy_package_dropdown'))
 }
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_PO_premium_defaults'))
+if ( ! function_exists('_PO_premium_goodies'))
 {
 	/**
-	 * Get Policy Premium Defaults
+	 * Get Policy Premium Goodies
 	 *
-	 * Get default policy premium defaults for given policy object
+	 * Get the following goodies for the given Portolio
+	 * 		1. Validation Rules
+	 * 		2. Tariff Record if Applies
 	 *
-	 * @param bool $record 	Object Record
-	 * @return	mixed
+	 * @param object $record Object Record
+	 * @param int $fiscal_yr_id Fiscal Year ID
+	 * @return	array
 	 */
-	function _PO_premium_defaults( $record )
+	function _PO_premium_goodies( $record, $fiscal_yr_id )
 	{
-		$premium = '';
+		$goodies = [];
 		switch ($record->portfolio_id)
 		{
 			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR:
-				$premium = _PO_MOTOR_premium_defaults($record);
+			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
+				$goodies = _PO_MOTOR_premium_goodies($record, $fiscal_yr_id);
 				break;
 
 			default:
 				# code...
 				break;
 		}
-		return $premium;
+		return $goodies;
 	}
 }
 // ------------------------------------------------------------------------
@@ -476,7 +479,7 @@ if ( ! function_exists('_PO_MOTOR_sub_portfolio_dropdown'))
 		$CI =& get_instance();
 		$CI->load->model('portfolio_model');
 
-		$dropdown = $CI->portfolio_model->dropdown_children(IQB_MASTER_PORTFOLIO_MOTOR, 'code');
+		$dropdown = $CI->portfolio_model->dropdown_children(IQB_MASTER_PORTFOLIO_MOTOR_ID, 'code');
 		if($flag_blank_select)
 		{
 			$dropdown = IQB_BLANK_SELECT + $dropdown;
@@ -634,19 +637,115 @@ if ( ! function_exists('_PO_MOTOR_policy_package_dropdown'))
 }
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_PO_MOTOR_premium_defaults'))
+if ( ! function_exists('_PO_MOTOR_premium_goodies'))
 {
 	/**
-	 * Get Policy Premium Defaults - Motor
+	 * Get Policy Premium Goodies for MOTOR
 	 *
-	 * Get default policy premium defaults for given motor object
+	 * Get the following goodies for the Motor Portfolio
+	 * 		1. Validation Rules
+	 * 		2. Tariff Record if Applies
 	 *
-	 * @param bool $record 	Object Record
-	 * @return	mixed
+	 * @param object $record Object Record
+	 * @param int $fiscal_yr_id Fiscal Year ID
+	 * @return	array
 	 */
-	function _PO_MOTOR_premium_defaults( $record )
+	function _PO_MOTOR_premium_goodies( $record, $fiscal_yr_id )
 	{
+		$CI =& get_instance();
 
+		// Get Object Attributes
+		$attributes = json_decode($record->attributes);
+
+		// Get the Tariff Configuration Record For this Portfolio
+		$CI->load->model('tariff_motor_model');
+		$tariff_record = $CI->tariff_motor_model->find_by([
+			'sub_portfolio' => $attributes->sub_portfolio,
+			'cvc_type' 		=> $attributes->cvc_type ? $attributes->cvc_type : NULL,
+			'ownership' 	=> $attributes->ownership,
+			'fiscal_yr_id' 	=> $fiscal_yr_id,
+		]);
+
+		if(!$tariff_record || $tariff_record->active == '0')
+		{
+			$message = 'Tariff Configuration for this Portfolio is either not present or Inactive. <br/>' .
+						'Portfolio: <strong>MOTOR</strong> <br/>' .
+						'Sub-Portfolio: <strong>' . $attributes->sub_portfolio . '</strong>';
+			$CI->template->render_404('', $message);
+			exit(1);
+		}
+
+		// Voluntary Excess Dropdown
+		$dr_voluntary_excess = $tariff_record->dr_voluntary_excess ? json_decode($tariff_record->dr_voluntary_excess) : NULL;
+		$voluntary_excess_dropdown = IQB_BLANK_SELECT;
+		if($dr_voluntary_excess )
+		{
+			foreach ($dr_voluntary_excess as $r)
+			{
+				$voluntary_excess_dropdown[$r->rate] = 'Rs ' . $r->amount;
+			}
+		}
+
+		// No Claim Discount Dropdown
+		$no_claim_discount = $tariff_record->no_claim_discount ? json_decode($tariff_record->no_claim_discount) : NULL;
+		$no_claim_discount_dropdown = IQB_BLANK_SELECT;
+		if($no_claim_discount )
+		{
+			foreach ($no_claim_discount as $r)
+			{
+				$no_claim_discount_dropdown[$r->rate] =  $r->years . ' years';
+			}
+		}
+
+		$validation_rules = [];
+		switch ($attributes->sub_portfolio)
+		{
+			case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
+				$validation_rules = [
+					[
+	                    'field' => 'dr_voluntary_excess',
+	                    'label' => 'Voluntary Excess',
+	                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+	                    '_type'     => 'dropdown',
+	                    '_data' 	=> $voluntary_excess_dropdown,
+	                    '_required' => true
+	                ],
+	                [
+	                    'field' => 'no_claim_discount',
+	                    'label' => 'No Claim Discount',
+	                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+	                    '_type'     => 'dropdown',
+	                    '_data' 	=> $no_claim_discount_dropdown,
+	                    '_required' => true
+	                ],
+	                [
+	                    'field' => 'riks_group[rate_pool_risk_mob]',
+	                    'label' => 'Pool Risk Mob (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा)',
+	                    'rules' => 'trim|integer|in_list[1]',
+	                    '_type'     => 'checkbox',
+	                    '_value' 	=> '1',
+	                    '_required' => false
+	                ],
+	                [
+	                    'field' => 'riks_group[rate_pool_risk_terorrism]',
+	                    'label' => 'Pool Risk Terorrism',
+	                    'rules' => 'trim|integer|in_list[1]',
+	                    '_type'     => 'checkbox',
+	                    '_value' 	=> '1',
+	                    '_required' => false
+	                ],
+				];
+				break;
+
+			default:
+				# code...
+				break;
+		}
+
+		return  [
+			'validation_rules' 	=> $validation_rules,
+			'tariff_record' 	=> $tariff_record
+		];
 	}
 }
 // ------------------------------------------------------------------------

@@ -18,7 +18,7 @@ class Tariff_motor_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "sub_portfolio", "cvc_type", "fiscal_yr_id", "ownership", "tariff", "no_claim_discount", "dr_mcy_disabled_friendly", "rate_pvc_on_hire", "dr_cvc_on_personal_use", "dr_voluntary_excess", "pramt_compulsory_excess", "additional_premium", "riks_group", "pramt_towing", "trolly_tariff", "active", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "sub_portfolio", "cvc_type", "fiscal_yr_id", "ownership", "tariff", "no_claim_discount", "dr_mcy_disabled_friendly", "rate_pvc_on_hire", "dr_cvc_on_personal_use", "dr_voluntary_excess", "pramt_compulsory_excess", "accident_premium", "riks_group", "pramt_towing", "trolly_tariff", "active", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -385,7 +385,7 @@ class Tariff_motor_model extends MY_Model
             ],
 
             /**
-             * JSON : Additional Premium
+             * JSON : Motor Accident Premium
              * -------------------------
              *
              * Structure:
@@ -395,24 +395,24 @@ class Tariff_motor_model extends MY_Model
              *      pramt_accident_per_passenger: 500
              *  }
              */
-            'additional_premium' => [
+            'accident_premium' => [
                 [
-                    'field' => 'additional_premium[pramt_driver_accident]',
-                    'label' => 'Additional Premium: Driver Accident (Rs.)',
+                    'field' => 'accident_premium[pramt_driver_accident]',
+                    'label' => 'Motor Accident Premium: Driver Accident (Rs.)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 [
-                    'field' => 'additional_premium[pramt_accident_per_staff]',
-                    'label' => 'Additional Premium: Per Staff Accident (Rs.)',
+                    'field' => 'accident_premium[pramt_accident_per_staff]',
+                    'label' => 'Motor Accident Premium: Per Staff Accident (Rs.)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 [
-                    'field' => 'additional_premium[pramt_accident_per_passenger]',
-                    'label' => 'Additional Premium: Per Passenger Accident (Rs.)',
+                    'field' => 'accident_premium[pramt_accident_per_passenger]',
+                    'label' => 'Motor Accident Premium: Per Passenger Accident (Rs.)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
                     '_type'     => 'text',
                     '_required' => true
@@ -432,14 +432,14 @@ class Tariff_motor_model extends MY_Model
              */
             'riks_group' => [
                 [
-                    'field' => 'riks_group[rate_mob]',
+                    'field' => 'riks_group[rate_pool_risk_mob]',
                     'label' => 'Risk: Pool (%)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 [
-                    'field' => 'riks_group[rate_terrorism]',
+                    'field' => 'riks_group[rate_pool_risk_terorrism]',
                     'label' => 'Risk: Terrorism (%)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
                     '_type'     => 'text',
