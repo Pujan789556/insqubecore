@@ -811,6 +811,14 @@ class DX_Auth
      */
     function apply_user_scope($table_alias)
     {
+    	/**
+    	 * If Admin, Escape This
+    	 */
+    	if($this->is_admin())
+    	{
+    		return;
+    	}
+
     	$scope_field = "{$table_alias}.branch_id";
         $scope = $this->get_scope_name();
 

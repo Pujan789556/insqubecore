@@ -398,3 +398,36 @@ if ( ! function_exists('get_country_name'))
 }
 
 // ------------------------------------------------------------------------
+
+if ( ! function_exists('belongs_to_me'))
+{
+    /**
+     * Belongs to Me?
+     *
+     * Check if this record belongs to branch Specified?
+     *
+     * @param integer $branch_id branch ID
+     * @return mixed
+     */
+    function belongs_to_me( $branch_id, $terminate_on_fail = TRUE  )
+    {
+        $CI =& get_instance();
+
+        $__flag_authorized = FALSE;
+        if( $CI->dx_auth->belongs_to_me($branch_id) )
+        {
+            $__flag_authorized = TRUE;
+        }
+
+        // Terminate on Exit?
+        if( $__flag_authorized === FALSE && $terminate_on_fail == TRUE)
+        {
+            $CI->dx_auth->deny_access();
+            exit(1);
+        }
+
+        return $__flag_authorized;
+    }
+}
+
+// ------------------------------------------------------------------------

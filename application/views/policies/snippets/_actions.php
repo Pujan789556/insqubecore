@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         class="btn btn-success btn-round trg-dialog-edit"
         data-box-size="large"
         data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $record->code?>'
-        data-url="<?php echo site_url('policies/update_premium/' . $record->id);?>"
+        data-url="<?php echo site_url('premium/edit/' . $record->id);?>"
         data-form="#_form-policy">
         <i class="fa fa-dollar"></i> Update Premium</a>
 

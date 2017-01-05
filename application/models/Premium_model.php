@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Object_model extends MY_Model
+class Premium_model extends MY_Model
 {
-    protected $table_name = 'dt_policy_objects';
+    protected $table_name = 'dt_policy_premium';
 
     protected $set_created = true;
 
@@ -19,7 +19,7 @@ class Object_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "customer_id", "portfolio_id", "attributes", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "policy_id", "total_amount", "attributes", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -41,8 +41,8 @@ class Object_model extends MY_Model
     {
         parent::__construct();
 
-        // Set validation rules
-        $this->validation_rules();
+        // // Set validation rules
+        // $this->validation_rules();
 
         // Required Helpers/Configurations
         $this->load->config('policy');
@@ -55,24 +55,24 @@ class Object_model extends MY_Model
 
     public function validation_rules()
     {
-        $this->load->model('portfolio_model');
-        $this->validation_rules =[
-            [
-                'field' => 'portfolio_id',
-                'label' => 'Portfolio',
-                'rules' => 'trim|required|integer|max_length[11]',
-                '_type'     => 'dropdown',
-                '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
-                '_id'       => '_object-portfolio-id',
-                '_required' => true
-            ]
-        ];
+        // $this->load->model('portfolio_model');
+        // $this->validation_rules =[
+        //     [
+        //         'field' => 'portfolio_id',
+        //         'label' => 'Portfolio',
+        //         'rules' => 'trim|required|integer|max_length[11]',
+        //         '_type'     => 'dropdown',
+        //         '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
+        //         '_id'       => '_object-portfolio-id',
+        //         '_required' => true
+        //     ]
+        // ];
     }
 
     // ----------------------------------------------------------------
 
     /**
-     * Is Object Editable?
+     * Is Premium Editable?
      *
      * @param integer $id
      * @return boolean
@@ -80,26 +80,18 @@ class Object_model extends MY_Model
     public function is_editable($id)
     {
         /**
-         * Is object editable?
+         * Is premium editable?
          * --------------------
          *
-         * If the object is currently assigned to a policy which is not editable,
-         * you can not edit this object
-         */
-
-        /**
-         * Find the latest policy of the current object owenr for this object.
-         * If we dont have any object, We are GOOD. Else, check the editable status.
+         * If the premium is currently assigned to a policy which is not editable,
+         * you can not edit this premium
          */
         $_flag_editable  = FALSE;
-        $policy_record = $this->db->select('P.branch_id, P.status as policy_status')
-                            ->from($this->table_name . ' as O')
-                            ->join('dt_policies P', 'P.object_id = O.id')
-                            ->join('rel_customer_policy_object R', 'R.object_id = O.id')
-                            ->where('O.id', $id)
-                            ->where('R.flag_current', 1)
-                            ->order_by('P.id', 'desc')
-                            ->get()->row();
+        $policy_record = $this->db->select('PLC.branch_id, PLC.status as policy_status')
+                                    ->from($this->table_name . ' as PRM')
+                                    ->join('dt_policies PLC', 'PLC.id_id = PRM.policy_id')
+                                    ->where('PRM.id', $id)
+                                    ->get()->row();
 
 
         if( $policy_record && belongs_to_me($policy_record->branch_id, FALSE) === TRUE && is_policy_editable($policy_record->policy_status, FALSE) === TRUE)
@@ -120,9 +112,9 @@ class Object_model extends MY_Model
      */
     public function row( $id )
     {
-        $this->_prepare_row_select();
-        return $this->db->where('O.id', $id)
-                        ->get()->row();
+        // $this->_prepare_row_select();
+        // return $this->db->where('O.id', $id)
+        //                 ->get()->row();
     }
 
     // ----------------------------------------------------------------
@@ -138,19 +130,19 @@ class Object_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_name = 'object_customer_' . $customer_id;
+        // $cache_name = 'object_customer_' . $customer_id;
 
-        $list = $this->get_cache($cache_name);
-        if(!$list)
-        {
-            $this->_prepare_row_select();
-            $list = $this->db->where('R.customer_id', $customer_id)
-                             ->order_by('O.id', 'desc')
-                             ->get()->result();
+        // $list = $this->get_cache($cache_name);
+        // if(!$list)
+        // {
+        //     $this->_prepare_row_select();
+        //     $list = $this->db->where('R.customer_id', $customer_id)
+        //                      ->order_by('O.id', 'desc')
+        //                      ->get()->result();
 
-            $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
-        }
-        return $list;
+        //     $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
+        // }
+        // return $list;
     }
 
     // ----------------------------------------------------------------
@@ -165,33 +157,33 @@ class Object_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->_prepare_row_select();
+        // $this->_prepare_row_select();
 
-        if(!empty($params))
-        {
-            $next_id = $params['next_id'] ?? NULL;
-            if( $next_id )
-            {
-                $this->db->where(['O.id <=' => $next_id]);
-            }
+        // if(!empty($params))
+        // {
+        //     $next_id = $params['next_id'] ?? NULL;
+        //     if( $next_id )
+        //     {
+        //         $this->db->where(['O.id <=' => $next_id]);
+        //     }
 
-            $portfolio_id = $params['portfolio_id'] ?? NULL;
-            if( $portfolio_id )
-            {
-                $this->db->where(['O.portfolio_id' =>  $portfolio_id]);
-            }
+        //     $portfolio_id = $params['portfolio_id'] ?? NULL;
+        //     if( $portfolio_id )
+        //     {
+        //         $this->db->where(['O.portfolio_id' =>  $portfolio_id]);
+        //     }
 
-            $keywords = $params['keywords'] ?? '';
-            if( $keywords )
-            {
-                // $this->db->where("MATCH ( C.`fts` ) AGAINST ( '{$keywords}*' IN BOOLEAN MODE)", NULL);
-                // $this->db->like('C.full_name', $keywords, 'after');
-            }
-        }
-        return $this->db
-                        ->order_by('O.id', 'desc')
-                        ->limit($this->settings->per_page+1)
-                        ->get()->result();
+        //     $keywords = $params['keywords'] ?? '';
+        //     if( $keywords )
+        //     {
+        //         // $this->db->where("MATCH ( C.`fts` ) AGAINST ( '{$keywords}*' IN BOOLEAN MODE)", NULL);
+        //         // $this->db->like('C.full_name', $keywords, 'after');
+        //     }
+        // }
+        // return $this->db
+        //                 ->order_by('O.id', 'desc')
+        //                 ->limit($this->settings->per_page+1)
+        //                 ->get()->result();
     }
 
     // ----------------------------------------------------------------
@@ -204,12 +196,12 @@ class Object_model extends MY_Model
      */
     private function _prepare_row_select( )
     {
-        $this->db->select('O.id, O.portfolio_id, O.attributes, P.code as portfolio_code, P.name_en as portfolio_name, R.customer_id, C.full_name as customer_name')
-                 ->from($this->table_name . ' as O')
-                 ->join('master_portfolio P', 'P.id = O.portfolio_id')
-                 ->join('rel_customer_policy_object R', 'R.object_id = O.id')
-                 ->join('dt_customers C', 'R.customer_id = C.id')
-                 ->where('R.flag_current', 1);
+        // $this->db->select('O.id, O.portfolio_id, O.attributes, P.code as portfolio_code, P.name_en as portfolio_name, R.customer_id, C.full_name as customer_name')
+        //          ->from($this->table_name . ' as O')
+        //          ->join('master_portfolio P', 'P.id = O.portfolio_id')
+        //          ->join('rel_customer_policy_object R', 'R.object_id = O.id')
+        //          ->join('dt_customers C', 'R.customer_id = C.id')
+        //          ->where('R.flag_current', 1);
     }
 
 	// --------------------------------------------------------------------
@@ -223,13 +215,13 @@ class Object_model extends MY_Model
      */
     public function _cb_motor_duplicate($where, $id=NULL)
     {
-        if( $id )
-        {
-            $this->db->where('id !=', $id);
-        }
-        // $where is array ['key' => $value]
-        return $this->db->where($where)
-                        ->count_all_results($this->table_name);
+        // if( $id )
+        // {
+        //     $this->db->where('id !=', $id);
+        // }
+        // // $where is array ['key' => $value]
+        // return $this->db->where($where)
+        //                 ->count_all_results($this->table_name);
     }
 
     // --------------------------------------------------------------------
@@ -329,7 +321,7 @@ class Object_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'object',
+            'module' => 'premium',
             'module_id' => $id,
             'action' => $action
         ];

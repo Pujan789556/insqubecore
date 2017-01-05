@@ -237,3 +237,73 @@ if ( ! function_exists('get_policy_status_text'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('is_policy_editable'))
+{
+	/**
+	 * Is Policy Editable?
+	 *
+	 * Check if the given policy is editable.
+	 * We need this helper function as it is used multiple controllers & models
+	 *
+	 * @param char $status 	Policy Status
+	 * @param bool $terminate_on_fail Terminate Right Here if not editable.
+	 * @return	bool
+	 */
+	function is_policy_editable( $status, $terminate_on_fail = TRUE )
+	{
+		$CI =& get_instance();
+
+		// Editable Permissions ?
+		$__flag_authorized 		= FALSE;
+		$__flag_editable_status = FALSE;
+
+		/**
+		 * Check Permissions
+		 *
+		 * Editable Status
+		 * 		draft | unverified
+		 *
+		 * Editable Permissions Are
+		 * 		edit.draft.policy | edit.unverified.policy
+		 */
+		$editable_status 		= [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED];
+
+		// Editable Status?
+		if( in_array($status, $editable_status) )
+		{
+			$__flag_editable_status = TRUE;
+		}
+
+		// Editable Permissions ?
+		if( $__flag_editable_status )
+		{
+			if(
+				$CI->dx_auth->is_admin()
+
+				||
+
+				( $status === IQB_POLICY_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('policies', 'edit.draft.policy') )
+
+				||
+
+				( $status === IQB_POLICY_STATUS_UNVERIFIED &&  $CI->dx_auth->is_authorized('policies', 'edit.unverified.policy') )
+
+			)
+			{
+				$__flag_authorized = TRUE;
+			}
+		}
+
+		// Terminate on Exit?
+		if( $__flag_authorized === FALSE && $terminate_on_fail == TRUE)
+		{
+			$CI->dx_auth->deny_access();
+			exit(1);
+		}
+
+		return $__flag_authorized;
+	}
+}
+
+// ------------------------------------------------------------------------
+

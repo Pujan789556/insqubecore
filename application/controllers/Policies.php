@@ -379,9 +379,15 @@ class Policies extends MY_Controller
 		}
 
 		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->branch_id);
+
+
+		/**
 		 * Check Editable?
 		 */
-		$this->__check_editable($record);
+		is_policy_editable($record->status);
 
 
 		// Validation Rule
@@ -557,111 +563,47 @@ class Policies extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Update Policy Premium
+	 * Delete a Policy
 	 *
+	 * Only Draft Version of a Policy can be deleted.
 	 *
 	 * @param integer $id
-	 * @return void
+	 * @return json
 	 */
-	public function update_premium($id, $from_widget = 'n')
+	public function delete($id)
 	{
-
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->policy_model->get($id);
+		$record = $this->policy_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
 		}
 
 		/**
-		 * Check Editable?
-		 */
-		$this->__check_editable($record);
-
-		/**
-		 *  Let's Load The Premium Form For this Record
-		 */
-		$object = new StdClass();
-		$object->attributes 	= $record->object_attributes;
-		$object->id 			= $record->object_id;
-		$object->portfolio_id 	= $record->portfolio_id;
-
-		// Let's get the premium goodies for given portfolio
-		$premium_goodies = _PO_premium_goodies($object, $record->fiscal_yr_id);
-		$_form = 'policies/premium/_form_' . $record->portfolio_code;
-
-		// Let's render the form
-        $json_data['form'] = $this->load->view($_form,
-            [
-                'form_elements'         => $premium_goodies['validation_rules'],
-                'record'                => $record,
-                'object' 				=> $object,
-                'tariff_record' 		=> $premium_goodies['tariff_record']
-            ], TRUE);
-
-        // Return HTML
-        $this->template->json($json_data);
-
-		// echo '<pre>'; print_r($premium_rules);exit;
-
-		// // Validation Rule
-		// $v_rules = $this->policy_model->validation_rules;
-
-		// // Update Policy Package Data
-		// $v_rules['portfolio'][1]['_data'] = _PO_policy_package_dropdown($record->portfolio_id);
-
-		// // Object Details
-		// $object_record = $this->object_model->row($record->object_id);
-		// $record->object_name = _PO_select_text($object_record);
-		// $form_data = [
-		// 	'form_elements' => $v_rules,
-		// 	'record' 		=> $record
-		// ];
-
-		// // Form Submitted? Save the data
-		// $this->_save('edit', $form_data, $from_widget);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Check if record is editable
-	 *
-	 * @return mixed
-	 */
-	private function __check_editable($record)
-	{
-		/**
 		 * Check Permissions
 		 *
-		 * Editable Status
-		 * 		draft | unverified
+		 * Deletable Status
+		 * 		draft
 		 *
-		 * Editable Permissions Are
-		 * 		edit.draft.policy | edit.unverified.policy
+		 * Deletable Permission
+		 * 		delete.draft.policy
 		 */
-		$editable_status 		= [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED];
 
-		// Editable Status?
-		if( !in_array($record->status, $editable_status) )
+		// Deletable Status?
+		if( $record->status !== IQB_POLICY_STATUS_DRAFT )
 		{
 			$this->dx_auth->deny_access();
 		}
 
-		// Editable Permissions ?
+		// Deletable Permission ?
 		$__flag_authorized 		= FALSE;
 		if(
 			$this->dx_auth->is_admin()
 
 			||
 
-			( $record->status === IQB_POLICY_STATUS_DRAFT &&  $this->dx_auth->is_authorized('policies', 'edit.draft.policy') )
-
-			||
-
-			( $record->status === IQB_POLICY_STATUS_UNVERIFIED &&  $this->dx_auth->is_authorized('policies', 'edit.unverified.policy') )
-
+			$this->dx_auth->is_authorized('policies', 'delete.draft.policy')
 		)
 		{
 			$__flag_authorized = TRUE;
@@ -672,7 +614,49 @@ class Policies extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
-		return $__flag_authorized;
+
+		$data = [
+			'status' 	=> 'error',
+			'message' 	=> 'You cannot delete the default records.'
+		];
+		/**
+		 * Safe to Delete?
+		 */
+		if( !safe_to_delete( 'Policy_model', $id ) )
+		{
+			return $this->template->json($data);
+		}
+
+		$done = $this->policy_model->delete($record->id);
+
+		if($done)
+		{
+			/**
+			 * @TODO: Delete all related media
+			 */
+			// if($record->picture)
+			// {
+			// 	// Load media helper
+			// 	$this->load->helper('insqube_media');
+
+			// 	delete_insqube_document($this->_upload_path . $record->picture);
+			// }
+
+			$data = [
+				'status' 	=> 'success',
+				'message' 	=> 'Successfully deleted!',
+				'removeRow' => true,
+				'rowId'		=> '#_data-row-policy-'.$record->id
+			];
+		}
+		else
+		{
+			$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be deleted. It might have references to other module(s)/component(s).'
+			];
+		}
+		return $this->template->json($data);
 	}
 
 	// --------------------------------------------------------------------
@@ -755,106 +739,10 @@ class Policies extends MY_Controller
 			return upload_insqube_media($options);
 		}
 
+
+
 	// --------------------------------------------------------------------
-
-	/**
-	 * Delete a Policy
-	 *
-	 * Only Draft Version of a Policy can be deleted.
-	 *
-	 * @param integer $id
-	 * @return json
-	 */
-	public function delete($id)
-	{
-		// Valid Record ?
-		$id = (int)$id;
-		$record = $this->policy_model->find($id);
-		if(!$record)
-		{
-			$this->template->render_404();
-		}
-
-		/**
-		 * Check Permissions
-		 *
-		 * Deletable Status
-		 * 		draft
-		 *
-		 * Deletable Permission
-		 * 		delete.draft.policy
-		 */
-		$editable_status 		= [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED];
-
-		// Deletable Status?
-		if( $record->status !== IQB_POLICY_STATUS_DRAFT )
-		{
-			$this->dx_auth->deny_access();
-		}
-
-		// Deletable Permission ?
-		$__flag_authorized 		= FALSE;
-		if(
-			$this->dx_auth->is_admin()
-
-			||
-
-			$this->dx_auth->is_authorized('policies', 'delete.draft.policy')
-		)
-		{
-			$__flag_authorized = TRUE;
-		}
-
-		if( !$__flag_authorized )
-		{
-			$this->dx_auth->deny_access();
-		}
-
-
-		$data = [
-			'status' 	=> 'error',
-			'message' 	=> 'You cannot delete the default records.'
-		];
-		/**
-		 * Safe to Delete?
-		 */
-		if( !safe_to_delete( 'Policy_model', $id ) )
-		{
-			return $this->template->json($data);
-		}
-
-		$done = $this->policy_model->delete($record->id);
-
-		if($done)
-		{
-			/**
-			 * @TODO: Delete all related media
-			 */
-			// if($record->picture)
-			// {
-			// 	// Load media helper
-			// 	$this->load->helper('insqube_media');
-
-			// 	delete_insqube_document($this->_upload_path . $record->picture);
-			// }
-
-			$data = [
-				'status' 	=> 'success',
-				'message' 	=> 'Successfully deleted!',
-				'removeRow' => true,
-				'rowId'		=> '#_data-row-policy-'.$record->id
-			];
-		}
-		else
-		{
-			$data = [
-				'status' 	=> 'error',
-				'message' 	=> 'Could not be deleted. It might have references to other module(s)/component(s).'
-			];
-		}
-		return $this->template->json($data);
-	}
-
+	//  POLICY DETAILS
 	// --------------------------------------------------------------------
 
     /**

@@ -550,13 +550,18 @@ class Policy_model extends MY_Model
                     'policy_id' => $id
                 ];
                 $this->load->model('rel_agent_policy_model');
-                return $this->rel_agent_policy_model->insert($relation_data, TRUE);
+                $this->rel_agent_policy_model->insert($relation_data, TRUE);
             }
 
             /**
              * TASK 2: Add Defualt Premium
              * ----------------------------
+             * This will be automatically performed by a database trigger
+             *
+             * Trigger Name: trg_policy_after_insert
              */
+
+            return TRUE;
 
         }
         return FALSE;

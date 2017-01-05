@@ -32,6 +32,8 @@ class Objects extends MY_Controller
 		]);
 
 		// Helper
+		$this->load->config('policy');
+		$this->load->helper('policy');
 		$this->load->helper('object');
 
 		// Load Model
