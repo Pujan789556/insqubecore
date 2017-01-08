@@ -17,6 +17,7 @@
     "preventDuplicates" : true
   };
 
+
  /**
  * Ajax Error Reporting
  */
@@ -24,7 +25,6 @@ $( document ).ajaxError(function( event, request, settings ) {
     var message = '<strong>Oops!</strong><br/>Something went wrong with the server. Please contact administrator for further support.',
     title       = 'OOPS!';
     toastr.clear(); // remove older toast
-
     try {
         var json = $.parseJSON(request.responseText);
         if(typeof json.title !== 'undefined'){
@@ -41,6 +41,11 @@ $( document ).ajaxError(function( event, request, settings ) {
         }
     }catch(err) { }
     toastr.error(message, title);
+
+    // Reset Loading Button if Any
+    if( typeof InsQube.options.__btn_loading !== 'undefined' && typeof InsQube.options.__btn_loading === 'object'){
+        InsQube.options.__btn_loading.button('reset');
+    }
 });
 
 /* global define */
@@ -445,6 +450,11 @@ $( document ).ajaxError(function( event, request, settings ) {
         form = $this.data('form'),
         size = $this.data('box-size') ? $this.data('box-size') : '';
 
+        // Button Loading
+        $this.button('loading');
+        InsQube.options.__btn_loading = $this; // assign loading button so that it is reset on AJAX Error
+
+
         // Get FORM
         $.getJSON(url, function(r){
             if( typeof r.form !== 'undefined' && r.form){
@@ -481,6 +491,9 @@ $( document ).ajaxError(function( event, request, settings ) {
                     radioClass: 'iradio_square-blue'
                 });
             }
+
+            // Reset Loading
+            $this.button('reset');
         });
  });
 

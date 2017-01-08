@@ -14,7 +14,8 @@ application/logs/*
 info.php
 random.php
 application/controllers/Test.php
-
+string.php
+todo.md
 
 # Environment Config
 # --------------------------
