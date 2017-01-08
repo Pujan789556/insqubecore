@@ -213,7 +213,7 @@ class Premium_model extends MY_Model
     {
         /**
          * Cache Clearance Logic:
-         *
+         * --------------------------------------
          * Every cache object belongs to specific customer ID.
          * So, when we add/edit/delete a object, we only need to
          * clear cache of the specific customer's object cache

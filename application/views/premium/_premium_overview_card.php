@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Policy: Details - Policy Premium Overview Card
 */
-$attributes = $record->attributes ? json_decode($record->attributes) : [];
+$attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 ?>
 <div class="box box-bordered box-success" id="_premium-card">
     <div class="box-header with-border border-dark">
@@ -28,7 +28,7 @@ $attributes = $record->attributes ? json_decode($record->attributes) : [];
     </div>
     <div class="box-body">
         <table class="table no-margin table-bordered">
-            <tbody>
+            <tbody id="_premium-details">
                 <?php if($attributes):?>
                     <?php foreach($attributes as $section_object):?>
                         <tr>

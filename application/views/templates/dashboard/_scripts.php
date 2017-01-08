@@ -28,4 +28,4 @@
 <script src="<?php echo THEME_URL; ?>plugins/bootbox/bootbox.min.js"></script>
 
 <!-- Insqube App -->
-<script src="<?php echo base_url()?>public/app/js/insqube.js"></script>
+<script src="<?php echo base_url()?>public/app/js/insqube.js?v=1.0"></script>

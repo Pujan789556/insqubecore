@@ -476,8 +476,11 @@ class Policies extends MY_Controller
 					 * --------------------------
 					 * If changed, we have to reset the premium info
 					 */
-					$this->premium_model->reset($record->id);
-
+					if($done)
+					{
+						$updated_record = (object)$data;
+						$this->__reset_premium_on_policy_update($record, $updated_record);
+					}
 				}
 
 	        	if(!$done)
@@ -568,6 +571,40 @@ class Policies extends MY_Controller
 		];
 		$this->template->json($json_data);
 	}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Reset Premium on Policy Update
+		 *
+		 * Reset premium on change of any of the followings
+		 * 	- portfolio
+		 * 	- policy package
+		 * 	- customer
+		 * 	- policy object
+		 * 	- flag direct discount/agent commission
+		 *
+		 * @param object $before_update Policy Record Before Update
+		 * @param object $after_update Policy Record After Update
+		 * @return void
+		 */
+		private function __reset_premium_on_policy_update($before_update, $after_update)
+		{
+			$fields = ['portfolio_id', 'policy_package', 'customer_id', 'object_id', 'flag_dc'];
+			$__flag_reset = FALSE;
+			foreach($fields as $column)
+			{
+				if($before_update->{$column} != $after_update->{$column})
+				{
+					$__flag_reset = TRUE;
+					break;
+				}
+			}
+			if( $__flag_reset === TRUE )
+			{
+				$this->premium_model->reset($before_update->id);
+			}
+		}
 
 	// --------------------------------------------------------------------
 

@@ -82,6 +82,7 @@ class Premium extends MY_Controller
 	 */
 	public function edit($policy_id)
 	{
+		// $this->template->render_404();
 		// Valid Record ?
 		$policy_id = (int)$policy_id;
 		$policy_record = $this->policy_model->get($policy_id);

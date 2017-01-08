@@ -16,7 +16,7 @@ class Object_model extends MY_Model
     // protected $before_insert = ['prepare_contact_data', 'prepare_customer_defaults', 'prepare_customer_fts_data'];
     // protected $before_update = ['prepare_contact_data', 'prepare_customer_fts_data'];
     protected $after_insert  = ['clear_cache'];
-    protected $after_update  = ['clear_cache'];
+    protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
     protected $fields = ["id", "customer_id", "portfolio_id", "attributes", "created_at", "created_by", "updated_at", "updated_by"];
@@ -69,6 +69,52 @@ class Object_model extends MY_Model
         ];
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * After Update Trigger
+     *
+     * Tasks that are to be performed after a policy is updated
+     *      1. Reset Policy Premium If this Object is Currently assigned to a Policy which is editable
+     *      2. @TODO: Find other tasks
+     *
+     *
+     * @param array $arr_record
+     * @return array
+     */
+    public function after_update__defaults($arr_record)
+    {
+        /**
+         *
+         * Data Structure
+                Array
+                (
+                    [id] => 10
+                    [fields] => Array
+                        (
+                            [attributes] => ...
+                        )
+
+                    [result] => 1
+                    [method] => update
+                )
+        */
+
+        $id = $arr_record['id'] ?? NULL;
+
+        if($id !== NULL)
+        {
+            $policy_record = $this->get_active_policy($id);
+
+            if($policy_record)
+            {
+                $this->load->model('premium_model');
+                $this->premium_model->reset($policy_record->id);
+            }
+        }
+        return FALSE;
+    }
+
     // ----------------------------------------------------------------
 
     /**
@@ -92,22 +138,35 @@ class Object_model extends MY_Model
          * If we dont have any object, We are GOOD. Else, check the editable status.
          */
         $_flag_editable  = FALSE;
-        $policy_record = $this->db->select('P.branch_id, P.status as policy_status')
-                            ->from($this->table_name . ' as O')
-                            ->join('dt_policies P', 'P.object_id = O.id')
-                            ->join('rel_customer_policy_object R', 'R.object_id = O.id')
-                            ->where('O.id', $id)
-                            ->where('R.flag_current', 1)
-                            ->order_by('P.id', 'desc')
-                            ->get()->row();
+        $policy_record = $this->get_active_policy($id);
 
 
-        if( $policy_record && belongs_to_me($policy_record->branch_id, FALSE) === TRUE && is_policy_editable($policy_record->policy_status, FALSE) === TRUE)
+        if( $policy_record && belongs_to_me($policy_record->branch_id, FALSE) === TRUE && is_policy_editable($policy_record->status, FALSE) === TRUE)
         {
             $_flag_editable  = TRUE;
         }
 
         return $_flag_editable;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get active policy Record of "This Object"
+     *
+     * @param integer $id
+     * @return mixed
+     */
+    public function get_active_policy($id)
+    {
+        return $this->db->select('P.*')
+                        ->from($this->table_name . ' as O')
+                        ->join('dt_policies P', 'P.object_id = O.id')
+                        ->join('rel_customer_policy_object R', 'R.object_id = O.id')
+                        ->where('O.id', $id)
+                        ->where('R.flag_current', 1)
+                        ->order_by('P.id', 'desc')
+                        ->get()->row();
     }
 
     // ----------------------------------------------------------------

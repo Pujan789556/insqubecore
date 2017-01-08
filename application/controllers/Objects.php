@@ -613,7 +613,6 @@ class Objects extends MY_Controller
 				$ajax_data = [
 					'message' => $message,
 					'status'  => $status,
-					'updateSection' => true,
 					'hideBootbox' => true
 				];
 
@@ -623,6 +622,7 @@ class Objects extends MY_Controller
 					$single_row = $from_widget === 'y' ? 'objects/_single_row_widget' : 'objects/_single_row';
 					$html = $this->load->view($single_row, ['record' => $record], TRUE);
 
+					$ajax_data['updateSection'] = true;
 					$ajax_data['updateSectionData'] = [
 						'box' 		=> '#search-result-object',
 						'method' 	=> 'prepend',
@@ -637,10 +637,19 @@ class Objects extends MY_Controller
 					$single_row = $from_widget === 'y' ? 'objects/snippets/_object_card' : 'objects/_single_row';
 					$html = $this->load->view($single_row, ['record' => $record, '__flag_object_editable' => TRUE], TRUE);
 
-					$ajax_data['updateSectionData']  = [
-						'box' 		=> $from_widget === 'n' ? '#_data-row-object-' . $record->id : '#iqb-object-card',
-						'method' 	=> 'replaceWith',
-						'html'		=> $html
+					$ajax_data['multipleUpdate'] =[
+						[
+							'box' 		=> $from_widget === 'n' ? '#_data-row-object-' . $record->id : '#iqb-object-card',
+							'html' 		=> $html,
+							'method' 	=> 'replaceWith'
+						],
+
+						// Since Every Edit of Object Resets the Premium, Let's Update the section if present
+						[
+							'box' 		=> '#_premium-details',
+							'html' 		=> '<tr><td colspan="2" class="text-muted text-center">No Premium Information Found!</td></tr>',
+							'method' 	=> 'html'
+						]
 					];
 				}
 				return $this->template->json($ajax_data);
