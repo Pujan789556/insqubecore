@@ -19,7 +19,7 @@ class Premium_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "policy_id", "total_amount", "attributes", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "policy_id", "total_amount", "stamp_duty",  "attributes", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -71,35 +71,15 @@ class Premium_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    /**
-     * Is Premium Editable?
-     *
-     * @param integer $id
-     * @return boolean
-     */
-    public function is_editable($id)
+    public function reset($policy_id)
     {
-        /**
-         * Is premium editable?
-         * --------------------
-         *
-         * If the premium is currently assigned to a policy which is not editable,
-         * you can not edit this premium
-         */
-        $_flag_editable  = FALSE;
-        $policy_record = $this->db->select('PLC.branch_id, PLC.status as policy_status')
-                                    ->from($this->table_name . ' as PRM')
-                                    ->join('dt_policies PLC', 'PLC.id_id = PRM.policy_id')
-                                    ->where('PRM.id', $id)
-                                    ->get()->row();
-
-
-        if( $policy_record && belongs_to_me($policy_record->branch_id, FALSE) === TRUE && is_policy_editable($policy_record->policy_status, FALSE) === TRUE)
-        {
-            $_flag_editable  = TRUE;
-        }
-
-        return $_flag_editable;
+        $reset_data = [
+            'total_amount'  => 0.00,
+            'stamp_duty'    => 0.00,
+            'attributes'    => NULL
+        ];
+        return $this->db->where('policy_id', $policy_id)
+                 ->update($this->table_name, $reset_data);
     }
 
     // ----------------------------------------------------------------

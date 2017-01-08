@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         data-box-size="large"
         data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $record->code?>'
         data-url="<?php echo site_url('premium/edit/' . $record->id);?>"
-        data-form="#_form-policy">
+        data-form="#_form-premium">
         <i class="fa fa-dollar"></i> Update Premium</a>
 
     <a href="#"

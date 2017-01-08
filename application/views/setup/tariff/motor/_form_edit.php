@@ -506,6 +506,38 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
         </div>
     </div>
 
+    <div class="box box-solid box-bordered box-config">
+        <div class="box-header with-border bg-teal">
+          <h4 class="box-title">Accident Covered Tariff (प्रति व्यक्ति बिमांक)</h4>
+        </div>
+        <div class="box-body bg-gray-light">
+            <?php
+            /**
+             * Load Form Components
+             */
+            $insured_value_tariff = $record->insured_value_tariff ? json_decode($record->insured_value_tariff, TRUE) : NULL;
+
+            $partial_form_elements = $form_elements['insured_value_tariff'];
+            if($insured_value_tariff)
+            {
+                foreach($insured_value_tariff as $key=>$value)
+                {
+                    // Field Name
+                    $field_name = 'insured_value_tariff[' . $key . ']';
+                    // Search for the Keys
+                    $index = array_search($field_name, array_column($partial_form_elements, 'field'));
+                    $partial_form_elements[$index]['_default'] = $value;
+                }
+            }
+            $this->load->view('templates/_common/_form_components_inline', [
+                'form_elements'     => $partial_form_elements,
+                'form_record'       => null,
+                'inline_grid_width' => 'col-sm-6 col-md-4'
+            ]);
+            ?>
+        </div>
+    </div>
+
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
 

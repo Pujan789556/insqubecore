@@ -18,7 +18,7 @@ class Portfolio_setting_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "fiscal_yr_id", "portfolio_id", "agent_commission", "direct_discount", "policy_base_no", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "fiscal_yr_id", "portfolio_id", "agent_commission", "direct_discount", "policy_base_no", "stamp_duty", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -58,6 +58,13 @@ class Portfolio_setting_model extends MY_Model
             '_required' => true
         ],
         [
+            'field' => 'stamp_duty[]',
+            'label' => 'Stamp Duty(Rs)',
+            'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+            '_type'     => 'text',
+            '_required' => true
+        ],
+        [
             'field' => 'setting_ids[]',
             'label' => 'Settings',
             'rules' => 'trim|integer|max_length[11]',
@@ -92,7 +99,7 @@ class Portfolio_setting_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('portfolio_setting_list');
+        $list = $this->get_cache('pfs_row_list');
         if(!$list)
         {
             $list = $this->db->select('PS.fiscal_yr_id, FY.code_en, FY.code_np')
@@ -100,7 +107,7 @@ class Portfolio_setting_model extends MY_Model
                                 ->join('master_fiscal_yrs FY', 'FY.id = PS.fiscal_yr_id')
                                 ->group_by('PS.fiscal_yr_id')
                                 ->get()->result();
-            $this->write_cache($list, 'portfolio_setting_list', CACHE_DURATION_DAY);
+            $this->write_cache($list, 'pfs_row_list', CACHE_DURATION_DAY);
         }
         return $list;
     }
@@ -120,11 +127,33 @@ class Portfolio_setting_model extends MY_Model
 
     public function get_list_by_fiscal_year($fiscal_yr_id)
     {
-        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, P.name_en as portfolio_name')
+        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, PS.stamp_duty, P.name_en as portfolio_name')
                         ->from($this->table_name . ' PS')
                         ->join('master_portfolio P', 'P.id = PS.portfolio_id')
                         ->where('PS.fiscal_yr_id', $fiscal_yr_id)
                         ->get()->result();
+    }
+
+    // ----------------------------------------------------------------
+
+    public function get_by_fiscal_yr_portfolio($fiscal_yr_id, $portfolio_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'pfs_' . $fiscal_yr_id . '_' . $portfolio_id;
+        $row = $this->get_cache($cache_name);
+        if(!$row)
+        {
+            $row = $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, PS.stamp_duty, P.name_en as portfolio_name')
+                        ->from($this->table_name . ' PS')
+                        ->join('master_portfolio P', 'P.id = PS.portfolio_id')
+                        ->where('PS.fiscal_yr_id', $fiscal_yr_id)
+                        ->where('PS.portfolio_id', $portfolio_id)
+                        ->get()->row();
+            $this->write_cache($row, $cache_name, CACHE_DURATION_DAY);
+        }
+        return $row;
     }
 
     // ----------------------------------------------------------------
@@ -149,7 +178,8 @@ class Portfolio_setting_model extends MY_Model
     {
         $cache_names = [
             'branch_targets_all',
-            'portfolio_setting_list'
+            'pfs_row_list',
+            'pfs_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

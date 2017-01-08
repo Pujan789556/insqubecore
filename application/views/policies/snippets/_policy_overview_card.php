@@ -53,6 +53,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <td><?php echo $record->end_date?></td>
                 </tr>
                 <tr>
+                    <td class="text-bold">Sales Staff</td>
+                    <td><?php echo $record->sales_staff_username;?></td>
+                </tr>
+                <tr>
+                    <td class="text-bold">Agent</td>
+                    <td><?php echo $record->agent_name;?></td>
+                </tr>
+                <tr>
                     <td class="text-bold">Status</td>
                     <td><?php echo get_policy_status_text($record->status, true);?></td>
                 </tr>

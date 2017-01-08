@@ -128,7 +128,7 @@ define('IQB_MASTER_PORTFOLIO_MOTOR_ID',        6);
 
 /*
 |--------------------------------------------------------------------------
-| MOTOR PORTFOLIO - SUB-PORTFOLIO LIST
+| MOTOR PORTFOLIO - SUB-PORTFOLIO LIST/OWNERSHIP
 |--------------------------------------------------------------------------
 |
 | WARNING: Should be exactly same as in database, add here if you add in db
@@ -137,6 +137,9 @@ define('IQB_MASTER_PORTFOLIO_MOTOR_ID',        6);
 define('IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE',          'MCY');
 define('IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE',     'PVC');
 define('IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE',  'CVC');
+
+define('IQB_PORTFOLIO_OWNERSHIP_GOVT',      'G');
+define('IQB_PORTFOLIO_OWNERSHIP_NON_GOVT',  'N');
 
 
 /*

@@ -54,7 +54,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $setting_fields = [
                 'agent_commission'  => ['label' => 'Agent Commission(%)'],
                 'direct_discount'   => ['label' => 'Direct Discount(%)'],
-                'policy_base_no'    => ['label' => 'Policy Base Number']
+                'policy_base_no'    => ['label' => 'Policy Base Number'],
+                'stamp_duty'        => ['label' => 'Stamp Duty(Rs)']
             ];
 
             foreach($portfolios as $portfolio_id=>$portfolio_name):
@@ -69,6 +70,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             $setting_fields['agent_commission']['values'][$i] = $t->agent_commission;
                             $setting_fields['direct_discount']['values'][$i] = $t->direct_discount;
                             $setting_fields['policy_base_no']['values'][$i] = $t->policy_base_no;
+                            $setting_fields['stamp_duty']['values'][$i] = $t->stamp_duty;
 
                             $setting_id      = $t->id;
                             break;

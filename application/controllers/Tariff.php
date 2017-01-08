@@ -590,6 +590,13 @@ class Tariff extends MY_Controller
                 $post_data['riks_group'] = json_encode($data['riks_group']);
 
                 /**
+                 * Insured Value Tariff (Coverred Amount)
+                 */
+                $post_data['insured_value_tariff'] = json_encode($data['insured_value_tariff']);
+
+
+
+                /**
                  * Trailer/Trolly Tarrif
                  */
                 $post_data['trolly_tariff'] = json_encode($data['trolly_tariff']);

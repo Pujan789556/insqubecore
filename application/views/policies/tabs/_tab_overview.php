@@ -49,37 +49,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			*/
 			$this->load->view('customers/snippets/_widget_profile', ['record' => $customer_record]);
 			?>
-			<?php
-			/**
-			* Sales Staff Card
-			*/
-			$this->load->view('policies/snippets/_sales_staff_card', ['record' => $record]);
-			if($record->flag_dc == 'C')
-			{
-				/**
-				* Agent Widget
-				*/
-				$agent_record = (object)[
-								'id' 			=> $record->agent_id,
-								'name' 			=> $record->agent_name,
-							'picture' 		=> $record->agent_picture,
-							'ud_code' 		=> $record->agent_ud_code,
-							'bs_code' 		=> $record->agent_bs_code,
-								'type' 			=> $record->agent_type,
-							'active' 		=> $record->agent_active,
-							'contact' 		=> $record->agent_contact
-				];
-				$this->load->view('setup/agents/snippets/_widget_profile', ['record' => $agent_record]);
-			}
-			?>
-		</div>
-		<div class="col-sm-6 col-md-8">
-			<?php
-			/**
-			* Policy Overvivew Card
-			*/
-			$this->load->view('policies/snippets/_policy_overview_card', ['record' => $record]);
 
+			<?php
 
 			/**
 			* Policy Object Card
@@ -96,6 +67,60 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	        ];
 			$this->load->view('objects/snippets/_object_card', ['record' => $object_record, '__flag_object_editable' => $__flag_object_editable]);
 			?>
+
+		</div>
+		<div class="col-sm-6 col-md-8">
+			<?php
+			/**
+			 * Policy Overvivew Card
+			 */
+			$this->load->view('policies/snippets/_policy_overview_card', ['record' => $record]);
+
+
+			/**
+			 * Policy Premium Card
+			 */
+			$premium_record = (object)[
+				'policy_id' 	=> $record->id,
+				'total_amount' 	=> $record->total_amount,
+				'stamp_duty' 	=> $record->stamp_duty,
+				'attributes'	=> $record->premium_attributes,
+				'status' 		=> $record->status,
+				'code' 			=> $record->code
+			];
+			$this->load->view('premium/_premium_overview_card', ['record' => $premium_record]);
+			?>
+
+			<div class="row">
+				<div class="col-sm-12">
+					<?php
+					/**
+					* Sales Staff Card
+					*/
+					// $this->load->view('policies/snippets/_sales_staff_card', ['record' => $record]);
+
+
+					// if($record->flag_dc == 'C')
+					// {
+					// 	/**
+					// 	* Agent Widget
+					// 	*/
+					// 	$agent_record = (object)[
+					// 		'id' 			=> $record->agent_id,
+					// 		'name' 			=> $record->agent_name,
+					// 		'picture' 		=> $record->agent_picture,
+					// 		'ud_code' 		=> $record->agent_ud_code,
+					// 		'bs_code' 		=> $record->agent_bs_code,
+					// 		'type' 			=> $record->agent_type,
+					// 		'active' 		=> $record->agent_active,
+					// 		'contact' 		=> $record->agent_contact
+					// 	];
+					// 	$this->load->view('setup/agents/snippets/_widget_profile', ['record' => $agent_record]);
+					// }
+					?>
+				</div>
+			</div>
+
 		</div>
 	</div>
 </div>

@@ -35,6 +35,7 @@ class Premium extends MY_Controller
 
 		// Load Model
 		$this->load->model('policy_model');
+		$this->load->model('portfolio_setting_model');
 		$this->load->model('premium_model');
 		$this->load->model('object_model');
 
@@ -42,6 +43,7 @@ class Premium extends MY_Controller
 		$this->load->config('policy');
 		$this->load->helper('policy');
 		$this->load->helper('object');
+		$this->load->helper('motor');
 
 		// Media Helper
 		$this->load->helper('insqube_media');
@@ -103,6 +105,7 @@ class Premium extends MY_Controller
 		// Post? Save it
 		$this->__save($policy_record);
 
+
 		// Render Form
 		$this->__render_form($policy_record);
 	}
@@ -110,348 +113,369 @@ class Premium extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Save a Record
+	 * Get Premium Form View
 	 *
-	 * @param string $action [add|edit]
-	 * @param object|null $record Record Object or NULL
-	 * @return array
+	 * @param object $policy_record Policy Record
+	 * @return string
 	 */
-	private function _save($action, $form_data, $from_widget = 'n')
+	private function __get_form_view_by_portfolio($policy_record)
 	{
-
-		// Valid action?
-		if( !in_array($action, array('add', 'edit')))
-		{
-			return [
-				'status' => 'error',
-				'message' => 'Invalid action!'
-			];
-		}
-
-		// Valid "from" ?
-		if( !in_array($from_widget, array('y', 'n')))
-		{
-			return [
-				'status' => 'error',
-				'message' => 'Invalid action!'
-			];
-		}
-
-		/**
-		 * Form Submitted?
-		 */
-		$return_data = [];
-		$record = $form_data['record'];
-
-		if( $this->input->post() )
-		{
-			$done = FALSE;
-
-			// These Rules are Sectioned, We need to merge Together
-			$this->policy_model->set_validation_rules($action); // set rules according to action
-			$v_rules = $this->policy_model->get_validation_rule($action);
-
-            $this->form_validation->set_rules($v_rules);
-			if($this->form_validation->run() === TRUE )
-        	{
-        		$data = $this->input->post();
-
-        		// Insert or Update?
-				if($action === 'add')
-				{
-					$done = $this->policy_model->insert($data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$done ? $this->policy_model->log_activity($done, 'C'): '';
-				}
-				else
-				{
-					// Now Update Data
-					$done = $this->policy_model->update($record->id, $data, TRUE) && $this->policy_model->log_activity($record->id, 'E');
-				}
-
-	        	if(!$done)
-				{
-					$status = 'error';
-					$message = 'Could not update.';
-				}
-				else
-				{
-					$status = 'success';
-					$message = 'Successfully Updated.';
-				}
-        	}
-        	else
-        	{
-        		$status = 'error';
-				$message = 'Validation Error.';
-        	}
-
-
-			if($status === 'success' )
-			{
-
-				$ajax_data = [
-					'message' => $message,
-					'status'  => $status,
-					'updateSection' => true,
-					'hideBootbox' => true
-				];
-
-				if($action === 'add')
-				{
-					$record = $this->policy_model->row($done);
-					$html = $this->load->view('policies/_single_row', ['record' => $record], TRUE);
-
-					$ajax_data['updateSectionData'] = [
-						'box' 		=> '#search-result-policy',
-						'method' 	=> 'prepend',
-						'html'		=> $html
-					];
-				}
-				else
-				{
-					/**
-					 * Widget or Row?
-					 */
-					$record = $from_widget === 'n'
-								? $this->policy_model->row($record->id)
-								: $this->policy_model->get($record->id);
-
-					$view = $from_widget === 'n'
-									? 'policies/_single_row'
-									: 'policies/tabs/_tab_overview';
-
-					$html = $this->load->view($view, ['record' => $record], TRUE);
-					$ajax_data['updateSectionData']  = [
-						'box' 		=> $from_widget === 'n' ? '#_data-row-policy-' . $record->id : '#tab-policy-overview-inner',
-						'method' 	=> 'replaceWith',
-						'html'		=> $html
-					];
-				}
-				return $this->template->json($ajax_data);
-			}
-			else
-			{
-
-				// Policy Package of Portfolio if supplied
-				$portfolio_id = (int)$this->input->post('portfolio_id');
-				if($portfolio_id )
-				{
-					$form_data['form_elements']['portfolio'][1]['_data'] = _PO_policy_package_dropdown($portfolio_id);
-				}
-
-				return $this->template->json([
-					'status' 		=> $status,
-					'message' 		=> $message,
-					'reloadForm' 	=> true,
-					'form' 			=> $this->load->view('policies/_form', $form_data, TRUE)
-				]);
-			}
-		}
-
-		/**
-		 * Render The Form
-		 */
-		$json_data = [
-			'form' => $this->load->view('policies/_form_box', $form_data, TRUE)
-		];
-		$this->template->json($json_data);
+		$form_view = 'premium/_form_' . $policy_record->portfolio_code;
+		return $form_view;
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Delete a Policy
+	 * Get Policy Object
 	 *
-	 * Only Draft Version of a Policy can be deleted.
-	 *
-	 * @param integer $id
-	 * @return json
+	 * @param object $policy_record Policy Record
+	 * @return object 	Policy Object
 	 */
-	public function delete($id)
+	private function __get_policy_object($policy_record)
 	{
-		// // Valid Record ?
-		// $id = (int)$id;
-		// $record = $this->policy_model->find($id);
-		// if(!$record)
-		// {
-		// 	$this->template->render_404();
-		// }
+		$policy_object = new StdClass();
+		$policy_object->attributes 		= $policy_record->object_attributes;
+		$policy_object->id 				= $policy_record->object_id;
+		$policy_object->portfolio_id 	= $policy_record->portfolio_id;
 
-		// /**
-		//  * Check Permissions
-		//  *
-		//  * Deletable Status
-		//  * 		draft
-		//  *
-		//  * Deletable Permission
-		//  * 		delete.draft.policy
-		//  */
-		// $editable_status 		= [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED];
-
-		// // Deletable Status?
-		// if( $record->status !== IQB_POLICY_STATUS_DRAFT )
-		// {
-		// 	$this->dx_auth->deny_access();
-		// }
-
-		// // Deletable Permission ?
-		// $__flag_authorized 		= FALSE;
-		// if(
-		// 	$this->dx_auth->is_admin()
-
-		// 	||
-
-		// 	$this->dx_auth->is_authorized('policies', 'delete.draft.policy')
-		// )
-		// {
-		// 	$__flag_authorized = TRUE;
-		// }
-
-		// if( !$__flag_authorized )
-		// {
-		// 	$this->dx_auth->deny_access();
-		// }
-
-
-		// $data = [
-		// 	'status' 	=> 'error',
-		// 	'message' 	=> 'You cannot delete the default records.'
-		// ];
-		// /**
-		//  * Safe to Delete?
-		//  */
-		// if( !safe_to_delete( 'Policy_model', $id ) )
-		// {
-		// 	return $this->template->json($data);
-		// }
-
-		// $done = $this->policy_model->delete($record->id);
-
-		// if($done)
-		// {
-		// 	/**
-		// 	 * @TODO: Delete all related media
-		// 	 */
-		// 	// if($record->picture)
-		// 	// {
-		// 	// 	// Load media helper
-		// 	// 	$this->load->helper('insqube_media');
-
-		// 	// 	delete_insqube_document($this->_upload_path . $record->picture);
-		// 	// }
-
-		// 	$data = [
-		// 		'status' 	=> 'success',
-		// 		'message' 	=> 'Successfully deleted!',
-		// 		'removeRow' => true,
-		// 		'rowId'		=> '#_data-row-policy-'.$record->id
-		// 	];
-		// }
-		// else
-		// {
-		// 	$data = [
-		// 		'status' 	=> 'error',
-		// 		'message' 	=> 'Could not be deleted. It might have references to other module(s)/component(s).'
-		// 	];
-		// }
-		// return $this->template->json($data);
+		return $policy_object;
 	}
 
-
 	// --------------------------------------------------------------------
 
-		/**
-		 * Get Premium Form View
-		 *
-		 * @param object $record Policy Record
-		 * @return string
-		 */
-		private function __get_form($record)
+	/**
+	 * Save/Update Premium
+	 *
+	 * @param type $policy_record 	Policy Record
+	 * @return mixed
+	 */
+	private function __save($policy_record)
+	{
+		if( $this->input->post() )
 		{
-			$form_view = 'premium/_form_' . $record->portfolio_code;
-			return $form_view;
+			$done = FALSE;
+			switch ($policy_record->portfolio_id)
+			{
+				// Motor
+				case IQB_MASTER_PORTFOLIO_MOTOR_ID:
+						$done = $this->__save_MOTOR($policy_record);
+					break;
+
+				default:
+					# code...
+					break;
+			}
+
+			if($done)
+			{
+				$ajax_data = [
+					'message' 		=> 'Successfully Updated.',
+					'status'  		=> 'success',
+					'updateSection' => true,
+					'hideBootbox' 	=> true
+				];
+
+				/**
+				 * Widget or Row?
+				 */
+				$policy_record = $this->policy_model->get($policy_record->id);
+
+				/**
+				 * Policy Premium Card
+				 */
+				$premium_record = (object)[
+					'policy_id' 	=> $policy_record->id,
+					'total_amount' 	=> $policy_record->total_amount,
+					'stamp_duty' 	=> $policy_record->stamp_duty,
+					'attributes'	=> $policy_record->premium_attributes,
+					'status' 		=> $policy_record->status,
+					'code' 			=> $policy_record->code
+				];
+				$ajax_data['updateSectionData']  = [
+					'box' 		=> '#_premium-card',
+					'method' 	=> 'replaceWith',
+					'html'		=> $this->load->view('premium/_premium_overview_card', ['record' => $premium_record], TRUE)
+				];
+
+				return $this->template->json($ajax_data);
+			}
 		}
+	}
 
 	// --------------------------------------------------------------------
 
 		/**
-		 * Get Policy Object
+		 * Motor Portfolio : Save a Premium Record For Given Policy
 		 *
-		 * @param object $record Policy Record
-		 * @return object 	Policy Object
+		 * @param object|null $policy_record  Policy Record
+		 * @return json
 		 */
-		private function __get_policy_object($record)
+		private function __save_MOTOR($policy_record)
 		{
-			$object = new StdClass();
-			$object->attributes 	= $record->object_attributes;
-			$object->id 			= $record->object_id;
-			$object->portfolio_id 	= $record->portfolio_id;
+			/**
+			 * Form Submitted?
+			 */
+			$return_data = [];
 
-			return $object;
-		}
-
-	// --------------------------------------------------------------------
-
-		/**
-		 * Save/Update Premium
-		 *
-		 * @param type $record 	Policy Record
-		 * @return type
-		 */
-		private function __save($record)
-		{
 			if( $this->input->post() )
 			{
-				switch ($record->portfolio_id)
-				{
-					// Motor
-					case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-							return $this->__save_MOTOR($record);
-						break;
+				// Policy Object
+				$policy_object = $this->__get_policy_object($policy_record);
 
-					default:
-						# code...
-						break;
-				}
+				// Let's get the premium goodies for given portfolio
+				$premium_goodies = $this->__premium_goodies($policy_record, $policy_object);
+
+				// Validation Rules
+				$v_rules = $premium_goodies['validation_rules'];
+
+	            $this->form_validation->set_rules($v_rules);
+				if($this->form_validation->run() === TRUE )
+	        	{
+	        		$data = $this->input->post();
+
+	        		// Get Object Attributes
+					$attributes = json_decode($policy_object->attributes);
+
+					// Tariff Record
+					$tariff_record = $premium_goodies['tariff_record'];
+
+					// Save Premium According to Subportfolio
+					switch ($attributes->sub_portfolio)
+					{
+						case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
+							return $this->__save_MOTOR_MCY($policy_record, $policy_object, $tariff_record );
+							break;
+
+						default:
+							# code...
+							break;
+					}
+	        	}
+	        	else
+	        	{
+	        		// Reload Form With Validation Error
+	        		$json_extra = [
+						'status' 		=> 'error',
+						'message' 		=> 'Validation Error.',
+						'reloadForm' 	=> true
+					];
+					return $this->__render_form($policy_record, $json_extra);
+	        	}
 			}
 		}
 
+			/**
+			 * Save Motorcycle Premium
+			 *
+			 * @param object $policy_record
+			 * @param object $object
+			 * @param object $tariff_record
+			 * @return json
+			 */
+			private function __save_MOTOR_MCY($policy_record, $policy_object, $tariff_record)
+			{
+				// Portfolio Settings Record For Given Fiscal Year and Portfolio
+				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+				$data = $this->input->post();
+				$premium_data = _PORTFOLIO_MOTOR_MCY_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+
+
+				// Target Premium Record
+				$premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
+
+				// Find Existing Premium Record
+				return $this->premium_model->update($premium_record->id, $premium_data, TRUE);
+
+			}
+
 	// --------------------------------------------------------------------
 
 
+	/**
+	 * Render Premium Form
+	 *
+	 * @param object 	$policy_record 	Policy Record
+	 * @param array 	$json_extra 	Extra Data to Pass as JSON
+	 * @return type
+	 */
+	private function __render_form($policy_record, $json_extra=[])
+	{
 		/**
-		 * Render Premium Form
-		 *
-		 * @param type $record 	Policy Record
-		 * @return type
+		 *  Let's Load The Premium Form For this Record
 		 */
-		private function __render_form($record)
+		$policy_object = $this->__get_policy_object($policy_record);
+
+		// Let's get the premium goodies for given portfolio
+		$premium_goodies = $this->__premium_goodies($policy_record, $policy_object);
+
+		// Premium Form
+		$form_view = $this->__get_form_view_by_portfolio($policy_record);
+
+		// Let's render the form
+        $json_data['form'] = $this->load->view($form_view, [
+								                'form_elements'         => $premium_goodies['validation_rules'],
+								                'policy_record'         => $policy_record,
+								                'policy_object' 		=> $policy_object,
+								                'tariff_record' 		=> $premium_goodies['tariff_record']
+								            ], TRUE);
+
+        $json_data = array_merge($json_data, $json_extra);
+
+        // Return HTML
+        $this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get Policy Premium Goodies
+	 *
+	 * Get the following goodies for the Given Portfolio of Supplied Policy
+	 * 		1. Validation Rules
+	 * 		2. Tariff Record if Applies
+	 *
+	 * @param object $policy_record Policy Record
+	 * @param object $policy_object Policy Object Record
+	 *
+	 * @return	array
+	 */
+	private function __premium_goodies($policy_record, $policy_object)
+	{
+		$goodies = [];
+		switch ($policy_record->portfolio_id)
 		{
-			/**
-			 *  Let's Load The Premium Form For this Record
-			 */
-			$object = $this->__get_policy_object($record);
+			// Motor
+			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
+				$goodies = $this->__premium_goodies_MOTOR($policy_record, $policy_object);
+				break;
 
-			// Let's get the premium goodies for given portfolio
-			$premium_goodies = _PO_premium_goodies($object, $record->fiscal_yr_id);
+			default:
+				# code...
+				break;
+		}
+		return $goodies;
+	}
 
-			// Premium Form
-			$form_view = $this->__get_form($record);
+	// --------------------------------------------------------------------
 
-			// Let's render the form
-	        $json_data['form'] = $this->load->view($form_view,
-	            [
-	                'form_elements'         => $premium_goodies['validation_rules'],
-	                'record'                => $record,
-	                'object' 				=> $object,
-	                'tariff_record' 		=> $premium_goodies['tariff_record']
-	            ], TRUE);
+		/**
+		 * Get Policy Premium Goodies for MOTOR
+		 *
+		 * Get the following goodies for the Motor Portfolio
+		 * 		1. Validation Rules
+		 * 		2. Tariff Record if Applies
+		 *
+		 * @param object $policy_record Policy Record
+		 * @param object $policy_object Policy Object Record
+		 *
+		 * @return	array
+		 */
+		private function __premium_goodies_MOTOR($policy_record, $policy_object)
+		{
 
-	        // Return HTML
-	        $this->template->json($json_data);
+			// Get Object Attributes
+			$attributes = json_decode($policy_object->attributes);
+
+			// Get the Tariff Configuration Record For this Portfolio
+			$this->load->model('tariff_motor_model');
+			$tariff_record = $this->tariff_motor_model->get_single(
+															$policy_record->fiscal_yr_id,
+															$attributes->ownership,
+															$attributes->sub_portfolio,
+															$attributes->cvc_type ? $attributes->cvc_type : NULL
+														);
+
+			if(!$tariff_record || $tariff_record->active == '0')
+			{
+				$message = 'Tariff Configuration for this Portfolio is either not present or Inactive. <br/>' .
+							'Portfolio: <strong>MOTOR</strong> <br/>' .
+							'Sub-Portfolio: <strong>' . $attributes->sub_portfolio . '</strong>';
+				$this->template->render_404('', $message);
+				exit(1);
+			}
+
+			$validation_rules = [];
+			switch ($attributes->sub_portfolio)
+			{
+				case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
+
+					/**
+					 * Validation Rule Logic
+					 * --------------------------
+					 *
+					 * Third Party Package: Only Ask for Stamp Duty
+					 */
+
+					// Portfolio Setting Record
+					$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+					$rule_stamp_duty = [
+	                    'field' => 'stamp_duty',
+	                    'label' => 'Stamp Duty(Rs.)',
+	                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+	                    '_type'     => 'text',
+	                    '_default' 	=> $pfs_record->stamp_duty,
+	                    '_required' => true
+	                ];
+					if($policy_record->policy_package == 'tp')
+					{
+						$validation_rules = [$rule_stamp_duty];
+					}
+					else
+					{
+						$validation_rules = [
+							[
+			                    'field' => 'dr_voluntary_excess',
+			                    'label' => 'Voluntary Excess',
+			                    'rules' => 'trim|prep_decimal|decimal|max_length[5]',
+			                    '_type'     => 'dropdown',
+			                    '_data' 	=> _PORTFOLIO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess),
+			                    '_required' => false
+			                ],
+			                [
+			                    'field' => 'no_claim_discount',
+			                    'label' => 'No Claim Discount',
+			                    'rules' => 'trim|prep_decimal|decimal|max_length[5]',
+			                    '_type'     => 'dropdown',
+			                    '_data' 	=> _PORTFOLIO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount),
+			                    '_required' => false
+			                ],
+			                [
+			                    'field' => 'riks_group[flag_risk_mob]',
+			                    'label' => 'Pool Risk Mob (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा)',
+			                    'rules' => 'trim|integer|in_list[1]',
+			                    '_type'     => 'checkbox',
+			                    '_value' 	=> '1',
+			                    '_required' => false
+			                ],
+			                [
+			                    'field' => 'riks_group[flag_risk_terorrism]',
+			                    'label' => 'Pool Risk Terorrism (आतंककारी/विध्वंशात्मक कार्य जोखिम बीमा)',
+			                    'rules' => 'trim|integer|in_list[1]',
+			                    '_type'     => 'checkbox',
+			                    '_value' 	=> '1',
+			                    '_required' => false
+			                ],
+
+			                $rule_stamp_duty
+						];
+					}
+					break;
+
+				default:
+					# code...
+					break;
+			}
+
+			return  [
+				'validation_rules' 	=> $validation_rules,
+				'tariff_record' 	=> $tariff_record
+			];
 		}
 
 	// --------------------------------------------------------------------
+
+
 }

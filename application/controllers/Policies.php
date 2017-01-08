@@ -34,6 +34,7 @@ class Policies extends MY_Controller
 		// Load Model
 		$this->load->model('policy_model');
 		$this->load->model('object_model');
+		$this->load->model('premium_model');
 
 		// Policy Configuration/Helper
 		$this->load->config('policy');
@@ -469,6 +470,14 @@ class Policies extends MY_Controller
 				{
 					// Now Update Data
 					$done = $this->policy_model->update($record->id, $data, TRUE) && $this->policy_model->log_activity($record->id, 'E');
+
+					/**
+					 * Policy Package Changed?
+					 * --------------------------
+					 * If changed, we have to reset the premium info
+					 */
+					$this->premium_model->reset($record->id);
+
 				}
 
 	        	if(!$done)

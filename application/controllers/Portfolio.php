@@ -493,12 +493,13 @@ class Portfolio extends MY_Controller
 			{
 				$data = $this->input->post();
 
-				$fiscal_yr_id = $this->input->post('fiscal_yr_id');
-				$agent_commission = $this->input->post('agent_commission');
-				$direct_discount = $this->input->post('direct_discount');
-				$policy_base_no  = $this->input->post('policy_base_no');
-				$portfolios = $this->portfolio_model->dropdown_parent();
+				$fiscal_yr_id 		= $this->input->post('fiscal_yr_id');
+				$agent_commission 	= $this->input->post('agent_commission');
+				$direct_discount 	= $this->input->post('direct_discount');
+				$policy_base_no  	= $this->input->post('policy_base_no');
+				$stamp_duty  		= $this->input->post('stamp_duty');
 
+				$portfolios 		= $this->portfolio_model->dropdown_parent();
 
 				// Insert or Update?
 				if($action === 'add')
@@ -511,7 +512,8 @@ class Portfolio extends MY_Controller
 							'portfolio_id'    	=> $portfolio_id,
 							'agent_commission' 	=> $agent_commission[$i],
 							'direct_discount' 	=> $direct_discount[$i],
-							'policy_base_no' 	=> $policy_base_no[$i]
+							'policy_base_no' 	=> $policy_base_no[$i],
+							'stamp_duty' 		=> $stamp_duty[$i]
 						];
 
 						$done = $this->portfolio_setting_model->insert($data, TRUE); // No Validation on Model
@@ -531,7 +533,8 @@ class Portfolio extends MY_Controller
 						$data = [
 							'agent_commission' 	=> $agent_commission[$i],
 							'direct_discount' 	=> $direct_discount[$i],
-							'policy_base_no' 	=> $policy_base_no[$i]
+							'policy_base_no' 	=> $policy_base_no[$i],
+							'stamp_duty' 		=> $stamp_duty[$i]
 						];
 						$setting_id = $setting_ids[$i];
 

@@ -396,12 +396,14 @@ class Policy_model extends MY_Model
     public function get($id)
     {
         return $this->db->select(  "P.*, PRT.name_en as portfolio_name, PRT.code as portfolio_code,
-                            C.code as customer_code, C.full_name as customer_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no,
-                            O.attributes as object_attributes,
-                            A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type,
-                            U.username as sales_staff_username, U.profile as sales_staff_profile
+                                    PRM.total_amount, PRM.stamp_duty, PRM.attributes as premium_attributes,
+                                    C.code as customer_code, C.full_name as customer_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no,
+                                    O.attributes as object_attributes,
+                                    A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type,
+                                    U.username as sales_staff_username, U.profile as sales_staff_profile
                             ")
                      ->from($this->table_name . ' as P')
+                     ->join('dt_policy_premium PRM', 'PRM.policy_id = P.id')
                      ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
                      ->join('dt_customers C', 'C.id = P.customer_id')
                      ->join('dt_policy_objects O', 'O.id = P.object_id')

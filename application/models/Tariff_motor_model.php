@@ -18,7 +18,7 @@ class Tariff_motor_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "sub_portfolio", "cvc_type", "fiscal_yr_id", "ownership", "tariff", "no_claim_discount", "dr_mcy_disabled_friendly", "rate_pvc_on_hire", "dr_cvc_on_personal_use", "dr_voluntary_excess", "pramt_compulsory_excess", "accident_premium", "riks_group", "pramt_towing", "trolly_tariff", "active", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "sub_portfolio", "cvc_type", "fiscal_yr_id", "ownership", "tariff", "no_claim_discount", "dr_mcy_disabled_friendly", "rate_pvc_on_hire", "dr_cvc_on_personal_use", "dr_voluntary_excess", "pramt_compulsory_excess", "accident_premium", "riks_group", "pramt_towing", "trolly_tariff", "insured_value_tariff", "active", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -496,7 +496,42 @@ class Tariff_motor_model extends MY_Model
                     '_type'     => 'text',
                     '_required' => true
                 ]
-            ]
+            ],
+
+            /**
+             * JSON : Accident Covered Tariff Amounts
+             * --------------------------------------
+             *
+             * Structure:
+             *  {
+             *      rate_mob: 0.123,
+             *      rate_terrorism: 0.12,
+             *      rate_additionl_per_thousand_on_extra_rate: 0.25
+             *  }
+             */
+            'insured_value_tariff' => [
+                [
+                    'field' => 'insured_value_tariff[driver]',
+                    'label' => 'Driver Covered Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'insured_value_tariff[staff]',
+                    'label' => 'Staff Covered Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'insured_value_tariff[passenger]',
+                    'label' => 'Passenger Covered Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+            ],
         ];
     }
 
@@ -531,7 +566,7 @@ class Tariff_motor_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('tarrif_motor_index_list');
+        $list = $this->get_cache('tm_index_list');
         if(!$list)
         {
             $list = $this->db->select('PTM.fiscal_yr_id, FY.code_en, FY.code_np')
@@ -539,7 +574,7 @@ class Tariff_motor_model extends MY_Model
                                 ->join('master_fiscal_yrs FY', 'FY.id = PTM.fiscal_yr_id')
                                 ->group_by('PTM.fiscal_yr_id')
                                 ->get()->result();
-            $this->write_cache($list, 'tarrif_motor_index_list', CACHE_DURATION_DAY);
+            $this->write_cache($list, 'tm_index_list', CACHE_DURATION_DAY);
         }
         return $list;
     }
@@ -578,6 +613,37 @@ class Tariff_motor_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function get_single($fiscal_yr_id, $ownership, $sub_portfolio, $cvc_type = NULL)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'tms_' . $fiscal_yr_id . '_' . $ownership . '_' . $sub_portfolio;
+        if($cvc_type)
+        {
+            $cache_name .= '_' . $cvc_type;
+        }
+
+        $row = $this->get_cache($cache_name);
+        if(!$row)
+        {
+            $where = [
+                'sub_portfolio' => $sub_portfolio,
+                'cvc_type'      => $cvc_type ? $cvc_type : NULL,
+                'ownership'     => $ownership,
+                'fiscal_yr_id'  => $fiscal_yr_id,
+            ];
+            $row = $this->db->select('PTM.*')
+                        ->from($this->table_name . ' PTM')
+                        ->where($where)
+                        ->get()->row();
+            $this->write_cache($row, $cache_name, CACHE_DURATION_DAY);
+        }
+        return $row;
+    }
+    // ----------------------------------------------------------------
+
+
     public function check_duplicate($where, $tariff_ids=NULL)
     {
         if( $tariff_ids )
@@ -597,7 +663,8 @@ class Tariff_motor_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'tarrif_motor_index_list'
+            'tm_index_list',
+            'tms_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

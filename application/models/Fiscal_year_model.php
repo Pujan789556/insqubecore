@@ -16,7 +16,7 @@ class Fiscal_year_model extends MY_Model
 
     protected $after_update  = ['clear_cache'];
 
-    protected $fields = ["id", "code_np", "code_en", "starts_at_en", "ends_at_en", "starts_at_np", "ends_at_np", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "code_np", "code_en", "starts_at_en", "ends_at_en", "starts_at_np", "ends_at_np", "settings", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 

@@ -1,10 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form Outer Box: Object
+ * Form Outer Box: Premium
  */
 ?>
-<div id="form-box-object">
+<div id="form-box-premium">
     <?php
     /**
      * Load object form
