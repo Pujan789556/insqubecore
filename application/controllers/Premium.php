@@ -246,6 +246,11 @@ class Premium extends MY_Controller
 							return $this->__save_MOTOR_MCY($policy_record, $policy_object, $tariff_record );
 							break;
 
+						case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE:
+							return $this->__save_MOTOR_PVC($policy_record, $policy_object, $tariff_record );
+							break;
+
+
 						default:
 							# code...
 							break;
@@ -279,6 +284,31 @@ class Premium extends MY_Controller
 
 				$data = $this->input->post();
 				$premium_data = _PORTFOLIO_MOTOR_MCY_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+
+
+				// Target Premium Record
+				$premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
+
+				// Find Existing Premium Record
+				return $this->premium_model->update($premium_record->id, $premium_data, TRUE);
+
+			}
+
+			/**
+			 * Save Private Vehicle Premium
+			 *
+			 * @param object $policy_record
+			 * @param object $object
+			 * @param object $tariff_record
+			 * @return json
+			 */
+			private function __save_MOTOR_PVC($policy_record, $policy_object, $tariff_record)
+			{
+				// Portfolio Settings Record For Given Fiscal Year and Portfolio
+				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+				$data = $this->input->post();
+				$premium_data = _PORTFOLIO_MOTOR_PVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
 
 
 				// Target Premium Record
@@ -492,24 +522,6 @@ class Premium extends MY_Controller
 						[
 		                    'field' => 'flag_towing',
 		                    'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
-		                    'rules' => 'trim|integer|in_list[1]',
-		                    '_type'     => 'checkbox',
-		                    '_value' 	=> '1',
-		                    '_required' => false
-		                ],
-
-		                // Accident Insurance of Driver
-						[
-		                    'field' => 'accident_insurance[driver]',
-		                    'label' => 'Accident Insurance of Driver (चालकको दुर्घटना बीमा)',
-		                    'rules' => 'trim|integer|in_list[1]',
-		                    '_type'     => 'checkbox',
-		                    '_value' 	=> '1',
-		                    '_required' => false
-		                ],
-		                [
-		                    'field' => 'accident_insurance[insured_party_and_passenger]',
-		                    'label' => 'Accident Insurance of Insured Party & Passenger (बीमित तथा यात्रीको दुर्घटना बीमा)',
 		                    'rules' => 'trim|integer|in_list[1]',
 		                    '_type'     => 'checkbox',
 		                    '_value' 	=> '1',

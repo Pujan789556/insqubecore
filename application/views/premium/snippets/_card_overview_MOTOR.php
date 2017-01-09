@@ -15,36 +15,34 @@ $attributes = $premium_record->attributes ? json_decode($premium_record->attribu
                         <td class="no-padding">
                             <table class="table no-margin table-bordered table-condensed">
                                 <tr><td colspan="2"><strong><?php echo $section_object->title_np?></strong></td></tr>
-                                <?php foreach($section_object->sections as $sub_sections):?>
-                                    <?php foreach($sub_sections as $section_object):?>
-                                            <tr>
-                                                <td width="80%">
-                                                    <?php
-                                                    $flag_section_total = $section_object->section_total ?? FALSE;
-                                                    if($flag_section_total)
-                                                    {
-                                                        echo '<strong class="pull-right">' . $section_object->title . '</strong>';
-                                                    }
-                                                    else
-                                                    {
-                                                        echo $section_object->title;
-                                                    }
-                                                    ?>
-                                                </td>
-                                                <td width="20%" class="text-right">
-                                                    <?php
-                                                    $label = $section_object->label ?? NULL;
-                                                    if($label)
-                                                    {
-                                                        echo '<span class="text-muted pull-left">'.$label.'</span>';
-                                                    }
+                                <?php foreach($section_object->sections as $sub_section):?>
+                                    <tr>
+                                        <td width="80%">
+                                            <?php
+                                            $flag_section_total = $sub_section->section_total ?? FALSE;
+                                            if($flag_section_total)
+                                            {
+                                                echo '<strong class="pull-right">' . $sub_section->title . '</strong>';
+                                            }
+                                            else
+                                            {
+                                                echo $sub_section->title;
+                                            }
+                                            ?>
+                                        </td>
+                                        <td width="20%" class="text-right">
+                                            <?php
+                                            $label = $sub_section->label ?? NULL;
+                                            if($label)
+                                            {
+                                                echo '<span class="text-muted pull-left">'.$label.'</span>';
+                                            }
 
-                                                    // Amount
-                                                    echo number_format((float)$section_object->amount, 2, '.', '');
-                                                    ?>
-                                                </td>
-                                            </tr>
-                                    <?php endforeach?>
+                                            // Amount
+                                            echo number_format((float)$sub_section->amount, 2, '.', '');
+                                            ?>
+                                        </td>
+                                    </tr>
                                 <?php endforeach?>
                             </table>
                         </td>
