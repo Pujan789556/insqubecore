@@ -189,14 +189,12 @@ class Premium extends MY_Controller
 					'policy_id' 	=> $policy_record->id,
 					'total_amount' 	=> $policy_record->total_amount,
 					'stamp_duty' 	=> $policy_record->stamp_duty,
-					'attributes'	=> $policy_record->premium_attributes,
-					'status' 		=> $policy_record->status,
-					'code' 			=> $policy_record->code
+					'attributes'	=> $policy_record->premium_attributes
 				];
 				$ajax_data['updateSectionData']  = [
 					'box' 		=> '#_premium-card',
 					'method' 	=> 'replaceWith',
-					'html'		=> $this->load->view('premium/_premium_overview_card', ['record' => $premium_record], TRUE)
+					'html'		=> $this->load->view('premium/_card_overview', ['premium_record' => $premium_record, 'policy_record' => $policy_record], TRUE)
 				];
 
 				return $this->template->json($ajax_data);

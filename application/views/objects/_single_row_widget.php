@@ -26,5 +26,5 @@ $select_json = [
 	<?php endif?>
 	<td><?php echo $record->portfolio_name;?></td>
 	<td><?php echo $record->customer_name;?></td>
-	<?php echo _PO_row_snippet($record);?>
+	<?php echo _PO_row_snippet($record, $_flag__show_widget_row);?>
 </tr>

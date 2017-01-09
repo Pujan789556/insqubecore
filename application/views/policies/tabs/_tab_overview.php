@@ -84,11 +84,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				'policy_id' 	=> $record->id,
 				'total_amount' 	=> $record->total_amount,
 				'stamp_duty' 	=> $record->stamp_duty,
-				'attributes'	=> $record->premium_attributes,
-				'status' 		=> $record->status,
-				'code' 			=> $record->code
+				'attributes'	=> $record->premium_attributes
 			];
-			$this->load->view('premium/_premium_overview_card', ['record' => $premium_record]);
+			$this->load->view('premium/_card_overview', ['premium_record' => $premium_record, 'policy_record' => $record]);
 			?>
 
 			<div class="row">

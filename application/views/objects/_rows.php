@@ -11,7 +11,7 @@ $_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 foreach($records as $record)
 {
 	$single_row = $_flag__show_widget_row ? 'objects/_single_row_widget' : 'objects/_single_row';
-	$this->load->view($single_row, compact('record'));
+	$this->load->view($single_row, ['record' => $record, '_flag__show_widget_row' => $_flag__show_widget_row]);
 }
 
 /**

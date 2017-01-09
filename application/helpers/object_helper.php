@@ -25,17 +25,18 @@ if ( ! function_exists('_PO_row_snippet'))
 	 *
 	 * Row Partial View for An Object
 	 *
-	 * @param bool $record 	Object Record
+	 * @param object $record Policy Object
+	 * @param bool $_flag__show_widget_row 	is this Widget Row? or Regular List Row?
 	 * @return	html
 	 */
-	function _PO_row_snippet( $record )
+	function _PO_row_snippet( $record, $_flag__show_widget_row = FALSE )
 	{
 		$snippet = '';
 		switch ($record->portfolio_id)
 		{
 			// Motor
 			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-				$snippet = _PO_MOTOR_row_snippet($record);
+				$snippet = _PO_MOTOR_row_snippet($record, $_flag__show_widget_row);
 				break;
 
 			default:
@@ -543,13 +544,14 @@ if ( ! function_exists('_PO_MOTOR_row_snippet'))
 	 *
 	 * Row Partial View for Motor Object
 	 *
-	 * @param bool $record 	Object Record
+	 * @param object $record Policy Object (Motor)
+	 * @param bool $_flag__show_widget_row 	is this Widget Row? or Regular List Row?
 	 * @return	html
 	 */
-	function _PO_MOTOR_row_snippet( $record )
+	function _PO_MOTOR_row_snippet( $record, $_flag__show_widget_row = FALSE )
 	{
 		$CI =& get_instance();
-		return $CI->load->view('objects/snippets/_row_motor', ['record' => $record], TRUE);
+		return $CI->load->view('objects/snippets/_row_motor', ['record' => $record, '_flag__show_widget_row' => $_flag__show_widget_row], TRUE);
 	}
 }
 

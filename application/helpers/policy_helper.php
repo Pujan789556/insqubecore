@@ -307,3 +307,32 @@ if ( ! function_exists('is_policy_editable'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('_PREMIUM_OVERVIEW_CARD_partial_view_by_portfolio'))
+{
+	/**
+	 * Get Premium Overview Card Partial View Name by Portfolio
+	 *
+	 * @param integer $portfolio_id Portfolio ID
+	 * @return	string
+	 */
+	function _PREMIUM_OVERVIEW_CARD_partial_view_by_portfolio( $portfolio_id )
+	{
+		$partial_view = '';
+		switch ($portfolio_id)
+		{
+			// Motor
+			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
+				$partial_view = 'premium/snippets/_card_overview_MOTOR';
+				break;
+
+			default:
+				# code...
+				break;
+		}
+		return $partial_view;
+	}
+}
+// ------------------------------------------------------------------------
+
+
+

@@ -187,12 +187,16 @@ $('#_portfolio-id').on('change', function(e){
 // Customer Finder
 $('#_find-customer').on('click', function(e){
     e.preventDefault();
+    var $this = $(this);
+    $this.button('loading');
+    InsQube.options.__btn_loading = $this;
     $.getJSON('<?php echo base_url()?>customers/page/f/y', function(r){
         if( typeof r.html !== 'undefined' && r.html != '' ){
             bootbox.dialog({
                 className: 'modal-default',
                 size: 'large',
-                closeButton: false,
+                title: 'Find Customer',
+                closeButton: true,
                 message: r.html,
                 buttons:{
                     cancel: {
@@ -202,18 +206,26 @@ $('#_find-customer').on('click', function(e){
                 }
             });
         }
+        // Reset Loading
+        $this.button('reset');
     });
 });
 
 // Object Finder
 $('#_find-object').on('click', function(e){
     e.preventDefault();
+    var $this = $(this);
+    $this.button('loading');
+    InsQube.options.__btn_loading = $this;
+
     var c = $('#customer-id').val(),
         p = $('#_portfolio-id').val();
 
     if( p == '' || c == '')
     {
         toastr.error('Please select customer and portfolio first.');
+        // Reset Loading
+        $this.button('reset');
         return false;
     }
     var url = '<?php echo base_url()?>objects/find/'+c + '/'+ p;
@@ -223,7 +235,8 @@ $('#_find-object').on('click', function(e){
             bootbox.dialog({
                 className: 'modal-default',
                 size: 'large',
-                closeButton: false,
+                closeButton: true,
+                title: 'Find Policy Object',
                 message: r.html,
                 buttons:{
                     cancel: {
@@ -233,6 +246,8 @@ $('#_find-object').on('click', function(e){
                 }
             });
         }
+        // Reset Loading
+        $this.button('reset');
     });
 });
 

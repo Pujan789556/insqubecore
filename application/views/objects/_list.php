@@ -14,8 +14,8 @@ $_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 			<th>Portfolio</th>
 			<th>Customer</th>
 			<th>Object Snippet</th>
-			<th>Preview</th>
 			<?php if( !$_flag__show_widget_row ):?>
+				<th>Preview</th>
 				<th>Actions</th>
 			<?php endif?>
 		</tr>
