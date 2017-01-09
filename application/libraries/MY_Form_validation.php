@@ -96,16 +96,18 @@ class MY_Form_validation extends CI_Form_validation {
 	/**
 	 * Prep Decimal
 	 *
+	 * If supplied value is numeric, convert this number into a decimal number
+	 *
 	 * @param	string
 	 * @return	string
 	 */
 	public function prep_decimal($str = '')
 	{
-		if( is_float($str) )
+		//  Number but not Decimal
+		if( is_numeric( $str ) && floor( $str ) == $str )
 		{
-			return $str;
+			$str = number_format($str, 2, '.', '');
 		}
-		$str = number_format($str, 2, '.', '');
 		return $str;
 	}
 }
