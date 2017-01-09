@@ -547,7 +547,7 @@ class Objects extends MY_Controller
 			}
 
 			$done 		= FALSE;
-			$v_rules 	= array_merge($v_rules, _PO_validation_rules($portfolio_id));
+			$v_rules 	= array_merge($v_rules, _PO_validation_rules($portfolio_id, TRUE));
             $this->form_validation->set_rules($v_rules);
 
 			if($this->form_validation->run() === TRUE )
@@ -656,6 +656,7 @@ class Objects extends MY_Controller
 			}
 			else
 			{
+				// echo validation_errors();exit;
 				$attributes = $record ? json_decode($record->attributes) : NULL;
 				$form_data['html_form_attribute_components'] = $this->gaf($portfolio_id, 'html', $attributes);
 

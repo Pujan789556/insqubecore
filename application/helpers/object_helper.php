@@ -88,16 +88,17 @@ if ( ! function_exists('_PO_validation_rules'))
 	 * Row Partial View for An Object
 	 *
 	 * @param integer $portfolio_id  Portfolio ID
+	 * @param bool $formatted  Should Return the Formatted Validation Rule ( if multi senction rules )
 	 * @return	array
 	 */
-	function _PO_validation_rules( $portfolio_id )
+	function _PO_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
 		$v_rules = [];
 		switch ($portfolio_id)
 		{
 			// Motor
 			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-				$v_rules = _PO_MOTOR_validation_rules();
+				$v_rules = _PO_MOTOR_validation_rules( $formatted );
 				break;
 
 			default:
@@ -180,9 +181,10 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 	 *
 	 * Returns array of form validation rules for motor policy object
 	 *
+	 * @param bool $formatted  Should Return the Formatted Validation Rule ( if multi senction rules )
 	 * @return	bool
 	 */
-	function _PO_MOTOR_validation_rules( )
+	function _PO_MOTOR_validation_rules( $formatted = FALSE )
 	{
 		$CI =& get_instance();
 
@@ -191,197 +193,235 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 		$object = $post['object'] ?? NULL;
 		$sub_portfolio 		= $object['sub_portfolio'] ?? '';
 		$cvc_type_rules 	= $sub_portfolio == 'CVC' ? 'trim|required|alpha' : 'trim|alpha';
-		return [
-			[
-		        'field' => 'object[ownership]',
-		        '_key' => 'ownership',
-		        'label' => 'Ownership',
-		        'rules' => 'trim|required|alpha|in_list[G,N]',
-		        '_type'     => 'dropdown',
-		        '_data' 	=> _PO_MOTOR_ownership_dropdown( ),
-		        '_default'  => 'N',
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[sub_portfolio]',
-		        '_key' => 'sub_portfolio',
-		        'label' => 'Sub-Portfolio',
-		        'rules' => 'trim|required|alpha|in_list[MCY,PVC,CVC]',
-		        '_id' 		=> '_motor-sub-portfolio',
-		        '_type'     => 'dropdown',
-		        '_data' 	=> _PO_MOTOR_sub_portfolio_dropdown( ),
-		        '_required' => true,
-		        '_extra_attributes' 	=> 'onchange="_po_motor_change_sub_portfolio(this)"'
-		    ],
-		    [
-		        'field' => 'object[cvc_type]',
-		        '_key' => 'cvc_type',
-		        'label' => 'Commercial Vehicle Type',
-		        'rules' => $cvc_type_rules,
-		        '_id' 		=> '_motor-vehicle-cvc-type',
-		        '_type'     => 'dropdown',
-		        '_data' 	=> _PO_MOTOR_CVC_type_dropdown(),
-		        '_required' => true
+
+		/**
+		 * Object Sections
+		 * -----------------
+		 * 	a. Vehicle Section
+		 * 	b. Trailer (Private/Commercial Vehicle)
+		 */
+
+		$v_rules = [
+
+			// Vehicle Section
+			'vehicle' =>[
+				[
+			        'field' => 'object[ownership]',
+			        '_key' => 'ownership',
+			        'label' => 'Ownership',
+			        'rules' => 'trim|required|alpha|in_list[G,N]',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _PO_MOTOR_ownership_dropdown( ),
+			        '_default'  => 'N',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[sub_portfolio]',
+			        '_key' => 'sub_portfolio',
+			        'label' => 'Sub-Portfolio',
+			        'rules' => 'trim|required|alpha|in_list[MCY,PVC,CVC]',
+			        '_id' 		=> '_motor-sub-portfolio',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _PO_MOTOR_sub_portfolio_dropdown( ),
+			        '_required' => true,
+			        '_extra_attributes' 	=> 'onchange="_po_motor_change_sub_portfolio(this)"'
+			    ],
+			    [
+			        'field' => 'object[cvc_type]',
+			        '_key' => 'cvc_type',
+			        'label' => 'Commercial Vehicle Type',
+			        'rules' => $cvc_type_rules,
+			        '_id' 		=> '_motor-vehicle-cvc-type',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _PO_MOTOR_CVC_type_dropdown(),
+			        '_required' => true
+			    ],
+
+			    [
+			        'field' => 'object[flag_mcy_df]',
+			        '_key' => 'flag_mcy_df',
+			        'label' => 'Disabled friendly Vehicle',
+			        'rules' => 'trim|integer|in_list[1]',
+			        '_id' 		=> '_motor-vehicle-df',
+			        '_type'     => 'checkbox',
+			        '_value' 	=> '1',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[engine_no]',
+			        '_key' => 'engine_no',
+			        'label' => 'Engine Number',
+			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[30]|strtoupper|callback__cb_motor_duplicate_engine_no',
+			        '_id' 		=> '_motor-engine-no',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[chasis_no]',
+			        '_key' => 'chasis_no',
+			        'label' => 'Chasis Number',
+			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[30]|strtoupper|callback__cb_motor_duplicate_chasis_no',
+			        '_id' 		=> '_motor-chasis-no',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[ec_unit]',
+			        '_key' => 'ec_unit',
+			        'label' => 'Engine Capacity Unit',
+			        'rules' => 'trim|required|alpha|in_list[CC,HP,KW]',
+			        '_id' 		=> '_motor-vehicle-ec-unit',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _PO_MOTOR_ec_unit_dropdown(),
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[engine_capacity]',
+			        '_key' => 'engine_capacity',
+			        'label' => 'Engine Capacity',
+			        'rules' => 'trim|required|integer|max_length[5]',
+			        '_id' 		=> '_motor-engine-capacity',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[year_mfd]',
+			        '_key' => 'year_mfd',
+			        'label' => 'Year Manufactured',
+			        'rules' => 'trim|required|integer|exact_length[4]',
+			        '_id' 		=> '_motor-mfd-year',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[reg_no]',
+			        '_key' => 'reg_no',
+			        'label' => 'Registration Number',
+			        'rules' => 'trim|max_length[30]|strtoupper|callback__cb_motor_duplicate_reg_no',
+			        '_id' 		=> '_motor-registration-no',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[reg_date]',
+			        '_key' => 'reg_date',
+			        'label' => 'Registration Date',
+			        'rules' => 'trim|required|valid_date',
+			        '_id' 		=> '_motor-registration-date',
+			        '_type'     => 'date',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[puchase_date]',
+			        '_key' => 'puchase_date',
+			        'label' => 'Purchase Date',
+			        'rules' => 'trim|required|valid_date',
+			        '_id' 		=> '_motor-purchase-date',
+			        '_type'     => 'date',
+			        '_required' => true
+			    ],
+			    [
+			    	'field' => 'object[vechile_status]',
+			        '_key' => 'vechile_status',
+			        'label' => 'Status on Purchase',
+			        'rules' => 'trim|required|alpha|in_list[N,O]',
+			        '_id' 		=> '_motor-purchase-status',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _PO_MOTOR_vehicle_status_dropdown(),
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[manufacturer]',
+			        '_key' => 'manufacturer',
+			        'label' => 'Manufacturer',
+			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[80]',
+			        '_id' 		=> '_motor-manufacturer',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[make]',
+			        '_key' => 'make',
+			        'label' => 'Make',
+			        'rules' => 'trim|required|max_length[60]',
+			        '_id' 		=> '_motor-make',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[model]',
+			        '_key' => 'model',
+			        'label' => 'Model',
+			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[60]',
+			        '_id' 		=> '_motor-model',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[price_vehicle]',
+			        '_key' => 'price_vehicle',
+			        'label' => 'Vehicle Price',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+			        '_id' 		=> '_motor-vehicle-price',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[price_accessories]',
+			        '_key' => 'price_accessories',
+			        'label' => 'Acessories Price',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+			        '_id' 		=> '_motor-accessories-price',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[carrying_unit]',
+			        '_key' => 'carrying_unit',
+			        'label' => 'Carrying Capacity Unit',
+			        'rules' => 'trim|required|alpha|in_list[S,T]',
+			        '_id' 		=> '_motor-vehicle-carrying-unit',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _PO_MOTOR_carrying_unit_dropdown(),
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[carrying_capacity]',
+			        '_key' => 'carrying_capacity',
+			        'label' => 'Carrying Capacity',
+			        'rules' => 'trim|required|integer|max_length[5]',
+			        '_id' 		=> '_motor-carrying-capacity',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ]
 		    ],
 
-		    [
-		        'field' => 'object[flag_mcy_df]',
-		        '_key' => 'flag_mcy_df',
-		        'label' => 'Disabled friendly Vehicle',
-		        'rules' => 'trim|integer|in_list[1]',
-		        '_id' 		=> '_motor-vehicle-df',
-		        '_type'     => 'checkbox',
-		        '_value' 	=> '1',
-		        '_required' => false
-		    ],
-		    [
-		        'field' => 'object[engine_no]',
-		        '_key' => 'engine_no',
-		        'label' => 'Engine Number',
-		        'rules' => 'trim|required|alpha_numeric_spaces|max_length[30]|strtoupper|callback__cb_motor_duplicate_engine_no',
-		        '_id' 		=> '_motor-engine-no',
-		        '_type'     => 'text',
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[chasis_no]',
-		        '_key' => 'chasis_no',
-		        'label' => 'Chasis Number',
-		        'rules' => 'trim|required|alpha_numeric_spaces|max_length[30]|strtoupper|callback__cb_motor_duplicate_chasis_no',
-		        '_id' 		=> '_motor-chasis-no',
-		        '_type'     => 'text',
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[ec_unit]',
-		        '_key' => 'ec_unit',
-		        'label' => 'Engine Capacity Unit',
-		        'rules' => 'trim|required|alpha|in_list[CC,HP,KW]',
-		        '_id' 		=> '_motor-vehicle-ec-unit',
-		        '_type'     => 'dropdown',
-		        '_data' 	=> _PO_MOTOR_ec_unit_dropdown(),
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[engine_capacity]',
-		        '_key' => 'engine_capacity',
-		        'label' => 'Engine Capacity',
-		        'rules' => 'trim|required|integer|max_length[5]',
-		        '_id' 		=> '_motor-engine-capacity',
-		        '_type'     => 'text',
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[year_mfd]',
-		        '_key' => 'year_mfd',
-		        'label' => 'Year Manufactured',
-		        'rules' => 'trim|required|integer|exact_length[4]',
-		        '_id' 		=> '_motor-mfd-year',
-		        '_type'     => 'text',
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[reg_no]',
-		        '_key' => 'reg_no',
-		        'label' => 'Registration Number',
-		        'rules' => 'trim|max_length[30]|strtoupper|callback__cb_motor_duplicate_reg_no',
-		        '_id' 		=> '_motor-registration-no',
-		        '_type'     => 'text',
-		        '_required' => false
-		    ],
-		    [
-		        'field' => 'object[reg_date]',
-		        '_key' => 'reg_date',
-		        'label' => 'Registration Date',
-		        'rules' => 'trim|required|valid_date',
-		        '_id' 		=> '_motor-registration-date',
-		        '_type'     => 'date',
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[puchase_date]',
-		        '_key' => 'puchase_date',
-		        'label' => 'Purchase Date',
-		        'rules' => 'trim|required|valid_date',
-		        '_id' 		=> '_motor-purchase-date',
-		        '_type'     => 'date',
-		        '_required' => true
-		    ],
-		    [
-		    	'field' => 'object[vechile_status]',
-		        '_key' => 'vechile_status',
-		        'label' => 'Status on Purchase',
-		        'rules' => 'trim|required|alpha|in_list[N,O]',
-		        '_id' 		=> '_motor-purchase-status',
-		        '_type'     => 'dropdown',
-		        '_data' 	=> _PO_MOTOR_vehicle_status_dropdown(),
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[manufacturer]',
-		        '_key' => 'manufacturer',
-		        'label' => 'Manufacturer',
-		        'rules' => 'trim|required|alpha_numeric_spaces|max_length[80]',
-		        '_id' 		=> '_motor-manufacturer',
-		        '_type'     => 'text',
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[make]',
-		        '_key' => 'make',
-		        'label' => 'Make',
-		        'rules' => 'trim|required|max_length[60]',
-		        '_id' 		=> '_motor-make',
-		        '_type'     => 'text',
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[model]',
-		        '_key' => 'model',
-		        'label' => 'Model',
-		        'rules' => 'trim|required|alpha_numeric_spaces|max_length[60]',
-		        '_id' 		=> '_motor-model',
-		        '_type'     => 'text',
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[price_vehicle]',
-		        '_key' => 'price_vehicle',
-		        'label' => 'Vehicle Price',
-		        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-		        '_id' 		=> '_motor-vehicle-price',
-		        '_type'     => 'text',
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[price_accessories]',
-		        '_key' => 'price_accessories',
-		        'label' => 'Acessories Price',
-		        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
-		        '_id' 		=> '_motor-accessories-price',
-		        '_type'     => 'text',
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[carrying_unit]',
-		        '_key' => 'carrying_unit',
-		        'label' => 'Carrying Capacity Unit',
-		        'rules' => 'trim|required|alpha|in_list[S,T]',
-		        '_id' 		=> '_motor-vehicle-carrying-unit',
-		        '_type'     => 'dropdown',
-		        '_data' 	=> _PO_MOTOR_carrying_unit_dropdown(),
-		        '_required' => true
-		    ],
-		    [
-		        'field' => 'object[carrying_capacity]',
-		        '_key' => 'carrying_capacity',
-		        'label' => 'Carrying Capacity',
-		        'rules' => 'trim|required|integer|max_length[5]',
-		        '_id' 		=> '_motor-carrying-capacity',
-		        '_type'     => 'text',
-		        '_required' => true
+		    // Trailer Section
+		    'trailer' => [
+		    	[
+			        'field' => 'object[trailer_price]',
+			        '_key' => 'trailer_price',
+			        'label' => 'Trailer Price',
+			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+			        '_id' 		=> '_motor-trailer-price',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
 		    ],
 		];
+
+		// return formatted?
+		$fromatted_v_rules = [];
+		if($formatted === TRUE)
+		{
+			foreach ($v_rules as $key => $rules)
+			{
+				$fromatted_v_rules = array_merge($fromatted_v_rules, $rules);
+			}
+			return $fromatted_v_rules;
+		}
+
+		return $v_rules;
 	}
 }
 

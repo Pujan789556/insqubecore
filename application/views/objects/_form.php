@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         // Hidden Fields
                         isset($record) ? ['id' => $record->id] : []); ?>
     <div class="box-header with-border">
-      <h3 class="box-title">Portfolio Information</h3>
+      <h3 class="no-margin">Portfolio Information</h3>
     </div>
     <div class="box-body">
         <?php
@@ -58,7 +58,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
     <div id="_object-box">
         <div class="box-header with-border">
-          <h3 class="box-title">Object Information</h3>
+          <h3 class="no-margin">Object Information</h3>
         </div>
         <div class="box-body" id="_object-attribute-box">
             <?php

@@ -141,10 +141,16 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
             }
         }
 
+        // No Claim Discount - Years & Rate
+        $no_claim_discount 		= $data['no_claim_discount'] ?? 0;
+        $no_claim_discount 		= $no_claim_discount ? $no_claim_discount : 0;
+		$year_no_claim_discount = $no_claim_discount ? _PORTFOLIO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
+
         // Rsik Group
         $tariff_rsik_group = json_decode($tariff_record->riks_group);
 
         // @TODO: Use a Separate Function To Calculate Thirdparty Only Premium
+
 
         /**
          * Package Comprehensive
@@ -186,8 +192,6 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 
 
 			// No Claim Discount : discount_GA
-			$no_claim_discount 		= $data['no_claim_discount'] ?? 0.00;
-			$year_no_claim_discount = $no_claim_discount ? _PORTFOLIO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : '';
 			$discount_GA 			= 0.00;
 			if($no_claim_discount)
 			{
@@ -263,19 +267,11 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 		/**
 		 * Third Party (आ)
 		 */
-
-		$year_no_claim_discount = 0;
-		$no_claim_discount = 0;
 		$premium_NGA = $premiumm_thirdparty;
 		$discount_NGA = 0.00;		// Compute No claim discount on Third Party if Comprehensive Package
-		if($policy_record->policy_package === 'cp')
+		if($policy_record->policy_package === 'cp' && $no_claim_discount != 0)
 		{
-			$no_claim_discount 		= $data['no_claim_discount'] ?? 0.00;
-			$year_no_claim_discount = $no_claim_discount ? _PORTFOLIO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : '';
-			if($no_claim_discount)
-			{
-				$discount_NGA = $premium_NGA * ($no_claim_discount/100.00);
-			}
+			$discount_NGA = $premium_NGA * ($no_claim_discount/100.00);
 		}
 
 		// आ TOTAL
@@ -311,7 +307,6 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 		$stamp_duty = $data['stamp_duty'];
 
 
-
 		/**
 		 * Cost Table: Third Party Only
 		 */
@@ -320,31 +315,33 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 			'title_np' 	=> 'तेश्रो पक्ष प्रतिको दायित्व बीमा वापत',
 			'title_en' 	=> 'Third party liability insurance amounted to',
 			'sections' 	=> [
-
-				// Section Ka
 				[
 					// Cost according to CC
 					[
 						'title' 	=> "सि. सि. अनुसारको बीमाशुल्क",
 						'amount' 	=> $premium_NGA,
 						'label' 	=> 'ङ'
-					],
-
-					// No Claim Discount
-					[
-						'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ङ” को $no_claim_discount %",
-						'amount' => $discount_NGA
-					],
-
-					// Sub Total
-					[
-						'title' 	=> 'जम्मा', // Subtotal
-						'amount' 	=> $premium_AA_total,
-						'section_total' => true
 					]
 				]
 			]
 		];
+
+		// Noclaim Dicount Only if Comprehensive
+		if($policy_record->policy_package === 'cp')
+		{
+			$__cost_table_third_party['sections'][0][] = [
+				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ङ” को $no_claim_discount %",
+				'amount' => $discount_NGA
+			];
+		}
+
+		// Third Party : Sub Total
+		$__cost_table_third_party['sections'][0][] = [
+			'title' 	=> 'जम्मा', // Subtotal
+			'amount' 	=> $premium_AA_total,
+			'section_total' => true
+		];
+
 
 		/**
 		 * Disabled Friendly Discount
