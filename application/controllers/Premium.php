@@ -309,6 +309,12 @@ class Premium extends MY_Controller
 		// Let's get the premium goodies for given portfolio
 		$premium_goodies = $this->__premium_goodies($policy_record, $policy_object);
 
+		// Valid Goodies?
+		if( empty($premium_goodies) )
+		{
+			$this->template->render_404('', 'No premium configuration found for this portfolio.');
+		}
+
 		// Premium Form
 		$form_view = $this->__get_form_view_by_portfolio($policy_record);
 
@@ -395,72 +401,122 @@ class Premium extends MY_Controller
 				exit(1);
 			}
 
+
+			// Portfolio Setting Record
+			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+			// Common Field: Stamp Duty
+			$rule_stamp_duty = [
+                'field' => 'stamp_duty',
+                'label' => 'Stamp Duty(Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                '_type'     => 'text',
+                '_default' 	=> $pfs_record->stamp_duty,
+                '_required' => true
+            ];
+
 			$validation_rules = [];
+
+			/**
+			 * Validation Rule Logic
+			 * --------------------------
+			 *
+			 * If policy package is "Third Party", we don't need any other validation fields
+			 * We can simply return the stamp validation rules
+			 */
+			if($policy_record->policy_package == 'tp')
+			{
+				$validation_rules = [$rule_stamp_duty];
+
+				return  [
+					'validation_rules' 	=> $validation_rules,
+					'tariff_record' 	=> $tariff_record
+				];
+			}
+
+			$__common_validation_rules =  [
+				[
+                    'field' => 'dr_voluntary_excess',
+                    'label' => 'Voluntary Excess',
+                    'rules' => 'trim|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'dropdown',
+                    '_data' 	=> _PORTFOLIO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess),
+                    '_required' => false
+                ],
+                [
+                    'field' => 'no_claim_discount',
+                    'label' => 'No Claim Discount',
+                    'rules' => 'trim|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'dropdown',
+                    '_data' 	=> _PORTFOLIO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount),
+                    '_required' => false
+                ],
+                [
+                    'field' => 'riks_group[flag_risk_mob]',
+                    'label' => 'Pool Risk Mob (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा)',
+                    'rules' => 'trim|integer|in_list[1]',
+                    '_type'     => 'checkbox',
+                    '_value' 	=> '1',
+                    '_required' => false
+                ],
+                [
+                    'field' => 'riks_group[flag_risk_terorrism]',
+                    'label' => 'Pool Risk Terorrism (आतंककारी/विध्वंशात्मक कार्य जोखिम बीमा)',
+                    'rules' => 'trim|integer|in_list[1]',
+                    '_type'     => 'checkbox',
+                    '_value' 	=> '1',
+                    '_required' => false
+                ]
+			];
+
 			switch ($attributes->sub_portfolio)
 			{
 				case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
+					$validation_rules = array_merge($__common_validation_rules, [$rule_stamp_duty]);
+					break;
 
-					/**
-					 * Validation Rule Logic
-					 * --------------------------
-					 *
-					 * Third Party Package: Only Ask for Stamp Duty
-					 */
+				case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE:
+					$extra_rules = [
 
-					// Portfolio Setting Record
-					$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+						// Commercial Use
+						[
+		                    'field' => 'flag_commercial_use',
+		                    'label' => 'Commercial Use (निजी प्रयोजनको लागि भाडामा दिएको)',
+		                    'rules' => 'trim|integer|in_list[1]',
+		                    '_type'     => 'checkbox',
+		                    '_value' 	=> '1',
+		                    '_required' => false
+		                ],
 
-					$rule_stamp_duty = [
-	                    'field' => 'stamp_duty',
-	                    'label' => 'Stamp Duty(Rs.)',
-	                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
-	                    '_type'     => 'text',
-	                    '_default' 	=> $pfs_record->stamp_duty,
-	                    '_required' => true
-	                ];
-					if($policy_record->policy_package == 'tp')
-					{
-						$validation_rules = [$rule_stamp_duty];
-					}
-					else
-					{
-						$validation_rules = [
-							[
-			                    'field' => 'dr_voluntary_excess',
-			                    'label' => 'Voluntary Excess',
-			                    'rules' => 'trim|prep_decimal|decimal|max_length[5]',
-			                    '_type'     => 'dropdown',
-			                    '_data' 	=> _PORTFOLIO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess),
-			                    '_required' => false
-			                ],
-			                [
-			                    'field' => 'no_claim_discount',
-			                    'label' => 'No Claim Discount',
-			                    'rules' => 'trim|prep_decimal|decimal|max_length[5]',
-			                    '_type'     => 'dropdown',
-			                    '_data' 	=> _PORTFOLIO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount),
-			                    '_required' => false
-			                ],
-			                [
-			                    'field' => 'riks_group[flag_risk_mob]',
-			                    'label' => 'Pool Risk Mob (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा)',
-			                    'rules' => 'trim|integer|in_list[1]',
-			                    '_type'     => 'checkbox',
-			                    '_value' 	=> '1',
-			                    '_required' => false
-			                ],
-			                [
-			                    'field' => 'riks_group[flag_risk_terorrism]',
-			                    'label' => 'Pool Risk Terorrism (आतंककारी/विध्वंशात्मक कार्य जोखिम बीमा)',
-			                    'rules' => 'trim|integer|in_list[1]',
-			                    '_type'     => 'checkbox',
-			                    '_value' 	=> '1',
-			                    '_required' => false
-			                ],
+		                // Pay for Towing
+						[
+		                    'field' => 'flag_towing',
+		                    'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
+		                    'rules' => 'trim|integer|in_list[1]',
+		                    '_type'     => 'checkbox',
+		                    '_value' 	=> '1',
+		                    '_required' => false
+		                ],
 
-			                $rule_stamp_duty
-						];
-					}
+		                // Accident Insurance of Driver
+						[
+		                    'field' => 'accident_insurance[driver]',
+		                    'label' => 'Accident Insurance of Driver (चालकको दुर्घटना बीमा)',
+		                    'rules' => 'trim|integer|in_list[1]',
+		                    '_type'     => 'checkbox',
+		                    '_value' 	=> '1',
+		                    '_required' => false
+		                ],
+		                [
+		                    'field' => 'accident_insurance[insured_party_and_passenger]',
+		                    'label' => 'Accident Insurance of Insured Party & Passenger (बीमित तथा यात्रीको दुर्घटना बीमा)',
+		                    'rules' => 'trim|integer|in_list[1]',
+		                    '_type'     => 'checkbox',
+		                    '_value' 	=> '1',
+		                    '_required' => false
+		                ]
+					];
+					$validation_rules = array_merge($__common_validation_rules, $extra_rules, [$rule_stamp_duty]);
 					break;
 
 				default:

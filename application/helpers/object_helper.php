@@ -348,7 +348,7 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 		        'field' => 'object[price_vehicle]',
 		        '_key' => 'price_vehicle',
 		        'label' => 'Vehicle Price',
-		        'rules' => 'trim|required|prep_decimal|decimal|max_length[11]',
+		        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 		        '_id' 		=> '_motor-vehicle-price',
 		        '_type'     => 'text',
 		        '_required' => true
@@ -357,10 +357,10 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 		        'field' => 'object[price_accessories]',
 		        '_key' => 'price_accessories',
 		        'label' => 'Acessories Price',
-		        'rules' => 'trim|required|prep_decimal|decimal|max_length[11]',
+		        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
 		        '_id' 		=> '_motor-accessories-price',
 		        '_type'     => 'text',
-		        '_required' => false
+		        '_required' => true
 		    ],
 		    [
 		        'field' => 'object[carrying_unit]',

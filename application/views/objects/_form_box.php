@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form Outer Box: Premium
  */
 ?>
-<div id="form-box-premium">
+<div id="form-box-object">
     <?php
     /**
      * Load object form

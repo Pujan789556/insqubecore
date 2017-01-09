@@ -144,6 +144,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
         // Rsik Group
         $tariff_rsik_group = json_decode($tariff_record->riks_group);
 
+        // @TODO: Use a Separate Function To Calculate Thirdparty Only Premium
 
         /**
          * Package Comprehensive

@@ -312,6 +312,7 @@ class Template {
 		{
 			show_404( $view );
 		}
+		exit(1);
 	}
 
 	private function _404_message( $method )
