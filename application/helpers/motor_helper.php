@@ -499,12 +499,12 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 		$trolly_tariff = $tariff_record->trolly_tariff ? json_decode($tariff_record->trolly_tariff) : NULL;
 
 		// Vehicle Price
-		$vehicle_price 				= $attributes->price_vehicle;
-		$vehicle_price_accessories 	= $attributes->price_accessories;
+		$vehicle_price 				= (float)$attributes->price_vehicle;
+		$vehicle_price_accessories 	= (float)$attributes->price_accessories;
 		$vehicle_total_price  		= $vehicle_price + $vehicle_price_accessories;
 
 		// Trolly/Trailer Price
-		$trailer_price 				= $attributes->trailer_price ?? 0.00;
+		$trailer_price 				= $attributes->trailer_price ? (float)$attributes->trailer_price : 0.00;
 
 		// Vehicle Age
 		$vehicle_registration_date 	= new DateTime($attributes->reg_date);
@@ -528,19 +528,19 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
         {
             if( $attributes->engine_capacity >= $t->ec_min && $attributes->engine_capacity <= $t->ec_max )
             {
-            	$minus_amount_according_to_cc 			= $t->rate->minus_amount;
-                $base_fragment 							= $t->rate->base_fragment;
-                $base_fragment_rate 					= $t->rate->base_fragment_rate;
-                $rest_fragment_rate 					= $t->rate->rest_fragment_rate;
-                $premiumm_third_party 					= $t->third_party;
+            	$minus_amount_according_to_cc 			= (float)$t->rate->minus_amount;
+                $base_fragment 							= (float)$t->rate->base_fragment;
+                $base_fragment_rate 					= (float)$t->rate->base_fragment_rate;
+                $rest_fragment_rate 					= (float)$t->rate->rest_fragment_rate;
+                $premiumm_third_party 					= (float)$t->third_party;
 
                 if( $t->age->age1_min <= $vehicle_age_in_yrs && $vehicle_age_in_yrs <= $t->age->age1_max )
 				{
-					$vehicle_over_age_rate = $t->age->rate1;
+					$vehicle_over_age_rate = (float)$t->age->rate1;
 				}
 				else if( $t->age->age2_min <= $vehicle_age_in_yrs && $vehicle_age_in_yrs <= $t->age->age2_max )
 				{
-					$vehicle_over_age_rate = $t->age->rate2;
+					$vehicle_over_age_rate = (float)$t->age->rate2;
 				}
                 break;
             }
@@ -599,7 +599,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 
 			// Trailer/Trolly Premium
 			$__premium_A_row_3 = 0.00;
-			if($trailer_price)
+			if( $trailer_price )
 			{
 				$__premium_A_row_3 = ( $trailer_price * ($trolly_tariff->rate/100.00) ) - $trolly_tariff->minus_amount;
 			}
