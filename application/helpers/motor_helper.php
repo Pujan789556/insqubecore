@@ -526,7 +526,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 
         foreach ($default_tariff as $t)
         {
-            if( $attributes->engine_capacity >= $t->ec_min && $attributes->engine_capacity <= $t->ec_max )
+        	// Should also match Engine Capacity Type
+            if( $attributes->engine_capacity >= $t->ec_min && $attributes->engine_capacity <= $t->ec_max && $attributes->ec_unit === $t->ec_type )
             {
             	$minus_amount_according_to_cc 			= (float)$t->rate->minus_amount;
                 $base_fragment 							= (float)$t->rate->base_fragment;

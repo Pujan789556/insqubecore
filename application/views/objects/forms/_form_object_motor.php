@@ -72,8 +72,13 @@ $this->load->view('templates/_common/_form_components_horz', [
 
         // Default Engine Capacity and Carrying Capacity Unit ( Motorcycle & Private Vehicle -> CC | Seat )
         if( v !== '' &&  v !== 'CVC'){
-            $('#_motor-vehicle-ec-unit').val('CC');
-            $('#_motor-vehicle-carrying-unit').val('S');
+
+            // We change if not already not anything (add mode)
+            var ec_unit = $('#_motor-vehicle-ec-unit').val(),
+            cr_unit  = $('#_motor-vehicle-carrying-unit').val();
+
+            if(ec_unit == '')$('#_motor-vehicle-ec-unit').val('CC');
+            if(cr_unit == '')$('#_motor-vehicle-carrying-unit').val('S');
         }
     }
 
