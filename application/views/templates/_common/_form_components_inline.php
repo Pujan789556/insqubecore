@@ -53,7 +53,8 @@ foreach($form_elements as $element):?>
 
 
         $value = '';
-        if(set_value($element['field']))
+        // if(set_value($element['field']))
+        if($this->input->post())
         {
             $value = set_value($element['field'], '', FALSE);
         }

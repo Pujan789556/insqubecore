@@ -53,7 +53,7 @@ foreach($form_elements as $element):?>
 
 
             $value = '';
-            if(set_value($element['field']))
+            if($this->input->post())
             {
                 $value = set_value($element['field'], '', FALSE);
             }
@@ -76,6 +76,18 @@ foreach($form_elements as $element):?>
                 $value = $element['_default'] ?? '';
             }
 
+
+            /**
+             * Do We have extra html, Just above the element?
+             *
+             *  HTML with JS or anything that is required in some cases to perform certain tasks
+             */
+            echo $element['_extra_html_above'] ?? '';
+
+
+            /**
+             * Let's Render the Element
+             */
             switch($element['_type'])
             {
                 case 'text':
@@ -144,9 +156,16 @@ foreach($form_elements as $element):?>
                     echo form_switch($element_config, $element['_value'], $checked, $extra_attributes);
                     break;
             }
-            ?>
-            <?php if(isset($element['_help_text'])):?><p class="help-block"><?php echo $element['_help_text']; ?></p><?php endif?>
 
+            /**
+             * Do We have extra html, Just below the element?
+             *
+             *  HTML with JS or anything that is required in some cases to perform certain tasks
+             */
+            echo $element['_extra_html_below'] ?? '';
+            ?>
+
+            <?php if(isset($element['_help_text'])):?><p class="help-block"><?php echo $element['_help_text']; ?></p><?php endif?>
             <?php if(form_error($element_config['name'])):?><span class="help-block"><?php echo form_error($element_config['name']); ?></span><?php endif?>
         </div>
     </div>
