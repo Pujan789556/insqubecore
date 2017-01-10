@@ -911,15 +911,12 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 		}
 
 		// Third Party : Sub Total (छ Total)
+		$premium_AA_total = $__premium_AA_row_1 - $__premium_AA_row_2;
 		$__cost_table_AA['sections'][] = [
 			'title' 	=> 'जम्मा', // Subtotal
 			'amount' 	=> $premium_AA_total,
 			'section_total' => true
 		];
-
-
-		// आ TOTAL
-		$premium_AA_total = $__premium_AA_row_1 - $__premium_AA_row_2;
 
 		// ---------------------------------------------------------------------------------------
 
