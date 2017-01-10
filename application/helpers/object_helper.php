@@ -194,6 +194,19 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 		$sub_portfolio 		= $object['sub_portfolio'] ?? '';
 		$cvc_type_rules 	= $sub_portfolio == 'CVC' ? 'trim|required|alpha' : 'trim|alpha';
 
+		// To Be Intimated Set?
+		$flag_to_be_intimated = $object['flag_to_be_intimated'] ?? NULL;
+		if($flag_to_be_intimated)
+		{
+			$reg_no_rules  = 'trim|max_length[30]|strtoupper|in_list[TO BE INTIMATED]';
+			$reg_date_rule = 'trim|valid_date';
+		}
+		else
+		{
+			$reg_no_rules  = 'trim|max_length[30]|strtoupper|callback__cb_motor_duplicate_reg_no';
+			$reg_date_rule = 'trim|required|valid_date';
+		}
+
 		/**
 		 * Object Sections
 		 * -----------------
@@ -247,6 +260,7 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        '_value' 	=> '1',
 			        '_required' => false
 			    ],
+
 			    [
 			        'field' => 'object[engine_no]',
 			        '_key' => 'engine_no',
@@ -293,11 +307,24 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        '_type'     => 'text',
 			        '_required' => true
 			    ],
+
+			    // For New Vehicle, It can Have "To Be Intimated"
+			    [
+			        'field' => 'object[flag_to_be_intimated]',
+			        '_key' => 'flag_to_be_intimated',
+			        'label' => 'To Be Intimated (<small>Click here if the vehicle is not registered yet.</small>)',
+			        'rules' => 'trim|integer|in_list[1]',
+			        '_id' 		=> '_motor-vehicle-to-be-intimated',
+			        '_type'     => 'checkbox',
+			        '_value' 	=> '1',
+			        '_required' => false
+			    ],
+
 			    [
 			        'field' => 'object[reg_no]',
 			        '_key' => 'reg_no',
 			        'label' => 'Registration Number',
-			        'rules' => 'trim|max_length[30]|strtoupper|callback__cb_motor_duplicate_reg_no',
+			        'rules' => $reg_no_rules,
 			        '_id' 		=> '_motor-registration-no',
 			        '_type'     => 'text',
 			        '_required' => false
@@ -306,7 +333,7 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        'field' => 'object[reg_date]',
 			        '_key' => 'reg_date',
 			        'label' => 'Registration Date',
-			        'rules' => 'trim|required|valid_date',
+			        'rules' => $reg_date_rule,
 			        '_id' 		=> '_motor-registration-date',
 			        '_type'     => 'date',
 			        '_required' => true

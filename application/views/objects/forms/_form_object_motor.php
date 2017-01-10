@@ -35,6 +35,25 @@ $this->load->view('templates/_common/_form_components_horz', [
 ?>
 
 <script type="text/javascript">
+function _po_to_be_intimated(d, et){
+    var $this       = $(d), // the source element
+    $reg_box        = $('#_motor-registration-no').closest('.form-group'),
+    $reg_date_box   = $('#_motor-registration-date').closest('.form-group'),
+    $reg_field      = $('#_motor-registration-no'),
+    $reg_date_field = $('#_motor-registration-date');
+
+    if(et === 'ifChecked' || $this.prop('checked') === true){
+        $reg_field.val('TO BE INTIMATED');
+        $reg_date_field.val('');
+
+        $reg_box.hide(500);
+        $reg_date_box.hide(500);
+    }else{
+        $reg_box.show(500);
+        $reg_date_box.show(500);
+    }
+}
+
 function _po_motor_change_sub_portfolio(d){
     var $this = $(d),
         v = $this.val();
@@ -52,6 +71,14 @@ function _po_motor_change_sub_portfolio(d){
 }
 
 (function($){
+
+    // Subportfolio Change
     _po_motor_change_sub_portfolio('#_motor-sub-portfolio');
+
+    // To Be Intimated Toggle
+    _po_to_be_intimated('#_motor-vehicle-to-be-intimated');
+    $('#_motor-vehicle-to-be-intimated').on('ifChecked ifUnchecked', function(event){
+        _po_to_be_intimated(this, event.type);
+    });
 })(jQuery);
 </script>
