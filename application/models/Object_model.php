@@ -140,8 +140,11 @@ class Object_model extends MY_Model
         $_flag_editable  = FALSE;
         $policy_record = $this->get_active_policy($id);
 
-
-        if( $policy_record && belongs_to_me($policy_record->branch_id, FALSE) === TRUE && is_policy_editable($policy_record->status, FALSE) === TRUE)
+        if(!$policy_record)
+        {
+            $_flag_editable  = TRUE;
+        }
+        else if( $policy_record && belongs_to_me($policy_record->branch_id, FALSE) === TRUE && is_policy_editable($policy_record->status, FALSE) === TRUE)
         {
             $_flag_editable  = TRUE;
         }

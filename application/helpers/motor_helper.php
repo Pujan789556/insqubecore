@@ -598,7 +598,11 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 
 
 			// Trailer/Trolly Premium
-			$__premium_A_row_3 = ( $trailer_price * ($trolly_tariff->rate/100.00) ) - $trolly_tariff->minus_amount;
+			$__premium_A_row_3 = 0.00;
+			if($trailer_price)
+			{
+				$__premium_A_row_3 = ( $trailer_price * ($trolly_tariff->rate/100.00) ) - $trolly_tariff->minus_amount;
+			}
 			$__cost_table_A['sections'][] = [
 				'title' 	=> "ट्रेलर (मालसामान ओसार्ने) वापतको बीमाशुल्क ( घोषित मूल्यको{$trolly_tariff->rate}% - रु. {$trolly_tariff->minus_amount})का दरले",
 				'amount' 	=> $__premium_A_row_3

@@ -30,6 +30,13 @@ class Customer_model extends MY_Model
             '_data'     => [ 'I' => 'Individual', 'C' => 'Company'],
             '_required' => true
         ],
+        [
+            'field' => 'full_name',
+            'label' => 'Full Name',
+            'rules' => 'trim|required|max_length[80]',
+            '_type'     => 'text',
+            '_required' => true
+        ],
 
         // If type is Company
         [
@@ -53,13 +60,7 @@ class Customer_model extends MY_Model
             '_type'     => 'text',
             '_required' => false
         ],
-        [
-            'field' => 'full_name',
-            'label' => 'Full Name',
-            'rules' => 'trim|required|max_length[80]',
-            '_type'     => 'text',
-            '_required' => true
-        ],
+
         [
             'field' => 'pan',
             'label' => 'PAN',
