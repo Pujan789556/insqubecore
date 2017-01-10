@@ -492,8 +492,9 @@ class Tariff extends MY_Controller
                 for($i = 0; $i < $tariff_count; $i++)
                 {
                 	$single_tarrif = [
-                		'ec_min' => $tariff['ec_min'][$i],
-                		'ec_max' => $tariff['ec_max'][$i],
+                        'ec_type'   => $tariff['ec_type'][$i],
+                        'ec_min'    => $tariff['ec_min'][$i],
+                        'ec_max'    => $tariff['ec_max'][$i],
 	               		'rate' => [
 							'age' 				=> $tariff['rate']['age'][$i],
 							'rate' 				=> $tariff['rate']['rate'][$i],

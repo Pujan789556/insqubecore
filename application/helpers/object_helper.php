@@ -582,6 +582,30 @@ if ( ! function_exists('_PO_MOTOR_ec_unit_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+
+if ( ! function_exists('_PO_MOTOR_ec_unit_tariff_dropdown'))
+{
+	/**
+	 * Get Policy Object - Motor - Engine Capacity Dropdown for Tariff Settings
+	 *
+	 * Motor Engine Capacity for Tariff Setting dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	bool
+	 */
+	function _PO_MOTOR_ec_unit_tariff_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = _PO_MOTOR_ec_unit_dropdown(FALSE) + ['T' => 'Metric Ton'];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('_PO_MOTOR_carrying_unit_dropdown'))
 {
 	/**
@@ -594,7 +618,7 @@ if ( ! function_exists('_PO_MOTOR_carrying_unit_dropdown'))
 	 */
 	function _PO_MOTOR_carrying_unit_dropdown( $flag_blank_select = true )
 	{
-		$dropdown = ['S' => 'Seat', 'T' => 'Ton'];
+		$dropdown = ['S' => 'Seat', 'T' => 'Metric Ton'];
 
 		if($flag_blank_select)
 		{

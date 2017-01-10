@@ -75,6 +75,7 @@ class Tariff_motor_model extends MY_Model
              *      ec_min: xxx,
              *      ec_max: yyy,
              *      rate: {
+             *          ec_type: [CC  | KW | HP | TON] // Engine Capacity Type
              *          age: nnn,           // Default Max Age
              *          rate: aaa,                // Ghoshit mulya ko x%
              *          minus_amount: bbb,          // Amount to Minus
@@ -104,6 +105,14 @@ class Tariff_motor_model extends MY_Model
              *  }]
              */
             'tariff' => [
+                [
+                    'field' => 'tariff[ec_type][]',
+                    'label' => 'Engine Capacity Type',
+                    'rules' => 'trim|required|alpha|max_length[2]',
+                    '_type'     => 'dropdown',
+                    '_data'     => _PO_MOTOR_ec_unit_tariff_dropdown(),
+                    '_required' => true
+                ],
                 [
                     'field' => 'tariff[ec_min][]',
                     'label' => 'Default Min (CC|KW|TON)',
