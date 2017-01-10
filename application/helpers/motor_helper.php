@@ -152,69 +152,128 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
         /**
          * Package Comprehensive
          */
-        $premium_A_total = 0.00;
-        $premium_I_total = 0.00;
+        $premium_A_total 	= 0.00;
+        $premium_AA_total 	= 0.00;
+        $premium_I_total 	= 0.00;
         if($policy_record->policy_package === 'cp')
 		{
 			/**
 			 * Defaults (अ)
 			 */
+			$__cost_table_A = [
+				'column_head' => 'अ',
+				'title_np' 	=> 'सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा तथा दुर्घटना बीमा वापत',
+				'title_en' 	=> 'Insurance against vehicle damage/loss & accident insurance amounted to'
+			];
 
-			// premium_ka =  X% of Vehicle Price
-			$premium_KA =  $vehicle_total_price * ($default_rate/100.00);
+			// Default Premium =  X% of Vehicle Price
+			$__premium_A_row_1 =  $vehicle_total_price * ($default_rate/100.00);
 
 
 			// Additional cost due to vehicle over aging
-			$premium_KA_additional = 0.00;
+			$__premium_A_row_2 = 0.00;
 			if( $vehicle_over_age_rate > 0.00 )
 			{
-				$premium_KA_additional = $premium_KA * ($vehicle_over_age_rate/100.00);
+				$__premium_A_row_2 = $__premium_A_row_1 * ($vehicle_over_age_rate/100.00);
 			}
-			// premium_KHA =  premium_KA + premium_KA_additional
-			$premium_KHA = $premium_KA + $premium_KA_additional;
+
+			$__cost_table_A['sections'][] = [
+				'label' 	=> 'क',
+				'title' 	=> "सि.सि.तथा घोषित मूल्य (सरसामान सहित) अनुसार बीमा शुल्क (घोषित मूल्यको {$default_rate}%)",
+				'amount' 	=> $__premium_A_row_1
+			];
+			$__cost_table_A['sections'][] = [
+				'title' 	=> "सवारी साधन {$vehicle_age_in_yrs} वर्ष पुरानो भए वापत थप बीमाशुल्क: “क” को {$vehicle_over_age_rate}%",
+				'amount' 	=> $__premium_A_row_2
+			];
+
+			// Sub Total : ख
+			$__premium_A_row_3 = $__premium_A_row_1 + $__premium_A_row_2;
+			$__cost_table_A['sections'][] = [
+				'label' 	=> 'ख',
+				'title' 	=> "",
+				'amount' 	=> $__premium_A_row_3
+			];
 
 
 			// Discount on Voluntary Excess : discount_KHA
-			$discount_KHA 				= 0.00;
-
+			$__premium_A_row_4 				= 0.00;
 			$dr_voluntary_excess 		= $data['dr_voluntary_excess'] ?? 0.00;
 			$amount_voluntary_excess 	= $dr_voluntary_excess ? _PORTFOLIO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess] : 0.00;
 
 			if($dr_voluntary_excess)
 			{
-				$discount_KHA = $premium_KHA * ($dr_voluntary_excess/100.00);
+				$__premium_A_row_4 = $__premium_A_row_3 * ($dr_voluntary_excess/100.00);
 			}
-			// premium_ga = premium_KHA - discount_KHA
-			$premium_GA = $premium_KHA - $discount_KHA;
+			$__cost_table_A['sections'][] = [
+				'title' 	=> "बीमित स्वयंले व्यहोर्ने स्वेच्छीक अधिक रु {$amount_voluntary_excess} वापत छुटः “ख” को {$dr_voluntary_excess} %",
+				'amount' 	=> $__premium_A_row_4
+			];
+
+
+			// Sub Total : ग
+			$__premium_A_row_5 = $__premium_A_row_3 - $__premium_A_row_4;
+			$__cost_table_A['sections'][] = [
+				'label' 	=> 'ग',
+				'title' 	=> "",
+				'amount' 	=> $__premium_A_row_5
+			];
 
 
 			// No Claim Discount : discount_GA
-			$discount_GA 			= 0.00;
+			$__premium_A_row_6 			= 0.00;
 			if($no_claim_discount)
 			{
-				$discount_GA = $premium_GA * ($no_claim_discount/100.00);
+				$__premium_A_row_6 = $__premium_A_row_5 * ($no_claim_discount/100.00);
 			}
-			// premium_GHA = premium_GA - discount_GA
-			$premium_GHA = $premium_GA - $discount_GA;
+			$__cost_table_A['sections'][] = [
+				'title' 	=> "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ग” को $no_claim_discount %",
+				'amount' 	=> $__premium_A_row_6
+			];
+
+
+			// Sub Total : घ
+			$__premium_A_row_7 = $__premium_A_row_5 - $__premium_A_row_6;
+			$__cost_table_A['sections'][] = [
+				'label' 	=> 'घ',
+				'title' 	=> "",
+				'amount' 	=> $__premium_A_row_7
+			];
+
 
 			//
 			// Agent Commission/Direct Discount? -> Applies only Non-GOVT
 			//
-			$discount_GHA = 0.00;
+			$__premium_A_row_8 = 0.00;
 			if( $policy_record->flag_dc === 'D' && $attributes->ownership === IQB_PORTFOLIO_OWNERSHIP_NON_GOVT )
 			{
 				// X% of GHA
-				$discount_GHA = $premium_GHA * ($pfs_record->direct_discount/100.00);
+				$__premium_A_row_8 = $__premium_A_row_7 * ($pfs_record->direct_discount/100.00);
 			}
+			$__cost_table_A['sections'][] = [
+				'title' 	=> "प्रत्यक्ष बीमा वापत छूटः “घ” को {$pfs_record->direct_discount} %",
+				'amount' 	=> $__premium_A_row_8
+			];
 
 			// अ Total
-			$premium_A_total = $premium_GHA  - $discount_GHA;
+			$premium_A_total = $__premium_A_row_7  - $__premium_A_row_8;
+			$__cost_table_A['sections'][] = [
+				'title' 		=> "जम्मा",
+				'amount' 		=> $premium_A_total,
+				'section_total' => true
+			];
 
 			// ---------------------------------------------------------------------------------------
+
 
 			/**
 			 * Risk Pool (इ)
 			 */
+			$__cost_table_I = [
+				'column_head' => 'इ',
+				'title_np' 	=> 'जोखिम समूह थप गरे वापत',
+				'title_en' 	=> 'Pool risk insurance amounted to'
+			];
 			$flag_risk_mob = $data['riks_group']['flag_risk_mob'] ?? NULL;
 			$flag_risk_terorrism = $data['riks_group']['flag_risk_terorrism'] ?? NULL;
 
@@ -223,13 +282,20 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 			{
 				$premium_risk_mob = $vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
 			}
+			$__cost_table_I['sections'][] = [
+				'title' => "(क) हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_mob}% का दरले)",
+				'amount' => $premium_risk_mob
+			];
 
 			$premium_risk_terorrism = 0.00;
 			$premium_for_insured_covered_on_terorrism = 0.00;
 			if($flag_risk_terorrism)
 			{
 				$premium_risk_terorrism = $vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
-
+				$__cost_table_I['sections'][] = [
+					'title' => "(ख) आतंककारी तथा विध्वंसात्मक कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_terorrism}%का दरले)",
+					'amount' => $premium_risk_terorrism
+				];
 				// Premium for "Per Thousand Insured Amount" on Terorrism rate_additionl_per_thousand_on_extra_rate
 
 				// Driver Covered
@@ -251,12 +317,20 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 				$premium_passenger = $passenger_count * (($insured_value_tariff->driver/1000.00) * $tariff_rsik_group->rate_additionl_per_thousand_on_extra_rate);
 
 				$premium_for_insured_covered_on_terorrism = $premium_driver + $premium_passenger;
+
+				$__cost_table_I['sections'][] = [
+					'title' => "(ग) चालक तथा पछाडि बस्ने व्यक्तिको आतंकबाद वापत {$tariff_rsik_group->rate_additionl_per_thousand_on_extra_rate} प्रति हजारका दरले ",
+					'amount' => $premium_for_insured_covered_on_terorrism
+				];
 			}
-
-
-
 			// इ TOTAL
 			$premium_I_total = $premium_risk_mob + $premium_risk_terorrism + $premium_for_insured_covered_on_terorrism;
+
+			$__cost_table_I['sections'][] = [
+				'title' 	=> 'जम्मा', // Subtotal
+				'amount' 	=> $premium_I_total,
+				'section_total' => true
+			];
 		}
 
 
@@ -264,15 +338,14 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 		/**
 		 * Third Party (आ)
 		 */
-		$premium_NGA = $premiumm_third_party;
-		$discount_NGA = 0.00;		// Compute No claim discount on Third Party if Comprehensive Package
+		$amount_noClaimDiscount_on_thirdParty = 0.00;		// Compute No claim discount on Third Party if Comprehensive Package
 		if($policy_record->policy_package === 'cp' && $no_claim_discount != 0)
 		{
-			$discount_NGA = $premium_NGA * ($no_claim_discount/100.00);
+			$amount_noClaimDiscount_on_thirdParty = $premiumm_third_party * ($no_claim_discount/100.00);
 		}
 
 		// आ TOTAL
-		$premium_AA_total = $premium_NGA - $discount_NGA;
+		$premium_AA_total = $premiumm_third_party - $amount_noClaimDiscount_on_thirdParty;
 
 		// ---------------------------------------------------------------------------------------
 
@@ -307,7 +380,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 		/**
 		 * Cost Table: Third Party Only
 		 */
-		$__cost_table_third_party = [
+		$__cost_table_AA = [
 			'column_head' => 'आ',
 			'title_np' 	=> 'तेश्रो पक्ष प्रतिको दायित्व बीमा वापत',
 			'title_en' 	=> 'Third party liability insurance amounted to',
@@ -315,7 +388,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 				// Cost according to CC
 				[
 					'title' 	=> "सि. सि. अनुसारको बीमाशुल्क",
-					'amount' 	=> $premium_NGA,
+					'amount' 	=> $premiumm_third_party,
 					'label' 	=> 'ङ'
 				]
 			]
@@ -324,14 +397,14 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 		// Noclaim Dicount Only if Comprehensive
 		if($policy_record->policy_package === 'cp')
 		{
-			$__cost_table_third_party['sections'][] = [
+			$__cost_table_AA['sections'][] = [
 				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ङ” को $no_claim_discount %",
-				'amount' => $discount_NGA
+				'amount' => $amount_noClaimDiscount_on_thirdParty
 			];
 		}
 
 		// Third Party : Sub Total
-		$__cost_table_third_party['sections'][] = [
+		$__cost_table_AA['sections'][] = [
 			'title' 	=> 'जम्मा', // Subtotal
 			'amount' 	=> $premium_AA_total,
 			'section_total' => true
@@ -351,7 +424,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 				'sections' => [
 					// Cost according to CC
 					[
-						'title' => "(अ) र (आ) को जम्मा रकममा {$tariff_record->dr_mcy_disabled_friendly} %̈ छुट",
+						'title' => "(अ) र (आ) को जम्मा रकममा {$tariff_record->dr_mcy_disabled_friendly} % छुट",
 						'amount' => $discount_MCY_DF
 					],
 
@@ -372,124 +445,24 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 
 		if($policy_record->policy_package === 'tp')
 		{
-			$__cost_table['attributes'] = json_encode(array_filter([$__cost_table_third_party, $__cost_table_flag_mcy_df]));
+			$__cost_table['attributes'] = json_encode(array_filter([$__cost_table_AA, $__cost_table_flag_mcy_df]));
 		}
 		else
 		{
 
-			$__cost_table_default = [
-				'column_head' => 'अ',
-				'title_np' 	=> 'सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा तथा दुर्घटना बीमा वापत',
-				'title_en' 	=> 'Insurance against vehicle damage/loss & accident insurance amounted to',
-				'sections' => [
-
-					// Ghosit Mulya Ko X%
-					[
-						'title' 	=> "सि.सि.तथा घोषित मूल्य (सरसामान सहित) अनुसार बीमा शुल्क (घोषित मूल्यको {$default_rate}%)",
-						'amount' 	=> $premium_KA,
-						'label' 	=> 'क'
-					],
-
-					// Purano Vaebapatko Thap Mulya
-					[
-						'title' => "सवारी साधन {$vehicle_age_in_yrs} वर्ष पुरानो भए वापत थप बीमाशुल्क: “क” को {$vehicle_over_age_rate}%",
-						'amount' => $premium_KA_additional
-					],
-
-					// Sub Total
-					[
-						'title' 	=> '', // Subtotal
-						'amount' 	=> $premium_KHA,
-						'label' 	=> 'ख'
-					],
-
-					// Voluntary Excess Discount
-					[
-						'title' => "बीमित स्वयंले व्यहोर्ने स्वेच्छीक अधिक रु {$amount_voluntary_excess} वापत छुटः “ख” को {$dr_voluntary_excess} %",
-						'amount' => $discount_KHA
-					],
-
-					// Subtotal
-					[
-						'title' 	=> '', // Subtotal
-						'amount' 	=> $premium_GA,
-						'label' 	=> 'ग'
-					],
-
-					// NO Claim Discount
-					[
-						'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ग” को $no_claim_discount %",
-						'amount' => $discount_GA
-					],
-
-					// Subtotal
-					[
-						'title' 	=> '', // Subtotal
-						'amount' 	=> $premium_GHA,
-						'label' 	=> 'घ'
-					],
-
-					// Direct Discount
-					[
-						'title' => "प्रत्यक्ष बीमा वापत छूटः “घ” को {$pfs_record->direct_discount} %",
-						'amount' => $discount_GHA
-					],
-
-					// Subtotal
-					[
-						'title' 		=> 'जम्मा', // Subtotal
-						'amount' 		=> $premium_A_total,
-						'section_total' => true
-					]
-				]
-			];
-
-			$__cost_table_risk_pool = [
-				'column_head' => 'इ',
-				'title_np' 	=> 'जोखिम समूह थप गरे वापत',
-				'title_en' 	=> 'Pool risk insurance amounted to',
-				'sections' => [
-
-					// Cost according to CC
-					[
-						'title' => "(क) हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_mob}% का दरले)",
-						'amount' => $premium_risk_mob
-					],
-
-					// Purano Vaebapatko Thap Mulya
-					[
-						'title' => "(ख) आतंककारी तथा विध्वंसात्मक कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_terorrism}%का दरले)",
-						'amount' => $premium_risk_terorrism
-					],
-
-					// Driver & Passenger Charge if Terorrism is Selected
-					[
-						'title' => "(ग) चालक तथा पछाडि बस्ने व्यक्तिको आतंकबाद वापत {$tariff_rsik_group->rate_additionl_per_thousand_on_extra_rate} प्रति हजारका दरले ",
-						'amount' => $premium_for_insured_covered_on_terorrism
-					],
-
-					// Sub Total
-					[
-						'title' 	=> 'जम्मा', // Subtotal
-						'amount' 	=> $premium_I_total,
-						'section_total' => true
-					]
-				]
-			];
-
 
 			$__cost_table_comprehensive = array_filter([
 				// Comprehensive
-				$__cost_table_default,
+				$__cost_table_A,
 
 				// Third Party
-				$__cost_table_third_party,
+				$__cost_table_AA,
 
 				// Discount Disabled Friendly
 				$__cost_table_flag_mcy_df,
 
 				// Pool Risk
-				$__cost_table_risk_pool
+				$__cost_table_I
 			]);
 
 			$__cost_table['attributes'] = json_encode($__cost_table_comprehensive);
@@ -997,9 +970,6 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 		return $__cost_table;
 	}
 }
-// ------------------------------------------------------------------------
-
-
 // ------------------------------------------------------------------------
 
 

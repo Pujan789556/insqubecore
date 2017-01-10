@@ -312,12 +312,13 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			    [
 			        'field' => 'object[flag_to_be_intimated]',
 			        '_key' => 'flag_to_be_intimated',
-			        'label' => 'To Be Intimated (<small>Click here if the vehicle is not registered yet.</small>)',
+			        'label' => 'To Be Intimated',
 			        'rules' => 'trim|integer|in_list[1]',
 			        '_id' 		=> '_motor-vehicle-to-be-intimated',
 			        '_type'     => 'checkbox',
 			        '_value' 	=> '1',
-			        '_required' => false
+			        '_required' => false,
+			        '_help_text' => 'Click here if the vehicle is not registered yet.'
 			    ],
 
 			    [
