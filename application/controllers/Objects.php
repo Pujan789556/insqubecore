@@ -558,7 +558,8 @@ class Objects extends MY_Controller
         		if($action === 'add')
 				{
 					$object_data = [
-						'portfolio_id' => $portfolio_id
+						'portfolio_id' => $portfolio_id,
+						'customer_id'  => $customer_record->id
 					];
 				}
         		$object_data['attributes'] = json_encode($data['object']);
@@ -568,19 +569,8 @@ class Objects extends MY_Controller
 				{
 					$done = $this->object_model->insert($object_data, TRUE); // No Validation on Model
 
-					if($done)
-					{
-						// Insert Relation Data
-						$rel_data = [
-							'customer_id' 	=> $customer_record->id,
-							'object_id' 	=> $done
-						];
-						$this->load->model('rel_customer_policy_object_model');
-						$this->rel_customer_policy_object_model->insert($rel_data, TRUE);
-
-						// Activity Log
-						$this->object_model->log_activity($done, 'C');
-					}
+					// Activity Log
+					$this->object_model->log_activity($done, 'C');
 				}
 				else
 				{

@@ -19,7 +19,7 @@ class Object_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "customer_id", "portfolio_id", "attributes", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "customer_id", "portfolio_id", "customer_id", "attributes", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -104,9 +104,9 @@ class Object_model extends MY_Model
 
         if($id !== NULL)
         {
-            $policy_record = $this->get_active_policy($id);
+            $policy_record = $this->get_latest_policy($id);
 
-            if($policy_record)
+            if($policy_record && is_policy_editable($policy_record->status, FALSE) === TRUE)
             {
                 $this->load->model('premium_model');
                 $this->premium_model->reset($policy_record->id);
@@ -138,7 +138,7 @@ class Object_model extends MY_Model
          * If we dont have any object, We are GOOD. Else, check the editable status.
          */
         $_flag_editable  = FALSE;
-        $policy_record = $this->get_active_policy($id);
+        $policy_record = $this->get_latest_policy($id);
 
         if(!$policy_record)
         {
@@ -155,19 +155,17 @@ class Object_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Get active policy Record of "This Object"
+     * Get the Latest policy Record of "This Object"
      *
      * @param integer $id
      * @return mixed
      */
-    public function get_active_policy($id)
+    public function get_latest_policy($id)
     {
         return $this->db->select('P.*')
                         ->from($this->table_name . ' as O')
                         ->join('dt_policies P', 'P.object_id = O.id')
-                        ->join('rel_customer_policy_object R', 'R.object_id = O.id')
                         ->where('O.id', $id)
-                        ->where('R.flag_current', 1)
                         ->order_by('P.id', 'desc')
                         ->get()->row();
     }
@@ -206,7 +204,7 @@ class Object_model extends MY_Model
         if(!$list)
         {
             $this->_prepare_row_select();
-            $list = $this->db->where('R.customer_id', $customer_id)
+            $list = $this->db->where('O.customer_id', $customer_id)
                              ->order_by('O.id', 'desc')
                              ->get()->result();
 
@@ -266,12 +264,10 @@ class Object_model extends MY_Model
      */
     private function _prepare_row_select( )
     {
-        $this->db->select('O.id, O.portfolio_id, O.attributes, P.code as portfolio_code, P.name_en as portfolio_name, R.customer_id, C.full_name as customer_name')
+        $this->db->select('O.id, O.portfolio_id, O.customer_id, O.attributes, P.code as portfolio_code, P.name_en as portfolio_name, C.full_name as customer_name')
                  ->from($this->table_name . ' as O')
                  ->join('master_portfolio P', 'P.id = O.portfolio_id')
-                 ->join('rel_customer_policy_object R', 'R.object_id = O.id')
-                 ->join('dt_customers C', 'R.customer_id = C.id')
-                 ->where('R.flag_current', 1);
+                 ->join('dt_customers C', 'O.customer_id = C.id');
     }
 
 	// --------------------------------------------------------------------

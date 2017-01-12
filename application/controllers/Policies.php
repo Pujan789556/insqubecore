@@ -370,9 +370,21 @@ class Policies extends MY_Controller
 	 */
 	public function edit($id, $from_widget = 'n')
 	{
+		// Capture the ID
+		$id = (int)$id;
+
+		// If Submit, must match (post ID = method ID)
+		if($this->input->post())
+		{
+			$post_id = (int)$this->input->post('id');
+
+			if($post_id !== $id)
+			{
+				$this->template->render_404();
+			}
+		}
 
 		// Valid Record ?
-		$id = (int)$id;
 		$record = $this->policy_model->row($id);
 		if(!$record)
 		{
@@ -452,7 +464,6 @@ class Policies extends MY_Controller
 			// These Rules are Sectioned, We need to merge Together
 			$this->policy_model->set_validation_rules($action); // set rules according to action
 			$v_rules = $this->policy_model->get_validation_rule($action);
-
             $this->form_validation->set_rules($v_rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -730,15 +741,18 @@ class Policies extends MY_Controller
     // --------------------------------------------------------------------
 
 	/**
-     * Callback : Valid Object Owner
+     * Callback : Valid Object Defaults
      *
-     * Edit Mode Callback Validation Function
-     * Check if object belongs to supplied customer
+     * Checks the Object Validity for the given Policy
+     * 		1. Object Owner and Selected Customer Should Match
+     * 		2. If the object is already assigned to other policy which is not
+     * 			Canceled|Expired, You can not assign this object to new policy.
+     *
      *
      * @param string $str
      * @return bool
      */
-    public function _cb_valid_object_owner($object_id)
+    public function _cb_valid_object_defaults($object_id)
     {
     	$object_id 		= (int)$object_id;
     	$customer_id 	= (int)$this->input->post('customer_id');
@@ -746,15 +760,63 @@ class Policies extends MY_Controller
 
     	if( !$object_id OR !$customer_id)
     	{
-    		$this->form_validation->set_message('_cb_valid_object_owner', $message);
+    		$this->form_validation->set_message('_cb_valid_object_defaults', 'Customer and/or Object not supplied.');
             return FALSE;
     	}
 
-    	$this->load->model('rel_customer_policy_object_model');
-    	if( !$this->rel_customer_policy_object_model->valid_object_owner($object_id, $customer_id) )
+    	$object_record = $this->object_model->find($object_id);
+    	if(!$object_record)
     	{
-    		$this->form_validation->set_message('_cb_valid_object_owner', $message);
+    		$this->form_validation->set_message('_cb_valid_object_defaults', 'You are trying to manipulate CUSTOMER & OBJECT, which unfortunately, DOES NOT WORK!');
             return FALSE;
+    	}
+
+    	if( $object_record->customer_id != $customer_id )
+    	{
+    		$this->form_validation->set_message('_cb_valid_object_defaults', 'The selected Object does not belong to the selected Customer.');
+            return FALSE;
+    	}
+
+    	/**
+    	 *  ! IMPORTANT !
+    	 * ---------------
+    	 * Is this object is free to assign to new/editable policy?
+    	 *
+    	 * Logic:
+    	 * 	If this policy object is already assigned to a policy which is NOT (CANCELED|EXPIRED)
+    	 * 	OR
+    	 *  If this policy object is already assigned to a policy which is editable
+    	 *
+    	 * For that, Simply get the latest policy record of this object and check
+    	 *
+    	 */
+    	$id = $this->input->post('id') ?? NULL;
+    	$id = $id ? (int)$id : NULL;
+    	$policy_record = $this->object_model->get_latest_policy($object_id);
+
+    	if( $policy_record )
+    	{
+    		// Add Mode
+    		if(!$id)
+    		{
+    			// If found Editable Policy Record, It is already assigned to another policy which is working with this object
+    			if( !in_array( $policy_record->status, [IQB_POLICY_STATUS_CANCELED, IQB_POLICY_STATUS_EXPIRED] ) )
+	    		{
+	    			$this->form_validation->set_message('_cb_valid_object_defaults', 'The selected object is already assigned to another active Policy.');
+	            	return FALSE;
+	    		}
+    		}
+
+    		// Edit Mode
+    		else
+    		{
+    			// If policy Do not Match, THe policy status must be Expired|Canceled
+    			if( $policy_record->id != $id )
+	    		{
+	    			$this->form_validation->set_message('_cb_valid_object_defaults', 'The selected object is already assigned to another Policy.');
+	            	return FALSE;
+	    		}
+    		}
     	}
         return TRUE;
     }

@@ -85,17 +85,6 @@ class Policy_model extends MY_Model
             }
         }
 
-        /**
-         * Callback Validation on Edit
-         *
-         *      Cases 1. Customer - Object Relation
-         */
-        $object_validation = 'trim|required|integer|max_length[11]';
-        if($action === 'edit')
-        {
-            $object_validation = 'trim|required|integer|max_length[11]|callback__cb_valid_object_owner';
-        }
-
         $this->validation_rules = [
 
             /**
@@ -151,7 +140,7 @@ class Policy_model extends MY_Model
                 [
                     'field' => 'object_id',
                     'label' => 'Policy Object',
-                    'rules' => $object_validation,
+                    'rules' => 'trim|required|integer|max_length[11]|callback__cb_valid_object_defaults',
                     '_type'     => 'hidden',
                     '_id'       => 'object-id', // dropdown policy object
                     '_required' => true
@@ -235,6 +224,27 @@ class Policy_model extends MY_Model
             ]
 
         ];
+
+
+        /**
+         * ID is compulsory in EDIT
+         *
+         * This is required as for some callbacks such as "_cb_valid_object_defaults"
+         */
+        if($action === 'edit')
+        {
+            $this->validation_rules['edit_extras'] = [
+                [
+                    'field' => 'id',
+                    'label' => 'Policy ID',
+                    'rules' => 'trim|required|integer|max_length[11]',
+                    '_type'     => 'hidden',
+                    '_id'       => 'policy-id',
+                    '_required' => true
+                ]
+            ];
+        }
+
     }
 
     // ----------------------------------------------------------------

@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Rel_customer_policy_object_model extends MY_Model
+class Policy_object_history_model extends MY_Model
 {
-    protected $table_name = 'rel_customer_policy_object';
+    protected $table_name = 'dt_policy_object_history';
 
     protected $set_created  = true;
     protected $set_modified = true;
@@ -15,7 +15,7 @@ class Rel_customer_policy_object_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "customer_id", "object_id", "flag_current", "data", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "customer_id", "object_id", "data", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -38,24 +38,6 @@ class Rel_customer_policy_object_model extends MY_Model
         parent::__construct();
     }
 
-	// --------------------------------------------------------------------
-
-    /**
-     * Valid Object Owner?
-     *
-     * Checks to make sure that the object and customer relation exists
-     *
-     * @param int $object_id
-     * @param int $customer_id
-     * @return boolean
-     */
-    public function valid_object_owner($object_id, $customer_id)
-    {
-
-        return $this->db->where('customer_id', $customer_id)
-                        ->where('object_id', $object_id)
-                        ->count_all_results($this->table_name);
-    }
 
     // --------------------------------------------------------------------
 

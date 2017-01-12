@@ -41,32 +41,10 @@ class Premium_model extends MY_Model
     {
         parent::__construct();
 
-        // // Set validation rules
-        // $this->validation_rules();
-
         // Required Helpers/Configurations
         $this->load->config('policy');
         $this->load->helper('policy');
         $this->load->helper('object');
-    }
-
-
-    // ----------------------------------------------------------------
-
-    public function validation_rules()
-    {
-        // $this->load->model('portfolio_model');
-        // $this->validation_rules =[
-        //     [
-        //         'field' => 'portfolio_id',
-        //         'label' => 'Portfolio',
-        //         'rules' => 'trim|required|integer|max_length[11]',
-        //         '_type'     => 'dropdown',
-        //         '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
-        //         '_id'       => '_object-portfolio-id',
-        //         '_required' => true
-        //     ]
-        // ];
     }
 
     // ----------------------------------------------------------------
@@ -81,128 +59,6 @@ class Premium_model extends MY_Model
         ];
         return $this->db->where('policy_id', $policy_id)
                  ->update($this->table_name, $reset_data);
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Get Single Row Data for Specific ID
-     *
-     * @param integer $id
-     * @return mixed
-     */
-    public function row( $id )
-    {
-        // $this->_prepare_row_select();
-        // return $this->db->where('O.id', $id)
-        //                 ->get()->row();
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Get all data for specified customer
-     *
-     * @param integer $customer_id
-     * @return mixed
-     */
-    public function get_by_customer( $customer_id )
-    {
-        /**
-         * Get Cached Result, If no, cache the query result
-         */
-        // $cache_name = 'object_customer_' . $customer_id;
-
-        // $list = $this->get_cache($cache_name);
-        // if(!$list)
-        // {
-        //     $this->_prepare_row_select();
-        //     $list = $this->db->where('R.customer_id', $customer_id)
-        //                      ->order_by('O.id', 'desc')
-        //                      ->get()->result();
-
-        //     $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
-        // }
-        // return $list;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Get Data Rows
-     *
-     * Get the filtered resulte set for listing purpose
-     *
-     * @param array $params
-     * @return type
-     */
-    public function rows($params = array())
-    {
-        // $this->_prepare_row_select();
-
-        // if(!empty($params))
-        // {
-        //     $next_id = $params['next_id'] ?? NULL;
-        //     if( $next_id )
-        //     {
-        //         $this->db->where(['O.id <=' => $next_id]);
-        //     }
-
-        //     $portfolio_id = $params['portfolio_id'] ?? NULL;
-        //     if( $portfolio_id )
-        //     {
-        //         $this->db->where(['O.portfolio_id' =>  $portfolio_id]);
-        //     }
-
-        //     $keywords = $params['keywords'] ?? '';
-        //     if( $keywords )
-        //     {
-        //         // $this->db->where("MATCH ( C.`fts` ) AGAINST ( '{$keywords}*' IN BOOLEAN MODE)", NULL);
-        //         // $this->db->like('C.full_name', $keywords, 'after');
-        //     }
-        // }
-        // return $this->db
-        //                 ->order_by('O.id', 'desc')
-        //                 ->limit($this->settings->per_page+1)
-        //                 ->get()->result();
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Prepare Row Select
-     *
-     * @param void
-     * @return void
-     */
-    private function _prepare_row_select( )
-    {
-        // $this->db->select('O.id, O.portfolio_id, O.attributes, P.code as portfolio_code, P.name_en as portfolio_name, R.customer_id, C.full_name as customer_name')
-        //          ->from($this->table_name . ' as O')
-        //          ->join('master_portfolio P', 'P.id = O.portfolio_id')
-        //          ->join('rel_customer_policy_object R', 'R.object_id = O.id')
-        //          ->join('dt_customers C', 'R.customer_id = C.id')
-        //          ->where('R.flag_current', 1);
-    }
-
-	// --------------------------------------------------------------------
-
-    /**
-     * Callback - Motor Duplicate Checks
-     *
-     * @param array $where
-     * @param integer|null $id
-     * @return bool
-     */
-    public function _cb_motor_duplicate($where, $id=NULL)
-    {
-        // if( $id )
-        // {
-        //     $this->db->where('id !=', $id);
-        // }
-        // // $where is array ['key' => $value]
-        // return $this->db->where($where)
-        //                 ->count_all_results($this->table_name);
     }
 
     // --------------------------------------------------------------------
