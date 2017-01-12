@@ -19,7 +19,7 @@ class Premium_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "policy_id", "total_amount", "stamp_duty",  "attributes", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "policy_id", "total_amount", "comission_amount", "stamp_duty",  "attributes", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -74,7 +74,8 @@ class Premium_model extends MY_Model
     public function reset($policy_id)
     {
         $reset_data = [
-            'total_amount'  => 0.00,
+            'total_amount'      => 0.00,
+            'comission_amount'  => NULL,
             'stamp_duty'    => 0.00,
             'attributes'    => NULL
         ];

@@ -422,15 +422,30 @@ class Premium extends MY_Controller
 															$attributes->cvc_type ? $attributes->cvc_type : NULL
 														);
 
-			if(!$tariff_record || $tariff_record->active == '0')
+
+			$__flag_valid_tariff = TRUE;
+			if( !$tariff_record )
 			{
-				$message = 'Tariff Configuration for this Portfolio is either not present or Inactive. <br/>' .
-							'Portfolio: <strong>MOTOR</strong> <br/>' .
-							'Sub-Portfolio: <strong>' . $attributes->sub_portfolio . '</strong>';
-				$this->template->render_404('', $message);
-				exit(1);
+				$message 	= 'Tariff Configuration for this Portfolio is not found.';
+				$title 		= 'Tariff Not Found!';
+				$__flag_valid_tariff = FALSE;
+			}
+			else if( $tariff_record->active == '0')
+			{
+				$message = 'Tariff Configuration for this Portfolio is <strong>Inactive</strong>.';
+				$title = 'Tariff Not Active!';
+				$__flag_valid_tariff = FALSE;
 			}
 
+			if( !$__flag_valid_tariff )
+			{
+				$message .= '<br/><br/>Portfolio: <strong>MOTOR</strong> <br/>' .
+							'Sub-Portfolio: <strong>' . $attributes->sub_portfolio . '</strong> <br/>' .
+							'<br/>Please contact <strong>IT Department</strong> for further assistance.';
+
+				$this->template->json(['error' => 'not_found', 'message' => $message, 'title' => $title], 404);
+				exit(1);
+			}
 
 			// Portfolio Setting Record
 			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);

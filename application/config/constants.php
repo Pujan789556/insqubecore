@@ -155,3 +155,23 @@ defined('IQB_POLICY_STATUS_ACTIVE')         OR define('IQB_POLICY_STATUS_ACTIVE'
 defined('IQB_POLICY_STATUS_CANCELED')       OR define('IQB_POLICY_STATUS_CANCELED',     'C');
 defined('IQB_POLICY_STATUS_EXPIRED')        OR define('IQB_POLICY_STATUS_EXPIRED',      'E');
 
+
+/*
+|--------------------------------------------------------------------------
+| POLICY OBJECT CONSTANTS - MOTOR
+|--------------------------------------------------------------------------
+*/
+
+// OBJECT OWNERSHIP
+defined('IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_GOVT')       OR define('IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_GOVT',      'G');
+defined('IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT')   OR define('IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT',   'N');
+
+// POLICY PACKAGES - Third Party | Comprehensive
+defined('IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE')       OR define('IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE',    'CP');
+defined('IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY')         OR define('IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY',      'TP');
+
+
+
+
+
+

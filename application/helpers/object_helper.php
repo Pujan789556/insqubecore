@@ -466,7 +466,7 @@ if ( ! function_exists('_PO_MOTOR_ownership_dropdown'))
 	 */
 	function _PO_MOTOR_ownership_dropdown( $flag_blank_select = true )
 	{
-		$dropdown = ['G' => 'Government', 'N' => 'Non-government'];
+		$dropdown = [IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_GOVT => 'Government', IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT => 'Non-government'];
 
 		if($flag_blank_select)
 		{
@@ -541,11 +541,10 @@ if ( ! function_exists('_PO_MOTOR_CVC_type_dropdown'))
 		$dropdown = [
 			'gcg' 	=> 'Goods Carrier - Truck',
 			'gct'  	=> 'Goods Carrier - Tanker',
-			'pc'  	=> 'Passenger Carrier - Bus/Van',
-			'pco' 	=> 'Passenger Carrier - Bus/Van - Office/School Usage',
+			'pc'  	=> 'Passenger Carrier',
 			'tx' 	=> 'Taxi',
-			'tm'	=> 'Tempo (e-rikshaw, tempo, tricycle)',
-			'af' 	=> 'Agriculture & Forestry',
+			'tm'	=> 'Tempo (e-rikshaw, safa tempo, tricycle)',
+			'af' 	=> 'Agriculture & Forestry Vehicle',
 			'tt'	=> 'Tractor & Power Triller',
 			'ce'	=> 'Construction Equipment Vehicle'
 		];
@@ -685,8 +684,8 @@ if ( ! function_exists('_PO_MOTOR_policy_package_dropdown'))
 	function _PO_MOTOR_policy_package_dropdown( $flag_blank_select = true)
 	{
 		$dropdown = [
-			'tp' 	=> 'Third Party',
-			'cp'  	=> 'Comprehensive',
+			IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE  	=> 'Comprehensive',
+			IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY 		=> 'Third Party',
 		];
 
 		if($flag_blank_select)

@@ -155,7 +155,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
         $premium_A_total 	= 0.00;
         $premium_AA_total 	= 0.00;
         $premium_I_total 	= 0.00;
-        if($policy_record->policy_package === 'cp')
+        if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			/**
 			 * Defaults (अ)
@@ -233,7 +233,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 
 
 			// Sub Total : घ
-			$__premium_A_row_7 = $__premium_A_row_5 - $__premium_A_row_6;
+			$__agent_comissionable_amount = $__premium_A_row_7 = $__premium_A_row_5 - $__premium_A_row_6;
 			$__cost_table_A['sections'][] = [
 				'label' 	=> 'घ',
 				'title' 	=> "",
@@ -339,7 +339,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 		 * Third Party (आ)
 		 */
 		$amount_noClaimDiscount_on_thirdParty = 0.00;		// Compute No claim discount on Third Party if Comprehensive Package
-		if($policy_record->policy_package === 'cp' && $no_claim_discount != 0)
+		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE && $no_claim_discount != 0)
 		{
 			$amount_noClaimDiscount_on_thirdParty = $premiumm_third_party * ($no_claim_discount/100.00);
 		}
@@ -395,7 +395,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 		];
 
 		// Noclaim Dicount Only if Comprehensive
-		if($policy_record->policy_package === 'cp')
+		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			$__cost_table_AA['sections'][] = [
 				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ङ” को $no_claim_discount %",
@@ -443,7 +443,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 			'stamp_duty' 	=> $stamp_duty
 		];
 
-		if($policy_record->policy_package === 'tp')
+		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
 		{
 			$__cost_table['attributes'] = json_encode(array_filter([$__cost_table_AA, $__cost_table_flag_mcy_df]));
 		}
@@ -466,6 +466,17 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 			]);
 
 			$__cost_table['attributes'] = json_encode($__cost_table_comprehensive);
+
+			/**
+			 * Agent Commission?
+			 * ------------------
+			 *
+			 * Applies only if the vehicle is non-govt and no direct discount
+			 */
+			if($policy_record->flag_dc === 'C' && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
+			{
+				$__cost_table['comission_amount'] = $__agent_comissionable_amount;
+			}
 		}
 
 		return $__cost_table;
@@ -564,7 +575,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
         $premium_I_total = 0.00;
         $premium_EE_total = 0.00;
         $premium_U_total = 0.00;
-        if($policy_record->policy_package === 'cp')
+        if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			/**
 			 * Defaults (अ)
@@ -708,7 +719,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 
 
 			// ङ Sub Total
-			$__premium_A_row_NGA = $__premium_A_row_13 = $__premium_A_row_GHA - $__premium_A_row_12;
+			$__agent_comissionable_amount = $__premium_A_row_NGA = $__premium_A_row_13 = $__premium_A_row_GHA - $__premium_A_row_12;
 			$__cost_table_A['sections'][] = [
 				'title' 	=> "",
 				'amount' 	=> $__premium_A_row_NGA,
@@ -893,7 +904,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 		];
 		$__premium_AA_row_1 = $premiumm_third_party;
 		$__premium_AA_row_2 = 0.00;		// Compute No claim discount on Third Party if Comprehensive Package
-		if($policy_record->policy_package === 'cp' && $no_claim_discount != 0)
+		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE && $no_claim_discount != 0)
 		{
 			$__premium_AA_row_2 = $__premium_AA_row_1 * ($no_claim_discount/100.00);
 		}
@@ -903,7 +914,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 		];
 
 		// No claim Dicount Only if Comprehensive
-		if($policy_record->policy_package === 'cp')
+		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			$__cost_table_AA['sections'][] = [
 				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “छ” को $no_claim_discount %",
@@ -941,7 +952,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 			'stamp_duty' 	=> $stamp_duty
 		];
 
-		if($policy_record->policy_package === 'tp')
+		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
 		{
 			$__cost_table['attributes'] = json_encode( [$__cost_table_AA] );
 		}
@@ -967,6 +978,18 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 			]);
 
 			$__cost_table['attributes'] = json_encode($__cost_table_comprehensive);
+
+
+			/**
+			 * Agent Commission?
+			 * ------------------
+			 *
+			 * Applies only if the vehicle is non-govt and no direct discount
+			 */
+			if($policy_record->flag_dc === 'C' && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
+			{
+				$__cost_table['comission_amount'] = $__agent_comissionable_amount;
+			}
 		}
 
 		return $__cost_table;
