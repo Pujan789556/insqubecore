@@ -92,6 +92,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     // finally show the element box
                     $('#_object-box').show();
 
+                    // checkbox Beautify if any
+                    $('input.icheck').iCheck({
+                        checkboxClass: 'icheckbox_square-blue',
+                        radioClass: 'iradio_square-blue'
+                    });
+
                     // Enable Submit
                     $('button[type="submit"]', $('#_form-object')).removeAttr('disabled');
                     $('button.btn-primary[data-bb-handler="primary"]').removeAttr('disabled','disabled');
