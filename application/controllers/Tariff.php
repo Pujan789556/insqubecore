@@ -498,7 +498,8 @@ class Tariff extends MY_Controller
 	               		'rate' => [
 							'age' 				=> $tariff['rate']['age'][$i],
 							'rate' 				=> $tariff['rate']['rate'][$i],
-							'minus_amount' 		=> $tariff['rate']['minus_amount'][$i],
+                            'minus_amount'      => $tariff['rate']['minus_amount'][$i],
+							'plus_amount' 		=> $tariff['rate']['plus_amount'][$i],
 							'ec_threshold' 		=> $tariff['rate']['ec_threshold'][$i],
 							'cost_per_ec_above' => $tariff['rate']['cost_per_ec_above'][$i],
 							'fragmented' 		=> $tariff['rate']['fragmented'][$i],

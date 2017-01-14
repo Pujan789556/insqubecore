@@ -151,6 +151,13 @@ class Tariff_motor_model extends MY_Model
                     '_required' => true
                 ],
                 [
+                    'field' => 'tariff[rate][plus_amount][]',
+                    'label' => 'Default To-Plus-Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
                     'field' => 'tariff[rate][ec_threshold][]',
                     'label' => 'Default Threshold (CC|KW|TON)',
                     'rules' => 'trim|required|integer|max_length[5]',

@@ -191,8 +191,15 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 		// Validation Rules on Form Post Change on interdependent components
 		$post = $CI->input->post();
 		$object = $post['object'] ?? NULL;
+
+
 		$sub_portfolio 		= $object['sub_portfolio'] ?? '';
-		$cvc_type_rules 	= $sub_portfolio == 'CVC' ? 'trim|required|alpha' : 'trim|alpha';
+		$cvc_type_rules 	= $sub_portfolio == 'CVC' ? 'trim|required|alpha|strtoupper' : 'trim|alpha|strtoupper';
+
+		// CVC TYPES in_list validation
+		$cvc_type_list = array_keys( _PO_MOTOR_CVC_type_dropdown(FALSE) );
+		$cvc_type_in_list = implode(',', $cvc_type_list);
+		$cvc_type_rules .= '|in_list['.$cvc_type_in_list.']';
 
 		// To Be Intimated Set?
 		$flag_to_be_intimated = $object['flag_to_be_intimated'] ?? NULL;
@@ -539,14 +546,14 @@ if ( ! function_exists('_PO_MOTOR_CVC_type_dropdown'))
 	function _PO_MOTOR_CVC_type_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			'gcg' 	=> 'Goods Carrier - Truck',
-			'gct'  	=> 'Goods Carrier - Tanker',
-			'pc'  	=> 'Passenger Carrier',
-			'tx' 	=> 'Taxi',
-			'tm'	=> 'Tempo (e-rikshaw, safa tempo, tricycle)',
-			'af' 	=> 'Agriculture & Forestry Vehicle',
-			'tt'	=> 'Tractor & Power Triller',
-			'ce'	=> 'Construction Equipment Vehicle'
+			IQB_MOTOR_CVC_TYPE_GOODS_CARRIER_GENERAL 	=> 'Goods Carrier - Truck', 	// GOODS CARRIER GENERAL
+			IQB_MOTOR_CVC_TYPE_GOODS_CARRIER_TANKER  	=> 'Goods Carrier - Tanker',	// GOODS CARRIER TANKER
+			IQB_MOTOR_CVC_TYPE_PASSENGER_CARRIER  		=> 'Passenger Carrier', 		// PASSENGER CARRIER
+			IQB_MOTOR_CVC_TYPE_TAXI 					=> 'Taxi',
+			IQB_MOTOR_CVC_TYPE_TEMPO					=> 'Tempo (e-rikshaw, safa tempo, tricycle)',
+			IQB_MOTOR_CVC_TYPE_AGRO_FORESTRY 			=> 'Agriculture & Forestry Vehicle',
+			IQB_MOTOR_CVC_TYPE_TRACTOR_POWER_TRILLER	=> 'Tractor & Power Triller',
+			IQB_MOTOR_CVC_TYPE_CONSTRUCTION_EQUIPMENT	=> 'Construction Equipment Vehicle'
 		];
 
 		if($flag_blank_select)

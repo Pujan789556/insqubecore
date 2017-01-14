@@ -5,6 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 $object_attributes = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
 
+
 // echo '<pre>';
 // print_r($object_attributes);
 // // print_r($policy_record);
@@ -95,13 +96,23 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
         <p class="form-control-static"><?php echo $policy_record->flag_dc === 'D' ? 'Yes' : 'No';?></p>
         </div>
     </div>
+
     <?php
+    /**
+     * Old Premium Record Data
+     */
+    $premium_extra_fields_object = $premium_record->extra_fields ? json_decode($premium_record->extra_fields) : NULL;
+    if($premium_extra_fields_object)
+    {
+        $premium_extra_fields_object->stamp_duty = $premium_record->stamp_duty;
+    }
+
     /**
      * Load Form Components
      */
     $this->load->view('templates/_common/_form_components_horz', [
-        'form_elements'         => $form_elements,
-        'form_policy_record'    => $policy_record
+        'form_elements'     => $form_elements,
+        'form_record'       => $premium_extra_fields_object
     ]);
     ?>
 

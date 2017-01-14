@@ -144,6 +144,21 @@ define('IQB_PORTFOLIO_OWNERSHIP_NON_GOVT',  'N');
 
 /*
 |--------------------------------------------------------------------------
+| MOTOR PORTFOLIO - "COMMERCIAL VEHICLE" SUB-PORTFOLIO - TYPES
+|--------------------------------------------------------------------------
+*/
+define('IQB_MOTOR_CVC_TYPE_GOODS_CARRIER_GENERAL',      'GCG');     // Goods Carrier - Truck
+define('IQB_MOTOR_CVC_TYPE_GOODS_CARRIER_TANKER',       'GCT');     // Goods Carrier - Tanker
+define('IQB_MOTOR_CVC_TYPE_PASSENGER_CARRIER',          'PC');      // Passenger Carrier
+define('IQB_MOTOR_CVC_TYPE_TAXI',                       'TX');      // TAXI
+define('IQB_MOTOR_CVC_TYPE_TEMPO',                      'TM');      // Tempo (e-rikshaw, safa tempo, tricycle)
+define('IQB_MOTOR_CVC_TYPE_AGRO_FORESTRY',              'AF');      // Agriculture & Forestry Vehicle
+define('IQB_MOTOR_CVC_TYPE_TRACTOR_POWER_TRILLER',      'TRPT');    // Tractor & Power Triller'
+define('IQB_MOTOR_CVC_TYPE_CONSTRUCTION_EQUIPMENT',     'CE');      // Construction Equipment Vehicle
+
+
+/*
+|--------------------------------------------------------------------------
 | POLICY STATUS CONSTANTS
 |--------------------------------------------------------------------------
 */

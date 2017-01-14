@@ -91,6 +91,13 @@ class Premium extends MY_Controller
 			$this->template->render_404();
 		}
 
+		// Premium Record
+		$premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
+		if(!$premium_record)
+		{
+			$this->template->render_404('', 'No Premium Record Found For Supplied Policy.');
+		}
+
 		/**
 		 * Belongs to Me? i.e. My Branch? OR Terminate
 		 */
@@ -104,11 +111,13 @@ class Premium extends MY_Controller
 
 
 		// Post? Save it
-		$this->__save($policy_record);
+		$this->__save($policy_record, $premium_record);
+
+
 
 
 		// Render Form
-		$this->__render_form($policy_record);
+		$this->__render_form($policy_record, $premium_record);
 	}
 
 	// --------------------------------------------------------------------
@@ -149,9 +158,10 @@ class Premium extends MY_Controller
 	 * Save/Update Premium
 	 *
 	 * @param type $policy_record 	Policy Record
+	 * @param type $premium_record 	Policy Premium Record
 	 * @return mixed
 	 */
-	private function __save($policy_record)
+	private function __save($policy_record, $premium_record)
 	{
 		if( $this->input->post() )
 		{
@@ -160,7 +170,7 @@ class Premium extends MY_Controller
 			{
 				// Motor
 				case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-						$done = $this->__save_MOTOR($policy_record);
+						$done = $this->__save_MOTOR($policy_record, $premium_record);
 					break;
 
 				default:
@@ -208,9 +218,10 @@ class Premium extends MY_Controller
 		 * Motor Portfolio : Save a Premium Record For Given Policy
 		 *
 		 * @param object|null $policy_record  Policy Record
+		 * @param type $premium_record 	Policy Premium Record
 		 * @return json
 		 */
-		private function __save_MOTOR($policy_record)
+		private function __save_MOTOR($policy_record, $premium_record)
 		{
 			/**
 			 * Form Submitted?
@@ -250,6 +261,9 @@ class Premium extends MY_Controller
 							return $this->__save_MOTOR_PVC($policy_record, $policy_object, $tariff_record );
 							break;
 
+						case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE:
+							return $this->__save_MOTOR_CVC($policy_record, $policy_object, $tariff_record );
+							break;
 
 						default:
 							# code...
@@ -264,7 +278,7 @@ class Premium extends MY_Controller
 						'message' 		=> 'Validation Error.',
 						'reloadForm' 	=> true
 					];
-					return $this->__render_form($policy_record, $json_extra);
+					return $this->__render_form($policy_record, $premium_record, $json_extra);
 	        	}
 			}
 		}
@@ -319,6 +333,30 @@ class Premium extends MY_Controller
 
 			}
 
+			/**
+			 * Save Commercial Vehicle Premium
+			 *
+			 * @param object $policy_record
+			 * @param object $object
+			 * @param object $tariff_record
+			 * @return json
+			 */
+			private function __save_MOTOR_CVC($policy_record, $policy_object, $tariff_record)
+			{
+				// Portfolio Settings Record For Given Fiscal Year and Portfolio
+				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+				$data = $this->input->post();
+				$premium_data = _PORTFOLIO_MOTOR_CVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+
+
+				// Target Premium Record
+				$premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
+
+				// Find Existing Premium Record
+				return $this->premium_model->update($premium_record->id, $premium_data, TRUE);
+			}
+
 	// --------------------------------------------------------------------
 
 
@@ -326,10 +364,11 @@ class Premium extends MY_Controller
 	 * Render Premium Form
 	 *
 	 * @param object 	$policy_record 	Policy Record
+	 * @param object 	$premium_record Premium Record
 	 * @param array 	$json_extra 	Extra Data to Pass as JSON
 	 * @return type
 	 */
-	private function __render_form($policy_record, $json_extra=[])
+	private function __render_form($policy_record, $premium_record, $json_extra=[])
 	{
 		/**
 		 *  Let's Load The Premium Form For this Record
@@ -352,6 +391,7 @@ class Premium extends MY_Controller
         $json_data['form'] = $this->load->view($form_view, [
 								                'form_elements'         => $premium_goodies['validation_rules'],
 								                'policy_record'         => $policy_record,
+								                'premium_record'        => $premium_record,
 								                'policy_object' 		=> $policy_object,
 								                'tariff_record' 		=> $premium_goodies['tariff_record']
 								            ], TRUE);
@@ -469,7 +509,7 @@ class Premium extends MY_Controller
 			 * If policy package is "Third Party", we don't need any other validation fields
 			 * We can simply return the stamp validation rules
 			 */
-			if($policy_record->policy_package == 'tp')
+			if($policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
 			{
 				$validation_rules = [$rule_stamp_duty];
 
@@ -481,33 +521,37 @@ class Premium extends MY_Controller
 
 			$__common_validation_rules =  [
 				[
-                    'field' => 'dr_voluntary_excess',
+                    'field' => 'extra_fields[dr_voluntary_excess]',
                     'label' => 'Voluntary Excess',
                     'rules' => 'trim|prep_decimal|decimal|max_length[5]',
+                    '_key' 		=> 'dr_voluntary_excess',
                     '_type'     => 'dropdown',
                     '_data' 	=> _PORTFOLIO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess),
                     '_required' => false
                 ],
                 [
-                    'field' => 'no_claim_discount',
+                    'field' => 'extra_fields[no_claim_discount]',
                     'label' => 'No Claim Discount',
                     'rules' => 'trim|prep_decimal|decimal|max_length[5]',
+                    '_key' 		=> 'no_claim_discount',
                     '_type'     => 'dropdown',
                     '_data' 	=> _PORTFOLIO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount),
                     '_required' => false
                 ],
                 [
-                    'field' => 'riks_group[flag_risk_mob]',
+                    'field' => 'extra_fields[flag_risk_mob]',
                     'label' => 'Pool Risk Mob (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा)',
                     'rules' => 'trim|integer|in_list[1]',
+                    '_key' 		=> 'flag_risk_mob',
                     '_type'     => 'checkbox',
                     '_value' 	=> '1',
                     '_required' => false
                 ],
                 [
-                    'field' => 'riks_group[flag_risk_terorrism]',
+                    'field' => 'extra_fields[flag_risk_terorrism]',
                     'label' => 'Pool Risk Terorrism (आतंककारी/विध्वंशात्मक कार्य जोखिम बीमा)',
                     'rules' => 'trim|integer|in_list[1]',
+                    '_key' 		=> 'flag_risk_terorrism',
                     '_type'     => 'checkbox',
                     '_value' 	=> '1',
                     '_required' => false
@@ -525,9 +569,10 @@ class Premium extends MY_Controller
 
 						// Commercial Use
 						[
-		                    'field' => 'flag_commercial_use',
+		                    'field' => 'extra_fields[flag_commercial_use]',
 		                    'label' => 'Commercial Use (निजी प्रयोजनको लागि भाडामा दिएको)',
 		                    'rules' => 'trim|integer|in_list[1]',
+		                    '_key' 		=> 'flag_commercial_use',
 		                    '_type'     => 'checkbox',
 		                    '_value' 	=> '1',
 		                    '_required' => false
@@ -535,9 +580,39 @@ class Premium extends MY_Controller
 
 		                // Pay for Towing
 						[
-		                    'field' => 'flag_towing',
+		                    'field' => 'extra_fields[flag_towing]',
 		                    'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
 		                    'rules' => 'trim|integer|in_list[1]',
+		                    '_key' 		=> 'flag_towing',
+		                    '_type'     => 'checkbox',
+		                    '_value' 	=> '1',
+		                    '_required' => false
+		                ]
+					];
+					$validation_rules = array_merge($__common_validation_rules, $extra_rules, [$rule_stamp_duty]);
+					break;
+
+				case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE:
+					$extra_rules = [
+
+						// Private Use
+						[
+		                    'field' => 'extra_fields[flag_private_use]',
+		                    'label' => 'Private Use',
+		                    'rules' => 'trim|integer|in_list[1]',
+		                    '_key' 		=> 'flag_private_use',
+		                    '_type'     => 'checkbox',
+		                    '_value' 	=> '1',
+		                    '_required' => false,
+		                    '_help_text' => '<small>* कार्यालय, पर्यटन र निजी प्रयोजनमा मात्र प्रयोग हुने सवारी साधनको तथा एम्बुलेन्स र शववाहनको ब्यापक बीमा गर्दा शरुु बीमाशुल्कको २५ प्रतिशत छुटहुनेछ ।<br/>** निजी प्रयोेजनको लागि प्रयोग गर्ने सवारी साधन तथा दमकलको ब्यापक बीमा गर्दा शुरु बीमाशुल्कको २५ प्रतिशत छुटहुनेछ ।</small>'
+		                ],
+
+		                // Pay for Towing
+						[
+		                    'field' => 'extra_fields[flag_towing]',
+		                    'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
+		                    'rules' => 'trim|integer|in_list[1]',
+		                    '_key' 		=> 'flag_towing',
 		                    '_type'     => 'checkbox',
 		                    '_value' 	=> '1',
 		                    '_required' => false
