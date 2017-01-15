@@ -57,6 +57,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <td><?php echo $record->sales_staff_username;?></td>
                 </tr>
                 <tr>
+                    <td class="text-bold">Proposed By</td>
+                    <td><?php echo nl2br($this->security->xss_clean($record->proposer));?></td>
+                </tr>
+                <tr>
                     <td class="text-bold">Agent</td>
                     <td><?php echo $record->agent_name;?></td>
                 </tr>

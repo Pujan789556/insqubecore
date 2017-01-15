@@ -18,7 +18,6 @@ echo form_open( $this->uri->uri_string(),
           <h4 class="box-title">Select Portfolio</h4>
         </div>
         <div class="box-body">
-
             <?php
             /**
              * Load Form Components
@@ -37,7 +36,16 @@ echo form_open( $this->uri->uri_string(),
           <h4 class="box-title">Select Customer</h4>
         </div>
         <div class="box-body">
-
+            <?php
+            /**
+             * Load Form Components : Proposer
+             */
+            $proposer_elements = $form_elements['proposer'];
+            $this->load->view('templates/_common/_form_components_horz', [
+                'form_elements' => $proposer_elements,
+                'form_record'   => $record
+            ]);
+            ?>
             <div id="_customer-box">
                 <div class="form-group <?php echo form_error('customer_id') ? 'has-error' : '';?>">
                   <label class="col-sm-2 control-label">Customer<?php echo field_compulsary_text( TRUE )?></label>
