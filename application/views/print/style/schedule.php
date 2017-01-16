@@ -17,9 +17,11 @@
         width: 100%;
     }
 
+    table.margin-b-10{margin-bottom:10pt;}
+
     p { margin: 0pt; }
 
-    td { vertical-align: top; padding: 5px; border:0.1mm solid #000000;}
+    td { vertical-align: top; padding: 3px; border:0.1mm solid #000000;}
     td.no-padding{padding: 0}
     .table td.border-top{border-top:0.1mm solid #000000;}
     .table td.bold{font-weight: bold}

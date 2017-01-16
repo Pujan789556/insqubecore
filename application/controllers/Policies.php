@@ -924,7 +924,7 @@ class Policies extends MY_Controller
 		{
 			// Motor
 			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-					$schedule_view = $this->__schedule_view_MOTOR($record);
+					$schedule_view = 'policies/print/schedule_MOTOR';
 				break;
 
 			default:
@@ -950,12 +950,6 @@ class Policies extends MY_Controller
 	        $mpdf->SetDisplayMode('fullpage');
 
 	        $html = $this->load->view( $schedule_view, ['record' => $record], TRUE);
-
-	        // echo $html;exit;
-	        // $stylesheet = file_get_contents(THEME_URL . 'bootstrap/css/bootstrap.min.css');
-	        // $mpdf->WriteHTML($stylesheet, 1);
-	        // $mpdf->WriteHTML('body{font-family: freeserif; font-size: 8pt}', 1);
-
 	        $mpdf->WriteHTML($html);
 
 	        $mpdf->Output();
@@ -965,32 +959,4 @@ class Policies extends MY_Controller
 			$this->template->render_404('', 'No Schedule View Found!');
 		}
     }
-
-		private function __schedule_view_MOTOR($record)
-		{
-			$attributes = json_decode($record->object_attributes);
-			$schedule_view = '';
-
-			// Get schedule view according sub-portfolio
-			switch ($attributes->sub_portfolio)
-			{
-				case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
-					$schedule_view = 'policies/print/schedule_MOTOR_MCY';
-					break;
-
-				case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE:
-					$schedule_view = 'policies/print/schedule_MOTOR_PVC';
-					break;
-
-				case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE:
-					$schedule_view = 'policies/print/schedule_MOTOR_CVC';
-					break;
-
-				default:
-					# code...
-					break;
-			}
-
-			return $schedule_view;
-		}
 }

@@ -6,6 +6,44 @@
 $object_attributes = json_decode($record->object_attributes);
 
 $premium_attributes = json_decode($record->premium_attributes);
+
+
+/**
+ * Sub Portfolio-wise  Statements
+ */
+$usage_limitation = '';
+$driver_limitation = '';
+$reaffirm_numbers = '';
+$schedule_table_title = '';
+$cost_table_title = '';
+switch ($object_attributes->sub_portfolio)
+{
+    case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
+        $schedule_table_title   = 'मोटरसाइकल बीमालेखको तालिका (सेड्युल)';
+        $usage_limitation       = 'यस बीमालेख अन्तर्गत रक्षावरण गरिएको सवारी साधन भाडा, इनाम, संगठनात्मक दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षण वा ढुवानी कार्यसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।';
+        $driver_limitation      = 'निम्नमध्ये कुनैः–(क) बीमित स्वयं वा (ख) बीमितको साधारण जानकारी र वा सहमतिले सवारी साधन चलाउने व्यक्ति । <br/>चालकसंग उक्त मोटरसाइकल चलाउने अनुमतिपत्र भएको र त्यस्तो अनुमतिपत्र राख्न वा प्राप्त गर्न अयोग्य नठहरिएको हुनुपर्नेछ ।';
+        $cost_table_title       = "मोटरसाइकलको बीमाशुल्क गणना तालिका";
+        break;
+
+    case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE:
+        $schedule_table_title   = 'निजी सवारी साधन बीमालेखको तालिका (सेड्युल)';
+        $usage_limitation       = 'यस बीमालेख अन्तर्गत रक्षावरण गरिएको सवारी साधन भाडा, इनाम, संगठनात्मक दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षण वा ढुवानी कार्यसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।';
+        $driver_limitation      = 'निम्नमध्ये कुनैः– (क) बीमित स्वयं वा (ख) बीमितको आदेश वा अनुमतिले सवारी साधन चलाउने व्यक्ति ।<br/>चालकसंग उक्त सवारी साधन चलाउने अनुमतिपत्र भएको र यस्तो अनुमतिपत्र राख्न वा प्राप्त गर्न अयोग्य नठहरिएको हुनुपर्नेछ ।';
+        $cost_table_title       = "निजी सवारी साधनको बीमाशुल्क गणना तालिका";
+        break;
+
+    case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE:
+
+        $schedule_table_title   = 'व्यावसायिक सवारी साधन बीमालेखको तालिका (सेड्युल)';
+        $usage_limitation       = 'यस बीमालेख अन्तर्गत रक्षावरण गरिएको व्यावसायिक सवारी साधन दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षणसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।';
+        $driver_limitation      = 'निम्नमध्ये कुनैः– (क) बीमित स्वयं वा (ख) बीमितको आदेश वा अनुमतिले सवारी साधन चलाउने व्यक्ति ।<br/>चालकसंग उक्त व्यवसायिक सवारी साधन चलाउने अनुमतिपत्र भएको र यस्तो अनुमतिपत्र राख्न वा प्राप्त गर्न अयोग्य नठहरिएको हुनुपर्नेछ ।';
+        $cost_table_title       = "व्यावसायिक सवारी साधनको बीमाशुल्क गणना तालिका";
+        break;
+
+    default:
+        # code...
+        break;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -26,7 +64,7 @@ $premium_attributes = json_decode($record->premium_attributes);
          */
         ?>
         <table class="table" width="100%">
-            <thead><tr><td colspan="2" align="center"><h3>मोटरसाइकल बीमालेखको तालिका (सेड्युल)</h3></td></tr></thead>
+            <thead><tr><td colspan="2" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
             <tbody>
                 <tr><td colspan="2">बीमालेख नं.: <?php echo $record->code;?></td></tr>
                 <tr>
@@ -168,19 +206,53 @@ $premium_attributes = json_decode($record->premium_attributes);
                 </tr>
 
                 <tr>
-                    <td colspan="2">
+                    <td colspan="2" style="font-size:7pt">
+                        <?php
+                        /**
+                         * Sub Portfolio-wise  Statements
+                         */
+                        $usage_limitation = '';
+                        $driver_limitation = '';
+                        $reaffirm_numbers = '';
+                        $cost_table_title = '';
+                        switch ($object_attributes->sub_portfolio)
+                        {
+                            case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
+                                $usage_limitation = 'यस बीमालेख अन्तर्गत रक्षावरण गरिएको सवारी साधन भाडा, इनाम, संगठनात्मक दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षण वा ढुवानी कार्यसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।';
+                                $driver_limitation = 'निम्नमध्ये कुनैः–(क) बीमित स्वयं वा (ख) बीमितको साधारण जानकारी र वा सहमतिले सवारी साधन चलाउने व्यक्ति । <br/>चालकसंग उक्त मोटरसाइकल चलाउने अनुमतिपत्र भएको र त्यस्तो अनुमतिपत्र राख्न वा प्राप्त गर्न अयोग्य नठहरिएको हुनुपर्नेछ ।';
+                                $cost_table_title = "मोटरसाइकलको बीमाशुल्क गणना तालिका";
+                                break;
+
+                            case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE:
+                                $usage_limitation = 'यस बीमालेख अन्तर्गत रक्षावरण गरिएको सवारी साधन भाडा, इनाम, संगठनात्मक दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षण वा ढुवानी कार्यसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।';
+                                $driver_limitation = 'निम्नमध्ये कुनैः– (क) बीमित स्वयं वा (ख) बीमितको आदेश वा अनुमतिले सवारी साधन चलाउने व्यक्ति ।<br/>चालकसंग उक्त सवारी साधन चलाउने अनुमतिपत्र भएको र यस्तो अनुमतिपत्र राख्न वा प्राप्त गर्न अयोग्य नठहरिएको हुनुपर्नेछ ।';
+                                $cost_table_title = "निजी सवारी साधनको बीमाशुल्क गणना तालिका";
+                                break;
+
+                            case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE:
+                                $usage_limitation = 'यस बीमालेख अन्तर्गत रक्षावरण गरिएको व्यावसायिक सवारी साधन दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षणसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।';
+                                $driver_limitation = 'निम्नमध्ये कुनैः– (क) बीमित स्वयं वा (ख) बीमितको आदेश वा अनुमतिले सवारी साधन चलाउने व्यक्ति ।<br/>चालकसंग उक्त व्यवसायिक सवारी साधन चलाउने अनुमतिपत्र भएको र यस्तो अनुमतिपत्र राख्न वा प्राप्त गर्न अयोग्य नठहरिएको हुनुपर्नेछ ।';
+                                $cost_table_title = "व्यावसायिक सवारी साधनको बीमाशुल्क गणना तालिका";
+                                break;
+
+                            default:
+                                # code...
+                                break;
+                        }
+                        ?>
                         <h4 class="border-b">प्रयोगको सीमा</h4>
-                        <p>यस बीमालेख अन्तर्गत रक्षावरण गरिएको सवारी साधन भाडा, इनाम, संगठनात्मक दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षण वा ढुवानी कार्यसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।</p><br/>
+
+                        <p><?php echo $usage_limitation?></p><br/>
 
                         <h4 class="border-b">चालक</h4>
-                        <p>निम्नमध्ये कुनैः–(क) बीमित स्वयं वा (ख) बीमितको साधारण जानकारी र वा सहमतिले सवारी साधन चलाउने व्यक्ति । <br/>चालकसंग उक्त मोटरसाइकल चलाउने अनुमतिपत्र भएको र त्यस्तो अनुमतिपत्र राख्न वा प्राप्त गर्न अयोग्य नठहरिएको हुनुपर्नेछ ।</p><br/>
+                        <p><?php echo $driver_limitation?></p><br/>
 
                         <h4 class="border-b">बीमाशुल्कको हिसाब</h4>
                         <p>संलग्न तालिका बमोजिम</p><br/>
 
                         <h4 class="border-b">अनिवार्य अधिक:  स्वेच्छीक अधिक:</h4><br/>
 
-                        <h4 class="border-b">संलग्न सम्पुष्टी नम्बरहरु: </h4>
+                        <h4 class="border-b">संलग्न सम्पुष्टी नम्बरहरु: <?php echo $reaffirm_numbers?></h4>
                     </td>
                 </tr>
             </tbody>
@@ -204,6 +276,8 @@ $premium_attributes = json_decode($record->premium_attributes);
             </tr>
         </table>
 
+        <pagebreak>
+
         <?php
         /**
          * Policy Premium Card
@@ -214,8 +288,7 @@ $premium_attributes = json_decode($record->premium_attributes);
             'stamp_duty'    => $record->stamp_duty,
             'attributes'    => $record->premium_attributes
         ];
-        $title = "मोटरसाइकलको बीमाशुल्क गणना तालिका";
-        $this->load->view('premium/snippets/_print_card_overview_MOTOR', ['premium_record' => $premium_record, 'policy_record' => $record, 'title' => $title]);
+        $this->load->view('premium/snippets/_print_card_overview_MOTOR', ['premium_record' => $premium_record, 'policy_record' => $record, 'title' => $cost_table_title]);
         ?>
     </body>
 </html>
