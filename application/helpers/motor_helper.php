@@ -266,6 +266,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 				'section_total' => true
 			];
 
+			$__cost_table_A['sub_total'] = $premium_A_total;
+
 			// ---------------------------------------------------------------------------------------
 
 
@@ -334,6 +336,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 				'amount' 	=> $premium_I_total,
 				'section_total' => true
 			];
+
+			$__cost_table_I['sub_total'] = $premium_I_total;
 		}
 
 
@@ -412,6 +416,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 			'amount' 	=> $premium_AA_total,
 			'section_total' => true
 		];
+
+		$__cost_table_AA['sub_total'] = $premium_AA_total;
 
 
 		/**
@@ -778,6 +784,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 				'section_total' => true
 			];
 
+			// Section Sub Total
+			$__cost_table_A['sub_total'] = $premium_A_total;
 
 			// ---------------------------------------------------------------------------------------
 
@@ -800,6 +808,9 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 				'amount' => $premium_I_total
 			];
 
+			// Section Sub Total
+			$__cost_table_I['sub_total'] = $premium_I_total;
+
 			// ---------------------------------------------------------------------------------------
 
 
@@ -818,6 +829,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 				'amount' => $premium_EE_total
 			];
 
+			// Section Sub Total
+			$__cost_table_EE['sub_total'] = $premium_EE_total;
 
 			// ---------------------------------------------------------------------------------------
 
@@ -897,6 +910,9 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 				'amount' 	=> $premium_U_total,
 				'section_total' => true
 			];
+
+			// Section Sub Total
+			$__cost_table_U['sub_total'] = $premium_U_total;
 		}
 
 
@@ -937,6 +953,9 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 			'amount' 	=> $premium_AA_total,
 			'section_total' => true
 		];
+
+		// Section Sub Total
+		$__cost_table_AA['sub_total'] = $premium_AA_total;
 
 		// ---------------------------------------------------------------------------------------
 
@@ -1372,6 +1391,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
                 'section_total' => true
             ];
 
+            // Section Sub Total
+			$__cost_table_A['sub_total'] = $premium_A_total;
 
 
 
@@ -1393,6 +1414,9 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
                 'amount' => $premium_I_total
             ];
 
+            // Section Sub Total
+			$__cost_table_I['sub_total'] = $premium_I_total;
+
 
             // ---------------------------------------------------------------------------------------
             //  ई) Staff Accident
@@ -1411,6 +1435,9 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
                 'amount' => $premium_EE_total
             ];
 
+            // Section Sub Total
+			$__cost_table_EE['sub_total'] = $premium_EE_total;
+
 
             // ---------------------------------------------------------------------------------------
             //  उ) Passenger Accident
@@ -1428,6 +1455,9 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
                 'title' => "प्रति ब्यक्ति (बीमांक रु. {$insured_value_tariff->staff}  को लागि प्रति ब्यक्ति रु. {$accident_premium->pramt_accident_per_passenger} का दरले)",
                 'amount' => $premium_U_total
             ];
+
+            // Section Sub Total
+			$__cost_table_U['sub_total'] = $premium_U_total;
 
 
             // ---------------------------------------------------------------------------------------
@@ -1509,6 +1539,9 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
                 'section_total' => true
             ];
 
+            // Section Sub Total
+			$__cost_table_OO['sub_total'] = $premium_OO_total;
+
         }
 
         // ---------------------------------------------------------------------------------------
@@ -1548,6 +1581,9 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
             'amount'    => $premium_AA_total,
             'section_total' => true
         ];
+
+        // Section Sub Total
+		$__cost_table_AA['sub_total'] = $premium_AA_total;
 
         // ---------------------------------------------------------------------------------------
         // Total Computation

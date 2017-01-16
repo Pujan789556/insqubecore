@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_no", "branch_id", "proposer", "customer_id", "portfolio_id", "policy_package", "sold_by", "object_id", "issue_date", "start_date", "duration", "end_date", "flag_dc", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_no", "branch_id", "proposer", "customer_id", "portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issue_date", "start_date", "duration", "end_date", "flag_dc", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -175,13 +175,22 @@ class Policy_model extends MY_Model
              */
             'duration' => [
                 [
+                    'field' => 'proposed_date',
+                    'label' => 'Policy Proposed Date',
+                    'rules' => 'trim|required|valid_date',
+                    '_type'             => 'date',
+                    '_default'          => date('Y-m-d'),
+                    '_extra_attributes' => 'data-provide="datepicker-inline"',
+                    '_required' => true
+                ],
+                [
                     'field' => 'issue_date',
                     'label' => 'Policy Issue Date',
                     'rules' => 'trim|required|valid_date',
                     '_type'             => 'date',
                     '_default'          => date('Y-m-d'),
                     '_extra_attributes' => 'data-provide="datepicker-inline"',
-                    '_required' => false
+                    '_required' => true
                 ],
                 [
                     'field' => 'start_date',
@@ -190,7 +199,7 @@ class Policy_model extends MY_Model
                     '_type'             => 'date',
                     '_default'          => date('Y-m-d'),
                     '_extra_attributes' => 'data-provide="datepicker-inline"',
-                    '_required' => false
+                    '_required' => true
                 ],
                 [
                     'field' => 'duration',
@@ -199,7 +208,7 @@ class Policy_model extends MY_Model
                     '_type'     => 'dropdown',
                     '_data'     => $select + get_policy_duration_list(),
                     '_default'  => '+1 year',
-                    '_required' => false
+                    '_required' => true
                 ],
             ],
 

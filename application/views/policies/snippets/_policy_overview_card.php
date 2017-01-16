@@ -41,6 +41,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <td><?php echo _PO_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
                 </tr>
                 <tr>
+                    <td class="text-bold">Policy Proposed Date</td>
+                    <td><?php echo $record->proposed_date?></td>
+                </tr>
+                <tr>
                     <td class="text-bold">Policy Issue Date</td>
                     <td><?php echo $record->issue_date?></td>
                 </tr>

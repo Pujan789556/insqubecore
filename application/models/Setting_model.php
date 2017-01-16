@@ -15,13 +15,20 @@ class Setting_model extends MY_Model
 
     protected $after_update  = ['clear_cache'];
 
-    protected $fields = ["id", "organization", "address", "pan_no", "logo", "per_page", "flag_offline", "offline_message", "admin_email", "from_email", "replyto_email", "noreply_email", "website", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "orgn_name_en", "orgn_name_np", "address", "pan_no", "logo", "per_page", "flag_offline", "offline_message", "admin_email", "from_email", "replyto_email", "noreply_email", "website", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
-        [
-                'field' => 'organization',
-                'label' => 'Organization Name',
+            [
+                'field' => 'orgn_name_en',
+                'label' => 'Organization Name (EN)',
                 'rules' => 'trim|required|max_length[100]',
+                '_type' => 'text',
+                '_required' => true
+            ],
+            [
+                'field' => 'orgn_name_np',
+                'label' => 'Organization Name (NP)',
+                'rules' => 'trim|required|max_length[150]',
                 '_type' => 'text',
                 '_required' => true
             ],

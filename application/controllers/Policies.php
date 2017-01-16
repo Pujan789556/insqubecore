@@ -891,4 +891,54 @@ class Policies extends MY_Controller
 						->render($this->data);
 
     }
+
+    // --------------------------------------------------------------------
+	//  POLICY PRINT
+	// --------------------------------------------------------------------
+
+	/**
+	 * Print Policy Schedule
+	 *
+	 * @param integer $id  Policy ID
+	 * @return void
+	 */
+    public function print($id)
+    {
+    	/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('policies', 'generate.policy.schedule') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+    	$id = (int)$id;
+		$record = $this->policy_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		$this->load->library('pdf');
+        $mpdf = $this->pdf->load();
+        $mpdf->SetMargins(10, 10, 10);
+        $mpdf->margin_header = 0;
+        $mpdf->margin_footer = 0;
+        $mpdf->SetProtection(array('print'));
+        $mpdf->SetTitle("Policy Schedule - {$record->code}");
+        $mpdf->SetAuthor($this->settings->orgn_name_ep);
+        $mpdf->SetWatermarkText( strtoupper(get_policy_status_text($record->status)) );
+        $mpdf->showWatermarkText = true;
+        $mpdf->watermark_font = 'DejaVuSansCondensed';
+        $mpdf->watermarkTextAlpha = 0.1;
+        $mpdf->SetDisplayMode('fullpage');
+
+        $html = $this->load->view('policies/print/schedule',['record' => $record], TRUE);
+
+        // echo $html;exit;
+        $mpdf->WriteHTML($html);
+
+        $mpdf->Output();
+
+    }
 }
