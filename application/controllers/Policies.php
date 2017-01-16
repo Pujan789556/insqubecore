@@ -943,7 +943,13 @@ class Policies extends MY_Controller
 	        $mpdf->SetProtection(array('print'));
 	        $mpdf->SetTitle("Policy Schedule - {$record->code}");
 	        $mpdf->SetAuthor($this->settings->orgn_name_ep);
-	        $mpdf->SetWatermarkText( strtoupper(get_policy_status_text($record->status)) );
+
+	        if( in_array($record->status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED, IQB_POLICY_STATUS_VERIFIED]))
+	        {
+	        	$mpdf->SetWatermarkText( 'DEBIT NOTE' );
+	        }
+
+
 	        $mpdf->showWatermarkText = true;
 	        $mpdf->watermark_font = 'DejaVuSansCondensed';
 	        $mpdf->watermarkTextAlpha = 0.1;
