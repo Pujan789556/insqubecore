@@ -101,7 +101,8 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
                 $form_data = [
                     'form_elements'     => $partial_form_elements,
                     'form_record'       => NULL,
-                    'inline_grid_width' => 'col-sm-6 col-md-4'
+                    'inline_grid_width' => 'col-sm-6 col-md-4',
+                    '__show_remove'     => FALSE
                 ];
                 if($i === 1)
                 {
@@ -229,7 +230,8 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
                 $form_data = [
                     'form_elements'     => $partial_form_elements,
                     'form_record'       => NULL,
-                    'inline_grid_width' => 'col-sm-6 col-md-4'
+                    'inline_grid_width' => 'col-sm-6 col-md-4',
+                    '__show_remove'     => FALSE
                 ];
                 if($i === 1)
                 {
@@ -292,7 +294,8 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
                 $form_data = [
                     'form_elements'     => $partial_form_elements,
                     'form_record'       => NULL,
-                    'inline_grid_width' => 'col-sm-6 col-md-4'
+                    'inline_grid_width' => 'col-sm-6 col-md-4',
+                    '__show_remove'     => FALSE
                 ];
                 if($i === 1)
                 {
@@ -354,7 +357,8 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
                 $form_data = [
                     'form_elements'     => $partial_form_elements,
                     'form_record'       => NULL,
-                    'inline_grid_width' => 'col-sm-6 col-md-4'
+                    'inline_grid_width' => 'col-sm-6 col-md-4',
+                    '__show_remove'     => FALSE
                 ];
                 if($i === 1)
                 {

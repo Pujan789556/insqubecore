@@ -21,7 +21,7 @@ $__show_remove = $__show_remove ?? FALSE;
             ]);
             ?>
         </div>
-        <?php if($__show_remove):?>
+        <?php if($__show_remove === TRUE):?>
         <div class="box-footer text-right">
             <a href="#" class="btn btn-danger btn-sm" onclick="$(this).closest('.box-removable').fadeOut('fast', function(){$(this).remove()})">Remove</a>
         </div>
