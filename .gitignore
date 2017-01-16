@@ -22,10 +22,11 @@ todo.md
 .env
 .env-dev
 
-# DB, Wiki Docs Reference Folder
+# DB, Wiki Docs etc Reference Folder
 # --------------------------------
 .db
 .wiki
+.sh
 
 # Third party Reference
 # --------------------------

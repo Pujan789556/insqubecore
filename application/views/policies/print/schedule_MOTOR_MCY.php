@@ -1,4 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
+/**
+ * Schedule Print : Motor - Motorcycle
+ */
 
 $object_attributes = json_decode($record->object_attributes);
 
@@ -17,23 +20,32 @@ $premium_attributes = json_decode($record->premium_attributes);
     </head>
     <body>
 
-        <table class="table table-bordered table-condensed" cellpadding="0" cellspacing="0" style="margin:0">
+        <?php
+        /**
+         * Policy Schedule
+         */
+        ?>
+        <table class="table" width="100%">
+            <thead><tr><td colspan="2" align="center"><h3>मोटरसाइकल बीमालेखको तालिका (सेड्युल)</h3></td></tr></thead>
             <tbody>
-                <tr><td  colspan="2" align="center"><h3>मोटरसाइकल बीमालेखको तालिका (सेड्युल)</h3></td></tr>
                 <tr><td colspan="2">बीमालेख नं.: <?php echo $record->code;?></td></tr>
                 <tr>
-                    <td width="50%" style="padding:0; margin:0">
-                        <table class="table no-border" cellpadding="0" cellspacing="0">
+                    <td width="50%" class="no-padding">
+                        <table class="table" width="100%">
                             <tr>
-                                <td class="border-b-dark">
+                                <td>
                                     <h4 class="border-b">बीमीतको विवरण</h4><br/>
                                     नाम थार: <?php echo $record->customer_name;?><br/>
-                                    ठेगाना: <?php echo get_contact_widget($record->customer_contact, true);?><br/>
+                                    ठेगाना: <?php echo get_contact_widget($record->customer_contact, true);?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
                                     पेशा: <?php echo $record->customer_profession;?>
                                 </td>
                             </tr>
                             <tr>
-                                <td class="border-b-dark">लागू हुने भौगोलिक क्षेत्र: नेपाल, भारत, भूटान, बंगलादेश र चीनको स्वशासित क्षेत्र तिब्बत</td>
+                                <td>लागू हुने भौगोलिक क्षेत्र: नेपाल, भारत, भूटान, बंगलादेश र चीनको स्वशासित क्षेत्र तिब्बत</td>
                             </tr>
 
                             <tr>
@@ -45,30 +57,30 @@ $premium_attributes = json_decode($record->premium_attributes);
                         </table>
                     </td>
 
-                    <td style="padding:0; margin:0" >
-                        <table class="table no-border table-condensed" cellpadding="0" cellspacing="0" border="0">
+                    <td width="50%" class="no-padding no-border">
+                        <table class="table">
                             <tr>
-                                <td class="border-b">बीमालेखको किसिम: <?php echo _PO_MOTOR_sub_portfolio_dropdown(FALSE)[$object_attributes->sub_portfolio]?></td>
+                                <td>बीमालेखको किसिम: <?php echo _PO_MOTOR_sub_portfolio_dropdown(FALSE)[$object_attributes->sub_portfolio]?></td>
                             </tr>
 
                             <tr>
-                                <td class="border-b">प्रस्तावकको नाम: <?php echo nl2br($this->security->xss_clean($record->proposer));?></td>
+                                <td>प्रस्तावकको नाम: <?php echo nl2br($this->security->xss_clean($record->proposer));?></td>
                             </tr>
 
                             <tr>
-                                <td class="border-b">बीमा प्रस्ताव भएको मिति: <?php echo $record->proposed_date?></td>
+                                <td>बीमा प्रस्ताव भएको मिति: <?php echo $record->proposed_date?></td>
                             </tr>
 
                             <tr>
-                                <td class="border-b">बीमालेख जारी भएको स्थान र मिति: <?php echo $this->dx_auth->get_branch_code()?>, <?php echo $record->issue_date?></td>
+                                <td>बीमालेख जारी भएको स्थान र मिति: <?php echo $this->dx_auth->get_branch_code()?>, <?php echo $record->issue_date?></td>
                             </tr>
 
                             <tr>
-                                <td class="border-b">रक्षावरण गरिएका जोखिमहरु: <?php echo _PO_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
+                                <td>रक्षावरण गरिएका जोखिमहरु: <?php echo _PO_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
                             </tr>
 
                             <tr>
-                                <td class="border-b">
+                                <td>
                                     जोखिम बहन गर्न शूरु हुने मिति: <?php echo $record->start_date?><br/>
                                     समय:
                                 </td>
@@ -81,16 +93,16 @@ $premium_attributes = json_decode($record->premium_attributes);
                                  */
                                 $agent_text = implode(', ', array_filter([$record->agent_name, $record->agent_ud_code]));
                                 ?>
-                                <td class="border-b">बीमा अभिकर्ताको नाम र इजाजत पत्र नम्बर: <?php echo $agent_text;?></td>
+                                <td>बीमा अभिकर्ताको नाम र इजाजत पत्र नम्बर: <?php echo $agent_text;?></td>
                             </tr>
 
                             <tr>
-                                <td class="border-b-dark">बीमा अवधि: <?php echo $record->start_date?> देखि <?php echo $record->end_date?> सम्म</td>
+                                <td>बीमा अवधि: <?php echo $record->start_date?> देखि <?php echo $record->end_date?> सम्म</td>
                             </tr>
 
                             <tr>
-                                <td style="margin:0; padding:0;">
-                                    <table class="table table-condensed no-border no-margin" cellpadding="0" cellspacing="0">
+                                <td>
+                                    <table class="table no-border">
                                         <tr><td colspan="2"><h4 class="border-b">बीमाशुल्क</h4><br/></td></tr>
 
                                         <?php foreach($premium_attributes as $section_object):?>
@@ -104,7 +116,7 @@ $premium_attributes = json_decode($record->premium_attributes);
 
                                         <tr>
                                             <td>जम्मा</td>
-                                            <td class="totals cost border-top">
+                                            <td class="cost border-top">
                                                 रु <?php echo number_format((float)$record->total_amount, 2, '.', '');?>
                                             </td>
                                         </tr>
@@ -121,8 +133,8 @@ $premium_attributes = json_decode($record->premium_attributes);
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="totals">मु. अ. क.(VAT) सहित जम्मा शुल्क</td>
-                                            <td class="totals cost border-top">
+                                            <td class="bold">मु. अ. क.(VAT) सहित जम्मा शुल्क</td>
+                                            <td class="cost border-top bold">
                                                 रु <?php echo number_format( (float)($record->stamp_duty + $record->total_amount) * 1.13, 2, '.', '');?>
                                             </td>
                                         </tr>
@@ -173,8 +185,8 @@ $premium_attributes = json_decode($record->premium_attributes);
                 </tr>
             </tbody>
         </table>
-        <p class="no-margin">यस तालिकामा उल्लेख भएको प्रयोगको सीमा उल्लघंन भएमा बीमकले बीमितलाई क्षतिपूर्ति दिनेछैन ।</p>
-        <table class="table no-border no-margin">
+        <p style="text-align: center">यस तालिकामा उल्लेख भएको प्रयोगको सीमा उल्लघंन भएमा बीमकले बीमितलाई क्षतिपूर्ति दिनेछैन ।</p>
+        <table class="table">
             <tr>
                 <td width="50%">
                     कर बिजक नं: <br/>
@@ -191,5 +203,19 @@ $premium_attributes = json_decode($record->premium_attributes);
                 </td>
             </tr>
         </table>
+
+        <?php
+        /**
+         * Policy Premium Card
+         */
+        $premium_record = (object)[
+            'policy_id'     => $record->id,
+            'total_amount'  => $record->total_amount,
+            'stamp_duty'    => $record->stamp_duty,
+            'attributes'    => $record->premium_attributes
+        ];
+        $title = "मोटरसाइकलको बीमाशुल्क गणना तालिका";
+        $this->load->view('premium/snippets/_print_card_overview_MOTOR', ['premium_record' => $premium_record, 'policy_record' => $record, 'title' => $title]);
+        ?>
     </body>
 </html>

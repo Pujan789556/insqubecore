@@ -4,10 +4,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Policy: Details - Actions
  */
 ?>
-<a href="#"
-        title="Print Policy"
-        class="btn bg-navy btn-round trg-dialog-action"
-        data-url="<?php echo site_url('policies/print/' . $record->id  );?>"
+<a title="Print Policy"
+        class="btn bg-navy btn-round"
+        href="<?php echo site_url('policies/print/' . $record->id  );?>"
+        target="_blank"
     ><i class="fa fa-print"></i> Print</a>
 
 <?php if( $record->status === IQB_POLICY_STATUS_DRAFT && $this->dx_auth->is_authorized('policies', 'status.to.unverified') ): ?>

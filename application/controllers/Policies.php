@@ -919,26 +919,78 @@ class Policies extends MY_Controller
 			$this->template->render_404();
 		}
 
-		$this->load->library('pdf');
-        $mpdf = $this->pdf->load();
-        $mpdf->SetMargins(10, 10, 10);
-        $mpdf->margin_header = 0;
-        $mpdf->margin_footer = 0;
-        $mpdf->SetProtection(array('print'));
-        $mpdf->SetTitle("Policy Schedule - {$record->code}");
-        $mpdf->SetAuthor($this->settings->orgn_name_ep);
-        $mpdf->SetWatermarkText( strtoupper(get_policy_status_text($record->status)) );
-        $mpdf->showWatermarkText = true;
-        $mpdf->watermark_font = 'DejaVuSansCondensed';
-        $mpdf->watermarkTextAlpha = 0.1;
-        $mpdf->SetDisplayMode('fullpage');
+		$schedule_view = '';
+		switch ($record->portfolio_id)
+		{
+			// Motor
+			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
+					$schedule_view = $this->__schedule_view_MOTOR($record);
+				break;
 
-        $html = $this->load->view('policies/print/schedule',['record' => $record], TRUE);
+			default:
+				# code...
+				break;
+		}
 
-        // echo $html;exit;
-        $mpdf->WriteHTML($html);
 
-        $mpdf->Output();
+		if( $schedule_view )
+		{
+			$this->load->library('pdf');
+	        $mpdf = $this->pdf->load();
+	        $mpdf->SetMargins(10, 10, 10);
+	        $mpdf->margin_header = 0;
+	        $mpdf->margin_footer = 0;
+	        $mpdf->SetProtection(array('print'));
+	        $mpdf->SetTitle("Policy Schedule - {$record->code}");
+	        $mpdf->SetAuthor($this->settings->orgn_name_ep);
+	        $mpdf->SetWatermarkText( strtoupper(get_policy_status_text($record->status)) );
+	        $mpdf->showWatermarkText = true;
+	        $mpdf->watermark_font = 'DejaVuSansCondensed';
+	        $mpdf->watermarkTextAlpha = 0.1;
+	        $mpdf->SetDisplayMode('fullpage');
 
+	        $html = $this->load->view( $schedule_view, ['record' => $record], TRUE);
+
+	        // echo $html;exit;
+	        // $stylesheet = file_get_contents(THEME_URL . 'bootstrap/css/bootstrap.min.css');
+	        // $mpdf->WriteHTML($stylesheet, 1);
+	        // $mpdf->WriteHTML('body{font-family: freeserif; font-size: 8pt}', 1);
+
+	        $mpdf->WriteHTML($html);
+
+	        $mpdf->Output();
+		}
+		else
+		{
+			$this->template->render_404('', 'No Schedule View Found!');
+		}
     }
+
+		private function __schedule_view_MOTOR($record)
+		{
+			$attributes = json_decode($record->object_attributes);
+			$schedule_view = '';
+
+			// Get schedule view according sub-portfolio
+			switch ($attributes->sub_portfolio)
+			{
+				case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
+					$schedule_view = 'policies/print/schedule_MOTOR_MCY';
+					break;
+
+				case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE:
+					$schedule_view = 'policies/print/schedule_MOTOR_PVC';
+					break;
+
+				case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE:
+					$schedule_view = 'policies/print/schedule_MOTOR_CVC';
+					break;
+
+				default:
+					# code...
+					break;
+			}
+
+			return $schedule_view;
+		}
 }
