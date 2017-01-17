@@ -1491,7 +1491,13 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
             $__premium_OO_row_5 = 0.00;
             if($flag_risk_terorrism)
             {
-                $__premium_OO_row_2 = $vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
+                $__premium_OO_row_2 = (float)($vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00));
+
+                // If we have trailer/trolly, we also have to add the premium
+                if($trailer_price > 0.00)
+                {
+                	$__premium_OO_row_2 += (float)($trailer_price * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00));
+                }
 
                 // Premium for "Per Thousand Insured Amount" on Terorrism rate_additionl_per_thousand_on_extra_rate
 
