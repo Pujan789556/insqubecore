@@ -1281,7 +1281,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
             $__discount_A_row__no_claim_discount = 0.00;
             if($no_claim_discount)
             {
-                $__discount_A_row__no_claim_discount = $__premium_A_row_GHA * ($no_claim_discount/100.00);
+                $__discount_A_row__no_claim_discount = $__premium_A_row_GA * ($no_claim_discount/100.00);
             }
             $__cost_table_A['sections'][] = [
                 'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ग” को {$no_claim_discount} %",
