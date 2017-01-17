@@ -111,11 +111,11 @@ $config['DX_permissions'] = [
 	],
 
 	/**
-	 * Group: Customers
+	 * Group: Policy
 	 */
 	'Policy Permissions' => [
 		/**
-		 * Customer Module
+		 * Policy Module
 		 */
 		'policies'  => [
 			'explore.policy',
@@ -161,6 +161,18 @@ $config['DX_permissions'] = [
 			'send.followup.notification',
 
 		],
+
+		/**
+		 * Object Module
+		 */
+		'objects' => [
+			'explore.object',
+			'add.object',
+			'edit.object',
+			'delete.object'
+		],
+
+
 	],
 ];
 

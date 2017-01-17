@@ -266,8 +266,7 @@ switch ($object_attributes->sub_portfolio)
                     रु.:
                 </td>
                 <td align="left">
-                    <h4>निमित्त, <?php echo $this->settings->orgn_name_np?></h4><br/>
-                    <h4 class="underline">अधिकार प्राप्त अधिकारीको</h4>
+                    <h4 class="underline"><?php echo $this->settings->orgn_name_np?> तर्फबाट अधिकार प्राप्त अधिकारीको</h4>
                     दस्तखत:<br/>
                     नाम थर:<br/>
                     छाप:<br/>

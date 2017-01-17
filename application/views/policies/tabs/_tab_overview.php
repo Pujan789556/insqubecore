@@ -55,11 +55,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			/**
 			* Policy Object Card
 			*/
-			$__flag_object_editable = FALSE;
-			if( in_array($record->status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED]) && $this->dx_auth->is_authorized_any('policies', ['edit.draft.policy', 'edit.unverified.policy']) )
-			{
-				$__flag_object_editable = TRUE;
-			}
+			$__flag_object_editable = is_policy_editable($record->status, FALSE);
 			$object_record = (object)[
 				'id' 			=> $record->object_id,
 	            'portfolio_id'  => $record->portfolio_id,

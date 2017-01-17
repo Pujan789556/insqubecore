@@ -76,7 +76,7 @@ class Objects extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('objects', 'explore.object') )
+		if( !$this->dx_auth->is_authorized('objects', 'explore.object') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -362,7 +362,7 @@ class Objects extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('objects', 'edit.object') )
+		if( !$this->dx_auth->is_authorized('objects', 'edit.object') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -439,7 +439,7 @@ class Objects extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('objects', 'add.object') )
+		if( !$this->dx_auth->is_authorized('objects', 'add.object') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -725,7 +725,7 @@ class Objects extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('objects', 'delete.object') )
+		if( !$this->dx_auth->is_authorized('objects', 'delete.object') )
 		{
 			$this->dx_auth->deny_access();
 		}

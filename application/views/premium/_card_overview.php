@@ -16,7 +16,7 @@ $_card_partial_view_by_portfolio = _PREMIUM_OVERVIEW_CARD_partial_view_by_portfo
         <h3 class="no-margin">
         <span class="pull-left">Premium Calculation Table</span>
         <span class="pull-right">
-            <?php if( in_array($policy_record->status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED]) && $this->dx_auth->is_authorized_any('policies', ['edit.draft.policy', 'edit.unverified.policy']) ): ?>
+            <?php if( is_policy_editable($policy_record->status, FALSE) ): ?>
                     <span class="action divider"></span>
                     <a href="#"
                         class="action trg-dialog-edit"

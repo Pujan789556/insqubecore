@@ -75,7 +75,7 @@ class Policies extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('policies', 'explore.policy') )
+		if( !$this->dx_auth->is_authorized('policies', 'explore.policy') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -298,36 +298,6 @@ class Policies extends MY_Controller
 		$this->page('l');
 	}
 
-	// --------------------------------------------------------------------
-	// CRUD HELPER - FUNCTIONS
-	// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Packages for Portfolio
-		 *
-		 * Get the policy packages for specified portfolio
-		 *
-		 * @param integer $portfolio_id
-		 * @param string 	$method 	Return Method
-		 * @return mixed
-		 */
-		public function gppp($portfolio_id)
-		{
-			// Valid Record ?
-			$portfolio_id = (int)$portfolio_id;
-
-			$options = _PO_policy_package_dropdown($portfolio_id);
-
-			if( !empty($options))
-			{
-				$this->template->json([
-					'status' => 'success',
-					'options' => $options
-				]);
-			}
-			$this->template->render_404('', 'Incorrect Portfolio');
-		}
-
 
 
 	// --------------------------------------------------------------------
@@ -345,7 +315,7 @@ class Policies extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('policies', 'add.policy') )
+		if( !$this->dx_auth->is_authorized('policies', 'add.policy') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -585,40 +555,6 @@ class Policies extends MY_Controller
 
 	// --------------------------------------------------------------------
 
-		/**
-		 * Reset Premium on Policy Update
-		 *
-		 * Reset premium on change of any of the followings
-		 * 	- portfolio
-		 * 	- policy package
-		 * 	- customer
-		 * 	- policy object
-		 * 	- flag direct discount/agent commission
-		 *
-		 * @param object $before_update Policy Record Before Update
-		 * @param object $after_update Policy Record After Update
-		 * @return void
-		 */
-		private function __reset_premium_on_policy_update($before_update, $after_update)
-		{
-			$fields = ['portfolio_id', 'policy_package', 'customer_id', 'object_id', 'flag_dc'];
-			$__flag_reset = FALSE;
-			foreach($fields as $column)
-			{
-				if($before_update->{$column} != $after_update->{$column})
-				{
-					$__flag_reset = TRUE;
-					break;
-				}
-			}
-			if( $__flag_reset === TRUE )
-			{
-				$this->premium_model->reset($before_update->id);
-			}
-		}
-
-	// --------------------------------------------------------------------
-
 	/**
 	 * Delete a Policy
 	 *
@@ -638,6 +574,12 @@ class Policies extends MY_Controller
 		}
 
 		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->branch_id);
+
+
+		/**
 		 * Check Permissions
 		 *
 		 * Deletable Status
@@ -655,13 +597,7 @@ class Policies extends MY_Controller
 
 		// Deletable Permission ?
 		$__flag_authorized 		= FALSE;
-		if(
-			$this->dx_auth->is_admin()
-
-			||
-
-			$this->dx_auth->is_authorized('policies', 'delete.draft.policy')
-		)
+		if( $this->dx_auth->is_authorized('policies', 'delete.draft.policy') )
 		{
 			$__flag_authorized = TRUE;
 		}
@@ -717,109 +653,177 @@ class Policies extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+	// CRUD HELPER - FUNCTIONS
+	// --------------------------------------------------------------------
 
+		/**
+		 * Get Policy Packages for Portfolio
+		 *
+		 * Get the policy packages for specified portfolio
+		 *
+		 * @param integer $portfolio_id
+		 * @param string 	$method 	Return Method
+		 * @return mixed
+		 */
+		public function gppp($portfolio_id)
+		{
+			// Valid Record ?
+			$portfolio_id = (int)$portfolio_id;
 
-	/**
-     * Callback : Valid Duration
-     *
-     * Check Start Date < End Date
-     *
-     * @param string $str
-     * @return bool
-     */
-    public function _cb_valid_policy_duration($str)
-    {
-    	$duration_list = get_policy_duration_list();
+			$options = _PO_policy_package_dropdown($portfolio_id);
 
-    	if( !array_key_exists($str, $duration_list) )
-    	{
-    		$this->form_validation->set_message('_cb_valid_policy_duration', 'Please select a valid duration.');
-            return FALSE;
-    	}
-        return TRUE;
-    }
-    // --------------------------------------------------------------------
+			if( !empty($options))
+			{
+				$this->template->json([
+					'status' => 'success',
+					'options' => $options
+				]);
+			}
+			$this->template->render_404('', 'Incorrect Portfolio');
+		}
 
-	/**
-     * Callback : Valid Object Defaults
-     *
-     * Checks the Object Validity for the given Policy
-     * 		1. Object Owner and Selected Customer Should Match
-     * 		2. If the object is already assigned to other policy which is not
-     * 			Canceled|Expired, You can not assign this object to new policy.
-     *
-     *
-     * @param string $str
-     * @return bool
-     */
-    public function _cb_valid_object_defaults($object_id)
-    {
-    	$object_id 		= (int)$object_id;
-    	$customer_id 	= (int)$this->input->post('customer_id');
-    	$message = 'The selected Object does not belong to the selected Customer.';
+		// --------------------------------------------------------------------
 
-    	if( !$object_id OR !$customer_id)
-    	{
-    		$this->form_validation->set_message('_cb_valid_object_defaults', 'Customer and/or Object not supplied.');
-            return FALSE;
-    	}
+		/**
+		 * Reset Premium on Policy Update
+		 *
+		 * Reset premium on change of any of the followings
+		 * 	- portfolio
+		 * 	- policy package
+		 * 	- customer
+		 * 	- policy object
+		 * 	- flag direct discount/agent commission
+		 *
+		 * @param object $before_update Policy Record Before Update
+		 * @param object $after_update Policy Record After Update
+		 * @return void
+		 */
+		private function __reset_premium_on_policy_update($before_update, $after_update)
+		{
+			$fields = ['portfolio_id', 'policy_package', 'customer_id', 'object_id', 'flag_dc'];
+			$__flag_reset = FALSE;
+			foreach($fields as $column)
+			{
+				if($before_update->{$column} != $after_update->{$column})
+				{
+					$__flag_reset = TRUE;
+					break;
+				}
+			}
+			if( $__flag_reset === TRUE )
+			{
+				$this->premium_model->reset($before_update->id);
+			}
+		}
 
-    	$object_record = $this->object_model->find($object_id);
-    	if(!$object_record)
-    	{
-    		$this->form_validation->set_message('_cb_valid_object_defaults', 'You are trying to manipulate CUSTOMER & OBJECT, which unfortunately, DOES NOT WORK!');
-            return FALSE;
-    	}
+	    // --------------------------------------------------------------------
 
-    	if( $object_record->customer_id != $customer_id )
-    	{
-    		$this->form_validation->set_message('_cb_valid_object_defaults', 'The selected Object does not belong to the selected Customer.');
-            return FALSE;
-    	}
+		/**
+	     * Callback : Valid Duration
+	     *
+	     * Check Start Date < End Date
+	     *
+	     * @param string $str
+	     * @return bool
+	     */
+	    public function _cb_valid_policy_duration($str)
+	    {
+	    	$duration_list = get_policy_duration_list();
 
-    	/**
-    	 *  ! IMPORTANT !
-    	 * ---------------
-    	 * Is this object is free to assign to new/editable policy?
-    	 *
-    	 * Logic:
-    	 * 	If this policy object is already assigned to a policy which is NOT (CANCELED|EXPIRED)
-    	 * 	OR
-    	 *  If this policy object is already assigned to a policy which is editable
-    	 *
-    	 * For that, Simply get the latest policy record of this object and check
-    	 *
-    	 */
-    	$id = $this->input->post('id') ?? NULL;
-    	$id = $id ? (int)$id : NULL;
-    	$policy_record = $this->object_model->get_latest_policy($object_id);
+	    	if( !array_key_exists($str, $duration_list) )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_policy_duration', 'Please select a valid duration.');
+	            return FALSE;
+	    	}
+	        return TRUE;
+	    }
 
-    	if( $policy_record )
-    	{
-    		// Add Mode
-    		if(!$id)
-    		{
-    			// If found Editable Policy Record, It is already assigned to another policy which is working with this object
-    			if( !in_array( $policy_record->status, [IQB_POLICY_STATUS_CANCELED, IQB_POLICY_STATUS_EXPIRED] ) )
+	    // --------------------------------------------------------------------
+
+		/**
+	     * Callback : Valid Object Defaults
+	     *
+	     * Checks the Object Validity for the given Policy
+	     * 		1. Object Owner and Selected Customer Should Match
+	     * 		2. If the object is already assigned to other policy which is not
+	     * 			Canceled|Expired, You can not assign this object to new policy.
+	     *
+	     *
+	     * @param string $str
+	     * @return bool
+	     */
+	    public function _cb_valid_object_defaults($object_id)
+	    {
+	    	$object_id 		= (int)$object_id;
+	    	$customer_id 	= (int)$this->input->post('customer_id');
+	    	$message = 'The selected Object does not belong to the selected Customer.';
+
+	    	if( !$object_id OR !$customer_id)
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_object_defaults', 'Customer and/or Object not supplied.');
+	            return FALSE;
+	    	}
+
+	    	$object_record = $this->object_model->find($object_id);
+	    	if(!$object_record)
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_object_defaults', 'You are trying to manipulate CUSTOMER & OBJECT, which unfortunately, DOES NOT WORK!');
+	            return FALSE;
+	    	}
+
+	    	if( $object_record->customer_id != $customer_id )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_object_defaults', 'The selected Object does not belong to the selected Customer.');
+	            return FALSE;
+	    	}
+
+	    	/**
+	    	 *  ! IMPORTANT !
+	    	 * ---------------
+	    	 * Is this object is free to assign to new/editable policy?
+	    	 *
+	    	 * Logic:
+	    	 * 	If this policy object is already assigned to a policy which is NOT (CANCELED|EXPIRED)
+	    	 * 	OR
+	    	 *  If this policy object is already assigned to a policy which is editable
+	    	 *
+	    	 * For that, Simply get the latest policy record of this object and check
+	    	 *
+	    	 */
+	    	$id = $this->input->post('id') ?? NULL;
+	    	$id = $id ? (int)$id : NULL;
+	    	$policy_record = $this->object_model->get_latest_policy($object_id);
+
+	    	if( $policy_record )
+	    	{
+	    		// Add Mode
+	    		if(!$id)
 	    		{
-	    			$this->form_validation->set_message('_cb_valid_object_defaults', 'The selected object is already assigned to another active Policy.');
-	            	return FALSE;
+	    			// If found Editable Policy Record, It is already assigned to another policy which is working with this object
+	    			if( !in_array( $policy_record->status, [IQB_POLICY_STATUS_CANCELED, IQB_POLICY_STATUS_EXPIRED] ) )
+		    		{
+		    			$this->form_validation->set_message('_cb_valid_object_defaults', 'The selected object is already assigned to another active Policy.');
+		            	return FALSE;
+		    		}
 	    		}
-    		}
 
-    		// Edit Mode
-    		else
-    		{
-    			// If policy Do not Match, THe policy status must be Expired|Canceled
-    			if( $policy_record->id != $id )
+	    		// Edit Mode
+	    		else
 	    		{
-	    			$this->form_validation->set_message('_cb_valid_object_defaults', 'The selected object is already assigned to another Policy.');
-	            	return FALSE;
+	    			// If policy Do not Match, THe policy status must be Expired|Canceled
+	    			if( $policy_record->id != $id )
+		    		{
+		    			$this->form_validation->set_message('_cb_valid_object_defaults', 'The selected object is already assigned to another Policy.');
+		            	return FALSE;
+		    		}
 	    		}
-    		}
-    	}
-        return TRUE;
-    }
+	    	}
+	        return TRUE;
+	    }
+
+
+		// --------------------------------------------------------------------
+
 
 		/**
 		 * Sub-function: Upload Policy Profile Picture
@@ -864,7 +868,7 @@ class Policies extends MY_Controller
     	/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('policies', 'explore.policy') )
+		if( !$this->dx_auth->is_authorized('policies', 'explore.policy') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -902,7 +906,7 @@ class Policies extends MY_Controller
 	 * @param integer $id  Policy ID
 	 * @return void
 	 */
-    public function print($id)
+    public function schedule($id)
     {
     	/**
 		 * Check Permissions
@@ -965,4 +969,185 @@ class Policies extends MY_Controller
 			$this->template->render_404('', 'No Schedule View Found!');
 		}
     }
+
+
+    // --------------------------------------------------------------------
+	//  POLICY STATUS UPGRADE/DOWNGRADE
+	// --------------------------------------------------------------------
+
+	/**
+	 * Upgrade/Downgrade Status of a Policy
+	 *
+	 * @param integer $id Policy ID
+	 * @param char $to_status_code Status Code
+	 * @return json
+	 */
+	public function status($id, $to_status_code)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->policy_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->branch_id);
+
+		/**
+		 * Check Permission
+		 * -----------------
+		 * You need to have permission to modify the given status.
+		 */
+		$this->__check_status_permission($to_status_code, $record);
+
+
+		/**
+		 * Let's Update the Status
+		 */
+		if( $this->policy_model->update_status($record->id, $to_status_code) )
+		{
+			/**
+			 * Update View
+			 */
+			$record->status = $to_status_code;
+			$view = 'policies/tabs/_tab_overview';
+			$html = $this->load->view($view, ['record' => $record], TRUE);
+
+			$ajax_data = [
+				'message' 	=> 'Successfully Updated!',
+				'status'  	=> 'success',
+				'reloadRow' => true,
+				'rowId' 	=> '#tab-policy-overview-inner',
+				'method' 	=> 'replaceWith',
+				'row'		=> $html
+			];
+			return $this->template->json($ajax_data);
+		}
+		return $this->template->json([
+			'status' 	=> 'error',
+			'message' 	=> 'Could not be updated!'
+		], 400);
+	}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Check Status up/down permission
+		 *
+		 * @param alpha $to_updown_status Status Code to UP/DOWN
+		 * @param object $record Policy Record
+		 * @return mixed
+		 */
+		private function __check_status_permission($to_updown_status, $record)
+		{
+			/**
+			 * Check Permission
+			 * ------------------------------
+			 *
+			 * You need to have permission to modify the given status.
+			 * Plus, you need to have some pre-requisite before you
+			 * upgrade an status
+			 *
+			 * Case 1: Send To Verify
+			 * 		- Check if premium info is not NULL
+			 *
+			 * Case 2: Verify
+			 * 		- Check if premium info is not NULL
+			 */
+
+			$status_keys = array_keys(get_policy_status_dropdown(FALSE));
+
+			// Valid Status Code?
+			if( !in_array($to_updown_status, $status_keys ) )
+			{
+				return $this->template->json([
+					'status' 	=> 'error',
+					'message' 	=> 'Invalid Status Code!'
+				], 403);
+			}
+
+			// Valid Permission?
+			$__flag_valid_permission = FALSE;
+			$permission_name 	= '';
+			switch ($to_updown_status)
+			{
+				case IQB_POLICY_STATUS_DRAFT:
+					$permission_name = 'status.to.draft';
+					break;
+
+				case IQB_POLICY_STATUS_UNVERIFIED:
+					$permission_name = 'status.to.unverified';
+					break;
+
+				case IQB_POLICY_STATUS_VERIFIED:
+					$permission_name = 'status.to.verified';
+					break;
+
+				case IQB_POLICY_STATUS_PAID:
+					$permission_name = 'status.to.paid';
+					break;
+
+				case IQB_POLICY_STATUS_ACTIVE:
+					$permission_name = 'status.to.active';
+					break;
+
+				case IQB_POLICY_STATUS_CANCELED:
+					$permission_name = 'status.to.cancel';
+					break;
+
+				default:
+					break;
+			}
+			if( $permission_name !== ''  && $this->dx_auth->is_authorized('policies', $permission_name) )
+			{
+				$__flag_valid_permission = TRUE;
+			}
+
+			if( !$__flag_valid_permission )
+			{
+				$this->dx_auth->deny_access();
+			}
+
+
+			/**
+			 * Pre-Requisite 1: Send To Verify
+			 * -------------------------------
+			 * 	- Check if Premium is NULL
+			 */
+			if( $record->status === IQB_POLICY_STATUS_DRAFT && $to_updown_status === IQB_POLICY_STATUS_UNVERIFIED )
+			{
+				if((float)$record->total_amount == 0.00 )
+				{
+					return $this->template->json([
+						'status' 	=> 'error',
+						'message' 	=> 'Please Update Policy Premium First!'
+					], 400);
+				}
+			}
+
+			/**
+			 * Pre-Requisite 2: Verify
+			 * -------------------------------
+			 * 	- Check if Premium is NULL
+			 */
+			if( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
+			{
+				if((float)$record->total_amount == 0.00 )
+				{
+					return $this->template->json([
+						'status' 	=> 'error',
+						'message' 	=> 'Please Update Policy Premium First!'
+					], 400);
+				}
+			}
+
+			return $__flag_valid_permission;
+		}
+
+	// --------------------------------------------------------------------
+
 }

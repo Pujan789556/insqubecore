@@ -97,7 +97,7 @@ class Policy_model extends MY_Model
                     'rules' => 'trim|max_length[255]',
                     '_id'       => 'proposer-text',
                     '_type'     => 'text',
-                    '_required' => true
+                    '_required' => false
                 ]
             ],
 
@@ -304,7 +304,23 @@ class Policy_model extends MY_Model
         return $v_rules;
     }
 
+    // ----------------------------------------------------------------
 
+    /**
+     * Update Policy Status
+     *
+     * @param integer $id Policy ID
+     * @param alpha $to_status_code Status Code
+     * @return bool
+     */
+    public function update_status($id, $to_status_code)
+    {
+        $data = [
+            'status' => $to_status_code
+        ];
+        return $this->db->where('id', $id)
+                        ->update($this->table_name, $data);
+    }
 
     // ----------------------------------------------------------------
 
@@ -588,15 +604,6 @@ class Policy_model extends MY_Model
                 $this->load->model('rel_agent_policy_model');
                 $this->rel_agent_policy_model->insert($relation_data, TRUE);
             }
-
-            /**
-             * TASK 2: Add Defualt Premium
-             * ----------------------------
-             * This will be automatically performed by a database trigger
-             *
-             * Trigger Name: trg_policy_after_insert
-             */
-
             return TRUE;
 
         }

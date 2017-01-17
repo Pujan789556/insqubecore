@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <h3 class="no-margin">
         <span class="pull-left">Policy Details</span>
         <span class="pull-right">
-            <?php if( in_array($record->status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED]) && $this->dx_auth->is_authorized_any('policies', ['edit.draft.policy', 'edit.unverified.policy']) ): ?>
+            <?php if( is_policy_editable($record->status, FALSE) ): ?>
                     <span class="action divider"></span>
                     <a href="#"
                         class="action trg-dialog-edit"
