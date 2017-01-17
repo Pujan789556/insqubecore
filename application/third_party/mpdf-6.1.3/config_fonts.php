@@ -81,6 +81,26 @@ $this->fonttrans = array(
  */
 
 $this->fontdata = array(
+
+	/**
+	 *  Added Fonts
+	 */
+	// Source Sans Pro
+	'sourcesanspro' => array(
+		'R' => 'SourceSansPro-Regular.ttf',
+		'B' => 'SourceSansPro-Bold.ttf',
+		'I' => 'SourceSansPro-Italic.ttf',
+		'BI' => 'SourceSansPro-BoldItalic.ttf'
+	),
+	// Halant : Devanagari
+	'halant' => array(
+		'R' => 'Halant-Regular.ttf',
+		'B' => 'Halant-Bold.ttf',
+		'useOTL' => 0xFF,
+    	'useKashida' => 75,
+	),
+	/* ..End: Added Fonts */
+
 	"dejavusanscondensed" => array(
 		'R' => "DejaVuSansCondensed.ttf",
 		'B' => "DejaVuSansCondensed-Bold.ttf",
