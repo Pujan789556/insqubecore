@@ -1133,7 +1133,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
                     $statement_3 = "भारबहन क्षमता अनुसार शरु बीमाशुल्कमा छूट";
 
                     // Bharbahan xamata anusar suru bima sulka ma thap ( X ton mathi Per Ton Z)
-                    $engine_capacity_above_threshold = ($object_attributes->engine_capacity > $primary_tariff_vehicle['ec_threshold']) ? $object_attributes->engine_capacity - $primary_tariff_vehicle['ec_threshold'] : 0;
+                    $engine_capacity_above_threshold = ($primary_tariff_vehicle['vehicle_capacity'] > $primary_tariff_vehicle['ec_threshold']) ? $primary_tariff_vehicle['vehicle_capacity'] - $primary_tariff_vehicle['ec_threshold'] : 0;
                     $__premium_A_row_2 = $engine_capacity_above_threshold * $primary_tariff_vehicle['cost_per_ec_above'];
                     $__cost_table_A['sections'][] = [
                         'title'     => $statement_2,
@@ -1676,6 +1676,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_primary_tariff_vehicle'))
         $primary_tariff_vehicle['minus_amount']         = 0.00;
         $primary_tariff_vehicle['plus_amount']          = 0.00;
         $primary_tariff_vehicle['ec_threshold']         = 0;
+        $primary_tariff_vehicle['vehicle_capacity']         = 0; // depending upon cvc_type ( )
         $primary_tariff_vehicle['cost_per_ec_above']    = 0.00;
 
         $primary_tariff_vehicle['fragmented']             = 'N';
@@ -1699,11 +1700,17 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_primary_tariff_vehicle'))
         	{
         		$capacity_type = $object_attributes->carrying_unit === $t->ec_type;
         		$capacity_column = "carrying_capacity";
+
+        		// Computable Engine Capacity for Cost table
+        		$primary_tariff_vehicle['vehicle_capacity'] = $object_attributes->carrying_capacity;
         	}
         	else
         	{
         		$capacity_type = $object_attributes->ec_unit === $t->ec_type;
         		$capacity_column = "engine_capacity";
+
+        		// Computable Engine Capacity for Cost table
+        		$primary_tariff_vehicle['vehicle_capacity'] = $object_attributes->engine_capacity;
         	}
 
 
