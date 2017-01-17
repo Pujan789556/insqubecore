@@ -141,7 +141,7 @@ switch ($object_attributes->sub_portfolio)
                             <tr>
                                 <td>
                                     <table class="table no-border">
-                                        <tr><td colspan="2"><h4 class="border-b">बीमाशुल्क</h4><br/></td></tr>
+                                        <tr><td colspan="2"><h4 class="underline">बीमाशुल्क</h4><br/></td></tr>
 
                                         <?php foreach($premium_attributes as $section_object):?>
                                             <tr>
@@ -206,7 +206,7 @@ switch ($object_attributes->sub_portfolio)
                 </tr>
 
                 <tr>
-                    <td colspan="2" style="font-size:7pt">
+                    <td colspan="2" style="font-size:8pt">
                         <?php
                         /**
                          * Sub Portfolio-wise  Statements
@@ -240,19 +240,19 @@ switch ($object_attributes->sub_portfolio)
                                 break;
                         }
                         ?>
-                        <h4 class="border-b">प्रयोगको सीमा</h4>
+                        <h4 class="underline">प्रयोगको सीमा</h4>
 
                         <p><?php echo $usage_limitation?></p><br/>
 
-                        <h4 class="border-b">चालक</h4>
+                        <h4 class="underline">चालक</h4>
                         <p><?php echo $driver_limitation?></p><br/>
 
-                        <h4 class="border-b">बीमाशुल्कको हिसाब</h4>
+                        <h4 class="underline">बीमाशुल्कको हिसाब</h4>
                         <p>संलग्न तालिका बमोजिम</p><br/>
 
-                        <h4 class="border-b">अनिवार्य अधिक:  स्वेच्छीक अधिक:</h4><br/>
+                        <h4 class="underline">अनिवार्य अधिक:  स्वेच्छीक अधिक:</h4><br/>
 
-                        <h4 class="border-b">संलग्न सम्पुष्टी नम्बरहरु: <?php echo $reaffirm_numbers?></h4>
+                        <h4>संलग्न सम्पुष्टी नम्बरहरु: <?php echo $reaffirm_numbers?></h4>
                     </td>
                 </tr>
             </tbody>
@@ -266,8 +266,8 @@ switch ($object_attributes->sub_portfolio)
                     रु.:
                 </td>
                 <td align="left">
-                    <h4>निमित्त, <?php echo $this->settings->orgn_name_np?></h4>
-                    <h4 class="border-b">अधिकार प्राप्त अधिकारीको</h4>
+                    <h4>निमित्त, <?php echo $this->settings->orgn_name_np?></h4><br/>
+                    <h4 class="underline">अधिकार प्राप्त अधिकारीको</h4>
                     दस्तखत:<br/>
                     नाम थर:<br/>
                     छाप:<br/>

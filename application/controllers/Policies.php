@@ -942,11 +942,11 @@ class Policies extends MY_Controller
 	        $mpdf->margin_footer = 0;
 	        $mpdf->SetProtection(array('print'));
 	        $mpdf->SetTitle("Policy Schedule - {$record->code}");
-	        $mpdf->SetAuthor($this->settings->orgn_name_ep);
+	        $mpdf->SetAuthor($this->settings->orgn_name_en);
 
 	        if( in_array($record->status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED, IQB_POLICY_STATUS_VERIFIED]))
 	        {
-	        	$mpdf->SetWatermarkText( 'DEBIT NOTE' );
+	        	$mpdf->SetWatermarkText( 'DEBIT NOTE - ' . $this->settings->orgn_name_en );
 	        }
 
 

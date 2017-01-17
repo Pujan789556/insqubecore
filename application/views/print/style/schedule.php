@@ -7,7 +7,7 @@
 <style type="text/css">
     body{
         /* -- Default Font (To support Unicode Characters) -- */
-        font-family: freeserif;
+        font-family:  halant, freeserif, sourcesanspro;
         font-size: 10pt;
     }
     table{
@@ -32,6 +32,7 @@
         font-variant: small-caps;
     }
     .border-b{border-bottom: 0.1mm solid #000000;}
+    .underline{text-decoration: underline;}
     .no-border, td.no-border, table.no-border td{border:none !important;}
     .table td.cost {
         text-align: "." center;
