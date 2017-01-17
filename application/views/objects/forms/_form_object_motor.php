@@ -19,10 +19,24 @@ $this->load->view('templates/_common/_form_components_horz', [
 ]);
 ?>
 <div class="box-header with-border">
+    <h3 class="box-title">Staff Count (Commercial Vehicle Only)</h3>
+</div>
+<p class="help-block"><i class="fa fa-info-circle"></i> Please supply staff count if this is commercial vehicle.</p>
+<?php
+/**
+ * Vehicle Information
+ */
+$staff_elements = $form_elements['staff'];
+$this->load->view('templates/_common/_form_components_horz', [
+    'form_elements' => $staff_elements,
+    'form_record'   => $record
+]);
+?>
+
+<div class="box-header with-border">
     <h3 class="box-title">Trailer/Trolly Information (Private/Commercial Vehicle Only)</h3>
 </div>
 <p class="help-block"><i class="fa fa-info-circle"></i> Please supply trailer/trolly price if this vehicle has any.</p>
-
 <?php
 /**
  * Vehicle Information

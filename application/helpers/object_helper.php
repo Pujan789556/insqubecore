@@ -194,7 +194,13 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 
 
 		$sub_portfolio 		= $object['sub_portfolio'] ?? '';
-		$cvc_type_rules 	= $sub_portfolio == 'CVC' ? 'trim|required|alpha|strtoupper' : 'trim|alpha|strtoupper';
+		$cvc_type_rules 	= 'trim|alpha|strtoupper';
+		$staff_count_rule 	= 'trim|integer|max_length[4]';
+		if($sub_portfolio == 'CVC')
+		{
+			$cvc_type_rules 	= 'trim|required|alpha|strtoupper';
+			$staff_count_rule 	= 'trim|required|integer|max_length[4]';
+		}
 
 		// CVC TYPES in_list validation
 		$cvc_type_list = array_keys( _PO_MOTOR_CVC_type_dropdown(FALSE) );
@@ -429,6 +435,19 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        '_type'     => 'text',
 			        '_required' => true
 			    ]
+		    ],
+
+		    // Staff Count (Commercial Vehicle Only)
+		    'staff' => [
+		    	[
+			        'field' => 'object[staff_count]',
+			        '_key' => 'staff_count',
+			        'label' => 'Staff Count',
+			        'rules' => $staff_count_rule,
+			        '_id' 		=> '_motor-staff-count',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
 		    ],
 
 		    // Trailer Section

@@ -1104,7 +1104,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
             ];
 
             // Statement 1 is common for all
-            $statement_1 = "घोषित मूल्य (सरसामान सहित) अनुसार शुरु बीमा शुल्क (घोषित मूल्यको " . $primary_tariff_vehicle['rate'] . " %";
+            $statement_1 = "घोषित मूल्य (सरसामान सहित) अनुसार शुरु बीमा शुल्क (घोषित मूल्यको " . $primary_tariff_vehicle['rate'] . " %)";
 
             // Common Row 1 - Ghosit Mulya ko X %
             $__premium_A_row_1 = $vehicle_total_price * ($primary_tariff_vehicle['rate'] / 100.00);
@@ -1428,7 +1428,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
                 'title_en'  => 'Staff Accident Insurance'
             ];
 
-            $staff_count = $post_data_extra_fields['staff_count'] ?? 0;
+            $staff_count = $object_attributes->staff_count ?? 0;
             $premium_EE_total =  $accident_premium->pramt_accident_per_staff * $staff_count;
             $__cost_table_EE['sections'][] = [
                 'title' => "प्रति ब्यक्ति (बीमांक रु. {$insured_value_tariff->staff}  को लागि प्रति ब्यक्ति रु. {$accident_premium->pramt_accident_per_staff} का दरले)",
