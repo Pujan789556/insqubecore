@@ -1501,7 +1501,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
                 // Driver Count  = 1
                 // Passenger Count = Seat Capacity
                 // Tariff Rate: rate_additionl_per_thousand_on_extra_rate
-                $passenger_count = $object_attributes->carrying_capacity;
+                $passenger_count = $object_attributes->carrying_unit == 'S' ?   $object_attributes->carrying_capacity : 0;
 
                 // Driver Premium
                 $__premium_OO_row_3 = ($insured_value_tariff->driver/1000.00) * $tariff_rsik_group->rate_additionl_per_thousand_on_extra_rate;
