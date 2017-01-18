@@ -1,14 +1,15 @@
 /**
  * InsQube Styles
  */
- .pointer{cursor:pointer;}
- .margin-t-10{margin-top:10px;}
- .margin-t-0{margin-top:0px !important;}
- .pad-t-0{padding-top:0px !important;}
- .no-border-b{border-bottom: none !important;}
- .no-margin-b{margin-bottom: 0px !important;}
+.pointer{cursor:pointer;}
+.margin-t-10{margin-top:10px;}
+.margin-t-0{margin-top:0px !important;}
+.pad-t-0{padding-top:0px !important;}
+.no-border-b{border-bottom: none !important;}
+.no-margin-b{margin-bottom: 0px !important;}
+.no-shadow{box-shadow: none;}
 
- .hr-medium{margin-top:10px; margin-bottom: 10px;}
+.hr-medium{margin-top:10px; margin-bottom: 10px;}
 
  /* -- Selectable Component -- */
 .selectable:hover{

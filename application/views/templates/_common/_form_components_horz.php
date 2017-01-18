@@ -17,7 +17,8 @@ foreach($form_elements as $element):?>
     <div class="form-group <?php echo form_error($element['field']) ? 'has-error' : '';?>">
         <label for="" class="<?php echo $grid_label; ?> control-label">
             <?php
-            if( !in_array($element['_type'], ['checkbox', 'radio']))
+            $_show_label = $element['_show_label'] ?? FALSE;
+            if( $_show_label === TRUE || !in_array($element['_type'], ['checkbox', 'radio']))
             {
                 echo $element['label'] . field_compulsary_text( $element['_required'] ?? FALSE );
             }
