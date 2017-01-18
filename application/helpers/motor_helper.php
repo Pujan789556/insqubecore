@@ -771,7 +771,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 				$__premium_A_row_16 = $tariff_record->pramt_towing ?? 0.00;
 			}
 			$__cost_table_A['sections'][] = [
-				'title' => "दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा वापत बीमा शल्ुक थप",
+				'title' => "दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा वापत बीमा शुल्क थप",
 				'amount' => $__premium_A_row_16
 			];
 
@@ -786,10 +786,13 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 
 			// Section Sub Total
 			$__cost_table_A['sub_total'] = $premium_A_total;
+		}
 
 			// ---------------------------------------------------------------------------------------
-
-
+			//  Driver/Insured Accident
+			//
+			// 	This applies to both thirdparty and comprehensive
+			// ---------------------------------------------------------------------------------------
 
 			/**
 			 * Driver Accident Insurance (इ)
@@ -835,6 +838,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 			// ---------------------------------------------------------------------------------------
 
 
+		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
+		{
 			/**
 			 * Risk Pool (उ)
 			 * ---------------
@@ -986,7 +991,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
 		{
-			$__cost_table['attributes'] = json_encode( [$__cost_table_AA] );
+			$__cost_table['attributes'] = json_encode( [$__cost_table_AA, $__cost_table_I, $__cost_table_EE ] );
 		}
 		else
 		{
@@ -1378,7 +1383,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
                 $__premium_A_row_towing = $tariff_record->pramt_towing ?? 0.00;
             }
             $__cost_table_A['sections'][] = [
-                'title' => "दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा वापत बीमा शल्ुक थप",
+                'title' => "दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा वापत बीमा शुल्क थप",
                 'amount' => $__premium_A_row_towing
             ];
 
@@ -1398,7 +1403,13 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
             // Section Sub Total
 			$__cost_table_A['sub_total'] = $premium_A_total;
 
+		}
 
+			// ---------------------------------------------------------------------------------------
+			//  Driver/Staff/Passenger Accident
+			//
+			// 	This applies to both thirdparty and comprehensive
+			// ---------------------------------------------------------------------------------------
 
             // ---------------------------------------------------------------------------------------
             //  इ) Driver Accident
@@ -1463,6 +1474,9 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
             // Section Sub Total
 			$__cost_table_U['sub_total'] = $premium_U_total;
 
+
+		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
+        {
 
             // ---------------------------------------------------------------------------------------
             //  ऊ) Risk Group
@@ -1547,7 +1561,6 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
 
             // Section Sub Total
 			$__cost_table_OO['sub_total'] = $premium_OO_total;
-
         }
 
         // ---------------------------------------------------------------------------------------
@@ -1619,7 +1632,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
 
         if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
         {
-            $__cost_table['attributes'] = json_encode( [$__cost_table_AA] );
+            $__cost_table['attributes'] = json_encode( [$__cost_table_AA, $__cost_table_I, $__cost_table_EE, $__cost_table_U] );
         }
         else
         {
