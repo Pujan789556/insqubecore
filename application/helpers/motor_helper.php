@@ -837,6 +837,10 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 
 			/**
 			 * Risk Pool (उ)
+			 * ---------------
+			 *
+			 * NOTE: Please note that you have to compute using both the Vehicle total price and
+			 * 		Trailer/Trolly Price (if any)
 			 */
 			$__cost_table_U = [
 				'column_head' => 'उ',
@@ -852,7 +856,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 			$__premium_U_row_1 = 0.00;
 			if($flag_risk_mob)
 			{
-				$__premium_U_row_1 = $vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
+				$__premium_U_row_1 = (float)($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
 			}
 			$__cost_table_U['sections'][] = [
 				'title' => "(क) हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_mob}% का दरले)",
@@ -866,7 +870,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 			$premium_for_insured_covered_on_terorrism = 0.00;
 			if($flag_risk_terorrism)
 			{
-				$__premium_U_row_2 = $vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
+				$__premium_U_row_2 = (float)($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
 
 				// Premium for "Per Thousand Insured Amount" on Terorrism rate_additionl_per_thousand_on_extra_rate
 
@@ -1462,8 +1466,10 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
 
             // ---------------------------------------------------------------------------------------
             //  ऊ) Risk Group
+            //
+            //  NOTE: Please note that you have to compute using both the Vehicle total price and
+            // 			Trailer/Trolly Price (if any)
             // ---------------------------------------------------------------------------------------
-
             $__cost_table_OO = [
                 'column_head' => 'ऊ',
                 'title_np'  => 'जोखिम समूह थप गरे वापत',
@@ -1477,7 +1483,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
             $__premium_OO_row_1 = 0.00;
             if($flag_risk_mob)
             {
-                $__premium_OO_row_1 = $vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
+                $__premium_OO_row_1 = (float)($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
             }
             $__cost_table_OO['sections'][] = [
                 'title' => "(क) हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_mob}% का दरले)",
@@ -1491,13 +1497,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
             $__premium_OO_row_5 = 0.00;
             if($flag_risk_terorrism)
             {
-                $__premium_OO_row_2 = (float)($vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00));
-
-                // If we have trailer/trolly, we also have to add the premium
-                if($trailer_price > 0.00)
-                {
-                	$__premium_OO_row_2 += (float)($trailer_price * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00));
-                }
+                $__premium_OO_row_2 = (float)( ($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00));
 
                 // Premium for "Per Thousand Insured Amount" on Terorrism rate_additionl_per_thousand_on_extra_rate
 
