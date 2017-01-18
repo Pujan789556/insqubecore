@@ -13,8 +13,8 @@ echo form_open( $this->uri->uri_string(),
     // Hidden Fields
     isset($record) ? ['id' => $record->id] : []); ?>
 
-    <div class="box box-solid">
-        <div class="box-header no-border gray">
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
           <h4 class="box-title">Select Portfolio</h4>
         </div>
         <div class="box-body">
@@ -31,14 +31,14 @@ echo form_open( $this->uri->uri_string(),
         </div>
     </div>
 
-    <div class="box box-solid">
-        <div class="box-header no-border gray">
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
           <h4 class="box-title">Select Customer</h4>
         </div>
         <div class="box-body">
             <?php
             /**
-             * Load Form Components : Proposer
+             * Load Form Components : Proposer, Care Of
              */
             $proposer_elements = $form_elements['proposer'];
             $this->load->view('templates/_common/_form_components_horz', [
@@ -71,11 +71,21 @@ echo form_open( $this->uri->uri_string(),
                   </div>
                 </div>
             </div>
+            <?php
+            /**
+             * Load Form Components : Proposer
+             */
+            $on_credit_elements = $form_elements['policy_object_on_credit'];
+            $this->load->view('templates/_common/_form_components_horz', [
+                'form_elements' => $on_credit_elements,
+                'form_record'   => $record
+            ]);
+            ?>
         </div>
     </div>
 
-    <div class="box box-solid">
-        <div class="box-header no-border gray">
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
           <h4 class="box-title">Select Policy Object</h4>
         </div>
         <div class="box-body">
@@ -108,8 +118,8 @@ echo form_open( $this->uri->uri_string(),
         </div>
     </div>
 
-    <div class="box box-solid">
-        <div class="box-header no-border gray">
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
           <h4 class="box-title">Select Duration</h4>
         </div>
         <div class="box-body">
@@ -126,8 +136,8 @@ echo form_open( $this->uri->uri_string(),
         </div>
     </div>
 
-    <div class="box box-solid no-margin-b">
-        <div class="box-header no-border gray">
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
           <h4 class="box-title">Sales Info</h4>
         </div>
         <div class="box-body">
@@ -171,6 +181,59 @@ function __do_select(a){
     var $bootbox = $a.closest('.bootbox');
     $('button[data-bb-handler="cancel"]', $bootbox).trigger('click');
 }
+
+// Creator Info Toggler
+function __toggle_creditor_info(){
+    var $creditorBox = $('#_creditor-id').closest('.form-group'),
+        $creditorBranchBox = $('#_creditor-branch-id').closest('.form-group'),
+        flag_on_credit = $("input[type=radio][name=flag_on_credit]:checked").val();
+    if(typeof flag_on_credit === 'undefined' || flag_on_credit === 'N'){
+        $creditorBox.fadeOut();
+        $creditorBranchBox.fadeOut();
+        $('#_creditor-id').prop('selectedIndex',0).trigger('change');
+    }else{
+        $creditorBox.fadeIn();
+        $creditorBranchBox.fadeIn();
+    }
+}
+
+// Agent Info Toggler
+function __toggle_agent_info(){
+    var v = $("input[type=radio][name=flag_dc]:checked").val(),
+      $agentbox = $('#_agent-id').closest('.form-group');
+    if(v === 'C'){
+        $agentbox.fadeIn();
+    }else{
+        $agentbox.fadeOut();
+        $('#_agent-id').prop('selectedIndex',0).trigger('change');
+    }
+}
+
+// Change Branch Options on Creditor Change
+$('#_creditor-id').on('change', function(e){
+    var v = this.value,
+        $target = $('#_creditor-branch-id');
+    $target.empty();
+    if(v){
+        // load the object form
+        $.getJSON('<?php echo base_url()?>policies/gccbc/'+v, function(r){
+            // Update dropdown
+            if(r.status == 'success' && typeof r.options !== 'undefined'){
+                $target.append($('<option>', {
+                    value: '',
+                    text : 'Select...'
+                }));
+                $.each(r.options, function(key, value) {
+                    $target.append($('<option>', {
+                        value: key,
+                        text : value
+                    }));
+                });
+                $target.prop('selectedIndex',0).trigger('change');
+              }
+        });
+    }
+});
 
 // Policy Package Changer
 $('#_portfolio-id').on('change', function(e){
@@ -266,31 +329,29 @@ $('.input-group.date').datepicker({
     format: 'yyyy-mm-dd'
 });
 
-// Hide agent list on Direct Discount Checked
-$('input[name="flag_dc"]').on('ifChecked', function(){
-  var v = $(this).val(),
-      $agentbox = $('#_agent-id').closest('.form-group');
-  if(v === 'C'){
-      $agentbox.fadeIn();
-  }else{
-    $agentbox.fadeOut();
-      $('#_agent-id').prop('selectedIndex',0).trigger('change');
-      // $("#_agent-id").select2();
-  }
+// Hide Creditor Info if Not on Loan
+__toggle_creditor_info();
+$('input[name="flag_on_credit"]').on('ifChecked', function(){
+  __toggle_creditor_info();
 });
 
-// Hide Agent Box if Direct Discount is Checked
-var $agentbox = $('#_agent-id').closest('.form-group'),
-    flag_dc = $("input[type=radio][name=flag_dc]:checked").val();
-if(typeof flag_dc === 'undefined' || flag_dc === 'D'){
-    $agentbox.hide();
-}
+
+// Hide agent list on Direct Discount Checked
+__toggle_agent_info();
+$('input[name="flag_dc"]').on('ifChecked', function(){
+    __toggle_agent_info();
+});
+
+
 
 // Initialize Select2
 $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
     //Initialize Select2 Elements
     $("#_marketing-staff").select2();
     $("#_agent-id").select2();
+    $("#_creditor-id").select2();
+    $("#_creditor-branch-id").select2();
+
     $('.bootbox.modal').removeAttr('tabindex'); // modal workaround
 });
 </script>

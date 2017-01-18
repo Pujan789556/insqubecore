@@ -177,7 +177,7 @@ class Policies extends MY_Controller
 							'policies/_index_header',
 							['content_header' => 'Manage Policies'] + $dom_data)
 						->partial('content', 'policies/_index', $data)
-						->partial('dynamic_js', 'policies/_customer_js')
+						->partial('dynamic_js', 'customers/_customer_js')
 						->render($this->data);
 	}
 
@@ -376,6 +376,14 @@ class Policies extends MY_Controller
 		// Validation Rule
 		$v_rules = $this->policy_model->validation_rules;
 
+		// Creditor Branch Dropdown Data
+		if($record->creditor_id)
+		{
+			$this->load->model('company_branch_model');
+			$v_rules['policy_object_on_credit'][2]['_data'] = IQB_BLANK_SELECT + $this->company_branch_model->dropdown_by_company($record->creditor_id);
+		}
+
+
 		// Update Policy Package Data
 		$v_rules['portfolio'][1]['_data'] = _PO_policy_package_dropdown($record->portfolio_id);
 
@@ -449,6 +457,16 @@ class Policies extends MY_Controller
 				}
 				else
 				{
+					/**
+					 * Reset Creditor Info if "No" Selected
+					 */
+					if($data['flag_on_credit'] === 'N')
+					{
+						$data['creditor_id'] = NULL;
+						$data['creditor_branch_id'] = NULL;
+					}
+
+
 					// Now Update Data
 					$done = $this->policy_model->update($record->id, $data, TRUE) && $this->policy_model->log_activity($record->id, 'E');
 
@@ -527,6 +545,14 @@ class Policies extends MY_Controller
 			}
 			else
 			{
+
+				// Creditor Branch Dropdown Data
+				$creditor_id  = (int)$this->input->post('creditor_id');
+				if($creditor_id)
+				{
+					$this->load->model('company_branch_model');
+					$form_data['form_elements']['policy_object_on_credit'][2]['_data'] = IQB_BLANK_SELECT + $this->company_branch_model->dropdown_by_company($creditor_id);
+				}
 
 				// Policy Package of Portfolio if supplied
 				$portfolio_id = (int)$this->input->post('portfolio_id');
@@ -685,6 +711,38 @@ class Policies extends MY_Controller
 		// --------------------------------------------------------------------
 
 		/**
+		 * Get Creditor Company Branches for Supplied  Creditor Company
+		 *
+		 * @param integer $portfolio_id
+		 * @param string 	$method 	Return Method
+		 * @return mixed
+		 */
+		public function gccbc($company_id)
+		{
+			// Valid Record ?
+			$company_id = (int)$company_id;
+			$this->load->model('company_branch_model');
+
+			$options = $this->company_branch_model->dropdown_by_company($company_id);
+			if( !empty($options))
+			{
+				$this->template->json([
+					'status' => 'success',
+					'options' => $options
+				]);
+			}
+			else
+			{
+				$this->template->json([
+					'status' => 'error',
+					'message' => 'No Branch Found. Please ask your IT Support to add "Company Branch" of selected "Creditor Company" and try again.'
+				], 404);
+			}
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
 		 * Reset Premium on Policy Update
 		 *
 		 * Reset premium on change of any of the followings
@@ -715,6 +773,32 @@ class Policies extends MY_Controller
 				$this->premium_model->reset($before_update->id);
 			}
 		}
+
+	    // --------------------------------------------------------------------
+
+		/**
+		 * Callback: Valid Company Branch
+		 *
+		 * Logic:
+		 * 		If flag_on_credit is set to Yes, you should supply both creditor company
+		 * 		and its branch.
+		 *
+		 * @param type $branch_id
+		 * @return type
+		 */
+	    public function _cb_valid_company_branch($branch_id)
+	    {
+	    	$branch_id = (int)$branch_id;
+	    	$creditor_id = (int)$this->input->post('creditor_id');
+	    	$this->load->model('company_branch_model');
+
+	    	if( !$this->company_branch_model->valid_branch($creditor_id, $branch_id) )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_company_branch', 'The supplied "Branch" does not belong to selected "Creditor Company".');
+	            return FALSE;
+	    	}
+	        return TRUE;
+	    }
 
 	    // --------------------------------------------------------------------
 

@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_no", "branch_id", "proposer", "customer_id", "portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issue_date", "start_date", "duration", "end_date", "flag_dc", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_no", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issue_date", "start_date", "duration", "end_date", "flag_dc", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -64,7 +64,7 @@ class Policy_model extends MY_Model
         $this->load->model('portfolio_model');
         $this->load->model('user_model');
         $this->load->model('agent_model');
-        $select = ['' => 'Select ...'];
+        $this->load->model('company_model');
 
         /**
          * List all marketing staffs of this branch
@@ -75,7 +75,9 @@ class Policy_model extends MY_Model
         /**
          * If posted and Direct Discount Checked, We don't need agent
          */
-        $agent_validation = 'trim|required|integer|max_length[11]';
+        $agent_validation           = 'trim|required|integer|max_length[11]';
+        $creditor_validation        = 'trim|integer|max_length[11]';
+        $creditor_branch_validation = 'trim|integer|max_length[11]';
         if($this->input->post())
         {
             $flag_dc = $this->input->post('flag_dc');
@@ -83,12 +85,19 @@ class Policy_model extends MY_Model
             {
                 $agent_validation = 'trim|integer|max_length[11]';
             }
+
+            $flag_on_credit = $this->input->post('flag_on_credit');
+            if($flag_on_credit === 'Y')
+            {
+                $creditor_validation        = 'trim|required|integer|max_length[11]';
+                $creditor_branch_validation = 'trim|required|integer|max_length[11]|callback__cb_valid_company_branch';
+            }
         }
 
         $this->validation_rules = [
 
             /**
-             * Proposer Information
+             * Proposer & Referer (Careof) Information
              */
             'proposer' => [
                 [
@@ -96,6 +105,14 @@ class Policy_model extends MY_Model
                     'label' => 'Proposed By',
                     'rules' => 'trim|max_length[255]',
                     '_id'       => 'proposer-text',
+                    '_type'     => 'text',
+                    '_required' => false
+                ],
+                [
+                    'field' => 'care_of',
+                    'label' => 'Care of (or Referer)',
+                    'rules' => 'trim|max_length[100]',
+                    '_id'       => 'care-of-text',
                     '_type'     => 'text',
                     '_required' => false
                 ]
@@ -120,8 +137,46 @@ class Policy_model extends MY_Model
                     '_id'       => 'customer-text',
                     '_type'     => 'hidden',
                     '_required' => true
-                ],
+                ]
+            ],
 
+            /**
+             *  Policy Object on Loan?
+             */
+            'policy_object_on_credit' => [
+                [
+                    'field' => 'flag_on_credit',
+                    'label' => 'Policy Object on Loan?',
+                    'rules' => 'trim|required|alpha|exact_length[1]|in_list[N,Y]',
+                    '_id'       => '_flag-on-credit',
+                    '_type'     => 'radio',
+                    '_data'     => [ 'Y' => 'Yes', 'N' => 'No'],
+                    '_default'  => 'N',
+                    '_show_label'   => true,
+                    '_required'     => true
+                ],
+                [
+                    'field' => 'creditor_id',
+                    'label' => 'Creditor Company',
+                    'rules' => $creditor_validation,
+                    '_id'       => '_creditor-id',
+                    '_extra_attributes' => 'style="width:100%; display:block"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $this->company_model->dropdown_creditor(true),
+                    '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Creditor Company" if not available in this list and try again.',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'creditor_branch_id',
+                    'label' => 'Company Branch',
+                    'rules' => $creditor_branch_validation,
+                    '_id'       => '_creditor-branch-id',
+                    '_extra_attributes' => 'style="width:100%; display:block"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT,
+                    '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Company Branch" of selected "Creditor Company" if not available in this list and try again.',
+                    '_required' => true
+                ]
             ],
 
             /**
@@ -134,7 +189,7 @@ class Policy_model extends MY_Model
                     'rules' => 'trim|required|integer|max_length[11]',
                     '_type'     => 'dropdown',
                     '_id'       => '_portfolio-id',
-                    '_data'     => $select + $this->portfolio_model->dropdown_parent(),
+                    '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
                     '_required' => true
                 ],
                 [
@@ -206,7 +261,7 @@ class Policy_model extends MY_Model
                     'label' => 'Policy Duration',
                     'rules' => 'trim|required|callback__cb_valid_policy_duration',
                     '_type'     => 'dropdown',
-                    '_data'     => $select + get_policy_duration_list(),
+                    '_data'     => IQB_BLANK_SELECT + get_policy_duration_list(),
                     '_default'  => '+1 year',
                     '_required' => true
                 ],
@@ -223,7 +278,7 @@ class Policy_model extends MY_Model
                     '_id'       => '_marketing-staff',
                     '_extra_attributes' => 'style="width:100%; display:block"',
                     '_type'     => 'dropdown',
-                    '_data'     => $select + $this->user_model->dropdown($role_id, $branch_id),
+                    '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown($role_id, $branch_id),
                     '_required' => true
                 ],
                 [
@@ -242,7 +297,7 @@ class Policy_model extends MY_Model
                     '_id'       => '_agent-id',
                     '_extra_attributes' => 'style="width:100%; display:block"',
                     '_type'     => 'dropdown',
-                    '_data'     => $select + $this->agent_model->dropdown(true),
+                    '_data'     => IQB_BLANK_SELECT + $this->agent_model->dropdown(true),
                     '_required' => true
                 ]
             ]
@@ -450,6 +505,8 @@ class Policy_model extends MY_Model
                                     C.code as customer_code, C.full_name as customer_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no,
                                     O.attributes as object_attributes,
                                     A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type,
+                                    CRD.name as creditor_name,
+                                    CRB.name as creditor_branch_name,
                                     U.username as sales_staff_username, U.profile as sales_staff_profile
                             ")
                      ->from($this->table_name . ' as P')
@@ -459,6 +516,8 @@ class Policy_model extends MY_Model
                      ->join('dt_policy_objects O', 'O.id = P.object_id')
                      ->join('auth_users U', 'U.id = P.sold_by')
                      ->join('rel_agent_policy RAP', 'RAP.policy_id = P.id', 'left')
+                     ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
+                     ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
                      ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
                      ->where('P.id', $id)
                      ->get()->row();

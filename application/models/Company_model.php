@@ -95,6 +95,40 @@ class Company_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Get Dropdown List of Creditor Companies
+     *
+     * @return array
+     */
+    public function dropdown_creditor()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('creditor_dropdown');
+        if(!$list)
+        {
+            $records = $this->db->select('C.id, C.name')
+                             ->from($this->table_name . ' as C')
+                             ->where('C.type', IQB_COMPANY_TYPE_BANK)
+                             ->where('C.active', IQB_STATUS_ACTIVE)
+                             ->get()->result();
+
+            $list = [];
+            foreach($records as $record)
+            {
+                $column = $record->id;
+                $list["{$column}"] = $record->name;
+            }
+            if(!empty($list))
+            {
+                $this->write_cache($list, 'creditor_dropdown', CACHE_DURATION_DAY);
+            }
+        }
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
 
     /**
      * Get Data Rows
@@ -154,7 +188,7 @@ class Company_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            // 'companies_all',
+            'creditor_dropdown'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

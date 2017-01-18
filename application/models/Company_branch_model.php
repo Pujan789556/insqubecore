@@ -58,6 +58,26 @@ class Company_branch_model extends MY_Model
         return $data;
     }
 
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Valid Branch ?
+     *
+     * @param iinteger $company_id
+     * @param integer $branch_id
+     * @return integer
+     */
+    public function valid_branch($company_id, $branch_id)
+    {
+        $where = [
+            'id'            => $branch_id,
+            'company_id'    => $company_id
+        ];
+        return $this->db->where($where)
+                        ->count_all_results($this->table_name);
+    }
+
     // ----------------------------------------------------------------
 
     /**
@@ -83,6 +103,18 @@ class Company_branch_model extends MY_Model
                                 ->get()->result();
 
             $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
+        }
+        return $list;
+    }
+
+    public function dropdown_by_company($company_id)
+    {
+        $records = $this->get_by_company($company_id);
+        $list = [];
+        foreach($records as $record)
+        {
+            $column = $record->id;
+            $list["{$column}"] = $record->name;
         }
         return $list;
     }

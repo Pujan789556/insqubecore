@@ -41,9 +41,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <td><?php echo _PO_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
                 </tr>
                 <tr>
+                    <td class="text-bold">Proposed By</td>
+                    <td><?php echo nl2br($this->security->xss_clean($record->proposer));?></td>
+                </tr>
+                <tr>
+                    <td class="text-bold">Care Of</td>
+                    <td><?php echo nl2br($this->security->xss_clean($record->care_of));?></td>
+                </tr>
+                <tr>
                     <td class="text-bold">Policy Proposed Date</td>
                     <td><?php echo $record->proposed_date?></td>
                 </tr>
+                <tr>
+                    <td class="text-bold">Policy Object on Credit/Loan?</td>
+                    <td><?php echo $record->flag_on_credit === 'Y' ? 'Yes' : 'No';?></td>
+                </tr>
+                <?php if($record->flag_on_credit === 'Y'):?>
+                    <tr>
+                        <td class="text-bold">Proposed By</td>
+                        <td><?php echo nl2br($this->security->xss_clean($record->creditor_name));?></td>
+                    </tr>
+                    <tr>
+                        <td class="text-bold">Proposed By</td>
+                        <td><?php echo nl2br($this->security->xss_clean($record->creditor_branch_name));?></td>
+                    </tr>
+                <?php endif?>
                 <tr>
                     <td class="text-bold">Policy Issue Date</td>
                     <td><?php echo $record->issue_date?></td>
@@ -60,10 +82,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <td class="text-bold">Sales Staff</td>
                     <td><?php echo $record->sales_staff_username;?></td>
                 </tr>
-                <tr>
-                    <td class="text-bold">Proposed By</td>
-                    <td><?php echo nl2br($this->security->xss_clean($record->proposer));?></td>
-                </tr>
+
                 <tr>
                     <td class="text-bold">Agent</td>
                     <td><?php echo $record->agent_name;?></td>
