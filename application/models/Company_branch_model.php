@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Company_model extends MY_Model
+class Company_branch_model extends MY_Model
 {
-    protected $table_name = 'master_companies';
+    protected $table_name = 'master_company_branches';
 
     protected $set_created = true;
 
@@ -19,16 +19,24 @@ class Company_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "name", "picture", "pan_no", "active", "type", "contact", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "company_id", "name", "contact", "created_at", "created_by", "updated_at", "updated_by"];
 
-    protected $validation_rules = [];
+    protected $validation_rules = [
+        [
+            'field' => 'name',
+            'label' => 'Branch Name',
+            'rules' => 'trim|required|max_length[50]',
+            '_type'     => 'text',
+            '_required' => true
+        ]
+    ];
 
 
     /**
      * Protect Default Records?
      */
-    public static $protect_default = TRUE;
-    public static $protect_max_id = 86; // First 86; i.e. imported old data
+    public static $protect_default = FALSE;
+    public static $protect_max_id = 0; // First 86; i.e. imported old data
 
 	// --------------------------------------------------------------------
 
@@ -40,49 +48,6 @@ class Company_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
-
-        // Validation Rules
-        $this->validation_rules();
-    }
-
-
-    // ----------------------------------------------------------------
-
-    public function validation_rules()
-    {
-        $type_in_list = implode(',', array_keys(_COMPANY_type_dropdown(FALSE)));
-        $this->validation_rules = [
-            [
-                'field' => 'name',
-                'label' => 'Company Name',
-                'rules' => 'trim|required|max_length[80]',
-                '_type'     => 'text',
-                '_required' => true
-            ],
-            [
-                'field' => 'pan_no',
-                'label' => 'Company Pan No',
-                'rules' => 'trim|max_length[20]',
-                '_type'     => 'text',
-                '_required' => false
-            ],
-            [
-                'field' => 'type',
-                'label' => 'Company Type',
-                'rules' => 'trim|required|alpha|exact_length[1]|in_list[' . $type_in_list . ']',
-                '_type'     => 'dropdown',
-                '_data'     => _COMPANY_type_dropdown(),
-                '_required' => true
-            ],
-            [
-                'field' => 'active',
-                'label' => 'Is Active?',
-                'rules' => 'trim|required|integer|exact_length[1]',
-                '_type'     => 'dropdown',
-                '_data'     => [ '' => 'Select...', '1' => 'Active', '0' => 'Not Active'],
-                '_required' => true
-            ]
-        ];
     }
 
     // ----------------------------------------------------------------
@@ -91,6 +56,35 @@ class Company_model extends MY_Model
     {
         $data['contact'] = get_contact_data_from_form();
         return $data;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get all branches for specified company
+     *
+     * @param integer $company_id
+     * @return mixed
+     */
+    public function get_by_company( $company_id )
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'branch_company_' . $company_id;
+
+        $list = $this->get_cache($cache_name);
+        if(!$list)
+        {
+            $list = $this->db->select('C.id, C.company_id, C.name, C.contact')
+                                ->from($this->table_name . ' as C')
+                                ->where('C.company_id', $company_id)
+                                ->order_by('C.name', 'asc')
+                                ->get()->result();
+
+            $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
+        }
+        return $list;
     }
 
     // ----------------------------------------------------------------
@@ -106,7 +100,7 @@ class Company_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('C.id, C.name, C.pan_no, C.type, C.active')
+        $this->db->select('C.id, C.company_id, C.name, C.contact')
                  ->from($this->table_name . ' as C');
 
         if(!empty($params))
@@ -115,25 +109,6 @@ class Company_model extends MY_Model
             if( $next_id )
             {
                 $this->db->where(['C.id >=' => $next_id]);
-            }
-
-            $type = $params['type'] ?? NULL;
-            if( $type )
-            {
-                $this->db->where(['C.type' =>  $type]);
-            }
-
-            $active = $params['active'];
-            $active = $active === '' ? NULL : $active; // to work with 0 value
-            if( $active !== NULL )
-            {
-                $this->db->where(['C.active' =>  $active]);
-            }
-
-            $pan_no = $params['pan_no'] ?? NULL;
-            if( $pan_no )
-            {
-                $this->db->where(['C.pan_no' =>  $pan_no]);
             }
 
             $keywords = $params['keywords'] ?? '';
@@ -154,7 +129,7 @@ class Company_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            // 'companies_all',
+            'branch_company_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)
@@ -220,7 +195,7 @@ class Company_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'company',
+            'module' => 'company_branch',
             'module_id' => $id,
             'action' => $action
         ];

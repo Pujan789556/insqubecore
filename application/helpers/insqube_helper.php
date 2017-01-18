@@ -430,4 +430,32 @@ if ( ! function_exists('belongs_to_me'))
     }
 }
 
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_COMPANY_type_dropdown'))
+{
+    /**
+     * Get Company Type Dropdown
+     *
+     *
+     * @param bool $flag_blank_select   Whether to append blank select
+     * @return  bool
+     */
+    function _COMPANY_type_dropdown( $flag_blank_select = true)
+    {
+        $dropdown = [
+
+            IQB_COMPANY_TYPE_BANK           => 'Bank or Financial Institution',
+            IQB_COMPANY_TYPE_BROKER         => 'Broker Company',
+            IQB_COMPANY_TYPE_INSURANCE      => 'Insurance Company',
+            IQB_COMPANY_TYPE_RE_INSURANCE   => 'Re-insurance Company',
+        ];
+
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
 // ------------------------------------------------------------------------

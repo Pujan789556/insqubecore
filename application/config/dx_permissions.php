@@ -35,6 +35,21 @@ $config['DX_permissions'] = [
 		],
 
 		/**
+		 * Company Module
+		 */
+		'companies'  => [
+			'explore.company',
+			'add.company',
+			'edit.company',
+			'delete.company',
+
+			// company branch
+			'add.company.branch',
+			'edit.company.branch',
+			'delete.company.branch',
+		],
+
+		/**
 		 * Country Module
 		 */
 		'countries'  => [

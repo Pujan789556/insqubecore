@@ -29,13 +29,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 				<ul class="list-group list-group-unbordered">
 					<li class="list-group-item">
-						<b>UD Code</b> <span class="pull-right"><?php echo $record->ud_code?></span>
-					</li>
-					<li class="list-group-item">
 						<b>Pan No</b> <span class="pull-right"><?php echo $record->pan_no?></span>
 					</li>
 					<li class="list-group-item">
-						<b>Type</b> <span class="pull-right"><?php echo $record->type ;?></span>
+						<b>Type</b> <span class="pull-right"><?php echo _COMPANY_type_dropdown(FALSE)[$record->type] ;?></span>
 					</li>
 
 					<li class="list-group-item">
@@ -60,16 +57,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		<!-- About Me Box -->
 		<div class="box box-primary">
-			<?php
-			/**
-			 * Contact Widget
-			 */
-			echo get_contact_widget($record->contact);
-			?>
-			<div class="box-footer">
-				<a href="#" class="btn btn-primary btn-block"><i class="fa fa-pencil-square-o margin-r-5"></i><b>Edit Contact</b></a>
-			</div>
-
+		<?php
+		/**
+		 * Contact Widget
+		 */
+		echo get_contact_widget($record->contact);
+		?>
 		</div>
 		<!-- /.box -->
 	</div>
@@ -77,25 +70,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="col-md-9">
 		<div class="nav-tabs-custom">
 			<ul class="nav nav-tabs">
-				<li class="active"><a href="#activity" data-toggle="tab">Summary</a></li>
-				<li><a href="#timeline" data-toggle="tab">Activities</a></li>
-				<li><a href="#targets" data-toggle="tab">Targets</a></li>
-				<li><a href="#settings" data-toggle="tab">Staffs</a></li>
-				<li><a href="#settings" data-toggle="tab">Customers</a></li>
-				<li><a href="#settings" data-toggle="tab">Policies</a></li>
-				<li><a href="#settings" data-toggle="tab">Claims</a></li>
-				<li><a href="#settings" data-toggle="tab">Reports</a></li>
+				<li class="active"><a href="#tab-branches" data-toggle="tab">Branches</a></li>
+				<li><a href="#tab-reports" data-toggle="tab">Reports</a></li>
 			</ul>
 			<div class="tab-content">
-				<div class="active tab-pane" id="activity">
-
+				<div class="active tab-pane" id="tab-branches">
+					<?php
+					/**
+					 * Load Rows from View
+					 */
+					$this->load->view('setup/company_branches/_index', [
+						'records' 			=> $branches,
+						'company_record' 	=> $record,
+						'add_url' 			=> 'companies/branch/add/' . $record->id
+					]);
+					?>
 				</div>
 				<!-- /.tab-pane -->
-				<div class="tab-pane" id="timeline">
-
-				</div>
-				<!-- /.tab-pane -->
-				<div class="tab-pane" id="settings">
+				<div class="tab-pane" id="tab-reports">
 
 				</div>
 				<!-- /.tab-pane -->

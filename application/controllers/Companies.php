@@ -41,6 +41,7 @@ class Companies extends MY_Controller
 
 		// Load Model
 		$this->load->model('company_model');
+		$this->load->model('company_branch_model');
 
 		// Image Path
         $this->_upload_path = INSQUBE_MEDIA_PATH . 'companies/';
@@ -166,25 +167,19 @@ class Companies extends MY_Controller
 		private function _get_filter_elements()
 		{
 			$select = ['' => 'Select ...'];
+			$type_in_list = implode(',', array_keys(_COMPANY_type_dropdown(FALSE)));
 			$filters = [
-				[
-	                'field' => 'filter_ud_code',
-	                'label' => 'Company UD Code',
-	                'rules' => 'trim|integer|max_length[15]',
-	                '_type'     => 'text',
-	                '_required' => false
-	            ],
 	            [
 	                'field' => 'filter_type',
 	                'label' => 'Company Type',
-	                'rules' => 'trim|alpha|exact_length[1]|in_list[B,L,R]',
+	                'rules' => 'trim|alpha|exact_length[1]|in_list[' . $type_in_list . ']',
 	                '_type'     => 'dropdown',
-	                '_data'     => [ '' => 'Select...', 'B' => 'Type B', 'L' => 'Type L', 'R' => 'Type R'],
+	                '_data'     => _COMPANY_type_dropdown(),
 	                '_required' => false
 	            ],
 	            [
 	                'field' => 'filter_pan_no',
-	                'label' => 'Commission Group',
+	                'label' => 'PAN No',
 	                'rules' => 'trim|max_length[20]',
 	                '_type'     => 'text',
 	                '_required' => false
@@ -219,9 +214,8 @@ class Companies extends MY_Controller
 				if( $this->form_validation->run() )
 				{
 					$data['data'] = [
-						'ud_code' 			=> $this->input->post('filter_ud_code') ?? NULL,
 						'type' 				=> $this->input->post('filter_type') ?? NULL,
-						'pan_no' 	=> $this->input->post('filter_pan_no') ?? NULL,
+						'pan_no' 			=> $this->input->post('filter_pan_no') ?? NULL,
 						'active' 			=> $this->input->post('filter_active') ?? NULL,
 						'keywords' 			=> $this->input->post('filter_keywords') ?? ''
 					];
@@ -580,6 +574,11 @@ class Companies extends MY_Controller
 		// Load media helper
 		$this->load->helper('insqube_media');
 
+		$data = [
+			'record' 	=> $record,
+			'branches' 	=>  $this->company_branch_model->get_by_company($record->id)
+		];
+
 		$this->data['site_title'] = 'Company Details | ' . $record->name;
 		$this->template->partial(
 							'content_header',
@@ -588,8 +587,231 @@ class Companies extends MY_Controller
 								'content_header' => 'Company Details <small>' . $record->name . '</small>',
 								'breadcrumbs' => ['Companies' => 'companies', 'Details' => NULL]
 						])
-						->partial('content', 'setup/companies/_details', compact('record'))
+						->partial('content', 'setup/companies/_details', $data)
 						->render($this->data);
 
     }
+
+	// --------------------------------------------------------------------
+	// COMPANY BRANCHES FUNCTIONS
+	// --------------------------------------------------------------------
+
+    public function branch($action, $company_id, $branch_id=NULL)
+    {
+    	if(!in_array($action, ['add', 'edit', 'delete']))
+    	{
+    		$this->template->json([
+    			'status' 	=> 'error',
+    			'message' 	=> 'Invalid Action!'
+			], 404);
+    	}
+
+    	// Permission?
+    	$permission = $action . '.company.branch';
+    	if( !$this->dx_auth->is_authorized('companies', $permission) )
+    	{
+    		$this->template->json([
+    			'status' 	=> 'error',
+    			'message' 	=> 'Permission Denied!'
+			], 403);
+    	}
+
+    	switch ($action)
+    	{
+    		case 'add':
+    		case 'edit':
+    			return $this->__branch_save($action, $company_id, $branch_id);
+    			break;
+
+			case 'delete':
+    			return $this->__branch_delete($company_id, $branch_id);
+    			break;
+
+    		default:
+    			break;
+    	}
+    }
+
+	// --------------------------------------------------------------------
+
+    private function __branch_save($action, $company_id, $branch_id=NULL)
+    {
+    	$record = NULL;
+    	if($action === 'edit')
+    	{
+    		$branch_id 	= (int)$branch_id;
+    		$record 	= $this->company_branch_model->find($branch_id);
+
+    		if( !$record || $record->company_id != $company_id )
+    		{
+    			$this->template->json([
+	    			'status' 	=> 'error',
+	    			'message' 	=> 'Either branch not found or supplied branch does not belong to specified company!'
+				], 404);
+    		}
+    	}
+
+    	// JSON Data to pass to form
+    	$json_data = [];
+
+    	// Form Posted? Let's save the damn thing!
+    	if($this->input->post())
+    	{
+    		$rules = array_merge($this->company_branch_model->validation_rules, get_contact_form_validation_rules());
+            $this->form_validation->set_rules($rules);
+            $status = 'error';
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$data = $this->input->post();
+
+        		// Insert or Update?
+				if($action === 'add')
+				{
+					$data['company_id'] = $company_id;
+					$done = $this->company_branch_model->insert($data, TRUE); // No Validation on Model
+
+					// Activity Log
+					$done ? $this->company_branch_model->log_activity($done, 'C'): '';
+				}
+				else
+				{
+					// Now Update Data
+					$done = $this->company_branch_model->update($record->id, $data, TRUE) && $this->company_branch_model->log_activity($record->id, 'E');
+				}
+
+	        	if(!$done)
+				{
+					$message = 'Could not update.';
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+				}
+
+
+				if($status === 'success' )
+				{
+					$row_view = 'setup/company_branches/_single_row';
+					if($action === 'add')
+					{
+						$record 	= $this->company_branch_model->find($done);
+						$dom_box 	= '#search-result-company-branch';
+						$dom_method = 'prepend';
+					}
+					else
+					{
+						$record 	= $this->company_branch_model->find($record->id);
+						$dom_box 	= '#_data-row-company-branch-' . $record->id;
+						$dom_method = 'replaceWith';
+
+					}
+					$html = $this->load->view($row_view, ['record' => $record], TRUE);
+
+					$ajax_data = [
+						'message' 		=> $message,
+						'status'  		=> $status,
+						'updateSection' => true,
+						'hideBootbox' 	=> true,
+						'updateSectionData' => [
+							'box' 		=> $dom_box,
+							'method' 	=> $dom_method,
+							'html'		=> $html
+						]
+					];
+
+					// return json
+					return $this->template->json($ajax_data);
+				}
+        	}
+        	else
+        	{
+        		$message = 'Validation Error.';
+        	}
+
+        	// return form with validation error
+			return $this->template->json([
+				'status' 		=> $status,
+				'message' 		=> $message,
+				'reloadForm' 	=> true,
+				'form' 			=> $this->load->view('setup/company_branches/_form',
+									[
+										'form_elements' => $this->company_branch_model->validation_rules,
+										'record' 		=> $record
+									], TRUE)
+			]);
+    	}
+
+    	// No form Submitted?
+		$json_data['form'] = $this->load->view('setup/company_branches/_form_box',
+		[
+			'form_elements' => $this->company_branch_model->validation_rules,
+			'record' 		=> $record
+		], TRUE);
+
+		// Load the form
+		$this->template->json($json_data);
+    }
+
+	// --------------------------------------------------------------------
+
+    /**
+	 * Delete a Company
+	 * @param integer $id
+	 * @return json
+	 */
+	public function __branch_delete($company_id, $branch_id)
+	{
+		// Valid Record?
+		$branch_id 	= (int)$branch_id;
+		$record 	= $this->company_branch_model->find($branch_id);
+
+		if( !$record || $record->company_id != $company_id )
+		{
+			$this->template->json([
+    			'status' 	=> 'error',
+    			'message' 	=> 'Either branch not found or supplied branch does not belong to specified company!'
+			], 404);
+		}
+
+
+		$data = [
+			'status' 	=> 'error',
+			'message' 	=> 'You cannot delete the default records.'
+		];
+		/**
+		 * Safe to Delete?
+		 */
+		if( !safe_to_delete( 'Company_branch_model', $branch_id ) )
+		{
+			$this->template->json([
+    			'status' 	=> 'error',
+    			'message' 	=> 'Sorry! You can not delete default records.'
+			], 404);
+		}
+
+		$done = $this->company_branch_model->delete($record->id);
+
+		if($done)
+		{
+			$data = [
+				'status' 	=> 'success',
+				'message' 	=> 'Successfully deleted!',
+				'removeRow' => true,
+				'rowId'		=> '#_data-row-company-branch-'.$record->id
+			];
+		}
+		else
+		{
+			$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be deleted. It might have references to other module(s)/component(s).'
+			];
+		}
+		return $this->template->json($data);
+	}
+
+	// --------------------------------------------------------------------
+
+
 }

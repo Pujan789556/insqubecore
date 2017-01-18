@@ -115,6 +115,18 @@ define('IQB_BLANK_SELECT', ['' => 'Select...']);
 
 /*
 |--------------------------------------------------------------------------
+| COMPANY TYPE CONSTANTS
+|--------------------------------------------------------------------------
+|
+*/
+define('IQB_COMPANY_TYPE_BROKER',       'B');
+define('IQB_COMPANY_TYPE_BANK',         'F');
+define('IQB_COMPANY_TYPE_RE_INSURANCE', 'R');
+define('IQB_COMPANY_TYPE_INSURANCE',    'I');
+
+
+/*
+|--------------------------------------------------------------------------
 | PARENT PORTFOLIO CONSTANTS
 |--------------------------------------------------------------------------
 |

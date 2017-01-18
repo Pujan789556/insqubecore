@@ -8,7 +8,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<tr>
 		<th>ID</th>
 		<th>Name</th>
-		<th>UD Code</th>
 		<th>Pan No</th>
 		<th>Type</th>
 		<th>Active</th>
