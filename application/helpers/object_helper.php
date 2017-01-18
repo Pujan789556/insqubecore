@@ -446,6 +446,7 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        'rules' => $staff_count_rule,
 			        '_id' 		=> '_motor-staff-count',
 			        '_type'     => 'text',
+			        '_default' 	=> 0,
 			        '_required' => false
 			    ],
 		    ],
@@ -459,6 +460,7 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
 			        '_id' 		=> '_motor-trailer-price',
 			        '_type'     => 'text',
+			        '_default' 	=> 0.00,
 			        '_required' => false
 			    ],
 		    ],
