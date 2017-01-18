@@ -271,14 +271,22 @@ $('input[name="flag_dc"]').on('ifChecked', function(){
   var v = $(this).val(),
       $agentbox = $('#_agent-id').closest('.form-group');
   if(v === 'C'){
-      $agentbox.show();
+      $agentbox.fadeIn();
   }else{
-    $agentbox.hide();
+    $agentbox.fadeOut();
       $('#_agent-id').prop('selectedIndex',0).trigger('change');
       // $("#_agent-id").select2();
   }
 });
 
+// Hide Agent Box if Direct Discount is Checked
+var $agentbox = $('#_agent-id').closest('.form-group'),
+    flag_dc = $("input[type=radio][name=flag_dc]:checked").val();
+if(typeof flag_dc === 'undefined' || flag_dc === 'D'){
+    $agentbox.hide();
+}
+
+// Initialize Select2
 $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
     //Initialize Select2 Elements
     $("#_marketing-staff").select2();
