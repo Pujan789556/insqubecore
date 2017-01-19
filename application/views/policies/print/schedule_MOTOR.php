@@ -73,8 +73,23 @@ switch ($object_attributes->sub_portfolio)
                             <tr>
                                 <td>
                                     <h4 class="border-b">बीमीतको विवरण</h4><br/>
-                                    नाम थार: <?php echo $record->customer_name;?><br/>
-                                    ठेगाना: <?php echo get_contact_widget($record->customer_contact, true);?>
+                                    नाम थर, ठेगाना:<br/>
+                                    <?php
+                                    /**
+                                     * If Policy Object is Financed or on Loan, The financial Institute will be "Insured Party"
+                                     * and the customer will be "Account Party"
+                                     */
+                                    if($record->flag_on_credit === 'Y')
+                                    {
+                                        echo 'INS.: ' . $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name) . '<br/>';
+                                        echo 'A/C.: ' . $this->security->xss_clean($record->customer_name) . '<br/>';
+                                    }
+                                    else
+                                    {
+                                        echo $this->security->xss_clean($record->customer_name) . '<br/>';
+                                    }
+                                    echo '<br/>' . get_contact_widget($record->customer_contact, true);
+                                    ?>
                                 </td>
                             </tr>
                             <tr>

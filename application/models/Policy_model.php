@@ -142,17 +142,21 @@ class Policy_model extends MY_Model
 
             /**
              *  Policy Object on Loan?
+             *  --------------------------
+             *  If the policy object, eg. motor, is on loan/financed, then
+             *  This creditor company is the "Insured Party" & Customer is "Account Party"
              */
             'policy_object_on_credit' => [
                 [
                     'field' => 'flag_on_credit',
-                    'label' => 'Policy Object on Loan?',
+                    'label' => 'on Loan/Financed?',
                     'rules' => 'trim|required|alpha|exact_length[1]|in_list[N,Y]',
                     '_id'       => '_flag-on-credit',
                     '_type'     => 'radio',
                     '_data'     => [ 'Y' => 'Yes', 'N' => 'No'],
                     '_default'  => 'N',
                     '_show_label'   => true,
+                    '_help_text' => '<i class="fa fa-info-circle"></i> If policy object, eg. motor, is on loan/financed by a bank or financial institution, then  the "<strong>Insured Party</strong>" of this policy  will be that financial institute. The customer will be "<strong>Account Party</strong>" in this case.',
                     '_required'     => true
                 ],
                 [
@@ -505,8 +509,8 @@ class Policy_model extends MY_Model
                                     C.code as customer_code, C.full_name as customer_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no,
                                     O.attributes as object_attributes,
                                     A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type,
-                                    CRD.name as creditor_name,
-                                    CRB.name as creditor_branch_name,
+                                    CRD.name as creditor_name, CRD.contact as creditor_contact,
+                                    CRB.name as creditor_branch_name, CRB.contact as creditor_branch_contact,
                                     U.username as sales_staff_username, U.profile as sales_staff_profile
                             ")
                      ->from($this->table_name . ' as P')

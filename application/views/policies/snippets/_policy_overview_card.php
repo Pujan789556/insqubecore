@@ -44,28 +44,34 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <td class="text-bold">Proposed By</td>
                     <td><?php echo nl2br($this->security->xss_clean($record->proposer));?></td>
                 </tr>
-                <tr>
-                    <td class="text-bold">Care Of</td>
-                    <td><?php echo nl2br($this->security->xss_clean($record->care_of));?></td>
-                </tr>
+
                 <tr>
                     <td class="text-bold">Policy Proposed Date</td>
                     <td><?php echo $record->proposed_date?></td>
                 </tr>
                 <tr>
-                    <td class="text-bold">Policy Object on Credit/Loan?</td>
+                    <td class="text-bold">Object on Loan/Financed?</td>
                     <td><?php echo $record->flag_on_credit === 'Y' ? 'Yes' : 'No';?></td>
                 </tr>
                 <?php if($record->flag_on_credit === 'Y'):?>
                     <tr>
-                        <td class="text-bold">Proposed By</td>
-                        <td><?php echo nl2br($this->security->xss_clean($record->creditor_name));?></td>
+                        <td class="text-bold">Insured Party</td>
+                        <td><?php echo $this->security->xss_clean($record->creditor_name);?>, <?php echo $this->security->xss_clean($record->creditor_branch_name);?></td>
                     </tr>
                     <tr>
-                        <td class="text-bold">Proposed By</td>
-                        <td><?php echo nl2br($this->security->xss_clean($record->creditor_branch_name));?></td>
+                        <td class="text-bold">Account Party</td>
+                        <td><?php echo $this->security->xss_clean($record->customer_name);?></td>
+                    </tr>
+                <?php else:?>
+                    <tr>
+                        <td class="text-bold">Insured Party</td>
+                        <td><?php echo $this->security->xss_clean($record->customer_name);?></td>
                     </tr>
                 <?php endif?>
+                <tr>
+                    <td class="text-bold">Care Of</td>
+                    <td><?php echo nl2br($this->security->xss_clean($record->care_of));?></td>
+                </tr>
                 <tr>
                     <td class="text-bold">Policy Issue Date</td>
                     <td><?php echo $record->issue_date?></td>
