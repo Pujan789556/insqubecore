@@ -414,6 +414,7 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
 			        '_id' 		=> '_motor-accessories-price',
 			        '_type'     => 'text',
+			        '_default' 	=> 0.00,
 			        '_required' => true
 			    ],
 			    [

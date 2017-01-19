@@ -705,7 +705,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 				$__premium_A_row_10 = $__premium_A_row_GA * ($dr_voluntary_excess/100.00);
 			}
 			$__cost_table_A['sections'][] = [
-				'title' => "बीमित स्वयंले व्यहोर्ने स्वेच्छीक अधिक रु {$amount_voluntary_excess} वापत छुटः “ख” को {$dr_voluntary_excess} %",
+				'title' => "बीमित स्वयंले व्यहोर्ने स्वेच्छीक अधिक रु {$amount_voluntary_excess} वापत छुटः “ग” को {$dr_voluntary_excess} %",
 				'amount' => $__premium_A_row_10
 			];
 
