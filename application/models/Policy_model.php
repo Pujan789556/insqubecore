@@ -107,14 +107,6 @@ class Policy_model extends MY_Model
                     '_id'       => 'proposer-text',
                     '_type'     => 'text',
                     '_required' => false
-                ],
-                [
-                    'field' => 'care_of',
-                    'label' => 'Care of (or Referer)',
-                    'rules' => 'trim|max_length[100]',
-                    '_id'       => 'care-of-text',
-                    '_type'     => 'text',
-                    '_required' => false
                 ]
             ],
 
@@ -146,7 +138,7 @@ class Policy_model extends MY_Model
              *  If the policy object, eg. motor, is on loan/financed, then
              *  This creditor company is the "Insured Party" & Customer is "Account Party"
              */
-            'policy_object_on_credit' => [
+            'flag_on_credit' => [
                 [
                     'field' => 'flag_on_credit',
                     'label' => 'on Loan/Financed?',
@@ -158,7 +150,10 @@ class Policy_model extends MY_Model
                     '_show_label'   => true,
                     '_help_text' => '<i class="fa fa-info-circle"></i> If policy object, eg. motor, is on loan/financed by a bank or financial institution, then  the "<strong>Insured Party</strong>" of this policy  will be that financial institute. The customer will be "<strong>Account Party</strong>" in this case.',
                     '_required'     => true
-                ],
+                ]
+            ],
+
+            'creditor_info' => [
                 [
                     'field' => 'creditor_id',
                     'label' => 'Creditor Company',
@@ -180,6 +175,14 @@ class Policy_model extends MY_Model
                     '_data'     => IQB_BLANK_SELECT,
                     '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Company Branch" of selected "Creditor Company" if not available in this list and try again.',
                     '_required' => true
+                ],
+                [
+                    'field' => 'care_of',
+                    'label' => 'Care of (or Referer)',
+                    'rules' => 'trim|max_length[100]',
+                    '_id'       => '_care-of-text',
+                    '_type'     => 'text',
+                    '_required' => false
                 ]
             ],
 

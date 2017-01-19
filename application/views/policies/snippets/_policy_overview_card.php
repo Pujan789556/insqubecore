@@ -62,16 +62,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <td class="text-bold">Account Party</td>
                         <td><?php echo $this->security->xss_clean($record->customer_name);?></td>
                     </tr>
+                     <tr>
+                        <td class="text-bold">Care Of</td>
+                        <td><?php echo nl2br($this->security->xss_clean($record->care_of));?></td>
+                    </tr>
                 <?php else:?>
                     <tr>
                         <td class="text-bold">Insured Party</td>
                         <td><?php echo $this->security->xss_clean($record->customer_name);?></td>
                     </tr>
                 <?php endif?>
-                <tr>
-                    <td class="text-bold">Care Of</td>
-                    <td><?php echo nl2br($this->security->xss_clean($record->care_of));?></td>
-                </tr>
                 <tr>
                     <td class="text-bold">Policy Issue Date</td>
                     <td><?php echo $record->issue_date?></td>

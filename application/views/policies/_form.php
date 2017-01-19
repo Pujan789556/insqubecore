@@ -73,14 +73,27 @@ echo form_open( $this->uri->uri_string(),
             </div>
             <?php
             /**
-             * Load Form Components : Proposer
+             * Load Form Components : Flag on Credit
              */
-            $on_credit_elements = $form_elements['policy_object_on_credit'];
+            $flag_on_credit_elements = $form_elements['flag_on_credit'];
             $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements' => $on_credit_elements,
+                'form_elements' => $flag_on_credit_elements,
                 'form_record'   => $record
             ]);
             ?>
+
+            <div id="__creditor_info_box">
+                <?php
+                 /**
+                 * Load Form Components : Creditor Info
+                 */
+                $creditor_info_elements = $form_elements['creditor_info'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $creditor_info_elements,
+                    'form_record'   => $record
+                ]);
+                ?>
+            </div>
         </div>
     </div>
 
@@ -184,16 +197,16 @@ function __do_select(a){
 
 // Creator Info Toggler
 function __toggle_creditor_info(){
-    var $creditorBox = $('#_creditor-id').closest('.form-group'),
-        $creditorBranchBox = $('#_creditor-branch-id').closest('.form-group'),
-        flag_on_credit = $("input[type=radio][name=flag_on_credit]:checked").val();
-    if(typeof flag_on_credit === 'undefined' || flag_on_credit === 'N'){
-        $creditorBox.fadeOut();
-        $creditorBranchBox.fadeOut();
+
+    var $box    = $('#__creditor_info_box'),
+        flag    = $("input[type=radio][name=flag_on_credit]:checked").val();
+
+    if(typeof flag === 'undefined' || flag === 'N'){
+        $box.fadeOut();
         $('#_creditor-id').prop('selectedIndex',0).trigger('change');
+        $('#_care-of-text').val('');
     }else{
-        $creditorBox.fadeIn();
-        $creditorBranchBox.fadeIn();
+        $box.fadeIn();
     }
 }
 
