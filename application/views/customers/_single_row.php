@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		Code: <strong><?php echo $record->code;?></strong><br/>
 		PAN: <strong><?php echo $record->pan;?></strong>
 	</td>
-	<td><?php $this->load->view('templates/_common/_widget_contact_snippet', ['contact' => json_decode($record->contact)]);?></td>
+	<td ><?php echo get_contact_widget($record->contact, true)?></td>
 	<td>
 		<?php echo $record->type == 'I' ? 'Individual' : 'Company';?>
 		<?php if($record->type == 'C'):?>
