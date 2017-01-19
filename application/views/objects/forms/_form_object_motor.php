@@ -18,36 +18,40 @@ $this->load->view('templates/_common/_form_components_horz', [
     'form_record'   => $record
 ]);
 ?>
-<div class="box-header with-border">
-    <h3 class="box-title">Staff Count (Commercial Vehicle Only)</h3>
-</div>
-<p class="help-block"><i class="fa fa-info-circle"></i> Please supply staff count if this is commercial vehicle.</p>
-<?php
-/**
- * Vehicle Information
- */
-$staff_elements = $form_elements['staff'];
-$this->load->view('templates/_common/_form_components_horz', [
-    'form_elements' => $staff_elements,
-    'form_record'   => $record
-]);
-?>
 
-<div class="box-header with-border">
-    <h3 class="box-title">Trailer/Trolly Information (Private/Commercial Vehicle Only)</h3>
+<div id="__staff-box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Staff Count (Commercial Vehicle Only)</h3>
+    </div>
+    <p class="help-block"><i class="fa fa-info-circle"></i> Please supply staff count if this is commercial vehicle.</p>
+    <?php
+    /**
+     * Vehicle Information
+     */
+    $staff_elements = $form_elements['staff'];
+    $this->load->view('templates/_common/_form_components_horz', [
+        'form_elements' => $staff_elements,
+        'form_record'   => $record
+    ]);
+    ?>
 </div>
-<p class="help-block"><i class="fa fa-info-circle"></i> Please supply trailer/trolly price if this vehicle has any.</p>
-<?php
-/**
- * Vehicle Information
- */
-$trailer_elements = $form_elements['trailer'];
-$this->load->view('templates/_common/_form_components_horz', [
-    'form_elements' => $trailer_elements,
-    'form_record'   => $record
-]);
-?>
 
+<div id="__trailer-box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Trailer/Trolly Information (Private/Commercial Vehicle Only)</h3>
+    </div>
+    <p class="help-block"><i class="fa fa-info-circle"></i> Please supply trailer/trolly price if this vehicle has any.</p>
+    <?php
+    /**
+     * Vehicle Information
+     */
+    $trailer_elements = $form_elements['trailer'];
+    $this->load->view('templates/_common/_form_components_horz', [
+        'form_elements' => $trailer_elements,
+        'form_record'   => $record
+    ]);
+    ?>
+</div>
 <script type="text/javascript">
 
     function _po_to_be_intimated(d, et){
@@ -72,16 +76,34 @@ $this->load->view('templates/_common/_form_components_horz', [
     function _po_motor_change_sub_portfolio(d){
         var $this = $(d),
             v = $this.val();
+
+        // staff count
+        $('#__staff-box').hide();
+
+        // trailer box
+        $('#__trailer-box').hide();
+
         if(v == 'CVC')
         {
-            $('#_motor-vehicle-df').closest('.form-group').hide();
-            $('#_motor-vehicle-cvc-type').closest('.form-group').show();
+            $('#_motor-vehicle-df').closest('.form-group').hide(500);
+            $('#_motor-vehicle-cvc-type').closest('.form-group').show(500);
+
+            // Staff box
+            $('#__staff-box').show(500);
+
+            // trailer box
+            $('#__trailer-box').show(500);
+
         }else if(v == 'MCY'){
-            $('#_motor-vehicle-cvc-type').closest('.form-group').hide();
-            $('#_motor-vehicle-df').closest('.form-group').show();
+            $('#_motor-vehicle-cvc-type').closest('.form-group').hide(500);
+            $('#_motor-vehicle-df').closest('.form-group').show(500);
+
         }else{
-            $('#_motor-vehicle-cvc-type').closest('.form-group').hide();
-            $('#_motor-vehicle-df').closest('.form-group').hide();
+            $('#_motor-vehicle-cvc-type').closest('.form-group').hide(500);
+            $('#_motor-vehicle-df').closest('.form-group').hide(500);
+
+            // trailer box
+            $('#__trailer-box').show(500);
         }
 
         // Default Engine Capacity and Carrying Capacity Unit ( Motorcycle & Private Vehicle -> CC | Seat )
