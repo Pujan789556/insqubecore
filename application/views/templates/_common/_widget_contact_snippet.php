@@ -28,7 +28,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $contact_data = [];
             $contact_data[] = $contact->address1 ?? NULL;
             $contact_data[] = $contact->address2 ?? NULL;
-            implode('</br/>', $contact_data);
+            echo implode('<br/>', $contact_data);
 
             $city = $contact->city ?? NULL;
             $state = $contact->state ?? NULL;
