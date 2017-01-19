@@ -140,13 +140,6 @@ if ( ! function_exists('get_contact_form_fields'))
 
 		return [
 			[
-				'name' 		=> 'contacts[contact_name]',
-		        'label' 	=> 'Contact Name',
-		        '_key' 		=> 'contact_name',
-		        '_type' 	=> 'text',
-		        '_required' => true
-			],
-			[
 				'name' 		=> 'contacts[address1]',
 		        'label' 	=> 'Address 1',
 		        '_key' 		=> 'address1',
@@ -248,11 +241,6 @@ if ( ! function_exists('get_contact_form_validation_rules'))
 	function get_contact_form_validation_rules(  )
 	{
 		return [
-			[
-                'field'     => 'contacts[contact_name]',
-                'label'     => 'Contact Name',
-                'rules'     => 'trim|required|max_length[100]'
-            ],
             [
                 'field'     => 'contacts[address1]',
                 'label'     => 'Address 1',
@@ -365,12 +353,14 @@ if ( ! function_exists('get_contact_widget'))
 	 * 		Web:
 	 *
 	 * @param JSON $contact Single JSON Contact Object
+	 * @param bool $snippet_only Return Only Snippet Text
+	 * @param bool $plain_text  Return only Plain Text(No link on email,mobile,website, No HR)
 	 * @return html
 	 */
-	function get_contact_widget( $contact, $snippet_only = false )
+	function get_contact_widget( $contact, $snippet_only = false, $plain_text = false )
 	{
 		$CI =& get_instance();
-		$data = ['contact' => json_decode($contact) ];
+		$data = ['contact' => json_decode($contact), 'plain_text' => $plain_text ];
 
         $view = $snippet_only ? 'templates/_common/_widget_contact_snippet' : 'templates/_common/_widget_contact';
 		return $CI->load->view( $view, $data, TRUE);
