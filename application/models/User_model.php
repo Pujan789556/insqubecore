@@ -128,12 +128,12 @@ class User_model extends MY_Model
 	 * @param type|array $params
 	 * @return type
 	 */
-	public function dropdown($role_id=NULL, $branch_id = NULL, $department_id = NULL)
+	public function dropdown($branch_id = NULL, $department_id = NULL)
     {
     	/**
          * Get Cached Result, If no, cache the query result
          */
-    	$cache_name = ['auth_users_dd', $role_id ?? '_', $branch_id ?? '_', $department_id ?? '_'];
+    	$cache_name = ['auth_users_dd', $branch_id ?? '_', $department_id ?? '_'];
     	$cache_name = implode('_', $cache_name);
 
     	// $this->delete_cache($cache_name);
@@ -147,34 +147,25 @@ class User_model extends MY_Model
 	    			 ->join('master_branches B', 'U.branch_id = B.id')
 	    			 ->join('master_departments D', 'U.department_id = D.id');
 
-			if( $role_id )
-	        {
-	        	$this->db->where(['U.role_id' => $role_id]);
-	        }
-
 	        if( $branch_id )
 	        {
-	        	$this->db->where(['U.branch_id' => $branch_id]);
+	        	$this->db->where(['B.id' => $branch_id]);
 	        }
 
 	        if( $department_id )
 	        {
-	        	$this->db->where(['U.department_id' => $department_id]);
+	        	$this->db->where(['D.id' => $department_id]);
 	        }
 
 	        $list = $this->db->get()->result();
+
 	        $dropdown = [];
 	        foreach($list as $r)
 	        {
 	        	$profile = $r->profile ? json_decode($r->profile) : NULL;
 	        	$initial = $r->branch_name . ' - ';
-	        	$initial .= isset($profile->name) ? $profile->name . " ({$r->username})" : $r->username;
-	        	$parts = [
-	        		$initial,
-					$r->role_name,
-					$r->department_name
-				];
-	        	$dropdown["{$r->id}"] = implode(', ', $parts);
+	        	$initial .= isset($profile->name) ? $profile->name . " ({$r->code})" : $r->username . " ({$r->code})";
+	        	$dropdown["{$r->id}"] = $initial;
 	        }
             $this->write_cache($dropdown, $cache_name, CACHE_DURATION_MONTH);
         }
@@ -229,7 +220,6 @@ class User_model extends MY_Model
     public function clear_cache()
     {
     	$cache_names = [
-            'auth_users_all',
             'auth_users_dd*'
         ];
     	// cache name without prefix

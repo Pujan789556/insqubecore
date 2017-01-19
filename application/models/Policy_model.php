@@ -69,7 +69,6 @@ class Policy_model extends MY_Model
         /**
          * List all marketing staffs of this branch
          */
-        $role_id = 7;
         $branch_id = $this->dx_auth->is_admin() ? NULL : $this->dx_auth->get_branch_id();
 
         /**
@@ -285,7 +284,7 @@ class Policy_model extends MY_Model
                     '_id'       => '_marketing-staff',
                     '_extra_attributes' => 'style="width:100%; display:block"',
                     '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown($role_id, $branch_id),
+                    '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown($branch_id),
                     '_required' => true
                 ],
                 [

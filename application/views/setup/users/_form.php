@@ -62,7 +62,7 @@ if (isset($record) )
                     {
                         $value = set_value($element['field'])
                                     ? set_value($element['field'], '', FALSE)
-                                    : ( isset($form_record) ?? '' );
+                                    : ( $record->{$element['field']} ?? '' );
                     }
 
                     switch($element['_type'])
