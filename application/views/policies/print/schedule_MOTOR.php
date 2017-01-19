@@ -83,12 +83,18 @@ switch ($object_attributes->sub_portfolio)
                                     {
                                         echo 'INS.: ' . $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name) . '<br/>';
                                         echo 'A/C.: ' . $this->security->xss_clean($record->customer_name) . '<br/>';
+
+                                        // Care of
+                                        echo $record->care_of ? 'C/O.: ' . $this->security->xss_clean($record->care_of) . '<br/>' : '';
+
+                                        echo '<br/>' . get_contact_widget($record->creditor_branch_contact, true, true);
                                     }
                                     else
                                     {
                                         echo $this->security->xss_clean($record->customer_name) . '<br/>';
+                                        echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                                     }
-                                    echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
+
                                     ?>
                                 </td>
                             </tr>
