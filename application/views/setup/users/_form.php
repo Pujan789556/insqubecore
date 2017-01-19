@@ -3,7 +3,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Form : User
  */
-
 $hidden = [
     'next_wizard' => isset($next_wizard) && $next_wizard ? 1 : 0
 ];
@@ -17,22 +16,22 @@ if (isset($record) )
     border:none;
 }
 </style>
-<?php echo form_open( $action_url,  
+<?php echo form_open( $action_url,
                         [
                             'class' => 'form-horizontal form-iqb-general',
                             'data-pc' => '.bootbox-body' // parent container ID
-                        ], 
+                        ],
                         // Hidden Fields
                         $hidden); ?>
     <div class="box-header with-border">
         <h3 class="box-title"><?php echo $form_title?></h3>
     </div>
-    <div class="box-body">    
-        <?php foreach($form_elements as $element):?>        
+    <div class="box-body">
+        <?php foreach($form_elements as $element):?>
             <div class="form-group <?php echo form_error($element['field']) ? 'has-error' : '';?>">
                 <label for="" class="col-sm-2 control-label"><?php echo $element['label'] . field_compulsary_text( $element['_required']);?></label>
                 <div class="col-sm-10">
-                    <?php 
+                    <?php
                     /**
                      * Load Form Element
                      */
@@ -53,16 +52,15 @@ if (isset($record) )
                         }
                         else if(isset($record))
                         {
-                            $scope = json_decode($record->scope); 
+                            $scope = json_decode($record->scope);
                             $value = $scope ? $scope->scope : '';
-                            $scope_list = isset($scope->list) ? $scope->list : []; 
-                        }                        
-                    }                    
+                            $scope_list = isset($scope->list) ? $scope->list : [];
+                        }
+                    }
                     else if($element['_type'] != 'password')
                     {
                         $value = set_value($element['field']) ? set_value($element['field'], '', FALSE) : ( isset($form_record) ? $form_record->{$element['field']} : '' );
-                    }                    
-
+                    }
                     switch($element['_type'])
                     {
                         case 'text':
@@ -123,7 +121,7 @@ if (isset($record) )
                 </div>
             </div>
 
-            <?php 
+            <?php
             if($element_config['name'] == 'scope[scope]'):
                 $branch_config = [
                     'name' => 'scope[list][]',
@@ -137,21 +135,21 @@ if (isset($record) )
                 <div class="form-group <?php echo form_error($branch_config['name']) ? 'has-error' : '';?>" id="scope-list" style="display:<?php echo $value == 'branch' ? 'block' : 'none';?>">
                     <div class="col-sm-10 col-sm-offset-2">
                         <label>Select Branch(es)<?php echo field_compulsary_text(true);?></label>
-                        <?php 
+                        <?php
 
-                        echo form_dropdown($branch_config, $branches, $scope_list);?>  
-                        <?php if(form_error($branch_config['name'])):?><span class="help-block"><?php echo form_error($branch_config['name']); ?></span><?php endif?>                      
+                        echo form_dropdown($branch_config, $branches, $scope_list);?>
+                        <?php if(form_error($branch_config['name'])):?><span class="help-block"><?php echo form_error($branch_config['name']); ?></span><?php endif?>
                     </div>
                 </div>
             <?php endif?>
 
-        <?php endforeach?>  
-    </div>     
-    <button type="submit" class="hide">Submit</button> 
+        <?php endforeach?>
+    </div>
+    <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
 
 <!-- Select2 -->
-<script>    
+<script>
     $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
         //Initialize Select2 Elements
         $(".select-multiple").select2();

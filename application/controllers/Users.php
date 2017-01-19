@@ -25,6 +25,13 @@ class Users extends MY_Controller
 		 */
 		'basic' => [
 			[
+				'field' => 'code',
+		        'label' => 'Employee Code',
+		        'rules' => 'trim|required|alpha_dash|max_length[20]|strtoupper|callback_code_check',
+		        '_type' 	=> 'text',
+		        '_required' => true
+			],
+			[
 				'field' => 'username',
 		        'label' => 'Username',
 		        'rules' => 'trim|required|min_length[4]|max_length[20]|alpha_dash|callback_username_check',
@@ -91,6 +98,13 @@ class Users extends MY_Controller
 		 * Edit Basic Information
 		 */
 		'edit-basic' => [
+			[
+				'field' => 'code',
+		        'label' => 'Employee Code',
+		        'rules' => 'trim|required|alpha_dash|max_length[20]|strtoupper|callback_code_check',
+		        '_type' 	=> 'text',
+		        '_required' => true
+			],
 			[
 				'field' => 'role_id',
 		        'label' => 'Application Role',
@@ -471,11 +485,10 @@ class Users extends MY_Controller
 		$this->form_validation->set_rules($rules);
 		if( $this->input->post() && $this->form_validation->run() )
 		{
-			// $data = $this->input->post();
-
 			$data = [
-				'role_id' => $this->input->post('role_id'),
-				'branch_id' => $this->input->post('branch_id'),
+				'code' 			=> $this->input->post('code'),
+				'role_id' 		=> $this->input->post('role_id'),
+				'branch_id' 	=> $this->input->post('branch_id'),
 				'department_id' => $this->input->post('department_id')
 			];
 
@@ -985,6 +998,28 @@ class Users extends MY_Controller
 			// Return HTML
 			$this->template->json($json_data);
 		}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Callback: Check Code
+	 *
+	 * @param string $code
+	 * @return bool
+	 */
+	function code_check($code)
+	{
+		$id  = (int)$this->input->post('id');
+		$id  = ($id !== 0) ? $id : NULL;
+
+		$result = $this->user_model->is_code_available($code, $id);
+		if ( ! $result )
+		{
+			$this->form_validation->set_message('code_check', 'Employee code already exist. Please choose another code.');
+		}
+
+		return $result;
+	}
 
 	// --------------------------------------------------------------------
 

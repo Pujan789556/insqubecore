@@ -401,6 +401,16 @@ class Auth extends MY_Controller
 
 	function cancel_account()
 	{
+		/**
+		 * Let's Disable Cancellation from Here
+		 * ------------------------------------
+		 *
+		 * Only Admin can do from User Module
+		 */
+		$this->template->render_404();
+		exit(1);
+
+
 		// Check logged in?
 		if ( !$this->dx_auth->is_logged_in())
 		{
