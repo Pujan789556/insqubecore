@@ -88,7 +88,7 @@ switch ($object_attributes->sub_portfolio)
                                     {
                                         echo $this->security->xss_clean($record->customer_name) . '<br/>';
                                     }
-                                    echo '<br/>' . get_contact_widget($record->customer_contact, true);
+                                    echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                                     ?>
                                 </td>
                             </tr>
