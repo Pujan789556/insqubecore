@@ -29,7 +29,7 @@ if (isset($record) )
     <div class="box-body">
         <?php foreach($form_elements as $element):?>
             <div class="form-group <?php echo form_error($element['field']) ? 'has-error' : '';?>">
-                <label for="" class="col-sm-2 control-label"><?php echo $element['label'] . field_compulsary_text( $element['_required']);?></label>
+                <label for="" class="col-sm-2 control-label"><?php echo $element['label'] . field_compulsary_text( $element['_required'] ?? false );?></label>
                 <div class="col-sm-10">
                     <?php
                     /**
@@ -49,6 +49,7 @@ if (isset($record) )
                         if(set_value($element['field']))
                         {
                             $value = set_value($element['field']);
+                            $scope_list = set_value('scope[list]');
                         }
                         else if(isset($record))
                         {
@@ -59,8 +60,11 @@ if (isset($record) )
                     }
                     else if($element['_type'] != 'password')
                     {
-                        $value = set_value($element['field']) ? set_value($element['field'], '', FALSE) : ( isset($form_record) ? $form_record->{$element['field']} : '' );
+                        $value = set_value($element['field'])
+                                    ? set_value($element['field'], '', FALSE)
+                                    : ( isset($form_record) ?? '' );
                     }
+
                     switch($element['_type'])
                     {
                         case 'text':

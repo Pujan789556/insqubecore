@@ -479,6 +479,7 @@ class Users extends MY_Controller
 				'field' => 'scope[list][]',
 				'label' => 'Branches',
 				'rules' => 'trim|required|integer',
+				'_type' => ''
 			];
 		}
 
