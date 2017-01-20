@@ -46,322 +46,336 @@ class Policy_model extends MY_Model
         $this->load->helper('policy');
 
         // Set validation rules
-        $this->set_validation_rules();
+        // $this->set_validation_rules();
     }
 
 
     // ----------------------------------------------------------------
 
     /**
-     * Set Validation Rules
+     * Get/Set Validation rule and return (either formatted or section-ed)
      *
-     * Set multi section Validation Rule for Policy Creation/Edit
+     * GET/SET multi section Validation Rule for Policy Creation/Edit
      *
+     * @param string $action    add|edit
+     * @param bool  $formatted  Multi-sectioned or Formatted to pass into Form Validation Library
+     * @param object $record    Policy Record
      * @return array
      */
-    public function set_validation_rules($action='add')
+    public function validation_rules($action, $formatted=FALSE, $record = NULL)
     {
-        $this->load->model('portfolio_model');
-        $this->load->model('user_model');
-        $this->load->model('agent_model');
-        $this->load->model('company_model');
+        $this->__set_validation_rule($action, $record);
 
-        /**
-         * List all marketing staffs of this branch
-         */
-        $branch_id = $this->dx_auth->is_admin() ? NULL : $this->dx_auth->get_branch_id();
-
-        /**
-         * If posted and Direct Discount Checked, We don't need agent
-         */
-        $agent_validation           = 'trim|required|integer|max_length[11]';
-        $creditor_validation        = 'trim|integer|max_length[11]';
-        $creditor_branch_validation = 'trim|integer|max_length[11]';
-        if($this->input->post())
+        // Now Return
+        if($formatted)
         {
-            $flag_dc = $this->input->post('flag_dc');
-            if($flag_dc == 'D')
-            {
-                $agent_validation = 'trim|integer|max_length[11]';
-            }
-
-            $flag_on_credit = $this->input->post('flag_on_credit');
-            if($flag_on_credit === 'Y')
-            {
-                $creditor_validation        = 'trim|required|integer|max_length[11]';
-                $creditor_branch_validation = 'trim|required|integer|max_length[11]|callback__cb_valid_company_branch';
-            }
+            return $this->validation_rules_formatted($this->validation_rules);
         }
 
-        $this->validation_rules = [
-
-            /**
-             * Proposer & Referer (Careof) Information
-             */
-            'proposer' => [
-                [
-                    'field' => 'proposer',
-                    'label' => 'Proposed By',
-                    'rules' => 'trim|max_length[255]',
-                    '_id'       => 'proposer-text',
-                    '_type'     => 'text',
-                    '_required' => false
-                ]
-            ],
-
-            /**
-             * Customer Information
-             */
-            'customer' => [
-                [
-                    'field' => 'customer_id',
-                    'label' => 'Customer',
-                    'rules' => 'trim|required|integer|max_length[11]',
-                    '_type'     => 'hidden',
-                    '_id'       => 'customer-id',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'customer_name',
-                    'label' => 'Customer',
-                    'rules' => 'trim|required',
-                    '_id'       => 'customer-text',
-                    '_type'     => 'hidden',
-                    '_required' => true
-                ]
-            ],
-
-            /**
-             *  Policy Object on Loan?
-             *  --------------------------
-             *  If the policy object, eg. motor, is on loan/financed, then
-             *  This creditor company is the "Insured Party" & Customer is "Account Party"
-             */
-            'flag_on_credit' => [
-                [
-                    'field' => 'flag_on_credit',
-                    'label' => 'on Loan/Financed?',
-                    'rules' => 'trim|required|alpha|exact_length[1]|in_list[N,Y]',
-                    '_id'       => '_flag-on-credit',
-                    '_type'     => 'radio',
-                    '_data'     => [ 'Y' => 'Yes', 'N' => 'No'],
-                    '_default'  => 'N',
-                    '_show_label'   => true,
-                    '_help_text' => '<i class="fa fa-info-circle"></i> If policy object, eg. motor, is on loan/financed by a bank or financial institution, then  the "<strong>Insured Party</strong>" of this policy  will be that financial institute. The customer will be "<strong>Account Party</strong>" in this case.',
-                    '_required'     => true
-                ]
-            ],
-
-            'creditor_info' => [
-                [
-                    'field' => 'creditor_id',
-                    'label' => 'Creditor Company',
-                    'rules' => $creditor_validation,
-                    '_id'       => '_creditor-id',
-                    '_extra_attributes' => 'style="width:100%; display:block"',
-                    '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + $this->company_model->dropdown_creditor(true),
-                    '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Creditor Company" if not available in this list and try again.',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'creditor_branch_id',
-                    'label' => 'Company Branch',
-                    'rules' => $creditor_branch_validation,
-                    '_id'       => '_creditor-branch-id',
-                    '_extra_attributes' => 'style="width:100%; display:block"',
-                    '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT,
-                    '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Company Branch" of selected "Creditor Company" if not available in this list and try again.',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'care_of',
-                    'label' => 'Care of (or Referer)',
-                    'rules' => 'trim|max_length[100]',
-                    '_id'       => '_care-of-text',
-                    '_type'     => 'text',
-                    '_required' => false
-                ]
-            ],
-
-            /**
-             * Portfolio Information
-             */
-            'portfolio' => [
-                [
-                    'field' => 'portfolio_id',
-                    'label' => 'Portfolio',
-                    'rules' => 'trim|required|integer|max_length[11]',
-                    '_type'     => 'dropdown',
-                    '_id'       => '_portfolio-id',
-                    '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
-                    '_required' => true
-                ],
-                [
-                    'field' => 'policy_package',
-                    'label' => 'Policy Package',
-                    'rules' => 'trim|required|alpha|max_length[10]',
-                    '_type'     => 'dropdown',
-                    '_id'       => '_policy-package-id',
-                    '_data'     => IQB_BLANK_SELECT,
-                    '_required' => true
-                ]
-            ],
-
-            /**
-             * Policy Object Information
-             */
-            'object' => [
-                [
-                    'field' => 'object_id',
-                    'label' => 'Policy Object',
-                    'rules' => 'trim|required|integer|max_length[11]|callback__cb_valid_object_defaults',
-                    '_type'     => 'hidden',
-                    '_id'       => 'object-id', // dropdown policy object
-                    '_required' => true
-                ],
-                [
-                    'field' => 'object_name',
-                    'label' => 'Policy Object',
-                    'rules' => 'trim|required',
-                    '_type'     => 'hidden',
-                    '_id'       => 'object-text', // dropdown policy object
-                    '_required' => true
-                ],
-            ],
-
-            /**
-             * Policy Duration Information
-             */
-            'duration' => [
-                [
-                    'field' => 'proposed_date',
-                    'label' => 'Policy Proposed Date',
-                    'rules' => 'trim|required|valid_date',
-                    '_type'             => 'date',
-                    '_default'          => date('Y-m-d'),
-                    '_extra_attributes' => 'data-provide="datepicker-inline"',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'issue_date',
-                    'label' => 'Policy Issue Date',
-                    'rules' => 'trim|required|valid_date',
-                    '_type'             => 'date',
-                    '_default'          => date('Y-m-d'),
-                    '_extra_attributes' => 'data-provide="datepicker-inline"',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'start_date',
-                    'label' => 'Policy Start Date',
-                    'rules' => 'trim|required|valid_date',
-                    '_type'             => 'date',
-                    '_default'          => date('Y-m-d'),
-                    '_extra_attributes' => 'data-provide="datepicker-inline"',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'duration',
-                    'label' => 'Policy Duration',
-                    'rules' => 'trim|required|callback__cb_valid_policy_duration',
-                    '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + get_policy_duration_list(),
-                    '_default'  => '+1 year',
-                    '_required' => true
-                ],
-            ],
-
-            /**
-             * Sales Info - Marketing Staff, Agent Info, Commission or Direct Discount
-             */
-            'sales' => [
-                [
-                    'field' => 'sold_by',
-                    'label' => 'Marketing Staff',
-                    'rules' => 'trim|required|integer|max_length[11]',
-                    '_id'       => '_marketing-staff',
-                    '_extra_attributes' => 'style="width:100%; display:block"',
-                    '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown($branch_id),
-                    '_required' => true
-                ],
-                [
-                    'field' => 'flag_dc',
-                    'label' => 'Direct Discount or Agent Commission',
-                    'rules' => 'trim|required|alpha|exact_length[1]|in_list[D,C]',
-                    '_id'       => '_flag-dc',
-                    '_type'     => 'radio',
-                    '_data'     => [ 'C' => 'Agent Commission', 'D' => 'Direct Discount'],
-                    '_required' => true
-                ],
-                [
-                    'field' => 'agent_id',
-                    'label' => 'Agent Name',
-                    'rules' => $agent_validation,
-                    '_id'       => '_agent-id',
-                    '_extra_attributes' => 'style="width:100%; display:block"',
-                    '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + $this->agent_model->dropdown(true),
-                    '_required' => true
-                ]
-            ]
-
-        ];
-
-
-        /**
-         * ID is compulsory in EDIT
-         *
-         * This is required as for some callbacks such as "_cb_valid_object_defaults"
-         */
-        if($action === 'edit')
-        {
-            $this->validation_rules['edit_extras'] = [
-                [
-                    'field' => 'id',
-                    'label' => 'Policy ID',
-                    'rules' => 'trim|required|integer|max_length[11]',
-                    '_type'     => 'hidden',
-                    '_id'       => 'policy-id',
-                    '_required' => true
-                ]
-            ];
-        }
-
+        return $this->validation_rules;
     }
+
+        private function __set_validation_rule($action, $record=NULL)
+        {
+            $this->load->model('portfolio_model');
+            $this->load->model('user_model');
+            $this->load->model('agent_model');
+            $this->load->model('company_model');
+            $this->load->model('company_branch_model');
+
+            /**
+             * List all marketing staffs of this branch
+             */
+            $branch_id = $this->dx_auth->is_admin() ? NULL : $this->dx_auth->get_branch_id();
+
+            /**
+             * If posted and Direct Discount Checked, We don't need agent
+             */
+            $agent_validation           = 'trim|required|integer|max_length[11]';
+            $creditor_validation        = 'trim|integer|max_length[11]';
+            $creditor_branch_validation = 'trim|integer|max_length[11]';
+            if($this->input->post())
+            {
+                $flag_dc = $this->input->post('flag_dc');
+                if($flag_dc == 'D')
+                {
+                    $agent_validation = 'trim|integer|max_length[11]';
+                }
+
+                $flag_on_credit = $this->input->post('flag_on_credit');
+                if($flag_on_credit === 'Y')
+                {
+                    $creditor_validation        = 'trim|required|integer|max_length[11]';
+                    $creditor_branch_validation = 'trim|required|integer|max_length[11]|callback__cb_valid_company_branch';
+                }
+            }
+
+            /**
+             * Default Dropdown Data on Edit/Post
+             * -----------------------------------
+             *
+             *      1. Portfolio's Policy Package Dropdown
+             *      2. Creditor Branch Dropdown
+             */
+
+            $portfolio_id = $this->input->post('portfolio_id') ? (int)$this->input->post('portfolio_id') : ($record->portfolio_id ?? NULL);
+            $creditor_id = $this->input->post('creditor_id') ? (int)$this->input->post('creditor_id') : ($record->creditor_id ?? NULL);
+
+            $policy_package_dropdown = $portfolio_id ? _PO_policy_package_dropdown($portfolio_id) : IQB_BLANK_SELECT;
+            $creditor_branch_dropdown = $creditor_id ? IQB_BLANK_SELECT + $this->company_branch_model->dropdown_by_company($creditor_id) : IQB_BLANK_SELECT;
+
+            $this->validation_rules = [
+
+                /**
+                 * Portfolio Information
+                 */
+                'portfolio' => [
+                    [
+                        'field' => 'portfolio_id',
+                        'label' => 'Portfolio',
+                        'rules' => 'trim|required|integer|max_length[11]',
+                        '_type'     => 'dropdown',
+                        '_id'       => '_portfolio-id',
+                        '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'policy_package',
+                        'label' => 'Policy Package',
+                        'rules' => 'trim|required|alpha|max_length[10]',
+                        '_type'     => 'dropdown',
+                        '_id'       => '_policy-package-id',
+                        '_data'     => $policy_package_dropdown,
+                        '_required' => true
+                    ]
+                ],
+
+                /**
+                 * Proposer & Referer (Careof) Information
+                 */
+                'proposer' => [
+                    [
+                        'field' => 'proposer',
+                        'label' => 'Proposed By',
+                        'rules' => 'trim|max_length[255]',
+                        '_id'       => 'proposer-text',
+                        '_type'     => 'text',
+                        '_required' => false
+                    ]
+                ],
+
+                /**
+                 * Customer Information
+                 */
+                'customer' => [
+                    [
+                        'field' => 'customer_id',
+                        'label' => 'Customer',
+                        'rules' => 'trim|required|integer|max_length[11]',
+                        '_type'     => 'hidden',
+                        '_id'       => 'customer-id',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'customer_name',
+                        'label' => 'Customer',
+                        'rules' => 'trim|required',
+                        '_id'       => 'customer-text',
+                        '_type'     => 'hidden',
+                        '_required' => true
+                    ]
+                ],
+
+                /**
+                 *  Policy Object on Loan?
+                 *  --------------------------
+                 *  If the policy object, eg. motor, is on loan/financed, then
+                 *  This creditor company is the "Insured Party" & Customer is "Account Party"
+                 */
+                'flag_on_credit' => [
+                    [
+                        'field' => 'flag_on_credit',
+                        'label' => 'on Loan/Financed?',
+                        'rules' => 'trim|required|alpha|exact_length[1]|in_list[N,Y]',
+                        '_id'       => '_flag-on-credit',
+                        '_type'     => 'radio',
+                        '_data'     => [ 'Y' => 'Yes', 'N' => 'No'],
+                        '_default'  => 'N',
+                        '_show_label'   => true,
+                        '_help_text' => '<i class="fa fa-info-circle"></i> If policy object, eg. motor, is on loan/financed by a bank or financial institution, then  the "<strong>Insured Party</strong>" of this policy  will be that financial institute. The customer will be "<strong>Account Party</strong>" in this case.',
+                        '_required'     => true
+                    ]
+                ],
+
+                'creditor_info' => [
+                    [
+                        'field' => 'creditor_id',
+                        'label' => 'Creditor Company',
+                        'rules' => $creditor_validation,
+                        '_id'       => '_creditor-id',
+                        '_extra_attributes' => 'style="width:100%; display:block"',
+                        '_type'     => 'dropdown',
+                        '_data'     => IQB_BLANK_SELECT + $this->company_model->dropdown_creditor(true),
+                        '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Creditor Company" if not available in this list and try again.',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'creditor_branch_id',
+                        'label' => 'Company Branch',
+                        'rules' => $creditor_branch_validation,
+                        '_id'       => '_creditor-branch-id',
+                        '_extra_attributes' => 'style="width:100%; display:block"',
+                        '_type'     => 'dropdown',
+                        '_data'     => $creditor_branch_dropdown,
+                        '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Company Branch" of selected "Creditor Company" if not available in this list and try again.',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'care_of',
+                        'label' => 'Care of (or Referer)',
+                        'rules' => 'trim|max_length[100]',
+                        '_id'       => '_care-of-text',
+                        '_type'     => 'text',
+                        '_required' => false
+                    ]
+                ],
+
+
+
+                /**
+                 * Policy Object Information
+                 */
+                'object' => [
+                    [
+                        'field' => 'object_id',
+                        'label' => 'Policy Object',
+                        'rules' => 'trim|required|integer|max_length[11]|callback__cb_valid_object_defaults',
+                        '_type'     => 'hidden',
+                        '_id'       => 'object-id', // dropdown policy object
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'object_name',
+                        'label' => 'Policy Object',
+                        'rules' => 'trim|required',
+                        '_type'     => 'hidden',
+                        '_id'       => 'object-text', // dropdown policy object
+                        '_required' => true
+                    ],
+                ],
+
+                /**
+                 * Policy Duration Information
+                 */
+                'duration' => [
+                    [
+                        'field' => 'proposed_date',
+                        'label' => 'Policy Proposed Date',
+                        'rules' => 'trim|required|valid_date',
+                        '_type'             => 'date',
+                        '_default'          => date('Y-m-d'),
+                        '_extra_attributes' => 'data-provide="datepicker-inline"',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'issue_date',
+                        'label' => 'Policy Issue Date',
+                        'rules' => 'trim|required|valid_date',
+                        '_type'             => 'date',
+                        '_default'          => date('Y-m-d'),
+                        '_extra_attributes' => 'data-provide="datepicker-inline"',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'start_date',
+                        'label' => 'Policy Start Date',
+                        'rules' => 'trim|required|valid_date',
+                        '_type'             => 'date',
+                        '_default'          => date('Y-m-d'),
+                        '_extra_attributes' => 'data-provide="datepicker-inline"',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'duration',
+                        'label' => 'Policy Duration',
+                        'rules' => 'trim|required|callback__cb_valid_policy_duration',
+                        '_type'     => 'dropdown',
+                        '_data'     => IQB_BLANK_SELECT + get_policy_duration_list(),
+                        '_default'  => '+1 year',
+                        '_required' => true
+                    ],
+                ],
+
+                /**
+                 * Sales Info - Marketing Staff, Agent Info, Commission or Direct Discount
+                 */
+                'sales' => [
+                    [
+                        'field' => 'sold_by',
+                        'label' => 'Marketing Staff',
+                        'rules' => 'trim|required|integer|max_length[11]',
+                        '_id'       => '_marketing-staff',
+                        '_extra_attributes' => 'style="width:100%; display:block"',
+                        '_type'     => 'dropdown',
+                        '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown($branch_id),
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'flag_dc',
+                        'label' => 'Direct Discount or Agent Commission',
+                        'rules' => 'trim|required|alpha|exact_length[1]|in_list[D,C]',
+                        '_id'       => '_flag-dc',
+                        '_type'     => 'radio',
+                        '_data'     => [ 'C' => 'Agent Commission', 'D' => 'Direct Discount'],
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'agent_id',
+                        'label' => 'Agent Name',
+                        'rules' => $agent_validation,
+                        '_id'       => '_agent-id',
+                        '_extra_attributes' => 'style="width:100%; display:block"',
+                        '_type'     => 'dropdown',
+                        '_data'     => IQB_BLANK_SELECT + $this->agent_model->dropdown(true),
+                        '_required' => true
+                    ]
+                ]
+
+            ];
+
+
+            /**
+             * ID is compulsory in EDIT
+             *
+             * This is required as for some callbacks such as "_cb_valid_object_defaults"
+             */
+            if($action === 'edit')
+            {
+                $this->validation_rules['edit_extras'] = [
+                    [
+                        'field' => 'id',
+                        'label' => 'Policy ID',
+                        'rules' => 'trim|required|integer|max_length[11]',
+                        '_type'     => 'hidden',
+                        '_id'       => 'policy-id',
+                        '_required' => true
+                    ]
+                ];
+            }
+        }
 
     // ----------------------------------------------------------------
 
-    public function get_validation_rule($action)
+    public function validation_rules_formatted($validation_rules)
     {
-        // Valid action?
-        if( !in_array($action, array('add', 'edit')))
-        {
-            return FALSE;
-        }
 
         $v_rules = [];
 
         // Merge All Sections and return
-        foreach($this->validation_rules as $section=>$rules)
+        foreach($validation_rules as $section=>$rules)
         {
             $v_rules = array_merge($v_rules, $rules);
         }
-
-        // if ($action === 'add')
-        // {
-        //     // Merge All Sections and return
-        //     foreach($this->validation_rules as $section=>$rules)
-        //     {
-        //         $v_rules = array_merge($v_rules, $rules);
-        //     }
-        // }
-        // else
-        // {
-
-        // }
         return $v_rules;
     }
 

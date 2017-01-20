@@ -321,7 +321,7 @@ class Policies extends MY_Controller
 		}
 
 		$form_data = [
-			'form_elements' => $this->policy_model->validation_rules,
+			'form_elements' => $this->policy_model->validation_rules('add'),
 			'record' 		=> NULL
 		];
 
@@ -374,18 +374,7 @@ class Policies extends MY_Controller
 
 
 		// Validation Rule
-		$v_rules = $this->policy_model->validation_rules;
-
-		// Creditor Branch Dropdown Data
-		if($record->creditor_id)
-		{
-			$this->load->model('company_branch_model');
-			$v_rules['policy_object_on_credit'][2]['_data'] = IQB_BLANK_SELECT + $this->company_branch_model->dropdown_by_company($record->creditor_id);
-		}
-
-
-		// Update Policy Package Data
-		$v_rules['portfolio'][1]['_data'] = _PO_policy_package_dropdown($record->portfolio_id);
+		$v_rules = $this->policy_model->validation_rules('edit', FALSE, $record);
 
 		// Object Details
 		$object_record = $this->object_model->row($record->object_id);
@@ -440,8 +429,7 @@ class Policies extends MY_Controller
 			$done = FALSE;
 
 			// These Rules are Sectioned, We need to merge Together
-			$this->policy_model->set_validation_rules($action); // set rules according to action
-			$v_rules = $this->policy_model->get_validation_rule($action);
+			$v_rules = $this->policy_model->validation_rules_formatted($form_data['form_elements']);
             $this->form_validation->set_rules($v_rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -545,22 +533,6 @@ class Policies extends MY_Controller
 			}
 			else
 			{
-
-				// Creditor Branch Dropdown Data
-				$creditor_id  = (int)$this->input->post('creditor_id');
-				if($creditor_id)
-				{
-					$this->load->model('company_branch_model');
-					$form_data['form_elements']['policy_object_on_credit'][2]['_data'] = IQB_BLANK_SELECT + $this->company_branch_model->dropdown_by_company($creditor_id);
-				}
-
-				// Policy Package of Portfolio if supplied
-				$portfolio_id = (int)$this->input->post('portfolio_id');
-				if($portfolio_id )
-				{
-					$form_data['form_elements']['portfolio'][1]['_data'] = _PO_policy_package_dropdown($portfolio_id);
-				}
-
 				return $this->template->json([
 					'status' 		=> $status,
 					'message' 		=> $message,

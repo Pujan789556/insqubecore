@@ -3,18 +3,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Dashboard extends MY_Controller
 {
-	
+
 	function __construct()
 	{
 		parent::__construct();
-		
+
 		// Form Validation
-		$this->load->library('Form_validation');		
+		$this->load->library('Form_validation');
 
 		// Set Template for this controller
         $this->template->set_template('dashboard');
 	}
-	
+
 	function index()
 	{
 
