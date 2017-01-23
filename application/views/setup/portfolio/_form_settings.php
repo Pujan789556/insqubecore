@@ -1,8 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : Branch
+ * Form : Portfolio Settings
  */
+
+$anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">' .
+                         '<a href="#" onclick=\'$(this).closest(".box-body").remove()\'>Remove</a>' .
+                     '</div></div>' .
+                 '</div>';
 ?>
 <?php echo form_open( $this->uri->uri_string(),
                         [
@@ -58,7 +63,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 'stamp_duty'        => ['label' => 'Stamp Duty(Rs)']
             ];
 
+
+
             foreach($portfolios as $portfolio_id=>$portfolio_name):
+
+                // Short Term Policy Rate Fields
+                $short_term_policy_rate_form_data = [];
 
                 $setting_id = '';
                 if($action === 'edit')
@@ -81,7 +91,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                 echo form_hidden('portfolio_id[]', $portfolio_id);
                 ?>
-                <div class="col-sm-6">
+                <div class="col-sm-12">
 
                     <div class="box box-solid box-bordered">
                         <div class="box-header bg-gray-light"><h3 class="box-title"><?php echo ucwords($portfolio_name)?></h3></div>
@@ -105,7 +115,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <div class="form-group <?php echo form_error("{$input_name}") ? 'has-error' : '';?>">
                                     <label><?php echo $label . field_compulsary_text( TRUE )?></label>
                                     <input
-                                        data-toggle="tooltip"
                                         title="<?php echo $label;?>"
                                         type="text"
                                         name="<?php echo $input_name;?>"
@@ -115,6 +124,62 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     <?php if(form_error("{$input_name}")):?><span class="help-block"><?php echo form_error("{$input_name}"); ?></span><?php endif?>
                                 </div>
                             <?php endforeach?>
+                            <hr/>
+                            <div class="form-inline">
+                                <div class="box box-solid box-bordered">
+                                    <div class="box-header with-border bg-teal">
+                                        <h4 class="box-title">Short Term Policy Rate</h4>
+                                    </div>
+                                    <div class="box-body">
+                                        <table class="table table-condensed">
+                                            <thead>
+                                                <tr>
+                                                    <th>Title<?php echo field_compulsary_text( TRUE )?></th>
+                                                    <th>Duration (days)<?php echo field_compulsary_text( TRUE )?></th>
+                                                    <th>Rate (%)<?php echo field_compulsary_text( TRUE )?></th>
+                                                </tr>
+                                            </thead>
+
+                                            <?php
+                                            $__stpr_box_id = '__stpr_box_' . $portfolio_id;
+                                            $__stpr_row_id = '__stpr_row_' . $portfolio_id;
+
+                                            $spr_validation_rules_per_portfolio = $spr_validation_rules["PORT_" . $portfolio_id];
+                                            ?>
+                                            <tbody id="<?php echo $__stpr_box_id?>">
+                                                <?php $i = 0;?>
+                                                <?php foreach ($spr_validation_rules_per_portfolio as $stpr_single_row):?>
+                                                    <tr <?php echo $i == 0 ? 'id="' . $__stpr_row_id . '"' : '' ?>>
+                                                        <?php foreach($stpr_single_row as $stpr):?>
+                                                            <td>
+                                                                <div class="form-group <?php echo form_error($stpr['field']) ? 'has-error' : '';?>">
+                                                                    <input
+                                                                        title="<?php echo $stpr['label'];?>"
+                                                                        type="text"
+                                                                        name="<?php echo $stpr['field'];?>"
+                                                                        class="form-control"
+                                                                        placeholder="<?php echo $stpr['label'];?>"
+                                                                        value="<?php echo $stpr['value'];?>">
+                                                                    <?php if(form_error($stpr['field'])):?><span class="help-block"><?php echo form_error($stpr['field']); ?></span><?php endif?>
+                                                                </div>
+                                                            </td>
+                                                        <?php endforeach?>
+                                                        <?php if($i == 0):?>
+                                                            <td>&nbsp;</td>
+                                                        <?php else:?>
+                                                            <td><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'>Remove</a></td>
+                                                        <?php endif;?>
+                                                    </tr>
+                                                    <?php $i++; ?>
+                                                <?php endforeach?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="box-footer bg-info">
+                                        <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#<?php echo $__stpr_box_id?>', '#<?php echo $__stpr_row_id?>', this)">Add More</a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -125,3 +190,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     </div>
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
+
+<script type="text/javascript">
+
+    /**
+     * Duplicate Short Term Policy Rate Row
+     */
+    function __duplicate_tr(box, src, a)
+    {
+        var $box = $(box),
+            $src = $(src),
+        html = '<tr>' +
+                    $src.html() +
+                    '<td><a href="#" class="btn btn-danger btn-sm" onclick=\'$(this).closest("tr").remove()\'>Remove</a></td>'
+                '</tr>';
+        $(box).append(html);
+    }
+</script>

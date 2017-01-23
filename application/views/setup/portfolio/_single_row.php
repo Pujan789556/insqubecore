@@ -12,7 +12,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->parent_name ?? '-';?></td>
 	<td class="ins-action">
 		<a href="#"
-			data-toggle="tooltip"
 			title="Edit portfolio"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio'

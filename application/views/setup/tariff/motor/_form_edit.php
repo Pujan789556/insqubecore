@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : Department
+ * Form : Tariff - Motor
  */
 $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">' .
                          '<a href="#" onclick=\'$(this).closest(".box-body").remove()\'>Remove</a>' .

@@ -6,7 +6,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <tr data-name="<?php echo $record->fiscal_yr_id;?>" class="searchable" data-id="<?php echo $record->fiscal_yr_id; ?>" id="_data-row-<?php echo $record->fiscal_yr_id;?>">
 	<td><a href="#"
-		data-toggle="tooltip"
 		title="Edit Portfolio Settings"
 		class="trg-dialog-edit"
 		data-box-size="large"
@@ -15,7 +14,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		data-form=".form-iqb-general"><?php echo $record->code_np . " ({$record->code_en})";?></a></td>
 	<td class="ins-action">
 		<a href="#"
-			data-toggle="tooltip"
 			title="Edit Portfolio Settings"
 			data-box-size="large"
 			class="trg-dialog-edit action"
