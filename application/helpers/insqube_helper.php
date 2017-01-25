@@ -448,4 +448,30 @@ if ( ! function_exists('_COMPANY_type_dropdown'))
         return $dropdown;
     }
 }
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('__FLAG_yes_no_dropdwon'))
+{
+    /**
+     * Get YES/NO DROPDOWN
+     *
+     *
+     * @param bool $flag_blank_select   Whether to append blank select
+     * @return  bool
+     */
+    function __FLAG_yes_no_dropdwon( $flag_blank_select = true)
+    {
+        $dropdown = [
+            IQB_FLAG_YES    => 'Yes',
+            IQB_FLAG_NO		=> 'No'
+        ];
+
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
+
 // ------------------------------------------------------------------------
