@@ -3,11 +3,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Form : Portfolio Settings
  */
-
-$anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">' .
-                         '<a href="#" onclick=\'$(this).closest(".box-body").remove()\'>Remove</a>' .
-                     '</div></div>' .
-                 '</div>';
 ?>
 <?php echo form_open( $this->uri->uri_string(),
                         [
@@ -60,7 +55,8 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
                 'agent_commission'  => ['label' => 'Agent Commission(%)'],
                 'direct_discount'   => ['label' => 'Direct Discount(%)'],
                 'policy_base_no'    => ['label' => 'Policy Base Number'],
-                'stamp_duty'        => ['label' => 'Stamp Duty(Rs)']
+                'stamp_duty'        => ['label' => 'Stamp Duty(Rs)'],
+                'default_duration'  => ['label' => 'Default Duration (Days)']
             ];
 
 
@@ -81,6 +77,7 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
                             $setting_fields['direct_discount']['values'][$i] = $t->direct_discount;
                             $setting_fields['policy_base_no']['values'][$i] = $t->policy_base_no;
                             $setting_fields['stamp_duty']['values'][$i] = $t->stamp_duty;
+                            $setting_fields['default_duration']['values'][$i] = $t->default_duration;
 
                             $setting_id      = $t->id;
                             break;
@@ -167,7 +164,7 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
                                                         <?php if($i == 0):?>
                                                             <td>&nbsp;</td>
                                                         <?php else:?>
-                                                            <td><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'>Remove</a></td>
+                                                            <td width="10%" align="right"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'>Remove</a></td>
                                                         <?php endif;?>
                                                     </tr>
                                                     <?php $i++; ?>
@@ -200,10 +197,18 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
     {
         var $box = $(box),
             $src = $(src),
-        html = '<tr>' +
-                    $src.html() +
-                    '<td><a href="#" class="btn btn-danger btn-sm" onclick=\'$(this).closest("tr").remove()\'>Remove</a></td>'
-                '</tr>';
-        $(box).append(html);
+            html = $src.html(),
+            $row  = $('<tr></tr>');
+
+        $row.html(html);
+
+        // remove last blank td
+        $row.find('td:last').remove();
+
+        // Add Remover Column
+        $row.append('<td width="10%" align="right"><a href="#" class="btn btn-danger btn-sm" onclick=\'$(this).closest("tr").remove()\'>Remove</a></td>');
+
+        // Append to table body
+        $(box).append($row);
     }
 </script>

@@ -621,6 +621,7 @@ class Portfolio extends MY_Controller
 				$direct_discount 	= $this->input->post('direct_discount');
 				$policy_base_no  	= $this->input->post('policy_base_no');
 				$stamp_duty  		= $this->input->post('stamp_duty');
+				$default_duration  	= $this->input->post('default_duration');
 
 
 
@@ -636,7 +637,8 @@ class Portfolio extends MY_Controller
 							'agent_commission' 	=> $agent_commission[$i],
 							'direct_discount' 	=> $direct_discount[$i],
 							'policy_base_no' 	=> $policy_base_no[$i],
-							'stamp_duty' 		=> $stamp_duty[$i]
+							'stamp_duty' 		=> $stamp_duty[$i],
+							'default_duration' 	=> $default_duration[$i]
 						];
 
 						// Short Term Policy Rate

@@ -18,7 +18,7 @@ class Portfolio_setting_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "fiscal_yr_id", "portfolio_id", "agent_commission", "direct_discount", "policy_base_no", "stamp_duty", "short_term_policy_rate", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "fiscal_yr_id", "portfolio_id", "agent_commission", "direct_discount", "policy_base_no", "stamp_duty", "default_duration", "short_term_policy_rate", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -61,6 +61,14 @@ class Portfolio_setting_model extends MY_Model
             'field' => 'stamp_duty[]',
             'label' => 'Stamp Duty(Rs)',
             'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+            '_type'     => 'text',
+            '_required' => true
+        ],
+        [
+            'field' => 'default_duration[]',
+            'label' => 'Default Duration (Days)',
+            'rules' => 'trim|required|integer|max_length[3]',
+            '_default'  => 365,
             '_type'     => 'text',
             '_required' => true
         ],
@@ -127,7 +135,7 @@ class Portfolio_setting_model extends MY_Model
 
     public function get_list_by_fiscal_year($fiscal_yr_id)
     {
-        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, PS.stamp_duty, PS.short_term_policy_rate, P.name_en as portfolio_name')
+        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, PS.stamp_duty, PS.short_term_policy_rate, PS.default_duration, P.name_en as portfolio_name')
                         ->from($this->table_name . ' PS')
                         ->join('master_portfolio P', 'P.id = PS.portfolio_id')
                         ->where('PS.fiscal_yr_id', $fiscal_yr_id)
@@ -145,7 +153,7 @@ class Portfolio_setting_model extends MY_Model
         $row = $this->get_cache($cache_name);
         if(!$row)
         {
-            $row = $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, PS.stamp_duty, PS.short_term_policy_rate, P.name_en as portfolio_name')
+            $row = $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, PS.stamp_duty, PS.short_term_policy_rate, PS.default_duration, P.name_en as portfolio_name')
                         ->from($this->table_name . ' PS')
                         ->join('master_portfolio P', 'P.id = PS.portfolio_id')
                         ->where('PS.fiscal_yr_id', $fiscal_yr_id)
