@@ -730,7 +730,7 @@ class Policies extends MY_Controller
 		 */
 		private function __reset_premium_on_policy_update($before_update, $after_update)
 		{
-			$fields = ['portfolio_id', 'policy_package', 'customer_id', 'object_id', 'flag_dc'];
+			$fields = ['portfolio_id', 'policy_package', 'customer_id', 'object_id', 'flag_dc', 'start_date', 'end_date'];
 			$__flag_reset = FALSE;
 			foreach($fields as $column)
 			{
@@ -777,18 +777,28 @@ class Policies extends MY_Controller
 		/**
 	     * Callback : Valid Duration
 	     *
-	     * Check Start Date < End Date
+	     * (End Date - Start Days) should not exceed the Portfolio's
+	     * Default Duration
 	     *
-	     * @param string $str
+	     * @param date $end_date
 	     * @return bool
 	     */
-	    public function _cb_valid_policy_duration($str)
+	    public function _cb_valid_policy_duration($end_date)
 	    {
-	    	$duration_list = get_policy_duration_list();
+	    	$start_date = $this->input->post('start_date');
+	    	$portfolio_id = (int)$this->input->post('portfolio_id');
 
-	    	if( !array_key_exists($str, $duration_list) )
+	    	$info = _POLICY__get_short_term_info( $portfolio_id, $start_date, $end_date );
+
+		    $start_timestamp    = strtotime($start_date);
+	        $end_timestamp      = strtotime($end_date);
+	        $difference         = $end_timestamp - $start_timestamp;
+	        $days               = floor($difference / (60 * 60 * 24));
+	        $default_duration 	= $info['default_duration'];
+
+	    	if( $days > $default_duration )
 	    	{
-	    		$this->form_validation->set_message('_cb_valid_policy_duration', 'Please select a valid duration.');
+	    		$this->form_validation->set_message('_cb_valid_policy_duration', "End date should not be higher than portfolio's default duration ({$default_duration} days)");
 	            return FALSE;
 	    	}
 	        return TRUE;

@@ -14,12 +14,12 @@ class Policy_model extends MY_Model
     protected $protected_attributes = ['id'];
 
     protected $before_insert = ['before_insert__defaults'];
-    protected $before_update = [];
+    protected $before_update = ['before_update__defaults'];
     protected $after_insert  = ['after_insert__defaults', 'clear_cache'];
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_no", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issue_date", "start_date", "duration", "end_date", "flag_dc", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_no", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issue_date", "start_date", "duration", "end_date", "flag_dc", "flag_short_term", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -296,14 +296,14 @@ class Policy_model extends MY_Model
                         '_required' => true
                     ],
                     [
-                        'field' => 'duration',
-                        'label' => 'Policy Duration',
-                        'rules' => 'trim|required|callback__cb_valid_policy_duration',
-                        '_type'     => 'dropdown',
-                        '_data'     => IQB_BLANK_SELECT + get_policy_duration_list(),
-                        '_default'  => '+1 year',
+                        'field' => 'end_date',
+                        'label' => 'Policy End Date',
+                        'rules' => 'trim|required|valid_date|callback__cb_valid_policy_duration',
+                        '_type'             => 'date',
+                        '_default'          => date('Y-m-d', strtotime( '+1 year', strtotime( date('Y-m-d') ) ) ),
+                        '_extra_attributes' => 'data-provide="datepicker-inline"',
                         '_required' => true
-                    ],
+                    ]
                 ],
 
                 /**
@@ -552,9 +552,10 @@ class Policy_model extends MY_Model
      *      1. Generate Random Policy Number & add
      *      2. Add Draft Code
      *      3. Add Branch ID
-     *      4. Add End Date
+     *      4. Add Short Term Flag
      *      5. Add Status = Draft
      *      6. Add Fiscal Year
+     *      7. Policy Duration
      *
      * @param array $data
      * @return array
@@ -564,6 +565,7 @@ class Policy_model extends MY_Model
         $this->load->library('Token');
         $this->load->model('portfolio_model');
         $this->load->model('fiscal_year_model');
+        $this->load->model('portfolio_setting_model');
 
         $portfolio_id   = $data['portfolio_id'];
         $portfolio_code = $this->portfolio_model->get_code($portfolio_id);
@@ -583,12 +585,17 @@ class Policy_model extends MY_Model
         $data['policy_no']      = $policy_no;
 
 
-
         // Branch ID
         $data['branch_id']      = $this->dx_auth->get_branch_id();
 
-        // End Date
-        $data['end_date']  = date('Y-m-d', strtotime( $data['duration'], strtotime($data['start_date']) ) );
+
+        /**
+         * Short Term Flag???
+         * ------------------
+         * Find if this start-end date gives a default duration or short term duration
+         */
+        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $data['start_date'], $data['end_date'] );
+
 
         // Status
         $data['status'] = IQB_POLICY_STATUS_DRAFT;
@@ -599,6 +606,26 @@ class Policy_model extends MY_Model
         return $data;
     }
 
+
+    /**
+     * Before Update Trigger
+     *
+     * Tasks carried
+     *      1. Short Term Flag
+     *
+     * @param array $data
+     * @return array
+     */
+    public function before_update__defaults($data)
+    {
+        /**
+         * Short Term Flag???
+         * ------------------
+         * Find if this start-end date gives a default duration or short term duration
+         */
+        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $data['start_date'], $data['end_date'] );
+        return $data;
+    }
 
     // --------------------------------------------------------------------
 

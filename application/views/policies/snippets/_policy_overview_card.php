@@ -85,6 +85,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <td><?php echo $record->end_date?></td>
                 </tr>
                 <tr>
+                    <td class="text-bold">is Short Term?</td>
+                    <td><?php echo _FLAG_yes_no_dropdwon(FALSE)[$record->flag_short_term]?></td>
+                </tr>
+                <tr>
                     <td class="text-bold">Sales Staff</td>
                     <td><?php echo $record->sales_staff_username;?></td>
                 </tr>

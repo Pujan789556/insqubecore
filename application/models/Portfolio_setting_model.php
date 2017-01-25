@@ -130,8 +130,8 @@ class Portfolio_setting_model extends MY_Model
             'flag_short_term'   => [
                 'field' => 'flag_short_term[]',
                 'label' => 'Has short term Policy?',
-                'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(__FLAG_yes_no_dropdwon(FALSE))).']',
-                '_data' => __FLAG_yes_no_dropdwon(),
+                'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdwon(FALSE))).']',
+                '_data' => _FLAG_yes_no_dropdwon(),
                 '_type'     => 'dropdown',
                 '_required' => true
             ]
@@ -143,6 +143,14 @@ class Portfolio_setting_model extends MY_Model
     {
         // Remember Fiscal year should be first validation rule
         return [$this->validation_rules[0]];
+    }
+
+    // ----------------------------------------------------------------
+
+    public function get_portfolio_short_term_flag_by_fiscal_year($fiscal_yr_id, $portfolio_id)
+    {
+        $record = $this->get_by_fiscal_yr_portfolio($fiscal_yr_id, $portfolio_id);
+        return $record->flag_short_term;
     }
 
     // ----------------------------------------------------------------
@@ -230,7 +238,6 @@ class Portfolio_setting_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'branch_targets_all',
             'pfs_row_list',
             'pfs_*'
         ];

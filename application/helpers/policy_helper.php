@@ -15,24 +15,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('get_policy_duration_list'))
-{
-	/**
-	 * Get Policy Duration List
-	 *
-	 * Returns the array of duration list from policy configuration
-	 *
-	 * @return	bool
-	 */
-	function get_policy_duration_list( )
-	{
-		$CI =& get_instance();
-		return $CI->config->item('PC_policy_duration_list');
-	}
-}
-
-// ------------------------------------------------------------------------
-
 if ( ! function_exists('get_policy_status_dropdown'))
 {
 	/**
@@ -332,6 +314,172 @@ if ( ! function_exists('_PREMIUM_OVERVIEW_CARD_partial_view_by_portfolio'))
 		return $partial_view;
 	}
 }
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__get_short_term_flag'))
+{
+    /**
+     * Get Short Term Policy Flag
+     *
+     * @param integer $portfolio_id Portfolio ID
+     * @param date  $start_date Policy Start Date
+     * @param date $end_date    Policy End Date
+     * @return  char
+     */
+    function _POLICY__get_short_term_flag( $portfolio_id, $start_date, $end_date )
+    {
+        $info = _POLICY__get_short_term_info( $portfolio_id, $start_date, $end_date );
+        return $info['flag'];
+    }
+}
+
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__is_short_term'))
+{
+    /**
+     * Is Policy Short Term?
+     *
+     * @param integer $portfolio_id Portfolio ID
+     * @param date  $start_date Policy Start Date
+     * @param date $end_date    Policy End Date
+     * @return  bool
+     */
+    function _POLICY__is_short_term( $portfolio_id, $start_date, $end_date )
+    {
+        $info = _POLICY__get_short_term_info( $portfolio_id, $start_date, $end_date );
+        return $info['flag'] === IQB_FLAG_NO;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__get_short_term_info'))
+{
+    /**
+     * Get Short Term Policy Info
+     *
+     * @param integer $portfolio_id Portfolio ID
+     * @param date  $start_date Policy Start Date
+     * @param date $end_date    Policy End Date
+     * @return  array
+     */
+    function _POLICY__get_short_term_info( $portfolio_id, $start_date, $end_date )
+    {
+        $CI =& get_instance();
+        $CI->load->model('fiscal_year_model');
+        $CI->load->model('portfolio_setting_model');
+
+        $false_return = [
+            'flag'      => IQB_FLAG_NO,
+            'record'    => NULL
+        ];
+
+        /**
+         * Current Fiscal Year Record & Portfolio Settings for This Fiscal Year
+         */
+        $fy_record  = $CI->fiscal_year_model->get_current_fiscal_year();
+        $pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($fy_record->id, $portfolio_id);
+
+        // update false return with default duration
+        $false_return['default_duration'] = (int)$pfs_record->default_duration;
+
+        if($pfs_record->flag_short_term === IQB_FLAG_NO )
+        {
+            return $false_return;
+        }
+
+
+        /**
+         * Let's find if the policy duration falls under Short Term Duration List
+         *
+         * Calculate the Number of Days between given two dates
+         */
+        $start_timestamp    = strtotime($start_date);
+        $end_timestamp      = strtotime($end_date);
+        $difference         = $end_timestamp - $start_timestamp;
+        $days               = floor($difference / (60 * 60 * 24));
+        $default_duration 	= (int)$pfs_record->default_duration;
+
+        /**
+         * Supplied Duration === Default Duration?
+         */
+        if($days == $default_duration)
+        {
+        	return $false_return;
+        }
+
+
+        $short_term_policy_rate = $pfs_record->short_term_policy_rate ? json_decode($pfs_record->short_term_policy_rate) : [];
+
+        // Build The Duration List
+        $duration_list = [$default_duration];
+        foreach($short_term_policy_rate as $spr)
+        {
+            $duration_list[] = (int)$spr->duration;
+        }
+        sort($duration_list);
+        $duration_list = array_values(array_unique($duration_list));
+
+        // Index
+        $index_days       = array_search($days, $duration_list);
+        $index_default    = array_search($default_duration, $duration_list);
+
+        $element_count = count($duration_list);
+
+        // If days is exactly found in duration list, bang...
+        $flag_short_term = FALSE;
+        $found          = FALSE;
+        $found_index    = 0;
+        if($index_days !== FALSE)
+        {
+            // We found the key
+            // Last key? then its not short term policy
+            $flag_short_term    = $index_days !== $index_default;
+            $found_index        = $index_days;
+        }
+        else
+        {
+            // Let's loop through to find where it falls
+            foreach ($duration_list as $key => $value)
+            {
+                if( !$found && $days < $value )
+                {
+                    $found = TRUE;
+                    $found_index = $key;
+                }
+            }
+            // Let's check if we have found
+            $flag_short_term = $found_index !== $index_default;
+        }
+
+        // is Short TERM?
+        if( !$flag_short_term )
+        {
+            return $false_return;
+        }
+
+        // Now Let's Get the Short Term Duration Record
+        $spr_record = NULL;
+        foreach($short_term_policy_rate as $spr)
+        {
+            $spr_duration = (int)$spr->duration;
+            if($spr_duration === $duration_list[$found_index] )
+            {
+                $spr_record = $spr;
+            }
+        }
+
+        return [
+            'flag'      		=> IQB_FLAG_YES,
+            'record'    		=> $spr_record,
+            'default_duration' 	=> $default_duration
+        ];
+    }
+}
+
 // ------------------------------------------------------------------------
 
 

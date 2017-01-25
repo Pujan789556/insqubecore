@@ -450,7 +450,7 @@ if ( ! function_exists('_COMPANY_type_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('__FLAG_yes_no_dropdwon'))
+if ( ! function_exists('_FLAG_yes_no_dropdwon'))
 {
     /**
      * Get YES/NO DROPDOWN
@@ -459,7 +459,7 @@ if ( ! function_exists('__FLAG_yes_no_dropdwon'))
      * @param bool $flag_blank_select   Whether to append blank select
      * @return  bool
      */
-    function __FLAG_yes_no_dropdwon( $flag_blank_select = true)
+    function _FLAG_yes_no_dropdwon( $flag_blank_select = true)
     {
         $dropdown = [
             IQB_FLAG_YES    => 'Yes',

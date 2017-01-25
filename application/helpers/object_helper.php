@@ -270,7 +270,7 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        'rules' => 'trim|integer|in_list[1]',
 			        '_id' 		=> '_motor-vehicle-df',
 			        '_type'     => 'checkbox',
-			        '_value' 	=> '1',
+			        '_checkbox_value' 	=> '1',
 			        '_required' => false
 			    ],
 
@@ -329,7 +329,7 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        'rules' => 'trim|integer|in_list[1]',
 			        '_id' 		=> '_motor-vehicle-to-be-intimated',
 			        '_type'     => 'checkbox',
-			        '_value' 	=> '1',
+			        '_checkbox_value' 	=> '1',
 			        '_required' => false,
 			        '_help_text' => 'Click here if the vehicle is not registered yet.'
 			    ],

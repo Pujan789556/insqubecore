@@ -59,7 +59,7 @@ class Setting_model extends MY_Model
                 'label' => 'Set Offline',
                 'rules' => 'trim|integer|in_list[1]',
                 '_type' => 'switch',
-                '_value' => '1'
+                '_checkbox_value' => '1'
             ],
             [
                 'field' => 'offline_message',

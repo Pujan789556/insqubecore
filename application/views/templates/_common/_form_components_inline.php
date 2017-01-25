@@ -53,7 +53,7 @@ foreach($form_elements as $element):?>
 
 
         $value = '';
-        // if(set_value($element['field']))
+
         if($this->input->post())
         {
             $value = set_value($element['field'], '', FALSE);
@@ -76,6 +76,13 @@ foreach($form_elements as $element):?>
             // Let's check if we have default value
             $value = $element['_default'] ?? '';
         }
+
+        // Do we have _value field?
+        if( $value  == '' )
+        {
+            $value = $element['_value'] ?? '';
+        }
+
 
         switch($element['_type'])
         {
@@ -111,9 +118,9 @@ foreach($form_elements as $element):?>
                 $element_config['class'] = 'icheck'; // Add icheck style
                 // unset placeholder
                 unset($element_config['placeholder']);
-                $checked = $element['_value'] == $value;
+                $checked = $element['_checkbox_value'] == $value;
                 echo '<label>';
-                    echo form_checkbox($element_config, $element['_value'], $checked, $extra_attributes);
+                    echo form_checkbox($element_config, $element['_checkbox_value'], $checked, $extra_attributes);
                     echo $element['label'];
                 echo '</label>';
                 break;
@@ -141,8 +148,8 @@ foreach($form_elements as $element):?>
                 $element_config['switch-type'] = 'switch-primary';
                 // unset placeholder
                 unset($element_config['placeholder']);
-                $checked = $element['_value'] == $value;
-                echo form_switch($element_config, $element['_value'], $checked, $extra_attributes);
+                $checked = $element['_checkbox_value'] == $value;
+                echo form_switch($element_config, $element['_checkbox_value'], $checked, $extra_attributes);
                 break;
         }
         ?>

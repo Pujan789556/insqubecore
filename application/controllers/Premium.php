@@ -544,7 +544,7 @@ class Premium extends MY_Controller
                     'rules' => 'trim|integer|in_list[1]',
                     '_key' 		=> 'flag_risk_mob',
                     '_type'     => 'checkbox',
-                    '_value' 	=> '1',
+                    '_checkbox_value' 	=> '1',
                     '_required' => false
                 ],
                 [
@@ -553,7 +553,7 @@ class Premium extends MY_Controller
                     'rules' => 'trim|integer|in_list[1]',
                     '_key' 		=> 'flag_risk_terorrism',
                     '_type'     => 'checkbox',
-                    '_value' 	=> '1',
+                    '_checkbox_value' 	=> '1',
                     '_required' => false
                 ]
 			];
@@ -574,7 +574,7 @@ class Premium extends MY_Controller
 		                    'rules' => 'trim|integer|in_list[1]',
 		                    '_key' 		=> 'flag_commercial_use',
 		                    '_type'     => 'checkbox',
-		                    '_value' 	=> '1',
+		                    '_checkbox_value' 	=> '1',
 		                    '_required' => false
 		                ],
 
@@ -585,7 +585,7 @@ class Premium extends MY_Controller
 		                    'rules' => 'trim|integer|in_list[1]',
 		                    '_key' 		=> 'flag_towing',
 		                    '_type'     => 'checkbox',
-		                    '_value' 	=> '1',
+		                    '_checkbox_value' 	=> '1',
 		                    '_required' => false
 		                ]
 					];
@@ -602,7 +602,7 @@ class Premium extends MY_Controller
 		                    'rules' => 'trim|integer|in_list[1]',
 		                    '_key' 		=> 'flag_private_use',
 		                    '_type'     => 'checkbox',
-		                    '_value' 	=> '1',
+		                    '_checkbox_value' 	=> '1',
 		                    '_required' => false,
 		                    '_help_text' => '<small>* कार्यालय, पर्यटन र निजी प्रयोजनमा मात्र प्रयोग हुने सवारी साधनको तथा एम्बुलेन्स र शववाहनको ब्यापक बीमा गर्दा शरुु बीमाशुल्कको २५ प्रतिशत छुटहुनेछ ।<br/>** निजी प्रयोेजनको लागि प्रयोग गर्ने सवारी साधन तथा दमकलको ब्यापक बीमा गर्दा शुरु बीमाशुल्कको २५ प्रतिशत छुटहुनेछ ।</small>'
 		                ],
@@ -614,7 +614,7 @@ class Premium extends MY_Controller
 		                    'rules' => 'trim|integer|in_list[1]',
 		                    '_key' 		=> 'flag_towing',
 		                    '_type'     => 'checkbox',
-		                    '_value' 	=> '1',
+		                    '_checkbox_value' 	=> '1',
 		                    '_required' => false
 		                ]
 					];
