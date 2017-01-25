@@ -54,6 +54,7 @@ foreach($form_elements as $element):?>
 
 
             $value = '';
+
             if($this->input->post())
             {
                 $value = set_value($element['field'], '', FALSE);
@@ -75,6 +76,12 @@ foreach($form_elements as $element):?>
             {
                 // Let's check if we have default value
                 $value = $element['_default'] ?? '';
+            }
+
+            // Do we have _value field?
+            if( $value  == '' )
+            {
+                $value = $element['_value'] ?? '';
             }
 
 
