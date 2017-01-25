@@ -22,9 +22,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         if($action === 'add')
         {
-            $fiscal_years = array($form_elements[0]);
             $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements' => $fiscal_years,
+                'form_elements' => $form_elements,
                 'form_record'   => $record,
                 'grid_form_control' => 'col-sm-10 col-md-4'
             ]);
@@ -50,34 +49,35 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <div class="box-body">
         <div class="row">
             <?php
-            $i = 0;
+            $portfolio_repeat_count = 0;
             $setting_fields = [
                 'agent_commission'  => ['label' => 'Agent Commission(%)'],
                 'direct_discount'   => ['label' => 'Direct Discount(%)'],
                 'policy_base_no'    => ['label' => 'Policy Base Number'],
                 'stamp_duty'        => ['label' => 'Stamp Duty(Rs)'],
-                'default_duration'  => ['label' => 'Default Duration (Days)']
+                'default_duration'  => ['label' => 'Default Duration (Days)'],
             ];
 
-
+            $setting_fields = $sectioned_elements;
 
             foreach($portfolios as $portfolio_id=>$portfolio_name):
 
-                // Short Term Policy Rate Fields
-                $short_term_policy_rate_form_data = [];
 
                 $setting_id = '';
+                $repeat_record = [];
                 if($action === 'edit')
                 {
                     foreach($settings as $t)
                     {
                         if( $t->portfolio_id == $portfolio_id)
                         {
-                            $setting_fields['agent_commission']['values'][$i] = $t->agent_commission;
-                            $setting_fields['direct_discount']['values'][$i] = $t->direct_discount;
-                            $setting_fields['policy_base_no']['values'][$i] = $t->policy_base_no;
-                            $setting_fields['stamp_duty']['values'][$i] = $t->stamp_duty;
-                            $setting_fields['default_duration']['values'][$i] = $t->default_duration;
+                            // $repeat_record[] = $t;
+                            $setting_fields['agent_commission']['values'][$portfolio_repeat_count]   = $t->agent_commission;
+                            $setting_fields['direct_discount']['values'][$portfolio_repeat_count]    = $t->direct_discount;
+                            $setting_fields['policy_base_no']['values'][$portfolio_repeat_count]     = $t->policy_base_no;
+                            $setting_fields['stamp_duty']['values'][$portfolio_repeat_count]         = $t->stamp_duty;
+                            $setting_fields['default_duration']['values'][$portfolio_repeat_count]   = $t->default_duration;
+                            $setting_fields['flag_short_term']['values'][$portfolio_repeat_count]    = $t->flag_short_term;
 
                             $setting_id      = $t->id;
                             break;
@@ -92,35 +92,34 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                     <div class="box box-solid box-bordered">
                         <div class="box-header bg-gray-light"><h3 class="box-title"><?php echo ucwords($portfolio_name)?></h3></div>
-                        <div class="box-body">
+                        <div class="box-body form-horizontal">
 
-                            <?php foreach($setting_fields as $field_name => $details):?>
-
-                                <?php
-                                $label = $details['label'];
-                                $values = $details['values'] ?? [];
+                            <?php
+                            foreach($setting_fields as $field_name => $details)
+                            {
+                                // Get the Value
                                 $input_name = "{$field_name}[]";
-                                $input_value = $values["{$i}"] ?? '';
+                                $values = $details['values'] ?? [];
+                                $input_value = $values["{$portfolio_repeat_count}"] ?? '';
 
                                 // From Form Submission
-                                if( set_value("{$field_name}[$i]") )
+                                if( set_value("{$field_name}[$portfolio_repeat_count]") )
                                 {
-                                    $input_value = set_value("{$field_name}[$i]");
+                                    $input_value = set_value("{$field_name}[$portfolio_repeat_count]");
                                 }
+                                $details['_default']    = $input_value;
+                                $details['_value']      = $input_value;
 
-                                ?>
-                                <div class="form-group <?php echo form_error("{$input_name}") ? 'has-error' : '';?>">
-                                    <label><?php echo $label . field_compulsary_text( TRUE )?></label>
-                                    <input
-                                        title="<?php echo $label;?>"
-                                        type="text"
-                                        name="<?php echo $input_name;?>"
-                                        class="form-control"
-                                        placeholder="<?php echo $label;?>"
-                                        value="<?php echo $input_value;?>">
-                                    <?php if(form_error("{$input_name}")):?><span class="help-block"><?php echo form_error("{$input_name}"); ?></span><?php endif?>
-                                </div>
-                            <?php endforeach?>
+                                $this->load->view('templates/_common/_form_components_horz', [
+                                    'form_elements' => [$details],
+                                    'form_record'   => NULL,
+                                    'grid_label'    => 'col-sm-3',
+                                    'grid_form_control' => 'col-sm-9'
+                                ]);
+                            }
+                            ?>
+                        </div>
+                        <div class="box-body">
                             <hr/>
                             <div class="form-inline">
                                 <div class="box box-solid box-bordered">
@@ -181,7 +180,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </div>
                 </div>
             <?php
-                $i++;
+                $portfolio_repeat_count++;
             endforeach?>
         </div>
     </div>

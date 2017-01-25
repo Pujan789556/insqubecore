@@ -18,68 +18,9 @@ class Portfolio_setting_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "fiscal_yr_id", "portfolio_id", "agent_commission", "direct_discount", "policy_base_no", "stamp_duty", "default_duration", "short_term_policy_rate", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "fiscal_yr_id", "portfolio_id", "agent_commission", "direct_discount", "policy_base_no", "stamp_duty", "default_duration", "flag_short_term", "short_term_policy_rate", "created_at", "created_by", "updated_at", "updated_by"];
 
-    protected $validation_rules = [
-        [
-            'field' => 'fiscal_yr_id',
-            'label' => 'Fiscal Year',
-            'rules' => 'trim|required|integer|max_length[3]|callback__cb_settings_check_duplicate',
-            '_type'     => 'dropdown',
-            '_default'  => '',
-            '_required' => true
-        ],
-        [
-            'field' => 'portfolio_id[]',
-            'label' => 'Portfolio',
-            'rules' => 'trim|required|integer|max_length[11]',
-            '_type'     => 'text',
-            '_required' => true
-        ],
-        [
-            'field' => 'agent_commission[]',
-            'label' => 'Agent Commission(%)',
-            'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-            '_type'     => 'text',
-            '_required' => true
-        ],
-        [
-            'field' => 'direct_discount[]',
-            'label' => 'Direct Discount(%)',
-            'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-            '_type'     => 'text',
-            '_required' => true
-        ],
-        [
-            'field' => 'policy_base_no[]',
-            'label' => 'Policy Base Number',
-            'rules' => 'trim|required|integer|max_length[11]',
-            '_type'     => 'text',
-            '_required' => true
-        ],
-        [
-            'field' => 'stamp_duty[]',
-            'label' => 'Stamp Duty(Rs)',
-            'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
-            '_type'     => 'text',
-            '_required' => true
-        ],
-        [
-            'field' => 'default_duration[]',
-            'label' => 'Default Duration (Days)',
-            'rules' => 'trim|required|integer|max_length[3]',
-            '_default'  => 365,
-            '_type'     => 'text',
-            '_required' => true
-        ],
-        [
-            'field' => 'setting_ids[]',
-            'label' => 'Settings',
-            'rules' => 'trim|integer|max_length[11]',
-            '_type'     => 'hidden',
-            '_required' => true
-        ]
-    ];
+    protected $validation_rules = [];
 
 
     /**
@@ -98,6 +39,110 @@ class Portfolio_setting_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+
+        $this->validation_rules();
+    }
+
+    // ----------------------------------------------------------------
+
+    // Validation Rules
+    public function validation_rules()
+    {
+        $this->validation_rules = [
+            [
+                'field' => 'fiscal_yr_id',
+                'label' => 'Fiscal Year',
+                'rules' => 'trim|required|integer|max_length[3]|callback__cb_settings_check_duplicate',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown(),
+                '_required' => true
+            ],
+            [
+                'field' => 'portfolio_id[]',
+                'label' => 'Portfolio',
+                'rules' => 'trim|required|integer|max_length[11]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            [
+                'field' => 'setting_ids[]',
+                'label' => 'Settings',
+                'rules' => 'trim|integer|max_length[11]',
+                '_type'     => 'hidden',
+                '_required' => true
+            ]
+        ];
+
+        /**
+         * Merge Sectioned Validation Rules
+         */
+        $sectioned_validation_rules = $this->sectioned_validation_rules();
+        $v_rules = [];
+        // Merge All Sections and return
+        foreach($sectioned_validation_rules as $section=>$rule)
+        {
+            $v_rules = array_merge($v_rules, [$rule]);
+        }
+
+        $this->validation_rules = array_merge($this->validation_rules, $v_rules);
+    }
+
+    // Sectioned Validation Rules Required on Form
+    public function sectioned_validation_rules()
+    {
+        return  [
+            'agent_commission'  => [
+                'field' => 'agent_commission[]',
+                'label' => 'Agent Commission(%)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            'direct_discount'   => [
+                'field' => 'direct_discount[]',
+                'label' => 'Direct Discount(%)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            'policy_base_no'    => [
+                'field' => 'policy_base_no[]',
+                'label' => 'Policy Base Number',
+                'rules' => 'trim|required|integer|max_length[11]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            'stamp_duty'        => [
+                'field' => 'stamp_duty[]',
+                'label' => 'Stamp Duty(Rs)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            'default_duration'  => [
+                'field' => 'default_duration[]',
+                'label' => 'Default Duration (Days)',
+                'rules' => 'trim|required|integer|max_length[3]',
+                '_default'  => 365,
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            'flag_short_term'   => [
+                'field' => 'flag_short_term[]',
+                'label' => 'Has short term Policy?',
+                'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(__FLAG_yes_no_dropdwon(FALSE))).']',
+                '_data' => __FLAG_yes_no_dropdwon(),
+                '_type'     => 'dropdown',
+                '_required' => true
+            ]
+        ];
+    }
+
+    // Fiscal year validation rules
+    public function fy_validation_rules()
+    {
+        // Remember Fiscal year should be first validation rule
+        return [$this->validation_rules[0]];
     }
 
     // ----------------------------------------------------------------
@@ -135,7 +180,7 @@ class Portfolio_setting_model extends MY_Model
 
     public function get_list_by_fiscal_year($fiscal_yr_id)
     {
-        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, PS.stamp_duty, PS.short_term_policy_rate, PS.default_duration, P.name_en as portfolio_name')
+        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, PS.stamp_duty, PS.flag_short_term, PS.short_term_policy_rate, PS.default_duration, P.name_en as portfolio_name')
                         ->from($this->table_name . ' PS')
                         ->join('master_portfolio P', 'P.id = PS.portfolio_id')
                         ->where('PS.fiscal_yr_id', $fiscal_yr_id)
@@ -153,7 +198,7 @@ class Portfolio_setting_model extends MY_Model
         $row = $this->get_cache($cache_name);
         if(!$row)
         {
-            $row = $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, PS.stamp_duty, PS.short_term_policy_rate, PS.default_duration, P.name_en as portfolio_name')
+            $row = $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.policy_base_no, PS.stamp_duty, PS.flag_short_term, PS.short_term_policy_rate, PS.default_duration, P.name_en as portfolio_name')
                         ->from($this->table_name . ' PS')
                         ->join('master_portfolio P', 'P.id = PS.portfolio_id')
                         ->where('PS.fiscal_yr_id', $fiscal_yr_id)

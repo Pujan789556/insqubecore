@@ -395,10 +395,6 @@ class Portfolio extends MY_Controller
 
 
 		// No form Submitted?
-		$rules = $this->portfolio_setting_model->validation_rules;
-		$rules[0]['_data'] = IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown();
-
-
 		$portfolios = $this->portfolio_model->dropdown_parent();
 
 		// Short term policy rate Validation Rules
@@ -406,8 +402,9 @@ class Portfolio extends MY_Controller
 
 		$json_data['form'] = $this->load->view('setup/portfolio/_form_settings',
 			[
-				'form_elements' 		=> $rules,
-				'spr_validation_rules' 	=> $spr_validation_rules,
+				'form_elements' 			=> $this->portfolio_setting_model->fy_validation_rules(),
+				'sectioned_elements' 		=> $this->portfolio_setting_model->sectioned_validation_rules(),
+				'spr_validation_rules' 		=> $spr_validation_rules,
 				'portfolios' 			=> $portfolios,
 				'action' 				=> 'add',
 				'record' 				=> $record
@@ -442,26 +439,30 @@ class Portfolio extends MY_Controller
 				{
 					$counter_spr = 0;
                     $stpr_post_data = $this->input->post("stpr[PORT_{$portfolio_id}]");
-					foreach($settings as $t)
-	                {
-	                	if( $t->portfolio_id == $portfolio_id)
-	                    {
-                    		// Format: [{"title":"One Week", "duration": 7, "rate": 10.00}]
-                            $short_term_policy_rate_list = $t->short_term_policy_rate ? json_decode($t->short_term_policy_rate) : [];
-                            foreach($short_term_policy_rate_list as $spr)
-                            {
-                            	$spr_data = [
-                            		'title' 	=> $stpr_post_data['title'][$counter_spr] ?? $spr->title,
-                            		'duration' 	=> $stpr_post_data['duration'][$counter_spr] ?? $spr->duration,
-                            		'rate' 		=> $stpr_post_data['rate'][$counter_spr] ?? $spr->rate
-                            	];
+                    if($settings)
+                    {
+                    	foreach($settings as $t)
+		                {
+		                	if( $t->portfolio_id == $portfolio_id)
+		                    {
+	                    		// Format: [{"title":"One Week", "duration": 7, "rate": 10.00}]
+	                            $short_term_policy_rate_list = $t->short_term_policy_rate ? json_decode($t->short_term_policy_rate) : [];
+	                            foreach($short_term_policy_rate_list as $spr)
+	                            {
+	                            	$spr_data = [
+	                            		'title' 	=> $stpr_post_data['title'][$counter_spr] ?? $spr->title,
+	                            		'duration' 	=> $stpr_post_data['duration'][$counter_spr] ?? $spr->duration,
+	                            		'rate' 		=> $stpr_post_data['rate'][$counter_spr] ?? $spr->rate
+	                            	];
 
-                            	$spr_validation_rules["PORT_{$portfolio_id}"][] = $this->__settings_stpr_validation_rule_single($portfolio_id, $spr_data);
+	                            	$spr_validation_rules["PORT_{$portfolio_id}"][] = $this->__settings_stpr_validation_rule_single($portfolio_id, $spr_data);
 
-                                $counter_spr++;
-                            }
-	                    }
-	                }
+	                                $counter_spr++;
+	                            }
+		                    }
+		                }
+                    }
+
 
 	                // Let's check if we have still more element per portfolio - On post request
 	                // Or Post on Add
@@ -558,8 +559,9 @@ class Portfolio extends MY_Controller
 
 		$json_data['form'] = $this->load->view('setup/portfolio/_form_settings',
 			[
-				'form_elements' 	=> $rules,
-				'spr_validation_rules' => $spr_validation_rules,
+				'form_elements' 			=> $this->portfolio_setting_model->fy_validation_rules(),
+				'sectioned_elements' 		=> $this->portfolio_setting_model->sectioned_validation_rules(),
+				'spr_validation_rules' 		=> $spr_validation_rules,
 				'action' 			=> 'edit',
 				'portfolios' 		=> $portfolios,
 				'settings' 			=> $settings,
@@ -622,6 +624,7 @@ class Portfolio extends MY_Controller
 				$policy_base_no  	= $this->input->post('policy_base_no');
 				$stamp_duty  		= $this->input->post('stamp_duty');
 				$default_duration  	= $this->input->post('default_duration');
+				$flag_short_term  	= $this->input->post('flag_short_term');
 
 
 
@@ -638,7 +641,8 @@ class Portfolio extends MY_Controller
 							'direct_discount' 	=> $direct_discount[$i],
 							'policy_base_no' 	=> $policy_base_no[$i],
 							'stamp_duty' 		=> $stamp_duty[$i],
-							'default_duration' 	=> $default_duration[$i]
+							'default_duration' 	=> $default_duration[$i],
+							'flag_short_term' 	=> $flag_short_term[$i]
 						];
 
 						// Short Term Policy Rate
@@ -676,7 +680,9 @@ class Portfolio extends MY_Controller
 							'agent_commission' 	=> $agent_commission[$i],
 							'direct_discount' 	=> $direct_discount[$i],
 							'policy_base_no' 	=> $policy_base_no[$i],
-							'stamp_duty' 		=> $stamp_duty[$i]
+							'stamp_duty' 		=> $stamp_duty[$i],
+							'default_duration' 	=> $default_duration[$i],
+							'flag_short_term' 	=> $flag_short_term[$i]
 						];
 						$setting_id = $setting_ids[$i];
 
@@ -764,7 +770,8 @@ class Portfolio extends MY_Controller
 				'form' 	  		=> $status === 'error'
 									? 	$this->load->view('setup/portfolio/_form_settings',
 											[
-												'form_elements' => $rules,
+												'form_elements' 			=> $this->portfolio_setting_model->fy_validation_rules(),
+												'sectioned_elements' 		=> $this->portfolio_setting_model->sectioned_validation_rules(),
 												'record' 		=> $record,
 												'action' 		=> $action,
 												'portfolios' 	=> $portfolios,
