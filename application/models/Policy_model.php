@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_no", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issue_date", "start_date", "end_date", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "fiscal_yr_id", "code", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issue_date", "start_date", "end_date", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -557,6 +557,37 @@ class Policy_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get Policy Code (Draft)
+     *
+     * @param integer $portfolio_id
+     * @param object $fy_record
+     * @return string
+     */
+    private function _get_draft_policy_code($portfolio_id, $fy_record)
+    {
+        $this->load->library('Token');
+        $this->load->model('portfolio_model');
+
+        $portfolio_code = $this->portfolio_model->get_code($portfolio_id);
+        $fy_code_np     = $fy_record->code_np;
+
+        $policy_no = strtoupper($this->token->generate(10));
+
+        /**
+         * Construct Policy Code
+         *
+         * @TODO: Draft/Final Policy Code
+         *
+         * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
+         */
+        $policy_code = 'DRAFT/' . $this->dx_auth->get_branch_code() . '/' . $portfolio_code . '/' . $policy_no . '/' . $fy_code_np;
+
+        return $policy_code;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
      * Before Insert Trigger
      *
      * Tasks carried
@@ -574,26 +605,16 @@ class Policy_model extends MY_Model
     public function before_insert__defaults($data)
     {
         $this->load->library('Token');
-        $this->load->model('portfolio_model');
         $this->load->model('fiscal_year_model');
-        $this->load->model('portfolio_setting_model');
-
-        $portfolio_id   = $data['portfolio_id'];
-        $portfolio_code = $this->portfolio_model->get_code($portfolio_id);
 
         $fy_record      = $this->fiscal_year_model->get_current_fiscal_year();
-        $fy_code_np     = $fy_record->code_np;
-
-        $policy_no = strtoupper($this->token->generate(10));
 
         /**
          * Policy Code - Draft One & Policy Number
          *
          * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
          */
-        $policy_code = 'DRAFT/' . $this->dx_auth->get_branch_code() . '/' . $portfolio_code . '/' . $policy_no . '/' . $fy_code_np;
-        $data['code']           = $policy_code;
-        $data['policy_no']      = $policy_no;
+        $data['code']      = $this->_get_draft_policy_code($data['portfolio_id'], $fy_record);
 
 
         // Branch ID
@@ -616,6 +637,8 @@ class Policy_model extends MY_Model
 
         return $data;
     }
+
+    // ----------------------------------------------------------------
 
 
     /**
@@ -691,7 +714,6 @@ class Policy_model extends MY_Model
                         [created_at] => 2016-12-28 16:22:46
                         [created_by] => 1
                         [code] => DRAFT/BRP/MOTOR/ASARV1VHFA/73-74
-                        [policy_no] => ASARV1VHFA
                         [branch_id] => 5
                         [end_date] => 2017-12-28
                         [status] => D

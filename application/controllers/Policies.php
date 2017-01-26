@@ -438,6 +438,15 @@ class Policies extends MY_Controller
         		// Business Referer NULL if not supplied
         		$data['ref_company_id'] = $data['ref_company_id'] ? $data['ref_company_id'] : NULL;
 
+        		/**
+				 * Reset Creditor Info if "No" Selected
+				 */
+				if($data['flag_on_credit'] === 'N')
+				{
+					$data['creditor_id'] = NULL;
+					$data['creditor_branch_id'] = NULL;
+				}
+
 
         		// Insert or Update?
 				if($action === 'add')
@@ -449,15 +458,6 @@ class Policies extends MY_Controller
 				}
 				else
 				{
-					/**
-					 * Reset Creditor Info if "No" Selected
-					 */
-					if($data['flag_on_credit'] === 'N')
-					{
-						$data['creditor_id'] = NULL;
-						$data['creditor_branch_id'] = NULL;
-					}
-
 
 					// Now Update Data
 					$done = $this->policy_model->update($record->id, $data, TRUE) && $this->policy_model->log_activity($record->id, 'E');
