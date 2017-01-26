@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_no", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issue_date", "start_date", "duration", "end_date", "flag_dc", "flag_short_term", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_no", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issue_date", "start_date", "end_date", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -338,7 +338,18 @@ class Policy_model extends MY_Model
                         '_type'     => 'dropdown',
                         '_data'     => IQB_BLANK_SELECT + $this->agent_model->dropdown(true),
                         '_required' => true
-                    ]
+                    ],
+                    [
+                        'field' => 'ref_company_id',
+                        'label' => 'Business Referer',
+                        'rules' => 'trim|integer|max_length[11]',
+                        '_id'       => '_ref-company-id',
+                        '_extra_attributes' => 'style="width:100%; display:block"',
+                        '_type'     => 'dropdown',
+                        '_data'     => IQB_BLANK_SELECT + $this->company_model->dropdown_general(true),
+                        '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Business Referer" if not available in this list and try again.',
+                        '_required' => false
+                    ],
                 ]
 
             ];

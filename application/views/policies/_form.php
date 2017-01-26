@@ -364,6 +364,7 @@ $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", func
     $("#_agent-id").select2();
     $("#_creditor-id").select2();
     $("#_creditor-branch-id").select2();
+    $("#_ref-company-id").select2();
 
     $('.bootbox.modal').removeAttr('tabindex'); // modal workaround
 });

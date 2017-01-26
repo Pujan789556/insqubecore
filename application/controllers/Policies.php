@@ -435,6 +435,10 @@ class Policies extends MY_Controller
         	{
         		$data = $this->input->post();
 
+        		// Business Referer NULL if not supplied
+        		$data['ref_company_id'] = $data['ref_company_id'] ? $data['ref_company_id'] : NULL;
+
+
         		// Insert or Update?
 				if($action === 'add')
 				{

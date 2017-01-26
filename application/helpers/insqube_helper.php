@@ -439,6 +439,7 @@ if ( ! function_exists('_COMPANY_type_dropdown'))
             IQB_COMPANY_TYPE_BROKER         => 'Broker Company',
             IQB_COMPANY_TYPE_INSURANCE      => 'Insurance Company',
             IQB_COMPANY_TYPE_RE_INSURANCE   => 'Re-insurance Company',
+            IQB_COMPANY_TYPE_GENERAL 		=> 'General Company'
         ];
 
         if($flag_blank_select)
