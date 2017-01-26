@@ -78,6 +78,57 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_no_claim_discount_dropdown'))
 	}
 }
 
+// ------------------------------------------------------------------------
+
+
+if ( ! function_exists('_PORTFOLIO_MOTOR_compute_short_term_premium'))
+{
+	/**
+	 * MOTOR PORTFOLIO: Compute Short Term Policy Premium
+	 *
+	 * @param object $policy_record Policy Record
+	 * @param object $pfs_record Portfolio Settings Record
+	 * @param array $cost_table Cost Table computed by Specific cost table function
+	 * @return	array
+	 */
+	function _PORTFOLIO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $cost_table )
+	{
+		/**
+		 * SHORT TERM POLICY?
+		 * ---------------------
+		 *
+		 * If the policy is short term policy, we have to calculate the short term values
+		 *
+		 */
+		$short_term_info = _POLICY__get_short_term_info( $policy_record->portfolio_id, $policy_record->start_date, $policy_record->end_date );
+
+		if(
+			$pfs_record->flag_short_term === IQB_FLAG_YES
+			&&
+			$short_term_info['flag'] === IQB_FLAG_YES
+			&&
+			$policy_record->flag_short_term === IQB_FLAG_YES )
+		{
+			$short_term_record = $short_term_info['record'];
+
+			$short_term_rate = $short_term_record->rate ?? 100.00;
+			$short_term_rate = (float)$short_term_rate;
+
+			// Compute Total Amount
+			$cost_table['total_amount'] = ($cost_table['total_amount'] * $short_term_rate)/100.00;
+
+			// Compute Commission Amount if any
+			$comission_amount = $cost_table['comission_amount'] ?? NULL;
+			if($comission_amount)
+			{
+				$cost_table['comission_amount'] = ($cost_table['comission_amount'] * $short_term_rate)/100.00;
+			}
+		}
+
+		return $cost_table;
+	}
+}
+
 
 // ------------------------------------------------------------------------
 // COMPUTATIONAL TABLE
@@ -486,6 +537,15 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 				$__cost_table['comission_amount'] = $__agent_comissionable_amount;
 			}
 		}
+
+		/**
+		 * SHORT TERM POLICY?
+		 * ---------------------
+		 *
+		 * If the policy is short term policy, we have to calculate the short term values
+		 *
+		 */
+		$__cost_table = _PORTFOLIO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
 
 		return $__cost_table;
 	}
@@ -1028,6 +1088,15 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 				$__cost_table['comission_amount'] = $__agent_comissionable_amount;
 			}
 		}
+
+		/**
+		 * SHORT TERM POLICY?
+		 * ---------------------
+		 *
+		 * If the policy is short term policy, we have to calculate the short term values
+		 *
+		 */
+		$__cost_table = _PORTFOLIO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
 
 		return $__cost_table;
 	}
@@ -1672,6 +1741,15 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
                 $__cost_table['comission_amount'] = $__agent_comissionable_amount;
             }
         }
+
+        /**
+		 * SHORT TERM POLICY?
+		 * ---------------------
+		 *
+		 * If the policy is short term policy, we have to calculate the short term values
+		 *
+		 */
+		$__cost_table = _PORTFOLIO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
 
         return $__cost_table;
     }
