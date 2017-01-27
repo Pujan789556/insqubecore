@@ -38,6 +38,7 @@ class Objects extends MY_Controller
 
 		// Load Model
 		$this->load->model('object_model');
+		$this->load->model('portfolio_model');
 
 		// Image Path
         $this->_upload_path = INSQUBE_MEDIA_PATH . 'objects/';
@@ -196,7 +197,6 @@ class Objects extends MY_Controller
 		}
 
 		// Valid Portfolio
-		$this->load->model('portfolio_model');
 		$portfolio_id 		= (int)$portfolio_id;
 		$portfolio_record 	= $this->portfolio_model->find($portfolio_id);
 		if(!$portfolio_record)
@@ -221,8 +221,6 @@ class Objects extends MY_Controller
 
 		private function _get_filter_elements($portfolio_id=0)
 		{
-			$this->load->model('portfolio_model');
-
 			$portfolio_id = $portfolio_id ? $portfolio_id : '';
 
 			$filters = [
@@ -403,7 +401,7 @@ class Objects extends MY_Controller
 		 */
 		$action_url = 'objects/edit/' . $record->id . '/' . $from_widget;
 		$form_data = [
-			'form_elements' 	=> [],
+			'form_elements' 	=> $this->object_model->validation_rules('edit', $record->portfolio_id),
 			'record' 			=> $record,
 			'portfolio_record' 	=> NULL,
 			'action' 			=> 'edit',
@@ -465,7 +463,6 @@ class Objects extends MY_Controller
 		$portfolio_id = (int)$portfolio_id;
 		if($portfolio_id)
 		{
-			$this->load->model('portfolio_model');
 			$portfolio_record = $this->portfolio_model->find($portfolio_id);
 		}
 
@@ -480,6 +477,13 @@ class Objects extends MY_Controller
 		if($from_widget === 'y')
 		{
 			$html_form_attribute_components = $this->gaf($portfolio_id, 'html');
+			$form_elements = $this->object_model->validation_rules('add_widget', $portfolio_id);
+		}
+		else
+		{
+			// needs for sub-portfolio listing if form is posted
+			$portfolio_id = $this->input->post('portfolio_id') ? (int)$this->input->post('portfolio_id') : 0;
+			$form_elements = $this->object_model->validation_rules('add', $portfolio_id);
 		}
 
 		/**
@@ -487,7 +491,8 @@ class Objects extends MY_Controller
 		 */
 		$action_url = 'objects/add/' . $customer_id . '/' . $from_widget . '/' . $portfolio_id;
 		$form_data = [
-			'form_elements' 	=> $from_widget === 'n' ? $this->object_model->validation_rules : [],
+			// 'form_elements' 	=> $from_widget === 'n' ? $this->object_model->validation_rules : [],
+			'form_elements' 	=> $form_elements,
 			'record' 			=> $record,
 			'portfolio_record' 	=> $portfolio_record,
 			'action' 			=> 'add',
@@ -538,16 +543,14 @@ class Objects extends MY_Controller
 			if($action === 'add')
 			{
 				$portfolio_id = (int)$this->input->post('portfolio_id');
-				$v_rules = $from_widget === 'n' ? $this->object_model->validation_rules : [];
 			}
 			else
 			{
 				$portfolio_id = (int)$record->portfolio_id;
-				$v_rules = []; // Only attributes validation rule is required
 			}
 
 			$done 		= FALSE;
-			$v_rules 	= array_merge($v_rules, _PO_validation_rules($portfolio_id, TRUE));
+			$v_rules 	= array_merge($this->object_model->validation_rules($action, $portfolio_id), _PO_validation_rules($portfolio_id, TRUE));
             $this->form_validation->set_rules($v_rules);
 
 			if($this->form_validation->run() === TRUE )
@@ -562,6 +565,11 @@ class Objects extends MY_Controller
 						'customer_id'  => $customer_record->id
 					];
 				}
+
+				// Sub-portfolio
+				$object_data['sub_portfolio_id'] = $data['sub_portfolio_id'];
+
+				// Object attributes
         		$object_data['attributes'] = json_encode($data['object']);
 
         		// Insert or Update?
@@ -779,7 +787,7 @@ class Objects extends MY_Controller
 
 
 		/**
-		 * Get Attribute Form
+		 * Get Attribute Form, Sub-portfolio Dropdown
 		 *
 		 * @param integer $portfolio_id Portfolio ID
 		 * @param string 	$method 	Return Method
@@ -796,6 +804,10 @@ class Objects extends MY_Controller
 
 			// echo '<pre>'; print_r($attributes);exit;
 
+			// Subportfolio Dropdown options
+			$sub_portfolio_options = $this->portfolio_model->get_children($portfolio_id);
+
+
 			// No form Submitted?
 			$html = $this->load->view($form_partial,
 				[
@@ -809,7 +821,7 @@ class Objects extends MY_Controller
 			}
 
 			// Return HTML
-			$this->template->json(['html' => $html]);
+			$this->template->json(['html' => $html, 'spdd' => $sub_portfolio_options]);
 
 		}
 

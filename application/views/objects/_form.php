@@ -16,44 +16,59 @@ defined('BASEPATH') OR exit('No direct script access allowed');
       <h3 class="no-margin">Portfolio Information</h3>
     </div>
     <div class="box-body">
+
         <?php
-        /**
-         * Object Form is Called From Two Places
-         *
-         * a. Customer Object Tab
-         *      In this case, you can create object of any portfolio. So you must choose portfolio first.
-         *
-         * b. Pollicy Add Form (Add Widget)
-         *      In this case, you have both the customer and portfolio selected. You will only need the object
-         *      attributes of specified portfolio
-         */
-        if($action == 'add' && $from_widget === 'n')
-        {
-            /**
-             * Load Form Components
-             */
-            $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements' => $form_elements,
-                'form_record'   => $record
-            ]);
-        }
-        else
-        {
+        if( $action == 'edit' || ($action == 'add' && $from_widget === 'y') ):
+
             // Only on add from widget
             if($from_widget === 'y' && $action === 'add')
             {
                 echo form_hidden('portfolio_id', $portfolio_record->id);
                 $portfolio_name = $portfolio_record->name_en;
             }
-            ?>
+        ?>
             <div class="form-group">
                 <label class="col-sm-2 control-label">Portfolio</label>
                 <div class="col-sm-10">
                     <p class="form-control-static"><?php echo $portfolio_name ?? $record->portfolio_name;?></p>
                 </div>
             </div>
-            <?php
-        }?>
+        <?php endif?>
+
+        <?php
+        /**
+         * Load Form Components
+         */
+        // Portfolio
+        $portfolio_elements = $form_elements['portfolio'] ?? NULL;
+        if($portfolio_elements)
+        {
+            $this->load->view('templates/_common/_form_components_horz', [
+                'form_elements' => [$portfolio_elements],
+                'form_record'   => $record
+            ]);
+        }
+
+        // sub-portfolio
+        $sub_portfolio_elements = $form_elements['subportfolio'] ?? NULL;
+        if( $sub_portfolio_elements ):
+            $sub_portfolio_id = $record->{$sub_portfolio_elements['field']} ?? set_value($sub_portfolio_elements['field'], '', FALSE) ?? '';
+        ?>
+            <div class="form-group <?php echo form_error($sub_portfolio_elements['field']) ? 'has-error' : '';?>">
+                <label for="" class="col-sm-2 control-label">
+                    <?php echo $sub_portfolio_elements['label'] . field_compulsary_text( $sub_portfolio_elements['_required'] ?? FALSE );?>
+                </label>
+                <div class="col-sm-10">
+                    <select name="<?php echo $sub_portfolio_elements['field']?>" class="form-control" placeholder="Sub-Portfolio" id="<?php echo $sub_portfolio_elements['_id'];?>">
+                        <option value="" >Select...</option>
+                        <?php foreach($sub_portfolio_elements['_data'] as $child):?>
+
+                            <option value="<?php echo $child->id?>" data-code="<?php echo $child->code?>" <?php echo $sub_portfolio_id == $child->id ? 'selected="selected"' : ''?>><?php echo $child->name_en?></option>
+                        <?php endforeach?>
+                    </select>
+                </div>
+            </div>
+        <?php endif?>
     </div>
 
     <div id="_object-box">
@@ -81,8 +96,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $('button[type="submit"]', $('#_form-object')).attr('disabled','disabled');
             $('button.btn-primary[data-bb-handler="primary"]').attr('disabled','disabled');
         }
+
+        // Portfolio Change - Render attribute form & sub-portfolio
         $('#_object-portfolio-id').on('change', function(e){
-            var v = this.value;
+            var v = this.value,
+            $subpf = $('#_object-sub-portfolio-id');
+            $subpf.empty();
             if(v){
                 // load the object form
                 $.getJSON('<?php echo base_url()?>objects/gaf/'+v, function(r){
@@ -98,6 +117,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         radioClass: 'iradio_square-blue'
                     });
 
+                    // Update subportfolio dropdown
+                    if( typeof r.spdd !== 'undefined'){
+                        $subpf.append($('<option>', {
+                            value: '',
+                            text : 'Select...'
+                        }));
+                        $.each(r.spdd, function(key, value) {
+                            $subpf.append($('<option>', {
+                                "value": value.id,
+                                "text" : value.name_en,
+                                "data-code": value.code
+                            }));
+                        });
+                        $subpf.prop('selectedIndex',0).trigger('change');
+                    }
+
                     // Enable Submit
                     $('button[type="submit"]', $('#_form-object')).removeAttr('disabled');
                     $('button.btn-primary[data-bb-handler="primary"]').removeAttr('disabled','disabled');
@@ -110,6 +145,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $('button.btn-primary[data-bb-handler="primary"]').attr('disabled','disabled');
             }
         });
+
     })(jQuery);
     </script>
 <?php endif;?>

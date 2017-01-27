@@ -19,7 +19,7 @@ class Object_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "customer_id", "portfolio_id", "customer_id", "attributes", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "customer_id", "portfolio_id", "sub_portfolio_id", "customer_id", "attributes", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -42,7 +42,7 @@ class Object_model extends MY_Model
         parent::__construct();
 
         // Set validation rules
-        $this->validation_rules();
+        // $this->validation_rules();
 
         // Required Helpers/Configurations
         $this->load->config('policy');
@@ -53,20 +53,65 @@ class Object_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function validation_rules()
+    public function validation_rules($action, $portfolio_id=0, $formatted = false)
     {
         $this->load->model('portfolio_model');
-        $this->validation_rules =[
-            [
-                'field' => 'portfolio_id',
-                'label' => 'Portfolio',
-                'rules' => 'trim|required|integer|max_length[11]',
-                '_type'     => 'dropdown',
-                '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
-                '_id'       => '_object-portfolio-id',
-                '_required' => true
-            ]
+
+        // Let's compute validtaion rule for sub-portfolio
+        // Add mode, it gets portfolio id from post and calculate in_list values,
+        // In edit, we supply $portfolio_id from method parameter which calculates in_list values
+        // Simple, isn't it?
+        $portfolio_id = $portfolio_id ?? ( $this->input->post('portfolio_id') ? (int)$this->input->post('portfolio_id') : 0 );
+        $sub_portfolio_dropdown = [];
+        $sub_portfolio_rules = 'trim|required|integer|max_length[11]';
+        if($portfolio_id)
+        {
+            $sub_dropdown = $this->portfolio_model->dropdown_children($portfolio_id);
+            $sub_portfolio_dropdown = $this->portfolio_model->get_children($portfolio_id);
+            $sub_portfolio_rules .= '|in_list[' . implode(',', array_keys($sub_dropdown)) . ']';
+        }
+
+        $sub_portfolio_rules = [
+            'field' => 'sub_portfolio_id',
+            'label' => 'Sub-Portfolio',
+            'rules' => $sub_portfolio_rules,
+            '_type'     => 'dropdown',
+            '_data'     => $sub_portfolio_dropdown,
+            '_id'       => '_object-sub-portfolio-id',
+            '_required' => true
         ];
+
+        if( $action == 'add' )
+        {
+            $this->validation_rules =[
+                'portfolio' => [
+                    'field' => 'portfolio_id',
+                    'label' => 'Portfolio',
+                    'rules' => 'trim|required|integer|max_length[11]',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
+                    '_id'       => '_object-portfolio-id',
+                    '_required' => true
+                ],
+                'subportfolio' => $sub_portfolio_rules
+            ];
+        }
+        else
+        {
+            $this->validation_rules =['subportfolio' => $sub_portfolio_rules];
+        }
+
+        $v_rules = [];
+        if($formatted)
+        {
+            foreach ($this->validation_rules as $section => $rules)
+            {
+                $v_rules[] = $rules;
+            }
+            return $v_rules;
+        }
+
+        return $this->validation_rules;
     }
 
     // --------------------------------------------------------------------
@@ -264,7 +309,7 @@ class Object_model extends MY_Model
      */
     private function _prepare_row_select( )
     {
-        $this->db->select('O.id, O.portfolio_id, O.customer_id, O.attributes, P.code as portfolio_code, P.name_en as portfolio_name, C.full_name as customer_name')
+        $this->db->select('O.id, O.portfolio_id, O.sub_portfolio_id, O.customer_id, O.attributes, P.code as portfolio_code, P.name_en as portfolio_name, C.full_name as customer_name')
                  ->from($this->table_name . ' as O')
                  ->join('master_portfolio P', 'P.id = O.portfolio_id')
                  ->join('dt_customers C', 'O.customer_id = C.id');

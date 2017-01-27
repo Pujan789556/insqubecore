@@ -192,11 +192,10 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 		$post = $CI->input->post();
 		$object = $post['object'] ?? NULL;
 
-
-		$sub_portfolio 		= $object['sub_portfolio'] ?? '';
+		$sub_portfolio_id 	= $post['sub_portfolio_id'] ?? '';
 		$cvc_type_rules 	= 'trim|alpha|strtoupper';
 		$staff_count_rule 	= 'trim|integer|max_length[4]';
-		if($sub_portfolio == 'CVC')
+		if($sub_portfolio_id == IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID )
 		{
 			$cvc_type_rules 	= 'trim|required|alpha|strtoupper';
 			$staff_count_rule 	= 'trim|required|integer|max_length[4]';
@@ -240,17 +239,6 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        '_data' 	=> _PO_MOTOR_ownership_dropdown( ),
 			        '_default'  => 'N',
 			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[sub_portfolio]',
-			        '_key' => 'sub_portfolio',
-			        'label' => 'Sub-Portfolio',
-			        'rules' => 'trim|required|alpha|in_list[MCY,PVC,CVC]',
-			        '_id' 		=> '_motor-sub-portfolio',
-			        '_type'     => 'dropdown',
-			        '_data' 	=> _PO_MOTOR_sub_portfolio_dropdown( ),
-			        '_required' => true,
-			        '_extra_attributes' 	=> 'onchange="_po_motor_change_sub_portfolio(this)"'
 			    ],
 			    [
 			        'field' => 'object[cvc_type]',

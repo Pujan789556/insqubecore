@@ -58,7 +58,7 @@ class Portfolio_model extends MY_Model
      * Protect Default Records?
      */
     public static $protect_default = TRUE;
-    public static $protect_max_id = 50; // Prevent first 12 records from deletion.
+    public static $protect_max_id = 99; // Prevent first 12 records from deletion.
 
 	// --------------------------------------------------------------------
 
@@ -79,7 +79,7 @@ class Portfolio_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('portfolio_all');
+        $list = $this->get_cache('pf_all');
         if(!$list)
         {
             // $list = parent::find_all();
@@ -88,7 +88,7 @@ class Portfolio_model extends MY_Model
                              ->from($this->table_name . ' L1')
                              ->join($this->table_name . ' L2', 'L1.parent_id = L2.id', 'left')
                              ->get()->result();
-            $this->write_cache($list, 'portfolio_all', CACHE_DURATION_DAY);
+            $this->write_cache($list, 'pf_all', CACHE_DURATION_DAY);
         }
         return $list;
     }
@@ -154,7 +154,7 @@ class Portfolio_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('portfolio_parent_all');
+        $list = $this->get_cache('pf_parent_all');
         if(!$list)
         {
             $records = $this->db->select('id, code, name_en')
@@ -170,7 +170,7 @@ class Portfolio_model extends MY_Model
             }
             if(!empty($list))
             {
-                $this->write_cache($list, 'portfolio_parent_all', CACHE_DURATION_DAY);
+                $this->write_cache($list, 'pf_parent_all', CACHE_DURATION_DAY);
             }
         }
         return $list;
@@ -186,30 +186,54 @@ class Portfolio_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function dropdown_children($parent_id, $field='id')
+    public function get_children($parent_id=NULL)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_var = 'portfolio_children_' . $parent_id . '_' . $field;
+        if(!$parent_id)
+        {
+            $cache_var = 'pf_children_all';
+        }
+        else
+        {
+            $cache_var = 'pf_children_' . $parent_id;
+        }
+
         $list = $this->get_cache($cache_var);
         if(!$list)
         {
-            $records = $this->db->select('id, code, name_en')
-                             ->from($this->table_name)
-                             ->where('parent_id', $parent_id)
-                             ->get()->result();
-
-            $list = [];
-            foreach($records as $record)
+            $this->db->select('id, parent_id, code, name_en, name_np')
+                            ->from($this->table_name);
+            if($parent_id)
             {
-                $column = $record->{$field};
-                $list["{$column}"] = $record->name_en;
+                $this->db->where('parent_id', $parent_id);
             }
+            else
+            {
+                $this->db->where('parent_id !=', 0);
+            }
+            $list = $this->db->get()->result();
+
             if(!empty($list))
             {
                 $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
             }
+        }
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function dropdown_children($parent_id=NULL, $field='id')
+    {
+        $records = $this->get_children($parent_id);
+
+        $list = [];
+        foreach($records as $record)
+        {
+            $column = $record->{$field};
+            $list["{$column}"] = $record->name_en;
         }
         return $list;
     }
@@ -222,9 +246,9 @@ class Portfolio_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'portfolio_all',
-            'portfolio_parent_all',
-            'portfolio_children_*',
+            'pf_all',
+            'pf_parent_all',
+            'pf_children_*',
             'portfolio_s_*'
         ];
         // cache name without prefix

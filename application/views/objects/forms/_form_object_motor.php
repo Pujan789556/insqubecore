@@ -75,7 +75,7 @@ $this->load->view('templates/_common/_form_components_horz', [
 
     function _po_motor_change_sub_portfolio(d){
         var $this = $(d),
-            v = $this.val();
+            v = $this.find(':selected').data('code');
 
         // staff count
         $('#__staff-box').hide();
@@ -121,7 +121,11 @@ $this->load->view('templates/_common/_form_components_horz', [
     (function($){
 
         // Subportfolio Change
-        _po_motor_change_sub_portfolio('#_motor-sub-portfolio');
+        _po_motor_change_sub_portfolio('#_object-sub-portfolio-id');
+
+        $('#_object-sub-portfolio-id').on('change', function(){
+            _po_motor_change_sub_portfolio(this);
+        })
 
         // To Be Intimated Toggle
         _po_to_be_intimated('#_motor-vehicle-to-be-intimated');
