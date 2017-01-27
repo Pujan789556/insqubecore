@@ -12,6 +12,7 @@ $_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 				<th>ID</th>
 			<?php endif?>
 			<th>Portfolio</th>
+			<th>Sub-Portfolio</th>
 			<th>Customer</th>
 			<th>Object Snippet</th>
 			<?php if( !$_flag__show_widget_row ):?>

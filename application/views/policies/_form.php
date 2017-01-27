@@ -252,18 +252,33 @@ $('#_creditor-id').on('change', function(e){
 $('#_portfolio-id').on('change', function(e){
     var v = this.value;
     $('#_policy-package-id').empty();
+    $('#_sub-portfolio-id').empty();
     if(v){
         // load the object form
         $.getJSON('<?php echo base_url()?>policies/gppp/'+v, function(r){
-            // Update dropdown
-            if(r.status == 'success' && typeof r.options !== 'undefined'){
-                $.each(r.options, function(key, value) {
+
+            // Update sub-portfolio options
+            if(r.status == 'success' && typeof r.spo !== 'undefined'){
+                $('#_sub-portfolio-id').append($('<option>', {value: '',text : 'Select...'}));
+                $.each(r.spo, function(key, value) {
+                    $('#_sub-portfolio-id').append($('<option>', {
+                        value: key,
+                        text : value
+                    }));
+                });
+            }
+
+            // Update policy package options
+            if(r.status == 'success' && typeof r.ppo !== 'undefined'){
+                $('#_policy-package-id').append($('<option>', {value: '',text : 'Select...'}));
+                $.each(r.ppo, function(key, value) {
+
                     $('#_policy-package-id').append($('<option>', {
                         value: key,
                         text : value
                     }));
                 });
-              }
+            }
         });
     }
 });
@@ -303,16 +318,17 @@ $('#_find-object').on('click', function(e){
     InsQube.options.__btn_loading = $this;
 
     var c = $('#customer-id').val(),
-        p = $('#_portfolio-id').val();
+        p = $('#_portfolio-id').val(),
+        sp = $('#_sub-portfolio-id').val();
 
-    if( p == '' || c == '')
+    if( p == '' || c == '' || sp == '')
     {
-        toastr.error('Please select customer and portfolio first.');
+        toastr.error('Please select Portfolio, Sub-Portfolio, & Customer first.');
         // Reset Loading
         $this.button('reset');
         return false;
     }
-    var url = '<?php echo base_url()?>objects/find/'+c + '/'+ p;
+    var url = '<?php echo base_url()?>objects/find/' + c + '/'+ p + '/' + sp;
 
     $.getJSON(url, function(r){
         if( typeof r.html !== 'undefined' && r.html != '' ){

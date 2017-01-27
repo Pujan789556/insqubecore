@@ -9,6 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
 	<td><?php echo $record->portfolio_name;?></td>
+	<td><?php echo $record->sub_portfolio_name;?></td>
 	<td><?php echo $record->customer_name;?></td>
 	<?php echo _PO_row_snippet($record);?>
 	<td class="ins-action">

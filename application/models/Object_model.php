@@ -309,9 +309,13 @@ class Object_model extends MY_Model
      */
     private function _prepare_row_select( )
     {
-        $this->db->select('O.id, O.portfolio_id, O.sub_portfolio_id, O.customer_id, O.attributes, P.code as portfolio_code, P.name_en as portfolio_name, C.full_name as customer_name')
+        $this->db->select("O.id, O.portfolio_id, O.sub_portfolio_id, O.customer_id, O.attributes,
+                            P.code as portfolio_code, P.name_en as portfolio_name,
+                            SP.code as sub_portfolio_code, SP.name_en as sub_portfolio_name,
+                            C.full_name as customer_name")
                  ->from($this->table_name . ' as O')
                  ->join('master_portfolio P', 'P.id = O.portfolio_id')
+                 ->join('master_portfolio SP', 'SP.id = O.sub_portfolio_id')
                  ->join('dt_customers C', 'O.customer_id = C.id');
     }
 

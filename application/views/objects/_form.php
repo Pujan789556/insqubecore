@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             if($from_widget === 'y' && $action === 'add')
             {
                 echo form_hidden('portfolio_id', $portfolio_record->id);
-                $portfolio_name = $portfolio_record->name_en;
+                $portfolio_name     = $portfolio_record->name_en;
             }
         ?>
             <div class="form-group">
@@ -49,9 +49,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             ]);
         }
 
-        // sub-portfolio
+        // sub-portfolio (Only on Regular Add/Edit)
         $sub_portfolio_elements = $form_elements['subportfolio'] ?? NULL;
-        if( $sub_portfolio_elements ):
+        if( $sub_portfolio_elements):
             $sub_portfolio_id = $record->{$sub_portfolio_elements['field']} ?? set_value($sub_portfolio_elements['field'], '', FALSE) ?? '';
         ?>
             <div class="form-group <?php echo form_error($sub_portfolio_elements['field']) ? 'has-error' : '';?>">

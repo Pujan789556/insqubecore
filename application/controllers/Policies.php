@@ -659,7 +659,7 @@ class Policies extends MY_Controller
 	// --------------------------------------------------------------------
 
 		/**
-		 * Get Policy Packages for Portfolio
+		 * Get Policy Package and Sub-Portfolio Options for Portfolio
 		 *
 		 * Get the policy packages for specified portfolio
 		 *
@@ -672,13 +672,19 @@ class Policies extends MY_Controller
 			// Valid Record ?
 			$portfolio_id = (int)$portfolio_id;
 
-			$options = _PO_policy_package_dropdown($portfolio_id);
+			// Policy Package Options
+			$ppo = _PO_policy_package_dropdown($portfolio_id, false);
 
-			if( !empty($options))
+			// Sub portfolio Options
+			$this->load->model('portfolio_model');
+			$spo = $this->portfolio_model->dropdown_children($portfolio_id);
+
+			if( !empty($ppo))
 			{
 				$this->template->json([
 					'status' => 'success',
-					'options' => $options
+					'ppo' => $ppo,
+					'spo' => $spo
 				]);
 			}
 			$this->template->render_404('', 'Incorrect Portfolio');
@@ -817,7 +823,7 @@ class Policies extends MY_Controller
 	     * 		1. Object Owner and Selected Customer Should Match
 	     * 		2. If the object is already assigned to other policy which is not
 	     * 			Canceled|Expired, You can not assign this object to new policy.
-	     *
+	     *		3. Object Portfolio/Subportfolio should match Object portfolio/subportfolio
 	     *
 	     * @param string $str
 	     * @return bool
@@ -826,8 +832,13 @@ class Policies extends MY_Controller
 	    {
 	    	$object_id 		= (int)$object_id;
 	    	$customer_id 	= (int)$this->input->post('customer_id');
-	    	$message = 'The selected Object does not belong to the selected Customer.';
+	    	$portfolio_id 		= (int)$this->input->post('portfolio_id');
+	    	$sub_portfolio_id 	= (int)$this->input->post('sub_portfolio_id');
 
+	    	/**
+	    	 * Case 1 : Check Ownership
+	    	 * ------------------------
+	    	 */
 	    	if( !$object_id OR !$customer_id)
 	    	{
 	    		$this->form_validation->set_message('_cb_valid_object_defaults', 'Customer and/or Object not supplied.');
@@ -848,8 +859,11 @@ class Policies extends MY_Controller
 	    	}
 
 	    	/**
+	    	 * Case 2: Object Editable?
+	    	 * ------------------------
+	    	 *
 	    	 *  ! IMPORTANT !
-	    	 * ---------------
+	    	 *
 	    	 * Is this object is free to assign to new/editable policy?
 	    	 *
 	    	 * Logic:
@@ -888,6 +902,17 @@ class Policies extends MY_Controller
 		    		}
 	    		}
 	    	}
+
+	    	/**
+	    	 * Case 3 : Portfolio/Sub-portfolio Match between Policy-Object
+	    	 * ------------------------------------------------------------
+	    	 */
+	    	if( $object_record->portfolio_id != $portfolio_id || $object_record->sub_portfolio_id != $sub_portfolio_id )
+    		{
+    			$this->form_validation->set_message('_cb_valid_object_defaults', "The object's Portfolio/Sub-portfolio MUST match with Policy's Portfolio/Sub-Portfolio");
+            	return FALSE;
+    		}
+
 	        return TRUE;
 	    }
 
