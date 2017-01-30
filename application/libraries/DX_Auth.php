@@ -190,7 +190,7 @@ class DX_Auth
     		// From Email and From Name will be From Site Settings Data
    //  		'from' 		=> [
    //  			'email' => $from,
-   //  			'name' => $this->ci->settings->organization
+   //  			'name' => $this->ci->settings->orgn_name_en
 			// ],
     		'to' 		=> $to,
     		'subject' 	=> $subject,
@@ -1204,7 +1204,7 @@ class DX_Auth
 			{
 				// Create email
 				$from = $this->ci->config->item('DX_webmaster_email');
-				$subject = sprintf($this->ci->lang->line('auth_activate_subject'), $this->ci->settings->organization);
+				$subject = sprintf($this->ci->lang->line('auth_activate_subject'), $this->ci->settings->orgn_name_en);
 
 				// Activation Link
 				$new_user['activate_url'] = site_url($this->ci->config->item('DX_activate_uri')."{$new_user['username']}/{$new_user['activation_key']}");
@@ -1222,7 +1222,7 @@ class DX_Auth
 				{
 					// Create email
 					$from = $this->ci->config->item('DX_webmaster_email');
-					$subject = sprintf($this->ci->lang->line('auth_account_subject'), $this->ci->settings->organization);
+					$subject = sprintf($this->ci->lang->line('auth_account_subject'), $this->ci->settings->orgn_name_en);
 
 					// Trigger event and get email content
 					$this->sending_account_email($new_user, $message);
@@ -1605,12 +1605,12 @@ class DX_Auth
 
 		// Create content
 		$content = sprintf($this->ci->lang->line('auth_account_content'),
-			$this->ci->settings->organization,
+			$this->ci->settings->orgn_name_en,
 			$data['username'],
 			$data['email'],
 			$data['password'],
 			site_url($this->ci->config->item('DX_login_uri')),
-			$this->ci->settings->organization);
+			$this->ci->settings->orgn_name_en);
 	}
 
 	// This event occurs right before dx auth send activation email
@@ -1621,13 +1621,13 @@ class DX_Auth
 	{
 		// Create content
 		$content = sprintf($this->ci->lang->line('auth_activate_content'),
-			$this->ci->settings->organization,
+			$this->ci->settings->orgn_name_en,
 			$data['activate_url'],
 			$this->ci->config->item('DX_email_activation_expire') / 60 / 60,
 			$data['username'],
 			$data['email'],
 			$data['password'],
-			$this->ci->settings->organization);
+			$this->ci->settings->orgn_name_en);
 	}
 
 	// This event occurs right before dx auth send forgot password request email
@@ -1638,12 +1638,12 @@ class DX_Auth
 	{
 		// Create content
 		$content = sprintf($this->ci->lang->line('auth_forgot_password_content'),
-			$this->ci->settings->organization,
+			$this->ci->settings->orgn_name_en,
 			$data['reset_password_uri'],
 			$data['password'],
 			$data['key'],
 			$this->ci->settings->from_email,
-			$this->ci->settings->organization);
+			$this->ci->settings->orgn_name_en);
 	}
 
 }

@@ -44,7 +44,7 @@ if ( ! function_exists('send_email'))
 		// FROM
 		$from = isset($options['from']) ? $options['from'] : NULL;
 		$from_email = isset($from['email']) ? $from['email'] : $CI->settings->from_email;
-		$from_name 	= isset($from['name']) ? $from['name'] : $CI->settings->organization;
+		$from_name 	= isset($from['name']) ? $from['name'] : $CI->settings->orgn_name_en;
 		if( !empty($from_email) || !empty($from_name) )
 		{
 			$CI->email->from( $from_email, $from_name );
