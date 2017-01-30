@@ -192,7 +192,7 @@ class Users extends MY_Controller
 			[
 				'field' => 'profile[dob]',
 				'label' => 'Date of Birth',
-				'rules' => 'trim|required|valid_date',
+				'rules' => 'trim|valid_date',
 				'_key' 		=> 'dob', // Json Key Name
 				'_type' 	=> 'date',
 		        '_required' => true
