@@ -213,8 +213,8 @@ class Tariff extends MY_Controller
                      * Sub-portfolio: Motorcycle
                      */
                     $batch_data[] = [
-                        'fiscal_yr_id'  => $fiscal_yr_id,
-                        'sub_portfolio' => IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE,
+                        'fiscal_yr_id'          => $fiscal_yr_id,
+                        'sub_portfolio_code'    => IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE,
                         'ownership'     => $ownership,
                         'cvc_type'      => NULL
                     ];
@@ -226,8 +226,8 @@ class Tariff extends MY_Controller
                      * Sub-portfolio: Private Vehicle
                      */
                     $batch_data[] = [
-                        'fiscal_yr_id'  => $fiscal_yr_id,
-                        'sub_portfolio' => IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE,
+                        'fiscal_yr_id'          => $fiscal_yr_id,
+                        'sub_portfolio_code'    => IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE,
                         'ownership'     => $ownership,
                         'cvc_type'      => NULL
                     ];
@@ -241,8 +241,8 @@ class Tariff extends MY_Controller
                     foreach ($cvc_type_list as $cvc_type=>$ctext)
                     {
                         $batch_data[] = [
-                            'fiscal_yr_id'  => $fiscal_yr_id,
-                            'sub_portfolio' => IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE,
+                            'fiscal_yr_id'          => $fiscal_yr_id,
+                            'sub_portfolio_code'    => IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE,
                             'ownership'     => $ownership,
                             'cvc_type'      => $cvc_type
                         ];

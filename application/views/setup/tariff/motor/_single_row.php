@@ -25,16 +25,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<i class="fa fa-copy"></i>
 			<span class="hidden-xs">Duplicate</span>
 		</a>
-		<?php if(safe_to_delete( 'Tariff_motor_model', $record->fiscal_yr_id )):?>
-			<a href="#"
-				title="Delete"
-				data-toggle="tooltip"
-				class="trg-row-action action"
-				data-confirm="true"
-				data-url="<?php echo site_url('tariff/motor/delete/' . $record->fiscal_yr_id);?>">
-					<i class="fa fa-trash-o"></i>
-					<span class="hidden-xs">Delete</span>
-			</a>
-		<?php endif?>
 	</td>
 </tr>

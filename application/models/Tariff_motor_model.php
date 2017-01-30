@@ -18,7 +18,7 @@ class Tariff_motor_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "sub_portfolio", "cvc_type", "fiscal_yr_id", "ownership", "tariff", "no_claim_discount", "dr_mcy_disabled_friendly", "rate_pvc_on_hire", "dr_cvc_on_personal_use", "dr_voluntary_excess", "pramt_compulsory_excess", "accident_premium", "riks_group", "pramt_towing", "trolly_tariff", "insured_value_tariff", "active", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "sub_portfolio_code", "cvc_type", "fiscal_yr_id", "ownership", "tariff", "no_claim_discount", "dr_mcy_disabled_friendly", "rate_pvc_on_hire", "dr_cvc_on_personal_use", "dr_voluntary_excess", "pramt_compulsory_excess", "accident_premium", "riks_group", "pramt_towing", "trolly_tariff", "insured_value_tariff", "active", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -62,7 +62,7 @@ class Tariff_motor_model extends MY_Model
                     'label' => 'Activate Tariff',
                     'rules' => 'trim|integer|in_list[1]',
                     '_type' => 'switch',
-                    '_value' => '1'
+                    '_checkbox_value' => '1'
                 ]
             ],
 
@@ -629,12 +629,12 @@ class Tariff_motor_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function get_single($fiscal_yr_id, $ownership, $sub_portfolio, $cvc_type = NULL)
+    public function get_single($fiscal_yr_id, $ownership, $sub_portfolio_code, $cvc_type = NULL)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_name = 'tms_' . $fiscal_yr_id . '_' . $ownership . '_' . $sub_portfolio;
+        $cache_name = 'tms_' . $fiscal_yr_id . '_' . $ownership . '_' . $sub_portfolio_code;
         if($cvc_type)
         {
             $cache_name .= '_' . $cvc_type;
@@ -644,7 +644,7 @@ class Tariff_motor_model extends MY_Model
         if(!$row)
         {
             $where = [
-                'sub_portfolio' => $sub_portfolio,
+                'sub_portfolio_code' => $sub_portfolio_code,
                 'cvc_type'      => $cvc_type ? $cvc_type : NULL,
                 'ownership'     => $ownership,
                 'fiscal_yr_id'  => $fiscal_yr_id,
@@ -694,6 +694,9 @@ class Tariff_motor_model extends MY_Model
 
     public function delete($id = NULL)
     {
+        // We do not delete any tariff
+        return FALSE;
+
         $id = intval($id);
         if( !safe_to_delete( get_class(), $id ) )
         {
