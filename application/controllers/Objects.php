@@ -177,7 +177,7 @@ class Objects extends MY_Controller
 	}
 
 	// Find Widget
-	function find( $customer_id, $portfolio_id  )
+	function find( $customer_id, $portfolio_id, $sub_portfolio_id )
 	{
 		/**
 		 * Check Permissions
@@ -207,7 +207,7 @@ class Objects extends MY_Controller
 			'records' 					=> $this->object_model->get_by_customer($customer_record->id),
 			'customer_record' 			=> $customer_record,
 			'portfolio_record' 		 	=> $portfolio_record,
-			'add_url' 					=> 'objects/add/' . $customer_id . '/y/' . $portfolio_id,
+			'add_url' 					=> 'objects/add/' . $customer_id . '/y/' . $portfolio_id . '/' . $sub_portfolio_id,
 			'_flag__show_widget_row' 	=> TRUE
 		];
 		$html = $this->load->view('objects/_find_widget', $data, TRUE);
@@ -397,13 +397,31 @@ class Objects extends MY_Controller
 		}
 
 		/**
+		 * Valication Rules
+		 * --------------------------------
+		 * 	Get validation rules accordinglgy
+		 */
+		$portfolio_record 		= $this->portfolio_model->find($record->portfolio_id);
+		$sub_portfolio_record 	= NULL;
+		if( $this->object_model->is_sub_portfolio_editable($record->id) )
+		{
+			$form_elements 	= $this->object_model->form_elements('edit_new', $record->portfolio_id);
+		}
+		else
+		{
+			$form_elements 			= $this->object_model->form_elements('edit_old', $record->portfolio_id);
+			$sub_portfolio_record 	= $this->portfolio_model->find($record->sub_portfolio_id);
+		}
+
+		/**
 		 * Prepare Common Form Data to pass to form view
 		 */
 		$action_url = 'objects/edit/' . $record->id . '/' . $from_widget;
 		$form_data = [
-			'form_elements' 	=> $this->object_model->validation_rules('edit', $record->portfolio_id),
+			'form_elements' 	=> $form_elements,
 			'record' 			=> $record,
-			'portfolio_record' 	=> NULL,
+			'portfolio_record' 	=> $portfolio_record,
+			'sub_portfolio_record' 	=> $sub_portfolio_record,
 			'action' 			=> 'edit',
 			'action_url' 		=> $action_url,
 			'from_widget' 		=> $from_widget,
@@ -432,7 +450,7 @@ class Objects extends MY_Controller
 	 *
 	 * @return void
 	 */
-	public function add( $customer_id, $from_widget='n', $portfolio_id = 0 )
+	public function add( $customer_id, $from_widget='n', $portfolio_id = 0, $sub_portfolio_id = 0 )
 	{
 		/**
 		 * Check Permissions
@@ -459,17 +477,23 @@ class Objects extends MY_Controller
 
 		$record = NULL;
 
-		$portfolio_record = NULL;
-		$portfolio_id = (int)$portfolio_id;
-		if($portfolio_id)
+		/**
+		 * If we are calling from Widget, We need to have both portfolio and sub-portfolio
+		 */
+		$portfolio_record 		= NULL;
+		$sub_portfolio_record 	= NULL;
+		$portfolio_id 			= (int)$portfolio_id;
+		$sub_portfolio_id 		= (int)$sub_portfolio_id;
+		if( $from_widget === 'y' )
 		{
-			$portfolio_record = $this->portfolio_model->find($portfolio_id);
-		}
+			$portfolio_record 		= $this->portfolio_model->find($portfolio_id);
+			$sub_portfolio_record 	= $this->portfolio_model->find($sub_portfolio_id);
 
-		// If from widget, we must need portfolio
-		if( $from_widget === 'y' && !$portfolio_record )
-		{
-			$this->template->render_404('', 'Please select a portfolio before creating an object.');
+			// Both record must exist and MUST match parent child relation
+			if( !$portfolio_record || !$sub_portfolio_record || $portfolio_record->id != $sub_portfolio_record->parent_id )
+			{
+				$this->template->render_404('', 'Please supply a valid Portfolio & its Sub-Portfolio');
+			}
 		}
 
 		// If coming from widget, we only need object attributes
@@ -477,24 +501,25 @@ class Objects extends MY_Controller
 		if($from_widget === 'y')
 		{
 			$html_form_attribute_components = $this->gaf($portfolio_id, 'html');
-			$form_elements = $this->object_model->validation_rules('add_widget', $portfolio_id);
+			$form_elements = $this->object_model->form_elements('add_widget', $portfolio_id);
 		}
 		else
 		{
 			// needs for sub-portfolio listing if form is posted
 			$portfolio_id = $this->input->post('portfolio_id') ? (int)$this->input->post('portfolio_id') : 0;
-			$form_elements = $this->object_model->validation_rules('add', $portfolio_id);
+			$form_elements = $this->object_model->form_elements('add', $portfolio_id);
 		}
 
 		/**
 		 * Prepare Common Form Data to pass to form view
 		 */
-		$action_url = 'objects/add/' . $customer_id . '/' . $from_widget . '/' . $portfolio_id;
+		$action_url = 'objects/add/' . $customer_id . '/' . $from_widget . '/' . $portfolio_id . '/' . $sub_portfolio_id;
 		$form_data = [
 			// 'form_elements' 	=> $from_widget === 'n' ? $this->object_model->validation_rules : [],
 			'form_elements' 	=> $form_elements,
 			'record' 			=> $record,
-			'portfolio_record' 	=> $portfolio_record,
+			'portfolio_record' 		=> $portfolio_record,
+			'sub_portfolio_record' 	=> $sub_portfolio_record,
 			'action' 			=> 'add',
 			'action_url' 		=> $action_url,
 			'from_widget' 		=> $from_widget,
@@ -550,7 +575,7 @@ class Objects extends MY_Controller
 			}
 
 			$done 		= FALSE;
-			$v_rules 	= array_merge($this->object_model->validation_rules($action, $portfolio_id), _PO_validation_rules($portfolio_id, TRUE));
+			$v_rules 	= array_merge($this->object_model->validation_rules, _PO_validation_rules($portfolio_id, TRUE));
             $this->form_validation->set_rules($v_rules);
 
 			if($this->form_validation->run() === TRUE )
@@ -561,13 +586,11 @@ class Objects extends MY_Controller
         		if($action === 'add')
 				{
 					$object_data = [
-						'portfolio_id' => $portfolio_id,
-						'customer_id'  => $customer_record->id
+						'portfolio_id' 		=> $data['portfolio_id'],
+						'sub_portfolio_id' 	=> $data['sub_portfolio_id'],
+						'customer_id'  		=> $customer_record->id
 					];
 				}
-
-				// Sub-portfolio
-				$object_data['sub_portfolio_id'] = $data['sub_portfolio_id'];
 
 				// Object attributes
         		$object_data['attributes'] = json_encode($data['object']);
@@ -582,6 +605,16 @@ class Objects extends MY_Controller
 				}
 				else
 				{
+					/**
+					 * Sub-portfolio Change Restriction
+					 * --------------------------------
+					 * 	Only fresh object, which are not assigned to any policy can change the sub-portfolio
+					 */
+					if( $this->object_model->is_sub_portfolio_editable($record->id) )
+					{
+						$object_data['sub_portfolio_id'] = $data['sub_portfolio_id'];
+					}
+
 					// Now Update Data
 					$done = $this->object_model->update($record->id, $object_data, TRUE) && $this->object_model->log_activity($record->id, 'E');
 				}

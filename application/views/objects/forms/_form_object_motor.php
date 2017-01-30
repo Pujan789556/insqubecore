@@ -74,8 +74,9 @@ $this->load->view('templates/_common/_form_components_horz', [
     }
 
     function _po_motor_change_sub_portfolio(d){
+
         var $this = $(d),
-            v = $this.find(':selected').data('code');
+            v = $this.attr('type') === 'hidden' ? $this.data('code') : $this.find(':selected').data('code');
 
         // staff count
         $('#__staff-box').hide();

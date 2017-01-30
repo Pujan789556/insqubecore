@@ -53,7 +53,13 @@ class Object_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function validation_rules($action, $portfolio_id=0, $formatted = false)
+    /**
+     * Set/Get Validation Rules
+     *
+     * @param integer $portfolio_id
+     * @return array
+     */
+    public function validation_rules( $portfolio_id=0 )
     {
         $this->load->model('portfolio_model');
 
@@ -66,11 +72,19 @@ class Object_model extends MY_Model
         $sub_portfolio_rules = 'trim|required|integer|max_length[11]';
         if($portfolio_id)
         {
-            $sub_dropdown = $this->portfolio_model->dropdown_children($portfolio_id);
+            $sub_dropdown           = $this->portfolio_model->dropdown_children($portfolio_id);
             $sub_portfolio_dropdown = $this->portfolio_model->get_children($portfolio_id);
-            $sub_portfolio_rules .= '|in_list[' . implode(',', array_keys($sub_dropdown)) . ']';
+            $sub_portfolio_rules    .= '|in_list[' . implode(',', array_keys($sub_dropdown)) . ']';
         }
-
+        $portfolio_rules =[
+            'field' => 'portfolio_id',
+            'label' => 'Portfolio',
+            'rules' => 'trim|required|integer|max_length[11]',
+            '_type'     => 'dropdown',
+            '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
+            '_id'       => '_object-portfolio-id',
+            '_required' => true
+        ];
         $sub_portfolio_rules = [
             'field' => 'sub_portfolio_id',
             'label' => 'Sub-Portfolio',
@@ -81,37 +95,63 @@ class Object_model extends MY_Model
             '_required' => true
         ];
 
-        if( $action == 'add' )
+        // Set Validation Rules
+        $this->validation_rules = [$portfolio_rules, $sub_portfolio_rules];
+    }
+
+    /**
+     * Get Form Elements
+     *
+     * We have 4 different scenarios.
+     *
+     *  Case 1: "add"
+     *      This is regular mode, where you have to supply both portfolio and sub-portfolio
+     *
+     *  Case 2: "add_widget"
+     *      This is when you are creating an object from Policy Add/Edit Form, You will be supplied
+     *      portfolio and sub-portfolio internally, so you need not the validation rule
+     *
+     * Case 3: "edit_new"
+     *      This is when you are editing a newly created policy object which is not assigned to any
+     *      policy. Here you can edit sub-portfolio
+     *
+     * Case 4: "edit_old"
+     *      If you are editing a policy object that is already assigned to a policy, you can not edit
+     *      sub-portfolio
+     *
+     * @param string $action
+     * @param integer $portfolio_id
+     * @return array
+     */
+    public function form_elements($action, $portfolio_id=0)
+    {
+        // Set validation rule if not already
+        if( empty($this->validation_rules) )
         {
-            $this->validation_rules =[
-                'portfolio' => [
-                    'field' => 'portfolio_id',
-                    'label' => 'Portfolio',
-                    'rules' => 'trim|required|integer|max_length[11]',
-                    '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
-                    '_id'       => '_object-portfolio-id',
-                    '_required' => true
-                ],
-                'subportfolio' => $sub_portfolio_rules
-            ];
-        }
-        else
-        {
-            $this->validation_rules =['subportfolio' => $sub_portfolio_rules];
+            $this->validation_rules($portfolio_id);
         }
 
-        $v_rules = [];
-        if($formatted)
+        $form_elements = [];
+        switch ($action)
         {
-            foreach ($this->validation_rules as $section => $rules)
-            {
-                $v_rules[] = $rules;
-            }
-            return $v_rules;
+            case 'add':
+                $form_elements = ['portfolio'=>$this->validation_rules[0], 'subportfolio'=>$this->validation_rules[1]];
+                break;
+
+            case 'add_widget':
+            case 'edit_old':
+                $form_elements = [];
+                break;
+
+            case 'edit_new':
+                $form_elements = ['subportfolio'=>$this->validation_rules[1]];
+                break;
+
+            default:
+                break;
         }
 
-        return $this->validation_rules;
+        return $form_elements;
     }
 
     // --------------------------------------------------------------------
@@ -192,6 +232,34 @@ class Object_model extends MY_Model
         else if( $policy_record && belongs_to_me($policy_record->branch_id, FALSE) === TRUE && is_policy_editable($policy_record->status, FALSE) === TRUE)
         {
             $_flag_editable  = TRUE;
+        }
+
+        return $_flag_editable;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Is Sub-Portfolio of this Object Editable?
+     *
+     * LOGIC:
+     *      if an object is assigned to a policy, we can not change sub-portfolio
+     *      because policy also has sub-portfolio and we can't afford to have a
+     *      sub-portfolio mismatch
+     *
+     * @NOTE: This method should be called only if an object is editable
+     *
+     * @param integer $id
+     * @return boolean
+     */
+    public function is_sub_portfolio_editable($id)
+    {
+        $_flag_editable  = TRUE;
+        $policy_record  = $this->get_latest_policy($id);
+
+        if($policy_record)
+        {
+            $_flag_editable  = FALSE;
         }
 
         return $_flag_editable;

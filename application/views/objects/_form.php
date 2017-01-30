@@ -18,27 +18,39 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <div class="box-body">
 
         <?php
-        if( $action == 'edit' || ($action == 'add' && $from_widget === 'y') ):
-
-            // Only on add from widget
-            if($from_widget === 'y' && $action === 'add')
-            {
-                echo form_hidden('portfolio_id', $portfolio_record->id);
-                $portfolio_name     = $portfolio_record->name_en;
-            }
-        ?>
+        /**
+         * Hidden Field - Portfolio
+         */
+        if($portfolio_record):?>
+            <input type="hidden" name="portfolio_id" id="_object-portfolio-id" value="<?php echo $portfolio_record->id?>">
             <div class="form-group">
                 <label class="col-sm-2 control-label">Portfolio</label>
                 <div class="col-sm-10">
-                    <p class="form-control-static"><?php echo $portfolio_name ?? $record->portfolio_name;?></p>
+                    <p class="form-control-static"><?php echo $portfolio_record->name_en;?></p>
                 </div>
             </div>
-        <?php endif?>
+        <?php endif;?>
+
+        <?php
+        /**
+         * Hidden Field - Sub-Portfolio
+         */
+        if($sub_portfolio_record):?>
+            <input type="hidden" name="sub_portfolio_id" id="_object-sub-portfolio-id" data-code="<?php echo $sub_portfolio_record->code?>" value="<?php echo $sub_portfolio_record->id?>">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Sub-Portfolio</label>
+                <div class="col-sm-10">
+                    <p class="form-control-static"><?php echo $sub_portfolio_record->name_en;?></p>
+                </div>
+            </div>
+        <?php endif;?>
+
 
         <?php
         /**
          * Load Form Components
          */
+
         // Portfolio
         $portfolio_elements = $form_elements['portfolio'] ?? NULL;
         if($portfolio_elements)
@@ -52,7 +64,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         // sub-portfolio (Only on Regular Add/Edit)
         $sub_portfolio_elements = $form_elements['subportfolio'] ?? NULL;
         if( $sub_portfolio_elements):
-            $sub_portfolio_id = $record->{$sub_portfolio_elements['field']} ?? set_value($sub_portfolio_elements['field'], '', FALSE) ?? '';
+            $sub_portfolio_id = set_value($sub_portfolio_elements['field'], '', FALSE) ?? ( $record->{$sub_portfolio_elements['field']} ?? '' );
         ?>
             <div class="form-group <?php echo form_error($sub_portfolio_elements['field']) ? 'has-error' : '';?>">
                 <label for="" class="col-sm-2 control-label">
