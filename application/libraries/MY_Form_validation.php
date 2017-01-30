@@ -31,6 +31,23 @@ class MY_Form_validation extends CI_Form_validation {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Valid Username Format
+	 *
+	 * Allowed Characters: alphanumeric character, underscore, dash and dot
+	 *
+	 * Example Format: abc.xyz, abc-xyz
+	 *
+	 * @param	string
+	 * @return	bool
+	 */
+	public function username_format($str)
+	{
+		return (bool) preg_match('/^[a-zA-Z0-9_]+([-.][a-zA-Z0-9_]+)*$/i', $str);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Valid Date
 	 *
 	 * 	Format: yyyy-mm-dd

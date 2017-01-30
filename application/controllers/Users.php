@@ -34,7 +34,7 @@ class Users extends MY_Controller
 			[
 				'field' => 'username',
 		        'label' => 'Username',
-		        'rules' => 'trim|required|min_length[4]|max_length[20]|alpha_dash|callback_username_check',
+		        'rules' => 'trim|required|min_length[4]|max_length[20]|username_format|callback_username_check',
 		        '_type' 	=> 'text',
 		        '_required' => true
 			],
