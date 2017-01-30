@@ -24,17 +24,17 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
     <div class="form-group">
         <label class="col-sm-2 control-label">Portfolio</label>
         <div class="col-sm-10">
-        <p class="form-control-static"><?php echo $policy_record->portfolio_name;?></p>
+            <p class="form-control-static"><?php echo $policy_record->portfolio_name;?></p>
         </div>
     </div>
 
     <div class="form-group">
         <label class="col-sm-2 control-label">Sub-Portfolio</label>
         <div class="col-sm-10">
-        <p class="form-control-static"><?php echo _PO_MOTOR_sub_portfolio_dropdown(FALSE)[$object_attributes->sub_portfolio]?></p>
+            <p class="form-control-static"><?php echo $policy_record->sub_portfolio_name;?></p>
         </div>
     </div>
-    <?php if($object_attributes->sub_portfolio === IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE):?>
+    <?php if($policy_record->sub_portfolio_code === IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE):?>
         <div class="form-group">
             <label class="col-sm-2 control-label">CVC Type</label>
             <div class="col-sm-10">

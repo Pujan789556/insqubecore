@@ -16,7 +16,7 @@ $driver_limitation = '';
 $reaffirm_numbers = '';
 $schedule_table_title = '';
 $cost_table_title = '';
-switch ($object_attributes->sub_portfolio)
+switch ($record->sub_portfolio_code)
 {
     case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
         $schedule_table_title   = 'मोटरसाइकल बीमालेखको तालिका (सेड्युल)';
@@ -120,7 +120,7 @@ switch ($object_attributes->sub_portfolio)
                     <td width="50%" class="no-padding no-border">
                         <table class="table">
                             <tr>
-                                <td>बीमालेखको किसिम: <?php echo _PO_MOTOR_sub_portfolio_dropdown(FALSE)[$object_attributes->sub_portfolio]?></td>
+                                <td>बीमालेखको किसिम: <?php echo $record->sub_portfolio_name; ?></td>
                             </tr>
 
                             <tr>
@@ -237,7 +237,7 @@ switch ($object_attributes->sub_portfolio)
                         $driver_limitation = '';
                         $reaffirm_numbers = '';
                         $cost_table_title = '';
-                        switch ($object_attributes->sub_portfolio)
+                        switch ($record->sub_portfolio_code)
                         {
                             case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
                                 $usage_limitation = 'यस बीमालेख अन्तर्गत रक्षावरण गरिएको सवारी साधन भाडा, इनाम, संगठनात्मक दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षण वा ढुवानी कार्यसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।';

@@ -148,6 +148,7 @@ class Premium extends MY_Controller
 		$policy_object->attributes 		= $policy_record->object_attributes;
 		$policy_object->id 				= $policy_record->object_id;
 		$policy_object->portfolio_id 	= $policy_record->portfolio_id;
+		$policy_object->sub_portfolio_id 	= $policy_record->sub_portfolio_id;
 
 		return $policy_object;
 	}
@@ -251,7 +252,7 @@ class Premium extends MY_Controller
 					$tariff_record = $premium_goodies['tariff_record'];
 
 					// Save Premium According to Subportfolio
-					switch ($attributes->sub_portfolio)
+					switch ($policy_record->sub_portfolio_code)
 					{
 						case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
 							return $this->__save_MOTOR_MCY($policy_record, $policy_object, $tariff_record );
@@ -458,7 +459,7 @@ class Premium extends MY_Controller
 			$tariff_record = $this->tariff_motor_model->get_single(
 															$policy_record->fiscal_yr_id,
 															$attributes->ownership,
-															$attributes->sub_portfolio,
+															$policy_record->sub_portfolio_code,
 															$attributes->cvc_type ? $attributes->cvc_type : NULL
 														);
 
@@ -480,7 +481,7 @@ class Premium extends MY_Controller
 			if( !$__flag_valid_tariff )
 			{
 				$message .= '<br/><br/>Portfolio: <strong>MOTOR</strong> <br/>' .
-							'Sub-Portfolio: <strong>' . $attributes->sub_portfolio . '</strong> <br/>' .
+							'Sub-Portfolio: <strong>' . $policy_record->sub_portfolio_code . '</strong> <br/>' .
 							'<br/>Please contact <strong>IT Department</strong> for further assistance.';
 
 				$this->template->json(['error' => 'not_found', 'message' => $message, 'title' => $title], 404);
@@ -558,7 +559,7 @@ class Premium extends MY_Controller
                 ]
 			];
 
-			switch ($attributes->sub_portfolio)
+			switch ($policy_record->sub_portfolio_code)
 			{
 				case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
 					$validation_rules = array_merge($__common_validation_rules, [$rule_stamp_duty]);

@@ -57,9 +57,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			*/
 			$__flag_object_editable = is_policy_editable($record->status, FALSE);
 			$object_record = (object)[
-				'id' 			=> $record->object_id,
-	            'portfolio_id'  => $record->portfolio_id,
-	            'attributes'    => $record->object_attributes
+				'id' 				=> $record->object_id,
+	            'portfolio_id'  	=> $record->portfolio_id,
+	            'sub_portfolio_id'  => $record->sub_portfolio_id,
+	            'attributes'    	=> $record->object_attributes
 	        ];
 			$this->load->view('objects/snippets/_object_card', ['record' => $object_record, '__flag_object_editable' => $__flag_object_editable]);
 			?>
