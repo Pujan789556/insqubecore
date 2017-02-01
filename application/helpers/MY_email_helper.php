@@ -100,7 +100,7 @@ if ( ! function_exists('log_email'))
 	function log_email($log)
 	{
 
-		$log_file = APPPATH.'logs/mail.log';
+		$log_file = MAIL_LOG_PATH;
 		$handle = fopen($log_file, 'a+');
 	    if ( $handle == false) {
 	        throw new Exception('Could not open file: ' . $log_file);
