@@ -174,6 +174,24 @@ class User_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+	/**
+	 * Get Data Rows
+	 *
+	 * For data listing purpose
+	 *
+	 * @param type|array $params
+	 * @return type
+	 */
+	public function user_ids_by_role($role_id)
+    {
+    	return $this->db->select('U.id')
+	    			 ->from($this->table_name . ' as U')
+	    			 ->where('U.role_id', $role_id)
+	    			 ->get()->result();
+    }
+
+    // ----------------------------------------------------------------
+
     /**
      * Single Row on Basic Information Edit
      *
@@ -441,7 +459,16 @@ class User_model extends MY_Model
 	{
 		$this->db->set('password', $new_pass);
 		$this->db->where('id', $user_id);
-		return $this->db->update($this->table_name) && $this->log_activity($user_id, 'H');;
+		$done = $this->db->update($this->table_name) && $this->log_activity($user_id, 'H');
+
+		// The user need to re-login if he/she is currently logged in
+		if($done)
+		{
+			$this->load->model('dx_auth/relogin_model', 'relogin_model');
+			$this->relogin_model->update_by_user($user_id, IQB_STATUS_ACTIVE);
+		}
+
+		return $done;
 	}
 
 	// ----------------------------------------------------------------

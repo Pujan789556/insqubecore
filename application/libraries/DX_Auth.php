@@ -279,117 +279,6 @@ class DX_Auth
 		return $record;
 	}
 
-	function _get_role_data_ORIGINAL($role_id)
-	{
-		return FALSE;
-
-		// Load models
-		$this->ci->load->model('role_model');
-		$this->ci->load->model('dx_auth/permissions', 'permissions');
-
-		// Clear return value
-		$role_name = '';
-		$parent_roles_id = array();
-		$parent_roles_name = array();
-		$permission = array();
-		$parent_permissions = array();
-
-		/* Get role_name, parent_roles_id and parent_roles_name */
-
-		// Get role query from role id
-		$query = $this->ci->role_model->get_role_by_id($role_id);
-
-		// Check if role exist
-		if ($query->num_rows() > 0)
-		{
-			// Get row
-			$role = $query->row();
-
-			// Get role name
-			$role_name = $role->name;
-
-			/*
-				Code below will search if user role_id have parent_id > 0 (which mean role_id have parent role_id)
-				and do it recursively until parent_id reach 0 (no parent) or parent_id not found.
-
-				If anyone have better approach than this code, please let me know.
-			*/
-
-			// Check if role has parent id
-			if ($role->parent_id > 0)
-			{
-				// Add to result array
-				$parent_roles_id[] = $role->parent_id;
-
-				// Set variable used in looping
-				$finished = FALSE;
-				$parent_id = $role->parent_id;
-
-				// Get all parent id
-				while ($finished == FALSE)
-				{
-					$i_query = $this->ci->role_model->get_role_by_id($parent_id);
-
-					// If role exist
-					if ($i_query->num_rows() > 0)
-					{
-						// Get row
-						$i_role = $i_query->row();
-
-						// Check if role doesn't have parent
-						if ($i_role->parent_id == 0)
-						{
-							// Get latest parent name
-							$parent_roles_name[] = $i_role->name;
-							// Stop looping
-							$finished = TRUE;
-						}
-						else
-						{
-							// Change parent id for next looping
-							$parent_id = $i_role->parent_id;
-
-							// Add to result array
-							$parent_roles_id[] = $parent_id;
-							$parent_roles_name[] = $i_role->name;
-						}
-					}
-					else
-					{
-						// Remove latest parent_roles_id since parent_id not found
-						array_pop($parent_roles_id);
-						// Stop looping
-						$finished = TRUE;
-					}
-				}
-			}
-		}
-
-		/* End of Get role_name, parent_roles_id and parent_roles_name */
-
-		/* Get user and parents permission */
-
-		// Get user role permission
-		$permission = $this->ci->permissions->get_permission_data($role_id);
-
-		// Get user role parent permissions
-		if ( ! empty($parent_roles_id))
-		{
-			$parent_permissions = $this->ci->permissions->get_permissions_data($parent_roles_id);
-		}
-
-		/* End of Get user and parents permission */
-
-		// Set return value
-		$data['role_name'] = $role_name;
-		$data['parent_roles_id'] = $parent_roles_id;
-		$data['parent_roles_name'] = $parent_roles_name;
-		$data['permission'] = $permission;
-		$data['parent_permissions'] = $parent_permissions;
-
-		return $data;
-	}
-
 	/* Autologin related function */
 
 	function _create_autologin($user_id)
@@ -497,7 +386,17 @@ class DX_Auth
 		);
 
 		$this->ci->session->set_userdata($user);
+
+		// Re-login Reset
+		$this->_reset_relogin($data->id);
 	}
+
+	function _reset_relogin($user_id)
+	{
+		$this->ci->load->model('dx_auth/relogin_model', 'relogin_model');
+		$this->ci->relogin_model->update_by_user($user_id, IQB_STATUS_INACTIVE);
+	}
+
 
 	function _auto_cookie($data)
 	{
@@ -934,7 +833,23 @@ class DX_Auth
 	// Check if user is logged in
 	function is_logged_in()
 	{
-		return $this->ci->session->userdata('DX_logged_in');
+		$flag_logged_in = $this->ci->session->userdata('DX_logged_in');
+
+		if( $flag_logged_in === TRUE )
+		{
+			// Check if user's relogin flag has been set by Administrator?
+			$user_id = $this->get_user_id();
+			$this->ci->load->model('dx_auth/relogin_model', 'relogin_model');
+			$record = $this->ci->relogin_model->get_by_user($user_id);
+
+			if( $record && $record->flag_re_login == IQB_STATUS_ACTIVE )
+			{
+				$this->logout();
+				return false;
+			}
+		}
+
+		return $flag_logged_in;
 	}
 
 	// Check if user is a banned user, call this only after calling login() and returning FALSE

@@ -405,6 +405,17 @@ class Roles extends MY_Controller
 				// Let's Update the Permissions
 				if( $this->role_model->update($record->id, ['permissions' => $json_permissions], TRUE) && $this->role_model->log_activity($record->id, 'P'))
 				{
+
+					// Let's check the permission difference
+					// The user need to re-login if he/she is currently logged in belonging to this role
+					$old_permissions = $record->permissions ? json_decode($record->permissions, true) : [];
+					$new_permissions = $post_data;
+					if($this->__permission_changed($old_permissions, $new_permissions))
+					{
+						$this->load->model('dx_auth/relogin_model', 'relogin_model');
+						$this->relogin_model->update_by_role($record->id, IQB_STATUS_ACTIVE);
+					}
+
 					$status = 'success';
 					$message = 'Successfully updated.';
 				}
@@ -438,6 +449,61 @@ class Roles extends MY_Controller
 		// Return HTML
 		$this->template->json($json_data);
     }
+
+    	/**
+    	 * Permission Changed?
+    	 *
+    	 * Check if the permission on edit is changed ?
+    	 *
+    	 * @param array $old
+    	 * @param array $new
+    	 * @return bool
+    	 */
+    	private function __permission_changed($old, $new)
+    	{
+    		$count_old = count($old);
+    		$count_new = count($new);
+
+    		if($count_old !== $count_new)
+    		{
+    			return TRUE;
+    		}
+
+    		// now compare one by one
+    		$flag_changed = FALSE;
+
+    		if($count_old !== 0)
+    		{
+    			asort($old);
+				asort($new);
+
+				foreach($old as $module=>$old_permissions)
+				{
+					$new_permissions = $new[$module];
+
+					asort($new_permissions);
+					asort($old_permissions);
+
+					$new_permissions = array_values($new_permissions);
+					$old_permissions = array_values($old_permissions);
+
+					if( count($new_permissions) !== count($old_permissions) )
+					{
+						$flag_changed = TRUE;
+						break;
+					}
+
+					$match = $old_permissions === $new_permissions;
+					if( !$match )
+					{
+						$flag_changed = TRUE;
+						break;
+					}
+				}
+    		}
+
+    		return $flag_changed;
+    	}
 
     // --------------------------------------------------------------------
 
@@ -514,6 +580,10 @@ class Roles extends MY_Controller
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully revoked all role-permissions!'
 			];
+
+			// Update relogin flag of all users
+			$this->load->model('dx_auth/relogin_model', 'relogin_model');
+			$this->relogin_model->update_flag_all(IQB_STATUS_ACTIVE);
 
 			// @TODO: Log activity
     	}

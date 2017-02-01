@@ -40,7 +40,7 @@ $config['phpass_hash_strength'] = 8;
 |
 | Determines table that used by DX Auth.
 |
-| 'DX_table_prefix' allows you to specify table prefix that will be use by the rest of the table. 
+| 'DX_table_prefix' allows you to specify table prefix that will be use by the rest of the table.
 |
 | For example specifying 'DX_' in 'DX_table_prefix' and 'users' in 'DX_users_table',
 | will make DX Auth user 'DX_users' as users table.
@@ -54,6 +54,7 @@ $config['DX_user_temp_table'] = 'user_temp';
 $config['DX_user_autologin'] = 'user_autologin';
 $config['DX_roles_table'] = 'roles';
 $config['DX_permissions_table'] = 'permissions';
+$config['DX_relogin_table'] = 'relogin';
 $config['DX_login_attempts_table'] = 'login_attempts';
 
 /*
@@ -61,12 +62,12 @@ $config['DX_login_attempts_table'] = 'login_attempts';
 | Password salt
 |--------------------------------------------------------------------------
 |
-| You can add major salt to be hashed with password. 
+| You can add major salt to be hashed with password.
 | For example, you can get salt from here: https://www.grc.com/passwords.htm
 |
-| Note: 
+| Note:
 |
-| Keep in mind that if you change the salt value after user registered, 
+| Keep in mind that if you change the salt value after user registered,
 | user that previously registered cannot login anymore.
 |
 */
@@ -83,10 +84,10 @@ $config['DX_salt'] = '';
 | 'DX_email_account_details' =  Email account details after registration, only if 'DX_email_activation' is FALSE.
 |
 */
- 
-$config['DX_email_activation'] = FALSE; 
-$config['DX_email_activation_expire'] = 60*60*24*2; 
-$config['DX_email_account_details'] = TRUE; 
+
+$config['DX_email_activation'] = FALSE;
+$config['DX_email_activation_expire'] = 60*60*24*2;
+$config['DX_email_account_details'] = TRUE;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,7 +97,7 @@ $config['DX_email_account_details'] = TRUE;
 | 'DX_login_using_username' = Determine if user can use username in username field to login.
 | 'DX_login_using_email' = Determine if user can use email in username field to login.
 |
-| You have to set at least one of settings above to TRUE. 
+| You have to set at least one of settings above to TRUE.
 |
 | 'DX_login_record_ip' = Determine if user IP address should be recorded in database when user login.
 | 'DX_login_record_time' = Determine if time should be recorded in database when user login.
@@ -132,7 +133,7 @@ $config['DX_autologin_cookie_life'] = 60*60*24*31*2;
 */
 
 $config['DX_count_login_attempts'] = TRUE;
-$config['DX_max_login_attempts'] = 3; 
+$config['DX_max_login_attempts'] = 3;
 
 /*
 |--------------------------------------------------------------------------
@@ -157,7 +158,7 @@ $config['DX_forgot_password_expire'] = 900;
 |
 */
 
-$config['DX_recaptcha_public_key'] = '6LdbwQcUAAAAAH6o8yH2HjJ1vo868641ehtHusjR'; 
+$config['DX_recaptcha_public_key'] = '6LdbwQcUAAAAAH6o8yH2HjJ1vo868641ehtHusjR';
 $config['DX_recaptcha_private_key'] = '6LdbwQcUAAAAAJtZ-WUR3R8nmX0DVfHHp_ZqT45R';
 
 
@@ -199,7 +200,7 @@ $config['DX_reset_password_uri'] = '/auth/reset_password/';
 */
 
 // Registration
-$config['DX_allow_registration'] = FALSE; 
+$config['DX_allow_registration'] = FALSE;
 $config['DX_captcha_registration'] = TRUE;
 
 // Login
