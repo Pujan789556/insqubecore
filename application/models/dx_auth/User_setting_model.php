@@ -1,7 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Re-Login Tracking Model
+ * User Settings Model
+ *
+ * This model contains per user settings flags and various other
+ * fields.
  *
  * This model is used to track whether the user required re-login.
  * This is necessary when we do the following activities related to a
@@ -10,10 +13,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * 		b. change role
  * 		c. change permissions of a role ( all users belonging to this role must re-login)
  */
-class Relogin_model extends MY_Model
+class User_setting_model extends MY_Model
 {
-    protected $table_name = 'auth_relogin';
-
     protected $set_created = false;
 
     protected $set_modified = false;
@@ -47,7 +48,7 @@ class Relogin_model extends MY_Model
     public function __construct()
     {
     	$this->_prefix 		= $this->config->item('DX_table_prefix');
-		$this->table_name 	= $this->_prefix.$this->config->item('DX_relogin_table');
+		$this->table_name 	= $this->_prefix.$this->config->item('DX_user_setting_table');
 
         parent::__construct();
     }
@@ -59,17 +60,18 @@ class Relogin_model extends MY_Model
      * Update Flag By User
      *
      * @param integer $user_id
-     * @param integer $flag 	1|0
+     * @param string $flag_name     Flag Column Name
+     * @param integer $flag_value   Flag Value [1|0]
      * @return boolean
      */
-    public function update_by_user($user_id, $flag)
+    public function update_flag_by_user($user_id, $flag_name, $flag_value)
     {
     	// Update Flag
     	$done = $this->db->where('user_id', $user_id)
-    			 		->update($this->table_name, ['flag_re_login' => $flag]);
+    			 		->update($this->table_name, [$flag_name => $flag_value]);
 
 	 	// Delete Cache Key
-	 	$cache_key = 'rl_u_' . $user_id;
+	 	$cache_key = 'usr_stng_' . $user_id;
 	 	if($done)
 	 	{
 	 		$this->clear_cache($cache_key);
@@ -84,10 +86,11 @@ class Relogin_model extends MY_Model
      * Update Flag By Role
      *
      * @param integer $role_id
-     * @param integer $flag 	1|0
+     * @param string $flag_name     Flag Column Name
+     * @param integer $flag_value   Flag Value [1|0]
      * @return boolean
      */
-    public function update_by_role($role_id, $flag)
+    public function update_flag_by_role($role_id, $flag_name, $flag_value)
     {
     	// Find all the user_ids of this roles
     	$this->load->model('user_model');
@@ -100,7 +103,7 @@ class Relogin_model extends MY_Model
     		foreach($user_list as $u)
     		{
     			$user_ids[] 	= $u->id;
-    			$cache_keys[] 	= 'rl_u_' . $u->id;
+    			$cache_keys[] 	= 'usr_stng_' . $u->id;
     		}
     	}
 
@@ -109,7 +112,7 @@ class Relogin_model extends MY_Model
     	{
     		// Update Flag
     		$done = $this->db->where_in('user_id', $user_ids)
-    			 			->update($this->table_name, ['flag_re_login' => $flag]);
+    			 			->update($this->table_name, [$flag_name => $flag_value]);
     	}
 
 	 	if($done)
@@ -123,19 +126,18 @@ class Relogin_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Update All Records
+     * Update Specific Flag For all records
      *
-     * Update all users so that all need to relogin to perform.
-     * This method is called when you revoke all permissions of all roles
      *
-     * @param integer $flag     1|0
+     * @param string $flag_name     Flag Column Name
+     * @param integer $flag_value   Flag Value [1|0]
      * @return boolean
      */
-    public function update_flag_all($flag)
+    public function update_flag_all($flag_name, $flag_value)
     {
 
-        $done = $this->db->update($this->table_name, ['flag_re_login' => $flag]);
-        $cache_key = 'rl_u_*';
+        $done = $this->db->update($this->table_name, [$flag_name => $flag_value]);
+        $cache_key = 'usr_stng_*';
         if($done)
         {
             $this->clear_cache($cache_key);
@@ -147,11 +149,11 @@ class Relogin_model extends MY_Model
 
 
     /**
-     * Get Single Record By User ID
+     * Get a Single Record
      */
-    public function get_by_user($user_id)
+    public function get($user_id)
     {
-        $cache_key = 'rl_u_' . $user_id;
+        $cache_key = 'usr_stng_' . $user_id;
 
         /**
          * Get Cached Result, If no, cache the query result
@@ -162,7 +164,6 @@ class Relogin_model extends MY_Model
             $record = $this->find_by(['user_id' => $user_id]);
             $this->write_cache($record, $cache_key, CACHE_DURATION_DAY);
         }
-
         return $record;
     }
 

@@ -412,8 +412,8 @@ class Roles extends MY_Controller
 					$new_permissions = $post_data;
 					if($this->__permission_changed($old_permissions, $new_permissions))
 					{
-						$this->load->model('dx_auth/relogin_model', 'relogin_model');
-						$this->relogin_model->update_by_role($record->id, IQB_STATUS_ACTIVE);
+						$this->load->model('dx_auth/user_setting_model', 'user_setting_model');
+						$this->user_setting_model->update_flag_by_role($record->id, 'flag_re_login', IQB_STATUS_ACTIVE);
 					}
 
 					$status = 'success';
@@ -582,8 +582,8 @@ class Roles extends MY_Controller
 			];
 
 			// Update relogin flag of all users
-			$this->load->model('dx_auth/relogin_model', 'relogin_model');
-			$this->relogin_model->update_flag_all(IQB_STATUS_ACTIVE);
+			$this->load->model('dx_auth/user_setting_model', 'user_setting_model');
+			$this->user_setting_model->update_flag_all('flag_re_login', IQB_STATUS_ACTIVE);
 
 			// @TODO: Log activity
     	}

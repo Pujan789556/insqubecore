@@ -465,8 +465,8 @@ class User_model extends MY_Model
 		// The user need to re-login if he/she is currently logged in
 		if($done)
 		{
-			$this->load->model('dx_auth/relogin_model', 'relogin_model');
-			$this->relogin_model->update_by_user($user_id, IQB_STATUS_ACTIVE);
+			$this->load->model('dx_auth/user_setting_model', 'user_setting_model');
+			$this->user_setting_model->update_flag_by_user($user_id, 'flag_re_login', IQB_STATUS_ACTIVE);
 		}
 
 		return $done;

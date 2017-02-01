@@ -393,8 +393,8 @@ class DX_Auth
 
 	function _reset_relogin($user_id)
 	{
-		$this->ci->load->model('dx_auth/relogin_model', 'relogin_model');
-		$this->ci->relogin_model->update_by_user($user_id, IQB_STATUS_INACTIVE);
+		$this->ci->load->model('dx_auth/user_setting_model', 'user_setting_model');
+		$this->ci->user_setting_model->update_flag_by_user($user_id, 'flag_re_login', IQB_STATUS_INACTIVE);
 	}
 
 
@@ -839,8 +839,8 @@ class DX_Auth
 		{
 			// Check if user's relogin flag has been set by Administrator?
 			$user_id = $this->get_user_id();
-			$this->ci->load->model('dx_auth/relogin_model', 'relogin_model');
-			$record = $this->ci->relogin_model->get_by_user($user_id);
+			$this->ci->load->model('dx_auth/user_setting_model', 'user_setting_model');
+			$record = $this->ci->user_setting_model->get($user_id);
 
 			if( $record && $record->flag_re_login == IQB_STATUS_ACTIVE )
 			{

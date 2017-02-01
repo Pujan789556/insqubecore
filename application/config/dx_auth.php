@@ -54,7 +54,7 @@ $config['DX_user_temp_table'] = 'user_temp';
 $config['DX_user_autologin'] = 'user_autologin';
 $config['DX_roles_table'] = 'roles';
 $config['DX_permissions_table'] = 'permissions';
-$config['DX_relogin_table'] = 'relogin';
+$config['DX_user_setting_table'] = 'user_settings';
 $config['DX_login_attempts_table'] = 'login_attempts';
 
 /*
