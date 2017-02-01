@@ -112,6 +112,7 @@ class User_model extends MY_Model
             if( $keywords )
             {
             	$this->db->like('U.username', $keywords, 'after');
+            	$this->db->or_like('U._profile_name', $keywords, 'after');
             }
         }
         return $this->db->limit($this->settings->per_page+1)

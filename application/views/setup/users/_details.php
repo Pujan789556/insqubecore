@@ -94,7 +94,6 @@ $profile = $record->profile ? json_decode($record->profile) : new class($record)
 			<div class="box-footer">
 				<a href="#" class="btn btn-primary btn-block"><i class="fa fa-pencil-square-o margin-r-5"></i><b>Edit Contact</b></a>
 			</div>
-
 		</div>
 		<!-- /.box -->
 	</div>

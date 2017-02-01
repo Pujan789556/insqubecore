@@ -195,7 +195,8 @@ class Users extends MY_Controller
 				'rules' => 'trim|valid_date',
 				'_key' 		=> 'dob', // Json Key Name
 				'_type' 	=> 'date',
-		        '_required' => true
+				'_extra_attributes' => 'data-provide="datepicker-inline"',
+		        '_required' => false
 			],
 			[
 				'field' => 'profile[salary]',
@@ -1237,6 +1238,13 @@ class Users extends MY_Controller
 						->partial('content', 'setup/users/_details', compact('record'))
 						->render($this->data);
 
+    }
+
+	// --------------------------------------------------------------------
+
+    public function profile()
+    {
+    	return $this->details($this->dx_auth->get_user_id());
     }
 
 	// --------------------------------------------------------------------

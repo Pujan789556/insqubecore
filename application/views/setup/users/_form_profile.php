@@ -53,3 +53,11 @@ if (isset($record) )
     </div>
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
+<script type="text/javascript">
+    // Datepicker
+    $('.input-group.date').datepicker({
+        autoclose: true,
+        todayHighlight: true,
+        format: 'yyyy-mm-dd'
+    });
+</script>
