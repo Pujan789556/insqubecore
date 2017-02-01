@@ -1325,4 +1325,36 @@ class Users extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+    /**
+     * Revoke All Back Date Settings
+     *
+     * Reset all back-date settings of all users
+     *
+     * @return json
+     */
+    public function revoke_all_backdate()
+    {
+    	$this->load->model('dx_auth/user_setting_model', 'user_setting_model');
+    	if( $this->user_setting_model->update_flag_all('flag_back_date', IQB_STATUS_INACTIVE) )
+    	{
+    		$data = [
+				'status' 	=> 'success',
+				'message' 	=> 'Successfully revoked all back-date settings!'
+			];
+
+			// @TODO: Log activity
+    	}
+    	else
+    	{
+    		$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be updated!'
+			];
+		}
+		return $this->template->json($data);
+	}
+
+	// --------------------------------------------------------------------
+
+
 }
