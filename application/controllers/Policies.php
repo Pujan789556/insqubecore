@@ -385,7 +385,7 @@ class Policies extends MY_Controller
 		];
 
 		// Form Submitted? Save the data
-		$this->_save('edit', $form_data, $from_widget);
+		$this->_save('edits', $form_data, $from_widget);
 	}
 
 	// --------------------------------------------------------------------
@@ -403,19 +403,19 @@ class Policies extends MY_Controller
 		// Valid action?
 		if( !in_array($action, array('add', 'edit')))
 		{
-			return [
+			return $this->template->json([
 				'status' => 'error',
 				'message' => 'Invalid action!'
-			];
+			],404);
 		}
 
 		// Valid "from" ?
 		if( !in_array($from_widget, array('y', 'n')))
 		{
-			return [
+			return $this->template->json([
 				'status' => 'error',
 				'message' => 'Invalid action!'
-			];
+			], 404);
 		}
 
 		/**
