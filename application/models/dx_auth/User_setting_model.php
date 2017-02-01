@@ -5,16 +5,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * This model contains per user settings flags and various other
  * fields.
- *
- * This model is used to track whether the user required re-login.
- * This is necessary when we do the following activities related to a
- * user:
- * 		a. change password
- * 		b. change role
- * 		c. change permissions of a role ( all users belonging to this role must re-login)
  */
 class User_setting_model extends MY_Model
 {
+    protected $primary_key = 'user_id';
+
     protected $set_created = false;
 
     protected $set_modified = false;
@@ -27,9 +22,26 @@ class User_setting_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["user_id", "flag_re_login", "created_at", "updated_at"];
+    protected $fields = ["user_id", "flag_re_login", "flag_back_date", "created_at", "updated_at"];
 
-    protected $validation_rules = [];
+    protected $validation_rules = [
+        [
+            'field' => 'flag_re_login',
+            'label' => 'Force Relogin',
+            'rules' => 'trim|integer|in_list[1]',
+            '_type' => 'switch',
+            '_checkbox_value' => '1',
+            '_help_text' => 'If you want this user to re-login immediately, please set this flag ON.'
+        ],
+        [
+            'field' => 'flag_back_date',
+            'label' => 'Enable Back Date',
+            'rules' => 'trim|integer|in_list[1]',
+            '_type' => 'switch',
+            '_checkbox_value' => '1',
+            '_help_text' => 'This will enable user to select back date.'
+        ]
+    ];
 
 
     /**
@@ -53,6 +65,29 @@ class User_setting_model extends MY_Model
         parent::__construct();
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Update User Settings
+     *
+     * @param integer $user_id
+     * @param array $data     Data to Update
+     * @return boolean
+     */
+    public function update_settings($user_id, $data)
+    {
+        // Update Settings
+        $done = $this->update($user_id, $data, TRUE);
+
+        // Delete Cache Key
+        $cache_key = 'usr_stng_' . $user_id;
+        if($done)
+        {
+            $this->clear_cache($cache_key);
+        }
+
+        return $done;
+    }
 
     // ----------------------------------------------------------------
 
@@ -161,7 +196,7 @@ class User_setting_model extends MY_Model
         $record = $this->get_cache($cache_key);
         if(!$record)
         {
-            $record = $this->find_by(['user_id' => $user_id]);
+            $record = $this->find($user_id);
             $this->write_cache($record, $cache_key, CACHE_DURATION_DAY);
         }
         return $record;

@@ -1247,5 +1247,82 @@ class Users extends MY_Controller
     	return $this->details($this->dx_auth->get_user_id());
     }
 
+
 	// --------------------------------------------------------------------
+	//  USER SETTINGS
+	// --------------------------------------------------------------------
+
+    /**
+     * Manage User Settings
+     *
+     * @param type $user_id
+     * @return type
+     */
+    public function settings($user_id)
+    {
+        // Valid Record ?
+        $this->load->model('dx_auth/user_setting_model', 'user_setting_model');
+        $user_id = (int)$user_id;
+        $record = $this->user_setting_model->get($user_id);
+        if(!$record)
+        {
+            return $this->template->json([
+                'status' => 'error',
+                'message' => 'No user found!'
+            ],404);
+        }
+
+        if( $this->input->post() )
+        {
+            $v_rules = $this->user_setting_model->validation_rules;
+            $this->form_validation->set_rules($v_rules);
+            if( $this->form_validation->run() )
+            {
+                // Validate Permissions
+                $post_data = $this->input->post();
+
+                // Check Flag One By One
+                $data = [
+                    'flag_re_login'     => $post_data['flag_re_login'] ?? 0,
+                    'flag_back_date'    => $post_data['flag_back_date'] ?? 0,
+                ];
+
+                // Let's Update the Permissions
+                if( $this->user_setting_model->update_settings($user_id, $data ) )
+                {
+                    $status = 'success';
+                    $message = 'Successfully updated.';
+                }
+                else
+                {
+                    $status = 'error';
+                    $message = 'Could not be updated.';
+                }
+            }
+            else
+            {
+                $status = 'error';
+                $message = 'Validation Failed!';
+            }
+
+            $this->template->json([
+                'status' => $status,
+                'message' => $message,
+                'hideBootbox' => $status === 'success' // Hide bootbox on Success
+            ]);
+        }
+
+        // Let's load the form
+        $json_data['form'] = $this->load->view('setup/users/_form_user_setting',
+        [
+            'record'        => $record,
+            'form_elements' => $this->user_setting_model->validation_rules
+        ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+    }
+
+	// --------------------------------------------------------------------
+
 }

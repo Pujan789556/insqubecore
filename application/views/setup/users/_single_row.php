@@ -34,6 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		?>
 	</td>
 	<td class="ins-action">
+		<?php $name_or_uname = $record->_profile_name ?? $record->username ?>
 		<div class="btn-group">
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
 			<i class="fa fa-pencil-square-o margin-r-5"></i><i class="fa fa-caret-down"></i></button>
@@ -42,7 +43,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<a href="#"
 						title="Edit Basic Information"
 						class="trg-dialog-edit"
-						data-title='<i class="fa fa-pencil-square-o"></i> Edit Basic Information'
+						data-title='<i class="fa fa-pencil-square-o"></i> Edit Basic Information - <?php echo $name_or_uname?>'
 						data-url="<?php echo site_url('users/edit/' . $record->id);?>"
 						data-form=".form-iqb-general">
 						<i class="fa fa-pencil-square-o"></i>
@@ -52,7 +53,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<a href="#"
 						title="Edit Contact"
 						class="trg-dialog-edit"
-						data-title='<i class="fa fa-pencil-square-o"></i> Edit Contact'
+						data-title='<i class="fa fa-pencil-square-o"></i> Edit Contact - <?php echo $name_or_uname?>'
 						data-url="<?php echo site_url('users/update_contact/' . $record->id);?>"
 						data-form=".form-iqb-general">
 						<i class="fa fa-map-marker"></i>
@@ -62,7 +63,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<a href="#"
 						title="Edit Profile"
 						class="trg-dialog-edit"
-						data-title='<i class="fa fa-pencil-square-o"></i> Edit Profile'
+						data-title='<i class="fa fa-pencil-square-o"></i> Edit Profile - <?php echo $name_or_uname?>'
 						data-url="<?php echo site_url('users/update_profile/' . $record->id);?>"
 						data-form=".form-iqb-general">
 						<i class="fa fa-pencil-square-o"></i>
@@ -70,11 +71,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</li>
 
 				<li class="divider"></li>
+
+				<li>
+					<a href="#"
+						title="Edit User Settings"
+						class="trg-dialog-edit"
+						data-title='<i class="fa fa-pencil-square-o"></i> Edit User Settings - <?php echo $name_or_uname?>'
+						data-url="<?php echo site_url('users/settings/' . $record->id);?>"
+						data-form=".form-iqb-general">
+						<i class="fa fa-cog"></i>
+						<span>Edit Settings</span></a>
+				</li>
+
+				<li class="divider"></li>
 				<li>
 					<a href="#"
 						title="Change Password"
 						class="trg-dialog-edit"
-						data-title='<i class="fa fa-pencil-square-o"></i> Change Password'
+						data-title='<i class="fa fa-pencil-square-o"></i> Change Password - <?php echo $name_or_uname?>'
 						data-url="<?php echo site_url('users/change_password/' . $record->id);?>"
 						data-form=".form-iqb-general">
 						<i class="fa fa-lock"></i>
@@ -90,7 +104,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						$ban_unban_icon = $record->banned ? 'fa-eye-slash' : 'fa-eye';
 						?>
 						<a href="#"
-							title="<?php echo $ban_unban_title;?>"
+							title="<?php echo $ban_unban_title;?> - <?php echo $name_or_uname?>"
 							class="trg-row-action"
 							data-confirm="true"
 							data-message="Are you sure you want to perform this action?"
