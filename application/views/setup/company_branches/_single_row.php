@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-company-branch-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
 	<td><?php echo $record->name;?></td>
-	<td><?php $this->load->view('templates/_common/_widget_contact_snippet', ['contact' => json_decode($record->contact)]);?></td>
+	<td><?php echo get_contact_widget($record->contact, true)?></td>
 	<td class="ins-action">
 		<?php if( $this->dx_auth->is_authorized('companies', 'edit.company.branch') ): ?>
 			<a href="#"
