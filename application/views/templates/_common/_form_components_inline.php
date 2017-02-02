@@ -101,6 +101,13 @@ foreach($form_elements as $element):?>
                             '</div>';
                     break;
 
+            case 'datetime':
+                    echo    '<div class="input-group datetime">' .
+                                form_input($element_config, $value, $extra_attributes) .
+                                '<span class="input-group-addon"><i class="fa fa-calendar pointer"></i></span>' .
+                            '</div>';
+                    break;
+
             case 'url':
                 echo form_url($element_config, $value, $extra_attributes);
                 break;

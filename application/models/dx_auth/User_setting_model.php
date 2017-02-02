@@ -202,7 +202,26 @@ class User_setting_model extends MY_Model
         return $record;
     }
 
+    // --------------------------------------------------------------------
 
+    /**
+     * Get Flag Value
+     *
+     * @param integer $user_id
+     * @param string $flag_name
+     * @return mixed
+     */
+    public function flag_enabled($user_id, $flag_name)
+    {
+        $enabled = FALSE;
+
+        $record = $this->get($user_id);
+        if($record && isset($record->{$flag_name}) )
+        {
+            $enabled = (int)$record->{$flag_name} === IQB_STATUS_ACTIVE;
+        }
+        return $enabled;
+    }
 
 	// --------------------------------------------------------------------
 

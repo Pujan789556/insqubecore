@@ -5,6 +5,10 @@
 ?>
 <!-- jQuery 2.2.3 -->
 <script src="<?php echo THEME_URL; ?>plugins/jQuery/jquery-2.2.3.min.js"></script>
+
+<!-- Moment.js -->
+<script type="text/javascript" src="<?php echo THEME_URL; ?>plugins/moment/moment.min.js"></script>
+
 <!-- Bootstrap 3.3.6 -->
 <script src="<?php echo THEME_URL; ?>bootstrap/js/bootstrap.min.js"></script>
 <!-- iCheck -->
@@ -23,6 +27,9 @@
 
 <!-- Bootstrap Datepicker -->
 <script src="<?php echo THEME_URL; ?>plugins/datepicker/js/bootstrap-datepicker.min.js"></script>
+
+<!-- Bootstrap Datetimepicker -->
+<script src="<?php echo THEME_URL; ?>plugins/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
 
 <!-- bootbox (for alert, confirm) -->
 <script src="<?php echo THEME_URL; ?>plugins/bootbox/bootbox.min.js"></script>

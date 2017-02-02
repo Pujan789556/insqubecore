@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_nr", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "sub_portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issued_date", "start_date", "end_date", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_nr", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "sub_portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issued_date", "issued_time", "start_date", "start_time", "end_date", "end_time", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by" ];
 
     protected $validation_rules = [];
 
@@ -300,30 +300,30 @@ class Policy_model extends MY_Model
                         '_required' => true
                     ],
                     [
-                        'field' => 'issued_date',
-                        'label' => 'Policy Issue Date',
-                        'rules' => 'trim|required|valid_date',
-                        '_type'             => 'date',
-                        '_default'          => date('Y-m-d'),
-                        '_extra_attributes' => 'data-provide="datepicker-inline"',
+                        'field' => 'issued_datetime',
+                        'label' => 'Policy Issue Date & Time',
+                        'rules' => 'trim|required|valid_date|callback__cb_valid_backdate',
+                        '_type'             => 'datetime',
+                        '_default'          => date('Y-m-d H:i:00'),
+                        '_extra_attributes' => 'data-provide="datetimepicker-inline"',
                         '_required' => true
                     ],
                     [
-                        'field' => 'start_date',
-                        'label' => 'Policy Start Date',
-                        'rules' => 'trim|required|valid_date',
-                        '_type'             => 'date',
-                        '_default'          => date('Y-m-d'),
-                        '_extra_attributes' => 'data-provide="datepicker-inline"',
+                        'field' => 'start_datetime',
+                        'label' => 'Policy Start Date & Time',
+                        'rules' => 'trim|required|valid_date|callback__cb_valid_backdate',
+                        '_type'             => 'datetime',
+                        '_default'          => date('Y-m-d H:i:00'),
+                        '_extra_attributes' => 'data-provide="datetimepicker-inline"',
                         '_required' => true
                     ],
                     [
-                        'field' => 'end_date',
-                        'label' => 'Policy End Date',
+                        'field' => 'end_datetime',
+                        'label' => 'Policy End Date & Time',
                         'rules' => 'trim|required|valid_date|callback__cb_valid_policy_duration',
-                        '_type'             => 'date',
-                        '_default'          => date('Y-m-d', strtotime( '+1 year', strtotime( date('Y-m-d') ) ) ),
-                        '_extra_attributes' => 'data-provide="datepicker-inline"',
+                        '_type'             => 'datetime',
+                        '_default'          => date('Y-m-d H:i:00', strtotime( '+1 year', strtotime( date('Y-m-d H:i:00') ) ) ),
+                        '_extra_attributes' => 'data-provide="datetimepicker-inline"',
                         '_required' => true
                     ]
                 ],
@@ -526,6 +526,9 @@ class Policy_model extends MY_Model
             // IF CALLED FROM row() function, we should also provide agent id and agent name
             // as it is required while editing the record
             $select = "P.*,
+                        TIMESTAMP( P.`issued_date`, P.`issued_time` ) AS issued_datetime,
+                        TIMESTAMP( P.`start_date`, P.`start_time` ) AS start_datetime,
+                        TIMESTAMP( P.`end_date`, P.`end_time` ) AS end_datetime,
                         PRT.name_en as portfolio_name, C.full_name as customer_name,
                         SPRT.name_en as sub_portfolio_name";
             if($signle_select)
@@ -557,6 +560,9 @@ class Policy_model extends MY_Model
     public function get($id)
     {
         return $this->db->select(  "P.*,
+                                    TIMESTAMP( P.`issued_date`, P.`issued_time` ) AS issued_datetime,
+                                    TIMESTAMP( P.`start_date`, P.`start_time` ) AS start_datetime,
+                                    TIMESTAMP( P.`end_date`, P.`end_time` ) AS end_datetime,
                                     PRT.name_en as portfolio_name, PRT.code as portfolio_code,
                                     SPRT.name_en as sub_portfolio_name, SPRT.code as sub_portfolio_code,
                                     PRM.total_amount, PRM.stamp_duty, PRM.attributes as premium_attributes,
@@ -649,19 +655,21 @@ class Policy_model extends MY_Model
         $data['branch_id']      = $this->dx_auth->get_branch_id();
 
 
+        // Status
+        $data['status'] = IQB_POLICY_STATUS_DRAFT;
+
+        // Fiscal Year
+        $data['fiscal_yr_id'] = $fy_record->id;
+
+        // Refactor Date & time
+        $data = $this->__refactor_datetime_fields($data);
+
         /**
          * Short Term Flag???
          * ------------------
          * Find if this start-end date gives a default duration or short term duration
          */
         $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $data['start_date'], $data['end_date'] );
-
-
-        // Status
-        $data['status'] = IQB_POLICY_STATUS_DRAFT;
-
-        // Fiscal Year
-        $data['fiscal_yr_id'] = $fy_record->id;
 
         return $data;
     }
@@ -673,22 +681,52 @@ class Policy_model extends MY_Model
      * Before Update Trigger
      *
      * Tasks carried
-     *      1. Short Term Flag
+     *
+     *      1. Issue Date & Time
+     *      2. Start Date & Time
+     *      3. End Date & Time
+     *      4. Short Term Flag
      *
      * @param array $data
      * @return array
      */
     public function before_update__defaults($data)
     {
+        // Refactor Date & time
+        $data = $this->__refactor_datetime_fields($data);
+
         /**
          * Short Term Flag???
          * ------------------
          * Find if this start-end date gives a default duration or short term duration
          */
         $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $data['start_date'], $data['end_date'] );
+
+
         return $data;
     }
 
+    // --------------------------------------------------------------------
+
+        private function __refactor_datetime_fields($data)
+        {
+            // Dates
+            $data['issued_date']    = date('Y-m-d', strtotime($data['issued_datetime']));
+            $data['start_date']     = date('Y-m-d', strtotime($data['start_datetime']));
+            $data['end_date']       = date('Y-m-d', strtotime($data['end_datetime']));
+
+            // Times
+            $data['issued_time']    = date('H:i:00', strtotime($data['issued_datetime']));
+            $data['start_time']     = date('H:i:00', strtotime($data['start_datetime']));
+            $data['end_time']       = date('H:i:00', strtotime($data['end_datetime']));
+
+            // unset
+            unset($data['issued_datetime']);
+            unset($data['start_datetime']);
+            unset($data['end_datetime']);
+
+            return $data;
+        }
     // --------------------------------------------------------------------
 
     /**

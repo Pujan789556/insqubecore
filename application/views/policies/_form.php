@@ -358,6 +358,11 @@ $('.input-group.date').datepicker({
     format: 'yyyy-mm-dd'
 });
 
+// Datetimepicker
+$('.input-group.datetime, .input-group.datetime input').datetimepicker({
+    format: 'YYYY-MM-DD HH:mm:00'
+});
+
 // Hide Creditor Info if Not on Loan
 __toggle_creditor_info();
 $('input[name="flag_on_credit"]').on('ifChecked', function(){

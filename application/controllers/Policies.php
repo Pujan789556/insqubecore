@@ -475,8 +475,7 @@ class Policies extends MY_Controller
 					 */
 					if($done)
 					{
-						$updated_record = (object)$data;
-						$this->__reset_premium_on_policy_update($record, $updated_record);
+						$this->__reset_premium_on_policy_update($record, $data);
 					}
 				}
 
@@ -741,11 +740,14 @@ class Policies extends MY_Controller
 		 * 	- flag direct discount/agent commission
 		 *
 		 * @param object $before_update Policy Record Before Update
-		 * @param object $after_update Policy Record After Update
+		 * @param array $data Post Data
 		 * @return void
 		 */
-		private function __reset_premium_on_policy_update($before_update, $after_update)
+		private function __reset_premium_on_policy_update($before_update, $data)
 		{
+			// Process data to get fractioned date/time
+			$after_update = (object)$this->policy_model->before_update__defaults($data);
+
 			$fields = ['portfolio_id', 'policy_package', 'customer_id', 'object_id', 'flag_dc', 'start_date', 'end_date'];
 			$__flag_reset = FALSE;
 			foreach($fields as $column)
@@ -791,23 +793,137 @@ class Policies extends MY_Controller
 	    // --------------------------------------------------------------------
 
 		/**
-	     * Callback : Valid Duration
+	     * Callback : Validate Backdate
 	     *
-	     * (End Date - Start Days) should not exceed the Portfolio's
-	     * Default Duration
+	     * If user has supplied backdate, please make sure that :
+	     * 		1. The user is allowed to enter Backdate
+	     * 		2. If so, the supplied date should be withing backdate limit
 	     *
-	     * @param date $end_date
+	     * @param date $date
 	     * @return bool
 	     */
-	    public function _cb_valid_policy_duration($end_date)
+	    public function _cb_valid_backdate($date)
 	    {
-	    	$start_date = $this->input->post('start_date');
-	    	$portfolio_id = (int)$this->input->post('portfolio_id');
+	    	$timestamp 		= strtotime($date);
 
-	    	$info = _POLICY__get_short_term_info( $portfolio_id, $start_date, $end_date );
+	    	/**
+	    	 * Not a past date?
+	    	 * ---------------
+	    	 * Simply return true;
+	    	 */
+	    	$dateonly_timestamp = strtotime(date('Y-m-d', $timestamp));
+	    	$today_timestamp 	= strtotime(date('Y-m-d'));
+	    	if($today_timestamp <=  $dateonly_timestamp )
+	    	{
+	    		return TRUE;
+	    	}
 
-		    $start_timestamp    = strtotime($start_date);
-	        $end_timestamp      = strtotime($end_date);
+
+	    	/**
+	    	 * Backdate Allowed?
+	    	 */
+	    	if( !$this->dx_auth->is_backdate_allowed() )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_backdate', 'You are not authorized to enter "Back Dates"');
+	            return FALSE;
+	    	}
+
+	    	/**
+	    	 * Backdate Limit Set by Administrator?
+	    	 */
+	    	$back_date_limit = $this->settings->back_date_limit;
+	    	if( !$back_date_limit || !valid_date($back_date_limit) )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_backdate', '"Back Date Limit" is not setup properly.<br/>Please contact Administrator for further assistance.');
+	            return FALSE;
+	    	}
+
+	    	/**
+	    	 * Within Backdate Range?
+	    	 * ----------------------
+	    	 * i.e. Back Date <= Supplied Date
+	    	 */
+	    	$back_date_timestamp = strtotime($back_date_limit);
+
+	    	if($timestamp < $back_date_timestamp )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_backdate', 'Supplied date(%s) can not exceed "Back Date Limit"');
+	            return FALSE;
+	    	}
+	        return TRUE;
+	    }
+
+	    // --------------------------------------------------------------------
+
+		/**
+	     * Callback : Valid Duration
+	     *
+	     * Case I:
+	     * 		Proposed Date <= Issued Date
+	     *
+	     * Case II:
+	     * 		Issued Date <= Start Date
+	     *
+	     * Case III:
+	     * 		Start Date < End Date
+	     *
+	     * Case IV:
+	     * 		(End Date - Start Date) should not exceed the Portfolio's Default Duration
+	     *
+	     * @param date $end_datetime
+	     * @return bool
+	     */
+	    public function _cb_valid_policy_duration($end_datetime)
+	    {
+	    	$proposed_date 		= $this->input->post('proposed_date');
+	    	$issued_datetime 	= $this->input->post('issued_datetime');
+	    	$start_datetime 	= $this->input->post('start_datetime');
+	    	$portfolio_id 		= (int)$this->input->post('portfolio_id');
+
+	    	$proposed_timestamp = strtotime($proposed_date);
+	    	$issued_timestamp 	= strtotime($issued_datetime);
+	    	$start_timestamp    = strtotime($start_datetime);
+	        $end_timestamp      = strtotime($end_datetime);
+
+	    	/**
+	    	 * Case I: Proposed Date <= Issued Date
+	    	 */
+	    	if( $proposed_timestamp > $issued_timestamp )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_policy_duration', '"Proposed Date" must not exceed "Issued Date & Time"');
+	            return FALSE;
+	    	}
+
+	    	/**
+	    	 * Case II: Issued Date <= Start Date
+	    	 */
+	    	if( $issued_timestamp > $start_timestamp )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_policy_duration', '"Issued Date & Time" must not exceed "Start Date & Time"');
+	            return FALSE;
+	    	}
+
+
+	    	/**
+	    	 * Case III: Start Date < End Date
+	    	 */
+	    	if( $start_timestamp >= $end_timestamp )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_policy_duration', '"Start Date & Time" must not exceed "End Date & Time"');
+	            return FALSE;
+	    	}
+
+	    	/**
+	    	 * Case IV: (End Date - Start Date) should not exceed the Portfolio's Default Duration
+	    	 */
+	    	if( !$portfolio_id )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_policy_duration', 'Please select portfolio first to compute "Policy Short Term Info"');
+	            return FALSE;
+	    	}
+	    	$info = _POLICY__get_short_term_info( $portfolio_id, $start_datetime, $end_datetime );
+
+
 	        $difference         = $end_timestamp - $start_timestamp;
 	        $days               = floor($difference / (60 * 60 * 24));
 	        $default_duration 	= $info['default_duration'];

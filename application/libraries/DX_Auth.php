@@ -859,6 +859,14 @@ class DX_Auth
 	}
 
 	// Check if user has the permission?
+	function is_backdate_allowed( $module='' )
+	{
+		// Get User Settings
+		$this->ci->load->model('dx_auth/user_setting_model', 'user_setting_model');
+		return $this->ci->user_setting_model->flag_enabled( $this->get_user_id(), 'flag_back_date' );
+	}
+
+	// Check if user has the permission?
 	function is_authorized($module, $action)
 	{
 		if($this->is_admin())
