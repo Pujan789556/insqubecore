@@ -566,12 +566,15 @@ class Policy_model extends MY_Model
                                     PRT.name_en as portfolio_name, PRT.code as portfolio_code,
                                     SPRT.name_en as sub_portfolio_name, SPRT.code as sub_portfolio_code,
                                     PRM.total_amount, PRM.stamp_duty, PRM.attributes as premium_attributes,
+                                    B.name as branch_name, B.code as branch_code, B.contacts as branch_contact,
                                     C.code as customer_code, C.full_name as customer_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no,
                                     O.attributes as object_attributes,
                                     A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type,
                                     CRD.name as creditor_name, CRD.contact as creditor_contact,
                                     CRB.name as creditor_branch_name, CRB.contact as creditor_branch_contact,
-                                    U.username as sales_staff_username, U.profile as sales_staff_profile
+                                    SU.username as sales_staff_username, SU.profile as sales_staff_profile,
+                                    CU.username as created_by_username, CU.code as created_by_code, CU._profile_name as created_by_profile_name,
+                                    VU.username as verified_by_username, VU.code as verified_by_code, VU._profile_name as verified_by_profile_name
                             ")
                      ->from($this->table_name . ' as P')
                      ->join('dt_policy_premium PRM', 'PRM.policy_id = P.id')
@@ -579,11 +582,14 @@ class Policy_model extends MY_Model
                      ->join('master_portfolio SPRT', 'SPRT.id = P.sub_portfolio_id')
                      ->join('dt_customers C', 'C.id = P.customer_id')
                      ->join('dt_policy_objects O', 'O.id = P.object_id')
-                     ->join('auth_users U', 'U.id = P.sold_by')
+                     ->join('master_branches B', 'B.id = P.branch_id')
+                     ->join('auth_users SU', 'SU.id = P.sold_by')
                      ->join('rel_agent_policy RAP', 'RAP.policy_id = P.id', 'left')
                      ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
                      ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
                      ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
+                     ->join('auth_users CU', 'CU.id = P.created_by')
+                     ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
                      ->where('P.id', $id)
                      ->get()->row();
     }

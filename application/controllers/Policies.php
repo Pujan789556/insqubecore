@@ -1169,9 +1169,9 @@ class Policies extends MY_Controller
 		{
 			$this->load->library('pdf');
 	        $mpdf = $this->pdf->load();
-	        $mpdf->SetMargins(10, 10, 10);
+	        $mpdf->SetMargins(10, 10, 5);
 	        $mpdf->margin_header = 0;
-	        $mpdf->margin_footer = 0;
+	        $mpdf->margin_footer = 2;
 	        $mpdf->SetProtection(array('print'));
 	        $mpdf->SetTitle("Policy Schedule - {$record->code}");
 	        $mpdf->SetAuthor($this->settings->orgn_name_en);

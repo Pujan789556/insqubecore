@@ -53,11 +53,37 @@ switch ($record->sub_portfolio_code)
     /**
      * Load Styles (inline)
      */
-    $this->load->view('print/style/schedule')
+    $this->load->view('print/style/schedule');
+
+    /**
+     * Header & Footer
+     */
+    $creator_text = $record->created_by_profile_name ?? $record->created_by_username;
+    $creator_text .= "({$record->created_by_code})";
+
+    $verifier_text = $record->created_by_profile_name ?? ($record->created_by_username ?? '');
+    $verifier_text .= $verifier_text ? "({$record->verified_by_profile_name})" : '';
+
+    $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $record->branch_name;
+
+    $header_footer = '<htmlpagefooter name="myfooter">
+                        <table class="table table-footer no-border">
+                            <tr>
+                                <td align="left"> Created By: ' . $creator_text . ' </td>
+                                <td align="right"> Verified By: ' . $verifier_text . ' </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="border-t">'. get_contact_widget_two_lines($record->branch_contact, $branch_contact_prefix) .'</td>
+                            </tr>
+                        </table>
+                    </htmlpagefooter>
+                    <sethtmlpagefooter name="myfooter" value="on" />';
     ?>
     </head>
     <body>
-
+        <!--mpdf
+            <?php echo $header_footer?>
+        mpdf-->
         <?php
         /**
          * Policy Schedule
@@ -279,7 +305,7 @@ switch ($record->sub_portfolio_code)
                 </tr>
             </tbody>
         </table>
-        <p style="text-align: center">यस तालिकामा उल्लेख भएको प्रयोगको सीमा उल्लघंन भएमा बीमकले बीमितलाई क्षतिपूर्ति दिनेछैन ।</p>
+        <p style="text-align: center;">यस तालिकामा उल्लेख भएको प्रयोगको सीमा उल्लघंन भएमा बीमकले बीमितलाई क्षतिपूर्ति दिनेछैन ।</p>
         <table class="table">
             <tr>
                 <td width="50%">
@@ -289,10 +315,10 @@ switch ($record->sub_portfolio_code)
                 </td>
                 <td align="left">
                     <h4 class="underline"><?php echo $this->settings->orgn_name_np?> तर्फबाट अधिकार प्राप्त अधिकारीको</h4>
-                    दस्तखत:<br/>
-                    नाम थर:<br/>
-                    छाप:<br/>
-                    दर्जा:
+                    <p style="line-height: 30px">दस्तखत:</p>
+                    <p>नाम थर:</p>
+                    <p>छाप:</p>
+                    <p>दर्जा:</p>
                 </td>
             </tr>
         </table>

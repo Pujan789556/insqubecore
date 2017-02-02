@@ -369,6 +369,33 @@ if ( ! function_exists('get_contact_widget'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('get_contact_widget_two_lines'))
+{
+	/**
+	 * Get Single Line Contact
+	 *
+	 * Get the contact widget html
+	 * Format:
+	 *
+	 * 		Address1,  address2,  city, state, zip, country
+	 * 		Tel: ..., Fax: ..., Mobile: ..., Email: ..., Web: ....
+	 *
+	 * @param JSON $contact Single JSON Contact Object
+	 * @param string $prefix Prefix text if any
+	 * @param bool $plain_text  Return only Plain Text(No link on email,mobile,website, No HR)
+	 * @return html
+	 */
+	function get_contact_widget_two_lines( $contact, $prefix = '' )
+	{
+		$CI =& get_instance();
+		$data = ['contact' => json_decode($contact), 'prefix' => $prefix ];
+		$view ='templates/_common/_widget_contact_snippet_two_lines';
+		return $CI->load->view( $view, $data, TRUE);
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('get_country_name'))
 {
 	/**

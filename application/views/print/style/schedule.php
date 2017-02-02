@@ -18,7 +18,6 @@
     }
 
     table.margin-b-10{margin-bottom:10pt;}
-
     p { margin: 0pt; }
 
     td { vertical-align: top; padding: 3px; border:0.1mm solid #000000;}
@@ -31,10 +30,15 @@
         border: 0.1mm solid #000000;
         font-variant: small-caps;
     }
-    .border-b{border-bottom: 0.1mm solid #000000;}
+    .border-b, td.border-b{border-bottom: 0.1mm solid #000000;}
+    .border-t, td.border-t{border-top: 0.1mm solid #000000;}
     .underline{text-decoration: underline;}
     .no-border, td.no-border, table.no-border td{border:none !important;}
     .table td.cost {
         text-align: "." center;
     }
+
+    .table-footer{font-size:8pt; border: none; color:333;}
+    .table-footer td.border-t{border-top: 0.1mm solid #999;}
+
 </style>
