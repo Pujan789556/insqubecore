@@ -100,7 +100,10 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_compute_short_term_premium'))
 		 * If the policy is short term policy, we have to calculate the short term values
 		 *
 		 */
-		$short_term_info = _POLICY__get_short_term_info( $policy_record->portfolio_id, $policy_record->start_date, $policy_record->end_date );
+		$CI =& get_instance();
+        $CI->load->model('fiscal_year_model');
+		$fy_record = $CI->fiscal_year_model->get_fiscal_year( $policy_record->issued_date );
+		$short_term_info = _POLICY__get_short_term_info( $policy_record->portfolio_id, $fy_record, $policy_record->start_date, $policy_record->end_date );
 
 		if(
 			$pfs_record->flag_short_term === IQB_FLAG_YES

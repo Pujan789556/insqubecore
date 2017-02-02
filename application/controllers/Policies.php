@@ -921,8 +921,19 @@ class Policies extends MY_Controller
 	    		$this->form_validation->set_message('_cb_valid_policy_duration', 'Please select portfolio first to compute "Policy Short Term Info"');
 	            return FALSE;
 	    	}
-	    	$info = _POLICY__get_short_term_info( $portfolio_id, $start_datetime, $end_datetime );
 
+	    	$fy_record = $this->fiscal_year_model->get_fiscal_year( $issued_datetime );
+	    	try{
+
+				$info 	= _POLICY__get_short_term_info( $portfolio_id, $fy_record, $start_datetime, $end_datetime );
+
+			} catch (Exception $e){
+
+				return $this->template->json([
+					'status' 	=> 'error',
+					'message' 	=> 'Exception: ' . $e->getMessage()
+				], 404);
+			}
 
 	        $difference         = $end_timestamp - $start_timestamp;
 	        $days               = floor($difference / (60 * 60 * 24));

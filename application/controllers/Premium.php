@@ -298,8 +298,16 @@ class Premium extends MY_Controller
 				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 
 				$data = $this->input->post();
-				$premium_data = _PORTFOLIO_MOTOR_MCY_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+				try{
 
+					$premium_data = _PORTFOLIO_MOTOR_MCY_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+
+				} catch (Exception $e){
+					return $this->template->json([
+						'status' 	=> 'error',
+						'message' 	=> 'Exception: ' . $e->getMessage()
+					], 404);
+				}
 
 				// Target Premium Record
 				$premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
@@ -323,8 +331,17 @@ class Premium extends MY_Controller
 				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 
 				$data = $this->input->post();
-				$premium_data = _PORTFOLIO_MOTOR_PVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
 
+				try{
+
+					$premium_data = _PORTFOLIO_MOTOR_PVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+
+				} catch (Exception $e){
+					return $this->template->json([
+						'status' 	=> 'error',
+						'message' 	=> 'Exception: ' . $e->getMessage()
+					], 404);
+				}
 
 				// Target Premium Record
 				$premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
@@ -348,8 +365,16 @@ class Premium extends MY_Controller
 				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 
 				$data = $this->input->post();
-				$premium_data = _PORTFOLIO_MOTOR_CVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+				try{
 
+					$premium_data = _PORTFOLIO_MOTOR_CVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+
+				} catch (Exception $e){
+					return $this->template->json([
+						'status' 	=> 'error',
+						'message' 	=> 'Exception: ' . $e->getMessage()
+					], 404);
+				}
 
 				// Target Premium Record
 				$premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);

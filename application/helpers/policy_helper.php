@@ -327,9 +327,9 @@ if ( ! function_exists('_POLICY__get_short_term_flag'))
      * @param date $end_date    Policy End Date
      * @return  char
      */
-    function _POLICY__get_short_term_flag( $portfolio_id, $start_date, $end_date )
+    function _POLICY__get_short_term_flag( $portfolio_id, $fy_record, $start_date, $end_date )
     {
-        $info = _POLICY__get_short_term_info( $portfolio_id, $start_date, $end_date );
+        $info = _POLICY__get_short_term_info( $portfolio_id, $fy_record, $start_date, $end_date );
         return $info['flag'];
     }
 }
@@ -347,9 +347,9 @@ if ( ! function_exists('_POLICY__is_short_term'))
      * @param date $end_date    Policy End Date
      * @return  bool
      */
-    function _POLICY__is_short_term( $portfolio_id, $start_date, $end_date )
+    function _POLICY__is_short_term( $portfolio_id, $fy_record, $start_date, $end_date )
     {
-        $info = _POLICY__get_short_term_info( $portfolio_id, $start_date, $end_date );
+        $info = _POLICY__get_short_term_info( $portfolio_id, $fy_record, $start_date, $end_date );
         return $info['flag'] === IQB_FLAG_NO;
     }
 }
@@ -366,10 +366,9 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
      * @param date $end_date    Policy End Date
      * @return  array
      */
-    function _POLICY__get_short_term_info( $portfolio_id, $start_date, $end_date )
+    function _POLICY__get_short_term_info( $portfolio_id, $fy_record, $start_date, $end_date )
     {
         $CI =& get_instance();
-        $CI->load->model('fiscal_year_model');
         $CI->load->model('portfolio_setting_model');
 
         $false_return = [
@@ -380,8 +379,11 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
         /**
          * Current Fiscal Year Record & Portfolio Settings for This Fiscal Year
          */
-        $fy_record  = $CI->fiscal_year_model->get_current_fiscal_year();
         $pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($fy_record->id, $portfolio_id);
+        if(!$pfs_record)
+        {
+        	throw new Exception("No Portfolio Setting Record found for specified fiscal year {$fy_record->code_np}({$fy_record->code_en})");
+        }
 
         // update false return with default duration
         $false_return['default_duration'] = (int)$pfs_record->default_duration;

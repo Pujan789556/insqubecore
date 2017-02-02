@@ -641,7 +641,7 @@ class Policy_model extends MY_Model
         $this->load->library('Token');
         $this->load->model('fiscal_year_model');
 
-        $fy_record      = $this->fiscal_year_model->get_current_fiscal_year();
+        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_datetime']);
 
         /**
          * Policy Code - Draft One & Policy Number
@@ -669,7 +669,7 @@ class Policy_model extends MY_Model
          * ------------------
          * Find if this start-end date gives a default duration or short term duration
          */
-        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $data['start_date'], $data['end_date'] );
+        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
 
         return $data;
     }
@@ -695,12 +695,16 @@ class Policy_model extends MY_Model
         // Refactor Date & time
         $data = $this->__refactor_datetime_fields($data);
 
+        $this->load->model('fiscal_year_model');
+
+        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
+
         /**
          * Short Term Flag???
          * ------------------
          * Find if this start-end date gives a default duration or short term duration
          */
-        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $data['start_date'], $data['end_date'] );
+        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
 
 
         return $data;
