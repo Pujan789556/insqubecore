@@ -26,6 +26,8 @@ class Settings extends MY_Controller
         $this->_upload_path = INSQUBE_MEDIA_PATH . 'settings/';
 	}
 
+    // --------------------------------------------------------------------
+
 	/**
 	 * Default Method
 	 *
@@ -38,6 +40,18 @@ class Settings extends MY_Controller
 		// Image Helper
 		$this->load->helper('insqube_media');
 
+		try{
+
+			$rules = $this->setting_model->get_validation_rules('general');
+
+		} catch (Exception $e){
+
+			return $this->template->json([
+				'status' 	=> 'error',
+				'message' 	=> 'Exception: ' . $e->getMessage()
+			], 404);
+		}
+
 		/**
 		 * Form Submitted?
 		 */
@@ -47,7 +61,7 @@ class Settings extends MY_Controller
 			/**
 			 * Validate Post before uploading any Media
 			 */
-			$rules = $this->setting_model->validation_rules;
+			// $rules = $this->setting_model->get_validation_rules('general');
 			$this->form_validation->set_rules($rules);
 
 			if( $this->form_validation->run() === TRUE )
@@ -103,7 +117,7 @@ class Settings extends MY_Controller
 									: $this->settings;
 
 			$view = $this->load->view('settings/_form_general', [
-								'form_elements' => $this->setting_model->validation_rules,
+								'form_elements' => $rules,
 								'record' 		=> $record
 							], TRUE);
 
@@ -128,11 +142,13 @@ class Settings extends MY_Controller
 						])
 						->partial('content', 'settings/_index',
 							[
-								'form_elements' => $this->setting_model->validation_rules,
-								'record' 		=> $this->settings
+								'rules' 	=> $this->setting_model->validation_rules,
+								'record'	=> $this->settings
 							])
 						->render($this->data);
 	}
+
+    // --------------------------------------------------------------------
 
 	function _upload_logo( )
 	{
@@ -153,5 +169,114 @@ class Settings extends MY_Controller
 		];
 		return upload_insqube_media($options);
 	}
+
+    // --------------------------------------------------------------------
+
+	/**
+     * Setting Sections
+     *
+     * Section specific settings are displayed/updated here
+     *
+     * @param string $section
+     * @return json
+     */
+    function section($section)
+    {
+        /**
+         * Valid Section?
+         */
+        if( !$this->setting_model->valid_section($section) )
+        {
+            return $this->template->json([
+                'status'    => 'error',
+                'message'   => 'No information submitted.'
+            ], 404);
+        }
+
+        /**
+         * Form Submitted?
+         */
+        if( $this->input->post() )
+        {
+            try{
+
+                $rules = $this->setting_model->get_validation_rules($section);
+
+            } catch (Exception $e){
+
+                return $this->template->json([
+                    'status'    => 'error',
+                    'message'   => 'Exception: ' . $e->getMessage()
+                ], 404);
+            }
+            /**
+             * Validate Post before uploading any Media
+             */
+            $this->form_validation->set_rules($rules);
+
+            if( $this->form_validation->run() === TRUE )
+            {
+                $post_data = $this->input->post();
+                $section_data = [];
+                foreach($rules as $element)
+                {
+                	$field_value = $this->input->post($element['field']) ? $this->input->post($element['field']) : NULL;
+                    $section_data[$element['field']] = $field_value;
+                }
+
+                $done = $this->setting_model->update(1, $section_data, TRUE) && $this->setting_model->log_activity(1, 'E');
+                // Validation Error?
+                if( !$done )
+                {
+                    $status = 'error';
+                    $message = 'Could not update.';
+                }
+                else
+                {
+                    $status = 'success';
+                    $message = 'Successfully Updated.';
+                }
+            }
+            else
+            {
+                $status = 'error';
+                $message = 'Validation Error.';
+            }
+
+            $record = $status === 'success'
+                                    ? $this->setting_model->get(['id' => 1])
+                                    : $this->settings;
+
+            /**
+             *  IMPORTANT!
+             * ---------------
+             *  $action_url & $dom_parent_container should match exactly while rendering form
+             *  from Index Method
+             *
+             *  $action_url             = "settings/section/{$section}"
+             *  $dom_parent_container   = "tab-{$section}-settings"
+             */
+            $action_url             = site_url("settings/section/{$section}");
+            $dom_parent_container   = "#tab-{$section}-settings";
+            $view = $this->load->view('settings/_form_section', [
+                                'form_elements'         => $rules,
+                                'record'                => $record,
+                                'action_url'            => $action_url,
+                                'dom_parent_container'  => $dom_parent_container
+                            ], TRUE);
+
+            $this->template->json([
+                'status'        => $status,
+                'message'       => $message,
+                'reloadForm'    => true,
+                'form'          => $view
+            ]);
+        }
+
+        return $this->template->json([
+            'status'    => 'error',
+            'message'   => 'No information submitted.'
+        ], 404);
+    }
 
 }

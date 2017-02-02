@@ -403,6 +403,13 @@ $( document ).ajaxError(function( event, request, settings ) {
                 checkboxClass: 'icheckbox_square-blue',
                 radioClass: 'iradio_square-blue'
             });
+
+            // datepicker
+            $('.input-group.date').datepicker({
+                autoclose: true,
+                todayHighlight: true,
+                format: 'yyyy-mm-dd'
+            });
         }
 
         if(typeof r.status !== 'undefined' && r.status === 'success')
