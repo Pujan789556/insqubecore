@@ -77,8 +77,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </tr>
                 <?php endif?>
                 <tr>
-                    <td class="text-bold">Policy Issue Date</td>
-                    <td><?php echo $record->issue_date?></td>
+                    <td class="text-bold">Policy Issued Date</td>
+                    <td><?php echo $record->issued_date?></td>
                 </tr>
                 <tr>
                     <td class="text-bold">Policy Start Date</td>

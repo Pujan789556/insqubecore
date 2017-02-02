@@ -132,7 +132,7 @@ switch ($record->sub_portfolio_code)
                             </tr>
 
                             <tr>
-                                <td>बीमालेख जारी भएको स्थान र मिति: <?php echo $this->dx_auth->get_branch_code()?>, <?php echo $record->issue_date?></td>
+                                <td>बीमालेख जारी भएको स्थान र मिति: <?php echo $this->dx_auth->get_branch_code()?>, <?php echo $record->issued_date?></td>
                             </tr>
 
                             <tr>

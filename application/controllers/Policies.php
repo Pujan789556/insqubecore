@@ -350,7 +350,10 @@ class Policies extends MY_Controller
 
 			if($post_id !== $id)
 			{
-				$this->template->render_404();
+				return $this->template->json([
+					'status' => 'error',
+					'message' => 'Data mismatch (post vs method param)'
+				],404);
 			}
 		}
 
@@ -358,7 +361,10 @@ class Policies extends MY_Controller
 		$record = $this->policy_model->row($id);
 		if(!$record)
 		{
-			$this->template->render_404();
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Policy not found!'
+			],404);
 		}
 
 		/**
@@ -385,7 +391,7 @@ class Policies extends MY_Controller
 		];
 
 		// Form Submitted? Save the data
-		$this->_save('edits', $form_data, $from_widget);
+		$this->_save('edit', $form_data, $from_widget);
 	}
 
 	// --------------------------------------------------------------------

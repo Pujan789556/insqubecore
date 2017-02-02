@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_nr", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "sub_portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issue_date", "start_date", "end_date", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_nr", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "sub_portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issued_date", "start_date", "end_date", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -300,7 +300,7 @@ class Policy_model extends MY_Model
                         '_required' => true
                     ],
                     [
-                        'field' => 'issue_date',
+                        'field' => 'issued_date',
                         'label' => 'Policy Issue Date',
                         'rules' => 'trim|required|valid_date',
                         '_type'             => 'date',
@@ -733,7 +733,7 @@ class Policy_model extends MY_Model
                         [customer_id] => 15
                         [object_name] => Scooter, Dio, FFF, 9879879, ADSF
                         [object_id] => 21
-                        [issue_date] => 2016-12-28
+                        [issued_date] => 2016-12-28
                         [start_date] => 2016-12-28
                         [duration] => +1 year
                         [sold_by] => 2
@@ -806,7 +806,7 @@ class Policy_model extends MY_Model
                             [customer_id] => 16
                             [object_name] => Motorcycle, Pulsar 250, , 98798, 987987
                             [object_id] => 22
-                            [issue_date] => 2016-12-28
+                            [issued_date] => 2016-12-28
                             [start_date] => 2016-12-28
                             [duration] => +1 year
                             [sold_by] => 2
