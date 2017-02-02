@@ -360,7 +360,9 @@ $('.input-group.date').datepicker({
 
 // Datetimepicker
 $('.input-group.datetime, .input-group.datetime input').datetimepicker({
-    format: 'YYYY-MM-DD HH:mm:00'
+    format: 'YYYY-MM-DD HH:mm:00',
+    showClose: true,
+    showClear: true
 });
 
 // Hide Creditor Info if Not on Loan
