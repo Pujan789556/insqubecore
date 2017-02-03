@@ -38,7 +38,7 @@
         text-align: "." center;
     }
 
-    .table-footer{font-size:8pt; border: none; color:333;}
+    .table-footer{font-size:8pt; border: none; color:333; font-style: italic;}
     .table-footer td.border-t{border-top: 0.1mm solid #999;}
 
 </style>

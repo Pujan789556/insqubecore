@@ -58,11 +58,11 @@ switch ($record->sub_portfolio_code)
     /**
      * Header & Footer
      */
-    $creator_text = $record->created_by_profile_name ?? $record->created_by_username;
-    $creator_text .= "({$record->created_by_code})";
+    $creator_text = ( $record->created_by_profile_name ?? $record->created_by_username ) . ' - ' . $record->created_by_code;
 
-    $verifier_text = $record->created_by_profile_name ?? ($record->created_by_username ?? '');
-    $verifier_text .= $verifier_text ? "({$record->verified_by_profile_name})" : '';
+    $verifier_text = $record->verified_by_code
+                        ? ( $record->verified_by_profile_name ?? $record->verified_by_username ) . ' - ' . $record->verified_by_code
+                        : '';
 
     $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $record->branch_name;
 
