@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_nr", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "sub_portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issued_date", "issued_time", "start_date", "start_time", "end_date", "end_time", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_date", "created_at", "created_by", "updated_at", "updated_by" ];
+    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_nr", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "sub_portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issued_date", "issued_time", "start_date", "start_time", "end_date", "end_time", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_at", "created_at", "created_by", "updated_at", "updated_by" ];
 
     protected $validation_rules = [];
 
@@ -424,8 +424,30 @@ class Policy_model extends MY_Model
     public function update_status($id, $to_status_code)
     {
         $data = [
-            'status' => $to_status_code
+            'status'        => $to_status_code,
+            'updated_by'    => $this->dx_auth->get_user_id(),
+            'updated_at'    => $this->set_date()
         ];
+
+        /**
+         * Extra Data according to Status Code
+         */
+        switch ($to_status_code)
+        {
+            /**
+             * Verified by and at
+             */
+            case IQB_POLICY_STATUS_VERIFIED:
+                $data['verified_by'] = $this->dx_auth->get_user_id();
+                $data['verified_at'] = $this->set_date();
+                break;
+
+            default:
+                # code...
+                break;
+        }
+
+
         return $this->db->where('id', $id)
                         ->update($this->table_name, $data);
     }
