@@ -1286,7 +1286,7 @@ class DX_Auth
 			if ($this->ci->user_model->create_user($row))
 			{
 				// Trigger event
-				$this->user_activated($this->ci->db->insert_id());
+				// $this->user_activated($this->ci->db->insert_id());
 
 				// Delete user from temp
 				$this->ci->user_temp->delete_user($del);
