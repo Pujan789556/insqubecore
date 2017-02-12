@@ -4,14 +4,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * InsQube Activity Class
  *
- * This class is used to save different module activities and to render the activity 
+ * This class is used to save different module activities and to render the activity
  * statements with proper anchoring to those module(s)
  *
  * @package		InsQube
  * @subpackage	Libraries
  * @category	Libraries
  * @author		IP Bastola <ip.bastola@gmail.com>
- * @link		
+ * @link
  */
 
 class Activity {
@@ -31,14 +31,14 @@ class Activity {
 
 	/**
 	 * Statement Method
-	 * 
+	 *
 	 * @var string
 	 */
 	private $_statement_method = '';
 
 	/**
 	 * Activity Error String
-	 * 
+	 *
 	 * @var string
 	 */
 	private $_activity_error = '';
@@ -105,8 +105,8 @@ class Activity {
 
 	/**
 	 * Save an Activity to Database
-	 * 
-	 * @param array $data 
+	 *
+	 * @param array $data
 	 * @return bool
 	 */
 	public function save($data)
@@ -119,15 +119,17 @@ class Activity {
 		{
 			return $this->ci->activity_model->insert($data);
 		}
-		return FALSE;
+		else{
+			throw new Exception($this->_activity_error);
+		}
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Validate Data before saving it
-	 * 
-	 * @param array $data 
+	 *
+	 * @param array $data
 	 * @return bool
 	 */
 	private function _before_save( $data )
@@ -158,13 +160,13 @@ class Activity {
 		}
 
 		return $valid;
-	}	
+	}
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Return activity statement
-	 * 
+	 *
 	 * @return string
 	 */
 	public function statement()
@@ -189,11 +191,11 @@ class Activity {
 
 	/**
 	 * Return Common Statement
-	 * 
+	 *
 	 * Common statement for all modules
-	 * 
+	 *
 	 * 	Format: <action> module
-	 * 
+	 *
 	 * @return string
 	 */
 	private function _statement_common( $fullstop = TRUE )
@@ -204,36 +206,36 @@ class Activity {
 
 		// If this is a recordwise action
 		if($this->_activity->module_id)
-		{	
+		{
 			// eg. <a href="roles/...">role</a>
-			$anchor = anchor( 
-						site_url( $action_base_uri . $this->_activity->module_id), 
+			$anchor = anchor(
+						site_url( $action_base_uri . $this->_activity->module_id),
 						"{$this->_activity->module}");
 		}
 		else
 		{
 			// Else, linke to module on the whole statement
 			$action = anchor(site_url( $action_base_uri ), $action);
-		}			
+		}
 
 		$statement = "$action $anchor";
 
 		$statement = $fullstop ? $statement . '.' : $statement;
 
-		return $statement;		
+		return $statement;
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Get User Activity Statement
-	 * 
+	 *
 	 * 	Format: <action> user
-	 * 
+	 *
 	 * @return string
 	 */
 	private function _statement_user(  )
-	{		
+	{
 		return $this->_statement_common();
 	}
 
@@ -241,14 +243,14 @@ class Activity {
 
 	/**
 	 * Get Role Activity Statement
-	 * 
+	 *
 	 * 	Format: <action> role [ to <user> ]
-	 * 
+	 *
 	 * @return string
 	 */
 	private function _statement_role(  )
-	{		
-		
+	{
+
 		$statement = $this->_statement_common( FALSE );
 
 		$extra_string = '.';
@@ -258,7 +260,7 @@ class Activity {
 		if($this->_activity->action == 'A')
 		{
 			// Statement:: assigned <role> to <user>
-			// ref_anchor holds user_id			
+			// ref_anchor holds user_id
 			$user_id = $this->_activity->extra ? (int)$this->_activity->extra : '';
 			if( $user_id )
 			{
@@ -272,17 +274,17 @@ class Activity {
 
 	// --------------------------------------------------------------------
 
-		
+
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Set Activity Render Method
-	 * 
+	 *
 	 * 	Set statement method according to current activity module.
-	 * 	e.g. if user module is set, then it will set user statement method as 
+	 * 	e.g. if user module is set, then it will set user statement method as
 	 *  _statement_user and so on...
-	 * 
+	 *
 	 * @return $this
 	 */
 	private function _set_statement_method()
@@ -296,7 +298,7 @@ class Activity {
 
 	/**
 	 * Get activity statement method
-	 * 
+	 *
 	 * @return string
 	 */
 	private function _get_statement_method()
@@ -308,11 +310,11 @@ class Activity {
 
 	/**
 	 * Set Activity Module Config
-	 * 	
+	 *
 	 * 	If no module is supplied, it will set module config for current actvity object,
 	 * 	else, it will set for specified module
-	 * 
-	 * @param string $module 
+	 *
+	 * @param string $module
 	 * @return Object
 	 */
 	public function set_module_config($module = '')
@@ -334,7 +336,7 @@ class Activity {
 
 	/**
 	 * Get Activity Module Config options
-	 * 
+	 *
 	 * @return array
 	 */
 	public function get_module_config()
@@ -346,7 +348,7 @@ class Activity {
 
 	/**
 	 * Get Activity Error
-	 * 
+	 *
 	 * @return string
 	 */
 	public function get_error()

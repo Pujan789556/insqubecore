@@ -56,7 +56,7 @@
 
 function ___environment_defaults()
 {
-    $environment_file = './.env';
+    $environment_file = '../.env';
 
     if(!file_exists($environment_file))
     {
