@@ -285,7 +285,7 @@ class MY_Model
      * Cache Implementation
      */
     protected $cache_driver = CACHE_DRIVER;
-    protected $cache_prefix = 'ch';
+    protected $cache_prefix = CACHE_PREFIX;
     protected $delete_cache_on_save = FALSE;
 
 
