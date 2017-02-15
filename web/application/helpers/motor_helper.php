@@ -173,6 +173,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 		$interval 					= $vehicle_registration_date->diff($today);
 		$vehicle_age_in_yrs 		= $interval->y;
 
+		$__remarks = NULL; // Premium Remarks, if tariff calculation falls below default premium
+
 		//
 		// Defaults: Thirdparty Premium, Default Rate, Vehicle Over Age Rate
 		//
@@ -297,7 +299,6 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 				'amount' 	=> $__premium_A_row_7
 			];
 
-
 			//
 			// Agent Commission/Direct Discount? -> Applies only Non-GOVT
 			//
@@ -314,6 +315,39 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 
 			// अ Total
 			$premium_A_total = $__premium_A_row_7  - $__premium_A_row_8;
+
+
+			/**
+			 * Default Premium Check
+			 * ---------------------
+			 *
+			 * If $premium_A_total  is below the default premium amount, we should use
+			 * the default premium amount from Motor Tariff.
+			 */
+			if( $tariff_record->default_premium > $premium_A_total )
+			{
+
+				// Premium Total and Commissionable Amount to Default.
+				$premium_A_total 				= $tariff_record->default_premium;
+				$__agent_comissionable_amount 	= $premium_A_total;
+
+				// Remove all the sections
+				$__cost_table_A = [
+					'column_head' => 'अ',
+					'title_np' 	=> 'सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा तथा दुर्घटना बीमा वापत',
+					'title_en' 	=> 'Insurance against vehicle damage/loss & accident insurance amounted to'
+				];
+				$__cost_table_A['sections'] = [];
+				$__cost_table_A['sections'][] = [
+					'title' 	=> "सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा तथा दुर्घटना बीमा वापत",
+					'amount' 	=> $premium_A_total
+				];
+
+				// Let's have a remarks
+				$__remarks = 'Tariff Calculation is below Default Premium Amount.';
+			}
+
+
 			$__cost_table_A['sections'][] = [
 				'title' 		=> "जम्मा",
 				'amount' 		=> $premium_A_total,
@@ -541,6 +575,9 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 			}
 		}
 
+		// Any Remarks?
+		$__cost_table['remarks'] = $__remarks;
+
 		/**
 		 * SHORT TERM POLICY?
 		 * ---------------------
@@ -598,6 +635,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 		$today 						= new DateTime(date('Y-m-d'));
 		$interval 					= $vehicle_registration_date->diff($today);
 		$vehicle_age_in_yrs 		= $interval->y;
+
+		$__remarks = NULL; // Premium Remarks, if tariff calculation falls below default premium
 
 		//
 		// Tariff Rate Defaults for Given Engine Capacity
@@ -841,6 +880,38 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 
 			// Section Sub Total (अ Total)
 			$premium_A_total  = $__premium_A_row_17 = $__premium_A_row_CHA + $__premium_A_row_16;
+
+			/**
+			 * Default Premium Check
+			 * ---------------------
+			 *
+			 * If $premium_A_total  is below the default premium amount, we should use
+			 * the default premium amount from Motor Tariff.
+			 */
+			if( $tariff_record->default_premium > $premium_A_total )
+			{
+
+				// Premium Total and Commissionable Amount to Default.
+				$premium_A_total 				= $tariff_record->default_premium;
+				$__agent_comissionable_amount 	= $premium_A_total;
+
+				// Remove all the sections
+				$__cost_table_A = [
+					'column_head' => 'अ',
+					'title_np' 	=> 'सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा वापत',
+					'title_en' 	=> 'Insurance against vehicle damage/loss',
+				];
+				$__cost_table_A['sections'] = [];
+				$__cost_table_A['sections'][] = [
+					'title' 	=> "सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा वापत",
+					'amount' 	=> $premium_A_total
+				];
+
+				// Let's have a remarks
+				$__remarks = 'Tariff Calculation is below Default Premium Amount.';
+			}
+
+
 			$__cost_table_A['sections'][] = [
 				'title' 	=> "जम्मा",
 				'amount' 	=> $premium_A_total,
@@ -1092,6 +1163,9 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 			}
 		}
 
+		// Any Remarks?
+		$__cost_table['remarks'] = $__remarks;
+
 		/**
 		 * SHORT TERM POLICY?
 		 * ---------------------
@@ -1148,6 +1222,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
         $today                      = new DateTime(date('Y-m-d'));
         $interval                   = $vehicle_registration_date->diff($today);
         $vehicle_age_in_yrs         = $interval->y;
+
+        $__remarks = NULL; // Premium Remarks, if tariff calculation falls below default premium
 
         //
         // Tariff Rate Defaults for Given Engine Capacity
@@ -1466,6 +1542,38 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
             // अ Sub Total
             //
             $premium_A_total =  $__premium_A_row_NGA - $__discount_A_row__direct_discount + $__premium_A_row_towing;
+
+            /**
+			 * Default Premium Check
+			 * ---------------------
+			 *
+			 * If $premium_A_total  is below the default premium amount, we should use
+			 * the default premium amount from Motor Tariff.
+			 */
+			if( $tariff_record->default_premium > $premium_A_total )
+			{
+
+				// Premium Total and Commissionable Amount to Default.
+				$premium_A_total 				= $tariff_record->default_premium;
+				$__agent_comissionable_amount 	= $premium_A_total;
+
+				// Remove all the sections
+				$__cost_table_A = [
+					'column_head' => 'अ',
+					'title_np' 	=> 'सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा वापत',
+					'title_en' 	=> 'Insurance against vehicle damage/loss',
+				];
+				$__cost_table_A['sections'] = [];
+				$__cost_table_A['sections'][] = [
+					'title' 	=> "सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा वापत",
+					'amount' 	=> $premium_A_total
+				];
+
+				// Let's have a remarks
+				$__remarks = 'Tariff Calculation is below Default Premium Amount.';
+			}
+
+
             $__cost_table_A['sections'][] = [
                 'title'     => "जम्मा",
                 'amount'    => $premium_A_total,
@@ -1744,6 +1852,10 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
                 $__cost_table['comissionable_amount'] = $__agent_comissionable_amount;
             }
         }
+
+        // Any Remarks?
+		$__cost_table['remarks'] = $__remarks;
+
 
         /**
 		 * SHORT TERM POLICY?

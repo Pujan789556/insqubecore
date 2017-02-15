@@ -19,7 +19,7 @@ class Premium_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "policy_id", "total_amount", "comissionable_amount", "stamp_duty",  "attributes", "extra_fields", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "policy_id", "total_amount", "comissionable_amount", "stamp_duty",  "attributes", "extra_fields", "remarks", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -56,7 +56,8 @@ class Premium_model extends MY_Model
             'comissionable_amount'  => NULL,
             'stamp_duty'        => 0.00,
             'attributes'        => NULL,
-            'extra_fields'      => NULL
+            'extra_fields'      => NULL,
+            'remarks'           => NULL
         ];
         return $this->db->where('policy_id', $policy_id)
                  ->update($this->table_name, $reset_data);
