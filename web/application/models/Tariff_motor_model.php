@@ -18,7 +18,7 @@ class Tariff_motor_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "sub_portfolio_code", "cvc_type", "fiscal_yr_id", "ownership", "tariff", "no_claim_discount", "dr_mcy_disabled_friendly", "rate_pvc_on_hire", "dr_cvc_on_personal_use", "dr_voluntary_excess", "pramt_compulsory_excess", "accident_premium", "riks_group", "pramt_towing", "trolly_tariff", "insured_value_tariff", "active", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "sub_portfolio_code", "cvc_type", "fiscal_yr_id", "ownership", "default_premium", "tariff", "no_claim_discount", "dr_mcy_disabled_friendly", "rate_pvc_on_hire", "dr_cvc_on_personal_use", "dr_voluntary_excess", "pramt_compulsory_excess", "accident_premium", "riks_group", "pramt_towing", "trolly_tariff", "insured_value_tariff", "active", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -56,13 +56,24 @@ class Tariff_motor_model extends MY_Model
     {
         $this->validation_rules = [
 
-            'active' => [
+            /**
+             * Default Configurations
+             */
+            'defaults' => [
                 [
                     'field' => 'active',
                     'label' => 'Activate Tariff',
                     'rules' => 'trim|integer|in_list[1]',
                     '_type' => 'switch',
                     '_checkbox_value' => '1'
+                ],
+                [
+                    'field' => 'default_premium',
+                    'label' => 'Default Premium Amount (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_required' => true,
+                    '_help_text' => 'This is the default premium amount for "अ. सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा तथा दुर्घटना बीमा वापत". When the tariff calculation falls below this amount, we use this amount as the premium amount.'
                 ]
             ],
 

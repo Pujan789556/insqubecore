@@ -606,6 +606,9 @@ class Tariff extends MY_Controller
                 // Activate Tariff
 	            $post_data['active'] = $data['active'] ?? 0;
 
+                // Default Premium
+                $post_data['default_premium'] = $data['default_premium'];
+
 
                 $done = $this->tariff_motor_model->update($record->id, $post_data, TRUE);
 

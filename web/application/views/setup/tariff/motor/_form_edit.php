@@ -42,13 +42,13 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
 
         <?php
         /**
-         * Activate Tariff
+         * Default Configurations
          *
          * Load Form Components
          */
-        $active = $form_elements['active'];
+        $default_form_elements = $form_elements['defaults'];
         $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements'     => $active,
+                'form_elements'     => $default_form_elements,
                 'form_record'       => $record
         ]);
         ?>
