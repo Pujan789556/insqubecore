@@ -53,7 +53,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $setting_fields = [
                 'agent_commission'  => ['label' => 'Agent Commission(%)'],
                 'direct_discount'   => ['label' => 'Direct Discount(%)'],
-                'policy_base_no'    => ['label' => 'Policy Base Number'],
                 'stamp_duty'        => ['label' => 'Stamp Duty(Rs)'],
                 'default_duration'  => ['label' => 'Default Duration (Days)'],
             ];
@@ -74,7 +73,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             // $repeat_record[] = $t;
                             $setting_fields['agent_commission']['values'][$portfolio_repeat_count]   = $t->agent_commission;
                             $setting_fields['direct_discount']['values'][$portfolio_repeat_count]    = $t->direct_discount;
-                            $setting_fields['policy_base_no']['values'][$portfolio_repeat_count]     = $t->policy_base_no;
                             $setting_fields['stamp_duty']['values'][$portfolio_repeat_count]         = $t->stamp_duty;
                             $setting_fields['default_duration']['values'][$portfolio_repeat_count]   = $t->default_duration;
                             $setting_fields['flag_short_term']['values'][$portfolio_repeat_count]    = $t->flag_short_term;
