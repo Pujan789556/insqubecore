@@ -84,9 +84,17 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
     </div>
 
     <div class="form-group">
-        <label class="col-sm-2 control-label">Vehicle Price</label>
+        <label class="col-sm-2 control-label">Sum Insured Value (Rs.)</label>
         <div class="col-sm-10">
         <p class="form-control-static">Rs. <?php echo $object_attributes->price_vehicle + $object_attributes->price_accessories;?></p>
+        <p class="help-box">
+            When Sum Insured Value is below or equal to Rs. <strong>1 Lakh (100000.00)</strong> then the Stamp Duty = should be <strong>Rs. 10</strong>.
+            If its greater it should be <strong>Rs. 20</strong>.<br/><br/>
+            <code>
+                IF Sum Insured <= 100000 Then  <strong>Stamp Duty = Rs. 10</strong> <br/>
+                Else <strong>Stamp Duty = Rs. 10</strong>
+            </code>
+        </p>
         </div>
     </div>
 
