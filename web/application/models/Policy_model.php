@@ -605,13 +605,13 @@ class Policy_model extends MY_Model
                      ->join('dt_customers C', 'C.id = P.customer_id')
                      ->join('dt_policy_objects O', 'O.id = P.object_id')
                      ->join('master_branches B', 'B.id = P.branch_id')
+                     ->join('auth_users CU', 'CU.id = P.created_by')
                      ->join('auth_users SU', 'SU.id = P.sold_by')
+                     ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
                      ->join('rel_agent_policy RAP', 'RAP.policy_id = P.id', 'left')
+                     ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
                      ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
                      ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
-                     ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
-                     ->join('auth_users CU', 'CU.id = P.created_by')
-                     ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
                      ->where('P.id', $id)
                      ->get()->row();
     }
