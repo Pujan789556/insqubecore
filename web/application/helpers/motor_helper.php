@@ -121,10 +121,10 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_compute_short_term_premium'))
 			$cost_table['total_amount'] = ($cost_table['total_amount'] * $short_term_rate)/100.00;
 
 			// Compute Commission Amount if any
-			$comission_amount = $cost_table['comission_amount'] ?? NULL;
-			if($comission_amount)
+			$comissionable_amount = $cost_table['comissionable_amount'] ?? NULL;
+			if($comissionable_amount)
 			{
-				$cost_table['comission_amount'] = ($cost_table['comission_amount'] * $short_term_rate)/100.00;
+				$cost_table['comissionable_amount'] = ($cost_table['comissionable_amount'] * $short_term_rate)/100.00;
 			}
 		}
 
@@ -537,7 +537,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 			 */
 			if($policy_record->flag_dc === 'C' && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
 			{
-				$__cost_table['comission_amount'] = $__agent_comissionable_amount;
+				$__cost_table['comissionable_amount'] = $__agent_comissionable_amount;
 			}
 		}
 
@@ -1088,7 +1088,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 			 */
 			if($policy_record->flag_dc === 'C' && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
 			{
-				$__cost_table['comission_amount'] = $__agent_comissionable_amount;
+				$__cost_table['comissionable_amount'] = $__agent_comissionable_amount;
 			}
 		}
 
@@ -1741,7 +1741,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
              */
             if($policy_record->flag_dc === 'C' && $object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
             {
-                $__cost_table['comission_amount'] = $__agent_comissionable_amount;
+                $__cost_table['comissionable_amount'] = $__agent_comissionable_amount;
             }
         }
 
