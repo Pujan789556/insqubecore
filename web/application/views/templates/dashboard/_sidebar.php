@@ -95,6 +95,20 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           </li>
                                     </ul>
                               </li>
+
+                              <li class="<?php echo set_menu_active($nav_level_1, 'account');?>">
+                                    <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Account
+                                          <span class="pull-right-container">
+                                                <i class="fa fa-angle-left pull-right"></i>
+                                          </span>
+                                    </a>
+                                    <ul class="treeview-menu">
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'ac_heading_groups');?>">
+                                                <a href="<?php echo site_url('ac_heading_groups');?>"><i class="fa fa-circle-o"></i> Heading Groups</a>
+                                          </li>
+                                    </ul>
+                              </li>
+
                               <li class="<?php echo set_menu_active($nav_level_1, 'portfolio');?>">
                                     <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Portfolio
                                           <span class="pull-right-container">

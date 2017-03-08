@@ -19,6 +19,17 @@
 $config['insqb_activity_types'] = [
 
 	/**
+	 * Activities related to Account Heading Group
+	 */
+	'ac_heading_group' => [
+		'_uri' => 'ac_heading_groups/',
+		'_table' => 'ac_account_heading_groups',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited'
+	]],
+
+	/**
 	 * Activities related to Agent
 	 */
 	'agent' => [
