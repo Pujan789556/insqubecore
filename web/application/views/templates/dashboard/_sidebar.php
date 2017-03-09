@@ -106,6 +106,9 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ac_heading_groups');?>">
                                                 <a href="<?php echo site_url('ac_heading_groups');?>"><i class="fa fa-circle-o"></i> Heading Groups</a>
                                           </li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'ac_headings');?>">
+                                                <a href="<?php echo site_url('ac_headings');?>"><i class="fa fa-circle-o"></i> Headings</a>
+                                          </li>
                                     </ul>
                               </li>
 

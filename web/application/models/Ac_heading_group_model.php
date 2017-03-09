@@ -52,6 +52,20 @@ class Ac_heading_group_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function valid_range($id, $ac_number)
+    {
+        $valid = FALSE;
+
+        $record = parent::find($id);
+        if($record)
+        {
+            $valid = $ac_number >= $record->range_min && $ac_number <= $record->range_max;
+        }
+        return $valid;
+    }
+
+    // ----------------------------------------------------------------
+
     public function get_all()
     {
         /**
@@ -60,7 +74,9 @@ class Ac_heading_group_model extends MY_Model
         $list = $this->get_cache('ac_hdg_all');
         if(!$list)
         {
-            $list = parent::find_all();
+            $list = $this->db->select('`id`, `range_min`, `range_max`, `name`')
+                        ->from($this->table_name)
+                        ->get()->result();
             $this->write_cache($list, 'ac_hdg_all', CACHE_DURATION_DAY);
         }
         return $list;
@@ -94,7 +110,7 @@ class Ac_heading_group_model extends MY_Model
         $list = [];
         foreach($records as $record)
         {
-            $list["{$record->id}"] = $record->name;
+            $list["{$record->id}"] = "[{$record->range_min}-{$record->range_max}] " . $record->name;
         }
         return $list;
     }
