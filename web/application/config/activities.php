@@ -21,9 +21,9 @@ $config['insqb_activity_types'] = [
 	/**
 	 * Activities related to Account Heading
 	 */
-	'ac_heading' => [
-		'_uri' => 'ac_headings/',
-		'_table' => 'ac_account_headings',
+	'ac_chart_of_account' => [
+		'_uri' => 'ac_chart_of_accounts/',
+		'_table' => 'ac_chart_of_accounts',
 		'_actions' => [
 			'C' => 'added',
 			'E' => 'edited',
@@ -33,11 +33,10 @@ $config['insqb_activity_types'] = [
 	/**
 	 * Activities related to Account Heading Group
 	 */
-	'ac_heading_group' => [
-		'_uri' => 'ac_heading_groups/',
-		'_table' => 'ac_account_heading_groups',
+	'ac_account_group' => [
+		'_uri' => 'ac_account_groups/',
+		'_table' => 'ac_account_groups',
 		'_actions' => [
-			'C' => 'added',
 			'E' => 'edited'
 	]],
 

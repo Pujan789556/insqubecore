@@ -110,7 +110,8 @@ define('CACHE_DURATION_MONTH', 2592000);
 |--------------------------------------------------------------------------
 |
 */
-define('IQB_BLANK_SELECT', ['' => 'Select...']);
+define('IQB_BLANK_SELECT', 	['' => 'Select...']);
+define('IQB_ZERO_SELECT', 	['0' => 'Select...']);
 
 
 /*

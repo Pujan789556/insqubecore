@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Account Heading Controller
+ * Chart of Accounts Controller
  *
  * This controller falls under "Master Setup" category.
  *
@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Ac_headings extends MY_Controller
+class Ac_chart_of_accounts extends MY_Controller
 {
 	function __construct()
 	{
@@ -31,18 +31,18 @@ class Ac_headings extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Account Headings';
+        $this->data['site_title'] = 'Master Setup | Chart of Accounts';
 
         // Setup Navigation
 		$this->active_nav_primary([
 			'level_0' => 'master_setup',
-			'level_1' => 'general',
+			'level_1' => 'account',
 			'level_2' => $this->router->class
 		]);
 
 		// Load Model
-		$this->load->model('ac_heading_group_model');
-		$this->load->model('ac_heading_model');
+		$this->load->model('ac_account_group_model');
+		$this->load->model('ac_chart_of_account_model');
 	}
 
 	// --------------------------------------------------------------------
@@ -86,7 +86,7 @@ class Ac_headings extends MY_Controller
 			$params = array_merge($params, $filter_data['data']);
 		}
 
-		$records = $this->ac_heading_model->rows($params);
+		$records = $this->ac_chart_of_account_model->rows($params);
 		$records = $records ? $records : [];
 		$total = count($records);
 
@@ -105,14 +105,14 @@ class Ac_headings extends MY_Controller
 
 		// DOM Data
 		$dom_data = [
-			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-ac-heading', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-ac-heading' 			// Filter Form ID
+			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-ac-chart-of-account', 		// List box ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-ac-chart-of-account' 			// Filter Form ID
 		];
 
 		$data = [
 			'records' => $records,
 			'next_id' => $next_id,
-			'next_url' => $next_id ? site_url( 'ac_headings/page/r/' . $next_id ) : NULL
+			'next_url' => $next_id ? site_url( 'ac_chart_of_accounts/page/r/' . $next_id ) : NULL
 		] + $dom_data;
 
 		/**
@@ -120,20 +120,20 @@ class Ac_headings extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'setup/ac_headings/_index';
+			$view = 'setup/ac_chart_of_accounts/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('ac_headings/page/l/' )
+				'filter_url' 	=> site_url('ac_chart_of_accounts/page/l/' )
 			]);
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/ac_headings/_list';
+			$view = 'setup/ac_chart_of_accounts/_list';
 		}
 		else
 		{
-			$view = 'setup/ac_headings/_rows';
+			$view = 'setup/ac_chart_of_accounts/_rows';
 		}
 
 
@@ -141,7 +141,7 @@ class Ac_headings extends MY_Controller
 		{
 
 
-			// $view = $refresh === FALSE ? 'setup/ac_headings/_rows' : 'setup/ac_headings/_list';
+			// $view = $refresh === FALSE ? 'setup/ac_chart_of_accounts/_rows' : 'setup/ac_chart_of_accounts/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$ajax_data = [
 				'status' => 'success',
@@ -159,25 +159,25 @@ class Ac_headings extends MY_Controller
 		 * Filter Configurations
 		 */
 		// $data['filters'] = $this->_get_filter_elements();
-		// $data['filter_url'] = site_url('ac_headings/filter/');
+		// $data['filter_url'] = site_url('ac_chart_of_accounts/filter/');
 
 		$this->template
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/ac_headings/_index_header',
-							['content_header' => 'Manage Agent'] + $dom_data)
-						->partial('content', 'setup/ac_headings/_index', $data)
+							'setup/ac_chart_of_accounts/_index_header',
+							['content_header' => 'Manage Chart of Accounts'] + $dom_data)
+						->partial('content', 'setup/ac_chart_of_accounts/_index', $data)
 						->render($this->data);
 	}
 
 		private function _get_filter_elements()
 		{
-			$dropdwon_heading_groups = $this->ac_heading_group_model->dropdown();
+			$dropdwon_heading_groups = $this->ac_account_group_model->dropdown();
 			$filters = [
 				[
-	                'field' => 'filter_account_heading_group_id',
-	                'label' => 'Account Heading Group',
+	                'field' => 'filter_account_group_id',
+	                'label' => 'Account Group',
 	                'rules' => 'trim|integer|max_length[10]|in_list[' . implode(',', array_keys($dropdwon_heading_groups)) . ']',
 	                '_type'     => 'dropdown',
 	                '_data'     => IQB_BLANK_SELECT + $dropdwon_heading_groups,
@@ -185,7 +185,7 @@ class Ac_headings extends MY_Controller
 	            ],
 	            [
 					'field' => 'filter_keywords',
-			        'label' => 'Heading Name',
+			        'label' => 'Chart of Account Name',
 			        'rules' => 'trim|max_length[80]',
 	                '_type'     => 'text',
 	                '_required' => false
@@ -210,7 +210,7 @@ class Ac_headings extends MY_Controller
 				if( $this->form_validation->run() )
 				{
 					$data['data'] = [
-						'account_heading_group_id' 	=> $this->input->post('filter_account_heading_group_id') ?? NULL,
+						'account_group_id' 	=> $this->input->post('filter_account_group_id') ?? NULL,
 						'keywords' 					=> $this->input->post('filter_keywords') ?? ''
 					];
 					$data['status'] = 'success';
@@ -265,7 +265,7 @@ class Ac_headings extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ac_heading_model->find($id);
+		$record = $this->ac_chart_of_account_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -276,9 +276,9 @@ class Ac_headings extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac_headings/_form',
+		$json_data['form'] = $this->load->view('setup/ac_chart_of_accounts/_form',
 			[
-				'form_elements' => $this->ac_heading_model->validation_rules,
+				'form_elements' => $this->ac_chart_of_account_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
@@ -302,9 +302,9 @@ class Ac_headings extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac_headings/_form',
+		$json_data['form'] = $this->load->view('setup/ac_chart_of_accounts/_form',
 			[
-				'form_elements' => $this->ac_heading_model->validation_rules,
+				'form_elements' => $this->ac_chart_of_account_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
@@ -345,7 +345,7 @@ class Ac_headings extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->ac_heading_model->validation_rules;
+			$rules = $this->ac_chart_of_account_model->validation_rules;
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -354,15 +354,15 @@ class Ac_headings extends MY_Controller
         		// Insert or Update?
 				if($action === 'add')
 				{
-					$done = $this->ac_heading_model->insert($data, TRUE); // No Validation on Model
+					$done = $this->ac_chart_of_account_model->insert($data, TRUE); // No Validation on Model
 
 					// Activity Log
-					$done ? $this->ac_heading_model->log_activity($done, 'C'): '';
+					$done ? $this->ac_chart_of_account_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->ac_heading_model->update($record->id, $data, TRUE) && $this->ac_heading_model->log_activity($record->id, 'E');
+					$done = $this->ac_chart_of_account_model->update($record->id, $data, TRUE) && $this->ac_chart_of_account_model->log_activity($record->id, 'E');
 				}
 
 	        	if(!$done)
@@ -396,7 +396,7 @@ class Ac_headings extends MY_Controller
 							'hideBootbox' => true,
 							'updateSection' => true,
 							'updateSectionData' => [
-								'box' 		=> '#_iqb-data-list-box-ac-heading',
+								'box' 		=> '#_iqb-data-list-box-ac-chart-of-account',
 								'method' 	=> 'html'
 							]
 						], FALSE);
@@ -404,8 +404,8 @@ class Ac_headings extends MY_Controller
 				else
 				{
 					// Get Updated Record
-					$record = $this->ac_heading_model->row($record->id);
-					$success_html = $this->load->view('setup/ac_headings/_single_row', ['record' => $record], TRUE);
+					$record = $this->ac_chart_of_account_model->row($record->id);
+					$success_html = $this->load->view('setup/ac_chart_of_accounts/_single_row', ['record' => $record], TRUE);
 					$ajax_data = [
 						'message' => $message,
 						'status'  => $status,
@@ -429,7 +429,7 @@ class Ac_headings extends MY_Controller
 					'hideBootbox' 	=> false,
 					'updateSection' => false,
 					'updateSectionData'	=> NULL,
-					'form' 	  		=> $this->load->view('setup/ac_headings/_form',
+					'form' 	  		=> $this->load->view('setup/ac_chart_of_accounts/_form',
 												[
 													'form_elements' => $rules,
 													'record' 		=> $record
@@ -447,28 +447,28 @@ class Ac_headings extends MY_Controller
 		/**
 		 * Callback Validation Function
 		 *
-		 * 1. Validate the ac_number range as per selected account heading group
+		 * 1. Validate the ac_number range as per selected account group
 		 * 2. Check duplicate
 		 *
 		 * @param integer $ac_number
 		 * @param integer|null $id
 		 * @return bool
 		 */
-		public function _cb_valid_heading_group($ac_number, $id=NULL)
+		public function _cb_valid_account_group($ac_number, $id=NULL)
 		{
 			$ac_number = strtoupper( $ac_number ? $ac_number : $this->input->post('ac_number') );
 	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
-	    	$account_heading_group_id = (int)$this->input->post('account_heading_group_id');
+	    	$account_group_id = (int)$this->input->post('account_group_id');
 
 	    	// First Check if Valid Range
-	    	if( !$this->ac_heading_group_model->valid_range($account_heading_group_id, $ac_number) )
+	    	if( !$this->ac_account_group_model->valid_range($account_group_id, $ac_number) )
 	    	{
 	    		$this->form_validation->set_message('_cb_valid_heading_group', 'The %s does not fall under selected heading group range.');
 	            return FALSE;
 	    	}
 
 	    	// Check Duplicate
-	        if( $this->ac_heading_model->check_duplicate(['ac_number' => $ac_number], $id))
+	        if( $this->ac_chart_of_account_model->check_duplicate(['ac_number' => $ac_number], $id))
 	        {
 	            $this->form_validation->set_message('_cb_valid_heading_group', 'The %s already exists.');
 	            return FALSE;
@@ -487,7 +487,7 @@ class Ac_headings extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ac_heading_model->find($id);
+		$record = $this->ac_chart_of_account_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -500,12 +500,12 @@ class Ac_headings extends MY_Controller
 		/**
 		 * Safe to Delete?
 		 */
-		if( !safe_to_delete( 'Ac_heading_model', $id ) )
+		if( !safe_to_delete( 'Ac_chart_of_account_model', $id ) )
 		{
 			return $this->template->json($data);
 		}
 
-		$done = $this->ac_heading_model->delete($record->id);
+		$done = $this->ac_chart_of_account_model->delete($record->id);
 
 		if($done)
 		{

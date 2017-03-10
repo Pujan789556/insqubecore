@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Account Heading Group: Index View
+* Account Group: Index View
 */
 ?>
 <div class="row">
@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/ac_heading_groups/_list');
+				$this->load->view('setup/ac_account_groups/_list');
 				?>
 			</div>
 			<!-- /.box-body -->

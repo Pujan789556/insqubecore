@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Account Heading Groups Controller
+ * Account Groups Controller
  *
  * This controller falls under "Master Setup" category.
  *
@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Ac_heading_groups extends MY_Controller
+class Ac_account_groups extends MY_Controller
 {
 	function __construct()
 	{
@@ -31,7 +31,7 @@ class Ac_heading_groups extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Account Heading Groups';
+        $this->data['site_title'] = 'Master Setup | Account Groups';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -41,7 +41,7 @@ class Ac_heading_groups extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('ac_heading_group_model');
+		$this->load->model('ac_account_group_model');
 	}
 
 	// --------------------------------------------------------------------
@@ -59,16 +59,16 @@ class Ac_heading_groups extends MY_Controller
 		 * Normal Form Render
 		 */
 		// this will generate cache name: mc_master_departments_all
-		$records = $this->ac_heading_group_model->get_all();
+		$records = $this->ac_account_group_model->get_all();
 
 		$this->template->partial(
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Manage Account Heading Groups',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Account Heading Groups' => NULL]
+								'content_header' => 'Manage Account Groups',
+								'breadcrumbs' => ['Master Setup' => NULL, 'Account Groups' => NULL]
 						])
-						->partial('content', 'setup/ac_heading_groups/_index', compact('records'))
+						->partial('content', 'setup/ac_account_groups/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -85,7 +85,7 @@ class Ac_heading_groups extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ac_heading_group_model->find($id);
+		$record = $this->ac_account_group_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -96,9 +96,9 @@ class Ac_heading_groups extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac_heading_groups/_form',
+		$json_data['form'] = $this->load->view('setup/ac_account_groups/_form',
 			[
-				'form_elements' => $this->ac_heading_group_model->validation_rules,
+				'form_elements' => $this->ac_account_group_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
@@ -135,7 +135,7 @@ class Ac_heading_groups extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->ac_heading_group_model->validation_rules;
+			$rules = $this->ac_account_group_model->validation_rules;
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
@@ -145,15 +145,15 @@ class Ac_heading_groups extends MY_Controller
 				if($action === 'add')
 				{
 					// @NOTE: Activity Log will be automatically inserted
-					$done = $this->ac_heading_group_model->insert($data, TRUE); // No Validation on Model
+					$done = $this->ac_account_group_model->insert($data, TRUE); // No Validation on Model
 
 					// Activity Log
-					$done ? $this->ac_heading_group_model->log_activity($done, 'C'): '';
+					$done ? $this->ac_account_group_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->ac_heading_group_model->update($record->id, $data, TRUE) && $this->ac_heading_group_model->log_activity($record->id, 'E');
+					$done = $this->ac_account_group_model->update($record->id, $data, TRUE) && $this->ac_account_group_model->log_activity($record->id, 'E');
 				}
 
 				if(!$done)
@@ -179,14 +179,14 @@ class Ac_heading_groups extends MY_Controller
 			{
 				if($action === 'add')
 				{
-					$records = $this->ac_heading_group_model->get_all();
-					$success_html = $this->load->view('setup/ac_heading_groups/_list', ['records' => $records], TRUE);
+					$records = $this->ac_account_group_model->get_all();
+					$success_html = $this->load->view('setup/ac_account_groups/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
-					$record = $this->ac_heading_group_model->find($record->id);
-					$success_html = $this->load->view('setup/ac_heading_groups/_single_row', ['record' => $record], TRUE);
+					$record = $this->ac_account_group_model->find($record->id);
+					$success_html = $this->load->view('setup/ac_account_groups/_single_row', ['record' => $record], TRUE);
 				}
 			}
 
@@ -211,9 +211,9 @@ class Ac_heading_groups extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/ac_heading_groups/_form',
+									? 	$this->load->view('setup/ac_account_groups/_form',
 											[
-												'form_elements' => $this->ac_heading_group_model->validation_rules,
+												'form_elements' => $this->ac_account_group_model->validation_rules,
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -223,28 +223,6 @@ class Ac_heading_groups extends MY_Controller
 
 		return $return_data;
 	}
-
-	// --------------------------------------------------------------------
-
-	/**
-     * Check Duplicate Callback
-     *
-     * @param string $code
-     * @param integer|null $id
-     * @return bool
-     */
-    public function check_duplicate($code, $id=NULL){
-
-    	$code = strtoupper( $code ? $code : $this->input->post('code') );
-    	$id   = $id ? (int)$id : (int)$this->input->post('id');
-
-        if( $this->ac_heading_group_model->check_duplicate(['code' => $code], $id))
-        {
-            $this->form_validation->set_message('check_duplicate', 'The %s already exists.');
-            return FALSE;
-        }
-        return TRUE;
-    }
 
     // --------------------------------------------------------------------
 

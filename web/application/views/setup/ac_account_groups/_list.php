@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Account Heading Groups:  Data List
+* Account Groups:  Data List
 */
 ?>
 <table class="table table-hover" id="live-searchable">
@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	 */
 	foreach($records as $record)
 	{
-		$this->load->view('setup/ac_heading_groups/_single_row', compact('record'));
+		$this->load->view('setup/ac_account_groups/_single_row', compact('record'));
 	}
 	?>
 </table>

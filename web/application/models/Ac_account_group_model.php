@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Ac_heading_group_model extends MY_Model
+class Ac_account_group_model extends MY_Model
 {
-    protected $table_name = 'ac_account_heading_groups';
+    protected $table_name = 'ac_account_groups';
 
     protected $set_created = true;
 
@@ -24,7 +24,7 @@ class Ac_heading_group_model extends MY_Model
     protected $validation_rules = [
         [
             'field' => 'name',
-            'label' => 'Heading Group Name',
+            'label' => 'Account Group Name',
             'rules' => 'trim|required|max_length[30]',
             '_type'     => 'text',
             '_required' => true
@@ -71,13 +71,13 @@ class Ac_heading_group_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('ac_hdg_all');
+        $list = $this->get_cache('ac_ag_all');
         if(!$list)
         {
             $list = $this->db->select('`id`, `range_min`, `range_max`, `name`')
                         ->from($this->table_name)
                         ->get()->result();
-            $this->write_cache($list, 'ac_hdg_all', CACHE_DURATION_DAY);
+            $this->write_cache($list, 'ac_ag_all', CACHE_DURATION_DAY);
         }
         return $list;
     }
@@ -123,7 +123,7 @@ class Ac_heading_group_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'ac_hdg_all'
+            'ac_ag_all'
         ];
         // cache name without prefix
         foreach($cache_names as $cache)
@@ -157,7 +157,7 @@ class Ac_heading_group_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'ac_heading_group',
+            'module' => 'ac_account_group',
             'module_id' => $id,
             'action' => $action
         ];

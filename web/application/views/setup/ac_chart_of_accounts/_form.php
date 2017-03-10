@@ -1,12 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : Account Heading Group
+ * Form : Chart of Account
  */
 ?>
 <?php echo form_open( $this->uri->uri_string(),
                         [
                             'class' => 'form-horizontal form-iqb-general',
+                            'id'    => '__form-ac-chart-of-account',
                             'data-pc' => '.bootbox-body' // parent container ID
                         ],
                         // Hidden Fields

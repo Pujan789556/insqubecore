@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Ac_heading_model extends MY_Model
+class Ac_chart_of_account_model extends MY_Model
 {
-    protected $table_name = 'ac_account_headings';
+    protected $table_name = 'ac_chart_of_accounts';
 
     protected $set_created = true;
 
@@ -17,7 +17,7 @@ class Ac_heading_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "account_heading_group_id", "ac_number", "name", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "parent_id", "account_group_id", "ac_number", "name", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -40,7 +40,7 @@ class Ac_heading_model extends MY_Model
         parent::__construct();
 
         // Set validation rule
-        $this->load->model('ac_heading_group_model');
+        $this->load->model('ac_account_group_model');
         $this->validation_rules();
     }
 
@@ -53,28 +53,37 @@ class Ac_heading_model extends MY_Model
      */
     public function validation_rules()
     {
-        $dropdwon_heading_groups = $this->ac_heading_group_model->dropdown();
+        $dropdwon_heading_groups    = $this->ac_account_group_model->dropdown();
+        $dropdown_parent            = $this->dropdown_parent();
 
         $this->validation_rules = [
             [
-                'field' => 'account_heading_group_id',
-                'label' => 'Heading Group',
-                'rules' => 'trim|required|integer|max_length[10]|in_list[' . implode(',', array_keys($dropdwon_heading_groups)) . ']',
+                'field' => 'account_group_id',
+                'label' => 'Account Group',
+                'rules' => 'trim|required|integer|max_length[11]|in_list[' . implode(',', array_keys($dropdwon_heading_groups)) . ']',
                 '_type'     => 'dropdown',
                 '_data'     => IQB_BLANK_SELECT + $dropdwon_heading_groups,
                 '_required' => true
             ],
             [
+                'field' => 'parent_id',
+                'label' => 'Parent Account Name',
+                'rules' => 'trim|integer|max_length[11]|in_list[0,' . implode(',', array_keys($dropdown_parent)) . ']',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_ZERO_SELECT + $dropdown_parent,
+                '_required' => true
+            ],
+            [
                 'field' => 'ac_number',
                 'label' => 'Account Number',
-                'rules' => 'trim|required|integer|max_length[6]|callback__cb_valid_heading_group',
+                'rules' => 'trim|required|integer|max_length[6]|callback__cb_valid_account_group',
                 '_type'     => 'text',
-                '_help_text' => 'Please provide a 6 digit number which is between range of selected "Heading Group"',
+                '_help_text' => 'Please provide a 6 digit number which is between range of selected "Account Group"',
                 '_required' => true
             ],
             [
                 'field' => 'name',
-                'label' => 'Heading Name',
+                'label' => 'Account Name',
                 'rules' => 'trim|required|max_length[100]',
                 '_type'     => 'text',
                 '_required' => true
@@ -98,9 +107,10 @@ class Ac_heading_model extends MY_Model
 
     public function row($id)
     {
-        return $this->db->select('AH.id, AH.account_heading_group_id, AH.ac_number, AH.name, AHG.name as heading_group_name')
+        return $this->db->select('AH.id, AH.account_group_id, AH.ac_number, AH.name, AHG.name as account_group_name, IAH.name as parent_name')
                  ->from($this->table_name . ' as AH')
-                 ->join('ac_account_heading_groups AHG', 'AHG.id = AH.account_heading_group_id')
+                 ->join('ac_account_groups AHG', 'AHG.id = AH.account_group_id')
+                 ->join( $this->table_name . ' IAH', 'IAH.id = AH.parent_id', 'left')
                  ->where('AH.id', $id)
                  ->get()->row();
     }
@@ -117,9 +127,10 @@ class Ac_heading_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('AH.id, AH.account_heading_group_id, AH.ac_number, AH.name, AHG.name as heading_group_name')
+        $this->db->select('AH.id, AH.account_group_id, AH.ac_number, AH.name, AHG.name as account_group_name, IAH.name as parent_name')
                  ->from($this->table_name . ' as AH')
-                 ->join('ac_account_heading_groups AHG', 'AHG.id = AH.account_heading_group_id');
+                 ->join('ac_account_groups AHG', 'AHG.id = AH.account_group_id')
+                 ->join( $this->table_name . ' IAH', 'IAH.id = AH.parent_id', 'left');
 
 
         if(!empty($params))
@@ -130,10 +141,10 @@ class Ac_heading_model extends MY_Model
                 $this->db->where(['AH.id >=' => $next_id]);
             }
 
-            $account_heading_group_id = $params['account_heading_group_id'] ?? NULL;
-            if( $account_heading_group_id )
+            $account_group_id = $params['account_group_id'] ?? NULL;
+            if( $account_group_id )
             {
-                $this->db->where(['AH.account_heading_group_id' =>  $account_heading_group_id]);
+                $this->db->where(['AH.account_group_id' =>  $account_group_id]);
             }
 
 
@@ -147,25 +158,56 @@ class Ac_heading_model extends MY_Model
                     ->get()->result();
     }
 
+    // --------------------------------------------------------------------
 
     /**
-     * Get Dropdown List
+     * Get Parent Dropdown List
      */
-    public function dropdown()
+    public function dropdown_parent()
     {
-        $cache_name = 'ac_hd_all';
+        $cache_name = 'ac_coa_parent';
         /**
          * Get Cached Result, If no, cache the query result
          */
         $list = $this->get_cache($cache_name);
         if(!$list)
         {
-            $this->db->select('`id`, `ac_number`, `name`')
-                        ->from($this->table_name);
+            $records = $this->db->select('`id`, `ac_number`, `name`')
+                        ->from($this->table_name)
+                        ->where('parent_id', 0)
+                        ->get()->result();
 
+            $list = [];
+            foreach($records as $record)
+            {
+                $list["{$record->id}"] = implode(' - ', [$record->ac_number, $record->name]);
+            }
 
+            $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
+        }
 
-            $records = $this->db->get()->result();
+        return $list;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Parent Dropdown List
+     */
+    public function dropdown_children($parent_id)
+    {
+        $cache_name = 'ac_coa_children_' . $parent_id;
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache($cache_name);
+        if(!$list)
+        {
+            $records = $this->db->select('`id`, `ac_number`, `name`')
+                        ->from($this->table_name)
+                        ->where('parent_id', $parent_id)
+                        ->get()->result();
+
             $list = [];
             foreach($records as $record)
             {
@@ -186,7 +228,8 @@ class Ac_heading_model extends MY_Model
     public function clear_cache($data=null)
     {
         $cache_names = [
-            'ac_hd_all'
+            'ac_coa_parent',
+            'ac_coa_children_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)
@@ -252,7 +295,7 @@ class Ac_heading_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'ac_heading',
+            'module' => 'ac_chart_of_account',
             'module_id' => $id,
             'action' => $action
         ];

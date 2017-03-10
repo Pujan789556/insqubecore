@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Account Headings:  Data List Rows
+* Chart of Account:  Data List Rows
 */
 
 /**
@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 foreach($records as $record)
 {
-	$this->load->view('setup/ac_headings/_single_row', compact('record'));
+	$this->load->view('setup/ac_chart_of_accounts/_single_row', compact('record'));
 }
 
 /**
@@ -23,7 +23,7 @@ if($next_id):
 			data-loading-text="Loading ..."
 			data-url="<?php echo $next_url;?>"
 			data-method="append"
-			data-box="#search-result-ac-heading"
+			data-box="#search-result-ac-chart-of-account"
 			data-self-destruct="true"
 			data-loader-box="#<?php echo $loader_box_id;?>"
 			data-load-method="post"

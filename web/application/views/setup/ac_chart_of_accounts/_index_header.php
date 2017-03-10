@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Account Heading: Content Header
+ * Chart of Accounts: Content Header
  */
 ?>
 <div class="box no-margin">
@@ -12,12 +12,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			</div>
 			<div class="col-sm-4 master-actions text-right">
 				<a href="#"
-					title="Add New Account Heading"
+					title="Add New Account"
 					data-toggle="tooltip"
 					class="btn btn-success btn-round trg-dialog-edit"
 					data-size="large"
-					data-title='<i class="fa fa-pencil-square-o"></i> Add New Account Heading'
-					data-url="<?php echo site_url('ac_headings/add/');?>"
+					data-title='<i class="fa fa-pencil-square-o"></i> Add New Account'
+					data-url="<?php echo site_url('ac_chart_of_accounts/add/');?>"
 					data-form=".form-iqb-general"
 				><i class="ion-plus-circled"></i> Add</a>
 
