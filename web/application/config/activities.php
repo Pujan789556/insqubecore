@@ -41,6 +41,28 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to Account Duties & Tax
+	 */
+	'ac_duties_and_tax' => [
+		'_uri' => 'ac_duties_and_tax/',
+		'_table' => 'ac_duties_and_tax',
+		'_actions' => [
+			'E' => 'edited'
+	]],
+
+
+	/**
+	 * Activities related to Account - Reference Transaction Type
+	 */
+	'ac_ref_transaction_type' => [
+		'_uri' => 'ac_ref_transaction_types/',
+		'_table' => 'ac_ref_transaction_types',
+		'_actions' => [
+			'E' => 'edited'
+	]],
+
+
+	/**
 	 * Activities related to Agent
 	 */
 	'agent' => [
