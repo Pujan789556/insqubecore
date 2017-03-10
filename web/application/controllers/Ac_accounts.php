@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Chart of Accounts Controller
+ * Accounts Controller
  *
  * This controller falls under "Master Setup" category.
  *
@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Ac_chart_of_accounts extends MY_Controller
+class Ac_accounts extends MY_Controller
 {
 	function __construct()
 	{
@@ -31,7 +31,7 @@ class Ac_chart_of_accounts extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Chart of Accounts';
+        $this->data['site_title'] = 'Master Setup | Accounts';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -42,7 +42,7 @@ class Ac_chart_of_accounts extends MY_Controller
 
 		// Load Model
 		$this->load->model('ac_account_group_model');
-		$this->load->model('ac_chart_of_account_model');
+		$this->load->model('ac_account_model');
 	}
 
 	// --------------------------------------------------------------------
@@ -86,7 +86,7 @@ class Ac_chart_of_accounts extends MY_Controller
 			$params = array_merge($params, $filter_data['data']);
 		}
 
-		$records = $this->ac_chart_of_account_model->rows($params);
+		$records = $this->ac_account_model->rows($params);
 		$records = $records ? $records : [];
 		$total = count($records);
 
@@ -105,14 +105,14 @@ class Ac_chart_of_accounts extends MY_Controller
 
 		// DOM Data
 		$dom_data = [
-			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-ac-chart-of-account', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-ac-chart-of-account' 			// Filter Form ID
+			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-ac-account', 		// List box ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-ac-account' 			// Filter Form ID
 		];
 
 		$data = [
 			'records' => $records,
 			'next_id' => $next_id,
-			'next_url' => $next_id ? site_url( 'ac_chart_of_accounts/page/r/' . $next_id ) : NULL
+			'next_url' => $next_id ? site_url( 'ac_accounts/page/r/' . $next_id ) : NULL
 		] + $dom_data;
 
 		/**
@@ -120,20 +120,20 @@ class Ac_chart_of_accounts extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'setup/ac_chart_of_accounts/_index';
+			$view = 'setup/ac_accounts/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('ac_chart_of_accounts/page/l/' )
+				'filter_url' 	=> site_url('ac_accounts/page/l/' )
 			]);
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/ac_chart_of_accounts/_list';
+			$view = 'setup/ac_accounts/_list';
 		}
 		else
 		{
-			$view = 'setup/ac_chart_of_accounts/_rows';
+			$view = 'setup/ac_accounts/_rows';
 		}
 
 
@@ -141,7 +141,7 @@ class Ac_chart_of_accounts extends MY_Controller
 		{
 
 
-			// $view = $refresh === FALSE ? 'setup/ac_chart_of_accounts/_rows' : 'setup/ac_chart_of_accounts/_list';
+			// $view = $refresh === FALSE ? 'setup/ac_accounts/_rows' : 'setup/ac_accounts/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$ajax_data = [
 				'status' => 'success',
@@ -159,15 +159,15 @@ class Ac_chart_of_accounts extends MY_Controller
 		 * Filter Configurations
 		 */
 		// $data['filters'] = $this->_get_filter_elements();
-		// $data['filter_url'] = site_url('ac_chart_of_accounts/filter/');
+		// $data['filter_url'] = site_url('ac_accounts/filter/');
 
 		$this->template
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/ac_chart_of_accounts/_index_header',
-							['content_header' => 'Manage Chart of Accounts'] + $dom_data)
-						->partial('content', 'setup/ac_chart_of_accounts/_index', $data)
+							'setup/ac_accounts/_index_header',
+							['content_header' => 'Manage Accounts'] + $dom_data)
+						->partial('content', 'setup/ac_accounts/_index', $data)
 						->render($this->data);
 	}
 
@@ -265,7 +265,7 @@ class Ac_chart_of_accounts extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ac_chart_of_account_model->find($id);
+		$record = $this->ac_account_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -276,9 +276,9 @@ class Ac_chart_of_accounts extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac_chart_of_accounts/_form',
+		$json_data['form'] = $this->load->view('setup/ac_accounts/_form',
 			[
-				'form_elements' => $this->ac_chart_of_account_model->validation_rules,
+				'form_elements' => $this->ac_account_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
@@ -302,9 +302,9 @@ class Ac_chart_of_accounts extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac_chart_of_accounts/_form',
+		$json_data['form'] = $this->load->view('setup/ac_accounts/_form',
 			[
-				'form_elements' => $this->ac_chart_of_account_model->validation_rules,
+				'form_elements' => $this->ac_account_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
@@ -345,7 +345,7 @@ class Ac_chart_of_accounts extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->ac_chart_of_account_model->validation_rules;
+			$rules = $this->ac_account_model->validation_rules;
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -354,15 +354,15 @@ class Ac_chart_of_accounts extends MY_Controller
         		// Insert or Update?
 				if($action === 'add')
 				{
-					$done = $this->ac_chart_of_account_model->insert($data, TRUE); // No Validation on Model
+					$done = $this->ac_account_model->insert($data, TRUE); // No Validation on Model
 
 					// Activity Log
-					$done ? $this->ac_chart_of_account_model->log_activity($done, 'C'): '';
+					$done ? $this->ac_account_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->ac_chart_of_account_model->update($record->id, $data, TRUE) && $this->ac_chart_of_account_model->log_activity($record->id, 'E');
+					$done = $this->ac_account_model->update($record->id, $data, TRUE) && $this->ac_account_model->log_activity($record->id, 'E');
 				}
 
 	        	if(!$done)
@@ -396,7 +396,7 @@ class Ac_chart_of_accounts extends MY_Controller
 							'hideBootbox' => true,
 							'updateSection' => true,
 							'updateSectionData' => [
-								'box' 		=> '#_iqb-data-list-box-ac-chart-of-account',
+								'box' 		=> '#_iqb-data-list-box-ac-account',
 								'method' 	=> 'html'
 							]
 						], FALSE);
@@ -404,8 +404,8 @@ class Ac_chart_of_accounts extends MY_Controller
 				else
 				{
 					// Get Updated Record
-					$record = $this->ac_chart_of_account_model->row($record->id);
-					$success_html = $this->load->view('setup/ac_chart_of_accounts/_single_row', ['record' => $record], TRUE);
+					$record = $this->ac_account_model->row($record->id);
+					$success_html = $this->load->view('setup/ac_accounts/_single_row', ['record' => $record], TRUE);
 					$ajax_data = [
 						'message' => $message,
 						'status'  => $status,
@@ -429,7 +429,7 @@ class Ac_chart_of_accounts extends MY_Controller
 					'hideBootbox' 	=> false,
 					'updateSection' => false,
 					'updateSectionData'	=> NULL,
-					'form' 	  		=> $this->load->view('setup/ac_chart_of_accounts/_form',
+					'form' 	  		=> $this->load->view('setup/ac_accounts/_form',
 												[
 													'form_elements' => $rules,
 													'record' 		=> $record
@@ -468,7 +468,7 @@ class Ac_chart_of_accounts extends MY_Controller
 	    	}
 
 	    	// Check Duplicate
-	        if( $this->ac_chart_of_account_model->check_duplicate(['ac_number' => $ac_number], $id))
+	        if( $this->ac_account_model->check_duplicate(['ac_number' => $ac_number], $id))
 	        {
 	            $this->form_validation->set_message('_cb_valid_heading_group', 'The %s already exists.');
 	            return FALSE;
@@ -487,7 +487,7 @@ class Ac_chart_of_accounts extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ac_chart_of_account_model->find($id);
+		$record = $this->ac_account_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -505,7 +505,7 @@ class Ac_chart_of_accounts extends MY_Controller
 			return $this->template->json($data);
 		}
 
-		$done = $this->ac_chart_of_account_model->delete($record->id);
+		$done = $this->ac_account_model->delete($record->id);
 
 		if($done)
 		{

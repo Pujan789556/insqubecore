@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Ac_chart_of_account_model extends MY_Model
+class Ac_account_model extends MY_Model
 {
-    protected $table_name = 'ac_chart_of_accounts';
+    protected $table_name = 'ac_accounts';
 
     protected $set_created = true;
 
@@ -165,7 +165,7 @@ class Ac_chart_of_account_model extends MY_Model
      */
     public function dropdown_parent()
     {
-        $cache_name = 'ac_coa_parent';
+        $cache_name = 'ac_account_parent';
         /**
          * Get Cached Result, If no, cache the query result
          */
@@ -196,7 +196,7 @@ class Ac_chart_of_account_model extends MY_Model
      */
     public function dropdown_children($parent_id)
     {
-        $cache_name = 'ac_coa_children_' . $parent_id;
+        $cache_name = 'ac_account_children_' . $parent_id;
         /**
          * Get Cached Result, If no, cache the query result
          */
@@ -228,8 +228,8 @@ class Ac_chart_of_account_model extends MY_Model
     public function clear_cache($data=null)
     {
         $cache_names = [
-            'ac_coa_parent',
-            'ac_coa_children_*'
+            'ac_account_parent',
+            'ac_account_children_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)
@@ -295,9 +295,9 @@ class Ac_chart_of_account_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'ac_chart_of_account',
+            'module'    => 'ac_account',
             'module_id' => $id,
-            'action' => $action
+            'action'    => $action
         ];
         return $this->activity->save($activity_log);
     }

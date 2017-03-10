@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					class="btn btn-success btn-round trg-dialog-edit"
 					data-size="large"
 					data-title='<i class="fa fa-pencil-square-o"></i> Add New Account'
-					data-url="<?php echo site_url('ac_chart_of_accounts/add/');?>"
+					data-url="<?php echo site_url('ac_accounts/add/');?>"
 					data-form=".form-iqb-general"
 				><i class="ion-plus-circled"></i> Add</a>
 

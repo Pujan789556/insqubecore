@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 foreach($records as $record)
 {
-	$this->load->view('setup/ac_chart_of_accounts/_single_row', compact('record'));
+	$this->load->view('setup/ac_accounts/_single_row', compact('record'));
 }
 
 /**
@@ -23,7 +23,7 @@ if($next_id):
 			data-loading-text="Loading ..."
 			data-url="<?php echo $next_url;?>"
 			data-method="append"
-			data-box="#search-result-ac-chart-of-account"
+			data-box="#search-result-ac-account"
 			data-self-destruct="true"
 			data-loader-box="#<?php echo $loader_box_id;?>"
 			data-load-method="post"
