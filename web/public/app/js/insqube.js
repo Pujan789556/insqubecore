@@ -332,38 +332,6 @@ $( document ).ajaxError(function( event, request, settings ) {
                 };
             }
 
-            function postData(url, data, callback)
-            {
-                $.ajax({
-                    type:'POST',
-                    url: url,
-                    data:data,
-                    cache:false,
-                    contentType: false,
-                    processData: false,
-                    success:function(r){
-                        // Show message
-                        // NOTE: r.status must be one of the toastr method [success|error|info|warning]
-                        if(typeof r.status !== 'undefined' && typeof r.message !== 'undefined'){
-                            // Clear Toastr
-                            toastr.clear();
-                            toastr[r.status](r.message);
-                        }
-
-                        // Callback if any
-                        if (callback && typeof(callback) === "function") {
-                            callback(r);
-                        }
-                    },
-                    error: function(r){
-                        // Callback if any
-                        if (callback && typeof(callback) === "function") {
-                            callback(r);
-                        }
-                    }
-                });
-            }
-
         })();
     });
 }(typeof define === 'function' && define.amd ? define : function (deps, factory) {
