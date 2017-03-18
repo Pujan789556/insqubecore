@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Ac_ref_transaction_type_model extends MY_Model
 {
-    protected $table_name = 'ac_ref_transaction_types';
+    protected $table_name = 'ac_ref_txn_types';
 
     protected $set_created = true;
 
