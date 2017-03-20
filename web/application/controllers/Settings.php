@@ -37,9 +37,6 @@ class Settings extends MY_Controller
 	 */
 	function index()
 	{
-		// Image Helper
-		$this->load->helper('insqube_media');
-
 		try{
 
 			$rules = $this->setting_model->get_validation_rules('general');

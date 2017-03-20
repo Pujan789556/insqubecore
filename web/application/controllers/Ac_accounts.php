@@ -333,9 +333,6 @@ class Ac_accounts extends MY_Controller
 			];
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
-
 		/**
 		 * Form Submitted?
 		 */

@@ -327,9 +327,6 @@ class Surveyors extends MY_Controller
 			];
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
-
 		/**
 		 * Form Submitted?
 		 */
@@ -520,9 +517,6 @@ class Surveyors extends MY_Controller
 			 */
 			if($record->picture)
 			{
-				// Load media helper
-				$this->load->helper('insqube_media');
-
 				delete_insqube_document($this->_upload_path . $record->picture);
 			}
 
@@ -560,8 +554,6 @@ class Surveyors extends MY_Controller
 			$this->template->render_404();
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
 
 		$this->data['site_title'] = 'Surveyor Details | ' . $record->name;
 		$this->template->partial(

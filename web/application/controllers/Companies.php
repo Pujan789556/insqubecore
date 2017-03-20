@@ -339,9 +339,6 @@ class Companies extends MY_Controller
 			];
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
-
 		/**
 		 * Form Submitted?
 		 */
@@ -531,9 +528,6 @@ class Companies extends MY_Controller
 			 */
 			if($record->picture)
 			{
-				// Load media helper
-				$this->load->helper('insqube_media');
-
 				delete_insqube_document($this->_upload_path . $record->picture);
 			}
 
@@ -571,8 +565,6 @@ class Companies extends MY_Controller
 			$this->template->render_404();
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
 
 		$data = [
 			'record' 	=> $record,

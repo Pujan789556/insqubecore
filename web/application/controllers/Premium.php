@@ -45,9 +45,6 @@ class Premium extends MY_Controller
 		$this->load->helper('object');
 		$this->load->helper('motor');
 
-		// Media Helper
-		$this->load->helper('insqube_media');
-
 		// Image Path
         $this->_upload_path = INSQUBE_MEDIA_PATH . 'policies/';
 	}

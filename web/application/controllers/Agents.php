@@ -345,9 +345,6 @@ class Agents extends MY_Controller
 			];
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
-
 		/**
 		 * Form Submitted?
 		 */
@@ -533,9 +530,6 @@ class Agents extends MY_Controller
 			 */
 			if($record->picture)
 			{
-				// Load media helper
-				$this->load->helper('insqube_media');
-
 				delete_insqube_document($this->_upload_path . $record->picture);
 			}
 
@@ -572,9 +566,6 @@ class Agents extends MY_Controller
 		{
 			$this->template->render_404();
 		}
-
-		// Load media helper
-		$this->load->helper('insqube_media');
 
 		$this->data['site_title'] = 'Agent Details | ' . $record->name;
 		$this->template->partial(

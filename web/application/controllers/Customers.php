@@ -76,8 +76,6 @@ class Customers extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
 
 		// If request is coming from refresh method, reset nextid
 		$next_id = (int)$next_id;
@@ -402,9 +400,6 @@ class Customers extends MY_Controller
 			];
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
-
 		/**
 		 * Form Submitted?
 		 */
@@ -598,9 +593,6 @@ class Customers extends MY_Controller
 			 */
 			if($record->picture)
 			{
-				// Load media helper
-				$this->load->helper('insqube_media');
-
 				delete_insqube_document($this->_upload_path . $record->picture);
 			}
 
@@ -660,8 +652,6 @@ class Customers extends MY_Controller
 		];
 
 
-		// Load media helper
-		$this->load->helper('insqube_media');
 
 		$this->data['site_title'] = 'Customer Details | ' . $record->full_name;
 		$this->template->partial(

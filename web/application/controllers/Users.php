@@ -879,9 +879,6 @@ class Users extends MY_Controller
 			$this->template->render_404();
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
-
 		// If called from Previous Wizard Form, Load form
 		if($next_wizard)
 		{
@@ -1107,9 +1104,6 @@ class Users extends MY_Controller
 			$profile = $record->profile ? json_decode($record->profile) : NULL;
 			if(isset($profile->picture) && $profile->picture != '' )
 			{
-				// Load media helper
-				$this->load->helper('insqube_media');
-
 				delete_insqube_document($this->_upload_path . $profile->picture);
 			}
 
@@ -1225,8 +1219,7 @@ class Users extends MY_Controller
 		{
 			$this->template->render_404();
 		}
-		// Load media helper
-		$this->load->helper('insqube_media');
+
 		$this->data['site_title'] = 'User Details | ' . $record->username;
 		$this->template->partial(
 							'content_header',

@@ -41,9 +41,6 @@ class Policies extends MY_Controller
 		$this->load->helper('policy');
 		$this->load->helper('object');
 
-		// Media Helper
-		$this->load->helper('insqube_media');
-
 		// Image Path
         $this->_upload_path = INSQUBE_MEDIA_PATH . 'policies/';
 	}
@@ -636,8 +633,6 @@ class Policies extends MY_Controller
 			 */
 			// if($record->picture)
 			// {
-			// 	// Load media helper
-			// 	$this->load->helper('insqube_media');
 
 			// 	delete_insqube_document($this->_upload_path . $record->picture);
 			// }

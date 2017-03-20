@@ -82,8 +82,6 @@ class Objects extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
 
 		// If request is coming from refresh method, reset nextid
 		$customer_id = (int)$customer_id; // Required if request is coming from find widget
@@ -555,9 +553,6 @@ class Objects extends MY_Controller
 			];
 		}
 
-		// Load media helper
-		// $this->load->helper('insqube_media');
-
 		/**
 		 * Form Submitted?
 		 */
@@ -889,8 +884,6 @@ class Objects extends MY_Controller
 			$this->template->render_404();
 		}
 
-		// Load media helper
-		$this->load->helper('insqube_media');
 
 		$this->data['site_title'] = 'Customer Details | ' . $record->full_name;
 		$this->template->partial(
