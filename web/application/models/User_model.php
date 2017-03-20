@@ -214,6 +214,36 @@ class User_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get Loggedin User Rrecord
+     *
+     * @param integer $id
+     * @return object
+     */
+    public function get_loggedin_user($id)
+    {
+    	/**
+         * Get Cached Result, If no, cache the query result
+         */
+    	$cache_name = 'auth_users_l_' . $id;
+
+    	$record = $this->get_cache($cache_name);
+        if(!$record)
+        {
+            $record = $this->db->select('U.id, U.code, U.username, U.email, U.banned, U.profile, U.contact, R.name as role_name, B.name as branch_name, D.name as department_name')
+						->from($this->table_name . ' as U')
+						->join('auth_roles R', 'U.role_id = R.id')
+						->join('master_branches B', 'U.branch_id = B.id')
+    			 		->join('master_departments D', 'U.department_id = D.id')
+						->where('U.id', $id)
+						->get()->row();
+            $this->write_cache($record, $cache_name, CACHE_DURATION_HR);
+        }
+        return $record;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Get Details of a Single Record
      *
      * @param int $id
@@ -239,7 +269,8 @@ class User_model extends MY_Model
     public function clear_cache()
     {
     	$cache_names = [
-            'auth_users_dd*'
+            'auth_users_dd*',
+            'auth_users_l_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

@@ -12,13 +12,13 @@ application/logs/*
 # Test Controller & Other Local Files
 # --------------------------------------
 application/controllers/Test.php
-info.php
-random.php
-requirements.txt
-sql.sql
-string.php
-todo.md
-update.sql
+/info.php
+/random.php
+/requirements.txt
+/sql.sql
+/string.php
+/todo.md
+/update.sql
 
 
 # User Guide and its source

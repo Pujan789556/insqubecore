@@ -21,54 +21,58 @@
 	<div class="navbar-custom-menu">
 		<ul class="nav navbar-nav">
 
-			<?php 
+			<?php
             /**
              * Templete Sub-Section: Header Message
-             * 
+             *
              * Section Data will be available to this view
-             * 
+             *
              * Load Directly
              */
-            $this->load->view('templates/dashboard/_header_message');
+            // $this->load->view('templates/dashboard/_header_message');
             ?>
 
-            <?php 
+            <?php
             /**
              * Templete Sub-Section: Header Notification
-             * 
+             *
              * Section Data will be available to this view
-             * 
+             *
              * Load Directly
              */
-            $this->load->view('templates/dashboard/_header_notification');
+            // $this->load->view('templates/dashboard/_header_notification');
             ?>
 
-            <?php 
+            <?php
             /**
              * Templete Sub-Section: Header Task
-             * 
+             *
              * Section Data will be available to this view
-             * 
+             *
              * Load Directly
              */
-            $this->load->view('templates/dashboard/_header_task');
+            // $this->load->view('templates/dashboard/_header_task');
             ?>
 
-            <?php 
+            <?php
             /**
              * Templete Sub-Section: Header User Control
-             * 
+             *
              * Section Data will be available to this view
-             * 
+             *
              * Load Directly
              */
             $this->load->view('templates/dashboard/_header_user_control');
             ?>
 
-			<!-- Control Sidebar Toggle Button -->
-			<li>
-				<a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
-			</li>
+            <?php
+            /**
+                  <!-- Control Sidebar Toggle Button -->
+                  <li>
+                        <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                  </li>
+             */
+            ?>
 		</ul>
 	</div>
 </nav>

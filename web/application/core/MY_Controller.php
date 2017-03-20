@@ -30,6 +30,13 @@ class MY_Controller extends CI_Controller
 	public $settings;
 
 	/**
+	 * Current User Info
+	 *
+	 * @var object
+	 */
+	public $user = NULL;
+
+	/**
 	 * Application's Current Fiscal Year from DB
 	 *
 	 * @var object
@@ -66,6 +73,12 @@ class MY_Controller extends CI_Controller
 		$this->load->model('setting_model');
 		$this->_app_settings();
 		$this->_app_fiscal_year();
+
+		/**
+		 * Loggedin User
+		 */
+		$this->load->model('user_model');
+		$this->_app_user();
 	}
 
 	// --------------------------------------------------------------------
@@ -130,6 +143,21 @@ class MY_Controller extends CI_Controller
          * Get Cached Result, If no, cache the query result
          */
         $this->settings = $this->setting_model->get(['id' => 1]);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set Loggedin User from DB
+	 *
+	 * @return void
+	 */
+	private function _app_user()
+	{
+		/**
+         * Get Cached Result, If no, cache the query result
+         */
+        $this->user = $this->user_model->get_loggedin_user($this->dx_auth->get_user_id());
 	}
 
 	// --------------------------------------------------------------------
