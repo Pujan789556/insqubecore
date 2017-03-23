@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : Account - Transaction Type References
+ * Form : Account - Voucher Type
  */
 ?>
 <?php echo form_open( $this->uri->uri_string(),

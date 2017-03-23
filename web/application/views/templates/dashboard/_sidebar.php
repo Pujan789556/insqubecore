@@ -109,8 +109,8 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ac_accounts');?>">
                                                 <a href="<?php echo site_url('ac_accounts');?>"><i class="fa fa-circle-o"></i> Accounts</a>
                                           </li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'ac_ref_transaction_types');?>">
-                                                <a href="<?php echo site_url('ac_ref_transaction_types');?>"><i class="fa fa-circle-o"></i> Txn Type References</a>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'ac_voucher_types');?>">
+                                                <a href="<?php echo site_url('ac_voucher_types');?>"><i class="fa fa-circle-o"></i> Voucher Types</a>
                                           </li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ac_duties_and_tax');?>">
                                                 <a href="<?php echo site_url('ac_duties_and_tax');?>"><i class="fa fa-circle-o"></i> Duties &amp; Tax</a>

@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Account Transaction Type References Controller
+ * Voucher Type Controller
  *
  * This controller falls under "Master Setup" category.
  *
@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Ac_ref_transaction_types extends MY_Controller
+class Ac_voucher_types extends MY_Controller
 {
 	function __construct()
 	{
@@ -41,7 +41,7 @@ class Ac_ref_transaction_types extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('ac_ref_transaction_type_model');
+		$this->load->model('ac_voucher_type_model');
 	}
 
 	// --------------------------------------------------------------------
@@ -59,7 +59,7 @@ class Ac_ref_transaction_types extends MY_Controller
 		 * Normal Form Render
 		 */
 		// this will generate cache name: mc_master_departments_all
-		$records = $this->ac_ref_transaction_type_model->get_all();
+		$records = $this->ac_voucher_type_model->get_all();
 
 		$this->template->partial(
 							'content_header',
@@ -68,7 +68,7 @@ class Ac_ref_transaction_types extends MY_Controller
 								'content_header' => 'Manage Account Transaction Type References',
 								'breadcrumbs' => ['Master Setup' => NULL, 'Account Transaction Type References' => NULL]
 						])
-						->partial('content', 'setup/ac_ref_transaction_types/_index', compact('records'))
+						->partial('content', 'setup/ac_voucher_types/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -85,7 +85,7 @@ class Ac_ref_transaction_types extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ac_ref_transaction_type_model->find($id);
+		$record = $this->ac_voucher_type_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -96,9 +96,9 @@ class Ac_ref_transaction_types extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac_ref_transaction_types/_form',
+		$json_data['form'] = $this->load->view('setup/ac_voucher_types/_form',
 			[
-				'form_elements' => $this->ac_ref_transaction_type_model->validation_rules,
+				'form_elements' => $this->ac_voucher_type_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
@@ -135,7 +135,7 @@ class Ac_ref_transaction_types extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->ac_ref_transaction_type_model->validation_rules;
+			$rules = $this->ac_voucher_type_model->validation_rules;
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
@@ -145,15 +145,15 @@ class Ac_ref_transaction_types extends MY_Controller
 				if($action === 'add')
 				{
 					// // @NOTE: Activity Log will be automatically inserted
-					// $done = $this->ac_ref_transaction_type_model->insert($data, TRUE); // No Validation on Model
+					// $done = $this->ac_voucher_type_model->insert($data, TRUE); // No Validation on Model
 
 					// // Activity Log
-					// $done ? $this->ac_ref_transaction_type_model->log_activity($done, 'C'): '';
+					// $done ? $this->ac_voucher_type_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->ac_ref_transaction_type_model->update($record->id, $data, TRUE) && $this->ac_ref_transaction_type_model->log_activity($record->id, 'E');
+					$done = $this->ac_voucher_type_model->update($record->id, $data, TRUE) && $this->ac_voucher_type_model->log_activity($record->id, 'E');
 				}
 
 				if(!$done)
@@ -179,14 +179,14 @@ class Ac_ref_transaction_types extends MY_Controller
 			{
 				if($action === 'add')
 				{
-					$records = $this->ac_ref_transaction_type_model->get_all();
-					$success_html = $this->load->view('setup/ac_ref_transaction_types/_list', ['records' => $records], TRUE);
+					$records = $this->ac_voucher_type_model->get_all();
+					$success_html = $this->load->view('setup/ac_voucher_types/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
-					$record = $this->ac_ref_transaction_type_model->find($record->id);
-					$success_html = $this->load->view('setup/ac_ref_transaction_types/_single_row', ['record' => $record], TRUE);
+					$record = $this->ac_voucher_type_model->find($record->id);
+					$success_html = $this->load->view('setup/ac_voucher_types/_single_row', ['record' => $record], TRUE);
 				}
 			}
 
@@ -211,9 +211,9 @@ class Ac_ref_transaction_types extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/ac_ref_transaction_types/_form',
+									? 	$this->load->view('setup/ac_voucher_types/_form',
 											[
-												'form_elements' => $this->ac_ref_transaction_type_model->validation_rules,
+												'form_elements' => $this->ac_voucher_type_model->validation_rules,
 												'record' 		=> $record
 											], TRUE)
 									: 	null

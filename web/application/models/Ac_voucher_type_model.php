@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Ac_ref_transaction_type_model extends MY_Model
+class Ac_voucher_type_model extends MY_Model
 {
-    protected $table_name = 'ac_ref_txn_types';
+    protected $table_name = 'ac_voucher_types';
 
     protected $set_created = true;
 
@@ -57,13 +57,13 @@ class Ac_ref_transaction_type_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('ac_ref_txn_type_all');
+        $list = $this->get_cache('ac_voucher_type_all');
         if(!$list)
         {
             $list = $this->db->select('`id`, `code`, `name`')
                         ->from($this->table_name)
                         ->get()->result();
-            $this->write_cache($list, 'ac_ref_txn_type_all', CACHE_DURATION_DAY);
+            $this->write_cache($list, 'ac_voucher_type_all', CACHE_DURATION_DAY);
         }
         return $list;
     }
@@ -95,7 +95,7 @@ class Ac_ref_transaction_type_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'ac_ref_txn_type_all'
+            'ac_voucher_type_all'
         ];
         // cache name without prefix
         foreach($cache_names as $cache)
