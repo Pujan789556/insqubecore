@@ -42,6 +42,7 @@ class Ac_account_groups extends MY_Controller
 
 		// Load Model
 		$this->load->model('ac_account_group_model');
+
 	}
 
 	// --------------------------------------------------------------------
@@ -70,6 +71,31 @@ class Ac_account_groups extends MY_Controller
 						])
 						->partial('content', 'setup/ac_account_groups/_index', compact('records'))
 						->render($this->data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Add a new Record
+	 *
+	 * @return void
+	 */
+	public function add()
+	{
+		$record = NULL;
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('add');
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('setup/ac_account_groups/_form',
+			[
+				'form_elements' => $this->ac_account_group_model->validation_rules,
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
 	}
 
 	// --------------------------------------------------------------------
@@ -223,6 +249,105 @@ class Ac_account_groups extends MY_Controller
 
 		return $return_data;
 	}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Callback Validation Function - Valid Parent
+		 *
+		 * 1. Same account can not be parent and child
+		 *
+		 * @param integer $parent_id
+		 * @param integer|null $id
+		 * @return bool
+		 */
+		public function _cb_valid_parent($parent_id, $id=NULL)
+		{
+			$parent_id = (int)$parent_id;
+	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
+
+	    	if($id && $id === $parent_id)
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_parent', 'Same account group can not be parent for itself.');
+	            return FALSE;
+	    	}
+	        return TRUE;
+		}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Callback Validation Function - Valid Minimum Range?
+		 *
+		 * 1. Range Must Be Unique and fall under parent range if any.
+		 *
+		 * @param integer $range_min
+		 * @param integer|null $id
+		 * @return bool
+		 */
+		public function _cb_valid_range_min($range_min, $id=NULL)
+		{
+			$range_min 	= (int)$range_min;
+	    	$id   		= $id ? (int)$id : (int)$this->input->post('id');
+	    	$parent_id 	= (int)$this->input->post('parent_id');
+
+	    	// Check Duplicate
+	        if( $this->ac_account_group_model->check_duplicate(['range_min' => $range_min], $id))
+	        {
+	            $this->form_validation->set_message('_cb_valid_range_min', 'The %s already exists.');
+	            return FALSE;
+	        }
+
+	    	// First Check if Valid Range
+	    	if( $parent_id && !$this->ac_account_group_model->valid_range($parent_id, $range_min) )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_range_min', 'The %s does not fall under selected parent range.');
+	            return FALSE;
+	    	}
+
+	        return TRUE;
+		}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Callback Validation Function - Valid Maximum Range?
+		 *
+		 * 1. Range Must Be Unique and fall under parent range if any.
+		 *
+		 * @param integer $range_max
+		 * @param integer|null $id
+		 * @return bool
+		 */
+		public function _cb_valid_range_max($range_max, $id=NULL)
+		{
+			$range_max 	= (int)$range_max;
+	    	$id   		= $id ? (int)$id : (int)$this->input->post('id');
+	    	$parent_id 	= (int)$this->input->post('parent_id');
+	    	$range_min 	= (int)$this->input->post('range_min');
+
+	    	// Range Max > Range Min
+	    	if($range_max <= $range_min){
+	    		$this->form_validation->set_message('_cb_valid_range_max', 'The %s  field must contain a number greater than Account Number Min.');
+	            return FALSE;
+	    	}
+
+	    	// Check Duplicate
+	        if( $this->ac_account_group_model->check_duplicate(['range_max' => $range_max], $id))
+	        {
+	            $this->form_validation->set_message('_cb_valid_range_max', 'The %s already exists.');
+	            return FALSE;
+	        }
+
+	    	// First Check if Valid Range
+	    	if( $parent_id && !$this->ac_account_group_model->valid_range($parent_id, $range_max) )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_range_max', 'The %s does not fall under selected parent range.');
+	            return FALSE;
+	    	}
+	        return TRUE;
+		}
+
 
     // --------------------------------------------------------------------
 

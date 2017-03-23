@@ -9,13 +9,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<div class="box">
 			<div class="box-header gray">
 				<div class="row">
-					<div class="col-xs-12">
+					<div class="col-sm-6">
 						<?php
 						/**
 						 * Load Live Search UI
 						 */
 						$this->load->view('templates/_common/_live_search');
 						?>
+					</div>
+					<div class="col-sm-6 master-actions text-right">
+						<a href="#"
+							title="Add New Account Group"
+							data-toggle="tooltip"
+							class="btn btn-success btn-round trg-dialog-edit"
+							data-size="large"
+							data-title='<i class="fa fa-pencil-square-o"></i> Add New Account Group'
+							data-url="<?php echo site_url('ac_account_groups/add/');?>"
+							data-form=".form-iqb-general"
+						><i class="ion-plus-circled"></i> Add</a>
 					</div>
 				</div>
 			</div>

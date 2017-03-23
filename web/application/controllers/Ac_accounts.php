@@ -173,14 +173,14 @@ class Ac_accounts extends MY_Controller
 
 		private function _get_filter_elements()
 		{
-			$dropdwon_heading_groups = $this->ac_account_group_model->dropdown();
+			$dropdwon_account_groups = $this->ac_account_group_model->dropdown_tree();
 			$filters = [
 				[
 	                'field' => 'filter_account_group_id',
 	                'label' => 'Account Group',
-	                'rules' => 'trim|integer|max_length[10]|in_list[' . implode(',', array_keys($dropdwon_heading_groups)) . ']',
+	                'rules' => 'trim|integer|max_length[10]|in_list[' . implode(',', array_keys($dropdwon_account_groups)) . ']',
 	                '_type'     => 'dropdown',
-	                '_data'     => IQB_BLANK_SELECT + $dropdwon_heading_groups,
+	                '_data'     => IQB_BLANK_SELECT + $dropdwon_account_groups,
 	                '_required' => false
 	            ],
 	            [
@@ -442,7 +442,7 @@ class Ac_accounts extends MY_Controller
 	// --------------------------------------------------------------------
 
 		/**
-		 * Callback Validation Function
+		 * Callback Validation Function - Valid Account Group?
 		 *
 		 * 1. Validate the ac_number range as per selected account group
 		 * 2. Check duplicate
@@ -460,16 +460,40 @@ class Ac_accounts extends MY_Controller
 	    	// First Check if Valid Range
 	    	if( !$this->ac_account_group_model->valid_range($account_group_id, $ac_number) )
 	    	{
-	    		$this->form_validation->set_message('_cb_valid_heading_group', 'The %s does not fall under selected heading group range.');
+	    		$this->form_validation->set_message('_cb_valid_account_group', 'The %s does not fall under selected heading group range.');
 	            return FALSE;
 	    	}
 
 	    	// Check Duplicate
 	        if( $this->ac_account_model->check_duplicate(['ac_number' => $ac_number], $id))
 	        {
-	            $this->form_validation->set_message('_cb_valid_heading_group', 'The %s already exists.');
+	            $this->form_validation->set_message('_cb_valid_account_group', 'The %s already exists.');
 	            return FALSE;
 	        }
+	        return TRUE;
+		}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Callback Validation Function - Valid Parent
+		 *
+		 * 1. Same account can not be parent and child
+		 *
+		 * @param integer $parent_id
+		 * @param integer|null $id
+		 * @return bool
+		 */
+		public function _cb_valid_parent($parent_id, $id=NULL)
+		{
+			$parent_id = (int)$parent_id;
+	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
+
+	    	if($id && $id === $parent_id)
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_parent', 'Same account can not be parent for itself.');
+	            return FALSE;
+	    	}
 	        return TRUE;
 		}
 

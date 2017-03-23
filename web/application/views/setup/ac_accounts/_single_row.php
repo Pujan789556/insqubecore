@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
 	<td><?php echo $record->ac_number;?></td>
-	<td><?php echo $record->account_group_name;?></td>
+	<td><?php echo $record->account_group_name_en;?></td>
 	<td><?php echo $record->parent_name ?? '-';?></td>
 	<td><?php echo $record->name;?></td>
 	<td class="ins-action">

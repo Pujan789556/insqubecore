@@ -11,7 +11,7 @@ class Ac_account_group_model extends MY_Model
 
     protected $log_user = true;
 
-    protected $protected_attributes = ['id', 'range_min', 'range_max'];
+    protected $protected_attributes = ['id'];
 
     // protected $before_insert = ['capitalize_code'];
     // protected $before_update = ['capitalize_code'];
@@ -54,9 +54,17 @@ class Ac_account_group_model extends MY_Model
      */
     public function validation_rules()
     {
-        $dropdown_parent            = $this->dropdown_parent();
+        $dropdown_parent = $this->dropdown_parent();
 
         $this->validation_rules = [
+            [
+                'field' => 'parent_id',
+                'label' => 'Parent Group',
+                'rules' => 'trim|integer|max_length[11]|in_list[0,' . implode(',', array_keys($dropdown_parent)) . ']|callback__cb_valid_parent',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_ZERO_SELECT + $dropdown_parent,
+                '_required' => true
+            ],
             [
                 'field' => 'name_en',
                 'label' => 'Account Group Name (EN)',
@@ -70,8 +78,67 @@ class Ac_account_group_model extends MY_Model
                 'rules' => 'trim|max_length[100]',
                 '_type'     => 'text',
                 '_required' => false
-            ]
+            ],
+            [
+                'field' => 'range_min',
+                'label' => 'Account Number Min',
+                'rules' => 'trim|required|integer|max_length[6]|callback__cb_valid_range_min',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            [
+                'field' => 'range_max',
+                'label' => 'Account Number Max',
+                'rules' => 'trim|required|integer|max_length[6]|callback__cb_valid_range_max',
+                '_type'     => 'text',
+                '_required' => true
+            ],
         ];
+
+
+
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Dropdown List
+     */
+    public function dropdown_tree()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $records = $this->get_all();
+
+        $list = [];
+        foreach ($records as $record)
+        {
+            if($record->parent_id)
+            {
+                $list['p_'.$record->parent_id]['children'][] = $record;
+            }
+            else
+            {
+                $list['p_'.$record->id]['parent'] = $record;
+            }
+        }
+
+        $dropdown_tree = [];
+
+        foreach ($list as $p)
+        {
+            $parent     = $p['parent'];
+            $children   = $p['children'] ?? [];
+            $dropdown_tree["{$parent->id}"] = $parent->name_en . " [{$parent->range_min}-{$parent->range_max}]";
+
+            foreach($children as $child)
+            {
+                $dropdown_tree["{$child->id}"] = "|--- " . $child->name_en . " [{$child->range_min}-{$child->range_max}]";
+            }
+
+        }
+        return $dropdown_tree;
     }
 
     // --------------------------------------------------------------------

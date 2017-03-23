@@ -53,7 +53,7 @@ class Ac_account_model extends MY_Model
      */
     public function validation_rules()
     {
-        $dropdwon_heading_groups    = $this->ac_account_group_model->dropdown();
+        $dropdwon_heading_groups    = $this->ac_account_group_model->dropdown_tree();
         $dropdown_parent            = $this->dropdown_parent();
 
         $this->validation_rules = [
@@ -68,7 +68,7 @@ class Ac_account_model extends MY_Model
             [
                 'field' => 'parent_id',
                 'label' => 'Parent Account Name',
-                'rules' => 'trim|integer|max_length[11]|in_list[0,' . implode(',', array_keys($dropdown_parent)) . ']',
+                'rules' => 'trim|integer|max_length[11]|in_list[0,' . implode(',', array_keys($dropdown_parent)) . ']|callback__cb_valid_parent',
                 '_type'     => 'dropdown',
                 '_data'     => IQB_ZERO_SELECT + $dropdown_parent,
                 '_required' => true
@@ -107,7 +107,7 @@ class Ac_account_model extends MY_Model
 
     public function row($id)
     {
-        return $this->db->select('AH.id, AH.account_group_id, AH.ac_number, AH.name, AHG.name as account_group_name, IAH.name as parent_name')
+        return $this->db->select('AH.id, AH.account_group_id, AH.ac_number, AH.name, AHG.name_en as account_group_name_en, IAH.name as parent_name')
                  ->from($this->table_name . ' as AH')
                  ->join('ac_account_groups AHG', 'AHG.id = AH.account_group_id')
                  ->join( $this->table_name . ' IAH', 'IAH.id = AH.parent_id', 'left')
@@ -127,7 +127,7 @@ class Ac_account_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('AH.id, AH.account_group_id, AH.ac_number, AH.name, AHG.name as account_group_name, IAH.name as parent_name')
+        $this->db->select('AH.id, AH.account_group_id, AH.ac_number, AH.name, AHG.name_en as account_group_name_en, IAH.name as parent_name')
                  ->from($this->table_name . ' as AH')
                  ->join('ac_account_groups AHG', 'AHG.id = AH.account_group_id')
                  ->join( $this->table_name . ' IAH', 'IAH.id = AH.parent_id', 'left');

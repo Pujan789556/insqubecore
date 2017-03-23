@@ -37,6 +37,7 @@ $config['insqb_activity_types'] = [
 		'_uri' => 'ac_account_groups/',
 		'_table' => 'ac_account_groups',
 		'_actions' => [
+			'C' => 'added',
 			'E' => 'edited'
 	]],
 
