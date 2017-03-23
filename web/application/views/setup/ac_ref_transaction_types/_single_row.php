@@ -6,6 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <tr data-name="<?php echo $record->name;?>" class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
+	<td><?php echo $record->code;?></td>
 	<td><a href="#"
 		data-toggle="tooltip"
 		title="Edit department"

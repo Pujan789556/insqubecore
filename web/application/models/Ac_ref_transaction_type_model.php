@@ -11,7 +11,7 @@ class Ac_ref_transaction_type_model extends MY_Model
 
     protected $log_user = true;
 
-    protected $protected_attributes = ['id'];
+    protected $protected_attributes = ['id', 'code'];
 
     // protected $before_insert = ['capitalize_code'];
     // protected $before_update = ['capitalize_code'];
@@ -19,7 +19,7 @@ class Ac_ref_transaction_type_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "name", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "code", "name", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -60,7 +60,7 @@ class Ac_ref_transaction_type_model extends MY_Model
         $list = $this->get_cache('ac_ref_txn_type_all');
         if(!$list)
         {
-            $list = $this->db->select('`id`, `name`')
+            $list = $this->db->select('`id`, `code`, `name`')
                         ->from($this->table_name)
                         ->get()->result();
             $this->write_cache($list, 'ac_ref_txn_type_all', CACHE_DURATION_DAY);
@@ -82,7 +82,7 @@ class Ac_ref_transaction_type_model extends MY_Model
         $list = [];
         foreach($records as $record)
         {
-            $list["{$record->id}"] =  $record->name;
+            $list["{$record->id}"] =  $record->code . ' - ' . $record->name;
         }
         return $list;
     }
