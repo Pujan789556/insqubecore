@@ -85,7 +85,7 @@ class Ac_account_groups extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ac_account_group_model->find($id);
+		$record = $this->ac_account_group_model->row($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -185,7 +185,7 @@ class Ac_account_groups extends MY_Controller
 				else
 				{
 					// Get Updated Record
-					$record = $this->ac_account_group_model->find($record->id);
+					$record = $this->ac_account_group_model->row($record->id);
 					$success_html = $this->load->view('setup/ac_account_groups/_single_row', ['record' => $record], TRUE);
 				}
 			}
