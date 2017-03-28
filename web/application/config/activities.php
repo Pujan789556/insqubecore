@@ -201,6 +201,21 @@ $config['insqb_activity_types'] = [
 			'D' => 'deleted'
 	]],
 
+
+	/**
+	 * RI Setup - Treaties
+	 */
+	'ri_setup_treaty' => [
+		'_uri' => 'ri_setup_treaties/',
+		'_table' => 'ri_setup_treaties',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
+
+
 	/**
 	 * Activities related to Roles
 	 */

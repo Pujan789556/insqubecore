@@ -130,6 +130,9 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ri_setup_treaty_types');?>">
                                                 <a href="<?php echo site_url('ri_setup_treaty_types');?>"><i class="fa fa-circle-o"></i> Treaty Types</a>
                                           </li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'ri_setup_treaties');?>">
+                                                <a href="<?php echo site_url('ri_setup_treaties');?>"><i class="fa fa-circle-o"></i> Treaty Setup</a>
+                                          </li>
                                     </ul>
                               </li>
 
