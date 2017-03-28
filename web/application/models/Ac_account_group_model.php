@@ -11,7 +11,7 @@ class Ac_account_group_model extends MY_Model
 
     protected $log_user = true;
 
-    protected $protected_attributes = ['id'];
+    protected $protected_attributes = ['id', 'parent_id', 'range_min', 'range_max'];
 
     // protected $before_insert = ['capitalize_code'];
     // protected $before_update = ['capitalize_code'];
@@ -57,14 +57,14 @@ class Ac_account_group_model extends MY_Model
         $dropdown_parent = $this->dropdown_parent();
 
         $this->validation_rules = [
-            [
-                'field' => 'parent_id',
-                'label' => 'Parent Group',
-                'rules' => 'trim|integer|max_length[11]|in_list[0,' . implode(',', array_keys($dropdown_parent)) . ']|callback__cb_valid_parent',
-                '_type'     => 'dropdown',
-                '_data'     => IQB_ZERO_SELECT + $dropdown_parent,
-                '_required' => true
-            ],
+            // [
+            //     'field' => 'parent_id',
+            //     'label' => 'Parent Group',
+            //     'rules' => 'trim|integer|max_length[11]|in_list[0,' . implode(',', array_keys($dropdown_parent)) . ']|callback__cb_valid_parent',
+            //     '_type'     => 'dropdown',
+            //     '_data'     => IQB_ZERO_SELECT + $dropdown_parent,
+            //     '_required' => true
+            // ],
             [
                 'field' => 'name_en',
                 'label' => 'Account Group Name (EN)',
@@ -79,20 +79,20 @@ class Ac_account_group_model extends MY_Model
                 '_type'     => 'text',
                 '_required' => false
             ],
-            [
-                'field' => 'range_min',
-                'label' => 'Account Number Min',
-                'rules' => 'trim|required|integer|max_length[6]|callback__cb_valid_range_min',
-                '_type'     => 'text',
-                '_required' => true
-            ],
-            [
-                'field' => 'range_max',
-                'label' => 'Account Number Max',
-                'rules' => 'trim|required|integer|max_length[6]|callback__cb_valid_range_max',
-                '_type'     => 'text',
-                '_required' => true
-            ],
+            // [
+            //     'field' => 'range_min',
+            //     'label' => 'Account Number Min',
+            //     'rules' => 'trim|required|integer|max_length[6]|callback__cb_valid_range_min',
+            //     '_type'     => 'text',
+            //     '_required' => true
+            // ],
+            // [
+            //     'field' => 'range_max',
+            //     'label' => 'Account Number Max',
+            //     'rules' => 'trim|required|integer|max_length[6]|callback__cb_valid_range_max',
+            //     '_type'     => 'text',
+            //     '_required' => true
+            // ],
         ];
 
 

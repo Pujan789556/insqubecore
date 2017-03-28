@@ -120,6 +120,19 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                     </ul>
                               </li>
 
+                              <li class="<?php echo set_menu_active($nav_level_1, 'ri');?>">
+                                    <a href="#"><i class="fa fa-arrow-circle-o-down"></i> RI Setup
+                                          <span class="pull-right-container">
+                                                <i class="fa fa-angle-left pull-right"></i>
+                                          </span>
+                                    </a>
+                                    <ul class="treeview-menu">
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'ri_setup_treaty_types');?>">
+                                                <a href="<?php echo site_url('ri_setup_treaty_types');?>"><i class="fa fa-circle-o"></i> Treaty Types</a>
+                                          </li>
+                                    </ul>
+                              </li>
+
                               <li class="<?php echo set_menu_active($nav_level_1, 'portfolio');?>">
                                     <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Portfolio
                                           <span class="pull-right-container">
