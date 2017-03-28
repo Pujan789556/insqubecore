@@ -185,8 +185,76 @@ class Ri_setup_treaty_model extends MY_Model
                 ->join('ri_setup_treaty_types TT', 'TT.id = T.treaty_type_id');
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Details of a Single Record
+     *
+     * @param integer $id
+     * @return object
+     */
+    public function get($id)
+    {
+        return $this->db->select(
+
+                        // Main table -  all fields
+                        'T.*, ' .
+
+                        // Treaty details table - all fields except treaty_id
+                        'TDTL.ac_basic, TDTL.flag_claim_recover_from_ri, TDTL.flag_comp_cession_apply, TDTL.comp_cession_percent, TDTL.comp_cession_max_amount, TDTL.qs_max_ret_amt, TDTL.qs_def_ret_amt, TDTL.flag_qs_line, TDTL.qs_retention_percent, TDTL.qs_quota_percent, TDTL.qs_lines_1, TDTL.qs_lines_2, TDTL.qs_lines_3, TDTL.eol_layer_amount_1, TDTL.eol_layer_amount_2, TDTL.eol_layer_amount_3, TDTL.eol_layer_amount_4, ' .
+
+                        // Treaty Tax and Commission - all fields except treaty_id
+                        'TTNC.qs_comm_ri_quota, TTNC.qs_comm_ri_surplus_1, TTNC.qs_comm_ri_surplus_2, TTNC.qs_comm_ri_surplus_3, TTNC.qs_tax_ri_quota, TTNC.qs_tax_ri_surplus_1, TTNC.qs_tax_ri_surplus_2, TTNC.qs_tax_ri_surplus_3, TTNC.qs_comm_ib_quota, TTNC.qs_comm_ib_surplus_1, TTNC.qs_comm_ib_surplus_2, TTNC.qs_comm_ib_surplus_3, TTNC.qs_piop_quota, TTNC.qs_piop_surplus_1, TTNC.qs_piop_surplus_2, TTNC.qs_piop_surplus_3, TTNC.qs_piol_quota, TTNC.qs_piol_surplus_1, TTNC.qs_piol_surplus_2, TTNC.qs_piol_surplus_3, TTNC.qs_pio_ib_cp_quota, TTNC.qs_pio_ib_cp_surplus_1, TTNC.qs_pio_ib_cp_surplus_2, TTNC.qs_pio_ib_cp_surplus_3, TTNC.qs_profit_comm_quota, TTNC.qs_profit_comm_surplus_1, TTNC.qs_profit_comm_surplus_2, TTNC.qs_profit_comm_surplus_3, TTNC.qs_comm_scale_quota, TTNC.qs_comm_scale_surplus_1, TTNC.qs_comm_scale_surplus_2, TTNC.qs_comm_scale_surplus_3, TTNC.eol_min_n_deposit_amt_l1, TTNC.eol_min_n_deposit_amt_l2, TTNC.eol_min_n_deposit_amt_l3, TTNC.eol_min_n_deposit_amt_l4, TTNC.eol_premium_mode_l1, TTNC.eol_premium_mode_l2, TTNC.eol_premium_mode_l3, TTNC.eol_premium_mode_l4, TTNC.eol_min_rate_l1, TTNC.eol_min_rate_l2, TTNC.eol_min_rate_l3, TTNC.eol_min_rate_l4, TTNC.eol_max_rate_l1, TTNC.eol_max_rate_l2, TTNC.eol_max_rate_l3, TTNC.eol_max_rate_l4, TTNC.eol_fixed_rate_l1, TTNC.eol_fixed_rate_l2, TTNC.eol_fixed_rate_l3, TTNC.eol_fixed_rate_l4, TTNC.eol_loading_factor_l1, TTNC.eol_loading_factor_l2, TTNC.eol_loading_factor_l3, TTNC.eol_loading_factor_l4, TTNC.eol_tax_ri_l1, TTNC.eol_tax_ri_l2, TTNC.eol_tax_ri_l3, TTNC.eol_tax_ri_l4, TTNC.eol_comm_ib_l1, TTNC.eol_comm_ib_l2, TTNC.eol_comm_ib_l3, TTNC.eol_comm_ib_l4, TTNC.flag_eol_rr_l1, TTNC.flag_eol_rr_l2, TTNC.flag_eol_rr_l3, TTNC.flag_eol_rr_l4, ' .
+
+                        // Fiscal year table
+                        'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, ' .
+
+                        // Treaty Type table
+                        'TT.name AS treaty_type_name'
+                        )
+                ->from($this->table_name . ' as T')
+                ->join('ri_setup_treaty_details TDTL', 'TDTL.treaty_id = T.id')
+                ->join('ri_setup_treaty_tax_n_commission TTNC', 'TTNC.treaty_id = T.id')
+                ->join('master_fiscal_yrs FY', 'FY.id = T.fiscal_yr_id')
+                ->join('ri_setup_treaty_types TT', 'TT.id = T.treaty_type_id')
+                ->where('T.id', $id)
+                ->get()->row();
+    }
 
 	// --------------------------------------------------------------------
+
+    public function get_brokers_by_treaty($id)
+    {
+        return $this->db->select('TB.treaty_id, TB.company_id, C.name, C.picture, C.pan_no, C.active, C.type, C.contact')
+                        ->from('ri_setup_treaty_broker TB')
+                        ->join('master_companies C', 'C.id = TB.company_id')
+                        ->where('TB.treaty_id', $id)
+                        ->get()->result();
+    }
+
+    // --------------------------------------------------------------------
+
+    public function get_portfolios_by_treaty($id)
+    {
+        return $this->db->select('TP.treaty_id, TP.portfolio_id, TP.config, P.code, P.name_en, P.name_np')
+                        ->from('ri_setup_treaty_portfolio TP')
+                        ->join('master_portfolio P', 'P.id = TP.portfolio_id')
+                        ->where('TP.treaty_id', $id)
+                        ->get()->result();
+    }
+
+    // --------------------------------------------------------------------
+
+    public function get_treaty_distribution_by_treaty($id)
+    {
+        return $this->db->select('TD.treaty_id, TD.company_id, TD.distribution_percent, TD.flag_leader, C.name, C.picture, C.pan_no, C.active, C.type, C.contact')
+                        ->from('ri_setup_treaty_distribution TD')
+                        ->join('master_companies C', 'C.id = TD.company_id')
+                        ->where('TD.treaty_id', $id)
+                        ->get()->result();
+    }
+
+    // --------------------------------------------------------------------
 
     /**
      * Delete Cache on Update/Delete Records

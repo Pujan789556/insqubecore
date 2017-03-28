@@ -62,6 +62,8 @@ class Ri_setup_treaties extends MY_Controller
 		$this->page();
 	}
 
+	// --------------------------------------------------------------------
+
 	/**
 	 * Paginate Data List
 	 *
@@ -171,6 +173,8 @@ class Ri_setup_treaties extends MY_Controller
 						->render($this->data);
 	}
 
+	// --------------------------------------------------------------------
+
 		private function _get_filter_elements()
 		{
 			$filters = [
@@ -227,6 +231,8 @@ class Ri_setup_treaties extends MY_Controller
 			}
 			return $data;
 		}
+
+	// --------------------------------------------------------------------
 
 	/**
 	 * Refresh The Module
@@ -540,6 +546,52 @@ class Ri_setup_treaties extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+    /**
+     * View Treaty Details
+     *
+     * @param integer $id
+     * @return void
+     */
+    public function details($id)
+    {
+    	/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('ri_setup_treaties', 'explore.treaty') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+    	$id = (int)$id;
+    	$record = $this->ri_setup_treaty_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+
+		$data = [
+			'record' 		=> $record,
+			'brokers' 		=> $this->ri_setup_treaty_model->get_brokers_by_treaty($id),
+			'portfolios' 	=> $this->ri_setup_treaty_model->get_portfolios_by_treaty($id),
+			'distribution' 	=> $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id),
+		];
+
+		$this->data['site_title'] = 'Treaty Details | ' . $record->name;
+		$this->template->partial(
+							'content_header',
+							'templates/_common/_content_header',
+							[
+								'content_header' => 'Treaty Details <small>' . $record->name . '</small>',
+								'breadcrumbs' => ['Treaty Setup' => 'ri_setup_treaties', 'Details' => NULL]
+						])
+						->partial('content', 'setup/ri/treaties/_details', $data)
+						->render($this->data);
+
+    }
+
+	// --------------------------------------------------------------------
+
 	/**
 	 * Delete a Agent
 	 * @param integer $id
@@ -618,6 +670,8 @@ class Ri_setup_treaties extends MY_Controller
         	$this->template->render_404('', "Sorry! File Not Found.");
         }
 	}
+
+	// --------------------------------------------------------------------
 
 
 }
