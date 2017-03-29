@@ -22,6 +22,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<a href="#"
 						title="Edit Treaty"
 						class="trg-dialog-edit"
+						data-box-size="large"
 						data-title='<i class="fa fa-pencil-square-o"></i> Edit Treaty'
 						data-url="<?php echo site_url('ri_setup_treaties/edit/' . $record->id);?>"
 						data-form=".form-iqb-general">

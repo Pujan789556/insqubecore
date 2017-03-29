@@ -7,22 +7,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div class="box box-bordered box-success">
     <div class="box-header with-border border-dark">
         <h3 class="no-margin">
-        <span class="pull-left">Policy Details</span>
-        <span class="pull-right">
-            <?php if( is_policy_editable($record->status, FALSE) ): ?>
-                    <span class="action divider"></span>
-                    <a href="#"
-                        class="action trg-dialog-edit"
-                        title="Edit Policy Information"
-                        data-toggle="tooltip"
-                        data-box-size="large"
-                        data-title='<i class="fa fa-pencil-square-o"></i> Edit Policy - <?php echo $record->code?>'
-                        data-url="<?php echo site_url('policies/edit/' . $record->id . '/y');?>"
-                        data-form="#_form-policy">
-                        <i class="fa fa-pencil-square-o"></i>
-                    </a>
-            <?php endif?>
-        </span>
+            <span class="pull-left">Policy Details</span>
+            <span class="pull-right">
+                <?php if( is_policy_editable($record->status, FALSE) ): ?>
+                        <span class="action divider"></span>
+                        <a href="#"
+                            class="action trg-dialog-edit"
+                            title="Edit Policy Information"
+                            data-toggle="tooltip"
+                            data-box-size="large"
+                            data-title='<i class="fa fa-pencil-square-o"></i> Edit Policy - <?php echo $record->code?>'
+                            data-url="<?php echo site_url('policies/edit/' . $record->id . '/y');?>"
+                            data-form="#_form-policy">
+                            <i class="fa fa-pencil-square-o"></i>
+                        </a>
+                <?php endif?>
+            </span>
         </h3>
     </div>
     <div class="box-body">

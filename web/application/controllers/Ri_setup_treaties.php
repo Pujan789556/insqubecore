@@ -267,19 +267,19 @@ class Ri_setup_treaties extends MY_Controller
 	{
 		$record = NULL;
 
+		/**
+		 * Prepare Form Data
+		 */
+		$this->load->model('company_model');
+		$form_data = [
+			'form_elements' => $this->ri_setup_treaty_model->validation_rules,
+			'record' 			=> $record,
+			'brokers' 			=> $this->company_model->dropdown_broker(),
+			'treaty_borkers' 	=> []
+		];
+
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add');
-
-
-		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form',
-			[
-				'form_elements' => $this->ri_setup_treaty_model->validation_rules,
-				'record' 		=> $record
-			], TRUE);
-
-		// Return HTML
-		$this->template->json($json_data);
+		return $this->_save('add', $record, $form_data);
 	}
 
 	// --------------------------------------------------------------------
@@ -301,19 +301,23 @@ class Ri_setup_treaties extends MY_Controller
 			$this->template->render_404();
 		}
 
+		/**
+		 * Existing Brokers
+		 */
+		$treaty_borkers = $this->ri_setup_treaty_model->get_brokers_by_treaty_dropdown($id);
+
+		/**
+		 * Prepare Form Data
+		 */
+		$form_data = [
+			'form_elements' 	=> $this->ri_setup_treaty_model->validation_rules,
+			'record' 			=> $record,
+			'brokers' 			=> $this->company_model->dropdown_broker(),
+			'treaty_borkers' 	=> array_keys($treaty_borkers)
+		];
+
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record);
-
-
-		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form',
-			[
-				'form_elements' => $this->ri_setup_treaty_model->validation_rules,
-				'record' 		=> $record
-			], TRUE);
-
-		// Return HTML
-		$this->template->json($json_data);
+		return $this->_save('edit', $record, $form_data);
 	}
 
 
@@ -326,7 +330,7 @@ class Ri_setup_treaties extends MY_Controller
 	 * @param object|null $record Record Object or NULL
 	 * @return array
 	 */
-	private function _save($action, $record = NULL)
+	private function _save($action, $record = NULL, $form_data)
 	{
 
 		// Valid action?
@@ -348,7 +352,7 @@ class Ri_setup_treaties extends MY_Controller
 			$done = FALSE;
 			$file = $record->file ?? NULL;
 
-			$rules = $this->ri_setup_treaty_model->validation_rules;
+			$rules = $this->ri_setup_treaty_model->validation_rules_formatted();
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -369,15 +373,12 @@ class Ri_setup_treaties extends MY_Controller
 	        		// Insert or Update?
 					if($action === 'add')
 					{
-						$done = $this->ri_setup_treaty_model->insert($data, TRUE); // No Validation on Model
-
-						// Activity Log
-						$done ? $this->ri_setup_treaty_model->log_activity($done, 'C'): '';
+						$done = $this->ri_setup_treaty_model->add($data);
 					}
 					else
 					{
 						// Now Update Data
-						$done = $this->ri_setup_treaty_model->update($record->id, $data, TRUE) && $this->ri_setup_treaty_model->log_activity($record->id, 'E');
+						$done = $this->ri_setup_treaty_model->edit($record->id, $data);
 					}
 
 		        	if(!$done)
@@ -444,18 +445,19 @@ class Ri_setup_treaties extends MY_Controller
 					'reloadForm' 	=> true,
 					'hideBootbox' 	=> false,
 					'updateSection' => false,
-					'updateSectionData'	=> NULL,
-					'form' 	  		=> $this->load->view('setup/ri/treaties/_form',
-												[
-													'form_elements' => $rules,
-													'record' 		=> $record
-												], TRUE)
-
+					'updateSectionData'	=> NULL
 				];
 			}
 		}
 
-		return $return_data;
+		// Prepare HTML Form
+		$json_data['form'] = $this->load->view('setup/ri/treaties/_form', $form_data, TRUE);
+
+		// Merge Return Data with Form Data
+		$json_data = array_merge($json_data, $return_data);
+
+		// Return JSON
+		$this->template->json($json_data);
 	}
 
 	// --------------------------------------------------------------------
@@ -569,12 +571,14 @@ class Ri_setup_treaties extends MY_Controller
 			$this->template->render_404();
 		}
 
-
+		/**
+		 * Treaty Data
+		 */
 		$data = [
-			'record' 		=> $record,
-			'brokers' 		=> $this->ri_setup_treaty_model->get_brokers_by_treaty($id),
-			'portfolios' 	=> $this->ri_setup_treaty_model->get_portfolios_by_treaty($id),
-			'distribution' 	=> $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id),
+			'record' 			=> $record,
+			'brokers' 			=> $this->ri_setup_treaty_model->get_brokers_by_treaty($id),
+			'portfolio_config' 	=> $this->ri_setup_treaty_model->get_portfolio_config_by_treaty($id),
+			'distribution' 		=> $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id),
 		];
 
 		$this->data['site_title'] = 'Treaty Details | ' . $record->name;

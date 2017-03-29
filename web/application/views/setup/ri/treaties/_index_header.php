@@ -15,7 +15,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					title="Add Treaty"
 					data-toggle="tooltip"
 					class="btn btn-success btn-round trg-dialog-edit"
-					data-size="large"
+					data-box-size="large"
 					data-title='<i class="fa fa-pencil-square-o"></i> Add Treaty'
 					data-url="<?php echo site_url('ri_setup_treaties/add/');?>"
 					data-form=".form-iqb-general"

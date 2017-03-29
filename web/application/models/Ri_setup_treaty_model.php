@@ -54,59 +54,242 @@ class Ri_setup_treaty_model extends MY_Model
      */
     public function validation_rules()
     {
+        $this->load->model('company_model');
+        $broker_dropdown = $this->company_model->dropdown_broker();
+
         $this->validation_rules = [
-            [
-                'field' => 'fiscal_yr_id',
-                'label' => 'Fiscal Year',
-                'rules' => 'trim|required|integer|max_length[3]',
-                '_type'     => 'dropdown',
-                '_data'     => IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown(),
-                '_required' => true
+
+            // Master Table (Treaty Setup)
+            'basic' => [
+                [
+                    'field' => 'fiscal_yr_id',
+                    'label' => 'Fiscal Year',
+                    'rules' => 'trim|required|integer|max_length[3]',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown(),
+                    '_required' => true
+                ],
+                [
+                    'field' => 'treaty_type_id',
+                    'label' => 'Treaty Type',
+                    'rules' => 'trim|required|integer|exact_length[1]|callback__cb_treaty_type__check_duplicate',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $this->ri_setup_treaty_type_model->dropdown(),
+                    '_required' => true
+                ],
+                [
+                    'field' => 'name',
+                    'label' => 'Treaty Title',
+                    'rules' => 'trim|required|max_length[100]|callback__cb_name__check_duplicate',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'currency_contract',
+                    'label' => 'Contract Currency',
+                    'rules' => 'trim|required|alpha|max_length[10]|strtoupper',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'currency_settlement',
+                    'label' => 'Settlement Currency',
+                    'rules' => 'trim|required|alpha|max_length[10]|strtoupper',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'estimated_premium_income',
+                    'label' => 'Estimated Premium Income',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'treaty_effective_date',
+                    'label' => 'Treaty Effective Date',
+                    'rules' => 'trim|required|valid_date',
+                    '_type'     => 'date',
+                    '_required' => true
+                ],
             ],
-            [
-                'field' => 'treaty_type_id',
-                'label' => 'Treaty Type',
-                'rules' => 'trim|required|integer|exact_length[1]|callback__cb_treaty_type__check_duplicate',
-                '_type'     => 'dropdown',
-                '_data'     => IQB_BLANK_SELECT + $this->ri_setup_treaty_type_model->dropdown(),
-                '_required' => true
-            ],
-            [
-                'field' => 'name',
-                'label' => 'Treaty Title',
-                'rules' => 'trim|required|max_length[100]|callback__cb_name__check_duplicate',
-                '_type'     => 'text',
-                '_required' => true
-            ],
-            [
-                'field' => 'currency_contract',
-                'label' => 'Contract Currency',
-                'rules' => 'trim|required|alpha|max_length[10]|strtoupper',
-                '_type'     => 'text',
-                '_required' => true
-            ],
-            [
-                'field' => 'currency_settlement',
-                'label' => 'Settlement Currency',
-                'rules' => 'trim|required|alpha|max_length[10]|strtoupper',
-                '_type'     => 'text',
-                '_required' => true
-            ],
-            [
-                'field' => 'estimated_premium_income',
-                'label' => 'Estimated Premium Income',
-                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                '_type'     => 'text',
-                '_required' => true
-            ],
-            [
-                'field' => 'treaty_effective_date',
-                'label' => 'Treaty Effective Date',
-                'rules' => 'trim|required|valid_date',
-                '_type'     => 'date',
-                '_required' => true
+
+            // Broker List
+            'brokers' => [
+                [
+                    'field' => 'broker_ids[]',
+                    'label' => 'Re-insurance Broker',
+                    'rules' => 'trim|required|integer|max_length[8]|in_list[' . implode( ',', array_keys($broker_dropdown) ) . ']',
+                    '_type'     => 'checkbox',
+                    '_data'     => $broker_dropdown,
+                    '_required' => true
+                ]
             ]
+
         ];
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Validation Rules Formatted
+     *
+     * @return void
+     */
+    public function validation_rules_formatted()
+    {
+        $v_rules = [];
+        foreach($this->validation_rules as $section=>$rules)
+        {
+            $v_rules = array_merge($v_rules, $rules);
+        }
+        return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Add New Treaty
+     *
+     * All transactions must be carried out, else rollback.
+     * The following tasks are carried during Treaty Setup:
+     *      a. Insert Master Record
+     *      b. Insert Broker Relation Records
+     *
+     * @param array $data
+     * @return mixed
+     */
+    public function add($data)
+    {
+        // Extract All Brokers
+        $broker_ids = $data['broker_ids'];
+        unset($data['broker_ids']);
+
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $id                 = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Task a: Insert Master Record, No Validation Required as it is performed on Controller
+            $id = parent::insert($data, TRUE);
+
+            // Task b. Insert Broker Relations
+            if($id)
+            {
+                // Insert Batch Broker Data
+                $this->batch_insert_treaty_brokers($id, $broker_ids);
+
+                // Log Activity
+                $this->log_activity($id, 'C');
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $id = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $id;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Edit Treaty
+     *
+     * All transactions must be carried out, else rollback.
+     * The following tasks are carried during Treaty Setup:
+     *      a. Update Master Record
+     *      b. Update Broker Relation Records
+     *
+     * @param array $data
+     * @return mixed
+     */
+    public function edit($id, $data)
+    {
+        // Extract All Brokers
+        $broker_ids = $data['broker_ids'];
+        unset($data['broker_ids']);
+
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $status             = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Task a: Update Master Record, No Validation Required as it is performed on Controller
+            $status = parent::update($id, $data, TRUE);
+
+            // Task b. Update Broker Relations
+            if($status)
+            {
+                // Delete Old Relation
+                $this->delete_brokers_by_treaty($id);
+
+                // Insert Batch Broker Data
+                $this->batch_insert_treaty_brokers($id, $broker_ids);
+
+                // Log Activity
+                $this->log_activity($id, 'E');
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $status;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function batch_insert_treaty_brokers($id, $broker_ids)
+    {
+        $batch_broker_data = [];
+        foreach($broker_ids as $company_id)
+        {
+            $batch_broker_data[] = [
+                'treaty_id'     => $id,
+                'company_id'    => $company_id
+            ];
+        }
+
+        // Insert Batch Broker Data
+        if( $batch_broker_data )
+        {
+            return $this->db->insert_batch('ri_setup_treaty_broker', $batch_broker_data);
+        }
+        return FALSE;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function delete_brokers_by_treaty($id)
+    {
+        return $this->db->where('treaty_id', $id)
+                        ->delete('ri_setup_treaty_broker');
     }
 
     // ----------------------------------------------------------------
@@ -200,9 +383,6 @@ class Ri_setup_treaty_model extends MY_Model
                         // Main table -  all fields
                         'T.*, ' .
 
-                        // Treaty details table - all fields except treaty_id
-                        'TDTL.ac_basic, TDTL.flag_claim_recover_from_ri, TDTL.flag_comp_cession_apply, TDTL.comp_cession_percent, TDTL.comp_cession_max_amount, TDTL.qs_max_ret_amt, TDTL.qs_def_ret_amt, TDTL.flag_qs_line, TDTL.qs_retention_percent, TDTL.qs_quota_percent, TDTL.qs_lines_1, TDTL.qs_lines_2, TDTL.qs_lines_3, TDTL.eol_layer_amount_1, TDTL.eol_layer_amount_2, TDTL.eol_layer_amount_3, TDTL.eol_layer_amount_4, ' .
-
                         // Treaty Tax and Commission - all fields except treaty_id
                         'TTNC.qs_comm_ri_quota, TTNC.qs_comm_ri_surplus_1, TTNC.qs_comm_ri_surplus_2, TTNC.qs_comm_ri_surplus_3, TTNC.qs_tax_ri_quota, TTNC.qs_tax_ri_surplus_1, TTNC.qs_tax_ri_surplus_2, TTNC.qs_tax_ri_surplus_3, TTNC.qs_comm_ib_quota, TTNC.qs_comm_ib_surplus_1, TTNC.qs_comm_ib_surplus_2, TTNC.qs_comm_ib_surplus_3, TTNC.qs_piop_quota, TTNC.qs_piop_surplus_1, TTNC.qs_piop_surplus_2, TTNC.qs_piop_surplus_3, TTNC.qs_piol_quota, TTNC.qs_piol_surplus_1, TTNC.qs_piol_surplus_2, TTNC.qs_piol_surplus_3, TTNC.qs_pio_ib_cp_quota, TTNC.qs_pio_ib_cp_surplus_1, TTNC.qs_pio_ib_cp_surplus_2, TTNC.qs_pio_ib_cp_surplus_3, TTNC.qs_profit_comm_quota, TTNC.qs_profit_comm_surplus_1, TTNC.qs_profit_comm_surplus_2, TTNC.qs_profit_comm_surplus_3, TTNC.qs_comm_scale_quota, TTNC.qs_comm_scale_surplus_1, TTNC.qs_comm_scale_surplus_2, TTNC.qs_comm_scale_surplus_3, TTNC.eol_min_n_deposit_amt_l1, TTNC.eol_min_n_deposit_amt_l2, TTNC.eol_min_n_deposit_amt_l3, TTNC.eol_min_n_deposit_amt_l4, TTNC.eol_premium_mode_l1, TTNC.eol_premium_mode_l2, TTNC.eol_premium_mode_l3, TTNC.eol_premium_mode_l4, TTNC.eol_min_rate_l1, TTNC.eol_min_rate_l2, TTNC.eol_min_rate_l3, TTNC.eol_min_rate_l4, TTNC.eol_max_rate_l1, TTNC.eol_max_rate_l2, TTNC.eol_max_rate_l3, TTNC.eol_max_rate_l4, TTNC.eol_fixed_rate_l1, TTNC.eol_fixed_rate_l2, TTNC.eol_fixed_rate_l3, TTNC.eol_fixed_rate_l4, TTNC.eol_loading_factor_l1, TTNC.eol_loading_factor_l2, TTNC.eol_loading_factor_l3, TTNC.eol_loading_factor_l4, TTNC.eol_tax_ri_l1, TTNC.eol_tax_ri_l2, TTNC.eol_tax_ri_l3, TTNC.eol_tax_ri_l4, TTNC.eol_comm_ib_l1, TTNC.eol_comm_ib_l2, TTNC.eol_comm_ib_l3, TTNC.eol_comm_ib_l4, TTNC.flag_eol_rr_l1, TTNC.flag_eol_rr_l2, TTNC.flag_eol_rr_l3, TTNC.flag_eol_rr_l4, ' .
 
@@ -213,7 +393,6 @@ class Ri_setup_treaty_model extends MY_Model
                         'TT.name AS treaty_type_name'
                         )
                 ->from($this->table_name . ' as T')
-                ->join('ri_setup_treaty_details TDTL', 'TDTL.treaty_id = T.id')
                 ->join('ri_setup_treaty_tax_n_commission TTNC', 'TTNC.treaty_id = T.id')
                 ->join('master_fiscal_yrs FY', 'FY.id = T.fiscal_yr_id')
                 ->join('ri_setup_treaty_types TT', 'TT.id = T.treaty_type_id')
@@ -226,7 +405,7 @@ class Ri_setup_treaty_model extends MY_Model
     public function get_brokers_by_treaty($id)
     {
         return $this->db->select('TB.treaty_id, TB.company_id, C.name, C.picture, C.pan_no, C.active, C.type, C.contact')
-                        ->from('ri_setup_treaty_broker TB')
+                        ->from('ri_setup_treaty_broker AS TB')
                         ->join('master_companies C', 'C.id = TB.company_id')
                         ->where('TB.treaty_id', $id)
                         ->get()->result();
@@ -234,12 +413,31 @@ class Ri_setup_treaty_model extends MY_Model
 
     // --------------------------------------------------------------------
 
-    public function get_portfolios_by_treaty($id)
+    public function get_brokers_by_treaty_dropdown($id)
     {
-        return $this->db->select('TP.treaty_id, TP.portfolio_id, TP.config, P.code, P.name_en, P.name_np')
-                        ->from('ri_setup_treaty_portfolio TP')
-                        ->join('master_portfolio P', 'P.id = TP.portfolio_id')
-                        ->where('TP.treaty_id', $id)
+        $list = $this->get_brokers_by_treaty($id);
+        $brokers = [];
+        foreach($list as $record)
+        {
+            $brokers["{$record->company_id}"] = $record->name;
+        }
+        return $brokers;
+    }
+
+    // --------------------------------------------------------------------
+
+    public function get_portfolio_config_by_treaty($id)
+    {
+        return $this->db->select(
+                            // Treaty Portfolio Config
+                            'TPCFG.treaty_id, TPCFG.portfolio_id, TPCFG.ac_basic, TPCFG.flag_claim_recover_from_ri, TPCFG.flag_comp_cession_apply, TPCFG.comp_cession_percent, TPCFG.comp_cession_max_amount, TPCFG.qs_max_ret_amt, TPCFG.qs_def_ret_amt, TPCFG.flag_qs_line, TPCFG.qs_retention_percent, TPCFG.qs_quota_percent, TPCFG.qs_lines_1, TPCFG.qs_lines_2, TPCFG.qs_lines_3, TPCFG.eol_layer_amount_1, TPCFG.eol_layer_amount_2, TPCFG.eol_layer_amount_3, TPCFG.eol_layer_amount_4, ' .
+
+                            // Portfolio Detail
+                            'P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np'
+                            )
+                        ->from('ri_setup_treaty_portfolio_config AS TPCFG')
+                        ->join('master_portfolio P', 'P.id = TPCFG.portfolio_id')
+                        ->where('TPCFG.treaty_id', $id)
                         ->get()->result();
     }
 

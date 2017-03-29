@@ -105,7 +105,7 @@ class Company_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('creditor_dropdown');
+        $list = $this->get_cache('company_creditor_dropdown');
         if(!$list)
         {
             $records = $this->db->select('C.id, C.name')
@@ -122,7 +122,7 @@ class Company_model extends MY_Model
             }
             if(!empty($list))
             {
-                $this->write_cache($list, 'creditor_dropdown', CACHE_DURATION_DAY);
+                $this->write_cache($list, 'company_creditor_dropdown', CACHE_DURATION_DAY);
             }
         }
         return $list;
@@ -140,7 +140,7 @@ class Company_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('general_dropdown');
+        $list = $this->get_cache('company_general_dropdown');
         if(!$list)
         {
             $records = $this->db->select('C.id, C.name')
@@ -157,7 +157,42 @@ class Company_model extends MY_Model
             }
             if(!empty($list))
             {
-                $this->write_cache($list, 'general_dropdown', CACHE_DURATION_DAY);
+                $this->write_cache($list, 'company_general_dropdown', CACHE_DURATION_DAY);
+            }
+        }
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Dropdown List of Broker Companies
+     *
+     * @return array
+     */
+    public function dropdown_broker()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('company_broker_dropdown');
+        if(!$list)
+        {
+            $records = $this->db->select('C.id, C.name')
+                             ->from($this->table_name . ' as C')
+                             ->where('C.type', IQB_COMPANY_TYPE_BROKER)
+                             ->where('C.active', IQB_STATUS_ACTIVE)
+                             ->get()->result();
+
+            $list = [];
+            foreach($records as $record)
+            {
+                $column = $record->id;
+                $list["{$column}"] = $record->name;
+            }
+            if(!empty($list))
+            {
+                $this->write_cache($list, 'company_broker_dropdown', CACHE_DURATION_DAY);
             }
         }
         return $list;
@@ -223,8 +258,9 @@ class Company_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'creditor_dropdown',
-            'general_dropdown'
+            'company_creditor_dropdown',
+            'company_general_dropdown',
+            'company_broker_dropdown'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)
