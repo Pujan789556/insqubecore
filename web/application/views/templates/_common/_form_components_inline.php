@@ -16,18 +16,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $inline_grid_width = $inline_grid_width ?? '';
 foreach($form_elements as $element):?>
     <div class="form-group <?php echo $inline_grid_width;?> <?php echo form_error($element['field']) ? 'has-error' : '';?>">
-        <label for="">
-            <?php
-            if( !in_array($element['_type'], ['checkbox', 'radio']))
-            {
-                echo $element['label'] . field_compulsary_text( $element['_required'] ?? FALSE );
-            }
-            else
-            {
-                echo '&nbsp;';
-            }
-            ?>
-        </label>
+
+        <?php
+        /**
+         * Show/Hide Label
+         */
+        $show_label = $element['_show_label'] ?? TRUE; // Default : True
+        if($show_label):
+        ?>
+            <label for="">
+                <?php
+                if( !in_array($element['_type'], ['checkbox', 'radio']))
+                {
+                    echo $element['label'] . field_compulsary_text( $element['_required'] ?? FALSE );
+                }
+                else
+                {
+                    echo '&nbsp;';
+                }
+                ?>
+            </label>
+        <?php endif;?>
         <?php
         /**
          * Load Form Element

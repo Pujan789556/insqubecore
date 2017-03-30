@@ -4,61 +4,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Setup - RI - Treaty : Details View
 */
 ?>
-<div class="box box-solid">
-	<div class="box-body border-radius-none">
-		<div class="row">
-			<div class="col-md-4">
-				<div class="box box-solid bg-teal-gradient">
-					<div class="box-header">
-						<h3 class="box-title"><?php echo  $record->name;?></h3>
-					</div>
-					<div class="box-body">
-						<table class="table table-stripped">
-							<tr>
-								<th>Fiscal Year</th>
-								<td><?php echo $record->fy_code_np . " ({$record->fy_code_en})"?></td>
-							</tr>
-							<tr>
-								<th>Treaty Type</th>
-								<td><?php echo $record->treaty_type_name ;?></td>
-							</tr>
-							<tr>
-								<th>Contract Currency</th>
-								<td><?php echo $record->currency_contract ;?></td>
-							</tr>
-							<tr>
-								<th>Settelment Currency</th>
-								<td><?php echo $record->currency_settlement ;?></td>
-							</tr>
-							<tr>
-								<th>Estimated Premium Income</th>
-								<td><?php echo $record->estimated_premium_income ;?></td>
-							</tr>
-							<tr>
-								<th>Treaty Effective Date</th>
-								<td><?php echo $record->treaty_effective_date ;?></td>
-							</tr>
-						</table>
-					</div>
-				</div>
-
-				<div class="box box-primary">
-					<div class="box-header"><h3 class="box-title">Brokers</h3></div>
-					<div class="box-body">
-						<ul class="list-group list-group-unbordered">
-							<?php foreach ($brokers as $broker):?>
-								<li class="list-group-item">
-									<a href="<?php echo site_url('companies/details/' . $broker->company_id)?>" target="_blank"><?php echo $broker->name?></a>
-								</li>
-							<?php endforeach;?>
-						</ul>
-					</div>
-				</div>
-
-			</div>
-		</div>
+<div class="row">
+	<div class="col-md-4">
+		<?php
+		/**
+		 * Basic Overview
+		 */
+		$this->load->view('setup/ri/treaties/snippets/_ri_basic');
+		?>
 	</div>
-
+	<div class="col-md-8">
+		<?php
+		/**
+		 * RI Distribution
+		 */
+		$this->load->view('setup/ri/treaties/snippets/_ri_distribution',['record' => $record, 'treaty_distribution' => $treaty_distribution]);
+		?>
+	</div>
 </div>
 
 <div class="row">

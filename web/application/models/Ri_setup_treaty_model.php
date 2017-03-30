@@ -5,22 +5,27 @@ class Ri_setup_treaty_model extends MY_Model
 {
     protected $table_name = 'ri_setup_treaties';
 
+    /**
+     * Other dependent tables
+     */
+    protected static $table_treaty_types                    = 'ri_setup_treaty_types';
+    protected static $table_treaty_brokers                  = 'ri_setup_treaty_brokers';
+    protected static $table_treaty_distribution             = 'ri_setup_treaty_distribution';
+    protected static $table_treaty_portfolios               = 'ri_setup_treaty_portfolios';
+    protected static $table_treaty_tax_and_commission       = 'ri_setup_treaty_tax_and_commission';
+
     protected $set_created = true;
-
     protected $set_modified = true;
-
     protected $log_user = true;
-
-    protected $protected_attributes = ['id'];
 
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
+    protected $protected_attributes = ['id'];
     protected $fields = ['id', 'name', 'fiscal_yr_id', 'treaty_type_id', 'currency_contract', 'currency_settlement', 'estimated_premium_income', 'treaty_effective_date', 'file', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
-
 
     /**
      * Protect Default Records?
@@ -40,6 +45,8 @@ class Ri_setup_treaty_model extends MY_Model
         parent::__construct();
 
         $this->load->model('ri_setup_treaty_type_model');
+        $this->load->model('company_model');
+        $this->load->model('portfolio_model');
 
         // Set validation rule
         $this->validation_rules();
@@ -48,14 +55,15 @@ class Ri_setup_treaty_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Set Validation Rules
+     * Set Validation Rules (Sectioned)
      *
      * @return void
      */
     public function validation_rules()
     {
-        $this->load->model('company_model');
-        $broker_dropdown = $this->company_model->dropdown_broker();
+        $broker_dropdown        = $this->company_model->dropdown_brokers();
+        $reinsurer_dropdown     = $this->company_model->dropdown_reinsurers();
+        $portfolio_dropdown     = $this->portfolio_model->dropdown_children();
 
         $this->validation_rules = [
 
@@ -122,7 +130,44 @@ class Ri_setup_treaty_model extends MY_Model
                     'rules' => 'trim|required|integer|max_length[8]|in_list[' . implode( ',', array_keys($broker_dropdown) ) . ']',
                     '_type'     => 'checkbox',
                     '_data'     => $broker_dropdown,
-                    '_required' => true
+                    '_show_label'   => false,
+                    '_required'     => true
+                ]
+            ],
+
+            // Portfolio List
+            'portfolios' => [
+                [
+                    'field' => 'portfolio_ids[]',
+                    'label' => 'Portfolio',
+                    'rules' => 'trim|required|integer|max_length[8]|in_list[' . implode( ',', array_keys($portfolio_dropdown) ) . ']|callback__cb_portfolio__check_duplicate',
+                    '_type'     => 'checkbox',
+                    '_data'     => $portfolio_dropdown,
+                    '_show_label'   => false,
+                    '_required'     => true
+                ]
+            ],
+
+            // Reinsurers List
+            'reinsurers' => [
+                [
+                    'field' => 'reinsurer_ids[]',
+                    'label' => 'Reinsurer',
+                    'rules' => 'trim|required|integer|max_length[8]|in_list[' . implode( ',', array_keys($reinsurer_dropdown) ) . ']',
+                    '_field'        => 'company_id',
+                    '_type'         => 'dropdown',
+                    '_show_label'   => false,
+                    '_data'         => IQB_BLANK_SELECT + $reinsurer_dropdown,
+                    '_required'     => true
+                ],
+                [
+                    'field' => 'distribution_percent[]',
+                    'label' => 'Distribution %',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]|callback__cb_distribution__complete',
+                    '_field'        => 'distribution_percent',
+                    '_type'         => 'text',
+                    '_show_label'   => false,
+                    '_required'     => true
                 ]
             ]
 
@@ -132,18 +177,40 @@ class Ri_setup_treaty_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Get Validation Rules Formatted
+     * Get Validation Rules (Sectioned)
      *
-     * @return void
+     * @param array|string $sections
+     * @return array
      */
-    public function validation_rules_formatted()
+    public function get_validation_rules($sections)
     {
+        // If a single section is supplied, convert it into array
+        $sections = is_array($sections) ? $sections : array($sections);
         $v_rules = [];
-        foreach($this->validation_rules as $section=>$rules)
+        foreach( $sections as $section)
         {
-            $v_rules = array_merge($v_rules, $rules);
+            $v_rules[$section] = $this->validation_rules[$section];
         }
         return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Validation Rules Formatted from Supplied sections to run Form Validation
+     *
+     * @param array  $sectioned_rules
+     * @return void
+     */
+    public function get_validation_rules_formatted($sections)
+    {
+        $sectioned_rules = $this->get_validation_rules($sections);
+        $v_rules_formatted = [];
+        foreach($sectioned_rules as $section=>$rules)
+        {
+            $v_rules_formatted = array_merge($v_rules_formatted, $rules);
+        }
+        return $v_rules_formatted;
     }
 
     // ----------------------------------------------------------------
@@ -155,15 +222,21 @@ class Ri_setup_treaty_model extends MY_Model
      * The following tasks are carried during Treaty Setup:
      *      a. Insert Master Record
      *      b. Insert Broker Relation Records
+     *      c. Insert Portfolio Configuration (Empty Record)
+     *      d. Insert Reinsurer distribution
      *
      * @param array $data
      * @return mixed
      */
     public function add($data)
     {
-        // Extract All Brokers
-        $broker_ids = $data['broker_ids'];
+        // Extract All Brokers, Portfolios
+        $broker_ids     = $data['broker_ids'];
+        $portfolio_ids  = $data['portfolio_ids'];
+
+        // Remove unused fields
         unset($data['broker_ids']);
+        unset($data['portfolio_ids']);
 
 
         // Disable DB Debug for transaction to work
@@ -181,6 +254,9 @@ class Ri_setup_treaty_model extends MY_Model
             {
                 // Insert Batch Broker Data
                 $this->batch_insert_treaty_brokers($id, $broker_ids);
+
+                // Insert Batch Portfolio Data
+                $this->batch_insert_treaty_portfolios($id, $portfolio_ids);
 
                 // Log Activity
                 $this->log_activity($id, 'C');
@@ -212,15 +288,27 @@ class Ri_setup_treaty_model extends MY_Model
      * The following tasks are carried during Treaty Setup:
      *      a. Update Master Record
      *      b. Update Broker Relation Records
+     *      c. Update Portfolio Configuration
+     *          - Old Records (if selected) - leave intact
+     *          - New Records - empty
      *
      * @param array $data
+     * @param array $old_data   Old reference data, such as old_portfolios, old_brokers etc.
      * @return mixed
      */
-    public function edit($id, $data)
+    public function edit($id, $data, $old_data)
     {
-        // Extract All Brokers
-        $broker_ids = $data['broker_ids'];
+        // Extract All Brokers, Portfolios
+        $broker_ids     = $data['broker_ids'];
+        $portfolio_ids  = $data['portfolio_ids'];
+
+        // Remove unused fields
         unset($data['broker_ids']);
+        unset($data['portfolio_ids']);
+
+        // Find To Insert/Delete Portfolios
+        $to_insert_portfolios = array_diff($portfolio_ids, $old_data['old_portfolios']);
+        $to_delete_portfolios = array_diff($old_data['old_portfolios'], $portfolio_ids);
 
 
         // Disable DB Debug for transaction to work
@@ -236,11 +324,17 @@ class Ri_setup_treaty_model extends MY_Model
             // Task b. Update Broker Relations
             if($status)
             {
-                // Delete Old Relation
+                // Delete Old Brokers Relation
                 $this->delete_brokers_by_treaty($id);
 
                 // Insert Batch Broker Data
                 $this->batch_insert_treaty_brokers($id, $broker_ids);
+
+                // Delete Old Portfolio Relation
+                $this->delete_specific_portfolios_by_treaty($id, $to_delete_portfolios);
+
+                // Insert Batch Portfolio Data
+                $this->batch_insert_treaty_portfolios($id, $to_insert_portfolios);
 
                 // Log Activity
                 $this->log_activity($id, 'E');
@@ -265,6 +359,94 @@ class Ri_setup_treaty_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Save Treaty Distribution
+     *
+     * All transactions must be carried out, else rollback.
+     * The following tasks are carried during Treaty Setup:
+     *      a. Delete old treaty distribution
+     *      b. Update New treaty distribution
+     *
+     * @param array $data
+     * @return mixed
+     */
+    public function save_treaty_distribution($id, $data)
+    {
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $status             = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Delete Old Distribution
+            $this->delete_distribution_by_treaty($id);
+
+            // Batch Insert distribution data
+            $this->batch_insert_treaty_distribution($id, $data);
+
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $status;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function batch_insert_treaty_distribution($id, $data)
+    {
+        // Extract All Data
+        $reinsurer_ids          = $data['reinsurer_ids'];
+        $distribution_percent   = $data['distribution_percent'];
+
+        $batch_distribution_data = [];
+
+        if( !empty($reinsurer_ids) && count($reinsurer_ids) === count($distribution_percent) )
+        {
+            for($i=0; $i < count($reinsurer_ids); $i++)
+            {
+                $batch_distribution_data[] = [
+                    'treaty_id'             => $id,
+                    'company_id'            => $reinsurer_ids[$i],
+                    'distribution_percent'  => $distribution_percent[$i],
+                    'flag_leader'           => IQB_FLAG_OFF
+                ];
+            }
+
+            // Set First Row as Leader
+            $batch_distribution_data[0]['flag_leader'] = IQB_FLAG_ON;
+        }
+
+        // Insert Batch Broker Data
+        if( $batch_distribution_data )
+        {
+            return $this->db->insert_batch(self::$table_treaty_distribution, $batch_distribution_data);
+        }
+        return FALSE;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function delete_distribution_by_treaty($id)
+    {
+        return $this->db->where('treaty_id', $id)
+                        ->delete(self::$table_treaty_distribution);
+    }
+
+    // ----------------------------------------------------------------
+
     public function batch_insert_treaty_brokers($id, $broker_ids)
     {
         $batch_broker_data = [];
@@ -279,7 +461,7 @@ class Ri_setup_treaty_model extends MY_Model
         // Insert Batch Broker Data
         if( $batch_broker_data )
         {
-            return $this->db->insert_batch('ri_setup_treaty_broker', $batch_broker_data);
+            return $this->db->insert_batch(self::$table_treaty_brokers, $batch_broker_data);
         }
         return FALSE;
     }
@@ -289,7 +471,42 @@ class Ri_setup_treaty_model extends MY_Model
     public function delete_brokers_by_treaty($id)
     {
         return $this->db->where('treaty_id', $id)
-                        ->delete('ri_setup_treaty_broker');
+                        ->delete(self::$table_treaty_brokers);
+    }
+
+    // ----------------------------------------------------------------
+
+    public function batch_insert_treaty_portfolios($id, $portfolio_ids)
+    {
+        $batch_portfolio_data = [];
+        foreach($portfolio_ids as $portfolio_id)
+        {
+            $batch_portfolio_data[] = [
+                'treaty_id'         => $id,
+                'portfolio_id'      => $portfolio_id
+            ];
+        }
+
+        // Insert Batch Broker Data
+        if( $batch_portfolio_data )
+        {
+            return $this->db->insert_batch(self::$table_treaty_portfolios, $batch_portfolio_data);
+        }
+        return FALSE;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function delete_specific_portfolios_by_treaty($id, $portfolio_ids)
+    {
+        if( !empty($portfolio_ids) && is_array($portfolio_ids))
+        {
+            return $this->db
+                            ->where('treaty_id', $id)
+                            ->where_in('portfolio_id', $portfolio_ids)
+                            ->delete(self::$table_treaty_portfolios);
+        }
+        return FALSE;
     }
 
     // ----------------------------------------------------------------
@@ -302,6 +519,33 @@ class Ri_setup_treaty_model extends MY_Model
         }
         return $this->db->where($where)
                         ->count_all_results($this->table_name);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Callback Portfolio: Check Duplicate
+     *
+     * Checks if the supplied portfolio only exists for 1 time per fiscal year.
+     * i.e. a portfolio can only be associated with one Treaty per Fiscal Year.
+     *
+     * @param array $where
+     * @param integernull $id
+     * @return bool
+     */
+    public function _cb_portfolio__check_duplicate($fiscal_yr_id, $portfolio_id, $id=NULL)
+    {
+        $this->db
+                ->from($this->table_name . ' AS T')
+                ->join(self::$table_treaty_portfolios . ' TP', 'T.id = TP.treaty_id')
+                ->where('T.fiscal_yr_id', $fiscal_yr_id)
+                ->where('TP.portfolio_id', $portfolio_id);
+
+        if( $id )
+        {
+            $this->db->where('T.id !=', $id);
+        }
+        return $this->db->count_all_results($this->table_name);
     }
 
     // ----------------------------------------------------------------
@@ -363,9 +607,9 @@ class Ri_setup_treaty_model extends MY_Model
     private function _row_select()
     {
         $this->db->select('T.id, T.name, T.fiscal_yr_id, T.treaty_type_id, T.currency_contract, T.currency_settlement, T.estimated_premium_income, T.treaty_effective_date, T.file, FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, TT.name AS treaty_type_name')
-                ->from($this->table_name . ' as T')
+                ->from($this->table_name . ' AS T')
                 ->join('master_fiscal_yrs FY', 'FY.id = T.fiscal_yr_id')
-                ->join('ri_setup_treaty_types TT', 'TT.id = T.treaty_type_id');
+                ->join(self::$table_treaty_types . ' TT', 'TT.id = T.treaty_type_id');
     }
 
     // ----------------------------------------------------------------
@@ -392,10 +636,10 @@ class Ri_setup_treaty_model extends MY_Model
                         // Treaty Type table
                         'TT.name AS treaty_type_name'
                         )
-                ->from($this->table_name . ' as T')
-                ->join('ri_setup_treaty_tax_n_commission TTNC', 'TTNC.treaty_id = T.id')
+                ->from($this->table_name . ' AS T')
+                ->join(self::$table_treaty_tax_and_commission . ' TTNC', 'TTNC.treaty_id = T.id')
                 ->join('master_fiscal_yrs FY', 'FY.id = T.fiscal_yr_id')
-                ->join('ri_setup_treaty_types TT', 'TT.id = T.treaty_type_id')
+                ->join(self::$table_treaty_types . ' TT', 'TT.id = T.treaty_type_id')
                 ->where('T.id', $id)
                 ->get()->row();
     }
@@ -405,7 +649,7 @@ class Ri_setup_treaty_model extends MY_Model
     public function get_brokers_by_treaty($id)
     {
         return $this->db->select('TB.treaty_id, TB.company_id, C.name, C.picture, C.pan_no, C.active, C.type, C.contact')
-                        ->from('ri_setup_treaty_broker AS TB')
+                        ->from(self::$table_treaty_brokers . ' AS TB')
                         ->join('master_companies C', 'C.id = TB.company_id')
                         ->where('TB.treaty_id', $id)
                         ->get()->result();
@@ -426,19 +670,32 @@ class Ri_setup_treaty_model extends MY_Model
 
     // --------------------------------------------------------------------
 
-    public function get_portfolio_config_by_treaty($id)
+    public function get_portfolios_by_treaty($id)
     {
         return $this->db->select(
                             // Treaty Portfolio Config
-                            'TPCFG.treaty_id, TPCFG.portfolio_id, TPCFG.ac_basic, TPCFG.flag_claim_recover_from_ri, TPCFG.flag_comp_cession_apply, TPCFG.comp_cession_percent, TPCFG.comp_cession_max_amount, TPCFG.qs_max_ret_amt, TPCFG.qs_def_ret_amt, TPCFG.flag_qs_line, TPCFG.qs_retention_percent, TPCFG.qs_quota_percent, TPCFG.qs_lines_1, TPCFG.qs_lines_2, TPCFG.qs_lines_3, TPCFG.eol_layer_amount_1, TPCFG.eol_layer_amount_2, TPCFG.eol_layer_amount_3, TPCFG.eol_layer_amount_4, ' .
+                            'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amount, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_line, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
 
                             // Portfolio Detail
                             'P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np'
                             )
-                        ->from('ri_setup_treaty_portfolio_config AS TPCFG')
-                        ->join('master_portfolio P', 'P.id = TPCFG.portfolio_id')
-                        ->where('TPCFG.treaty_id', $id)
+                        ->from(self::$table_treaty_portfolios . ' AS TP')
+                        ->join('master_portfolio P', 'P.id = TP.portfolio_id')
+                        ->where('TP.treaty_id', $id)
                         ->get()->result();
+    }
+
+    // --------------------------------------------------------------------
+
+    public function get_portfolios_by_treaty_dropdown($id)
+    {
+        $list = $this->get_portfolios_by_treaty($id);
+        $portfolios = [];
+        foreach($list as $record)
+        {
+            $portfolios["{$record->portfolio_id}"] = $record->portfolio_name_en;
+        }
+        return $portfolios;
     }
 
     // --------------------------------------------------------------------
@@ -446,7 +703,7 @@ class Ri_setup_treaty_model extends MY_Model
     public function get_treaty_distribution_by_treaty($id)
     {
         return $this->db->select('TD.treaty_id, TD.company_id, TD.distribution_percent, TD.flag_leader, C.name, C.picture, C.pan_no, C.active, C.type, C.contact')
-                        ->from('ri_setup_treaty_distribution TD')
+                        ->from(self::$table_treaty_distribution . ' TD')
                         ->join('master_companies C', 'C.id = TD.company_id')
                         ->where('TD.treaty_id', $id)
                         ->get()->result();

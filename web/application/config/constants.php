@@ -126,12 +126,15 @@ define('IQB_STATUS_INACTIVE',     0);
 
 /*
 |--------------------------------------------------------------------------
-| YES/NO FLAG
+| YES/NO FLAG, ON/OFF FLAG
 |--------------------------------------------------------------------------
 |
 */
-define('IQB_FLAG_YES',    'Y');
-define('IQB_FLAG_NO',     'N');
+define('IQB_FLAG_YES',    	'Y');
+define('IQB_FLAG_NO',     	'N');
+
+define('IQB_FLAG_ON',    	1);
+define('IQB_FLAG_OFF',		0);
 
 
 

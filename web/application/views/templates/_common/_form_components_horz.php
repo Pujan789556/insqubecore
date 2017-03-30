@@ -15,19 +15,28 @@ $grid_label = $grid_label ?? 'col-sm-2';
 $grid_form_control = $grid_form_control ?? 'col-sm-10';
 foreach($form_elements as $element):?>
     <div class="form-group <?php echo form_error($element['field']) ? 'has-error' : '';?>">
-        <label for="" class="<?php echo $grid_label; ?> control-label">
-            <?php
-            $_show_label = $element['_show_label'] ?? FALSE;
-            if( $_show_label === TRUE || !in_array($element['_type'], ['checkbox', 'radio']))
-            {
-                echo $element['label'] . field_compulsary_text( $element['_required'] ?? FALSE );
-            }
-            else
-            {
-                echo '&nbsp;';
-            }
-            ?>
-        </label>
+        <?php
+        /**
+         * Show/Hide Label
+         */
+        $show_label = $element['_show_label'] ?? TRUE; // Default : True
+        if($show_label):
+        ?>
+            <label for="" class="<?php echo $grid_label; ?> control-label">
+                <?php
+                $_show_label = $element['_show_label'] ?? FALSE;
+                if( $_show_label === TRUE || !in_array($element['_type'], ['checkbox', 'radio']))
+                {
+                    echo $element['label'] . field_compulsary_text( $element['_required'] ?? FALSE );
+                }
+                else
+                {
+                    echo '&nbsp;';
+                }
+                ?>
+            </label>
+        <?php endif;?>
+
         <div class="<?php echo $grid_form_control; ?>">
             <?php
             /**

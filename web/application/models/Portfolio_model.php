@@ -203,15 +203,21 @@ class Portfolio_model extends MY_Model
         $list = $this->get_cache($cache_var);
         if(!$list)
         {
-            $this->db->select('id, parent_id, code, name_en, name_np')
-                            ->from($this->table_name);
+            $this->db->select('L1.*, L2.name_en as parent_name_en, L2.name_np as parent_name_np')
+                             ->from($this->table_name . ' L1')
+                             ->join($this->table_name . ' L2', 'L1.parent_id = L2.id', 'left');
+
+
+            // $this->db->select('id, parent_id, code, name_en, name_np')
+            //                 ->from($this->table_name);
+
             if($parent_id)
             {
-                $this->db->where('parent_id', $parent_id);
+                $this->db->where('L1.parent_id', $parent_id);
             }
             else
             {
-                $this->db->where('parent_id !=', 0);
+                $this->db->where('L1.parent_id !=', 0);
             }
             $list = $this->db->get()->result();
 
@@ -233,7 +239,7 @@ class Portfolio_model extends MY_Model
         foreach($records as $record)
         {
             $column = $record->{$field};
-            $list["{$column}"] = $record->name_en;
+            $list["{$column}"] = $record->parent_name_en . ' - ' . $record->name_en;
         }
         return $list;
     }

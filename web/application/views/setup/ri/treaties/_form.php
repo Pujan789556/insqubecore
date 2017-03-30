@@ -6,8 +6,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <?php echo form_open( $this->uri->uri_string(),
                         [
-                            'class' => 'form-horizontal form-iqb-general',
-                            'id'    => '__form-ac-chart-of-account',
+                            'class' => 'form-iqb-general',
+                            'id'    => '__form-treaty-setup',
                             'data-pc' => '.bootbox-body' // parent container ID
                         ],
                         // Hidden Fields
@@ -16,7 +16,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <div class="box-header with-border">
           <h4 class="box-title">Treaty Basic Information</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal ">
 
             <div class="form-group">
                 <label for="logo" class="col-sm-2 control-label">Treay File</label>
@@ -40,6 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             ?>
         </div>
     </div>
+
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">
           <h4 class="box-title">Select Brokers</h4>
@@ -63,8 +64,33 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             ?>
         </div>
     </div>
+
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
+          <h4 class="box-title">Select Portfolios</h4>
+        </div>
+        <div class="box-body">
+            <?php
+            $portfolio_form_element = $form_elements['portfolios'][0]; // This is a single element
+            $portfolio_list = $portfolio_form_element['_data'];
+            unset($portfolio_form_element['_data']);
+            foreach($portfolio_list as $portfolio_id=>$portfolio_name)
+            {
+                $portfolio_form_element['_checkbox_value']  = $portfolio_id;
+                $portfolio_form_element['label']            = $portfolio_name;
+                $portfolio_form_element['_value']           = in_array($portfolio_id, $treaty_portfolios) ? $portfolio_id : '';
+
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => [$portfolio_form_element],
+                    'form_record'   => NULL
+                ]);
+            }
+            ?>
+        </div>
+    </div>
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
+
 <script type="text/javascript">
     // Datepicker
     $('.input-group.date').datepicker({

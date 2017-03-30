@@ -42,7 +42,6 @@ class Ri_setup_treaties extends MY_Controller
 
 		// Load Model
 		$this->load->model('ri_setup_treaty_model');
-		$this->load->model('ri_setup_treaty_type_model');
 
 		// Data Path
         $this->_upload_path = INSQUBE_DATA_PATH . 'treaties/';
@@ -270,12 +269,21 @@ class Ri_setup_treaties extends MY_Controller
 		/**
 		 * Prepare Form Data
 		 */
-		$this->load->model('company_model');
 		$form_data = [
-			'form_elements' => $this->ri_setup_treaty_model->validation_rules,
+			'form_elements' 	=> $this->ri_setup_treaty_model->get_validation_rules(['basic', 'brokers', 'portfolios']),
 			'record' 			=> $record,
-			'brokers' 			=> $this->company_model->dropdown_broker(),
-			'treaty_borkers' 	=> []
+
+			// Broker Companies
+			'brokers' 			=> $this->company_model->dropdown_brokers(),
+			'treaty_borkers' 	=> [],
+
+			// Portfolios
+			'portfolios' 		=> $this->portfolio_model->dropdown_children(),
+			'treaty_portfolios' => [],
+
+			// // Reinsurer Companies
+			// 'reinsurers' 			=> $this->company_model->dropdown_reinsurers(),
+			// 'treaty_distribution' 	=> [],
 		];
 
 		// Form Submitted? Save the data
@@ -307,13 +315,25 @@ class Ri_setup_treaties extends MY_Controller
 		$treaty_borkers = $this->ri_setup_treaty_model->get_brokers_by_treaty_dropdown($id);
 
 		/**
+		 * Existing Portfolios
+		 */
+		$treaty_portfolios = $this->ri_setup_treaty_model->get_portfolios_by_treaty_dropdown($id);
+
+
+		/**
 		 * Prepare Form Data
 		 */
 		$form_data = [
-			'form_elements' 	=> $this->ri_setup_treaty_model->validation_rules,
+			'form_elements' 	=> $this->ri_setup_treaty_model->get_validation_rules(['basic', 'brokers', 'portfolios']),
 			'record' 			=> $record,
-			'brokers' 			=> $this->company_model->dropdown_broker(),
-			'treaty_borkers' 	=> array_keys($treaty_borkers)
+
+			// Brokers
+			'brokers' 			=> $this->company_model->dropdown_brokers(),
+			'treaty_borkers' 	=> array_keys($treaty_borkers),
+
+			// Portfolios
+			'portfolios' 		=> $this->portfolio_model->dropdown_children(),
+			'treaty_portfolios' => array_keys($treaty_portfolios)
 		];
 
 		// Form Submitted? Save the data
@@ -352,7 +372,7 @@ class Ri_setup_treaties extends MY_Controller
 			$done = FALSE;
 			$file = $record->file ?? NULL;
 
-			$rules = $this->ri_setup_treaty_model->validation_rules_formatted();
+			$rules = $this->ri_setup_treaty_model->get_validation_rules_formatted(['basic', 'brokers', 'portfolios']);
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -378,7 +398,9 @@ class Ri_setup_treaties extends MY_Controller
 					else
 					{
 						// Now Update Data
-						$done = $this->ri_setup_treaty_model->edit($record->id, $data);
+						// Get old treaty portfolio
+						$old_data['old_portfolios'] = $form_data['treaty_portfolios'];
+						$done = $this->ri_setup_treaty_model->edit($record->id, $data, $old_data);
 					}
 
 		        	if(!$done)
@@ -462,6 +484,141 @@ class Ri_setup_treaties extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	public function distribution($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->ri_setup_treaty_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Treaty Distribution
+		 */
+		$treaty_distribution = $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id);
+
+		/**
+		 * Prepare Form Data
+		 */
+		$form_data = [
+			'form_elements' 	=> $this->ri_setup_treaty_model->get_validation_rules(['reinsurers']),
+			'record' 			=> $record,
+
+			// Treaty Distribution
+			'reinsurers' 			=> $this->company_model->dropdown_reinsurers(),
+			'treaty_distribution' 	=> $treaty_distribution,
+		];
+
+		$return_data = [];
+		if( $this->input->post() )
+		{
+			$done 	= FALSE;
+			$rules 	= $this->ri_setup_treaty_model->get_validation_rules_formatted(['reinsurers']);
+
+            $this->form_validation->set_rules($rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$data = $this->input->post();
+        		$done = $this->ri_setup_treaty_model->save_treaty_distribution($record->id, $data);
+
+        		if($done)
+        		{
+        			// Update the Distribution Table
+					$treaty_distribution = $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id);
+					$success_html = $this->load->view('setup/ri/treaties/snippets/_ri_distribution_data', ['treaty_distribution' => $treaty_distribution], TRUE);
+
+					$ajax_data = [
+						'message' => 'Successfully Updated',
+						'status'  => 'success',
+						'updateSection' => true,
+						'hideBootbox' => true
+					];
+					$ajax_data['updateSectionData'] = [
+						'box' 		=> '#ri-distribution-data',
+						'method' 	=> 'html',
+						'html'		=> $success_html
+					];
+					return $this->template->json($ajax_data);
+        		}
+        		else
+        		{
+        			// Simply return could not update message. Might be some logical error or db error.
+	        		return $this->template->json([
+	                    'status'        => 'error',
+	                    'message'       => 'Could not update!'
+	                ]);
+        		}
+        	}
+        	else
+        	{
+    			// Simply Return Validation Error
+        		return $this->template->json([
+                    'status'        => 'error',
+                    'message'       => validation_errors()
+                ]);
+        	}
+		}
+
+		// Prepare HTML Form
+		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_distribution', $form_data, TRUE);
+
+		// Merge Return Data with Form Data
+		$json_data = array_merge($json_data, $return_data);
+
+		// Return JSON
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Callback Validation Function - Check if RI Distribution is 100%
+		 *
+		 * @param integer $treaty_type_id
+		 * @param integer|null $id
+		 * @return bool
+		 */
+		public function _cb_distribution__complete($str)
+		{
+			$reinsurer_ids = $this->input->post('reinsurer_ids');
+			$distribution_percent = $this->input->post('distribution_percent');
+
+			// Check duplicate Entries
+			$unique_count = count( array_unique($reinsurer_ids) );
+			if( $unique_count !== count($reinsurer_ids) )
+			{
+				$this->form_validation->set_message('_cb_distribution__complete', 'Reinsurer can not be duplicate.');
+	            return FALSE;
+			}
+
+			// Lets do the math
+			$percent = [];
+			$i = 0;
+			foreach ($reinsurer_ids as $rid)
+			{
+				$percent["$rid"] = $distribution_percent[$i++];
+			}
+
+			$total = 0;
+			foreach($percent as $rid=>$dp)
+			{
+				$total += (float)$dp;
+			}
+			$total = (int)$total;
+
+			// 100% ?
+	        if( $total != 100 )
+	        {
+	            $this->form_validation->set_message('_cb_distribution__complete', 'The TOTAL of all %s must be equal to 100.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
+
+	// --------------------------------------------------------------------
+
 		/**
 		 * Sub-function: Upload Company Profile Picture
 		 *
@@ -524,6 +681,39 @@ class Ri_setup_treaties extends MY_Controller
 	// --------------------------------------------------------------------
 
 		/**
+		 * Callback Validation Function - Check Duplicate - Portfolio
+		 *
+		 * Duplicate Condition: Portfolio Should be attached to only on Treay Per Fiscal Year
+		 *
+		 * @param integer $portfolio_id
+		 * @param integer|null $id
+		 * @return bool
+		 */
+		public function _cb_portfolio__check_duplicate($portfolio_id, $id=NULL)
+		{
+			$portfolio_id = strtoupper( $portfolio_id ? $portfolio_id : $this->input->post('portfolio_id') );
+	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
+	    	$fiscal_yr_id = (int)$this->input->post('fiscal_yr_id');
+
+	    	// Check if Fiscal Year has not been selected yet?
+	    	if( !$fiscal_yr_id )
+	    	{
+	    		$this->form_validation->set_message('_cb_portfolio__check_duplicate', 'The Fiscal Year must be supplied along with %s.');
+	            return FALSE;
+	    	}
+
+	    	// Check Duplicate - Treaty Record Exist with given portfolio for given fiscal year other than supplied treaty id
+	        if( $this->ri_setup_treaty_model->_cb_portfolio__check_duplicate($fiscal_yr_id, $portfolio_id, $id) )
+	        {
+	            $this->form_validation->set_message('_cb_portfolio__check_duplicate', 'The %s already exists for supplied Fiscal Year in another Treaty.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
+
+	// --------------------------------------------------------------------
+
+		/**
 		 * Callback Validation Function - Check Duplicate - Name
 		 *
 		 * Duplicate Condition: [Fiscal Year ID, Treaty Type] Should be Unique
@@ -575,10 +765,10 @@ class Ri_setup_treaties extends MY_Controller
 		 * Treaty Data
 		 */
 		$data = [
-			'record' 			=> $record,
-			'brokers' 			=> $this->ri_setup_treaty_model->get_brokers_by_treaty($id),
-			'portfolio_config' 	=> $this->ri_setup_treaty_model->get_portfolio_config_by_treaty($id),
-			'distribution' 		=> $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id),
+			'record' 				=> $record,
+			'brokers' 				=> $this->ri_setup_treaty_model->get_brokers_by_treaty($id),
+			'portfolios' 			=> $this->ri_setup_treaty_model->get_portfolios_by_treaty($id),
+			'treaty_distribution' 	=> $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id),
 		];
 
 		$this->data['site_title'] = 'Treaty Details | ' . $record->name;
