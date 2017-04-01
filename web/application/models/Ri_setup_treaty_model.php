@@ -169,8 +169,212 @@ class Ri_setup_treaty_model extends MY_Model
                     '_show_label'   => false,
                     '_required'     => true
                 ]
-            ]
+            ],
 
+            // Treaty Portfolios: Common Fields
+            'portfolios_common' => [
+                [
+                    'field' => 'portfolio_ids[]',
+                    'label' => 'Portfolio',
+                    'rules' => 'trim|required|integer|max_length[8]',
+                    '_field'        => 'portfolio_id',
+                    '_type'         => 'hidden',
+                    '_show_label'   => false,
+                    '_required'     => true
+                ],
+                [
+                    'field' => 'ac_basic[]',
+                    'label' => 'Account Basic',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(IQB_RI_SETUP_AC_BASIC_TYPES) ) . ']',
+                    '_field'        => 'ac_basic',
+                    '_type'         => 'dropdown',
+                    '_show_label'   => false,
+                    '_data'         => IQB_BLANK_SELECT + IQB_RI_SETUP_AC_BASIC_TYPES,
+                    '_required'     => true
+                ],
+                [
+                    'field' => 'flag_claim_recover_from_ri[]',
+                    'label' => 'Claim Recover From RI',
+                    'rules' => 'trim|required|integer|in_list[0,1]',
+                    '_field'            => 'flag_claim_recover_from_ri',
+                    '_type'             => 'dropdown',
+                    '_show_label'       => false,
+                    '_data'             => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'flag_comp_cession_apply[]',
+                    'label' => 'Apply Compulsory Cession',
+                    'rules' => 'trim|required|integer|in_list[0,1]',
+                    '_field'            => 'flag_comp_cession_apply',
+                    '_type'             => 'dropdown',
+                    '_show_label'       => false,
+                    '_data'             => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'comp_cession_percent[]',
+                    'label' => 'Compulsory Cession(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_field'            => 'comp_cession_percent',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'comp_cession_max_amount[]',
+                    'label' => 'Compulsory Max Amount',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_field'            => 'comp_cession_max_amount',
+                    '_type'             => 'text',
+                    '_show_label'       => false,
+                    '_required'         => true
+                ],
+            ],
+
+            // Treaty Portfolios: "Quota" Only Fields
+            'portfolios_qt' => [
+                [
+                    'field' => 'qs_max_ret_amt[]',
+                    'label' => 'Maximum Retention Amount',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_field'            => 'qs_max_ret_amt',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_def_ret_amt[]',
+                    'label' => 'Defined Retention Amount',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]|less_than[qs_max_ret_amt[]]',
+                    '_field'            => 'qs_def_ret_amt',
+                    '_type'             => 'text',
+                    '_show_label'       => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_retention_percent[]',
+                    'label' => 'Quota Retention(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_field'            => 'qs_retention_percent',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_quota_percent[]',
+                    'label' => 'Quota Distribution(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_field'            => 'qs_quota_percent',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+            ],
+
+            // Treaty Portfolios: "Surplus" Only Fields
+            'portfolios_sp' => [
+                [
+                    'field' => 'qs_max_ret_amt[]',
+                    'label' => 'Maximum Retention Amount',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_field'            => 'qs_max_ret_amt',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_def_ret_amt[]',
+                    'label' => 'Defined Retention Amount',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]|less_than[qs_max_ret_amt[]]',
+                    '_field'            => 'qs_def_ret_amt',
+                    '_type'             => 'text',
+                    '_show_label'       => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_lines_1[]',
+                    'label' => '1st Surplus Lines',
+                    'rules' => 'trim|required|integer|max_length[4]',
+                    '_field'            => 'qs_lines_1',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_lines_2[]',
+                    'label' => '2nd Surplus Lines',
+                    'rules' => 'trim|required|integer|max_length[4]',
+                    '_field'            => 'qs_lines_2',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_lines_3[]',
+                    'label' => '3rd Surplus Lines',
+                    'rules' => 'trim|required|integer|max_length[4]',
+                    '_field'            => 'qs_lines_3',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+            ],
+
+            // Treaty Portfolios: "Quota & Surplus" Only Fields
+            // @NOTE: You have to merge [common, qt, qs, sp] together to get full validation list
+            'portfolios_qs' => [
+                [
+                    'field' => 'flag_qs_line[]',
+                    'label' => 'Surplus Line Reference',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(ri_qs_surplus_line_reference_dropdown(false)) ) . ']',
+                    '_field'        => 'flag_qs_line',
+                    '_type'         => 'dropdown',
+                    '_show_label'   => false,
+                    '_data'         => IQB_BLANK_SELECT + ri_qs_surplus_line_reference_dropdown(),
+                    '_required'     => true
+                ],
+            ],
+
+            // Treaty Portfolios: "Excell of Loss" only Fields
+            'portfolios_eol' => [
+                [
+                    'field' => 'eol_layer_amount_1[]',
+                    'label' => 'EOL Amount Layer 1',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_field'            => 'eol_layer_amount_1',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'eol_layer_amount_2[]',
+                    'label' => 'EOL Amount Layer 2',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_field'            => 'eol_layer_amount_2',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'eol_layer_amount_3[]',
+                    'label' => 'EOL Amount Layer 3',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_field'            => 'eol_layer_amount_3',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'eol_layer_amount_4[]',
+                    'label' => 'EOL Amount Layer 4',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_field'            => 'eol_layer_amount_4',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ]
+            ],
         ];
     }
 
@@ -476,6 +680,65 @@ class Ri_setup_treaty_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Save Treaty Portfolios
+     *
+     * All transactions must be carried out, else rollback.
+     * Since the number of portfolios are fixed (which are added during treaty add/edit),
+     * we will only update the configuration for existing portfolios
+     *
+     * @param array $data
+     * @return mixed
+     */
+    public function save_treaty_portfolios($id, $data)
+    {
+        $status                     = TRUE;
+        $treaty_portfolio_fillables = ['ac_basic','flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amount', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_line', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
+
+        $total_portfolios           = count($data['portfolio_ids']);
+        $treaty_id                  = $id;
+
+         // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            for($i = 0; $i < $total_portfolios; $i++)
+            {
+                $portfolio_id = $data['portfolio_ids'][$i];
+                $treaty_portfolio_data = [];
+
+                foreach($treaty_portfolio_fillables as $column)
+                {
+                    $treaty_portfolio_data[$column] = $data[$column][$i] ?? 0; // Reset to Default
+                }
+
+                // Update Treaty Portfolio Configuration
+                $this->db->where('treaty_id', $treaty_id)
+                         ->where('portfolio_id', $portfolio_id)
+                         ->set($treaty_portfolio_data)
+                         ->update(self::$table_treaty_portfolios);
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $status;
+    }
+    // ----------------------------------------------------------------
+
     public function batch_insert_treaty_portfolios($id, $portfolio_ids)
     {
         $batch_portfolio_data = [];
@@ -677,10 +940,12 @@ class Ri_setup_treaty_model extends MY_Model
                             'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amount, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_line, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
 
                             // Portfolio Detail
-                            'P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np'
+                            'P.code as portfolio_code, P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np, ' .
+                            'PP.code as protfolio_parent_code, PP.name_en as portfolio_parent_name_en, PP.name_np as portfolio_parent_name_np'
                             )
                         ->from(self::$table_treaty_portfolios . ' AS TP')
                         ->join('master_portfolio P', 'P.id = TP.portfolio_id')
+                        ->join('master_portfolio PP', 'P.parent_id = PP.id', 'left')
                         ->where('TP.treaty_id', $id)
                         ->get()->result();
     }

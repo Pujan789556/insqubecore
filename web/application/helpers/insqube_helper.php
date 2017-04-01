@@ -503,3 +503,60 @@ if ( ! function_exists('_FLAG_yes_no_dropdwon'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('_FLAG_on_off_dropdwon'))
+{
+    /**
+     * Get ON/OFF DROPDOWN
+     *
+     *
+     * @param bool $flag_blank_select   Whether to append blank select
+     * @return  bool
+     */
+    function _FLAG_on_off_dropdwon( $flag_blank_select = true)
+    {
+        $dropdown = [
+            IQB_FLAG_ON    	=> 'Yes',
+            IQB_FLAG_OFF	=> 'No'
+        ];
+
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('yes_no_text'))
+{
+    /**
+     * Get Yes/No Text
+     *
+     *
+     * @param char $flag
+     * @return  bool
+     */
+    function yes_no_text( $flag = NULL, $null_return = '' )
+    {
+    	$text = $null_return;
+
+    	// Return Nothing if flag is NULL
+    	if(is_null($flag))
+    	{
+    		return $text;
+    	}
+
+    	if( (string)$flag == IQB_FLAG_YES || (int)$flag == IQB_FLAG_ON )
+    	{
+    		$text = 'Yes';
+    	}
+    	else if( (string)$flag == IQB_FLAG_NO || (int)$flag == IQB_FLAG_OFF )
+    	{
+    		$text = 'No';
+    	}
+        return $text;
+    }
+}
+
+// ------------------------------------------------------------------------

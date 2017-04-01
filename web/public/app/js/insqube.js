@@ -423,7 +423,15 @@ $( document ).ajaxError(function( event, request, settings ) {
         url = $this.data('url'),
         title = $this.data('title'),
         form = $this.data('form'),
-        size = $this.data('box-size') ? $this.data('box-size') : '';
+        size = $this.data('box-size') ? $this.data('box-size') : '',
+        bootboxClass = 'modal-default';
+
+    // Check if size if full-width
+    if( size === 'full-width' ){
+        size = '';
+        bootboxClass = 'modal-default modal-full-width'
+    }
+
 
         // Button Loading
         $this.button('loading');
@@ -434,7 +442,7 @@ $( document ).ajaxError(function( event, request, settings ) {
         $.getJSON(url, function(r){
             if( typeof r.form !== 'undefined' && r.form){
                 bootbox.dialog({
-                    className: 'modal-default',
+                    className: bootboxClass,
                     size: size,
                     title: title,
                     message: r.form,
@@ -454,8 +462,20 @@ $( document ).ajaxError(function( event, request, settings ) {
                     }
                 });
 
-                // Focus on First Input Element on Bootbox Form Dialog Load
+                $('.bootbox[role="dialog"]').on("show.bs.modal", function() {
+
+                    console.log('hello');
+                });
+
+                // Post modal Shown Tasks
                 $('.bootbox[role="dialog"]').on("shown.bs.modal", function() {
+
+                    // // Has size been set to "full-width"
+                    // if(flag_fw){
+                    //     $('.modal-dialog', $(this)).addClass('modal-full-width');
+                    // }
+
+                    // Focus on First Input Element on Bootbox Form Dialog Load
                     $('.bootbox-body :input:enabled:visible:first', $(this)).focus();
                 });
 

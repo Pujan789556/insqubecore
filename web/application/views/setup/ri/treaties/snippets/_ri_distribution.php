@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Setup - RI - Treaty : RI Distribution View
 */
 ?>
-<div class="box box-solid">
+<div class="box box-success">
 	<div class="box-header with-border">
 		<h3 class="box-title">RI Distribution</h3>
 		<a href="#"

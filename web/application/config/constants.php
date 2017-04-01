@@ -227,6 +227,34 @@ defined('IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE')       OR define('IQB_POLICY_PA
 defined('IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY')         OR define('IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY',      'TP');
 
 
+/*
+|--------------------------------------------------------------------------
+| RI CONSTANTS
+|--------------------------------------------------------------------------
+*/
+
+// ACCOUNT BASIC TYPES
+defined('IQB_RI_SETUP_AC_BASIC_TYPE_AY')    OR define('IQB_RI_SETUP_AC_BASIC_TYPE_AY',	1);
+defined('IQB_RI_SETUP_AC_BASIC_TYPE_LOY')   OR define('IQB_RI_SETUP_AC_BASIC_TYPE_LOY', 2);
+defined('IQB_RI_SETUP_AC_BASIC_TYPE_UWY')	OR define('IQB_RI_SETUP_AC_BASIC_TYPE_UWY', 3);
+defined('IQB_RI_SETUP_AC_BASIC_TYPES')    	OR define('IQB_RI_SETUP_AC_BASIC_TYPES', 	[
+	IQB_RI_SETUP_AC_BASIC_TYPE_AY 	=> 'Accounting Year',
+	IQB_RI_SETUP_AC_BASIC_TYPE_LOY 	=> 'Loss Occuring Year',
+	IQB_RI_SETUP_AC_BASIC_TYPE_UWY 	=> 'Under Writing Year'
+]);
+
+// TREATY TYPES (Must Match with Database)
+defined('IQB_RI_TREATY_TYPE_SP')    OR define('IQB_RI_TREATY_TYPE_SP',	1);
+defined('IQB_RI_TREATY_TYPE_QT')    OR define('IQB_RI_TREATY_TYPE_QT',	2);
+defined('IQB_RI_TREATY_TYPE_QS')    OR define('IQB_RI_TREATY_TYPE_QS',	3);
+defined('IQB_RI_TREATY_TYPE_EOL')   OR define('IQB_RI_TREATY_TYPE_EOL',	4);
+defined('IQB_RI_TREATY_TYPES')    	OR define('IQB_RI_TREATY_TYPES', 	[
+	IQB_RI_TREATY_TYPE_SP 	=> 'Surplus',
+	IQB_RI_TREATY_TYPE_QT 	=> 'Quota Share',
+	IQB_RI_TREATY_TYPE_QS 	=> 'Quota Share & Surplus',
+	IQB_RI_TREATY_TYPE_EOL 	=> 'Excess of Loss',
+]);
+
 
 
 

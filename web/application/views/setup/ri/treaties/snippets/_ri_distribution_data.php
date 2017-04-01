@@ -8,8 +8,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<thead>
 		<tr>
 			<th>SN</th>
-			<th>Reinsurer</th>
-			<th>Distribution(%)</th>
+			<th>Reinsurer Company</th>
+			<th class="text-right">Distribution(%)</th>
 			<th>&nbsp;</th>
 		</tr>
 	</thead>
@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		$total_percentage = 0.00;
 		foreach($treaty_distribution as $distrib):?>
 			<tr>
-				<td><?php echo $sn++;?></td>
+				<td><?php echo $sn++;?>.</td>
 				<td>
 					<a href="<?php echo site_url('companies/details/' . $distrib->company_id)?>" target="_blank">
 						<?php echo $distrib->name?>

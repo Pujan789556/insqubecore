@@ -24,6 +24,9 @@ class Ri_setup_treaties extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
+		// Helper
+		$this->load->helper('ri');
+
 		// Form Validation
 		$this->load->library('Form_validation');
 
@@ -42,6 +45,8 @@ class Ri_setup_treaties extends MY_Controller
 
 		// Load Model
 		$this->load->model('ri_setup_treaty_model');
+
+
 
 		// Data Path
         $this->_upload_path = INSQUBE_DATA_PATH . 'treaties/';
@@ -484,6 +489,12 @@ class Ri_setup_treaties extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Manage Distribution
+	 *
+	 * @param integer $id Treaty ID
+	 * @return void
+	 */
 	public function distribution($id)
 	{
 		// Valid Record ?
@@ -615,6 +626,137 @@ class Ri_setup_treaties extends MY_Controller
 	            return FALSE;
 	        }
 	        return TRUE;
+		}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Manage Portfolios
+	 *
+	 * @param integer $id Treaty ID
+	 * @return void
+	 */
+	public function portfolios($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->ri_setup_treaty_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Treaty Portfolios
+		 */
+		$portfolios = $this->ri_setup_treaty_model->get_portfolios_by_treaty($id);
+
+		/**
+		 * Validation Rules/Form Elements Based on the Treaty Type
+		 */
+		$v_rules = $this->_portfolio_validation_rules_by_treaty_type($record);
+
+
+		/**
+		 * Prepare Form Data
+		 */
+		$form_data = [
+			'form_elements' 	=> $v_rules,
+			'record' 			=> $record,
+
+			// Treaty Portfolio
+			'portfolios' 	=> $portfolios,
+		];
+
+		$return_data = [];
+		if( $this->input->post() )
+		{
+			$done 	= FALSE;
+
+            $this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$data = $this->input->post();
+        		$done = $this->ri_setup_treaty_model->save_treaty_portfolios($record->id, $data);
+
+        		if($done)
+        		{
+        			// Update the Portfolio Table
+					$portfolios = $this->ri_setup_treaty_model->get_portfolios_by_treaty($id);
+					$success_html = $this->load->view('setup/ri/treaties/snippets/_ri_portfolio_data', ['portfolios' => $portfolios], TRUE);
+
+					$ajax_data = [
+						'message' => 'Successfully Updated',
+						'status'  => 'success',
+						'updateSection' => true,
+						'hideBootbox' => true
+					];
+					$ajax_data['updateSectionData'] = [
+						'box' 		=> '#ri-portfolio-data',
+						'method' 	=> 'html',
+						'html'		=> $success_html
+					];
+					return $this->template->json($ajax_data);
+        		}
+        		else
+        		{
+        			// Simply return could not update message. Might be some logical error or db error.
+	        		return $this->template->json([
+	                    'status'        => 'error',
+	                    'message'       => 'Could not update!'
+	                ]);
+        		}
+        	}
+        	else
+        	{
+    			// Simply Return Validation Error
+        		return $this->template->json([
+                    'status'        => 'error',
+                    'message'       => validation_errors()
+                ]);
+        	}
+		}
+
+		// Prepare HTML Form
+		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_portfolios', $form_data, TRUE);
+
+		// Merge Return Data with Form Data
+		$json_data = array_merge($json_data, $return_data);
+
+		// Return JSON
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+		private function _portfolio_validation_rules_by_treaty_type($record)
+		{
+
+			$portfolio_dropdown = $this->ri_setup_treaty_model->get_portfolios_by_treaty_dropdown($record->id);
+			$v_rules = $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_common']);
+
+			// First rule is 'portfolio_ids[]', update validation rule
+			$v_rules[0]['rules'] = 'trim|required|integer|max_length[8]|in_list['.implode(',',array_keys($portfolio_dropdown)).']';
+
+
+			if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_SP )
+			{
+				$v_rules = array_merge($v_rules, $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_sp']));
+			}
+			else if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_QT )
+			{
+				$v_rules = array_merge($v_rules, $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_qt']));
+			}
+			else if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_QS )
+			{
+				$v_rules = array_merge($v_rules, $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_qt', 'portfolios_qs', 'portfolios_sp']));
+			}
+			else if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_EOL )
+			{
+				$v_rules = array_merge($v_rules, $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_eol']));
+			}
+
+			return $v_rules;
 		}
 
 	// --------------------------------------------------------------------
