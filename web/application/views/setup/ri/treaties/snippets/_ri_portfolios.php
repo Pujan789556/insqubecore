@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <i class="fa fa-pencil-square-o"></i> Manage
         </a>
 	</div>
-	<div class="box-body" style="overflow-x: scroll;" id="ri-portfolio-data">
+	<div class="box-body small" style="overflow-x: scroll;" id="ri-portfolio-data">
 		<?php
 		/**
 		 * Load portfolio data

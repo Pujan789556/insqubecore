@@ -25,6 +25,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		 */
 		$this->load->view('setup/ri/treaties/snippets/_ri_distribution',['record' => $record, 'treaty_distribution' => $treaty_distribution]);
 		?>
+
+		<?php
+		/**
+		 * RI Tax & Commission
+		 */
+		$this->load->view('setup/ri/treaties/snippets/_ri_tnc',['record' => $record]);
+		?>
 	</div>
 </div>
 

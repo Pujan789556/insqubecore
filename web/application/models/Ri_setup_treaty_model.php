@@ -14,6 +14,12 @@ class Ri_setup_treaty_model extends MY_Model
     protected static $table_treaty_portfolios               = 'ri_setup_treaty_portfolios';
     protected static $table_treaty_tax_and_commission       = 'ri_setup_treaty_tax_and_commission';
 
+    /**
+     * Other table Fillables
+     */
+    // Tax and Commission Tables
+    protected static $tnc_fillables = ['qs_comm_ri_quota', 'qs_comm_ri_surplus_1', 'qs_comm_ri_surplus_2', 'qs_comm_ri_surplus_3', 'qs_tax_ri_quota', 'qs_tax_ri_surplus_1', 'qs_tax_ri_surplus_2', 'qs_tax_ri_surplus_3', 'qs_comm_ib_quota', 'qs_comm_ib_surplus_1', 'qs_comm_ib_surplus_2', 'qs_comm_ib_surplus_3', 'qs_piop_quota', 'qs_piop_surplus_1', 'qs_piop_surplus_2', 'qs_piop_surplus_3', 'qs_piol_quota', 'qs_piol_surplus_1', 'qs_piol_surplus_2', 'qs_piol_surplus_3', 'qs_pio_ib_cp_quota', 'qs_pio_ib_cp_surplus_1', 'qs_pio_ib_cp_surplus_2', 'qs_pio_ib_cp_surplus_3', 'qs_profit_comm_quota', 'qs_profit_comm_surplus_1', 'qs_profit_comm_surplus_2', 'qs_profit_comm_surplus_3', 'qs_comm_scale_quota', 'qs_comm_scale_surplus_1', 'qs_comm_scale_surplus_2', 'qs_comm_scale_surplus_3', 'eol_min_n_deposit_amt_l1', 'eol_min_n_deposit_amt_l2', 'eol_min_n_deposit_amt_l3', 'eol_min_n_deposit_amt_l4', 'eol_premium_mode_l1', 'eol_premium_mode_l2', 'eol_premium_mode_l3', 'eol_premium_mode_l4', 'eol_min_rate_l1', 'eol_min_rate_l2', 'eol_min_rate_l3', 'eol_min_rate_l4', 'eol_max_rate_l1', 'eol_max_rate_l2', 'eol_max_rate_l3', 'eol_max_rate_l4', 'eol_fixed_rate_l1', 'eol_fixed_rate_l2', 'eol_fixed_rate_l3', 'eol_fixed_rate_l4', 'eol_loading_factor_l1', 'eol_loading_factor_l2', 'eol_loading_factor_l3', 'eol_loading_factor_l4', 'eol_tax_ri_l1', 'eol_tax_ri_l2', 'eol_tax_ri_l3', 'eol_tax_ri_l4', 'eol_comm_ib_l1', 'eol_comm_ib_l2', 'eol_comm_ib_l3', 'eol_comm_ib_l4', 'flag_eol_rr_l1', 'flag_eol_rr_l2', 'flag_eol_rr_l3', 'flag_eol_rr_l4'];
+
     protected $set_created = true;
     protected $set_modified = true;
     protected $log_user = true;
@@ -419,6 +425,153 @@ class Ri_setup_treaty_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function get_tnc_validation_rules($treaty_type_id, $formatted = false)
+    {
+        if( $treaty_type_id == IQB_RI_TREATY_TYPE_EOL )
+        {
+            $col_headings = ['Title', 'Layer 1', 'Layer 2', 'Layer 3', 'Layer 4'];
+            $tnc_col_postfix = ['l1','l2', 'l3', 'l4'];
+            $tnc_val_prefix = [
+                'eol_min_n_deposit_amt'    => [
+                    'label' => 'Minimum & Deposit Premium',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_premium_mode'    => [
+                    'label' => 'Premium Mode',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[0,1]',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + [0 => 'Fixed', 1 => 'Range'],
+                    '_required' => true
+                ],
+                'eol_min_rate'    => [
+                    'label' => 'Minimum Rate(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_max_rate'    => [
+                    'label' => 'Maximum Rate(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_fixed_rate'    => [
+                    'label' => 'Fixed Rate(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_loading_factor'    => [
+                    'label' => 'Loading Factor',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_tax_ri'    => [
+                    'label' => 'RI Tax(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_comm_ib'    => [
+                    'label' => 'IB Commission(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'flag_eol_rr'    => [
+                    'label' => 'Reinstatement Required',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[0,1]',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + [0 => 'Yes', 1 => 'No'],
+                    '_required' => true
+                ]
+            ];
+        }
+        else
+        {
+            $col_headings = ['Title', 'Quota', '1st Surplus', '2nd Surplus', '3rd Surplus'];
+            $tnc_col_postfix = ['quota','surplus_1', 'surplus_2', 'surplus_3'];
+            $tnc_val_prefix = [
+                'qs_comm_ri'    => [
+                    'label' => 'RI Commission(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'qs_tax_ri'    => [
+                    'label' => 'RI Tax(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'qs_comm_ib'    => [
+                    'label' => 'Insurance Board Commission(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'qs_piop'    => [
+                    'label' => 'Portfolio In & Out Premium(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'qs_piol'    => [
+                    'label' => 'Portfolio In & Out Loss(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'qs_pio_ib_cp'    => [
+                    'label' => 'Portfolio In & Out IB Claim Provision(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'qs_profit_comm'    => [
+                    'label' => 'Profit Commission(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'qs_comm_scale'    => [
+                    'label' => 'Commission Scale(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
+            ];
+        }
+
+        if($formatted)
+        {
+            $v_rules = [];
+            foreach($tnc_val_prefix as $col_prefix => $rule_single)
+            {
+                foreach($tnc_col_postfix as $col_postfix)
+                {
+                    $rule_single['field'] = $col_prefix . '_' . $col_postfix;
+                    $v_rules[] = $rule_single;
+                }
+            }
+
+            return $v_rules;
+        }
+        else
+        {
+            return [
+                'col_headings'      => $col_headings,
+                'tnc_val_prefix'    => $tnc_val_prefix,
+                'tnc_col_postfix'   => $tnc_col_postfix
+            ];
+        }
+    }
+
+    // ----------------------------------------------------------------
+
     /**
      * Add New Treaty
      *
@@ -559,6 +712,56 @@ class Ri_setup_treaty_model extends MY_Model
 
         // return result/status
         return $status;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Save Tax & Commission Configuration of a Treaty
+     *
+     * @param integer $id Treaty ID
+     * @param array $data
+     * @return bool
+     */
+    public function save_treaty_tnc($id, $data)
+    {
+        // Get only fillable fields
+        $fillable_data = [];
+        foreach( self::$tnc_fillables as $col )
+        {
+            $fillable_data[$col] = $data[$col] ?? NULL;
+        }
+
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $status             = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Data
+            $this->db->where('treaty_id', $id)
+                     ->set($fillable_data)
+                     ->update(self::$table_treaty_tax_and_commission);
+
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $status;
+
     }
 
     // ----------------------------------------------------------------
@@ -711,7 +914,7 @@ class Ri_setup_treaty_model extends MY_Model
 
                 foreach($treaty_portfolio_fillables as $column)
                 {
-                    $treaty_portfolio_data[$column] = $data[$column][$i] ?? 0; // Reset to Default
+                    $treaty_portfolio_data[$column] = $data[$column][$i] ?? NULL; // Reset to Default
                 }
 
                 // Update Treaty Portfolio Configuration

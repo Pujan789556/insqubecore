@@ -28,7 +28,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<th>EOL Amount L4</th>
 		</tr>
 	</thead>
-	<tbody class="small">
+	<tbody>
 		<?php
 		$portfolio_sn = 1;
 		foreach ($portfolios as $portfolio):?>
