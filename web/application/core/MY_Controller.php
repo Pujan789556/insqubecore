@@ -79,6 +79,11 @@ class MY_Controller extends CI_Controller
 		 */
 		$this->load->model('user_model');
 		$this->_app_user();
+
+		/**
+		 * Check if system if offline
+		 */
+		$this->_check_offline();
 	}
 
 	// --------------------------------------------------------------------
@@ -176,14 +181,45 @@ class MY_Controller extends CI_Controller
         $this->current_fiscal_year = $this->fiscal_year_model->get_fiscal_year(date('Y-m-d'));
 	}
 
+	// --------------------------------------------------------------------
 
+	/**
+	 * Check Offline
+	 *
+	 * Show offline message and exit if the sytem is set to be offline
+	 *
+	 * @return void
+	 */
+	private function _check_offline()
+	{
+		$controller = $this->router->fetch_class();
+		if( $controller !== 'auth' && !$this->dx_auth->is_admin() && $this->settings->flag_offline == IQB_FLAG_ON )
+		{
+			// Set offline data
+			$offline_data = [
+				'title' 		=> 'We are Offline!',
+				'message' 		=> nl2br($this->settings->offline_message) . '<br/><br/>Please ' . anchor('auth/logout', 'Logout') . ' before you leave.'
+			];
+
+			/**
+			 * Check if this is an AJAX Request
+			 */
+			$this->template->set_template('offline');
+			if(  $this->input->is_ajax_request() )
+			{
+				$this->template->json($offline_data, 503);
+				exit(1);
+			}
+
+			// Echo Message and Exit
+			echo $this->load->view('offline/message', $offline_data, TRUE);
+			exit(1);
+		}
+	}
 
 	/**
 	 *  @TODO: Add Authorization/Authentication Related Functions
 	 */
-
-
-
 }
 
 /* End of file MY_Controller.php */
