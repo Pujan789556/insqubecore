@@ -447,6 +447,33 @@ if ( ! function_exists('belongs_to_me'))
     }
 }
 
+// ------------------------------------------------------------------------
+if ( ! function_exists('fiscal_year_quarters_dropdown'))
+{
+    /**
+     * Get Fiscal Quarter Dropdown
+     *
+     *
+     * @param bool $flag_blank_select   Whether to append blank select
+     * @return  bool
+     */
+    function fiscal_year_quarters_dropdown( $flag_blank_select = true)
+    {
+        $dropdown = [
+
+            1 	=> 'First',
+            2   => 'Second',
+            3  	=> 'Third',
+            4   => 'Fourth'
+        ];
+
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
 
 // ------------------------------------------------------------------------
 if ( ! function_exists('_COMPANY_type_dropdown'))
