@@ -13,12 +13,13 @@ class Ri_setup_treaty_model extends MY_Model
     protected static $table_treaty_distribution             = 'ri_setup_treaty_distribution';
     protected static $table_treaty_portfolios               = 'ri_setup_treaty_portfolios';
     protected static $table_treaty_tax_and_commission       = 'ri_setup_treaty_tax_and_commission';
+    protected static $table_treaty_commission_scale         = 'ri_setup_commission_scale';
 
     /**
      * Other table Fillables
      */
     // Tax and Commission Tables
-    protected static $tnc_fillables = ['qs_comm_ri_quota', 'qs_comm_ri_surplus_1', 'qs_comm_ri_surplus_2', 'qs_comm_ri_surplus_3', 'qs_tax_ri_quota', 'qs_tax_ri_surplus_1', 'qs_tax_ri_surplus_2', 'qs_tax_ri_surplus_3', 'qs_comm_ib_quota', 'qs_comm_ib_surplus_1', 'qs_comm_ib_surplus_2', 'qs_comm_ib_surplus_3', 'qs_piop_quota', 'qs_piop_surplus_1', 'qs_piop_surplus_2', 'qs_piop_surplus_3', 'qs_piol_quota', 'qs_piol_surplus_1', 'qs_piol_surplus_2', 'qs_piol_surplus_3', 'qs_pio_ib_cp_quota', 'qs_pio_ib_cp_surplus_1', 'qs_pio_ib_cp_surplus_2', 'qs_pio_ib_cp_surplus_3', 'qs_profit_comm_quota', 'qs_profit_comm_surplus_1', 'qs_profit_comm_surplus_2', 'qs_profit_comm_surplus_3', 'qs_comm_scale_quota', 'qs_comm_scale_surplus_1', 'qs_comm_scale_surplus_2', 'qs_comm_scale_surplus_3', 'eol_min_n_deposit_amt_l1', 'eol_min_n_deposit_amt_l2', 'eol_min_n_deposit_amt_l3', 'eol_min_n_deposit_amt_l4', 'eol_premium_mode_l1', 'eol_premium_mode_l2', 'eol_premium_mode_l3', 'eol_premium_mode_l4', 'eol_min_rate_l1', 'eol_min_rate_l2', 'eol_min_rate_l3', 'eol_min_rate_l4', 'eol_max_rate_l1', 'eol_max_rate_l2', 'eol_max_rate_l3', 'eol_max_rate_l4', 'eol_fixed_rate_l1', 'eol_fixed_rate_l2', 'eol_fixed_rate_l3', 'eol_fixed_rate_l4', 'eol_loading_factor_l1', 'eol_loading_factor_l2', 'eol_loading_factor_l3', 'eol_loading_factor_l4', 'eol_tax_ri_l1', 'eol_tax_ri_l2', 'eol_tax_ri_l3', 'eol_tax_ri_l4', 'eol_comm_ib_l1', 'eol_comm_ib_l2', 'eol_comm_ib_l3', 'eol_comm_ib_l4', 'flag_eol_rr_l1', 'flag_eol_rr_l2', 'flag_eol_rr_l3', 'flag_eol_rr_l4'];
+    protected static $tnc_fillables = ['qs_comm_ri_quota', 'qs_comm_ri_surplus_1', 'qs_comm_ri_surplus_2', 'qs_comm_ri_surplus_3', 'qs_tax_ri_quota', 'qs_tax_ri_surplus_1', 'qs_tax_ri_surplus_2', 'qs_tax_ri_surplus_3', 'qs_comm_ib_quota', 'qs_comm_ib_surplus_1', 'qs_comm_ib_surplus_2', 'qs_comm_ib_surplus_3', 'qs_piop_quota', 'qs_piop_surplus_1', 'qs_piop_surplus_2', 'qs_piop_surplus_3', 'qs_piol_quota', 'qs_piol_surplus_1', 'qs_piol_surplus_2', 'qs_piol_surplus_3', 'qs_pio_ib_cp_quota', 'qs_pio_ib_cp_surplus_1', 'qs_pio_ib_cp_surplus_2', 'qs_pio_ib_cp_surplus_3', 'qs_profit_comm_quota', 'qs_profit_comm_surplus_1', 'qs_profit_comm_surplus_2', 'qs_profit_comm_surplus_3', 'flag_qs_comm_scale_quota', 'flag_qs_comm_scale_surplus_1', 'flag_qs_comm_scale_surplus_2', 'flag_qs_comm_scale_surplus_3', 'eol_min_n_deposit_amt_l1', 'eol_min_n_deposit_amt_l2', 'eol_min_n_deposit_amt_l3', 'eol_min_n_deposit_amt_l4', 'eol_premium_mode_l1', 'eol_premium_mode_l2', 'eol_premium_mode_l3', 'eol_premium_mode_l4', 'eol_min_rate_l1', 'eol_min_rate_l2', 'eol_min_rate_l3', 'eol_min_rate_l4', 'eol_max_rate_l1', 'eol_max_rate_l2', 'eol_max_rate_l3', 'eol_max_rate_l4', 'eol_fixed_rate_l1', 'eol_fixed_rate_l2', 'eol_fixed_rate_l3', 'eol_fixed_rate_l4', 'eol_loading_factor_l1', 'eol_loading_factor_l2', 'eol_loading_factor_l3', 'eol_loading_factor_l4', 'eol_tax_ri_l1', 'eol_tax_ri_l2', 'eol_tax_ri_l3', 'eol_tax_ri_l4', 'eol_comm_ib_l1', 'eol_comm_ib_l2', 'eol_comm_ib_l3', 'eol_comm_ib_l4', 'flag_eol_rr_l1', 'flag_eol_rr_l2', 'flag_eol_rr_l3', 'flag_eol_rr_l4'];
 
     protected $set_created = true;
     protected $set_modified = true;
@@ -29,7 +30,7 @@ class Ri_setup_treaty_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'name', 'fiscal_yr_id', 'treaty_type_id', 'currency_contract', 'currency_settlement', 'estimated_premium_income', 'treaty_effective_date', 'file', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'name', 'fiscal_yr_id', 'treaty_type_id', 'estimated_premium_income', 'treaty_effective_date', 'file', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -98,26 +99,13 @@ class Ri_setup_treaty_model extends MY_Model
                     '_type'     => 'text',
                     '_required' => true
                 ],
-                [
-                    'field' => 'currency_contract',
-                    'label' => 'Contract Currency',
-                    'rules' => 'trim|required|alpha|max_length[10]|strtoupper',
-                    '_type'     => 'text',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'currency_settlement',
-                    'label' => 'Settlement Currency',
-                    'rules' => 'trim|required|alpha|max_length[10]|strtoupper',
-                    '_type'     => 'text',
-                    '_required' => true
-                ],
+
                 [
                     'field' => 'estimated_premium_income',
                     'label' => 'Estimated Premium Income',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    'rules' => 'trim|prep_decimal|decimal|max_length[20]',
                     '_type'     => 'text',
-                    '_required' => true
+                    '_required' => false
                 ],
                 [
                     'field' => 'treaty_effective_date',
@@ -154,7 +142,7 @@ class Ri_setup_treaty_model extends MY_Model
                 ]
             ],
 
-            // Reinsurers List
+            // RI Distribution
             'reinsurers' => [
                 [
                     'field' => 'reinsurer_ids[]',
@@ -174,6 +162,46 @@ class Ri_setup_treaty_model extends MY_Model
                     '_type'         => 'text',
                     '_show_label'   => false,
                     '_required'     => true
+                ]
+            ],
+
+            // Commission Scale
+            'commission_scale' => [
+                [
+                    'field' => 'name[]',
+                    'label' => 'Title',
+                    'rules' => 'trim|required|max_length[100]',
+                    '_field'        => 'name',
+                    '_type'         => 'text',
+                    '_show_label'   => false,
+                    '_required'     => true
+                ],
+                [
+                    'field' => 'scale_min[]',
+                    'label' => 'Minimum Scale(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+                    '_field'            => 'scale_min',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'scale_max[]',
+                    'label' => 'Maximum Scale(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+                    '_field'            => 'scale_max',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'rate[]',
+                    'label' => 'Commission Rate(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+                    '_field'            => 'rate',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
                 ]
             ],
 
@@ -485,7 +513,7 @@ class Ri_setup_treaty_model extends MY_Model
                     'label' => 'Reinstatement Required',
                     'rules' => 'trim|required|integer|exact_length[1]|in_list[0,1]',
                     '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + [0 => 'Yes', 1 => 'No'],
+                    '_data'     => IQB_BLANK_SELECT + [0 => 'No', 1 => 'Yes'],
                     '_required' => true
                 ]
             ];
@@ -537,10 +565,11 @@ class Ri_setup_treaty_model extends MY_Model
                     '_type'     => 'text',
                     '_required' => true
                 ],
-                'qs_comm_scale'    => [
-                    'label' => 'Commission Scale(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-                    '_type'     => 'text',
+                'flag_qs_comm_scale' => [
+                    'label' => 'Apply Commission Scale',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[0,1]',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + [0 => 'No', 1 => 'Yes'],
                     '_required' => true
                 ]
             ];
@@ -744,6 +773,64 @@ class Ri_setup_treaty_model extends MY_Model
             $this->db->where('treaty_id', $id)
                      ->set($fillable_data)
                      ->update(self::$table_treaty_tax_and_commission);
+
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $status;
+
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Save Commission Scale of a Treaty
+     *
+     * @param integer $id Treaty ID
+     * @param array $data
+     * @return bool
+     */
+    public function save_treaty_commission_scale($id, $data)
+    {
+        // Prepare JSON for commission scale
+        $total_count = count($data['name']);
+        $scale_data = [];
+        $json = [];
+        for($i = 0; $i<$total_count; $i++)
+        {
+            $json[] = [
+                'name'      => $data['name'][$i],
+                'scale_min' => $data['scale_min'][$i],
+                'scale_max' => $data['scale_max'][$i],
+                'rate'      => $data['rate'][$i],
+            ];
+        }
+        $scale_data['scales'] = $json ? json_encode($json) : NULL;
+
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $status             = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Data
+            $this->db->where('treaty_id', $id)
+                     ->set($scale_data)
+                     ->update(self::$table_treaty_commission_scale);
 
 
         // Commit all transactions on success, rollback else
@@ -1072,7 +1159,7 @@ class Ri_setup_treaty_model extends MY_Model
 
     private function _row_select()
     {
-        $this->db->select('T.id, T.name, T.fiscal_yr_id, T.treaty_type_id, T.currency_contract, T.currency_settlement, T.estimated_premium_income, T.treaty_effective_date, T.file, FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, TT.name AS treaty_type_name')
+        $this->db->select('T.id, T.name, T.fiscal_yr_id, T.treaty_type_id, T.estimated_premium_income, T.treaty_effective_date, T.file, FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, TT.name AS treaty_type_name')
                 ->from($this->table_name . ' AS T')
                 ->join('master_fiscal_yrs FY', 'FY.id = T.fiscal_yr_id')
                 ->join(self::$table_treaty_types . ' TT', 'TT.id = T.treaty_type_id');
@@ -1094,7 +1181,10 @@ class Ri_setup_treaty_model extends MY_Model
                         'T.*, ' .
 
                         // Treaty Tax and Commission - all fields except treaty_id
-                        'TTNC.qs_comm_ri_quota, TTNC.qs_comm_ri_surplus_1, TTNC.qs_comm_ri_surplus_2, TTNC.qs_comm_ri_surplus_3, TTNC.qs_tax_ri_quota, TTNC.qs_tax_ri_surplus_1, TTNC.qs_tax_ri_surplus_2, TTNC.qs_tax_ri_surplus_3, TTNC.qs_comm_ib_quota, TTNC.qs_comm_ib_surplus_1, TTNC.qs_comm_ib_surplus_2, TTNC.qs_comm_ib_surplus_3, TTNC.qs_piop_quota, TTNC.qs_piop_surplus_1, TTNC.qs_piop_surplus_2, TTNC.qs_piop_surplus_3, TTNC.qs_piol_quota, TTNC.qs_piol_surplus_1, TTNC.qs_piol_surplus_2, TTNC.qs_piol_surplus_3, TTNC.qs_pio_ib_cp_quota, TTNC.qs_pio_ib_cp_surplus_1, TTNC.qs_pio_ib_cp_surplus_2, TTNC.qs_pio_ib_cp_surplus_3, TTNC.qs_profit_comm_quota, TTNC.qs_profit_comm_surplus_1, TTNC.qs_profit_comm_surplus_2, TTNC.qs_profit_comm_surplus_3, TTNC.qs_comm_scale_quota, TTNC.qs_comm_scale_surplus_1, TTNC.qs_comm_scale_surplus_2, TTNC.qs_comm_scale_surplus_3, TTNC.eol_min_n_deposit_amt_l1, TTNC.eol_min_n_deposit_amt_l2, TTNC.eol_min_n_deposit_amt_l3, TTNC.eol_min_n_deposit_amt_l4, TTNC.eol_premium_mode_l1, TTNC.eol_premium_mode_l2, TTNC.eol_premium_mode_l3, TTNC.eol_premium_mode_l4, TTNC.eol_min_rate_l1, TTNC.eol_min_rate_l2, TTNC.eol_min_rate_l3, TTNC.eol_min_rate_l4, TTNC.eol_max_rate_l1, TTNC.eol_max_rate_l2, TTNC.eol_max_rate_l3, TTNC.eol_max_rate_l4, TTNC.eol_fixed_rate_l1, TTNC.eol_fixed_rate_l2, TTNC.eol_fixed_rate_l3, TTNC.eol_fixed_rate_l4, TTNC.eol_loading_factor_l1, TTNC.eol_loading_factor_l2, TTNC.eol_loading_factor_l3, TTNC.eol_loading_factor_l4, TTNC.eol_tax_ri_l1, TTNC.eol_tax_ri_l2, TTNC.eol_tax_ri_l3, TTNC.eol_tax_ri_l4, TTNC.eol_comm_ib_l1, TTNC.eol_comm_ib_l2, TTNC.eol_comm_ib_l3, TTNC.eol_comm_ib_l4, TTNC.flag_eol_rr_l1, TTNC.flag_eol_rr_l2, TTNC.flag_eol_rr_l3, TTNC.flag_eol_rr_l4, ' .
+                        'TTNC.*, ' .
+
+                        // Treaty Commission Scale
+                        'TCS.scales as commission_scales, ' .
 
                         // Fiscal year table
                         'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, ' .
@@ -1104,6 +1194,7 @@ class Ri_setup_treaty_model extends MY_Model
                         )
                 ->from($this->table_name . ' AS T')
                 ->join(self::$table_treaty_tax_and_commission . ' TTNC', 'TTNC.treaty_id = T.id')
+                ->join(self::$table_treaty_commission_scale . ' TCS', 'TCS.treaty_id = T.id')
                 ->join('master_fiscal_yrs FY', 'FY.id = T.fiscal_yr_id')
                 ->join(self::$table_treaty_types . ' TT', 'TT.id = T.treaty_type_id')
                 ->where('T.id', $id)

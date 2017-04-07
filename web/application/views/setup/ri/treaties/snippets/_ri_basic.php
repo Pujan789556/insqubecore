@@ -19,14 +19,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<td class="text-right"><?php echo $record->treaty_type_name ;?></td>
 			</tr>
 			<tr>
-				<th>Contract Currency</th>
-				<td class="text-right"><?php echo $record->currency_contract ;?></td>
-			</tr>
-			<tr>
-				<th>Settelment Currency</th>
-				<td class="text-right"><?php echo $record->currency_settlement ;?></td>
-			</tr>
-			<tr>
 				<th>Estimated Premium Income</th>
 				<td class="text-right"><?php echo $record->estimated_premium_income ;?></td>
 			</tr>

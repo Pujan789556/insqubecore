@@ -25,9 +25,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			'qs_comm_ib' 	=> 'Insurance Board Commission(%)',
 			'qs_piop'		=> 'Portfolio In & Out Premium(%)',
 			'qs_piol'		=> 'Portfolio In & Out Loss (%)',
-			'qs_pio_ib_cp'		=> 'Portfolio In & Out IB Claim Provision (%)',
-			'qs_profit_comm' 	=> 'Profit Commission (%)',
-			'qs_comm_scale' 	=> 'Commission Scale (%)'
+			'qs_pio_ib_cp'			=> 'Portfolio In & Out IB Claim Provision (%)',
+			'qs_profit_comm' 		=> 'Profit Commission (%)',
+			'flag_qs_comm_scale' 	=> ['label' => 'Apply Commission Scale?', 'callback' => 'yes_no_text']
 		];
 
 		$tnc_col_postfix = ['quota','surplus_1', 'surplus_2', 'surplus_3'];
@@ -35,9 +35,35 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		foreach($tnc_col_prefix as $col_prefix => $heading):
 		?>
 			<tr>
-				<td><?php echo $heading;?></td>
+				<td>
+					<?php
+					$callback = NULL;
+					if(is_array($heading))
+					{
+						$label 		= $heading['label'];
+						$callback 	= $heading['callback'] ?? NULL;
+					}
+					else
+					{
+						$label = $heading;
+					}
+					echo $label;
+					?>
+				</td>
 				<?php foreach ($tnc_col_postfix as $col_postfix):?>
-					<td><?php echo $record->{$col_prefix . '_' . $col_postfix}?></td>
+					<td>
+						<?php
+						$value = $record->{$col_prefix . '_' . $col_postfix};
+						if($callback && function_exists($callback))
+						{
+							echo call_user_func($callback, $value);
+						}
+						else
+						{
+							echo $value;
+						}
+						?>
+					</td>
 				<?php endforeach?>
 			</tr>
 		<?php endforeach?>

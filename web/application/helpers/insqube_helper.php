@@ -566,7 +566,7 @@ if ( ! function_exists('yes_no_text'))
      */
     function yes_no_text( $flag = NULL, $null_return = '' )
     {
-    	$text = $null_return;
+        $text = $null_return;
 
     	// Return Nothing if flag is NULL
     	if(is_null($flag))
@@ -574,11 +574,11 @@ if ( ! function_exists('yes_no_text'))
     		return $text;
     	}
 
-    	if( (string)$flag == IQB_FLAG_YES || (int)$flag == IQB_FLAG_ON )
+    	if( (string)$flag === IQB_FLAG_YES || (int)$flag === IQB_FLAG_ON )
     	{
     		$text = 'Yes';
     	}
-    	else if( (string)$flag == IQB_FLAG_NO || (int)$flag == IQB_FLAG_OFF )
+    	else if( (string)$flag === IQB_FLAG_NO || (int)$flag === IQB_FLAG_OFF )
     	{
     		$text = 'No';
     	}

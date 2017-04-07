@@ -395,6 +395,9 @@ class Ri_setup_treaties extends MY_Controller
 	            	$data = $this->input->post();
 	            	$data['file'] = $file;
 
+	            	// if no estimated premium income, null it.
+	            	$data['estimated_premium_income'] = $data['estimated_premium_income'] ? $data['estimated_premium_income'] : NULL;
+
 	        		// Insert or Update?
 					if($action === 'add')
 					{
@@ -505,8 +508,6 @@ class Ri_setup_treaties extends MY_Controller
 			$this->template->render_404();
 		}
 
-
-
 		if( $this->input->post() )
 		{
 			$done 	= FALSE;
@@ -566,6 +567,87 @@ class Ri_setup_treaties extends MY_Controller
 		// Prepare HTML Form
 		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_tnc', $form_data, TRUE);
 
+
+		// Return JSON
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Manage Commission Scales
+	 *
+	 * @param integer $id Treaty ID
+	 * @return void
+	 */
+	public function commission_scales($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->ri_setup_treaty_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		if( $this->input->post() )
+		{
+			$done 	= FALSE;
+			$rules 	= $this->ri_setup_treaty_model->get_validation_rules_formatted(['commission_scale']);
+            $this->form_validation->set_rules($rules);
+            if( $this->form_validation->run() === TRUE )
+        	{
+        		$data = $this->input->post();
+        		$done = $this->ri_setup_treaty_model->save_treaty_commission_scale($record->id, $data);
+
+        		if($done)
+        		{
+        			// Update the Portfolio Table
+					$record 		= $this->ri_setup_treaty_model->get($id);
+					$success_html 	= $this->load->view('setup/ri/treaties/snippets/_ri_commission_scale_data', ['record' => $record], TRUE);
+
+					$ajax_data = [
+						'message' => 'Successfully Updated',
+						'status'  => 'success',
+						'updateSection' => true,
+						'hideBootbox' => true
+					];
+					$ajax_data['updateSectionData'] = [
+						'box' 		=> '#ri-commission-scale-data',
+						'method' 	=> 'html',
+						'html'		=> $success_html
+					];
+					return $this->template->json($ajax_data);
+        		}
+        		else
+        		{
+        			// Simply return could not update message. Might be some logical error or db error.
+	        		return $this->template->json([
+	                    'status'        => 'error',
+	                    'message'       => 'Could not update!'
+	                ]);
+        		}
+        	}
+        	else
+        	{
+    			// Simply Return Validation Error
+        		return $this->template->json([
+                    'status'        => 'error',
+                    'message'       => validation_errors()
+                ]);
+        	}
+		}
+
+		/**
+		 * Prepare Form Data
+		 */
+		$form_data = [
+			'form_elements' 	=> $this->ri_setup_treaty_model->get_validation_rules(['commission_scale']),
+			'record' 			=> $record
+		];
+
+		// Prepare HTML Form
+		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_commission_scale', $form_data, TRUE);
 
 		// Return JSON
 		$this->template->json($json_data);

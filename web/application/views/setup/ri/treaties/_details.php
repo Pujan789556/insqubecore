@@ -5,7 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 ?>
 <div class="row">
-	<div class="col-md-4">
+	<div class="col-md-5">
 		<?php
 		/**
 		 * Basic Overview
@@ -16,9 +16,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		 * Brokers Overview
 		 */
 		$this->load->view('setup/ri/treaties/snippets/_ri_brokers');
+
+		/**
+		 * Commission Scale
+		 */
+		$this->load->view('setup/ri/treaties/snippets/_ri_commission_scale');
 		?>
 	</div>
-	<div class="col-md-8">
+	<div class="col-md-7">
 		<?php
 		/**
 		 * RI Distribution
