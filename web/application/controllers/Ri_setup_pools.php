@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * RI Setup - Treaties Controller
+ * RI Setup - Pool Treaties Controller
  *
  * This controller falls under "Master Setup" category.
  *
@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Ri_setup_treaties extends MY_Controller
+class Ri_setup_pools extends MY_Controller
 {
 	function __construct()
 	{
@@ -34,7 +34,7 @@ class Ri_setup_treaties extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | RI | Treaties';
+        $this->data['site_title'] = 'Master Setup | RI | Pools';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -44,12 +44,7 @@ class Ri_setup_treaties extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('ri_setup_treaty_model');
-
-
-
-		// Data Path
-        $this->_upload_path = INSQUBE_DATA_PATH . 'treaties/';
+		$this->load->model('ri_setup_pool_model');
 	}
 
 	// --------------------------------------------------------------------
@@ -95,7 +90,7 @@ class Ri_setup_treaties extends MY_Controller
 			$params = array_merge($params, $filter_data['data']);
 		}
 
-		$records = $this->ri_setup_treaty_model->rows($params);
+		$records = $this->ri_setup_pool_model->rows($params);
 		$records = $records ? $records : [];
 		$total = count($records);
 
@@ -121,7 +116,7 @@ class Ri_setup_treaties extends MY_Controller
 		$data = [
 			'records' => $records,
 			'next_id' => $next_id,
-			'next_url' => $next_id ? site_url( 'ri_setup_treaties/page/r/' . $next_id ) : NULL
+			'next_url' => $next_id ? site_url( 'ri_setup_pools/page/r/' . $next_id ) : NULL
 		] + $dom_data;
 
 		/**
@@ -129,23 +124,23 @@ class Ri_setup_treaties extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'setup/ri/treaties/_index';
+			$view = 'setup/ri/pools/_index';
 
 			/**
 			 * Filter Configurations
 			 */
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('ri_setup_treaties/page/l/' )
+				'filter_url' 	=> site_url('ri_setup_pools/page/l/' )
 			]);
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/ri/treaties/_list';
+			$view = 'setup/ri/pools/_list';
 		}
 		else
 		{
-			$view = 'setup/ri/treaties/_rows';
+			$view = 'setup/ri/pools/_rows';
 		}
 
 
@@ -153,7 +148,7 @@ class Ri_setup_treaties extends MY_Controller
 		{
 
 
-			// $view = $refresh === FALSE ? 'setup/ri/treaties/_rows' : 'setup/ri/treaties/_list';
+			// $view = $refresh === FALSE ? 'setup/ri/pools/_rows' : 'setup/ri/pools/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$ajax_data = [
 				'status' => 'success',
@@ -171,9 +166,9 @@ class Ri_setup_treaties extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/ri/treaties/_index_header',
+							'setup/ri/pools/_index_header',
 							['content_header' => 'Manage Treaties'] + $dom_data)
-						->partial('content', 'setup/ri/treaties/_index', $data)
+						->partial('content', 'setup/ri/pools/_index', $data)
 						->render($this->data);
 	}
 
@@ -275,7 +270,7 @@ class Ri_setup_treaties extends MY_Controller
 		 * Prepare Form Data
 		 */
 		$form_data = [
-			'form_elements' 	=> $this->ri_setup_treaty_model->get_validation_rules(['basic', 'brokers', 'portfolios']),
+			'form_elements' 	=> $this->ri_setup_pool_model->get_validation_rules(['basic', 'brokers', 'portfolios']),
 			'record' 			=> $record,
 
 			// Broker Companies
@@ -308,7 +303,7 @@ class Ri_setup_treaties extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ri_setup_treaty_model->find($id);
+		$record = $this->ri_setup_pool_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -317,19 +312,19 @@ class Ri_setup_treaties extends MY_Controller
 		/**
 		 * Existing Brokers
 		 */
-		$treaty_borkers = $this->ri_setup_treaty_model->get_brokers_by_treaty_dropdown($id);
+		$treaty_borkers = $this->ri_setup_pool_model->get_brokers_by_treaty_dropdown($id);
 
 		/**
 		 * Existing Portfolios
 		 */
-		$treaty_portfolios = $this->ri_setup_treaty_model->get_portfolios_by_treaty_dropdown($id);
+		$treaty_portfolios = $this->ri_setup_pool_model->get_portfolios_by_treaty_dropdown($id);
 
 
 		/**
 		 * Prepare Form Data
 		 */
 		$form_data = [
-			'form_elements' 	=> $this->ri_setup_treaty_model->get_validation_rules(['basic', 'brokers', 'portfolios']),
+			'form_elements' 	=> $this->ri_setup_pool_model->get_validation_rules(['basic', 'brokers', 'portfolios']),
 			'record' 			=> $record,
 
 			// Brokers
@@ -377,7 +372,7 @@ class Ri_setup_treaties extends MY_Controller
 			$done = FALSE;
 			$file = $record->file ?? NULL;
 
-			$rules = $this->ri_setup_treaty_model->get_validation_rules_formatted(['basic', 'brokers', 'portfolios']);
+			$rules = $this->ri_setup_pool_model->get_validation_rules_formatted(['basic', 'brokers', 'portfolios']);
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -401,14 +396,14 @@ class Ri_setup_treaties extends MY_Controller
 	        		// Insert or Update?
 					if($action === 'add')
 					{
-						$done = $this->ri_setup_treaty_model->add($data);
+						$done = $this->ri_setup_pool_model->add($data);
 					}
 					else
 					{
 						// Now Update Data
 						// Get old treaty portfolio
 						$old_data['old_portfolios'] = $form_data['treaty_portfolios'];
-						$done = $this->ri_setup_treaty_model->edit($record->id, $data, $old_data);
+						$done = $this->ri_setup_pool_model->edit($record->id, $data, $old_data);
 					}
 
 		        	if(!$done)
@@ -441,8 +436,8 @@ class Ri_setup_treaties extends MY_Controller
 						else
 						{
 							// Get Updated Record
-							$record = $this->ri_setup_treaty_model->row($record->id);
-							$success_html = $this->load->view('setup/ri/treaties/_single_row', ['record' => $record], TRUE);
+							$record = $this->ri_setup_pool_model->row($record->id);
+							$success_html = $this->load->view('setup/ri/pools/_single_row', ['record' => $record], TRUE);
 							$ajax_data = [
 								'message' => $message,
 								'status'  => $status,
@@ -470,7 +465,7 @@ class Ri_setup_treaties extends MY_Controller
 		}
 
 		// Prepare HTML Form
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form', $form_data, TRUE);
+		$json_data['form'] = $this->load->view('setup/ri/pools/_form', $form_data, TRUE);
 
 		// Return JSON
 		$this->template->json($json_data);
@@ -488,7 +483,7 @@ class Ri_setup_treaties extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ri_setup_treaty_model->get($id);
+		$record = $this->ri_setup_pool_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -498,17 +493,17 @@ class Ri_setup_treaties extends MY_Controller
 		{
 			$done 	= FALSE;
 
-            $this->form_validation->set_rules($this->ri_setup_treaty_model->get_tnc_validation_rules($record->treaty_type_id, true));
+            $this->form_validation->set_rules($this->ri_setup_pool_model->get_tnc_validation_rules($record->treaty_type_id, true));
 			if($this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
-        		$done = $this->ri_setup_treaty_model->save_treaty_tnc($record->id, $data);
+        		$done = $this->ri_setup_pool_model->save_treaty_tnc($record->id, $data);
 
         		if($done)
         		{
         			// Update the Portfolio Table
-					$record = $this->ri_setup_treaty_model->get($id);
-					$success_html = $this->load->view('setup/ri/treaties/snippets/_ri_tnc_data', ['record' => $record], TRUE);
+					$record = $this->ri_setup_pool_model->get($id);
+					$success_html = $this->load->view('setup/ri/pools/snippets/_ri_tnc_data', ['record' => $record], TRUE);
 
 					$ajax_data = [
 						'message' => 'Successfully Updated',
@@ -546,12 +541,12 @@ class Ri_setup_treaties extends MY_Controller
 		 * Prepare Form Data
 		 */
 		$form_data = [
-			'form_elements' 	=> $this->ri_setup_treaty_model->get_tnc_validation_rules($record->treaty_type_id),
+			'form_elements' 	=> $this->ri_setup_pool_model->get_tnc_validation_rules($record->treaty_type_id),
 			'record' 			=> $record
 		];
 
 		// Prepare HTML Form
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_tnc', $form_data, TRUE);
+		$json_data['form'] = $this->load->view('setup/ri/pools/_form_tnc', $form_data, TRUE);
 
 
 		// Return JSON
@@ -570,7 +565,7 @@ class Ri_setup_treaties extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ri_setup_treaty_model->get($id);
+		$record = $this->ri_setup_pool_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -579,18 +574,18 @@ class Ri_setup_treaties extends MY_Controller
 		if( $this->input->post() )
 		{
 			$done 	= FALSE;
-			$rules 	= $this->ri_setup_treaty_model->get_validation_rules_formatted(['commission_scale']);
+			$rules 	= $this->ri_setup_pool_model->get_validation_rules_formatted(['commission_scale']);
             $this->form_validation->set_rules($rules);
             if( $this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
-        		$done = $this->ri_setup_treaty_model->save_treaty_commission_scale($record->id, $data);
+        		$done = $this->ri_setup_pool_model->save_treaty_commission_scale($record->id, $data);
 
         		if($done)
         		{
         			// Update the Portfolio Table
-					$record 		= $this->ri_setup_treaty_model->get($id);
-					$success_html 	= $this->load->view('setup/ri/treaties/snippets/_ri_commission_scale_data', ['record' => $record], TRUE);
+					$record 		= $this->ri_setup_pool_model->get($id);
+					$success_html 	= $this->load->view('setup/ri/pools/snippets/_ri_commission_scale_data', ['record' => $record], TRUE);
 
 					$ajax_data = [
 						'message' => 'Successfully Updated',
@@ -628,12 +623,12 @@ class Ri_setup_treaties extends MY_Controller
 		 * Prepare Form Data
 		 */
 		$form_data = [
-			'form_elements' 	=> $this->ri_setup_treaty_model->get_validation_rules(['commission_scale']),
+			'form_elements' 	=> $this->ri_setup_pool_model->get_validation_rules(['commission_scale']),
 			'record' 			=> $record
 		];
 
 		// Prepare HTML Form
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_commission_scale', $form_data, TRUE);
+		$json_data['form'] = $this->load->view('setup/ri/pools/_form_commission_scale', $form_data, TRUE);
 
 		// Return JSON
 		$this->template->json($json_data);
@@ -651,7 +646,7 @@ class Ri_setup_treaties extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ri_setup_treaty_model->find($id);
+		$record = $this->ri_setup_pool_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -660,13 +655,13 @@ class Ri_setup_treaties extends MY_Controller
 		/**
 		 * Treaty Distribution
 		 */
-		$treaty_distribution = $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id);
+		$treaty_distribution = $this->ri_setup_pool_model->get_treaty_distribution_by_treaty($id);
 
 		/**
 		 * Prepare Form Data
 		 */
 		$form_data = [
-			'form_elements' 	=> $this->ri_setup_treaty_model->get_validation_rules(['reinsurers']),
+			'form_elements' 	=> $this->ri_setup_pool_model->get_validation_rules(['reinsurers']),
 			'record' 			=> $record,
 
 			// Treaty Distribution
@@ -678,19 +673,19 @@ class Ri_setup_treaties extends MY_Controller
 		if( $this->input->post() )
 		{
 			$done 	= FALSE;
-			$rules 	= $this->ri_setup_treaty_model->get_validation_rules_formatted(['reinsurers']);
+			$rules 	= $this->ri_setup_pool_model->get_validation_rules_formatted(['reinsurers']);
 
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
-        		$done = $this->ri_setup_treaty_model->save_treaty_distribution($record->id, $data);
+        		$done = $this->ri_setup_pool_model->save_treaty_distribution($record->id, $data);
 
         		if($done)
         		{
         			// Update the Distribution Table
-					$treaty_distribution = $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id);
-					$success_html = $this->load->view('setup/ri/treaties/snippets/_ri_distribution_data', ['treaty_distribution' => $treaty_distribution], TRUE);
+					$treaty_distribution = $this->ri_setup_pool_model->get_treaty_distribution_by_treaty($id);
+					$success_html = $this->load->view('setup/ri/pools/snippets/_ri_distribution_data', ['treaty_distribution' => $treaty_distribution], TRUE);
 
 					$ajax_data = [
 						'message' => 'Successfully Updated',
@@ -725,7 +720,7 @@ class Ri_setup_treaties extends MY_Controller
 		}
 
 		// Prepare HTML Form
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_distribution', $form_data, TRUE);
+		$json_data['form'] = $this->load->view('setup/ri/pools/_form_distribution', $form_data, TRUE);
 
 		// Merge Return Data with Form Data
 		$json_data = array_merge($json_data, $return_data);
@@ -792,7 +787,7 @@ class Ri_setup_treaties extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ri_setup_treaty_model->get($id);
+		$record = $this->ri_setup_pool_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -801,7 +796,7 @@ class Ri_setup_treaties extends MY_Controller
 		/**
 		 * Treaty Portfolios
 		 */
-		$portfolios = $this->ri_setup_treaty_model->get_portfolios_by_treaty($id);
+		$portfolios = $this->ri_setup_pool_model->get_portfolios_by_treaty($id);
 
 		/**
 		 * Validation Rules/Form Elements Based on the Treaty Type
@@ -829,13 +824,13 @@ class Ri_setup_treaties extends MY_Controller
 			if($this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
-        		$done = $this->ri_setup_treaty_model->save_treaty_portfolios($record->id, $data);
+        		$done = $this->ri_setup_pool_model->save_treaty_portfolios($record->id, $data);
 
         		if($done)
         		{
         			// Update the Portfolio Table
-					$portfolios = $this->ri_setup_treaty_model->get_portfolios_by_treaty($id);
-					$success_html = $this->load->view('setup/ri/treaties/snippets/_ri_portfolio_data', ['portfolios' => $portfolios], TRUE);
+					$portfolios = $this->ri_setup_pool_model->get_portfolios_by_treaty($id);
+					$success_html = $this->load->view('setup/ri/pools/snippets/_ri_portfolio_data', ['portfolios' => $portfolios], TRUE);
 
 					$ajax_data = [
 						'message' => 'Successfully Updated',
@@ -870,7 +865,7 @@ class Ri_setup_treaties extends MY_Controller
 		}
 
 		// Prepare HTML Form
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_portfolios', $form_data, TRUE);
+		$json_data['form'] = $this->load->view('setup/ri/pools/_form_portfolios', $form_data, TRUE);
 
 		// Merge Return Data with Form Data
 		$json_data = array_merge($json_data, $return_data);
@@ -884,8 +879,8 @@ class Ri_setup_treaties extends MY_Controller
 		private function _portfolio_validation_rules_by_treaty_type($record)
 		{
 
-			$portfolio_dropdown = $this->ri_setup_treaty_model->get_portfolios_by_treaty_dropdown($record->id);
-			$v_rules = $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_common']);
+			$portfolio_dropdown = $this->ri_setup_pool_model->get_portfolios_by_treaty_dropdown($record->id);
+			$v_rules = $this->ri_setup_pool_model->get_validation_rules_formatted(['portfolios_common']);
 
 			// First rule is 'portfolio_ids[]', update validation rule
 			$v_rules[0]['rules'] = 'trim|required|integer|max_length[8]|in_list['.implode(',',array_keys($portfolio_dropdown)).']';
@@ -893,19 +888,19 @@ class Ri_setup_treaties extends MY_Controller
 
 			if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_SP )
 			{
-				$v_rules = array_merge($v_rules, $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_sp']));
+				$v_rules = array_merge($v_rules, $this->ri_setup_pool_model->get_validation_rules_formatted(['portfolios_sp']));
 			}
 			else if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_QT )
 			{
-				$v_rules = array_merge($v_rules, $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_qt']));
+				$v_rules = array_merge($v_rules, $this->ri_setup_pool_model->get_validation_rules_formatted(['portfolios_qt']));
 			}
 			else if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_QS )
 			{
-				$v_rules = array_merge($v_rules, $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_qt', 'portfolios_qs', 'portfolios_sp']));
+				$v_rules = array_merge($v_rules, $this->ri_setup_pool_model->get_validation_rules_formatted(['portfolios_qt', 'portfolios_qs', 'portfolios_sp']));
 			}
 			else if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_EOL )
 			{
-				$v_rules = array_merge($v_rules, $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_eol']));
+				$v_rules = array_merge($v_rules, $this->ri_setup_pool_model->get_validation_rules_formatted(['portfolios_eol']));
 			}
 
 			return $v_rules;
@@ -964,7 +959,7 @@ class Ri_setup_treaties extends MY_Controller
 	    	}
 
 	    	// Check Duplicate
-	        if( $this->ri_setup_treaty_model->check_duplicate(['fiscal_yr_id' => $fiscal_yr_id, 'treaty_type_id' => $treaty_type_id], $id))
+	        if( $this->ri_setup_pool_model->check_duplicate(['fiscal_yr_id' => $fiscal_yr_id, 'treaty_type_id' => $treaty_type_id], $id))
 	        {
 	            $this->form_validation->set_message('_cb_treaty_type__check_duplicate', 'The %s already exists for supplied Fiscal Year.');
 	            return FALSE;
@@ -997,7 +992,7 @@ class Ri_setup_treaties extends MY_Controller
 	    	}
 
 	    	// Check Duplicate - Treaty Record Exist with given portfolio for given fiscal year other than supplied treaty id
-	        if( $this->ri_setup_treaty_model->_cb_portfolio__check_duplicate($fiscal_yr_id, $portfolio_id, $id) )
+	        if( $this->ri_setup_pool_model->_cb_portfolio__check_duplicate($fiscal_yr_id, $portfolio_id, $id) )
 	        {
 	            $this->form_validation->set_message('_cb_portfolio__check_duplicate', 'The %s already exists for supplied Fiscal Year in another Treaty.');
 	            return FALSE;
@@ -1022,7 +1017,7 @@ class Ri_setup_treaties extends MY_Controller
 	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
 
 	    	// Check Duplicate
-	        if( $this->ri_setup_treaty_model->check_duplicate(['LOWER(`name`)=' => strtolower($name)], $id))
+	        if( $this->ri_setup_pool_model->check_duplicate(['LOWER(`name`)=' => strtolower($name)], $id))
 	        {
 	            $this->form_validation->set_message('_cb_name__check_duplicate', 'The %s already exists.');
 	            return FALSE;
@@ -1043,13 +1038,13 @@ class Ri_setup_treaties extends MY_Controller
     	/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('ri_setup_treaties', 'explore.treaty') )
+		if( !$this->dx_auth->is_authorized('ri_setup_pools', 'explore.treaty') )
 		{
 			$this->dx_auth->deny_access();
 		}
 
     	$id = (int)$id;
-    	$record = $this->ri_setup_treaty_model->get($id);
+    	$record = $this->ri_setup_pool_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -1060,9 +1055,9 @@ class Ri_setup_treaties extends MY_Controller
 		 */
 		$data = [
 			'record' 				=> $record,
-			'brokers' 				=> $this->ri_setup_treaty_model->get_brokers_by_treaty($id),
-			'portfolios' 			=> $this->ri_setup_treaty_model->get_portfolios_by_treaty($id),
-			'treaty_distribution' 	=> $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id),
+			'brokers' 				=> $this->ri_setup_pool_model->get_brokers_by_treaty($id),
+			'portfolios' 			=> $this->ri_setup_pool_model->get_portfolios_by_treaty($id),
+			'treaty_distribution' 	=> $this->ri_setup_pool_model->get_treaty_distribution_by_treaty($id),
 		];
 
 		$this->data['site_title'] = 'Treaty Details | ' . $record->name;
@@ -1071,9 +1066,9 @@ class Ri_setup_treaties extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Treaty Details <small>' . $record->name . '</small>',
-								'breadcrumbs' => ['Treaty Setup' => 'ri_setup_treaties', 'Details' => NULL]
+								'breadcrumbs' => ['Treaty Setup' => 'ri_setup_pools', 'Details' => NULL]
 						])
-						->partial('content', 'setup/ri/treaties/_details', $data)
+						->partial('content', 'setup/ri/pools/_details', $data)
 						->render($this->data);
 
     }
@@ -1089,7 +1084,7 @@ class Ri_setup_treaties extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ri_setup_treaty_model->find($id);
+		$record = $this->ri_setup_pool_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -1107,7 +1102,7 @@ class Ri_setup_treaties extends MY_Controller
 			return $this->template->json($data);
 		}
 
-		$done = $this->ri_setup_treaty_model->delete($record->id);
+		$done = $this->ri_setup_pool_model->delete($record->id);
 
 		if($done)
 		{
@@ -1135,12 +1130,12 @@ class Ri_setup_treaties extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('ri_setup_treaties', 'download.treaty') )
+		if( !$this->dx_auth->is_authorized('ri_setup_pools', 'download.treaty') )
 		{
 			$this->dx_auth->deny_access();
 		}
 
-		$record = $this->ri_setup_treaty_model->find($id);
+		$record = $this->ri_setup_pool_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
