@@ -201,6 +201,18 @@ $config['insqb_activity_types'] = [
 			'D' => 'deleted'
 	]],
 
+	/**
+	 * RI Setup - Pools
+	 */
+	'ri_setup_pool' => [
+		'_uri' => 'ri_setup_pools/',
+		'_table' => 'ri_setup_pools',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
 
 	/**
 	 * RI Setup - Treaties
@@ -213,7 +225,6 @@ $config['insqb_activity_types'] = [
 			'E' => 'edited',
 			'D' => 'deleted'
 	]],
-
 
 
 	/**
