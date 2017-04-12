@@ -331,8 +331,8 @@ switch ($record->sub_portfolio_code)
          */
         $premium_record = (object)[
             'policy_id'     => $record->id,
-            'total_amount'  => $record->total_amount,
-            'stamp_duty'    => $record->stamp_duty,
+            'total_premium_amount'  => $record->total_premium_amount,
+            'stamp_duty_amount'     => $record->stamp_duty_amount,
             'attributes'    => $record->premium_attributes
         ];
         $this->load->view('premium/snippets/_print_card_overview_MOTOR', ['premium_record' => $premium_record, 'policy_record' => $record, 'title' => $cost_table_title]);

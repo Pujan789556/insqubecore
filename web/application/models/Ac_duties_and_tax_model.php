@@ -60,6 +60,27 @@ class Ac_duties_and_tax_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function get($id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'ac_dat_' . $id;
+
+        $record = $this->get_cache($cache_name);
+        if(!$record)
+        {
+            $record = $this->db->select('`id`, `name`, `rate`')
+                        ->from($this->table_name)
+                        ->where('id', $id)
+                        ->get()->row();
+            $this->write_cache($record, $cache_name, CACHE_DURATION_MONTH);
+        }
+        return $record;
+    }
+
+    // ----------------------------------------------------------------
+
     public function get_all()
     {
         /**
@@ -71,7 +92,7 @@ class Ac_duties_and_tax_model extends MY_Model
             $list = $this->db->select('`id`, `name`, `rate`')
                         ->from($this->table_name)
                         ->get()->result();
-            $this->write_cache($list, 'ac_dat_all', CACHE_DURATION_DAY);
+            $this->write_cache($list, 'ac_dat_all', CACHE_DURATION_MONTH);
         }
         return $list;
     }
@@ -117,7 +138,7 @@ class Ac_duties_and_tax_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'ac_dat_all'
+            'ac_dat_*'
         ];
         // cache name without prefix
         foreach($cache_names as $cache)

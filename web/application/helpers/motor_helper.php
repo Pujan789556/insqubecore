@@ -118,7 +118,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_compute_short_term_premium'))
 			$short_term_rate = (float)$short_term_rate;
 
 			// Compute Total Amount
-			$cost_table['total_amount'] = ($cost_table['total_amount'] * $short_term_rate)/100.00;
+			$cost_table['total_premium_amount'] = ($cost_table['total_premium_amount'] * $short_term_rate)/100.00;
 
 			// Compute Commission Amount if any
 			$comissionable_amount = $cost_table['comissionable_amount'] ?? NULL;
@@ -463,13 +463,13 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 		//
 		// Grand Total
 		//
-		$total_amount = $premium_total_A_AA  + $premium_I_total;
+		$total_premium_amount = $premium_total_A_AA  + $premium_I_total;
 
 
 		//
 		// Stamp Duty
 		//
-		$stamp_duty = $data['stamp_duty'];
+		$stamp_duty_amount = $data['stamp_duty_amount'];
 
 
 		/**
@@ -536,8 +536,8 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 		}
 
 		$__cost_table = [
-			'total_amount'  => $total_amount,
-			'stamp_duty' 	=> $stamp_duty,
+			'total_premium_amount'  => $total_premium_amount,
+			'stamp_duty_amount' 	=> $stamp_duty_amount,
 			'extra_fields' 	=> $post_data_extra_fields ? json_encode($post_data_extra_fields) : NULL
 		];
 
@@ -1107,19 +1107,19 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 		//
 		// Grand Total
 		//
-		$total_amount = $premium_A_total + $premium_AA_total  + $premium_I_total + $premium_EE_total + $premium_U_total;
+		$total_premium_amount = $premium_A_total + $premium_AA_total  + $premium_I_total + $premium_EE_total + $premium_U_total;
 
 
 		//
 		// Stamp Duty
 		//
-		$stamp_duty = $data['stamp_duty'];
+		$stamp_duty_amount 	= $data['stamp_duty_amount'];
 
 
 
 		$__cost_table = [
-			'total_amount'  => $total_amount,
-			'stamp_duty' 	=> $stamp_duty,
+			'total_premium_amount'  => $total_premium_amount,
+			'stamp_duty_amount' 	=> $stamp_duty_amount,
 			'extra_fields' 	=> $post_data_extra_fields ? json_encode($post_data_extra_fields) : NULL
 		];
 
@@ -1791,21 +1791,21 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
         //
         // Grand Total
         //
-        $total_amount = $premium_A_total + $premium_AA_total  + $premium_I_total + $premium_EE_total + $premium_U_total + $premium_OO_total;
+        $total_premium_amount = $premium_A_total + $premium_AA_total  + $premium_I_total + $premium_EE_total + $premium_U_total + $premium_OO_total;
 
 
         //
         // Stamp Duty
         //
-        $stamp_duty = $data['stamp_duty'];
+        $stamp_duty_amount = $data['stamp_duty_amount'];
 
 
         //
         // Premium Data
         //
         $__cost_table = [
-            'total_amount'  => $total_amount,
-            'stamp_duty'    => $stamp_duty,
+            'total_premium_amount'  => $total_premium_amount,
+            'stamp_duty_amount'    => $stamp_duty_amount,
             'extra_fields'  => $post_data_extra_fields ? json_encode($post_data_extra_fields) : NULL
         ];
 

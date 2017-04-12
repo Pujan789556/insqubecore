@@ -54,19 +54,19 @@ $attributes = $premium_record->attributes ? json_decode($premium_record->attribu
                     <table class="table" cellpadding="0" cellspacing="0">
                         <tr>
                             <td width="80%" align="right"><strong>जम्मा</strong></td>
-                            <td width="100px" align="right"><strong><?php echo number_format((float)$premium_record->total_amount, 2, '.', '')?></strong></td>
+                            <td width="100px" align="right"><strong><?php echo number_format((float)$premium_record->total_premium_amount, 2, '.', '')?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>टिकट दस्तुर</strong></td>
-                            <td align="right"><strong><?php echo $premium_record->stamp_duty;?></strong></td>
+                            <td align="right"><strong><?php echo $premium_record->stamp_duty_amount;?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>मु. अ. क. (VAT)</strong></td>
-                            <td align="right"><strong><?php echo number_format( (float)($premium_record->stamp_duty + $premium_record->total_amount) * 0.13, 2, '.', '');?></strong></td>
+                            <td align="right"><strong><?php echo number_format( (float)($premium_record->stamp_duty_amount + $premium_record->total_premium_amount) * 0.13, 2, '.', '');?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                            <td align="right"><strong><?php echo number_format( (float)($premium_record->stamp_duty + $premium_record->total_amount) * 1.13, 2, '.', '');?></strong></td>
+                            <td align="right"><strong><?php echo number_format( (float)($premium_record->stamp_duty_amount + $premium_record->total_premium_amount) * 1.13, 2, '.', '');?></strong></td>
                         </tr>
                     </table>
                 </td>

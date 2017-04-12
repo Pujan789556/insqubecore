@@ -587,7 +587,7 @@ class Policy_model extends MY_Model
                                     TIMESTAMP( P.`end_date`, P.`end_time` ) AS end_datetime,
                                     PRT.name_en as portfolio_name, PRT.code as portfolio_code,
                                     SPRT.name_en as sub_portfolio_name, SPRT.code as sub_portfolio_code,
-                                    PRM.total_amount, PRM.stamp_duty, PRM.attributes as premium_attributes,
+                                    PRM.total_premium_amount, PRM.stamp_duty_amount, PRM.attributes as premium_attributes,
                                     B.name as branch_name, B.code as branch_code, B.contacts as branch_contact,
                                     C.code as customer_code, C.full_name as customer_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no,
                                     O.attributes as object_attributes,
@@ -766,7 +766,7 @@ class Policy_model extends MY_Model
      *
      * Tasks that are to be performed after policy is created are
      *      1. Add Agent Policy Relation if supplied
-     *      2. Add Premium Based on Portfolio and Object Details
+     *      2. Update Sum Insured value on "Premium Table"
      *      3. @TODO: Find other tasks
      *
      * $arr_record structure
@@ -841,6 +841,13 @@ class Policy_model extends MY_Model
                 $this->load->model('rel_agent_policy_model');
                 $this->rel_agent_policy_model->insert($relation_data, TRUE);
             }
+
+            /**
+             * TASK 2: Update Sum Insured value on "Premium Table"
+             * ----------------------------------------------------
+             */
+
+
             return TRUE;
 
         }
@@ -854,7 +861,8 @@ class Policy_model extends MY_Model
      *
      * Tasks that are to be performed after a policy is updated
      *      1. Update Agent Relation (ADD or DELETE)
-     *      2. @TODO: Find other tasks
+     *      2. Update Sum Insured value on "Premium Table"
+     *      3. @TODO: Find other tasks
      *
      *
      * @param array $arr_record

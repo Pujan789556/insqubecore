@@ -194,10 +194,10 @@ class Premium extends MY_Controller
 				 * Policy Premium Card
 				 */
 				$premium_record = (object)[
-					'policy_id' 	=> $policy_record->id,
-					'total_amount' 	=> $policy_record->total_amount,
-					'stamp_duty' 	=> $policy_record->stamp_duty,
-					'attributes'	=> $policy_record->premium_attributes
+					'policy_id' 			=> $policy_record->id,
+					'total_premium_amount' 	=> $policy_record->total_premium_amount,
+					'stamp_duty_amount' 	=> $policy_record->stamp_duty_amount,
+					'attributes'			=> $policy_record->premium_attributes
 				];
 				$ajax_data['updateSectionData']  = [
 					'box' 		=> '#_premium-card',
@@ -307,10 +307,10 @@ class Premium extends MY_Controller
 				}
 
 				// Target Premium Record
-				$premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
+				// $premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
 
 				// Find Existing Premium Record
-				return $this->premium_model->update($premium_record->id, $premium_data, TRUE);
+				return $this->premium_model->save($policy_record->id, $premium_data);
 
 			}
 
@@ -340,11 +340,8 @@ class Premium extends MY_Controller
 					], 404);
 				}
 
-				// Target Premium Record
-				$premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
-
 				// Find Existing Premium Record
-				return $this->premium_model->update($premium_record->id, $premium_data, TRUE);
+				return $this->premium_model->save($policy_record->id, $premium_data);
 
 			}
 
@@ -373,11 +370,9 @@ class Premium extends MY_Controller
 					], 404);
 				}
 
-				// Target Premium Record
-				$premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
-
 				// Find Existing Premium Record
-				return $this->premium_model->update($premium_record->id, $premium_data, TRUE);
+				// return $this->premium_model->update($premium_record->id, $premium_data, TRUE);
+				return $this->premium_model->save($policy_record->id, $premium_data);
 			}
 
 	// --------------------------------------------------------------------
@@ -515,7 +510,7 @@ class Premium extends MY_Controller
 
 			// Common Field: Stamp Duty
 			$rule_stamp_duty = [
-                'field' => 'stamp_duty',
+                'field' => 'stamp_duty_amount',
                 'label' => 'Stamp Duty(Rs.)',
                 'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
                 '_type'     => 'text',

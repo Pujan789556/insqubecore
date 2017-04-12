@@ -112,7 +112,7 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
     $premium_extra_fields_object = $premium_record->extra_fields ? json_decode($premium_record->extra_fields) : NULL;
     if($premium_extra_fields_object)
     {
-        $premium_extra_fields_object->stamp_duty = $premium_record->stamp_duty;
+        $premium_extra_fields_object->stamp_duty_amount = $premium_record->stamp_duty_amount;
     }
 
     /**

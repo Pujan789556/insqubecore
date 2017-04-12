@@ -79,8 +79,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			 */
 			$premium_record = (object)[
 				'policy_id' 	=> $record->id,
-				'total_amount' 	=> $record->total_amount,
-				'stamp_duty' 	=> $record->stamp_duty,
+				'total_premium_amount' 	=> $record->total_premium_amount,
+				'stamp_duty_amount' 	=> $record->stamp_duty_amount,
 				'attributes'	=> $record->premium_attributes
 			];
 			$this->load->view('premium/_card_overview', ['premium_record' => $premium_record, 'policy_record' => $record]);

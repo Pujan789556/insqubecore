@@ -256,6 +256,14 @@ defined('IQB_RI_TREATY_TYPES')    	OR define('IQB_RI_TREATY_TYPES', 	[
 ]);
 
 
+/*
+|--------------------------------------------------------------------------
+| ACCOUNT CONSTANTS
+|--------------------------------------------------------------------------
+*/
 
+// ACCOUNT DUTY AND TAX IDS
+defined('IQB_AC_DUTY_AND_TAX_ID_VAT')    			OR define('IQB_AC_DUTY_AND_TAX_ID_VAT',	1);
+defined('IQB_AC_DUTY_AND_TAX_ID_ON_PURCHASE')   	OR define('IQB_AC_DUTY_AND_TAX_ID_ON_PURCHASE',	2);
 
 

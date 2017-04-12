@@ -55,19 +55,19 @@ $attributes = $premium_record->attributes ? json_decode($premium_record->attribu
                         <table class="table no-margin table-bordered table-condensed">
                             <tr>
                                 <td width="80%" class="text-right"><strong>जम्मा</strong></td>
-                                <td class="text-right"><strong><?php echo number_format((float)$premium_record->total_amount, 2, '.', '')?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format((float)$premium_record->total_premium_amount, 2, '.', '')?></strong></td>
                             </tr>
                             <tr>
                                 <td class="text-right"><strong>टिकट दस्तुर</strong></td>
-                                <td class="text-right"><strong><?php echo $premium_record->stamp_duty;?></strong></td>
+                                <td class="text-right"><strong><?php echo $premium_record->stamp_duty_amount;?></strong></td>
                             </tr>
                             <tr>
                                 <td class="text-right"><strong>मु. अ. क. (VAT)</strong></td>
-                                <td class="text-right"><strong><?php echo number_format( (float)($premium_record->stamp_duty + $premium_record->total_amount) * 0.13, 2, '.', '');?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format( (float)($premium_record->stamp_duty_amount + $premium_record->total_premium_amount) * 0.13, 2, '.', '');?></strong></td>
                             </tr>
                             <tr>
                                 <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                                <td class="text-right"><strong><?php echo number_format( (float)($premium_record->stamp_duty + $premium_record->total_amount) * 1.13, 2, '.', '');?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format( (float)($premium_record->stamp_duty_amount + $premium_record->total_premium_amount) * 1.13, 2, '.', '');?></strong></td>
                             </tr>
                         </table>
                     </td>

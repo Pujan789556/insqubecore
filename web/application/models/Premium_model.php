@@ -11,7 +11,7 @@ class Premium_model extends MY_Model
 
     protected $log_user = true;
 
-    protected $protected_attributes = ['id'];
+    protected $protected_attributes = ['policy_id'];
 
     // protected $before_insert = ['prepare_contact_data', 'prepare_customer_defaults', 'prepare_customer_fts_data'];
     // protected $before_update = ['prepare_contact_data', 'prepare_customer_fts_data'];
@@ -19,10 +19,11 @@ class Premium_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "policy_id", "total_amount", "comissionable_amount", "stamp_duty",  "attributes", "extra_fields", "remarks", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ['sum_insured_amount', 'total_premium_amount', 'pool_premium_amount', 'comissionable_amount', 'stamp_duty_amount', 'vat_amount', 'attributes', 'extra_fields', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
+    protected $skip_validation = TRUE; // No need to validate on Model
 
     /**
      * Protect Default Records?
@@ -51,16 +52,51 @@ class Premium_model extends MY_Model
 
     public function reset($policy_id)
     {
-        $reset_data = [
-            'total_amount'      => 0.00,
-            'comissionable_amount'  => NULL,
-            'stamp_duty'        => 0.00,
-            'attributes'        => NULL,
-            'extra_fields'      => NULL,
-            'remarks'           => NULL
-        ];
+        // !!!NOTE: 'sum_insured_amount' can not be emptied as it is updated when policy is updated
+
+        $numeric_fields  = ['total_premium_amount', 'pool_premium_amount', 'comissionable_amount', 'stamp_duty_amount', 'vat_amount'];
+        $nullable_fields = ['attributes', 'extra_fields', 'remarks'];
+
+        $reset_data = [];
+
+        foreach ($numeric_fields as $field)
+        {
+             $reset_data[$field] = 0;
+        }
+
+        foreach ($nullable_fields as $field)
+        {
+             $reset_data[$field] = NULL;
+        }
         return $this->db->where('policy_id', $policy_id)
                  ->update($this->table_name, $reset_data);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Save a policy premium
+     *
+     * @param int $policy_id
+     * @param array $data
+     * @return bool
+     */
+    public function save($policy_id, $data)
+    {
+
+        /**
+         * Let's Build computable fields
+         *      - vat_amount
+         */
+        $this->load->model('ac_duties_and_tax_model');
+        $vat_config_record = $this->ac_duties_and_tax_model->get(IQB_AC_DUTY_AND_TAX_ID_VAT);
+        $vat_amount = $data['total_premium_amount'] * ($vat_config_record->rate/100.00);
+
+        $data['vat_amount'] = $vat_amount;
+
+        // Let's Update the premium
+        return parent::update_by(['policy_id' => $policy_id], $data);
+
     }
 
     // --------------------------------------------------------------------
