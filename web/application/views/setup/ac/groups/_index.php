@@ -18,6 +18,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						?>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
+						<a href="<?php echo site_url('ac_account_groups/chart/');?>"
+								title="View Chart of Accounts"
+								data-toggle="tooltip"
+								class="btn btn-primary btn-round"
+							><i class="fa fa-sitemap"></i> Chart</a>
 						<a href="#"
 							title="Add New Account Group"
 							data-toggle="tooltip"
@@ -36,7 +41,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/ac_account_groups/_list');
+				$this->load->view('setup/ac/groups/_list');
 				?>
 			</div>
 			<!-- /.box-body -->

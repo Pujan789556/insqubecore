@@ -60,7 +60,7 @@ class Ac_account_groups extends MY_Controller
 		 * Normal Form Render
 		 */
 		// this will generate cache name: mc_master_departments_all
-		$records = $this->ac_account_group_model->get_all();
+		$records = $this->ac_account_group_model->rows();
 
 		$this->template->partial(
 							'content_header',
@@ -69,8 +69,66 @@ class Ac_account_groups extends MY_Controller
 								'content_header' => 'Manage Account Groups',
 								'breadcrumbs' => ['Master Setup' => NULL, 'Account Groups' => NULL]
 						])
-						->partial('content', 'setup/ac_account_groups/_index', compact('records'))
+						->partial('content', 'setup/ac/groups/_index', compact('records'))
 						->render($this->data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Chart of Account
+	 *
+	 * Render the Chart of Account
+	 *
+	 * @return type
+	 */
+	function chart($action='view')
+	{
+		/**
+		 * Get the Chart of account tree
+		 */
+		$records = $this->ac_account_group_model->tree(NULL, ' | ---');
+
+
+		if($action == 'view')
+		{
+			$this->template->partial(
+								'content_header',
+								'templates/_common/_content_header',
+								[
+									'content_header' => 'Chart of Accounts',
+									'breadcrumbs' => ['Master Setup' => NULL, 'Account Groups' => 'ac_account_groups']
+							])
+							->partial('content', 'setup/ac/groups/_chart', compact('records'))
+							->render($this->data);
+		}
+		else if($action == 'print')
+		{
+
+			if( $records )
+			{
+				$this->load->library('pdf');
+		        $mpdf = $this->pdf->load();
+		        $mpdf->SetMargins(10, 10, 5);
+		        $mpdf->margin_header = 0;
+		        $mpdf->margin_footer = 2;
+		        $mpdf->SetProtection(array('print'));
+		        $mpdf->SetTitle("Chart of Accounts");
+		        $mpdf->SetAuthor($this->settings->orgn_name_en);
+
+
+		        $mpdf->showWatermarkText = true;
+		        $mpdf->watermark_font = 'DejaVuSansCondensed';
+		        $mpdf->watermarkTextAlpha = 0.1;
+		        $mpdf->SetDisplayMode('fullpage');
+
+		        $html = $this->load->view('setup/ac/groups/_chart_data', compact('records'), TRUE);
+		        $mpdf->WriteHTML($html);
+
+		        $mpdf->Output('chart-of-accounts.pdf', 'I');
+			}
+		}
+
 	}
 
 	// --------------------------------------------------------------------
@@ -84,18 +142,12 @@ class Ac_account_groups extends MY_Controller
 	{
 		$record = NULL;
 
-		// Form Submitted? Save the data
-		$json_data = $this->_save('add');
+		$form_data = [
+			'form_elements' => $this->ac_account_group_model->validation_rules['add'],
+			'record' 		=> $record
+		];
 
-		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac_account_groups/_form',
-			[
-				'form_elements' => $this->ac_account_group_model->validation_rules,
-				'record' 		=> $record
-			], TRUE);
-
-		// Return HTML
-		$this->template->json($json_data);
+		return $this->_save('add', $form_data, $record);
 	}
 
 	// --------------------------------------------------------------------
@@ -117,19 +169,62 @@ class Ac_account_groups extends MY_Controller
 			$this->template->render_404();
 		}
 
-		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record);
+		$form_data = [
+			'form_elements' => $this->ac_account_group_model->validation_rules['edit'],
+			'record' 		=> $record
+		];
 
+		return $this->_save('edit', $form_data, $record);
+	}
 
-		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac_account_groups/_form',
-			[
-				'form_elements' => $this->ac_account_group_model->validation_rules,
-				'record' 		=> $record
-			], TRUE);
+	// --------------------------------------------------------------------
 
-		// Return HTML
-		$this->template->json($json_data);
+	/**
+	 * Move a  Record
+	 *
+	 * @return void
+	 */
+	public function move($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->ac_account_group_model->row($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		$form_data = [
+			'form_elements' => $this->ac_account_group_model->validation_rules['move'],
+			'record' 		=> $record
+		];
+
+		return $this->_save('move', $form_data, $record);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Move a  Record
+	 *
+	 * @return void
+	 */
+	public function order($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->ac_account_group_model->row($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		$form_data = [
+			'form_elements' => $this->ac_account_group_model->validation_rules['order'],
+			'record' 		=> $record
+		];
+
+		return $this->_save('order', $form_data, $record);
 	}
 
 	// --------------------------------------------------------------------
@@ -141,15 +236,15 @@ class Ac_account_groups extends MY_Controller
 	 * @param object|null $record Record Object or NULL
 	 * @return array
 	 */
-	private function _save($action, $record = NULL)
+	private function _save($action, $form_data, $record = NULL)
 	{
 		// Valid action?
-		if( !in_array($action, array('add', 'edit')))
+		if( !in_array($action, array('add', 'edit', 'move', 'order')))
 		{
-			return [
+			return $this->template->json([
 				'status' => 'error',
 				'message' => 'Invalid action!'
-			];
+			]);
 		}
 
 		/**
@@ -161,7 +256,7 @@ class Ac_account_groups extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->ac_account_group_model->validation_rules;
+			$rules = $form_data['form_elements'];
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
@@ -171,21 +266,29 @@ class Ac_account_groups extends MY_Controller
 				if($action === 'add')
 				{
 					// @NOTE: Activity Log will be automatically inserted
-					$done = $this->ac_account_group_model->insert($data, TRUE); // No Validation on Model
+					$done = $this->ac_account_group_model->add($data); // No Validation on Model
 
 					// Activity Log
 					$done ? $this->ac_account_group_model->log_activity($done, 'C'): '';
 				}
-				else
+				else if($action === 'edit' )
 				{
 					// Now Update Data
 					$done = $this->ac_account_group_model->update($record->id, $data, TRUE) && $this->ac_account_group_model->log_activity($record->id, 'E');
 				}
+				else if($action === 'move' ){
+					// Now Update Data
+					$done = $this->ac_account_group_model->move($record->id, $data);
+				}
+				else if($action === 'order' ){
+					// Now Update Data
+					$done = $this->ac_account_group_model->order($record->id, $data);
+				}
 
 				if(!$done)
 				{
-					$status = 'error';
 					$message = 'Could not update.';
+					$status = 'error';
 				}
 				else
 				{
@@ -195,8 +298,8 @@ class Ac_account_groups extends MY_Controller
 			}
 			else
 			{
+				$message = validation_errors();
 				$status = 'error';
-				$message = 'Validation Error.';
 			}
 
 			// Success HTML
@@ -205,49 +308,55 @@ class Ac_account_groups extends MY_Controller
 			{
 				if($action === 'add')
 				{
-					$records = $this->ac_account_group_model->get_all();
-					$success_html = $this->load->view('setup/ac_account_groups/_list', ['records' => $records], TRUE);
+					$records = $this->ac_account_group_model->rows();
+					$success_html = $this->load->view('setup/ac/groups/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->ac_account_group_model->row($record->id);
-					$success_html = $this->load->view('setup/ac_account_groups/_single_row', ['record' => $record], TRUE);
+					$success_html = $this->load->view('setup/ac/groups/_single_row', ['record' => $record], TRUE);
 				}
+
+
+				$return_data = [
+					'status' 		=> $status,
+					'message' 		=> $message,
+					'reloadForm' 	=> false,
+					'hideBootbox' 	=> true,
+					'updateSection' => true,
+					'updateSectionData'	=> [
+						'box' 	=> $action === 'add'
+									? '#iqb-data-list'
+									: '#_data-row-' . $record->id,
+						'html' 	=> $success_html,
+
+						//
+						// How to Work with success html?
+						// Jquery Method 	html|replaceWith|append|prepend etc.
+						//
+						'method' 	=> $action === 'add' ? 'html' : 'replaceWith'
+					]
+				];
+
+				$this->template->json($return_data);
+
 			}
-
-			$return_data = [
-				'status' 		=> $status,
-				'message' 		=> $message,
-				'reloadForm' 	=> $status === 'error',
-				'hideBootbox' 	=> $status === 'success',
-				'updateSection' => $status === 'success',
-				'updateSectionData'	=> $status === 'success'
-										? 	[
-												'box' 	=> $action === 'add'
-															? '#iqb-data-list'
-															: '#_data-row-' . $record->id,
-												'html' 	=> $success_html,
-
-												//
-												// How to Work with success html?
-												// Jquery Method 	html|replaceWith|append|prepend etc.
-												//
-												'method' 	=> $action === 'add' ? 'html' : 'replaceWith'
-											]
-										: NULL,
-				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/ac_account_groups/_form',
-											[
-												'form_elements' => $this->ac_account_group_model->validation_rules,
-												'record' 		=> $record
-											], TRUE)
-									: 	null
-
-			];
+			else
+			{
+				return $this->template->json([
+					'status' => 'error',
+					'message' => $message
+				]);
+			}
 		}
 
-		return $return_data;
+		// Render Form
+		$json_data['form'] = $this->load->view('setup/ac/groups/_form', $form_data, TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+
 	}
 
 	// --------------------------------------------------------------------
@@ -274,81 +383,63 @@ class Ac_account_groups extends MY_Controller
 	        return TRUE;
 		}
 
-	// --------------------------------------------------------------------
-
-		/**
-		 * Callback Validation Function - Valid Minimum Range?
-		 *
-		 * 1. Range Must Be Unique and fall under parent range if any.
-		 *
-		 * @param integer $range_min
-		 * @param integer|null $id
-		 * @return bool
-		 */
-		public function _cb_valid_range_min($range_min, $id=NULL)
-		{
-			$range_min 	= (int)$range_min;
-	    	$id   		= $id ? (int)$id : (int)$this->input->post('id');
-	    	$parent_id 	= (int)$this->input->post('parent_id');
-
-	    	// Check Duplicate
-	        if( $this->ac_account_group_model->check_duplicate(['range_min' => $range_min], $id))
-	        {
-	            $this->form_validation->set_message('_cb_valid_range_min', 'The %s already exists.');
-	            return FALSE;
-	        }
-
-	    	// First Check if Valid Range
-	    	if( $parent_id && !$this->ac_account_group_model->valid_range($parent_id, $range_min) )
-	    	{
-	    		$this->form_validation->set_message('_cb_valid_range_min', 'The %s does not fall under selected parent range.');
-	            return FALSE;
-	    	}
-
-	        return TRUE;
-		}
-
-	// --------------------------------------------------------------------
-
-		/**
-		 * Callback Validation Function - Valid Maximum Range?
-		 *
-		 * 1. Range Must Be Unique and fall under parent range if any.
-		 *
-		 * @param integer $range_max
-		 * @param integer|null $id
-		 * @return bool
-		 */
-		public function _cb_valid_range_max($range_max, $id=NULL)
-		{
-			$range_max 	= (int)$range_max;
-	    	$id   		= $id ? (int)$id : (int)$this->input->post('id');
-	    	$parent_id 	= (int)$this->input->post('parent_id');
-	    	$range_min 	= (int)$this->input->post('range_min');
-
-	    	// Range Max > Range Min
-	    	if($range_max <= $range_min){
-	    		$this->form_validation->set_message('_cb_valid_range_max', 'The %s  field must contain a number greater than Account Number Min.');
-	            return FALSE;
-	    	}
-
-	    	// Check Duplicate
-	        if( $this->ac_account_group_model->check_duplicate(['range_max' => $range_max], $id))
-	        {
-	            $this->form_validation->set_message('_cb_valid_range_max', 'The %s already exists.');
-	            return FALSE;
-	        }
-
-	    	// First Check if Valid Range
-	    	if( $parent_id && !$this->ac_account_group_model->valid_range($parent_id, $range_max) )
-	    	{
-	    		$this->form_validation->set_message('_cb_valid_range_max', 'The %s does not fall under selected parent range.');
-	            return FALSE;
-	    	}
-	        return TRUE;
-		}
-
-
     // --------------------------------------------------------------------
+
+
+	public function delete($type, $id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->ac_account_group_model->find($id);
+
+		if( !$record || !in_array($type, ['node', 'subtree']) )
+		{
+			$this->template->render_404();
+		}
+
+		$data = [
+			'status' 	=> 'error',
+			'message' 	=> 'You cannot delete the default records.'
+		];
+		/**
+		 * Safe to Delete?
+		 */
+		if( !safe_to_delete( 'Ac_account_group_model', $id ) )
+		{
+			return $this->template->json($data);
+		}
+
+		// Admin Constraint?
+		$done = $this->ac_account_group_model->delete_nodes($record->id, $type);
+		if($done)
+		{
+			$records = $this->ac_account_group_model->rows();
+			$success_html = $this->load->view('setup/ac/groups/_list', ['records' => $records], TRUE);
+
+			// Reload the view
+			$data = [
+				'status' 	=> 'success',
+				'message' 	=> 'Successfully deleted!',
+				'multipleUpdate' => [
+					[
+						'box' 		=> '#iqb-data-list',
+						'method' 	=> 'html',
+						'html' 		=> $success_html
+					]
+				]
+			];
+		}
+		else
+		{
+			$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be deleted. It might have references to other module(s)/component(s).'
+			];
+		}
+		return $this->template->json($data);
+	}
+
+	// --------------------------------------------------------------------
+
 
 }

@@ -11,7 +11,8 @@ class Ac_account_group_model extends MY_Model
 
     protected $log_user = true;
 
-    protected $protected_attributes = ['id', 'parent_id', 'range_min', 'range_max'];
+    // protected $protected_attributes = ['id', 'parent_id', 'range_min', 'range_max'];
+    protected $protected_attributes = ['id'];
 
     // protected $before_insert = ['capitalize_code'];
     // protected $before_update = ['capitalize_code'];
@@ -19,7 +20,7 @@ class Ac_account_group_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'parent_id', 'range_min', 'range_max', 'name_en', 'name_np', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'lft', 'rgt', 'parent_id', 'name', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -27,8 +28,8 @@ class Ac_account_group_model extends MY_Model
     /**
      * Protect Default Records?
      */
-    public static $protect_default = TRUE;
-    public static $protect_max_id = 12; // Prevent first 12 records from deletion.
+    public static $protect_default = FALSE;
+    public static $protect_max_id = 500; // Prevent first 500 records from deletion.
 
 	// --------------------------------------------------------------------
 
@@ -43,6 +44,8 @@ class Ac_account_group_model extends MY_Model
 
         // Set validation rules
         $this->validation_rules();
+
+        // $this->clear_cache();
     }
 
     // ----------------------------------------------------------------
@@ -54,197 +57,294 @@ class Ac_account_group_model extends MY_Model
      */
     public function validation_rules()
     {
-        $dropdown_parent = $this->dropdown_parent();
-
+        $dropdown_parent = $this->dropdown_tree();
         $this->validation_rules = [
-            [
-                'field' => 'parent_id',
-                'label' => 'Parent Group',
-                'rules' => 'trim|integer|max_length[11]|in_list[0,' . implode(',', array_keys($dropdown_parent)) . ']|callback__cb_valid_parent',
-                '_type'     => 'dropdown',
-                '_data'     => IQB_ZERO_SELECT + $dropdown_parent,
-                '_required' => true
+            'add' => [
+                [
+                    'field' => 'parent_id',
+                    'label' => 'Parent Group',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($dropdown_parent)) . ']|callback__cb_valid_parent',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_ZERO_SELECT + $dropdown_parent,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'name',
+                    'label' => 'Group Name',
+                    'rules' => 'trim|required|max_length[80]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
             ],
-            [
-                'field' => 'name_en',
-                'label' => 'Account Group Name (EN)',
-                'rules' => 'trim|required|max_length[80]',
-                '_type'     => 'text',
-                '_required' => true
+            'edit' => [
+                [
+                    'field' => 'name',
+                    'label' => 'Group Name',
+                    'rules' => 'trim|required|max_length[80]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
             ],
-            [
-                'field' => 'name_np',
-                'label' => 'Account Group Name (NP)',
-                'rules' => 'trim|max_length[100]',
-                '_type'     => 'text',
-                '_required' => false
+            'move' => [
+                [
+                    'field' => 'parent_id',
+                    'label' => 'Parent Group',
+                    'rules' => 'trim|required|integer|max_length[11]|in_list[' . implode(',', array_keys($dropdown_parent)) . ']|callback__cb_valid_parent',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_ZERO_SELECT + $dropdown_parent,
+                    '_required' => true
+                ]
             ],
-            [
-                'field' => 'flag_leaf',
-                'label' => 'Set as Leaf',
-                'rules' => 'trim|integer|in_list[1]',
-                '_type' => 'switch',
-                '_checkbox_value' => '1',
-                '_help_text' => 'Real transactional account exists under this group.'
-            ],
-            [
-                'field' => 'range_min',
-                'label' => 'Account Number Min',
-                'rules' => 'trim|required|integer|max_length[6]|callback__cb_valid_range_min',
-                '_type'     => 'text',
-                '_required' => true
-            ],
-            [
-                'field' => 'range_max',
-                'label' => 'Account Number Max',
-                'rules' => 'trim|required|integer|max_length[6]|callback__cb_valid_range_max',
-                '_type'     => 'text',
-                '_required' => true
+            'order' => [
+                [
+                    'field' => 'parent_id',
+                    'label' => 'Parent Group',
+                    'rules' => 'trim|required|integer|max_length[11]|in_list[' . implode(',', array_keys($dropdown_parent)) . ']|callback__cb_valid_parent',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_ZERO_SELECT + $dropdown_parent,
+                    '_required' => true
+                ]
             ],
         ];
-
-
-
     }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Add a Node
+     *
+     * @param array $data
+     * @return bool
+     */
+    public function add($data)
+    {
+
+        // Step 1: Bind Parameters
+        $task_type  = 'insert';
+        $user_id    = $this->dx_auth->get_user_id();
+        $id         = NULL;
+        $parent_id  = $data['parent_id'] ? $data['parent_id'] : NULL;
+        $name       = $data['name'];
+
+        $bind_params = [$task_type, $user_id, $id, $parent_id, $name ];
+        $sql = "CALL `r_acg_tree_traversal`(?, ?, ?, ?, ?)";
+
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $id                 = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            $result = mysqli_store_procedure('insert', $sql, $bind_params);
+
+            if($result)
+            {
+                $id = $result[0]->id;
+            }
+
+            if($id)
+            {
+                // Log Activity
+                $this->log_activity($id, 'C');
+
+                // Clear Cache
+                $this->clear_cache();
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $id = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $id;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Move a Node
+     *
+     * @param array $data
+     * @return bool
+     */
+    public function move($id, $data)
+    {
+
+        // Step 1: Bind Parameters
+        $task_type  = 'move';
+        $user_id    = $this->dx_auth->get_user_id();
+        $id         = (int)$id;
+        $parent_id  = (int)$data['parent_id'];
+        $name       = NULL;
+
+        $bind_params = [$task_type, $user_id, $id, $parent_id, $name ];
+        $sql = "CALL `r_acg_tree_traversal`(?, ?, ?, ?, ?)";
+
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            $result = mysqli_store_procedure('update', $sql, $bind_params);
+
+            if($result)
+            {
+                // Log Activity
+                $this->log_activity($id, 'E');
+
+                // Clear Cache
+                $this->clear_cache();
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $id = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $id;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Order a Node
+     *
+     * @param array $data
+     * @return bool
+     */
+    public function order($id, $data)
+    {
+
+        // Step 1: Bind Parameters
+        $task_type  = 'order';
+        $user_id    = $this->dx_auth->get_user_id();
+        $id         = (int)$id;
+        $parent_id  = (int)$data['parent_id'];
+        $name       = NULL;
+
+        $bind_params = [$task_type, $user_id, $id, $parent_id, $name ];
+        $sql = "CALL `r_acg_tree_traversal`(?, ?, ?, ?, ?)";
+
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            $result = mysqli_store_procedure('update', $sql, $bind_params);
+
+            if($result)
+            {
+                // Log Activity
+                $this->log_activity($id, 'E');
+
+                // Clear Cache
+                $this->clear_cache();
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $id = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $id;
+    }
+
 
     // --------------------------------------------------------------------
 
     /**
      * Get Dropdown List
      */
-    public function dropdown_tree()
+    public function dropdown_tree($start_at=null)
     {
+
+        $cache_name = $start_at ? 'ac_ag_dd_tree_' . $start_at : 'ac_ag_dd_tree_full';
+
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $records = $this->get_all();
-
-        $list = [];
-        foreach ($records as $record)
+        $dropdown_tree = $this->get_cache($cache_name);
+        if(!$dropdown_tree)
         {
-            if($record->parent_id)
+            // Get Tree from DB
+            $records = $this->tree($start_at);
+            $dropdown_tree = [];
+            foreach($records as $record)
             {
-                $list['p_'.$record->parent_id]['children'][] = $record;
+                $dropdown_tree["{$record->id}"] = $record->name;
             }
-            else
-            {
-                $list['p_'.$record->id]['parent'] = $record;
-            }
+
+            $this->write_cache($dropdown_tree, $cache_name, CACHE_DURATION_DAY);
         }
 
-        $dropdown_tree = [];
-
-        foreach ($list as $p)
-        {
-            $parent     = $p['parent'];
-            $children   = $p['children'] ?? [];
-            $dropdown_tree["{$parent->id}"] = $parent->name_en . " [{$parent->range_min}-{$parent->range_max}]";
-
-            foreach($children as $child)
-            {
-                $dropdown_tree["{$child->id}"] = "|--- " . $child->name_en . " [{$child->range_min}-{$child->range_max}]";
-            }
-
-        }
         return $dropdown_tree;
     }
 
-    // --------------------------------------------------------------------
-
-    /**
-     * Get Parent Dropdown List
-     */
-    public function dropdown_parent()
-    {
-        $cache_name = 'ac_account_group_parent';
-        /**
-         * Get Cached Result, If no, cache the query result
-         */
-        $list = $this->get_cache($cache_name);
-        if(!$list)
-        {
-            $records = $this->db->select('`id`, `range_min`, `range_max`, `name_en`, `name_np`')
-                        ->from($this->table_name)
-                        ->where('parent_id', 0)
-                        ->get()->result();
-
-            $list = [];
-            foreach($records as $record)
-            {
-                $list["{$record->id}"] = "[{$record->range_min}-{$record->range_max}] " . $record->name_en;
-            }
-
-            $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
-        }
-
-        return $list;
-    }
 
     // --------------------------------------------------------------------
 
-    /**
-     * Get Parent Dropdown List
-     */
-    public function dropdown_children($parent_id)
+    public function tree($exclude=null, $stuff=' | ---')
     {
-        $cache_name = 'ac_account_group_children_' . $parent_id;
+
         /**
-         * Get Cached Result, If no, cache the query result
+         * Step 1: Prepare Bind Query & Params
          */
-        $list = $this->get_cache($cache_name);
-        if(!$list)
-        {
-            $records = $this->db->select('`id`, `range_min`, `range_max`, `name_en`, `name_np`')
-                        ->from($this->table_name)
-                        ->where('parent_id', $parent_id)
-                        ->get()->result();
+        $exclude = $exclude ? (int)$exclude : NULL;
+        $bind_params  = [$exclude, $stuff];
+        $sql = "CALL `r_acg_return_tree`(?,?)";
 
-            $list = [];
-            foreach($records as $record)
-            {
-                $list["{$record->id}"] = "[{$record->range_min}-{$record->range_max}] " . $record->name_en;
-            }
-
-            $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
-        }
-
-        return $list;
+        $result = mysqli_store_procedure('select', $sql, $bind_params);
+        return $result;
     }
+
 
     // ----------------------------------------------------------------
 
-    public function valid_range($id, $ac_number)
-    {
-        $valid = FALSE;
-
-        $record = parent::find($id);
-        if($record)
-        {
-            $valid = $ac_number >= $record->range_min && $ac_number <= $record->range_max;
-        }
-        return $valid;
-    }
-
-    // ----------------------------------------------------------------
-
-    public function get_all()
+    public function rows()
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('ac_ag_all');
+        $list = $this->get_cache('ac_ag_rows');
         if(!$list)
         {
-            // $list = $this->db->select('`id`, `parent_id`, `range_min`, `range_max`, `name_en`, `name_np`')
-            //             ->from($this->table_name)
-            //             ->get()->result();
+            $this->_row_select();
+            $list = $this->db->get()->result();
 
-            $list = $this->db->select('AG.`id`, AG.`parent_id`, AG.`range_min`, AG.`range_max`, AG.`name_en`, AG.`name_np`, AGP.`name_en` as parent_name_en, AGP.`name_np` as parent_name_np')
-                 ->from($this->table_name . ' as AG')
-                 ->join( $this->table_name . ' AGP', 'AGP.id = AG.parent_id', 'left')
-                 ->get()->result();
-
-            $this->write_cache($list, 'ac_ag_all', CACHE_DURATION_DAY);
+            $this->write_cache($list, 'ac_ag_rows', CACHE_DURATION_DAY);
         }
         return $list;
     }
@@ -253,11 +353,18 @@ class Ac_account_group_model extends MY_Model
 
     public function row($id)
     {
-        return $this->db->select('AG.`id`, AG.`parent_id`, AG.`range_min`, AG.`range_max`, AG.`name_en`, AG.`name_np`, AGP.`name_en` as parent_name_en, AGP.`name_np` as parent_name_np')
+        $this->_row_select();
+        return $this->db->where('AG.id', $id)
+                        ->get()->row();
+    }
+
+    // ----------------------------------------------------------------
+
+    private function _row_select()
+    {
+        $this->db->select('AG.id, AG.parent_id, AG.name, AG.lft, AG.rgt, AGP.name as parent_name')
                  ->from($this->table_name . ' as AG')
-                 ->join( $this->table_name . ' AGP', 'AGP.id = AG.parent_id', 'left')
-                 ->where('AG.id', $id)
-                 ->get()->row();
+                 ->join($this->table_name . ' as AGP', 'AGP.id = AG.parent_id', 'left');
     }
 
     // ----------------------------------------------------------------
@@ -273,25 +380,6 @@ class Ac_account_group_model extends MY_Model
                         ->count_all_results($this->table_name);
     }
 
-    // --------------------------------------------------------------------
-
-    /**
-     * Get Dropdown List
-     */
-    public function dropdown()
-    {
-        /**
-         * Get Cached Result, If no, cache the query result
-         */
-        $records = $this->get_all();
-        $list = [];
-        foreach($records as $record)
-        {
-            $list["{$record->id}"] = "[{$record->range_min}-{$record->range_max}] " . $record->name_en;
-        }
-        return $list;
-    }
-
 	// --------------------------------------------------------------------
 
     /**
@@ -300,9 +388,8 @@ class Ac_account_group_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'ac_ag_all',
-            'ac_account_group_parent',
-            'ac_account_group_children_*'
+            'ac_ag_rows',
+            'ac_ag_dd_tree_*',
         ];
         // cache name without prefix
         foreach($cache_names as $cache)
@@ -314,9 +401,55 @@ class Ac_account_group_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function delete($id = NULL)
+    public function delete_nodes($id, $type)
     {
-        return FALSE;
+        $id = intval($id);
+        if( !safe_to_delete( get_class(), $id ) )
+        {
+            return FALSE;
+        }
+
+        // Step 1: Bind Parameters
+        $task_type  = $type == 'node' ? 'delete-node' : 'delete-subtree';
+        $user_id    = $this->dx_auth->get_user_id();
+        $id         = (int)$id;
+        $parent_id  = NULL;
+        $name       = NULL;
+
+        $bind_params = [$task_type, $user_id, $id, $parent_id, $name ];
+        $sql = "CALL `r_acg_tree_traversal`(?, ?, ?, ?, ?)";
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Let's delete the record(s)
+            $result = mysqli_store_procedure('delete', $sql, $bind_params);
+
+            // Log Activity
+            $this->log_activity($id, 'D');
+
+            // Clear Cache
+            $this->clear_cache();
+
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE)
+        {
+            // get_allenerate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $status;
     }
 
     // ----------------------------------------------------------------
