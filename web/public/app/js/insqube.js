@@ -419,6 +419,11 @@ $( document ).ajaxError(function( event, request, settings ) {
  */
  $(document).on('click', '.trg-dialog-edit', function(e){
     e.preventDefault();
+
+    // Remove any opened tooltip UI (eg. edit button tooltip)
+    $('div.tooltip[role="tooltip"]').remove();
+
+
     var $this = $(this),
         url = $this.data('url'),
         title = $this.data('title'),
@@ -497,6 +502,10 @@ $( document ).ajaxError(function( event, request, settings ) {
  */
  $(document).on('click', '.trg-row-action, .trg-dialog-action', function(e){
     e.preventDefault();
+
+    // Remove any opened tooltip UI (eg. edit button tooltip)
+    $('div.tooltip[role="tooltip"]').remove();
+
     var $this = $(this),
         url = $this.data('url'),
         title = $this.data('title') || '<i class="fa fa-warning"></i>&nbsp;<strong>Confirmation Required!</strong>',
@@ -628,6 +637,15 @@ $(document).on('hidden.bs.modal', '.bootbox[role="dialog"]', function(){
         $('body').addClass('modal-open');
     }
 
-    // Destroy all tooltip if any on modal
-    $('body').tooltip('destroy');
+    // Remove any opened tooltip UI on bootbox
+    $('div.tooltip[role="tooltip"]').remove();
+});
+
+/**
+ * After Bootbox Shown?
+ */
+$(document).on('hidden.bs.modal', '.bootbox[role="dialog"]', function(){
+
+    // Remove any opened tooltip UI (eg. edit button tooltip)
+    $('div.tooltip[role="tooltip"]').remove();
 });
