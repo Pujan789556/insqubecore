@@ -32,22 +32,22 @@ if ( ! function_exists('_PO_row_snippet'))
 	function _PO_row_snippet( $record, $_flag__show_widget_row = FALSE )
 	{
 		$snippet = '';
-		switch ($record->portfolio_id)
-		{
-			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-				$snippet = _PO_MOTOR_row_snippet($record, $_flag__show_widget_row);
-				break;
 
-			default:
-				# code...
-				break;
+		/**
+		 * MOTOR
+		 * -----
+		 * For all type of motor portfolios, we have same package list
+		 */
+		if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		{
+			$snippet = _PO_MOTOR_row_snippet($record, $_flag__show_widget_row);
 		}
+
 		return $snippet;
 	}
 }
-// ------------------------------------------------------------------------
 
+// ------------------------------------------------------------------------
 
 if ( ! function_exists('_PO_select_text'))
 {
@@ -64,20 +64,21 @@ if ( ! function_exists('_PO_select_text'))
 	function _PO_select_text( $record )
 	{
 		$snippet = '';
-		switch ($record->portfolio_id)
-		{
-			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-				$snippet = _PO_MOTOR_select_text($record);
-				break;
 
-			default:
-				# code...
-				break;
+		/**
+		 * MOTOR
+		 * -----
+		 * For all type of motor portfolios, we have same package list
+		 */
+		if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		{
+			$snippet = _PO_MOTOR_select_text($record);
 		}
+
 		return $snippet;
 	}
 }
+
 // ------------------------------------------------------------------------
 
 if ( ! function_exists('_PO_validation_rules'))
@@ -94,20 +95,20 @@ if ( ! function_exists('_PO_validation_rules'))
 	function _PO_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
 		$v_rules = [];
-		switch ($portfolio_id)
-		{
-			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-				$v_rules = _PO_MOTOR_validation_rules( $formatted );
-				break;
 
-			default:
-				# code...
-				break;
+		/**
+		 * MOTOR
+		 * -----
+		 * For all type of motor portfolios, we have same package list
+		 */
+		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		{
+			$v_rules = _PO_MOTOR_validation_rules( $portfolio_id, $formatted );
 		}
 		return $v_rules;
 	}
 }
+
 // ------------------------------------------------------------------------
 
 if ( ! function_exists('_PO_attribute_form'))
@@ -123,20 +124,21 @@ if ( ! function_exists('_PO_attribute_form'))
 	function _PO_attribute_form( $portfolio_id )
 	{
 		$attribute_form = '';
-		switch ($portfolio_id)
-		{
-			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-				$attribute_form = 'objects/forms/_form_object_motor';
-				break;
 
-			default:
-				# code...
-				break;
+		/**
+		 * MOTOR
+		 * -----
+		 * For all type of motor portfolios, we have same package list
+		 */
+		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		{
+			$attribute_form = 'objects/forms/_form_object_motor';
 		}
+
 		return $attribute_form;
 	}
 }
+
 // ------------------------------------------------------------------------
 
 if ( ! function_exists('_PO_policy_package_dropdown'))
@@ -152,23 +154,52 @@ if ( ! function_exists('_PO_policy_package_dropdown'))
 	function _PO_policy_package_dropdown( $portfolio_id, $flag_blank_select = true )
 	{
 		$dropdown = [];
-		switch ($portfolio_id)
-		{
-			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-				$dropdown = _PO_MOTOR_policy_package_dropdown($flag_blank_select);
-				break;
 
-			default:
-				# code...
-				break;
+		/**
+		 * MOTOR
+		 * -----
+		 * For all type of motor portfolios, we have same package list
+		 */
+		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		{
+			$dropdown = _PO_MOTOR_policy_package_dropdown($flag_blank_select);
 		}
+
 		return $dropdown;
 	}
 }
+
 // ------------------------------------------------------------------------
 
 
+if ( ! function_exists('_PO_sum_insured_amount'))
+{
+	/**
+	 * Get Sum Insured Amount of Policy Object
+	 *
+	 * Compute sum insured amount based on object's portfolio and return.
+	 *
+	 * @param integer $portfolio_id  Portfolio ID
+	 * @param array $data 	Object Data
+	 * @return float
+	 */
+	function _PO_sum_insured_amount( $portfolio_id, $data )
+	{
+		$sum_insured_amount =  0.00;
+
+		/**
+		 * MOTOR
+		 * -----
+		 * For all type of motor portfolios, we have same package list
+		 */
+		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		{
+			$sum_insured_amount = _PO_MOTOR_sum_insured_amount($portfolio_id, $data);
+		}
+
+		return $sum_insured_amount;
+	}
+}
 
 // ------------------------------------------------------------------------
 // MOTOR OBJECT HELPERS
@@ -181,10 +212,11 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 	 *
 	 * Returns array of form validation rules for motor policy object
 	 *
+	 * @param integer $portfolio_id  Portfolio ID
 	 * @param bool $formatted  Should Return the Formatted Validation Rule ( if multi senction rules )
 	 * @return	bool
 	 */
-	function _PO_MOTOR_validation_rules( $formatted = FALSE )
+	function _PO_MOTOR_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
 		$CI =& get_instance();
 
@@ -192,19 +224,9 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 		$post = $CI->input->post();
 		$object = $post['object'] ?? NULL;
 
-		$sub_portfolio_id 	= $post['sub_portfolio_id'] ?? '';
-		$cvc_type_rules 	= 'trim|alpha|strtoupper';
-		$staff_count_rule 	= 'trim|integer|max_length[4]';
-		if($sub_portfolio_id == IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID )
-		{
-			$cvc_type_rules 	= 'trim|required|alpha|strtoupper';
-			$staff_count_rule 	= 'trim|required|integer|max_length[4]';
-		}
-
 		// CVC TYPES in_list validation
 		$cvc_type_list = array_keys( _PO_MOTOR_CVC_type_dropdown(FALSE) );
 		$cvc_type_in_list = implode(',', $cvc_type_list);
-		$cvc_type_rules .= '|in_list['.$cvc_type_in_list.']';
 
 		// To Be Intimated Set?
 		$flag_to_be_intimated = $object['flag_to_be_intimated'] ?? NULL;
@@ -222,14 +244,15 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 		/**
 		 * Object Sections
 		 * -----------------
-		 * 	a. Vehicle Section
-		 * 	b. Trailer (Private/Commercial Vehicle)
+		 * 	a. Common Vehicle Section
+		 * 	b. CVC Specific, Staff (CVC Specific)
+		 * 	c. Trailer (Private/Commercial Vehicle)
 		 */
 
 		$v_rules = [
 
-			// Vehicle Section
-			'vehicle' =>[
+			// Vehicle Common Fields
+			'vehicle-common' =>[
 				[
 			        'field' => 'object[ownership]',
 			        '_key' => 'ownership',
@@ -241,17 +264,6 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        '_required' => true
 			    ],
 			    [
-			        'field' => 'object[cvc_type]',
-			        '_key' => 'cvc_type',
-			        'label' => 'Commercial Vehicle Type',
-			        'rules' => $cvc_type_rules,
-			        '_id' 		=> '_motor-vehicle-cvc-type',
-			        '_type'     => 'dropdown',
-			        '_data' 	=> _PO_MOTOR_CVC_type_dropdown(),
-			        '_required' => true
-			    ],
-
-			    [
 			        'field' => 'object[flag_mcy_df]',
 			        '_key' => 'flag_mcy_df',
 			        'label' => 'Disabled friendly Vehicle',
@@ -261,7 +273,6 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			        '_checkbox_value' 	=> '1',
 			        '_required' => false
 			    ],
-
 			    [
 			        'field' => 'object[engine_no]',
 			        '_key' => 'engine_no',
@@ -426,13 +437,27 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			    ]
 		    ],
 
+		    // Commercial Vehicle Extra Fields
+		    'vehicle-cvc' => [
+		    	[
+			        'field' => 'object[cvc_type]',
+			        '_key' => 'cvc_type',
+			        'label' => 'Commercial Vehicle Type',
+			        'rules' => 'trim|required|alpha|strtoupper|in_list[' . $cvc_type_in_list . ']',
+			        '_id' 		=> '_motor-vehicle-cvc-type',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _PO_MOTOR_CVC_type_dropdown(),
+			        '_required' => true
+			    ],
+		    ],
+
 		    // Staff Count (Commercial Vehicle Only)
 		    'staff' => [
 		    	[
 			        'field' => 'object[staff_count]',
 			        '_key' => 'staff_count',
 			        'label' => 'Staff Count',
-			        'rules' => $staff_count_rule,
+			        'rules' => 'trim|required|integer|max_length[4]',
 			        '_id' 		=> '_motor-staff-count',
 			        '_type'     => 'text',
 			        '_default' 	=> 0,
@@ -440,7 +465,7 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 			    ],
 		    ],
 
-		    // Trailer Section
+		    // Trailer Section (Private and Commercial Vehicle Only)
 		    'trailer' => [
 		    	[
 			        'field' => 'object[trailer_price]',
@@ -455,18 +480,39 @@ if ( ! function_exists('_PO_MOTOR_validation_rules'))
 		    ],
 		];
 
+		if($portfolio_id == IQB_SUB_PORTFOLIO_MOTORCYCLE_ID)
+		{
+			$sections = ['vehicle-common'];
+		}
+		else if($portfolio_id == IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID)
+		{
+			$sections = ['vehicle-common', 'trailer'];
+		}
+		else
+		{
+			$sections = ['vehicle-cvc', 'vehicle-common', 'staff', 'trailer'];
+		}
+
+
 		// return formatted?
 		$fromatted_v_rules = [];
+		$sectioned_v_rules = [];
 		if($formatted === TRUE)
 		{
-			foreach ($v_rules as $key => $rules)
+			foreach ($sections as $section)
 			{
-				$fromatted_v_rules = array_merge($fromatted_v_rules, $rules);
+				$fromatted_v_rules = array_merge($fromatted_v_rules, $v_rules[$section]);
 			}
 			return $fromatted_v_rules;
 		}
-
-		return $v_rules;
+		else
+		{
+			foreach ($sections as $section)
+			{
+				$sectioned_v_rules[$section] = $v_rules[$section];
+			}
+			return $sectioned_v_rules;
+		}
 	}
 }
 
@@ -622,6 +668,7 @@ if ( ! function_exists('_PO_MOTOR_ec_unit_tariff_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+
 if ( ! function_exists('_PO_MOTOR_carrying_unit_dropdown'))
 {
 	/**
@@ -645,6 +692,7 @@ if ( ! function_exists('_PO_MOTOR_carrying_unit_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+
 if ( ! function_exists('_PO_MOTOR_row_snippet'))
 {
 	/**
@@ -664,6 +712,7 @@ if ( ! function_exists('_PO_MOTOR_row_snippet'))
 }
 
 // ------------------------------------------------------------------------
+
 if ( ! function_exists('_PO_MOTOR_select_text'))
 {
 	/**
@@ -688,6 +737,7 @@ if ( ! function_exists('_PO_MOTOR_select_text'))
 }
 
 // ------------------------------------------------------------------------
+
 if ( ! function_exists('_PO_MOTOR_policy_package_dropdown'))
 {
 	/**
@@ -712,9 +762,37 @@ if ( ! function_exists('_PO_MOTOR_policy_package_dropdown'))
 		return $dropdown;
 	}
 }
+
 // ------------------------------------------------------------------------
+if ( ! function_exists('_PO_MOTOR_sum_insured_amount'))
+{
+	/**
+	 * Get Sum Insured Amount of Policy Object - Motor Portfolio
+	 *
+	 * Compute sum insured amount based on object's portfolio and return.
+	 *
+	 * @param integer $portfolio_id  Portfolio ID
+	 * @param array $data 	Object Data
+	 * @return float
+	 */
+	function _PO_MOTOR_sum_insured_amount( $portfolio_id, $data )
+	{
+		$price_vehicle 		= $data['price_vehicle'] 		? floatval($data['price_vehicle']) : 0.00;
+		$price_accessories 	= $data['price_accessories'] 	? floatval($data['price_accessories']) : 0.00;
+		$trailer_price 		= isset($data['trailer_price']) ? floatval($data['trailer_price']) : 0.00;
 
+		// Common Price for all three sub-portfolios
+		$sum_insured_amount = $price_vehicle + $price_accessories;
 
+		// Add trailer price on Private Vehicle or Commercial Vehicle
+		if($portfolio_id != IQB_SUB_PORTFOLIO_MOTORCYCLE_ID )
+		{
+			$sum_insured_amount += $trailer_price;
+		}
+
+		return $sum_insured_amount;
+	}
+}
 
 
 

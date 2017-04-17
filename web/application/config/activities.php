@@ -170,7 +170,7 @@ $config['insqb_activity_types'] = [
 	 */
 	'object' => [
 		'_uri' => 'objects/',
-		'_table' => 'dt_policy_objects',
+		'_table' => 'dt_objects',
 		'_actions' => [
 			'C' => 'added',
 			'E' => 'edited',

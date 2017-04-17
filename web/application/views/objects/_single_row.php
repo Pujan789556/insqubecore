@@ -9,10 +9,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
 	<td><?php echo $record->portfolio_name;?></td>
-	<td><?php echo $record->sub_portfolio_name;?></td>
 	<td><?php echo $record->customer_name;?></td>
 	<?php echo _PO_row_snippet($record);?>
-	<td class="ins-action">
+	<td class="ins-action" width="20%">
 		<?php if( $this->dx_auth->is_authorized('objects', 'edit.object') ): ?>
 			<a href="#"
 				title="Edit Basic Information"

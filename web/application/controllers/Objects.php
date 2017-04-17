@@ -395,37 +395,24 @@ class Objects extends MY_Controller
 		}
 
 		/**
-		 * Valication Rules
-		 * --------------------------------
-		 * 	Get validation rules accordinglgy
+		 * Portfolio Record
 		 */
 		$portfolio_record 		= $this->portfolio_model->find($record->portfolio_id);
-		$sub_portfolio_record 	= NULL;
-		if( $this->object_model->is_sub_portfolio_editable($record->id) )
-		{
-			$form_elements 	= $this->object_model->form_elements('edit_new', $record->portfolio_id);
-		}
-		else
-		{
-			$form_elements 			= $this->object_model->form_elements('edit_old', $record->portfolio_id);
-			$sub_portfolio_record 	= $this->portfolio_model->find($record->sub_portfolio_id);
-		}
 
 		/**
 		 * Prepare Common Form Data to pass to form view
 		 */
 		$action_url = 'objects/edit/' . $record->id . '/' . $from_widget;
 		$form_data = [
-			'form_elements' 	=> $form_elements,
+			'form_elements' 	=> $this->object_model->validation_rules['edit'],
 			'record' 			=> $record,
 			'portfolio_record' 	=> $portfolio_record,
-			'sub_portfolio_record' 	=> $sub_portfolio_record,
 			'action' 			=> 'edit',
 			'action_url' 		=> $action_url,
 			'from_widget' 		=> $from_widget,
 
 			// Attribute Elements
-			'html_form_attribute_components' => $this->gaf($record->portfolio_id, 'html', json_decode($record->attributes))
+			'html_form_attribute_components' => $this->get_attribute_form($record->portfolio_id, 'html', json_decode($record->attributes))
 		];
 
 		// Form Submitted? Save the data else load the form
@@ -448,7 +435,7 @@ class Objects extends MY_Controller
 	 *
 	 * @return void
 	 */
-	public function add( $customer_id, $from_widget='n', $portfolio_id = 0, $sub_portfolio_id = 0 )
+	public function add( $customer_id, $from_widget='n', $portfolio_id = 0)
 	{
 		/**
 		 * Check Permissions
@@ -466,8 +453,8 @@ class Objects extends MY_Controller
 
 		// Valid Customer Record ?
 		$this->load->model('customer_model');
-		$customer_id = (int)$customer_id;
-		$customer_record = $this->customer_model->find($customer_id);
+		$customer_id 		= (int)$customer_id;
+		$customer_record 	= $this->customer_model->find($customer_id);
 		if(!$customer_record)
 		{
 			$this->template->render_404();
@@ -476,21 +463,18 @@ class Objects extends MY_Controller
 		$record = NULL;
 
 		/**
-		 * If we are calling from Widget, We need to have both portfolio and sub-portfolio
+		 * If we are calling from Widget, We must have portfolio
 		 */
 		$portfolio_record 		= NULL;
-		$sub_portfolio_record 	= NULL;
 		$portfolio_id 			= (int)$portfolio_id;
-		$sub_portfolio_id 		= (int)$sub_portfolio_id;
 		if( $from_widget === 'y' )
 		{
 			$portfolio_record 		= $this->portfolio_model->find($portfolio_id);
-			$sub_portfolio_record 	= $this->portfolio_model->find($sub_portfolio_id);
 
 			// Both record must exist and MUST match parent child relation
-			if( !$portfolio_record || !$sub_portfolio_record || $portfolio_record->id != $sub_portfolio_record->parent_id )
+			if( !$portfolio_record )
 			{
-				$this->template->render_404('', 'Please supply a valid Portfolio & its Sub-Portfolio');
+				$this->template->render_404('', 'Please supply a valid Portfolio');
 			}
 		}
 
@@ -498,26 +482,17 @@ class Objects extends MY_Controller
 		$html_form_attribute_components = '';
 		if($from_widget === 'y')
 		{
-			$html_form_attribute_components = $this->gaf($portfolio_id, 'html');
-			$form_elements = $this->object_model->form_elements('add_widget', $portfolio_id);
-		}
-		else
-		{
-			// needs for sub-portfolio listing if form is posted
-			$portfolio_id = $this->input->post('portfolio_id') ? (int)$this->input->post('portfolio_id') : 0;
-			$form_elements = $this->object_model->form_elements('add', $portfolio_id);
+			$html_form_attribute_components = $this->get_attribute_form($portfolio_id, 'html');
 		}
 
 		/**
 		 * Prepare Common Form Data to pass to form view
 		 */
-		$action_url = 'objects/add/' . $customer_id . '/' . $from_widget . '/' . $portfolio_id . '/' . $sub_portfolio_id;
+		$action_url = 'objects/add/' . $customer_id . '/' . $from_widget . '/' . $portfolio_id;
 		$form_data = [
-			// 'form_elements' 	=> $from_widget === 'n' ? $this->object_model->validation_rules : [],
-			'form_elements' 	=> $form_elements,
+			'form_elements' 	=> $this->object_model->validation_rules[$from_widget === 'n' ? 'add' : 'add_widget'],
 			'record' 			=> $record,
-			'portfolio_record' 		=> $portfolio_record,
-			'sub_portfolio_record' 	=> $sub_portfolio_record,
+			'portfolio_record' 	=> $portfolio_record,
 			'action' 			=> 'add',
 			'action_url' 		=> $action_url,
 			'from_widget' 		=> $from_widget,
@@ -582,13 +557,17 @@ class Objects extends MY_Controller
 				{
 					$object_data = [
 						'portfolio_id' 		=> $data['portfolio_id'],
-						'sub_portfolio_id' 	=> $data['sub_portfolio_id'],
 						'customer_id'  		=> $customer_record->id
 					];
 				}
 
 				// Object attributes
         		$object_data['attributes'] = json_encode($data['object']);
+
+        		/**
+				 * Compute Sum Insured Amount
+				 */
+        		$object_data['sum_insured_amount'] = _PO_sum_insured_amount($portfolio_id, $data['object']);
 
         		// Insert or Update?
 				if($action === 'add')
@@ -600,16 +579,6 @@ class Objects extends MY_Controller
 				}
 				else
 				{
-					/**
-					 * Sub-portfolio Change Restriction
-					 * --------------------------------
-					 * 	Only fresh object, which are not assigned to any policy can change the sub-portfolio
-					 */
-					if( $this->object_model->is_sub_portfolio_editable($record->id) )
-					{
-						$object_data['sub_portfolio_id'] = $data['sub_portfolio_id'];
-					}
-
 					// Now Update Data
 					$done = $this->object_model->update($record->id, $object_data, TRUE) && $this->object_model->log_activity($record->id, 'E');
 				}
@@ -684,7 +653,7 @@ class Objects extends MY_Controller
 			{
 				// echo validation_errors();exit;
 				$attributes = $record ? json_decode($record->attributes) : NULL;
-				$form_data['html_form_attribute_components'] = $this->gaf($portfolio_id, 'html', $attributes);
+				$form_data['html_form_attribute_components'] = $this->get_attribute_form($portfolio_id, 'html', $attributes);
 
 				return $this->template->json([
 					'status' 		=> $status,
@@ -813,7 +782,6 @@ class Objects extends MY_Controller
 	// CRUD HELPER - FUNCTIONS
 	// --------------------------------------------------------------------
 
-
 		/**
 		 * Get Attribute Form, Sub-portfolio Dropdown
 		 *
@@ -822,18 +790,13 @@ class Objects extends MY_Controller
 		 * @param object 	$attributes 	Attribute Object
 		 * @return json
 		 */
-		public function gaf( $portfolio_id, $method  = 'json', $attributes = NULL )
+		public function get_attribute_form( $portfolio_id, $method  = 'json', $attributes = NULL )
 		{
 			// Valid Record ?
 			$portfolio_id = (int)$portfolio_id;
 
 			$form_elements = _PO_validation_rules($portfolio_id);
 			$form_partial = _PO_attribute_form($portfolio_id);
-
-			// echo '<pre>'; print_r($attributes);exit;
-
-			// Subportfolio Dropdown options
-			$sub_portfolio_options = $this->portfolio_model->get_children($portfolio_id);
 
 
 			// No form Submitted?
@@ -849,7 +812,7 @@ class Objects extends MY_Controller
 			}
 
 			// Return HTML
-			$this->template->json(['html' => $html, 'spdd' => $sub_portfolio_options]);
+			$this->template->json(['html' => $html]);
 
 		}
 

@@ -101,7 +101,7 @@ class Portfolio extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/portfolio/_form',
 			[
-				'form_elements' => $this->_get_validation_rules('edit'),
+				'form_elements' => $this->portfolio_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
@@ -127,7 +127,7 @@ class Portfolio extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/portfolio/_form',
 			[
-				'form_elements' => $this->_get_validation_rules(),
+				'form_elements' => $this->portfolio_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
@@ -164,7 +164,7 @@ class Portfolio extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->_get_validation_rules($action);
+			$rules = $this->portfolio_model->validation_rules;
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
@@ -251,21 +251,6 @@ class Portfolio extends MY_Controller
 		}
 
 		return $return_data;
-	}
-
-	// --------------------------------------------------------------------
-
-	private function _get_validation_rules( $action = 'add' )
-	{
-		$rules = $this->portfolio_model->validation_rules;
-		$rules[0]['_data'] = ['' => 'Select...', '0' => 'None'] + $this->portfolio_model->dropdown_parent();
-
-		if($action == 'edit')
-		{
-			$rules[3]['rules'] = 'trim|required|max_length[15]|callback_check_duplicate';
-		}
-
-		return $rules;
 	}
 
 	// --------------------------------------------------------------------

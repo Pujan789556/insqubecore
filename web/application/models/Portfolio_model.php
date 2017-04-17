@@ -11,7 +11,7 @@ class Portfolio_model extends MY_Model
 
     protected $log_user = true;
 
-    protected $protected_attributes = ['id'];
+    protected $protected_attributes = ['id', 'parent_id', 'code'];
 
     protected $before_insert = ['capitalize_code'];
     protected $before_update = ['capitalize_code'];
@@ -22,14 +22,6 @@ class Portfolio_model extends MY_Model
     protected $fields = ["id", "parent_id", "code", "name_en", "name_np", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
-        [
-            'field' => 'parent_id',
-            'label' => 'Parent Portfolio',
-            'rules' => 'trim|required|integer|max_length[11]',
-            '_type'     => 'dropdown',
-            '_default'  => '0',
-            '_required' => true
-        ],
         [
             'field' => 'name_en',
             'label' => 'Portfolio Name(EN)',
@@ -43,14 +35,7 @@ class Portfolio_model extends MY_Model
             'rules' => 'trim|max_length[100]',
             '_type'     => 'text',
             '_required' => false
-        ],
-        [
-            'field' => 'code',
-            'label' => 'Portfolio Code',
-            'rules' => 'trim|required|alpha|max_length[15]|is_unique[master_portfolio.code]|strtoupper',
-            '_type'     => 'text',
-            '_required' => true
-        ],
+        ]
     ];
 
 
@@ -178,6 +163,36 @@ class Portfolio_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function dropdown_children_tree()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('pf_dropdown_children_tree');
+        if(!$list)
+        {
+            $records = $this->db->select('N.id, N.parent_id, N.code, N.name_en, P.name_en AS parent_name_en')
+                             ->from($this->table_name . ' AS N')
+                             ->join($this->table_name . ' AS P', 'P.id = N.parent_id', 'left')
+                             ->where('N.parent_id !=', 0)
+                             ->get()->result();
+
+            $list = [];
+            foreach($records as $record)
+            {
+                $parent_name = $record->parent_name_en;
+                $list["{$parent_name}"]["{$record->id}"] = $record->name_en;
+            }
+            if(!empty($list))
+            {
+                $this->write_cache($list, 'pf_dropdown_children_tree', CACHE_DURATION_DAY);
+            }
+        }
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
+
     public function get_code($id)
     {
         $record = $this->find($id);
@@ -253,6 +268,7 @@ class Portfolio_model extends MY_Model
     {
         $cache_names = [
             'pf_all',
+            'pf_dropdown_children_tree',
             'pf_parent_all',
             'pf_children_*',
             'portfolio_s_*'

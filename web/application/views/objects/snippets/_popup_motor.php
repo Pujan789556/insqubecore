@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Object Snippet: Motor Popover
 */
 $attributes = $record->attributes ? json_decode($record->attributes, TRUE) : NULL;
-$v_rules = _PO_MOTOR_validation_rules(TRUE);
+$v_rules = _PO_MOTOR_validation_rules($record->portfolio_id, TRUE);
 $formatted_attriutes = [];
 if($attributes)
 {

@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Object_model extends MY_Model
 {
-    protected $table_name = 'dt_policy_objects';
+    protected $table_name = 'dt_objects';
 
     protected $set_created = true;
 
@@ -14,12 +14,12 @@ class Object_model extends MY_Model
     protected $protected_attributes = ['id'];
 
     // protected $before_insert = ['prepare_contact_data', 'prepare_customer_defaults', 'prepare_customer_fts_data'];
-    // protected $before_update = ['prepare_contact_data', 'prepare_customer_fts_data'];
+    protected $before_update = ['before_update__defaults'];
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "customer_id", "portfolio_id", "sub_portfolio_id", "customer_id", "attributes", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ['id', 'portfolio_id', 'customer_id', 'attributes', 'sum_insured_amount', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -41,13 +41,15 @@ class Object_model extends MY_Model
     {
         parent::__construct();
 
-        // Set validation rules
-        // $this->validation_rules();
+
 
         // Required Helpers/Configurations
         $this->load->config('policy');
         $this->load->helper('policy');
         $this->load->helper('object');
+
+        // Set validation rules
+        $this->validation_rules();
     }
 
 
@@ -63,40 +65,22 @@ class Object_model extends MY_Model
     {
         $this->load->model('portfolio_model');
 
-        // Let's compute validtaion rule for sub-portfolio
-        // Add mode, it gets portfolio id from post and calculate in_list values,
-        // In edit, we supply $portfolio_id from method parameter which calculates in_list values
-        // Simple, isn't it?
-        $portfolio_id = $portfolio_id ?? ( $this->input->post('portfolio_id') ? (int)$this->input->post('portfolio_id') : 0 );
-        $sub_portfolio_dropdown = [];
-        $sub_portfolio_rules = 'trim|required|integer|max_length[11]';
-        if($portfolio_id)
-        {
-            $sub_dropdown           = $this->portfolio_model->dropdown_children($portfolio_id);
-            $sub_portfolio_dropdown = $this->portfolio_model->get_children($portfolio_id);
-            $sub_portfolio_rules    .= '|in_list[' . implode(',', array_keys($sub_dropdown)) . ']';
-        }
-        $portfolio_rules =[
-            'field' => 'portfolio_id',
-            'label' => 'Portfolio',
-            'rules' => 'trim|required|integer|max_length[11]',
-            '_type'     => 'dropdown',
-            '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
-            '_id'       => '_object-portfolio-id',
-            '_required' => true
-        ];
-        $sub_portfolio_rules = [
-            'field' => 'sub_portfolio_id',
-            'label' => 'Sub-Portfolio',
-            'rules' => $sub_portfolio_rules,
-            '_type'     => 'dropdown',
-            '_data'     => $sub_portfolio_dropdown,
-            '_id'       => '_object-sub-portfolio-id',
-            '_required' => true
-        ];
+        $this->validation_rules = [
+            'add' => [
+                [
+                    'field' => 'portfolio_id',
+                    'label' => 'Portfolio',
+                    'rules' => 'trim|required|integer|max_length[11]',
+                    '_type'     => 'dropdown',
+                    '_id'       => '_object-portfolio-id',
+                    '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_children_tree(),
+                    '_required' => true
+                ],
+            ],
+            'add_widget' => [],
 
-        // Set Validation Rules
-        $this->validation_rules = [$portfolio_rules, $sub_portfolio_rules];
+            'edit' => []
+        ];
     }
 
     /**
@@ -123,7 +107,7 @@ class Object_model extends MY_Model
      * @param integer $portfolio_id
      * @return array
      */
-    public function form_elements($action, $portfolio_id=0)
+    public function form_elements___DEPRICATED($action, $portfolio_id=0)
     {
         // Set validation rule if not already
         if( empty($this->validation_rules) )
@@ -152,6 +136,22 @@ class Object_model extends MY_Model
         }
 
         return $form_elements;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Before Update Trigger
+     *
+     * @param array $data
+     * @return array
+     */
+    public function before_update__defaults($data)
+    {
+        // Task 1: Remove portfoliio_id if present ( !!! IMPORTANT: Portfolio ID is not editable )
+        unset($data['portfolio_id']); //
+
+        return $data;
     }
 
     // --------------------------------------------------------------------
@@ -240,34 +240,6 @@ class Object_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Is Sub-Portfolio of this Object Editable?
-     *
-     * LOGIC:
-     *      if an object is assigned to a policy, we can not change sub-portfolio
-     *      because policy also has sub-portfolio and we can't afford to have a
-     *      sub-portfolio mismatch
-     *
-     * @NOTE: This method should be called only if an object is editable
-     *
-     * @param integer $id
-     * @return boolean
-     */
-    public function is_sub_portfolio_editable($id)
-    {
-        $_flag_editable  = TRUE;
-        $policy_record  = $this->get_latest_policy($id);
-
-        if($policy_record)
-        {
-            $_flag_editable  = FALSE;
-        }
-
-        return $_flag_editable;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
      * Get the Latest policy Record of "This Object"
      *
      * @param integer $id
@@ -277,7 +249,8 @@ class Object_model extends MY_Model
     {
         return $this->db->select('P.*')
                         ->from($this->table_name . ' as O')
-                        ->join('dt_policies P', 'P.object_id = O.id')
+                        ->join('rel_policy__object RPO', 'RPO.object_id = O.id')
+                        ->join('dt_policies P', 'P.id = RPO.policy_id')
                         ->where('O.id', $id)
                         ->order_by('P.id', 'desc')
                         ->get()->row();
@@ -377,13 +350,11 @@ class Object_model extends MY_Model
      */
     private function _prepare_row_select( )
     {
-        $this->db->select("O.id, O.portfolio_id, O.sub_portfolio_id, O.customer_id, O.attributes,
+        $this->db->select("O.id, O.portfolio_id, O.customer_id, O.attributes,
                             P.code as portfolio_code, P.name_en as portfolio_name,
-                            SP.code as sub_portfolio_code, SP.name_en as sub_portfolio_name,
                             C.full_name as customer_name")
                  ->from($this->table_name . ' as O')
                  ->join('master_portfolio P', 'P.id = O.portfolio_id')
-                 ->join('master_portfolio SP', 'SP.id = O.sub_portfolio_id')
                  ->join('dt_customers C', 'O.customer_id = C.id');
     }
 
