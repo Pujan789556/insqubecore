@@ -21,23 +21,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</div>
 			</div>
 			<!-- /.box-header -->
-			<div class="box-body table-responsive no-padding">
+			<div class="box-body table-responsive data-rows">
 				<table class="table table-hover" id="live-searchable">
 					<tr>
 						<th>ID</th>
 						<th>Name (EN)</th>
 						<th>Name(NP)</th>
 						<th>Actions</th>
-					</tr>					
+					</tr>
 					<?php
 					/**
 					 * Load Rows from View
-					 */ 
+					 */
 					foreach($records as $record)
 					{
 						$this->load->view('setup/districts/_single_row', compact('record'));
 					}
-					?>				
+					?>
 				</table>
 			</div>
 			<!-- /.box-body -->

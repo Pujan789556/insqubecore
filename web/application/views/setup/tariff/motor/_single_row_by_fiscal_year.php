@@ -9,19 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo _PO_MOTOR_ownership_dropdown(FALSE)[$record->ownership]?></td>
 	<td><?php echo _PO_MOTOR_sub_portfolio_dropdown(FALSE)[$record->sub_portfolio_code]?></td>
 	<td><?php echo $record->cvc_type ? _PO_MOTOR_CVC_type_dropdown(FALSE)[$record->cvc_type] : '-'?></td>
-	<td>
-		<?php
-		if($record->active)
-		{
-			$active_str = '<i class="fa fa-circle text-green" title="Active" data-toggle="tooltip"></i>';
-		}
-		else
-		{
-			$active_str = '<i class="fa fa-circle-thin" title="Not Active" data-toggle="tooltip"></i>';
-		}
-		echo $active_str;
-		?>
-	</td>
+	<td><?php echo  active_inactive_text($record->active);?></td>
 	<td class="ins-action">
 		<a href="#"
 			data-toggle="tooltip"

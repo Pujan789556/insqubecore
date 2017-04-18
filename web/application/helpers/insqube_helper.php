@@ -587,3 +587,35 @@ if ( ! function_exists('yes_no_text'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('active_inactive_text'))
+{
+    /**
+     * Get Yes/No Text
+     *
+     *
+     * @param char $flag
+     * @return  bool
+     */
+    function active_inactive_text( $flag = NULL, $formatted = TRUE )
+    {
+        $text = '';
+
+        // Return Nothing if flag is NULL
+        if(is_null($flag))
+        {
+            return $text;
+        }
+
+        if( (string)$flag === IQB_FLAG_YES || (int)$flag === IQB_FLAG_ON || (int)$flag === IQB_STATUS_ACTIVE )
+        {
+            $text = $formatted ? '<i class="fa fa-circle text-green" title="Active" data-toggle="tooltip"></i>' : 'Active';
+        }
+        else if( (string)$flag === IQB_FLAG_NO || (int)$flag === IQB_FLAG_OFF || (int)$flag === IQB_STATUS_INACTIVE )
+        {
+            $text = $formatted ? '<i class="fa fa-circle-thin" title="Not Active" data-toggle="tooltip"></i>': 'Inactive';
+        }
+        return $text;
+    }
+}
+
+// ------------------------------------------------------------------------

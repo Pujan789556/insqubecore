@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 foreach($records as $record)
 {
-	$this->load->view('setup/ac_accounts/_single_row', compact('record'));
+	$this->load->view('setup/ac/accounts/_single_row', compact('record'));
 }
 
 /**

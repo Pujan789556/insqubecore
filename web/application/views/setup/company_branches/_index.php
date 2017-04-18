@@ -33,7 +33,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</div>
 			</div>
 			<!-- /.box-header -->
-			<div class="box-body table-responsive no-padding" id="_iqb-data-list-box-company-branch">
+			<div class="box-body table-responsive data-rows" id="_iqb-data-list-box-company-branch">
 				<?php
 				/**
 				 * Load Rows from View

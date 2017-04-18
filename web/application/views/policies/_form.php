@@ -252,21 +252,9 @@ $('#_creditor-id').on('change', function(e){
 $('#_portfolio-id').on('change', function(e){
     var v = this.value;
     $('#_policy-package-id').empty();
-    $('#_sub-portfolio-id').empty();
     if(v){
         // load the object form
         $.getJSON('<?php echo base_url()?>policies/gppp/'+v, function(r){
-
-            // Update sub-portfolio options
-            if(r.status == 'success' && typeof r.spo !== 'undefined'){
-                $('#_sub-portfolio-id').append($('<option>', {value: '',text : 'Select...'}));
-                $.each(r.spo, function(key, value) {
-                    $('#_sub-portfolio-id').append($('<option>', {
-                        value: key,
-                        text : value
-                    }));
-                });
-            }
 
             // Update policy package options
             if(r.status == 'success' && typeof r.ppo !== 'undefined'){

@@ -198,6 +198,7 @@
 .box.box-solid.box-bordered{
     border-top: 1px solid #e9ebf0;
 }
+.data-rows{padding-bottom: 200px !important}
 /*.box-header.gray{
 	background: #f9fafc;
   border-bottom: 1px solid #d2d6de;

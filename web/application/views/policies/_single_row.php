@@ -15,7 +15,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</td>
 	<td><?php echo $record->customer_name;?></td>
 	<td><?php echo $record->portfolio_name;?></td>
-	<td><?php echo $record->sub_portfolio_name;?></td>
 
 	<!-- <td><?php echo $record->type == 'N' ? 'Fresh' : 'Renewal';?></td> -->
 	<td><?php echo $record->start_date . ' - ' . $record->end_date;?></td>
@@ -62,16 +61,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</li>
 			</ul>
 		</div>
-
-
-
-
-
-
-
-
-
-
-
 	</td>
 </tr>

@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Account - Voucher Type - Index View
+* Duties & Tax: Index View
 */
 ?>
 <div class="row">
@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/ac_voucher_types/_list');
+				$this->load->view('setup/ac/duties_and_tax/_list');
 				?>
 			</div>
 			<!-- /.box-body -->

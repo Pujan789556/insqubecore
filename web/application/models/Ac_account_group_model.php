@@ -282,6 +282,45 @@ class Ac_account_group_model extends MY_Model
         return $id;
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Path
+     *
+     * Get the full path of a Node from Root node
+     *
+     * @param array $data
+     * @return bool
+     */
+    public function get_path($id)
+    {
+
+        $cache_name = 'ac_ag_path_' . $id;
+
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $path_result = $this->get_cache($cache_name);
+        if(!$path_result)
+        {
+            /**
+             * Step 1: Prepare Bind Query & Params
+             */
+            $bind_params  = [(int)$id];
+            $sql = "CALL `r_acg_return_path`(?)";
+
+            /**
+             * Step 2: Call procedure to get Result
+             */
+            $path_result = mysqli_store_procedure('select', $sql, $bind_params);
+
+            $this->write_cache($path_result, $cache_name, CACHE_DURATION_DAY);
+        }
+
+        return $path_result;
+
+    }
+
 
     // --------------------------------------------------------------------
 
@@ -318,7 +357,6 @@ class Ac_account_group_model extends MY_Model
 
     public function tree($exclude=null, $stuff=' | ---')
     {
-
         /**
          * Step 1: Prepare Bind Query & Params
          */
@@ -326,6 +364,9 @@ class Ac_account_group_model extends MY_Model
         $bind_params  = [$exclude, $stuff];
         $sql = "CALL `r_acg_return_tree`(?,?)";
 
+        /**
+         * Step 2: Call procedure to get Result
+         */
         $result = mysqli_store_procedure('select', $sql, $bind_params);
         return $result;
     }
@@ -389,6 +430,7 @@ class Ac_account_group_model extends MY_Model
     {
         $cache_names = [
             'ac_ag_rows',
+            'ac_ag_path_*',
             'ac_ag_dd_tree_*',
         ];
         // cache name without prefix

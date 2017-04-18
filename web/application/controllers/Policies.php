@@ -659,7 +659,7 @@ class Policies extends MY_Controller
 	// --------------------------------------------------------------------
 
 		/**
-		 * Get Policy Package and Sub-Portfolio Options for Portfolio
+		 * Get Policy Packages for Portfolio
 		 *
 		 * Get the policy packages for specified portfolio
 		 *
@@ -675,16 +675,15 @@ class Policies extends MY_Controller
 			// Policy Package Options
 			$ppo = _PO_policy_package_dropdown($portfolio_id, false);
 
-			// Sub portfolio Options
-			$this->load->model('portfolio_model');
-			$spo = $this->portfolio_model->dropdown_children($portfolio_id);
+			// // Sub portfolio Options
+			// $this->load->model('portfolio_model');
+			// $spo = $this->portfolio_model->dropdown_children($portfolio_id);
 
 			if( !empty($ppo))
 			{
 				$this->template->json([
 					'status' => 'success',
-					'ppo' => $ppo,
-					'spo' => $spo
+					'ppo' => $ppo
 				]);
 			}
 			$this->template->render_404('', 'Incorrect Portfolio');

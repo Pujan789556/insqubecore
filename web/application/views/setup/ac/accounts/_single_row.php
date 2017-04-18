@@ -6,10 +6,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
-	<td><?php echo $record->ac_number;?></td>
-	<td><?php echo $record->account_group_name_en;?></td>
-	<td><?php echo $record->parent_name ?? '-';?></td>
+	<td>
+		<?php
+		$path_str = [];
+		if( count($record->acg_path) > 2 )
+		{
+			array_shift($record->acg_path); // Remove "Chart of Account"
+			foreach($record->acg_path as $path)
+			{
+				$path_str[]=$path->name;
+			}
+		}
+		else
+		{
+			$path_str[] = $record->group_name;
+		}
+
+		echo implode('<i class="fa fa-angle-right text-bold text-red" style="margin:0 5px;"></i>', $path_str);
+		?>
+	</td>
 	<td><?php echo $record->name;?></td>
+	<td><?php echo  active_inactive_text($record->active);?></td>
 	<td class="ins-action">
 		<div class="btn-group">
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit Record" data-toggle="dropdown" aria-expanded="true">

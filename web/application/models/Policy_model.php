@@ -19,7 +19,7 @@ class Policy_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_nr", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "sub_portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issued_date", "issued_time", "start_date", "start_time", "end_date", "end_time", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_at", "created_at", "created_by", "updated_at", "updated_by" ];
+    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_nr", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issued_date", "issued_time", "start_date", "start_time", "end_date", "end_time", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_at", "created_at", "created_by", "updated_at", "updated_by" ];
 
     protected $validation_rules = [];
 
@@ -121,16 +121,10 @@ class Policy_model extends MY_Model
             $portfolio_id = $this->input->post('portfolio_id') ? (int)$this->input->post('portfolio_id') : ($record->portfolio_id ?? NULL);
             $creditor_id = $this->input->post('creditor_id') ? (int)$this->input->post('creditor_id') : ($record->creditor_id ?? NULL);
 
-            $sub_portfolio_dropdown     = IQB_BLANK_SELECT;
             $policy_package_dropdown    = IQB_BLANK_SELECT;
             $sub_portfolio_rules        = 'trim|required|integer|max_length[11]';
             if($portfolio_id)
             {
-                $sub_dropdown               = $this->portfolio_model->dropdown_children($portfolio_id);
-                $sub_portfolio_dropdown     = IQB_BLANK_SELECT + $sub_dropdown;
-
-                $sub_portfolio_rules .= '|in_list[' . implode(',', array_keys($sub_dropdown)) . ']';
-
                 $policy_package_dropdown    = _PO_policy_package_dropdown($portfolio_id);
             }
 
@@ -149,16 +143,7 @@ class Policy_model extends MY_Model
                         'rules' => 'trim|required|integer|max_length[11]',
                         '_type'     => 'dropdown',
                         '_id'       => '_portfolio-id',
-                        '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
-                        '_required' => true
-                    ],
-                    [
-                        'field' => 'sub_portfolio_id',
-                        'label' => 'Sub-Portfolio',
-                        'rules' => $sub_portfolio_rules,
-                        '_type'     => 'dropdown',
-                        '_id'       => '_sub-portfolio-id',
-                        '_data'     => $sub_portfolio_dropdown,
+                        '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_children_tree(),
                         '_required' => true
                     ],
                     [
@@ -551,8 +536,7 @@ class Policy_model extends MY_Model
                         TIMESTAMP( P.`issued_date`, P.`issued_time` ) AS issued_datetime,
                         TIMESTAMP( P.`start_date`, P.`start_time` ) AS start_datetime,
                         TIMESTAMP( P.`end_date`, P.`end_time` ) AS end_datetime,
-                        PRT.name_en as portfolio_name, C.full_name as customer_name,
-                        SPRT.name_en as sub_portfolio_name";
+                        PRT.name_en as portfolio_name, C.full_name as customer_name";
             if($signle_select)
             {
                 $select .= ', RAP.agent_id';
@@ -560,7 +544,6 @@ class Policy_model extends MY_Model
             $this->db->select($select)
                      ->from($this->table_name . ' as P')
                      ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
-                     ->join('master_portfolio SPRT', 'SPRT.id = P.sub_portfolio_id')
                      ->join('dt_customers C', 'C.id = P.customer_id');
 
             if($signle_select)
@@ -603,7 +586,7 @@ class Policy_model extends MY_Model
                      ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
                      ->join('master_portfolio SPRT', 'SPRT.id = P.sub_portfolio_id')
                      ->join('dt_customers C', 'C.id = P.customer_id')
-                     ->join('dt_policy_objects O', 'O.id = P.object_id')
+                     ->join('dt_objects O', 'O.id = P.object_id')
                      ->join('master_branches B', 'B.id = P.branch_id')
                      ->join('auth_users CU', 'CU.id = P.created_by')
                      ->join('auth_users SU', 'SU.id = P.sold_by')

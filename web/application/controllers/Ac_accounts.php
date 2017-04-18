@@ -91,6 +91,19 @@ class Ac_accounts extends MY_Controller
 		$total = count($records);
 
 		/**
+		 * Account Group Paths
+		 */
+		if($total)
+		{
+			foreach($records as &$record)
+			{
+				$path = $this->ac_account_group_model->get_path($record->account_group_id);
+				$record->acg_path = $path;
+			}
+		}
+
+
+		/**
 		 * Grab Next ID or Reset It
 		 */
 		if($total == $this->settings->per_page+1)
@@ -120,7 +133,7 @@ class Ac_accounts extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'setup/ac_accounts/_index';
+			$view = 'setup/ac/accounts/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
@@ -129,11 +142,11 @@ class Ac_accounts extends MY_Controller
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/ac_accounts/_list';
+			$view = 'setup/ac/accounts/_list';
 		}
 		else
 		{
-			$view = 'setup/ac_accounts/_rows';
+			$view = 'setup/ac/accounts/_rows';
 		}
 
 
@@ -141,7 +154,7 @@ class Ac_accounts extends MY_Controller
 		{
 
 
-			// $view = $refresh === FALSE ? 'setup/ac_accounts/_rows' : 'setup/ac_accounts/_list';
+			// $view = $refresh === FALSE ? 'setup/ac/accounts/_rows' : 'setup/ac/accounts/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$ajax_data = [
 				'status' => 'success',
@@ -165,9 +178,9 @@ class Ac_accounts extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/ac_accounts/_index_header',
+							'setup/ac/accounts/_index_header',
 							['content_header' => 'Manage Accounts'] + $dom_data)
-						->partial('content', 'setup/ac_accounts/_index', $data)
+						->partial('content', 'setup/ac/accounts/_index', $data)
 						->render($this->data);
 	}
 
@@ -178,14 +191,14 @@ class Ac_accounts extends MY_Controller
 				[
 	                'field' => 'filter_account_group_id',
 	                'label' => 'Account Group',
-	                'rules' => 'trim|integer|max_length[10]|in_list[' . implode(',', array_keys($dropdwon_account_groups)) . ']',
+	                'rules' => 'trim|integer|max_length[8]',
 	                '_type'     => 'dropdown',
 	                '_data'     => IQB_BLANK_SELECT + $dropdwon_account_groups,
 	                '_required' => false
 	            ],
 	            [
 					'field' => 'filter_keywords',
-			        'label' => 'Chart of Account Name',
+			        'label' => 'Account Name',
 			        'rules' => 'trim|max_length[80]',
 	                '_type'     => 'text',
 	                '_required' => false
@@ -276,7 +289,7 @@ class Ac_accounts extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac_accounts/_form',
+		$json_data['form'] = $this->load->view('setup/ac/accounts/_form',
 			[
 				'form_elements' => $this->ac_account_model->validation_rules,
 				'record' 		=> $record
@@ -302,7 +315,7 @@ class Ac_accounts extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac_accounts/_form',
+		$json_data['form'] = $this->load->view('setup/ac/accounts/_form',
 			[
 				'form_elements' => $this->ac_account_model->validation_rules,
 				'record' 		=> $record
@@ -347,6 +360,9 @@ class Ac_accounts extends MY_Controller
 			if($this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
+
+        		// Active/Inactive
+        		$data['active'] = $data['active'] ?? 0;
 
         		// Insert or Update?
 				if($action === 'add')
@@ -402,7 +418,8 @@ class Ac_accounts extends MY_Controller
 				{
 					// Get Updated Record
 					$record = $this->ac_account_model->row($record->id);
-					$success_html = $this->load->view('setup/ac_accounts/_single_row', ['record' => $record], TRUE);
+					$record->acg_path = $this->ac_account_group_model->get_path($record->account_group_id);
+					$success_html = $this->load->view('setup/ac/accounts/_single_row', ['record' => $record], TRUE);
 					$ajax_data = [
 						'message' => $message,
 						'status'  => $status,
@@ -426,7 +443,7 @@ class Ac_accounts extends MY_Controller
 					'hideBootbox' 	=> false,
 					'updateSection' => false,
 					'updateSectionData'	=> NULL,
-					'form' 	  		=> $this->load->view('setup/ac_accounts/_form',
+					'form' 	  		=> $this->load->view('setup/ac/accounts/_form',
 												[
 													'form_elements' => $rules,
 													'record' 		=> $record
@@ -438,64 +455,6 @@ class Ac_accounts extends MY_Controller
 
 		return $return_data;
 	}
-
-	// --------------------------------------------------------------------
-
-		/**
-		 * Callback Validation Function - Valid Account Group?
-		 *
-		 * 1. Validate the ac_number range as per selected account group
-		 * 2. Check duplicate
-		 *
-		 * @param integer $ac_number
-		 * @param integer|null $id
-		 * @return bool
-		 */
-		public function _cb_valid_account_group($ac_number, $id=NULL)
-		{
-			$ac_number = strtoupper( $ac_number ? $ac_number : $this->input->post('ac_number') );
-	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
-	    	$account_group_id = (int)$this->input->post('account_group_id');
-
-	    	// First Check if Valid Range
-	    	if( !$this->ac_account_group_model->valid_range($account_group_id, $ac_number) )
-	    	{
-	    		$this->form_validation->set_message('_cb_valid_account_group', 'The %s does not fall under selected heading group range.');
-	            return FALSE;
-	    	}
-
-	    	// Check Duplicate
-	        if( $this->ac_account_model->check_duplicate(['ac_number' => $ac_number], $id))
-	        {
-	            $this->form_validation->set_message('_cb_valid_account_group', 'The %s already exists.');
-	            return FALSE;
-	        }
-	        return TRUE;
-		}
-
-	// --------------------------------------------------------------------
-
-		/**
-		 * Callback Validation Function - Valid Parent
-		 *
-		 * 1. Same account can not be parent and child
-		 *
-		 * @param integer $parent_id
-		 * @param integer|null $id
-		 * @return bool
-		 */
-		public function _cb_valid_parent($parent_id, $id=NULL)
-		{
-			$parent_id = (int)$parent_id;
-	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
-
-	    	if($id && $id === $parent_id)
-	    	{
-	    		$this->form_validation->set_message('_cb_valid_parent', 'Same account can not be parent for itself.');
-	            return FALSE;
-	    	}
-	        return TRUE;
-		}
 
 	// --------------------------------------------------------------------
 

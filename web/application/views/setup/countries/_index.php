@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</div>
 			</div>
 			<!-- /.box-header -->
-			<div class="box-body table-responsive no-padding">
+			<div class="box-body table-responsive data-rows">
 				<table class="table table-hover" id="live-searchable">
 					<tr>
 						<th>Name</th>
@@ -30,16 +30,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						<th>Currency Code</th>
 						<th>Currency Name</th>
 						<th>Actions</th>
-					</tr>					
+					</tr>
 					<?php
 					/**
 					 * Load Rows from View
-					 */ 
+					 */
 					foreach($records as $record)
 					{
 						$this->load->view('setup/countries/_single_row', compact('record'));
 					}
-					?>				
+					?>
 				</table>
 			</div>
 			<!-- /.box-body -->

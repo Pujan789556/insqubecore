@@ -13,7 +13,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<th>Code</th>
 			<th>Customer</th>
 			<th>Portfolio</th>
-			<th>Sub-Portfolio</th>
 			<th>Dates</th>
 			<th>Status</th>
 			<th>Actions</th>
