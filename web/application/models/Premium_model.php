@@ -19,7 +19,7 @@ class Premium_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['sum_insured_amount', 'total_premium_amount', 'pool_premium_amount', 'comissionable_amount', 'stamp_duty_amount', 'vat_amount', 'attributes', 'extra_fields', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['amt_sum_insured', 'total_premium_amount', 'pool_premium_amount', 'comissionable_amount', 'stamp_duty_amount', 'vat_amount', 'attributes', 'extra_fields', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -52,7 +52,7 @@ class Premium_model extends MY_Model
 
     public function reset($policy_id)
     {
-        // !!!NOTE: 'sum_insured_amount' can not be emptied as it is updated when policy is updated
+        // !!!NOTE: 'amt_sum_insured' can not be emptied as it is updated when policy is updated
 
         $numeric_fields  = ['total_premium_amount', 'pool_premium_amount', 'comissionable_amount', 'stamp_duty_amount', 'vat_amount'];
         $nullable_fields = ['attributes', 'extra_fields', 'remarks'];

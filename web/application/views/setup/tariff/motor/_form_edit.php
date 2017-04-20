@@ -24,19 +24,19 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
         <div class="form-group">
             <label class="col-sm-2 control-label">Ownership</label>
             <div class="col-sm-10">
-            <p class="form-control-static"><?php echo _PO_MOTOR_ownership_dropdown(FALSE)[$record->ownership]?></p>
+            <p class="form-control-static"><?php echo _OBJ_MOTOR_ownership_dropdown(FALSE)[$record->ownership]?></p>
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label">Sub-Portfolio</label>
             <div class="col-sm-10">
-            <p class="form-control-static"><?php echo _PO_MOTOR_sub_portfolio_dropdown(FALSE)[$record->sub_portfolio_code]?></p>
+            <p class="form-control-static"><?php echo _OBJ_MOTOR_sub_portfolio_dropdown(FALSE)[$record->sub_portfolio_code]?></p>
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label">CVC Type</label>
             <div class="col-sm-10">
-            <p class="form-control-static"><?php echo $record->cvc_type ? _PO_MOTOR_CVC_type_dropdown(FALSE)[$record->cvc_type] : '-'?></p>
+            <p class="form-control-static"><?php echo $record->cvc_type ? _OBJ_MOTOR_CVC_type_dropdown(FALSE)[$record->cvc_type] : '-'?></p>
             </div>
         </div>
 

@@ -121,7 +121,7 @@ class Tariff_motor_model extends MY_Model
                     'label' => 'Engine Capacity Type',
                     'rules' => 'trim|required|alpha|max_length[2]',
                     '_type'     => 'dropdown',
-                    '_data'     => _PO_MOTOR_ec_unit_tariff_dropdown(),
+                    '_data'     => _OBJ_MOTOR_ec_unit_tariff_dropdown(),
                     '_required' => true
                 ],
                 [

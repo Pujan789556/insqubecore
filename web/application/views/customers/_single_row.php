@@ -31,6 +31,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<?php endif?>
 	</td>
 	<td><?php echo $record->profession;?></td>
+	<td><?php echo locked_unlocked_text($record->flag_locked);?></td>
 	<td class="ins-action">
 		<div class="btn-group">
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">

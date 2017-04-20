@@ -15,11 +15,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 
 // ------------------------------------------------------------------------
-// DROPDOWN HELPERS
+// PORTFOLIO DROPDOWN HELPERS
 // ------------------------------------------------------------------------
 
 
-if ( ! function_exists('_PORTFOLIO_MOTOR_voluntary_excess_dropdown'))
+if ( ! function_exists('_PO_MOTOR_voluntary_excess_dropdown'))
 {
 	/**
 	 * Get "Voluntary Excess" Dropdown for Given Portfolio Tariff
@@ -27,7 +27,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_voluntary_excess_dropdown'))
 	 * @param JSON $dr_voluntary_excess  Tariff Record's "Voluntary Excess" JSON
 	 * @return	array
 	 */
-	function _PORTFOLIO_MOTOR_voluntary_excess_dropdown( $dr_voluntary_excess, $flag_blank_select = true, $prefix = 'Rs. ' )
+	function _PO_MOTOR_voluntary_excess_dropdown( $dr_voluntary_excess, $flag_blank_select = true, $prefix = 'Rs. ' )
 	{
 		$dropdown = [];
 		$dr_voluntary_excess = $dr_voluntary_excess ? json_decode($dr_voluntary_excess) : NULL;
@@ -50,7 +50,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_voluntary_excess_dropdown'))
 // ------------------------------------------------------------------------
 
 
-if ( ! function_exists('_PORTFOLIO_MOTOR_no_claim_discount_dropdown'))
+if ( ! function_exists('_PO_MOTOR_no_claim_discount_dropdown'))
 {
 	/**
 	 * Get "No Claim Discount" Dropdown for Given Portfolio Tariff
@@ -58,7 +58,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_no_claim_discount_dropdown'))
 	 * @param JSON $no_claim_discount  Tariff Record's "No Claim Discount" JSON
 	 * @return	array
 	 */
-	function _PORTFOLIO_MOTOR_no_claim_discount_dropdown( $no_claim_discount, $flag_blank_select = true, $suffix = ' years' )
+	function _PO_MOTOR_no_claim_discount_dropdown( $no_claim_discount, $flag_blank_select = true, $suffix = ' years' )
 	{
 		$dropdown = [];
 		$no_claim_discount = $no_claim_discount ? json_decode($no_claim_discount) : NULL;
@@ -81,7 +81,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_no_claim_discount_dropdown'))
 // ------------------------------------------------------------------------
 
 
-if ( ! function_exists('_PORTFOLIO_MOTOR_compute_short_term_premium'))
+if ( ! function_exists('_PO_MOTOR_compute_short_term_premium'))
 {
 	/**
 	 * MOTOR PORTFOLIO: Compute Short Term Policy Premium
@@ -91,7 +91,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_compute_short_term_premium'))
 	 * @param array $cost_table Cost Table computed by Specific cost table function
 	 * @return	array
 	 */
-	function _PORTFOLIO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $cost_table )
+	function _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $cost_table )
 	{
 		/**
 		 * SHORT TERM POLICY?
@@ -134,10 +134,10 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_compute_short_term_premium'))
 
 
 // ------------------------------------------------------------------------
-// COMPUTATIONAL TABLE
+// PORTFOLIO COMPUTATIONAL TABLE
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
+if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 {
 	/**
 	 * Motorcycle Policy Cost Table
@@ -151,7 +151,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 	 *
 	 * @return	array
 	 */
-	function _PORTFOLIO_MOTOR_MCY_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
+	function _PO_MOTOR_MCY_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
 	{
 		$cost_table = [];
 		$attributes = json_decode($policy_object->attributes);
@@ -203,7 +203,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
         // No Claim Discount - Years & Rate
         $no_claim_discount 		= $post_data_extra_fields['no_claim_discount'] ?? 0;
         $no_claim_discount 		= $no_claim_discount ? $no_claim_discount : 0;
-		$year_no_claim_discount = $no_claim_discount ? _PORTFOLIO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
+		$year_no_claim_discount = $no_claim_discount ? _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
 
         // Rsik Group
         $tariff_rsik_group = json_decode($tariff_record->riks_group);
@@ -258,7 +258,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 			// Discount on Voluntary Excess : discount_KHA
 			$__premium_A_row_4 				= 0.00;
 			$dr_voluntary_excess 		= $post_data_extra_fields['dr_voluntary_excess'] ?? 0.00;
-			$amount_voluntary_excess 	= $dr_voluntary_excess ? _PORTFOLIO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess] : 0.00;
+			$amount_voluntary_excess 	= $dr_voluntary_excess ? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess] : 0.00;
 
 			if($dr_voluntary_excess)
 			{
@@ -585,7 +585,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 		 * If the policy is short term policy, we have to calculate the short term values
 		 *
 		 */
-		$__cost_table = _PORTFOLIO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
+		$__cost_table = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
 
 		return $__cost_table;
 	}
@@ -593,7 +593,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_MCY_cost_table'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
+if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 {
 	/**
 	 * Private Vehicle Policy Cost Table
@@ -607,7 +607,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 	 *
 	 * @return	array
 	 */
-	function _PORTFOLIO_MOTOR_PVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
+	function _PO_MOTOR_PVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
 	{
 		$cost_table = [];
 		$attributes = json_decode($policy_object->attributes);
@@ -676,7 +676,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
         // No Claim Discount - Years & Rate
         $no_claim_discount 		= $post_data_extra_fields['no_claim_discount'] ?? 0;
         $no_claim_discount 		= $no_claim_discount ? $no_claim_discount : 0;
-		$year_no_claim_discount = $no_claim_discount ? _PORTFOLIO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
+		$year_no_claim_discount = $no_claim_discount ? _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
 
         // Rsik Group
         $tariff_rsik_group = json_decode($tariff_record->riks_group);
@@ -799,7 +799,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 			// Discount on Voluntary Excess - GA ko X%
 			$dr_voluntary_excess 		= $post_data_extra_fields['dr_voluntary_excess'] ?? FALSE;
 			$amount_voluntary_excess 	= $dr_voluntary_excess
-											? _PORTFOLIO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess]
+											? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess]
 											: 0.00;
 			$__premium_A_row_10 		= 0.00;
 			if( $dr_voluntary_excess )
@@ -1173,7 +1173,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 		 * If the policy is short term policy, we have to calculate the short term values
 		 *
 		 */
-		$__cost_table = _PORTFOLIO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
+		$__cost_table = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
 
 		return $__cost_table;
 	}
@@ -1181,7 +1181,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_PVC_cost_table'))
 
 // -----------------------------------------------------------------------
 
-if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
+if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
 {
     /**
      * Commercial Vehicle Policy Cost Table
@@ -1195,7 +1195,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
      *
      * @return  array
      */
-    function _PORTFOLIO_MOTOR_CVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
+    function _PO_MOTOR_CVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
     {
         $object_attributes = json_decode($policy_object->attributes);
 
@@ -1230,12 +1230,12 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
         //      To Minus Amount, Base Fragment, Base Fragment Rate, Rest Fragment Rate, Third Party Rate, Vehicle Over Age Rate
         //      Example: First 20 lakhs 1.24% + Rest Amount's 1.6% - Rs. 3000
         //
-        $primary_tariff_vehicle = _PORTFOLIO_MOTOR_CVC_primary_tariff_vehicle($object_attributes, $default_tariff, $vehicle_age_in_yrs);
+        $primary_tariff_vehicle = _PO_MOTOR_CVC_primary_tariff_vehicle($object_attributes, $default_tariff, $vehicle_age_in_yrs);
 
         // No Claim Discount - Years & Rate
         $no_claim_discount      = $post_data_extra_fields['no_claim_discount'] ?? 0;
         $no_claim_discount      = $no_claim_discount ? $no_claim_discount : 0;
-        $year_no_claim_discount = $no_claim_discount ? _PORTFOLIO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
+        $year_no_claim_discount = $no_claim_discount ? _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
 
         // Rsik Group
         $tariff_rsik_group = json_decode($tariff_record->riks_group);
@@ -1410,7 +1410,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
             // Discount on Voluntary Excess - GA ko X%
             $dr_voluntary_excess        = $post_data_extra_fields['dr_voluntary_excess'] ?? FALSE;
             $amount_voluntary_excess    = $dr_voluntary_excess
-                                            ? _PORTFOLIO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess]
+                                            ? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess]
                                             : 0.00;
             $__discount_A_row__voluntary_excess         = 0.00;
             if( $dr_voluntary_excess )
@@ -1864,7 +1864,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
 		 * If the policy is short term policy, we have to calculate the short term values
 		 *
 		 */
-		$__cost_table = _PORTFOLIO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
+		$__cost_table = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
 
         return $__cost_table;
     }
@@ -1872,7 +1872,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_cost_table'))
 
 // -----------------------------------------------------------------------
 
-if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_primary_tariff_vehicle'))
+if ( ! function_exists('_PO_MOTOR_CVC_primary_tariff_vehicle'))
 {
     /**
      * Get Primary Tariff of a Vehicle
@@ -1882,7 +1882,7 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_primary_tariff_vehicle'))
      * @param integer $vehicle_age_in_yrs Vehicle Age in Years (From the Date of Registration)
      * @return array
      */
-    function _PORTFOLIO_MOTOR_CVC_primary_tariff_vehicle($object_attributes, $default_tariff, $vehicle_age_in_yrs=0)
+    function _PO_MOTOR_CVC_primary_tariff_vehicle($object_attributes, $default_tariff, $vehicle_age_in_yrs=0)
     {
         $primary_tariff_vehicle['rate']                 = 0.00;
         $primary_tariff_vehicle['minus_amount']         = 0.00;
@@ -1957,8 +1957,660 @@ if ( ! function_exists('_PORTFOLIO_MOTOR_CVC_primary_tariff_vehicle'))
         return $primary_tariff_vehicle;
     }
 }
+
+
+// ------------------------------------------------------------------------
+// PORTFOLIO OBJECT HELPERS
 // ------------------------------------------------------------------------
 
+
+if ( ! function_exists('_OBJ_MOTOR_row_snippet'))
+{
+	/**
+	 * Get Policy Object - Motor - Row Snippet
+	 *
+	 * Row Partial View for Motor Object
+	 *
+	 * @param object $record Policy Object (Motor)
+	 * @param bool $_flag__show_widget_row 	is this Widget Row? or Regular List Row?
+	 * @return	html
+	 */
+	function _OBJ_MOTOR_row_snippet( $record, $_flag__show_widget_row = FALSE )
+	{
+		$CI =& get_instance();
+		return $CI->load->view('objects/snippets/_row_motor', ['record' => $record, '_flag__show_widget_row' => $_flag__show_widget_row], TRUE);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_select_text'))
+{
+	/**
+	 * Get Policy Object - Motor - Selection Text or Summary Text
+	 *
+	 * Useful while add/edit-ing a policy or whenever we need to
+	 * show the object summary from object attribute
+	 *
+	 * @param bool $record 	Object Record
+	 * @return	html
+	 */
+	function _OBJ_MOTOR_select_text( $record )
+	{
+		$attributes = $record->attributes ? json_decode($record->attributes) : NULL;
+		$select_text = '';
+		if($attributes)
+		{
+			$select_text = implode(', ', [$attributes->make, $attributes->model, $attributes->reg_no, $attributes->engine_no, $attributes->chasis_no]);
+		}
+		return $select_text;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
+{
+	/**
+	 * Get Policy Object - Motor - Validation Rules
+	 *
+	 * Returns array of form validation rules for motor policy object
+	 *
+	 * @param integer $portfolio_id  Portfolio ID
+	 * @param bool $formatted  Should Return the Formatted Validation Rule ( if multi senction rules )
+	 * @return	bool
+	 */
+	function _OBJ_MOTOR_validation_rules( $portfolio_id, $formatted = FALSE )
+	{
+		$CI =& get_instance();
+
+		// Validation Rules on Form Post Change on interdependent components
+		$post = $CI->input->post();
+		$object = $post['object'] ?? NULL;
+
+		// CVC TYPES in_list validation
+		$cvc_type_list = array_keys( _OBJ_MOTOR_CVC_type_dropdown(FALSE) );
+		$cvc_type_in_list = implode(',', $cvc_type_list);
+
+		// To Be Intimated Set?
+		$flag_to_be_intimated = $object['flag_to_be_intimated'] ?? NULL;
+		if($flag_to_be_intimated)
+		{
+			$reg_no_rules  = 'trim|max_length[30]|strtoupper|in_list[TO BE INTIMATED]';
+			$reg_date_rule = 'trim|valid_date';
+		}
+		else
+		{
+			$reg_no_rules  = 'trim|max_length[30]|strtoupper|callback__cb_motor_duplicate_reg_no';
+			$reg_date_rule = 'trim|required|valid_date';
+		}
+
+		/**
+		 * Object Sections
+		 * -----------------
+		 * 	a. Common Vehicle Section
+		 * 	b. CVC Specific, Staff (CVC Specific)
+		 * 	c. Trailer (Private/Commercial Vehicle)
+		 */
+
+		$v_rules = [
+
+			// Vehicle Common Fields
+			'vehicle-common' =>[
+				[
+			        'field' => 'object[ownership]',
+			        '_key' => 'ownership',
+			        'label' => 'Ownership',
+			        'rules' => 'trim|required|alpha|in_list[G,N]',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _OBJ_MOTOR_ownership_dropdown( ),
+			        '_default'  => 'N',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[flag_mcy_df]',
+			        '_key' => 'flag_mcy_df',
+			        'label' => 'Disabled friendly Vehicle',
+			        'rules' => 'trim|integer|in_list[1]',
+			        '_id' 		=> '_motor-vehicle-df',
+			        '_type'     => 'checkbox',
+			        '_checkbox_value' 	=> '1',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[engine_no]',
+			        '_key' => 'engine_no',
+			        'label' => 'Engine Number',
+			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[30]|strtoupper|callback__cb_motor_duplicate_engine_no',
+			        '_id' 		=> '_motor-engine-no',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[chasis_no]',
+			        '_key' => 'chasis_no',
+			        'label' => 'Chasis Number',
+			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[30]|strtoupper|callback__cb_motor_duplicate_chasis_no',
+			        '_id' 		=> '_motor-chasis-no',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[ec_unit]',
+			        '_key' => 'ec_unit',
+			        'label' => 'Engine Capacity Unit',
+			        'rules' => 'trim|required|alpha|in_list[CC,HP,KW]',
+			        '_id' 		=> '_motor-vehicle-ec-unit',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _OBJ_MOTOR_ec_unit_dropdown(),
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[engine_capacity]',
+			        '_key' => 'engine_capacity',
+			        'label' => 'Engine Capacity',
+			        'rules' => 'trim|required|integer|max_length[5]',
+			        '_id' 		=> '_motor-engine-capacity',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[year_mfd]',
+			        '_key' => 'year_mfd',
+			        'label' => 'Year Manufactured',
+			        'rules' => 'trim|required|integer|exact_length[4]',
+			        '_id' 		=> '_motor-mfd-year',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+
+			    // For New Vehicle, It can Have "To Be Intimated"
+			    [
+			        'field' => 'object[flag_to_be_intimated]',
+			        '_key' => 'flag_to_be_intimated',
+			        'label' => 'To Be Intimated',
+			        'rules' => 'trim|integer|in_list[1]',
+			        '_id' 		=> '_motor-vehicle-to-be-intimated',
+			        '_type'     => 'checkbox',
+			        '_checkbox_value' 	=> '1',
+			        '_required' => false,
+			        '_help_text' => 'Click here if the vehicle is not registered yet.'
+			    ],
+
+			    [
+			        'field' => 'object[reg_no]',
+			        '_key' => 'reg_no',
+			        'label' => 'Registration Number',
+			        'rules' => $reg_no_rules,
+			        '_id' 		=> '_motor-registration-no',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[reg_date]',
+			        '_key' => 'reg_date',
+			        'label' => 'Registration Date',
+			        'rules' => $reg_date_rule,
+			        '_id' 		=> '_motor-registration-date',
+			        '_type'     => 'date',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[puchase_date]',
+			        '_key' => 'puchase_date',
+			        'label' => 'Purchase Date',
+			        'rules' => 'trim|required|valid_date',
+			        '_id' 		=> '_motor-purchase-date',
+			        '_type'     => 'date',
+			        '_required' => true
+			    ],
+			    [
+			    	'field' => 'object[vechile_status]',
+			        '_key' => 'vechile_status',
+			        'label' => 'Status on Purchase',
+			        'rules' => 'trim|required|alpha|in_list[N,O]',
+			        '_id' 		=> '_motor-purchase-status',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _OBJ_MOTOR_vehicle_status_dropdown(),
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[manufacturer]',
+			        '_key' => 'manufacturer',
+			        'label' => 'Manufacturer',
+			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[80]',
+			        '_id' 		=> '_motor-manufacturer',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[make]',
+			        '_key' => 'make',
+			        'label' => 'Make',
+			        'rules' => 'trim|required|max_length[60]',
+			        '_id' 		=> '_motor-make',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[model]',
+			        '_key' => 'model',
+			        'label' => 'Model',
+			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[60]',
+			        '_id' 		=> '_motor-model',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[price_vehicle]',
+			        '_key' => 'price_vehicle',
+			        'label' => 'Vehicle Price',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+			        '_id' 		=> '_motor-vehicle-price',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[price_accessories]',
+			        '_key' => 'price_accessories',
+			        'label' => 'Acessories Price',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+			        '_id' 		=> '_motor-accessories-price',
+			        '_type'     => 'text',
+			        '_default' 	=> 0.00,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[carrying_unit]',
+			        '_key' => 'carrying_unit',
+			        'label' => 'Carrying Capacity Unit',
+			        'rules' => 'trim|required|alpha|in_list[S,T]',
+			        '_id' 		=> '_motor-vehicle-carrying-unit',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _OBJ_MOTOR_carrying_unit_dropdown(),
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[carrying_capacity]',
+			        '_key' => 'carrying_capacity',
+			        'label' => 'Carrying Capacity',
+			        'rules' => 'trim|required|integer|max_length[5]',
+			        '_id' 		=> '_motor-carrying-capacity',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ]
+		    ],
+
+		    // Commercial Vehicle Extra Fields
+		    'vehicle-cvc' => [
+		    	[
+			        'field' => 'object[cvc_type]',
+			        '_key' => 'cvc_type',
+			        'label' => 'Commercial Vehicle Type',
+			        'rules' => 'trim|required|alpha|strtoupper|in_list[' . $cvc_type_in_list . ']',
+			        '_id' 		=> '_motor-vehicle-cvc-type',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _OBJ_MOTOR_CVC_type_dropdown(),
+			        '_required' => true
+			    ],
+		    ],
+
+		    // Staff Count (Commercial Vehicle Only)
+		    'staff' => [
+		    	[
+			        'field' => 'object[staff_count]',
+			        '_key' => 'staff_count',
+			        'label' => 'Staff Count',
+			        'rules' => 'trim|required|integer|max_length[4]',
+			        '_id' 		=> '_motor-staff-count',
+			        '_type'     => 'text',
+			        '_default' 	=> 0,
+			        '_required' => false
+			    ],
+		    ],
+
+		    // Trailer Section (Private and Commercial Vehicle Only)
+		    'trailer' => [
+		    	[
+			        'field' => 'object[trailer_price]',
+			        '_key' => 'trailer_price',
+			        'label' => 'Trailer Price',
+			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+			        '_id' 		=> '_motor-trailer-price',
+			        '_type'     => 'text',
+			        '_default' 	=> 0.00,
+			        '_required' => false
+			    ],
+		    ],
+		];
+
+		if($portfolio_id == IQB_SUB_PORTFOLIO_MOTORCYCLE_ID)
+		{
+			$sections = ['vehicle-common'];
+		}
+		else if($portfolio_id == IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID)
+		{
+			$sections = ['vehicle-common', 'trailer'];
+		}
+		else
+		{
+			$sections = ['vehicle-cvc', 'vehicle-common', 'staff', 'trailer'];
+		}
+
+
+		// return formatted?
+		$fromatted_v_rules = [];
+		$sectioned_v_rules = [];
+		if($formatted === TRUE)
+		{
+			foreach ($sections as $section)
+			{
+				$fromatted_v_rules = array_merge($fromatted_v_rules, $v_rules[$section]);
+			}
+			return $fromatted_v_rules;
+		}
+		else
+		{
+			foreach ($sections as $section)
+			{
+				$sectioned_v_rules[$section] = $v_rules[$section];
+			}
+			return $sectioned_v_rules;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_policy_package_dropdown'))
+{
+	/**
+	 * Get Policy Packages - Motor
+	 *
+	 * Motor Policy Packages
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	bool
+	 */
+	function _OBJ_MOTOR_policy_package_dropdown( $flag_blank_select = true)
+	{
+		$dropdown = [
+			IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE  	=> 'Comprehensive',
+			IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY 		=> 'Third Party',
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_sum_insured_amount'))
+{
+	/**
+	 * Get Sum Insured Amount of Policy Object - Motor Portfolio
+	 *
+	 * Compute sum insured amount based on object's portfolio and return.
+	 *
+	 * @param integer $portfolio_id  Portfolio ID
+	 * @param array $data 	Object Data
+	 * @return float
+	 */
+	function _OBJ_MOTOR_sum_insured_amount( $portfolio_id, $data )
+	{
+		$price_vehicle 		= $data['price_vehicle'] 		? floatval($data['price_vehicle']) : 0.00;
+		$price_accessories 	= $data['price_accessories'] 	? floatval($data['price_accessories']) : 0.00;
+		$trailer_price 		= isset($data['trailer_price']) ? floatval($data['trailer_price']) : 0.00;
+
+		// Common Price for all three sub-portfolios
+		$amt_sum_insured = $price_vehicle + $price_accessories;
+
+		// Add trailer price on Private Vehicle or Commercial Vehicle
+		if($portfolio_id != IQB_SUB_PORTFOLIO_MOTORCYCLE_ID )
+		{
+			$amt_sum_insured += $trailer_price;
+		}
+
+		return $amt_sum_insured;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_ownership_dropdown'))
+{
+	/**
+	 * Get Policy Object - Motor - Ownership Dropdown
+	 *
+	 * Motor ownership dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	bool
+	 */
+	function _OBJ_MOTOR_ownership_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_GOVT => 'Government', IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT => 'Non-government'];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_vehicle_status_dropdown'))
+{
+	/**
+	 * Get Policy Object - Motor - Ownership Dropdown
+	 *
+	 * Motor ownership dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	bool
+	 */
+	function _OBJ_MOTOR_vehicle_status_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = ['N' => 'New', 'O' => 'Old'];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_sub_portfolio_dropdown'))
+{
+	/**
+	 * Get Policy Object - Motor - Sub Portfolio List
+	 *
+	 * Motor Sub-portfolio Dorpdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	bool
+	 */
+	function _OBJ_MOTOR_sub_portfolio_dropdown( $flag_blank_select = true)
+	{
+		$CI =& get_instance();
+		$CI->load->model('portfolio_model');
+
+		$dropdown = $CI->portfolio_model->dropdown_children(IQB_MASTER_PORTFOLIO_MOTOR_ID, 'code');
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_CVC_type_dropdown'))
+{
+	/**
+	 * Get Policy Object - Motor - Commercial Vehicle Dropdown
+	 *
+	 * Motor - Commercial Vehicle Dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @param bool $sub_type Return Sub Type instead of primary type
+	 * @return	bool
+	 */
+	function _OBJ_MOTOR_CVC_type_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_MOTOR_CVC_TYPE_GOODS_CARRIER_GENERAL 	=> 'Goods Carrier - Truck', 	// GOODS CARRIER GENERAL
+			IQB_MOTOR_CVC_TYPE_GOODS_CARRIER_TANKER  	=> 'Goods Carrier - Tanker',	// GOODS CARRIER TANKER
+			IQB_MOTOR_CVC_TYPE_PASSENGER_CARRIER  		=> 'Passenger Carrier', 		// PASSENGER CARRIER
+			IQB_MOTOR_CVC_TYPE_TAXI 					=> 'Taxi',
+			IQB_MOTOR_CVC_TYPE_TEMPO					=> 'Tempo (e-rikshaw, safa tempo, tricycle)',
+			IQB_MOTOR_CVC_TYPE_AGRO_FORESTRY 			=> 'Agriculture & Forestry Vehicle',
+			IQB_MOTOR_CVC_TYPE_TRACTOR_POWER_TRILLER	=> 'Tractor & Power Triller',
+			IQB_MOTOR_CVC_TYPE_CONSTRUCTION_EQUIPMENT	=> 'Construction Equipment Vehicle'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_ec_unit_dropdown'))
+{
+	/**
+	 * Get Policy Object - Motor - Engine Capacity Dropdown
+	 *
+	 * Motor Engine Capacity dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	bool
+	 */
+	function _OBJ_MOTOR_ec_unit_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = ['CC' => 'Cubic Centimeter (CC)', 'HP' => 'Horse Power (HP)', 'KW' => 'Kilo Watt (KW)'];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_ec_unit_tariff_dropdown'))
+{
+	/**
+	 * Get Policy Object - Motor - Engine Capacity Dropdown for Tariff Settings
+	 *
+	 * Motor Engine Capacity for Tariff Setting dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	bool
+	 */
+	function _OBJ_MOTOR_ec_unit_tariff_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = _OBJ_MOTOR_ec_unit_dropdown(FALSE) + ['T' => 'Metric Ton'];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_carrying_unit_dropdown'))
+{
+	/**
+	 * Get Policy Object - Motor - Carrying Capacity Dropdown
+	 *
+	 * Motor Carrying Capacity dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	bool
+	 */
+	function _OBJ_MOTOR_carrying_unit_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = ['S' => 'Seat', 'T' => 'Metric Ton'];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_transactional_attributes'))
+{
+	/**
+	 * Get the list of transactional attributes for Motor Portfolio
+	 *
+	 * These are the object attributes, whose change will affect on
+	 * 	- Sum Insured Amount
+	 * 	- Premium
+	 *
+	 * For tariff-portfolio, we must need this list to generate cost reference table.
+	 *
+	 * @param integer $portfolio_id  Portfolio ID
+	 * @return float
+	 */
+	function _OBJ_MOTOR_transactional_attributes( $portfolio_id )
+	{
+		return  [
+
+			// Vehicle Ownership
+			'ownership',
+
+			// Disable Friendly Vehicle?
+			'flag_mcy_df',
+
+			// Engine Capacity Unig
+			'ec_unit',
+
+			// Engine Capacity
+			'engine_capacity',
+
+			// Vehicle Price
+			'price_vehicle',
+
+			// Accessories Price
+			'price_accessories',
+
+			// Carrying Uning
+			'carrying_unit',
+
+			// Carrying Capacity
+			'carrying_capacity',
+
+			// Staff Count
+			'staff_count',
+
+			// Trailer Price
+			'trailer_price'
+		];
+	}
+}
 
 
 

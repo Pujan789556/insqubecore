@@ -199,9 +199,9 @@ class Tariff extends MY_Controller
                 /**
                  * Insert Default Batch
                  */
-                $ownership_list     = _PO_MOTOR_ownership_dropdown(FALSE);
-                $sub_portfolio_list = _PO_MOTOR_sub_portfolio_dropdown(FALSE);
-                $cvc_type_list      = _PO_MOTOR_CVC_type_dropdown(FALSE);
+                $ownership_list     = _OBJ_MOTOR_ownership_dropdown(FALSE);
+                $sub_portfolio_list = _OBJ_MOTOR_sub_portfolio_dropdown(FALSE);
+                $cvc_type_list      = _OBJ_MOTOR_CVC_type_dropdown(FALSE);
 
                 // echo '<pre>'; print_r($cvc_type_list);exit;
 

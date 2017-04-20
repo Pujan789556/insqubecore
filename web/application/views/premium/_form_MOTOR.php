@@ -38,7 +38,7 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
         <div class="form-group">
             <label class="col-sm-2 control-label">CVC Type</label>
             <div class="col-sm-10">
-            <p class="form-control-static"><?php echo $object_attributes->cvc_type ? _PO_MOTOR_CVC_type_dropdown(FALSE)[$object_attributes->cvc_type] : '-'?></p>
+            <p class="form-control-static"><?php echo $object_attributes->cvc_type ? _OBJ_MOTOR_CVC_type_dropdown(FALSE)[$object_attributes->cvc_type] : '-'?></p>
             </div>
         </div>
     <?php endif?>
@@ -46,7 +46,7 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
     <div class="form-group">
         <label class="col-sm-2 control-label">Ownership</label>
         <div class="col-sm-10">
-        <p class="form-control-static"><?php echo _PO_MOTOR_ownership_dropdown(FALSE)[$object_attributes->ownership]?></p>
+        <p class="form-control-static"><?php echo _OBJ_MOTOR_ownership_dropdown(FALSE)[$object_attributes->ownership]?></p>
         </div>
     </div>
     <div class="form-group">
@@ -59,7 +59,7 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
     <div class="form-group">
         <label class="col-sm-2 control-label">Policy Package</label>
         <div class="col-sm-10">
-        <p class="form-control-static"><?php echo _PO_policy_package_dropdown($policy_record->portfolio_id)[$policy_record->policy_package]?></p>
+        <p class="form-control-static"><?php echo _OBJ_policy_package_dropdown($policy_record->portfolio_id)[$policy_record->policy_package]?></p>
         </div>
     </div>
 

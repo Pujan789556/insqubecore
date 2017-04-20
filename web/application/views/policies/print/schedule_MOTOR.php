@@ -162,7 +162,7 @@ switch ($record->sub_portfolio_code)
                             </tr>
 
                             <tr>
-                                <td>रक्षावरण गरिएका जोखिमहरु: <?php echo _PO_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
+                                <td>रक्षावरण गरिएका जोखिमहरु: <?php echo _OBJ_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
                             </tr>
 
                             <tr>

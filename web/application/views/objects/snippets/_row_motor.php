@@ -26,6 +26,7 @@ $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 		</span>
 	<?php endif;?>
 </td>
+<td><?php echo locked_unlocked_text($record->flag_locked);?></td>
 <?php if( !$_flag__show_widget_row ):?>
 	<td>
 		<?php if($attributes):?>

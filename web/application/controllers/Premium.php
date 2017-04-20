@@ -297,7 +297,7 @@ class Premium extends MY_Controller
 				$data = $this->input->post();
 				try{
 
-					$premium_data = _PORTFOLIO_MOTOR_MCY_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+					$premium_data = _PO_MOTOR_MCY_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
 
 				} catch (Exception $e){
 					return $this->template->json([
@@ -331,7 +331,7 @@ class Premium extends MY_Controller
 
 				try{
 
-					$premium_data = _PORTFOLIO_MOTOR_PVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+					$premium_data = _PO_MOTOR_PVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
 
 				} catch (Exception $e){
 					return $this->template->json([
@@ -361,7 +361,7 @@ class Premium extends MY_Controller
 				$data = $this->input->post();
 				try{
 
-					$premium_data = _PORTFOLIO_MOTOR_CVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+					$premium_data = _PO_MOTOR_CVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
 
 				} catch (Exception $e){
 					return $this->template->json([
@@ -544,7 +544,7 @@ class Premium extends MY_Controller
                     'rules' => 'trim|prep_decimal|decimal|max_length[5]',
                     '_key' 		=> 'dr_voluntary_excess',
                     '_type'     => 'dropdown',
-                    '_data' 	=> _PORTFOLIO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess),
+                    '_data' 	=> _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess),
                     '_required' => false
                 ],
                 [
@@ -553,7 +553,7 @@ class Premium extends MY_Controller
                     'rules' => 'trim|prep_decimal|decimal|max_length[5]',
                     '_key' 		=> 'no_claim_discount',
                     '_type'     => 'dropdown',
-                    '_data' 	=> _PORTFOLIO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount),
+                    '_data' 	=> _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount),
                     '_required' => false
                 ],
                 [

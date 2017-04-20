@@ -545,7 +545,7 @@ class Objects extends MY_Controller
 			}
 
 			$done 		= FALSE;
-			$v_rules 	= array_merge($this->object_model->validation_rules, _PO_validation_rules($portfolio_id, TRUE));
+			$v_rules 	= array_merge($this->object_model->validation_rules, _OBJ_validation_rules($portfolio_id, TRUE));
             $this->form_validation->set_rules($v_rules);
 
 			if($this->form_validation->run() === TRUE )
@@ -567,7 +567,7 @@ class Objects extends MY_Controller
         		/**
 				 * Compute Sum Insured Amount
 				 */
-        		$object_data['sum_insured_amount'] = _PO_sum_insured_amount($portfolio_id, $data['object']);
+        		$object_data['amt_sum_insured'] = _OBJ_sum_insured_amount($portfolio_id, $data['object']);
 
         		// Insert or Update?
 				if($action === 'add')
@@ -795,8 +795,8 @@ class Objects extends MY_Controller
 			// Valid Record ?
 			$portfolio_id = (int)$portfolio_id;
 
-			$form_elements = _PO_validation_rules($portfolio_id);
-			$form_partial = _PO_attribute_form($portfolio_id);
+			$form_elements = _OBJ_validation_rules($portfolio_id);
+			$form_partial = _OBJ_attribute_form($portfolio_id);
 
 
 			// No form Submitted?

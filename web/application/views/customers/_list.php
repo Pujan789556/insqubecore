@@ -15,6 +15,7 @@ $_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 			<th>Contact</th>
 			<th>Type</th>
 			<th>Profession/Expertise</th>
+			<th>Locked?</th>
 			<?php if( !$_flag__show_widget_row ):?>
 				<th>Actions</th>
 			<?php endif?>

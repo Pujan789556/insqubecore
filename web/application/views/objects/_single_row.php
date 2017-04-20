@@ -8,9 +8,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<?php if( $this->dx_auth->is_admin() ): ?>
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
-	<td><?php echo $record->portfolio_name;?></td>
+	<td><?php echo $record->portfolio_name;?><br/><em class="text-bold" data-toggle="tooltip" title="Sum Insured Amount">RS. <?php echo $record->amt_sum_insured;?></em></td>
 	<td><?php echo $record->customer_name;?></td>
-	<?php echo _PO_row_snippet($record);?>
+	<?php echo _OBJ_row_snippet($record);?>
 	<td class="ins-action" width="20%">
 		<?php if( $this->dx_auth->is_authorized('objects', 'edit.object') ): ?>
 			<a href="#"

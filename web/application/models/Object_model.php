@@ -19,7 +19,7 @@ class Object_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'portfolio_id', 'customer_id', 'attributes', 'sum_insured_amount', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'portfolio_id', 'customer_id', 'attributes', 'amt_sum_insured', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -81,61 +81,6 @@ class Object_model extends MY_Model
 
             'edit' => []
         ];
-    }
-
-    /**
-     * Get Form Elements
-     *
-     * We have 4 different scenarios.
-     *
-     *  Case 1: "add"
-     *      This is regular mode, where you have to supply both portfolio and sub-portfolio
-     *
-     *  Case 2: "add_widget"
-     *      This is when you are creating an object from Policy Add/Edit Form, You will be supplied
-     *      portfolio and sub-portfolio internally, so you need not the validation rule
-     *
-     * Case 3: "edit_new"
-     *      This is when you are editing a newly created policy object which is not assigned to any
-     *      policy. Here you can edit sub-portfolio
-     *
-     * Case 4: "edit_old"
-     *      If you are editing a policy object that is already assigned to a policy, you can not edit
-     *      sub-portfolio
-     *
-     * @param string $action
-     * @param integer $portfolio_id
-     * @return array
-     */
-    public function form_elements___DEPRICATED($action, $portfolio_id=0)
-    {
-        // Set validation rule if not already
-        if( empty($this->validation_rules) )
-        {
-            $this->validation_rules($portfolio_id);
-        }
-
-        $form_elements = [];
-        switch ($action)
-        {
-            case 'add':
-                $form_elements = ['portfolio'=>$this->validation_rules[0], 'subportfolio'=>$this->validation_rules[1]];
-                break;
-
-            case 'add_widget':
-            case 'edit_old':
-                $form_elements = [];
-                break;
-
-            case 'edit_new':
-                $form_elements = ['subportfolio'=>$this->validation_rules[1]];
-                break;
-
-            default:
-                break;
-        }
-
-        return $form_elements;
     }
 
     // --------------------------------------------------------------------
@@ -350,7 +295,7 @@ class Object_model extends MY_Model
      */
     private function _prepare_row_select( )
     {
-        $this->db->select("O.id, O.portfolio_id, O.customer_id, O.attributes,
+        $this->db->select("O.id, O.portfolio_id, O.customer_id, O.attributes, O.amt_sum_insured, O.flag_locked,
                             P.code as portfolio_code, P.name_en as portfolio_name,
                             C.full_name as customer_name")
                  ->from($this->table_name . ' as O')

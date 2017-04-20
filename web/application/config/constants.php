@@ -126,7 +126,7 @@ define('IQB_STATUS_INACTIVE',     0);
 
 /*
 |--------------------------------------------------------------------------
-| YES/NO FLAG, ON/OFF FLAG
+| YES/NO FLAG, ON/OFF FLAG, LOCKED/UNLOCKED FLAG
 |--------------------------------------------------------------------------
 |
 */
@@ -135,6 +135,9 @@ define('IQB_FLAG_NO',     	'N');
 
 define('IQB_FLAG_ON',    	1);
 define('IQB_FLAG_OFF',		0);
+
+define('IQB_FLAG_LOCKED',	1);
+define('IQB_FLAG_UNLOCKED',	0);
 
 
 

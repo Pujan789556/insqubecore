@@ -96,9 +96,9 @@ class Policies extends MY_Controller
 			$params = array_merge($params, $filter_data['data']);
 		}
 
-		$records = $this->policy_model->rows($params);
-		$records = $records ? $records : [];
-		$total = count($records);
+		$records 	= $this->policy_model->rows($params);
+		$records 	= $records ? $records : [];
+		$total 		= count($records);
 
 		/**
 		 * Grab Next ID or Reset It
@@ -381,7 +381,7 @@ class Policies extends MY_Controller
 
 		// Object Details
 		$object_record = $this->object_model->row($record->object_id);
-		$record->object_name = _PO_select_text($object_record);
+		$record->object_name = _OBJ_select_text($object_record);
 		$form_data = [
 			'form_elements' => $v_rules,
 			'record' 		=> $record
@@ -673,7 +673,7 @@ class Policies extends MY_Controller
 			$portfolio_id = (int)$portfolio_id;
 
 			// Policy Package Options
-			$ppo = _PO_policy_package_dropdown($portfolio_id, false);
+			$ppo = _OBJ_policy_package_dropdown($portfolio_id, false);
 
 			// // Sub portfolio Options
 			// $this->load->model('portfolio_model');

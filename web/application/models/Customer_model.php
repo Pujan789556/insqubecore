@@ -19,7 +19,7 @@ class Customer_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "branch_id", "code", "type", "pan", "full_name", "picture", "profession", "contact", "company_reg_no", "citizenship_no", "passport_no", "fts", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ['id', 'branch_id', 'code', 'type', 'pan', 'full_name', 'picture', 'profession', 'contact', 'company_reg_no', 'citizenship_no', 'passport_no', 'fts', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [
         [
@@ -198,7 +198,7 @@ class Customer_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('C.id, C.code, C.pan, C.full_name, C.picture, C.type, C.profession, C.company_reg_no, C.citizenship_no, C.passport_no, C.contact')
+        $this->db->select('C.id, C.code, C.pan, C.full_name, C.picture, C.type, C.profession, C.company_reg_no, C.citizenship_no, C.passport_no, C.contact, C.flag_locked')
                  ->from($this->table_name . ' as C');
 
 

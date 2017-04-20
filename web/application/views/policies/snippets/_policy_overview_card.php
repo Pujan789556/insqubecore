@@ -42,7 +42,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </tr>
                 <tr>
                     <td class="text-bold">Policy Package</td>
-                    <td><?php echo _PO_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
+                    <td><?php echo _OBJ_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
                 </tr>
                 <tr>
                     <td class="text-bold">Proposed By</td>

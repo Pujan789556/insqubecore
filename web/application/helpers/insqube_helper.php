@@ -619,3 +619,59 @@ if ( ! function_exists('active_inactive_text'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('locked_unlocked_text'))
+{
+    /**
+     * Get Locked/Unlocked Text
+     *
+     *
+     * @param char $flag
+     * @return  bool
+     */
+    function locked_unlocked_text( $flag = NULL, $formatted = TRUE )
+    {
+        $text = '';
+
+        if( (int)$flag === IQB_FLAG_LOCKED )
+        {
+            $text = $formatted ? '<i class="fa fa-lock text-muted" title="Locked" data-toggle="tooltip"></i>' : 'Locked';
+        }
+        else if( (int)$flag === IQB_FLAG_UNLOCKED )
+        {
+            $text = $formatted ? '<i class="fa fa-unlock" title="Unlocked" data-toggle="tooltip"></i>': 'Unlocked';
+        }
+        return $text;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('load_portfolio_helper'))
+{
+    /**
+     * Load portfolio specific helper file
+     *
+     * This helper file contains portfolio and portfolio object specific helper functions.
+     *
+     * @param integer $portfolio_id  Portfolio ID
+     * @return void
+     */
+    function load_portfolio_helper( $portfolio_id )
+    {
+
+        $CI =& get_instance();
+
+        /**
+         * MOTOR
+         * -----
+         * We have a single helper file for motor portfolio
+         */
+        if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+        {
+            $CI->load->helper('motor');
+        }
+    }
+}
+
+// ------------------------------------------------------------------------
+

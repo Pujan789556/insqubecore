@@ -125,7 +125,7 @@ class Policy_model extends MY_Model
             $sub_portfolio_rules        = 'trim|required|integer|max_length[11]';
             if($portfolio_id)
             {
-                $policy_package_dropdown    = _PO_policy_package_dropdown($portfolio_id);
+                $policy_package_dropdown    = _OBJ_policy_package_dropdown($portfolio_id);
             }
 
 
@@ -423,6 +423,10 @@ class Policy_model extends MY_Model
              * Verified by and at
              */
             case IQB_POLICY_STATUS_VERIFIED:
+
+                /**
+                 * @TODO - Please lock customer, object and premium table
+                 */
                 $data['verified_by'] = $this->dx_auth->get_user_id();
                 $data['verified_at'] = $this->set_date();
                 break;
@@ -548,7 +552,7 @@ class Policy_model extends MY_Model
 
             if($signle_select)
             {
-                $this->db->join('rel_agent_policy RAP', 'RAP.policy_id = P.id', 'left');
+                $this->db->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left');
             }
         }
 
