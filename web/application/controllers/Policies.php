@@ -34,7 +34,7 @@ class Policies extends MY_Controller
 		// Load Model
 		$this->load->model('policy_model');
 		$this->load->model('object_model');
-		$this->load->model('premium_model');
+		$this->load->model('policy_txn_model');
 
 		// Policy Configuration/Helper
 		$this->load->config('policy');
@@ -318,7 +318,7 @@ class Policies extends MY_Controller
 		}
 
 		$form_data = [
-			'form_elements' => $this->policy_model->validation_rules('add'),
+			'form_elements' => $this->policy_model->validation_rules('add_edit_draft'),
 			'record' 		=> NULL
 		];
 
@@ -377,7 +377,7 @@ class Policies extends MY_Controller
 
 
 		// Validation Rule
-		$v_rules = $this->policy_model->validation_rules('edit', FALSE, $record);
+		$v_rules = $this->policy_model->validation_rules('add_edit_draft', FALSE, $record);
 
 		// Object Details
 		$object_record = $this->object_model->row($record->object_id);
@@ -432,38 +432,23 @@ class Policies extends MY_Controller
 			$done = FALSE;
 
 			// These Rules are Sectioned, We need to merge Together
-			$v_rules = $this->policy_model->validation_rules_formatted($form_data['form_elements']);
+			$v_rules = $this->policy_model->validation_rules('add_edit_draft', TRUE, $record);
             $this->form_validation->set_rules($v_rules);
 			if($this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
 
-        		// Business Referer NULL if not supplied
-        		$data['ref_company_id'] = $data['ref_company_id'] ? $data['ref_company_id'] : NULL;
-
-        		/**
-				 * Reset Creditor Info if "No" Selected
-				 */
-				if($data['flag_on_credit'] === 'N')
-				{
-					$data['creditor_id'] = NULL;
-					$data['creditor_branch_id'] = NULL;
-				}
-
-
         		// Insert or Update?
 				if($action === 'add')
 				{
-					$done = $this->policy_model->insert($data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$done ? $this->policy_model->log_activity($done, 'C'): '';
+					$done = $this->policy_model->add_debit_note($data); // No Validation on Model
 				}
 				else
 				{
 
 					// Now Update Data
-					$done = $this->policy_model->update($record->id, $data, TRUE) && $this->policy_model->log_activity($record->id, 'E');
+					$done = $this->policy_model->edit_debit_note($record->id, $data);
+
 
 					/**
 					 * Policy Package Changed?
@@ -628,15 +613,6 @@ class Policies extends MY_Controller
 
 		if($done)
 		{
-			/**
-			 * @TODO: Delete all related media
-			 */
-			// if($record->picture)
-			// {
-
-			// 	delete_insqube_document($this->_upload_path . $record->picture);
-			// }
-
 			$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
@@ -674,10 +650,6 @@ class Policies extends MY_Controller
 
 			// Policy Package Options
 			$ppo = _OBJ_policy_package_dropdown($portfolio_id, false);
-
-			// // Sub portfolio Options
-			// $this->load->model('portfolio_model');
-			// $spo = $this->portfolio_model->dropdown_children($portfolio_id);
 
 			if( !empty($ppo))
 			{
@@ -754,8 +726,10 @@ class Policies extends MY_Controller
 			}
 			if( $__flag_reset === TRUE )
 			{
-				$this->premium_model->reset($before_update->id);
+
+				return $this->policy_txn_model->reset($before_update->id);
 			}
+			return TRUE;
 		}
 
 	    // --------------------------------------------------------------------
@@ -960,7 +934,6 @@ class Policies extends MY_Controller
 	    	$object_id 		= (int)$object_id;
 	    	$customer_id 	= (int)$this->input->post('customer_id');
 	    	$portfolio_id 		= (int)$this->input->post('portfolio_id');
-	    	$sub_portfolio_id 	= (int)$this->input->post('sub_portfolio_id');
 
 	    	/**
 	    	 * Case 1 : Check Ownership
@@ -1034,7 +1007,7 @@ class Policies extends MY_Controller
 	    	 * Case 3 : Portfolio/Sub-portfolio Match between Policy-Object
 	    	 * ------------------------------------------------------------
 	    	 */
-	    	if( $object_record->portfolio_id != $portfolio_id || $object_record->sub_portfolio_id != $sub_portfolio_id )
+	    	if( $object_record->portfolio_id != $portfolio_id )
     		{
     			$this->form_validation->set_message('_cb_valid_object_defaults', "The object's Portfolio/Sub-portfolio MUST match with Policy's Portfolio/Sub-Portfolio");
             	return FALSE;
@@ -1043,36 +1016,7 @@ class Policies extends MY_Controller
 	        return TRUE;
 	    }
 
-
 		// --------------------------------------------------------------------
-
-
-		/**
-		 * Sub-function: Upload Policy Profile Picture
-		 *
-		 * @param string|null $old_picture
-		 * @return array
-		 */
-		private function _upload_profile_picture( $old_picture = NULL )
-		{
-			$options = [
-				'config' => [
-					'encrypt_name' => TRUE,
-	                'upload_path' => $this->_upload_path,
-	                'allowed_types' => 'gif|jpg|jpeg|png',
-	                'max_size' => '2048'
-				],
-				'form_field' => 'picture',
-
-				'create_thumb' => TRUE,
-
-				// Delete Old file
-				'old_files' => $old_picture ? [$old_picture] : [],
-				'delete_old' => TRUE
-			];
-			return upload_insqube_media($options);
-		}
-
 
 
 	// --------------------------------------------------------------------

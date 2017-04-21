@@ -138,8 +138,8 @@ class Object_model extends MY_Model
 
             if($policy_record && is_policy_editable($policy_record->status, FALSE) === TRUE)
             {
-                $this->load->model('premium_model');
-                $this->premium_model->reset($policy_record->id);
+                $this->load->model('policy_txn_model');
+                $this->policy_txn_model->reset($policy_record->id);
             }
         }
         return FALSE;

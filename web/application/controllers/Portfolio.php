@@ -379,18 +379,19 @@ class Portfolio extends MY_Controller
 		$json_data = $this->_save_settings('add');
 
 
-		// No form Submitted?
-		$portfolios = $this->portfolio_model->dropdown_parent();
+
+		$portfolios_tree 		= $this->portfolio_model->dropdown_children_tree();
+		$children_portfolios 	= $this->portfolio_model->dropdown_children();
 
 		// Short term policy rate Validation Rules
-		$spr_validation_rules = $this->__settings_stpr_validation_rules($portfolios, []);
+		$spr_validation_rules = $this->__settings_stpr_validation_rules($children_portfolios, []);
 
 		$json_data['form'] = $this->load->view('setup/portfolio/_form_settings',
 			[
 				'form_elements' 			=> $this->portfolio_setting_model->fy_validation_rules(),
 				'sectioned_elements' 		=> $this->portfolio_setting_model->sectioned_validation_rules(),
 				'spr_validation_rules' 		=> $spr_validation_rules,
-				'portfolios' 			=> $portfolios,
+				'portfolios_tree' 		=> $portfolios_tree,
 				'action' 				=> 'add',
 				'record' 				=> $record
 			], TRUE);
@@ -404,14 +405,14 @@ class Portfolio extends MY_Controller
 		/**
 		 * Get Short Term Policy Rate - Validation Rules
 		 *
-		 * @param array $portfolios Portfolio Dropdown
+		 * @param array $child_portfolios Portfolio Dropdown (All Children)
 		 * @return array
 		 */
-		private function __settings_stpr_validation_rules($portfolios, $settings=[], $formatted=false)
+		private function __settings_stpr_validation_rules($child_portfolios, $settings=[], $formatted=false)
 		{
 			$spr_validation_rules = [];
 
-			foreach($portfolios as $portfolio_id=>$portfolio_name)
+			foreach($child_portfolios as $portfolio_id=>$portfolio_name)
 			{
 				/**
 				 * If Formatted, We only return to Run Validation Rule
@@ -534,13 +535,15 @@ class Portfolio extends MY_Controller
 
 
 		// No form Submitted?
-		$portfolios = $this->portfolio_model->dropdown_parent();
+
+		$portfolios_tree 		= $this->portfolio_model->dropdown_children_tree();
+		$children_portfolios 	= $this->portfolio_model->dropdown_children();
 
 		$rules = $this->portfolio_setting_model->validation_rules;
 		$rules[0]['_data'] = IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown();
 
 		// Short term policy rate Validation Rules
-		$spr_validation_rules = $this->__settings_stpr_validation_rules($portfolios, $settings);
+		$spr_validation_rules = $this->__settings_stpr_validation_rules($children_portfolios, $settings);
 
 		$json_data['form'] = $this->load->view('setup/portfolio/_form_settings',
 			[
@@ -548,7 +551,7 @@ class Portfolio extends MY_Controller
 				'sectioned_elements' 		=> $this->portfolio_setting_model->sectioned_validation_rules(),
 				'spr_validation_rules' 		=> $spr_validation_rules,
 				'action' 			=> 'edit',
-				'portfolios' 		=> $portfolios,
+				'portfolios_tree' 	=> $portfolios_tree,
 				'settings' 			=> $settings,
 				'record' 			=> $record
 			], TRUE);
@@ -586,14 +589,17 @@ class Portfolio extends MY_Controller
 		if( $this->input->post() )
 		{
 
-			$portfolios = $this->portfolio_model->dropdown_parent();
+			// $portfolios = $this->portfolio_model->dropdown_parent();
+
+			$portfolios_tree 		= $this->portfolio_model->dropdown_children_tree();
+			$children_portfolios 	= $this->portfolio_model->dropdown_children();
 
 			$done = FALSE;
 
 			$rules = $this->portfolio_setting_model->validation_rules;
 
 			// Short term policy rate Validation Rules
-			$spr_validation_rules = $this->__settings_stpr_validation_rules($portfolios, [], true);
+			$spr_validation_rules = $this->__settings_stpr_validation_rules($children_portfolios, [], true);
 
 			// Merge both rules
 			$v_rules = array_merge($rules, $spr_validation_rules);
@@ -616,7 +622,7 @@ class Portfolio extends MY_Controller
 				if($action === 'add')
 				{
 					$i = 0;
-					foreach($portfolios as $portfolio_id => $portfolio_name)
+					foreach($children_portfolios as $portfolio_id => $portfolio_name)
 					{
 						$data = [
 							'fiscal_yr_id' 		=> $fiscal_yr_id,
@@ -657,7 +663,7 @@ class Portfolio extends MY_Controller
 					// Now Update Data
 					$setting_ids = $this->input->post('setting_ids');
 					$i = 0;
-					foreach($portfolios as $portfolio_id => $portfolio_name)
+					foreach($children_portfolios as $portfolio_id => $portfolio_name)
 					{
 						$data = [
 							'agent_commission' 	=> $agent_commission[$i],
@@ -728,7 +734,7 @@ class Portfolio extends MY_Controller
 			$rules 				= $this->portfolio_setting_model->validation_rules;
 			$rules[0]['_data'] 	= IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown();
 			$settings 			= $record ? $this->portfolio_setting_model->get_list_by_fiscal_year($record->fiscal_yr_id) : NULL;
-			$spr_validation_rules = $this->__settings_stpr_validation_rules($portfolios, $settings);
+			$spr_validation_rules = $this->__settings_stpr_validation_rules($children_portfolios, $settings);
 			$return_data = [
 				'status' 		=> $status,
 				'message' 		=> $message,
@@ -756,7 +762,7 @@ class Portfolio extends MY_Controller
 												'sectioned_elements' 		=> $this->portfolio_setting_model->sectioned_validation_rules(),
 												'record' 		=> $record,
 												'action' 		=> $action,
-												'portfolios' 	=> $portfolios,
+												'portfolios_tree' 	=> $portfolios_tree,
 												'settings' 		=> $settings,
 												'spr_validation_rules' => $spr_validation_rules
 											], TRUE)

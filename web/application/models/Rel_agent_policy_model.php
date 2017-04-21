@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Rel_agent_policy_model extends MY_Model
 {
-    protected $table_name = 'rel_agent_policy';
+    protected $table_name = 'rel_agent__policy';
 
     protected $skip_validation = TRUE;
 

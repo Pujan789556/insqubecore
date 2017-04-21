@@ -19,7 +19,8 @@ class Policy_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = [ "id", "fiscal_yr_id", "code", "policy_nr", "branch_id", "proposer", "customer_id", "flag_on_credit", "creditor_id", "creditor_branch_id", "care_of", "portfolio_id", "policy_package", "sold_by", "object_id", "proposed_date", "issued_date", "issued_time", "start_date", "start_time", "end_date", "end_time", "flag_dc", "flag_short_term", "ref_company_id", "status", "verified_by", "verified_at", "created_at", "created_by", "updated_at", "updated_by" ];
+
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'policy_nr', 'proposer', 'customer_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'flag_locked', 'status', 'cur_amt_sum_insured', 'cur_amt_total_premium', 'cur_amt_pool_premium', 'cur_amt_commissionable', 'cur_amt_agent_commission', 'cur_amt_stamp_duty', 'cur_amt_vat', 'created_at', 'created_by', 'updated_at', 'updated_by' ];
 
     protected $validation_rules = [];
 
@@ -51,31 +52,53 @@ class Policy_model extends MY_Model
 
 
     // ----------------------------------------------------------------
-
     /**
-     * Get/Set Validation rule and return (either formatted or section-ed)
+     * Set/Get Validation Rules
      *
-     * GET/SET multi section Validation Rule for Policy Creation/Edit
+     * Set the validation rules as per the action specified.
+     * And returns the rules (Formatted/Sectioned)
      *
-     * @param string $action    add|edit
-     * @param bool  $formatted  Multi-sectioned or Formatted to pass into Form Validation Library
-     * @param object $record    Policy Record
+     * @param string $action
+     * @param bool $formatted
+     * @param object|null $record
      * @return array
      */
-    public function validation_rules($action, $formatted=FALSE, $record = NULL)
+    public function validation_rules($action, $formatted = FALSE, $record=NULL)
     {
-        $this->__set_validation_rule($action, $record);
+        /**
+         * Set the Validation Rules According to the action
+         */
+        $this->validation_rules = [];
 
-        // Now Return
-        if($formatted)
+        switch($action)
         {
-            return $this->validation_rules_formatted($this->validation_rules);
+            case 'add_edit_draft':
+                $this->__set_v_rules__add_edit_draft($record);
+                break;
+
+            default:
+                break;
         }
 
-        return $this->validation_rules;
+        if( !$formatted )
+        {
+            return $this->validation_rules;
+        }
+        else
+        {
+            return $this->__get_v_rules__formatted();
+        }
     }
 
-        private function __set_validation_rule($action, $record=NULL)
+    // ----------------------------------------------------------------
+
+        /**
+         * Set Validation Rules for Add/Edit Draft Policy
+         *
+         * @param object|null $record
+         * @return void
+         */
+        private function __set_v_rules__add_edit_draft($record=NULL)
         {
             $this->load->model('portfolio_model');
             $this->load->model('user_model');
@@ -122,17 +145,26 @@ class Policy_model extends MY_Model
             $creditor_id = $this->input->post('creditor_id') ? (int)$this->input->post('creditor_id') : ($record->creditor_id ?? NULL);
 
             $policy_package_dropdown    = IQB_BLANK_SELECT;
-            $sub_portfolio_rules        = 'trim|required|integer|max_length[11]';
             if($portfolio_id)
             {
+                $portfolio_id               = (int)$portfolio_id;
                 $policy_package_dropdown    = _OBJ_policy_package_dropdown($portfolio_id);
             }
 
-
             $creditor_branch_dropdown   = $creditor_id ? IQB_BLANK_SELECT + $this->company_branch_model->dropdown_by_company($creditor_id) : IQB_BLANK_SELECT;
 
+
+            // Set the Validation Rules
             $this->validation_rules = [
 
+                /**
+                 * Validation Rules For
+                 * --------------------
+                 *  a. Fresh Policy Add
+                 *  b. Fresh Policy Draft Edit
+                 *  c. Renewal Policy Add
+                 *  d. Renewal Policy Draft Edit
+                 */
                 /**
                  * Portfolio Information
                  */
@@ -247,8 +279,6 @@ class Policy_model extends MY_Model
                     ]
                 ],
 
-
-
                 /**
                  * Policy Object Information
                  */
@@ -360,44 +390,111 @@ class Policy_model extends MY_Model
                 ]
 
             ];
-
-
-            /**
-             * ID is compulsory in EDIT
-             *
-             * This is required as for some callbacks such as "_cb_valid_object_defaults"
-             */
-            if($action === 'edit')
-            {
-                $this->validation_rules['edit_extras'] = [
-                    [
-                        'field' => 'id',
-                        'label' => 'Policy ID',
-                        'rules' => 'trim|required|integer|max_length[11]',
-                        '_type'     => 'hidden',
-                        '_id'       => 'policy-id',
-                        '_required' => true
-                    ]
-                ];
-            }
         }
 
     // ----------------------------------------------------------------
 
-    public function validation_rules_formatted($validation_rules)
-    {
-
-        $v_rules = [];
-
-        // Merge All Sections and return
-        foreach($validation_rules as $section=>$rules)
+        /**
+         * Get Formatted Validation Rules
+         *
+         * @return array
+         */
+        private function __get_v_rules__formatted( )
         {
-            $v_rules = array_merge($v_rules, $rules);
+            $v_rules_formatted  = [];
+
+            // Merge All Sections and return
+            foreach($this->validation_rules as $section=>$rules)
+            {
+                $v_rules_formatted = array_merge($v_rules_formatted, $rules);
+            }
+            return $v_rules_formatted;
         }
-        return $v_rules;
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Add a Fresh/Renewal Policy Debit Note(Draft)
+     *
+     * @param array $data
+     * @return mixed
+     */
+    public function add_debit_note($data)
+    {
+        // Disable DB Debug for transaction to work
+        // $this->db->db_debug = FALSE;
+        $id                 = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Task a: Insert Master Record, No Validation Required as it is performed on Controller
+            $id = parent::insert($data, TRUE);
+
+            // Task b. Insert Broker Relations
+            if($id)
+            {
+                // Log Activity
+                $this->log_activity($id, 'C');
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $id = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $id;
     }
 
     // ----------------------------------------------------------------
+
+    public function edit_debit_note($id, $data)
+    {
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $status             = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Task a: Update Master Record, No Validation Required as it is performed on Controller
+            $status = parent::update($id, $data, TRUE);
+
+            // Task b. Update Broker Relations
+            if($status)
+            {
+                // Log Activity
+                $this->log_activity($id, 'E');
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $status;
+    }
+
+    // ----------------------------------------------------------------
+
 
     /**
      * Update Policy Status
@@ -673,11 +770,26 @@ class Policy_model extends MY_Model
         // Status
         $data['status'] = IQB_POLICY_STATUS_DRAFT;
 
+
         // Fiscal Year
         $data['fiscal_yr_id'] = $fy_record->id;
 
+
+        // Business Referer NULL if not supplied
+        $data['ref_company_id'] = $data['ref_company_id'] ? $data['ref_company_id'] : NULL;
+
+
+        // Reset Creditor Info if "No" Selected
+        if($data['flag_on_credit'] === 'N')
+        {
+            $data['creditor_id']        = NULL;
+            $data['creditor_branch_id'] = NULL;
+        }
+
+
         // Refactor Date & time
         $data = $this->__refactor_datetime_fields($data);
+
 
         /**
          * Short Term Flag???
@@ -829,11 +941,6 @@ class Policy_model extends MY_Model
                 $this->rel_agent_policy_model->insert($relation_data, TRUE);
             }
 
-            /**
-             * TASK 2: Update Sum Insured value on "Premium Table"
-             * ----------------------------------------------------
-             */
-
 
             return TRUE;
 
@@ -921,7 +1028,6 @@ class Policy_model extends MY_Model
     public function clear_cache($data=null)
     {
         $cache_names = [
-
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)
@@ -959,6 +1065,7 @@ class Policy_model extends MY_Model
         $this->db->trans_start();
 
             parent::delete($id);
+            $this->log_activity($id, 'D');
 
         $this->db->trans_complete();
 
@@ -966,10 +1073,6 @@ class Policy_model extends MY_Model
         {
             // generate an error... or use the log_message() function to log your error
             $status = FALSE;
-        }
-        else
-        {
-            $this->log_activity($id, 'D');
         }
 
         // Enable db_debug if on development environment
@@ -996,9 +1099,9 @@ class Policy_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'policy',
+            'module'    => 'policy',
             'module_id' => $id,
-            'action' => $action
+            'action'    => $action
         ];
         return $this->activity->save($activity_log);
     }

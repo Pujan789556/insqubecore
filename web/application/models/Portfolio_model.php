@@ -55,6 +55,9 @@ class Portfolio_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+
+        // Cache clear
+        $this->clear_cache();
     }
 
     // ----------------------------------------------------------------
@@ -218,7 +221,7 @@ class Portfolio_model extends MY_Model
         $list = $this->get_cache($cache_var);
         if(!$list)
         {
-            $this->db->select('L1.*, L2.name_en as parent_name_en, L2.name_np as parent_name_np')
+            $this->db->select('L1.*, L2.code as parent_code, L2.name_en as parent_name_en, L2.name_np as parent_name_np')
                              ->from($this->table_name . ' L1')
                              ->join($this->table_name . ' L2', 'L1.parent_id = L2.id', 'left');
 
@@ -254,7 +257,7 @@ class Portfolio_model extends MY_Model
         foreach($records as $record)
         {
             $column = $record->{$field};
-            $list["{$column}"] = $record->parent_name_en . ' - ' . $record->name_en;
+            $list["{$column}"] = $record->parent_code . ' - ' . $record->name_en;
         }
         return $list;
     }
