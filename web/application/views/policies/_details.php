@@ -9,8 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<div class="nav-tabs-custom">
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#tab-policy-overview" data-toggle="tab">Overview</a></li>
-				<li><a href="#timeline" data-toggle="tab">Documents</a></li>
-				<li><a href="#timeline" data-toggle="tab">Endorsements</a></li>
+				<li><a href="#timeline" data-toggle="tab">Transactions/Endorsements</a></li>
 				<li><a href="#targets" data-toggle="tab">Invoices</a></li>
 				<li><a href="#settings" data-toggle="tab">Documents</a></li>
 				<li><a href="#settings" data-toggle="tab">Claim</a></li>

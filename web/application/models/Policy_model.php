@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'policy_nr', 'proposer', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'flag_locked', 'status', 'cur_amt_sum_insured', 'cur_amt_total_premium', 'cur_amt_pool_premium', 'cur_amt_commissionable', 'cur_amt_agent_commission', 'cur_amt_stamp_duty', 'cur_amt_vat', 'created_at', 'created_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'policy_nr', 'proposer', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'cur_amt_sum_insured', 'cur_amt_total_premium', 'cur_amt_pool_premium', 'cur_amt_commissionable', 'cur_amt_agent_commission', 'cur_amt_stamp_duty', 'cur_amt_vat', 'created_at', 'created_by', 'verified_at', 'verified_by', 'approved_at', 'approved_by', 'updated_at', 'updated_by' ];
 
     protected $validation_rules = [];
 
@@ -988,34 +988,87 @@ class Policy_model extends MY_Model
      */
     public function get($id)
     {
-        return $this->db->select(  "P.*,
-                                    TIMESTAMP( P.`issued_date`, P.`issued_time` ) AS issued_datetime,
-                                    TIMESTAMP( P.`start_date`, P.`start_time` ) AS start_datetime,
-                                    TIMESTAMP( P.`end_date`, P.`end_time` ) AS end_datetime,
-                                    PRT.name_en as portfolio_name, PRT.code as portfolio_code,
-                                    SPRT.name_en as sub_portfolio_name, SPRT.code as sub_portfolio_code,
-                                    PRM.total_premium_amount, PRM.stamp_duty_amount, PRM.attributes as premium_attributes,
-                                    B.name as branch_name, B.code as branch_code, B.contacts as branch_contact,
-                                    C.code as customer_code, C.full_name as customer_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no,
-                                    O.attributes as object_attributes,
-                                    A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type,
-                                    CRD.name as creditor_name, CRD.contact as creditor_contact,
-                                    CRB.name as creditor_branch_name, CRB.contact as creditor_branch_contact,
-                                    SU.username as sales_staff_username, SU.profile as sales_staff_profile,
-                                    CU.username as created_by_username, CU.code as created_by_code, CU._profile_name as created_by_profile_name,
-                                    VU.username as verified_by_username, VU.code as verified_by_code, VU._profile_name as verified_by_profile_name
-                            ")
+        return $this->db->select(
+
+                            /**
+                             * Policy Table (all fields, formatted datetime fields)
+                             */
+                            "P.*,
+                            TIMESTAMP( P.`issued_date`, P.`issued_time` ) AS issued_datetime,
+                            TIMESTAMP( P.`start_date`, P.`start_time` ) AS start_datetime,
+                            TIMESTAMP( P.`end_date`, P.`end_time` ) AS end_datetime, " .
+
+
+                            /**
+                             * Branch Table
+                             */
+                            "B.name as branch_name, B.code as branch_code, B.contacts as branch_contact, " .
+
+
+                            /**
+                             * Portfolio Table ( code, name )
+                             */
+                            "PRT.name_en as portfolio_name, PRT.code as portfolio_code, " .
+
+
+                            /**
+                             * Object Table (attributes, sum insured amount, lock flag)
+                             */
+                            "O.attributes AS object_attributes, O.amt_sum_insured AS object_amt_sum_insured, O.flag_locked AS object_flag_locked, " .
+
+
+                            /**
+                             * Customer Table (code, name, type, pan, picture, pfrofession, contact,
+                             * company reg no, citizenship no, passport no, lock flag)
+                             */
+                            "C.code as customer_code, C.full_name as customer_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no, C.flag_locked AS customer_flag_locked, " .
+
+
+                            /**
+                             * User Table - Sales Staff Info ( username, profile)
+                             */
+                            "SU.username as sold_by_username, SU.code AS sold_by_code, SU.profile as sold_by_profile, " .
+
+
+                            /**
+                             * User Table - Created By User Info (username, code, name)
+                             */
+                            "CU.username as created_by_username, CU.code as created_by_code, CU.profile as created_by_profile, " .
+
+                            /**
+                             * User Table - Verified By User Info (username, code, name)
+                             */
+                            "VU.username as verified_by_username, VU.code as verified_by_code, VU.profile as verified_by_profile, " .
+
+
+                            /**
+                             * User Table - Approved By User Info (username, code, name)
+                             */
+                            "AU.username as approved_by_username, AU.code as approved_by_code, AU.profile as approved_by_profile, " .
+
+
+                            /**
+                             * Agent Table (agent_id, name, picture, bs code, ud code, contact, active, type)
+                             */
+                            "A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type, " .
+
+
+                            /**
+                             * Crediter & Its Branch Info (name, contact), (branch name, branch contact)
+                             */
+                            "CRD.name as creditor_name, CRD.contact as creditor_contact, " .
+                            "CRB.name as creditor_branch_name, CRB.contact as creditor_branch_contact"
+                        )
                      ->from($this->table_name . ' as P')
-                     ->join('dt_policy_premium PRM', 'PRM.policy_id = P.id')
-                     ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
-                     ->join('master_portfolio SPRT', 'SPRT.id = P.sub_portfolio_id')
-                     ->join('dt_customers C', 'C.id = P.customer_id')
-                     ->join('dt_objects O', 'O.id = P.object_id')
                      ->join('master_branches B', 'B.id = P.branch_id')
-                     ->join('auth_users CU', 'CU.id = P.created_by')
+                     ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
+                     ->join('dt_objects O', 'O.id = P.object_id')
+                     ->join('dt_customers C', 'C.id = P.customer_id')
                      ->join('auth_users SU', 'SU.id = P.sold_by')
+                     ->join('auth_users CU', 'CU.id = P.created_by')
                      ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
-                     ->join('rel_agent_policy RAP', 'RAP.policy_id = P.id', 'left')
+                     ->join('auth_users AU', 'AU.id = P.approved_by', 'left')
+                     ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
                      ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
                      ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
                      ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
@@ -1023,7 +1076,7 @@ class Policy_model extends MY_Model
                      ->get()->row();
     }
 
-
+    // ----------------------------------------------------------------
 
 
     /**

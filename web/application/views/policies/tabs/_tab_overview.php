@@ -26,7 +26,50 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-sm-6 col-md-4">
+		<div class="col-sm-6 col-md-8">
+			<?php
+			/**
+			 * Policy Overvivew Card
+			 */
+			$this->load->view('policies/snippets/_policy_overview_card', ['record' => $record]);
+
+
+			/**
+			 * Policy Premium Card
+			 */
+			// $premium_record = (object)[
+			// 	'policy_id' 	=> $record->id,
+			// 	'total_premium_amount' 	=> $record->total_premium_amount,
+			// 	'stamp_duty_amount' 	=> $record->stamp_duty_amount,
+			// 	'attributes'	=> $record->premium_attributes
+			// ];
+			// $this->load->view('premium/_card_overview', ['premium_record' => $premium_record, 'policy_record' => $record]);
+			?>
+			<h3 class="text-red">@TODO: Current Premium Cost Table</h3>
+			<h3 class="text-red">@TODO: Current RI Distribution Table</h3>
+			<h3 class="text-red">@TODO: Fresh Policy सम्पुष्टि विवरण</h3>
+		</div>
+		<div class="col-sm-6 col-md-4 no-padding-l-col-sm no-padding-l-col-md">
+			<?php
+
+			/**
+			* Policy Object Card
+			*/
+			$__flag_object_editable = is_policy_editable($record->status, FALSE);
+			$object_record = (object)[
+				'id' 				=> $record->object_id,
+	            'portfolio_id'  	=> $record->portfolio_id,
+	            'portfolio_name' 	=> $record->portfolio_name,
+	            'customer_name' 	=> $record->customer_name,
+	            'amt_sum_insured' 	=> $record->object_amt_sum_insured,
+	            'attributes'    	=> $record->object_attributes,
+	            'flag_locked'		=> $record->object_flag_locked,
+	        ];
+
+			$this->load->view('objects/snippets/_object_card', ['record' => $object_record, '__flag_object_editable' => $__flag_object_editable]);
+			?>
+
+
 			<?php
 			/**
 			* Customer Overview
@@ -42,7 +85,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				'passport_no' 		=> $record->passport_no,
 				'pan' 				=> $record->customer_pan,
 				'profession' 		=> $record->customer_profession,
-				'contact' 			=> $record->customer_contact
+				'contact' 			=> $record->customer_contact,
+				'flag_locked'		=> $record->customer_flag_locked
 			];
 			/**
 			* Customer Widget
@@ -50,72 +94,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			$this->load->view('customers/snippets/_widget_profile', ['record' => $customer_record]);
 			?>
 
-			<?php
 
-			/**
-			* Policy Object Card
-			*/
-			$__flag_object_editable = is_policy_editable($record->status, FALSE);
-			$object_record = (object)[
-				'id' 				=> $record->object_id,
-	            'portfolio_id'  	=> $record->portfolio_id,
-	            'sub_portfolio_id'  => $record->sub_portfolio_id,
-	            'attributes'    	=> $record->object_attributes
-	        ];
-			$this->load->view('objects/snippets/_object_card', ['record' => $object_record, '__flag_object_editable' => $__flag_object_editable]);
-			?>
 
 		</div>
-		<div class="col-sm-6 col-md-8">
-			<?php
-			/**
-			 * Policy Overvivew Card
-			 */
-			$this->load->view('policies/snippets/_policy_overview_card', ['record' => $record]);
 
-
-			/**
-			 * Policy Premium Card
-			 */
-			$premium_record = (object)[
-				'policy_id' 	=> $record->id,
-				'total_premium_amount' 	=> $record->total_premium_amount,
-				'stamp_duty_amount' 	=> $record->stamp_duty_amount,
-				'attributes'	=> $record->premium_attributes
-			];
-			$this->load->view('premium/_card_overview', ['premium_record' => $premium_record, 'policy_record' => $record]);
-			?>
-
-			<div class="row">
-				<div class="col-sm-12">
-					<?php
-					/**
-					* Sales Staff Card
-					*/
-					// $this->load->view('policies/snippets/_sales_staff_card', ['record' => $record]);
-
-
-					// if($record->flag_dc == 'C')
-					// {
-					// 	/**
-					// 	* Agent Widget
-					// 	*/
-					// 	$agent_record = (object)[
-					// 		'id' 			=> $record->agent_id,
-					// 		'name' 			=> $record->agent_name,
-					// 		'picture' 		=> $record->agent_picture,
-					// 		'ud_code' 		=> $record->agent_ud_code,
-					// 		'bs_code' 		=> $record->agent_bs_code,
-					// 		'type' 			=> $record->agent_type,
-					// 		'active' 		=> $record->agent_active,
-					// 		'contact' 		=> $record->agent_contact
-					// 	];
-					// 	$this->load->view('setup/agents/snippets/_widget_profile', ['record' => $agent_record]);
-					// }
-					?>
-				</div>
-			</div>
-
-		</div>
 	</div>
 </div>

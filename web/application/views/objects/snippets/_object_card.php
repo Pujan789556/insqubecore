@@ -10,9 +10,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <span class="pull-left">Policy Object Details</span>
         <span class="pull-right">
             <?php if( $__flag_object_editable ): ?>
-                <span class="action divider"></span>
                 <a href="#"
-                    class="action trg-dialog-edit"
+                    class="trg-dialog-edit btn btn-primary btn-sm"
                     title="Edit Object Information"
                     data-toggle="tooltip"
                     data-box-size="large"
@@ -21,11 +20,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     data-form="#_form-object">
                     <i class="fa fa-pencil-square-o"></i>
                 </a>
+            <?php elseif ($record->flag_locked):?>
+                <i class="fa fa-lock" data-toggle="tooltip" title="Locked"></i>
             <?php endif?>
         </span>
         </h3>
     </div>
-    <div class="box-body">
+    <div class="box-body bg-gray-light">
         <?php
         /**
         * Policy Object Details

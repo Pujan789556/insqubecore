@@ -8,8 +8,11 @@
 .pad-t-0{padding-top:0px !important;}
 .no-border-b{border-bottom: none !important;}
 .no-margin-b{margin-bottom: 0px !important;}
+.no-padding-b{padding-bottom: 0px !important;}
 .no-shadow{box-shadow: none;}
 .hr-medium{margin-top:10px; margin-bottom: 10px;}
+
+
 
 /* ------------------------------ */
 /* -- Nav Bar User Image Style -- */
@@ -42,6 +45,7 @@
   color:rgba(255,255,255,0.5);
 }
 /* -- END: Nav Bar User Image Style -- */
+
 
  /* -- Selectable Component -- */
 .selectable:hover{
@@ -223,28 +227,86 @@ h4.box-title{
 }
 
 
-/*----------------------*/
- /* -- Media Queries -- */
- /*----------------------*/
-@media only screen and (min-width : 768px) {
+/*==================================================
+=            Bootstrap 3 Media Queries             =
+==================================================*/
 
-  /*-- Search Filter --*/
-  .ins-box-filter .form-group{width:200px; margin-top:10px;}
-  .ins-box-filter .form-group label{padding-left:1px; margin-bottom: 0px}
-  .ins-box-filter .form-control{width:185px;}
-}
-@media only screen and (max-width : 767px) {
 
-  /*-- box-tools --*/
-  .box-header>.box-tools{
-    position: relative;
-    right: inherit;
-    top: inherit;
-    margin-top:10px;
-  }
 
-  /* -- Master Action -- */
-  .master-actions{
-    margin-top:10px;
-  }
-}
+    /*==========  Mobile First Method  ==========*/
+
+    /* Custom, iPhone Retina */
+    @media only screen and (min-width : 320px) {
+
+    }
+
+    /* Extra Small Devices, Phones */
+    @media only screen and (min-width : 480px) {
+
+    }
+
+    /* Small Devices, Tablets */
+    @media only screen and (min-width : 768px) {
+
+      /*-- Search Filter --*/
+      .ins-box-filter .form-group{width:200px; margin-top:10px;}
+      .ins-box-filter .form-group label{padding-left:1px; margin-bottom: 0px}
+      .ins-box-filter .form-control{width:185px;}
+    }
+
+    /* Medium Devices, Desktops */
+    @media only screen and (min-width : 992px) {
+
+      /* -- No padding on sm col -- */
+      .no-padding-l-col-sm{padding-left:0;}
+      .no-padding-r-col-sm{padding-right:0;}
+
+    }
+
+    /* Large Devices, Wide Screens */
+    @media only screen and (min-width : 1200px) {
+
+      /* -- No padding on md col -- */
+      .no-padding-l-col-md{padding-left:0;}
+      .no-padding-r-col-md{padding-left:0;}
+    }
+
+    /*==========  Non-Mobile First Method  ==========*/
+
+    /* Large Devices, Wide Screens */
+    @media only screen and (max-width : 1200px) {
+
+    }
+
+    /* Medium Devices, Desktops */
+    @media only screen and (max-width : 992px) {
+
+    }
+
+    /* Small Devices, Tablets */
+    @media only screen and (max-width : 768px) {
+
+      /*-- box-tools --*/
+      .box-header>.box-tools{
+        position: relative;
+        right: inherit;
+        top: inherit;
+        margin-top:10px;
+      }
+
+      /* -- Master Action -- */
+      .master-actions{
+        margin-top:10px;
+      }
+    }
+
+    /* Extra Small Devices, Phones */
+    @media only screen and (max-width : 480px) {
+
+    }
+
+    /* Custom, iPhone Retina */
+    @media only screen and (max-width : 320px) {
+
+    }
+

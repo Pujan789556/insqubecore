@@ -10,9 +10,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <span class="pull-left">Policy Details</span>
             <span class="pull-right">
                 <?php if( is_policy_editable($record->status, FALSE) ): ?>
-                        <span class="action divider"></span>
                         <a href="#"
-                            class="action trg-dialog-edit"
+                            class="trg-dialog-edit btn btn-primary btn-sm"
                             title="Edit Policy Information"
                             data-toggle="tooltip"
                             data-box-size="large"
@@ -25,87 +24,105 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             </span>
         </h3>
     </div>
-    <div class="box-body">
-        <table class="table no-margin no-border">
-            <tbody>
-                <tr>
-                    <td class="text-bold">Policy Code</td>
-                    <td><?php echo $record->code?></td>
-                </tr>
-                <tr>
-                    <td class="text-bold">Portfolio</td>
-                    <td><?php echo $record->portfolio_name?></td>
-                </tr>
-                <tr>
-                    <td class="text-bold">Sub Portfolio</td>
-                    <td><?php echo $record->sub_portfolio_name?></td>
-                </tr>
-                <tr>
-                    <td class="text-bold">Policy Package</td>
-                    <td><?php echo _OBJ_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
-                </tr>
-                <tr>
-                    <td class="text-bold">Proposed By</td>
-                    <td><?php echo nl2br($this->security->xss_clean($record->proposer));?></td>
-                </tr>
 
-                <tr>
-                    <td class="text-bold">Policy Proposed Date</td>
-                    <td><?php echo $record->proposed_date?></td>
-                </tr>
-                <tr>
-                    <td class="text-bold">Object on Loan/Financed?</td>
-                    <td><?php echo $record->flag_on_credit === 'Y' ? 'Yes' : 'No';?></td>
-                </tr>
-                <?php if($record->flag_on_credit === 'Y'):?>
-                    <tr>
-                        <td class="text-bold">Insured Party</td>
-                        <td><?php echo $this->security->xss_clean($record->creditor_name);?>, <?php echo $this->security->xss_clean($record->creditor_branch_name);?></td>
-                    </tr>
-                    <tr>
-                        <td class="text-bold">Account Party</td>
-                        <td><?php echo $this->security->xss_clean($record->customer_name);?></td>
-                    </tr>
-                     <tr>
-                        <td class="text-bold">Care Of</td>
-                        <td><?php echo nl2br($this->security->xss_clean($record->care_of));?></td>
-                    </tr>
-                <?php else:?>
-                    <tr>
-                        <td class="text-bold">Insured Party</td>
-                        <td><?php echo $this->security->xss_clean($record->customer_name);?></td>
-                    </tr>
-                <?php endif?>
-                <tr>
-                    <td class="text-bold">Policy Issued Date</td>
-                    <td><?php echo $record->issued_date?></td>
-                </tr>
-                <tr>
-                    <td class="text-bold">Policy Start Date</td>
-                    <td><?php echo $record->start_date?></td>
-                </tr>
-                <tr>
-                    <td class="text-bold">Policy End Date</td>
-                    <td><?php echo $record->end_date?></td>
-                </tr>
-                <tr>
-                    <td class="text-bold">is Short Term?</td>
-                    <td><?php echo _FLAG_yes_no_dropdwon(FALSE)[$record->flag_short_term]?></td>
-                </tr>
-                <tr>
-                    <td class="text-bold">Sales Staff</td>
-                    <td><?php echo $record->sales_staff_username;?></td>
-                </tr>
+    <div class="box-body bg-gray-light no-padding-b">
+        <div class="box no-border">
+            <div class="box-body no-padding">
+                <table class="table table-hover">
+                    <tbody>
+                        <tr>
+                            <td class="text-bold">Policy Code</td>
+                            <td><?php echo $record->code?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Portfolio</td>
+                            <td><?php echo $record->portfolio_name?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Policy Package</td>
+                            <td><?php echo _OBJ_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Proposed By</td>
+                            <td><?php echo nl2br($this->security->xss_clean($record->proposer));?></td>
+                        </tr>
 
-                <tr>
-                    <td class="text-bold">Agent</td>
-                    <td><?php echo $record->agent_name;?></td>
-                </tr>
-                <tr>
-                    <td class="text-bold">Status</td>
-                    <td><?php echo get_policy_status_text($record->status, true);?></td>
-                </tr>
-            </tbody>
-        </table>
+                        <tr>
+                            <td class="text-bold">Policy Proposed Date</td>
+                            <td><?php echo $record->proposed_date?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Object on Loan/Financed?</td>
+                            <td><?php echo $record->flag_on_credit === 'Y' ? 'Yes' : 'No';?></td>
+                        </tr>
+                        <?php if($record->flag_on_credit === 'Y'):?>
+                            <tr>
+                                <td class="text-bold">Insured Party</td>
+                                <td><?php echo $this->security->xss_clean($record->creditor_name);?>, <?php echo $this->security->xss_clean($record->creditor_branch_name);?></td>
+                            </tr>
+                            <tr>
+                                <td class="text-bold">Account Party</td>
+                                <td><?php echo $this->security->xss_clean($record->customer_name);?></td>
+                            </tr>
+                             <tr>
+                                <td class="text-bold">Care Of</td>
+                                <td><?php echo nl2br($this->security->xss_clean($record->care_of));?></td>
+                            </tr>
+                        <?php else:?>
+                            <tr>
+                                <td class="text-bold">Insured Party</td>
+                                <td><?php echo $this->security->xss_clean($record->customer_name);?></td>
+                            </tr>
+                        <?php endif?>
+                        <tr>
+                            <td class="text-bold">Policy Issued Date</td>
+                            <td><?php echo $record->issued_date?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Policy Start Date</td>
+                            <td><?php echo $record->start_date?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Policy End Date</td>
+                            <td><?php echo $record->end_date?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">is Short Term?</td>
+                            <td><?php echo _FLAG_yes_no_dropdwon(FALSE)[$record->flag_short_term]?></td>
+                        </tr>
+
+                        <tr>
+                            <td class="text-bold">Agent</td>
+                            <td><?php echo $record->agent_id ? anchor('agents/details/'. $record->agent_id, $record->agent_name . ' <i class="fa fa fa-external-link"></i>', ['target' => '_blank']) : '-';?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Status</td>
+                            <td><?php echo get_policy_status_text($record->status, true);?></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
     </div>
+
+    <div class="box-body bg-gray-light no-padding-b">
+        <?php
+        /**
+         * Current Premium Info
+         */
+        $this->load->view('policies/snippets/_policy_current_financial_card', ['record' => $record]);
+        ?>
+    </div>
+
+    <div class="box-body bg-gray-light">
+        <?php
+        /**
+         * Sales Staff, Created By, Verified By, Approved By
+         */
+        $this->load->view('policies/snippets/_policy_user_card', ['record' => $record]);
+        ?>
+    </div>
+
+
 </div>
