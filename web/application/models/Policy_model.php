@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'policy_nr', 'proposer', 'customer_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'flag_locked', 'status', 'cur_amt_sum_insured', 'cur_amt_total_premium', 'cur_amt_pool_premium', 'cur_amt_commissionable', 'cur_amt_agent_commission', 'cur_amt_stamp_duty', 'cur_amt_vat', 'created_at', 'created_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'policy_nr', 'proposer', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'flag_locked', 'status', 'cur_amt_sum_insured', 'cur_amt_total_premium', 'cur_amt_pool_premium', 'cur_amt_commissionable', 'cur_amt_agent_commission', 'cur_amt_stamp_duty', 'cur_amt_vat', 'created_at', 'created_by', 'updated_at', 'updated_by' ];
 
     protected $validation_rules = [];
 
@@ -45,9 +45,6 @@ class Policy_model extends MY_Model
         // Policy Configuration/Helper
         $this->load->config('policy');
         $this->load->helper('policy');
-
-        // Set validation rules
-        // $this->set_validation_rules();
     }
 
 
@@ -422,7 +419,7 @@ class Policy_model extends MY_Model
     public function add_debit_note($data)
     {
         // Disable DB Debug for transaction to work
-        // $this->db->db_debug = FALSE;
+        $this->db->db_debug = FALSE;
         $id                 = FALSE;
 
         // Use automatic transaction
@@ -492,6 +489,332 @@ class Policy_model extends MY_Model
         // return result/status
         return $status;
     }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Policy Code (Draft)
+     *
+     * @param integer $portfolio_id
+     * @param object $fy_record
+     * @return string
+     */
+    private function _get_draft_policy_code($portfolio_id, $fy_record)
+    {
+        $this->load->library('Token');
+        $this->load->model('portfolio_model');
+
+        $portfolio_code = $this->portfolio_model->get_code($portfolio_id);
+        $fy_code_np     = $fy_record->code_np;
+
+        $policy_no = strtoupper($this->token->generate(10));
+
+        /**
+         * Construct Policy Code
+         *
+         * @TODO: Draft/Final Policy Code
+         *
+         * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
+         */
+        $policy_code = 'DRAFT/' . $this->dx_auth->get_branch_code() . '/' . $portfolio_code . '/' . $policy_no . '/' . $fy_code_np;
+
+        return $policy_code;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Before Insert Trigger
+     *
+     * Tasks carried
+     *      1. Generate Random Policy Number & add
+     *      2. Add Draft Code
+     *      3. Add Branch ID
+     *      4. Add Short Term Flag
+     *      5. Add Status = Draft
+     *      6. Add Fiscal Year
+     *      7. Policy Duration
+     *
+     * @param array $data
+     * @return array
+     */
+    public function before_insert__defaults($data)
+    {
+        $this->load->library('Token');
+        $this->load->model('fiscal_year_model');
+
+        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_datetime']);
+
+        /**
+         * Policy Code - Draft One & Policy Number
+         *
+         * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
+         */
+        $data['code']      = $this->_get_draft_policy_code($data['portfolio_id'], $fy_record);
+
+
+        // Branch ID
+        $data['branch_id']      = $this->dx_auth->get_branch_id();
+
+
+        // Status
+        $data['status'] = IQB_POLICY_STATUS_DRAFT;
+
+
+        // Fiscal Year
+        $data['fiscal_yr_id'] = $fy_record->id;
+
+
+        // Business Referer NULL if not supplied
+        $data['ref_company_id'] = $data['ref_company_id'] ? $data['ref_company_id'] : NULL;
+
+
+        // Reset Creditor Info if "No" Selected
+        if($data['flag_on_credit'] === 'N')
+        {
+            $data['creditor_id']        = NULL;
+            $data['creditor_branch_id'] = NULL;
+        }
+
+
+        // Refactor Date & time
+        $data = $this->__refactor_datetime_fields($data);
+
+
+        /**
+         * Short Term Flag???
+         * ------------------
+         * Find if this start-end date gives a default duration or short term duration
+         */
+        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
+
+        return $data;
+    }
+
+    // ----------------------------------------------------------------
+
+
+    /**
+     * Before Update Trigger
+     *
+     * Tasks carried
+     *
+     *      1. Issue Date & Time
+     *      2. Start Date & Time
+     *      3. End Date & Time
+     *      4. Short Term Flag
+     *
+     * @param array $data
+     * @return array
+     */
+    public function before_update__defaults($data)
+    {
+        // Refactor Date & time
+        $data = $this->__refactor_datetime_fields($data);
+
+        /**
+         * Short Term Flag???
+         * ------------------
+         * Find if this start-end date gives a default duration or short term duration
+         */
+        $this->load->model('fiscal_year_model');
+        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
+        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
+
+        // Business Referer NULL if not supplied
+        $data['ref_company_id'] = $data['ref_company_id'] ? $data['ref_company_id'] : NULL;
+
+
+        // Reset Creditor Info if "No" Selected
+        if($data['flag_on_credit'] === 'N')
+        {
+            $data['creditor_id']        = NULL;
+            $data['creditor_branch_id'] = NULL;
+        }
+
+
+        return $data;
+    }
+
+    // --------------------------------------------------------------------
+
+        private function __refactor_datetime_fields($data)
+        {
+            // Dates
+            $data['issued_date']    = date('Y-m-d', strtotime($data['issued_datetime']));
+            $data['start_date']     = date('Y-m-d', strtotime($data['start_datetime']));
+            $data['end_date']       = date('Y-m-d', strtotime($data['end_datetime']));
+
+            // Times
+            $data['issued_time']    = date('H:i:00', strtotime($data['issued_datetime']));
+            $data['start_time']     = date('H:i:00', strtotime($data['start_datetime']));
+            $data['end_time']       = date('H:i:00', strtotime($data['end_datetime']));
+
+            // unset
+            unset($data['issued_datetime']);
+            unset($data['start_datetime']);
+            unset($data['end_datetime']);
+
+            return $data;
+        }
+    // --------------------------------------------------------------------
+
+    /**
+     * After Insert Trigger
+     *
+     * Tasks that are to be performed after policy is created are
+     *      1. Add Agent Policy Relation if supplied
+     *      2. @TODO: Find other tasks
+     *
+     * $arr_record structure
+     *  'fields'  contains the fields and values that were used while inserting
+     *  data.
+     *
+     *  Example
+     *      [
+     *          'id'        => 'xxx',
+     *          'fields'    => [
+     *              'field'  => 'value',
+     *              ...
+     *           ]
+     *      ]
+     *
+     *
+     * @param array $arr_record
+     * @return array
+     */
+    public function after_insert__defaults($arr_record)
+    {
+        /**
+         * Data Structure
+         *
+            Array
+            (
+                [id] => 11
+                [fields] => Array
+                    (
+                        [portfolio_id] => 6
+                        [fiscal_yr_id] => x
+                        [policy_package] => tp
+                        [customer_name] => Sonam Singh
+                        [customer_id] => 15
+                        [object_name] => Scooter, Dio, FFF, 9879879, ADSF
+                        [object_id] => 21
+                        [issued_date] => 2016-12-28
+                        [start_date] => 2016-12-28
+                        [duration] => +1 year
+                        [sold_by] => 2
+                        [flag_dc] => C
+                        [agent_id] => 214
+                        [created_at] => 2016-12-28 16:22:46
+                        [created_by] => 1
+                        [code] => DRAFT/BRP/MOTOR/ASARV1VHFA/73-74
+                        [branch_id] => 5
+                        [end_date] => 2017-12-28
+                        [status] => D
+                    )
+
+                [method] => insert
+            )
+        */
+        $id = $arr_record['id'] ?? NULL;
+
+        if($id !== NULL)
+        {
+            $fields = $arr_record['fields'];
+
+            /**
+             * TASK 1: Add agent relation
+             * --------------------------
+             */
+            if( isset($fields['flag_dc']) && $fields['flag_dc'] === 'C')
+            {
+                // Get the agent id
+                $agent_id = $fields['agent_id'];
+                $relation_data = [
+                    'agent_id'  => $agent_id,
+                    'policy_id' => $id
+                ];
+                $this->load->model('rel_agent_policy_model');
+                $this->rel_agent_policy_model->insert($relation_data, TRUE);
+            }
+
+
+            return TRUE;
+
+        }
+        return FALSE;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * After Update Trigger
+     *
+     * Tasks that are to be performed after a policy is updated
+     *      1. Update Agent Relation (ADD or DELETE)
+     *
+     *
+     * @param array $arr_record
+     * @return array
+     */
+    public function after_update__defaults($arr_record)
+    {
+        /**
+         *
+         * Data Structure
+                Array
+                (
+                    [id] => 10
+                    [fields] => Array
+                        (
+                            [portfolio_id] => 6
+                            [policy_package] => tp
+                            [customer_name] => Bishal Lepcha
+                            [customer_id] => 16
+                            [object_name] => Motorcycle, Pulsar 250, , 98798, 987987
+                            [object_id] => 22
+                            [issued_date] => 2016-12-28
+                            [start_date] => 2016-12-28
+                            [duration] => +1 year
+                            [sold_by] => 2
+                            [flag_dc] => C
+                            [agent_id] => 35
+                            [updated_at] => 2016-12-28 15:51:47
+                            [updated_by] => 1
+                        )
+
+                    [result] => 1
+                    [method] => update
+                )
+        */
+
+        $id = $arr_record['id'] ?? NULL;
+
+        if($id !== NULL)
+        {
+            $fields = $arr_record['fields'];
+            $this->load->model('rel_agent_policy_model');
+            $relation_data = [
+                'policy_id' => $id
+            ];
+
+            if( isset($fields['flag_dc']) && $fields['flag_dc'] === 'C')
+            {
+                // Add or Update the Relation
+                // Get the agent id
+                $relation_data['agent_id'] = $fields['agent_id'];
+                return $this->rel_agent_policy_model->insert_or_update($relation_data);
+            }
+            else
+            {
+                // Delete if we have any existing record having this policy
+                return $this->rel_agent_policy_model->delete_by($relation_data);
+            }
+        }
+        return FALSE;
+    }
+
 
     // ----------------------------------------------------------------
 
@@ -700,326 +1023,7 @@ class Policy_model extends MY_Model
                      ->get()->row();
     }
 
-    // ----------------------------------------------------------------
 
-    /**
-     * Get Policy Code (Draft)
-     *
-     * @param integer $portfolio_id
-     * @param object $fy_record
-     * @return string
-     */
-    private function _get_draft_policy_code($portfolio_id, $fy_record)
-    {
-        $this->load->library('Token');
-        $this->load->model('portfolio_model');
-
-        $portfolio_code = $this->portfolio_model->get_code($portfolio_id);
-        $fy_code_np     = $fy_record->code_np;
-
-        $policy_no = strtoupper($this->token->generate(10));
-
-        /**
-         * Construct Policy Code
-         *
-         * @TODO: Draft/Final Policy Code
-         *
-         * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
-         */
-        $policy_code = 'DRAFT/' . $this->dx_auth->get_branch_code() . '/' . $portfolio_code . '/' . $policy_no . '/' . $fy_code_np;
-
-        return $policy_code;
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Before Insert Trigger
-     *
-     * Tasks carried
-     *      1. Generate Random Policy Number & add
-     *      2. Add Draft Code
-     *      3. Add Branch ID
-     *      4. Add Short Term Flag
-     *      5. Add Status = Draft
-     *      6. Add Fiscal Year
-     *      7. Policy Duration
-     *
-     * @param array $data
-     * @return array
-     */
-    public function before_insert__defaults($data)
-    {
-        $this->load->library('Token');
-        $this->load->model('fiscal_year_model');
-
-        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_datetime']);
-
-        /**
-         * Policy Code - Draft One & Policy Number
-         *
-         * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
-         */
-        $data['code']      = $this->_get_draft_policy_code($data['portfolio_id'], $fy_record);
-
-
-        // Branch ID
-        $data['branch_id']      = $this->dx_auth->get_branch_id();
-
-
-        // Status
-        $data['status'] = IQB_POLICY_STATUS_DRAFT;
-
-
-        // Fiscal Year
-        $data['fiscal_yr_id'] = $fy_record->id;
-
-
-        // Business Referer NULL if not supplied
-        $data['ref_company_id'] = $data['ref_company_id'] ? $data['ref_company_id'] : NULL;
-
-
-        // Reset Creditor Info if "No" Selected
-        if($data['flag_on_credit'] === 'N')
-        {
-            $data['creditor_id']        = NULL;
-            $data['creditor_branch_id'] = NULL;
-        }
-
-
-        // Refactor Date & time
-        $data = $this->__refactor_datetime_fields($data);
-
-
-        /**
-         * Short Term Flag???
-         * ------------------
-         * Find if this start-end date gives a default duration or short term duration
-         */
-        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
-
-        return $data;
-    }
-
-    // ----------------------------------------------------------------
-
-
-    /**
-     * Before Update Trigger
-     *
-     * Tasks carried
-     *
-     *      1. Issue Date & Time
-     *      2. Start Date & Time
-     *      3. End Date & Time
-     *      4. Short Term Flag
-     *
-     * @param array $data
-     * @return array
-     */
-    public function before_update__defaults($data)
-    {
-        // Refactor Date & time
-        $data = $this->__refactor_datetime_fields($data);
-
-        $this->load->model('fiscal_year_model');
-
-        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
-
-        /**
-         * Short Term Flag???
-         * ------------------
-         * Find if this start-end date gives a default duration or short term duration
-         */
-        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
-
-
-        return $data;
-    }
-
-    // --------------------------------------------------------------------
-
-        private function __refactor_datetime_fields($data)
-        {
-            // Dates
-            $data['issued_date']    = date('Y-m-d', strtotime($data['issued_datetime']));
-            $data['start_date']     = date('Y-m-d', strtotime($data['start_datetime']));
-            $data['end_date']       = date('Y-m-d', strtotime($data['end_datetime']));
-
-            // Times
-            $data['issued_time']    = date('H:i:00', strtotime($data['issued_datetime']));
-            $data['start_time']     = date('H:i:00', strtotime($data['start_datetime']));
-            $data['end_time']       = date('H:i:00', strtotime($data['end_datetime']));
-
-            // unset
-            unset($data['issued_datetime']);
-            unset($data['start_datetime']);
-            unset($data['end_datetime']);
-
-            return $data;
-        }
-    // --------------------------------------------------------------------
-
-    /**
-     * After Insert Trigger
-     *
-     * Tasks that are to be performed after policy is created are
-     *      1. Add Agent Policy Relation if supplied
-     *      2. Update Sum Insured value on "Premium Table"
-     *      3. @TODO: Find other tasks
-     *
-     * $arr_record structure
-     *  'fields'  contains the fields and values that were used while inserting
-     *  data.
-     *
-     *  Example
-     *      [
-     *          'id'        => 'xxx',
-     *          'fields'    => [
-     *              'field'  => 'value',
-     *              ...
-     *           ]
-     *      ]
-     *
-     *
-     * @param array $arr_record
-     * @return array
-     */
-    public function after_insert__defaults($arr_record)
-    {
-        /**
-         * Data Structure
-         *
-            Array
-            (
-                [id] => 11
-                [fields] => Array
-                    (
-                        [portfolio_id] => 6
-                        [fiscal_yr_id] => x
-                        [policy_package] => tp
-                        [customer_name] => Sonam Singh
-                        [customer_id] => 15
-                        [object_name] => Scooter, Dio, FFF, 9879879, ADSF
-                        [object_id] => 21
-                        [issued_date] => 2016-12-28
-                        [start_date] => 2016-12-28
-                        [duration] => +1 year
-                        [sold_by] => 2
-                        [flag_dc] => C
-                        [agent_id] => 214
-                        [created_at] => 2016-12-28 16:22:46
-                        [created_by] => 1
-                        [code] => DRAFT/BRP/MOTOR/ASARV1VHFA/73-74
-                        [branch_id] => 5
-                        [end_date] => 2017-12-28
-                        [status] => D
-                    )
-
-                [method] => insert
-            )
-        */
-        $id = $arr_record['id'] ?? NULL;
-
-        if($id !== NULL)
-        {
-            $fields = $arr_record['fields'];
-
-            /**
-             * TASK 1: Add agent relation
-             * --------------------------
-             */
-            if( isset($fields['flag_dc']) && $fields['flag_dc'] === 'C')
-            {
-                // Get the agent id
-                $agent_id = $fields['agent_id'];
-                $relation_data = [
-                    'agent_id'  => $agent_id,
-                    'policy_id' => $id
-                ];
-                $this->load->model('rel_agent_policy_model');
-                $this->rel_agent_policy_model->insert($relation_data, TRUE);
-            }
-
-
-            return TRUE;
-
-        }
-        return FALSE;
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * After Update Trigger
-     *
-     * Tasks that are to be performed after a policy is updated
-     *      1. Update Agent Relation (ADD or DELETE)
-     *      2. Update Sum Insured value on "Premium Table"
-     *      3. @TODO: Find other tasks
-     *
-     *
-     * @param array $arr_record
-     * @return array
-     */
-    public function after_update__defaults($arr_record)
-    {
-        /**
-         *
-         * Data Structure
-                Array
-                (
-                    [id] => 10
-                    [fields] => Array
-                        (
-                            [portfolio_id] => 6
-                            [policy_package] => tp
-                            [customer_name] => Bishal Lepcha
-                            [customer_id] => 16
-                            [object_name] => Motorcycle, Pulsar 250, , 98798, 987987
-                            [object_id] => 22
-                            [issued_date] => 2016-12-28
-                            [start_date] => 2016-12-28
-                            [duration] => +1 year
-                            [sold_by] => 2
-                            [flag_dc] => C
-                            [agent_id] => 35
-                            [updated_at] => 2016-12-28 15:51:47
-                            [updated_by] => 1
-                        )
-
-                    [result] => 1
-                    [method] => update
-                )
-        */
-
-        $id = $arr_record['id'] ?? NULL;
-
-        if($id !== NULL)
-        {
-            $fields = $arr_record['fields'];
-            $this->load->model('rel_agent_policy_model');
-            $relation_data = [
-                'policy_id' => $id
-            ];
-
-            if( isset($fields['flag_dc']) && $fields['flag_dc'] === 'C')
-            {
-                // Add or Update the Relation
-                // Get the agent id
-                $relation_data['agent_id'] = $fields['agent_id'];
-                return $this->rel_agent_policy_model->insert_or_update($relation_data);
-            }
-            else
-            {
-                // Delete if we have any existing record having this policy
-                return $this->rel_agent_policy_model->delete_by($relation_data);
-            }
-        }
-        return FALSE;
-    }
-
-    // --------------------------------------------------------------------
 
 
     /**

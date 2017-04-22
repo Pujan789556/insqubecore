@@ -194,8 +194,7 @@ class Object_model extends MY_Model
     {
         return $this->db->select('P.*')
                         ->from($this->table_name . ' as O')
-                        ->join('rel_policy__object RPO', 'RPO.object_id = O.id')
-                        ->join('dt_policies P', 'P.id = RPO.policy_id')
+                        ->join('dt_policies P', 'P.object_id = O.id')
                         ->where('O.id', $id)
                         ->order_by('P.id', 'desc')
                         ->get()->row();

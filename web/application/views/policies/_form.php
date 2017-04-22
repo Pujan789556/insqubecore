@@ -355,14 +355,14 @@ $('.input-group.datetime, .input-group.datetime input').datetimepicker({
 
 // Hide Creditor Info if Not on Loan
 __toggle_creditor_info();
-$('input[name="flag_on_credit"]').on('ifChecked', function(){
-  __toggle_creditor_info();
+$(document).on('ifChecked', 'input[name="flag_on_credit"]', function(e){
+    __toggle_creditor_info();
 });
 
 
 // Hide agent list on Direct Discount Checked
 __toggle_agent_info();
-$('input[name="flag_dc"]').on('ifChecked', function(){
+$(document).on('ifChecked', 'input[name="flag_dc"]', function(e){
     __toggle_agent_info();
 });
 
