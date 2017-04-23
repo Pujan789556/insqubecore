@@ -177,7 +177,9 @@ $config['DX_permissions'] = [
 			 * Invoice/Receipt Related Permissions
 			 */
 			'print.policy.invoice',
+			'update.policy.invoice.print.flag',
 			'print.policy.receipt',
+			'update.policy.receipt.print.flag',
 
 			/**
 			 * Followup Related Permissions
