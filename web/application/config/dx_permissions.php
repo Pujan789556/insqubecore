@@ -129,6 +129,7 @@ $config['DX_permissions'] = [
 	 * Group: Policy
 	 */
 	'Policy Permissions' => [
+
 		/**
 		 * Policy Module
 		 */
@@ -137,6 +138,9 @@ $config['DX_permissions'] = [
 
 			/**
 			 * CRUD Permissions
+			 * -------------------
+			 * These CRUD permissions will apply homogeniously to all kind of policies ie.
+			 * Fresh/Renewal/Endorsement
 			 */
 			'add.policy',
 			'edit.draft.policy',
@@ -152,6 +156,12 @@ $config['DX_permissions'] = [
 			'status.to.paid',
 			'status.to.activate', // issue policy
 			'status.to.cancel',
+
+			/**
+			 * Policy Transaction Specific permissions
+			 */
+			'build.policy.transaction', // Depends on [add|edit.draft|edit.unverified].policy permission
+			'ri.approval.on.policy.transaction',
 
 			/**
 			 * Policy Schedule Generation
