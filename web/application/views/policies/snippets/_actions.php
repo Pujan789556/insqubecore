@@ -128,7 +128,7 @@ if( $record->status === IQB_POLICY_STATUS_VERIFIED ): ?>
  *      - update invoice/receipt print flag
  */
 if( $record->status === IQB_POLICY_STATUS_PAID ): ?>
-    <?php if( $this->dx_auth->is_authorized('policies', 'status.to.activate') ): ?>
+    <?php if( $this->dx_auth->is_authorized('policies', 'status.to.active') ): ?>
         <a href="#"
             title="Make a Payment"
             data-confirm="true"

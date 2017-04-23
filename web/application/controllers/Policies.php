@@ -1280,29 +1280,19 @@ class Policies extends MY_Controller
 
 
 			/**
-			 * Pre-Requisite 1: Send To Verify
-			 * -------------------------------
+			 * Check Pre-Requisite
+			 * --------------------
+			 * 	Condition 1: Upgrade from "Draft" to "Unverified"
+			 * 	Condition 2: Upgrade from "Unverified" to "Verified"
 			 * 	- Check if Premium is NULL
 			 */
-			if( $record->status === IQB_POLICY_STATUS_DRAFT && $to_updown_status === IQB_POLICY_STATUS_UNVERIFIED )
+			if (
+				( $record->status === IQB_POLICY_STATUS_DRAFT && $to_updown_status === IQB_POLICY_STATUS_UNVERIFIED )
+					||
+				( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
+			)
 			{
-				if((float)$record->total_amount == 0.00 )
-				{
-					return $this->template->json([
-						'status' 	=> 'error',
-						'message' 	=> 'Please Update Policy Premium First!'
-					], 400);
-				}
-			}
-
-			/**
-			 * Pre-Requisite 2: Verify
-			 * -------------------------------
-			 * 	- Check if Premium is NULL
-			 */
-			if( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
-			{
-				if((float)$record->total_amount == 0.00 )
+				if((float)$record->amt_total_premium == 0.00 )
 				{
 					return $this->template->json([
 						'status' 	=> 'error',
