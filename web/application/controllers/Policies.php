@@ -457,7 +457,7 @@ class Policies extends MY_Controller
 					 */
 					if($done)
 					{
-						$this->__reset_premium_on_policy_update($record, $data);
+						$this->__reset_premium_on_debitnote_update($record, $data);
 					}
 				}
 
@@ -696,7 +696,7 @@ class Policies extends MY_Controller
 		// --------------------------------------------------------------------
 
 		/**
-		 * Reset Premium on Policy Update
+		 * Reset Premium on Debit Note Update
 		 *
 		 * Reset premium on change of any of the followings
 		 * 	- portfolio
@@ -709,7 +709,7 @@ class Policies extends MY_Controller
 		 * @param array $data Post Data
 		 * @return void
 		 */
-		private function __reset_premium_on_policy_update($before_update, $data)
+		private function __reset_premium_on_debitnote_update($before_update, $data)
 		{
 			// Process data to get fractioned date/time
 			$after_update = (object)$this->policy_model->before_update__defaults($data);

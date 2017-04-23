@@ -150,7 +150,7 @@ $config['DX_permissions'] = [
 			'status.to.unverified',
 			'status.to.verified',
 			'status.to.paid',
-			'status.to.active',
+			'status.to.activate', // issue policy
 			'status.to.cancel',
 
 			/**
@@ -162,13 +162,12 @@ $config['DX_permissions'] = [
 			 * Payment Related Permissions
 			 */
 			'make.policy.payment',
-			'print.policy.payment.receipt',
 
 			/**
-			 * Invoice Related Permissions
+			 * Invoice/Receipt Related Permissions
 			 */
-			'generate.policy.invoice',
 			'print.policy.invoice',
+			'print.policy.receipt',
 
 			/**
 			 * Followup Related Permissions

@@ -148,38 +148,96 @@ class Object_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Is Object Editable?
+     * Is object editable?
+     * --------------------
      *
-     * @param integer $id
+     * Edit Constraints:
+     *      1. Flag Lock is ON
+     *          - You can not edit object if it's lock flag is ON.
+     *          - This flag is set ON once a policy is verified.
+     *
+     * Note:
+     *      - Upon policy expire/cancel, the object lock flag should be released
+     *
+     * @param int|object $record    Object ID or Object Record
      * @return boolean
      */
-    public function is_editable($id)
+    public function is_editable($record)
     {
-        /**
-         * Is object editable?
-         * --------------------
-         *
-         * If the object is currently assigned to a policy which is not editable,
-         * you can not edit this object
-         */
-
-        /**
-         * Find the latest policy of the current object owenr for this object.
-         * If we dont have any object, We are GOOD. Else, check the editable status.
-         */
         $_flag_editable  = FALSE;
-        $policy_record = $this->get_latest_policy($id);
 
-        if(!$policy_record)
+        /**
+         * Get the Object record if ID is supplied
+         */
+        $record = is_numeric($record) ? $this->row( (int)$record ) : $record;
+
+        // Throw exception if we do not find an object record
+        if(!$record)
         {
-            $_flag_editable  = TRUE;
+            throw new Exception("Object Model: Object not found.");
         }
-        else if( $policy_record && belongs_to_me($policy_record->branch_id, FALSE) === TRUE && is_policy_editable($policy_record->status, FALSE) === TRUE)
-        {
-            $_flag_editable  = TRUE;
-        }
+
+        /**
+         * Object Locked?
+         */
+        $_flag_editable = (int)$record->flag_locked === IQB_FLAG_UNLOCKED;
 
         return $_flag_editable;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Is object deletable?
+     * --------------------
+     *
+     * Delete Constraints:
+     *      - Newly created object which is not assigned to any policy is deletable
+     *
+     * @param int|object $record    Object ID or Object Record
+     * @return boolean
+     */
+    public function is_deletable($record)
+    {
+        $_flag_deletable  = FALSE;
+
+        /**
+         * Get the Object record if ID is supplied
+         */
+        $record = is_numeric($record) ? $this->row( (int)$record ) : $record;
+
+        // Throw exception if we do not find an object record
+        if(!$record)
+        {
+            throw new Exception("Object Model: Object not found.");
+        }
+
+        /**
+         * Has this object been assigned to any policy?
+         * --------------------------------------------
+         *  MUST be editable & NOT Assigned to any policy
+         */
+        if( $this->is_editable($record) && !$this->assigned_to_any_policy($record->id) )
+        {
+            $_flag_deletable  = TRUE;
+        }
+
+        return $_flag_deletable;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Has this object been assigned to any "Policy(ies)"
+     *
+     * @param integer $id
+     * @return mixed
+     */
+    public function assigned_to_any_policy($id)
+    {
+        return $this->db->from('dt_policies as P')
+                        ->where('P.object_id', $id)
+                        ->count_all_results();
     }
 
     // ----------------------------------------------------------------
@@ -358,7 +416,7 @@ class Object_model extends MY_Model
     public function delete($id = NULL)
     {
         $id = intval($id);
-        if( !safe_to_delete( get_class(), $id ) )
+        if( !safe_to_delete( get_class(), $id ) || !$this->is_deletable($id) )
         {
             return FALSE;
         }

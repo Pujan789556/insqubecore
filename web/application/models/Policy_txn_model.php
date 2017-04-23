@@ -48,6 +48,18 @@ class Policy_txn_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Reset Current Policy Transaction Record
+     *
+     * This function will reset the current transaction record of the
+     * specified policy to default(empty/null).
+     *
+     * !!!IMPORTANT: The record MUST NOT be ACTIVE.
+     *
+     *
+     * @param integer $policy_id
+     * @return bool
+     */
     public function reset($policy_id)
     {
         // !!!NOTE: 'amt_sum_insured' can not be emptied as it is updated when policy is updated

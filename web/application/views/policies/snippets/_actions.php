@@ -24,7 +24,7 @@ if( is_policy_editable($record->status, FALSE) ):
         class="btn btn-success btn-round trg-dialog-edit"
         data-box-size="large"
         data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $record->code?>'
-        data-url="<?php echo site_url('premium/edit/' . $record->id);?>"
+        data-url="<?php echo site_url('policy_txn/rebuild/1/' . $record->id);?>"
         data-form="#_form-premium">
         <i class="fa fa-dollar"></i> Update Premium</a>
 <?php endif?>
@@ -60,6 +60,9 @@ if( $record->status === IQB_POLICY_STATUS_DRAFT && $this->dx_auth->is_authorized
 <?php
 /**
  * Status "Back to Un-verified"
+ *
+ *  1. Lock flag to "OFF" from Customer and Object Record
+ *  2. Status to "DRAFT" from Policy Transaction Record
  */
 if( $record->status === IQB_POLICY_STATUS_VERIFIED && $this->dx_auth->is_authorized('policies', 'status.to.unverified') ): ?>
     <a href="#"
@@ -75,6 +78,10 @@ if( $record->status === IQB_POLICY_STATUS_VERIFIED && $this->dx_auth->is_authori
 <?php
 /**
  * Status "to Verified"
+ *
+ *  1. Lock flag to "ON" from Customer and Object Record
+ *  2. Status to "VERIFIED" from Policy Record
+ *  3. Status to "VERIFIED" from Policy Transaction Record
  */
 if( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $this->dx_auth->is_authorized('policies', 'status.to.verified') ): ?>
     <a href="#"
@@ -99,17 +106,36 @@ if( $record->status === IQB_POLICY_STATUS_VERIFIED ): ?>
             title="Make a Payment"
             data-confirm="true"
             class="btn btn-success btn-round trg-dialog-action"
-            data-message="Are you sure you want to do this?"
+            data-message="Are you sure you want to MAKE PAYMENT for this policy?<br/>This will automatically perform accounting transactions (Policy Premiums, RI Distribution); which CAN NOT be reverted."
             data-url="<?php echo site_url('policies/payment/' . $record->id );?>"
         ><i class="fa fa-money"></i> Make a Payment</a>
     <?php endif?>
+<?php endif?>
 
-    <?php if( $this->dx_auth->is_authorized('policies', 'print.policy.payment.receipt') ): ?>
-        <a title="Print Payment Receipt"
-            class="btn bg-navy btn-round"
-            href="<?php echo site_url('policies/receipt/' . $record->id  );?>"
-            target="_blank"
-            ><i class="fa fa-print"></i> Receipt</a>
+
+<?php
+/**
+ * Actions on "Paid" Status
+ * ----------------------------
+ *  1. Activate Policy
+ *  2. Generate Original(Fresh Policy Schedule) PDF and store on InsQube Media Storage
+ *  2. Generate Invoice
+ *  3. Generate Receipt
+ *
+ *  After this action, you can :
+ *      - download/print invoice from invoice tab
+ *      - download/print receipt from receipt tab
+ *      - update invoice/receipt print flag
+ */
+if( $record->status === IQB_POLICY_STATUS_PAID ): ?>
+    <?php if( $this->dx_auth->is_authorized('policies', 'status.to.activate') ): ?>
+        <a href="#"
+            title="Make a Payment"
+            data-confirm="true"
+            class="btn btn-success btn-round trg-dialog-action"
+            data-message="Are you sure you want to do this? This will now activate policy, generate invoice and receipt."
+            data-url="<?php echo site_url('policies/activate/' . $record->id );?>"
+        ><i class="fa fa-check-square"></i> Issue Policy</a>
     <?php endif?>
 <?php endif?>
 

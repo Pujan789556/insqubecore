@@ -376,13 +376,24 @@ class Objects extends MY_Controller
 		 * Is object editable?
 		 * --------------------
 		 *
-		 * If the object is currently assigned to a policy which is not editable,
-		 * you can not edit this object
+		 * Edit Constraints:
+		 * 		1. Flag Lock is ON
+		 * 			- You can not edit object if it's lock flag is ON.
+		 * 			- This flag is set ON once a policy is verified.
+		 *
+		 * Note:
+		 * 		- Upon policy expire/cancel, the object lock flag should be released
 		 */
-		if(!$this->object_model->is_editable($record->id))
-		{
-			$this->template->json(['status' => 'error', 'title' => 'Operatiion Not Permitted.', 'message' => 'This object is not editable.'], 404);
+		try {
+			if(!$this->object_model->is_editable($record))
+			{
+				$this->template->json(['status' => 'error', 'title' => 'Operatiion Not Permitted.', 'message' => 'This object is not editable.'], 404);
+			}
+		} catch (Exception $e) {
+			$this->template->json(['status' => 'error', 'title' => 'Exception Occured', 'message' => $e->getMessage()], 404);
 		}
+
+
 
 
 
