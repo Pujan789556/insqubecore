@@ -186,9 +186,9 @@ if ( ! function_exists('get_policy_status_text'))
 	{
 		$list = get_policy_status_dropdown();
 
-		$text = $list[$key];
+		$text = $list[$key] ?? '';
 
-		if($formatted)
+		if($formatted && $text != '')
 		{
 			if($key === IQB_POLICY_STATUS_ACTIVE )
 			{
@@ -213,6 +213,107 @@ if ( ! function_exists('get_policy_status_text'))
 
 			$text = '<strong class="'.$css_class.'">'.$text.'</strong>';
 		}
+		return $text;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('get_policy_txn_status_dropdown'))
+{
+	/**
+	 * Get Policy Transaction Status Dropdown
+	 *
+	 * @return	bool
+	 */
+	function get_policy_txn_status_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_POLICY_TXN_STATUS_DRAFT 		=> 'Draft',
+			IQB_POLICY_TXN_STATUS_VERIFIED 		=> 'Verified',
+			IQB_POLICY_TXN_STATUS_RI_APPROVED 	=> 'RI Approved',
+			IQB_POLICY_TXN_STATUS_ACTIVE 		=> 'Active'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('get_policy_txn_status_text'))
+{
+	/**
+	 * Get Policy Transaction Status Text
+	 *
+	 * @return	string
+	 */
+	function get_policy_txn_status_text( $key, $formatted = FALSE, $sentence = FALSE )
+	{
+		$list = get_policy_txn_status_dropdown();
+
+		$text = $list[$key] ?? '';
+
+		if($formatted && $text != '')
+		{
+			if($key === IQB_POLICY_TXN_STATUS_ACTIVE || $key === IQB_POLICY_TXN_STATUS_RI_APPROVED )
+			{
+				// Green
+				$css_class = 'text-green';
+			}
+			else
+			{
+				// Orange
+				$css_class = 'text-orange';
+			}
+
+			$text = '<strong class="'.$css_class.'">'.$text.'</strong>';
+		}
+		return $text;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('get_policy_txn_type_dropdown'))
+{
+	/**
+	 * Get Policy Transaction Status Dropdown
+	 *
+	 * @return	bool
+	 */
+	function get_policy_txn_type_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_POLICY_TXN_TYPE_FRESH 		=> 'Fresh',
+			IQB_POLICY_TXN_TYPE_RENEWAL 	=> 'Renewal',
+			IQB_POLICY_TXN_TYPE_ET 			=> 'Endorsement-TXNL',
+			IQB_POLICY_TXN_TYPE_EG 			=> 'Endorsement-GNRL'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('get_policy_txn_type_text'))
+{
+	/**
+	 * Get Policy Status Text
+	 *
+	 * @return	string
+	 */
+	function get_policy_txn_type_text( $key, $formatted = FALSE, $sentence = FALSE )
+	{
+		$list = get_policy_txn_type_dropdown();
+
+		$text = $list[$key] ?? '';
+
 		return $text;
 	}
 }

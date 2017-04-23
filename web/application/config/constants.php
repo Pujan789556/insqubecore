@@ -223,6 +223,27 @@ defined('IQB_POLICY_STATUS_ACTIVE')         OR define('IQB_POLICY_STATUS_ACTIVE'
 defined('IQB_POLICY_STATUS_CANCELED')       OR define('IQB_POLICY_STATUS_CANCELED',     'C');
 defined('IQB_POLICY_STATUS_EXPIRED')        OR define('IQB_POLICY_STATUS_EXPIRED',      'E');
 
+/*
+|--------------------------------------------------------------------------
+| POLICY TRANSACTION STATUS CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_POLICY_TXN_STATUS_DRAFT')          OR define('IQB_POLICY_TXN_STATUS_DRAFT',        'D');
+defined('IQB_POLICY_TXN_STATUS_VERIFIED')       OR define('IQB_POLICY_TXN_STATUS_VERIFIED',     'V');
+defined('IQB_POLICY_TXN_STATUS_RI_APPROVED')    OR define('IQB_POLICY_TXN_STATUS_RI_APPROVED',  'P');
+defined('IQB_POLICY_TXN_STATUS_ACTIVE')         OR define('IQB_POLICY_TXN_STATUS_ACTIVE',       'A');
+
+
+/*
+|--------------------------------------------------------------------------
+| POLICY TRANSACTION TYPES CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_POLICY_TXN_TYPE_FRESH')    OR define('IQB_POLICY_TXN_TYPE_FRESH',      1);
+defined('IQB_POLICY_TXN_TYPE_RENEWAL')  OR define('IQB_POLICY_TXN_TYPE_RENEWAL',    2);
+defined('IQB_POLICY_TXN_TYPE_ET')       OR define('IQB_POLICY_TXN_TYPE_ET',     	3); // ENDORSEMENT TRANSACTIONAL
+defined('IQB_POLICY_TXN_TYPE_EG')       OR define('IQB_POLICY_TXN_TYPE_EG',     	4); // ENDORSEMENT GENERAL
+
 
 /*
 |--------------------------------------------------------------------------
