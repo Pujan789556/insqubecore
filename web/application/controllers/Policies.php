@@ -1174,8 +1174,14 @@ class Policies extends MY_Controller
 		/**
 		 * Let's Update the Status
 		 */
-		if( $this->policy_model->update_status($record->id, $to_status_code) )
+		if( $this->policy_model->update_status($record, $to_status_code) )
 		{
+
+			/**
+			 * @TODO: Post Status Update Tasks
+			 * example send SMS on policy activation etc ...
+			 */
+
 			/**
 			 * Update View
 			 */
@@ -1292,7 +1298,7 @@ class Policies extends MY_Controller
 				( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
 			)
 			{
-				if((float)$record->amt_total_premium == 0.00 )
+				if((float)$record->cur_amt_total_premium == 0.00 )
 				{
 					return $this->template->json([
 						'status' 	=> 'error',

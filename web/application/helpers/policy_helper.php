@@ -66,43 +66,40 @@ if ( ! function_exists('get_policy_status_dropdown'))
 			 * Now, you can proceed for making payment of this policy OR back to unverified
 			 *
 			 * Action Allowed
-			 * 		1. Make Payment
+			 * 		1. Approve
 			 * 		2. Un-verify
 			 * 		3. Generate Schedule (Marked: Verified)
 			 *
-			 * Upper Status Level: Paid
+			 * Upper Status Level: Approved
 			 * Lower Status Level: Unverified
 			 */
 			IQB_POLICY_STATUS_VERIFIED => 'Verified',
 
 			/**
-			 * Policy Status - Paid
+			 * Policy Status - Approved
 			 *
-			 * This is verified-paid Debit Note.
-			 * Once you make payment, you can now generate payment receipt.
-			 * When this status is made, you have "Policy Number" generated and stored in database.
-			 *
-			 * Now, you can issue invoice, get final policy schedule.
-			 *
-			 * Generate Invoice
-			 * 		Once you make request generat Invoice, A fresh Invoice is generated along with its original PDF.
-			 * 		The first time you download/print, it will have status updated as "Printed". The next time onward,
-			 * 		the invoice will have "Duplicate Copy" marked.
-			 *
-			 * 		Upon this action completion, The Policy will be final and status upgraded to "Active".
-			 *
-			 * @TODO: Policy Cancelation
-			 * 		What happens when you cancel a policy?
-			 * 		- in transactional amount & its distribution - RI, Commissions etc, invoices and other related place
+			 * This is an approved of Debit Note.
+			 * Now, you can proceed for making payment of this policy OR back to unverified
 			 *
 			 * Action Allowed
-			 * 		1. Generate Invoice
-			 * 		2. Print Receipt
-			 * 		3. Cancel Policy
+			 * 		1. Make Payment
+			 * 		2. Back to Verified
+			 * 		3. Generate Schedule (Marked: Approved)
+			 *
+			 * Upper Status Level: Paid
+			 * Lower Status Level: Unverified
+			 */
+			IQB_POLICY_STATUS_APPROVED => 'Approved',
+
+			/**
+			 * Policy Status - Paid
+			 *
+			 * Action Allowed
+			 * 		1. Issue Invoice
 			 * 		4. Generate Schedule (Marked: Paid)
 			 *
 			 * Upper Status Level: Active | Cancel
-			 * Lower Status Level: Verified
+			 * Lower Status Level: Approved
 			 */
 			IQB_POLICY_STATUS_PAID => 'Paid',
 
@@ -190,7 +187,7 @@ if ( ! function_exists('get_policy_status_text'))
 
 		if($formatted && $text != '')
 		{
-			if($key === IQB_POLICY_STATUS_ACTIVE )
+			if($key === IQB_POLICY_STATUS_ACTIVE || $key === IQB_POLICY_STATUS_PAID || $key === IQB_POLICY_STATUS_APPROVED )
 			{
 				// Green
 				$css_class = 'text-green';

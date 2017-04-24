@@ -45,10 +45,16 @@ class Policy_model extends MY_Model
         // Policy Configuration/Helper
         $this->load->config('policy');
         $this->load->helper('policy');
+
+        // Dependent Model
+        $this->load->model('object_model');
+        $this->load->model('customer_model');
+        $this->load->model('policy_txn_model');
     }
 
 
     // ----------------------------------------------------------------
+
     /**
      * Set/Get Validation Rules
      *
@@ -657,6 +663,7 @@ class Policy_model extends MY_Model
 
             return $data;
         }
+
     // --------------------------------------------------------------------
 
     /**
@@ -822,44 +829,223 @@ class Policy_model extends MY_Model
     /**
      * Update Policy Status
      *
-     * @param integer $id Policy ID
-     * @param alpha $to_status_code Status Code
+     * This method only performs the following.
+     *      - Policy Table - Status, User Date/Time
+     *      - Policy Transaction Table - Status, User Date/Time
+     *      - Object Table - Lock Flag
+     *      - Customer Table - Lock Flag
+     *
+     * @param integer|object $record Policy ID | Policy Record
+     * @param alpha $to_status_flag Status Code
      * @return bool
      */
-    public function update_status($id, $to_status_code)
+    public function update_status($record, $to_status_flag)
     {
+        // Get the Policy Record
+        $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
+
+        // Valid Record? Valid Status Code?
+        if( !$record || !in_array($to_status_flag, array_keys( get_policy_status_dropdown() ) ) )
+        {
+            return FALSE;
+        }
+
+        // Status Qualified?
+        if( !$this->_status_qualifies($record->status, $to_status_flag) )
+        {
+            return FALSE;
+        }
+
+        $id = $record->id;
         $data = [
-            'status'        => $to_status_code,
+            'status'        => $to_status_flag,
             'updated_by'    => $this->dx_auth->get_user_id(),
             'updated_at'    => $this->set_date()
         ];
 
+
         /**
-         * Extra Data according to Status Code
+         * ==================== TRANSACTIONS BEGIN =========================
          */
-        switch ($to_status_code)
+        $transaction_status = TRUE;
+
+        /**
+         * Disable DB Debugging
+         */
+        $this->db->db_debug = FALSE;
+        $this->db->trans_start();
+
+                switch($to_status_flag)
+                {
+                    /**
+                     * This status is downgraded from Unverified. We simply Update status flag.
+                     */
+                    case IQB_POLICY_STATUS_DRAFT:
+                        $this->_to_status($id, $data);
+                        break;
+
+                    // ----------------------------------------------------------------
+
+
+                    /**
+                     * This is the case when a policy status is upgraded from "draft" or downgraded from "verified".
+                     * So, the following tasks are carried out:
+                     *      1. Policy Record [Status -> Unverified, Verified date/user -> NULL]
+                     *      2. Policy Transaction Record [Status -> Draft]
+                     *      3. Open Lock Flag [Object, Customer]
+                     */
+                    case IQB_POLICY_STATUS_UNVERIFIED:
+
+                        // Task 1 - Policy Record [Status -> Unverified, Verified date/user -> NULL]
+                        $data['verified_at'] = NULL;
+                        $data['verified_by'] = NULL;
+                        $this->_to_status($id, $data);
+
+                        // Task 2 - Policy Transaction Record [Status -> Draft]
+                        $this->policy_txn_model->update_status($id, IQB_POLICY_TXN_STATUS_DRAFT);
+
+                        // Task 3 - Open Lock Flag [Object, Customer]
+                        $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
+                        $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
+                        break;
+
+                    // ----------------------------------------------------------------
+
+                    /**
+                     * This is the case when a policy status is upgraded from "unverified" or downgraded from "approved".
+                     * So, the following tasks are carried out:
+                     *      1. Policy Record [Status -> Verified, Verified date/user -> current, Approved date/user -> NULL]
+                     *      2. Policy Transaction Record [Status -> Verified]
+                     *      3. Activate Lock Flag [Object, Customer]
+                     */
+                    case IQB_POLICY_STATUS_VERIFIED:
+
+                        // Task 1 - Policy Record [Status -> Verified, Verified date/user -> current, Approved date/user -> NULL]
+                        $data['verified_at'] = $this->set_date();
+                        $data['verified_by'] = $this->dx_auth->get_user_id();
+
+                        $data['approved_at'] = NULL;
+                        $data['approved_by'] = NULL;
+
+                        $this->_to_status($id, $data);
+
+                        // Task 2 - Policy Transaction Record [Status -> Verified]
+                        $this->policy_txn_model->update_status($id, IQB_POLICY_TXN_STATUS_VERIFIED);
+
+                        // Task 3 - Activate Lock Flag [Object, Customer]
+                        $this->object_model->update_lock($record->object_id, IQB_FLAG_LOCKED);
+                        $this->customer_model->update_lock($record->customer_id, IQB_FLAG_LOCKED);
+                        break;
+
+                    // ----------------------------------------------------------------
+
+                    /**
+                     * This is the case when a policy status is upgraded from "verified".
+                     * So, the following tasks are carried out:
+                     *      1. Policy Record [Status -> Approved, Approved date/user -> current]
+                     */
+                    case IQB_POLICY_STATUS_APPROVED:
+
+                        // Task 1 - Policy Record [Status -> Approved, Approved date/user -> current]
+                        $data['approved_at'] = $this->set_date();
+                        $data['approved_by'] = $this->dx_auth->get_user_id();
+                        $this->_to_status($id, $data);
+                        break;
+
+                    // ----------------------------------------------------------------
+
+                    /**
+                     * Change Status Only
+                     */
+                    case IQB_POLICY_STATUS_PAID:
+                    case IQB_POLICY_STATUS_ACTIVE:
+                    case IQB_POLICY_STATUS_CANCELED:
+                    case IQB_POLICY_STATUS_EXPIRED:
+                        $this->_to_status($id, $data);
+                        break;
+
+                    // ----------------------------------------------------------------
+
+                    default:
+                        break;
+                }
+
+        /**
+         * Complete transactions or Rollback
+         */
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
         {
-            /**
-             * Verified by and at
-             */
-            case IQB_POLICY_STATUS_VERIFIED:
-
-                /**
-                 * @TODO - Please lock customer, object and premium table
-                 */
-                $data['verified_by'] = $this->dx_auth->get_user_id();
-                $data['verified_at'] = $this->set_date();
-                break;
-
-            default:
-                # code...
-                break;
+            $transaction_status = FALSE;
         }
 
+        /**
+         * Restore DB Debug Configuration
+         */
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, $data);
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+
+        return $transaction_status;
     }
+
+    // ----------------------------------------------------------------
+
+        private function _status_qualifies($current_status, $to_status)
+        {
+            $flag_qualifies = FALSE;
+
+            switch ($to_status)
+            {
+                case IQB_POLICY_STATUS_DRAFT:
+                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_UNVERIFIED;
+                    break;
+
+                case IQB_POLICY_STATUS_UNVERIFIED:
+                    $flag_qualifies = in_array($current_status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_VERIFIED]);
+                    break;
+
+                case IQB_POLICY_STATUS_VERIFIED:
+                    $flag_qualifies = in_array($current_status, [IQB_POLICY_STATUS_UNVERIFIED, IQB_POLICY_STATUS_APPROVED]);
+                    break;
+
+                case IQB_POLICY_STATUS_APPROVED:
+                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_VERIFIED;
+                    break;
+
+                case IQB_POLICY_STATUS_PAID:
+                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_APPROVED;
+                    break;
+
+                case IQB_POLICY_STATUS_ACTIVE:
+                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_PAID;
+                    break;
+
+                case IQB_POLICY_STATUS_CANCELED:
+                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_ACTIVE;
+                    break;
+
+                case IQB_POLICY_STATUS_EXPIRED:
+                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_ACTIVE;
+                    break;
+
+                default:
+                    break;
+            }
+            return $flag_qualifies;
+        }
+
+    // ----------------------------------------------------------------
+
+        private function _to_status($id, $data)
+        {
+            return $this->db->where('id', $id)
+                        ->update($this->table_name, $data);
+        }
+
 
     // ----------------------------------------------------------------
 

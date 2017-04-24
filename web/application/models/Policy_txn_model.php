@@ -78,7 +78,102 @@ class Policy_txn_model extends MY_Model
     // --------------------------------------------------------------------
 
 
+    /**
+     * Update Policy Transaction Status
+     *
+     * !!! NOTE: We can only change status of current Transaction Record
+     *
+     * @param integer $policy_id Policy ID
+     * @param alpha $to_status_code Status Code
+     * @return bool
+     */
+    public function update_status($policy_id, $to_status_code)
+    {
+        $record = $this->get_current_txn_by_policy($policy_id);
+        if(!$record)
+        {
+            throw new Exception("Policy TXN Model: Current TXN record could not be found.");
+        }
+
+        $data = [
+            'status'        => $to_status_code,
+            'updated_by'    => $this->dx_auth->get_user_id(),
+            'updated_at'    => $this->set_date()
+        ];
+
+        switch($to_status_code)
+        {
+            /**
+             * Reset Verified date/user to NULL
+             */
+            case IQB_POLICY_TXN_STATUS_DRAFT:
+                $data['verified_at'] = NULL;
+                $data['verified_by'] = NULL;
+                break;
+
+            /**
+             * Update Verified date/user and Reset ri_approved date/user to null
+             */
+            case IQB_POLICY_TXN_STATUS_VERIFIED:
+                $data['verified_at'] = $this->set_date();
+                $data['verified_by'] = $this->dx_auth->get_user_id();
+                $data['ri_approved_at'] = NULL;
+                $data['ri_approved_by'] = NULL;
+            break;
+
+            /**
+             * Update RI Approved date/user
+             */
+            case IQB_POLICY_TXN_STATUS_RI_APPROVED:
+                $data['ri_approved_at'] = $this->set_date();
+                $data['ri_approved_by'] = $this->dx_auth->get_user_id();
+            break;
+
+            /**
+             * Update approved date/user
+             */
+            case IQB_POLICY_TXN_STATUS_ACTIVE:
+                $data['approved_at'] = $this->set_date();
+                $data['approved_by'] = $this->dx_auth->get_user_id();
+            break;
+
+            default:
+                break;
+        }
+
+        return $this->_to_status($record->id, $data);
+    }
+
+    // ----------------------------------------------------------------
+
+        private function _to_status($id, $data)
+        {
+            return $this->db->where('id', $id)
+                        ->update($this->table_name, $data);
+        }
+
     // --------------------------------------------------------------------
+
+    /**
+     * Get Current Policy Transaction Record for Supplied Policy
+     *
+     * @param int $policy_id
+     * @return object
+     */
+    public function get_current_txn_by_policy($policy_id)
+    {
+        $where = [
+            'PTXN.policy_id'    => $policy_id,
+            'PTXN.flag_current' => IQB_FLAG_ON
+        ];
+        return $this->db->select('PTXN.*')
+                        ->from($this->table_name . ' AS PTXN')
+                        ->where($where)
+                        ->get()->row();
+    }
+
+    // ----------------------------------------------------------------
+
 
     /**
      * Delete Cache on Update/Delete Records

@@ -218,6 +218,7 @@ define('IQB_MOTOR_CVC_TYPE_CONSTRUCTION_EQUIPMENT',     'CE');      // Construct
 defined('IQB_POLICY_STATUS_DRAFT')          OR define('IQB_POLICY_STATUS_DRAFT',        'D');
 defined('IQB_POLICY_STATUS_UNVERIFIED')     OR define('IQB_POLICY_STATUS_UNVERIFIED',   'U');
 defined('IQB_POLICY_STATUS_VERIFIED')       OR define('IQB_POLICY_STATUS_VERIFIED',     'V');
+defined('IQB_POLICY_STATUS_APPROVED')       OR define('IQB_POLICY_STATUS_APPROVED',     'R');
 defined('IQB_POLICY_STATUS_PAID')           OR define('IQB_POLICY_STATUS_PAID',         'P');
 defined('IQB_POLICY_STATUS_ACTIVE')         OR define('IQB_POLICY_STATUS_ACTIVE',       'A');
 defined('IQB_POLICY_STATUS_CANCELED')       OR define('IQB_POLICY_STATUS_CANCELED',     'C');

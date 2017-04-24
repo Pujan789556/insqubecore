@@ -186,6 +186,33 @@ class Customer_model extends MY_Model
 
         return $data;
     }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Update Lock Flag
+     *
+     * @param int $id
+     * @param int $flag
+     * @return bool
+     */
+    public function update_lock($id, $flag)
+    {
+        if( !in_array($flag, [IQB_FLAG_UNLOCKED, IQB_FLAG_LOCKED]) )
+        {
+            return FALSE;
+        }
+
+        // Let's Update the Flag
+        $data = [
+            'flag_locked'   => $flag,
+            'updated_by'    => $this->dx_auth->get_user_id(),
+            'updated_at'    => $this->set_date()
+        ];
+        return $this->db->where('id', $id)
+                        ->update($this->table_name, $data);
+    }
+
     // ----------------------------------------------------------------
 
     /**

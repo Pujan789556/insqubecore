@@ -85,7 +85,7 @@ if( $record->status === IQB_POLICY_STATUS_VERIFIED && $this->dx_auth->is_authori
  */
 if( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $this->dx_auth->is_authorized('policies', 'status.to.verified') ): ?>
     <a href="#"
-        title="Verify"
+        title="Verify Debit Note"
         data-confirm="true"
         class="btn bg-orange btn-round trg-dialog-action"
         data-message="Are you sure you want to do this?<br/>You can not modify this policy anymore."
@@ -97,10 +97,28 @@ if( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $this->dx_auth->is_autho
 /**
  * Actions on "Verified" Status
  * ----------------------------
- *  1. Make Payment
- *  2. Print Rreceipt
+ *  1. Upgrade Status to "Approved"
  */
 if( $record->status === IQB_POLICY_STATUS_VERIFIED ): ?>
+    <?php if( $this->dx_auth->is_authorized('policies', 'make.policy.payment') ): ?>
+        <a href="#"
+            title="Approve Debit Note"
+            data-confirm="true"
+            class="btn btn-success btn-round trg-dialog-action"
+            data-message="Are you sure you want to APPROVE this debit note?"
+            data-url="<?php echo site_url('policies/status/' . $record->id . '/' . IQB_POLICY_STATUS_APPROVED );?>"
+        ><i class="fa fa-check-square-o"></i> Make a Payment</a>
+    <?php endif?>
+<?php endif?>
+
+<?php
+/**
+ * Actions on "Approved" Status
+ * ----------------------------
+ *  1. Upgrade status to "Paid"
+ *  2. Generate all Accounting Transactions (Premium Vouchers, RI Distribution Vouchers)
+ */
+if( $record->status === IQB_POLICY_STATUS_APPROVED ): ?>
     <?php if( $this->dx_auth->is_authorized('policies', 'make.policy.payment') ): ?>
         <a href="#"
             title="Make a Payment"
@@ -130,7 +148,7 @@ if( $record->status === IQB_POLICY_STATUS_VERIFIED ): ?>
 if( $record->status === IQB_POLICY_STATUS_PAID ): ?>
     <?php if( $this->dx_auth->is_authorized('policies', 'status.to.active') ): ?>
         <a href="#"
-            title="Make a Payment"
+            title="Issue Policy"
             data-confirm="true"
             class="btn btn-success btn-round trg-dialog-action"
             data-message="Are you sure you want to do this? This will now activate policy, generate invoice and receipt."

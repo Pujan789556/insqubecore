@@ -153,6 +153,7 @@ $config['DX_permissions'] = [
 			'status.to.draft',
 			'status.to.unverified',
 			'status.to.verified',
+			'status.to.approved',
 			'status.to.paid',
 			'status.to.active', // issue policy
 			'status.to.cancel',
