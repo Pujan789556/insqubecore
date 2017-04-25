@@ -2439,12 +2439,12 @@ if ( ! function_exists('_OBJ_MOTOR_sub_portfolio_dropdown'))
 	 * @param bool $flag_blank_select 	Whether to append blank select
 	 * @return	bool
 	 */
-	function _OBJ_MOTOR_sub_portfolio_dropdown( $flag_blank_select = true)
+	function _OBJ_MOTOR_sub_portfolio_dropdown( $flag_blank_select = true, $key="id")
 	{
 		$CI =& get_instance();
 		$CI->load->model('portfolio_model');
 
-		$dropdown = $CI->portfolio_model->dropdown_children(IQB_MASTER_PORTFOLIO_MOTOR_ID, 'code');
+		$dropdown = $CI->portfolio_model->dropdown_children(IQB_MASTER_PORTFOLIO_MOTOR_ID, $key);
 		if($flag_blank_select)
 		{
 			$dropdown = IQB_BLANK_SELECT + $dropdown;

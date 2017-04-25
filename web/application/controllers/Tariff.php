@@ -80,16 +80,17 @@ class Tariff extends MY_Controller
     	// tarrif_motor
     	/**
     	 * Valid Method?
-    	 * 		Methods: add | edit | details
+    	 * 		Methods: add | edit | details | flush
     	 *
     	 * Urls
     	 * 		/tariff/motor
     	 * 		/tariff/motor/add
     	 * 		/tariff/motor/details/<fiscal_year_id>
     	 * 		/tariff/motor/duplicate/<fiscal_year_id>
-    	 * 		/tariff/motor/edit/<record_id>
+         *      /tariff/motor/edit/<record_id>
+    	 * 		/tariff/motor/flush
     	 */
-    	if( !empty($method) && !in_array($method, ['add', 'edit', 'duplicate', 'details']))
+    	if( !empty($method) && !in_array($method, ['add', 'edit', 'duplicate', 'details', 'flush']))
     	{
     		$this->template->render_404();
     	}
@@ -203,49 +204,38 @@ class Tariff extends MY_Controller
                 $sub_portfolio_list = _OBJ_MOTOR_sub_portfolio_dropdown(FALSE);
                 $cvc_type_list      = _OBJ_MOTOR_CVC_type_dropdown(FALSE);
 
-                // echo '<pre>'; print_r($cvc_type_list);exit;
-
                 $batch_data = [];
-                // $this->db->insert_batch('mytable', $data);
-                foreach($ownership_list as $ownership=>$otext)
-                {
-                    /**
-                     * Sub-portfolio: Motorcycle
-                     */
-                    $batch_data[] = [
-                        'fiscal_yr_id'          => $fiscal_yr_id,
-                        'sub_portfolio_code'    => IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE,
-                        'ownership'     => $ownership,
-                        'cvc_type'      => NULL
-                    ];
-                }
-                foreach($ownership_list as $ownership=>$otext)
-                {
 
-                    /**
-                     * Sub-portfolio: Private Vehicle
-                     */
-                    $batch_data[] = [
-                        'fiscal_yr_id'          => $fiscal_yr_id,
-                        'sub_portfolio_code'    => IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE,
-                        'ownership'     => $ownership,
-                        'cvc_type'      => NULL
-                    ];
-                }
-                foreach($ownership_list as $ownership=>$otext)
+                // For all Motor Portfolios
+                foreach ($sub_portfolio_list as $portfolio_id=>$ptext)
                 {
-
-                    /**
-                     * Sub-portfolio: Commercial Vehicle
-                     */
-                    foreach ($cvc_type_list as $cvc_type=>$ctext)
+                    // CVC Types on Commercial Vehicle
+                    if( (int)$portfolio_id === IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID )
                     {
-                        $batch_data[] = [
-                            'fiscal_yr_id'          => $fiscal_yr_id,
-                            'sub_portfolio_code'    => IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE,
-                            'ownership'     => $ownership,
-                            'cvc_type'      => $cvc_type
-                        ];
+                        foreach($cvc_type_list as $cvc_type=>$ctext)
+                        {
+                            foreach($ownership_list as $ownership=>$otext)
+                            {
+                                $batch_data[] = [
+                                    'fiscal_yr_id'      => $fiscal_yr_id,
+                                    'portfolio_id'      => $portfolio_id,
+                                    'ownership'         => $ownership,
+                                    'cvc_type'          => $cvc_type
+                                ];
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach($ownership_list as $ownership=>$otext)
+                        {
+                            $batch_data[] = [
+                                'fiscal_yr_id'      => $fiscal_yr_id,
+                                'portfolio_id'      => $portfolio_id,
+                                'ownership'         => $ownership,
+                                'cvc_type'          => NULL
+                            ];
+                        }
                     }
                 }
 
@@ -453,7 +443,7 @@ class Tariff extends MY_Controller
 
     	// Valid Record ?
 		$id = (int)$id;
-		$record = $this->tariff_motor_model->find($id);
+		$record = $this->tariff_motor_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -678,6 +668,21 @@ class Tariff extends MY_Controller
 
         // Return HTML
         $this->template->json($json_data);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    private function __motor__flush($id)
+    {
+        $this->load->model('tariff_motor_model');
+
+        $this->tariff_motor_model->clear_cache();
+        redirect('tariff/motor');
     }
 
     // --------------------------------------------------------------------

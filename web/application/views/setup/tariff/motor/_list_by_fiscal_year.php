@@ -8,8 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<tr>
 		<th>Fiscal Year</th>
 		<th>Ownership</th>
-		<th>Sub-Portfolio</th>
-		<th>Commercial Vehicle Type</th>
+		<th>Portfolio</th>
 		<th>Status</th>
 		<th>Actions</th>
 	</tr>

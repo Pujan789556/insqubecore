@@ -18,9 +18,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						?>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
+						<a href="<?php echo site_url('tariff/motor/flush/');?>" title="Flush Cache"
+							class="btn btn-success btn-round"
+							data-toggle="tooltip"
+						><i class="fa fa-trash-o"></i> Flush Cache</a>
+
 						<a href="#" title="Add New Motor Portfolio Tarrif"
 							class="btn btn-success btn-round trg-dialog-edit"
 							data-box-size="large"
+							data-toggle="tooltip"
 							data-title='<i class="fa fa-pencil-square-o"></i> Add New Motor Portfolio Tarrif'
 							data-url="<?php echo site_url('tariff/motor/add/');?>"
 							data-form=".form-iqb-general"

@@ -18,7 +18,7 @@ class Tariff_motor_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "sub_portfolio_code", "cvc_type", "fiscal_yr_id", "ownership", "default_premium", "tariff", "no_claim_discount", "dr_mcy_disabled_friendly", "rate_pvc_on_hire", "dr_cvc_on_personal_use", "dr_voluntary_excess", "pramt_compulsory_excess", "accident_premium", "riks_group", "pramt_towing", "trolly_tariff", "insured_value_tariff", "active", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ['id', 'portfolio_id', 'cvc_type', 'fiscal_yr_id', 'ownership', 'default_premium', 'tariff', 'no_claim_discount', 'dr_mcy_disabled_friendly', 'rate_pvc_on_hire', 'dr_cvc_on_personal_use', 'dr_voluntary_excess', 'pramt_compulsory_excess', 'accident_premium', 'riks_group', 'pramt_towing', 'trolly_tariff', 'insured_value_tariff', 'active', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -44,6 +44,8 @@ class Tariff_motor_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+
+        $this->load->helper('motor');
 
         // Valication Rule
         $this->validation_rules();
@@ -631,21 +633,34 @@ class Tariff_motor_model extends MY_Model
 
     public function get_list_by_fiscal_year_rows($fiscal_yr_id)
     {
-        return $this->db->select('PTM.*, FY.code_en as fy_code_en, FY.code_np as fy_code_np')
+        return $this->db->select('PTM.*, FY.code_en as fy_code_en, FY.code_np as fy_code_np, PRT.name_en as portfolio_name_en')
                         ->from($this->table_name . ' PTM')
                         ->join('master_fiscal_yrs FY', 'FY.id = PTM.fiscal_yr_id')
+                        ->join('master_portfolio PRT', 'PRT.id = PTM.portfolio_id')
                         ->where('PTM.fiscal_yr_id', $fiscal_yr_id)
                         ->get()->result();
     }
 
     // ----------------------------------------------------------------
 
-    public function get_single($fiscal_yr_id, $ownership, $sub_portfolio_code, $cvc_type = NULL)
+    public function get($id)
+    {
+        return $this->db->select('PTM.*, FY.code_en as fy_code_en, FY.code_np as fy_code_np, PRT.name_en as portfolio_name_en')
+                        ->from($this->table_name . ' PTM')
+                        ->join('master_fiscal_yrs FY', 'FY.id = PTM.fiscal_yr_id')
+                        ->join('master_portfolio PRT', 'PRT.id = PTM.portfolio_id')
+                        ->where('PTM.id', $id)
+                        ->get()->row();
+    }
+
+    // ----------------------------------------------------------------
+
+    public function get_single($fiscal_yr_id, $ownership, $portfolio_id, $cvc_type = NULL)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_name = 'tms_' . $fiscal_yr_id . '_' . $ownership . '_' . $sub_portfolio_code;
+        $cache_name = 'tms_' . $fiscal_yr_id . '_' . $ownership . '_' . $portfolio_id;
         if($cvc_type)
         {
             $cache_name .= '_' . $cvc_type;
@@ -655,7 +670,7 @@ class Tariff_motor_model extends MY_Model
         if(!$row)
         {
             $where = [
-                'sub_portfolio_code' => $sub_portfolio_code,
+                'portfolio_id'  => $portfolio_id,
                 'cvc_type'      => $cvc_type ? $cvc_type : NULL,
                 'ownership'     => $ownership,
                 'fiscal_yr_id'  => $fiscal_yr_id,

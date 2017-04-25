@@ -28,9 +28,9 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-2 control-label">Sub-Portfolio</label>
+            <label class="col-sm-2 control-label">Portfolio</label>
             <div class="col-sm-10">
-            <p class="form-control-static"><?php echo _OBJ_MOTOR_sub_portfolio_dropdown(FALSE)[$record->sub_portfolio_code]?></p>
+            <p class="form-control-static"><?php echo $record->portfolio_name_en;?></p>
             </div>
         </div>
         <div class="form-group">
