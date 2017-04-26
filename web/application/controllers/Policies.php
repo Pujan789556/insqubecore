@@ -1174,31 +1174,42 @@ class Policies extends MY_Controller
 		/**
 		 * Let's Update the Status
 		 */
-		if( $this->policy_model->update_status($record, $to_status_code) )
-		{
+		try {
 
-			/**
-			 * @TODO: Post Status Update Tasks
-			 * example send SMS on policy activation etc ...
-			 */
+			if( $this->policy_model->update_status($record, $to_status_code) )
+			{
 
-			/**
-			 * Update View
-			 */
-			$record->status = $to_status_code;
-			$view = 'policies/tabs/_tab_overview';
-			$html = $this->load->view($view, ['record' => $record], TRUE);
+				/**
+				 * @TODO: Post Status Update Tasks
+				 * example send SMS on policy activation etc ...
+				 */
 
-			$ajax_data = [
-				'message' 	=> 'Successfully Updated!',
-				'status'  	=> 'success',
-				'reloadRow' => true,
-				'rowId' 	=> '#tab-policy-overview-inner',
-				'method' 	=> 'replaceWith',
-				'row'		=> $html
-			];
-			return $this->template->json($ajax_data);
+				/**
+				 * Update View
+				 */
+				$record->status = $to_status_code;
+				$view = 'policies/tabs/_tab_overview';
+				$html = $this->load->view($view, ['record' => $record], TRUE);
+
+				$ajax_data = [
+					'message' 	=> 'Successfully Updated!',
+					'status'  	=> 'success',
+					'reloadRow' => true,
+					'rowId' 	=> '#tab-policy-overview-inner',
+					'method' 	=> 'replaceWith',
+					'row'		=> $html
+				];
+				return $this->template->json($ajax_data);
+			}
+
+		} catch (Exception $e) {
+
+			return $this->template->json([
+				'status' 	=> 'error',
+				'message' 	=> $e->getMessage()
+			], 400);
 		}
+
 		return $this->template->json([
 			'status' 	=> 'error',
 			'message' 	=> 'Could not be updated!'

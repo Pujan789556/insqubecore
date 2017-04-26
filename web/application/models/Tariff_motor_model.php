@@ -602,6 +602,7 @@ class Tariff_motor_model extends MY_Model
                                 ->from($this->table_name . ' PTM')
                                 ->join('master_fiscal_yrs FY', 'FY.id = PTM.fiscal_yr_id')
                                 ->group_by('PTM.fiscal_yr_id')
+                                ->order_by('PTM.fiscal_yr_id', 'DESC')
                                 ->get()->result();
             $this->write_cache($list, 'tm_index_list', CACHE_DURATION_DAY);
         }

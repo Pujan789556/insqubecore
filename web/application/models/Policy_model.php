@@ -745,8 +745,6 @@ class Policy_model extends MY_Model
                 $this->load->model('rel_agent_policy_model');
                 $this->rel_agent_policy_model->insert($relation_data, TRUE);
             }
-
-
             return TRUE;
 
         }
@@ -824,7 +822,8 @@ class Policy_model extends MY_Model
 
 
     // ----------------------------------------------------------------
-
+    //  POLICY STATUS UPDATE METHODS
+    // ----------------------------------------------------------------
 
     /**
      * Update Policy Status
@@ -847,45 +846,100 @@ class Policy_model extends MY_Model
         // Valid Record? Valid Status Code?
         if( !$record || !in_array($to_status_flag, array_keys( get_policy_status_dropdown() ) ) )
         {
-            return FALSE;
+            throw new Exception("Exception [Policy Model]: Either Policy Record not found or Invalid status flag supplied.");
         }
 
         // Status Qualified?
         if( !$this->_status_qualifies($record->status, $to_status_flag) )
         {
-            return FALSE;
+            throw new Exception("Exception [Policy Model]: Current Status does not qualify to upgrade/downgrade.");
         }
 
-        $id = $record->id;
-        $data = [
+
+        // Prepare Basic Update Data
+        $base_data = [
             'status'        => $to_status_flag,
             'updated_by'    => $this->dx_auth->get_user_id(),
             'updated_at'    => $this->set_date()
         ];
 
+        $method = '_to_status_' . $to_status_flag;
 
         /**
-         * ==================== TRANSACTIONS BEGIN =========================
+         * Call Individual Status Method
          */
-        $transaction_status = TRUE;
+        return $this->{$method}($record, $base_data);
+    }
+
+    // ----------------------------------------------------------------
 
         /**
-         * Disable DB Debugging
+         * Update Status to Draft
+         *
+         * @param object $record
+         * @param array $base_data
+         * @return bool
          */
-        $this->db->db_debug = FALSE;
-        $this->db->trans_start();
+        private function _to_status_D($record, $base_data)
+        {
+            /**
+             * ==================== TRANSACTIONS BEGIN =========================
+             */
+            $transaction_status = TRUE;
 
-                switch($to_status_flag)
-                {
-                    /**
-                     * This status is downgraded from Unverified. We simply Update status flag.
-                     */
-                    case IQB_POLICY_STATUS_DRAFT:
-                        $this->_to_status($id, $data);
-                        break;
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_start();
 
-                    // ----------------------------------------------------------------
 
+                    $this->_to_status($record->id, $base_data);
+
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $transaction_status = FALSE;
+            }
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+            /**
+             * ==================== TRANSACTIONS END =========================
+             */
+
+            return $transaction_status;
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Update Status to Unverified
+         *
+         * @param object $record
+         * @param array $base_data
+         * @return bool
+         */
+        private function _to_status_U($record, $base_data)
+        {
+
+            /**
+             * ==================== TRANSACTIONS BEGIN =========================
+             */
+            $transaction_status = TRUE;
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_start();
 
                     /**
                      * This is the case when a policy status is upgraded from "draft" or downgraded from "verified".
@@ -894,22 +948,63 @@ class Policy_model extends MY_Model
                      *      2. Policy Transaction Record [Status -> Draft]
                      *      3. Open Lock Flag [Object, Customer]
                      */
-                    case IQB_POLICY_STATUS_UNVERIFIED:
 
-                        // Task 1 - Policy Record [Status -> Unverified, Verified date/user -> NULL]
-                        $data['verified_at'] = NULL;
-                        $data['verified_by'] = NULL;
-                        $this->_to_status($id, $data);
+                    // Task 1 - Policy Record [Status -> Unverified, Verified date/user -> NULL]
+                    $base_data['verified_at'] = NULL;
+                    $base_data['verified_by'] = NULL;
+                    $this->_to_status($record->id, $base_data);
 
-                        // Task 2 - Policy Transaction Record [Status -> Draft]
-                        $this->policy_txn_model->update_status($id, IQB_POLICY_TXN_STATUS_DRAFT);
+                    // Task 2 - Policy Transaction Record [Status -> Draft]
+                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_DRAFT);
 
-                        // Task 3 - Open Lock Flag [Object, Customer]
-                        $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
-                        $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
-                        break;
+                    // Task 3 - Open Lock Flag [Object, Customer]
+                    $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
+                    $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
 
-                    // ----------------------------------------------------------------
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $transaction_status = FALSE;
+            }
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+            /**
+             * ==================== TRANSACTIONS END =========================
+             */
+
+            return $transaction_status;
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Update Status to Verified
+         *
+         * @param object $record
+         * @param array $base_data
+         * @return bool
+         */
+        private function _to_status_V($record, $base_data)
+        {
+            /**
+             * ==================== TRANSACTIONS BEGIN =========================
+             */
+            $transaction_status = TRUE;
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_start();
+
 
                     /**
                      * This is the case when a policy status is upgraded from "unverified" or downgraded from "approved".
@@ -918,81 +1013,296 @@ class Policy_model extends MY_Model
                      *      2. Policy Transaction Record [Status -> Verified]
                      *      3. Activate Lock Flag [Object, Customer]
                      */
-                    case IQB_POLICY_STATUS_VERIFIED:
 
-                        // Task 1 - Policy Record [Status -> Verified, Verified date/user -> current, Approved date/user -> NULL]
-                        $data['verified_at'] = $this->set_date();
-                        $data['verified_by'] = $this->dx_auth->get_user_id();
+                    // Task 1 - Policy Record [Status -> Verified, Verified date/user -> current, Approved date/user -> NULL]
+                    $base_data['verified_at'] = $this->set_date();
+                    $base_data['verified_by'] = $this->dx_auth->get_user_id();
 
-                        $data['approved_at'] = NULL;
-                        $data['approved_by'] = NULL;
+                    $base_data['approved_at'] = NULL;
+                    $base_data['approved_by'] = NULL;
 
-                        $this->_to_status($id, $data);
+                    $this->_to_status($record->id, $base_data);
 
-                        // Task 2 - Policy Transaction Record [Status -> Verified]
-                        $this->policy_txn_model->update_status($id, IQB_POLICY_TXN_STATUS_VERIFIED);
+                    // Task 2 - Policy Transaction Record [Status -> Verified]
+                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_VERIFIED);
 
-                        // Task 3 - Activate Lock Flag [Object, Customer]
-                        $this->object_model->update_lock($record->object_id, IQB_FLAG_LOCKED);
-                        $this->customer_model->update_lock($record->customer_id, IQB_FLAG_LOCKED);
-                        break;
+                    // Task 3 - Activate Lock Flag [Object, Customer]
+                    $this->object_model->update_lock($record->object_id, IQB_FLAG_LOCKED);
+                    $this->customer_model->update_lock($record->customer_id, IQB_FLAG_LOCKED);
 
-                    // ----------------------------------------------------------------
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $transaction_status = FALSE;
+            }
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+            /**
+             * ==================== TRANSACTIONS END =========================
+             */
+
+            return $transaction_status;
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Update Status to Approved
+         *
+         * @param object $record
+         * @param array $base_data
+         * @return bool
+         */
+        private function _to_status_R($record, $base_data)
+        {
+            if( !$this->policy_txn_model->ri_approved($record->id) )
+            {
+                return FALSE;
+            }
+            /**
+             * ==================== TRANSACTIONS BEGIN =========================
+             */
+            $transaction_status = TRUE;
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_start();
+
 
                     /**
                      * This is the case when a policy status is upgraded from "verified".
+                     *
+                     * !!! NOTE: The Txn Record's RI Approval Constraint must met.
+                     *
                      * So, the following tasks are carried out:
                      *      1. Policy Record [Status -> Approved, Approved date/user -> current]
                      */
-                    case IQB_POLICY_STATUS_APPROVED:
 
-                        // Task 1 - Policy Record [Status -> Approved, Approved date/user -> current]
-                        $data['approved_at'] = $this->set_date();
-                        $data['approved_by'] = $this->dx_auth->get_user_id();
-                        $this->_to_status($id, $data);
-                        break;
+                    // Task 1 - Policy Record [Status -> Approved, Approved date/user -> current]
+                    $base_data['approved_at'] = $this->set_date();
+                    $base_data['approved_by'] = $this->dx_auth->get_user_id();
+                    $this->_to_status($record->id, $base_data);
 
-                    // ----------------------------------------------------------------
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $transaction_status = FALSE;
+            }
 
-                    /**
-                     * Change Status Only
-                     */
-                    case IQB_POLICY_STATUS_PAID:
-                    case IQB_POLICY_STATUS_ACTIVE:
-                    case IQB_POLICY_STATUS_CANCELED:
-                    case IQB_POLICY_STATUS_EXPIRED:
-                        $this->_to_status($id, $data);
-                        break;
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
-                    // ----------------------------------------------------------------
+            /**
+             * ==================== TRANSACTIONS END =========================
+             */
 
-                    default:
-                        break;
-                }
-
-        /**
-         * Complete transactions or Rollback
-         */
-        $this->db->trans_complete();
-        if ($this->db->trans_status() === FALSE)
-        {
-            $transaction_status = FALSE;
+            return $transaction_status;
         }
 
-        /**
-         * Restore DB Debug Configuration
-         */
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+        // ----------------------------------------------------------------
 
         /**
-         * ==================== TRANSACTIONS END =========================
+         * Update Status to Paid
+         *
+         * @param object $record
+         * @param array $base_data
+         * @return bool
          */
+        private function _to_status_P($record, $base_data)
+        {
+            /**
+             * ==================== TRANSACTIONS BEGIN =========================
+             */
+            $transaction_status = TRUE;
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_start();
 
 
-        return $transaction_status;
-    }
+                    $this->_to_status($record->id, $base_data);
 
-    // ----------------------------------------------------------------
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $transaction_status = FALSE;
+            }
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+            /**
+             * ==================== TRANSACTIONS END =========================
+             */
+
+            return $transaction_status;
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Update Status to Active
+         *
+         * @param object $record
+         * @param array $base_data
+         * @return bool
+         */
+        private function _to_status_A($record, $base_data)
+        {
+            /**
+             * ==================== TRANSACTIONS BEGIN =========================
+             */
+            $transaction_status = TRUE;
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_start();
+
+
+                    $this->_to_status($record->id, $base_data);
+
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $transaction_status = FALSE;
+            }
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+            /**
+             * ==================== TRANSACTIONS END =========================
+             */
+
+            return $transaction_status;
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Update Status to Canceled
+         *
+         * @param object $record
+         * @param array $base_data
+         * @return bool
+         */
+        private function _to_status_C($record, $base_data)
+        {
+            /**
+             * ==================== TRANSACTIONS BEGIN =========================
+             */
+            $transaction_status = TRUE;
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_start();
+
+
+                    $this->_to_status($record->id, $base_data);
+
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $transaction_status = FALSE;
+            }
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+            /**
+             * ==================== TRANSACTIONS END =========================
+             */
+
+            return $transaction_status;
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Update Status to Expired
+         *
+         * @param object $record
+         * @param array $base_data
+         * @return bool
+         */
+        private function _to_status_E($record, $base_data)
+        {
+            /**
+             * ==================== TRANSACTIONS BEGIN =========================
+             */
+            $transaction_status = TRUE;
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_start();
+
+
+                    $this->_to_status($record->id, $base_data);
+
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $transaction_status = FALSE;
+            }
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+            /**
+             * ==================== TRANSACTIONS END =========================
+             */
+
+            return $transaction_status;
+        }
+
+        // ----------------------------------------------------------------
 
         private function _status_qualifies($current_status, $to_status)
         {
@@ -1038,7 +1348,7 @@ class Policy_model extends MY_Model
             return $flag_qualifies;
         }
 
-    // ----------------------------------------------------------------
+        // ----------------------------------------------------------------
 
         private function _to_status($id, $data)
         {
@@ -1047,7 +1357,8 @@ class Policy_model extends MY_Model
         }
 
 
-    // ----------------------------------------------------------------
+    // -------------------- END: POLICY STATUS UPDATE METHODS --------------
+
 
     /**
      * Get Data Rows
@@ -1200,7 +1511,7 @@ class Policy_model extends MY_Model
                             /**
                              * Object Table (attributes, sum insured amount, lock flag)
                              */
-                            "O.attributes AS object_attributes, O.amt_sum_insured AS object_amt_sum_insured, O.flag_locked AS object_flag_locked, " .
+                            "O.portfolio_id AS object_portfolio_id, O.customer_id AS object_customer_id, O.attributes AS object_attributes, O.amt_sum_insured AS object_amt_sum_insured, O.flag_locked AS object_flag_locked, " .
 
 
                             /**

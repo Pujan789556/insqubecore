@@ -44,6 +44,8 @@ class Policy_txn_model extends MY_Model
         $this->load->config('policy');
         $this->load->helper('policy');
         $this->load->helper('object');
+
+        $this->load->model('policy_crf_model');
     }
 
     // ----------------------------------------------------------------
@@ -54,6 +56,8 @@ class Policy_txn_model extends MY_Model
      * This function will reset the current transaction record of the
      * specified policy to default(empty/null).
      *
+     * It will further reset the cost reference record if any
+     *
      * !!!IMPORTANT: The record MUST NOT be ACTIVE.
      *
      *
@@ -62,21 +66,131 @@ class Policy_txn_model extends MY_Model
      */
     public function reset($policy_id)
     {
-        // !!!NOTE: 'amt_sum_insured' can not be emptied as it is updated when policy is updated
-        $nullable_fields = ['txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_comissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval'];
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+        $transaction_status = TRUE;
 
-        $reset_data = [];
+        /**
+         * Disable DB Debugging
+         */
+        $this->db->db_debug = FALSE;
+        $this->db->trans_start();
 
-        foreach ($nullable_fields as $field)
+                $this->_reset($policy_id);
+
+        /**
+         * Complete transactions or Rollback
+         */
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
         {
-             $reset_data[$field] = NULL;
+            $transaction_status = FALSE;
         }
-        return $this->db->where('policy_id', $policy_id)
-                 ->update($this->table_name, $reset_data);
+
+        /**
+         * Restore DB Debug Configuration
+         */
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        return $transaction_status;
+    }
+
+        // --------------------------------------------------------------------
+
+        private function _reset($policy_id)
+        {
+            $record = $this->get_current_txn_by_policy($policy_id);
+
+            if(!$record)
+            {
+                throw new Exception("Exception [Model: Policy_txn_model][Method: _reset()]: Current TXN record could not be found.");
+            }
+
+            /**
+             * Task 1: Reset Policy Transaction Record
+             */
+            // !!!NOTE: 'amt_sum_insured' can not be emptied as it is updated when policy is updated
+            $nullable_fields = ['txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_comissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval'];
+
+            $reset_data = [];
+
+            foreach ($nullable_fields as $field)
+            {
+                 $reset_data[$field] = NULL;
+            }
+            $this->db->where('id', $record->id)
+                     ->update($this->table_name, $reset_data);
+
+            /**
+             * Task 2: Reset Policy Cost Reference Record
+             */
+            $this->policy_crf_model->reset($record->id);
+        }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * RI Approval Required?
+     *
+     * Check if the transaction required RI Approval.
+     *
+     * @param integer|object $policy_id_or_record   Policy ID or Transaction Record
+     * @return bool
+     */
+    public function ri_approval_required($policy_id_or_record)
+    {
+        $record = is_numeric($policy_id_or_record) ? $this->get_current_txn_by_policy( (int)$policy_id_or_record ): $policy_id_or_record;
+        $approval_required  = FALSE;
+
+        if( $record )
+        {
+            $approval_required = (int)$record->flag_ri_approval === IQB_FLAG_ON;
+        }
+
+        return $approval_required;
     }
 
     // --------------------------------------------------------------------
 
+    /**
+     * RI Approved?
+     *
+     * Check if the transaction is RI Approved (if required).
+     * If RI approval is not required for this txn record,
+     * it will simply return TRUE.
+     *
+     *
+     * @param integer|object $policy_id_or_record   Policy ID or Transaction Record
+     * @return bool
+     */
+    public function ri_approved( $record )
+    {
+        $record = is_numeric($policy_id_or_record) ? $this->get_current_txn_by_policy( (int)$policy_id_or_record ): $policy_id_or_record;
+        $approved  = TRUE;
+
+        // First check if it requires RI Approval
+        if( $this->ri_approval_required($record) )
+        {
+            // Transaction status must be "RI Approved"
+            $approved = $record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED;
+        }
+
+        return $approved;
+    }
+
+    // --------------------------------------------------------------------
+
+    public function is_editable($status)
+    {
+        return $status === IQB_POLICY_TXN_STATUS_DRAFT;
+    }
+
+    // --------------------------------------------------------------------
 
     /**
      * Update Policy Transaction Status
@@ -84,24 +198,30 @@ class Policy_txn_model extends MY_Model
      * !!! NOTE: We can only change status of current Transaction Record
      *
      * @param integer $policy_id Policy ID
-     * @param alpha $to_status_code Status Code
+     * @param alpha $to_status_flag Status Code
      * @return bool
      */
-    public function update_status($policy_id, $to_status_code)
+    public function update_status($policy_id, $to_status_flag)
     {
         $record = $this->get_current_txn_by_policy($policy_id);
         if(!$record)
         {
-            throw new Exception("Policy TXN Model: Current TXN record could not be found.");
+            throw new Exception("Exception [Model: Policy_txn_model][Method: update_status()]: Current TXN record could not be found.");
+        }
+
+        // Status Qualified?
+        if( !$this->_status_qualifies($record->status, $to_status_flag) )
+        {
+            throw new Exception("Exception [Model:Policy_txn_model][Method: update_status()]: Current Status does not qualify to upgrade/downgrade.");
         }
 
         $data = [
-            'status'        => $to_status_code,
+            'status'        => $to_status_flag,
             'updated_by'    => $this->dx_auth->get_user_id(),
             'updated_at'    => $this->set_date()
         ];
 
-        switch($to_status_code)
+        switch($to_status_flag)
         {
             /**
              * Reset Verified date/user to NULL
@@ -144,7 +264,37 @@ class Policy_txn_model extends MY_Model
         return $this->_to_status($record->id, $data);
     }
 
-    // ----------------------------------------------------------------
+        // ----------------------------------------------------------------
+
+        private function _status_qualifies($current_status, $to_status)
+        {
+            $flag_qualifies = FALSE;
+
+            switch ($to_status)
+            {
+                case IQB_POLICY_TXN_STATUS_DRAFT:
+                    $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_VERIFIED;
+                    break;
+
+                case IQB_POLICY_TXN_STATUS_VERIFIED:
+                    $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_DRAFT, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
+                    break;
+
+                case IQB_POLICY_TXN_STATUS_RI_APPROVED:
+                    $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_VERIFIED;
+                    break;
+
+                case IQB_POLICY_TXN_STATUS_ACTIVE:
+                    $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
+                    break;
+
+                default:
+                    break;
+            }
+            return $flag_qualifies;
+        }
+
+        // ----------------------------------------------------------------
 
         private function _to_status($id, $data)
         {

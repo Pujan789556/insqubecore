@@ -2613,5 +2613,256 @@ if ( ! function_exists('_OBJ_MOTOR_transactional_attributes'))
 }
 
 
+// ------------------------------------------------------------------------
+// POLICY TRANSACTION HELPER FUNCTIONS FOR MOTOR PORTFOLIO
+// ------------------------------------------------------------------------
 
+if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
+{
+	/**
+	 * Get Policy TXN Validation Rules for Premium Add/Update for Motor Portfolio
+	 *
+	 * @param object $policy_record 	Policy Record
+	 * @param object $pfs_record		Portfolio Setting Record
+	 * @param object $tariff_record 	Portfolio Tariff Record
+	 * @param bool $formatted 			Return Sectioned or Formatted
+	 * @param string $return 			Return all rules or policy package specific
+	 * @return array
+	 */
+	function _TXN_MOTOR_premium_validation_rules($policy_record, $pfs_record, $tariff_record, $formatted = true, $return = 'specific' )
+	{
+		$CI =& get_instance();
+
+		// Let's have the Endorsement Templates
+		$CI->load->model('endorsement_template_model');
+		$template_dropdown = $CI->endorsement_template_model->dropdown( $policy_record->portfolio_id );
+
+		$validation_rules = [
+
+			/**
+			 * Common to All Package Type
+			 * ----------------------------
+			 * Sampusti Bibaran and Remarks are common to all type of policy package.
+			 */
+			'common_all' => [
+				[
+	                'field' => 'txn_details',
+	                'label' => 'Details/सम्पुष्टि विवरण',
+	                'rules' => 'trim|required|htmlspecialchars',
+	                '_type'     => 'textarea',
+	                '_id'		=> 'txn-details',
+	                '_required' => true
+	            ],
+	            [
+                    'field' => 'template_reference',
+                    'label' => 'Load from endorsement templates',
+                    'rules' => 'trim|integer|max_length[8]',
+                    '_key' 		=> 'template_reference',
+                    '_id'		=> 'template-reference',
+                    '_type'     => 'dropdown',
+                    '_data' 	=> IQB_BLANK_SELECT + $template_dropdown,
+                    '_required' => false
+                ],
+	            [
+	                'field' => 'remarks',
+	                'label' => 'Remarks/कैफियत',
+	                'rules' => 'trim|htmlspecialchars',
+	                '_type'     => 'textarea',
+	                '_required' => true
+	            ]
+			],
+
+
+
+			/**
+			 * Third Party Validation Rules
+			 * ----------------------------
+			 * We only need stamp duty. The rest are auto computed from tariff.
+			 */
+			'third_party' => [
+				[
+	                'field' => 'amt_stamp_duty',
+	                'label' => 'Stamp Duty(Rs.)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+	                '_type'     => 'text',
+	                '_default' 	=> $pfs_record->stamp_duty,
+	                '_required' => true
+	            ]
+			],
+
+			/**
+			 * Comprehensive Common Validation Rules
+			 * ---------------------------------------
+			 * These rules apply to MCY/PVC/CVC
+			 */
+			'comprehensive_common' => [
+				[
+                    'field' => 'extra_fields[dr_voluntary_excess]',
+                    'label' => 'Voluntary Excess',
+                    'rules' => 'trim|prep_decimal|decimal|max_length[5]',
+                    '_key' 		=> 'dr_voluntary_excess',
+                    '_type'     => 'dropdown',
+                    '_data' 	=> _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess),
+                    '_required' => false
+                ],
+                [
+                    'field' => 'extra_fields[no_claim_discount]',
+                    'label' => 'No Claim Discount',
+                    'rules' => 'trim|prep_decimal|decimal|max_length[5]',
+                    '_key' 		=> 'no_claim_discount',
+                    '_type'     => 'dropdown',
+                    '_data' 	=> _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount),
+                    '_required' => false
+                ],
+                [
+                    'field' => 'extra_fields[flag_risk_pool]',
+                    'label' => 'Pool Risk (जोखिम समूह बीमा)',
+                    'rules' => 'trim|integer|in_list[1]',
+                    '_key' 		=> 'flag_risk_mob',
+                    '_type'     => 'checkbox',
+                    '_checkbox_value' 	=> '1',
+                    '_required' => false,
+                    '_help_text' => '<small>This covers both (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा) & (आतंककारी/विध्वंशात्मक कार्य जोखिम बीमा) </small>'
+                ],
+                // [
+                //     'field' => 'extra_fields[flag_risk_mob]',
+                //     'label' => 'Pool Risk Mob (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा)',
+                //     'rules' => 'trim|integer|in_list[1]',
+                //     '_key' 		=> 'flag_risk_mob',
+                //     '_type'     => 'checkbox',
+                //     '_checkbox_value' 	=> '1',
+                //     '_required' => false
+                // ],
+                // [
+                //     'field' => 'extra_fields[flag_risk_terorrism]',
+                //     'label' => 'Pool Risk Terorrism (आतंककारी/विध्वंशात्मक कार्य जोखिम बीमा)',
+                //     'rules' => 'trim|integer|in_list[1]',
+                //     '_key' 		=> 'flag_risk_terorrism',
+                //     '_type'     => 'checkbox',
+                //     '_checkbox_value' 	=> '1',
+                //     '_required' => false
+                // ],
+                [
+	                'field' => 'amt_stamp_duty',
+	                'label' => 'Stamp Duty(Rs.)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+	                '_type'     => 'text',
+	                '_default' 	=> $pfs_record->stamp_duty,
+	                '_required' => true
+	            ]
+			],
+
+			/**
+			 * Comprehensive PVC Only Validation Rules
+			 * ---------------------------------------
+			 * These rules apply to Private Vehicle
+			 */
+			'comprehensive_pvc' => [
+
+				// Commercial Use
+				[
+                    'field' => 'extra_fields[flag_commercial_use]',
+                    'label' => 'Commercial Use (निजी प्रयोजनको लागि भाडामा दिएको)',
+                    'rules' => 'trim|integer|in_list[1]',
+                    '_key' 		=> 'flag_commercial_use',
+                    '_type'     => 'checkbox',
+                    '_checkbox_value' 	=> '1',
+                    '_required' => false
+                ],
+
+                // Pay for Towing
+				[
+                    'field' => 'extra_fields[flag_towing]',
+                    'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
+                    'rules' => 'trim|integer|in_list[1]',
+                    '_key' 		=> 'flag_towing',
+                    '_type'     => 'checkbox',
+                    '_checkbox_value' 	=> '1',
+                    '_required' => false
+                ]
+			],
+
+			/**
+			 * Comprehensive CVC Only Validation Rules
+			 * ---------------------------------------
+			 * These rules apply to Commercial Vehicle
+			 */
+			'comprehensive_cvc' => [
+				// Private Use
+				[
+                    'field' => 'extra_fields[flag_private_use]',
+                    'label' => 'Private Use',
+                    'rules' => 'trim|integer|in_list[1]',
+                    '_key' 		=> 'flag_private_use',
+                    '_type'     => 'checkbox',
+                    '_checkbox_value' 	=> '1',
+                    '_required' => false,
+                    '_help_text' => '<small>* कार्यालय, पर्यटन र निजी प्रयोजनमा मात्र प्रयोग हुने सवारी साधनको तथा एम्बुलेन्स र शववाहनको ब्यापक बीमा गर्दा शरुु बीमाशुल्कको २५ प्रतिशत छुटहुनेछ ।<br/>** निजी प्रयोेजनको लागि प्रयोग गर्ने सवारी साधन तथा दमकलको ब्यापक बीमा गर्दा शुरु बीमाशुल्कको २५ प्रतिशत छुटहुनेछ ।</small>'
+                ],
+
+                // Pay for Towing
+				[
+                    'field' => 'extra_fields[flag_towing]',
+                    'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
+                    'rules' => 'trim|integer|in_list[1]',
+                    '_key' 		=> 'flag_towing',
+                    '_type'     => 'checkbox',
+                    '_checkbox_value' 	=> '1',
+                    '_required' => false
+                ]
+			]
+		];
+
+		/**
+		 * Do we need to return all validation rules or Policy Package Specific only?
+		 */
+		$rules = [];
+		if( $return === 'specific')
+		{
+			if($policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
+			{
+				$rules['third_party'] = $validation_rules['third_party'];
+				$rules['common_all'] = $validation_rules['common_all'];
+			}
+			else
+			{
+				$rules['comprehensive_common'] = $validation_rules['comprehensive_common'];
+
+				// Portfolio Specific Rules
+				if( (int)$policy_record->portfolio_id === IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID )
+				{
+					$rules['comprehensive_pvc'] = $validation_rules['comprehensive_pvc'];
+				}
+				elseif( (int)$policy_record->portfolio_id === IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID )
+				{
+					$rules['comprehensive_cvc'] = $validation_rules['comprehensive_cvc'];
+				}
+
+				// common to all
+				$rules['common_all'] = $validation_rules['common_all'];
+			}
+		}
+		else
+		{
+			$rules = $validation_rules;
+		}
+
+		/**
+		 * Return Formatted or Sectioned
+		 */
+		if( !$formatted )
+		{
+			return $rules;
+		}
+
+		$v_rules = [];
+		foreach($rules as $section=>$r)
+		{
+			$v_rules = array_merge($v_rules, $r);
+		}
+
+		return $v_rules;
+
+	}
+}
 

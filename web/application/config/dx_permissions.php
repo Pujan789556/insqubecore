@@ -159,12 +159,6 @@ $config['DX_permissions'] = [
 			'status.to.cancel',
 
 			/**
-			 * Policy Transaction Specific permissions
-			 */
-			'build.policy.transaction', // Depends on [add|edit.draft|edit.unverified].policy permission
-			'ri.approval.on.policy.transaction',
-
-			/**
 			 * Policy Schedule Generation
 			 */
 			'generate.policy.schedule',
@@ -186,7 +180,32 @@ $config['DX_permissions'] = [
 			 * Followup Related Permissions
 			 */
 			'send.followup.notification',
+		],
 
+		/**
+		 * Policy Transaction/Endorsement
+		 */
+		'policy_txn' => [
+
+			/**
+			 * CRUD Operation Permissions
+			 */
+			'explore.transaction',
+			'add.transaction',
+			'edit.transaction',
+			'delete.transaction',
+
+			/**
+			 * Verify/Approval Permission
+			 */
+			'status.to.draft',
+			'status.to.verified',
+			'status.to.active', // Issue Endorsement (this will update approved_by, approved_at)
+
+			/**
+			 * RI-Approval Permission
+			 */
+			'ri.approval.on.transaction', // this will updated ri_approved_at/by & status to ri-approved(R)
 		],
 
 		/**

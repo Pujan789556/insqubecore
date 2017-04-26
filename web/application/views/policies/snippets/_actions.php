@@ -24,7 +24,7 @@ if( is_policy_editable($record->status, FALSE) ):
         class="btn btn-success btn-round trg-dialog-edit"
         data-box-size="large"
         data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $record->code?>'
-        data-url="<?php echo site_url('policy_txn/rebuild/1/' . $record->id);?>"
+        data-url="<?php echo site_url('policy_txn/premium/' . IQB_POLICY_TXN_TYPE_FRESH . '/' . $record->id);?>"
         data-form="#_form-premium">
         <i class="fa fa-dollar"></i> Update Premium</a>
 <?php endif?>
