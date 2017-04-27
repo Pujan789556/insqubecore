@@ -359,6 +359,47 @@ if ( ! function_exists('get_policy_crf_transfer_type_text'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('get_policy_crf_computation_type_dropdown'))
+{
+	/**
+	 * Get Policy CRF Computation Type Dropdown
+	 *
+	 * @return	array
+	 */
+	function get_policy_crf_computation_type_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_POLICY_CRF_COMPUTE_AUTO 	=> 'Automatic',
+			IQB_POLICY_CRF_COMPUTE_MANUAL 	=> 'Manual'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('get_policy_crf_computation_type_text'))
+{
+	/**
+	 * Get Policy CRF Computation Type Text
+	 *
+	 * @return	string
+	 */
+	function get_policy_crf_computation_type_text( $key, $formatted = FALSE, $sentence = FALSE )
+	{
+		$list = get_policy_txn_type_dropdown();
+
+		$text = $list[$key] ?? '';
+
+		return $text;
+	}
+}
+
+// ------------------------------------------------------------------------
 
 if ( ! function_exists('is_policy_editable'))
 {
@@ -430,27 +471,26 @@ if ( ! function_exists('is_policy_editable'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_PREMIUM_OVERVIEW_CARD_partial_view_by_portfolio'))
+if ( ! function_exists('_POLICY_partial_view__cost_calculation_table'))
 {
 	/**
-	 * Get Premium Overview Card Partial View Name by Portfolio
+	 * Get Cost Calculation Table Parital View
 	 *
 	 * @param integer $portfolio_id Portfolio ID
 	 * @return	string
 	 */
-	function _PREMIUM_OVERVIEW_CARD_partial_view_by_portfolio( $portfolio_id )
+	function _POLICY_partial_view__cost_calculation_table( $portfolio_id )
 	{
 		$partial_view = '';
-		switch ($portfolio_id)
-		{
-			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-				$partial_view = 'premium/snippets/_card_overview_MOTOR';
-				break;
 
-			default:
-				# code...
-				break;
+		/**
+		 * MOTOR
+		 * -----
+		 * For all type of motor portfolios, we have same package list
+		 */
+		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		{
+			$partial_view = 'policy_txn/snippets/_cost_calculation_table_MOTOR';
 		}
 		return $partial_view;
 	}
@@ -523,7 +563,7 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
         $pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($fy_record->id, $portfolio_id);
         if(!$pfs_record)
         {
-        	throw new Exception("No Portfolio Setting Record found for specified fiscal year {$fy_record->code_np}({$fy_record->code_en})");
+        	throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__get_short_term_info()]: No Portfolio Setting Record found for specified fiscal year {$fy_record->code_np}({$fy_record->code_en})");
         }
 
         // update false return with default duration

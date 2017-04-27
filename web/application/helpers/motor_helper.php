@@ -118,13 +118,15 @@ if ( ! function_exists('_PO_MOTOR_compute_short_term_premium'))
 			$short_term_rate = (float)$short_term_rate;
 
 			// Compute Total Amount
-			$cost_table['total_premium_amount'] = ($cost_table['total_premium_amount'] * $short_term_rate)/100.00;
+			$cost_table['amt_total_premium'] = ($cost_table['amt_total_premium'] * $short_term_rate)/100.00;
 
-			// Compute Commission Amount if any
-			$comissionable_amount = $cost_table['comissionable_amount'] ?? NULL;
-			if($comissionable_amount)
+
+			// Update Commissionable Amount and Commission
+			$amt_commissionable = $cost_table['amt_commissionable'] ?? NULL;
+			if($amt_commissionable)
 			{
-				$cost_table['comissionable_amount'] = ($cost_table['comissionable_amount'] * $short_term_rate)/100.00;
+				$cost_table['amt_commissionable'] 	= ($cost_table['amt_commissionable'] * $short_term_rate)/100.00;
+				$cost_table['amt_agent_commission'] = ($cost_table['amt_commissionable'] * $pfs_record->agent_commission)/100.00;
 			}
 		}
 
@@ -134,10 +136,48 @@ if ( ! function_exists('_PO_MOTOR_compute_short_term_premium'))
 
 
 // ------------------------------------------------------------------------
-// PORTFOLIO COMPUTATIONAL TABLE
+// TARIFF BASED COST COMPUTATION FUNCTIONS
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
+
+if ( ! function_exists('_PO_MOTOR_crf_compute_method'))
+{
+    /**
+     * Get MOTOR Cost Reference Computation Method
+     *
+     * @param int $portfolio_id
+     * @return string
+     */
+    function _PO_MOTOR_crf_compute_method($portfolio_id)
+    {
+    	// Method to compute CRF data
+		$method = '';
+
+		switch ($portfolio_id)
+		{
+			case IQB_SUB_PORTFOLIO_MOTORCYCLE_ID:
+				$method = '_PO_MOTOR_MCY_compute_crf';
+				break;
+
+			case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID:
+				$method = '_PO_MOTOR_PVC_compute_crf';
+				break;
+
+			case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID:
+				$method = '_PO_MOTOR_CVC_compute_crf';
+				break;
+
+			default:
+				break;
+		}
+
+		return $method;
+    }
+}
+
+// -----------------------------------------------------------------------
+
+if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 {
 	/**
 	 * Motorcycle Policy Cost Table
@@ -151,13 +191,12 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 	 *
 	 * @return	array
 	 */
-	function _PO_MOTOR_MCY_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
+	function _PO_MOTOR_MCY_compute_crf( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
 	{
-		$cost_table = [];
 		$attributes = json_decode($policy_object->attributes);
 
 		// Form Posted Data - Extra Fields Required to Perform Cost Calculation
-		$post_data_extra_fields = $data['extra_fields'] ?? NULL;
+		$post_data_other_cost_fields = $data['other_cost_fields'] ?? NULL;
 
 		// Tariff Extracts
 		$default_tariff = json_decode($tariff_record->tariff);
@@ -201,7 +240,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
         }
 
         // No Claim Discount - Years & Rate
-        $no_claim_discount 		= $post_data_extra_fields['no_claim_discount'] ?? 0;
+        $no_claim_discount 		= $post_data_other_cost_fields['no_claim_discount'] ?? 0;
         $no_claim_discount 		= $no_claim_discount ? $no_claim_discount : 0;
 		$year_no_claim_discount = $no_claim_discount ? _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
 
@@ -219,7 +258,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 			/**
 			 * Defaults (अ)
 			 */
-			$__cost_table_A = [
+			$__CRF_cc_table__A = [
 				'column_head' => 'अ',
 				'title_np' 	=> 'सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा तथा दुर्घटना बीमा वापत',
 				'title_en' 	=> 'Insurance against vehicle damage/loss & accident insurance amounted to'
@@ -236,19 +275,19 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 				$__premium_A_row_2 = $__premium_A_row_1 * ($vehicle_over_age_rate/100.00);
 			}
 
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'label' 	=> 'क',
 				'title' 	=> "सि.सि.तथा घोषित मूल्य (सरसामान सहित) अनुसार बीमा शुल्क (घोषित मूल्यको {$default_rate}%)",
 				'amount' 	=> $__premium_A_row_1
 			];
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "सवारी साधन {$vehicle_age_in_yrs} वर्ष पुरानो भए वापत थप बीमाशुल्क: “क” को {$vehicle_over_age_rate}%",
 				'amount' 	=> $__premium_A_row_2
 			];
 
 			// Sub Total : ख
 			$__premium_A_row_3 = $__premium_A_row_1 + $__premium_A_row_2;
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'label' 	=> 'ख',
 				'title' 	=> "",
 				'amount' 	=> $__premium_A_row_3
@@ -257,14 +296,14 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 
 			// Discount on Voluntary Excess : discount_KHA
 			$__premium_A_row_4 				= 0.00;
-			$dr_voluntary_excess 		= $post_data_extra_fields['dr_voluntary_excess'] ?? 0.00;
+			$dr_voluntary_excess 		= $post_data_other_cost_fields['dr_voluntary_excess'] ?? 0.00;
 			$amount_voluntary_excess 	= $dr_voluntary_excess ? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess] : 0.00;
 
 			if($dr_voluntary_excess)
 			{
 				$__premium_A_row_4 = $__premium_A_row_3 * ($dr_voluntary_excess/100.00);
 			}
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "बीमित स्वयंले व्यहोर्ने स्वेच्छीक अधिक रु {$amount_voluntary_excess} वापत छुटः “ख” को {$dr_voluntary_excess} %",
 				'amount' 	=> $__premium_A_row_4
 			];
@@ -272,7 +311,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 
 			// Sub Total : ग
 			$__premium_A_row_5 = $__premium_A_row_3 - $__premium_A_row_4;
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'label' 	=> 'ग',
 				'title' 	=> "",
 				'amount' 	=> $__premium_A_row_5
@@ -285,7 +324,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 			{
 				$__premium_A_row_6 = $__premium_A_row_5 * ($no_claim_discount/100.00);
 			}
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ग” को $no_claim_discount %",
 				'amount' 	=> $__premium_A_row_6
 			];
@@ -293,7 +332,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 
 			// Sub Total : घ
 			$__agent_comissionable_amount = $__premium_A_row_7 = $__premium_A_row_5 - $__premium_A_row_6;
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'label' 	=> 'घ',
 				'title' 	=> "",
 				'amount' 	=> $__premium_A_row_7
@@ -308,7 +347,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 				// X% of GHA
 				$__premium_A_row_8 = $__premium_A_row_7 * ($pfs_record->direct_discount/100.00);
 			}
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "प्रत्यक्ष बीमा वापत छूटः “घ” को {$pfs_record->direct_discount} %",
 				'amount' 	=> $__premium_A_row_8
 			];
@@ -332,13 +371,13 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 				$__agent_comissionable_amount 	= $premium_A_total;
 
 				// Remove all the sections
-				$__cost_table_A = [
+				$__CRF_cc_table__A = [
 					'column_head' => 'अ',
 					'title_np' 	=> 'सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा तथा दुर्घटना बीमा वापत',
 					'title_en' 	=> 'Insurance against vehicle damage/loss & accident insurance amounted to'
 				];
-				$__cost_table_A['sections'] = [];
-				$__cost_table_A['sections'][] = [
+				$__CRF_cc_table__A['sections'] = [];
+				$__CRF_cc_table__A['sections'][] = [
 					'title' 	=> "सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा तथा दुर्घटना बीमा वापत",
 					'amount' 	=> $premium_A_total
 				];
@@ -348,13 +387,13 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 			}
 
 
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 		=> "जम्मा",
 				'amount' 		=> $premium_A_total,
 				'section_total' => true
 			];
 
-			$__cost_table_A['sub_total'] = $premium_A_total;
+			$__CRF_cc_table__A['sub_total'] = $premium_A_total;
 
 			// ---------------------------------------------------------------------------------------
 
@@ -362,33 +401,21 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 			/**
 			 * Risk Pool (इ)
 			 */
-			$__cost_table_I = [
+			$__CRF_cc_table__I = [
 				'column_head' => 'इ',
 				'title_np' 	=> 'जोखिम समूह थप गरे वापत',
 				'title_en' 	=> 'Pool risk insurance amounted to'
 			];
-			$flag_risk_mob = $post_data_extra_fields['flag_risk_mob'] ?? NULL;
-			$flag_risk_terorrism = $post_data_extra_fields['flag_risk_terorrism'] ?? NULL;
 
+			$flag_risk_pool = $post_data_other_cost_fields['flag_risk_pool'] ?? NULL;
 			$premium_risk_mob = 0.00;
-			if($flag_risk_mob)
-			{
-				$premium_risk_mob = $vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
-			}
-			$__cost_table_I['sections'][] = [
-				'title' => "(क) हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_mob}% का दरले)",
-				'amount' => $premium_risk_mob
-			];
-
 			$premium_risk_terorrism = 0.00;
 			$premium_for_insured_covered_on_terorrism = 0.00;
-			if($flag_risk_terorrism)
+			if($flag_risk_pool)
 			{
+				$premium_risk_mob 		= $vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
 				$premium_risk_terorrism = $vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
-				$__cost_table_I['sections'][] = [
-					'title' => "(ख) आतंककारी तथा विध्वंसात्मक कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_terorrism}%का दरले)",
-					'amount' => $premium_risk_terorrism
-				];
+
 				// Premium for "Per Thousand Insured Amount" on Terorrism rate_additionl_per_thousand_on_extra_rate
 
 				// Driver Covered
@@ -396,7 +423,6 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 				// Driver Count  = 1
 				// Passenger Count = Seat Capacity - 1
 				// Tariff Rate: rate_additionl_per_thousand_on_extra_rate
-
 
 				$insured_value_tariff = json_decode($tariff_record->insured_value_tariff);
 
@@ -410,22 +436,31 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 				$premium_passenger = $passenger_count * (($insured_value_tariff->driver/1000.00) * $tariff_rsik_group->rate_additionl_per_thousand_on_extra_rate);
 
 				$premium_for_insured_covered_on_terorrism = $premium_driver + $premium_passenger;
-
-				$__cost_table_I['sections'][] = [
-					'title' => "(ग) चालक तथा पछाडि बस्ने व्यक्तिको आतंकबाद वापत {$tariff_rsik_group->rate_additionl_per_thousand_on_extra_rate} प्रति हजारका दरले ",
-					'amount' => $premium_for_insured_covered_on_terorrism
-				];
 			}
+			$__CRF_cc_table__I['sections'][] = [
+				'title' => "(क) हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_mob}% का दरले)",
+				'amount' => $premium_risk_mob
+			];
+			$__CRF_cc_table__I['sections'][] = [
+				'title' => "(ख) आतंककारी तथा विध्वंसात्मक कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_terorrism}%का दरले)",
+				'amount' => $premium_risk_terorrism
+			];
+
+			$__CRF_cc_table__I['sections'][] = [
+				'title' => "(ग) चालक तथा पछाडि बस्ने व्यक्तिको आतंकबाद वापत {$tariff_rsik_group->rate_additionl_per_thousand_on_extra_rate} प्रति हजारका दरले ",
+				'amount' => $premium_for_insured_covered_on_terorrism
+			];
+
 			// इ TOTAL
 			$premium_I_total = $premium_risk_mob + $premium_risk_terorrism + $premium_for_insured_covered_on_terorrism;
 
-			$__cost_table_I['sections'][] = [
+			$__CRF_cc_table__I['sections'][] = [
 				'title' 	=> 'जम्मा', // Subtotal
 				'amount' 	=> $premium_I_total,
 				'section_total' => true
 			];
 
-			$__cost_table_I['sub_total'] = $premium_I_total;
+			$__CRF_cc_table__I['sub_total'] = $premium_I_total;
 		}
 
 
@@ -463,19 +498,19 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 		//
 		// Grand Total
 		//
-		$total_premium_amount = $premium_total_A_AA  + $premium_I_total;
+		$amt_total_premium = $premium_total_A_AA  + $premium_I_total;
 
 
 		//
 		// Stamp Duty
 		//
-		$stamp_duty_amount = $data['stamp_duty_amount'];
+		$amt_stamp_duty = $data['amt_stamp_duty'];
 
 
 		/**
 		 * Cost Table: Third Party Only
 		 */
-		$__cost_table_AA = [
+		$__CRF_cc_table__AA = [
 			'column_head' => 'आ',
 			'title_np' 	=> 'तेश्रो पक्ष प्रतिको दायित्व बीमा वापत',
 			'title_en' 	=> 'Third party liability insurance amounted to',
@@ -492,29 +527,29 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 		// Noclaim Dicount Only if Comprehensive
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
-			$__cost_table_AA['sections'][] = [
+			$__CRF_cc_table__AA['sections'][] = [
 				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ङ” को $no_claim_discount %",
 				'amount' => $amount_noClaimDiscount_on_thirdParty
 			];
 		}
 
 		// Third Party : Sub Total
-		$__cost_table_AA['sections'][] = [
+		$__CRF_cc_table__AA['sections'][] = [
 			'title' 	=> 'जम्मा', // Subtotal
 			'amount' 	=> $premium_AA_total,
 			'section_total' => true
 		];
 
-		$__cost_table_AA['sub_total'] = $premium_AA_total;
+		$__CRF_cc_table__AA['sub_total'] = $premium_AA_total;
 
 
 		/**
 		 * Disabled Friendly Discount
 		 */
-		$__cost_table_flag_mcy_df = [];
+		$__CRF_cc_table__flag_mcy_df = [];
 		if($vehile_flag_mcy_df)
 		{
-			$__cost_table_flag_mcy_df = [
+			$__CRF_cc_table__flag_mcy_df = [
 				'column_head' => '*',
 				'title_np' 	=> 'अपाङ्ग मैत्री छुट',
 				'title_en' 	=> 'Disabled-friendly discount',
@@ -535,33 +570,35 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 			];
 		}
 
-		$__cost_table = [
-			'total_premium_amount'  => $total_premium_amount,
-			'stamp_duty_amount' 	=> $stamp_duty_amount,
-			'extra_fields' 	=> $post_data_extra_fields ? json_encode($post_data_extra_fields) : NULL
+		$CRF_PREMIUM_DATA = [
+			'amt_sum_insured' 		=> $policy_object->amt_sum_insured,
+			'amt_total_premium'  	=> $amt_total_premium,
+			'amt_stamp_duty' 		=> $amt_stamp_duty,
+			'other_cost_fields' 	=> $post_data_other_cost_fields ? json_encode($post_data_other_cost_fields) : NULL,
+			'amt_pool_premium' 		=> $premium_I_total
 		];
 
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
 		{
-			$__cost_table['attributes'] = json_encode(array_filter([$__cost_table_AA, $__cost_table_flag_mcy_df]));
+			$CRF_PREMIUM_DATA['cost_calculation_table'] = json_encode(array_filter([$__CRF_cc_table__AA, $__CRF_cc_table__flag_mcy_df]));
 		}
 		else
 		{
-			$__cost_table_comprehensive = array_filter([
+			$__CRF_cc_table__comprehensive = array_filter([
 				// Comprehensive
-				$__cost_table_A,
+				$__CRF_cc_table__A,
 
 				// Third Party
-				$__cost_table_AA,
+				$__CRF_cc_table__AA,
 
 				// Discount Disabled Friendly
-				$__cost_table_flag_mcy_df,
+				$__CRF_cc_table__flag_mcy_df,
 
 				// Pool Risk
-				$__cost_table_I
+				$__CRF_cc_table__I
 			]);
 
-			$__cost_table['attributes'] = json_encode($__cost_table_comprehensive);
+			$CRF_PREMIUM_DATA['cost_calculation_table'] = json_encode($__CRF_cc_table__comprehensive);
 
 			/**
 			 * Agent Commission?
@@ -571,12 +608,13 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 			 */
 			if($policy_record->flag_dc === 'C' && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
 			{
-				$__cost_table['comissionable_amount'] = $__agent_comissionable_amount;
+				$CRF_PREMIUM_DATA['amt_commissionable'] 	= $__agent_comissionable_amount;
+				$CRF_PREMIUM_DATA['amt_agent_commission'] 	= ($__agent_comissionable_amount * $pfs_record->agent_commission)/100.00;
 			}
 		}
 
 		// Any Remarks?
-		$__cost_table['remarks'] = $__remarks;
+		$CRF_PREMIUM_DATA['remarks'] = $__remarks;
 
 		/**
 		 * SHORT TERM POLICY?
@@ -585,15 +623,15 @@ if ( ! function_exists('_PO_MOTOR_MCY_cost_table'))
 		 * If the policy is short term policy, we have to calculate the short term values
 		 *
 		 */
-		$__cost_table = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
+		$CRF_PREMIUM_DATA = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $CRF_PREMIUM_DATA );
 
-		return $__cost_table;
+		return $CRF_PREMIUM_DATA;
 	}
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
+if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 {
 	/**
 	 * Private Vehicle Policy Cost Table
@@ -607,13 +645,12 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 	 *
 	 * @return	array
 	 */
-	function _PO_MOTOR_PVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
+	function _PO_MOTOR_PVC_compute_crf( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
 	{
-		$cost_table = [];
 		$attributes = json_decode($policy_object->attributes);
 
 		// Form Posted Data - Extra Fields Required to Perform Cost Calculation
-		$post_data_extra_fields = $data['extra_fields'] ?? NULL;
+		$post_data_other_cost_fields = $data['other_cost_fields'] ?? NULL;
 
 
 		// Tariff Extracts
@@ -674,7 +711,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
         }
 
         // No Claim Discount - Years & Rate
-        $no_claim_discount 		= $post_data_extra_fields['no_claim_discount'] ?? 0;
+        $no_claim_discount 		= $post_data_other_cost_fields['no_claim_discount'] ?? 0;
         $no_claim_discount 		= $no_claim_discount ? $no_claim_discount : 0;
 		$year_no_claim_discount = $no_claim_discount ? _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
 
@@ -695,7 +732,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 			/**
 			 * Defaults (अ)
 			 */
-			$__cost_table_A = [
+			$__CRF_cc_table__A = [
 				'column_head' => 'अ',
 				'title_np' 	=> 'सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा वापत',
 				'title_en' 	=> 'Insurance against vehicle damage/loss',
@@ -714,11 +751,11 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 			{
 				$__premium_A_row_1 = $vehicle_total_price * ($base_fragment_rate / 100.00);
 			}
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "सि.सि.अनुसार घोषित मूल्य मध्ये पहिलो बीस लाखसम्मको बीमाशुल्क (घोषित मूल्यको {$base_fragment_rate}%)",
 				'amount' 	=> $__premium_A_row_1
 			];
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "बाँकी घोषित मूल्यको बीमा शुल्क (बाँकी घोषित मूल्यको {$rest_fragment_rate}%)",
 				'amount' 	=> $__premium_A_row_2
 			];
@@ -730,7 +767,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 			{
 				$__premium_A_row_3 = ( $trailer_price * ($trolly_tariff->rate/100.00) ) - $trolly_tariff->minus_amount;
 			}
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "ट्रेलर (मालसामान ओसार्ने) वापतको बीमाशुल्क ( घोषित मूल्यको{$trolly_tariff->rate}% - रु. {$trolly_tariff->minus_amount})का दरले",
 				'amount' 	=> $__premium_A_row_3
 			];
@@ -738,7 +775,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 
 			// Discount according to CC
 			$__premium_A_row_4 = $minus_amount_according_to_cc;
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "सि.सि. अनुसार बीमाशुल्कमा छूट",
 				'amount' 	=> $__premium_A_row_4
 			];
@@ -746,7 +783,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 
 			// क Sub Total
 			$__premium_A_row_KA = $__premium_A_row_5 = $__premium_A_row_1 + $__premium_A_row_2 + $__premium_A_row_3 - $__premium_A_row_4;
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "",
 				'amount' 	=> $__premium_A_row_5,
 				'label' 	=> 'क'
@@ -759,7 +796,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 			{
 				$__premium_A_row_6 = $__premium_A_row_KA * ($vehicle_over_age_rate/100.00);
 			}
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' => "सवारी साधन {$vehicle_age_in_yrs} वर्ष पुरानो भए वापत थप बीमाशुल्क: “क” को {$vehicle_over_age_rate}%",
 				'amount' => $__premium_A_row_6
 			];
@@ -767,7 +804,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 
 			// ख Sub Total
 			$__premium_A_row_KHA = $__premium_A_row_7 = $__premium_A_row_KA + $__premium_A_row_6;
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "",
 				'amount' 	=> $__premium_A_row_KHA,
 				'label' 	=> 'ख'
@@ -775,13 +812,13 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 
 
 			// Private on Hire (Commercial Use)
-			$flag_commercial_use = $post_data_extra_fields['flag_commercial_use'] ?? FALSE;
+			$flag_commercial_use = $post_data_other_cost_fields['flag_commercial_use'] ?? FALSE;
 			$__premium_A_row_8 = 0.00;
 			if( $flag_commercial_use )
 			{
 				$__premium_A_row_8 = $__premium_A_row_KHA * ($tariff_record->rate_pvc_on_hire/100.00);
 			}
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' => "निजी प्रयोजनको लागि भाडामा दिए वापत थप: “ख” को {$tariff_record->rate_pvc_on_hire}%",
 				'amount' => $__premium_A_row_8
 			];
@@ -789,7 +826,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 
 			// ग Sub Total
 			$__premium_A_row_GA = $__premium_A_row_9 = $__premium_A_row_KHA + $__premium_A_row_8;
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "",
 				'amount' 	=> $__premium_A_row_GA,
 				'label' 	=> 'ग'
@@ -797,7 +834,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 
 
 			// Discount on Voluntary Excess - GA ko X%
-			$dr_voluntary_excess 		= $post_data_extra_fields['dr_voluntary_excess'] ?? FALSE;
+			$dr_voluntary_excess 		= $post_data_other_cost_fields['dr_voluntary_excess'] ?? FALSE;
 			$amount_voluntary_excess 	= $dr_voluntary_excess
 											? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess]
 											: 0.00;
@@ -806,7 +843,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 			{
 				$__premium_A_row_10 = $__premium_A_row_GA * ($dr_voluntary_excess/100.00);
 			}
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' => "बीमित स्वयंले व्यहोर्ने स्वेच्छीक अधिक रु {$amount_voluntary_excess} वापत छुटः “ग” को {$dr_voluntary_excess} %",
 				'amount' => $__premium_A_row_10
 			];
@@ -814,7 +851,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 
 			// घ Sub Total
 			$__premium_A_row_GHA = $__premium_A_row_11 = $__premium_A_row_GA - $__premium_A_row_10;
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "",
 				'amount' 	=> $__premium_A_row_GHA,
 				'label' 	=> 'घ'
@@ -827,7 +864,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 			{
 				$__premium_A_row_12 = $__premium_A_row_GHA * ($no_claim_discount/100.00);
 			}
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “घ” को {$no_claim_discount} %",
 				'amount' => $__premium_A_row_12
 			];
@@ -835,7 +872,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 
 			// ङ Sub Total
 			$__agent_comissionable_amount = $__premium_A_row_NGA = $__premium_A_row_13 = $__premium_A_row_GHA - $__premium_A_row_12;
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "",
 				'amount' 	=> $__premium_A_row_NGA,
 				'label' 	=> 'ङ'
@@ -851,14 +888,14 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 				// X% of ङ
 				$__premium_A_row_14 = $__premium_A_row_NGA * ($pfs_record->direct_discount/100.00);
 			}
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' => "प्रत्यक्ष बीमा वापत छुटः “ङ” को {$pfs_record->direct_discount} %",
 				'amount' => $__premium_A_row_14
 			];
 
 			// च Sub Total
 			$__premium_A_row_CHA = $__premium_A_row_15 = $__premium_A_row_NGA - $__premium_A_row_14;
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "",
 				'amount' 	=> $__premium_A_row_CHA,
 				'label' 	=> 'च'
@@ -866,13 +903,13 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 
 
 			// Towing
-			$flag_towing = $post_data_extra_fields['flag_towing'] ?? FALSE;
+			$flag_towing = $post_data_other_cost_fields['flag_towing'] ?? FALSE;
 			$__premium_A_row_16 = 0.00;
 			if( $flag_towing )
 			{
 				$__premium_A_row_16 = $tariff_record->pramt_towing ?? 0.00;
 			}
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' => "दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा वापत बीमा शुल्क थप",
 				'amount' => $__premium_A_row_16
 			];
@@ -896,13 +933,13 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 				$__agent_comissionable_amount 	= $premium_A_total;
 
 				// Remove all the sections
-				$__cost_table_A = [
+				$__CRF_cc_table__A = [
 					'column_head' => 'अ',
 					'title_np' 	=> 'सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा वापत',
 					'title_en' 	=> 'Insurance against vehicle damage/loss',
 				];
-				$__cost_table_A['sections'] = [];
-				$__cost_table_A['sections'][] = [
+				$__CRF_cc_table__A['sections'] = [];
+				$__CRF_cc_table__A['sections'][] = [
 					'title' 	=> "सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा वापत",
 					'amount' 	=> $premium_A_total
 				];
@@ -912,14 +949,14 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 			}
 
 
-			$__cost_table_A['sections'][] = [
+			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "जम्मा",
 				'amount' 	=> $premium_A_total,
 				'section_total' => true
 			];
 
 			// Section Sub Total
-			$__cost_table_A['sub_total'] = $premium_A_total;
+			$__CRF_cc_table__A['sub_total'] = $premium_A_total;
 		}
 
 			// ---------------------------------------------------------------------------------------
@@ -933,20 +970,20 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 			 */
 			$accident_premium = $tariff_record->accident_premium ? json_decode($tariff_record->accident_premium) : NULL;
 			$insured_value_tariff = $tariff_record->insured_value_tariff ? json_decode($tariff_record->insured_value_tariff) : NULL;
-			$__cost_table_I = [
+			$__CRF_cc_table__I = [
 				'column_head' => 'इ',
 				'title_np' 	=> 'चालकको दुर्घटना बीमा वापत',
 				'title_en' 	=> 'Driver Accident Insurance'
 			];
 
 			$premium_I_total =  $accident_premium->pramt_driver_accident;
-			$__cost_table_I['sections'][] = [
+			$__CRF_cc_table__I['sections'][] = [
 				'title' => "चालक (बीमांक रु. {$insured_value_tariff->driver}  को रु. {$accident_premium->pramt_driver_accident} का दरले)",
 				'amount' => $premium_I_total
 			];
 
 			// Section Sub Total
-			$__cost_table_I['sub_total'] = $premium_I_total;
+			$__CRF_cc_table__I['sub_total'] = $premium_I_total;
 
 			// ---------------------------------------------------------------------------------------
 
@@ -954,20 +991,20 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 			/**
 			 * Insured Party/Passenger Accident Insurance (ई)
 			 */
-			$__cost_table_EE = [
+			$__CRF_cc_table__EE = [
 				'column_head' => 'ई',
 				'title_np' 	=> 'बीमित तथा यात्रीको दुर्घटना बीमा वापत',
 				'title_en' 	=> 'Insured Party & Passenger Accident Insurance'
 			];
 
 			$premium_EE_total =  ($attributes->carrying_capacity - 1) * $accident_premium->pramt_accident_per_passenger;
-			$__cost_table_EE['sections'][] = [
+			$__CRF_cc_table__EE['sections'][] = [
 				'title' => "प्रति व्यक्ति बीमांक रु. {$insured_value_tariff->passenger} को लागी बीमाशुल्क प्रति सिट रु. {$accident_premium->pramt_accident_per_passenger} का दरले",
 				'amount' => $premium_EE_total
 			];
 
 			// Section Sub Total
-			$__cost_table_EE['sub_total'] = $premium_EE_total;
+			$__CRF_cc_table__EE['sub_total'] = $premium_EE_total;
 
 			// ---------------------------------------------------------------------------------------
 
@@ -981,34 +1018,24 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 			 * NOTE: Please note that you have to compute using both the Vehicle total price and
 			 * 		Trailer/Trolly Price (if any)
 			 */
-			$__cost_table_U = [
+			$__CRF_cc_table__U = [
 				'column_head' => 'उ',
 				'title_np' 	=> 'जोखिम समूह थप गरे वापत',
 				'title_en' 	=> 'Pool risk insurance amounted to'
 			];
 
-			$flag_risk_mob = $post_data_extra_fields['flag_risk_mob'] ?? NULL;
-			$flag_risk_terorrism = $post_data_extra_fields['flag_risk_terorrism'] ?? NULL;
-
-
-			// Mob/Strike
+			$flag_risk_pool = $post_data_other_cost_fields['flag_risk_pool'] ?? NULL;
 			$__premium_U_row_1 = 0.00;
-			if($flag_risk_mob)
-			{
-				$__premium_U_row_1 = (float)($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
-			}
-			$__cost_table_U['sections'][] = [
-				'title' => "(क) हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_mob}% का दरले)",
-				'amount' => $__premium_U_row_1
-			];
-
-			// Terorrism
 			$__premium_U_row_2 = 0.00;
 			$__premium_U_row_3 = 0.00;
 			$__premium_U_row_4 = 0.00;
 			$premium_for_insured_covered_on_terorrism = 0.00;
-			if($flag_risk_terorrism)
+			if($flag_risk_pool)
 			{
+				// Mob/Strike
+				$__premium_U_row_1 = (float)($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
+
+				// Terrorism
 				$__premium_U_row_2 = (float)($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
 
 				// Premium for "Per Thousand Insured Amount" on Terorrism rate_additionl_per_thousand_on_extra_rate
@@ -1030,32 +1057,38 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 
 				// Passenger Premium
 				$__premium_U_row_4 = $passenger_count * (($insured_value_tariff->passenger/1000.00) * $tariff_rsik_group->rate_additionl_per_thousand_on_extra_rate);
+
 			}
+			$__CRF_cc_table__U['sections'][] = [
+				'title' => "(क) हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_mob}% का दरले)",
+				'amount' => $__premium_U_row_1
+			];
+
 
 			// उ TOTAL
 			$premium_U_total = $__premium_U_row_1 + $__premium_U_row_2 + $__premium_U_row_3 + $__premium_U_row_4;
 
-			$__cost_table_U['sections'][] = [
+			$__CRF_cc_table__U['sections'][] = [
 				'title' => "(ख) आतंककारी तथा विध्वंसात्मक कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_terorrism}%का दरले)",
 				'amount' => $__premium_U_row_2
 			];
-			$__cost_table_U['sections'][] = [
+			$__CRF_cc_table__U['sections'][] = [
 				'title' => "(ग) चालक",
 				'amount' => $__premium_U_row_3
 			];
-			$__cost_table_U['sections'][] = [
+			$__CRF_cc_table__U['sections'][] = [
 				'title' => "(घ) बीमित तथा यात्री",
 				'amount' => $__premium_U_row_4
 			];
 
-			$__cost_table_U['sections'][] = [
+			$__CRF_cc_table__U['sections'][] = [
 				'title' 	=> 'जम्मा', // Subtotal
 				'amount' 	=> $premium_U_total,
 				'section_total' => true
 			];
 
 			// Section Sub Total
-			$__cost_table_U['sub_total'] = $premium_U_total;
+			$__CRF_cc_table__U['sub_total'] = $premium_U_total;
 		}
 
 
@@ -1064,7 +1097,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 		/**
 		 * Third Party (आ)
 		 */
-		$__cost_table_AA = [
+		$__CRF_cc_table__AA = [
 			'column_head' => 'आ',
 			'title_np' 	=> 'तेश्रो पक्ष प्रतिको दायित्व बीमा वापत',
 			'title_en' 	=> 'Third party liability insurance amounted to'
@@ -1075,7 +1108,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 		{
 			$__premium_AA_row_2 = $__premium_AA_row_1 * ($no_claim_discount/100.00);
 		}
-		$__cost_table_AA['sections'][] = [
+		$__CRF_cc_table__AA['sections'][] = [
 			'title' => "सि. सि. अनुसारको बीमाशुल्क",
 			'amount' => $__premium_AA_row_1
 		];
@@ -1083,7 +1116,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 		// No claim Dicount Only if Comprehensive
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
-			$__cost_table_AA['sections'][] = [
+			$__CRF_cc_table__AA['sections'][] = [
 				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “छ” को $no_claim_discount %",
 				'amount' => $__premium_AA_row_2
 			];
@@ -1091,14 +1124,14 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 
 		// Third Party : Sub Total (छ Total)
 		$premium_AA_total = $__premium_AA_row_1 - $__premium_AA_row_2;
-		$__cost_table_AA['sections'][] = [
+		$__CRF_cc_table__AA['sections'][] = [
 			'title' 	=> 'जम्मा', // Subtotal
 			'amount' 	=> $premium_AA_total,
 			'section_total' => true
 		];
 
 		// Section Sub Total
-		$__cost_table_AA['sub_total'] = $premium_AA_total;
+		$__CRF_cc_table__AA['sub_total'] = $premium_AA_total;
 
 		// ---------------------------------------------------------------------------------------
 
@@ -1107,48 +1140,50 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 		//
 		// Grand Total
 		//
-		$total_premium_amount = $premium_A_total + $premium_AA_total  + $premium_I_total + $premium_EE_total + $premium_U_total;
+		$amt_total_premium = $premium_A_total + $premium_AA_total  + $premium_I_total + $premium_EE_total + $premium_U_total;
 
 
 		//
 		// Stamp Duty
 		//
-		$stamp_duty_amount 	= $data['stamp_duty_amount'];
+		$amt_stamp_duty 	= $data['amt_stamp_duty'];
 
 
 
-		$__cost_table = [
-			'total_premium_amount'  => $total_premium_amount,
-			'stamp_duty_amount' 	=> $stamp_duty_amount,
-			'extra_fields' 	=> $post_data_extra_fields ? json_encode($post_data_extra_fields) : NULL
+		$CRF_PREMIUM_DATA = [
+			'amt_sum_insured' 		=> $policy_object->amt_sum_insured,
+			'amt_total_premium'  	=> $amt_total_premium,
+			'amt_stamp_duty' 		=> $amt_stamp_duty,
+			'other_cost_fields' 	=> $post_data_other_cost_fields ? json_encode($post_data_other_cost_fields) : NULL,
+			'amt_pool_premium' 		=> $premium_U_total
 		];
 
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
 		{
-			$__cost_table['attributes'] = json_encode( [$__cost_table_AA, $__cost_table_I, $__cost_table_EE ] );
+			$CRF_PREMIUM_DATA['cost_calculation_table'] = json_encode( [$__CRF_cc_table__AA, $__CRF_cc_table__I, $__CRF_cc_table__EE ] );
 		}
 		else
 		{
 
-			$__cost_table_comprehensive = array_filter([
+			$__CRF_cc_table__comprehensive = array_filter([
 
 				// Comprehensive
-				$__cost_table_A,
+				$__CRF_cc_table__A,
 
 				// Third Party
-				$__cost_table_AA,
+				$__CRF_cc_table__AA,
 
 				// Driver Accident
-				$__cost_table_I,
+				$__CRF_cc_table__I,
 
 				// Passenger Accident
-				$__cost_table_EE,
+				$__CRF_cc_table__EE,
 
 				// Risk Group
-				$__cost_table_U
+				$__CRF_cc_table__U
 			]);
 
-			$__cost_table['attributes'] = json_encode($__cost_table_comprehensive);
+			$CRF_PREMIUM_DATA['cost_calculation_table'] = json_encode($__CRF_cc_table__comprehensive);
 
 
 			/**
@@ -1159,12 +1194,13 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 			 */
 			if($policy_record->flag_dc === 'C' && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
 			{
-				$__cost_table['comissionable_amount'] = $__agent_comissionable_amount;
+				$CRF_PREMIUM_DATA['amt_commissionable'] 	= $__agent_comissionable_amount;
+				$CRF_PREMIUM_DATA['amt_agent_commission'] 	= ($__agent_comissionable_amount * $pfs_record->agent_commission)/100.00;
 			}
 		}
 
 		// Any Remarks?
-		$__cost_table['remarks'] = $__remarks;
+		$CRF_PREMIUM_DATA['remarks'] = $__remarks;
 
 		/**
 		 * SHORT TERM POLICY?
@@ -1173,15 +1209,15 @@ if ( ! function_exists('_PO_MOTOR_PVC_cost_table'))
 		 * If the policy is short term policy, we have to calculate the short term values
 		 *
 		 */
-		$__cost_table = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
+		$CRF_PREMIUM_DATA = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $CRF_PREMIUM_DATA );
 
-		return $__cost_table;
+		return $CRF_PREMIUM_DATA;
 	}
 }
 
 // -----------------------------------------------------------------------
 
-if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
+if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
 {
     /**
      * Commercial Vehicle Policy Cost Table
@@ -1195,12 +1231,12 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
      *
      * @return  array
      */
-    function _PO_MOTOR_CVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
+    function _PO_MOTOR_CVC_compute_crf( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
     {
         $object_attributes = json_decode($policy_object->attributes);
 
         // Form Posted Data - Extra Fields Required to Perform Cost Calculation
-        $post_data_extra_fields = $data['extra_fields'] ?? NULL;
+        $post_data_other_cost_fields = $data['other_cost_fields'] ?? NULL;
 
 
         // Tariff Extracts
@@ -1233,7 +1269,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
         $primary_tariff_vehicle = _PO_MOTOR_CVC_primary_tariff_vehicle($object_attributes, $default_tariff, $vehicle_age_in_yrs);
 
         // No Claim Discount - Years & Rate
-        $no_claim_discount      = $post_data_extra_fields['no_claim_discount'] ?? 0;
+        $no_claim_discount      = $post_data_other_cost_fields['no_claim_discount'] ?? 0;
         $no_claim_discount      = $no_claim_discount ? $no_claim_discount : 0;
         $year_no_claim_discount = $no_claim_discount ? _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
 
@@ -1254,7 +1290,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
             /**
              * Defaults (अ)
              */
-            $__cost_table_A = [
+            $__CRF_cc_table__A = [
                 'column_head' => 'अ',
                 'title_np'  => 'सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा वापत',
                 'title_en'  => 'Insurance against vehicle damage/loss',
@@ -1265,7 +1301,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
 
             // Common Row 1 - Ghosit Mulya ko X %
             $__premium_A_row_1 = $vehicle_total_price * ($primary_tariff_vehicle['rate'] / 100.00);
-            $__cost_table_A['sections'][] = [
+            $__CRF_cc_table__A['sections'][] = [
                 'title'     => $statement_1,
                 'amount'    => $__premium_A_row_1
             ];
@@ -1292,27 +1328,27 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
                     // Bharbahan xamata anusar suru bima sulka ma thap ( X ton mathi Per Ton Z)
                     $engine_capacity_above_threshold = ($primary_tariff_vehicle['vehicle_capacity'] > $primary_tariff_vehicle['ec_threshold']) ? $primary_tariff_vehicle['vehicle_capacity'] - $primary_tariff_vehicle['ec_threshold'] : 0;
                     $__premium_A_row_2 = $engine_capacity_above_threshold * $primary_tariff_vehicle['cost_per_ec_above'];
-                    $__cost_table_A['sections'][] = [
+                    $__CRF_cc_table__A['sections'][] = [
                         'title'     => $statement_2,
                         'amount'    => $__premium_A_row_2
                     ];
 
                     // Bharbahan xamata anusar suru bima sulka ma xut
                     $__premium_A_row_3 = $primary_tariff_vehicle['minus_amount'];
-                    $__cost_table_A['sections'][] = [
+                    $__CRF_cc_table__A['sections'][] = [
                         'title'     => $statement_3,
                         'amount'    => $__premium_A_row_3
                     ];
 
                     // Trailer Premium
-                    $__cost_table_A['sections'][] = [
+                    $__CRF_cc_table__A['sections'][] = [
                         'title'     => $statement_trailer,
                         'amount'    => $__premium_A_row_trailer
                     ];
 
                     // Subtotal
                     $__premium_A_row_KA = $__premium_A_row_1 + $__premium_A_row_2 - $__premium_A_row_3 + $__premium_A_row_trailer;;
-                    $__cost_table_A['sections'][] = [
+                    $__CRF_cc_table__A['sections'][] = [
                         'title'     => "",
                         'amount'    => $__premium_A_row_KA,
                         'label'     => 'क'
@@ -1322,14 +1358,14 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
                 case IQB_MOTOR_CVC_TYPE_TRACTOR_POWER_TRILLER:
                 case IQB_MOTOR_CVC_TYPE_TEMPO:
                     // Trailer Premium
-                    $__cost_table_A['sections'][] = [
+                    $__CRF_cc_table__A['sections'][] = [
                         'title'     => $statement_trailer,
                         'amount'    => $__premium_A_row_trailer
                     ];
 
                     // Subtotal
                     $__premium_A_row_KA = $__premium_A_row_1 + $__premium_A_row_trailer;;
-                    $__cost_table_A['sections'][] = [
+                    $__CRF_cc_table__A['sections'][] = [
                         'title'     => "",
                         'amount'    => $__premium_A_row_KA,
                         'label'     => 'क'
@@ -1340,20 +1376,20 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
                     // Seat xamata anusar suru bimasulka ma xut
                     $statement_2        = "सिट क्षमता अनुसार शुरु बीमाशुल्कमा छूट";
                     $__premium_A_row_2  = $primary_tariff_vehicle['minus_amount'];
-                    $__cost_table_A['sections'][] = [
+                    $__CRF_cc_table__A['sections'][] = [
                         'title'     => $statement_2,
                         'amount'    => $__premium_A_row_2
                     ];
 
                     // Trailer Premium
-                    $__cost_table_A['sections'][] = [
+                    $__CRF_cc_table__A['sections'][] = [
                         'title'     => $statement_trailer,
                         'amount'    => $__premium_A_row_trailer
                     ];
 
                     // Subtotal
                     $__premium_A_row_KA = $__premium_A_row_1 - $__premium_A_row_2 + $__premium_A_row_trailer;
-                    $__cost_table_A['sections'][] = [
+                    $__CRF_cc_table__A['sections'][] = [
                         'title'     => "",
                         'amount'    => $__premium_A_row_KA,
                         'label'     => 'क'
@@ -1363,14 +1399,14 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
                 case IQB_MOTOR_CVC_TYPE_TAXI:
                     $statement_2 = "सि.सि.अनुसार शुरु बीमा शुल्कमा थप";
                     $__premium_A_row_2 = $primary_tariff_vehicle['plus_amount'];
-                    $__cost_table_A['sections'][] = [
+                    $__CRF_cc_table__A['sections'][] = [
                         'title'     => $statement_2,
                         'amount'    => $__premium_A_row_2
                     ];
 
                     // Subtotal
                     $__premium_A_row_KA = $__premium_A_row_1 + $__premium_A_row_2;
-                    $__cost_table_A['sections'][] = [
+                    $__CRF_cc_table__A['sections'][] = [
                         'title'     => "",
                         'amount'    => $__premium_A_row_KA,
                         'label'     => 'क'
@@ -1390,7 +1426,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
             {
                 $__premium_A_row_old_age = $__premium_A_row_KA * ($primary_tariff_vehicle['over_age_rate']/100.00);
             }
-            $__cost_table_A['sections'][] = [
+            $__CRF_cc_table__A['sections'][] = [
                 'title' => "सवारी साधन {$vehicle_age_in_yrs} वर्ष पुरानो भए वापत थप बीमाशुल्क: “क” को " . $primary_tariff_vehicle['over_age_rate'] . " %",
                 'amount' => $__premium_A_row_old_age
             ];
@@ -1399,7 +1435,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
             // ख Sub Total
             //
             $__premium_A_row_KHA =  $__premium_A_row_KA + $__premium_A_row_old_age;
-            $__cost_table_A['sections'][] = [
+            $__CRF_cc_table__A['sections'][] = [
                 'title'     => "",
                 'amount'    => $__premium_A_row_KHA,
                 'label'     => 'ख'
@@ -1408,7 +1444,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
             // ----------------------------------------------------------------------------------
 
             // Discount on Voluntary Excess - GA ko X%
-            $dr_voluntary_excess        = $post_data_extra_fields['dr_voluntary_excess'] ?? FALSE;
+            $dr_voluntary_excess        = $post_data_other_cost_fields['dr_voluntary_excess'] ?? FALSE;
             $amount_voluntary_excess    = $dr_voluntary_excess
                                             ? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess]
                                             : 0.00;
@@ -1417,7 +1453,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
             {
                 $__discount_A_row__voluntary_excess = $__premium_A_row_KHA * ($dr_voluntary_excess/100.00);
             }
-            $__cost_table_A['sections'][] = [
+            $__CRF_cc_table__A['sections'][] = [
                 'title' => "बीमित स्वयंले व्यहोर्ने स्वेच्छीक अधिक रु {$amount_voluntary_excess} वापत छुटः “ख” को {$dr_voluntary_excess} %",
                 'amount' => $__discount_A_row__voluntary_excess
             ];
@@ -1426,7 +1462,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
             // ग Sub Total
             //
             $__premium_A_row_GA =  $__premium_A_row_KHA - $__discount_A_row__voluntary_excess;
-            $__cost_table_A['sections'][] = [
+            $__CRF_cc_table__A['sections'][] = [
                 'title'     => "",
                 'amount'    => $__premium_A_row_GA,
                 'label'     => 'ग'
@@ -1440,7 +1476,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
             {
                 $__discount_A_row__no_claim_discount = $__premium_A_row_GA * ($no_claim_discount/100.00);
             }
-            $__cost_table_A['sections'][] = [
+            $__CRF_cc_table__A['sections'][] = [
                 'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ग” को {$no_claim_discount} %",
                 'amount' => $__discount_A_row__no_claim_discount
             ];
@@ -1449,7 +1485,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
             // घ Sub Total
             //
             $__premium_A_row_GHA =  $__premium_A_row_GA - $__discount_A_row__no_claim_discount;
-            $__cost_table_A['sections'][] = [
+            $__CRF_cc_table__A['sections'][] = [
                 'title'     => "",
                 'amount'    => $__premium_A_row_GHA,
                 'label'     => 'घ'
@@ -1474,7 +1510,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
                     case IQB_MOTOR_CVC_TYPE_TRACTOR_POWER_TRILLER:
                     case IQB_MOTOR_CVC_TYPE_TEMPO:
                     case IQB_MOTOR_CVC_TYPE_PASSENGER_CARRIER:
-                        $flag_private_use = $post_data_extra_fields['flag_private_use'] ?? FALSE;
+                        $flag_private_use = $post_data_other_cost_fields['flag_private_use'] ?? FALSE;
                         $statement = "निजी प्रयोजनमा प्रयोग गरे वापत छुट: “घ” को {$tariff_record->dr_cvc_on_personal_use} प्रतिशत";
                         if( $flag_private_use )
                         {
@@ -1486,7 +1522,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
                         # code...
                         break;
                 }
-                $__cost_table_A['sections'][] = [
+                $__CRF_cc_table__A['sections'][] = [
                     'title'  => $statement,
                     'amount' => $__discount_A_row_on_personal_use
                 ];
@@ -1495,7 +1531,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
                 // ङ Sub Total
                 //
                 $__premium_A_row_NGA =  $__premium_A_row_GHA - $__discount_A_row_on_personal_use;
-                $__cost_table_A['sections'][] = [
+                $__CRF_cc_table__A['sections'][] = [
                     'title'     => "",
                     'amount'    => $__premium_A_row_NGA,
                     'label'     => 'ङ'
@@ -1517,20 +1553,20 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
                 // X% of ङ
                 $__discount_A_row__direct_discount = $__premium_A_row_NGA * ($pfs_record->direct_discount/100.00);
 
-                $__cost_table_A['sections'][] = [
+                $__CRF_cc_table__A['sections'][] = [
                     'title' => "प्रत्यक्ष बीमा वापत छुटः “ङ” को {$pfs_record->direct_discount} %",
                     'amount' => $__discount_A_row__direct_discount
                 ];
             }
 
             // Towing
-            $flag_towing = $post_data_extra_fields['flag_towing'] ?? FALSE;
+            $flag_towing = $post_data_other_cost_fields['flag_towing'] ?? FALSE;
             $__premium_A_row_towing = 0.00;
             if( $flag_towing )
             {
                 $__premium_A_row_towing = $tariff_record->pramt_towing ?? 0.00;
             }
-            $__cost_table_A['sections'][] = [
+            $__CRF_cc_table__A['sections'][] = [
                 'title' => "दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा वापत बीमा शुल्क थप",
                 'amount' => $__premium_A_row_towing
             ];
@@ -1558,13 +1594,13 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
 				$__agent_comissionable_amount 	= $premium_A_total;
 
 				// Remove all the sections
-				$__cost_table_A = [
+				$__CRF_cc_table__A = [
 					'column_head' => 'अ',
 					'title_np' 	=> 'सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा वापत',
 					'title_en' 	=> 'Insurance against vehicle damage/loss',
 				];
-				$__cost_table_A['sections'] = [];
-				$__cost_table_A['sections'][] = [
+				$__CRF_cc_table__A['sections'] = [];
+				$__CRF_cc_table__A['sections'][] = [
 					'title' 	=> "सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा वापत",
 					'amount' 	=> $premium_A_total
 				];
@@ -1574,14 +1610,14 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
 			}
 
 
-            $__cost_table_A['sections'][] = [
+            $__CRF_cc_table__A['sections'][] = [
                 'title'     => "जम्मा",
                 'amount'    => $premium_A_total,
                 'section_total' => true
             ];
 
             // Section Sub Total
-			$__cost_table_A['sub_total'] = $premium_A_total;
+			$__CRF_cc_table__A['sub_total'] = $premium_A_total;
 
 		}
 
@@ -1597,27 +1633,27 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
 
             $accident_premium = $tariff_record->accident_premium ? json_decode($tariff_record->accident_premium) : NULL;
             $insured_value_tariff = $tariff_record->insured_value_tariff ? json_decode($tariff_record->insured_value_tariff) : NULL;
-            $__cost_table_I = [
+            $__CRF_cc_table__I = [
                 'column_head' => 'इ',
                 'title_np'  => 'चालकको दुर्घटना बीमा वापत',
                 'title_en'  => 'Driver Accident Insurance'
             ];
 
             $premium_I_total =  $accident_premium->pramt_driver_accident;
-            $__cost_table_I['sections'][] = [
+            $__CRF_cc_table__I['sections'][] = [
                 'title' => "चालक (बीमांक रु. {$insured_value_tariff->driver}  को रु. {$accident_premium->pramt_driver_accident} का दरले)",
                 'amount' => $premium_I_total
             ];
 
             // Section Sub Total
-			$__cost_table_I['sub_total'] = $premium_I_total;
+			$__CRF_cc_table__I['sub_total'] = $premium_I_total;
 
 
             // ---------------------------------------------------------------------------------------
             //  ई) Staff Accident
             // ---------------------------------------------------------------------------------------
 
-            $__cost_table_EE = [
+            $__CRF_cc_table__EE = [
                 'column_head' => 'ई',
                 'title_np'  => 'परिचालक तथा अन्य कर्मचारी (चालक बाहेक) को दुर्घटना बीमा वापत',
                 'title_en'  => 'Staff Accident Insurance'
@@ -1625,20 +1661,20 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
 
             $staff_count = $object_attributes->staff_count ?? 0;
             $premium_EE_total =  $accident_premium->pramt_accident_per_staff * $staff_count;
-            $__cost_table_EE['sections'][] = [
+            $__CRF_cc_table__EE['sections'][] = [
                 'title' => "प्रति ब्यक्ति (बीमांक रु. {$insured_value_tariff->staff}  को लागि प्रति ब्यक्ति रु. {$accident_premium->pramt_accident_per_staff} का दरले)",
                 'amount' => $premium_EE_total
             ];
 
             // Section Sub Total
-			$__cost_table_EE['sub_total'] = $premium_EE_total;
+			$__CRF_cc_table__EE['sub_total'] = $premium_EE_total;
 
 
             // ---------------------------------------------------------------------------------------
             //  उ) Passenger Accident
             // ---------------------------------------------------------------------------------------
 
-            $__cost_table_U = [
+            $__CRF_cc_table__U = [
                 'column_head' => 'उ',
                 'title_np'  => 'यात्रीको दुर्घटना बीमा वापत',
                 'title_en'  => 'Passenger Accident Insurance'
@@ -1646,13 +1682,13 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
 
             $passenger_count    = $object_attributes->carrying_unit === 'S' ?  $object_attributes->carrying_capacity : 0;
             $premium_U_total   =  $accident_premium->pramt_accident_per_passenger * $passenger_count;
-            $__cost_table_U['sections'][] = [
+            $__CRF_cc_table__U['sections'][] = [
                 'title' => "प्रति ब्यक्ति (बीमांक रु. {$insured_value_tariff->staff}  को लागि प्रति ब्यक्ति रु. {$accident_premium->pramt_accident_per_passenger} का दरले)",
                 'amount' => $premium_U_total
             ];
 
             // Section Sub Total
-			$__cost_table_U['sub_total'] = $premium_U_total;
+			$__CRF_cc_table__U['sub_total'] = $premium_U_total;
 
 
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
@@ -1664,33 +1700,28 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
             //  NOTE: Please note that you have to compute using both the Vehicle total price and
             // 			Trailer/Trolly Price (if any)
             // ---------------------------------------------------------------------------------------
-            $__cost_table_OO = [
+            $__CRF_cc_table__OO = [
                 'column_head' => 'ऊ',
                 'title_np'  => 'जोखिम समूह थप गरे वापत',
                 'title_en'  => 'Pool risk insurance amounted to'
             ];
 
-            $flag_risk_mob          = $post_data_extra_fields['flag_risk_mob'] ?? NULL;
-            $flag_risk_terorrism    = $post_data_extra_fields['flag_risk_terorrism'] ?? NULL;
+            $flag_risk_mob          = $post_data_other_cost_fields['flag_risk_mob'] ?? NULL;
+            $flag_risk_terorrism    = $post_data_other_cost_fields['flag_risk_terorrism'] ?? NULL;
 
             // Mob/Strike
             $__premium_OO_row_1 = 0.00;
-            if($flag_risk_mob)
-            {
-                $__premium_OO_row_1 = (float)($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
-            }
-            $__cost_table_OO['sections'][] = [
-                'title' => "(क) हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_mob}% का दरले)",
-                'amount' => $__premium_OO_row_1
-            ];
-
-            // Terorrism
             $__premium_OO_row_2 = 0.00;
             $__premium_OO_row_3 = 0.00;
             $__premium_OO_row_4 = 0.00;
             $__premium_OO_row_5 = 0.00;
-            if($flag_risk_terorrism)
+            $flag_risk_pool = $post_data_other_cost_fields['flag_risk_pool'] ?? NULL;
+            if($flag_risk_pool)
             {
+            	// Mob/Strike
+                $__premium_OO_row_1 = (float)($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
+
+                // Terrorism
                 $__premium_OO_row_2 = (float)( ($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00));
 
                 // Premium for "Per Thousand Insured Amount" on Terorrism rate_additionl_per_thousand_on_extra_rate
@@ -1711,36 +1742,41 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
 
                 // Passenger Premium
                 $__premium_OO_row_5 = $passenger_count * (($insured_value_tariff->passenger/1000.00) * $tariff_rsik_group->rate_additionl_per_thousand_on_extra_rate);
+
             }
+            $__CRF_cc_table__OO['sections'][] = [
+                'title' => "(क) हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_mob}% का दरले)",
+                'amount' => $__premium_OO_row_1
+            ];
 
             // उ TOTAL
             $premium_OO_total = $__premium_OO_row_1 + $__premium_OO_row_2 + $__premium_OO_row_3 + $__premium_OO_row_4 + $__premium_OO_row_5;
 
-            $__cost_table_OO['sections'][] = [
+            $__CRF_cc_table__OO['sections'][] = [
                 'title' => "(ख) आतंककारी तथा विध्वंसात्मक कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_terorrism}%का दरले)",
                 'amount' => $__premium_OO_row_2
             ];
-            $__cost_table_OO['sections'][] = [
+            $__CRF_cc_table__OO['sections'][] = [
                 'title' => "(ग) चालक",
                 'amount' => $__premium_OO_row_3
             ];
-            $__cost_table_OO['sections'][] = [
+            $__CRF_cc_table__OO['sections'][] = [
                 'title' => "(घ) परिचालक तथा अन्य कर्मचारी",
                 'amount' => $__premium_OO_row_4
             ];
-            $__cost_table_OO['sections'][] = [
+            $__CRF_cc_table__OO['sections'][] = [
                 'title' => "(ङ) यात्री",
                 'amount' => $__premium_OO_row_5
             ];
 
-            $__cost_table_OO['sections'][] = [
+            $__CRF_cc_table__OO['sections'][] = [
                 'title'     => 'जम्मा', // Subtotal
                 'amount'    => $premium_OO_total,
                 'section_total' => true
             ];
 
             // Section Sub Total
-			$__cost_table_OO['sub_total'] = $premium_OO_total;
+			$__CRF_cc_table__OO['sub_total'] = $premium_OO_total;
         }
 
         // ---------------------------------------------------------------------------------------
@@ -1748,7 +1784,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
         /**
          * Third Party (आ)
          */
-        $__cost_table_AA = [
+        $__CRF_cc_table__AA = [
             'column_head' => 'आ',
             'title_np'  => 'तेश्रो पक्ष प्रतिको दायित्व बीमा वापत',
             'title_en'  => 'Third party liability insurance amounted to'
@@ -1759,7 +1795,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
         {
             $__premium_AA_row_2 = $__premium_AA_row_1 * ($no_claim_discount/100.00);
         }
-        $__cost_table_AA['sections'][] = [
+        $__CRF_cc_table__AA['sections'][] = [
             'title' => "सि. सि. अनुसारको बीमाशुल्क",
             'amount' => $__premium_AA_row_1
         ];
@@ -1767,7 +1803,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
         // No claim Dicount Only if Comprehensive
         if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
         {
-            $__cost_table_AA['sections'][] = [
+            $__CRF_cc_table__AA['sections'][] = [
                 'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “छ” को $no_claim_discount %",
                 'amount' => $__premium_AA_row_2
             ];
@@ -1775,14 +1811,14 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
 
         // Third Party : Sub Total
         $premium_AA_total = $__premium_AA_row_1 - $__premium_AA_row_2;
-        $__cost_table_AA['sections'][] = [
+        $__CRF_cc_table__AA['sections'][] = [
             'title'     => 'जम्मा', // Subtotal
             'amount'    => $premium_AA_total,
             'section_total' => true
         ];
 
         // Section Sub Total
-		$__cost_table_AA['sub_total'] = $premium_AA_total;
+		$__CRF_cc_table__AA['sub_total'] = $premium_AA_total;
 
         // ---------------------------------------------------------------------------------------
         // Total Computation
@@ -1791,54 +1827,56 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
         //
         // Grand Total
         //
-        $total_premium_amount = $premium_A_total + $premium_AA_total  + $premium_I_total + $premium_EE_total + $premium_U_total + $premium_OO_total;
+        $amt_total_premium = $premium_A_total + $premium_AA_total  + $premium_I_total + $premium_EE_total + $premium_U_total + $premium_OO_total;
 
 
         //
         // Stamp Duty
         //
-        $stamp_duty_amount = $data['stamp_duty_amount'];
+        $amt_stamp_duty = $data['amt_stamp_duty'];
 
 
         //
         // Premium Data
         //
-        $__cost_table = [
-            'total_premium_amount'  => $total_premium_amount,
-            'stamp_duty_amount'    => $stamp_duty_amount,
-            'extra_fields'  => $post_data_extra_fields ? json_encode($post_data_extra_fields) : NULL
+        $CRF_PREMIUM_DATA = [
+        	'amt_sum_insured' 		=> $policy_object->amt_sum_insured,
+            'amt_total_premium'  	=> $amt_total_premium,
+            'amt_stamp_duty'    	=> $amt_stamp_duty,
+            'other_cost_fields'  	=> $post_data_other_cost_fields ? json_encode($post_data_other_cost_fields) : NULL,
+            'amt_pool_premium' 		=> $premium_OO_total
         ];
 
 
         if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
         {
-            $__cost_table['attributes'] = json_encode( [$__cost_table_AA, $__cost_table_I, $__cost_table_EE, $__cost_table_U] );
+            $CRF_PREMIUM_DATA['cost_calculation_table'] = json_encode( [$__CRF_cc_table__AA, $__CRF_cc_table__I, $__CRF_cc_table__EE, $__CRF_cc_table__U] );
         }
         else
         {
 
-            $__cost_table_comprehensive = array_filter([
+            $__CRF_cc_table__comprehensive = array_filter([
 
                 // Comprehensive
-                $__cost_table_A,
+                $__CRF_cc_table__A,
 
                 // Third Party
-                $__cost_table_AA,
+                $__CRF_cc_table__AA,
 
                 // Driver Accident
-                $__cost_table_I,
+                $__CRF_cc_table__I,
 
                 // Staff Accident
-                $__cost_table_EE,
+                $__CRF_cc_table__EE,
 
                 // Passenger Accident
-                $__cost_table_U,
+                $__CRF_cc_table__U,
 
                 // Risk Group
-                $__cost_table_OO
+                $__CRF_cc_table__OO
             ]);
 
-            $__cost_table['attributes'] = json_encode($__cost_table_comprehensive);
+            $CRF_PREMIUM_DATA['cost_calculation_table'] = json_encode($__CRF_cc_table__comprehensive);
 
 
             /**
@@ -1849,12 +1887,13 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
              */
             if($policy_record->flag_dc === 'C' && $object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
             {
-                $__cost_table['comissionable_amount'] = $__agent_comissionable_amount;
+                $CRF_PREMIUM_DATA['amt_commissionable'] 	= $__agent_comissionable_amount;
+				$CRF_PREMIUM_DATA['amt_agent_commission'] 	= ($__agent_comissionable_amount * $pfs_record->agent_commission)/100.00;
             }
         }
 
         // Any Remarks?
-		$__cost_table['remarks'] = $__remarks;
+		$CRF_PREMIUM_DATA['remarks'] = $__remarks;
 
 
         /**
@@ -1864,9 +1903,9 @@ if ( ! function_exists('_PO_MOTOR_CVC_cost_table'))
 		 * If the policy is short term policy, we have to calculate the short term values
 		 *
 		 */
-		$__cost_table = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $__cost_table );
+		$CRF_PREMIUM_DATA = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $CRF_PREMIUM_DATA );
 
-        return $__cost_table;
+        return $CRF_PREMIUM_DATA;
     }
 }
 
@@ -2668,7 +2707,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 	                'label' => 'Remarks/कैफियत',
 	                'rules' => 'trim|htmlspecialchars',
 	                '_type'     => 'textarea',
-	                '_required' => true
+	                '_required' => false
 	            ]
 			],
 
@@ -2697,7 +2736,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 			 */
 			'comprehensive_common' => [
 				[
-                    'field' => 'extra_fields[dr_voluntary_excess]',
+                    'field' => 'other_cost_fields[dr_voluntary_excess]',
                     'label' => 'Voluntary Excess',
                     'rules' => 'trim|prep_decimal|decimal|max_length[5]',
                     '_key' 		=> 'dr_voluntary_excess',
@@ -2706,7 +2745,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
                     '_required' => false
                 ],
                 [
-                    'field' => 'extra_fields[no_claim_discount]',
+                    'field' => 'other_cost_fields[no_claim_discount]',
                     'label' => 'No Claim Discount',
                     'rules' => 'trim|prep_decimal|decimal|max_length[5]',
                     '_key' 		=> 'no_claim_discount',
@@ -2715,33 +2754,15 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
                     '_required' => false
                 ],
                 [
-                    'field' => 'extra_fields[flag_risk_pool]',
+                    'field' => 'other_cost_fields[flag_risk_pool]',
                     'label' => 'Pool Risk (जोखिम समूह बीमा)',
                     'rules' => 'trim|integer|in_list[1]',
-                    '_key' 		=> 'flag_risk_mob',
+                    '_key' 		=> 'flag_risk_pool',
                     '_type'     => 'checkbox',
                     '_checkbox_value' 	=> '1',
                     '_required' => false,
                     '_help_text' => '<small>This covers both (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा) & (आतंककारी/विध्वंशात्मक कार्य जोखिम बीमा) </small>'
                 ],
-                // [
-                //     'field' => 'extra_fields[flag_risk_mob]',
-                //     'label' => 'Pool Risk Mob (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा)',
-                //     'rules' => 'trim|integer|in_list[1]',
-                //     '_key' 		=> 'flag_risk_mob',
-                //     '_type'     => 'checkbox',
-                //     '_checkbox_value' 	=> '1',
-                //     '_required' => false
-                // ],
-                // [
-                //     'field' => 'extra_fields[flag_risk_terorrism]',
-                //     'label' => 'Pool Risk Terorrism (आतंककारी/विध्वंशात्मक कार्य जोखिम बीमा)',
-                //     'rules' => 'trim|integer|in_list[1]',
-                //     '_key' 		=> 'flag_risk_terorrism',
-                //     '_type'     => 'checkbox',
-                //     '_checkbox_value' 	=> '1',
-                //     '_required' => false
-                // ],
                 [
 	                'field' => 'amt_stamp_duty',
 	                'label' => 'Stamp Duty(Rs.)',
@@ -2761,7 +2782,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 
 				// Commercial Use
 				[
-                    'field' => 'extra_fields[flag_commercial_use]',
+                    'field' => 'other_cost_fields[flag_commercial_use]',
                     'label' => 'Commercial Use (निजी प्रयोजनको लागि भाडामा दिएको)',
                     'rules' => 'trim|integer|in_list[1]',
                     '_key' 		=> 'flag_commercial_use',
@@ -2772,7 +2793,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 
                 // Pay for Towing
 				[
-                    'field' => 'extra_fields[flag_towing]',
+                    'field' => 'other_cost_fields[flag_towing]',
                     'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
                     'rules' => 'trim|integer|in_list[1]',
                     '_key' 		=> 'flag_towing',
@@ -2790,7 +2811,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 			'comprehensive_cvc' => [
 				// Private Use
 				[
-                    'field' => 'extra_fields[flag_private_use]',
+                    'field' => 'other_cost_fields[flag_private_use]',
                     'label' => 'Private Use',
                     'rules' => 'trim|integer|in_list[1]',
                     '_key' 		=> 'flag_private_use',
@@ -2802,7 +2823,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 
                 // Pay for Towing
 				[
-                    'field' => 'extra_fields[flag_towing]',
+                    'field' => 'other_cost_fields[flag_towing]',
                     'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
                     'rules' => 'trim|integer|in_list[1]',
                     '_key' 		=> 'flag_towing',

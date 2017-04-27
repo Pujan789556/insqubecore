@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Policy: Details - Policy Premium Overview Card
+* Policy: Details - Policy Cost Calculation Table
 */
 
 // ------------------------------------------------------------------
@@ -9,22 +9,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Find The Proper Premium Overview Card
  */
-$_card_partial_view_by_portfolio = _PREMIUM_OVERVIEW_CARD_partial_view_by_portfolio($policy_record->portfolio_id);
+$cost_calculation_table_view = _POLICY_partial_view__cost_calculation_table($policy_record->portfolio_id);
 ?>
 <div class="box box-bordered box-success" id="_premium-card">
     <div class="box-header with-border border-dark">
         <h3 class="no-margin">
         <span class="pull-left">Premium Calculation Table</span>
         <span class="pull-right">
-            <?php if( is_policy_editable($policy_record->status, FALSE) ): ?>
-                    <span class="action divider"></span>
+            <?php if( is_policy_editable($policy_record->status, FALSE) ):
+                $txn_type = $policy_record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL:   IQB_POLICY_TXN_TYPE_FRESH;
+                $update_premium_url = 'policy_txn/premium/' . $txn_type . '/' . $policy_record->id;
+            ?>
                     <a href="#"
-                        class="action trg-dialog-edit"
+                        class="action trg-dialog-edit btn btn-primary btn-sm"
                         title="Update Premium"
                         data-toggle="tooltip"
                         data-box-size="large"
                         data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $policy_record->code?>'
-                        data-url="<?php echo site_url('premium/edit/' . $policy_record->id );?>"
+                        data-url="<?php echo site_url($update_premium_url);?>"
                         data-form="#_form-premium">
                         <i class="fa fa-pencil-square-o"></i>
                     </a>
@@ -37,7 +39,7 @@ $_card_partial_view_by_portfolio = _PREMIUM_OVERVIEW_CARD_partial_view_by_portfo
     /**
      * Load Partial Overview Card
      */
-    $this->load->view($_card_partial_view_by_portfolio, ['premium_record' => $premium_record, 'policy_record' => $policy_record]);
+    $this->load->view($cost_calculation_table_view, ['txn_record' => $txn_record, 'policy_record' => $policy_record]);
     ?>
 
 </div>

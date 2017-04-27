@@ -297,7 +297,7 @@ class Premium extends MY_Controller
 				$data = $this->input->post();
 				try{
 
-					$premium_data = _PO_MOTOR_MCY_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+					$premium_data = _PO_MOTOR_MCY_compute_crf( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
 
 				} catch (Exception $e){
 					return $this->template->json([
@@ -331,7 +331,7 @@ class Premium extends MY_Controller
 
 				try{
 
-					$premium_data = _PO_MOTOR_PVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+					$premium_data = _PO_MOTOR_PVC_compute_crf( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
 
 				} catch (Exception $e){
 					return $this->template->json([
@@ -361,7 +361,7 @@ class Premium extends MY_Controller
 				$data = $this->input->post();
 				try{
 
-					$premium_data = _PO_MOTOR_CVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
+					$premium_data = _PO_MOTOR_CVC_compute_crf( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
 
 				} catch (Exception $e){
 					return $this->template->json([

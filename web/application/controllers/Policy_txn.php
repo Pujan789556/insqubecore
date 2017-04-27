@@ -77,6 +77,8 @@ class Policy_txn extends MY_Controller
 	 * This method is used to edit the transaction table.
 	 * This method only applies for Fresh/Renewal Record.
 	 *
+	 * !!! Important: Fresh/Renewal Only
+	 *
 	 * @param char $txn_type Transaction Type
 	 * @param integer $id Policy ID
 	 * @return void
@@ -149,177 +151,100 @@ class Policy_txn extends MY_Controller
 		belongs_to_me($policy_record->branch_id);
 
 
-		// Post? Save it
-		// $this->__save($policy_record, $txn_record);
+		// Post? Save Premium
+		$this->__save_premium($policy_record, $txn_record, $crf_record);
 
 
 		// Render Form
 		$this->__render_premium_form($policy_record, $txn_record, $crf_record);
 	}
 
+
+
+
+
 	// --------------------------------------------------------------------
-
-	/**
-	 * Edit a Policy Policy Transaction Record (Endorsement Records)
-	 *
-	 *
-	 * @param integer $id
-	 * @return void
-	 */
-	public function edit($policy_id)
-	{
-		$policy_id = (int)$policy_id;
-		$policy_record = $this->policy_model->get($policy_id);
-		if(!$policy_record)
-		{
-			$this->template->render_404();
-		}
-
-		// Policy Transaction Record
-		$premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
-		if(!$premium_record)
-		{
-			$this->template->render_404('', 'No Policy Transaction Record Found For Supplied Policy.');
-		}
+	//  SAVE PREMIUM FUNCTIONS
+	// --------------------------------------------------------------------
 
 		/**
-		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 * Save/Update Policy Premium
+		 *
+		 * !!! Important: Fresh/Renewal Only
+		 *
+		 * @param object $policy_record 	Policy Record
+		 * @param object $txn_record 		Policy Transaction Record
+		 * @param object $crf_record 		Policy Cost Reference Record
+		 * @return mixed
 		 */
-		belongs_to_me($policy_record->branch_id);
-
-
-		/**
-		 * Check Editable?
-		 */
-		is_policy_editable($policy_record->status);
-
-
-		// Post? Save it
-		$this->__save($policy_record, $premium_record);
-
-
-
-
-		// Render Form
-		$this->__render_form($policy_record, $premium_record);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Get Policy Transaction Form View
-	 *
-	 * @param object $policy_record Policy Record
-	 * @return string
-	 */
-	private function __get_form_view_by_portfolio($policy_record)
-	{
-		$form_view = '';
-
-		/**
-		 * MOTOR
-		 * -----
-		 * For all type of motor portfolios, we have same package list
-		 */
-		if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		private function __save_premium($policy_record, $txn_record, $crf_record)
 		{
-			$form_view = 'policies_txn/_form_MOTOR';
-		}
-
-		// $form_view = 'premium/_form_' . $policy_record->portfolio_code;
-		return $form_view;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Get Policy Object
-	 *
-	 * @param object $policy_record Policy Record
-	 * @return object 	Policy Object
-	 */
-	private function __get_policy_object($policy_record)
-	{
-		// Policy Record contains the following columns by prefixing "object_"
-		$object_columns = ['id', 'portfolio_id', 'customer_id', 'attributes', 'amt_sum_insured', 'flag_locked'];
-		$object = new StdClass();
-		foreach($object_columns as $column )
-		{
-			$object->{$column} = $policy_record->{'object_' . $column};
-		}
-		return $object;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Save/Update Policy Transaction
-	 *
-	 * @param type $policy_record 	Policy Record
-	 * @param type $premium_record 	Policy Policy Transaction Record
-	 * @return mixed
-	 */
-	private function __save($policy_record, $premium_record)
-	{
-		if( $this->input->post() )
-		{
-			$done = FALSE;
-			switch ($policy_record->portfolio_id)
+			if( $this->input->post() )
 			{
-				// Motor
-				case IQB_MASTER_PORTFOLIO_MOTOR_ID:
-						$done = $this->__save_MOTOR($policy_record, $premium_record);
-					break;
-
-				default:
-					# code...
-					break;
-			}
-
-			if($done)
-			{
-				$ajax_data = [
-					'message' 		=> 'Successfully Updated.',
-					'status'  		=> 'success',
-					'updateSection' => true,
-					'hideBootbox' 	=> true
-				];
+				$done = FALSE;
 
 				/**
-				 * Widget or Row?
+				 * MOTOR
+				 * -----
+				 * For all type of motor portfolios, we have same package list
 				 */
-				$policy_record = $this->policy_model->get($policy_record->id);
+				if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+				{
+					$done = $this->__save_premium_MOTOR( $policy_record, $txn_record, $crf_record );
+				}
 
-				/**
-				 * Policy Policy Transaction Card
-				 */
-				$premium_record = (object)[
-					'policy_id' 			=> $policy_record->id,
-					'total_premium_amount' 	=> $policy_record->total_premium_amount,
-					'stamp_duty_amount' 	=> $policy_record->stamp_duty_amount,
-					'attributes'			=> $policy_record->premium_attributes
-				];
-				$ajax_data['updateSectionData']  = [
-					'box' 		=> '#_premium-card',
-					'method' 	=> 'replaceWith',
-					'html'		=> $this->load->view('premium/_card_overview', ['premium_record' => $premium_record, 'policy_record' => $policy_record], TRUE)
-				];
 
-				return $this->template->json($ajax_data);
+				if($done)
+				{
+					$ajax_data = [
+						'message' 		=> 'Successfully Updated.',
+						'status'  		=> 'success',
+						'updateSection' => true,
+						'hideBootbox' 	=> true
+					];
+
+					/**
+					 * Get the Policy Fresh/Renewal Txn Record
+					 */
+					try {
+
+						$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $policy_record->id, $policy_record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+
+					} catch (Exception $e) {
+
+						return $this->template->json([
+							'status' => 'error',
+							'message' => $e->getMessage()
+						], 404);
+					}
+
+					/**
+					 * Policy Cost Calculation Table
+					 */
+					$ajax_data['updateSectionData']  = [
+						'box' 		=> '#_premium-card',
+						'method' 	=> 'replaceWith',
+						'html'		=> $this->load->view('policy_txn/_cost_calculation_table', ['txn_record' => $txn_record, 'policy_record' => $policy_record], TRUE)
+					];
+
+					return $this->template->json($ajax_data);
+				}
 			}
 		}
-	}
 
-	// --------------------------------------------------------------------
+		// --------------------------------------------------------------------
 
 		/**
 		 * Motor Portfolio : Save a Policy Transaction Record For Given Policy
 		 *
-		 * @param object|null $policy_record  Policy Record
-		 * @param type $premium_record 	Policy Policy Transaction Record
+		 *	!!! Important: Fresh/Renewal Only
+		 *
+		 * @param object $policy_record  Policy Record
+		 * @param object $txn_record 	 Policy Transaction Record
+		 * @param object $crf_record 		Policy Cost Reference Record
 		 * @return json
 		 */
-		private function __save_MOTOR($policy_record, $premium_record)
+		private function __save_premium_MOTOR($policy_record, $txn_record, $crf_record)
 		{
 			/**
 			 * Form Submitted?
@@ -328,44 +253,72 @@ class Policy_txn extends MY_Controller
 
 			if( $this->input->post() )
 			{
-				// Policy Object
-				$policy_object = $this->__get_policy_object($policy_record);
 
-				// Let's get the premium goodies for given portfolio
-				$premium_goodies = $this->__premium_goodies($policy_record, $policy_object);
-
-				// Validation Rules
-				$v_rules = $premium_goodies['validation_rules'];
+				/**
+				 * Let's get the Required Records
+				 */
+				$policy_object 		= $this->__get_policy_object($policy_record);
+				$premium_goodies 	= $this->__premium_goodies($policy_record, $policy_object);
+				$v_rules 			= $premium_goodies['validation_rules'];
+				$tariff_record 		= $premium_goodies['tariff_record'];
 
 	            $this->form_validation->set_rules($v_rules);
 				if($this->form_validation->run() === TRUE )
 	        	{
-	        		$data = $this->input->post();
+	        		// Portfolio Settings Record For Given Fiscal Year and Portfolio
+					$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 
-	        		// Get Object Attributes
-					$attributes = json_decode($policy_object->attributes);
+					// Premium Data
+					$post_data = $this->input->post();
 
-					// Tariff Record
-					$tariff_record = $premium_goodies['tariff_record'];
+					// Method to compute premium data
+					$method = _PO_MOTOR_crf_compute_method($policy_record->portfolio_id);
 
-					// Save Policy Transaction According to Subportfolio
-					switch ($policy_record->sub_portfolio_code)
+					/**
+					 * Do we have a valid method?
+					 */
+					if($method)
 					{
-						case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
-							return $this->__save_MOTOR_MCY($policy_record, $policy_object, $tariff_record );
-							break;
+						try{
 
-						case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_CODE:
-							return $this->__save_MOTOR_PVC($policy_record, $policy_object, $tariff_record );
-							break;
+							/**
+							 * Get the Cost Reference Data
+							 */
+							$crf_data = call_user_func($method, $policy_record, $policy_object, $tariff_record, $pfs_record, $post_data);
 
-						case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_CODE:
-							return $this->__save_MOTOR_CVC($policy_record, $policy_object, $tariff_record );
-							break;
+							/**
+							 * Save CRF Data
+							 * -----------------
+							 *
+							 * Task 1: Build CRF Data
+							 * 		Copy the computed data to Cost Reference Table with "transfer_type" = "Take Whole Amount"
+							 *
+							 * Task 2: Build Txn Data
+							 *		Transfer CRF data to TXN Table based on transfer type
+							 *
+							 * Task 3: Update CRF and TXN data
+							 */
+							$crf_data['transfer_type'] 		= IQB_POLICY_CRF_TRANSFER_TYPE_FULL;
+							$crf_data['computation_type'] 	= IQB_POLICY_CRF_COMPUTE_AUTO;
 
-						default:
-							# code...
-							break;
+							$txn_data = $this->_prepare_txn_data($policy_record, $txn_record, $crf_data, $post_data);
+
+							return $this->policy_txn_model->save($txn_record->id, $crf_data, $txn_data);
+
+						} catch (Exception $e){
+
+							return $this->template->json([
+								'status' 	=> 'error',
+								'message' 	=> $e->getMessage()
+							], 404);
+						}
+					}
+					else
+					{
+						return $this->template->json([
+							'status' 	=> 'error',
+							'message' 	=> "No CRF computation method found for specified MOTOR portfolio!"
+						], 404);
 					}
 	        	}
 	        	else
@@ -376,106 +329,13 @@ class Policy_txn extends MY_Controller
 						'message' 		=> 'Validation Error.',
 						'reloadForm' 	=> true
 					];
-					return $this->__render_form($policy_record, $premium_record, $json_extra);
+					return $this->__render_premium_form($policy_record, $txn_record, $crf_record, $json_extra);
 	        	}
 			}
 		}
 
-			/**
-			 * Save Motorcycle Policy Transaction
-			 *
-			 * @param object $policy_record
-			 * @param object $object
-			 * @param object $tariff_record
-			 * @return json
-			 */
-			private function __save_MOTOR_MCY($policy_record, $policy_object, $tariff_record)
-			{
-				// Portfolio Settings Record For Given Fiscal Year and Portfolio
-				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+	// --------------- END: SAVE PREMIUM FUNCTIONS --------------------
 
-				$data = $this->input->post();
-				try{
-
-					$premium_data = _PO_MOTOR_MCY_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
-
-				} catch (Exception $e){
-					return $this->template->json([
-						'status' 	=> 'error',
-						'message' 	=> 'Exception: ' . $e->getMessage()
-					], 404);
-				}
-
-				// Target Policy Transaction Record
-				// $premium_record = $this->premium_model->find_by(['policy_id' => $policy_record->id]);
-
-				// Find Existing Policy Transaction Record
-				return $this->premium_model->save($policy_record->id, $premium_data);
-
-			}
-
-			/**
-			 * Save Private Vehicle Policy Transaction
-			 *
-			 * @param object $policy_record
-			 * @param object $object
-			 * @param object $tariff_record
-			 * @return json
-			 */
-			private function __save_MOTOR_PVC($policy_record, $policy_object, $tariff_record)
-			{
-				// Portfolio Settings Record For Given Fiscal Year and Portfolio
-				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-				$data = $this->input->post();
-
-				try{
-
-					$premium_data = _PO_MOTOR_PVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
-
-				} catch (Exception $e){
-					return $this->template->json([
-						'status' 	=> 'error',
-						'message' 	=> 'Exception: ' . $e->getMessage()
-					], 404);
-				}
-
-				// Find Existing Policy Transaction Record
-				return $this->premium_model->save($policy_record->id, $premium_data);
-
-			}
-
-			/**
-			 * Save Commercial Vehicle Policy Transaction
-			 *
-			 * @param object $policy_record
-			 * @param object $object
-			 * @param object $tariff_record
-			 * @return json
-			 */
-			private function __save_MOTOR_CVC($policy_record, $policy_object, $tariff_record)
-			{
-				// Portfolio Settings Record For Given Fiscal Year and Portfolio
-				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-				$data = $this->input->post();
-				try{
-
-					$premium_data = _PO_MOTOR_CVC_cost_table( $policy_record, $policy_object, $tariff_record, $pfs_record, $data );
-
-				} catch (Exception $e){
-					return $this->template->json([
-						'status' 	=> 'error',
-						'message' 	=> 'Exception: ' . $e->getMessage()
-					], 404);
-				}
-
-				// Find Existing Policy Transaction Record
-				// return $this->premium_model->update($premium_record->id, $premium_data, TRUE);
-				return $this->premium_model->save($policy_record->id, $premium_data);
-			}
-
-	// --------------------------------------------------------------------
 
 
 	/**
@@ -511,7 +371,7 @@ class Policy_txn extends MY_Controller
 		}
 
 		// Policy Transaction Form
-		$form_view = $this->__get_form_view_by_portfolio($policy_record);
+		$form_view = $this->__premium_form_view_by_portfolio($policy_record->portfolio_id);
 
 
 
@@ -531,39 +391,42 @@ class Policy_txn extends MY_Controller
         $this->template->json($json_data);
 	}
 
-	// --------------------------------------------------------------------
 
-	/**
-	 * Get Policy Policy Transaction Goodies
-	 *
-	 * Get the following goodies for the Given Portfolio of Supplied Policy
-	 * 		1. Validation Rules
-	 * 		2. Tariff Record if Applies
-	 *
-	 * @param object $policy_record Policy Record
-	 * @param object $policy_object Policy Object Record
-	 *
-	 * @return	array
-	 */
-	private function __premium_goodies($policy_record, $policy_object)
-	{
-		$goodies = [];
+	// --------------------------------------------------------------------
+	// PREMIUM GOODIES FUNCTIONS
+	// --------------------------------------------------------------------
 
 		/**
-		 * MOTOR
-		 * -----
-		 * For all type of motor portfolios, we have same package list
+		 * Get Policy Policy Transaction Goodies
+		 *
+		 * Get the following goodies for the Given Portfolio of Supplied Policy
+		 * 		1. Validation Rules
+		 * 		2. Tariff Record if Applies
+		 *
+		 * @param object $policy_record Policy Record
+		 * @param object $policy_object Policy Object Record
+		 *
+		 * @return	array
 		 */
-		if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		private function __premium_goodies($policy_record, $policy_object)
 		{
-			$goodies = $this->__premium_goodies_MOTOR($policy_record, $policy_object);
+			$goodies = [];
+
+			/**
+			 * MOTOR
+			 * -----
+			 * For all type of motor portfolios, we have same package list
+			 */
+			if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+			{
+				$goodies = $this->__premium_goodies_MOTOR($policy_record, $policy_object);
+			}
+
+
+			return $goodies;
 		}
 
-
-		return $goodies;
-	}
-
-	// --------------------------------------------------------------------
+		// --------------------------------------------------------------------
 
 		/**
 		 * Get Policy Policy Transaction Goodies for MOTOR
@@ -632,7 +495,130 @@ class Policy_txn extends MY_Controller
 			];
 		}
 
+	//  ------------------- END: PREMIUM GOODIES FUNCTIONS -------------------------
+
+
+
 	// --------------------------------------------------------------------
+	// PRIVATE CRUD HELPER FUNCTIONS
+	// --------------------------------------------------------------------
+
+		/**
+		 * Get Policy Transaction Premium Form View
+		 *
+		 * @param id $portfolio_id Portfolio ID
+		 * @return string
+		 */
+		private function __premium_form_view_by_portfolio($portfolio_id)
+		{
+			$form_view = '';
+
+			/**
+			 * MOTOR
+			 * -----
+			 * For all type of motor portfolios, we have same package list
+			 */
+			if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+			{
+				$form_view = 'policy_txn/forms/_form_premium_MOTOR';
+			}
+
+			return $form_view;
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Get Policy Object
+		 *
+		 * @param object $policy_record Policy Record
+		 * @return object 	Policy Object
+		 */
+		private function __get_policy_object($policy_record)
+		{
+			// Policy Record contains the following columns by prefixing "object_"
+			$object_columns = ['id', 'portfolio_id', 'customer_id', 'attributes', 'amt_sum_insured', 'flag_locked'];
+			$object = new StdClass();
+			foreach($object_columns as $column )
+			{
+				$object->{$column} = $policy_record->{'object_' . $column};
+			}
+			return $object;
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Prepare TXN Data
+		 *
+		 * Prepare transactional data based on the supplied crf data and other post data
+		 *
+		 * @param object $policy_record
+		 * @param object $txn_record
+		 * @param array $crf_data
+		 * @param array $post_data
+		 * @return array
+		 */
+		private function _prepare_txn_data($policy_record, $txn_record, $crf_data, $post_data)
+		{
+			$transfer_type = $crf_data['transfer_type'];
+	        if( !$transfer_type )
+	        {
+	            throw new Exception("Exception [Controller: Policy_txn][Method: _prepare_txn_data()]: Invalid Transfer Type!");
+	        }
+
+	        /**
+	         * Compute TXN data based on "transfer_type"
+	         */
+	        $txn_data = [];
+	        switch($transfer_type)
+	        {
+	            case IQB_POLICY_CRF_TRANSFER_TYPE_FULL:
+	            	$txn_data = $this->_crf_transfer_full($crf_data);
+	                break;
+
+	            case IQB_POLICY_CRF_TRANSFER_TYPE_PRORATA_ON_DIFF:
+	                break;
+
+	            case IQB_POLICY_CRF_TRANSFER_TYPE_SHORT_TERM_RATE_ON_FULL:
+	                break;
+
+	            case IQB_POLICY_CRF_TRANSFER_TYPE_DIRECT_DIFF:
+	                break;
+	        }
+
+	        /**
+	         * TXN Specific Post Data
+	         */
+	        $txn_data['txn_details'] 	= $post_data['txn_details'];
+	        $txn_data['remarks'] 		= $post_data['remarks'];
+	        return $txn_data;
+		}
+
+		private function _crf_transfer_full($crf_data)
+		{
+			$txn_data = [];
+
+			/**
+			 * Task 1: Simply Copy all data from CRF to TXN
+			 */
+			foreach(Policy_crf_model::$fields_to_txn_transfer as $field)
+        	{
+        		$txn_data[$field] = $crf_data[$field] ?? NULL;
+        	}
+
+        	/**
+			 * Task 1: Compute VAT ON Taxable Amount
+			 */
+        	$this->load->model('ac_duties_and_tax_model');
+	        $taxable_amount 		= $txn_data['amt_total_premium'] + $txn_data['amt_stamp_duty'];
+	        $txn_data['amt_vat'] 	= $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DUTY_AND_TAX_ID_VAT, $taxable_amount);
+
+	        return $txn_data;
+		}
+
+	// --------------------- END: PRIVATE CRUD HELPER FUNCTIONS --------------------
+
 
 
 }

@@ -60,6 +60,29 @@ class Ac_duties_and_tax_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Compute Duty & Tax
+     *
+     * Compute duty and tax of supllied amount for supplied duty&tax ID
+     *
+     * @param integer $id
+     * @param decimal $src_amount
+     * @return decimal
+     */
+    public function compute_tax($id, $src_amount)
+    {
+        $record = $this->get($id);
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Ac_duties_and_tax_model][Method: compute_vat()]: Duty & Tax record could not be found.");
+        }
+        $vat_amount = $src_amount * ($record->rate/100.00);
+
+        return $vat_amount;
+    }
+
+    // ----------------------------------------------------------------
+
     public function get($id)
     {
         /**

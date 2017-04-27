@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Policy: Details - Policy Premium Overview Card
 */
-$attributes = $premium_record->attributes ? json_decode($premium_record->attributes) : NULL;
+$cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn_record->cost_calculation_table) : NULL;
 ?>
 
 <table class="table">
@@ -11,8 +11,8 @@ $attributes = $premium_record->attributes ? json_decode($premium_record->attribu
         <tr><td colspan="2" align="center"><h3><?php echo $title;?></h3></td></tr>
     </thead>
     <tbody>
-        <?php if($attributes):?>
-            <?php foreach($attributes as $section_object):?>
+        <?php if($cost_calculation_table):?>
+            <?php foreach($cost_calculation_table as $section_object):?>
                 <tr>
                     <td><strong><?php echo $section_object->column_head?></strong></td>
                     <td class="no-padding">
@@ -54,19 +54,19 @@ $attributes = $premium_record->attributes ? json_decode($premium_record->attribu
                     <table class="table" cellpadding="0" cellspacing="0">
                         <tr>
                             <td width="80%" align="right"><strong>जम्मा</strong></td>
-                            <td width="100px" align="right"><strong><?php echo number_format((float)$premium_record->total_premium_amount, 2, '.', '')?></strong></td>
+                            <td width="100px" align="right"><strong><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>टिकट दस्तुर</strong></td>
-                            <td align="right"><strong><?php echo $premium_record->stamp_duty_amount;?></strong></td>
+                            <td align="right"><strong><?php echo $txn_record->amt_stamp_duty;?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>मु. अ. क. (VAT)</strong></td>
-                            <td align="right"><strong><?php echo number_format( (float)($premium_record->stamp_duty_amount + $premium_record->total_premium_amount) * 0.13, 2, '.', '');?></strong></td>
+                            <td align="right"><strong><?php echo number_format( (float)$txn_record->amt_vat, 2, '.', '');?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                            <td align="right"><strong><?php echo number_format( (float)($premium_record->stamp_duty_amount + $premium_record->total_premium_amount) * 1.13, 2, '.', '');?></strong></td>
+                            <td align="right"><strong><?php echo number_format( (float)( $txn_record->amt_stamp_duty + $txn_record->amt_total_premium + $txn_record->amt_vat ) , 2, '.', '');?></strong></td>
                         </tr>
                     </table>
                 </td>

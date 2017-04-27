@@ -35,15 +35,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 
 			/**
-			 * Policy Premium Card
+			 * Render Cost Calculation Table
 			 */
-			// $premium_record = (object)[
-			// 	'policy_id' 	=> $record->id,
-			// 	'total_premium_amount' 	=> $record->total_premium_amount,
-			// 	'stamp_duty_amount' 	=> $record->stamp_duty_amount,
-			// 	'attributes'	=> $record->premium_attributes
-			// ];
-			// $this->load->view('premium/_card_overview', ['premium_record' => $premium_record, 'policy_record' => $record]);
+			$this->load->view('policy_txn/_cost_calculation_table', ['txn_record' => $txn_record, 'policy_record' => $record]);
 			?>
 			<h3 class="text-red">@TODO: Current Premium Cost Table</h3>
 			<h3 class="text-red">@TODO: Current RI Distribution Table</h3>

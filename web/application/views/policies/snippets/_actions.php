@@ -18,13 +18,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Allowed Status: draft | unverified
  */
 if( is_policy_editable($record->status, FALSE) ):
+    $txn_type = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL:   IQB_POLICY_TXN_TYPE_FRESH;
+    $update_premium_url = 'policy_txn/premium/' . $txn_type . '/' . $record->id;
 ?>
     <a href="#"
         title="Update Premium"
         class="btn btn-success btn-round trg-dialog-edit"
         data-box-size="large"
         data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $record->code?>'
-        data-url="<?php echo site_url('policy_txn/premium/' . IQB_POLICY_TXN_TYPE_FRESH . '/' . $record->id);?>"
+        data-url="<?php echo site_url($update_premium_url);?>"
         data-form="#_form-premium">
         <i class="fa fa-dollar"></i> Update Premium</a>
 <?php endif?>

@@ -93,20 +93,21 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
 
     <?php
     /**
-     * Old Premium Record Data
+     * Merge other_cost_fields JSON Object to Default columns to pass to form elements
      */
-    $premium_extra_fields_object = $crf_record->other_cost_fields ? json_decode($crf_record->other_cost_fields) : NULL;
-    if($premium_extra_fields_object)
-    {
-        $premium_extra_fields_object->stamp_duty_amount = $crf_record->stamp_duty_amount;
-    }
+    $other_cost_fields = $crf_record->other_cost_fields ? json_decode($crf_record->other_cost_fields) : NULL;
+    $merged_crf_record = (object) array_merge((array) $crf_record, (array) $other_cost_fields);
+
+    // Add Values From TXN Table [txn_details, remarks]
+    $merged_crf_record->txn_details = $txn_record->txn_details;
+    $merged_crf_record->remarks     = $txn_record->remarks;
 
     /**
      * Load Form Components
      */
     $this->load->view('templates/_common/_form_components_horz', [
         'form_elements'     => $form_elements,
-        'form_record'       => $premium_extra_fields_object
+        'form_record'       => $merged_crf_record
     ]);
     ?>
 

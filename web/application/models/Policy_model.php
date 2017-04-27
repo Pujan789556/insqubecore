@@ -846,13 +846,13 @@ class Policy_model extends MY_Model
         // Valid Record? Valid Status Code?
         if( !$record || !in_array($to_status_flag, array_keys( get_policy_status_dropdown() ) ) )
         {
-            throw new Exception("Exception [Policy Model]: Either Policy Record not found or Invalid status flag supplied.");
+            throw new Exception("Exception [Model: Policy_model][Method: update_status()]: Either Policy Record not found or Invalid status flag supplied.");
         }
 
         // Status Qualified?
         if( !$this->_status_qualifies($record->status, $to_status_flag) )
         {
-            throw new Exception("Exception [Policy Model]: Current Status does not qualify to upgrade/downgrade.");
+            throw new Exception("Exception [Model: Policy_model][Method: update_status()]: Current Status does not qualify to upgrade/downgrade.");
         }
 
 

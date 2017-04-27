@@ -273,6 +273,8 @@ class Policies extends MY_Controller
 			return $data;
 		}
 
+	// --------------------------------------------------------------------
+
 	/**
 	 * Refresh The Module
 	 *
@@ -284,6 +286,8 @@ class Policies extends MY_Controller
 	{
 		$this->page('l');
 	}
+
+	// --------------------------------------------------------------------
 
 	/**
 	 * Filter the Data
@@ -629,6 +633,7 @@ class Policies extends MY_Controller
 		}
 		return $this->template->json($data);
 	}
+
 
 	// --------------------------------------------------------------------
 	// CRUD HELPER - FUNCTIONS
@@ -1016,12 +1021,11 @@ class Policies extends MY_Controller
 	        return TRUE;
 	    }
 
-		// --------------------------------------------------------------------
-
 
 	// --------------------------------------------------------------------
 	//  POLICY DETAILS
 	// --------------------------------------------------------------------
+
 
     /**
      * View Policy Details
@@ -1046,7 +1050,27 @@ class Policies extends MY_Controller
 			$this->template->render_404();
 		}
 
-		// echo '<pre>'; print_r($record);exit;
+		/**
+		 * Get the Policy Fresh/Renewal Txn Record
+		 */
+		try {
+
+			$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+
+		} catch (Exception $e) {
+
+			return $this->template->json([
+				'status' => 'error',
+				'message' => $e->getMessage()
+			], 404);
+		}
+
+
+
+		$data = [
+			'record' 		=> $record,
+			'txn_record' 	=> $txn_record
+		];
 
 		$this->data['site_title'] = 'Policy Details | ' . $record->code;
 		$this->template->partial(
@@ -1056,8 +1080,7 @@ class Policies extends MY_Controller
 								'content_header' => 'Policy -' . $record->code,
 								'breadcrumbs' => ['Policies' => 'policies', 'Details' => NULL]
 						])
-						->partial('content', 'policies/_details', compact('record'))
-						// ->partial('dynamic_js', 'policies/_customer_js')
+						->partial('content', 'policies/_details', $data)
 						->render($this->data);
 
     }

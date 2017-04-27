@@ -169,7 +169,7 @@ class Setting_model extends MY_Model
         // Throw exception if invalid section
         if ( ! $this->valid_section($section) )
         {
-            throw new Exception("Invalid validation section ({$section})");
+            throw new Exception("Exception [Model: Setting_model][Method: get_validation_rules()]: Invalid validation section ({$section})");
         }
         return $this->validation_rules[$section];
     }

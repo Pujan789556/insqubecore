@@ -305,6 +305,60 @@ class Policy_txn_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
+     * Save Cost Reference Data and Transactional Data
+     *
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
+    public function save($id, $crf_data, $txn_data)
+    {
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+        $transaction_status = TRUE;
+
+        /**
+         * Disable DB Debugging
+         */
+        $this->db->db_debug = FALSE;
+        $this->db->trans_start();
+
+
+                /**
+                 * Task 1: Update CRF Data
+                 */
+                $this->policy_crf_model->save($id, $crf_data);
+
+                /**
+                 * Task 2: Update TXN Data
+                 */
+                parent::update($id, $txn_data, TRUE);
+
+        /**
+         * Complete transactions or Rollback
+         */
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            $transaction_status = FALSE;
+        }
+
+        /**
+         * Restore DB Debug Configuration
+         */
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        return $transaction_status;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
      * Get Current Policy Transaction Record for Supplied Policy
      *
      * @param int $policy_id
@@ -315,6 +369,33 @@ class Policy_txn_model extends MY_Model
         $where = [
             'PTXN.policy_id'    => $policy_id,
             'PTXN.flag_current' => IQB_FLAG_ON
+        ];
+        return $this->db->select('PTXN.*')
+                        ->from($this->table_name . ' AS PTXN')
+                        ->where($where)
+                        ->get()->row();
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Fresh/Renewal Transaction Record of the Policy
+     *
+     * If the policy is renewed, we need renewed record or fresh
+     * txn record
+     *
+     * @param int $policy_id
+     * @return object
+     */
+    public function get_fresh_renewal_by_policy($policy_id, $txn_type)
+    {
+        if( !in_array($txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+        {
+            throw new Exception("Exception [Model:Policy_txn_model][Method: get_fresh_renewal_by_policy()]: Invalid Transaction Type.");
+        }
+        $where = [
+            'PTXN.policy_id'    => $policy_id,
+            'PTXN.txn_type'     => $txn_type
         ];
         return $this->db->select('PTXN.*')
                         ->from($this->table_name . ' AS PTXN')

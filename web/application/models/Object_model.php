@@ -200,7 +200,7 @@ class Object_model extends MY_Model
         // Throw exception if we do not find an object record
         if(!$record)
         {
-            throw new Exception("Object Model: Object not found.");
+            throw new Exception("Exception [Model: Object_model][Method: is_editable()]: Object not found.");
         }
 
         /**
@@ -235,7 +235,7 @@ class Object_model extends MY_Model
         // Throw exception if we do not find an object record
         if(!$record)
         {
-            throw new Exception("Object Model: Object not found.");
+            throw new Exception("Exception [Model: Object_model][Method: is_deletable()]: Object not found.");
         }
 
         /**

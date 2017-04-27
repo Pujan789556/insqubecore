@@ -259,6 +259,15 @@ defined('IQB_POLICY_CRF_TRANSFER_TYPE_DIRECT_DIFF')       		OR define('IQB_POLIC
 
 /*
 |--------------------------------------------------------------------------
+| POLICY COST REFERENCE COMPUTATION TYPES CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_POLICY_CRF_COMPUTE_AUTO')    	OR define('IQB_POLICY_CRF_COMPUTE_AUTO', 	1);
+defined('IQB_POLICY_CRF_COMPUTE_MANUAL') 	OR define('IQB_POLICY_CRF_COMPUTE_MANUAL',  2);
+
+
+/*
+|--------------------------------------------------------------------------
 | POLICY OBJECT CONSTANTS - MOTOR
 |--------------------------------------------------------------------------
 */

@@ -120,7 +120,7 @@ class Activity {
 			return $this->ci->activity_model->insert($data);
 		}
 		else{
-			throw new Exception($this->_activity_error);
+			throw new Exception('Exception [Library: Activity][Method: save()]: ' . $this->_activity_error);
 		}
 	}
 

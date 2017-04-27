@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Find The Proper Premium Overview Card
  */
-$_card_partial_view_by_portfolio = _PREMIUM_OVERVIEW_CARD_partial_view_by_portfolio($policy_record->portfolio_id);
+$_card_partial_view_by_portfolio = _POLICY_partial_view__cos_calculation_table($policy_record->portfolio_id);
 ?>
 <div class="box box-bordered box-success" id="_premium-card">
     <div class="box-header with-border border-dark">
