@@ -248,6 +248,17 @@ defined('IQB_POLICY_TXN_TYPE_EG')       OR define('IQB_POLICY_TXN_TYPE_EG',     
 
 /*
 |--------------------------------------------------------------------------
+| POLICY COST REFERENCE TRANSFER TYPES CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_POLICY_CRF_TRANSFER_TYPE_FULL')    				OR define('IQB_POLICY_CRF_TRANSFER_TYPE_FULL',      				1);
+defined('IQB_POLICY_CRF_TRANSFER_TYPE_PRORATA_ON_DIFF') 		OR define('IQB_POLICY_CRF_TRANSFER_TYPE_PRORATA_ON_DIFF',    		2);
+defined('IQB_POLICY_CRF_TRANSFER_TYPE_SHORT_TERM_RATE_ON_FULL') OR define('IQB_POLICY_CRF_TRANSFER_TYPE_SHORT_TERM_RATE_ON_FULL', 	3);
+defined('IQB_POLICY_CRF_TRANSFER_TYPE_DIRECT_DIFF')       		OR define('IQB_POLICY_CRF_TRANSFER_TYPE_DIRECT_DIFF',     			4);
+
+
+/*
+|--------------------------------------------------------------------------
 | POLICY OBJECT CONSTANTS - MOTOR
 |--------------------------------------------------------------------------
 */
