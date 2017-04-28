@@ -901,7 +901,7 @@ class Ri_setup_treaties extends MY_Controller
 			}
 			else if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_QS )
 			{
-				$v_rules = array_merge($v_rules, $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_qt', 'portfolios_qs', 'portfolios_sp']));
+				$v_rules = array_merge($v_rules, $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_qs']));
 			}
 			else if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_EOL )
 			{

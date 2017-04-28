@@ -358,6 +358,54 @@ class Ri_setup_treaty_model extends MY_Model
             // Treaty Portfolios: "Quota & Surplus" Only Fields
             // @NOTE: You have to merge [common, qt, qs, sp] together to get full validation list
             'portfolios_qs' => [
+
+                /**
+                 * Quota Share & Surplus Common Part
+                 */
+                [
+                    'field' => 'qs_max_ret_amt[]',
+                    'label' => 'Maximum Retention Amount',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_field'            => 'qs_max_ret_amt',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_def_ret_amt[]',
+                    'label' => 'Defined Retention Amount',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]|less_than[qs_max_ret_amt[]]',
+                    '_field'            => 'qs_def_ret_amt',
+                    '_type'             => 'text',
+                    '_show_label'       => false,
+                    '_required'         => true
+                ],
+
+                /**
+                 * Quota Share  Part
+                 */
+                [
+                    'field' => 'qs_retention_percent[]',
+                    'label' => 'Quota Retention(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_field'            => 'qs_retention_percent',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_quota_percent[]',
+                    'label' => 'Quota Distribution(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_field'            => 'qs_quota_percent',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+
+                /**
+                 * Surplus Reference Line (Max/Def retention as One Line or Quota % as One surplus Line)
+                 */
                 [
                     'field' => 'flag_qs_line[]',
                     'label' => 'Surplus Line Reference',
@@ -367,6 +415,37 @@ class Ri_setup_treaty_model extends MY_Model
                     '_show_label'   => false,
                     '_data'         => IQB_BLANK_SELECT + ri_qs_surplus_line_reference_dropdown(),
                     '_required'     => true
+                ],
+
+                /**
+                 * Surplus Part
+                 */
+                [
+                    'field' => 'qs_lines_1[]',
+                    'label' => '1st Surplus Lines',
+                    'rules' => 'trim|required|integer|max_length[4]',
+                    '_field'            => 'qs_lines_1',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_lines_2[]',
+                    'label' => '2nd Surplus Lines',
+                    'rules' => 'trim|required|integer|max_length[4]',
+                    '_field'            => 'qs_lines_2',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_lines_3[]',
+                    'label' => '3rd Surplus Lines',
+                    'rules' => 'trim|required|integer|max_length[4]',
+                    '_field'            => 'qs_lines_3',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
                 ],
             ],
 
