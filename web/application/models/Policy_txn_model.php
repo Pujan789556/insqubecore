@@ -168,7 +168,7 @@ class Policy_txn_model extends MY_Model
      * @param integer|object $policy_id_or_record   Policy ID or Transaction Record
      * @return bool
      */
-    public function ri_approved( $record )
+    public function ri_approved( $policy_id_or_record )
     {
         $record = is_numeric($policy_id_or_record) ? $this->get_current_txn_by_policy( (int)$policy_id_or_record ): $policy_id_or_record;
         $approved  = TRUE;
