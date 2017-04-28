@@ -1195,6 +1195,12 @@ class Policies extends MY_Controller
 
 
 		/**
+		 * Meet the Status Pre-Requisite ?
+		 */
+		$this->__check_status_prerequisite($to_status_code, $record);
+
+
+		/**
 		 * Let's Update the Status
 		 */
 		try {
@@ -1212,7 +1218,21 @@ class Policies extends MY_Controller
 				 */
 				$record->status = $to_status_code;
 				$view = 'policies/tabs/_tab_overview';
-				$html = $this->load->view($view, ['record' => $record], TRUE);
+				/**
+				 * Get the Policy Fresh/Renewal Txn Record
+				 */
+				try {
+
+					$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+				} catch (Exception $e) {
+
+					return $this->template->json([
+						'status' => 'error',
+						'message' => $e->getMessage()
+					], 404);
+				}
+
+				$html = $this->load->view($view, ['record' => $record, 'txn_record' => $txn_record], TRUE);
 
 				$ajax_data = [
 					'message' 	=> 'Successfully Updated!',
@@ -1293,6 +1313,10 @@ class Policies extends MY_Controller
 					$permission_name = 'status.to.verified';
 					break;
 
+				case IQB_POLICY_STATUS_APPROVED:
+					$permission_name = 'status.to.approved';
+					break;
+
 				case IQB_POLICY_STATUS_PAID:
 					$permission_name = 'status.to.paid';
 					break;
@@ -1318,6 +1342,25 @@ class Policies extends MY_Controller
 				$this->dx_auth->deny_access();
 			}
 
+			return $__flag_valid_permission;
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Check Status up/down Pre-Requisite
+		 *
+		 * @param alpha $to_updown_status Status Code to UP/DOWN
+		 * @param object $record Policy Record
+		 * @return mixed
+		 */
+		private function __check_status_prerequisite($to_updown_status, $record)
+		{
+			/**
+			 * Get the Currentn Txn Record
+			 */
+			$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy($record->id, IQB_POLICY_TXN_TYPE_FRESH);
+
 
 			/**
 			 * Check Pre-Requisite
@@ -1332,7 +1375,7 @@ class Policies extends MY_Controller
 				( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
 			)
 			{
-				if((float)$record->cur_amt_total_premium == 0.00 )
+				if( !$txn_record->amt_total_premium )
 				{
 					return $this->template->json([
 						'status' 	=> 'error',
@@ -1341,7 +1384,8 @@ class Policies extends MY_Controller
 				}
 			}
 
-			return $__flag_valid_permission;
+			return TRUE;
+
 		}
 
 	// --------------------------------------------------------------------

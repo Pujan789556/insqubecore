@@ -39,7 +39,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			 */
 			$this->load->view('policy_txn/_cost_calculation_table', ['txn_record' => $txn_record, 'policy_record' => $record]);
 			?>
-			<h3 class="text-red">@TODO: Current Premium Cost Table</h3>
 			<h3 class="text-red">@TODO: Current RI Distribution Table</h3>
 			<h3 class="text-red">@TODO: Fresh Policy सम्पुष्टि विवरण</h3>
 		</div>

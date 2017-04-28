@@ -102,14 +102,14 @@ if( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $this->dx_auth->is_autho
  *  1. Upgrade Status to "Approved"
  */
 if( $record->status === IQB_POLICY_STATUS_VERIFIED ): ?>
-    <?php if( $this->dx_auth->is_authorized('policies', 'make.policy.payment') ): ?>
+    <?php if( $this->dx_auth->is_authorized('policies', 'status.to.approved') ): ?>
         <a href="#"
             title="Approve Debit Note"
             data-confirm="true"
             class="btn btn-success btn-round trg-dialog-action"
             data-message="Are you sure you want to APPROVE this debit note?"
             data-url="<?php echo site_url('policies/status/' . $record->id . '/' . IQB_POLICY_STATUS_APPROVED );?>"
-        ><i class="fa fa-check-square-o"></i> Make a Payment</a>
+        ><i class="fa fa-check-square-o"></i> Approve Debit Note</a>
     <?php endif?>
 <?php endif?>
 

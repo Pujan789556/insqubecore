@@ -955,7 +955,11 @@ class Policy_model extends MY_Model
                     $this->_to_status($record->id, $base_data);
 
                     // Task 2 - Policy Transaction Record [Status -> Draft]
-                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_DRAFT);
+                    // Only if we are downgrading from verified to Unverified
+                    if($record->status === IQB_POLICY_STATUS_VERIFIED )
+                    {
+                        $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_DRAFT);
+                    }
 
                     // Task 3 - Open Lock Flag [Object, Customer]
                     $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
