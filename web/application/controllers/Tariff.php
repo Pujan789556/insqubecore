@@ -111,7 +111,6 @@ class Tariff extends MY_Controller
         /**
          * Update Nav Data
          */
-        $this->_navigation['level_2'] = 'tariff';
         $this->_navigation['level_3'] = 'motor';
         $this->active_nav_primary($this->_navigation);
 
@@ -160,7 +159,7 @@ class Tariff extends MY_Controller
         /**
          * Update Nav Data
          */
-        $this->_navigation['level_2'] = 'tariff_motor';
+        $this->_navigation['level_3'] = 'motor';
         $this->active_nav_primary($this->_navigation);
 
 
