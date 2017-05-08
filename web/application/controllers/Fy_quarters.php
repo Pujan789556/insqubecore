@@ -84,5 +84,18 @@ class Fy_quarters extends MY_Controller
 						->render($this->data);
 	}
 
+	// --------------------------------------------------------------------
+
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        $this->fy_quarter_model->clear_cache();
+        redirect($this->router->class);
+    }
+
 
 }

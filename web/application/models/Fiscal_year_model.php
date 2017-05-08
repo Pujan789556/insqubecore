@@ -125,8 +125,6 @@ class Fiscal_year_model extends MY_Model
     public function clear_cache()
     {
     	$cache_names = [
-            'fy_all',
-            'fy_current',
             'fy_*'
         ];
         // cache name without prefix

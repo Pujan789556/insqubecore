@@ -83,5 +83,18 @@ class Fiscal_years extends MY_Controller
 						->render($this->data);
 	}
 
+	// --------------------------------------------------------------------
+
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        $this->fiscal_year_model->clear_cache();
+        redirect($this->router->class);
+    }
+
 
 }
