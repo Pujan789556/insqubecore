@@ -51,15 +51,16 @@ $config['insqb_activity_types'] = [
 			'E' => 'edited'
 	]],
 
-
 	/**
-	 * Activities related to Account - Reference Transaction Type
+	 * Activities related to Account Parties
 	 */
-	'ac_ref_transaction_type' => [
-		'_uri' => 'ac_ref_transaction_types/',
-		'_table' => 'ac_ref_transaction_types',
+	'ac_party' => [
+		'_uri' => 'ac_parties/',
+		'_table' => 'ac_parties',
 		'_actions' => [
-			'E' => 'edited'
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
 	]],
 
 

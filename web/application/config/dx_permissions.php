@@ -217,8 +217,49 @@ $config['DX_permissions'] = [
 			'edit.object',
 			'delete.object'
 		],
+	],
+
+	/**
+	 * Group: Policy
+	 */
+	'Accounting Permissions' => [
+
+		/**
+		 * Accounting Parties
+		 */
+		'ac_parties'  => [
+			'explore.ac_party',
+			'add.ac_party',
+			'edit.ac_party',
+			'delete.ac_party'
+		],
+
+		/**
+		 * Vouchers
+		 */
+		'ac_vouchers'  => [
+			'explore.voucher',
+			'add.voucher',
+
+			/**
+			 * Voucher Scope
+			 * -------------------
+			 * The accounting system slightly differs from regular user scope.
+			 * So we have to develop a module specific scope per user basis.
+			 * That's why the following permissions must be applied with
+			 * the user's scope
+			 */
+			'voucher.scope.to.local',
+			'voucher.scope.to.branch',
+			'voucher.scope.to.global',
 
 
+			/**
+			 * Reporting Permissions
+			 * ---------------------
+			 * @TODO -
+			 */
+		]
 	],
 ];
 

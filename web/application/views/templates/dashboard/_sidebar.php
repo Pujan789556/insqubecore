@@ -219,6 +219,24 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                         <i class="fa fa-certificate"></i> <span>Objects</span>
                   </a>
             </li>
+
+            <li class="<?php echo set_menu_active($nav_level_0, 'accounting');?>">
+                  <a href="#">
+                        <i class="fa fa-book"></i> Accounting
+                        <span class="pull-right-container">
+                              <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                  </a>
+                  <ul class="treeview-menu">
+                        <li class="<?php echo set_menu_active($nav_level_1, 'ac_parties');?>">
+                              <a href="<?php echo site_url('ac_parties');?>"><i class="fa fa-circle-o"></i> Parties</a>
+                        </li>
+                        <li class="<?php echo set_menu_active($nav_level_1, 'ac_vouchers');?>">
+                              <a href="<?php echo site_url('ac_vouchers');?>"><i class="fa fa-circle-o"></i> Vouchers</a>
+                        </li>
+
+                  </ul>
+            </li>
       </ul>
 </section>
 <!-- /.sidebar -->
