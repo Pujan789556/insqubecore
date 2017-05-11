@@ -134,6 +134,9 @@ foreach($form_elements as $element):?>
                     break;
 
                 case 'textarea':
+                    // Rows/Cols
+                    $element_config['rows'] = $element['rows'] ?? '10';
+                    $element_config['cols'] = $element['cols'] ?? '40';
                     echo form_textarea($element_config, $value, $extra_attributes);
                     break;
 
