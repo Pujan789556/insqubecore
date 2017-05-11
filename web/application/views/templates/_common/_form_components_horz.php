@@ -116,7 +116,7 @@ foreach($form_elements as $element):?>
                     break;
 
                 case 'date':
-                        echo    '<div class="input-group date">' .
+                        echo    '<div class="input-group date" data-provide="datepicker" data-date-autoclose="true" data-date-format="yyyy-mm-dd" data-date-today-highlight="true">' .
                                     form_input($element_config, $value, $extra_attributes) .
                                     '<span class="input-group-addon"><i class="fa fa-calendar pointer"></i></span>' .
                                 '</div>';
