@@ -339,13 +339,6 @@ $('#_find-object').on('click', function(e){
     });
 });
 
-// Datepicker
-$('.input-group.date').datepicker({
-    autoclose: true,
-    todayHighlight: true,
-    format: 'yyyy-mm-dd'
-});
-
 // Datetimepicker
 $('.input-group.datetime, .input-group.datetime input').datetimepicker({
     format: 'YYYY-MM-DD HH:mm:00',
