@@ -1,11 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Agents:  Single Row
+* Chart of Account:  Single Row
 */
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
-	<td><?php echo $record->id;?></td>
+	<?php if( $this->dx_auth->is_admin() ): ?>
+		<td><?php echo $record->id;?></td>
+	<?php endif?>
 	<td>
 		<?php
 		$path_str = [];

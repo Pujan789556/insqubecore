@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         [
                             'class' => 'form-horizontal form-iqb-general',
                             'id'    => '__form-ac-chart-of-account',
-                            'data-pc' => '.bootbox-body' // parent container ID
+                            'data-pc' => '#form-box-chart-of-account' // parent container ID
                         ],
                         // Hidden Fields
                         isset($record) ? ['id' => $record->id] : []); ?>

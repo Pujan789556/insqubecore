@@ -43,4 +43,5 @@ $select_json = [
 		<?php endif?>
 	</td>
 	<td><?php echo $record->profession;?></td>
+	<td><?php echo locked_unlocked_text($record->flag_locked);?></td>
 </tr>

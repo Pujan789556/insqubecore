@@ -83,6 +83,13 @@ class Ac_account_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Check Duplicate
+     *
+     * @param array $where
+     * @param integer|null $id
+     * @return integer
+     */
     public function check_duplicate($where, $id=NULL)
     {
         if( $id )
@@ -91,6 +98,43 @@ class Ac_account_model extends MY_Model
         }
         return $this->db->where($where)
                         ->count_all_results($this->table_name);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Dropdown List by Account Group ID
+     *
+     * @param integer $account_group_id
+     * @return array
+     */
+    public function dropdown($account_group_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'ac_account_' . $account_group_id;
+
+        $list = $this->get_cache($cache_name);
+        if(!$list)
+        {
+            $where = [
+                'AC.account_group_id'   => $account_group_id,
+                'AC.active'             => IQB_FLAG_ON
+            ];
+            $records = $this->db->select('AC.id, AC.name')
+                                 ->from($this->table_name . ' as AC')
+                                 ->where($where)
+                                 ->get()->result();
+
+            $list = [];
+            foreach($records as $record)
+            {
+                $list["{$record->id}"] =  $record->name;
+            }
+            $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
+        }
+        return $list;
     }
 
     // ----------------------------------------------------------------
@@ -160,7 +204,7 @@ class Ac_account_model extends MY_Model
     public function clear_cache($data=null)
     {
         $cache_names = [
-
+            'ac_account_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

@@ -355,7 +355,7 @@ class Customers extends MY_Controller
 		$record = NULL;
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add', NULL, $from_widget);
+		$json_data = $this->_save('add', $record, $from_widget);
 
 
 		// No form Submitted?

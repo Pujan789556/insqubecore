@@ -7,9 +7,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Load Rows from View
  */
+$_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 foreach($records as $record)
 {
-	$this->load->view('setup/ac/accounts/_single_row', compact('record'));
+	$single_row = $_flag__show_widget_row ? 'setup/ac/accounts/_single_row_widget' : 'setup/ac/accounts/_single_row';
+	$this->load->view($single_row, compact('record'));
 }
 
 /**

@@ -225,6 +225,16 @@ $config['DX_permissions'] = [
 	'Accounting Permissions' => [
 
 		/**
+		 * Accounts
+		 */
+		'ac_accounts'  => [
+			'explore.ac_account',
+			'add.ac_account',
+			'edit.ac_account',
+			'delete.ac_account'
+		],
+
+		/**
 		 * Accounting Parties
 		 */
 		'ac_parties'  => [
