@@ -1,14 +1,16 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Agents:  Single Row
+* Company:  Single Row
 */
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
-	<td><?php echo $record->id;?></td>
+	<?php if( $this->dx_auth->is_admin() ): ?>
+		<td><?php echo $record->id;?></td>
+	<?php endif?>
 	<td>
 		<a href="<?php echo site_url('companies/details/' . $record->id);?>"
-						title="View agent details.">
+						title="View company details.">
 						<?php echo $record->name;?></a>
 	</td>
 	<td><?php echo $record->pan_no;?></td>
@@ -40,11 +42,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						data-form=".form-iqb-general">
 						<i class="fa fa-pencil-square-o"></i>
 						<span>Edit Company Info</span></a>
-				</li>
-
+				</li><li class="divider"></li>
 
 				<?php if(safe_to_delete( 'Company_model', $record->id )):?>
-					<li class="divider"></li>
 					<li>
 						<a href="#"
 							title="Delete"
@@ -53,8 +53,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							data-url="<?php echo site_url('companies/delete/' . $record->id);?>">
 								<i class="fa fa-trash-o"></i>
 								<span>Delete</span></a>
-					</li>
-					<li class="divider"></li>
+					</li><li class="divider"></li>
 				<?php endif?>
 
 				<li>
@@ -65,16 +64,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</li>
 			</ul>
 		</div>
-
-
-
-
-
-
-
-
-
-
-
 	</td>
 </tr>
