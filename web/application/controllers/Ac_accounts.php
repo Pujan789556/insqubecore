@@ -107,7 +107,7 @@ class Ac_accounts extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/' . $widget_reference)
+				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/0/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')

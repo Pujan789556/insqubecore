@@ -105,7 +105,7 @@ class Ac_parties extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/' . $widget_reference)
+				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/0/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')
@@ -142,7 +142,6 @@ class Ac_parties extends MY_Controller
 
 		private function _get_filter_elements()
 		{
-			$select = ['' => 'Select ...'];
 			$filters = [
 				[
 	                'field' => 'filter_type',
@@ -316,12 +315,17 @@ class Ac_parties extends MY_Controller
 				redirect('agents/page/f/y/0/' . $widget_reference);
 				break;
 
+			/**
+			 * Companies
+			 */
+			case IQB_AC_PARTY_TYPE_COMPANY:
+				redirect('companies/page/f/y/0/' . $widget_reference);
+				break;
+
 			default:
 				# code...
 				break;
 		}
-
-
 	}
 
 
