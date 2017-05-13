@@ -17,12 +17,6 @@ class Agents extends MY_Controller
 	{
 		parent::__construct();
 
-		// Only Admin Can access this controller
-		if( !$this->dx_auth->is_admin() )
-		{
-			$this->dx_auth->deny_access();
-		}
-
 		// Form Validation
 		$this->load->library('Form_validation');
 
@@ -66,65 +60,49 @@ class Agents extends MY_Controller
 	 * @param integer $next_id
 	 * @return void
 	 */
-	function page( $layout='f', $next_id = 0,  $ajax_extra = [] )
+	function page( $layout='f', $from_widget='n', $next_id = 0, $widget_reference = '' )
 	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('agents', 'explore.agent') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+
 		// If request is coming from refresh method, reset nextid
 		$next_id = (int)$next_id;
-
-		$params = array();
-		if( $next_id )
-		{
-			$params = ['next_id' => $next_id];
-		}
-
-		/**
-		 * Extract Filter Elements
-		 */
-		$filter_data = $this->_get_filter_data( );
-		if( $filter_data['status'] === 'success' )
-		{
-			$params = array_merge($params, $filter_data['data']);
-		}
-
-		$records = $this->agent_model->rows($params);
-		$records = $records ? $records : [];
-		$total = count($records);
-
-		/**
-		 * Grab Next ID or Reset It
-		 */
-		if($total == $this->settings->per_page+1)
-		{
-			$next_id = $records[$total-1]->id;
-			unset($records[$total-1]); // remove last record
-		}
-		else
-		{
-			$next_id = NULL;
-		}
+		$next_url_base = 'agents/page/r/'.$from_widget;
 
 		// DOM Data
 		$dom_data = [
-			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-agent', 		// List box ID
+			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-agent', 		// List box ID
 			'DOM_FilterFormId'		=> '_iqb-filter-form-agent' 			// Filter Form ID
 		];
 
-		$data = [
-			'records' => $records,
-			'next_id' => $next_id,
-			'next_url' => $next_id ? site_url( 'agents/page/r/' . $next_id ) : NULL
-		] + $dom_data;
+		/**
+		 * Get Search Result
+		 */
+		$data = $this->_get_filter_data( $next_url_base, $next_id, $widget_reference );
+		$data = array_merge($data, $dom_data);
+
+		/**
+		 * Widget Specific Data
+		 */
+		$data['_flag__show_widget_row'] = $from_widget === 'y';
+
 
 		/**
 		 * Find View
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'setup/agents/_index';
+			$view = $from_widget === 'y' ? 'setup/agents/_find_widget' : 'setup/agents/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('agents/page/l/' )
+				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')
@@ -136,29 +114,16 @@ class Agents extends MY_Controller
 			$view = 'setup/agents/_rows';
 		}
 
-
 		if ( $this->input->is_ajax_request() )
 		{
 
-			// $view = $refresh === FALSE ? 'setup/agents/_rows' : 'setup/agents/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$ajax_data = [
 				'status' => 'success',
 				'html'   => $html
 			];
-
-			if( !empty($ajax_extra))
-			{
-				$ajax_data = array_merge($ajax_data, $ajax_extra);
-			}
 			$this->template->json($ajax_data);
 		}
-
-		/**
-		 * Filter Configurations
-		 */
-		// $data['filters'] = $this->_get_filter_elements();
-		// $data['filter_url'] = site_url('agents/filter/');
 
 		$this->template
 						->set_layout('layout-advanced-filters')
@@ -208,9 +173,9 @@ class Agents extends MY_Controller
 			return $filters;
 		}
 
-		private function _get_filter_data()
+		private function _get_filter_data( $next_url_base, $next_id = 0, $widget_reference = '')
 		{
-			$data = ['status' => 'empty'];
+			$params = [];
 
 			if( $this->input->post() )
 			{
@@ -218,14 +183,13 @@ class Agents extends MY_Controller
 				$this->form_validation->set_rules($rules);
 				if( $this->form_validation->run() )
 				{
-					$data['data'] = [
+					$params = [
 						'ud_code' 			=> $this->input->post('filter_ud_code') ?? NULL,
 						'type' 				=> $this->input->post('filter_type') ?? NULL,
 						'commission_group' 	=> $this->input->post('filter_commission_group') ?? NULL,
 						'active' 			=> $this->input->post('filter_active') ?? NULL,
 						'keywords' 			=> $this->input->post('filter_keywords') ?? ''
 					];
-					$data['status'] = 'success';
 				}
 				else
 				{
@@ -237,6 +201,39 @@ class Agents extends MY_Controller
 					$this->template->json($data);
 				}
 			}
+
+			$next_id = (int)$next_id;
+			if( $next_id )
+			{
+				$params['next_id'] = $next_id;
+			}
+
+			/**
+			 * Get Search Result
+			 */
+			$records = $this->agent_model->rows($params);
+			$records = $records ? $records : [];
+			$total = count($records);
+
+			/**
+			 * Grab Next ID or Reset It
+			 */
+			if($total == $this->settings->per_page+1)
+			{
+				$next_id = $records[$total-1]->id;
+				unset($records[$total-1]); // remove last record
+			}
+			else
+			{
+				$next_id = NULL;
+			}
+
+			$data = [
+				'records' 			=> $records,
+				'widget_reference' 	=> $widget_reference,
+				'next_id'  => $next_id,
+				'next_url' => $next_id ? site_url( rtrim($next_url_base, '/\\') . '/' . $next_id  . '/' . $widget_reference ) : NULL
+			];
 			return $data;
 		}
 
@@ -264,8 +261,6 @@ class Agents extends MY_Controller
 
 	// --------------------------------------------------------------------
 
-	// --------------------------------------------------------------------
-
 	/**
 	 * Edit a Recrod
 	 *
@@ -273,8 +268,16 @@ class Agents extends MY_Controller
 	 * @param integer $id
 	 * @return void
 	 */
-	public function edit($id)
+	public function edit($id, $from_widget = 'n', $widget_reference = '')
 	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('agents', 'edit.agent') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
 		// Valid Record ?
 		$id = (int)$id;
 		$record = $this->agent_model->find($id);
@@ -284,11 +287,11 @@ class Agents extends MY_Controller
 		}
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record);
+		$json_data = $this->_save('edit', $record, $from_widget, $widget_reference);
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/agents/_form',
+		$json_data['form'] = $this->load->view('setup/agents/_form_box',
 			[
 				'form_elements' => $this->agent_model->validation_rules,
 				'record' 		=> $record
@@ -305,16 +308,24 @@ class Agents extends MY_Controller
 	 *
 	 * @return void
 	 */
-	public function add()
+	public function add($from_widget='n', $widget_reference = '')
 	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('agents', 'add.agent') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
 		$record = NULL;
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add');
+		$json_data = $this->_save('add', $record, $from_widget, $widget_reference);
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/agents/_form',
+		$json_data['form'] = $this->load->view('setup/agents/_form_box',
 			[
 				'form_elements' => $this->agent_model->validation_rules,
 				'record' 		=> $record
@@ -331,18 +342,19 @@ class Agents extends MY_Controller
 	 *
 	 * @param string $action [add|edit]
 	 * @param object|null $record Record Object or NULL
+	 * @param char 	$from_widget
+	 * @param string $widget_reference
 	 * @return array
 	 */
-	private function _save($action, $record = NULL)
+	private function _save($action, $record = NULL, $from_widget='n', $widget_reference = '')
 	{
-
-		// Valid action?
-		if( !in_array($action, array('add', 'edit')))
+		// Valid action? Valid from_widget
+		if( !in_array($action, array('add', 'edit')) || !in_array($from_widget, array('y', 'n')) )
 		{
-			return [
+			return $this->template->json([
 				'status' => 'error',
 				'message' => 'Invalid action!'
-			];
+			], 404);
 		}
 
 		/**
@@ -413,54 +425,40 @@ class Agents extends MY_Controller
 			$return_extra = [];
 			if($status === 'success' )
 			{
-				if($action === 'add')
+				$ajax_data = [
+					'message' => $message,
+					'status'  => $status,
+					'updateSection' => true,
+					'hideBootbox' => true
+				];
+
+				$record 			= $this->agent_model->find( $action === 'add' ? $done : $record->id );
+				$single_row 		=  'setup/agents/_single_row';
+				if($action === 'add' && $from_widget === 'y' )
 				{
-					// Refresh the list page and close bootbox
-					return $this->page('l', 0, [
-							'message' => $message,
-							'status'  => $status,
-							'hideBootbox' => true,
-							'updateSection' => true,
-							'updateSectionData' => [
-								'box' 		=> '#_iqb-data-list-box-agent',
-								'method' 	=> 'html'
-							],
-						]);
+					$single_row = 'setup/agents/_single_row_widget';
 				}
-				else
-				{
-					// Get Updated Record
-					$record = $this->agent_model->find($record->id);
-					$success_html = $this->load->view('setup/agents/_single_row', ['record' => $record], TRUE);
-				}
+				$html = $this->load->view($single_row, ['record' => $record, 'widget_reference' => $widget_reference], TRUE);
+				$ajax_data['updateSectionData'] = [
+					'box' 		=> $action === 'add' ? '#search-result-agent' : '#_data-row-' . $record->id,
+					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
+					'html'		=> $html
+				];
+
+				return $this->template->json($ajax_data);
 			}
 
-			$return_data = [
+			// Form
+			return $this->template->json([
 				'status' 		=> $status,
 				'message' 		=> $message,
-				'reloadForm' 	=> $status === 'error',
-				'hideBootbox' 	=> $status === 'success',
-				'updateSection' => $status === 'success',
-				'updateSectionData'	=> $status === 'success'
-										? 	[
-												'box' 	=> '#_data-row-' . $record->id,
-												'html' 	=> $success_html,
-												//
-												// How to Work with success html?
-												// Jquery Method 	html|replaceWith|append|prepend etc.
-												//
-												'method' 	=> 'replaceWith'
-											]
-										: NULL,
-				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/agents/_form',
-											[
-												'form_elements' => $this->agent_model->validation_rules,
-												'record' 		=> $record
-											], TRUE)
-									: 	null
-
-			];
+				'reloadForm' 	=> true,
+				'form' 			=> $this->load->view('setup/agents/_form',
+									[
+										'form_elements' => $this->agent_model->validation_rules,
+										'record' 		=> $record
+									], TRUE)
+			]);
 		}
 
 		return $return_data;
@@ -501,6 +499,14 @@ class Agents extends MY_Controller
 	 */
 	public function delete($id)
 	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('agents', 'delete.agent') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
 		// Valid Record ?
 		$id = (int)$id;
 		$record = $this->agent_model->find($id);

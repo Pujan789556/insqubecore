@@ -25,6 +25,16 @@ $config['DX_permissions'] = [
 	 */
 	'General Permissions' => [
 		/**
+		 * Agent Module
+		 */
+		'agents'  => [
+			'explore.agent',
+			'add.agent',
+			'edit.agent',
+			'delete.agent'
+		],
+
+		/**
 		 * Branch Module
 		 */
 		'branches'  => [
