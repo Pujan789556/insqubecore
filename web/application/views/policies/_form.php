@@ -173,7 +173,7 @@ echo form_open( $this->uri->uri_string(),
 <script type="text/javascript">
 function __do_select(a){
     var $a = $(a),
-    selectable = $a.data('selectable')
+    selectable = $a.data('selectable'),
     fields = selectable.fields,
     html = selectable.html;
 
