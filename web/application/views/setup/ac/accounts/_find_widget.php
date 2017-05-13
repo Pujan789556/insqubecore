@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						class="btn btn-success btn-round trg-dialog-edit"
 						data-box-size="large"
 						data-title='<i class="fa fa-pencil-square-o"></i> Add New Account'
-						data-url="<?php echo site_url('ac_accounts/add/y');?>"
+						data-url="<?php echo site_url('ac_accounts/add/y/' . $widget_reference);?>"
 						data-form="#__form-ac-chart-of-account"
 					><i class="ion-plus-circled"></i> Add</a>
 				<?php endif?>

@@ -20,11 +20,11 @@ $_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 		</tr>
 	</thead>
 	<tbody id="search-result-ac_party">
-	<?php
-	/**
-	 * Load Rows & Next Link (if any)
-	 */
-	$this->load->view('accounting/parties/_rows');
-	?>
+		<?php
+		/**
+		 * Load Rows & Next Link (if any)
+		 */
+		$this->load->view('accounting/parties/_rows');
+		?>
 	</tbody>
 </table>

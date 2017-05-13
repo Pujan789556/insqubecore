@@ -5,18 +5,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 $select_json = [
 	'fields' => [
-		['id' => 'ac_party-id', 'val' => $record->id],
-		['id' => 'ac_party-text', 'val' => $record->full_name]
+		['ref' => 'party_id', 'val' => $record->id],
 	],
 	'html' => [
-		['id' => '_text-ref-ac_party', 'val' => $record->full_name]
+		['ref' => '_text-ref-party', 'val' => $record->full_name]
 	]
 ];
-
 ?>
 <tr class="selectable pointer"
 	data-selectable='<?php echo json_encode($select_json)?>'
+	data-target-rowid='<?php echo $widget_reference?>'
 	title="Select this party."
+	data-toggle="tooltip"
 	onclick="__do_select(this)"
 	id="_data-row-<?php echo $record->id;?>">
 

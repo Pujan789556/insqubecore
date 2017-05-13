@@ -30,6 +30,9 @@ class Ac_parties extends MY_Controller
 			'level_1' => $this->router->class
 		]);
 
+		// Helper
+        $this->load->helper('account');
+
 		// Load Model
 		$this->load->model('ac_party_model');
 	}
@@ -60,9 +63,7 @@ class Ac_parties extends MY_Controller
 	 * @param integer $next_id
 	 * @return void
 	 */
-
-	// $layout, $from_widget, $next_id, $ajax_extra
-	function page( $layout='f', $from_widget='n', $next_id = 0, $ajax_extra = [] )
+	function page( $layout='f', $from_widget='n', $next_id = 0, $widget_reference = '' )
 	{
 		/**
 		 * Check Permissions
@@ -79,16 +80,16 @@ class Ac_parties extends MY_Controller
 
 		// DOM Data
 		$dom_data = [
-			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-ac_party', 		// List box ID
+			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-ac_party', 		// List box ID
 			'DOM_FilterFormId'		=> '_iqb-filter-form-ac_party' 			// Filter Form ID
 		];
 
 		/**
 		 * Get Search Result
 		 */
-		$data = $this->_get_filter_data( $next_url_base, $next_id );
+		$data = $this->_get_filter_data( $next_url_base, $next_id, $widget_reference );
 		$data = array_merge($data, $dom_data);
-		// echo $this->db->last_query();exit;
+
 		/**
 		 * Widget Specific Data
 		 */
@@ -104,7 +105,7 @@ class Ac_parties extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('ac_parties/page/l/' . $from_widget )
+				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')
@@ -124,11 +125,6 @@ class Ac_parties extends MY_Controller
 				'status' => 'success',
 				'html'   => $html
 			];
-
-			if( !empty($ajax_extra))
-			{
-				$ajax_data = array_merge($ajax_data, $ajax_extra);
-			}
 			$this->template->json($ajax_data);
 		}
 
@@ -191,7 +187,7 @@ class Ac_parties extends MY_Controller
 			return $filters;
 		}
 
-		private function _get_filter_data( $next_url_base, $next_id = 0)
+		private function _get_filter_data( $next_url_base, $next_id = 0, $widget_reference = '')
 		{
 			$params = [];
 
@@ -247,9 +243,10 @@ class Ac_parties extends MY_Controller
 			}
 
 			$data = [
-				'records' => $records,
+				'records' 			=> $records,
+				'widget_reference' 	=> $widget_reference,
 				'next_id'  => $next_id,
-				'next_url' => $next_id ? site_url( rtrim($next_url_base, '/\\') . '/' . $next_id ) : NULL
+				'next_url' => $next_id ? site_url( rtrim($next_url_base, '/\\') . '/' . $next_id  . '/' . $widget_reference ) : NULL
 			];
 			return $data;
 		}
@@ -281,6 +278,56 @@ class Ac_parties extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+
+	function finder( $accounting_party_type, $widget_reference )
+	{
+		/**
+		 * Valid accounting party type
+		 */
+		$dropdown_party_types = ac_party_types_dropdown(false);
+		if( !in_array($accounting_party_type, array_keys($dropdown_party_types)) )
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Invalid Party Type!'
+			], 404);
+		}
+
+		/**
+		 * We have to showcase Party Finder UI based on supplied accounting party type
+		 */
+
+		// --------------------------------------------------------------------
+
+		switch ($accounting_party_type)
+		{
+			/**
+			 * Regular Accounting Party
+			 */
+			case IQB_AC_PARTY_TYPE_GENERAL:
+				return $this->page('f', 'y', 0, $widget_reference);
+				break;
+
+
+			/**
+			 * Agent Party
+			 */
+			case IQB_AC_PARTY_TYPE_AGENT:
+				redirect('agents/page/f/y/0/' . $widget_reference);
+				break;
+
+			default:
+				# code...
+				break;
+		}
+
+
+	}
+
+
+
+
+	// --------------------------------------------------------------------
 	// CRUD - FUNCTIONS
 	// --------------------------------------------------------------------
 
@@ -291,7 +338,7 @@ class Ac_parties extends MY_Controller
 	 * @param integer $id
 	 * @return void
 	 */
-	public function edit($id, $from_widget = 'n')
+	public function edit($id, $from_widget = 'n', $widget_reference = '')
 	{
 		/**
 		 * Check Permissions
@@ -310,8 +357,7 @@ class Ac_parties extends MY_Controller
 		}
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record, $from_widget);
-
+		$json_data = $this->_save('edit', $record, $from_widget, $widget_reference);
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('accounting/parties/_form_box',
@@ -331,7 +377,7 @@ class Ac_parties extends MY_Controller
 	 *
 	 * @return void
 	 */
-	public function add( $from_widget='n' )
+	public function add( $from_widget='n', $widget_reference = '' )
 	{
 		/**
 		 * Check Permissions
@@ -344,7 +390,7 @@ class Ac_parties extends MY_Controller
 		$record = NULL;
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add', NULL, $from_widget);
+		$json_data = $this->_save('add', $record, $from_widget, $widget_reference);
 
 
 		// No form Submitted?
@@ -366,27 +412,18 @@ class Ac_parties extends MY_Controller
 	 * @param string $action [add|edit]
 	 * @param object|null $record Record Object or NULL
 	 * @param char 	$from_widget
+	 * @param string $widget_reference
 	 * @return array
 	 */
-	private function _save($action, $record = NULL, $from_widget='n')
+	private function _save($action, $record = NULL, $from_widget='n', $widget_reference = '')
 	{
-
-		// Valid action?
-		if( !in_array($action, array('add', 'edit')))
+		// Valid action? Valid from_widget
+		if( !in_array($action, array('add', 'edit')) || !in_array($from_widget, array('y', 'n')) )
 		{
-			return [
+			return $this->template->json([
 				'status' => 'error',
 				'message' => 'Invalid action!'
-			];
-		}
-
-		// Valid "from" ?
-		if( !in_array($from_widget, array('y', 'n')))
-		{
-			return [
-				'status' => 'error',
-				'message' => 'Invalid action!'
-			];
+			], 404);
 		}
 
 		/**
@@ -435,9 +472,7 @@ class Ac_parties extends MY_Controller
 				$message = 'Validation Error.';
         	}
 
-        	// Success HTML
-			$success_html = '';
-			$return_extra = [];
+
 			if($status === 'success' )
 			{
 				$ajax_data = [
@@ -447,33 +482,19 @@ class Ac_parties extends MY_Controller
 					'hideBootbox' => true
 				];
 
-				if($action === 'add')
+				$record 			= $this->ac_party_model->find( $action === 'add' ? $done : $record->id );
+				$single_row 		=  'accounting/parties/_single_row';
+				if($action === 'add' && $from_widget === 'y' )
 				{
-					$record = $this->ac_party_model->find($done);
-					$single_row = $from_widget === 'y' ? 'accounting/parties/_single_row_widget' : 'accounting/parties/_single_row';
-					$html = $this->load->view($single_row, ['record' => $record], TRUE);
-
-					$ajax_data['updateSectionData'] = [
-						'box' 		=> '#search-result-ac_party',
-						'method' 	=> 'prepend',
-						'html'		=> $html
-					];
+					$single_row = 'accounting/parties/_single_row_widget';
 				}
-				else
-				{
-					/**
-					 * Widget or Row?
-					 */
-					$record = $this->ac_party_model->find($record->id);
-					$view 	= $from_widget === 'n' ? 'accounting/parties/_single_row' : 'accounting/parties/snippets/_widget_profile';
-					$html 	= $this->load->view($view , ['record' => $record], TRUE);
+				$html = $this->load->view($single_row, ['record' => $record, 'widget_reference' => $widget_reference], TRUE);
+				$ajax_data['updateSectionData'] = [
+					'box' 		=> $action === 'add' ? '#search-result-ac_party' : '#_data-row-' . $record->id,
+					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
+					'html'		=> $html
+				];
 
-					$ajax_data['updateSectionData'] = [
-						'box' 		=> $from_widget === 'n' ? '#_data-row-ac_party-' . $record->id : '#iqb-widget-ac_party-profile',
-						'method' 	=> 'replaceWith',
-						'html'		=> $html
-					];
-				}
 				return $this->template->json($ajax_data);
 			}
 

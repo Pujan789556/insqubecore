@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						class="btn btn-success btn-round trg-dialog-edit"
 						data-box-size="large"
 						data-title='<i class="fa fa-pencil-square-o"></i> Add New Accounting Party'
-						data-url="<?php echo site_url('ac_parties/add/y');?>"
+						data-url="<?php echo site_url('ac_parties/add/y/' . $widget_reference);?>"
 						data-form="#_form-ac_party"
 					><i class="ion-plus-circled"></i> Add</a>
 				<?php endif?>

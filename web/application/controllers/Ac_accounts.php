@@ -107,7 +107,7 @@ class Ac_accounts extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('ac_accounts/page/l/' . $from_widget . '/0/' . $widget_reference )
+				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')
@@ -269,7 +269,7 @@ class Ac_accounts extends MY_Controller
 	 * @param integer $id
 	 * @return void
 	 */
-	public function edit($id)
+	public function edit($id, $from_widget = 'n', $widget_reference = '')
 	{
 		/**
 		 * Check Permissions
@@ -288,7 +288,7 @@ class Ac_accounts extends MY_Controller
 		}
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record);
+		$json_data = $this->_save('edit', $record, $from_widget, $widget_reference);
 
 
 		// No form Submitted?
@@ -309,7 +309,7 @@ class Ac_accounts extends MY_Controller
 	 *
 	 * @return void
 	 */
-	public function add($from_widget='n')
+	public function add( $from_widget='n', $widget_reference = '' )
 	{
 		/**
 		 * Check Permissions
@@ -322,8 +322,7 @@ class Ac_accounts extends MY_Controller
 		$record = NULL;
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add', $record, $from_widget);
-
+		$json_data = $this->_save('add', $record, $from_widget, $widget_reference);
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/ac/accounts/_form_box',
@@ -344,21 +343,19 @@ class Ac_accounts extends MY_Controller
 	 * @param string $action [add|edit]
 	 * @param object|null $record Record Object or NULL
 	 * @param char 	$from_widget
+	 * @param string $widget_reference
 	 * @return array
 	 */
-	private function _save($action, $record = NULL, $from_widget='n')
+	private function _save($action, $record = NULL, $from_widget='n', $widget_reference = '')
 	{
-
 		// Valid action? Valid from_widget
 		if( !in_array($action, array('add', 'edit')) || !in_array($from_widget, array('y', 'n')) )
 		{
-
 			return $this->template->json([
 				'status' => 'error',
 				'message' => 'Invalid action!'
 			], 404);
 		}
-
 
 		/**
 		 * Form Submitted?
@@ -409,9 +406,6 @@ class Ac_accounts extends MY_Controller
 				$message = 'Validation Error.';
         	}
 
-        	// Success HTML
-			$success_html = '';
-			$return_extra = [];
 			if($status === 'success' )
 			{
 				$ajax_data = [
@@ -428,7 +422,7 @@ class Ac_accounts extends MY_Controller
 				{
 					$single_row = 'setup/ac/accounts/_single_row_widget';
 				}
-				$html = $this->load->view($single_row, ['record' => $record], TRUE);
+				$html = $this->load->view($single_row, ['record' => $record, 'widget_reference' => $widget_reference], TRUE);
 				$ajax_data['updateSectionData'] = [
 					'box' 		=> $action === 'add' ? '#search-result-ac-account' : '#_data-row-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
@@ -436,75 +430,19 @@ class Ac_accounts extends MY_Controller
 				];
 
 				return $this->template->json($ajax_data);
-
-				// if($action === 'add')
-				// {
-				// 	$single_row = $from_widget === 'y' ? 'setup/ac/accounts/_single_row_widget' : 'setup/ac/accounts/_single_row';
-				// 	$html = $this->load->view($single_row, ['record' => $record], TRUE);
-				// 	$ajax_data = [
-				// 		'message' => $message,
-				// 		'status'  => $status,
-				// 		'updateSection' => true,
-				// 		'hideBootbox' 	=> true,
-				// 		'updateSectionData' => [
-				// 			'box' 		=> '#search-result-ac-account',
-				// 			'method' 	=> 'prepend',
-				// 			'html'		=> $html
-				// 		]
-				// 	];
-
-
-
-
-				// 	$record = $this->customer_model->find($done);
-				// 	$single_row = $from_widget === 'y' ? 'customers/_single_row_widget' : 'customers/_single_row';
-
-
-				// 	$ajax_data['updateSectionData'] = [
-				// 		'box' 		=> '#search-result-customer',
-				// 		'method' 	=> 'prepend',
-				// 		'html'		=> $html
-				// 	];
-
-
-				// }
-				// else
-				// {
-				// 	// Get Updated Record
-				// 	$record = $this->ac_account_model->row($record->id);
-				// 	$record->acg_path = $this->ac_account_group_model->get_path($record->account_group_id);
-				// 	$success_html = $this->load->view('setup/ac/accounts/_single_row', ['record' => $record], TRUE);
-				// 	$ajax_data = [
-				// 		'message' => $message,
-				// 		'status'  => $status,
-				// 		'updateSection' => true,
-				// 		'hideBootbox' => true
-				// 	];
-				// 	$ajax_data['updateSectionData'] = [
-				// 		'box' 		=> '#_data-row-' . $record->id,
-				// 		'method' 	=> 'replaceWith',
-				// 		'html'		=> $success_html
-				// 	];
-
-				// }
 			}
-			else
-			{
-				$return_data = [
-					'status' 		=> $status,
-					'message' 		=> $message,
-					'reloadForm' 	=> true,
-					'hideBootbox' 	=> false,
-					'updateSection' => false,
-					'updateSectionData'	=> NULL,
-					'form' 	  		=> $this->load->view('setup/ac/accounts/_form',
-												[
-													'form_elements' => $rules,
-													'record' 		=> $record
-												], TRUE)
 
-				];
-			}
+			// Form
+			return $this->template->json([
+				'status' 		=> $status,
+				'message' 		=> $message,
+				'reloadForm' 	=> true,
+				'form' 			=> $this->load->view('setup/ac/accounts/_form',
+									[
+										'form_elements' => $rules,
+										'record' 		=> $record
+									], TRUE)
+			]);
 		}
 
 		return $return_data;
