@@ -84,6 +84,16 @@ $config['DX_permissions'] = [
 			'explore.district',
 			'edit.district'
 		],
+
+		/**
+		 * Surveyor Module
+		 */
+		'surveyors'  => [
+			'explore.surveyor',
+			'add.surveyor',
+			'edit.surveyor',
+			'delete.surveyor'
+		],
 	],
 
 	/**

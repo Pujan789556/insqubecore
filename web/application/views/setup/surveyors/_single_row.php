@@ -5,7 +5,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
-	<td><?php echo $record->id;?></td>
+	<?php if( $this->dx_auth->is_admin() ): ?>
+		<td><?php echo $record->id;?></td>
+	<?php endif?>
 	<td>
 		<a href="<?php echo site_url('surveyors/details/' . $record->id);?>"
 						title="View agent details.">
@@ -39,11 +41,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						data-form=".form-iqb-general">
 						<i class="fa fa-pencil-square-o"></i>
 						<span>Edit Surveyor Info</span></a>
-				</li>
+				</li><li class="divider"></li>
 
 
 				<?php if(safe_to_delete( 'Surveyor_model', $record->id )):?>
-					<li class="divider"></li>
 					<li>
 						<a href="#"
 							title="Delete"
@@ -52,8 +53,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							data-url="<?php echo site_url('surveyors/delete/' . $record->id);?>">
 								<i class="fa fa-trash-o"></i>
 								<span>Delete</span></a>
-					</li>
-					<li class="divider"></li>
+					</li><li class="divider"></li>
 				<?php endif?>
 
 				<li>
@@ -64,16 +64,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</li>
 			</ul>
 		</div>
-
-
-
-
-
-
-
-
-
-
-
 	</td>
 </tr>

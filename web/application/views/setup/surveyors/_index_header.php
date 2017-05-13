@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					data-size="large"
 					data-title='<i class="fa fa-pencil-square-o"></i> Add New Surveyor'
 					data-url="<?php echo site_url('surveyors/add/');?>"
-					data-form=".form-iqb-general"
+					data-form="#_form-surveyor"
 				><i class="ion-plus-circled"></i> Add</a>
 
 				<a href="javascript:;"

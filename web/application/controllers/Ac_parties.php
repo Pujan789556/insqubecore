@@ -322,6 +322,13 @@ class Ac_parties extends MY_Controller
 				redirect('companies/page/f/y/0/' . $widget_reference);
 				break;
 
+			/**
+			 * Surveyors
+			 */
+			case IQB_AC_PARTY_TYPE_SURVEYOR:
+				redirect('surveyors/page/f/y/0/' . $widget_reference);
+				break;
+
 			default:
 				# code...
 				break;
