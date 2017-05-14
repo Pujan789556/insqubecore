@@ -229,7 +229,7 @@ class Objects extends MY_Controller
 	                '_id'       => 'filter-portfolio',
 	                '_type'     => 'dropdown',
 	                '_default' 	=> $portfolio_id,
-	                '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_parent(),
+	                '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_children_tree(),
 	            ],
 	            [
 					'field' => 'filter_keywords',
