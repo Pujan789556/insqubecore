@@ -56,6 +56,36 @@ class Fy_quarter_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Get Quarter for Given Fiscal year's Date
+     *
+     * @param type $date
+     * @return type
+     */
+    public function get_quarter_by_date($date)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'fy_quarter_' . date('Ymd', strtotime($date));
+        $record = $this->get_cache($cache_name);
+        if(!$record)
+        {
+            $where = [
+                'Q.starts_at <=' => $date,
+                'Q.ends_at >=' => $date
+            ];
+            $record = $this->db->select('Q.id, Q.fiscal_yr_id, Q.quarter, Q.starts_at, Q.ends_at')
+                            ->from($this->table_name . ' as Q')
+                            ->where($where)
+                            ->get()->row();
+            $this->write_cache($record, $cache_name, CACHE_DURATION_DAY);
+        }
+        return $record;
+    }
+
+    // ----------------------------------------------------------------
+
     public function get_by_fiscal_year( $fiscal_yr_id )
     {
         /**
