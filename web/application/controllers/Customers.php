@@ -64,35 +64,33 @@ class Customers extends MY_Controller
 	 * @param integer $next_id
 	 * @return void
 	 */
-
-	// $layout, $from_widget, $next_id, $ajax_extra
-	function page( $layout='f', $from_widget='n', $next_id = 0, $ajax_extra = [] )
+	function page( $layout='f', $from_widget='n', $next_id = 0, $widget_reference = '' )
 	{
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('customers', 'explore.customer') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'explore.ac_party') )
 		{
 			$this->dx_auth->deny_access();
 		}
 
 
 		// If request is coming from refresh method, reset nextid
-		$next_id = (int)$next_id;
-		$next_url_base = 'customers/page/r/'.$from_widget;
+		$next_id 		= (int)$next_id;
+		$next_url_base 	= $this->router->class . '/page/r/' . $from_widget;
 
 		// DOM Data
 		$dom_data = [
-			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-customer', 		// List box ID
+			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-customer', 		// List box ID
 			'DOM_FilterFormId'		=> '_iqb-filter-form-customer' 			// Filter Form ID
 		];
 
 		/**
 		 * Get Search Result
 		 */
-		$data = $this->_get_filter_data( $next_url_base, $next_id );
+		$data = $this->_get_filter_data( $next_url_base, $next_id, $widget_reference );
 		$data = array_merge($data, $dom_data);
-		// echo $this->db->last_query();exit;
+
 		/**
 		 * Widget Specific Data
 		 */
@@ -108,7 +106,7 @@ class Customers extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('customers/page/l/' . $from_widget )
+				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/0/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')
@@ -128,11 +126,6 @@ class Customers extends MY_Controller
 				'status' => 'success',
 				'html'   => $html
 			];
-
-			if( !empty($ajax_extra))
-			{
-				$ajax_data = array_merge($ajax_data, $ajax_extra);
-			}
 			$this->template->json($ajax_data);
 		}
 
@@ -150,7 +143,6 @@ class Customers extends MY_Controller
 
 		private function _get_filter_elements()
 		{
-			$select = ['' => 'Select ...'];
 			$filters = [
 				[
 	                'field' => 'filter_type',
@@ -201,7 +193,7 @@ class Customers extends MY_Controller
 			return $filters;
 		}
 
-		private function _get_filter_data( $next_url_base, $next_id = 0)
+		private function _get_filter_data( $next_url_base, $next_id = 0, $widget_reference = '')
 		{
 			$params = [];
 
@@ -258,9 +250,10 @@ class Customers extends MY_Controller
 			}
 
 			$data = [
-				'records' => $records,
+				'records' 			=> $records,
+				'widget_reference' 	=> $widget_reference,
 				'next_id'  => $next_id,
-				'next_url' => $next_id ? site_url( rtrim($next_url_base, '/\\') . '/' . $next_id ) : NULL
+				'next_url' => $next_id ? site_url( rtrim($next_url_base, '/\\') . '/' . $next_id  . '/' . $widget_reference ) : NULL
 			];
 			return $data;
 		}
@@ -276,7 +269,7 @@ class Customers extends MY_Controller
 	 */
 	function refresh()
 	{
-		$this->page('l', 'n');
+		$this->page('l');
 	}
 
 	// --------------------------------------------------------------------
@@ -288,7 +281,7 @@ class Customers extends MY_Controller
 	 */
 	function filter()
 	{
-		$this->page('l', 'n');
+		$this->page('l');
 	}
 
 	// --------------------------------------------------------------------
@@ -302,7 +295,7 @@ class Customers extends MY_Controller
 	 * @param integer $id
 	 * @return void
 	 */
-	public function edit($id, $from_widget = 'n')
+	public function edit($id, $from_widget = 'n', $widget_reference = '')
 	{
 		/**
 		 * Check Permissions
@@ -321,7 +314,7 @@ class Customers extends MY_Controller
 		}
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record, $from_widget);
+		$json_data = $this->_save('edit', $record, $from_widget, $widget_reference);
 
 
 		// No form Submitted?
@@ -342,7 +335,7 @@ class Customers extends MY_Controller
 	 *
 	 * @return void
 	 */
-	public function add( $from_widget='n' )
+	public function add( $from_widget='n', $widget_reference = '' )
 	{
 		/**
 		 * Check Permissions
@@ -355,8 +348,7 @@ class Customers extends MY_Controller
 		$record = NULL;
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add', $record, $from_widget);
-
+		$json_data = $this->_save('add', $record, $from_widget, $widget_reference);
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('customers/_form_box',
@@ -377,9 +369,10 @@ class Customers extends MY_Controller
 	 * @param string $action [add|edit]
 	 * @param object|null $record Record Object or NULL
 	 * @param char 	$from_widget
+	 * @param string $widget_reference
 	 * @return array
 	 */
-	private function _save($action, $record = NULL, $from_widget='n')
+	private function _save($action, $record = NULL, $from_widget='n', $widget_reference = '')
 	{
 
 		// Valid action?
@@ -463,9 +456,6 @@ class Customers extends MY_Controller
 				$message = 'Validation Error.';
         	}
 
-        	// Success HTML
-			$success_html = '';
-			$return_extra = [];
 			if($status === 'success' )
 			{
 				$ajax_data = [
@@ -475,33 +465,25 @@ class Customers extends MY_Controller
 					'hideBootbox' => true
 				];
 
-				if($action === 'add')
+				$record 			= $this->customer_model->find( $action === 'add' ? $done : $record->id );
+				$single_row 		=  'customers/_single_row';
+				if($action === 'add' && $from_widget === 'y' )
 				{
-					$record = $this->customer_model->find($done);
-					$single_row = $from_widget === 'y' ? 'customers/_single_row_widget' : 'customers/_single_row';
-					$html = $this->load->view($single_row, ['record' => $record], TRUE);
-
-					$ajax_data['updateSectionData'] = [
-						'box' 		=> '#search-result-customer',
-						'method' 	=> 'prepend',
-						'html'		=> $html
-					];
+					$single_row = 'customers/_single_row_widget';
 				}
-				else
+				else if($action === 'edit' && $from_widget === 'y' )
 				{
-					/**
-					 * Widget or Row?
-					 */
-					$record = $this->customer_model->find($record->id);
-					$view 	= $from_widget === 'n' ? 'customers/_single_row' : 'customers/snippets/_widget_profile';
-					$html 	= $this->load->view($view , ['record' => $record], TRUE);
-
-					$ajax_data['updateSectionData'] = [
-						'box' 		=> $from_widget === 'n' ? '#_data-row-customer-' . $record->id : '#iqb-widget-customer-profile',
-						'method' 	=> 'replaceWith',
-						'html'		=> $html
-					];
+					$single_row = 'customers/snippets/_widget_profile';
 				}
+				$html = $this->load->view($single_row, ['record' => $record, 'widget_reference' => $widget_reference], TRUE);
+				$ajax_data['updateSectionData'] = [
+					'box' 		=> $action === 'add'
+										? '#search-result-customer'
+										: ( $from_widget === 'n' ? '#_data-row-customer-' . $record->id : '#iqb-widget-customer-profile' ),
+					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
+					'html'		=> $html
+				];
+
 				return $this->template->json($ajax_data);
 			}
 

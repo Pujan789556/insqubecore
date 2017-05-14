@@ -323,6 +323,13 @@ class Ac_parties extends MY_Controller
 				break;
 
 			/**
+			 * Customers
+			 */
+			case IQB_AC_PARTY_TYPE_CUSTOMER:
+				redirect('customers/page/f/y/0/' . $widget_reference);
+				break;
+
+			/**
 			 * Surveyors
 			 */
 			case IQB_AC_PARTY_TYPE_SURVEYOR:
