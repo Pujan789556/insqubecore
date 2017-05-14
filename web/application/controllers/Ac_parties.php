@@ -48,7 +48,7 @@ class Ac_parties extends MY_Controller
 	 */
 	function index()
 	{
-		$this->page();
+		$this->explore();
 	}
 
 
@@ -75,8 +75,8 @@ class Ac_parties extends MY_Controller
 
 
 		// If request is coming from refresh method, reset nextid
-		$next_id = (int)$next_id;
-		$next_url_base = 'ac_parties/page/r/'.$from_widget;
+		$next_id 		= (int)$next_id;
+		$next_url_base 	= $this->router->class . '/page/r/' . $from_widget;
 
 		// DOM Data
 		$dom_data = [
@@ -501,7 +501,7 @@ class Ac_parties extends MY_Controller
 				}
 				$html = $this->load->view($single_row, ['record' => $record, 'widget_reference' => $widget_reference], TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add' ? '#search-result-ac_party' : '#_data-row-' . $record->id,
+					'box' 		=> $action === 'add' ? '#search-result-ac_party' : '#_data-row-ac_party-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
 				];

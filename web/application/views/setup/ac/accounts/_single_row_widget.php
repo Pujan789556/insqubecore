@@ -4,6 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Chart of Account:  Single Row Widget
 */
 
+// ------------------------------------------------------------------------------
+
 $group_path = [];
 if( count($record->acg_path) > 2 )
 {
@@ -23,18 +25,36 @@ $group_path_selectable[] = '<strong>' . $record->name . '</strong>';
 $group_path_str = implode('<i class="fa fa-angle-right text-bold text-red" style="margin:0 5px;"></i>', $group_path);
 $selectable_path_str = implode('<i class="fa fa-angle-right text-bold text-red" style="margin:0 5px;"></i>', $group_path_selectable);
 
-$select_json = [
-	'fields' => [
-		['ref' => 'account_id', 'val' => $record->id],
-	],
-	'html' => [
-		['ref' => '_text-ref-account', 'val' => $selectable_path_str]
-	]
-];
+// ------------------------------------------------------------------------------
+
+/**
+ * Extract Widget Data
+ */
+$widget_data 	= explode(':', $widget_reference); // target-row-id:widget_type
+$target_row_id 	= $widget_data[0];
+$widget_type 	= $widget_data[1];
+
+
+/**
+ * Build Seletable JSON based on widget type
+ */
+$select_json = [];
+if($widget_type === 'account')
+{
+	$select_json = [
+		'fields' => [
+			['ref' => 'account_id', 'val' => $record->id],
+		],
+		'html' => [
+			['ref' => '_text-ref-account', 'val' => $selectable_path_str]
+		]
+	];
+}
+
 ?>
 <tr class="selectable pointer"
 	data-selectable='<?php echo json_encode($select_json)?>'
-	data-target-rowid='<?php echo $widget_reference?>'
+	data-target-rowid='<?php echo $target_row_id?>'
 	title="Select this account."
 	data-toggle="tooltip"
 	onclick="__do_select(this)"

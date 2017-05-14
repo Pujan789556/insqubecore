@@ -3,18 +3,36 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Accounting Parties:  Single Row
 */
-$select_json = [
-	'fields' => [
-		['ref' => 'party_id', 'val' => $record->id],
-	],
-	'html' => [
-		['ref' => '_text-ref-party', 'val' => $record->full_name]
-	]
-];
+
+// ------------------------------------------------------------------------------
+
+/**
+ * Extract Widget Data
+ */
+$widget_data 	= explode(':', $widget_reference); // target-row-id:widget_type
+$target_row_id 	= $widget_data[0];
+$widget_type 	= $widget_data[1];
+
+
+/**
+ * Build Seletable JSON based on widget type
+ */
+$select_json = [];
+if($widget_type === 'party')
+{
+	$select_json = [
+		'fields' => [
+			['ref' => 'party_id', 'val' => $record->id],
+		],
+		'html' => [
+			['ref' => '_text-ref-party', 'val' => $record->full_name]
+		]
+	];
+}
 ?>
 <tr class="selectable pointer"
 	data-selectable='<?php echo json_encode($select_json)?>'
-	data-target-rowid='<?php echo $widget_reference?>'
+	data-target-rowid='<?php echo $target_row_id?>'
 	title="Select this party."
 	data-toggle="tooltip"
 	onclick="__do_select(this)"

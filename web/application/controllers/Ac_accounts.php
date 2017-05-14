@@ -18,12 +18,6 @@ class Ac_accounts extends MY_Controller
 	{
 		parent::__construct();
 
-		// // Only Admin Can access this controller
-		// if( !$this->dx_auth->is_admin() )
-		// {
-		// 	$this->dx_auth->deny_access();
-		// }
-
 		// Form Validation
 		$this->load->library('Form_validation');
 
@@ -77,7 +71,7 @@ class Ac_accounts extends MY_Controller
 
 		// If request is coming from refresh method, reset nextid
 		$next_id 		= (int)$next_id;
-		$next_url_base 	= 'ac_accounts/page/r/' . $from_widget;
+		$next_url_base 	= $this->router->class . '/page/r/' . $from_widget;
 
 		// DOM Data
 		$dom_data = [
