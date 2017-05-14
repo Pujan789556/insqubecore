@@ -15,10 +15,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					title="Add New Voucher"
 					data-toggle="tooltip"
 					class="btn btn-success btn-round trg-dialog-edit"
-					data-size="large"
+					data-box-size="full-width"
 					data-title='<i class="fa fa-pencil-square-o"></i> Add New Voucher'
 					data-url="<?php echo site_url($this->router->class . '/add/');?>"
-					data-form=".form-iqb-general"
+					data-form="#__form-ac-voucher"
 				><i class="ion-plus-circled"></i> Add</a>
 
 				<a href="javascript:;"

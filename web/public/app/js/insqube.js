@@ -469,7 +469,7 @@ $( document ).ajaxError(function( event, request, settings ) {
 
                 $('.bootbox[role="dialog"]').on("show.bs.modal", function() {
 
-                    console.log('hello');
+                    // console.log('hello');
                 });
 
                 // Post modal Shown Tasks
