@@ -10,7 +10,8 @@ class Ac_voucher_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    protected $after_insert  = ['clear_cache'];
+    protected $before_insert = ['before_insert__defaults'];
+    protected $after_insert  = ['after_insert__defaults', 'clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
@@ -40,7 +41,7 @@ class Ac_voucher_model extends MY_Model
         $this->load->helper('account');
 
         // Set validation rule
-        $this->load->model('ac_account_group_model');
+        $this->load->model('ac_voucher_detail_model');
         $this->load->model('ac_voucher_type_model');
         $this->validation_rules();
     }
@@ -134,7 +135,7 @@ class Ac_voucher_model extends MY_Model
                         '_show_label' => false,
                         '_type'     => 'dropdown',
                         '_data'     => IQB_BLANK_SELECT + $dropdown_party_types,
-                        '_extra_attributes' => 'data-field="party_type"',
+                        '_extra_attributes' => 'data-field="party_type" onchange="__reset_party(this)"',
                         '_required' => false
                     ],
                     [
@@ -183,7 +184,7 @@ class Ac_voucher_model extends MY_Model
                         '_show_label' => false,
                         '_type'     => 'dropdown',
                         '_data'     => IQB_BLANK_SELECT + $dropdown_party_types,
-                        '_extra_attributes' => 'data-field="party_type"',
+                        '_extra_attributes' => 'data-field="party_type" onchange="__reset_party(this)"',
                         '_required' => false
                     ],
                     [
@@ -215,6 +216,11 @@ class Ac_voucher_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Get Validation Rules Formatted
+     *
+     * @return array
+     */
     public function validation_rules_formatted()
     {
         $v_rules         = $this->_v_rules_basic();
@@ -226,6 +232,190 @@ class Ac_voucher_model extends MY_Model
         }
 
         return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Add New Voucher
+     *
+     * All transactions must be carried out, else rollback.
+     * The following tasks are carried during Treaty Setup:
+     *      a. Insert Master Record, Update Voucher Code
+     *      b. Insert Voucher Details - Debit, Credit
+     *
+     * @param array $data
+     * @return mixed
+     */
+    public function add($data)
+    {
+
+        /**
+         * Prepare Master Record Data
+         */
+        $master_data = [
+            'voucher_date'      => $data['voucher_date'],
+            'voucher_type_id'   => $data['voucher_type_id'],
+            'narration'         => $data['narration'],
+            'flag_internal'     => $data['flag_internal']
+        ];
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Debit Rows
+         */
+        $accounts       = $data['account_id']['dr'];
+        $party_types    = $data['party_type']['dr'];
+        $party_ids      = $data['party_id']['dr'];
+        $amounts        = $data['amount']['dr'];
+        $count_dr       = count($accounts);
+
+        $batch_data_details = [];
+        for($i = 0; $i < $count_dr; $i++)
+        {
+            // Both Party Type and Party ID must be Supplied else nullify them!
+            $party_type = $party_types[$i] ? $party_types[$i] : NULL;
+            $party_id   = $party_ids[$i] ? $party_ids[$i] : NULL;
+            if( $party_type == NULL || $party_id == NULL )
+            {
+                $party_type = NULL;
+                $party_id   = NULL;
+            }
+
+            $batch_data_details[] = [
+                'sno'           => $i+1,
+                'flag_type'     => IQB_AC_DEBIT,
+                'account_id'    => $accounts[$i],
+                'party_type'    => $party_type,
+                'party_id'      => $party_id,
+                'amount'        => $amounts[$i]
+            ];
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Credit Rows
+         */
+        $accounts       = $data['account_id']['cr'];
+        $party_types    = $data['party_type']['cr'];
+        $party_ids      = $data['party_id']['cr'];
+        $amounts        = $data['amount']['cr'];
+        $count_dr       = count($accounts);
+        for($i = 0; $i < $count_dr; $i++)
+        {
+            $batch_data_details[] = [
+                'sno'           => $i+1,
+                'flag_type'     => IQB_AC_CREDIT,
+                'account_id'    => $accounts[$i],
+                'party_type'    => $party_types[$i] ? $party_types[$i] : NULL,
+                'party_id'      => $party_ids[$i] ? $party_ids[$i] : NULL,
+                'amount'        => $amounts[$i]
+            ];
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * !!! IMPORTANT
+         *
+         * We do not use transaction here as we may lost the voucher id autoincrement.
+         * We simply use try catch block.
+         */
+
+        $id = parent::insert($master_data, TRUE);
+
+        if( $id )
+        {
+            // Insert Batch Broker Data
+            $this->ac_voucher_detail_model->batch_insert($id, $batch_data_details);
+
+            // Log Activity
+            $this->log_activity($id, 'C');
+        }
+        else
+        {
+            throw new Exception("Exception [Model: Ac_voucher_model][Method: add()]: Could not insert record.");
+        }
+
+        // return result/status
+        return $id;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Before Insert Trigger
+     *
+     * Tasks carried
+     *      2. Add Draft Voucher Code (Random Characters)
+     *      3. Add Branch ID
+     *      4. Add Fiscal Year ID
+     *      5. Add Fiscal Year Quarter
+     *
+     * @param array $data
+     * @return array
+     */
+    public function before_insert__defaults($data)
+    {
+        $this->load->library('Token');
+        $fy_record  = $this->fiscal_year_model->get_fiscal_year($data['voucher_date']);
+        $fy_quarter = $this->fy_quarter_model->get_quarter_by_date($data['voucher_date']);
+
+        // Voucher Code
+        $data['voucher_code']      = strtoupper($this->token->generate(10));
+
+        // Branch ID
+        $data['branch_id']      = $this->dx_auth->get_branch_id();
+
+        // Fiscal Year
+        $data['fiscal_yr_id'] = $fy_record->id;
+
+        // Fiscal Year Quarter
+        $data['fy_quarter'] = $fy_quarter->quarter;
+
+        return $data;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * After Insert Trigger
+     *
+     * Tasks that are to be performed after policy is created are
+     *      1. Generate and Update Voucher Code
+     *
+     * @param array $arr_record
+     * @return array
+     */
+    public function after_insert__defaults($arr_record)
+    {
+        /**
+         * Data Structure
+         *
+            Array
+            (
+                [id] => 11
+                [fields] => Array
+                    (
+                        [voucher_code] => 6
+                        [branch_id] => 6
+                        [fiscal_yr_id] => x
+                        ...
+                    )
+                [method] => insert
+            )
+        */
+        $id = $arr_record['id'] ?? NULL;
+
+        if($id !== NULL)
+        {
+            $params     = [$id, $this->dx_auth->get_user_id()];
+            $sql        = "SELECT `f_generate_voucher_number`(?, ?) AS voucher_code";
+            return mysqli_store_procedure('select', $sql, $params);
+        }
+        return FALSE;
     }
 
     // ----------------------------------------------------------------
@@ -323,7 +513,7 @@ class Ac_voucher_model extends MY_Model
     {
         $this->db->select(
                         // Voucher Table
-                        'V.id, V.code, V.voucher_date, ' .
+                        'V.id, V.voucher_code, V.voucher_date, ' .
 
                         // Voucher Type Table
                         'VT.name AS voucher_type_name, ' .
@@ -382,7 +572,7 @@ class Ac_voucher_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module'    => 'ac_account',
+            'module'    => 'ac_voucher',
             'module_id' => $id,
             'action'    => $action
         ];

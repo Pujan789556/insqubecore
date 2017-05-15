@@ -334,3 +334,14 @@ defined('IQB_AC_PARTY_TYPES')    	OR define('IQB_AC_PARTY_TYPES', 	[
 	IQB_AC_PARTY_TYPE_COMPANY				=> 'Company',
 	IQB_AC_PARTY_TYPE_SURVEYOR				=> 'Surveyor'
 ]);
+
+
+// DEBIT/CREDIT CONSTANTS
+defined('IQB_AC_DEBIT') 	OR define('IQB_AC_DEBIT',	'D');
+defined('IQB_AC_CREDIT') 	OR define('IQB_AC_CREDIT',	'C');
+
+
+
+
+
+

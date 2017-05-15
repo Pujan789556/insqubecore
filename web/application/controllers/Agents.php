@@ -420,10 +420,7 @@ class Agents extends MY_Controller
 				$message = 'Validation Error.';
         	}
 
-        	// Success HTML
-			$success_html = '';
-			$return_extra = [];
-			if($status === 'success' )
+        	if($status === 'success' )
 			{
 				$ajax_data = [
 					'message' => $message,

@@ -32,7 +32,7 @@ class Ac_vouchers extends MY_Controller
 		]);
 
 		// Load Model
-		// $this->load->model('ac_account_group_model');
+		$this->load->model('ac_account_group_model');
 		$this->load->model('ac_voucher_model');
 	}
 
@@ -56,7 +56,7 @@ class Ac_vouchers extends MY_Controller
 	 * @param integer $next_id
 	 * @return void
 	 */
-	public function page( $layout='f', $next_id = 0,  $ajax_extra = [], $do_filter = TRUE )
+	public function page( $layout='f', $next_id = 0,  $do_filter = TRUE )
 	{
 		/**
 		 * Check Permissions
@@ -66,14 +66,11 @@ class Ac_vouchers extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
-		/**
-		 * NO AJAX ??
-		 * 	Render the Explorer
-		 */
-		if ( !$this->input->is_ajax_request() )
-		{
-			return $this->_page_default();
-		}
+		// dom data
+		$dom_data = [
+			'DOM_DataListBoxId'	=> '_iqb-data-list-box-ac-voucher', 	// List box ID
+			'DOM_FilterFormId'	=> '_iqb-filter-form-ac-voucher', 		// Filter Form ID
+		];
 
 		// If request is coming from refresh method, reset nextid
 		$next_id = (int)$next_id;
@@ -97,18 +94,6 @@ class Ac_vouchers extends MY_Controller
 		$records = $records ? $records : [];
 		$total = count($records);
 
-		/**
-		 * Account Group Paths
-		 */
-		if($total)
-		{
-			foreach($records as &$record)
-			{
-				$path = $this->ac_account_group_model->get_path($record->account_group_id);
-				$record->acg_path = $path;
-			}
-		}
-
 
 		/**
 		 * Grab Next ID or Reset It
@@ -127,7 +112,7 @@ class Ac_vouchers extends MY_Controller
 			'records' => $records,
 			'next_id' => $next_id,
 			'next_url' => $next_id ? site_url( 'ac_vouchers/page/r/' . $next_id ) : NULL
-		];
+		] + $dom_data;
 
 		/**
 		 * Find View
@@ -150,46 +135,31 @@ class Ac_vouchers extends MY_Controller
 			$view = 'accounting/vouchers/_rows';
 		}
 
-
-		$html = $this->load->view($view, $data, TRUE);
-		$ajax_data = [
-			'status' => 'success',
-			'html'   => $html
-		];
-
-		if( !empty($ajax_extra))
+		if ( $this->input->is_ajax_request() )
 		{
-			$ajax_data = array_merge($ajax_data, $ajax_extra);
+			$html = $this->load->view($view, $data, TRUE);
+			$ajax_data = [
+				'status' => 'success',
+				'html'   => $html
+			];
+			$this->template->json($ajax_data);
 		}
-		$this->template->json($ajax_data);
+
+		$this->template
+					->set_layout('layout-advanced-filters')
+					->partial(
+						'content_header',
+						'accounting/vouchers/_index_header',
+						['content_header' => 'Manage Vouchers'] + $data)
+					->partial('content', 'accounting/vouchers/_index', $data)
+					->render($this->data);
 	}
 
-		public function _page_default(  )
-		{
-			$data = [
-				'DOM_DataListBoxId'	=> '_iqb-data-list-box-ac-voucher', 	// List box ID
-				'DOM_FilterFormId'	=> '_iqb-filter-form-ac-voucher', 		// Filter Form ID
-				'records' 			=> [],
-				'next_id' 			=> NULL,
-				'next_url' 			=> NULL,
-				'filters' 			=> $this->_get_filter_elements(),
-				'filter_url' 		=> site_url('ac_vouchers/page/l/' )
-			];
-			$this->template
-							->set_layout('layout-advanced-filters')
-							->partial(
-								'content_header',
-								'accounting/vouchers/_index_header',
-								['content_header' => 'Manage Vouchers'] + $data)
-							->partial('content', 'accounting/vouchers/_index', $data)
-							->render($this->data);
-		}
 
 		private function _get_filter_elements()
 		{
 			$this->load->model('branch_model');
 			$dropdown_branch 		 = $this->branch_model->dropdown();
-			$dropdwon_account_groups = $this->ac_account_group_model->dropdown_tree();
 			$filters = [
 				[
 	                'field' => 'filter_branch_id',
@@ -314,6 +284,12 @@ class Ac_vouchers extends MY_Controller
 	 */
 	public function edit($id)
 	{
+		return $this->template->json([
+				'status' => 'error',
+				'message' => '@TODO - Please update edit function.'
+			], 404);
+
+
 		// Valid Record ?
 		$id = (int)$id;
 		$record = $this->ac_voucher_model->find($id);
@@ -374,7 +350,6 @@ class Ac_vouchers extends MY_Controller
 	 */
 	private function _save($action, $record = NULL)
 	{
-
 		// Valid action?
 		if( !in_array($action, array('add', 'edit')))
 		{
@@ -398,30 +373,32 @@ class Ac_vouchers extends MY_Controller
 			$this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
-
-        		// @TODO - SAVE VOUCHER
-        		$this->template->json([
-					'status' => 'error',
-					'message' => '@TODO - PLEASE UPDATE VOUCHER SAVE!'
-				], 404);
-
         		$data = $this->input->post();
-
-        		// Active/Inactive
-        		$data['active'] = $data['active'] ?? 0;
+        		// echo '<pre>'; print_r($data);exit;
 
         		// Insert or Update?
 				if($action === 'add')
 				{
-					$done = $this->ac_voucher_model->insert($data, TRUE); // No Validation on Model
+					$data['flag_internal'] = IQB_FLAG_OFF;
 
-					// Activity Log
-					$done ? $this->ac_voucher_model->log_activity($done, 'C'): '';
+					try {
+
+						$done = $this->ac_voucher_model->add($data);
+
+					} catch (Exception $e) {
+
+						return $this->template->json([
+							'status' => $status,
+							'message' => $e->getMessage()
+						]);
+					}
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->ac_voucher_model->update($record->id, $data, TRUE) && $this->ac_voucher_model->log_activity($record->id, 'E');
+					// $done = $this->ac_voucher_model->update($record->id, $data, TRUE) && $this->ac_voucher_model->log_activity($record->id, 'E');
+
+					$done = false;
 				}
 
 	        	if(!$done)
@@ -438,71 +415,38 @@ class Ac_vouchers extends MY_Controller
         	else
         	{
         		$status = 'error';
-				$message = 'Validation Error.';
-				return $this->template->json([
-					'status' => $status,
-					'message' => validation_errors()
-				]);
+        		$message = validation_errors();
+
         	}
 
-        	// Success HTML
-			$success_html = '';
-			$return_extra = [];
-			if($status === 'success' )
+        	if($status === 'success' )
 			{
-				if($action === 'add')
-				{
-					// Refresh the list page and close bootbox
-					return $this->page('l', 0, [
-							'message' => $message,
-							'status'  => $status,
-							'hideBootbox' => true,
-							'updateSection' => true,
-							'updateSectionData' => [
-								'box' 		=> '#_iqb-data-list-box-ac-voucher',
-								'method' 	=> 'html'
-							]
-						], FALSE);
-				}
-				else
-				{
-					// Get Updated Record
-					$record = $this->ac_voucher_model->row($record->id);
-					$record->acg_path = $this->ac_account_group_model->get_path($record->account_group_id);
-					$success_html = $this->load->view('accounting/vouchers/_single_row', ['record' => $record], TRUE);
-					$ajax_data = [
-						'message' => $message,
-						'status'  => $status,
-						'updateSection' => true,
-						'hideBootbox' => true
-					];
-					$ajax_data['updateSectionData'] = [
-						'box' 		=> '#_data-row-' . $record->id,
-						'method' 	=> 'replaceWith',
-						'html'		=> $success_html
-					];
-					return $this->template->json($ajax_data);
-				}
+				$ajax_data = [
+					'message' => $message,
+					'status'  => $status,
+					'updateSection' => true,
+					'hideBootbox' => true
+				];
+
+				$record 		= $this->ac_voucher_model->row($action === 'add' ? $done : $record->id);
+				$single_row 	=  'accounting/vouchers/_single_row';
+				$html = $this->load->view($single_row, ['record' => $record], TRUE);
+				$ajax_data['updateSectionData'] = [
+					'box' 		=> $action === 'add' ? '#search-result-voucher' : '#_data-row-' . $record->id,
+					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
+					'html'		=> $html
+				];
+
+				return $this->template->json($ajax_data);
 			}
 			else
 			{
-				$return_data = [
-					'status' 		=> $status,
-					'message' 		=> $message,
-					'reloadForm' 	=> true,
-					'hideBootbox' 	=> false,
-					'updateSection' => false,
-					'updateSectionData'	=> NULL,
-					'form' 	  		=> $this->load->view('accounting/vouchers/_form',
-												[
-													'form_elements' => $rules,
-													'record' 		=> $record
-												], TRUE)
-
-				];
+				return $this->template->json([
+					'status' => $status,
+					'message' => $message
+				]);
 			}
 		}
-
 		return $return_data;
 	}
 

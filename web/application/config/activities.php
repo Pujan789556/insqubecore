@@ -63,6 +63,17 @@ $config['insqb_activity_types'] = [
 			'D' => 'deleted'
 	]],
 
+	/**
+	 * Activities related to Account Voucher
+	 */
+	'ac_voucher' => [
+		'_uri' => 'ac_vouchers/',
+		'_table' => 'ac_vouchers',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited'
+	]],
+
 
 	/**
 	 * Activities related to Agent

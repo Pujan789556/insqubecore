@@ -252,6 +252,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         });
     }
 
+    // Reset Party
+    function __reset_party(a)
+    {
+        var $this       = $(a),
+            rowId       = $this.closest('tr').attr('id');
+
+        $( '#' + rowId + ' ._text-ref-party').html('');
+        $( '#' + rowId + ' input[data-field="party_id"]').val('');
+    }
+
     // Remove Row
     function __remove_row(a){
 
