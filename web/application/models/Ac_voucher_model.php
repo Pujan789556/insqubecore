@@ -513,7 +513,7 @@ class Ac_voucher_model extends MY_Model
     {
         $this->db->select(
                         // Voucher Table
-                        'V.id, V.voucher_code, V.voucher_date, ' .
+                        'V.id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.voucher_date, ' .
 
                         // Voucher Type Table
                         'VT.name AS voucher_type_name, ' .
@@ -524,10 +524,35 @@ class Ac_voucher_model extends MY_Model
                         // Fiscal Year Table
                         'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
                     )
-                 ->from($this->table_name . ' AS V')
-                 ->join('ac_voucher_types VT', 'VT.id = V.voucher_type_id')
-                 ->join('master_branches B', 'B.id = V.branch_id')
+                ->from($this->table_name . ' AS V')
+                ->join('ac_voucher_types VT', 'VT.id = V.voucher_type_id')
+                ->join('master_branches B', 'B.id = V.branch_id')
                 ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id');
+    }
+
+    // --------------------------------------------------------------------
+
+    public function get($id)
+    {
+        return $this->db->select(
+                        // Voucher Table
+                        'V.*, ' .
+
+                        // Voucher Type Table
+                        'VT.name AS voucher_type_name, ' .
+
+                        // Branch Table
+                        'B.name AS branch_name, ' .
+
+                        // Fiscal Year Table
+                        'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
+                    )
+                ->from($this->table_name . ' AS V')
+                ->join('ac_voucher_types VT', 'VT.id = V.voucher_type_id')
+                ->join('master_branches B', 'B.id = V.branch_id')
+                ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id')
+                ->where('V.id', $id)
+                ->get()->row();
     }
 
 	// --------------------------------------------------------------------

@@ -236,6 +236,22 @@ class Company_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get Name
+     *
+     * @param integer $id
+     * @return string
+     */
+    public function name($id)
+    {
+        return $this->db->select('C.name')
+                 ->from($this->table_name . ' as C')
+                 ->where('C.id', $id)
+                 ->get()->row()->name;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Get Data Rows
      *
      * Get the filtered resulte set for listing purpose

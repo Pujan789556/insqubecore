@@ -48,7 +48,7 @@ class Ac_parties extends MY_Controller
 	 */
 	function index()
 	{
-		$this->explore();
+		$this->page();
 	}
 
 

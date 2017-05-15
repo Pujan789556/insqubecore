@@ -77,6 +77,20 @@ class Surveyor_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Get Name
+     *
+     * @param integer $id
+     * @return string
+     */
+    public function name($id)
+    {
+        return $this->db->select('S.name')
+                 ->from($this->table_name . ' as S')
+                 ->where('S.id', $id)
+                 ->get()->row()->name;
+    }
+
     // ----------------------------------------------------------------
 
     /**

@@ -297,6 +297,8 @@ class Policy_txn extends MY_Controller
 							 *		Transfer CRF data to TXN Table based on transfer type
 							 *
 							 * Task 3: Update CRF and TXN data
+							 *
+							 * Task 4: Update RI-Distribution for this Policy
 							 */
 							$crf_data['transfer_type'] 		= IQB_POLICY_CRF_TRANSFER_TYPE_FULL;
 							$crf_data['computation_type'] 	= IQB_POLICY_CRF_COMPUTE_AUTO;
@@ -304,6 +306,14 @@ class Policy_txn extends MY_Controller
 							$txn_data = $this->_prepare_txn_data($policy_record, $txn_record, $crf_data, $post_data);
 
 							return $this->policy_txn_model->save($txn_record->id, $crf_data, $txn_data);
+
+							/**
+							 * @TODO
+							 *
+							 * Build RI Distribution Data For This Policy
+							 */
+
+
 
 						} catch (Exception $e){
 

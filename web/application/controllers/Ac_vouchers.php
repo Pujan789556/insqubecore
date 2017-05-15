@@ -90,6 +90,7 @@ class Ac_vouchers extends MY_Controller
 			$params = array_merge($params, $filter_data['data']);
 		}
 
+		// @TODO - Only data belonging to me!!!
 		$records = $this->ac_voucher_model->rows($params);
 		$records = $records ? $records : [];
 		$total = count($records);
@@ -273,7 +274,6 @@ class Ac_vouchers extends MY_Controller
 
 	// --------------------------------------------------------------------
 
-	// --------------------------------------------------------------------
 
 	/**
 	 * Edit a Recrod
@@ -284,6 +284,14 @@ class Ac_vouchers extends MY_Controller
 	 */
 	public function edit($id)
 	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('ac_vouchers', 'edit.voucher') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
 		return $this->template->json([
 				'status' => 'error',
 				'message' => '@TODO - Please update edit function.'
@@ -322,6 +330,14 @@ class Ac_vouchers extends MY_Controller
 	 */
 	public function add()
 	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('ac_vouchers', 'add.voucher') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
 		$record = NULL;
 
 		// Form Submitted? Save the data
@@ -521,50 +537,168 @@ class Ac_vouchers extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Delete a Agent
+	 * Delete a Voucher
+	 *
+	 * You can not delete any Voucher.
+	 *
 	 * @param integer $id
-	 * @return json
+	 * @return void
 	 */
 	public function delete($id)
 	{
-		// Valid Record ?
-		$id = (int)$id;
-		$record = $this->ac_voucher_model->find($id);
+		return $this->template->json([
+			'status' => 'error',
+			'message' => 'You can not delete a voucher!'
+		], 404);
+	}
+
+	// --------------------------------------------------------------------
+	//  DETAILS
+	// --------------------------------------------------------------------
+
+
+    /**
+     * View Voucher Details
+     *
+     * @param integer $id
+     * @return void
+     */
+    public function details($id)
+    {
+    	/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('ac_vouchers', 'explore.ac_voucher') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Main Record
+		 */
+    	$id = (int)$id;
+		$record = $this->ac_voucher_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
 		}
 
-		$data = [
-			'status' 	=> 'error',
-			'message' 	=> 'You cannot delete the default records.'
-		];
 		/**
-		 * Safe to Delete?
+		 * Check if Belongs to me?
 		 */
-		if( !safe_to_delete( 'Ac_chart_of_account_model', $id ) )
-		{
-			return $this->template->json($data);
-		}
+		belongs_to_me( $record->branch_id );
 
-		$done = $this->ac_voucher_model->delete($record->id);
+		/**
+		 * Voucher Details
+		 */
+		$voucher_rows = $this->ac_voucher_detail_model->rows_by_voucher($record->id);
+		// echo $this->db->last_query();exit;
 
-		if($done)
+		$debit_rows = [];
+		$credit_rows = [];
+		foreach( $voucher_rows as $row )
 		{
-			$data = [
-				'status' 	=> 'success',
-				'message' 	=> 'Successfully deleted!',
-				'removeRow' => true,
-				'rowId'		=> '#_data-row-'.$record->id
-			];
+			// Account Group Path
+			$path = $this->ac_account_group_model->get_path($row->account_group_id);
+			$row->acg_path = $path;
+
+			// Party Name
+			$row->party_name = $this->_party_name($row->party_type, $row->party_id);
+
+			if( $row->flag_type === IQB_AC_DEBIT )
+			{
+				$debit_rows[] = $row;
+			}
+			else
+			{
+				$credit_rows[] = $row;
+			}
 		}
-		else
-		{
-			$data = [
-				'status' 	=> 'error',
-				'message' 	=> 'Could not be deleted. It might have references to other module(s)/component(s).'
-			];
-		}
-		return $this->template->json($data);
-	}
+		unset($voucher_rows); // No more needed, free the memory
+
+		$data = [
+			'record' 		=> $record,
+			'debit_rows' 	=> $debit_rows,
+			'credit_rows' 	=> $credit_rows
+		];
+
+
+		$this->data['site_title'] = 'Voucher Details | ' . $record->voucher_code;
+		$this->template->partial(
+							'content_header',
+							'templates/_common/_content_header',
+							[
+								'content_header' => 'Voucher -' . $record->voucher_code,
+								'breadcrumbs' => ['Vouchers' => $this->router->class, 'Details' => NULL]
+						])
+						->partial('content', 'accounting/vouchers/_details', $data)
+						->render($this->data);
+
+    }
+
+    	private function _party_name($party_type, $party_id)
+    	{
+    		$party_name = '';
+    		if( !$party_type || !$party_id ) return $party_name;
+
+    		// Let's build party name
+    		$party_model = '';
+    		switch($party_type)
+    		{
+    			case IQB_AC_PARTY_TYPE_GENERAL:
+    				// $this->load->model('ac_party_model');
+    				$party_model = 'ac_party_model';
+    				// $party_name = $this->ac_party_model->name($party_id);
+    				break;
+
+				case IQB_AC_PARTY_TYPE_AGENT:
+    				// $this->load->model('agent_model');
+    				$party_model = 'agent_model';
+    				// $party_name = $this->agent_model->name($party_id);
+    				break;
+
+				case IQB_AC_PARTY_TYPE_CUSTOMER:
+    				// $this->load->model('customer_model');
+    				$party_model = 'customer_model';
+    				// $party_name = $this->customer_model->name($party_id);
+    				break;
+
+				case IQB_AC_PARTY_TYPE_COMPANY:
+    				// $this->load->model('company_model');
+    				$party_model = 'company_model';
+    				// $party_name = $this->company_model->name($party_id);
+    				break;
+
+				case IQB_AC_PARTY_TYPE_SURVEYOR:
+    				// $this->load->model('surveyor_model');
+    				$party_model = 'surveyor_model';
+    				// $party_name = $this->surveyor_model->name($party_id);
+    				break;
+
+				default:
+					break;
+    		}
+    		if($party_model)
+    		{
+    			$this->load->model($party_model);
+    			$party_name = $this->{$party_model}->name($party_id);
+    		}
+    		return $party_name;
+
+    	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

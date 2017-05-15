@@ -216,6 +216,22 @@ class Customer_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get Name
+     *
+     * @param integer $id
+     * @return string
+     */
+    public function name($id)
+    {
+        return $this->db->select('C.full_name')
+                 ->from($this->table_name . ' as C')
+                 ->where('C.id', $id)
+                 ->get()->row()->full_name;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Get Data Rows
      *
      * Get the filtered resulte set for listing purpose

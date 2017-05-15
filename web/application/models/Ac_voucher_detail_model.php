@@ -40,6 +40,13 @@ class Ac_voucher_detail_model extends MY_Model
 
 	// --------------------------------------------------------------------
 
+    /**
+     * Batch Insert Voucher Details Records
+     *
+     * @param integer $voucher_id
+     * @param array $batch_data
+     * @return bool
+     */
     public function batch_insert($voucher_id, $batch_data)
     {
         /**
@@ -56,6 +63,30 @@ class Ac_voucher_detail_model extends MY_Model
             return $this->db->insert_batch( $this->table_name, $batch_data);
         }
         return FALSE;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Voucher Detail Rows for Given Voucher ID
+     *
+     * @param integer $voucher_id
+     * @return array
+     */
+    public function rows_by_voucher($voucher_id)
+    {
+        return $this->db->select(
+                        // Voucher Table
+                        'VDTL.*, ' .
+
+                        // Voucher Type Table
+                        'AC.account_group_id, AC.name AS account_name'
+                    )
+                ->from($this->table_name . ' AS VDTL')
+                ->join('ac_accounts AC', 'AC.id = VDTL.account_id')
+                ->where('VDTL.voucher_id', $voucher_id)
+                ->get()
+                ->result();
     }
 
     // --------------------------------------------------------------------

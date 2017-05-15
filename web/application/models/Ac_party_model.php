@@ -234,6 +234,21 @@ class Ac_party_model extends MY_Model
                         ->get()->result();
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Name
+     *
+     * @param integer $id
+     * @return string
+     */
+    public function name($id)
+    {
+        return $this->db->select('P.full_name')
+                 ->from($this->table_name . ' as P')
+                 ->where('P.id', $id)
+                 ->get()->row()->full_name;
+    }
 
 	// --------------------------------------------------------------------
 
@@ -298,6 +313,18 @@ class Ac_party_model extends MY_Model
         // return result/status
         return $status;
     }
+
+        private function _deletable($id)
+        {
+            return FALSE;
+
+            // @TODO - Check if this party has done any transaction (voucher detail table)
+
+            // $this->load->model()
+
+            // return $this->db->where($where)
+            //                 ->count_all_results($this->table_name);
+        }
 
     // ----------------------------------------------------------------
 

@@ -270,6 +270,7 @@ $config['DX_permissions'] = [
 		'ac_vouchers'  => [
 			'explore.voucher',
 			'add.voucher',
+			'print.voucher',
 
 			/**
 			 * Voucher Scope

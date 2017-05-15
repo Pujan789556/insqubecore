@@ -91,6 +91,20 @@ class Agent_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Get Name
+     *
+     * @param integer $id
+     * @return string
+     */
+    public function name($id)
+    {
+        return $this->db->select('A.name')
+                 ->from($this->table_name . ' as A')
+                 ->where('A.id', $id)
+                 ->get()->row()->name;
+    }
+
     // ----------------------------------------------------------------
 
     /**

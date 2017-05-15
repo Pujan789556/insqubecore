@@ -14,6 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<th>Branch</th>
 			<th>Type</th>
 			<th>Date</th>
+			<th>Action</th>
 		</tr>
 	</thead>
 	<tbody id="search-result-voucher">
