@@ -237,10 +237,122 @@ class Ac_voucher_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Add New Voucher
+     * Edit Voucher
      *
      * All transactions must be carried out, else rollback.
      * The following tasks are carried during Treaty Setup:
+     *      a. Update Master Record
+     *      b. Insert Voucher Details - Debit, Credit (Remove Old Ones)
+     *
+     * @param int $id
+     * @param array $data
+     * @return mixed
+     */
+    public function edit($id, $data)
+    {
+
+        /**
+         * Prepare Master Record Data
+         */
+        $master_data = [
+            'voucher_date'      => $data['voucher_date'],
+            'voucher_type_id'   => $data['voucher_type_id'],
+            'narration'         => $data['narration']
+        ];
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Debit Rows
+         */
+        $accounts       = $data['account_id']['dr'];
+        $party_types    = $data['party_type']['dr'];
+        $party_ids      = $data['party_id']['dr'];
+        $amounts        = $data['amount']['dr'];
+        $count_dr       = count($accounts);
+
+        $batch_data_details = [];
+        for($i = 0; $i < $count_dr; $i++)
+        {
+            // Both Party Type and Party ID must be Supplied else nullify them!
+            $party_type = $party_types[$i] ? $party_types[$i] : NULL;
+            $party_id   = $party_ids[$i] ? $party_ids[$i] : NULL;
+            if( $party_type == NULL || $party_id == NULL )
+            {
+                $party_type = NULL;
+                $party_id   = NULL;
+            }
+
+            $batch_data_details[] = [
+                'sno'           => $i+1,
+                'flag_type'     => IQB_AC_DEBIT,
+                'account_id'    => $accounts[$i],
+                'party_type'    => $party_type,
+                'party_id'      => $party_id,
+                'amount'        => $amounts[$i]
+            ];
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Credit Rows
+         */
+        $accounts       = $data['account_id']['cr'];
+        $party_types    = $data['party_type']['cr'];
+        $party_ids      = $data['party_id']['cr'];
+        $amounts        = $data['amount']['cr'];
+        $count_dr       = count($accounts);
+        for($i = 0; $i < $count_dr; $i++)
+        {
+            $batch_data_details[] = [
+                'sno'           => $i+1,
+                'flag_type'     => IQB_AC_CREDIT,
+                'account_id'    => $accounts[$i],
+                'party_type'    => $party_types[$i] ? $party_types[$i] : NULL,
+                'party_id'      => $party_ids[$i] ? $party_ids[$i] : NULL,
+                'amount'        => $amounts[$i]
+            ];
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * !!! IMPORTANT
+         *
+         * We do not use transaction here as we may lost the voucher id autoincrement.
+         * We simply use try catch block.
+         */
+
+        $done = parent::update($id, $master_data, TRUE);
+
+        if( $done )
+        {
+            // Delete Old Details Data
+            $this->ac_voucher_detail_model->delete_old($id);
+
+
+            // Insert Batch Voucher Details Data
+            $this->ac_voucher_detail_model->batch_insert($id, $batch_data_details);
+
+            // Log Activity
+            $this->log_activity($id, 'E');
+        }
+        else
+        {
+            throw new Exception("Exception [Model: Ac_voucher_model][Method: add()]: Could not insert record.");
+        }
+
+        // return result/status
+        return $id;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Add New Voucher
+     *
+     * The following tasks are carried during Voucher Add:
      *      a. Insert Master Record, Update Voucher Code
      *      b. Insert Voucher Details - Debit, Credit
      *
@@ -328,7 +440,7 @@ class Ac_voucher_model extends MY_Model
 
         if( $id )
         {
-            // Insert Batch Broker Data
+            // Insert Batch Voucher Details Data
             $this->ac_voucher_detail_model->batch_insert($id, $batch_data_details);
 
             // Log Activity
@@ -518,7 +630,7 @@ class Ac_voucher_model extends MY_Model
     {
         $this->db->select(
                         // Voucher Table
-                        'V.id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.voucher_date, ' .
+                        'V.id, V.branch_id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.voucher_date, ' .
 
                         // Voucher Type Table
                         'VT.name AS voucher_type_name, ' .

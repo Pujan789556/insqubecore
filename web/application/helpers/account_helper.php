@@ -35,6 +35,77 @@ if ( ! function_exists('ac_party_types_dropdown'))
 	}
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('is_voucher_editable'))
+{
+	/**
+	 * Is Voucher Editable?
+	 *
+	 * Check if a Voucher is Editable?
+	 * It is only editable if it
+	 * 		- is manual voucher
+	 * 		- is within this fiscal year
+	 *
+	 * @param object $record 	Voucher Record
+	 * @param bool $terminate_on_fail Terminate Right Here if not editable.
+	 * @return	bool
+	 */
+	function is_voucher_editable( $record, $terminate_on_fail = TRUE )
+	{
+		$CI =& get_instance();
+
+		/**
+		 * Manual Voucher? Belong to Current Fiscal Year?
+		 */
+		$__flag_editable = $record->flag_internal == IQB_FLAG_OFF && $record->fiscal_yr_id == $CI->current_fiscal_year->id;
+
+		// Terminate on Exit?
+		if( $__flag_editable === FALSE && $terminate_on_fail == TRUE)
+		{
+			$CI->dx_auth->deny_access();
+			exit(1);
+		}
+
+		return $__flag_editable;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('ac_account_group_path_formatted'))
+{
+	/**
+	 * Get Account Group Path Formatted
+	 *
+	 * @return	string
+	 */
+	function ac_account_group_path_formatted( $acg_path, $account_name = ''  )
+	{
+		$group_path = [];
+		if( count($acg_path) > 2 )
+		{
+			array_shift($acg_path); // Remove "Chart of Account"
+			foreach($acg_path as $path)
+			{
+				$group_path[]=$path->name;
+			}
+		}
+		else
+		{
+			$group_path[] = $record->group_name;
+		}
+
+		// If account name is supplied, append it too
+		if($account_name)
+		{
+			$group_path[] = '<strong>' . $account_name . '</strong>';
+		}
+
+
+		return implode('<i class="fa fa-angle-right text-bold text-red" style="margin:0 5px;"></i>', $group_path);
+	}
+}
 
 // ------------------------------------------------------------------------
 

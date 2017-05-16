@@ -15,24 +15,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td class="ins-action">
 		<?php if(
 
-			// Edit Permissions?
+			// Permission?
 			$this->dx_auth->is_authorized('ac_vouchers', 'edit.voucher')
 
 			&&
 
-			// Manual Voucher?
-			$record->flag_internal == IQB_FLAG_OFF
+			// Belongs to me?
+			belongs_to_me($record->branch_id, FALSE)
 
 			&&
 
-			// Same Fiscal Year
-			$record->fiscal_yr_id == $this->current_fiscal_year->id
+			// Editable?
+			is_voucher_editable($record)
 
 			):?>
 			<a href="#"
 				data-toggle="tooltip"
 				title="Edit Voucher"
 				class="trg-dialog-edit action"
+				data-box-size="full-width"
 				data-title='<i class="fa fa-pencil-square-o"></i> Edit Voucher'
 				data-url="<?php echo site_url('ac_vouchers/edit/' . $record->id);?>"
 				data-form=".form-iqb-general">

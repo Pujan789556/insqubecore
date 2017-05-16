@@ -6,24 +6,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // ------------------------------------------------------------------------------
 
-$group_path = [];
-if( count($record->acg_path) > 2 )
-{
-	array_shift($record->acg_path); // Remove "Chart of Account"
-	foreach($record->acg_path as $path)
-	{
-		$group_path[]=$path->name;
-	}
-}
-else
-{
-	$group_path[] = $record->group_name;
-}
-$group_path_selectable = $group_path;
-$group_path_selectable[] = '<strong>' . $record->name . '</strong>';
-
-$group_path_str = implode('<i class="fa fa-angle-right text-bold text-red" style="margin:0 5px;"></i>', $group_path);
-$selectable_path_str = implode('<i class="fa fa-angle-right text-bold text-red" style="margin:0 5px;"></i>', $group_path_selectable);
+$group_path_str = ac_account_group_path_formatted($record->acg_path);
+$selectable_path_str = ac_account_group_path_formatted($record->acg_path, $record->name);
 
 // ------------------------------------------------------------------------------
 

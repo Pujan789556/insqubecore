@@ -59,12 +59,9 @@ class Ac_vouchers extends MY_Controller
 	public function page( $layout='f', $next_id = 0,  $do_filter = TRUE )
 	{
 		/**
-		 * Check Permissions
+		 * Check Permissions? OR Deny on Fail!
 		 */
-		if( !$this->dx_auth->is_authorized('ac_vouchers', 'explore.voucher') )
-		{
-			$this->dx_auth->deny_access();
-		}
+		$this->dx_auth->is_authorized('ac_vouchers', 'explore.voucher', TRUE);
 
 		// dom data
 		$dom_data = [
@@ -287,16 +284,7 @@ class Ac_vouchers extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('ac_vouchers', 'edit.voucher') )
-		{
-			$this->dx_auth->deny_access();
-		}
-
-		return $this->template->json([
-				'status' => 'error',
-				'message' => '@TODO - Please update edit function.'
-			], 404);
-
+		$this->dx_auth->is_authorized('ac_vouchers', 'edit.voucher', TRUE);
 
 		// Valid Record ?
 		$id = (int)$id;
@@ -306,6 +294,19 @@ class Ac_vouchers extends MY_Controller
 			$this->template->render_404();
 		}
 
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->branch_id);
+
+		/**
+		 * Editable? OR Terminate
+		 */
+		is_voucher_editable($record);
+
+
+		$voucher_detail_rows = $this->_voucher_detail_rows($record->id);
+
 		// Form Submitted? Save the data
 		$json_data = $this->_save('edit', $record);
 
@@ -313,8 +314,9 @@ class Ac_vouchers extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('accounting/vouchers/_form',
 			[
-				'form_elements' => $this->ac_voucher_model->validation_rules,
-				'record' 		=> $record
+				'form_elements' 		=> $this->ac_voucher_model->validation_rules,
+				'record' 				=> $record,
+				'voucher_detail_rows' 	=> $voucher_detail_rows
 			], TRUE);
 
 		// Return HTML
@@ -331,12 +333,9 @@ class Ac_vouchers extends MY_Controller
 	public function add()
 	{
 		/**
-		 * Check Permissions
+		 * Check Permissions? OR Deny on Fail
 		 */
-		if( !$this->dx_auth->is_authorized('ac_vouchers', 'add.voucher') )
-		{
-			$this->dx_auth->deny_access();
-		}
+		$this->dx_auth->is_authorized('ac_vouchers', 'add.voucher', TRUE);
 
 		$record = NULL;
 
@@ -347,8 +346,9 @@ class Ac_vouchers extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('accounting/vouchers/_form',
 			[
-				'form_elements' => $this->ac_voucher_model->validation_rules,
-				'record' 		=> $record
+				'form_elements' 		=> $this->ac_voucher_model->validation_rules,
+				'record' 				=> $record,
+				'voucher_detail_rows' 	=> NULL
 			], TRUE);
 
 		// Return HTML
@@ -412,9 +412,7 @@ class Ac_vouchers extends MY_Controller
 				else
 				{
 					// Now Update Data
-					// $done = $this->ac_voucher_model->update($record->id, $data, TRUE) && $this->ac_voucher_model->log_activity($record->id, 'E');
-
-					$done = false;
+					$done = $this->ac_voucher_model->edit($record->id, $data);
 				}
 
 	        	if(!$done)
@@ -589,38 +587,10 @@ class Ac_vouchers extends MY_Controller
 		belongs_to_me( $record->branch_id );
 
 		/**
-		 * Voucher Details
+		 * Voucher Detail Rows
 		 */
-		$voucher_rows = $this->ac_voucher_detail_model->rows_by_voucher($record->id);
-		// echo $this->db->last_query();exit;
-
-		$debit_rows = [];
-		$credit_rows = [];
-		foreach( $voucher_rows as $row )
-		{
-			// Account Group Path
-			$path = $this->ac_account_group_model->get_path($row->account_group_id);
-			$row->acg_path = $path;
-
-			// Party Name
-			$row->party_name = $this->_party_name($row->party_type, $row->party_id);
-
-			if( $row->flag_type === IQB_AC_DEBIT )
-			{
-				$debit_rows[] = $row;
-			}
-			else
-			{
-				$credit_rows[] = $row;
-			}
-		}
-		unset($voucher_rows); // No more needed, free the memory
-
-		$data = [
-			'record' 		=> $record,
-			'debit_rows' 	=> $debit_rows,
-			'credit_rows' 	=> $credit_rows
-		];
+		$data = $this->_voucher_detail_rows($record->id);
+		$data['record'] = $record;
 
 
 		$this->data['site_title'] = 'Voucher Details | ' . $record->voucher_code;
@@ -636,6 +606,41 @@ class Ac_vouchers extends MY_Controller
 
     }
 
+    	private function _voucher_detail_rows($voucher_id)
+    	{
+    		/**
+			 * Voucher Details
+			 */
+			$voucher_rows = $this->ac_voucher_detail_model->rows_by_voucher($voucher_id);
+			// echo $this->db->last_query();exit;
+
+			$debit_rows = [];
+			$credit_rows = [];
+			foreach( $voucher_rows as $row )
+			{
+				// Account Group Path
+				$path = $this->ac_account_group_model->get_path($row->account_group_id);
+				$row->acg_path = $path;
+
+				// Party Name
+				$row->party_name = $this->_party_name($row->party_type, $row->party_id);
+
+				if( $row->flag_type === IQB_AC_DEBIT )
+				{
+					$debit_rows[] = $row;
+				}
+				else
+				{
+					$credit_rows[] = $row;
+				}
+			}
+
+			return [
+				'debit_rows' 	=> $debit_rows,
+				'credit_rows' 	=> $credit_rows
+			];
+    	}
+
     	private function _party_name($party_type, $party_id)
     	{
     		$party_name = '';
@@ -646,33 +651,23 @@ class Ac_vouchers extends MY_Controller
     		switch($party_type)
     		{
     			case IQB_AC_PARTY_TYPE_GENERAL:
-    				// $this->load->model('ac_party_model');
     				$party_model = 'ac_party_model';
-    				// $party_name = $this->ac_party_model->name($party_id);
     				break;
 
 				case IQB_AC_PARTY_TYPE_AGENT:
-    				// $this->load->model('agent_model');
     				$party_model = 'agent_model';
-    				// $party_name = $this->agent_model->name($party_id);
     				break;
 
 				case IQB_AC_PARTY_TYPE_CUSTOMER:
-    				// $this->load->model('customer_model');
     				$party_model = 'customer_model';
-    				// $party_name = $this->customer_model->name($party_id);
     				break;
 
 				case IQB_AC_PARTY_TYPE_COMPANY:
-    				// $this->load->model('company_model');
     				$party_model = 'company_model';
-    				// $party_name = $this->company_model->name($party_id);
     				break;
 
 				case IQB_AC_PARTY_TYPE_SURVEYOR:
-    				// $this->load->model('surveyor_model');
     				$party_model = 'surveyor_model';
-    				// $party_name = $this->surveyor_model->name($party_id);
     				break;
 
 				default:
@@ -684,8 +679,10 @@ class Ac_vouchers extends MY_Controller
     			$party_name = $this->{$party_model}->name($party_id);
     		}
     		return $party_name;
-
     	}
+
+	// --------------------------------------------------------------------
+
 }
 
 

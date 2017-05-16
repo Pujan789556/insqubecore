@@ -8,25 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<?php if( $this->dx_auth->is_admin() ): ?>
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
-	<td>
-		<?php
-		$path_str = [];
-		if( count($record->acg_path) > 2 )
-		{
-			array_shift($record->acg_path); // Remove "Chart of Account"
-			foreach($record->acg_path as $path)
-			{
-				$path_str[]=$path->name;
-			}
-		}
-		else
-		{
-			$path_str[] = $record->group_name;
-		}
-
-		echo implode('<i class="fa fa-angle-right text-bold text-red" style="margin:0 5px;"></i>', $path_str);
-		?>
-	</td>
+	<td> <?php echo ac_account_group_path_formatted($record->acg_path);?> </td>
 	<td><?php echo $record->name;?></td>
 	<td><?php echo  active_inactive_text($record->active);?></td>
 	<td class="ins-action">

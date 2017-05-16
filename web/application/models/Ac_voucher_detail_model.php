@@ -107,6 +107,13 @@ class Ac_voucher_detail_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function delete_old( $voucher_id )
+    {
+        return parent::delete_by(['voucher_id' => $voucher_id]);
+    }
+
+    // ----------------------------------------------------------------
+
     public function delete($id = NULL)
     {
         return FALSE;

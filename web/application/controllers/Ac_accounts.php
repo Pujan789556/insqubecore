@@ -37,6 +37,9 @@ class Ac_accounts extends MY_Controller
 		// Load Model
 		$this->load->model('ac_account_group_model');
 		$this->load->model('ac_account_model');
+
+		// Helper
+		$this->load->helper('account');
 	}
 
 	// --------------------------------------------------------------------

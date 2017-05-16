@@ -75,15 +75,39 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $party_id           = $credit_elements[2];
             $credit_amount      = $credit_elements[3];
 
-            /**
-             * Render Default Row
-             */
-            $this->load->view('accounting/vouchers/_form_credit_row', [
-                'row_type'              => 'default',
-                'row_id'                => 'tmpl-credit-row-1',
-                'amount_element'        => $credit_amount,
-                'party_type_element'    => $party_type,
-            ]);
+            $credit_rows = $voucher_detail_rows['credit_rows'] ?? [];
+            $row_counter = 1;
+            if( $credit_rows )
+            {
+                foreach($credit_rows as $row)
+                {
+                    /**
+                     * Render Default, Regular Rows
+                     */
+                    $row_type = $row_counter == 1 ? 'default' : 'regular';
+                    $this->load->view('accounting/vouchers/_form_credit_row', [
+                        'row_type'              => $row_type,
+                        'row_id'                => 'tmpl-credit-row-' . $row_counter,
+                        'amount_element'        => $credit_amount,
+                        'party_type_element'    => $party_type,
+                        'row'                   => $row
+                    ]);
+                    $row_counter++;
+                }
+            }
+            else
+            {
+                /**
+                 * Render Default Row
+                 */
+                $this->load->view('accounting/vouchers/_form_credit_row', [
+                    'row_type'              => 'default',
+                    'row_id'                => 'tmpl-credit-row-' . $row_counter,
+                    'amount_element'        => $credit_amount,
+                    'party_type_element'    => $party_type,
+                    'row'                   => NULL
+                ]);
+            }
             ?>
 
             <tr id="credit-row-add-more">
@@ -101,16 +125,40 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $party_id           = $debit_elements[2];
             $debit_amount       = $debit_elements[3];
 
-            /**
-             * Render Default Row
-             */
-            $this->load->view('accounting/vouchers/_form_debit_row', [
-                'row_type'          => 'default',
-                'row_id'            => 'tmpl-debit-row-1',
-                'amount_element'    => $debit_amount,
-                'party_type_element'    => $party_type,
 
-            ]);
+            $debit_rows = $voucher_detail_rows['debit_rows'] ?? [];
+            $row_counter = 1;
+            if( $debit_rows )
+            {
+                foreach($debit_rows as $row)
+                {
+                    /**
+                     * Render Default, Regular Rows
+                     */
+                    $row_type = $row_counter == 1 ? 'default' : 'regular';
+                    $this->load->view('accounting/vouchers/_form_debit_row', [
+                        'row_type'              => $row_type,
+                        'row_id'                => 'tmpl-debit-row-' . $row_counter,
+                        'amount_element'        => $debit_amount,
+                        'party_type_element'    => $party_type,
+                        'row'                   => $row
+                    ]);
+                    $row_counter++;
+                }
+            }
+            else
+            {
+                /**
+                 * Render Default Row
+                 */
+                $this->load->view('accounting/vouchers/_form_debit_row', [
+                    'row_type'              => 'default',
+                    'row_id'                => 'tmpl-debit-row-' . $row_counter,
+                    'amount_element'        => $debit_amount,
+                    'party_type_element'    => $party_type,
+                    'row'                   => NULL
+                ]);
+            }
             ?>
             <tr id="debit-row-add-more">
                 <td class="add-more" colspan="5">
@@ -140,6 +188,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         'row_id'                => NULL,
         'amount_element'        => $debit_amount,
         'party_type_element'    => $party_type_dr,
+        'row'                   => NULL
     ]);
     ?>
 </template>
@@ -153,6 +202,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         'row_id'                => NULL,
         'amount_element'        => $credit_amount,
         'party_type_element'    => $party_type_cr,
+        'row'                   => NULL
     ]);
     ?>
 </template>
