@@ -229,8 +229,8 @@ class User_model extends MY_Model
     	$record = $this->get_cache($cache_name);
         if(!$record)
         {
-            $record = $this->db->select('U.id, U.code, U.username, U.email, U.banned, U.profile, U.contact, R.name as role_name, B.name as branch_name, D.name as department_name')
-						->from($this->table_name . ' as U')
+            $record = $this->db->select('U.id, U.code, U.username, U.email, U.banned, U.profile, U.contact, R.name AS role_name, B.name AS branch_name, B.contacts AS branch_contact, D.name AS department_name')
+						->from($this->table_name . ' AS U')
 						->join('auth_roles R', 'U.role_id = R.id')
 						->join('master_branches B', 'U.branch_id = B.id')
     			 		->join('master_departments D', 'U.department_id = D.id')
