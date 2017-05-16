@@ -5,7 +5,7 @@ class Ac_voucher_model extends MY_Model
 {
     protected $table_name   = 'ac_vouchers';
     protected $set_created  = true;
-    protected $set_modified = false;
+    protected $set_modified = true;
     protected $log_user     = true;
 
     protected $protected_attributes = ['id'];
@@ -263,57 +263,9 @@ class Ac_voucher_model extends MY_Model
         // ----------------------------------------------------------------
 
         /**
-         * Debit Rows
+         * Batch Data - Voucher Details
          */
-        $accounts       = $data['account_id']['dr'];
-        $party_types    = $data['party_type']['dr'];
-        $party_ids      = $data['party_id']['dr'];
-        $amounts        = $data['amount']['dr'];
-        $count_dr       = count($accounts);
-
-        $batch_data_details = [];
-        for($i = 0; $i < $count_dr; $i++)
-        {
-            // Both Party Type and Party ID must be Supplied else nullify them!
-            $party_type = $party_types[$i] ? $party_types[$i] : NULL;
-            $party_id   = $party_ids[$i] ? $party_ids[$i] : NULL;
-            if( $party_type == NULL || $party_id == NULL )
-            {
-                $party_type = NULL;
-                $party_id   = NULL;
-            }
-
-            $batch_data_details[] = [
-                'sno'           => $i+1,
-                'flag_type'     => IQB_AC_DEBIT,
-                'account_id'    => $accounts[$i],
-                'party_type'    => $party_type,
-                'party_id'      => $party_id,
-                'amount'        => $amounts[$i]
-            ];
-        }
-
-        // ----------------------------------------------------------------
-
-        /**
-         * Credit Rows
-         */
-        $accounts       = $data['account_id']['cr'];
-        $party_types    = $data['party_type']['cr'];
-        $party_ids      = $data['party_id']['cr'];
-        $amounts        = $data['amount']['cr'];
-        $count_dr       = count($accounts);
-        for($i = 0; $i < $count_dr; $i++)
-        {
-            $batch_data_details[] = [
-                'sno'           => $i+1,
-                'flag_type'     => IQB_AC_CREDIT,
-                'account_id'    => $accounts[$i],
-                'party_type'    => $party_types[$i] ? $party_types[$i] : NULL,
-                'party_id'      => $party_ids[$i] ? $party_ids[$i] : NULL,
-                'amount'        => $amounts[$i]
-            ];
-        }
+        $batch_data_details = $this->_build_voucher_details_batch_data($data);
 
         // ----------------------------------------------------------------
 
@@ -375,57 +327,9 @@ class Ac_voucher_model extends MY_Model
         // ----------------------------------------------------------------
 
         /**
-         * Debit Rows
+         * Batch Data - Voucher Details
          */
-        $accounts       = $data['account_id']['dr'];
-        $party_types    = $data['party_type']['dr'];
-        $party_ids      = $data['party_id']['dr'];
-        $amounts        = $data['amount']['dr'];
-        $count_dr       = count($accounts);
-
-        $batch_data_details = [];
-        for($i = 0; $i < $count_dr; $i++)
-        {
-            // Both Party Type and Party ID must be Supplied else nullify them!
-            $party_type = $party_types[$i] ? $party_types[$i] : NULL;
-            $party_id   = $party_ids[$i] ? $party_ids[$i] : NULL;
-            if( $party_type == NULL || $party_id == NULL )
-            {
-                $party_type = NULL;
-                $party_id   = NULL;
-            }
-
-            $batch_data_details[] = [
-                'sno'           => $i+1,
-                'flag_type'     => IQB_AC_DEBIT,
-                'account_id'    => $accounts[$i],
-                'party_type'    => $party_type,
-                'party_id'      => $party_id,
-                'amount'        => $amounts[$i]
-            ];
-        }
-
-        // ----------------------------------------------------------------
-
-        /**
-         * Credit Rows
-         */
-        $accounts       = $data['account_id']['cr'];
-        $party_types    = $data['party_type']['cr'];
-        $party_ids      = $data['party_id']['cr'];
-        $amounts        = $data['amount']['cr'];
-        $count_dr       = count($accounts);
-        for($i = 0; $i < $count_dr; $i++)
-        {
-            $batch_data_details[] = [
-                'sno'           => $i+1,
-                'flag_type'     => IQB_AC_CREDIT,
-                'account_id'    => $accounts[$i],
-                'party_type'    => $party_types[$i] ? $party_types[$i] : NULL,
-                'party_id'      => $party_ids[$i] ? $party_ids[$i] : NULL,
-                'amount'        => $amounts[$i]
-            ];
-        }
+        $batch_data_details = $this->_build_voucher_details_batch_data($data);
 
         // ----------------------------------------------------------------
 
@@ -453,6 +357,72 @@ class Ac_voucher_model extends MY_Model
 
         // return result/status
         return $id;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Build Voucher Details Batch Data
+     *
+     * @param array $data Form Post Data
+     * @return array
+     */
+    private function _build_voucher_details_batch_data($data)
+    {
+        /**
+         * Debit Rows
+         */
+        $accounts       = $data['account_id']['dr'];
+        $party_types    = $data['party_type']['dr'];
+        $party_ids      = $data['party_id']['dr'];
+        $amounts        = $data['amount']['dr'];
+        $count_dr       = count($accounts);
+
+        $batch_data = [];
+        for($i = 0; $i < $count_dr; $i++)
+        {
+            // Both Party Type and Party ID must be Supplied else nullify them!
+            $party_type = $party_types[$i] ? $party_types[$i] : NULL;
+            $party_id   = $party_ids[$i] ? $party_ids[$i] : NULL;
+            if( $party_type == NULL || $party_id == NULL )
+            {
+                $party_type = NULL;
+                $party_id   = NULL;
+            }
+
+            $batch_data[] = [
+                'sno'           => $i+1,
+                'flag_type'     => IQB_AC_DEBIT,
+                'account_id'    => $accounts[$i],
+                'party_type'    => $party_type,
+                'party_id'      => $party_id,
+                'amount'        => $amounts[$i]
+            ];
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Credit Rows
+         */
+        $accounts       = $data['account_id']['cr'];
+        $party_types    = $data['party_type']['cr'];
+        $party_ids      = $data['party_id']['cr'];
+        $amounts        = $data['amount']['cr'];
+        $count_dr       = count($accounts);
+        for($i = 0; $i < $count_dr; $i++)
+        {
+            $batch_data[] = [
+                'sno'           => $i+1,
+                'flag_type'     => IQB_AC_CREDIT,
+                'account_id'    => $accounts[$i],
+                'party_type'    => $party_types[$i] ? $party_types[$i] : NULL,
+                'party_id'      => $party_ids[$i] ? $party_ids[$i] : NULL,
+                'amount'        => $amounts[$i]
+            ];
+        }
+
+        return $batch_data;
     }
 
     // --------------------------------------------------------------------
