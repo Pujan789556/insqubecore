@@ -98,6 +98,17 @@
 
         </div>
 
+
+        <footer class="printable print-only" id="printable-footer">
+            <?php
+            /**
+             * Printable Footer - Show Company Name and Branch Address of Currently Logged in User
+             */
+            $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $this->user->branch_name;
+            echo get_contact_widget_two_lines($this->user->branch_contact, $branch_contact_prefix)
+            ?>
+        </footer>
+
         <?php
         /**
          * Templete Section: Scripts
