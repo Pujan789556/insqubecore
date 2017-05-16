@@ -1112,11 +1112,14 @@ class Policies extends MY_Controller
 			$this->template->render_404();
 		}
 
+
 		$schedule_view = '';
 		switch ($record->portfolio_id)
 		{
 			// Motor
-			case IQB_MASTER_PORTFOLIO_MOTOR_ID:
+			case IQB_SUB_PORTFOLIO_MOTORCYCLE_ID:
+			case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID:
+			case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID:
 					$schedule_view = 'policies/print/schedule_MOTOR';
 				break;
 
