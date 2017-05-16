@@ -867,7 +867,7 @@ class DX_Auth
 	}
 
 	// Check if user has the permission?
-	function is_authorized($module, $action)
+	function is_authorized($module, $action, $deny_on_fail = FALSE)
 	{
 		if($this->is_admin())
 		{
@@ -876,7 +876,16 @@ class DX_Auth
 
 		// Check permissions for non-admin user
 		$permissions = $this->get_permissions()->{$module} ?? NULL;
-		return ( !empty($permissions) && in_array($action, $permissions)) ? TRUE : FALSE;
+		$authorized = ( !empty($permissions) && in_array($action, $permissions)) ? TRUE : FALSE;
+
+		// Deny on Fail?
+		if($deny_on_fail)
+		{
+			return $this->deny_access();
+		}
+
+		// Simply return the status
+		return $authorized;
 	}
 
 	// Check if user any of the permissions
