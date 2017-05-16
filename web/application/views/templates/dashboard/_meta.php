@@ -29,7 +29,7 @@
 <!-- Theme style -->
 <link rel="stylesheet" href="<?php echo THEME_URL; ?>dist/css/AdminLTE.min.css">
 
-<link rel="stylesheet" href="<?php echo base_url()?>public/app/css/insqube.css?v=1.1">
+<link rel="stylesheet" href="<?php echo base_url()?>public/app/css/insqube.css?v=1.1<?php echo APP_ENV === 'development' ? time(): '';?>">
 
 <!-- On/Off Switch Style -->
 <link rel="stylesheet" href="<?php echo THEME_URL; ?>dist/css/switch.css">
