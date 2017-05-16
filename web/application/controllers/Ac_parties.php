@@ -68,7 +68,7 @@ class Ac_parties extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'explore.ac_party') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'explore.party') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -361,7 +361,7 @@ class Ac_parties extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'edit.ac_party') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'edit.party') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -400,7 +400,7 @@ class Ac_parties extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'add.ac_party') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'add.party') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -544,7 +544,7 @@ class Ac_parties extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'delete.ac_party') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'delete.party') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -606,7 +606,7 @@ class Ac_parties extends MY_Controller
     	/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'explore.ac_party') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'explore.party') )
 		{
 			$this->dx_auth->deny_access();
 		}

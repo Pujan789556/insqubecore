@@ -248,20 +248,20 @@ $config['DX_permissions'] = [
 		 * Accounts
 		 */
 		'ac_accounts'  => [
-			'explore.ac_account',
-			'add.ac_account',
-			'edit.ac_account',
-			'delete.ac_account'
+			'explore.account',
+			'add.account',
+			'edit.account',
+			'delete.account'
 		],
 
 		/**
 		 * Accounting Parties
 		 */
 		'ac_parties'  => [
-			'explore.ac_party',
-			'add.ac_party',
-			'edit.ac_party',
-			'delete.ac_party'
+			'explore.party',
+			'add.party',
+			'edit.party',
+			'delete.party'
 		],
 
 		/**
@@ -270,19 +270,7 @@ $config['DX_permissions'] = [
 		'ac_vouchers'  => [
 			'explore.voucher',
 			'add.voucher',
-			'print.voucher',
-
-			/**
-			 * Voucher Scope
-			 * -------------------
-			 * The accounting system slightly differs from regular user scope.
-			 * So we have to develop a module specific scope per user basis.
-			 * That's why the following permissions must be applied with
-			 * the user's scope
-			 */
-			'voucher.scope.to.local',
-			'voucher.scope.to.branch',
-			'voucher.scope.to.global',
+			'edit.voucher',
 
 
 			/**

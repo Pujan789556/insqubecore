@@ -528,6 +528,11 @@ class Ac_voucher_model extends MY_Model
                 ->join('ac_voucher_types VT', 'VT.id = V.voucher_type_id')
                 ->join('master_branches B', 'B.id = V.branch_id')
                 ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id');
+
+        /**
+         * Apply Scope
+         * ------------
+         */
     }
 
     // --------------------------------------------------------------------

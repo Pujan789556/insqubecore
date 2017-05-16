@@ -64,7 +64,7 @@ class Ac_accounts extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_accounts', 'explore.ac_account') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_accounts', 'explore.account') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -268,7 +268,7 @@ class Ac_accounts extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_accounts', 'edit.ac_account') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_accounts', 'edit.account') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -308,7 +308,7 @@ class Ac_accounts extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_accounts', 'add.ac_account') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_accounts', 'add.account') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -454,7 +454,7 @@ class Ac_accounts extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_accounts', 'delete.ac_account') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_accounts', 'delete.account') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -474,7 +474,7 @@ class Ac_accounts extends MY_Controller
 		/**
 		 * Safe to Delete?
 		 */
-		if( !safe_to_delete( 'Ac_chart_of_account_model', $id ) )
+		if( !safe_to_delete( 'Ac_account_model', $id ) )
 		{
 			return $this->template->json($data);
 		}
