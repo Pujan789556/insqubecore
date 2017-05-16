@@ -454,6 +454,11 @@ class Ac_voucher_model extends MY_Model
     {
         $this->_row_select();
 
+        /**
+         * Apply User Scope
+         */
+        $this->dx_auth->apply_user_scope('V');
+
         if(!empty($params))
         {
             $next_id = $params['next_id'] ?? NULL;

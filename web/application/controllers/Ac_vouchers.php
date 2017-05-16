@@ -568,7 +568,7 @@ class Ac_vouchers extends MY_Controller
     	/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('ac_vouchers', 'explore.ac_voucher') )
+		if( !$this->dx_auth->is_authorized('ac_vouchers', 'explore.voucher') )
 		{
 			$this->dx_auth->deny_access();
 		}

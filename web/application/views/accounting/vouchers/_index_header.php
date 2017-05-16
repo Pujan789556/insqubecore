@@ -11,15 +11,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<h1 style="margin:0; font-size:24px;"><?php echo $content_header; ?></h1>
 			</div>
 			<div class="col-sm-4 master-actions text-right">
-				<a href="#"
-					title="Add New Voucher"
-					data-toggle="tooltip"
-					class="btn btn-success btn-round trg-dialog-edit"
-					data-box-size="full-width"
-					data-title='<i class="fa fa-pencil-square-o"></i> Add New Voucher'
-					data-url="<?php echo site_url($this->router->class . '/add/');?>"
-					data-form="#__form-ac-voucher"
-				><i class="ion-plus-circled"></i> Add</a>
+				<?php if( $this->dx_auth->is_authorized($this->router->class, 'add.voucher') ): ?>
+					<a href="#"
+						title="Add New Voucher"
+						data-toggle="tooltip"
+						class="btn btn-success btn-round trg-dialog-edit"
+						data-box-size="full-width"
+						data-title='<i class="fa fa-pencil-square-o"></i> Add New Voucher'
+						data-url="<?php echo site_url($this->router->class . '/add/');?>"
+						data-form="#__form-ac-voucher"
+					><i class="ion-plus-circled"></i> Add</a>
+				<?php endif;?>
 
 				<a href="javascript:;"
 					title="Refresh"
