@@ -328,7 +328,7 @@ defined('IQB_AC_PARTY_TYPE_COMPANY') 				OR define('IQB_AC_PARTY_TYPE_COMPANY',	
 defined('IQB_AC_PARTY_TYPE_SURVEYOR') 				OR define('IQB_AC_PARTY_TYPE_SURVEYOR',	'S');
 defined('IQB_AC_PARTY_TYPE_GENERAL') 				OR define('IQB_AC_PARTY_TYPE_GENERAL',	'P');
 defined('IQB_AC_PARTY_TYPES')    	OR define('IQB_AC_PARTY_TYPES', 	[
-	IQB_AC_PARTY_TYPE_GENERAL				=> 'General Accounting Party',
+	IQB_AC_PARTY_TYPE_GENERAL				=> 'General Party',
 	IQB_AC_PARTY_TYPE_AGENT					=> 'Agent',
 	IQB_AC_PARTY_TYPE_CUSTOMER				=> 'Customer',
 	IQB_AC_PARTY_TYPE_COMPANY				=> 'Company',

@@ -12,7 +12,7 @@ $credit_total = 0;
 	        <span class="pull-left">Voucher Details</span>
             <span class="pull-right">
                 <?php if( $this->dx_auth->is_authorized('ac_vouchers', 'print.voucher') ): ?>
-                        <a href="#<?php //echo site_url('ac_vouchers/print/' . $record->id)?>"
+                        <a href="#"
                             title="Print Voucher (Ctrl + P)"
                             class="btn btn-sm btn-outline"
                             onclick="window.print()"

@@ -280,7 +280,7 @@ class Ac_party_model extends MY_Model
         /**
          * Party already used with Vouchers?
          */
-        if( !$this->_deletable($id) )
+        if( !$this->is_deletable($id) )
         {
             return FALSE;
         }
@@ -314,16 +314,26 @@ class Ac_party_model extends MY_Model
         return $status;
     }
 
-        private function _deletable($id)
+        /**
+         * Is this party Deletable?
+         *
+         * Check to make sure that the party is not associated with any :
+         *      1. Voucher
+         *
+         * @param integer $id
+         * @return bool
+         */
+        private function is_deletable($id)
         {
-            return FALSE;
+            /**
+             * Has this party been associated with any transaction?
+             */
+            $voucher_count = $this->db->from($this->table_name . ' AS P')
+                                      ->join('ac_voucher_details VDTL', 'VDTL.party_id = P.id')
+                                      ->where('VDTL.party_type', IQB_AC_PARTY_TYPE_GENERAL )
+                                      ->count_all_results();
 
-            // @TODO - Check if this party has done any transaction (voucher detail table)
-
-            // $this->load->model()
-
-            // return $this->db->where($where)
-            //                 ->count_all_results($this->table_name);
+            return $voucher_count ? FALSE : TRUE;
         }
 
     // ----------------------------------------------------------------
