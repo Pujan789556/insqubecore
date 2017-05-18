@@ -174,27 +174,28 @@ $config['DX_permissions'] = [
 			'status.to.unverified',
 			'status.to.verified',
 			'status.to.approved',
-			'status.to.paid',
+			'status.to.invoiced'
 			'status.to.active', // issue policy
 			'status.to.cancel',
+
+			/**
+			 * Accounting Permissions
+			 * 	1. Generate Policy Voucher and Invoice
+			 * 	2. Make payment and generate Policy Receipt
+			 * 	3. Invoice Print, Update Print Flag
+			 * 	4. Receipt Print, Update Print Flag
+			 */
+			'generate.policy.voucher.and.invoice',
+			'make.policy.payment',
+			'print.policy.invoice',
+			'update.policy.invoice.print.flag',
+			'print.policy.receipt',
+			'update.policy.receipt.print.flag',
 
 			/**
 			 * Policy Schedule Generation
 			 */
 			'generate.policy.schedule',
-
-			/**
-			 * Payment Related Permissions
-			 */
-			'make.policy.payment',
-
-			/**
-			 * Invoice/Receipt Related Permissions
-			 */
-			'print.policy.invoice',
-			'update.policy.invoice.print.flag',
-			'print.policy.receipt',
-			'update.policy.receipt.print.flag',
 
 			/**
 			 * Followup Related Permissions

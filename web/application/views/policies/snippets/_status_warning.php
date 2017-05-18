@@ -14,9 +14,9 @@ else if( $record->status === IQB_POLICY_STATUS_VERIFIED )
     $status_sentence   = '<i class="fa fa-warning margin-r-5"></i>This Policy is <strong>VERIFIED</strong>.';
     $css_class  = 'text-purple';
 }
-else if( $record->status === IQB_POLICY_STATUS_PAID )
+else if( $record->status === IQB_POLICY_STATUS_INVOICED )
 {
-    $status_sentence   = '<i class="fa fa-warning margin-r-5"></i>This Policy is <strong>PAID</strong>.';
+    $status_sentence   = '<i class="fa fa-warning margin-r-5"></i>This Policy is <strong>INVOICED</strong>.';
     $css_class  = 'text-green';
 }
 else if($record->status === IQB_POLICY_STATUS_ACTIVE )

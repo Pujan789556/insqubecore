@@ -92,16 +92,15 @@ if ( ! function_exists('get_policy_status_dropdown'))
 			IQB_POLICY_STATUS_APPROVED => 'Approved',
 
 			/**
-			 * Policy Status - Paid
+			 * Policy Status - Invliced
 			 *
 			 * Action Allowed
-			 * 		1. Issue Invoice
-			 * 		4. Generate Schedule (Marked: Paid)
+			 * 		...
 			 *
 			 * Upper Status Level: Active | Cancel
 			 * Lower Status Level: Approved
 			 */
-			IQB_POLICY_STATUS_PAID => 'Paid',
+			IQB_POLICY_STATUS_INVOICED => 'Invoiced',
 
 			/**
 			 * Policy Status - Active
@@ -187,7 +186,7 @@ if ( ! function_exists('get_policy_status_text'))
 
 		if($formatted && $text != '')
 		{
-			if($key === IQB_POLICY_STATUS_ACTIVE || $key === IQB_POLICY_STATUS_PAID || $key === IQB_POLICY_STATUS_APPROVED )
+			if($key === IQB_POLICY_STATUS_ACTIVE || $key === IQB_POLICY_STATUS_INVOICED || $key === IQB_POLICY_STATUS_APPROVED )
 			{
 				// Green
 				$css_class = 'text-green';

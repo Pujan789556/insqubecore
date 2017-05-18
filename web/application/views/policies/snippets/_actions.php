@@ -95,11 +95,17 @@ if( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $this->dx_auth->is_autho
     ><i class="fa fa-check-square-o"></i> Verify</a>
 <?php endif?>
 
+<h4>@TODO - After Verified, Check RI-Approval Constraint. If needed, have it before moving to Approve Status</h4>
+
 <?php
 /**
  * Actions on "Verified" Status
  * ----------------------------
- *  1. Upgrade Status to "Approved"
+ * Upon Approval, the Debit note becomes a "Policy". To do so, we perform
+ * the following tasks:
+ *
+ *  1. Generate a Policy Number and assigned to it.
+ *  2. Update Status to "Approved"
  */
 if( $record->status === IQB_POLICY_STATUS_VERIFIED ): ?>
     <?php if( $this->dx_auth->is_authorized('policies', 'status.to.approved') ): ?>
@@ -117,16 +123,52 @@ if( $record->status === IQB_POLICY_STATUS_VERIFIED ): ?>
 /**
  * Actions on "Approved" Status
  * ----------------------------
- *  1. Upgrade status to "Paid"
- *  2. Generate all Accounting Transactions (Premium Vouchers, RI Distribution Vouchers)
+ * At this stage, we perform accounting transactions as follows:
+ *
+ *  1. Generate Policy Premium Voucher for this Policy
+ *  2. Generate Invoice against this Voucher for the customer
+ *  3. Upgrade status to "Invoiced"
+ *
+ * After this action, you can
+ *  a. Print Invoice
+ *  b. View Premium Voucher Details
  */
 if( $record->status === IQB_POLICY_STATUS_APPROVED ): ?>
+    <?php if( $this->dx_auth->is_authorized('policies', 'generate.policy.voucher.and.invoice') ): ?>
+        <a href="#"
+            title="Generate Voucher & Invoice"
+            data-confirm="true"
+            class="btn btn-success btn-round trg-dialog-action"
+            data-message="Are you sure you want to do this?<br/>This will automatically generate VOUCHER and INVOICE for this policy."
+            data-url="<?php echo site_url('policies/voucher/' . $record->id );?>"
+        ><i class="fa fa-money"></i> Voucher &amp; Invoice</a>
+    <?php endif?>
+<?php endif?>
+
+
+<?php
+/**
+ * Actions on "Invoiced" Status
+ * ----------------------------
+ * Now, you can finally make payment on this policy. You do the following:
+ *  1. Generate Receipt Voucher
+ *  2. Generae Payment Receipt Against Receipt Voucher (Which will be priinted and given to customer)
+ *  3. Upgrade status to "Active"
+ *  4. Generate Original(Fresh Policy Schedule) PDF and store on InsQube Media Storage
+ *  5. SMS customer the Policy Code, Expiry Date and Thank You Message.
+ *
+ * After this action, you can
+ *  a. Print/Download Receipt
+ *  b. Print Receipt Voucher Details
+ *  c. Print/Download Policy Schedule
+ */
+if( $record->status === IQB_POLICY_STATUS_INVOICED ): ?>
     <?php if( $this->dx_auth->is_authorized('policies', 'make.policy.payment') ): ?>
         <a href="#"
             title="Make a Payment"
             data-confirm="true"
             class="btn btn-success btn-round trg-dialog-action"
-            data-message="Are you sure you want to MAKE PAYMENT for this policy?<br/>This will automatically perform accounting transactions (Policy Premiums, RI Distribution); which CAN NOT be reverted."
+            data-message="Are you sure you want to MAKE PAYMENT for this policy?<br/>This will automatically generate Receipt Voucher, Payment Receipt and Activate the Policy."
             data-url="<?php echo site_url('policies/payment/' . $record->id );?>"
         ><i class="fa fa-money"></i> Make a Payment</a>
     <?php endif?>
@@ -135,29 +177,14 @@ if( $record->status === IQB_POLICY_STATUS_APPROVED ): ?>
 
 <?php
 /**
- * Actions on "Paid" Status
+ * Actions on "Active" Status
  * ----------------------------
- *  1. Activate Policy
- *  2. Generate Original(Fresh Policy Schedule) PDF and store on InsQube Media Storage
- *  2. Generate Invoice
- *  3. Generate Receipt
  *
- *  After this action, you can :
  *      - download/print invoice from invoice tab
  *      - download/print receipt from receipt tab
  *      - update invoice/receipt print flag
  */
-if( $record->status === IQB_POLICY_STATUS_PAID ): ?>
-    <?php if( $this->dx_auth->is_authorized('policies', 'status.to.active') ): ?>
-        <a href="#"
-            title="Issue Policy"
-            data-confirm="true"
-            class="btn btn-success btn-round trg-dialog-action"
-            data-message="Are you sure you want to do this? This will now activate policy, generate invoice and receipt."
-            data-url="<?php echo site_url('policies/activate/' . $record->id );?>"
-        ><i class="fa fa-check-square"></i> Issue Policy</a>
-    <?php endif?>
-<?php endif?>
+?>
 
 
 

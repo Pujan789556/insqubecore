@@ -1069,7 +1069,7 @@ class Policy_model extends MY_Model
         {
             if( !$this->policy_txn_model->ri_approved($record->id) )
             {
-                return FALSE;
+                throw new Exception("Exception [Model: Policy_model][Method: _to_status_R()]: The policy transaction has to be RI Approved.");
             }
             /**
              * ==================== TRANSACTIONS BEGIN =========================
@@ -1121,13 +1121,13 @@ class Policy_model extends MY_Model
         // ----------------------------------------------------------------
 
         /**
-         * Update Status to Paid
+         * Update Status to Invoiced
          *
          * @param object $record
          * @param array $base_data
          * @return bool
          */
-        private function _to_status_P($record, $base_data)
+        private function _to_status_I($record, $base_data)
         {
             /**
              * ==================== TRANSACTIONS BEGIN =========================
@@ -1323,19 +1323,19 @@ class Policy_model extends MY_Model
                     break;
 
                 case IQB_POLICY_STATUS_VERIFIED:
-                    $flag_qualifies = in_array($current_status, [IQB_POLICY_STATUS_UNVERIFIED, IQB_POLICY_STATUS_APPROVED]);
+                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_UNVERIFIED;
                     break;
 
                 case IQB_POLICY_STATUS_APPROVED:
                     $flag_qualifies = $current_status === IQB_POLICY_STATUS_VERIFIED;
                     break;
 
-                case IQB_POLICY_STATUS_PAID:
+                case IQB_POLICY_STATUS_INVOICED:
                     $flag_qualifies = $current_status === IQB_POLICY_STATUS_APPROVED;
                     break;
 
                 case IQB_POLICY_STATUS_ACTIVE:
-                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_PAID;
+                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_INVOICED;
                     break;
 
                 case IQB_POLICY_STATUS_CANCELED:

@@ -310,7 +310,8 @@ class Policy_txn extends MY_Controller
 							/**
 							 * @TODO
 							 *
-							 * Build RI Distribution Data For This Policy
+							 * 1. Build RI Distribution Data For This Policy
+							 * 2. RI Approval Constraint for this Policy
 							 */
 
 

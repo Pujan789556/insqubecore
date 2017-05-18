@@ -1320,8 +1320,8 @@ class Policies extends MY_Controller
 					$permission_name = 'status.to.approved';
 					break;
 
-				case IQB_POLICY_STATUS_PAID:
-					$permission_name = 'status.to.paid';
+				case IQB_POLICY_STATUS_INVOICED:
+					$permission_name = 'status.to.invoiced';
 					break;
 
 				case IQB_POLICY_STATUS_ACTIVE:
