@@ -16,7 +16,7 @@ $driver_limitation = '';
 $reaffirm_numbers = '';
 $schedule_table_title = '';
 $cost_table_title = '';
-switch ($record->sub_portfolio_code)
+switch ($record->portfolio_code)
 {
     case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
         $schedule_table_title   = 'मोटरसाइकल बीमालेखको तालिका (सेड्युल)';
