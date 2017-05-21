@@ -226,4 +226,17 @@ class Ac_duties_and_tax extends MY_Controller
 
     // --------------------------------------------------------------------
 
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        $this->ac_duties_and_tax_model->clear_cache();
+        redirect($this->router->class);
+    }
+
+	// --------------------------------------------------------------------
+
 }
