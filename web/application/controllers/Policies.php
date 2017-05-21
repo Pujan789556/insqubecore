@@ -1072,12 +1072,14 @@ class Policies extends MY_Controller
 			'txn_record' 	=> $txn_record
 		];
 
+		$page_header = 'Policy Details - <span id="page-title-policy-code">' . $record->code . '</span>';
+
 		$this->data['site_title'] = 'Policy Details | ' . $record->code;
 		$this->template->partial(
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Policy -' . $record->code,
+								'content_header' => $page_header,
 								'breadcrumbs' => ['Policies' => 'policies', 'Details' => NULL]
 						])
 						->partial('content', 'policies/_details', $data)
@@ -1112,54 +1114,30 @@ class Policies extends MY_Controller
 			$this->template->render_404();
 		}
 
+		/**
+		 * Get the Policy Fresh/Renewal Txn Record
+		 */
+		try {
 
-		$schedule_view = '';
-		switch ($record->portfolio_id)
-		{
-			// Motor
-			case IQB_SUB_PORTFOLIO_MOTORCYCLE_ID:
-			case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID:
-			case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID:
-					$schedule_view = 'policies/print/schedule_MOTOR';
-				break;
+			$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 
-			default:
-				# code...
-				break;
+		} catch (Exception $e) {
+
+			return $this->template->json([
+				'status' => 'error',
+				'message' => $e->getMessage()
+			], 404);
 		}
 
+		$data = [
+			'record' 		=> $record,
+			'txn_record' 	=> $txn_record
+		];
 
-		if( $schedule_view )
-		{
-			$this->load->library('pdf');
-	        $mpdf = $this->pdf->load();
-	        $mpdf->SetMargins(10, 10, 5);
-	        $mpdf->margin_header = 0;
-	        $mpdf->margin_footer = 2;
-	        $mpdf->SetProtection(array('print'));
-	        $mpdf->SetTitle("Policy Schedule - {$record->code}");
-	        $mpdf->SetAuthor($this->settings->orgn_name_en);
-
-	        if( in_array($record->status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED, IQB_POLICY_STATUS_VERIFIED]))
-	        {
-	        	$mpdf->SetWatermarkText( 'DEBIT NOTE - ' . $this->settings->orgn_name_en );
-	        }
-
-
-	        $mpdf->showWatermarkText = true;
-	        $mpdf->watermark_font = 'DejaVuSansCondensed';
-	        $mpdf->watermarkTextAlpha = 0.1;
-	        $mpdf->SetDisplayMode('fullpage');
-
-	        $html = $this->load->view( $schedule_view, ['record' => $record], TRUE);
-	        $mpdf->WriteHTML($html);
-
-	        $mpdf->Output();
-		}
-		else
-		{
-			$this->template->render_404('', 'No Schedule View Found!');
-		}
+		/**
+		 * Render Print View
+		 */
+		_POLICY__schedule($data, 'print');
     }
 
 
@@ -1219,7 +1197,7 @@ class Policies extends MY_Controller
 				/**
 				 * Update View
 				 */
-				$record->status = $to_status_code;
+				$record = $this->policy_model->get($id);
 				$view = 'policies/tabs/_tab_overview';
 				/**
 				 * Get the Policy Fresh/Renewal Txn Record
@@ -1236,14 +1214,21 @@ class Policies extends MY_Controller
 				}
 
 				$html = $this->load->view($view, ['record' => $record, 'txn_record' => $txn_record], TRUE);
-
 				$ajax_data = [
 					'message' 	=> 'Successfully Updated!',
 					'status'  	=> 'success',
-					'reloadRow' => true,
-					'rowId' 	=> '#tab-policy-overview-inner',
-					'method' 	=> 'replaceWith',
-					'row'		=> $html
+					'multipleUpdate' => [
+						[
+							'box' 		=> '#tab-policy-overview-inner',
+							'method' 	=> 'replaceWith',
+							'html' 		=> $html
+						],
+						[
+							'box' 		=> '#page-title-policy-code',
+							'method' 	=> 'html',
+							'html' 		=> $record->code
+						]
+					]
 				];
 				return $this->template->json($ajax_data);
 			}

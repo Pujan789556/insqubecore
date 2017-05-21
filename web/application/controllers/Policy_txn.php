@@ -631,5 +631,245 @@ class Policy_txn extends MY_Controller
 	// --------------------- END: PRIVATE CRUD HELPER FUNCTIONS --------------------
 
 
+	// --------------------------------------------------------------------
+	//  STATUS UPGRADE/DOWNGRADE
+	// --------------------------------------------------------------------
+
+	/**
+	 * Upgrade/Downgrade Status of a Policy Txn Record
+	 *
+	 * @param integer $id Policy ID
+	 * @param char $to_status_code Status Code
+	 * @param string $ref 	Where does this requrest come from?
+	 * @return json
+	 */
+	public function status($policy_id, $to_status_code, $ref)
+	{
+		// Current Policy Transaction Record and Has valid Type?
+		$txn_record = $this->policy_txn_model->get_current_txn_by_policy($policy_id);
+		if( !$txn_record  )
+		{
+			return $this->template->json([
+				'status' 	=> 'error',
+				'message' 	=> 'Invalid Current Policy Transaction Record!'
+			], 400);
+		}
+
+		/**
+		 * Check Permission
+		 * -----------------
+		 * You need to have permission to modify the given status.
+		 */
+		$this->__check_status_permission($to_status_code, $txn_record);
+
+
+		/**
+		 * Meet the Status Pre-Requisite ?
+		 */
+		$this->__check_status_prerequisite($to_status_code, $txn_record);
+
+
+		/**
+		 * Let's Update the Status
+		 */
+		try {
+
+			if( $this->policy_txn_model->update_status($txn_record->policy_id, $to_status_code) )
+			{
+				/**
+				 * Updated Transaction Record
+				 */
+				$txn_record = $this->policy_txn_model->get($txn_record->id);
+
+				/**
+				 * What to reload/render after success?
+				 * -----------------------------------
+				 * 	1. RI Approval Triggered from Policy Overview Tab
+				 */
+				if( $ref = 'policy_tab_overview' )
+				{
+					$policy_record = $this->policy_model->get($txn_record->policy_id);
+
+					/**
+					 * Update View
+					 */
+					$view = 'policies/tabs/_tab_overview';
+					$html = $this->load->view($view, ['record' => $policy_record, 'txn_record' => $txn_record], TRUE);
+
+					$ajax_data = [
+						'message' 	=> 'Successfully Updated!',
+						'status'  	=> 'success',
+						'multipleUpdate' => [
+							[
+								'box' 		=> '#tab-policy-overview-inner',
+								'method' 	=> 'replaceWith',
+								'html' 		=> $html
+							],
+							[
+								'box' 		=> '#page-title-policy-code',
+								'method' 	=> 'html',
+								'html' 		=> $policy_record->code
+							]
+						]
+					];
+					return $this->template->json($ajax_data);
+				}
+				else
+				{
+					return $this->template->json([
+						'status' 	=> 'error',
+						'title' 	=> '@TODO',
+						'message' 	=> 'Please update other reference return'
+					], 400);
+				}
+			}
+
+		} catch (Exception $e) {
+
+			return $this->template->json([
+				'status' 	=> 'error',
+				'title' 	=> 'Exception Occured.',
+				'message' 	=> $e->getMessage()
+			], 400);
+		}
+
+		return $this->template->json([
+			'status' 	=> 'error',
+			'message' 	=> 'Could not be updated!'
+		], 400);
+	}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Check Status up/down permission
+		 *
+		 * @param alpha $to_updown_status Status Code to UP/DOWN
+		 * @param bool $terminate_on_fail Terminate right here on fails
+		 * @return mixed
+		 */
+		private function __check_status_permission($to_updown_status, $terminate_on_fail = TRUE)
+		{
+			/**
+			 * Check Permission
+			 * ------------------------------
+			 *
+			 */
+
+			$status_keys = array_keys(get_policy_txn_status_dropdown(FALSE));
+
+			// Valid Status Code?
+			if( !in_array($to_updown_status, $status_keys ) )
+			{
+				return $this->template->json([
+					'status' 	=> 'error',
+					'message' 	=> 'Invalid Status Code!'
+				], 403);
+			}
+
+			// Valid Permission?
+			$__flag_valid_permission = FALSE;
+			$permission_name 	= '';
+			switch ($to_updown_status)
+			{
+				case IQB_POLICY_TXN_STATUS_DRAFT:
+					$permission_name = 'status.to.draft';
+					break;
+
+				case IQB_POLICY_TXN_STATUS_VERIFIED:
+					$permission_name = 'status.to.verified';
+					break;
+
+				case IQB_POLICY_TXN_STATUS_RI_APPROVED:
+					$permission_name = 'status.to.ri.approved';
+					break;
+
+				case IQB_POLICY_STATUS_ACTIVE:
+					$permission_name = 'status.to.active';
+					break;
+
+				default:
+					break;
+			}
+			if( $permission_name !== ''  && $this->dx_auth->is_authorized('policy_txn', $permission_name) )
+			{
+				$__flag_valid_permission = TRUE;
+			}
+
+			if( !$__flag_valid_permission && $terminate_on_fail )
+			{
+				$this->dx_auth->deny_access();
+			}
+
+			return $__flag_valid_permission;
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Check Status up/down Pre-Requisite
+		 *
+		 * This is very important that not all type of policy txn has manu status
+		 * up/down facility. So we have to look into the type of Policy Txn Record Type and
+		 * follow the logic accordingly.
+		 *
+		 * @param alpha $to_updown_status Status Code to UP/DOWN
+		 * @param object $txn_record Policy Transaction Record
+		 * @param bool $terminate_on_fail Terminate right here on fails
+		 * @return mixed
+		 */
+		private function __check_status_prerequisite($to_updown_status, $txn_record, $terminate_on_fail = TRUE)
+		{
+			/**
+			 * Check Pre-Requisite
+			 * --------------------
+			 * 		Case 1. IQB_POLICY_TXN_TYPE_FRESH & IQB_POLICY_TXN_TYPE_RENEWAL
+			 * 			- Verifty <--> RI-Approval
+			 *
+			 * 		Case 2: All other types
+			 * 			- Draft <--> Verifty <--> RI-Approval <--> Active
+			 */
+
+			$__flag_pass = FALSE;
+			if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_FRESH  || $txn_record->txn_type == IQB_POLICY_TXN_TYPE_RENEWAL )
+			{
+				$__flag_pass = $txn_record->status === IQB_POLICY_TXN_STATUS_VERIFIED && $to_updown_status === IQB_POLICY_TXN_STATUS_RI_APPROVED;
+			}
+			else
+			{
+				switch ( $txn_record->status )
+				{
+					case IQB_POLICY_TXN_STATUS_DRAFT:
+						$__flag_pass = $to_updown_status === IQB_POLICY_TXN_STATUS_VERIFIED;
+						break;
+
+					case IQB_POLICY_TXN_STATUS_VERIFIED:
+						$__flag_pass = $to_updown_status === IQB_POLICY_TXN_STATUS_RI_APPROVED || $to_updown_status === IQB_POLICY_TXN_STATUS_ACTIVE;
+						break;
+
+					case IQB_POLICY_TXN_STATUS_RI_APPROVED:
+						$__flag_pass = $to_updown_status === IQB_POLICY_TXN_STATUS_ACTIVE;
+						break;
+
+					default:
+						break;
+				}
+			}
+
+			if( !$__flag_pass && $terminate_on_fail )
+			{
+				return $this->template->json([
+					'status' 	=> 'error',
+					'title' 	=> 'Invalid Status Transaction',
+					'message' 	=> 'You can not swith to the state from this state of transaction.'
+				], 400);
+			}
+
+			return $__flag_pass;
+
+		}
+
+	// --------------------- END: STATUS UPGRADE/DOWNGRADE --------------------
+
 
 }

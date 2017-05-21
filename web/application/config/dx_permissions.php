@@ -226,7 +226,7 @@ $config['DX_permissions'] = [
 			/**
 			 * RI-Approval Permission
 			 */
-			'ri.approval.on.transaction', // this will updated ri_approved_at/by & status to ri-approved(R)
+			'status.to.ri.approved', // this will updated ri_approved_at/by & status to ri-approved(R)
 		],
 
 		/**

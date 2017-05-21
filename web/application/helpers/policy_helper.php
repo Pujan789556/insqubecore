@@ -470,15 +470,16 @@ if ( ! function_exists('is_policy_editable'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_POLICY_partial_view__cost_calculation_table'))
+if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 {
 	/**
 	 * Get Cost Calculation Table Parital View
 	 *
 	 * @param integer $portfolio_id Portfolio ID
+	 * @param string $view_for View For [regular|print]
 	 * @return	string
 	 */
-	function _POLICY_partial_view__cost_calculation_table( $portfolio_id )
+	function _POLICY__partial_view__cost_calculation_table( $portfolio_id, $view_for = 'regular' )
 	{
 		$partial_view = '';
 
@@ -489,7 +490,8 @@ if ( ! function_exists('_POLICY_partial_view__cost_calculation_table'))
 		 */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
-			$partial_view = 'policy_txn/snippets/_cost_calculation_table_MOTOR';
+			$view_prefix = $view_for === 'print' ? '_print' : '';
+			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MOTOR";
 		}
 		return $partial_view;
 	}
@@ -659,6 +661,145 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
             'record'    		=> $spr_record,
             'default_duration' 	=> $default_duration
         ];
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__ri_approval_constraint'))
+{
+	/**
+	 * RI Approval Constraint on Policy
+	 *
+	 * Check if the current policy transaction record requires RI Approval and is Approved
+	 * i.e.
+	 * 		if RI Approval required and not approved yet, it returns TRUE
+	 * 		FALSE otherwise.
+	 *
+	 * @param char $policy_id_or_txn_record 	Policy ID or Txn Record
+	 * @return	bool
+	 */
+	function _POLICY__ri_approval_constraint( $policy_id_or_txn_record )
+	{
+		$CI =& get_instance();
+		$CI->load->model('policy_txn_model');
+
+		return $CI->policy_txn_model->ri_approved($policy_id_or_txn_record) != TRUE;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__schedule'))
+{
+    /**
+     * Save or Print Policy Schedule.
+     *
+     * 1. Save the Original Policy Schedule (PDF)
+     * 		Once the policy number is generated, the Original/First Copy of
+     * 		policy is saved as pdf. This is required because the policy contents
+     * 		change over the period of time via "Endorsement".
+     *
+     * 2. Print The Policy Schedule (PDF)
+     * 		This action is called to generate current policy schedule's pdf.
+     *
+     * Filename: <policycode>.pdf
+     *
+     * @param array $data 		['record' => xxx, 'txn_record' => yyy]
+     * @param string $action 	[save|print]
+     * @return  void
+     */
+    function _POLICY__schedule( $data, $action )
+    {
+    	if( !in_array($action, ['save', 'print', 'download']) )
+    	{
+    		throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: No schedule view exists for given portfolio({$record->portfolio_name});");
+    	}
+
+    	$CI =& get_instance();
+
+		/**
+		 * Extract Policy Record and Policy Transaction Record
+		 */
+		$record 		= $data['record'];
+		$txn_record 	= $data['txn_record'];
+		$schedule_view 	= _POLICY__get_schedule_view($record->portfolio_id);
+		if( $schedule_view )
+		{
+			$CI->load->library('pdf');
+	        $mpdf = $CI->pdf->load();
+	        // $mpdf->SetMargins(10, 10, 5);
+	        $mpdf->SetMargins(10, 5, 10, 5);
+	        $mpdf->margin_header = 5;
+	        $mpdf->margin_footer = 5;
+	        $mpdf->SetProtection(array('print'));
+	        $mpdf->SetTitle("Policy Schedule - {$record->code}");
+	        $mpdf->SetAuthor($CI->settings->orgn_name_en);
+
+	        if( in_array($record->status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED, IQB_POLICY_STATUS_VERIFIED]))
+	        {
+	        	$mpdf->SetWatermarkText( 'DEBIT NOTE - ' . $CI->settings->orgn_name_en );
+	        }
+
+	        $mpdf->showWatermarkText = true;
+	        $mpdf->watermark_font = 'DejaVuSansCondensed';
+	        $mpdf->watermarkTextAlpha = 0.1;
+	        $mpdf->SetDisplayMode('fullpage');
+
+	        $html = $CI->load->view( $schedule_view, $data, TRUE);
+	        $mpdf->WriteHTML($html);
+	        $filename = $data_path . "policy-{$record->code}.pdf";
+	        if( $action === 'save' )
+	        {
+	        	$save_full_path = rtrim(INSQUBE_DATA_PATH, '/') . '/policies/' . $filename;
+	        	$mpdf->Output($save_full_path,'F');
+	        }
+	        else if($action === 'download')
+	        {
+	        	$mpdf->Output($filename,'D');      // make it to DOWNLOAD
+	        }
+	        else
+	        {
+	        	$mpdf->Output();
+	        }
+		}
+		else
+		{
+			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: No schedule view exists for given portfolio({$record->portfolio_name});");
+		}
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__get_schedule_view'))
+{
+    /**
+     * Get the policy schedule view
+     *
+     * @param integer $portfolio_id Portfolio ID
+     * @return  void
+     */
+    function _POLICY__get_schedule_view( $portfolio_id )
+    {
+    	$schedule_view = '';
+    	$portfolio_id  = (int)$portfolio_id;
+
+		switch ($portfolio_id)
+		{
+			// Motor
+			case IQB_SUB_PORTFOLIO_MOTORCYCLE_ID:
+			case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID:
+			case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID:
+					$schedule_view = 'policies/print/schedule_MOTOR';
+				break;
+
+			default:
+				# code...
+				break;
+		}
+
+		return $schedule_view;
     }
 }
 

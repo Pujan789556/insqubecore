@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'policy_nr', 'proposer', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'cur_amt_sum_insured', 'cur_amt_total_premium', 'cur_amt_pool_premium', 'cur_amt_commissionable', 'cur_amt_agent_commission', 'cur_amt_stamp_duty', 'cur_amt_vat', 'created_at', 'created_by', 'verified_at', 'verified_by', 'approved_at', 'approved_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'proposer', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'cur_amt_sum_insured', 'cur_amt_total_premium', 'cur_amt_pool_premium', 'cur_amt_commissionable', 'cur_amt_agent_commission', 'cur_amt_stamp_duty', 'cur_amt_vat', 'created_at', 'created_by', 'verified_at', 'verified_by', 'approved_at', 'approved_by', 'updated_at', 'updated_by' ];
 
     protected $validation_rules = [];
 
@@ -1090,12 +1090,33 @@ class Policy_model extends MY_Model
                      *
                      * So, the following tasks are carried out:
                      *      1. Policy Record [Status -> Approved, Approved date/user -> current]
+                     *      2. Generate Policy Number
+                     *      3. Save Original Schedule PDF
+                     *
+                     * !!! NOTE: Both the tasks are done by calling the stored function.
                      */
+                    $policy_type    = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH;
+                    $params         = [$policy_type, $record->id, $this->dx_auth->get_user_id()];
+                    $sql            = "SELECT `f_generate_policy_number`(?, ?, ?) AS policy_code";
+                    $result         = mysqli_store_procedure('select', $sql, $params);
 
-                    // Task 1 - Policy Record [Status -> Approved, Approved date/user -> current]
-                    $base_data['approved_at'] = $this->set_date();
-                    $base_data['approved_by'] = $this->dx_auth->get_user_id();
-                    $this->_to_status($record->id, $base_data);
+                    /**
+                     * Save Original Schedule PDF
+                     */
+                    $result_row = $result[0];
+                    if($result_row->policy_code)
+                    {
+                        /**
+                         * Updated Records - Policy and Policy Transaction
+                         */
+                        $record     = $this->get($record->id);
+                        $txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+
+                        _POLICY__schedule([
+                                'record'        => $record,
+                                'txn_record'    => $txn_record
+                            ], 'save');
+                    }
 
             /**
              * Complete transactions or Rollback

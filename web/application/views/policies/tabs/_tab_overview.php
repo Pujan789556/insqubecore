@@ -58,12 +58,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	            'attributes'    	=> $record->object_attributes,
 	            'flag_locked'		=> $record->object_flag_locked,
 	        ];
-
 			$this->load->view('objects/snippets/_object_card', ['record' => $object_record, '__flag_object_editable' => $__flag_object_editable]);
-			?>
 
 
-			<?php
 			/**
 			* Customer Overview
 			*/
@@ -86,10 +83,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			*/
 			$this->load->view('customers/snippets/_widget_profile', ['record' => $customer_record]);
 			?>
-
-
-
 		</div>
-
 	</div>
 </div>

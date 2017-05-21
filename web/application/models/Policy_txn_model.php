@@ -273,7 +273,7 @@ class Policy_txn_model extends MY_Model
             switch ($to_status)
             {
                 case IQB_POLICY_TXN_STATUS_DRAFT:
-                    $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_VERIFIED;
+                    $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
                     break;
 
                 case IQB_POLICY_TXN_STATUS_VERIFIED:
@@ -370,9 +370,27 @@ class Policy_txn_model extends MY_Model
             'PTXN.policy_id'    => $policy_id,
             'PTXN.flag_current' => IQB_FLAG_ON
         ];
-        return $this->db->select('PTXN.*')
+        return $this->db->select('PTXN.*, P.branch_id')
                         ->from($this->table_name . ' AS PTXN')
+                        ->join('dt_policies P', 'P.id = PTXN.policy_id')
                         ->where($where)
+                        ->get()->row();
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Policy Transaction Record
+     *
+     * @param int $id
+     * @return object
+     */
+    public function get($id)
+    {
+        return $this->db->select('PTXN.*, P.branch_id')
+                        ->from($this->table_name . ' AS PTXN')
+                        ->join('dt_policies P', 'P.id = PTXN.policy_id')
+                        ->where('PTXN.id', $id)
                         ->get()->row();
     }
 
@@ -431,7 +449,7 @@ class Policy_txn_model extends MY_Model
             return FALSE;
         }
 
-        $record = $this->row($id);
+        $record = $this->get($id);
         if(!$record)
         {
             return FALSE;

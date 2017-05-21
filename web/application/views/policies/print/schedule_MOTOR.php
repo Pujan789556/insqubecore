@@ -263,7 +263,7 @@ switch ($record->portfolio_code)
                         $driver_limitation = '';
                         $reaffirm_numbers = '';
                         $cost_table_title = '';
-                        switch ($record->sub_portfolio_code)
+                        switch ($record->portfolio_code)
                         {
                             case IQB_SUB_PORTFOLIO_MOTORCYCLE_CODE:
                                 $usage_limitation = 'यस बीमालेख अन्तर्गत रक्षावरण गरिएको सवारी साधन भाडा, इनाम, संगठनात्मक दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षण वा ढुवानी कार्यसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।';
@@ -322,20 +322,13 @@ switch ($record->portfolio_code)
                 </td>
             </tr>
         </table>
-
         <pagebreak>
-
         <?php
         /**
          * Policy Premium Card
          */
-        $premium_record = (object)[
-            'policy_id'     => $record->id,
-            'total_premium_amount'  => $record->total_premium_amount,
-            'stamp_duty_amount'     => $record->stamp_duty_amount,
-            'attributes'    => $record->premium_attributes
-        ];
-        $this->load->view('premium/snippets/_print_card_overview_MOTOR', ['premium_record' => $premium_record, 'policy_record' => $record, 'title' => $cost_table_title]);
+        $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($record->portfolio_id, 'print');
+        $this->load->view($cost_calculation_table_view, ['txn_record' => $txn_record, 'policy_record' => $record, 'title' => $cost_table_title]);
         ?>
     </body>
 </html>
