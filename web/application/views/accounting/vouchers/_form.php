@@ -67,6 +67,56 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             </tr>
         </thead>
 
+        <tbody id="debit-box">
+            <?php
+            $debit_elements     = $form_elements['details']['debits'];
+            $account_id         = $debit_elements[0];
+            $party_type_dr = $party_type = $debit_elements[1];
+            $party_id           = $debit_elements[2];
+            $debit_amount       = $debit_elements[3];
+
+
+            $debit_rows = $voucher_detail_rows['debit_rows'] ?? [];
+            $row_counter = 1;
+            if( $debit_rows )
+            {
+                foreach($debit_rows as $row)
+                {
+                    /**
+                     * Render Default, Regular Rows
+                     */
+                    $row_type = $row_counter == 1 ? 'default' : 'regular';
+                    $this->load->view('accounting/vouchers/_form_debit_row', [
+                        'row_type'              => $row_type,
+                        'row_id'                => 'tmpl-debit-row-' . $row_counter,
+                        'amount_element'        => $debit_amount,
+                        'party_type_element'    => $party_type,
+                        'row'                   => $row
+                    ]);
+                    $row_counter++;
+                }
+            }
+            else
+            {
+                /**
+                 * Render Default Row
+                 */
+                $this->load->view('accounting/vouchers/_form_debit_row', [
+                    'row_type'              => 'default',
+                    'row_id'                => 'tmpl-debit-row-' . $row_counter,
+                    'amount_element'        => $debit_amount,
+                    'party_type_element'    => $party_type,
+                    'row'                   => NULL
+                ]);
+            }
+            ?>
+            <tr id="debit-row-add-more">
+                <td class="add-more" colspan="5">
+                    <a class="btn btn-sm btn-success _add_row" data-row-template="tmpl-debit-row" href="#" data-toggle="tooltip" title="Add Debit Row">+ Debit Row</a>
+                </td>
+            </tr>
+        </tbody>
+
         <tbody id="credit-box">
             <?php
             $credit_elements    = $form_elements['details']['credits'];
@@ -117,55 +167,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             </tr>
         </tbody>
 
-        <tbody id="debit-box">
-            <?php
-            $debit_elements     = $form_elements['details']['debits'];
-            $account_id         = $debit_elements[0];
-            $party_type_dr = $party_type = $debit_elements[1];
-            $party_id           = $debit_elements[2];
-            $debit_amount       = $debit_elements[3];
-
-
-            $debit_rows = $voucher_detail_rows['debit_rows'] ?? [];
-            $row_counter = 1;
-            if( $debit_rows )
-            {
-                foreach($debit_rows as $row)
-                {
-                    /**
-                     * Render Default, Regular Rows
-                     */
-                    $row_type = $row_counter == 1 ? 'default' : 'regular';
-                    $this->load->view('accounting/vouchers/_form_debit_row', [
-                        'row_type'              => $row_type,
-                        'row_id'                => 'tmpl-debit-row-' . $row_counter,
-                        'amount_element'        => $debit_amount,
-                        'party_type_element'    => $party_type,
-                        'row'                   => $row
-                    ]);
-                    $row_counter++;
-                }
-            }
-            else
-            {
-                /**
-                 * Render Default Row
-                 */
-                $this->load->view('accounting/vouchers/_form_debit_row', [
-                    'row_type'              => 'default',
-                    'row_id'                => 'tmpl-debit-row-' . $row_counter,
-                    'amount_element'        => $debit_amount,
-                    'party_type_element'    => $party_type,
-                    'row'                   => NULL
-                ]);
-            }
-            ?>
-            <tr id="debit-row-add-more">
-                <td class="add-more" colspan="5">
-                    <a class="btn btn-sm btn-success _add_row" data-row-template="tmpl-debit-row" href="#" data-toggle="tooltip" title="Add Debit Row">+ Debit Row</a>
-                </td>
-            </tr>
-        </tbody>
         <tfoot>
             <tr>
                 <td colspan="2">&nbsp;</td>

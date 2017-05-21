@@ -62,26 +62,7 @@ $credit_total = 0;
                 			?>
                 			<tr>
                 				<td><?php echo $row->sno?></td>
-                				<td>
-                					<?php
-									$path_str = [];
-									if( count($row->acg_path) > 2 )
-									{
-										array_shift($row->acg_path); // Remove "Chart of Account"
-										foreach($row->acg_path as $path)
-										{
-											$path_str[]=$path->name;
-										}
-									}
-									else
-									{
-										$path_str[] = $row->group_name;
-									}
-									$path_str[] = $row->account_name;
-
-									echo implode('<i class="fa fa-angle-right text-bold text-red" style="margin:0 5px;"></i>', $path_str);
-									?>
-                				</td>
+                				<td><?php echo ac_account_group_path_formatted($row->acg_path, $row->account_name);?></td>
                 				<td>
                 					<?php
                 					echo $row->party_name;
@@ -101,26 +82,7 @@ $credit_total = 0;
                 			?>
                 			<tr>
                 				<td><?php echo $row->sno?></td>
-                				<td>
-                					<?php
-									$path_str = [];
-									if( count($row->acg_path) > 2 )
-									{
-										array_shift($row->acg_path); // Remove "Chart of Account"
-										foreach($row->acg_path as $path)
-										{
-											$path_str[]=$path->name;
-										}
-									}
-									else
-									{
-										$path_str[] = $row->group_name;
-									}
-									$path_str[] = $row->account_name;
-
-									echo implode('<i class="fa fa-angle-right text-bold text-red" style="margin:0 5px;"></i>', $path_str);
-									?>
-                				</td>
+                				<td><?php echo ac_account_group_path_formatted($row->acg_path, $row->account_name);?></td>
                 				<td>
                 					<?php
                 					echo $row->party_name;
