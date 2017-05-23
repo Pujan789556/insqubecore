@@ -78,14 +78,17 @@ if ( ! function_exists('ac_account_group_path_formatted'))
 	/**
 	 * Get Account Group Path Formatted
 	 *
+	 * @param array $acg_path
+	 * @param string $account_name
+	 * @param string $path_separator
 	 * @return	string
 	 */
-	function ac_account_group_path_formatted( $acg_path, $account_name = ''  )
+	function ac_account_group_path_formatted( $acg_path, $account_name = '', $path_separator = 'html'  )
 	{
 		$group_path = [];
-		if( count($acg_path) > 2 )
+		if( count($acg_path) >= 2 )
 		{
-			array_shift($acg_path); // Remove "Chart of Account"
+			// array_shift($acg_path); // Remove "Chart of Account"
 			foreach($acg_path as $path)
 			{
 				$group_path[]=$path->name;
@@ -93,7 +96,7 @@ if ( ! function_exists('ac_account_group_path_formatted'))
 		}
 		else
 		{
-			$group_path[] = $record->group_name;
+			$group_path[] = $acg_path[0]->name;
 		}
 
 		// If account name is supplied, append it too
@@ -102,8 +105,18 @@ if ( ! function_exists('ac_account_group_path_formatted'))
 			$group_path[] = '<strong>' . $account_name . '</strong>';
 		}
 
+		// Path Seperator
+		// Options: html|regular
+		if($path_separator == 'html')
+		{
+			$seperator = '<i class="fa fa-angle-right text-bold text-red" style="margin:0 5px;"></i>';
+		}
+		else{
+			$seperator = ' &gt; ';
+		}
 
-		return implode('<i class="fa fa-angle-right text-bold text-red" style="margin:0 5px;"></i>', $group_path);
+
+		return implode($seperator, $group_path);
 	}
 }
 

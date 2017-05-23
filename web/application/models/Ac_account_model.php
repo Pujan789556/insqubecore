@@ -39,6 +39,9 @@ class Ac_account_model extends MY_Model
     {
         parent::__construct();
 
+        // Helper
+        $this->load->helper('account');
+
         // Set validation rule
         $this->load->model('ac_account_group_model');
         $this->validation_rules();
@@ -53,13 +56,14 @@ class Ac_account_model extends MY_Model
      */
     public function validation_rules()
     {
-        $dropdwon_heading_groups    = $this->ac_account_group_model->dropdown_tree();
-
+        $dropdwon_heading_groups    = $this->ac_account_group_model->dropdown_tree(null, true, 'regular');
         $this->validation_rules = [
             [
                 'field' => 'account_group_id',
                 'label' => 'Account Group',
                 'rules' => 'trim|required|integer|max_length[11]|in_list[' . implode(',', array_keys($dropdwon_heading_groups)) . ']',
+                '_id'       => '_ac_group-id',
+                '_extra_attributes' => 'style="width:100%; display:block"',
                 '_type'     => 'dropdown',
                 '_data'     => IQB_BLANK_SELECT + $dropdwon_heading_groups,
                 '_required' => true

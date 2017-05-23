@@ -23,3 +23,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     ?>
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
+<script type="text/javascript">
+    // Initialize Select2
+    $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
+        //Initialize Select2 Elements
+        $("#_parent-id").select2();
+        $('.bootbox.modal').removeAttr('tabindex'); // modal workaround
+    });
+</script>

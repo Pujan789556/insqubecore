@@ -42,10 +42,11 @@ class Ac_account_group_model extends MY_Model
     {
         parent::__construct();
 
+        // Helper
+        $this->load->helper('account');
+
         // Set validation rules
         $this->validation_rules();
-
-        // $this->clear_cache();
     }
 
     // ----------------------------------------------------------------
@@ -57,13 +58,15 @@ class Ac_account_group_model extends MY_Model
      */
     public function validation_rules()
     {
-        $dropdown_parent = $this->dropdown_tree();
+        $dropdown_parent = $this->dropdown_tree(null, true, 'regular');
         $this->validation_rules = [
             'add' => [
                 [
                     'field' => 'parent_id',
                     'label' => 'Parent Group',
                     'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($dropdown_parent)) . ']|callback__cb_valid_parent',
+                    '_id'       => '_parent-id',
+                    '_extra_attributes' => 'style="width:100%; display:block"',
                     '_type'     => 'dropdown',
                     '_data'     => IQB_ZERO_SELECT + $dropdown_parent,
                     '_required' => true
@@ -327,10 +330,13 @@ class Ac_account_group_model extends MY_Model
     /**
      * Get Dropdown List
      */
-    public function dropdown_tree($start_at=null)
+    public function dropdown_tree($start_at=null, $path_formatted=false, $path_separator = 'html')
     {
-
         $cache_name = $start_at ? 'ac_ag_dd_tree_' . $start_at : 'ac_ag_dd_tree_full';
+        if($path_formatted == true)
+        {
+            $$cache_name = $cache_name . $path_separator ;
+        }
 
         /**
          * Get Cached Result, If no, cache the query result
@@ -343,9 +349,14 @@ class Ac_account_group_model extends MY_Model
             $dropdown_tree = [];
             foreach($records as $record)
             {
+                if($path_formatted)
+                {
+                    $path = $this->get_path($record->id);
+                    $record->name = ac_account_group_path_formatted( $path, '', $path_separator );
+                }
+
                 $dropdown_tree["{$record->id}"] = $record->name;
             }
-
             $this->write_cache($dropdown_tree, $cache_name, CACHE_DURATION_DAY);
         }
 
