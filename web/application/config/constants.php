@@ -317,8 +317,13 @@ defined('IQB_RI_TREATY_TYPES')    	OR define('IQB_RI_TREATY_TYPES', 	[
 */
 
 // ACCOUNT DUTY AND TAX IDS
-defined('IQB_AC_DUTY_AND_TAX_ID_VAT')    			OR define('IQB_AC_DUTY_AND_TAX_ID_VAT',	1);
-defined('IQB_AC_DUTY_AND_TAX_ID_ON_PURCHASE')   	OR define('IQB_AC_DUTY_AND_TAX_ID_ON_PURCHASE',	2);
+defined('IQB_AC_DNT_ID_VAT')    			OR define('IQB_AC_DNT_ID_VAT',	1);
+defined('IQB_AC_DNT_ID_VAT_ON_PURCHASE')   	OR define('IQB_AC_DNT_ID_VAT_ON_PURCHASE',	2);
+defined('IQB_AC_DNT_ID_TDS_ON_AC')   		OR define('IQB_AC_DNT_ID_TDS_ON_AC',	3); // TDS on Agent Commission
+defined('IQB_AC_DNT_ID_SC_BSRP')   			OR define('IQB_AC_DNT_ID_SC_BSRP',	4); // Service Charge - Beema Samiti on Regular Policy
+defined('IQB_AC_DNT_ID_SC_BSIP')   			OR define('IQB_AC_DNT_ID_SC_BSIP',	5); // Service Charge - Beema Samiti on Inward Policy
+defined('IQB_AC_DNT_ID_TDS_ON_SFVR')   		OR define('IQB_AC_DNT_ID_TDS_ON_SFVR',	6); // TDS on Surveyor Fee - Vat Registered
+defined('IQB_AC_DNT_ID_TDS_ON_SFVNR')   	OR define('IQB_AC_DNT_ID_TDS_ON_SFVNR',	7); // TDS on Surveyor Fee - Vat Not Registered
 
 
 // ACCOUNT PARTY TYPES
