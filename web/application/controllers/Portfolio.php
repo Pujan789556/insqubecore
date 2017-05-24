@@ -61,7 +61,6 @@ class Portfolio extends MY_Controller
 		/**
 		 * Normal Form Render
 		 */
-		// this will generate cache name: mc_master_Portfolio_all
 		$records = $this->portfolio_model->get_all();
 
 		$this->template->partial(
@@ -252,6 +251,19 @@ class Portfolio extends MY_Controller
 
 		return $return_data;
 	}
+
+	// --------------------------------------------------------------------
+
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        $this->portfolio_model->clear_cache();
+        redirect($this->router->class);
+    }
 
 	// --------------------------------------------------------------------
 

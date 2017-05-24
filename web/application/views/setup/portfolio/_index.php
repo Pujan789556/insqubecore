@@ -17,10 +17,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						$this->load->view('templates/_common/_live_search');
 						?>
 					</div>
-					<div class="col-sm-6 master-actions">
+					<div class="col-sm-6 master-actions text-right">
 						<a href="#" title="Add new portfolio"
-							class="btn btn-success btn-round pull-right trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New Portfolio' data-url="<?php echo site_url('portfolio/add/');?>" data-form=".form-iqb-general"
+							class="btn btn-success btn-round trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New Portfolio' data-url="<?php echo site_url('portfolio/add/');?>" data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
+						<a href="<?php echo site_url( $this->router->class . '/flush/' );?>" title="Flush Cache"
+							class="btn btn-success btn-round"
+							data-toggle="tooltip"
+						><i class="fa fa-trash-o"></i> Flush Cache</a>
 					</div>
 				</div>
 			</div>

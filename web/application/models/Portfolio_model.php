@@ -11,39 +11,24 @@ class Portfolio_model extends MY_Model
 
     protected $log_user = true;
 
-    protected $protected_attributes = ['id', 'parent_id', 'code'];
+    protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['capitalize_code'];
-    protected $before_update = ['capitalize_code'];
+    protected $before_insert = ['before_insert_update__defaults'];
+    protected $before_update = ['before_insert_update__defaults'];
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
     protected $fields = ["id", "parent_id", "code", "name_en", "name_np", "created_at", "created_by", "updated_at", "updated_by"];
 
-    protected $validation_rules = [
-        [
-            'field' => 'name_en',
-            'label' => 'Portfolio Name(EN)',
-            'rules' => 'trim|required|max_length[100]',
-            '_type'     => 'text',
-            '_required' => true
-        ],
-        [
-            'field' => 'name_np',
-            'label' => 'Portfolio Name (NP)',
-            'rules' => 'trim|max_length[100]',
-            '_type'     => 'text',
-            '_required' => false
-        ]
-    ];
+    protected $validation_rules = [];
 
 
     /**
      * Protect Default Records?
      */
     public static $protect_default = TRUE;
-    public static $protect_max_id = 99; // Prevent first 12 records from deletion.
+    public static $protect_max_id = 1000; // Prevent first 12 records from deletion.
 
 	// --------------------------------------------------------------------
 
@@ -56,8 +41,46 @@ class Portfolio_model extends MY_Model
     {
         parent::__construct();
 
-        // Cache clear
-        $this->clear_cache();
+        // Validation Rules
+        $this->validation_rules();
+    }
+
+    // ----------------------------------------------------------------
+
+    public function validation_rules()
+    {
+        $parent_dropdown = $this->dropdown_parent();
+        $this->validation_rules = [
+            [
+                'field' => 'parent_id',
+                'label' => 'Parent Portfolio',
+                'rules' => 'trim|integer|max_length[8]|in_list[' . implode(',', array_keys($parent_dropdown)) . ']',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_BLANK_SELECT + $parent_dropdown,
+                '_required' => true
+            ],
+            [
+                'field' => 'name_en',
+                'label' => 'Portfolio Name(EN)',
+                'rules' => 'trim|required|max_length[100]|ucfirst',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            [
+                'field' => 'name_np',
+                'label' => 'Portfolio Name (NP)',
+                'rules' => 'trim|max_length[100]',
+                '_type'     => 'text',
+                '_required' => false
+            ],
+            [
+                'field' => 'code',
+                'label' => 'Portfolio Code',
+                'rules' => 'trim|required|alpha|max_length[15]|strtoupper|callback_check_duplicate',
+                '_type'     => 'text',
+                '_required' => true
+            ]
+        ];
     }
 
     // ----------------------------------------------------------------
@@ -109,7 +132,17 @@ class Portfolio_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function capitalize_code($data)
+    /**
+     * Trigger - Before Insert/Update
+     *
+     * The following tasks are carried out before inserting/updating the record:
+     *  1. Capitalize Code
+     *  2. Nullify Parent ID if empty supplied
+     *
+     * @param array $data
+     * @return array
+     */
+    public function before_insert_update__defaults($data)
     {
         $code_cols = array('code');
         foreach($code_cols as $col)
@@ -118,6 +151,11 @@ class Portfolio_model extends MY_Model
             {
                 $data[$col] = strtoupper($data[$col]);
             }
+        }
+
+        if( !$data['parent_id'])
+        {
+            $data['parent_id'] = NULL;
         }
         return $data;
     }
@@ -130,7 +168,6 @@ class Portfolio_model extends MY_Model
         {
             $this->db->where('id !=', $id);
         }
-        // $where is array ['key' => $value]
         return $this->db->where($where)
                         ->count_all_results($this->table_name);
     }
@@ -147,7 +184,7 @@ class Portfolio_model extends MY_Model
         {
             $records = $this->db->select('id, code, name_en')
                              ->from($this->table_name)
-                             ->where('parent_id', '0')
+                             ->where('parent_id', NULL)
                              ->get()->result();
 
             $list = [];
