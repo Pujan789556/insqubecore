@@ -56,7 +56,7 @@ class Ac_account_model extends MY_Model
      */
     public function validation_rules()
     {
-        $dropdwon_heading_groups    = $this->ac_account_group_model->dropdown_tree(null, true, 'regular');
+        $dropdwon_heading_groups    = $this->ac_account_group_model->dropdown_tree(null, true, 'html');
         $this->validation_rules = [
             [
                 'field' => 'account_group_id',
