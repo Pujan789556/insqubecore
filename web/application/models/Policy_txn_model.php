@@ -17,7 +17,7 @@ class Policy_txn_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_comissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval', 'flag_current', 'status', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'approved_at', 'approved_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval', 'flag_current', 'status', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'approved_at', 'approved_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -115,7 +115,7 @@ class Policy_txn_model extends MY_Model
              * Task 1: Reset Policy Transaction Record
              */
             // !!!NOTE: 'amt_sum_insured' can not be emptied as it is updated when policy is updated
-            $nullable_fields = ['txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_comissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval'];
+            $nullable_fields = ['txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval'];
 
             $reset_data = [];
 
