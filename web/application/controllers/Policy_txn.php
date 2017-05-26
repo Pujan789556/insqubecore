@@ -304,7 +304,6 @@ class Policy_txn extends MY_Controller
 							$crf_data['computation_type'] 	= IQB_POLICY_CRF_COMPUTE_AUTO;
 
 							$txn_data = $this->_prepare_txn_data($policy_record, $txn_record, $crf_data, $post_data);
-
 							return $this->policy_txn_model->save($txn_record->id, $crf_data, $txn_data);
 
 							/**
@@ -623,7 +622,7 @@ class Policy_txn extends MY_Controller
 			 */
         	$this->load->model('ac_duties_and_tax_model');
 	        $taxable_amount 		= $txn_data['amt_total_premium'] + $txn_data['amt_stamp_duty'];
-	        $txn_data['amt_vat'] 	= $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DUTY_AND_TAX_ID_VAT, $taxable_amount);
+	        $txn_data['amt_vat'] 	= $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
 	        return $txn_data;
 		}
