@@ -14,6 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		data-form=".form-iqb-general"><?php echo $record->code_np . " ({$record->code_en})";?></a></td>
 	<td class="ins-action">
 		<a href="#"
+			data-toggle="tooltip"
 			title="Edit Portfolio Settings"
 			data-box-size="large"
 			class="trg-dialog-edit action"
@@ -23,17 +24,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
 		</a>
-
-		<?php if(safe_to_delete( 'Portfolio_setting_model', $record->fiscal_yr_id )):?>
-			<a href="#"
-				title="Delete"
-				data-toggle="tooltip"
-				class="trg-row-action action"
-				data-confirm="true"
-				data-url="<?php echo site_url('portfolio/delete_settings/' . $record->fiscal_yr_id);?>">
-					<i class="fa fa-trash-o"></i>
-					<span class="hidden-xs">Delete</span>
-			</a>
-		<?php endif?>
+		<a href="#"
+			data-toggle="tooltip"
+			title="Import Missing Portfolio Settings for This Fiscal Year"
+			data-box-size="large"
+			class="trg-row-action action"
+			data-url="<?php echo site_url('portfolio/import_missing_settings/' . $record->fiscal_yr_id);?>">
+			<i class="fa fa-plus-square-o"></i>
+			<span class="hidden-xs">Import Missing</span>
+		</a>
 	</td>
 </tr>

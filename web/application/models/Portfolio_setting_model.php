@@ -190,6 +190,16 @@ class Portfolio_setting_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function get_portfolios_by_fiscal_year($fiscal_yr_id)
+    {
+        return $this->db->select('PS.portfolio_id')
+                        ->from($this->table_name . ' PS')
+                        ->where('PS.fiscal_yr_id', $fiscal_yr_id)
+                        ->get()->result();
+    }
+
+    // ----------------------------------------------------------------
+
     public function get_by_fiscal_yr_portfolio($fiscal_yr_id, $portfolio_id)
     {
         /**

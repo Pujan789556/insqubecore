@@ -214,7 +214,7 @@ class Portfolio_model extends MY_Model
             $records = $this->db->select('N.id, N.parent_id, N.code, N.name_en, P.name_en AS parent_name_en')
                              ->from($this->table_name . ' AS N')
                              ->join($this->table_name . ' AS P', 'P.id = N.parent_id', 'left')
-                             ->where('N.parent_id !=', 0)
+                             ->where('N.parent_id !=', NULL)
                              ->get()->result();
 
             $list = [];
@@ -272,7 +272,7 @@ class Portfolio_model extends MY_Model
             }
             else
             {
-                $this->db->where('L1.parent_id !=', 0);
+                $this->db->where('L1.parent_id !=', NULL);
             }
             $list = $this->db->get()->result();
 

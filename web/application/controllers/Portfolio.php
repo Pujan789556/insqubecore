@@ -353,7 +353,6 @@ class Portfolio extends MY_Controller
     	$this->data['site_title'] = 'Master Setup | Portfolio Settings';
 
     	$this->load->model('portfolio_setting_model');
-
     	/**
     	 * Update Nav Data
     	 */
@@ -808,6 +807,71 @@ class Portfolio extends MY_Controller
         }
         return TRUE;
     }
+
+    // --------------------------------------------------------------------
+
+	/**
+	 * Import Missing Portfolio Settings for Specific Fiscal Year
+	 *
+	 * 	We will simply create missing portfolios default entry.
+	 *
+	 * @param integer $fiscal_yr_id
+	 * @return void
+	 */
+	public function import_missing_settings($fiscal_yr_id)
+	{
+		$this->load->model('portfolio_setting_model');
+
+		// Valid Record ?
+		$fiscal_yr_id 	= (int)$fiscal_yr_id;
+		$existing_child_portfolios 	= $this->portfolio_setting_model->get_portfolios_by_fiscal_year($fiscal_yr_id);
+		$all_child_portfolios 		= $this->portfolio_model->get_children();
+
+		$existing = [];
+		$all = [];
+		foreach($existing_child_portfolios as $e)
+		{
+			$existing[] = $e->portfolio_id;
+		}
+		foreach($all_child_portfolios as $a)
+		{
+			$all[] = $a->id;
+		}
+
+		$existing = array_values($existing);
+		$all = array_values($all);
+
+		asort($existing);
+		asort($all);
+
+		$missing = array_diff($all, $existing);
+		$count = count($missing);
+		if( count($missing) )
+		{
+			$batch_data = [];
+
+			foreach($missing as $portfolio_id)
+			{
+				$batch_data[] = [
+					'fiscal_yr_id' => $fiscal_yr_id,
+					'portfolio_id' => $portfolio_id,
+				];
+			}
+
+			if ( !$this->portfolio_setting_model->insert_batch($batch_data, TRUE) )
+			{
+				return $this->template->json([
+					'status' => 'error',
+					'message' => 'Could not import missing portfolios.'
+				]);
+			}
+		}
+		return $this->template->json([
+			'status' => 'success',
+			'message' => "Successfully imported {$count} portfolios."
+		]);
+
+	}
 
 	// --------------------------------------------------------------------
 
