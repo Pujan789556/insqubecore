@@ -27,6 +27,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
 		</a>
+		<?php if( (int)$record->id !== 1 ):?>
 		<a href="#"
 			data-toggle="tooltip"
 			title="Move Account Group"
@@ -38,6 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<i class="fa fa-long-arrow-down"></i>
 			<span class="hidden-xs">Move</span>
 		</a>
+		<?php endif?>
 		<?php if(safe_to_delete( 'Ac_account_group_model', $record->id )):?>
 			<?php /*
 			<a href="#"
