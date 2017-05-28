@@ -339,8 +339,8 @@ defined('IQB_AC_PARTY_TYPES')    	OR define('IQB_AC_PARTY_TYPES', 	[
 
 
 // DEBIT/CREDIT CONSTANTS
-defined('IQB_AC_DEBIT') 	OR define('IQB_AC_DEBIT',	'D');
-defined('IQB_AC_CREDIT') 	OR define('IQB_AC_CREDIT',	'C');
+defined('IQB_AC_FLAG_DEBIT') 	OR define('IQB_AC_FLAG_DEBIT',	'D');
+defined('IQB_AC_FLAG_CREDIT') 	OR define('IQB_AC_FLAG_CREDIT',	'C');
 
 /**
  * ACCOUNT GROUP ID - FOR PORTFOLIO SPECIFIC ACCOUNT DROPDOWN

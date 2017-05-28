@@ -392,7 +392,7 @@ class Ac_voucher_model extends MY_Model
 
             $batch_data[] = [
                 'sno'           => $i+1,
-                'flag_type'     => IQB_AC_DEBIT,
+                'flag_type'     => IQB_AC_FLAG_DEBIT,
                 'account_id'    => $accounts[$i],
                 'party_type'    => $party_type,
                 'party_id'      => $party_id,
@@ -414,7 +414,7 @@ class Ac_voucher_model extends MY_Model
         {
             $batch_data[] = [
                 'sno'           => $i+1,
-                'flag_type'     => IQB_AC_CREDIT,
+                'flag_type'     => IQB_AC_FLAG_CREDIT,
                 'account_id'    => $accounts[$i],
                 'party_type'    => $party_types[$i] ? $party_types[$i] : NULL,
                 'party_id'      => $party_ids[$i] ? $party_ids[$i] : NULL,

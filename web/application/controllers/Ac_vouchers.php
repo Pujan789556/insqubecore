@@ -622,7 +622,7 @@ class Ac_vouchers extends MY_Controller
 				// Party Name
 				$row->party_name = $this->_party_name($row->party_type, $row->party_id);
 
-				if( $row->flag_type === IQB_AC_DEBIT )
+				if( $row->flag_type === IQB_AC_FLAG_DEBIT )
 				{
 					$debit_rows[] = $row;
 				}
