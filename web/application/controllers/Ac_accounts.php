@@ -154,7 +154,7 @@ class Ac_accounts extends MY_Controller
 	            ],
 	            [
 					'field' => 'filter_keywords',
-			        'label' => 'Account Name',
+			        'label' => 'Account ID/Name',
 			        'rules' => 'trim|max_length[80]',
 	                '_type'     => 'text',
 	                '_required' => false

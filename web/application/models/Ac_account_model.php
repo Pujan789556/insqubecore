@@ -25,8 +25,8 @@ class Ac_account_model extends MY_Model
     /**
      * Protect Default Records?
      */
-    public static $protect_default = FALSE;
-    public static $protect_max_id = 0;
+    public static $protect_default = TRUE;
+    public static $protect_max_id = 800;
 
 	// --------------------------------------------------------------------
 
@@ -183,10 +183,20 @@ class Ac_account_model extends MY_Model
             $keywords = $params['keywords'] ?? '';
             if( $keywords )
             {
-                $this->db->group_start()
-                         ->like('AC.name', $keywords, 'after')
-                         ->or_like('ACG.name', $keywords, 'after')
-                         ->group_end();
+                // If Numeric, Query ID
+                if( is_numeric($keywords) )
+                {
+                    $id = (int)$keywords;
+                    $this->db->where('AC.id', $id);
+                }
+                else
+                {
+                    $this->db->group_start()
+                             ->like('AC.name', $keywords, 'after')
+                             ->or_like('ACG.name', $keywords, 'after')
+                             ->group_end();
+                }
+
             }
         }
         return $this->db->limit($this->settings->per_page+1)
