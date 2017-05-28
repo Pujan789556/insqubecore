@@ -29,7 +29,7 @@ class Ac_account_group_model extends MY_Model
      * Protect Default Records?
      */
     public static $protect_default = TRUE;
-    public static $protect_max_id = 5; // Prevent first 500 records from deletion.
+    public static $protect_max_id = 200; // Prevent first 500 records from deletion.
 
 	// --------------------------------------------------------------------
 
