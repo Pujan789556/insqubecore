@@ -249,9 +249,9 @@ h4.box-title{
     @media only screen and (min-width : 768px) {
 
       /*-- Search Filter --*/
-      .ins-box-filter .form-group{width:200px; margin-top:10px;}
+      .ins-box-filter .form-group{min-width:200px; margin-top:10px;}
       .ins-box-filter .form-group label{padding-left:1px; margin-bottom: 0px}
-      .ins-box-filter .form-control{width:185px;}
+      .ins-box-filter .form-control{min-width:200px;}
     }
 
     /* Medium Devices, Desktops */
