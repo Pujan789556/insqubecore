@@ -13,6 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td class="ins-action">
 		<a href="#"
 			title="Edit portfolio"
+			data-toggle="tooltip"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio'
 			data-url="<?php echo site_url('portfolio/edit/' . $record->id);?>"
@@ -20,6 +21,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
 		</a>
+		<?php if($record->parent_id): ?>
+			<a href="#"
+				title="Edit Portfolio Specific Default Internal Accounts"
+				data-toggle="tooltip"
+				data-box-size="large"
+				class="trg-dialog-edit action"
+				data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio Specific Internal Accounts - <?php echo $record->name_en?>'
+				data-url="<?php echo site_url('portfolio/accounts/' . $record->id);?>"
+				data-form=".form-iqb-general">
+				<i class="fa fa-dollar"></i>
+				<span class="hidden-xs">Accounts</span>
+			</a>
+		<?php endif?>
 
 		<?php if(safe_to_delete( 'Portfolio_model', $record->id )):?>
 			<a href="#"

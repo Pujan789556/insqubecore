@@ -19,7 +19,7 @@ class Portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "parent_id", "code", "name_en", "name_np", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -41,6 +41,9 @@ class Portfolio_model extends MY_Model
     {
         parent::__construct();
 
+        // Account Model
+        $this->load->model('ac_account_model');
+
         // Validation Rules
         $this->validation_rules();
     }
@@ -50,36 +53,198 @@ class Portfolio_model extends MY_Model
     public function validation_rules()
     {
         $parent_dropdown = $this->dropdown_parent();
+
+        $account_id_dpi_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_DIRECT_PREMIUM_INCOME);
+        $account_id_tpc_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_PREMIUM_CEDED);
+        $account_id_fpc_dropdown = $account_id_tpc_dropdown;
+
+        $account_id_rtc_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_RCI);
+        $account_id_rfc_dropdown = $account_id_rtc_dropdown;
+
+        $account_id_fpi_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_REINSURANCE_PREMIUM_INCOME);
+        $account_id_fce_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_RCE);
+
+        $account_id_pw_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_RECEIVABLE_FROM_REINSURER);
+        $account_id_pe_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_PAYABLE_TO_REINSURER);
+        $account_id_ce_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_CLAIM_EXPENSE);
+
+
+
         $this->validation_rules = [
-            [
-                'field' => 'parent_id',
-                'label' => 'Parent Portfolio',
-                'rules' => 'trim|integer|max_length[8]|in_list[' . implode(',', array_keys($parent_dropdown)) . ']',
-                '_type'     => 'dropdown',
-                '_data'     => IQB_BLANK_SELECT + $parent_dropdown,
-                '_required' => true
+            'basic' => [
+                [
+                    'field' => 'parent_id',
+                    'label' => 'Parent Portfolio',
+                    'rules' => 'trim|integer|max_length[8]|in_list[' . implode(',', array_keys($parent_dropdown)) . ']',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $parent_dropdown,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'name_en',
+                    'label' => 'Portfolio Name(EN)',
+                    'rules' => 'trim|required|max_length[100]|ucfirst',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'name_np',
+                    'label' => 'Portfolio Name (NP)',
+                    'rules' => 'trim|max_length[100]',
+                    '_type'     => 'text',
+                    '_required' => false
+                ],
+                [
+                    'field' => 'code',
+                    'label' => 'Portfolio Code',
+                    'rules' => 'trim|required|alpha|max_length[15]|strtoupper|callback_check_duplicate',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
             ],
-            [
-                'field' => 'name_en',
-                'label' => 'Portfolio Name(EN)',
-                'rules' => 'trim|required|max_length[100]|ucfirst',
-                '_type'     => 'text',
-                '_required' => true
-            ],
-            [
-                'field' => 'name_np',
-                'label' => 'Portfolio Name (NP)',
-                'rules' => 'trim|max_length[100]',
-                '_type'     => 'text',
-                '_required' => false
-            ],
-            [
-                'field' => 'code',
-                'label' => 'Portfolio Code',
-                'rules' => 'trim|required|alpha|max_length[15]|strtoupper|callback_check_duplicate',
-                '_type'     => 'text',
-                '_required' => true
+            'accounts' => [
+
+                /**
+                 * Account ID - Direct Premium Income
+                 */
+                [
+                    'field' => 'account_id_dpi',
+                    'label' => 'Account Direct Premium Income',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($account_id_dpi_dropdown)) . ']',
+                    '_id'       => 'account_id_dpi',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $account_id_dpi_dropdown,
+                    '_required' => false
+                ],
+
+                /**
+                 * Account ID - Treaty Premium Ceded
+                 */
+                [
+                    'field' => 'account_id_tpc',
+                    'label' => 'Account Treaty Premium Ceded',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($account_id_tpc_dropdown)) . ']',
+                    '_id'       => 'account_id_tpc',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $account_id_tpc_dropdown,
+                    '_required' => false
+                ],
+
+                /**
+                 * Account ID - FAC Premium Ceded
+                 */
+                [
+                    'field' => 'account_id_fpc',
+                    'label' => 'Account FAC Premium Ceded',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($account_id_fpc_dropdown)) . ']',
+                    '_id'       => 'account_id_fpc',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $account_id_fpc_dropdown,
+                    '_required' => false
+                ],
+
+                /**
+                 * Account ID - RI Treaty Commission
+                 */
+                [
+                    'field' => 'account_id_rtc',
+                    'label' => 'Account RI Treaty Commission',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($account_id_rtc_dropdown)) . ']',
+                    '_id'       => 'account_id_rtc',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $account_id_rtc_dropdown,
+                    '_required' => false
+                ],
+
+                /**
+                 * Account ID - RI FAC Commission
+                 */
+                [
+                    'field' => 'account_id_rfc',
+                    'label' => 'Account RI FAC Commission',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($account_id_rfc_dropdown)) . ']',
+                    '_id'       => 'account_id_rfc',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $account_id_rfc_dropdown,
+                    '_required' => false
+                ],
+
+                /**
+                 * Account ID - FAC Premium Accepted
+                 */
+                [
+                    'field' => 'account_id_fpi',
+                    'label' => 'Account FAC Premium Accepted',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($account_id_fpi_dropdown)) . ']',
+                    '_id'       => 'account_id_fpi',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $account_id_fpi_dropdown,
+                    '_required' => false
+                ],
+
+                /**
+                 * Account ID - FAC Commission Expense
+                 */
+                [
+                    'field' => 'account_id_fce',
+                    'label' => 'Account FAC Commission Expense',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($account_id_fce_dropdown)) . ']',
+                    '_id'       => 'account_id_fce',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $account_id_fce_dropdown,
+                    '_required' => false
+                ],
+
+                /**
+                 * Account ID - Portfolio Withdrawl
+                 */
+                [
+                    'field' => 'account_id_pw',
+                    'label' => 'Account Portfolio Withdrawl',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($account_id_pw_dropdown)) . ']',
+                    '_id'       => 'account_id_pw',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $account_id_pw_dropdown,
+                    '_required' => false
+                ],
+
+                /**
+                 * Account ID - Portfolio Entry
+                 */
+                [
+                    'field' => 'account_id_pe',
+                    'label' => 'Account Portfolio Entry',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($account_id_pe_dropdown)) . ']',
+                    '_id'       => 'account_id_pe',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $account_id_pe_dropdown,
+                    '_required' => false
+                ],
+
+                /**
+                 * Account ID - Claim Expense
+                 */
+                [
+                    'field' => 'account_id_ce',
+                    'label' => 'Account Claim Expense',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($account_id_ce_dropdown)) . ']',
+                    '_id'       => 'account_id_ce',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $account_id_ce_dropdown,
+                    '_required' => false
+                ]
             ]
+
         ];
     }
 
@@ -115,7 +280,7 @@ class Portfolio_model extends MY_Model
         $record = $this->get_cache($cache_var);
         if(!$record)
         {
-            $record = $this->db->select('L1.id, L1.code, L1.parent_id, L1.name_en, L1.name_np, L2.name_en as parent_name')
+            $record = $this->db->select('L1.*, L2.name_en as parent_name')
                              ->from($this->table_name . ' L1')
                              ->join($this->table_name . ' L2', 'L1.parent_id = L2.id', 'left')
                              ->where('L1.id', $id)
@@ -129,6 +294,26 @@ class Portfolio_model extends MY_Model
         return $record;
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Save Portfolio Specific Accounts
+     *
+     * @param integer $id
+     * @param array $data
+     * @return bool
+     */
+    public function save_accounts($id, $data)
+    {
+        $result = $this->db->where('id', $id)
+                        ->set($data)
+                        ->update($this->table_name);
+
+        if( $result)
+        {
+            $this->clear_cache();
+        }
+    }
 
     // ----------------------------------------------------------------
 

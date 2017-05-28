@@ -342,6 +342,41 @@ defined('IQB_AC_PARTY_TYPES')    	OR define('IQB_AC_PARTY_TYPES', 	[
 defined('IQB_AC_DEBIT') 	OR define('IQB_AC_DEBIT',	'D');
 defined('IQB_AC_CREDIT') 	OR define('IQB_AC_CREDIT',	'C');
 
+/**
+ * ACCOUNT GROUP ID - FOR PORTFOLIO SPECIFIC ACCOUNT DROPDOWN
+ */
+// Direct Premium Income (Direct premium income portfolio-wise)
+defined('IQB_AC_ACCOUNT_GROUP_ID_DIRECT_PREMIUM_INCOME')  OR define('IQB_AC_ACCOUNT_GROUP_ID_DIRECT_PREMIUM_INCOME',	121);
+
+// Premium Ceded (Treaty/FAC premium ceded portfolio-wise)
+defined('IQB_AC_ACCOUNT_GROUP_ID_PREMIUM_CEDED') OR define('IQB_AC_ACCOUNT_GROUP_ID_PREMIUM_CEDED',	120);
+
+// Reinsurance Commission Income (RI Treaty/FAC Commossion portfolio wise)
+defined('IQB_AC_ACCOUNT_GROUP_ID_RCI') OR define('IQB_AC_ACCOUNT_GROUP_ID_RCI',	93);
+
+// Reinsurance Premium Income (FAC Premium Portfolio-wise)
+defined('IQB_AC_ACCOUNT_GROUP_ID_REINSURANCE_PREMIUM_INCOME') OR define('IQB_AC_ACCOUNT_GROUP_ID_REINSURANCE_PREMIUM_INCOME',	122);
+
+//  Reinsurance Commission Expense (FAC commission Portfolio-wise)
+defined('IQB_AC_ACCOUNT_GROUP_ID_RCE') OR define('IQB_AC_ACCOUNT_GROUP_ID_RCE',	102);
+
+// Receivable From Reinsurer (Portfolio Withdrawl - Portfolio-wise)
+defined('IQB_AC_ACCOUNT_GROUP_ID_RECEIVABLE_FROM_REINSURER') OR define('IQB_AC_ACCOUNT_GROUP_ID_RECEIVABLE_FROM_REINSURER',	32);
+
+// Payable to Reinsurer (Portfolio Entry - Portfolio-wise)
+defined('IQB_AC_ACCOUNT_GROUP_ID_PAYABLE_TO_REINSURER') OR define('IQB_AC_ACCOUNT_GROUP_ID_PAYABLE_TO_REINSURER',	124);
+
+//  Claim Expense (Claim Expense Portfolio-wise)
+defined('IQB_AC_ACCOUNT_GROUP_ID_CLAIM_EXPENSE') OR define('IQB_AC_ACCOUNT_GROUP_ID_CLAIM_EXPENSE',	101);
+
+
+// DEFAULT INTERNAL ACCOUNT IDs (To generate default internal Voucher)
+// defined('IQB_AC_ACCOUNT_ID_INSURED_PARTY') 		OR define('IQB_AC_ACCOUNT_ID_INSURED_PARTY',	1);
+// defined('IQB_AC_ACCOUNT_ID_BS_SERVICE_CHARGE') 	OR define('IQB_AC_ACCOUNT_ID_BS_SERVICE_CHARGE',	2); // Beema Samiti Service Charge
+// defined('IQB_AC_ACCOUNT_ID_VAT_PAYABLE') 		OR define('IQB_AC_ACCOUNT_ID_VAT_PAYABLE',	3);
+// defined('IQB_AC_ACCOUNT_ID_STAMP_INCOME') 		OR define('IQB_AC_ACCOUNT_ID_STAMP_INCOME',	4);
+
+
 
 
 

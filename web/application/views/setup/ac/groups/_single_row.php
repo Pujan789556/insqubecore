@@ -27,18 +27,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
 		</a>
+		<a href="#"
+			data-toggle="tooltip"
+			title="Move Account Group"
+			class="trg-dialog-edit action"
+			data-title='<i class="fa fa-pencil-square-o"></i> Move Account Group - <?php echo $record->name?>'
+			data-url="<?php echo site_url('ac_account_groups/move/' . $record->id);?>"
+			data-form=".form-iqb-general">
+			<i class="fa fa-long-arrow-up"></i>
+			<i class="fa fa-long-arrow-down"></i>
+			<span class="hidden-xs">Move</span>
+		</a>
 		<?php if(safe_to_delete( 'Ac_account_group_model', $record->id )):?>
-			<a href="#"
-				data-toggle="tooltip"
-				title="Move Account Group"
-				class="trg-dialog-edit action"
-				data-title='<i class="fa fa-pencil-square-o"></i> Move Account Group - <?php echo $record->name?>'
-				data-url="<?php echo site_url('ac_account_groups/move/' . $record->id);?>"
-				data-form=".form-iqb-general">
-				<i class="fa fa-long-arrow-up"></i>
-				<i class="fa fa-long-arrow-down"></i>
-				<span class="hidden-xs">Move</span>
-			</a>
 			<?php /*
 			<a href="#"
 				data-toggle="tooltip"

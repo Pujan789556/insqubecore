@@ -100,7 +100,7 @@ class Portfolio extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/portfolio/_form',
 			[
-				'form_elements' => $this->portfolio_model->validation_rules,
+				'form_elements' => $this->portfolio_model->validation_rules['basic'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -126,7 +126,41 @@ class Portfolio extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/portfolio/_form',
 			[
-				'form_elements' => $this->portfolio_model->validation_rules,
+				'form_elements' => $this->portfolio_model->validation_rules['basic'],
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Edit a Portfolio Specific Accounts
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function accounts($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->portfolio_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('accounts', $record);
+
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('setup/portfolio/_form',
+			[
+				'form_elements' => $this->portfolio_model->validation_rules['accounts'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -146,7 +180,7 @@ class Portfolio extends MY_Controller
 	private function _save($action, $record = NULL)
 	{
 		// Valid action?
-		if( !in_array($action, array('add', 'edit')))
+		if( !in_array($action, array('add', 'edit', 'accounts')))
 		{
 			return [
 				'status' => 'error',
@@ -163,7 +197,7 @@ class Portfolio extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->portfolio_model->validation_rules;
+			$rules = $this->portfolio_model->validation_rules[ in_array($action, ['add', 'edit']) ? 'basic' : 'accounts'];
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
@@ -177,6 +211,17 @@ class Portfolio extends MY_Controller
 
 					// Activity Log
 					$done ? $this->portfolio_model->log_activity($done, 'C'): '';
+				}
+				else if ($action === 'accounts')
+				{
+					// Nullify Account ID if nothing supplied
+					foreach($rules as $r)
+					{
+						$data[$r['field']] = $data[$r['field']] ? $data[$r['field']] : NULL;
+					}
+
+					// Now Update Data
+					$done = $this->portfolio_model->save_accounts($record->id, $data) && $this->portfolio_model->log_activity($record->id, 'E');
 				}
 				else
 				{
