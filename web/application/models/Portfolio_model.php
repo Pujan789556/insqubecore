@@ -313,6 +313,8 @@ class Portfolio_model extends MY_Model
         {
             $this->clear_cache();
         }
+
+        return $result;
     }
 
     // ----------------------------------------------------------------
