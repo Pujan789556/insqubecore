@@ -183,8 +183,10 @@ class Ac_account_model extends MY_Model
             $keywords = $params['keywords'] ?? '';
             if( $keywords )
             {
-                $this->db->like('AC.name', $keywords, 'after');
-                $this->db->or_like('ACG.name', $keywords, 'after');
+                $this->db->group_start()
+                         ->like('AC.name', $keywords, 'after')
+                         ->or_like('ACG.name', $keywords, 'after')
+                         ->group_end();
             }
         }
         return $this->db->limit($this->settings->per_page+1)
