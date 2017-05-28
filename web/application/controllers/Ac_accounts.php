@@ -135,6 +135,7 @@ class Ac_accounts extends MY_Controller
 							'setup/ac/accounts/_index_header',
 							['content_header' => 'Manage Accounts'] + $dom_data)
 						->partial('content', 'setup/ac/accounts/_index', $data)
+						->partial('dynamic_js', 'setup/ac/accounts/_script_list')
 						->render($this->data);
 	}
 
@@ -147,6 +148,7 @@ class Ac_accounts extends MY_Controller
 	                'label' => 'Account Group',
 	                'rules' => 'trim|integer|max_length[8]',
 	                '_type'     => 'dropdown',
+	                '_extra_attributes' => 'style="width:400px; display:block" data-ddtype="select"',
 	                '_data'     => IQB_BLANK_SELECT + $dropdwon_account_groups,
 	                '_required' => false
 	            ],
