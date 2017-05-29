@@ -28,7 +28,7 @@ class Company_model extends MY_Model
      * Protect Default Records?
      */
     public static $protect_default = TRUE;
-    public static $protect_max_id = 86; // First 86; i.e. imported old data
+    public static $protect_max_id = 88; // First 86; i.e. imported old data
 
 	// --------------------------------------------------------------------
 

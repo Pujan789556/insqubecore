@@ -342,7 +342,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 			// Agent Commission/Direct Discount? -> Applies only Non-GOVT
 			//
 			$__premium_A_row_8 = 0.00;
-			if( $policy_record->flag_dc === 'D' && $attributes->ownership === IQB_PORTFOLIO_OWNERSHIP_NON_GOVT )
+			if( $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
 			{
 				// X% of GHA
 				$__premium_A_row_8 = $__premium_A_row_7 * ($pfs_record->direct_discount/100.00);
@@ -606,8 +606,11 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 			 *
 			 * Applies only if the vehicle is non-govt and no direct discount
 			 */
-			if($policy_record->flag_dc === 'C' && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
-			{
+			if(
+				$policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION
+				&&
+				$attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT
+			){
 				$CRF_PREMIUM_DATA['amt_commissionable'] 	= $__agent_comissionable_amount;
 				$CRF_PREMIUM_DATA['amt_agent_commission'] 	= ($__agent_comissionable_amount * $pfs_record->agent_commission)/100.00;
 			}
@@ -883,7 +886,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 			// Agent Commission/Direct Discount? -> Applies only Non-GOVT
 			//
 			$__premium_A_row_14 = 0.00;
-			if( $policy_record->flag_dc === 'D' && $attributes->ownership === IQB_PORTFOLIO_OWNERSHIP_NON_GOVT )
+			if( $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
 			{
 				// X% of ङ
 				$__premium_A_row_14 = $__premium_A_row_NGA * ($pfs_record->direct_discount/100.00);
@@ -1192,8 +1195,11 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 			 *
 			 * Applies only if the vehicle is non-govt and no direct discount
 			 */
-			if($policy_record->flag_dc === 'C' && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
-			{
+			if(
+				$policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION
+					&&
+				$attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT
+			){
 				$CRF_PREMIUM_DATA['amt_commissionable'] 	= $__agent_comissionable_amount;
 				$CRF_PREMIUM_DATA['amt_agent_commission'] 	= ($__agent_comissionable_amount * $pfs_record->agent_commission)/100.00;
 			}
@@ -1499,7 +1505,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
              */
             $__premium_A_row_NGA = 0.00;
             $__discount_A_row_on_personal_use = 0.00;
-            if( $object_attributes->ownership === IQB_PORTFOLIO_OWNERSHIP_NON_GOVT )
+            if( $object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
             {
                 switch ( $object_attributes->cvc_type )
                 {
@@ -1548,7 +1554,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
 
             // Agent Commission/Direct Discount? -> Applies only Non-GOVT
             $__discount_A_row__direct_discount = 0.00;
-            if( $policy_record->flag_dc === 'D' && $object_attributes->ownership === IQB_PORTFOLIO_OWNERSHIP_NON_GOVT )
+            if( $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT && $object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
             {
                 // X% of ङ
                 $__discount_A_row__direct_discount = $__premium_A_row_NGA * ($pfs_record->direct_discount/100.00);
@@ -1885,8 +1891,11 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
              *
              * Applies only if the vehicle is non-govt and no direct discount
              */
-            if($policy_record->flag_dc === 'C' && $object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
-            {
+            if(
+            	$policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION
+            	&&
+            	$object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT
+        	){
                 $CRF_PREMIUM_DATA['amt_commissionable'] 	= $__agent_comissionable_amount;
 				$CRF_PREMIUM_DATA['amt_agent_commission'] 	= ($__agent_comissionable_amount * $pfs_record->agent_commission)/100.00;
             }

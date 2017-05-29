@@ -34,6 +34,7 @@ class Ac_vouchers extends MY_Controller
 		// Load Model
 		$this->load->model('ac_account_group_model');
 		$this->load->model('ac_voucher_model');
+
 	}
 
 	// --------------------------------------------------------------------

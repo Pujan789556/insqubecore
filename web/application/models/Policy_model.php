@@ -123,7 +123,7 @@ class Policy_model extends MY_Model
             if($this->input->post())
             {
                 $flag_dc = $this->input->post('flag_dc');
-                if($flag_dc == 'D')
+                if($flag_dc == IQB_POLICY_FLAG_DC_DIRECT)
                 {
                     $agent_validation = 'trim|integer|max_length[11]';
                 }
@@ -734,7 +734,7 @@ class Policy_model extends MY_Model
              * TASK 1: Add agent relation
              * --------------------------
              */
-            if( isset($fields['flag_dc']) && $fields['flag_dc'] === 'C')
+            if( isset($fields['flag_dc']) && $fields['flag_dc'] === IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
             {
                 // Get the agent id
                 $agent_id = $fields['agent_id'];
@@ -804,7 +804,7 @@ class Policy_model extends MY_Model
                 'policy_id' => $id
             ];
 
-            if( isset($fields['flag_dc']) && $fields['flag_dc'] === 'C')
+            if( isset($fields['flag_dc']) && $fields['flag_dc'] === IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
             {
                 // Add or Update the Relation
                 // Get the agent id
@@ -1161,8 +1161,15 @@ class Policy_model extends MY_Model
             $this->db->db_debug = FALSE;
             $this->db->trans_start();
 
-
+                    /**
+                     * Task 1: Policy Record [Status --> Invoiced]
+                     */
                     $this->_to_status($record->id, $base_data);
+
+                    /**
+                     * Task 2: Policy Transaction Record [Status --> Active]
+                     */
+                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_ACTIVE);
 
 
             /**

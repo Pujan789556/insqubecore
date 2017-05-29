@@ -879,7 +879,7 @@ class DX_Auth
 		$authorized = ( !empty($permissions) && in_array($action, $permissions)) ? TRUE : FALSE;
 
 		// Deny on Fail?
-		if($deny_on_fail)
+		if( $authorized === FALSE && $deny_on_fail === TRUE)
 		{
 			return $this->deny_access();
 		}

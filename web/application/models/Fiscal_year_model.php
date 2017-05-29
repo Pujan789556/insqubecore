@@ -36,6 +36,29 @@ class Fiscal_year_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get a Fiscal year Record
+     *
+     * @param integer $id
+     * @return object
+     */
+    public function get($id)
+    {
+        /**
+         * CACHE first
+         */
+        $cache_key = 'fy_id_' . $id;
+        $record = $this->get_cache($cache_key);
+        if(!$record)
+        {
+            $record = parent::find($id);
+            $this->write_cache($record, $cache_key, CACHE_DURATION_WEEK);
+        }
+        return $record;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Get fiscal year
      *
      * Get the fiscal year for the specified date

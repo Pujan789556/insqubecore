@@ -437,7 +437,7 @@ if ( ! function_exists('belongs_to_me'))
         }
 
         // Terminate on Exit?
-        if( $__flag_authorized === FALSE && $terminate_on_fail == TRUE)
+        if( $__flag_authorized === FALSE && $terminate_on_fail === TRUE)
         {
             $CI->dx_auth->deny_access();
             exit(1);

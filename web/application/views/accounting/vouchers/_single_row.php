@@ -26,7 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			&&
 
 			// Editable?
-			is_voucher_editable($record)
+			is_voucher_editable($record, FALSE)
 
 			):?>
 			<a href="#"

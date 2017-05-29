@@ -1376,6 +1376,401 @@ class Policies extends MY_Controller
 
 		}
 
+
+	// --------------------------------------------------------------------
+	//  POLICY Voucher & Invoice
 	// --------------------------------------------------------------------
 
+	public function voucher($id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('policies', 'generate.policy.voucher.and.invoice') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Policy Record
+		 */
+		$id = (int)$id;
+		$record = $this->policy_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Record Authorized to Generate Voucher?
+		 */
+		if($record->status !== IQB_POLICY_STATUS_APPROVED )
+		{
+			return $this->template->json([
+				'title' 	=> 'OOPS!',
+				'status' 	=> 'error',
+				'message' 	=> 'You can not perform this action.'
+			], 404);
+		}
+
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Get the Policy Fresh/Renewal Txn Record
+		 */
+		try {
+
+			$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+
+		} catch (Exception $e) {
+
+			return $this->template->json([
+				'title' 	=> 'Exception Occured!',
+				'status' 	=> 'error',
+				'message' 	=> $e->getMessage()
+			], 404);
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Fiscal Year Record
+		 */
+		$fy_record = $this->fiscal_year_model->get($record->fiscal_yr_id);
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Portfoliio Record
+		 */
+		$this->load->model('portfolio_model');
+		$this->load->model('portfolio_setting_model');
+		$portfolio_record = $this->portfolio_model->find($record->portfolio_id);
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Portfolio Setting Record
+		 */
+		$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($record->fiscal_yr_id, $record->portfolio_id);
+		if( !$pfs_record )
+		{
+			return $this->template->json([
+				'title' 	=> 'Portfolio Setting Missing!',
+				'status' 	=> 'error',
+				'message' 	=> "Please add portfolio settings for fiscal year({$fy_record->code_np}) for portfolio ({$portfolio_record->name_en})"
+			], 404);
+		}
+
+		// --------------------------------------------------------------------
+
+
+		/**
+		 * Let's Build Policy Voucher
+		 */
+		$narration = $record->ancestor_id ? 'RENEWAL POLICY VOUCHER' : 'FRESH POLICY VOUCHER';
+		$narration .= ' - POLICY CODE : ' . $record->code;
+		$voucher_data = [
+            'voucher_date'      => date('Y-m-d'),
+            'voucher_type_id'   => IQB_AC_VOUCHER_TYPE_PRI,
+            'narration'         => $narration,
+            'flag_internal'     => IQB_FLAG_ON
+        ];
+
+		// --------------------------------------------------------------------
+
+
+        /**
+         * Voucher Amount Computation
+         */
+        $gross_premium_amount 		= $txn_record->amt_total_premium;
+        $stamp_income_amount 		= $txn_record->amt_stamp_duty;
+        $vat_payable_amount 		= $txn_record->amt_vat;
+
+        $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
+        $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
+        $agent_commission_amount 					= $txn_record->amt_agent_commission;
+
+		// --------------------------------------------------------------------
+
+        /**
+         * Debit Rows
+         */
+        $dr_rows = [
+
+        	/**
+        	 * Accounts
+        	 */
+        	 'accounts' => 	[
+	        	// Insured Party
+	        	IQB_AC_ACCOUNT_ID_INSURED_PARTY,
+
+	        	// Expense - Beema Samiti Service Charge
+	        	IQB_AC_ACCOUNT_ID_EXPENSE_BS_SERVICE_CHARGE
+	        ],
+
+	        /**
+	         * Party Types
+	         */
+	        'party_types' => [
+	        	// Insured Party -- Customer
+	        	IQB_AC_PARTY_TYPE_CUSTOMER,
+
+	        	// Beema Samiti Service Charge -- Company
+	        	IQB_AC_PARTY_TYPE_COMPANY,
+	        ],
+
+	        /**
+	         * Party IDs
+	         */
+	        'parties' => [
+
+	        	// Insured Party -- Customr ID
+	        	$record->customer_id,
+
+	        	// Beema Samiti Service Charge -- Beema Samiti ID
+	        	IQB_COMPANY_ID_BEEMA_SAMITI
+	        ],
+
+	        /**
+	         * Amounts
+	         */
+	        'amounts' => [
+
+	        	// Insured Party -- Amount Received From Insured Party
+	        	$total_to_receive_from_insured_party_amount,
+
+	        	// Beema Samiti Service Charge -- Beema Samiti Service Charge
+	        	$beema_samiti_service_charge_amount
+	        ]
+
+        ];
+
+		// --------------------------------------------------------------------
+
+        /**
+         * Credit Rows
+         */
+        $cr_rows = [
+
+        	/**
+        	 * Accounts
+        	 */
+        	 'accounts' => 	[
+	        	// Vat Payable
+	        	IQB_AC_ACCOUNT_ID_VAT_PAYABLE,
+
+	        	// Stamp Income
+	        	IQB_AC_ACCOUNT_ID_STAMP_INCOME,
+
+	        	// Direct Premium Income Portfolio Wise
+	        	$portfolio_record->account_id_dpi,
+
+	        	// Liability - Service fee Beema Samiti
+	        	IQB_AC_ACCOUNT_ID_LIABILITY_BS_SERVICE_CHARGE
+	        ],
+
+	        /**
+	         * Party Types
+	         */
+	        'party_types' => [
+	        	// Vat Payable -- NULL
+	        	NULL,
+
+	        	// Stamp Income -- NULL
+	        	NULL,
+
+	        	// Direct Premium Income -- NULL
+	        	NULL,
+
+	        	// Beema Samiti Service Charge -- Company
+	        	IQB_AC_PARTY_TYPE_COMPANY
+	        ],
+
+	        /**
+	         * Party IDs
+	         */
+	        'parties' => [
+
+	        	// Vat Payable -- NULL
+	        	NULL,
+
+	        	// Stamp Income -- NULL
+	        	NULL,
+
+	        	// Direct Premium Income -- NULL
+	        	NULL,
+
+	        	// Beema Samiti Service Charge -- Beema Samiti ID
+	        	IQB_COMPANY_ID_BEEMA_SAMITI
+	        ],
+
+	        /**
+	         * Amounts
+	         */
+	        'amounts' => [
+
+	        	// Vat Payable -- Vat Amount
+	        	$vat_payable_amount,
+
+	        	// Stamp Income -- Stamp Income Amount
+	        	$stamp_income_amount,
+
+	        	// Direct Premium Income -- Gross Premium Amount
+	        	$gross_premium_amount,
+
+	        	// Beema Samiti Service Charge -- Beema Samiti Service Charge
+	        	$beema_samiti_service_charge_amount
+	        ]
+
+        ];
+
+		// --------------------------------------------------------------------
+
+        /**
+         * Additional Debit/Credit Rows if Agent Commission Apply?
+         */
+        if( $record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $record->agent_id )
+        {
+        	// Agency Commission
+        	$dr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION;
+
+        	// Agency Commission -- Agent
+        	$dr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
+
+        	// Agency Commission -- Agent ID
+        	$dr_rows['parties'][] = $record->agent_id;
+
+        	// Agency Commission -- Agent Commission Amount
+        	$dr_rows['amounts'][] = $agent_commission_amount;
+
+
+
+        	// Agent TDS, Agent Commission Payable
+        	$cr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_TDS_AGENCY_COMMISSION;
+        	$cr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION_PAYABLE;
+
+        	// Agent TDS -- Agent, Agent Commission Payable -- Agent
+        	$cr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
+        	$cr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
+
+        	// Agent TDS -- Agent ID, Agent Commission Payable -- Agent ID
+        	$cr_rows['parties'][] = $record->agent_id;
+        	$cr_rows['parties'][] = $record->agent_id;
+
+        	// Agent TDS -- TDS Amount, Agent Commission Payable -- Agent Payable Amount
+        	$this->load->model('ac_duties_and_tax_model');
+        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount);
+        	$agent_commission_payable_amount = $agent_commission_amount - $agent_tds_amount;
+        	$cr_rows['amounts'][] = $agent_tds_amount;
+        	$cr_rows['amounts'][] = $agent_commission_payable_amount;
+        }
+
+		// --------------------------------------------------------------------
+
+        /**
+         * Format Data
+         */
+        $voucher_data['account_id']['dr'] 	= $dr_rows['accounts'];
+        $voucher_data['party_type']['dr'] 	= $dr_rows['party_types'];
+        $voucher_data['party_id']['dr'] 	= $dr_rows['parties'];
+        $voucher_data['amount']['dr'] 		= $dr_rows['amounts'];
+
+        $voucher_data['account_id']['cr'] 	= $cr_rows['accounts'];
+        $voucher_data['party_type']['cr'] 	= $cr_rows['party_types'];
+        $voucher_data['party_id']['cr'] 	= $cr_rows['parties'];
+        $voucher_data['amount']['cr'] 		= $cr_rows['amounts'];
+
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Save Voucher and Its Relation with Policy
+		 */
+		$this->load->model('ac_voucher_model');
+		$this->load->model('ac_rel_voucher_internal_model');
+		try {
+
+			return $this->template->json([
+				'title' 	=> '@TODO - Add Invoice',
+				'status' 	=> 'error',
+				'message' 	=> 'Please add policy invoice after adding voucher'
+			]);
+
+			/**
+			 * Task 1: Save Voucher and Generate Voucher Code
+			 */
+			$voucher_id = $this->ac_voucher_model->add($voucher_data);
+
+
+
+			if($voucher_id)
+			{
+				/**
+				 * Task 2: Update Voucher Internal Relatio with Policy
+				 */
+				$relation_data = [
+					'voucher_id' 	=> $voucher_id,
+					'type' 		 	=> IQB_AC_VOUCHER_REL_INTERNAL_TYPE_POLICY,
+					'type_id' 		=> $record->id
+				];
+				$this->ac_rel_voucher_internal_model->add($relation_data);
+
+				/**
+				 * @TODO Task 3: Generate Policy Invoice from this Voucher
+				 */
+
+				/**
+				 * Task 4: Update Policy Status to "Invoiced", Policy TXN Status to "Active"
+				 */
+				$this->policy_model->update_status($record, IQB_POLICY_STATUS_INVOICED);
+			}
+			else
+			{
+				return $this->template->json([
+					'title' 	=> 'Something went wrong!',
+					'status' 	=> 'error',
+					'message' 	=> 'Could not save Policy Voucher!'
+				]);
+			}
+
+		} catch (Exception $e) {
+
+			return $this->template->json([
+				'title' 	=> 'Exception Occured!',
+				'status' 	=> 'error',
+				'message' 	=> $e->getMessage()
+			]);
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Reload the Policy Overview Tab
+		 */
+		$record->status 	= IQB_POLICY_STATUS_INVOICED;
+		$txn_record->status = IQB_POLICY_TXN_STATUS_ACTIVE;
+		$view = 'policies/tabs/_tab_overview';
+		$html = $this->load->view($view, ['record' => $record, 'txn_record' => $txn_record], TRUE);
+		$ajax_data = [
+			'message' 	=> 'Successfully Updated!',
+			'status'  	=> 'success',
+			'multipleUpdate' => [
+				[
+					'box' 		=> '#tab-policy-overview-inner',
+					'method' 	=> 'replaceWith',
+					'html' 		=> $html
+				],
+				[
+					'box' 		=> '#page-title-policy-code',
+					'method' 	=> 'html',
+					'html' 		=> $record->code
+				]
+			]
+		];
+		return $this->template->json($ajax_data);
+	}
 }

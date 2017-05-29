@@ -87,7 +87,7 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
     <div class="form-group">
         <label class="col-sm-2 control-label">Direct Discount</label>
         <div class="col-sm-10">
-        <p class="form-control-static"><?php echo $policy_record->flag_dc === 'D' ? 'Yes' : 'No';?></p>
+        <p class="form-control-static"><?php echo $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT ? 'Yes' : 'No';?></p>
         </div>
     </div>
 

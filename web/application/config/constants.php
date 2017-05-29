@@ -153,6 +153,14 @@ define('IQB_COMPANY_TYPE_RE_INSURANCE', 'R');
 define('IQB_COMPANY_TYPE_INSURANCE',    'I');
 define('IQB_COMPANY_TYPE_GENERAL',      'G');
 
+/*
+|--------------------------------------------------------------------------
+| COMPANY ID CONSTANTS
+|--------------------------------------------------------------------------
+|
+*/
+define('IQB_COMPANY_ID_BEEMA_SAMITI',  1);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -231,6 +239,14 @@ defined('IQB_POLICY_TXN_STATUS_VERIFIED')       OR define('IQB_POLICY_TXN_STATUS
 defined('IQB_POLICY_TXN_STATUS_RI_APPROVED')    OR define('IQB_POLICY_TXN_STATUS_RI_APPROVED',  'P');
 defined('IQB_POLICY_TXN_STATUS_ACTIVE')         OR define('IQB_POLICY_TXN_STATUS_ACTIVE',       'A');
 
+/*
+|--------------------------------------------------------------------------
+| POLICY FLAG DIRECT DISCOUNT, AGENT COMMISSION CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_POLICY_FLAG_DC_AGENT_COMMISSION')  OR define('IQB_POLICY_FLAG_DC_AGENT_COMMISSION',    'C');
+defined('IQB_POLICY_FLAG_DC_DIRECT')    		OR define('IQB_POLICY_FLAG_DC_DIRECT',      		'D');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -305,6 +321,31 @@ defined('IQB_RI_TREATY_TYPES')    	OR define('IQB_RI_TREATY_TYPES', 	[
 	IQB_RI_TREATY_TYPE_QS 	=> 'Quota Share & Surplus',
 	IQB_RI_TREATY_TYPE_EOL 	=> 'Excess of Loss',
 ]);
+
+/*
+|--------------------------------------------------------------------------
+| VOUCHER TYPE CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_AC_VOUCHER_TYPE_PRI')    			OR define('IQB_AC_VOUCHER_TYPE_PRI',	1);
+defined('IQB_AC_VOUCHER_TYPE_RCPT')    			OR define('IQB_AC_VOUCHER_TYPE_RCPT',	2);
+defined('IQB_AC_VOUCHER_TYPE_PMNT')    			OR define('IQB_AC_VOUCHER_TYPE_PMNT',	3);
+defined('IQB_AC_VOUCHER_TYPE_JRNL')    			OR define('IQB_AC_VOUCHER_TYPE_JRNL',	4);
+defined('IQB_AC_VOUCHER_TYPE_CNTR')    			OR define('IQB_AC_VOUCHER_TYPE_CNTR',	5);
+defined('IQB_AC_VOUCHER_TYPE_CRDN')    			OR define('IQB_AC_VOUCHER_TYPE_CRDN',	6);
+defined('IQB_AC_VOUCHER_TYPE_GINV')    			OR define('IQB_AC_VOUCHER_TYPE_GINV',	7);
+defined('IQB_AC_VOUCHER_TYPE_PUR')    			OR define('IQB_AC_VOUCHER_TYPE_PUR',	8);
+defined('IQB_AC_VOUCHER_TYPE_PURRTN')    		OR define('IQB_AC_VOUCHER_TYPE_PURRTN',	9);
+
+
+/*
+|--------------------------------------------------------------------------
+| VOUCHER INTERNAL RELATION TYPE CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_AC_VOUCHER_REL_INTERNAL_TYPE_POLICY') OR define('IQB_AC_VOUCHER_REL_INTERNAL_TYPE_POLICY',	1);
+
+
 
 
 /*
