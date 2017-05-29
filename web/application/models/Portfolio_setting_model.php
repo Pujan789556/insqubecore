@@ -18,7 +18,7 @@ class Portfolio_setting_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "fiscal_yr_id", "portfolio_id", "agent_commission", "direct_discount", "stamp_duty", "default_duration", "flag_short_term", "short_term_policy_rate", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ['id', 'fiscal_yr_id', 'portfolio_id', 'agent_commission', 'bs_service_charge', 'direct_discount', 'stamp_duty', 'default_duration', 'flag_short_term', 'short_term_policy_rate', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -94,6 +94,13 @@ class Portfolio_setting_model extends MY_Model
             'agent_commission'  => [
                 'field' => 'agent_commission[]',
                 'label' => 'Agent Commission(%)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            'bs_service_charge'  => [
+                'field' => 'bs_service_charge[]',
+                'label' => 'Beema Samiti Service Charge(%)',
                 'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
                 '_type'     => 'text',
                 '_required' => true
@@ -181,7 +188,7 @@ class Portfolio_setting_model extends MY_Model
 
     public function get_list_by_fiscal_year($fiscal_yr_id)
     {
-        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.stamp_duty, PS.flag_short_term, PS.short_term_policy_rate, PS.default_duration, P.name_en as portfolio_name')
+        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.bs_service_charge, PS.direct_discount, PS.stamp_duty, PS.flag_short_term, PS.short_term_policy_rate, PS.default_duration, P.name_en as portfolio_name')
                         ->from($this->table_name . ' PS')
                         ->join('master_portfolio P', 'P.id = PS.portfolio_id')
                         ->where('PS.fiscal_yr_id', $fiscal_yr_id)
@@ -209,7 +216,7 @@ class Portfolio_setting_model extends MY_Model
         $row = $this->get_cache($cache_name);
         if(!$row)
         {
-            $row = $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.direct_discount, PS.stamp_duty, PS.flag_short_term, PS.short_term_policy_rate, PS.default_duration, P.name_en as portfolio_name')
+            $row = $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.bs_service_charge, PS.direct_discount, PS.stamp_duty, PS.flag_short_term, PS.short_term_policy_rate, PS.default_duration, P.name_en as portfolio_name')
                         ->from($this->table_name . ' PS')
                         ->join('master_portfolio P', 'P.id = PS.portfolio_id')
                         ->where('PS.fiscal_yr_id', $fiscal_yr_id)

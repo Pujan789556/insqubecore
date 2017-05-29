@@ -69,6 +69,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     if( $t->portfolio_id == $portfolio_id)
                                     {
                                         $setting_fields['agent_commission']['values'][$portfolio_repeat_count]   = $t->agent_commission;
+                                        $setting_fields['bs_service_charge']['values'][$portfolio_repeat_count]  = $t->bs_service_charge;
                                         $setting_fields['direct_discount']['values'][$portfolio_repeat_count]    = $t->direct_discount;
                                         $setting_fields['stamp_duty']['values'][$portfolio_repeat_count]         = $t->stamp_duty;
                                         $setting_fields['default_duration']['values'][$portfolio_repeat_count]   = $t->default_duration;

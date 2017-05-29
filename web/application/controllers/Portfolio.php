@@ -667,6 +667,7 @@ class Portfolio extends MY_Controller
 
 				$fiscal_yr_id 		= $this->input->post('fiscal_yr_id');
 				$agent_commission 	= $this->input->post('agent_commission');
+				$bs_service_charge 	= $this->input->post('bs_service_charge');
 				$direct_discount 	= $this->input->post('direct_discount');
 				$stamp_duty  		= $this->input->post('stamp_duty');
 				$default_duration  	= $this->input->post('default_duration');
@@ -684,6 +685,7 @@ class Portfolio extends MY_Controller
 							'fiscal_yr_id' 		=> $fiscal_yr_id,
 							'portfolio_id'    	=> $portfolio_id,
 							'agent_commission' 	=> $agent_commission[$i],
+							'bs_service_charge' => $bs_service_charge[$i],
 							'direct_discount' 	=> $direct_discount[$i],
 							'stamp_duty' 		=> $stamp_duty[$i],
 							'default_duration' 	=> $default_duration[$i],
@@ -723,6 +725,7 @@ class Portfolio extends MY_Controller
 					{
 						$data = [
 							'agent_commission' 	=> $agent_commission[$i],
+							'bs_service_charge' => $bs_service_charge[$i],
 							'direct_discount' 	=> $direct_discount[$i],
 							'stamp_duty' 		=> $stamp_duty[$i],
 							'default_duration' 	=> $default_duration[$i],
@@ -746,7 +749,6 @@ class Portfolio extends MY_Controller
 
 						// Add to update data
 						$data['short_term_policy_rate'] = $json_spr_data;
-
 						$done = $this->portfolio_setting_model->update($setting_id, $data, TRUE) && $this->portfolio_setting_model->log_activity($setting_id, 'E');
 
 						$i++;
