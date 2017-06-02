@@ -1158,11 +1158,11 @@ class Policy_model extends MY_Model
              * Task 1: Policy Record [Status --> Vouchered]
              * Task 2: Policy Transaction Record [Status --> Active]
              */
-            return $this->_to_status($record->id, $base_data)
-
-                &&
-
-                $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_ACTIVE);
+            if( $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_ACTIVE) )
+            {
+               return $this->_to_status($record->id, $base_data);
+            }
+            return FALSE;
         }
 
         // ----------------------------------------------------------------

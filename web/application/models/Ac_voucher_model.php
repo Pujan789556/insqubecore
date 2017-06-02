@@ -484,7 +484,7 @@ class Ac_voucher_model extends MY_Model
      * @param integer $id
      * @return boolean
      */
-    private function enable_voucher($id)
+    public function enable_voucher($id)
     {
         return $this->db->where('id', $id)
                         ->update($this->table_name, ['flag_complete' => IQB_FLAG_ON]);
@@ -498,7 +498,7 @@ class Ac_voucher_model extends MY_Model
      * @param integer $id
      * @return boolean
      */
-    private function disable_voucher($id)
+    public function disable_voucher($id)
     {
         return $this->db->where('id', $id)
                         ->update($this->table_name, ['flag_complete' => IQB_FLAG_OFF]);

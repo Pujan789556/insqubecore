@@ -1704,79 +1704,6 @@ class Policies extends MY_Controller
 			 */
 			$voucher_id = $this->ac_voucher_model->add($voucher_data);
 
-			if($voucher_id)
-			{
-
-				/**
-	             * ==================== TRANSACTIONS BEGIN =========================
-	             */
-
-
-	                /**
-	                 * Disable DB Debugging
-	                 */
-	                $this->db->db_debug = FALSE;
-	                $this->db->trans_start();
-
-
-	                    // --------------------------------------------------------------------
-
-	                	/**
-						 * Task 2: Update Voucher Internal Relatio with Policy Transaction
-						 */
-						$relation_data = [
-							'voucher_id' 	=> $voucher_id,
-							'type' 		 	=> IQB_AC_VOUCHER_REL_INTERNAL_TYPE_POLICY_TXN,
-							'type_id' 		=> $txn_record->id
-						];
-						$this->ac_rel_voucher_internal_model->add($relation_data);
-
-	                    // --------------------------------------------------------------------
-
-						/**
-						 * Task 4: Update Policy Status to "Vouchered", Policy TXN Status to "Active"
-						 */
-						$this->policy_model->update_status($record, IQB_POLICY_STATUS_VOUCHERED);
-
-	                    // --------------------------------------------------------------------
-
-
-	                /**
-	                 * Complete transactions or Rollback
-	                 */
-	                $this->db->trans_complete();
-	                if ($this->db->trans_status() === FALSE)
-	                {
-	                	/**
-	                	 * Set Voucher Flag Complete to OFF
-	                	 */
-	                	$this->ac_voucher_model->disable_voucher($voucher_id);
-
-	                    return $this->template->json([
-							'title' 	=> 'Something went wrong!',
-							'status' 	=> 'error',
-							'message' 	=> 'Could not perform post voucher add task'
-						]);
-	                }
-
-	                /**
-	                 * Restore DB Debug Configuration
-	                 */
-	                $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-	            /**
-	             * ==================== TRANSACTIONS END =========================
-	             */
-			}
-			else
-			{
-				return $this->template->json([
-					'title' 	=> 'Something went wrong!',
-					'status' 	=> 'error',
-					'message' 	=> 'Could not save Policy Voucher!'
-				]);
-			}
-
 		} catch (Exception $e) {
 
 			return $this->template->json([
@@ -1785,6 +1712,105 @@ class Policies extends MY_Controller
 				'message' 	=> $e->getMessage()
 			]);
 		}
+
+		$flag_exception = FALSE;
+		$message = '';
+
+
+		/**
+		 * --------------------------------------------------------------------
+		 * Post Voucher Add Tasks
+		 * --------------------------------------------------------------------
+		 */
+
+
+		/**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_start();
+
+
+                // --------------------------------------------------------------------
+
+            	/**
+				 * Task 2: Update Voucher Internal Relatio with Policy Transaction
+				 */
+
+				try {
+
+					$relation_data = [
+						'voucher_id' 	=> $voucher_id,
+						'type' 		 	=> IQB_AC_VOUCHER_REL_INTERNAL_TYPE_POLICY_TXN,
+						'type_id' 		=> $txn_record->id
+					];
+
+					$this->ac_rel_voucher_internal_model->add($relation_data);
+
+				} catch (Exception $e) {
+
+					$flag_exception = TRUE;
+					$message = $e->getMessage();
+				}
+
+                // --------------------------------------------------------------------
+
+				/**
+				 * Task 4: Update Policy Status to "Vouchered", Policy TXN Status to "Active"
+				 */
+				if( !$flag_exception )
+				{
+					try{
+
+						$this->policy_model->update_status($record, IQB_POLICY_STATUS_VOUCHERED);
+
+					} catch (Exception $e) {
+
+						$flag_exception = TRUE;
+						$message = $e->getMessage();
+					}
+				}
+
+                // --------------------------------------------------------------------
+
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+
+            /**
+             * Transaction failed or Exception Occured
+             */
+            if ( $this->db->trans_status() === FALSE || $flag_exception === TRUE)
+            {
+            	/**
+            	 * Set Voucher Flag Complete to OFF
+            	 */
+            	$this->ac_voucher_model->disable_voucher($voucher_id);
+
+                return $this->template->json([
+					'title' 	=> 'Something went wrong!',
+					'status' 	=> 'error',
+					'message' 	=> $message ? $message : 'Could not perform save voucher relation or update policy status'
+				]);
+            }
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+
 
 		// --------------------------------------------------------------------
 
