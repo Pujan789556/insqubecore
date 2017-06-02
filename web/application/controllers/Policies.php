@@ -1305,6 +1305,10 @@ class Policies extends MY_Controller
 					$permission_name = 'status.to.approved';
 					break;
 
+				case IQB_POLICY_STATUS_VOUCHERED:
+					$permission_name = 'status.to.vouchered';
+					break;
+
 				case IQB_POLICY_STATUS_INVOICED:
 					$permission_name = 'status.to.invoiced';
 					break;
@@ -1386,7 +1390,7 @@ class Policies extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('policies', 'generate.policy.voucher.and.invoice') )
+		if( !$this->dx_auth->is_authorized('policies', 'generate.policy.voucher') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -1692,41 +1696,77 @@ class Policies extends MY_Controller
 		 */
 		$this->load->model('ac_voucher_model');
 		$this->load->model('ac_rel_voucher_internal_model');
-		try {
 
-			return $this->template->json([
-				'title' 	=> '@TODO - Add Invoice',
-				'status' 	=> 'error',
-				'message' 	=> 'Please add policy invoice after adding voucher'
-			]);
+		try {
 
 			/**
 			 * Task 1: Save Voucher and Generate Voucher Code
 			 */
 			$voucher_id = $this->ac_voucher_model->add($voucher_data);
 
-
-
 			if($voucher_id)
 			{
-				/**
-				 * Task 2: Update Voucher Internal Relatio with Policy
-				 */
-				$relation_data = [
-					'voucher_id' 	=> $voucher_id,
-					'type' 		 	=> IQB_AC_VOUCHER_REL_INTERNAL_TYPE_POLICY,
-					'type_id' 		=> $record->id
-				];
-				$this->ac_rel_voucher_internal_model->add($relation_data);
 
 				/**
-				 * @TODO Task 3: Generate Policy Invoice from this Voucher
-				 */
+	             * ==================== TRANSACTIONS BEGIN =========================
+	             */
 
-				/**
-				 * Task 4: Update Policy Status to "Invoiced", Policy TXN Status to "Active"
-				 */
-				$this->policy_model->update_status($record, IQB_POLICY_STATUS_INVOICED);
+
+	                /**
+	                 * Disable DB Debugging
+	                 */
+	                $this->db->db_debug = FALSE;
+	                $this->db->trans_start();
+
+
+	                    // --------------------------------------------------------------------
+
+	                	/**
+						 * Task 2: Update Voucher Internal Relatio with Policy Transaction
+						 */
+						$relation_data = [
+							'voucher_id' 	=> $voucher_id,
+							'type' 		 	=> IQB_AC_VOUCHER_REL_INTERNAL_TYPE_POLICY_TXN,
+							'type_id' 		=> $txn_record->id
+						];
+						$this->ac_rel_voucher_internal_model->add($relation_data);
+
+	                    // --------------------------------------------------------------------
+
+						/**
+						 * Task 4: Update Policy Status to "Vouchered", Policy TXN Status to "Active"
+						 */
+						$this->policy_model->update_status($record, IQB_POLICY_STATUS_VOUCHERED);
+
+	                    // --------------------------------------------------------------------
+
+
+	                /**
+	                 * Complete transactions or Rollback
+	                 */
+	                $this->db->trans_complete();
+	                if ($this->db->trans_status() === FALSE)
+	                {
+	                	/**
+	                	 * Set Voucher Flag Complete to OFF
+	                	 */
+	                	$this->ac_voucher_model->disable_voucher($voucher_id);
+
+	                    return $this->template->json([
+							'title' 	=> 'Something went wrong!',
+							'status' 	=> 'error',
+							'message' 	=> 'Could not perform post voucher add task'
+						]);
+	                }
+
+	                /**
+	                 * Restore DB Debug Configuration
+	                 */
+	                $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+	            /**
+	             * ==================== TRANSACTIONS END =========================
+	             */
 			}
 			else
 			{
@@ -1751,7 +1791,7 @@ class Policies extends MY_Controller
 		/**
 		 * Reload the Policy Overview Tab
 		 */
-		$record->status 	= IQB_POLICY_STATUS_INVOICED;
+		$record->status 	= IQB_POLICY_STATUS_VOUCHERED;
 		$txn_record->status = IQB_POLICY_TXN_STATUS_ACTIVE;
 		$view = 'policies/tabs/_tab_overview';
 		$html = $this->load->view($view, ['record' => $record, 'txn_record' => $txn_record], TRUE);

@@ -158,25 +158,55 @@ endif;
  *
  *  1. Generate Policy Premium Voucher for this Policy
  *  2. Generate Invoice against this Voucher for the customer
- *  3. Upgrade status to "Invoiced"
+ *  3. Upgrade status to "Vouchered"
  *
  * After this action, you can
  *  a. Print Invoice
  *  b. View Premium Voucher Details
  */
 if( $record->status === IQB_POLICY_STATUS_APPROVED ): ?>
-    <?php if( $this->dx_auth->is_authorized('policies', 'generate.policy.voucher.and.invoice') ): ?>
+    <?php if( $this->dx_auth->is_authorized('policies', 'generate.policy.voucher') ): ?>
         <a href="#"
-            title="Generate Voucher & Invoice"
+            title="Generate Voucher"
             data-confirm="true"
             class="btn btn-success btn-round trg-dialog-action"
-            data-message="Are you sure you want to do this?<br/>This will automatically generate VOUCHER and INVOICE for this policy."
+            data-message="Are you sure you want to do this?<br/>This will automatically generate VOUCHER for this policy."
             data-url="<?php echo site_url('policies/voucher/' . $record->id );?>"
-        ><i class="fa fa-money"></i> Voucher &amp; Invoice</a>
+        ><i class="fa fa-money"></i> Generate Voucher</a>
     <?php endif?>
 
     <a href="#">Print Invoice</a>
 
+<?php
+endif;
+
+// ------------------------------------------------------------------------------
+
+/**
+ * Actions on "Vouchered" Status
+ * ----------------------------
+ * Now, you can finally make payment on this policy. You do the following:
+ *  1. Generate Receipt Voucher
+ *  2. Generate Invoice against this Voucher for the customer
+ *  3. Upgrade status to "Invoiced"
+ *
+ * After this action, you can
+ *  b. Print Receipt Voucher Details
+ *  c. Print/Download Policy Schedule
+ */
+
+// @TODO - We
+if( $record->status === IQB_POLICY_STATUS_VOUCHERED ):
+?>
+    <?php if( $this->dx_auth->is_authorized('policies', 'generate.policy.invoice') ): ?>
+        <a href="#"
+            title="Generate Invoice"
+            data-confirm="true"
+            class="btn btn-success btn-round trg-dialog-action"
+            data-message="Are you sure you want to Genrate Invoice for this policy?<br/>This will automatically generate INVOICE for this Policy."
+            data-url="<?php echo site_url('policies/invoice/' . $record->id );?>"
+        ><i class="fa fa-money"></i> Generate Invoice</a>
+    <?php endif?>
 <?php
 endif;
 

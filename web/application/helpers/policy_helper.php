@@ -92,13 +92,24 @@ if ( ! function_exists('get_policy_status_dropdown'))
 			IQB_POLICY_STATUS_APPROVED => 'Approved',
 
 			/**
+			 * Policy Status - Vouchered
+			 *
+			 * Action Allowed
+			 * 		...
+			 *
+			 * Upper Status Level: Invoiced | Cancel
+			 * Lower Status Level: Approved
+			 */
+			IQB_POLICY_STATUS_VOUCHERED => 'Vouchered',
+
+			/**
 			 * Policy Status - Invliced
 			 *
 			 * Action Allowed
 			 * 		...
 			 *
 			 * Upper Status Level: Active | Cancel
-			 * Lower Status Level: Approved
+			 * Lower Status Level: Vouchered
 			 */
 			IQB_POLICY_STATUS_INVOICED => 'Invoiced',
 
@@ -186,7 +197,7 @@ if ( ! function_exists('get_policy_status_text'))
 
 		if($formatted && $text != '')
 		{
-			if($key === IQB_POLICY_STATUS_ACTIVE || $key === IQB_POLICY_STATUS_INVOICED || $key === IQB_POLICY_STATUS_APPROVED )
+			if($key === IQB_POLICY_STATUS_ACTIVE || $key === IQB_POLICY_STATUS_INVOICED || $key === IQB_POLICY_STATUS_VOUCHERED || $key === IQB_POLICY_STATUS_APPROVED )
 			{
 				// Green
 				$css_class = 'text-green';

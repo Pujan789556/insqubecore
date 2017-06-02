@@ -868,7 +868,11 @@ class Policy_model extends MY_Model
         /**
          * Call Individual Status Method
          */
-        return $this->{$method}($record, $base_data);
+        if(method_exists($this, $method)){
+            return $this->{$method}($record, $base_data);
+        }else{
+            throw new Exception("Exception [Model: Policy_model][Method: update_status()]: Method does not exists ({$method})");
+        }
     }
 
     // ----------------------------------------------------------------
@@ -1142,6 +1146,28 @@ class Policy_model extends MY_Model
         // ----------------------------------------------------------------
 
         /**
+         * Update Status to Vouchered
+         *
+         * @param object $record
+         * @param array $base_data
+         * @return bool
+         */
+        private function _to_status_H($record, $base_data)
+        {
+            /**
+             * Task 1: Policy Record [Status --> Vouchered]
+             * Task 2: Policy Transaction Record [Status --> Active]
+             */
+            return $this->_to_status($record->id, $base_data)
+
+                &&
+
+                $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_ACTIVE);
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
          * Update Status to Invoiced
          *
          * @param object $record
@@ -1358,8 +1384,12 @@ class Policy_model extends MY_Model
                     $flag_qualifies = $current_status === IQB_POLICY_STATUS_VERIFIED;
                     break;
 
-                case IQB_POLICY_STATUS_INVOICED:
+                case IQB_POLICY_STATUS_VOUCHERED:
                     $flag_qualifies = $current_status === IQB_POLICY_STATUS_APPROVED;
+                    break;
+
+                case IQB_POLICY_STATUS_INVOICED:
+                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_VOUCHERED;
                     break;
 
                 case IQB_POLICY_STATUS_ACTIVE:

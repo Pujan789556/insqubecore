@@ -19,6 +19,11 @@ else if( $record->status === IQB_POLICY_STATUS_APPROVED )
     $status_sentence   = '<i class="fa fa-warning margin-r-5"></i>This Policy is <strong>Approved</strong>.';
     $css_class  = 'text-green';
 }
+else if( $record->status === IQB_POLICY_STATUS_VOUCHERED )
+{
+    $status_sentence   = '<i class="fa fa-warning margin-r-5"></i>This Policy is <strong>VOUCHERED</strong>.';
+    $css_class  = 'text-green';
+}
 else if( $record->status === IQB_POLICY_STATUS_INVOICED )
 {
     $status_sentence   = '<i class="fa fa-warning margin-r-5"></i>This Policy is <strong>INVOICED</strong>.';
