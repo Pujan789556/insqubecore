@@ -15,7 +15,7 @@ class Ac_voucher_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'voucher_code', 'branch_id', 'fiscal_yr_id', 'fy_quarter', 'voucher_type_id', 'voucher_date', 'narration', 'flag_internal', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'voucher_code', 'branch_id', 'fiscal_yr_id', 'fy_quarter', 'voucher_type_id', 'voucher_date', 'narration', 'flag_internal', 'flag_complete', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -338,17 +338,68 @@ class Ac_voucher_model extends MY_Model
          *
          * We do not use transaction here as we may lost the voucher id autoincrement.
          * We simply use try catch block.
+         *
+         * If transaction fails, we will have a voucher with complete flag off.
          */
 
         $id = parent::insert($master_data, TRUE);
 
         if( $id )
         {
-            // Insert Batch Voucher Details Data
-            $this->ac_voucher_detail_model->batch_insert($id, $batch_data_details);
 
-            // Log Activity
-            $this->log_activity($id, 'C');
+            /**
+             * ==================== TRANSACTIONS BEGIN =========================
+             */
+
+
+                /**
+                 * Disable DB Debugging
+                 */
+                $this->db->db_debug = FALSE;
+                $this->db->trans_start();
+
+
+                    // --------------------------------------------------------------------
+
+                    /**
+                     * Task 1: Insert Voucher Details
+                     */
+                    $this->ac_voucher_detail_model->batch_insert($id, $batch_data_details);
+
+                    // --------------------------------------------------------------------
+
+                    /**
+                     * Task 2: Complete Voucher Status
+                     */
+                    $this->_complete_voucher_transaction($id);
+
+                    // --------------------------------------------------------------------
+
+                    /**
+                     * Task 3: Log Activity
+                     */
+                    $this->log_activity($id, 'C');
+
+                    // --------------------------------------------------------------------
+
+
+                /**
+                 * Complete transactions or Rollback
+                 */
+                $this->db->trans_complete();
+                if ($this->db->trans_status() === FALSE)
+                {
+                    throw new Exception("Exception [Model: Ac_voucher_model][Method: add()]: Could not save voucher details and other details.");
+                }
+
+                /**
+                 * Restore DB Debug Configuration
+                 */
+                $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+            /**
+             * ==================== TRANSACTIONS END =========================
+             */
         }
         else
         {
@@ -423,6 +474,20 @@ class Ac_voucher_model extends MY_Model
         }
 
         return $batch_data;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Complete Voucher Transaction
+     *
+     * @param integer $id
+     * @return boolean
+     */
+    private function _complete_voucher_transaction($id)
+    {
+        return $this->db->where('id', $id)
+                        ->update($this->table_name, ['flag_complete' => IQB_FLAG_ON]);
     }
 
     // --------------------------------------------------------------------
