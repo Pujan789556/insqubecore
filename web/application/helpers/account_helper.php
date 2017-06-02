@@ -58,7 +58,7 @@ if ( ! function_exists('is_voucher_editable'))
 		/**
 		 * Manual Voucher? Belong to Current Fiscal Year?
 		 */
-		$__flag_editable = $record->flag_internal == IQB_FLAG_OFF && $record->fiscal_yr_id == $CI->current_fiscal_year->id;
+		$__flag_editable = $record->flag_internal == IQB_FLAG_OFF && $record->flag_complete == IQB_FLAG_ON && $record->fiscal_yr_id == $CI->current_fiscal_year->id;
 
 		// Terminate on Exit?
 		if( $__flag_editable === FALSE && $terminate_on_fail == TRUE)
@@ -68,6 +68,37 @@ if ( ! function_exists('is_voucher_editable'))
 		}
 
 		return $__flag_editable;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('voucher_complete_flag_text'))
+{
+	/**
+	 * Voucher Complete Flag Text
+	 *
+	 * @param integer $flag 	Voucher Complete Flag
+	 * @param bool $plain_text Return as HTML formatted or plain text
+	 * @return	bool
+	 */
+	function voucher_complete_flag_text( $flag, $plain_text = FALSE )
+	{
+		$title = $flag == IQB_FLAG_ON ? 'Complete' : 'Incomplete';
+		if($plain_text)
+		{
+			return $title;
+		}
+
+		if( $flag == IQB_FLAG_ON )
+		{
+			$css = 'fa-check text-green';
+		}
+		else
+		{
+			$css = 'fa-exclamation-triangle text-muted';
+		}
+		return '<i class="fa '.$css.'" data-toggle="tooltip" title="'.$title.'"></i>';
 	}
 }
 

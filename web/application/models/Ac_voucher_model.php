@@ -665,7 +665,7 @@ class Ac_voucher_model extends MY_Model
     {
         $this->db->select(
                         // Voucher Table
-                        'V.id, V.branch_id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.voucher_date, ' .
+                        'V.id, V.branch_id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.flag_complete, V.voucher_date, ' .
 
                         // Voucher Type Table
                         'VT.name AS voucher_type_name, ' .
