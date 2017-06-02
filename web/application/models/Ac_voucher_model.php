@@ -371,7 +371,7 @@ class Ac_voucher_model extends MY_Model
                     /**
                      * Task 2: Complete Voucher Status
                      */
-                    $this->_complete_voucher_transaction($id);
+                    $this->enable_voucher($id);
 
                     // --------------------------------------------------------------------
 
@@ -479,15 +479,29 @@ class Ac_voucher_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Complete Voucher Transaction
+     * Enable Voucher Transaction [Complete Flagg - OFF]
      *
      * @param integer $id
      * @return boolean
      */
-    private function _complete_voucher_transaction($id)
+    private function enable_voucher($id)
     {
         return $this->db->where('id', $id)
                         ->update($this->table_name, ['flag_complete' => IQB_FLAG_ON]);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Disable Voucher Transaction [Complete Flagg - OFF]
+     *
+     * @param integer $id
+     * @return boolean
+     */
+    private function disable_voucher($id)
+    {
+        return $this->db->where('id', $id)
+                        ->update($this->table_name, ['flag_complete' => IQB_FLAG_OFF]);
     }
 
     // --------------------------------------------------------------------
@@ -684,6 +698,7 @@ class Ac_voucher_model extends MY_Model
         /**
          * Apply Scope
          * ------------
+         * @TODO - Only data belonging to me!!!
          */
     }
 
