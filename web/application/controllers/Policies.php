@@ -1178,7 +1178,7 @@ class Policies extends MY_Controller
 		/**
 		 * Meet the Status Pre-Requisite ?
 		 */
-		$this->__check_status_prerequisite($to_status_code, $record);
+		$this->__status_qualifies($to_status_code, $record);
 
 
 		/**
@@ -1305,14 +1305,6 @@ class Policies extends MY_Controller
 					$permission_name = 'status.to.approved';
 					break;
 
-				case IQB_POLICY_STATUS_VOUCHERED:
-					$permission_name = 'status.to.vouchered';
-					break;
-
-				case IQB_POLICY_STATUS_INVOICED:
-					$permission_name = 'status.to.invoiced';
-					break;
-
 				case IQB_POLICY_STATUS_ACTIVE:
 					$permission_name = 'status.to.active';
 					break;
@@ -1340,28 +1332,48 @@ class Policies extends MY_Controller
 		// --------------------------------------------------------------------
 
 		/**
-		 * Check Status up/down Pre-Requisite
+		 * Status Qualifies to UP/DOWN
 		 *
 		 * @param alpha $to_updown_status Status Code to UP/DOWN
 		 * @param object $record Policy Record
+		 * @param bool $terminate_on_fail Terminate right here on fails
 		 * @return mixed
 		 */
-		private function __check_status_prerequisite($to_updown_status, $record)
+		private function __status_qualifies($to_updown_status, $record, $terminate_on_fail = TRUE)
 		{
 			/**
-			 * Get the Currentn Txn Record
+			 * Get the Current Txn Record
 			 */
 			$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy($record->id, IQB_POLICY_TXN_TYPE_FRESH);
 
+			/**
+			 * Qualifies the status ladder?
+			 */
+			$__flag_pass 	= $this->policy_model->status_qualifies($txn_record->status, $to_updown_status);
+			$failed_message = '';
 
 			/**
-			 * Check Pre-Requisite
-			 * --------------------
-			 * 	Condition 1: Upgrade from "Draft" to "Unverified"
-			 * 	Condition 2: Upgrade from "Unverified" to "Verified"
-			 * 	- Check if Premium is NULL
+			 *  You can not manually update/downgrade the following status
+			 * 		active, expired
 			 */
-			if (
+			if(
+				$__flag_passed === TRUE
+				&&
+				!in_array($to_updown_status, [
+					IQB_POLICY_STATUS_ACTIVE,
+					IQB_POLICY_STATUS_EXPIRED
+				])
+			)
+			{
+				$failed_message = 'No manually status update/downgrade to supplied status is not allowed.';
+			}
+
+			/**
+			 * Premium Not Updated on Draft/Unverified State?
+			 */
+			if(
+				$__flag_passed === TRUE
+					&&
 				( $record->status === IQB_POLICY_STATUS_DRAFT && $to_updown_status === IQB_POLICY_STATUS_UNVERIFIED )
 					||
 				( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
@@ -1369,15 +1381,42 @@ class Policies extends MY_Controller
 			{
 				if( !$txn_record->amt_total_premium )
 				{
-					return $this->template->json([
-						'status' 	=> 'error',
-						'message' 	=> 'Please Update Policy Premium First!'
-					], 400);
+					$__flag_passed = FALSE;
+					$failed_message 	= 'Please Update Policy Premium First!';
 				}
 			}
 
-			return TRUE;
+			/**
+			 * RI Approval Constraint?
+			 */
+			if(
+				$__flag_passed === TRUE
+					&&
+				$txn_record->flag_ri_approval == IQB_FLAG_ON
+					&&
+				$to_updown_status === IQB_POLICY_STATUS_APPROVED
+					&&
+				$txn_record->status !== IQB_POLICY_TXN_STATUS_RI_APPROVED
 
+			)
+			{
+				$__flag_passed = FALSE;
+				$failed_message 	= 'RI Approval is Needed for PID Approval.';
+			}
+
+			/**
+			 * Terminate Right here if Failed
+			 */
+			if( !$__flag_pass && $terminate_on_fail )
+			{
+				return $this->template->json([
+					'status' 	=> 'error',
+					'title' 	=> 'Invalid Status Transaction',
+					'message' 	=> $failed_message
+				], 400);
+			}
+
+			return $__flag_pass;
 		}
 
 

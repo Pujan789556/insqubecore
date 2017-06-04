@@ -18,16 +18,20 @@ else if( $record->status === IQB_POLICY_STATUS_APPROVED )
 {
     $status_sentence   = '<i class="fa fa-warning margin-r-5"></i>This Policy is <strong>Approved</strong>.';
     $css_class  = 'text-green';
-}
-else if( $record->status === IQB_POLICY_STATUS_VOUCHERED )
-{
-    $status_sentence   = '<i class="fa fa-warning margin-r-5"></i>This Policy is <strong>VOUCHERED</strong>.';
-    $css_class  = 'text-green';
-}
-else if( $record->status === IQB_POLICY_STATUS_INVOICED )
-{
-    $status_sentence   = '<i class="fa fa-warning margin-r-5"></i>This Policy is <strong>INVOICED</strong>.';
-    $css_class  = 'text-green';
+
+    // Transaction Status
+    if($txn_record->status == IQB_POLICY_TXN_STATUS_APPROVED )
+    {
+        $status_sentence .= "Please Generate Policy Voucher from Transaction/Endorsement Tab.";
+    }
+    else if( $txn_record->status == IQB_POLICY_TXN_STATUS_VOUCHERED )
+    {
+        $status_sentence .= "Please Generate Policy Invoice from Vouchers Tab.";
+    }
+    else if( $txn_record->status == IQB_POLICY_TXN_STATUS_INVOICED )
+    {
+        $status_sentence .= "Please make payment for this policy from Invoices Tab.";
+    }
 }
 else if($record->status === IQB_POLICY_STATUS_ACTIVE )
 {

@@ -174,26 +174,8 @@ $config['DX_permissions'] = [
 			'status.to.unverified',
 			'status.to.verified',
 			'status.to.approved',
-			'status.to.vouchered',
-			'status.to.invoiced'
 			'status.to.active', // issue policy
 			'status.to.cancel',
-
-			/**
-			 * Accounting Permissions
-			 * 	1. Generate Policy Voucher
-			 * 	1. Generate Policy Invoice
-			 * 	2. Make payment and generate Policy Receipt
-			 * 	3. Invoice Print, Update Print Flag
-			 * 	4. Receipt Print, Update Print Flag
-			 */
-			'generate.policy.voucher',
-			'generate.policy.invoice',
-			'make.policy.payment',
-			'print.policy.invoice',
-			'update.policy.invoice.print.flag',
-			'print.policy.receipt',
-			'update.policy.receipt.print.flag',
 
 			/**
 			 * Policy Schedule Generation
@@ -223,13 +205,29 @@ $config['DX_permissions'] = [
 			 * Verify/Approval Permission
 			 */
 			'status.to.draft',
+			'status.to.unverified',
 			'status.to.verified',
+			'status.to.ri.approved', // this will updated ri_approved_at/by & status to ri-approved(R)
+			'status.to.vouchered',
+			'status.to.invoiced',
 			'status.to.active', // Issue Endorsement (this will update approved_by, approved_at)
 
 			/**
-			 * RI-Approval Permission
+			 * Accounting Permissions
+			 * 	1. Generate Policy Voucher
+			 * 	1. Generate Policy Invoice
+			 * 	2. Make payment and generate Policy Receipt
+			 * 	3. Invoice Print, Update Print Flag
+			 * 	4. Receipt Print, Update Print Flag
 			 */
-			'status.to.ri.approved', // this will updated ri_approved_at/by & status to ri-approved(R)
+			'generate.policy.voucher',
+			'generate.policy.invoice',
+			'make.policy.payment',
+			'print.policy.invoice',
+			'update.policy.invoice.print.flag',
+			'print.policy.receipt',
+			'update.policy.receipt.print.flag',
+
 		],
 
 		/**

@@ -166,13 +166,13 @@ endif;
  */
 if( $record->status === IQB_POLICY_STATUS_APPROVED ): ?>
     <?php if( $this->dx_auth->is_authorized('policies', 'generate.policy.voucher') ): ?>
-        <a href="#"
+        <!-- <a href="#"
             title="Generate Voucher"
             data-confirm="true"
             class="btn btn-success btn-round trg-dialog-action"
             data-message="Are you sure you want to do this?<br/>This will automatically generate VOUCHER for this policy."
             data-url="<?php echo site_url('policies/voucher/' . $record->id );?>"
-        ><i class="fa fa-money"></i> Generate Voucher</a>
+        ><i class="fa fa-money"></i> Generate Voucher</a> -->
     <?php endif?>
 <?php
 endif;
@@ -193,19 +193,19 @@ endif;
  */
 
 // @TODO - We
-if( $record->status === IQB_POLICY_STATUS_VOUCHERED ):
+// if( $record->status === IQB_POLICY_STATUS_VOUCHERED ):
 ?>
     <?php if( $this->dx_auth->is_authorized('policies', 'generate.policy.invoice') ): ?>
-        <a href="#"
+       <!--  <a href="#"
             title="Generate Invoice"
             data-confirm="true"
             class="btn btn-success btn-round trg-dialog-action"
             data-message="Are you sure you want to Genrate Invoice for this policy?<br/>This will automatically generate INVOICE for this Policy."
             data-url="<?php echo site_url('policies/invoice/' . $record->id );?>"
-        ><i class="fa fa-money"></i> Generate Invoice</a>
+        ><i class="fa fa-money"></i> Generate Invoice</a> -->
     <?php endif?>
 <?php
-endif;
+// endif;
 
 // ------------------------------------------------------------------------------
 
@@ -224,17 +224,17 @@ endif;
  *  b. Print Receipt Voucher Details
  *  c. Print/Download Policy Schedule
  */
-if( $record->status === IQB_POLICY_STATUS_INVOICED ): ?>
+// if( $record->status === IQB_POLICY_STATUS_INVOICED ): ?>
     <?php if( $this->dx_auth->is_authorized('policies', 'make.policy.payment') ): ?>
-        <a href="#"
+        <!-- <a href="#"
             title="Make a Payment"
             data-confirm="true"
             class="btn btn-success btn-round trg-dialog-action"
             data-message="Are you sure you want to MAKE PAYMENT for this policy?<br/>This will automatically generate Receipt Voucher, Payment Receipt and Activate the Policy."
             data-url="<?php echo site_url('policies/payment/' . $record->id );?>"
-        ><i class="fa fa-money"></i> Make a Payment</a>
+        ><i class="fa fa-money"></i> Make a Payment</a> -->
     <?php endif?>
-<?php endif?>
+<?php //endif; ?>
 
 
 <?php

@@ -210,7 +210,7 @@ class Policy_txn_model extends MY_Model
         }
 
         // Status Qualified?
-        if( !$this->_status_qualifies($record->status, $to_status_flag) )
+        if( !$this->status_qualifies($record->status, $to_status_flag) )
         {
             throw new Exception("Exception [Model:Policy_txn_model][Method: update_status()]: Current Status does not qualify to upgrade/downgrade.");
         }
@@ -227,6 +227,7 @@ class Policy_txn_model extends MY_Model
              * Reset Verified date/user to NULL
              */
             case IQB_POLICY_TXN_STATUS_DRAFT:
+            case IQB_POLICY_TXN_STATUS_UNVERIFIED:
                 $data['verified_at'] = NULL;
                 $data['verified_by'] = NULL;
                 break;
@@ -264,35 +265,52 @@ class Policy_txn_model extends MY_Model
         return $this->_to_status($record->id, $data);
     }
 
-        // ----------------------------------------------------------------
+    // ----------------------------------------------------------------
 
-        private function _status_qualifies($current_status, $to_status)
+    public function status_qualifies($current_status, $to_status)
+    {
+        $flag_qualifies = FALSE;
+
+        switch ($to_status)
         {
-            $flag_qualifies = FALSE;
+            case IQB_POLICY_TXN_STATUS_DRAFT:
+                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
+                break;
 
-            switch ($to_status)
-            {
-                case IQB_POLICY_TXN_STATUS_DRAFT:
-                    $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
-                    break;
+            case IQB_POLICY_TXN_STATUS_UNVERIFIED:
+                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_DRAFT, IQB_POLICY_TXN_STATUS_VERIFIED]);
+                break;
 
-                case IQB_POLICY_TXN_STATUS_VERIFIED:
-                    $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_DRAFT, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
-                    break;
+            case IQB_POLICY_TXN_STATUS_VERIFIED:
+                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_UNVERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
+                break;
 
-                case IQB_POLICY_TXN_STATUS_RI_APPROVED:
-                    $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_VERIFIED;
-                    break;
+            case IQB_POLICY_TXN_STATUS_RI_APPROVED:
+                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_VERIFIED;
+                break;
 
-                case IQB_POLICY_TXN_STATUS_ACTIVE:
-                    $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
-                    break;
+            case IQB_POLICY_TXN_STATUS_APPROVED:
+                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
+                break;
 
-                default:
-                    break;
-            }
-            return $flag_qualifies;
+            case IQB_POLICY_TXN_STATUS_VOUCHERED:
+                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_APPROVED;
+                break;
+
+            case IQB_POLICY_TXN_STATUS_INVOICED:
+                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_VOUCHERED;
+                break;
+
+            // For non-txnal endorsement, its from approved
+            case IQB_POLICY_TXN_STATUS_ACTIVE:
+                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_APPROVED, IQB_POLICY_TXN_STATUS_INVOICED]);
+                break;
+
+            default:
+                break;
         }
+        return $flag_qualifies;
+    }
 
         // ----------------------------------------------------------------
 

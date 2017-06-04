@@ -26,150 +26,13 @@ if ( ! function_exists('get_policy_status_dropdown'))
 	{
 		$dropdown = [
 
-			/**
-			 * Policy Status - Draft
-			 *
-			 * This is a newly created Debit Note.
-			 * One can edit/delete or make a final draft that can be verified.
-			 *
-			 * Action Allowed
-			 * 		1. Edit
-			 * 		2. Delete
-			 * 		3. Send to Verify
-			 * 		4. Generate Schedule (Marked: Draft)
-			 *
-			 * Upper Status Level: Verifiable
-			 */
-			IQB_POLICY_STATUS_DRAFT => 'Draft',
-
-			/**
-			 * Policy Status - Unverified
-			 *
-			 * This is a final draft of Debit Note.
-			 * Now, only Verifier User can Edit this note if changes are to be made
-			 *
-			 * Action Allowed
-			 * 		1. Edit
-			 * 		2. Verify
-			 * 		3. Revert to Draft
-			 * 		4. Generate Schedule (Marked: Unverified)
-			 *
-			 * Upper Status Level: Verified
-			 * Lower Status Level: Draft
-			 */
-			IQB_POLICY_STATUS_UNVERIFIED => 'Unverified',
-
-			/**
-			 * Policy Status - Verified
-			 *
-			 * This is a verified of Debit Note.
-			 * Now, you can proceed for making payment of this policy OR back to unverified
-			 *
-			 * Action Allowed
-			 * 		1. Approve
-			 * 		2. Un-verify
-			 * 		3. Generate Schedule (Marked: Verified)
-			 *
-			 * Upper Status Level: Approved
-			 * Lower Status Level: Unverified
-			 */
-			IQB_POLICY_STATUS_VERIFIED => 'Verified',
-
-			/**
-			 * Policy Status - Approved
-			 *
-			 * This is an approved of Debit Note.
-			 * Now, you can proceed for making payment of this policy OR back to unverified
-			 *
-			 * Action Allowed
-			 * 		1. Make Payment
-			 * 		2. Back to Verified
-			 * 		3. Generate Schedule (Marked: Approved)
-			 *
-			 * Upper Status Level: Paid
-			 * Lower Status Level: Unverified
-			 */
-			IQB_POLICY_STATUS_APPROVED => 'Approved',
-
-			/**
-			 * Policy Status - Vouchered
-			 *
-			 * Action Allowed
-			 * 		...
-			 *
-			 * Upper Status Level: Invoiced | Cancel
-			 * Lower Status Level: Approved
-			 */
-			IQB_POLICY_STATUS_VOUCHERED => 'Vouchered',
-
-			/**
-			 * Policy Status - Invliced
-			 *
-			 * Action Allowed
-			 * 		...
-			 *
-			 * Upper Status Level: Active | Cancel
-			 * Lower Status Level: Vouchered
-			 */
-			IQB_POLICY_STATUS_INVOICED => 'Invoiced',
-
-			/**
-			 * Policy Status - Active
-			 *
-			 * This is Final Policy.
-			 * You can now print Invoice, Print Receipt, print Policy Schedule or Cancel Policy.
-			 *
-			 * @TODO: Policy Cancelation
-			 * 		What do you if you have to cancel policy at this stage?
-			 *
-			 * Action Allowed
-			 * 		1. Print Invoice
-			 * 		2. Print Receipt
-			 * 		3. Cancel Policy
-			 * 		4. Generate Schedule (Final Schedule)
-			 *
-			 * Upper Status Level: Canceled|Expired
-			 * Lower Status Level: Paid
-			 */
-			IQB_POLICY_STATUS_ACTIVE => 'Active',
-
-			/**
-			 * Policy Status - Canceled
-			 *
-			 * This is a canceled policy.
-			 * You have to undo all the previous transactions to get to this status.
-			 *
-			 * @TODO: To be discussed with the stakeholder and finalized its business process
-			 *
-			 * Action Allowed
-			 * 		3. Generate Schedule (Marked: Canceled)
-			 *
-			 * Upper Status Level: -
-			 * Lower Status Level: Active
-			 */
-			IQB_POLICY_STATUS_CANCELED => 'Canceled',
-
-			/**
-			 * Policy Status - Expired
-			 *
-			 * This status is automatically upgraded when a policy expires.
-			 * It will be done by cron-job.
-			 *
-			 * You can now renew this policy.
-			 *
-			 * Tasks carried while upgrading to this status
-			 * 		1. Set Status Flag to "Expired"
-			 * 		2. Send followup notification to client regarding this expiry
-			 * 		3. Create a followup notification to marketing agent who brought
-			 * 			this policy.
-			 *
-			 * Action Allowed
-			 * 		3. Renew This Policy
-			 *
-			 * Upper Status Level: -
-			 * Lower Status Level: Active
-			 */
-			IQB_POLICY_STATUS_EXPIRED => 'Expired'
+			IQB_POLICY_STATUS_DRAFT 		=> 'Draft',
+			IQB_POLICY_STATUS_UNVERIFIED 	=> 'Unverified',
+			IQB_POLICY_STATUS_VERIFIED 		=> 'Verified',
+			IQB_POLICY_STATUS_APPROVED 		=> 'Approved',
+			IQB_POLICY_STATUS_ACTIVE 		=> 'Active',
+			IQB_POLICY_STATUS_CANCELED 		=> 'Canceled',
+			IQB_POLICY_STATUS_EXPIRED 		=> 'Expired'
 		];
 
 		if($flag_blank_select)
@@ -197,7 +60,7 @@ if ( ! function_exists('get_policy_status_text'))
 
 		if($formatted && $text != '')
 		{
-			if($key === IQB_POLICY_STATUS_ACTIVE || $key === IQB_POLICY_STATUS_INVOICED || $key === IQB_POLICY_STATUS_VOUCHERED || $key === IQB_POLICY_STATUS_APPROVED )
+			if( in_array($key, [IQB_POLICY_STATUS_APPROVED, IQB_POLICY_STATUS_ACTIVE]) )
 			{
 				// Green
 				$css_class = 'text-green';
@@ -235,10 +98,14 @@ if ( ! function_exists('get_policy_txn_status_dropdown'))
 	function get_policy_txn_status_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			IQB_POLICY_TXN_STATUS_DRAFT 		=> 'Draft',
-			IQB_POLICY_TXN_STATUS_VERIFIED 		=> 'Verified',
-			IQB_POLICY_TXN_STATUS_RI_APPROVED 	=> 'RI Approved',
-			IQB_POLICY_TXN_STATUS_ACTIVE 		=> 'Active'
+			IQB_POLICY_TXN_STATUS_DRAFT			=> 'Draft',
+			IQB_POLICY_TXN_STATUS_UNVERIFIED	=> 'Unverified',
+			IQB_POLICY_TXN_STATUS_VERIFIED		=> 'Verified',
+			IQB_POLICY_TXN_STATUS_RI_APPROVED	=> 'RI Approved',
+			IQB_POLICY_TXN_STATUS_APPROVED		=> 'Approved',
+			IQB_POLICY_TXN_STATUS_VOUCHERED		=> 'Vouchered',
+			IQB_POLICY_TXN_STATUS_INVOICED		=> 'Invoiced',
+			IQB_POLICY_TXN_STATUS_ACTIVE		=> 'Active'
 		];
 
 		if($flag_blank_select)
@@ -265,7 +132,7 @@ if ( ! function_exists('get_policy_txn_status_text'))
 
 		if($formatted && $text != '')
 		{
-			if($key === IQB_POLICY_TXN_STATUS_ACTIVE || $key === IQB_POLICY_TXN_STATUS_RI_APPROVED )
+			if( in_array($key, [IQB_POLICY_TXN_STATUS_APPROVED, IQB_POLICY_TXN_STATUS_VOUCHERED, IQB_POLICY_TXN_STATUS_INVOICED, IQB_POLICY_TXN_STATUS_ACTIVE]) )
 			{
 				// Green
 				$css_class = 'text-green';

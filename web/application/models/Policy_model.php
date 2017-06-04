@@ -850,12 +850,81 @@ class Policy_model extends MY_Model
         }
 
         // Status Qualified?
-        if( !$this->_status_qualifies($record->status, $to_status_flag) )
+        if( !$this->status_qualifies($record->status, $to_status_flag) )
         {
             throw new Exception("Exception [Model: Policy_model][Method: update_status()]: Current Status does not qualify to upgrade/downgrade.");
         }
 
 
+        // Update Status and It's Dependency
+        return $this->_do_status_transaction($record, $to_status_flag);
+
+
+        // // Prepare Basic Update Data
+        // $base_data = [
+        //     'status'        => $to_status_flag,
+        //     'updated_by'    => $this->dx_auth->get_user_id(),
+        //     'updated_at'    => $this->set_date()
+        // ];
+
+        // $method = '_to_status_' . $to_status_flag;
+
+        // *
+        //  * Call Individual Status Method
+
+        // if(method_exists($this, $method)){
+        //     return $this->{$method}($record, $base_data);
+        // }else{
+        //     throw new Exception("Exception [Model: Policy_model][Method: update_status()]: Method does not exists ({$method})");
+        // }
+    }
+
+    // ----------------------------------------------------------------
+
+    public function status_qualifies($current_status, $to_status)
+    {
+        $flag_qualifies = FALSE;
+
+        switch ($to_status)
+        {
+            case IQB_POLICY_STATUS_DRAFT:
+                $flag_qualifies = $current_status === IQB_POLICY_STATUS_UNVERIFIED;
+                break;
+
+            case IQB_POLICY_STATUS_UNVERIFIED:
+                $flag_qualifies = in_array($current_status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_VERIFIED]);
+                break;
+
+            case IQB_POLICY_STATUS_VERIFIED:
+                $flag_qualifies = $current_status === IQB_POLICY_STATUS_UNVERIFIED;
+                break;
+
+            case IQB_POLICY_STATUS_APPROVED:
+                $flag_qualifies = $current_status === IQB_POLICY_STATUS_VERIFIED;
+                break;
+
+            case IQB_POLICY_STATUS_ACTIVE:
+                $flag_qualifies = $current_status === IQB_POLICY_STATUS_INVOICED;
+                break;
+
+            case IQB_POLICY_STATUS_CANCELED:
+                $flag_qualifies = $current_status === IQB_POLICY_STATUS_ACTIVE;
+                break;
+
+            case IQB_POLICY_STATUS_EXPIRED:
+                $flag_qualifies = $current_status === IQB_POLICY_STATUS_ACTIVE;
+                break;
+
+            default:
+                break;
+        }
+        return $flag_qualifies;
+    }
+
+    // ----------------------------------------------------------------
+
+    private function _do_status_transaction($record, $to_status_flag)
+    {
         // Prepare Basic Update Data
         $base_data = [
             'status'        => $to_status_flag,
@@ -863,202 +932,160 @@ class Policy_model extends MY_Model
             'updated_at'    => $this->set_date()
         ];
 
-        $method = '_to_status_' . $to_status_flag;
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+        $transaction_status = TRUE;
 
         /**
-         * Call Individual Status Method
+         * Disable DB Debugging
          */
-        if(method_exists($this, $method)){
-            return $this->{$method}($record, $base_data);
-        }else{
-            throw new Exception("Exception [Model: Policy_model][Method: update_status()]: Method does not exists ({$method})");
-        }
-    }
+        $this->db->db_debug = FALSE;
+        $this->db->trans_start();
 
-    // ----------------------------------------------------------------
 
-        /**
-         * Update Status to Draft
-         *
-         * @param object $record
-         * @param array $base_data
-         * @return bool
-         */
-        private function _to_status_D($record, $base_data)
-        {
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
-            $transaction_status = TRUE;
+            // ----------------------------------------------------------------
 
             /**
-             * Disable DB Debugging
+             * Update Case to Case basis data dependency on Transaction, Object, Customer Tables
              */
-            $this->db->db_debug = FALSE;
-            $this->db->trans_start();
-
-
-                    $this->_to_status($record->id, $base_data);
-
-
-            /**
-             * Complete transactions or Rollback
-             */
-            $this->db->trans_complete();
-            if ($this->db->trans_status() === FALSE)
+            switch($to_status_flag)
             {
-                $transaction_status = FALSE;
-            }
+                /**
+                 * to Draft
+                 */
+                case IQB_POLICY_STATUS_DRAFT:
+                    $this->_to_status($record->id, $base_data);
+                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_DRAFT);
+                    break;
 
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
-            /**
-             * ==================== TRANSACTIONS END =========================
-             */
-
-            return $transaction_status;
-        }
-
-        // ----------------------------------------------------------------
-
-        /**
-         * Update Status to Unverified
-         *
-         * @param object $record
-         * @param array $base_data
-         * @return bool
-         */
-        private function _to_status_U($record, $base_data)
-        {
-
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
-            $transaction_status = TRUE;
-
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
-            $this->db->trans_start();
-
-                    /**
-                     * This is the case when a policy status is upgraded from "draft" or downgraded from "verified".
-                     * So, the following tasks are carried out:
-                     *      1. Policy Record [Status -> Unverified, Verified date/user -> NULL]
-                     *      2. Policy Transaction Record [Status -> Draft]
-                     *      3. Open Lock Flag [Object, Customer]
-                     */
-
-                    // Task 1 - Policy Record [Status -> Unverified, Verified date/user -> NULL]
+                /**
+                 * to Unverified
+                 */
+                case IQB_POLICY_STATUS_UNVERIFIED:
                     $base_data['verified_at'] = NULL;
                     $base_data['verified_by'] = NULL;
                     $this->_to_status($record->id, $base_data);
 
-                    // Task 2 - Policy Transaction Record [Status -> Draft]
-                    // Only if we are downgrading from verified to Unverified
-                    if($record->status === IQB_POLICY_STATUS_VERIFIED )
-                    {
-                        $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_DRAFT);
-                    }
+                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_UNVERIFIED);
 
-                    // Task 3 - Open Lock Flag [Object, Customer]
                     $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
                     $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
+                    break;
 
 
-            /**
-             * Complete transactions or Rollback
-             */
-            $this->db->trans_complete();
-            if ($this->db->trans_status() === FALSE)
-            {
-                $transaction_status = FALSE;
-            }
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-            /**
-             * ==================== TRANSACTIONS END =========================
-             */
-
-            return $transaction_status;
-        }
-
-        // ----------------------------------------------------------------
-
-        /**
-         * Update Status to Verified
-         *
-         * @param object $record
-         * @param array $base_data
-         * @return bool
-         */
-        private function _to_status_V($record, $base_data)
-        {
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
-            $transaction_status = TRUE;
-
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
-            $this->db->trans_start();
-
-
-                    /**
-                     * This is the case when a policy status is upgraded from "unverified" or downgraded from "approved".
-                     * So, the following tasks are carried out:
-                     *      1. Policy Record [Status -> Verified, Verified date/user -> current, Approved date/user -> NULL]
-                     *      2. Policy Transaction Record [Status -> Verified]
-                     *      3. Activate Lock Flag [Object, Customer]
-                     */
-
-                    // Task 1 - Policy Record [Status -> Verified, Verified date/user -> current, Approved date/user -> NULL]
+                /**
+                 * to Verified
+                 */
+                case IQB_POLICY_STATUS_VERIFIED:
                     $base_data['verified_at'] = $this->set_date();
                     $base_data['verified_by'] = $this->dx_auth->get_user_id();
-
                     $base_data['approved_at'] = NULL;
                     $base_data['approved_by'] = NULL;
-
                     $this->_to_status($record->id, $base_data);
 
-                    // Task 2 - Policy Transaction Record [Status -> Verified]
                     $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_VERIFIED);
 
-                    // Task 3 - Activate Lock Flag [Object, Customer]
                     $this->object_model->update_lock($record->object_id, IQB_FLAG_LOCKED);
                     $this->customer_model->update_lock($record->customer_id, IQB_FLAG_LOCKED);
+                    break;
 
 
-            /**
-             * Complete transactions or Rollback
-             */
-            $this->db->trans_complete();
-            if ($this->db->trans_status() === FALSE)
-            {
-                $transaction_status = FALSE;
+                /**
+                 * to Approved
+                 */
+                case IQB_POLICY_STATUS_APPROVED:
+                    /**
+                     * This is the case when a policy status is upgraded from "verified".
+                     *
+                     * !!! NOTE: The Txn Record's RI Approval Constraint must met.
+                     *
+                     * So, the following tasks are carried out:
+                     *      1. Policy Record [Status -> Approved, Approved date/user -> current]
+                     *      2. Generate Policy Number
+                     *      3. Save Original Schedule PDF
+                     *
+                     * !!! NOTE: Both the tasks are done by calling the stored function.
+                     */
+                    $policy_type    = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH;
+                    $params         = [$policy_type, $record->id, $this->dx_auth->get_user_id()];
+                    $sql            = "SELECT `f_generate_policy_number`(?, ?, ?) AS policy_code";
+                    $result         = mysqli_store_procedure('select', $sql, $params);
+
+                    /**
+                     * Save Original Schedule PDF
+                     */
+                    $result_row = $result[0];
+                    if($result_row->policy_code)
+                    {
+                        // Update Transaction Status
+                        $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_APPROVED);
+
+                        /**
+                         * Updated Records - Policy and Policy Transaction
+                         */
+                        $record     = $this->get($record->id);
+                        $txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+
+                        _POLICY__schedule([
+                                'record'        => $record,
+                                'txn_record'    => $txn_record
+                            ], 'save');
+                    }
+                    break;
+
+
+                /**
+                 * to Active
+                 */
+                case IQB_POLICY_STATUS_ACTIVE:
+                case IQB_POLICY_STATUS_CANCELED:
+                case IQB_POLICY_STATUS_EXPIRED:
+                    $this->_to_status($record->id, $base_data);
+                    break;
             }
 
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-            /**
-             * ==================== TRANSACTIONS END =========================
-             */
-
-            return $transaction_status;
+        /**
+         * Complete transactions or Rollback
+         */
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            $transaction_status = FALSE;
         }
+
+        /**
+         * Restore DB Debug Configuration
+         */
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        return $transaction_status;
+
+
+        return $this->db->where('id', $id)
+                    ->update($this->table_name, $data);
+    }
+
+
+    // ----------------------------------------------------------------
+
+        private function _to_status($id, $data)
+        {
+            return $this->db->where('id', $id)
+                    ->update($this->table_name, $data);
+        }
+    // ----------------------------------------------------------------
+
+
+
+
+
+
 
         // ----------------------------------------------------------------
 
@@ -1219,204 +1246,7 @@ class Policy_model extends MY_Model
             return $transaction_status;
         }
 
-        // ----------------------------------------------------------------
 
-        /**
-         * Update Status to Active
-         *
-         * @param object $record
-         * @param array $base_data
-         * @return bool
-         */
-        private function _to_status_A($record, $base_data)
-        {
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
-            $transaction_status = TRUE;
-
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
-            $this->db->trans_start();
-
-
-                    $this->_to_status($record->id, $base_data);
-
-
-            /**
-             * Complete transactions or Rollback
-             */
-            $this->db->trans_complete();
-            if ($this->db->trans_status() === FALSE)
-            {
-                $transaction_status = FALSE;
-            }
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-            /**
-             * ==================== TRANSACTIONS END =========================
-             */
-
-            return $transaction_status;
-        }
-
-        // ----------------------------------------------------------------
-
-        /**
-         * Update Status to Canceled
-         *
-         * @param object $record
-         * @param array $base_data
-         * @return bool
-         */
-        private function _to_status_C($record, $base_data)
-        {
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
-            $transaction_status = TRUE;
-
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
-            $this->db->trans_start();
-
-
-                    $this->_to_status($record->id, $base_data);
-
-
-            /**
-             * Complete transactions or Rollback
-             */
-            $this->db->trans_complete();
-            if ($this->db->trans_status() === FALSE)
-            {
-                $transaction_status = FALSE;
-            }
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-            /**
-             * ==================== TRANSACTIONS END =========================
-             */
-
-            return $transaction_status;
-        }
-
-        // ----------------------------------------------------------------
-
-        /**
-         * Update Status to Expired
-         *
-         * @param object $record
-         * @param array $base_data
-         * @return bool
-         */
-        private function _to_status_E($record, $base_data)
-        {
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
-            $transaction_status = TRUE;
-
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
-            $this->db->trans_start();
-
-
-                    $this->_to_status($record->id, $base_data);
-
-
-            /**
-             * Complete transactions or Rollback
-             */
-            $this->db->trans_complete();
-            if ($this->db->trans_status() === FALSE)
-            {
-                $transaction_status = FALSE;
-            }
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-            /**
-             * ==================== TRANSACTIONS END =========================
-             */
-
-            return $transaction_status;
-        }
-
-        // ----------------------------------------------------------------
-
-        private function _status_qualifies($current_status, $to_status)
-        {
-            $flag_qualifies = FALSE;
-
-            switch ($to_status)
-            {
-                case IQB_POLICY_STATUS_DRAFT:
-                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_UNVERIFIED;
-                    break;
-
-                case IQB_POLICY_STATUS_UNVERIFIED:
-                    $flag_qualifies = in_array($current_status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_VERIFIED]);
-                    break;
-
-                case IQB_POLICY_STATUS_VERIFIED:
-                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_UNVERIFIED;
-                    break;
-
-                case IQB_POLICY_STATUS_APPROVED:
-                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_VERIFIED;
-                    break;
-
-                case IQB_POLICY_STATUS_VOUCHERED:
-                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_APPROVED;
-                    break;
-
-                case IQB_POLICY_STATUS_INVOICED:
-                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_VOUCHERED;
-                    break;
-
-                case IQB_POLICY_STATUS_ACTIVE:
-                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_INVOICED;
-                    break;
-
-                case IQB_POLICY_STATUS_CANCELED:
-                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_ACTIVE;
-                    break;
-
-                case IQB_POLICY_STATUS_EXPIRED:
-                    $flag_qualifies = $current_status === IQB_POLICY_STATUS_ACTIVE;
-                    break;
-
-                default:
-                    break;
-            }
-            return $flag_qualifies;
-        }
-
-        // ----------------------------------------------------------------
-
-        private function _to_status($id, $data)
-        {
-            return $this->db->where('id', $id)
-                        ->update($this->table_name, $data);
-        }
 
 
     // -------------------- END: POLICY STATUS UPDATE METHODS --------------

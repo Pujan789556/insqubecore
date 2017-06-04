@@ -665,7 +665,7 @@ class Policy_txn extends MY_Controller
 		/**
 		 * Meet the Status Pre-Requisite ?
 		 */
-		$this->__check_status_prerequisite($to_status_code, $txn_record);
+		$this->__status_qualifies($to_status_code, $txn_record);
 
 
 		/**
@@ -783,6 +783,18 @@ class Policy_txn extends MY_Controller
 					$permission_name = 'status.to.ri.approved';
 					break;
 
+				case IQB_POLICY_TXN_STATUS_APPROVED:
+					$permission_name = 'status.to.approved';
+					break;
+
+				case IQB_POLICY_TXN_STATUS_VOUCHERED:
+					$permission_name = 'status.to.vouchered';
+					break;
+
+				case IQB_POLICY_TXN_STATUS_INVOICED:
+					$permission_name = 'status.to.invoiced';
+					break;
+
 				case IQB_POLICY_STATUS_ACTIVE:
 					$permission_name = 'status.to.active';
 					break;
@@ -806,7 +818,7 @@ class Policy_txn extends MY_Controller
 		// --------------------------------------------------------------------
 
 		/**
-		 * Check Status up/down Pre-Requisite
+		 * Status Qualifies to UP/DOWN
 		 *
 		 * This is very important that not all type of policy txn has manu status
 		 * up/down facility. So we have to look into the type of Policy Txn Record Type and
@@ -817,45 +829,30 @@ class Policy_txn extends MY_Controller
 		 * @param bool $terminate_on_fail Terminate right here on fails
 		 * @return mixed
 		 */
-		private function __check_status_prerequisite($to_updown_status, $txn_record, $terminate_on_fail = TRUE)
+		private function __status_qualifies($to_updown_status, $txn_record, $terminate_on_fail = TRUE)
 		{
-			/**
-			 * Check Pre-Requisite
-			 * --------------------
-			 * 		Case 1. IQB_POLICY_TXN_TYPE_FRESH & IQB_POLICY_TXN_TYPE_RENEWAL
-			 * 			- Verifty <--> RI-Approval
-			 *
-			 * 		Case 2: All other types
-			 * 			- Draft <--> Verifty <--> RI-Approval <--> Active
-			 */
+			$__flag_passed = $this->policy_txn_model->status_qualifies($txn_record->status, $to_updown_status);
 
-			$__flag_pass = FALSE;
-			if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_FRESH  || $txn_record->txn_type == IQB_POLICY_TXN_TYPE_RENEWAL )
+			if( $__flag_passed )
 			{
-				$__flag_pass = $txn_record->status === IQB_POLICY_TXN_STATUS_VERIFIED && $to_updown_status === IQB_POLICY_TXN_STATUS_RI_APPROVED;
-			}
-			else
-			{
-				switch ( $txn_record->status )
+				/**
+				 * FRESH/RENEWAL Policy Transaction
+				 * 	Draft/Unverified/Verified/Approved are automatically triggered from
+				 * 	Policy Status Update Method
+				 */
+				if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_FRESH  || $txn_record->txn_type == IQB_POLICY_TXN_TYPE_RENEWAL )
 				{
-					case IQB_POLICY_TXN_STATUS_DRAFT:
-						$__flag_pass = $to_updown_status === IQB_POLICY_TXN_STATUS_VERIFIED;
-						break;
-
-					case IQB_POLICY_TXN_STATUS_VERIFIED:
-						$__flag_pass = $to_updown_status === IQB_POLICY_TXN_STATUS_RI_APPROVED || $to_updown_status === IQB_POLICY_TXN_STATUS_ACTIVE;
-						break;
-
-					case IQB_POLICY_TXN_STATUS_RI_APPROVED:
-						$__flag_pass = $to_updown_status === IQB_POLICY_TXN_STATUS_ACTIVE;
-						break;
-
-					default:
-						break;
+					$__flag_passed = !in_array($to_updown_status, [
+						IQB_POLICY_TXN_STATUS_DRAFT,
+						IQB_POLICY_TXN_STATUS_UNVERIFIED,
+						IQB_POLICY_TXN_STATUS_VERIFIED,
+						IQB_POLICY_TXN_STATUS_APPROVED,
+						IQB_POLICY_TXN_STATUS_ACTIVE
+					]);
 				}
 			}
 
-			if( !$__flag_pass && $terminate_on_fail )
+			if( !$__flag_passed && $terminate_on_fail )
 			{
 				return $this->template->json([
 					'status' 	=> 'error',
