@@ -174,9 +174,6 @@ if( $record->status === IQB_POLICY_STATUS_APPROVED ): ?>
             data-url="<?php echo site_url('policies/voucher/' . $record->id );?>"
         ><i class="fa fa-money"></i> Generate Voucher</a>
     <?php endif?>
-
-    <a href="#">Print Invoice</a>
-
 <?php
 endif;
 

@@ -1720,12 +1720,21 @@ class Policies extends MY_Controller
 		/**
 		 * --------------------------------------------------------------------
 		 * Post Voucher Add Tasks
+		 *
+		 * NOTE
+		 * 		We perform post voucher add tasks which are mainly to insert
+		 * 		voucher internal relation with policy txn record and  update
+		 * 		policy status.
+		 *
+		 * 		Please note that, if any of transaction fails or exception
+		 * 		happens, we rollback and disable voucher. (We can not delete
+		 * 		voucher as we need to maintain sequential order for audit trail)
 		 * --------------------------------------------------------------------
 		 */
 
 
 		/**
-         * ==================== TRANSACTIONS BEGIN =========================
+         * ==================== MANUAL TRANSACTIONS BEGIN =========================
          */
 
 
@@ -1733,7 +1742,8 @@ class Policies extends MY_Controller
              * Disable DB Debugging
              */
             $this->db->db_debug = FALSE;
-            $this->db->trans_start();
+            // $this->db->trans_start();
+            $this->db->trans_begin();
 
 
                 // --------------------------------------------------------------------
@@ -1778,28 +1788,28 @@ class Policies extends MY_Controller
 
                 // --------------------------------------------------------------------
 
-
-            /**
+			/**
              * Complete transactions or Rollback
              */
-            $this->db->trans_complete();
+			if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
+			{
+		        $this->db->trans_rollback();
 
-            /**
-             * Transaction failed or Exception Occured
-             */
-            if ( $this->db->trans_status() === FALSE || $flag_exception === TRUE)
-            {
-            	/**
+		        /**
             	 * Set Voucher Flag Complete to OFF
             	 */
             	$this->ac_voucher_model->disable_voucher($voucher_id);
 
-                return $this->template->json([
+            	return $this->template->json([
 					'title' 	=> 'Something went wrong!',
 					'status' 	=> 'error',
 					'message' 	=> $message ? $message : 'Could not perform save voucher relation or update policy status'
 				]);
-            }
+			}
+			else
+			{
+			        $this->db->trans_commit();
+			}
 
             /**
              * Restore DB Debug Configuration
@@ -1807,7 +1817,7 @@ class Policies extends MY_Controller
             $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         /**
-         * ==================== TRANSACTIONS END =========================
+         * ==================== MANUAL TRANSACTIONS END =========================
          */
 
 
