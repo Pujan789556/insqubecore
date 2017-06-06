@@ -49,3 +49,9 @@ folder instead of downloading all of them to reduce the load. -->
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
+
+<script type="text/javascript">
+var __IQB__APP_BASE_URL = '<?php echo APP_URL; ?>',
+	__IQB__APP_GOODIES_URL = '<?php echo APP_URL; ?>public/app/',
+	__IQB__APP_THEME_URL = '<?php echo THEME_URL; ?>';
+</script>
