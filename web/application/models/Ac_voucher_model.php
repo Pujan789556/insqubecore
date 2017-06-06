@@ -675,11 +675,53 @@ class Ac_voucher_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function rows_by_policy($policy_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var = 'ac_voucher_'.$policy_id;
+        $rows = $this->get_cache($cache_var);
+        if(!$rows)
+        {
+            $rows = $this->_rows_by_policy($policy_id);
+
+            if($rows)
+            {
+                $this->write_cache($rows, $cache_var, CACHE_DURATION_HR);
+            }
+        }
+        return $rows;
+    }
+
+        /**
+         * Get Rows from Database
+         *
+         * @param int $policy_id
+         * @return array
+         */
+        private function _rows_by_policy($policy_id)
+        {
+            // Common Row Select
+            $this->_row_select();
+
+            // Policy Related JOIN
+            return $this->db->select('RPV.flag_invoiced, RPV.policy_txn_id, PTXN.policy_id')
+                        ->join('rel_policy_txn__voucher RPV', 'RPV.voucher_id = V.id')
+                        ->join('dt_policy_txn PTXN', 'RPV.policy_txn_id = PTXN.id')
+                        ->where('PTXN.policy_id', $policy_id)
+                        ->order_by('V.id', 'DESC')
+                        ->get()
+                        ->result();
+        }
+
+    // ----------------------------------------------------------------
+
     private function _row_select()
     {
         $this->db->select(
                         // Voucher Table
-                        'V.id, V.branch_id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.flag_complete, V.voucher_date, ' .
+                        'V.id, V.voucher_type_id, V.branch_id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.flag_complete, V.voucher_date, ' .
 
                         // Voucher Type Table
                         'VT.name AS voucher_type_name, ' .
@@ -732,12 +774,27 @@ class Ac_voucher_model extends MY_Model
     /**
      * Delete Cache on Update/Delete Records
      */
-    public function clear_cache($data=null)
+    public function clear_cache( $data=null )
     {
-        $cache_names = [
+        /**
+         * If no data supplied, delete all caches
+         */
+        if( !$data )
+        {
+            $cache_names = [
+                'ac_voucher_*'
+            ];
+        }
+        else
+        {
+            /**
+             * If data supplied, we only delete the supplied
+             * caches
+             */
+            $cache_names = is_array($data) ? $data : [$data];
+        }
 
-        ];
-    	// cache name without prefix
+        // cache name without prefix
         foreach($cache_names as $cache)
         {
             $this->delete_cache($cache);

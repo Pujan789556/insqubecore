@@ -8,6 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="col-xs-12">
 		<div class="box no-border">
 			<div class="box-header gray">
+				<h2 class="page-header">Transactions/Endorsements</h2>
 				<div class="row">
 					<div class="col-sm-6">
 						<?php

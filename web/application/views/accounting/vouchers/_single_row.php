@@ -19,12 +19,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			// Permission?
 			$this->dx_auth->is_authorized('ac_vouchers', 'edit.voucher')
 
-			&&
+				&&
 
 			// Belongs to me?
 			belongs_to_me($record->branch_id, FALSE)
 
-			&&
+				&&
 
 			// Editable?
 			is_voucher_editable($record, FALSE)
@@ -42,5 +42,47 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<span class="hidden-xs">Edit</span>
 			</a>
 		<?php endif;?>
+
+
+		<?php
+		/**
+		 * Internal Voucher - Policy Voucher to Generate Invoice
+		 */
+		if(
+			// Must be Internal
+			$record->flag_internal == IQB_FLAG_ON
+
+				&&
+
+			// Premium Income Voucher
+			$record->voucher_type_id == IQB_AC_VOUCHER_TYPE_PRI
+
+				&&
+
+			// Must not Be Invoiced Yet
+			isset($record->flag_invoiced) && (int)$record->flag_invoiced === IQB_FLAG_OFF
+
+				&&
+
+			// Must have Policy Transaction ID
+			isset($record->policy_txn_id) && (int)$record->policy_txn_id !== IQB_FLAG_OFF
+
+				&&
+
+			// Has Permission
+			$this->dx_auth->is_authorized('policy_txn', 'generate.policy.invoice')
+
+		):?>
+			<a href="#"
+	            title="Generate Invoice"
+	            data-toggle="tooltip"
+	            data-confirm="true"
+	            class="btn btn-sm btn-success btn-round trg-dialog-action"
+	            data-message="Are you sure you want to Genrate Invoice for this policy?<br/>This will automatically generate INVOICE for this Policy."
+	            data-url="<?php echo site_url('policy_txn/invoice/' . $record->policy_txn_id );?>"
+	        ><i class="fa fa-list-alt"></i> Invoice</a>
+		<?php endif;?>
+
+
 	</td>
 </tr>

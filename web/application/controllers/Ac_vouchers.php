@@ -38,6 +38,8 @@ class Ac_vouchers extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+	// SEARCH/LIST WIDGET FUNCTIONS
+	// --------------------------------------------------------------------
 
 	/**
 	 * Default Method
@@ -248,6 +250,9 @@ class Ac_vouchers extends MY_Controller
 			return $data;
 		}
 
+
+	// --------------------------------------------------------------------
+
 	/**
 	 * Refresh The Module
 	 *
@@ -259,6 +264,8 @@ class Ac_vouchers extends MY_Controller
 	{
 		$this->page('l');
 	}
+
+	// --------------------------------------------------------------------
 
 	/**
 	 * Filter the Data
@@ -272,6 +279,39 @@ class Ac_vouchers extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Get all Voucher for Supplied Policy
+	 *
+	 * @param int $policy_id
+	 * @return JSON
+	 */
+	function by_policy($policy_id)
+	{
+		/**
+		 * Check Permissions? OR Deny on Fail!
+		 */
+		$this->dx_auth->is_authorized('ac_vouchers', 'explore.voucher', TRUE);
+
+		$policy_id 	= (int)$policy_id;
+		// $this->ac_voucher_model->clear_cache();
+		$records = $this->ac_voucher_model->rows_by_policy($policy_id);
+		$data = [
+			'records' 					=> $records,
+			'next_id' 					=> NULL
+		];
+		// echo '<pre>'; print_r($data);exit;
+		$html = $this->load->view('accounting/vouchers/_policy/_list_widget', $data, TRUE);
+		$ajax_data = [
+			'status' => 'success',
+			'html'   => $html
+		];
+
+		$this->template->json($ajax_data);
+	}
+
+	// --------------------------------------------------------------------
+	// CRUD FUNCTIONS
+	// --------------------------------------------------------------------
 
 	/**
 	 * Edit a Recrod
@@ -550,6 +590,7 @@ class Ac_vouchers extends MY_Controller
 			'message' => 'You can not delete a voucher!'
 		], 404);
 	}
+
 
 	// --------------------------------------------------------------------
 	//  DETAILS
