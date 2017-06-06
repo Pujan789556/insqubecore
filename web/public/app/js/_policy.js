@@ -9,14 +9,16 @@
  */
 $(document).on('click', '#policy-tabs a', function(e){
 	e.preventDefault();
-	var $this = $(this);
+	var $this = $(this),
+		$tab_box = $($this.data('box'));
 	$this.tab('show');
-
+	console.log($tab_box);
 	/**
 	 * AJAX Load Content if this is not Overview Tab
 	 */
 	if($this.attr('aria-controls') !== 'tab-policy-overview' )
 	{
+		$tab_box.html('Loading...');
 		InsQube.load(e, this);
 	}
 });
