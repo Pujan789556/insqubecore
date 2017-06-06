@@ -22,15 +22,15 @@ else if( $record->status === IQB_POLICY_STATUS_APPROVED )
     // Transaction Status
     if($txn_record->status == IQB_POLICY_TXN_STATUS_APPROVED )
     {
-        $status_sentence .= "Please Generate Policy Voucher from Transaction/Endorsement Tab.";
+        $status_sentence .= "<br/>Please <strong>Generate Policy Voucher</strong> from <strong>Transactions</strong> Tab.";
     }
     else if( $txn_record->status == IQB_POLICY_TXN_STATUS_VOUCHERED )
     {
-        $status_sentence .= "Please Generate Policy Invoice from Vouchers Tab.";
+        $status_sentence .= "<br/>Please <strong>Generate Policy Invoice</strong> from <strong>Vouchers</strong> Tab.";
     }
     else if( $txn_record->status == IQB_POLICY_TXN_STATUS_INVOICED )
     {
-        $status_sentence .= "Please make payment for this policy from Invoices Tab.";
+        $status_sentence .= "<br/>Please <strong>Make Payment</strong> for this policy from <strong>Invoices</strong> Tab.";
     }
 }
 else if($record->status === IQB_POLICY_STATUS_ACTIVE )

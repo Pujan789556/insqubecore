@@ -341,15 +341,6 @@ defined('IQB_AC_VOUCHER_TYPE_PUR')    			OR define('IQB_AC_VOUCHER_TYPE_PUR',	8)
 defined('IQB_AC_VOUCHER_TYPE_PURRTN')    		OR define('IQB_AC_VOUCHER_TYPE_PURRTN',	9);
 
 
-/*
-|--------------------------------------------------------------------------
-| VOUCHER INTERNAL RELATION TYPE CONSTANTS
-|--------------------------------------------------------------------------
-*/
-defined('IQB_AC_VOUCHER_REL_INTERNAL_TYPE_POLICY_TXN') OR define('IQB_AC_VOUCHER_REL_INTERNAL_TYPE_POLICY_TXN',	1);
-
-
-
 
 /*
 |--------------------------------------------------------------------------

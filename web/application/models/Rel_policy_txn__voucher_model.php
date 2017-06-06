@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Ac_rel_voucher_internal_model extends MY_Model
+class Rel_policy_txn__voucher_model extends MY_Model
 {
-    protected $table_name   = 'ac_rel_voucher_internals';
+    protected $table_name   = 'rel_policy_txn__voucher';
     protected $set_created  = FALSE;
     protected $set_modified = FALSE;
     protected $log_user     = FALSE;
@@ -15,7 +15,7 @@ class Ac_rel_voucher_internal_model extends MY_Model
     protected $after_update  = [];
     protected $after_delete  = [];
 
-    protected $fields = ['voucher_id', 'type', 'type_id'];
+    protected $fields = ['policy_txn_id', 'voucher_id', 'flag_invoiced'];
 
     protected $validation_rules = [];
 
@@ -57,7 +57,7 @@ class Ac_rel_voucher_internal_model extends MY_Model
         $done = $this->db->insert($this->table_name, $data);
         if( !$done )
         {
-            throw new Exception("Exception [Model: Ac_rel_voucher_internal_model][Method: add()]: Could not insert record.");
+            throw new Exception("Exception [Model: Rel_policy_txn__voucher_model][Method: add()]: Could not insert record.");
         }
 
         // return result/status

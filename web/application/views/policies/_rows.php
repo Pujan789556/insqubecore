@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Customers:  Data List Rows
+* Policies:  Data List Rows
 */
 
 /**

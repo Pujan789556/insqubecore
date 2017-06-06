@@ -130,6 +130,12 @@ class Policy_txn_model extends MY_Model
              * Task 2: Reset Policy Cost Reference Record
              */
             $this->policy_crf_model->reset($record->id);
+
+            /**
+             * Task 3: Clear Cache (Speciic to this Policy ID)
+             */
+            $cache_var = 'policy_txn_' . $policy_id;
+            $this->clear_cache($cache_var);
         }
 
     // --------------------------------------------------------------------
@@ -262,7 +268,11 @@ class Policy_txn_model extends MY_Model
                 break;
         }
 
-        return $this->_to_status($record->id, $data);
+        /**
+         * Update Status and Clear Cache Specific to this Policy ID
+         */
+        $cache_var = 'policy_txn_' . $policy_id;
+        return $this->_to_status($record->id, $data) && $this->clear_cache($cache_var);
     }
 
     // ----------------------------------------------------------------
@@ -415,6 +425,61 @@ class Policy_txn_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
+     * Get All Transactions Rows for Supplied Policy
+     *
+     * @param int $policy_id
+     * @return type
+     */
+    public function rows($policy_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var = 'policy_txn_'.$policy_id;
+        $rows = $this->get_cache($cache_var);
+        if(!$rows)
+        {
+            $rows = $this->_rows($policy_id);
+
+            if($rows)
+            {
+                $this->write_cache($rows, $cache_var, CACHE_DURATION_HR);
+            }
+        }
+        return $rows;
+    }
+
+    // --------------------------------------------------------------------
+
+        /**
+         * Get Rows from Database
+         *
+         * @param integer $policy_id
+         * @return mixed
+         */
+        private function _rows($policy_id)
+        {
+            // Data Selection
+            $this->db->select('PTXN.id, PTXN.policy_id, PTXN.txn_type, PTXN.txn_date, PTXN.flag_ri_approval, PTXN.flag_current, PTXN.status, P.branch_id')
+                            ->from($this->table_name . ' AS PTXN')
+                            ->join('dt_policies P', 'P.id = PTXN.policy_id')
+                            ->where('P.id', $policy_id);
+
+            /**
+             * Apply User Scope
+             */
+            $this->dx_auth->apply_user_scope('P');
+
+
+            // Get the damn result
+            return $this->db->order_by('PTXN.id', 'DESC')
+                            ->get()->result();
+        }
+
+    // --------------------------------------------------------------------
+
+
+    /**
      * Get Fresh/Renewal Transaction Record of the Policy
      *
      * If the policy is renewed, we need renewed record or fresh
@@ -445,10 +510,26 @@ class Policy_txn_model extends MY_Model
     /**
      * Delete Cache on Update/Delete Records
      */
-    public function clear_cache($data=null)
+    public function clear_cache( $data=null )
     {
-        $cache_names = [
-        ];
+        /**
+         * If no data supplied, delete all caches
+         */
+        if( !$data )
+        {
+            $cache_names = [
+                'policy_txn_*'
+            ];
+        }
+        else
+        {
+            /**
+             * If data supplied, we only delete the supplied
+             * caches
+             */
+            $cache_names = is_array($data) ? $data : [$data];
+        }
+
         // cache name without prefix
         foreach($cache_names as $cache)
         {

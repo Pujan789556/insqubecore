@@ -59,3 +59,9 @@ $route['translate_uri_dashes'] = FALSE;
 $route['profile'] = 'users/profile';
 
 
+/**
+ * Policy Transactions Routes
+ */
+$route['policy_txn/(:num)'] = 'policy_txn/index/$1';
+
+

@@ -7,15 +7,38 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div class="row">
 	<div class="col-xs-12">
 		<div class="nav-tabs-custom">
-			<ul class="nav nav-tabs">
-				<li class="active"><a href="#tab-policy-overview" data-toggle="tab">Overview</a></li>
-				<li><a href="#timeline" data-toggle="tab">Transactions/Endorsements</a></li>
-				<li><a href="#targets" data-toggle="tab">Vouchers</a></li>
-				<li><a href="#targets" data-toggle="tab">Invoices</a></li>
-				<li><a href="#targets" data-toggle="tab">Payments</a></li>
-				<li><a href="#settings" data-toggle="tab">Documents</a></li>
-				<li><a href="#settings" data-toggle="tab">Claim</a></li>
-				<li><a href="#settings" data-toggle="tab">Logs</a></li>
+			<ul class="nav nav-tabs" id="policy-tabs">
+				<li role="presentation" class="active">
+					<a href="#tab-policy-overview" aria-controls="tab-policy-overview" role="tab" data-toggle="tab">Overview</a>
+				</li>
+				<li role="presentation">
+					<a href="#tab-policy-transactions"
+						data-url="<?php echo site_url('policy_txn/'. $record->id)?>"
+						data-load-method="get"
+						data-box="#tab-policy-transactions"
+						data-method="html"
+						aria-controls="tab-policy-transactions"
+						role="tab"
+						data-toggle="tab">Transactions</a>
+				</li>
+				<li role="presentation">
+					<a href="#tab-policy-vouchers" aria-controls="tab-policy-vouchers" role="tab"  data-toggle="tab">Vouchers</a>
+				</li>
+				<li role="presentation">
+					<a href="#tab-policy-invoices" aria-controls="tab-policy-invoices" role="tab"  data-toggle="tab">Invoices</a>
+				</li>
+				<li role="presentation">
+					<a href="#tab-policy-payments" aria-controls="tab-policy-payments" role="tab"  data-toggle="tab">Payments</a>
+				</li>
+				<li role="presentation">
+					<a href="#tab-policy-claims" aria-controls="tab-policy-claims" role="tab" data-toggle="tab">Claim</a>
+				</li>
+				<li role="presentation">
+					<a href="#tab-policy-docs" aria-controls="tab-policy-docs" role="tab"  data-toggle="tab">Documents</a>
+				</li>
+				<li role="presentation">
+					<a href="#tab-policy-logs" aria-controls="tab-policy-logs" role="tab" data-toggle="tab">Logs</a>
+				</li>
 			</ul>
 			<div class="tab-content">
 				<div class="active tab-pane" id="tab-policy-overview">
@@ -26,19 +49,35 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					$this->load->view('policies/tabs/_tab_overview');
 					?>
 				</div>
-				<!-- /.tab-pane -->
-				<div class="tab-pane" id="timeline">
+
+				<div class="tab-pane" id="tab-policy-transactions">
 
 				</div>
-				<!-- /.tab-pane -->
-				<div class="tab-pane" id="settings">
+
+				<div class="tab-pane" id="tab-policy-vouchers">
 
 				</div>
-				<!-- /.tab-pane -->
+
+				<div class="tab-pane" id="tab-policy-invoices">
+
+				</div>
+
+				<div class="tab-pane" id="tab-policy-payments">
+
+				</div>
+
+				<div class="tab-pane" id="tab-policy-claims">
+
+				</div>
+
+				<div class="tab-pane" id="tab-policy-docs">
+
+				</div>
+
+				<div class="tab-pane" id="tab-policy-logs">
+
+				</div>
 			</div>
-			<!-- /.tab-content -->
 		</div>
-		<!-- /.nav-tabs-custom -->
 	</div>
-	<!-- /.col -->
 </div>

@@ -174,7 +174,7 @@ $config['DX_permissions'] = [
 			'status.to.unverified',
 			'status.to.verified',
 			'status.to.approved',
-			'status.to.active', // issue policy
+			'status.to.active',
 			'status.to.cancel',
 
 			/**
@@ -197,9 +197,9 @@ $config['DX_permissions'] = [
 			 * CRUD Operation Permissions
 			 */
 			'explore.transaction',
-			'add.transaction',
-			'edit.transaction',
-			'delete.transaction',
+			'edit.draft.transaction',
+			'edit.unverified.transaction',
+			'delete.draft.transaction',
 
 			/**
 			 * Verify/Approval Permission
@@ -208,6 +208,7 @@ $config['DX_permissions'] = [
 			'status.to.unverified',
 			'status.to.verified',
 			'status.to.ri.approved', // this will updated ri_approved_at/by & status to ri-approved(R)
+			'status.to.approved',
 			'status.to.vouchered',
 			'status.to.invoiced',
 			'status.to.active', // Issue Endorsement (this will update approved_by, approved_at)

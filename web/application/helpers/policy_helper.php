@@ -348,6 +348,77 @@ if ( ! function_exists('is_policy_editable'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('is_policy_txn_editable'))
+{
+	/**
+	 * Is Policy Transaction Editable?
+	 *
+	 * Check if the given policy transaction is editable.
+	 *
+	 * @param char $status 	Policy Transaction Status
+	 * @param char $flag_current 	Is this Current Policy Transaction
+	 * @param bool $terminate_on_fail Terminate Right Here if not editable.
+	 * @return	bool
+	 */
+	function is_policy_txn_editable($status, $flag_current, $terminate_on_fail = TRUE )
+	{
+		$CI =& get_instance();
+
+		// Editable Permissions ?
+		$__flag_authorized 		= FALSE;
+		$__flag_editable_status = FALSE;
+
+
+		/**
+		 * Check Permissions
+		 *
+		 * Editable Status
+		 * 		draft | unverified
+		 *
+		 * Editable Permissions Are
+		 * 		edit.draft.transaction | edit.unverified.transaction
+		 */
+		$editable_status 	= [IQB_POLICY_TXN_STATUS_DRAFT, IQB_POLICY_TXN_STATUS_UNVERIFIED];
+
+		// Editable Status? Must be Current Transaction
+		if( in_array($status, $editable_status) && $flag_current == IQB_FLAG_ON)
+		{
+			$__flag_editable_status = TRUE;
+		}
+
+		// Editable Permissions ?
+		if( $__flag_editable_status )
+		{
+			if(
+				$CI->dx_auth->is_admin()
+
+				||
+
+				( $status === IQB_POLICY_TXN_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('policy_txn', 'edit.draft.transaction') )
+
+				||
+
+				( $status === IQB_POLICY_TXN_STATUS_UNVERIFIED &&  $CI->dx_auth->is_authorized('policy_txn', 'edit.unverified.transaction') )
+
+			)
+			{
+				$__flag_authorized = TRUE;
+			}
+		}
+
+		// Terminate on Exit?
+		if( $__flag_authorized === FALSE && $terminate_on_fail == TRUE)
+		{
+			$CI->dx_auth->deny_access();
+			exit(1);
+		}
+
+		return $__flag_authorized;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 {
 	/**

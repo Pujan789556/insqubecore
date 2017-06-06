@@ -858,25 +858,6 @@ class Policy_model extends MY_Model
 
         // Update Status and It's Dependency
         return $this->_do_status_transaction($record, $to_status_flag);
-
-
-        // // Prepare Basic Update Data
-        // $base_data = [
-        //     'status'        => $to_status_flag,
-        //     'updated_by'    => $this->dx_auth->get_user_id(),
-        //     'updated_at'    => $this->set_date()
-        // ];
-
-        // $method = '_to_status_' . $to_status_flag;
-
-        // *
-        //  * Call Individual Status Method
-
-        // if(method_exists($this, $method)){
-        //     return $this->{$method}($record, $base_data);
-        // }else{
-        //     throw new Exception("Exception [Model: Policy_model][Method: update_status()]: Method does not exists ({$method})");
-        // }
     }
 
     // ----------------------------------------------------------------
