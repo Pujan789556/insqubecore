@@ -10,9 +10,10 @@
 $(document).on('click', '#policy-tabs a', function(e){
 	e.preventDefault();
 	var $this = $(this),
-		$tab_box = $($this.data('box'));
+	$tab_box  = $($this.data('box'));
 	$this.tab('show');
-	console.log($tab_box);
+
+
 	/**
 	 * AJAX Load Content if this is not Overview Tab
 	 */

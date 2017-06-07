@@ -487,7 +487,7 @@ class Ac_vouchers extends MY_Controller
 				$single_row 	=  'accounting/vouchers/_single_row';
 				$html = $this->load->view($single_row, ['record' => $record], TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add' ? '#search-result-voucher' : '#_data-row-' . $record->id,
+					'box' 		=> $action === 'add' ? '#search-result-voucher' : '#_data-row-voucher-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
 				];

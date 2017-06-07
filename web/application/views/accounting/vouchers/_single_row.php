@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Vouchers:  Single Row
 */
 ?>
-<tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
+<tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-voucher-<?php echo $record->id;?>">
 	<?php if( $this->dx_auth->is_admin() ): ?>
 			<td><?php echo $record->id;?></td>
 		<?php endif;?>
@@ -79,7 +79,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	            data-confirm="true"
 	            class="btn btn-sm btn-success btn-round trg-dialog-action"
 	            data-message="Are you sure you want to Genrate Invoice for this policy?<br/>This will automatically generate INVOICE for this Policy."
-	            data-url="<?php echo site_url('policy_txn/invoice/' . $record->policy_txn_id );?>"
+	            data-url="<?php echo site_url('policy_txn/invoice/' . $record->policy_txn_id  . '/' . $record->id );?>"
 	        ><i class="fa fa-list-alt"></i> Invoice</a>
 		<?php endif;?>
 

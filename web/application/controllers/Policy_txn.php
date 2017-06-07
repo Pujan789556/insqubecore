@@ -940,6 +940,7 @@ class Policy_txn extends MY_Controller
 
 	// --------------------- END: STATUS UPGRADE/DOWNGRADE --------------------
 
+
 	// --------------------------------------------------------------------
 	//  POLICY Voucher & Invoice
 	// --------------------------------------------------------------------
@@ -1395,6 +1396,8 @@ class Policy_txn extends MY_Controller
 		];
 		return $this->template->json($ajax_data);
 	}
+
+	// --------------------------------------------------------------------
 
 
 
