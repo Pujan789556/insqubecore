@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy Transaction: List View
 */
 ?>
-<div class="row">
+<div class="row" id="list-widget-policy_txn">
 	<div class="col-xs-12">
 		<div class="box no-border">
 			<div class="box-header gray">

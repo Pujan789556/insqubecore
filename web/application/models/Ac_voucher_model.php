@@ -675,12 +675,41 @@ class Ac_voucher_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    private function _row_select()
+    {
+        $this->db->select(
+                        // Voucher Table
+                        'V.id, V.voucher_type_id, V.branch_id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.flag_complete, V.voucher_date, ' .
+
+                        // Voucher Type Table
+                        'VT.name AS voucher_type_name, ' .
+
+                        // Branch Table
+                        'B.name AS branch_name, ' .
+
+                        // Fiscal Year Table
+                        'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
+                    )
+                ->from($this->table_name . ' AS V')
+                ->join('ac_voucher_types VT', 'VT.id = V.voucher_type_id')
+                ->join('master_branches B', 'B.id = V.branch_id')
+                ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id');
+
+        /**
+         * Apply Scope
+         * ------------
+         * @TODO - Only data belonging to me!!!
+         */
+    }
+
+    // ----------------------------------------------------------------
+
     public function rows_by_policy($policy_id)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_var = 'ac_voucher_'.$policy_id;
+        $cache_var = 'ac_voucher_list_by_policy_'.$policy_id;
         $rows = $this->get_cache($cache_var);
         if(!$rows)
         {
@@ -710,39 +739,11 @@ class Ac_voucher_model extends MY_Model
                         ->join('rel_policy_txn__voucher RPV', 'RPV.voucher_id = V.id')
                         ->join('dt_policy_txn PTXN', 'RPV.policy_txn_id = PTXN.id')
                         ->where('PTXN.policy_id', $policy_id)
+                        ->where('V.flag_complete', IQB_FLAG_ON)
                         ->order_by('V.id', 'DESC')
                         ->get()
                         ->result();
         }
-
-    // ----------------------------------------------------------------
-
-    private function _row_select()
-    {
-        $this->db->select(
-                        // Voucher Table
-                        'V.id, V.voucher_type_id, V.branch_id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.flag_complete, V.voucher_date, ' .
-
-                        // Voucher Type Table
-                        'VT.name AS voucher_type_name, ' .
-
-                        // Branch Table
-                        'B.name AS branch_name, ' .
-
-                        // Fiscal Year Table
-                        'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
-                    )
-                ->from($this->table_name . ' AS V')
-                ->join('ac_voucher_types VT', 'VT.id = V.voucher_type_id')
-                ->join('master_branches B', 'B.id = V.branch_id')
-                ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id');
-
-        /**
-         * Apply Scope
-         * ------------
-         * @TODO - Only data belonging to me!!!
-         */
-    }
 
     // --------------------------------------------------------------------
 
@@ -769,6 +770,40 @@ class Ac_voucher_model extends MY_Model
                 ->get()->row();
     }
 
+    // --------------------------------------------------------------------
+
+    public function get_voucher_by_policy_txn_relation($policy_txn_id, $voucher_id)
+    {
+        return $this->db->select(
+
+                // Relation Table
+                'REL.*, ' .
+
+                // Voucher Table
+                'V.id, V.voucher_type_id, V.branch_id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.flag_complete, V.voucher_date, ' .
+
+                // Voucher Type Table
+                'VT.name AS voucher_type_name, ' .
+
+                // Branch Table
+                'B.name AS branch_name, ' .
+
+                // Fiscal Year Table
+                'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
+            )
+            ->from($this->table_name . ' AS V')
+            ->join('rel_policy_txn__voucher REL', 'V.id = REL.voucher_id')
+            ->join('ac_voucher_types VT', 'VT.id = V.voucher_type_id')
+            ->join('master_branches B', 'B.id = V.branch_id')
+            ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id')
+            ->where([
+                'REL.policy_txn_id' => $policy_txn_id,
+                'REL.voucher_id'    => $voucher_id,
+                'V.id'              => $voucher_id,
+                'V.flag_complete'   => IQB_FLAG_ON
+            ])->get()->row();
+    }
+
 	// --------------------------------------------------------------------
 
     /**
@@ -782,7 +817,7 @@ class Ac_voucher_model extends MY_Model
         if( !$data )
         {
             $cache_names = [
-                'ac_voucher_*'
+                'ac_voucher_list_by_policy_*'
             ];
         }
         else

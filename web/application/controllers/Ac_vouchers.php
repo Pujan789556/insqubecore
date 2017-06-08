@@ -283,9 +283,10 @@ class Ac_vouchers extends MY_Controller
 	 * Get all Voucher for Supplied Policy
 	 *
 	 * @param int $policy_id
+	 * @param bool $data_only Return Data Only
 	 * @return JSON
 	 */
-	function by_policy($policy_id)
+	function by_policy($policy_id, $data_only = FALSE)
 	{
 		/**
 		 * Check Permissions? OR Deny on Fail!
@@ -293,10 +294,12 @@ class Ac_vouchers extends MY_Controller
 		$this->dx_auth->is_authorized('ac_vouchers', 'explore.voucher', TRUE);
 
 		$policy_id 	= (int)$policy_id;
-		// $this->ac_voucher_model->clear_cache();
+		$this->ac_voucher_model->clear_cache();
 		$records = $this->ac_voucher_model->rows_by_policy($policy_id);
+		// echo $this->db->last_query();exit;
 		$data = [
 			'records' 					=> $records,
+			'policy_id' 				=> $policy_id,
 			'next_id' 					=> NULL
 		];
 		// echo '<pre>'; print_r($data);exit;
@@ -306,7 +309,42 @@ class Ac_vouchers extends MY_Controller
 			'html'   => $html
 		];
 
+		// Return if Ajax Data Only is Set
+		if($data_only) return $ajax_data;
+
 		$this->template->json($ajax_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Flush Cache - Per Policy
+	 *
+	 * @param type $policy_id
+	 * @return type
+	 */
+	public function flush_by_policy($policy_id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		$this->dx_auth->is_authorized('ac_vouchers', 'explore.voucher', TRUE);
+
+		$policy_id = $policy_id ? (int)$policy_id : NULL;
+		$cache_var = $policy_id ? 'ac_voucher_list_by_policy_' . $policy_id : NULL;
+
+		$this->ac_voucher_model->clear_cache($cache_var);
+
+		$ajax_data = $this->by_policy($policy_id, TRUE);
+		$json_data = [
+			'status' 	=> 'success',
+			'message' 	=> 'Successfully flushed the cache.',
+			'reloadRow' => true,
+			'rowId' 	=> '#list-widget-policy-vouchers',
+			'row' 		=> $ajax_data['html']
+		];
+
+		return $this->template->json($json_data);
 	}
 
 	// --------------------------------------------------------------------

@@ -54,6 +54,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 				&&
 
+			// Must be Complete
+			$record->flag_complete == IQB_FLAG_ON
+
+				&&
+
 			// Premium Income Voucher
 			$record->voucher_type_id == IQB_AC_VOUCHER_TYPE_PRI
 

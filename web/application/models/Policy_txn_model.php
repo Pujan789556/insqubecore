@@ -199,17 +199,40 @@ class Policy_txn_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
+     * Update Status of Transaction Record
+     *
+     * @param Integer|Object $txn_id_or_txn_record    Transaction ID or Transaction Record
+     * @param Char $to_status_flag
+     * @return mixed
+     */
+    public function update_status_direct($txn_id_or_txn_record, $to_status_flag)
+    {
+        $record = is_numeric($txn_id_or_txn_record) ? $this->get( (int)$txn_id_or_txn_record ) : $txn_id_or_txn_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Policy_txn_model][Method: update_status_direct()]: Current TXN record could not be found.");
+        }
+
+        return $this->update_status($record, $to_status_flag);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
      * Update Policy Transaction Status
      *
      * !!! NOTE: We can only change status of current Transaction Record
      *
-     * @param integer $policy_id Policy ID
+     * @param integer $policy_id_or_txn_record Policy ID or Transaction Record
      * @param alpha $to_status_flag Status Code
      * @return bool
      */
-    public function update_status($policy_id, $to_status_flag)
+    public function update_status($policy_id_or_txn_record, $to_status_flag)
     {
-        $record = $this->get_current_txn_by_policy($policy_id);
+        // Get the Policy Record
+        $record = is_numeric($policy_id_or_txn_record) ? $this->get_current_txn_by_policy( (int)$policy_id_or_txn_record ) : $policy_id_or_txn_record;
+
         if(!$record)
         {
             throw new Exception("Exception [Model: Policy_txn_model][Method: update_status()]: Current TXN record could not be found.");
@@ -271,7 +294,7 @@ class Policy_txn_model extends MY_Model
         /**
          * Update Status and Clear Cache Specific to this Policy ID
          */
-        $cache_var = 'policy_txn_' . $policy_id;
+        $cache_var = 'policy_txn_' . $record->policy_id;
         return $this->_to_status($record->id, $data) && $this->clear_cache($cache_var);
     }
 

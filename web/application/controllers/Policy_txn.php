@@ -126,7 +126,7 @@ class Policy_txn extends MY_Controller
 				'status' => 'success',
 				'message' 	=> 'Successfully flushed the cache.',
 				'reloadRow' => true,
-				'rowId' 	=> '#tab-policy-transactions',
+				'rowId' 	=> '#list-widget-policy_txn',
 				'row' 		=> $ajax_data['html']
 			];
 
@@ -1326,7 +1326,7 @@ class Policy_txn extends MY_Controller
 				{
 					try{
 
-						$this->policy_txn_model->update_status($policy_record->id, IQB_POLICY_TXN_STATUS_VOUCHERED);
+						$this->policy_txn_model->update_status_direct($txn_record->id, IQB_POLICY_TXN_STATUS_VOUCHERED);
 
 					} catch (Exception $e) {
 
@@ -1399,6 +1399,270 @@ class Policy_txn extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	public function invoice($id, $voucher_id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('policy_txn', 'generate.policy.invoice') )
+		{
+			$this->dx_auth->deny_access();
+		}
 
+		// --------------------------------------------------------------------
+
+		/**
+		 * Get the Policy Fresh/Renewal Txn Record
+		 */
+		$id 		= (int)$id;
+		$voucher_id = (int)$voucher_id;
+		$txn_record = $this->policy_txn_model->get( $id );
+		if(!$txn_record)
+		{
+			$this->template->render_404();
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Get Voucher Record By Policy Transaction Relation
+		 */
+		$this->load->model('ac_voucher_model');
+		$voucher_record = $this->ac_voucher_model->get_voucher_by_policy_txn_relation($txn_record->id, $voucher_id);
+		if(!$voucher_record)
+		{
+			$this->template->render_404();
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Policy Record
+		 */
+		$policy_record = $this->policy_model->get($txn_record->policy_id);
+		if(!$policy_record)
+		{
+			$this->template->render_404();
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Record Status Authorized to Generate Voucher?
+		 */
+		if($txn_record->status !== IQB_POLICY_TXN_STATUS_VOUCHERED || $voucher_record->flag_invoiced != IQB_FLAG_OFF )
+		{
+			return $this->template->json([
+				'title' 	=> 'OOPS!',
+				'status' 	=> 'error',
+				'message' 	=> 'You can not perform this action.'
+			], 404);
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Let's Build Policy Invoice
+		 */
+
+		/**
+         * Voucher Amount Computation
+         */
+        $gross_premium_amount 		= $txn_record->amt_total_premium;
+        $stamp_income_amount 		= $txn_record->amt_stamp_duty;
+        $vat_payable_amount 		= $txn_record->amt_vat;
+
+        $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
+
+		$invoice_data = [
+			'customer_id' 		=> $policy_record->customer_id,
+            'invoice_date'      => date('Y-m-d'),
+            'voucher_id'   		=> $voucher_id,
+            'amount' 			=> $total_to_receive_from_insured_party_amount
+        ];
+
+		// --------------------------------------------------------------------
+
+        /**
+         * Invoice Details
+         */
+        $invoice_details_data = [
+        	[
+	        	'description' 	=> "Policy Premium Amount (Policy Code - {$policy_record->code})",
+	        	'amount'		=> $gross_premium_amount
+	        ],
+	        [
+	        	'description' 	=> "Stamp Duty",
+	        	'amount'		=> $stamp_income_amount
+	        ],
+	        [
+	        	'description' 	=> "VAT",
+	        	'amount'		=> $vat_payable_amount
+	        ]
+        ];
+
+
+		// --------------------------------------------------------------------
+
+        // echo '<pre>';
+        // print_r($invoice_data);
+        // print_r($invoice_details_data);
+        // exit;
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Save Invoice
+		 */
+		$this->load->model('ac_invoice_model');
+		try {
+
+			/**
+			 * Task 1: Save Invoice and Generate Invoice Code
+			 */
+			$invoice_id = $this->ac_invoice_model->add($invoice_data, $invoice_details_data);
+
+		} catch (Exception $e) {
+
+			return $this->template->json([
+				'title' 	=> 'Exception Occured!',
+				'status' 	=> 'error',
+				'message' 	=> $e->getMessage()
+			]);
+		}
+
+		$flag_exception = FALSE;
+		$message = '';
+
+
+		/**
+		 * --------------------------------------------------------------------
+		 * Post Voucher Add Tasks
+		 *
+		 * NOTE
+		 * 		We perform post voucher add tasks which are mainly to insert
+		 * 		voucher internal relation with policy txn record and  update
+		 * 		policy status.
+		 *
+		 * 		Please note that, if any of transaction fails or exception
+		 * 		happens, we rollback and disable voucher. (We can not delete
+		 * 		voucher as we need to maintain sequential order for audit trail)
+		 * --------------------------------------------------------------------
+		 */
+
+
+		/**
+         * ==================== MANUAL TRANSACTIONS BEGIN =========================
+         */
+
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            // $this->db->trans_start();
+            $this->db->trans_begin();
+
+
+                // --------------------------------------------------------------------
+
+				/**
+				 * Task 2: Update Transaction Status to "Invoiced", Clean Cache
+				 */
+				try{
+
+					$this->policy_txn_model->update_status_direct($txn_record->id, IQB_POLICY_TXN_STATUS_INVOICED);
+
+				} catch (Exception $e) {
+
+					$flag_exception = TRUE;
+					$message = $e->getMessage();
+				}
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 3: Update Relation Table Flag - "flag_invoiced"
+                 */
+                if( !$flag_exception )
+				{
+					$this->load->model('rel_policy_txn__voucher_model');
+					$rel_base_where = [
+						'policy_txn_id' => $txn_record->id,
+						'voucher_id' 	=> $voucher_id
+					];
+	                $this->rel_policy_txn__voucher_model->update_by($rel_base_where, [
+	                	'flag_invoiced' => IQB_FLAG_ON
+	            	]);
+
+	            	// Clear Voucher Cache for This Policy
+	            	$cache_var = 'ac_voucher_list_by_policy_' . $policy_record->id;
+					$this->ac_voucher_model->clear_cache($cache_var);
+            	}
+
+                // --------------------------------------------------------------------
+
+			/**
+             * Complete transactions or Rollback
+             */
+			if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
+			{
+		        $this->db->trans_rollback();
+
+		        /**
+            	 * Set Invoice Flag Complete to OFF
+            	 */
+            	$this->ac_invoice_model->disable_invoice($invoice_id);
+
+            	return $this->template->json([
+					'title' 	=> 'Something went wrong!',
+					'status' 	=> 'error',
+					'message' 	=> $message ? $message : 'Could not update policy transaction status or voucher relation flag'
+				]);
+			}
+			else
+			{
+			        $this->db->trans_commit();
+			}
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== MANUAL TRANSACTIONS END =========================
+         */
+
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Reload the Policy Overview Tab, Update Transaction Row (Replace)
+		 */
+		$txn_record->status = IQB_POLICY_TXN_STATUS_INVOICED;
+		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'txn_record' => $txn_record], TRUE);
+
+		$voucher_record->flag_invoiced = IQB_FLAG_ON;
+		$html_voucher_row 	= $this->load->view('accounting/vouchers/_single_row', ['record' => $voucher_record], TRUE);
+
+		$ajax_data = [
+			'message' 	=> 'Successfully Updated!',
+			'status'  	=> 'success',
+			'multipleUpdate' => [
+				[
+					'box' 		=> '#tab-policy-overview-inner',
+					'method' 	=> 'replaceWith',
+					'html' 		=> $html_tab_ovrview
+				],
+				[
+					'box' 		=> '#_data-row-voucher-' . $voucher_id,
+					'method' 	=> 'replaceWith',
+					'html' 		=> $html_voucher_row
+				]
+			]
+		];
+		return $this->template->json($ajax_data);
+	}
 
 }

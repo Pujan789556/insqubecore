@@ -74,6 +74,17 @@ $config['insqb_activity_types'] = [
 			'E' => 'edited'
 	]],
 
+	/**
+	 * Activities related to Account Invoice
+	 */
+	'ac_invoice' => [
+		'_uri' => 'ac_invoices/',
+		'_table' => 'ac_invoices',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited'
+	]],
+
 
 	/**
 	 * Activities related to Agent
