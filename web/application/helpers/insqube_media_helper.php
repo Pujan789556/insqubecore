@@ -282,3 +282,71 @@ if ( ! function_exists('thumbnail_name'))
 		return $base . $thumb_fix . $extension;
 	}
 }
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('insqube_js'))
+{
+    /**
+     * Format Insqube JS file
+     *
+     * Format JS file with prover version support.
+     * On non-production environment, it loads
+     * unminified version with timestamp to avoid
+     * browser caching for testing.
+     *
+     *
+     * @param string  $file Filename without Extension
+     * @return void
+     */
+    function insqube_js( $file, $version = '' )
+    {
+        $filename = '';
+
+        if (ENVIRONMENT === 'production')
+        {
+            $filename = "{$file}.min.js";
+            $filename .= $version ? "?v={$version}" : '';
+        }
+        else
+        {
+            $filename = "{$file}.js?v=$version".time();
+        }
+
+        return $filename;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('insqube_css'))
+{
+    /**
+     * Format Insqube CSS file
+     *
+     * Format CSS file with prover version support.
+     * On non-production environment, it loads
+     * unminified version with timestamp to avoid
+     * browser caching for testing.
+     *
+     *
+     * @param string  $file Filename without Extension
+     * @return void
+     */
+    function insqube_css( $file, $version = '' )
+    {
+        $filename = '';
+
+        if (ENVIRONMENT === 'production')
+        {
+            $filename = "{$file}.min.css";
+            $filename .= $version ? "?v={$version}" : '';
+        }
+        else
+        {
+            $filename = "{$file}.css?v=$version".time();
+        }
+
+        return $filename;
+    }
+}
