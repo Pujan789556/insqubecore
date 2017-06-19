@@ -32,7 +32,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						data-toggle="tab">Vouchers</a>
 				</li>
 				<li role="presentation">
-					<a href="#tab-policy-invoices" aria-controls="tab-policy-invoices" role="tab"  data-toggle="tab">Invoices</a>
+					<a href="#tab-policy-invoices"
+						data-url="<?php echo site_url('ac_invoices/by_policy/'. $record->id)?>"
+						data-load-method="get"
+						data-box="#tab-policy-invoices"
+						data-method="html"
+						aria-controls="tab-policy-invoices"
+						role="tab"
+						data-toggle="tab">Invoices</a>
 				</li>
 				<li role="presentation">
 					<a href="#tab-policy-payments" aria-controls="tab-policy-payments" role="tab"  data-toggle="tab">Payments</a>

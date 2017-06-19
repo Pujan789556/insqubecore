@@ -615,11 +615,6 @@ class Ac_voucher_model extends MY_Model
     {
         $this->_row_select();
 
-        /**
-         * Apply User Scope
-         */
-        $this->dx_auth->apply_user_scope('V');
-
         if(!empty($params))
         {
             $next_id = $params['next_id'] ?? NULL;
@@ -695,11 +690,11 @@ class Ac_voucher_model extends MY_Model
                 ->join('master_branches B', 'B.id = V.branch_id')
                 ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id');
 
+
         /**
-         * Apply Scope
-         * ------------
-         * @TODO - Only data belonging to me!!!
+         * Apply User Scope
          */
+        $this->dx_auth->apply_user_scope('V');
     }
 
     // ----------------------------------------------------------------

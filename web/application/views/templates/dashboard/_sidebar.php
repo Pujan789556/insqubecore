@@ -234,7 +234,9 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                         <li class="<?php echo set_menu_active($nav_level_1, 'ac_vouchers');?>">
                               <a href="<?php echo site_url('ac_vouchers');?>"><i class="fa fa-circle-o"></i> Vouchers</a>
                         </li>
-
+                        <li class="<?php echo set_menu_active($nav_level_1, 'ac_invoices');?>">
+                              <a href="<?php echo site_url('ac_invoices');?>"><i class="fa fa-circle-o"></i> Invoices</a>
+                        </li>
                   </ul>
             </li>
       </ul>

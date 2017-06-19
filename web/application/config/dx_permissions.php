@@ -281,6 +281,21 @@ $config['DX_permissions'] = [
 			 * ---------------------
 			 * @TODO -
 			 */
+		],
+
+		/**
+		 * Vouchers
+		 */
+		'ac_invoices'  => [
+			'explore.invoice',
+			'add.invoice',
+			'print.invoice',
+
+			/**
+			 * Reporting Permissions
+			 * ---------------------
+			 * @TODO -
+			 */
 		]
 	],
 ];

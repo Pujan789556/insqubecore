@@ -697,7 +697,8 @@ if ( ! function_exists('_POLICY__schedule'))
 
 	        $html = $CI->load->view( $schedule_view, $data, TRUE);
 	        $mpdf->WriteHTML($html);
-	        $filename = $data_path . "policy-{$record->code}.pdf";
+	        // $filename = $data_path . "policy-{$record->code}.pdf";
+	        $filename = "policy-{$record->code}.pdf";
 	        if( $action === 'save' )
 	        {
 	        	$save_full_path = rtrim(INSQUBE_DATA_PATH, '/') . '/policies/' . $filename;

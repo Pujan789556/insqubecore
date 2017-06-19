@@ -76,7 +76,11 @@ class Ac_invoice_detail_model extends MY_Model
     public function rows_by_invoice($invoice_id)
     {
 
-        return parent::find_by(['invoice_id'=>$invoice_id]);
+        return $this->db->select('IDTL.*')
+                        ->from($this->table_name . ' AS IDTL')
+                        ->where('IDTL.invoice_id', $invoice_id)
+                        ->get()
+                        ->result();
     }
 
     // --------------------------------------------------------------------

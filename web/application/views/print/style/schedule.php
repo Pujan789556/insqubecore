@@ -21,6 +21,7 @@
     p { margin: 0pt; }
 
     td { vertical-align: top; padding: 3px; border:0.1mm solid #000000;}
+    td.bold{font-weight: bold;}
     td.no-padding{padding: 0}
     .table td.border-top{border-top:0.1mm solid #000000;}
     .table td.bold{font-weight: bold}
@@ -33,7 +34,7 @@
     .border-b, td.border-b{border-bottom: 0.1mm solid #000000;}
     .border-t, td.border-t{border-top: 0.1mm solid #000000;}
     .underline{text-decoration: underline;}
-    .no-border, td.no-border, table.no-border td{border:none !important;}
+    .no-border, td.no-border, table.no-border td, table.no-border th{border:none !important;}
     .table td.cost {
         text-align: "." center;
     }

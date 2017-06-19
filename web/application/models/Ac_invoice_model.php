@@ -539,7 +539,7 @@ class Ac_invoice_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_var = 'ac_invoice_'.$policy_id;
+        $cache_var = 'ac_invoice_list_by_policy_'.$policy_id;
         $rows = $this->get_cache($cache_var);
         if(!$rows)
         {
@@ -581,10 +581,38 @@ class Ac_invoice_model extends MY_Model
 
     // --------------------------------------------------------------------
 
-    public function get($id)
+    public function get($id, $flag_complete=NULL)
     {
         // Common Row Select
         $this->_row_select();
+
+        // Policy, Customer Related JOIN
+        $this->db->select(
+                            // Branch Contact
+                            'B.contacts as branch_contact, ' .
+
+                            // Policy Transaction ID, Policy ID
+                            'PTXN.id AS policy_txn_id, PTXN.policy_id, ' .
+
+                            // Policy Code
+                            'POLICY.code AS policy_code, ' .
+
+                            // Customer Details
+                            'CST.full_name AS customer_full_name, CST.contact as customer_contact'
+                        )
+                    ->join('ac_vouchers V', 'V.id = I.voucher_id')
+                    ->join('rel_policy_txn__voucher RELPTXNVHR', 'RELPTXNVHR.voucher_id = I.voucher_id')
+                    ->join('dt_policy_txn PTXN', 'RELPTXNVHR.policy_txn_id = PTXN.id')
+                    ->join('dt_policies POLICY', 'POLICY.id = PTXN.policy_id')
+                    ->join('dt_customers CST', 'CST.id = I.customer_id');
+
+        /**
+         * Complete/Active Invoice?
+         */
+        if($flag_complete !== NULL )
+        {
+            $this->db->where('I.flag_complete', (int)$flag_complete);
+        }
 
         return $this->db->where('I.id', $id)
                         ->get()->row();
@@ -602,7 +630,7 @@ class Ac_invoice_model extends MY_Model
         if( !$data )
         {
             $cache_names = [
-                'ac_invoice_*'
+                'ac_invoice_list_by_policy_*'
             ];
         }
         else
