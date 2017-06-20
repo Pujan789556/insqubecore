@@ -428,7 +428,7 @@ class Ac_invoice_model extends MY_Model
      */
     public function invoice_exists($voucher_id)
     {
-        return $this->check_duplicate(['voucher_id' => $voucher_id]);
+        return $this->check_duplicate(['voucher_id' => $voucher_id, 'flag_complete' => IQB_FLAG_ON]);
     }
 
     // ----------------------------------------------------------------

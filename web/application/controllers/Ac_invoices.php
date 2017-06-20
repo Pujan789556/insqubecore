@@ -725,43 +725,7 @@ class Ac_invoices extends MY_Controller
 			'rows' 		=> $this->ac_invoice_detail_model->rows_by_invoice($record->id)
 		];
 
-
-		$this->load->library('pdf');
-        $mpdf = $this->pdf->load();
-        // $mpdf->SetMargins(10, 10, 5);
-        $mpdf->SetMargins(10, 5, 10, 5);
-        $mpdf->margin_header = 5;
-        $mpdf->margin_footer = 5;
-        $mpdf->SetProtection(array('print'));
-        $mpdf->SetTitle("Policy Invoice - {$record->invoice_code}");
-        $mpdf->SetAuthor($this->settings->orgn_name_en);
-
-        if( $record->flag_printed == IQB_FLAG_ON )
-        {
-        	$mpdf->SetWatermarkText( 'INVOICE COPY - ' . $this->settings->orgn_name_en );
-        }
-
-        $mpdf->showWatermarkText = true;
-        $mpdf->watermark_font = 'DejaVuSansCondensed';
-        $mpdf->watermarkTextAlpha = 0.1;
-        $mpdf->SetDisplayMode('fullpage');
-
-        $html = $this->load->view( 'accounting/invoices/print/invoice', $data, TRUE);
-        $mpdf->WriteHTML($html);
-        $filename =  "invoice-{$record->invoice_code}.pdf";
-        if( $action === 'save' )
-        {
-        	$save_full_path = rtrim(INSQUBE_DATA_PATH, '/') . '/invoices/' . $filename;
-        	$mpdf->Output($save_full_path,'F');
-        }
-        else if($action === 'download')
-        {
-        	$mpdf->Output($filename,'D');      // make it to DOWNLOAD
-        }
-        else
-        {
-        	$mpdf->Output();
-        }
+		_INVOICE__pdf($data, 'print');
     }
 
 	// --------------------------------------------------------------------
