@@ -1350,7 +1350,7 @@ class Policies extends MY_Controller
 			/**
 			 * Qualifies the status ladder?
 			 */
-			$__flag_pass 	= $this->policy_model->status_qualifies($txn_record->status, $to_updown_status);
+			$__flag_passed 	= $this->policy_model->status_qualifies($txn_record->status, $to_updown_status);
 			$failed_message = '';
 
 			/**
@@ -1408,7 +1408,7 @@ class Policies extends MY_Controller
 			/**
 			 * Terminate Right here if Failed
 			 */
-			if( !$__flag_pass && $terminate_on_fail )
+			if( !$__flag_passed && $terminate_on_fail )
 			{
 				return $this->template->json([
 					'status' 	=> 'error',
@@ -1417,6 +1417,6 @@ class Policies extends MY_Controller
 				], 400);
 			}
 
-			return $__flag_pass;
+			return $__flag_passed;
 		}
 }

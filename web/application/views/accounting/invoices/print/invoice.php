@@ -42,12 +42,14 @@
         <table class="table no-border" width="100%">
             <tbody>
                 <tr>
-                    <td colspan="2"><h2><?php echo $this->settings->orgn_name_en?></h2></td>
-                    <td align="right">Invoice Date: <strong><?php echo $record->invoice_date?></strong></td>
+                    <td colspan="2" align="left">
+                        <img style="margin-bottom: 20px;" src="<?php echo site_url('public/app/images/logo.png') ?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
+                    </td>
+                    <td align="right"><h2>Invoice</h2></td>
                 </tr>
                 <tr>
                     <td>
-                        From
+                        From<br/>
                         <address>
                             <strong><?php echo $this->settings->orgn_name_en?></strong><br>
                             <?php echo nl2br($this->settings->address)?>
@@ -55,14 +57,15 @@
                         <p>PAN No. : <strong><?php echo $this->settings->pan_no?></strong></p>
                     </td>
                     <td>
-                        To
+                        To<br/>
                         <address>
                             <strong><?php echo $record->customer_full_name?></strong><br>
                             <?php echo get_contact_widget($record->customer_contact, true, true)?>
                         </address>
                     </td>
                     <td align="right">
-                        <b>Invoice # <?php echo $record->invoice_code?></b><br/>
+                        Invoice Date: <strong><?php echo $record->invoice_date?></strong><br/>
+                        Invoice # <strong><?php echo $record->invoice_code?></strong><br/>
                         Policy # <strong><?php echo $record->policy_code?></strong><br/>
                         Branch: <strong><?php echo $record->branch_name?></strong>
                     </td>
@@ -106,7 +109,7 @@
                             </tr>
                             <tr>
                                 <td colspan="2">
-                                    Amount in Words:
+                                    Amount in Words (Rs.):
                                     <strong>
                                         <?php
                                         echo ucfirst( number_to_words( number_format($record->amount, 2, '.', '') ) );
@@ -126,6 +129,10 @@
                 <p class="text-muted well well-sm no-shadow" style="margin-top: 10px;">
                     Payment by Cheque/Drafts are subject to realisation
                 </p>
+                <br/>
+                <br/>
+                <br/>
+                <p style="text-align: right">Authorised Signature</p>
             </div>
         </div>
     </body>

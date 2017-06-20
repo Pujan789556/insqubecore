@@ -945,6 +945,12 @@ class Policy_txn extends MY_Controller
 	//  POLICY Voucher & Invoice
 	// --------------------------------------------------------------------
 
+	/**
+	 * Generate Voucher
+	 *
+	 * @param integer $id Policy TXN ID
+	 * @return mixed
+	 */
 	public function voucher($id)
 	{
 		/**
@@ -989,6 +995,27 @@ class Policy_txn extends MY_Controller
 				'message' 	=> 'You can not perform this action.'
 			], 404);
 		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Load voucher models
+		 */
+		$this->load->model('ac_voucher_model');
+		$this->load->model('rel_policy_txn__voucher_model');
+
+		/**
+		 * Check if Voucher already generated for this Transaction
+		 */
+		if( $this->rel_policy_txn__voucher_model->voucher_exists($txn_record->id))
+		{
+			return $this->template->json([
+				'title' 	=> 'OOPS!',
+				'status' 	=> 'error',
+				'message' 	=> 'Voucher already exists for this Transaction/Endorsement.'
+			], 404);
+		}
+
 
 		// --------------------------------------------------------------------
 
@@ -1242,11 +1269,9 @@ class Policy_txn extends MY_Controller
 
 		// --------------------------------------------------------------------
 
-		/**
+        /**
 		 * Save Voucher and Its Relation with Policy
 		 */
-		$this->load->model('ac_voucher_model');
-		$this->load->model('rel_policy_txn__voucher_model');
 
 		try {
 
@@ -1399,6 +1424,13 @@ class Policy_txn extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Generate Invoice
+	 *
+	 * @param integer $id Policy TXN ID
+	 * @param integer $voucher_id Voucher ID
+	 * @return mixed
+	 */
 	public function invoice($id, $voucher_id)
 	{
 		/**
@@ -1432,6 +1464,21 @@ class Policy_txn extends MY_Controller
 		if(!$voucher_record)
 		{
 			$this->template->render_404();
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Check if Invoice already generated for this Voucher
+		 */
+		$this->load->model('ac_invoice_model');
+		if( $this->ac_invoice_model->invoice_exists($voucher_id))
+		{
+			return $this->template->json([
+				'title' 	=> 'OOPS!',
+				'status' 	=> 'error',
+				'message' 	=> 'Invoice already exists for this Voucher.'
+			], 404);
 		}
 
 		// --------------------------------------------------------------------
@@ -1504,17 +1551,9 @@ class Policy_txn extends MY_Controller
 
 		// --------------------------------------------------------------------
 
-        // echo '<pre>';
-        // print_r($invoice_data);
-        // print_r($invoice_details_data);
-        // exit;
-
-		// --------------------------------------------------------------------
-
 		/**
 		 * Save Invoice
 		 */
-		$this->load->model('ac_invoice_model');
 		try {
 
 			/**
@@ -1664,5 +1703,8 @@ class Policy_txn extends MY_Controller
 		];
 		return $this->template->json($ajax_data);
 	}
+
+	// --------------------------------------------------------------------
+
 
 }

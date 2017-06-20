@@ -418,6 +418,19 @@ class Ac_invoice_model extends MY_Model
         return FALSE;
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Check if Invoice Exists for Given Voucher ID
+     *
+     * @param integer $voucher_id
+     * @return integer
+     */
+    public function invoice_exists($voucher_id)
+    {
+        return $this->check_duplicate(['voucher_id' => $voucher_id]);
+    }
+
     // ----------------------------------------------------------------
 
     public function check_duplicate($where, $id=NULL)

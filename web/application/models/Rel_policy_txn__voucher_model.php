@@ -67,6 +67,20 @@ class Rel_policy_txn__voucher_model extends MY_Model
 	// --------------------------------------------------------------------
 
     /**
+     * Check if Voucher Exists for Given Transaction ID
+     *
+     * @param integer $policy_txn_id
+     * @return integer
+     */
+    public function voucher_exists($policy_txn_id)
+    {
+        return $this->db->where('policy_txn_id', $policy_txn_id)
+                        ->count_all_results($this->table_name);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
      * Delete Cache on Update/Delete Records
      */
     public function clear_cache($data=null)
