@@ -685,10 +685,16 @@ if ( ! function_exists('_POLICY__schedule'))
 	        $mpdf->SetTitle("Policy Schedule - {$record->code}");
 	        $mpdf->SetAuthor($CI->settings->orgn_name_en);
 
-	        if( in_array($record->status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED, IQB_POLICY_STATUS_VERIFIED]))
+	        /**
+	         * Only Active Policy Does not have watermark!!!
+	         */
+	        if( $action === 'print' ||  $action === 'download')
 	        {
-	        	$mpdf->SetWatermarkText( 'DEBIT NOTE - ' . $CI->settings->orgn_name_en );
-	        }
+		        if( !in_array($record->status, [IQB_POLICY_STATUS_ACTIVE, IQB_POLICY_STATUS_CANCELED, IQB_POLICY_STATUS_EXPIRED]))
+		        {
+		        	$mpdf->SetWatermarkText( 'DEBIT NOTE - ' . strtoupper(get_policy_status_text($record->status)) );
+		        }
+		    }
 
 	        $mpdf->showWatermarkText = true;
 	        $mpdf->watermark_font = 'DejaVuSansCondensed';
