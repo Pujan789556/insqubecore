@@ -57,7 +57,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     class="btn btn-sm bg-navy btn-round"
                     target="_blank"
                     data-toggle="tooltip">
-                    <i class="fa fa-print"></i> Print
+                    <i class="fa fa-print"></i> Invoice
+                </a>
+
+                <a href="<?php echo site_url('ac_invoices/receipt/' . $record->id)?>"
+                    title="Print Receipt"
+                    class="btn btn-sm bg-navy btn-round"
+                    target="_blank"
+                    data-toggle="tooltip">
+                    <i class="fa fa-print"></i> Receipt
                 </a>
         <?php endif?>
 	</td>

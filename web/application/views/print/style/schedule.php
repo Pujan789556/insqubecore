@@ -42,4 +42,8 @@
     .table-footer{font-size:8pt; border: none; color:333; font-style: italic;}
     .table-footer td.border-t{border-top: 0.1mm solid #999;}
 
+    /* -- Receipt Styles --*/
+    p.receipt-description {font-weight:14px; font-style: italic;}
+    p.receipt-description strong{font-size: 16px; font-style: normal;}
+
 </style>

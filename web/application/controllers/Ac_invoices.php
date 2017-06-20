@@ -730,6 +730,45 @@ class Ac_invoices extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+    /**
+	 * Print Invoice Receipt
+	 *
+	 * @param integer $id  Invoice ID
+	 * @return void
+	 */
+    public function receipt($id)
+    {
+    	/**
+		 * Check Permissions
+		 */
+		$this->dx_auth->is_authorized('ac_invoices', 'print.invoice', TRUE);
+
+    	/**
+		 * Main Record (Complete Invoice)
+		 */
+    	$id = (int)$id;
+		$invoice_record = $this->ac_invoice_model->get($id, IQB_FLAG_ON);
+		if(!$invoice_record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Check if Belongs to me?
+		 */
+		belongs_to_me( $invoice_record->branch_id );
+
+		/**
+		 * Invoice Detail Rows
+		 */
+		$this->load->model('ac_receipt_model');
+		$data = [
+			'record' 			=> $this->ac_receipt_model->find_by(['invoice_id' => $invoice_record->id]),
+			'invoice_record' 	=> $invoice_record
+		];
+
+		_RECEIPT__pdf($data, 'print');
+    }
 }
 
 

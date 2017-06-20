@@ -2092,7 +2092,8 @@ class Policy_txn extends MY_Controller
                 // --------------------------------------------------------------------
 
                 /**
-                 * Task 6: SMS Customer with his Policy CODE and Expiration Date with Portfolio
+                 * Task 6: @TODO
+                 * SMS Customer with his Policy CODE and Expiration Date with Portfolio
                  */
                 if( !$flag_exception )
                 {
