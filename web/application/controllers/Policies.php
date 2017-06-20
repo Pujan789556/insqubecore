@@ -1138,7 +1138,7 @@ class Policies extends MY_Controller
 		/**
 		 * Render Print View
 		 */
-		_POLICY__schedule($data, 'print');
+		_POLICY__schedule_pdf($data, 'print');
     }
 
 

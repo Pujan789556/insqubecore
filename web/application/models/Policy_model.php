@@ -1012,7 +1012,7 @@ class Policy_model extends MY_Model
                         /**
                          * Save a Fresh PDF copy
                          */
-                        _POLICY__schedule([
+                        _POLICY__schedule_pdf([
                                 'record'        => $record,
                                 'txn_record'    => $txn_record
                             ], 'save');

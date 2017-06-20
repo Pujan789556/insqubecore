@@ -1576,12 +1576,12 @@ class Policy_txn extends MY_Controller
 
 		/**
 		 * --------------------------------------------------------------------
-		 * Post Voucher Add Tasks
+		 * Post Invoice Add Tasks
 		 *
 		 * NOTE
-		 * 		We perform post voucher add tasks which are mainly to insert
+		 * 		We perform post voucher add tasks which are mainly to update
 		 * 		voucher internal relation with policy txn record and  update
-		 * 		policy status.
+		 * 		policy transaction status.
 		 *
 		 * 		Please note that, if any of transaction fails or exception
 		 * 		happens, we rollback and disable voucher. (We can not delete
@@ -1640,6 +1640,24 @@ class Policy_txn extends MY_Controller
             	}
 
                 // --------------------------------------------------------------------
+
+
+				/**
+				 * Task 4: Save Invoice PDF (Original)
+				 */
+				try{
+
+					$invoice_data = [
+						'record' 	=> $this->ac_invoice_model->get($invoice_id),
+						'rows' 		=> $this->ac_invoice_detail_model->rows_by_invoice($invoice_id)
+					];
+					_INVOICE__pdf($invoice_data, 'save');
+
+				} catch (Exception $e) {
+
+					$flag_exception = TRUE;
+					$message = $e->getMessage();
+				}
 
 			/**
              * Complete transactions or Rollback

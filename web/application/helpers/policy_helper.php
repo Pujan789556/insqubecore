@@ -639,7 +639,7 @@ if ( ! function_exists('_POLICY__ri_approval_constraint'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_POLICY__schedule'))
+if ( ! function_exists('_POLICY__schedule_pdf'))
 {
     /**
      * Save or Print Policy Schedule.
@@ -658,11 +658,11 @@ if ( ! function_exists('_POLICY__schedule'))
      * @param string $action 	[save|print]
      * @return  void
      */
-    function _POLICY__schedule( $data, $action )
+    function _POLICY__schedule_pdf( $data, $action )
     {
     	if( !in_array($action, ['save', 'print', 'download']) )
     	{
-    		throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: No schedule view exists for given portfolio({$record->portfolio_name});");
+    		throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: Invalid Action({$action}).");
     	}
 
     	$CI =& get_instance();
@@ -721,7 +721,7 @@ if ( ! function_exists('_POLICY__schedule'))
 		}
 		else
 		{
-			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: No schedule view exists for given portfolio({$record->portfolio_name});");
+			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: No schedule view exists for given portfolio({$record->portfolio_name}).");
 		}
     }
 }

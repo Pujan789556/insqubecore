@@ -74,8 +74,12 @@ class Rel_policy_txn__voucher_model extends MY_Model
      */
     public function voucher_exists($policy_txn_id)
     {
-        return $this->db->where('policy_txn_id', $policy_txn_id)
-                        ->count_all_results($this->table_name);
+        return $this->db
+                        ->from($this->table_name . ' AS REL')
+                        ->join('ac_vouchers V', 'V.id = REL.voucher_id')
+                        ->where('REL.policy_txn_id', $policy_txn_id)
+                        ->where('V.flag_complete', IQB_FLAG_ON)
+                        ->count_all_results();
     }
 
     // --------------------------------------------------------------------
