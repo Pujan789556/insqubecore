@@ -37,6 +37,27 @@ if ( ! function_exists('ac_party_types_dropdown'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('ac_payment_receipt_mode_dropdown'))
+{
+	/**
+	 * Get Payment Receipt Mode Dropdown
+	 *
+	 * @return	string
+	 */
+	function ac_payment_receipt_mode_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = IQB_AC_PAYMENT_RECEIPT_MODES;
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('is_voucher_editable'))
 {
 	/**
@@ -128,6 +149,37 @@ if ( ! function_exists('invoice_complete_flag_text'))
 		else
 		{
 			$css = 'fa-exclamation-triangle text-muted';
+		}
+		return '<i class="fa '.$css.'" data-toggle="tooltip" title="'.$title.'"></i>';
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('invoice_flag_on_off_text'))
+{
+	/**
+	 * Invoice Flag ON/OFF Text
+	 *
+	 * @param integer $flag 	Invoice Flag
+	 * @param bool $plain_text Return as HTML formatted or plain text
+	 * @return	bool
+	 */
+	function invoice_flag_on_off_text( $flag, $plain_text = FALSE )
+	{
+		$title = $flag == IQB_FLAG_ON ? 'Yes' : 'No';
+		if($plain_text)
+		{
+			return $title;
+		}
+
+		if( $flag == IQB_FLAG_ON )
+		{
+			$css = 'fa-check text-green';
+		}
+		else
+		{
+			$css = 'fa-minus text-muted';
 		}
 		return '<i class="fa '.$css.'" data-toggle="tooltip" title="'.$title.'"></i>';
 	}

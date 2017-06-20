@@ -85,6 +85,18 @@ $config['insqb_activity_types'] = [
 			'E' => 'edited'
 	]],
 
+	/**
+	 * Activities related to Account Receipts
+	 */
+	'ac_receipt' => [
+		'_uri' => 'ac_receipts/',
+		'_table' => 'ac_receipts',
+		'_actions' => [
+			'C' => 'added'
+	]],
+
+
+
 
 	/**
 	 * Activities related to Agent

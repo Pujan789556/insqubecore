@@ -12,6 +12,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->branch_name;?></td>
 	<td><?php echo $record->invoice_date;?></td>
 	<td><?php echo invoice_complete_flag_text($record->flag_complete);?></td>
+	<td><?php echo invoice_flag_on_off_text($record->flag_paid);?></td>
+	<td><?php echo invoice_flag_on_off_text($record->flag_printed);?></td>
 	<td class="ins-action">
 		<?php
 		/**
@@ -41,9 +43,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<a href="#"
 	            title="Make Payment"
 	            data-toggle="tooltip"
-	            data-confirm="true"
-	            class="btn btn-sm btn-success btn-round trg-dialog-action"
-	            data-message="Are you sure you want to Make Payment for this Invoice?"
+	            class="btn btn-sm btn-success btn-round trg-dialog-edit"
+	            data-form="#_form-payment"
+	            data-box-size="large"
+	            data-title='<i class="fa fa-pencil-square-o"></i> Make a Payment'
 	            data-url="<?php echo site_url('policy_txn/payment/' . $record->policy_txn_id  . '/' . $record->id );?>"
 	        ><i class="fa fa-list-alt"></i> Payment</a>
 		<?php endif;?>

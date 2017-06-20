@@ -885,7 +885,7 @@ class Policy_model extends MY_Model
                 break;
 
             case IQB_POLICY_STATUS_ACTIVE:
-                $flag_qualifies = $current_status === IQB_POLICY_STATUS_INVOICED;
+                $flag_qualifies = $current_status === IQB_POLICY_STATUS_APPROVED;
                 break;
 
             case IQB_POLICY_STATUS_CANCELED:

@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Ac_invoice_model extends MY_Model
+class Ac_receipt_model extends MY_Model
 {
-    protected $table_name   = 'ac_invoices';
+    protected $table_name   = 'ac_receipts';
     protected $set_created  = true;
     protected $set_modified = true;
     protected $log_user     = true;
@@ -15,7 +15,7 @@ class Ac_invoice_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'invoice_code', 'customer_id', 'voucher_id', 'branch_id', 'fiscal_yr_id', 'fy_quarter', 'invoice_date', 'amount', 'flag_paid', 'flag_printed', 'flag_complete', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'receipt_code', 'invoice_id', 'customer_id', 'adjustment_amount', 'amount', 'received_in', 'received_in_date', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -40,8 +40,7 @@ class Ac_invoice_model extends MY_Model
         // Helper
         $this->load->helper('account');
 
-        // Set validation rule
-        $this->load->model('ac_invoice_detail_model');
+        // Validation Rules
         $this->validation_rules();
     }
 
@@ -227,132 +226,28 @@ class Ac_invoice_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Add New Invoice
+     * Add New Receipt
      *
-     * The following tasks are carried during Invoice Add:
-     *      a. Insert Master Record, Update Invoice Code
-     *      b. Insert Invoice Details
+     * The following tasks are carried during Receipt Add:
+     *      a. Insert Master Record,
+     *      b. Update Receipt Code
      *
      * @param array $data
      * @return mixed
      */
-    public function add($master_data, $batch_data_details)
+    public function add($data)
     {
-        /**
-         * !!! IMPORTANT
-         *
-         * We do not use transaction here as we may lost the invoice id autoincrement.
-         * We simply use try catch block.
-         *
-         * If transaction fails, we will have a invoice with complete flag off.
-         */
-
-        $id = parent::insert($master_data, TRUE);
-
-        if( $id )
-        {
-
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
-
-
-                /**
-                 * Disable DB Debugging
-                 */
-                $this->db->db_debug = FALSE;
-                $this->db->trans_start();
-
-
-                    // --------------------------------------------------------------------
-
-                    /**
-                     * Task 1: Insert Invoice Details
-                     */
-                    $this->ac_invoice_detail_model->batch_insert($id, $batch_data_details);
-
-                    // --------------------------------------------------------------------
-
-                    /**
-                     * Task 2: Complete Invoice Status
-                     */
-                    $this->enable_invoice($id);
-
-                    // --------------------------------------------------------------------
-
-                    /**
-                     * Task 3: Log Activity
-                     */
-                    $this->log_activity($id, 'C');
-
-                    // --------------------------------------------------------------------
-
-
-                /**
-                 * Complete transactions or Rollback
-                 */
-                $this->db->trans_complete();
-                if ($this->db->trans_status() === FALSE)
-                {
-                    throw new Exception("Exception [Model: Ac_invoice_model][Method: add()]: Could not save Invoice details and other details.");
-                }
-
-                /**
-                 * Restore DB Debug Configuration
-                 */
-                $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-            /**
-             * ==================== TRANSACTIONS END =========================
-             */
-        }
-        else
-        {
-            throw new Exception("Exception [Model: Ac_invoice_model][Method: add()]: Could not insert record.");
-        }
-
-        // return result/status
-        return $id;
+        return parent::insert($data, TRUE);
     }
 
     // --------------------------------------------------------------------
 
-    /**
-     * Enable Invoice Transaction [Complete Flagg - OFF]
-     *
-     * @param integer $id
-     * @return boolean
-     */
-    public function enable_invoice($id)
-    {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, ['flag_complete' => IQB_FLAG_ON]);
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Disable invoice Transaction [Complete Flagg - OFF]
-     *
-     * @param integer $id
-     * @return boolean
-     */
-    public function disable_invoice($id)
-    {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, ['flag_complete' => IQB_FLAG_OFF]);
-    }
-
-    // --------------------------------------------------------------------
 
     /**
      * Before Insert Trigger
      *
      * Tasks carried
-     *      2. Add Draft Invoice Code (Random Characters)
-     *      3. Add Branch ID
-     *      4. Add Fiscal Year ID
-     *      5. Add Fiscal Year Quarter
+     *      2. Add Draft Receipt Code (Random Characters)
      *
      * @param array $data
      * @return array
@@ -360,20 +255,9 @@ class Ac_invoice_model extends MY_Model
     public function before_insert__defaults($data)
     {
         $this->load->library('Token');
-        $fy_record  = $this->fiscal_year_model->get_fiscal_year($data['invoice_date']);
-        $fy_quarter = $this->fy_quarter_model->get_quarter_by_date($data['invoice_date']);
 
-        // Invoice Code
-        $data['invoice_code']      = strtoupper($this->token->generate(10));
-
-        // Branch ID
-        $data['branch_id']      = $this->dx_auth->get_branch_id();
-
-        // Fiscal Year
-        $data['fiscal_yr_id'] = $fy_record->id;
-
-        // Fiscal Year Quarter
-        $data['fy_quarter'] = $fy_quarter->quarter;
+        // Receipt Code
+        $data['receipt_code']      = strtoupper($this->token->generate(10));
 
         return $data;
     }
@@ -384,7 +268,7 @@ class Ac_invoice_model extends MY_Model
      * After Insert Trigger
      *
      * Tasks that are to be performed after policy is created are
-     *      1. Generate and Update Invoice Code
+     *      1. Generate and Update Receipt Code
      *
      * @param array $arr_record
      * @return array
@@ -399,9 +283,7 @@ class Ac_invoice_model extends MY_Model
                 [id] => 11
                 [fields] => Array
                     (
-                        [invoice_code] => 6
-                        [branch_id] => 6
-                        [fiscal_yr_id] => x
+                        [receipt_code] => 6
                         ...
                     )
                 [method] => insert
@@ -412,7 +294,7 @@ class Ac_invoice_model extends MY_Model
         if($id !== NULL)
         {
             $params     = [$id, $this->dx_auth->get_user_id()];
-            $sql        = "SELECT `f_generate_invoice_number`(?, ?) AS invoice_code";
+            $sql        = "SELECT `f_generate_receipt_number`(?, ?) AS receipt_code";
             return mysqli_store_procedure('select', $sql, $params);
         }
         return FALSE;
@@ -420,32 +302,15 @@ class Ac_invoice_model extends MY_Model
 
     // --------------------------------------------------------------------
 
-
-    /**
-     * Update Invoice Flags
-     *
-     *  Flags: flag_paid|flag_printed
-     *
-     * @param integer $id
-     * @return boolean
-     */
-    public function update_flag($id, $flag_name, $flag_value)
-    {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, [$flag_name => $flag_value]);
-    }
-
-    // --------------------------------------------------------------------
-
     /**
      * Check if Invoice Exists for Given Voucher ID
      *
-     * @param integer $voucher_id
+     * @param integer $invoice_id
      * @return integer
      */
-    public function invoice_exists($voucher_id)
+    public function receipt_exists($invoice_id)
     {
-        return $this->check_duplicate(['voucher_id' => $voucher_id, 'flag_complete' => IQB_FLAG_ON]);
+        return $this->check_duplicate(['invoice_id' => $invoice_id]);
     }
 
     // ----------------------------------------------------------------
@@ -482,105 +347,105 @@ class Ac_invoice_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->_row_select();
+        // $this->_row_select();
 
-        if(!empty($params))
-        {
-            $next_id = $params['next_id'] ?? NULL;
-            if( $next_id )
-            {
-                $this->db->where(['I.id <=' => $next_id]);
-            }
+        // if(!empty($params))
+        // {
+        //     $next_id = $params['next_id'] ?? NULL;
+        //     if( $next_id )
+        //     {
+        //         $this->db->where(['I.id <=' => $next_id]);
+        //     }
 
-            $branch_id = $params['branch_id'] ?? NULL;
-            if( $branch_id )
-            {
-                $this->db->where(['I.branch_id' =>  $branch_id]);
-            }
+        //     $branch_id = $params['branch_id'] ?? NULL;
+        //     if( $branch_id )
+        //     {
+        //         $this->db->where(['I.branch_id' =>  $branch_id]);
+        //     }
 
-            $fiscal_yr_id = $params['fiscal_yr_id'] ?? NULL;
-            if( $fiscal_yr_id )
-            {
-                $this->db->where(['I.fiscal_yr_id' =>  $fiscal_yr_id]);
-            }
+        //     $fiscal_yr_id = $params['fiscal_yr_id'] ?? NULL;
+        //     if( $fiscal_yr_id )
+        //     {
+        //         $this->db->where(['I.fiscal_yr_id' =>  $fiscal_yr_id]);
+        //     }
 
-            $fy_quarter = $params['fy_quarter'] ?? NULL;
-            if( $fy_quarter )
-            {
-                $this->db->where(['I.fy_quarter' =>  $fy_quarter]);
-            }
+        //     $fy_quarter = $params['fy_quarter'] ?? NULL;
+        //     if( $fy_quarter )
+        //     {
+        //         $this->db->where(['I.fy_quarter' =>  $fy_quarter]);
+        //     }
 
-            // Start Dates
-            $start_date = $params['start_date'] ?? NULL;
-            if( $start_date )
-            {
-                $this->db->where(['I.invoice_date >=' =>  $start_date]);
-            }
+        //     // Start Dates
+        //     $start_date = $params['start_date'] ?? NULL;
+        //     if( $start_date )
+        //     {
+        //         $this->db->where(['I.invoice_date >=' =>  $start_date]);
+        //     }
 
-            // End Dates
-            $end_date = $params['end_date'] ?? NULL;
-            if( $end_date )
-            {
-                $this->db->where(['I.invoice_date <=' =>  $end_date]);
-            }
+        //     // End Dates
+        //     $end_date = $params['end_date'] ?? NULL;
+        //     if( $end_date )
+        //     {
+        //         $this->db->where(['I.invoice_date <=' =>  $end_date]);
+        //     }
 
-            // Invoice Code
-            $keywords = $params['keywords'] ?? '';
-            if( $keywords )
-            {
-                $this->db->like('I.invoice_code', $keywords, 'after');
-            }
-        }
+        //     // Invoice Code
+        //     $keywords = $params['keywords'] ?? '';
+        //     if( $keywords )
+        //     {
+        //         $this->db->like('I.invoice_code', $keywords, 'after');
+        //     }
+        // }
 
-        return $this->db
-                    ->order_by('I.id', 'DESC')
-                    ->limit($this->settings->per_page+1)
-                    ->get()->result();
+        // return $this->db
+        //             ->order_by('I.id', 'DESC')
+        //             ->limit($this->settings->per_page+1)
+        //             ->get()->result();
     }
 
     // ----------------------------------------------------------------
 
     private function _row_select()
     {
-        $this->db->select(
-                        // Invoice Table
-                        'I.*, ' .
+        // $this->db->select(
+        //                 // Invoice Table
+        //                 'I.*, ' .
 
-                        // Branch Table
-                        'B.name AS branch_name, ' .
+        //                 // Branch Table
+        //                 'B.name AS branch_name, ' .
 
-                        // Fiscal Year Table
-                        'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
-                    )
-                ->from($this->table_name . ' AS I')
-                ->join('master_branches B', 'B.id = I.branch_id')
-                ->join('master_fiscal_yrs FY', 'FY.id = I.fiscal_yr_id');
+        //                 // Fiscal Year Table
+        //                 'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
+        //             )
+        //         ->from($this->table_name . ' AS I')
+        //         ->join('master_branches B', 'B.id = I.branch_id')
+        //         ->join('master_fiscal_yrs FY', 'FY.id = I.fiscal_yr_id');
 
-        /**
-         * Apply User Scope
-         */
-        $this->dx_auth->apply_user_scope('I');
+        // /**
+        //  * Apply User Scope
+        //  */
+        // $this->dx_auth->apply_user_scope('I');
     }
 
     // ----------------------------------------------------------------
 
     public function rows_by_policy($policy_id)
     {
-        /**
-         * Get Cached Result, If no, cache the query result
-         */
-        $cache_var = 'ac_invoice_list_by_policy_'.$policy_id;
-        $rows = $this->get_cache($cache_var);
-        if(!$rows)
-        {
-            $rows = $this->_rows_by_policy($policy_id);
+        // /**
+        //  * Get Cached Result, If no, cache the query result
+        //  */
+        // $cache_var = 'ac_receipt_list_by_policy_'.$policy_id;
+        // $rows = $this->get_cache($cache_var);
+        // if(!$rows)
+        // {
+        //     $rows = $this->_rows_by_policy($policy_id);
 
-            if($rows)
-            {
-                $this->write_cache($rows, $cache_var, CACHE_DURATION_HR);
-            }
-        }
-        return $rows;
+        //     if($rows)
+        //     {
+        //         $this->write_cache($rows, $cache_var, CACHE_DURATION_HR);
+        //     }
+        // }
+        // return $rows;
     }
 
         /**
@@ -591,20 +456,20 @@ class Ac_invoice_model extends MY_Model
          */
         private function _rows_by_policy($policy_id)
         {
-            // Common Row Select
-            $this->_row_select();
+            // // Common Row Select
+            // $this->_row_select();
 
-            // Policy Related JOIN
-            return $this->db->select('PTXN.id AS policy_txn_id, PTXN.policy_id')
-                        ->join('ac_vouchers V', 'V.id = I.voucher_id')
-                        ->join('rel_policy_txn__voucher RELPTXNVHR', 'RELPTXNVHR.voucher_id = I.voucher_id')
-                        ->join('dt_policy_txn PTXN', 'RELPTXNVHR.policy_txn_id = PTXN.id')
-                        ->where('PTXN.policy_id', $policy_id)
-                        ->where('I.flag_complete', IQB_FLAG_ON)
-                        ->where('V.flag_complete', IQB_FLAG_ON)
-                        ->order_by('I.id', 'DESC')
-                        ->get()
-                        ->result();
+            // // Policy Related JOIN
+            // return $this->db->select('PTXN.id AS policy_txn_id, PTXN.policy_id')
+            //             ->join('ac_vouchers V', 'V.id = I.voucher_id')
+            //             ->join('rel_policy_txn__voucher RELPTXNVHR', 'RELPTXNVHR.voucher_id = I.voucher_id')
+            //             ->join('dt_policy_txn PTXN', 'RELPTXNVHR.policy_txn_id = PTXN.id')
+            //             ->where('PTXN.policy_id', $policy_id)
+            //             ->where('I.flag_complete', IQB_FLAG_ON)
+            //             ->where('V.flag_complete', IQB_FLAG_ON)
+            //             ->order_by('I.id', 'DESC')
+            //             ->get()
+            //             ->result();
         }
 
 
@@ -613,39 +478,39 @@ class Ac_invoice_model extends MY_Model
 
     public function get($id, $flag_complete=NULL)
     {
-        // Common Row Select
-        $this->_row_select();
+        // // Common Row Select
+        // $this->_row_select();
 
-        // Policy, Customer Related JOIN
-        $this->db->select(
-                            // Branch Contact
-                            'B.contacts as branch_contact, ' .
+        // // Policy, Customer Related JOIN
+        // $this->db->select(
+        //                     // Branch Contact
+        //                     'B.contacts as branch_contact, ' .
 
-                            // Policy Transaction ID, Policy ID
-                            'PTXN.id AS policy_txn_id, PTXN.policy_id, ' .
+        //                     // Policy Transaction ID, Policy ID
+        //                     'PTXN.id AS policy_txn_id, PTXN.policy_id, ' .
 
-                            // Policy Code
-                            'POLICY.code AS policy_code, ' .
+        //                     // Policy Code
+        //                     'POLICY.code AS policy_code, ' .
 
-                            // Customer Details
-                            'CST.full_name AS customer_full_name, CST.contact as customer_contact'
-                        )
-                    ->join('ac_vouchers V', 'V.id = I.voucher_id')
-                    ->join('rel_policy_txn__voucher RELPTXNVHR', 'RELPTXNVHR.voucher_id = I.voucher_id')
-                    ->join('dt_policy_txn PTXN', 'RELPTXNVHR.policy_txn_id = PTXN.id')
-                    ->join('dt_policies POLICY', 'POLICY.id = PTXN.policy_id')
-                    ->join('dt_customers CST', 'CST.id = I.customer_id');
+        //                     // Customer Details
+        //                     'CST.full_name AS customer_full_name, CST.contact as customer_contact'
+        //                 )
+        //             ->join('ac_vouchers V', 'V.id = I.voucher_id')
+        //             ->join('rel_policy_txn__voucher RELPTXNVHR', 'RELPTXNVHR.voucher_id = I.voucher_id')
+        //             ->join('dt_policy_txn PTXN', 'RELPTXNVHR.policy_txn_id = PTXN.id')
+        //             ->join('dt_policies POLICY', 'POLICY.id = PTXN.policy_id')
+        //             ->join('dt_customers CST', 'CST.id = I.customer_id');
 
-        /**
-         * Complete/Active Invoice?
-         */
-        if($flag_complete !== NULL )
-        {
-            $this->db->where('I.flag_complete', (int)$flag_complete);
-        }
+        // /**
+        //  * Complete/Active Invoice?
+        //  */
+        // if($flag_complete !== NULL )
+        // {
+        //     $this->db->where('I.flag_complete', (int)$flag_complete);
+        // }
 
-        return $this->db->where('I.id', $id)
-                        ->get()->row();
+        // return $this->db->where('I.id', $id)
+        //                 ->get()->row();
     }
 	// --------------------------------------------------------------------
 
@@ -660,7 +525,7 @@ class Ac_invoice_model extends MY_Model
         if( !$data )
         {
             $cache_names = [
-                'ac_invoice_list_by_policy_*'
+                'ac_receipt_list_by_policy_*'
             ];
         }
         else
@@ -704,7 +569,7 @@ class Ac_invoice_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module'    => 'ac_invoice',
+            'module'    => 'ac_receipt',
             'module_id' => $id,
             'action'    => $action
         ];

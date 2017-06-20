@@ -1724,5 +1724,507 @@ class Policy_txn extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	public function payment($id, $invoice_id)
+    {
+        /**
+         * Check Permissions
+         */
+        if( !$this->dx_auth->is_authorized('policy_txn', 'make.policy.payment') )
+        {
+            $this->dx_auth->deny_access();
+        }
 
+        /**
+         * Get the Policy Fresh/Renewal Txn Record
+         */
+        $id         = (int)$id;
+        $invoice_id = (int)$invoice_id;
+        $txn_record = $this->policy_txn_model->get( $id );
+        if(!$txn_record)
+        {
+            $this->template->render_404();
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Policy Record
+         */
+        $policy_record = $this->policy_model->get($txn_record->policy_id);
+        if(!$policy_record)
+        {
+            $this->template->render_404();
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Record Status Authorized to Make Payment?
+         */
+        if($txn_record->status !== IQB_POLICY_TXN_STATUS_INVOICED)
+        {
+            return $this->template->json([
+                'title'     => 'OOPS!',
+                'status'    => 'error',
+                'message'   => 'You can not perform this action.'
+            ], 404);
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Invoice Record? Already Paid?
+         */
+        $this->load->model('ac_invoice_model');
+        $this->load->model('ac_invoice_detail_model');
+        $invoice_record = $this->ac_invoice_model->get($invoice_id);
+        if(!$invoice_record || $invoice_record->flag_paid == IQB_FLAG_ON)
+        {
+            return $this->template->json([
+                'title'     => 'OOPS!',
+                'status'    => 'error',
+                'message'   => 'You have already made payment for this Invoice.'
+            ], 404);
+        }
+
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Load voucher models
+         */
+        $this->load->model('ac_voucher_model');
+        $this->load->model('rel_policy_txn__voucher_model');
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Render Payment Form
+         */
+        if( !$this->input->post() )
+		{
+			$invoice_data = [
+				'record' 	=> $invoice_record,
+				'rows' 		=> $this->ac_invoice_detail_model->rows_by_invoice($invoice_record->id)
+			];
+			return $this->_payment_form($invoice_data);
+		}
+		else
+		{
+			$v_rules = $this->_payment_rules();
+			$this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$payment_data = $this->input->post();
+        	}
+        	else
+        	{
+        		return $this->template->json([
+	                'title'     => 'Validation Failed!',
+	                'status'    => 'error',
+	                'message'   => validation_errors()
+	            ], 404);
+        	}
+		}
+
+
+
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Fiscal Year Record
+         */
+        $fy_record = $this->fiscal_year_model->get($policy_record->fiscal_yr_id);
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Portfoliio Record
+         */
+        $this->load->model('portfolio_model');
+        $this->load->model('portfolio_setting_model');
+        $portfolio_record = $this->portfolio_model->find($policy_record->portfolio_id);
+
+        // --------------------------------------------------------------------
+
+
+        /**
+         * Let's Build Policy Voucher
+         */
+        $narration = "Receipt against Policy ({$policy_record->code}) Invoice ({$invoice_record->invoice_code})";
+        $narration .= $payment_data['narration'] ? PHP_EOL . $payment_data['narration'] : '';
+
+        $voucher_data = [
+            'voucher_date'      => date('Y-m-d'),
+            'voucher_type_id'   => IQB_AC_VOUCHER_TYPE_RCPT,
+            'narration'         => $narration,
+            'flag_internal'     => IQB_FLAG_ON
+        ];
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Debit Rows
+         */
+        $dr_rows = [
+
+            /**
+             * Accounts
+             */
+             'accounts' =>  [
+                // Collection
+                IQB_AC_ACCOUNT_ID_COLLECTION
+            ],
+
+            /**
+             * Party Types
+             */
+            'party_types' => [
+                NULL
+            ],
+
+            /**
+             * Party IDs
+             */
+            'parties' => [
+
+                NULL
+            ],
+
+            /**
+             * Amounts
+             */
+            'amounts' => [
+
+                $invoice_record->amount
+            ]
+
+        ];
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Credit Rows
+         */
+        $cr_rows = [
+
+            /**
+             * Accounts
+             */
+             'accounts' =>  [
+                // Insured Party
+                IQB_AC_ACCOUNT_ID_INSURED_PARTY,
+            ],
+
+            /**
+             * Party Types
+             */
+            'party_types' => [
+                // Insured Party -- Customer
+                IQB_AC_PARTY_TYPE_CUSTOMER
+            ],
+
+            /**
+             * Party IDs
+             */
+            'parties' => [
+
+                // Insured Party -- Customr ID
+                $policy_record->customer_id
+            ],
+
+            /**
+             * Amounts
+             */
+            'amounts' => [
+
+                $invoice_record->amount
+            ]
+
+        ];
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Format Data
+         */
+        $voucher_data['account_id']['dr']   = $dr_rows['accounts'];
+        $voucher_data['party_type']['dr']   = $dr_rows['party_types'];
+        $voucher_data['party_id']['dr']     = $dr_rows['parties'];
+        $voucher_data['amount']['dr']       = $dr_rows['amounts'];
+
+        $voucher_data['account_id']['cr']   = $cr_rows['accounts'];
+        $voucher_data['party_type']['cr']   = $cr_rows['party_types'];
+        $voucher_data['party_id']['cr']     = $cr_rows['parties'];
+        $voucher_data['amount']['cr']       = $cr_rows['amounts'];
+
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Save Voucher and Its Relation with Policy
+         */
+
+        try {
+
+            /**
+             * Task 1: Save Voucher and Generate Voucher Code
+             */
+            $voucher_id = $this->ac_voucher_model->add($voucher_data);
+
+        } catch (Exception $e) {
+
+            return $this->template->json([
+                'title'     => 'Exception Occured!',
+                'status'    => 'error',
+                'message'   => $e->getMessage()
+            ]);
+        }
+
+        $flag_exception = FALSE;
+        $message = '';
+
+
+        /**
+         * --------------------------------------------------------------------
+         * Post Voucher Add Tasks
+         *
+         * NOTE
+         *      We perform post voucher add tasks which are mainly to insert
+         *      voucher internal relation with policy txn record and  update
+         *      policy status.
+         *
+         *      Please note that, if any of transaction fails or exception
+         *      happens, we rollback and disable voucher. (We can not delete
+         *      voucher as we need to maintain sequential order for audit trail)
+         * --------------------------------------------------------------------
+         */
+
+
+        /**
+         * ==================== MANUAL TRANSACTIONS BEGIN =========================
+         */
+
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            // $this->db->trans_start();
+            $this->db->trans_begin();
+
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 2: Add Voucher-Policy Transaction Relation
+                 */
+
+                try {
+
+                    $relation_data = [
+                        'policy_txn_id' => $txn_record->id,
+                        'voucher_id'    => $voucher_id,
+                        'flag_invoiced' => IQB_FLAG_NOT_REQUIRED
+                    ];
+                    $this->rel_policy_txn__voucher_model->add($relation_data);
+
+                } catch (Exception $e) {
+
+                    $flag_exception = TRUE;
+                    $message = $e->getMessage();
+                }
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 4:
+                 * 		Update Invoice Paid Flat to "ON"
+                 *      Update Policy Status to "Active"
+                 *      Update Transaction Status to "Active", Clean Cache
+                 */
+                if( !$flag_exception )
+                {
+                    try{
+
+                    	$this->ac_invoice_model->update_flag($invoice_record->id, 'flag_paid', IQB_FLAG_ON);
+                        $this->policy_model->update_status($policy_record->id, IQB_POLICY_STATUS_ACTIVE);
+                        $this->policy_txn_model->update_status_direct($txn_record->id, IQB_POLICY_TXN_STATUS_ACTIVE);
+
+                    } catch (Exception $e) {
+
+                        $flag_exception = TRUE;
+                        $message = $e->getMessage();
+                    }
+                }
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 5:
+                 *      - Save Receipt
+                 *      - Generate Receipt PDF (Original)
+                 */
+                if( !$flag_exception )
+                {
+
+                	$receipt_data = [
+                		'invoice_id' 		=> $invoice_record->id,
+                		'customer_id' 		=> $policy_record->customer_id,
+                		'adjustment_amount' => $payment_data['adjustment_amount'],
+                		'amount' 			=> $invoice_record->amount,
+                		'received_in'		=> $payment_data['received_in'],
+                		'received_in_date'	=> $payment_data['received_in_date'] ? $payment_data['received_in_date'] : NULL,
+                	];
+                	$this->load->model('ac_receipt_model');
+                    try{
+
+                        $this->ac_receipt_model->add($receipt_data);
+
+                    } catch (Exception $e) {
+
+                        $flag_exception = TRUE;
+                        $message = $e->getMessage();
+                    }
+                }
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 6: SMS Customer with his Policy CODE and Expiration Date with Portfolio
+                 */
+                if( !$flag_exception )
+                {
+                    // try{
+
+                    //     $this->policy_model->update_status($policy_record->id, IQB_POLICY_STATUS_ACTIVE);
+                    //     $this->policy_txn_model->update_status_direct($txn_record->id, IQB_POLICY_TXN_STATUS_ACTIVE);
+
+                    // } catch (Exception $e) {
+
+                    //     $flag_exception = TRUE;
+                    //     $message = $e->getMessage();
+                    // }
+                }
+
+
+                // --------------------------------------------------------------------
+
+            /**
+             * Complete transactions or Rollback
+             */
+            if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
+            {
+                $this->db->trans_rollback();
+
+                /**
+                 * Set Voucher Flag Complete to OFF
+                 */
+                $this->ac_voucher_model->disable_voucher($voucher_id);
+
+                return $this->template->json([
+                    'title'     => 'Something went wrong!',
+                    'status'    => 'error',
+                    'message'   => $message ? $message : 'Could not perform save voucher relation or update policy status'
+                ]);
+            }
+            else
+            {
+                    $this->db->trans_commit();
+            }
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== MANUAL TRANSACTIONS END =========================
+         */
+
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Reload the Policy Overview Tab, Update Transaction Row (Replace)
+         */
+        $txn_record->status         = IQB_POLICY_TXN_STATUS_ACTIVE;
+        $policy_record->status      = IQB_POLICY_STATUS_ACTIVE;
+        $invoice_record->flag_paid  = IQB_FLAG_ON;
+        $html_tab_ovrview           = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'txn_record' => $txn_record], TRUE);
+        $html_invoice_row       	= $this->load->view('accounting/invoices/_single_row', ['record' => $invoice_record], TRUE);
+        $ajax_data = [
+            'message'   => 'Successfully Updated!',
+            'status'    => 'success',
+            'hideBootbox' => true,
+            'multipleUpdate' => [
+                [
+                    'box'       => '#tab-policy-overview-inner',
+                    'method'    => 'replaceWith',
+                    'html'      => $html_tab_ovrview
+                ],
+                [
+                    'box'       => '#_data-row-invoice-' . $invoice_record->id,
+                    'method'    => 'replaceWith',
+                    'html'      => $html_invoice_row
+                ]
+            ]
+        ];
+        return $this->template->json($ajax_data);
+    }
+
+    private function _payment_form( $invoice_data )
+    {
+        $form_data = [
+            'form_elements' => $this->_payment_rules(),
+            'record' 		=> NULL,
+            'invoice_data' 	=> $invoice_data
+        ];
+
+        /**
+         * Render The Form
+         */
+        $json_data = [
+            'form' => $this->load->view('accounting/invoices/_form_payment', $form_data, TRUE)
+        ];
+        $this->template->json($json_data);
+    }
+
+        private function _payment_rules()
+        {
+
+        	$received_in_dropdown = ac_payment_receipt_mode_dropdown(FALSE);
+            return [
+                [
+                    'field' => 'narration',
+                    'label' => 'Narration',
+                    'rules' => 'trim|max_length[255]',
+                    '_type' => 'textarea',
+                    'rows'  => '3',
+                ],
+                [
+                    'field' => 'adjustment_amount',
+                    'label' => 'Adjustment Amount',
+                    'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+                    '_type' => 'text',
+                ],
+                [
+                    'field' => 'received_in',
+                    'label' => 'Received In',
+                    'rules' => 'trim|required|alpha|exact_length[1]|in_list[' . implode(',', array_keys($received_in_dropdown)) . ']',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $received_in_dropdown,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'received_in_date',
+                    'label' => 'Dated (Cheque/Draft)',
+                    'rules' => 'trim|valid_date',
+                    '_type'             => 'date',
+                    '_extra_attributes' => 'data-provide="datepicker-inline"',
+                    '_required' => false
+                ],
+            ];
+        }
 }

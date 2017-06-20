@@ -133,8 +133,9 @@ define('IQB_STATUS_INACTIVE',     0);
 define('IQB_FLAG_YES',    	'Y');
 define('IQB_FLAG_NO',     	'N');
 
-define('IQB_FLAG_ON',    	1);
-define('IQB_FLAG_OFF',		0);
+define('IQB_FLAG_OFF',				0);
+define('IQB_FLAG_ON',    			1);
+define('IQB_FLAG_NOT_REQUIRED',		2);
 
 define('IQB_FLAG_LOCKED',	1);
 define('IQB_FLAG_UNLOCKED',	0);
@@ -370,6 +371,17 @@ defined('IQB_AC_PARTY_TYPES')    	OR define('IQB_AC_PARTY_TYPES', 	[
 	IQB_AC_PARTY_TYPE_CUSTOMER				=> 'Customer',
 	IQB_AC_PARTY_TYPE_COMPANY				=> 'Company',
 	IQB_AC_PARTY_TYPE_SURVEYOR				=> 'Surveyor'
+]);
+
+
+// PAYMENT RECEIVING MODES
+defined('IQB_AC_PAYMENT_RECEIPT_MODE_CASH') 	OR define('IQB_AC_PAYMENT_RECEIPT_MODE_CASH',	'C');
+defined('IQB_AC_PAYMENT_RECEIPT_MODE_CHEQUE') 	OR define('IQB_AC_PAYMENT_RECEIPT_MODE_CHEQUE',	'Q');
+defined('IQB_AC_PAYMENT_RECEIPT_MODE_DRAFT') 	OR define('IQB_AC_PAYMENT_RECEIPT_MODE_DRAFT',	'D');
+defined('IQB_AC_PAYMENT_RECEIPT_MODES')    	OR define('IQB_AC_PAYMENT_RECEIPT_MODES', 	[
+	IQB_AC_PAYMENT_RECEIPT_MODE_CASH		=> 'Cash',
+	IQB_AC_PAYMENT_RECEIPT_MODE_CHEQUE		=> 'Cheque',
+	IQB_AC_PAYMENT_RECEIPT_MODE_DRAFT		=> 'Draft'
 ]);
 
 
