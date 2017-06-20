@@ -990,8 +990,8 @@ class Policy_model extends MY_Model
                      * !!! NOTE: Both the tasks are done by calling the stored function.
                      */
                     $policy_type    = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH;
-                    $params         = [$policy_type, $record->id, $this->dx_auth->get_user_id()];
-                    $sql            = "SELECT `f_generate_policy_number`(?, ?, ?) AS policy_code";
+                    $params         = [$policy_type, $record->id, $this->dx_auth->get_user_id(), IQB_POLICY_STATUS_APPROVED];
+                    $sql            = "SELECT `f_generate_policy_number`(?, ?, ?, ?) AS policy_code";
                     $result         = mysqli_store_procedure('select', $sql, $params);
 
                     /**
@@ -1009,6 +1009,9 @@ class Policy_model extends MY_Model
                         $record     = $this->get($record->id);
                         $txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 
+                        /**
+                         * Save a Fresh PDF copy
+                         */
                         _POLICY__schedule([
                                 'record'        => $record,
                                 'txn_record'    => $txn_record
@@ -1060,172 +1063,8 @@ class Policy_model extends MY_Model
             return $this->db->where('id', $id)
                     ->update($this->table_name, $data);
         }
+
     // ----------------------------------------------------------------
-
-
-
-
-
-
-
-        // ----------------------------------------------------------------
-
-        /**
-         * Update Status to Approved
-         *
-         * @param object $record
-         * @param array $base_data
-         * @return bool
-         */
-        private function _to_status_R($record, $base_data)
-        {
-            if( !$this->policy_txn_model->ri_approved($record->id) )
-            {
-                throw new Exception("Exception [Model: Policy_model][Method: _to_status_R()]: The policy transaction has to be RI Approved.");
-            }
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
-            $transaction_status = TRUE;
-
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
-            $this->db->trans_start();
-
-
-                    /**
-                     * This is the case when a policy status is upgraded from "verified".
-                     *
-                     * !!! NOTE: The Txn Record's RI Approval Constraint must met.
-                     *
-                     * So, the following tasks are carried out:
-                     *      1. Policy Record [Status -> Approved, Approved date/user -> current]
-                     *      2. Generate Policy Number
-                     *      3. Save Original Schedule PDF
-                     *
-                     * !!! NOTE: Both the tasks are done by calling the stored function.
-                     */
-                    $policy_type    = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH;
-                    $params         = [$policy_type, $record->id, $this->dx_auth->get_user_id()];
-                    $sql            = "SELECT `f_generate_policy_number`(?, ?, ?) AS policy_code";
-                    $result         = mysqli_store_procedure('select', $sql, $params);
-
-                    /**
-                     * Save Original Schedule PDF
-                     */
-                    $result_row = $result[0];
-                    if($result_row->policy_code)
-                    {
-                        /**
-                         * Updated Records - Policy and Policy Transaction
-                         */
-                        $record     = $this->get($record->id);
-                        $txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
-
-                        _POLICY__schedule([
-                                'record'        => $record,
-                                'txn_record'    => $txn_record
-                            ], 'save');
-                    }
-
-            /**
-             * Complete transactions or Rollback
-             */
-            $this->db->trans_complete();
-            if ($this->db->trans_status() === FALSE)
-            {
-                $transaction_status = FALSE;
-            }
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-            /**
-             * ==================== TRANSACTIONS END =========================
-             */
-
-            return $transaction_status;
-        }
-
-        // ----------------------------------------------------------------
-
-        /**
-         * Update Status to Vouchered
-         *
-         * @param object $record
-         * @param array $base_data
-         * @return bool
-         */
-        private function _to_status_H($record, $base_data)
-        {
-            /**
-             * Task 1: Policy Record [Status --> Vouchered]
-             * Task 2: Policy Transaction Record [Status --> Active]
-             */
-            if( $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_ACTIVE) )
-            {
-               return $this->_to_status($record->id, $base_data);
-            }
-            return FALSE;
-        }
-
-        // ----------------------------------------------------------------
-
-        /**
-         * Update Status to Invoiced
-         *
-         * @param object $record
-         * @param array $base_data
-         * @return bool
-         */
-        private function _to_status_I($record, $base_data)
-        {
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
-            $transaction_status = TRUE;
-
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
-            $this->db->trans_start();
-
-                    /**
-                     * Task 1: Policy Record [Status --> Invoiced]
-                     */
-                    $this->_to_status($record->id, $base_data);
-
-                    /**
-                     * Task 2: Policy Transaction Record [Status --> Active]
-                     */
-                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_ACTIVE);
-
-
-            /**
-             * Complete transactions or Rollback
-             */
-            $this->db->trans_complete();
-            if ($this->db->trans_status() === FALSE)
-            {
-                $transaction_status = FALSE;
-            }
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-            /**
-             * ==================== TRANSACTIONS END =========================
-             */
-
-            return $transaction_status;
-        }
 
 
 
