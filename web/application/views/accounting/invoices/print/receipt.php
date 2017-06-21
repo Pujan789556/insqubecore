@@ -35,7 +35,7 @@
         <table class="table no-border" width="100%">
             <tbody>
                 <tr>
-                    <td align="left">
+                    <td colspan="2" align="left">
                         <img style="margin-bottom: 20px;" src="<?php echo site_url('public/app/images/logo.png') ?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
                     </td>
                     <td align="right"><h2>Receipt# <?php echo $record->receipt_code?></h2></td>
@@ -47,6 +47,14 @@
                             <?php echo nl2br($this->settings->address)?>
                         </address><br/>
                         <p>PAN No. : <strong><?php echo $this->settings->pan_no?></strong></p>
+                    </td>
+
+                    <td>
+                        <strong>Customer Details</strong><br/>
+                        <address>
+                            <strong><?php echo $invoice_record->customer_full_name?></strong><br>
+                            <?php echo get_contact_widget($invoice_record->customer_contact, true, true)?>
+                        </address>
                     </td>
 
                     <td align="right">

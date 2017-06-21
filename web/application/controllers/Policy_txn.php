@@ -2072,7 +2072,7 @@ class Policy_txn extends MY_Controller
                 	$receipt_data = [
                 		'invoice_id' 		=> $invoice_record->id,
                 		'customer_id' 		=> $policy_record->customer_id,
-                		'adjustment_amount' => $payment_data['adjustment_amount'],
+                		'adjustment_amount' => $payment_data['adjustment_amount'] ? $payment_data['adjustment_amount'] : NULL,
                 		'amount' 			=> $invoice_record->amount,
                 		'received_in'		=> $payment_data['received_in'],
                 		'received_in_date'	=> $payment_data['received_in_date'] ? $payment_data['received_in_date'] : NULL,
@@ -2080,7 +2080,16 @@ class Policy_txn extends MY_Controller
                 	$this->load->model('ac_receipt_model');
                     try{
 
-                        $this->ac_receipt_model->add($receipt_data);
+                        if( $this->ac_receipt_model->add($receipt_data) )
+                        {
+                        	// Save Receipt PDF
+                        	$receipt_data = [
+								'record' 			=> $this->ac_receipt_model->find_by(['invoice_id' => $invoice_record->id]),
+								'invoice_record' 	=> $invoice_record
+							];
+
+							_RECEIPT__pdf($receipt_data, 'save');
+                        }
 
                     } catch (Exception $e) {
 

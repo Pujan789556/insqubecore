@@ -451,7 +451,6 @@ if ( ! function_exists('_RECEIPT__pdf'))
          * Extract Invoice Record and Invoice Rows
          */
         $record    = $data['record'];
-        $rows      = $data['rows'];
 
         $CI->load->library('pdf');
         $mpdf = $CI->pdf->load();
