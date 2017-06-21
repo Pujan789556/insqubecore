@@ -218,16 +218,11 @@ $config['DX_permissions'] = [
 			 * 	1. Generate Policy Voucher
 			 * 	1. Generate Policy Invoice
 			 * 	2. Make payment and generate Policy Receipt
-			 * 	3. Invoice Print, Update Print Flag
-			 * 	4. Receipt Print, Update Print Flag
 			 */
 			'generate.policy.voucher',
 			'generate.policy.invoice',
 			'make.policy.payment',
-			'print.policy.invoice',
-			'update.policy.invoice.print.flag',
-			'print.policy.receipt',
-			'update.policy.receipt.print.flag',
+
 
 		],
 
@@ -291,6 +286,8 @@ $config['DX_permissions'] = [
 			'add.invoice',
 			'print.invoice',
 			'print.receipt',
+			'update.invoice.print.flag',
+			'update.receipt.print.flag',
 
 			/**
 			 * Reporting Permissions

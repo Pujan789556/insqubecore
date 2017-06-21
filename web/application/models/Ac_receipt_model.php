@@ -302,6 +302,23 @@ class Ac_receipt_model extends MY_Model
 
     // --------------------------------------------------------------------
 
+
+    /**
+     * Update Receipt Flags
+     *
+     *  Flags: flag_printed
+     *
+     * @param integer $id
+     * @return boolean
+     */
+    public function update_flag($id, $flag_name, $flag_value)
+    {
+        return $this->db->where('id', $id)
+                        ->update($this->table_name, [$flag_name => $flag_value]);
+    }
+
+    // --------------------------------------------------------------------
+
     /**
      * Check if Invoice Exists for Given Voucher ID
      *

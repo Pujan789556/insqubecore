@@ -685,6 +685,9 @@ class Ac_invoices extends MY_Controller
     		return $party_name;
     	}
 
+
+	// --------------------------------------------------------------------
+	//  PRINT INVOICE/RECEIPT
 	// --------------------------------------------------------------------
 
 	/**
@@ -718,11 +721,98 @@ class Ac_invoices extends MY_Controller
 		return $this->$method($id);
 
     }
+	// --------------------------------------------------------------------
 
-    private function _print_invoice($id)
+
+	    private function _print_invoice($id)
+	    {
+	    	/**
+			 * Main Record (Complete Invoice)
+			 */
+	    	$id = (int)$id;
+			$record = $this->ac_invoice_model->get($id, IQB_FLAG_ON);
+			if(!$record)
+			{
+				$this->template->render_404();
+			}
+
+			/**
+			 * Check if Belongs to me?
+			 */
+			belongs_to_me( $record->branch_id );
+
+			/**
+			 * Invoice Detail Rows
+			 */
+			$data = [
+				'record' 	=> $record,
+				'rows' 		=> $this->ac_invoice_detail_model->rows_by_invoice($record->id)
+			];
+
+			_INVOICE__pdf($data, 'print');
+	    }
+
+		// --------------------------------------------------------------------
+
+	    /**
+		 * Print Invoice Receipt
+		 *
+		 * @param integer $id  Invoice ID
+		 * @return void
+		 */
+	    private function _print_receipt($id)
+	    {
+	    	/**
+			 * Main Record (Complete Invoice)
+			 */
+	    	$id = (int)$id;
+			$invoice_record = $this->ac_invoice_model->get($id, IQB_FLAG_ON);
+			if(!$invoice_record)
+			{
+				$this->template->render_404();
+			}
+
+			/**
+			 * Check if Belongs to me?
+			 */
+			belongs_to_me( $invoice_record->branch_id );
+
+			/**
+			 * Invoice Detail Rows
+			 */
+			$this->load->model('ac_receipt_model');
+			$data = [
+				'record' 			=> $this->ac_receipt_model->find_by(['invoice_id' => $invoice_record->id]),
+				'invoice_record' 	=> $invoice_record
+			];
+
+			_RECEIPT__pdf($data, 'print');
+	    }
+
+
+	// --------------------------------------------------------------------
+	//  FLAG AS PRINT
+	// --------------------------------------------------------------------
+
+    public function printed($type, $id)
     {
     	/**
-		 * Main Record (Complete Invoice)
+		 * Valid Type?
+		 */
+    	if( !in_array($type, ['invoice', 'receipt']) )
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Check Permissions
+		 */
+    	$permission = "update.{$type}.print.flag";
+		$this->dx_auth->is_authorized('ac_invoices', $permission, TRUE);
+
+
+		/**
+		 * Main Record (Complete Invoice + Receipt Data)
 		 */
     	$id = (int)$id;
 		$record = $this->ac_invoice_model->get($id, IQB_FLAG_ON);
@@ -732,57 +822,89 @@ class Ac_invoices extends MY_Controller
 		}
 
 		/**
-		 * Check if Belongs to me?
-		 */
-		belongs_to_me( $record->branch_id );
+    	 * Already Printed?
+    	 */
+		$already_printed = FALSE;
+		if( $type === 'invoice' )
+		{
+			$already_printed = $record->flag_printed == IQB_FLAG_ON;
+		}
+		else
+		{
+			// Must have Receipt
+			$already_printed = $record->receipt_id && $record->receipt_flag_printed == IQB_FLAG_ON;
+		}
+		if( $already_printed )
+		{
+			return $this->template->json([
+				'title' 	=> 'Invalid Action!',
+				'status' 	=> 'error',
+				'message' 	=> 'It seems, you have already updated print flag!'
+			], 404);
+		}
+
+
 
 		/**
-		 * Invoice Detail Rows
+		 * Call Individual Printed Method
 		 */
-		$data = [
-			'record' 	=> $record,
-			'rows' 		=> $this->ac_invoice_detail_model->rows_by_invoice($record->id)
-		];
+		$method =  "_printed_{$type}";
+		$record = $this->$method($record);
 
-		_INVOICE__pdf($data, 'print');
+		if($record === FALSE )
+		{
+			return $this->template->json([
+				'title' 	=> 'Could not Update',
+				'status' 	=> 'error',
+				'message' 	=> 'Could not update flag!'
+			], 500);
+		}
+
+		/**
+		 * Clear the Cache
+		 */
+		$this->ac_invoice_model->clear_cache();
+
+		/**
+		 * Update The Row
+		 */
+		$row_html = $this->load->view('accounting/invoices/_single_row', ['record' => $record], TRUE);
+		$ajax_data = [
+			'message' => 'Successfully Updated',
+			'status'  => 'success',
+			'reloadRow' => true,
+			'rowId' 	=> '#_data-row-invoice-' . $record->id,
+			'row' 		=> $row_html
+		];
+		return $this->template->json($ajax_data);
     }
 
 	// --------------------------------------------------------------------
 
-    /**
-	 * Print Invoice Receipt
-	 *
-	 * @param integer $id  Invoice ID
-	 * @return void
-	 */
-    private function _print_receipt($id)
-    {
-    	/**
-		 * Main Record (Complete Invoice)
-		 */
-    	$id = (int)$id;
-		$invoice_record = $this->ac_invoice_model->get($id, IQB_FLAG_ON);
-		if(!$invoice_record)
-		{
-			$this->template->render_404();
-		}
+    	private function _printed_invoice($record)
+	    {
+	    	if( $this->ac_invoice_model->update_flag($record->id, 'flag_printed', IQB_FLAG_ON) )
+	    	{
+	    		$record->flag_printed = IQB_FLAG_ON;
 
-		/**
-		 * Check if Belongs to me?
-		 */
-		belongs_to_me( $invoice_record->branch_id );
+	    		return $record;
+	    	}
+	    	return FALSE;
+	    }
 
-		/**
-		 * Invoice Detail Rows
-		 */
-		$this->load->model('ac_receipt_model');
-		$data = [
-			'record' 			=> $this->ac_receipt_model->find_by(['invoice_id' => $invoice_record->id]),
-			'invoice_record' 	=> $invoice_record
-		];
+		// --------------------------------------------------------------------
 
-		_RECEIPT__pdf($data, 'print');
-    }
+	    private function _printed_receipt($record)
+	    {
+	    	$this->load->model('ac_receipt_model');
+	    	if( $this->ac_receipt_model->update_flag($record->receipt_id, 'flag_printed', IQB_FLAG_ON) )
+	    	{
+	    		$record->receipt_flag_printed = IQB_FLAG_ON;
+
+	    		return $record;
+	    	}
+	    	return FALSE;
+	    }
 
 	// --------------------------------------------------------------------
 

@@ -546,6 +546,9 @@ class Ac_invoice_model extends MY_Model
                         // Invoice Table
                         'I.*, ' .
 
+                        // Receipt Data
+                        'RCPT.id as receipt_id, RCPT.adjustment_amount, RCPT.received_in, RCPT.received_in_date, RCPT.flag_printed as receipt_flag_printed, ' .
+
                         // Branch Table
                         'B.name AS branch_name, ' .
 
@@ -553,6 +556,7 @@ class Ac_invoice_model extends MY_Model
                         'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
                     )
                 ->from($this->table_name . ' AS I')
+                ->join('ac_receipts RCPT', 'I.id = RCPT.invoice_id', 'left')
                 ->join('master_branches B', 'B.id = I.branch_id')
                 ->join('master_fiscal_yrs FY', 'FY.id = I.fiscal_yr_id');
 

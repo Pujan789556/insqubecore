@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo invoice_complete_flag_text($record->flag_complete);?></td>
 	<td><?php echo invoice_flag_on_off_text($record->flag_paid);?></td>
 	<td><?php echo invoice_flag_on_off_text($record->flag_printed);?></td>
-	<td><?php //echo invoice_flag_on_off_text($record->flag_printed);?></td>
+	<td><?php echo invoice_flag_on_off_text($record->receipt_flag_printed);?></td>
 	<td class="ins-action">
 		<div class="btn-group">
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
@@ -68,16 +68,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		                    <i class="fa fa-print"></i> Print Invoice
 		                </a>
 	                </li>
-	                <li>
-		                <a href="#"
-		                	data-toggle="tooltip"
-							title="Mark as Invoice Printed"
-							class="trg-row-action"
-							data-confirm="true"
-							data-message="Are you sure you want to do this? <br/>Once you do this, printing invoice gives a copy."
-							data-url="<?php echo site_url('ac_invoices/flag/invoice/print/' . $record->id);?>">
-								<i class="fa fa-check-square-o"></i> Mark as Invoice Printed</a>
-					</li><li class="divider"></li>
+
+	                <?php if($record->flag_printed == IQB_FLAG_OFF):?>
+		                <li>
+			                <a href="#"
+			                	data-toggle="tooltip"
+								title="Mark as Invoice Printed"
+								class="trg-row-action"
+								data-confirm="true"
+								data-message="Are you sure you want to do this? <br/>Once you do this, printing invoice gives a copy."
+								data-url="<?php echo site_url('ac_invoices/printed/invoice/' . $record->id);?>">
+									<i class="fa fa-check-square-o"></i> Mark as Invoice Printed</a>
+						</li>
+					<?php endif;?><li class="divider"></li>
 
 					<li>
 		                <a href="<?php echo site_url('ac_invoices/print/receipt/' . $record->id)?>"
@@ -87,16 +90,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		                    <i class="fa fa-print"></i> Print Receipt
 		                </a>
 	                </li>
-	                <li>
-		                <a href="#"
-		                	data-toggle="tooltip"
-							title="Mark as Receipt Printed"
-							class="trg-row-action"
-							data-confirm="true"
-							data-message="Are you sure you want to do this? <br/>Once you do this, printing receipt gives a copy."
-							data-url="<?php echo site_url('ac_invoices/flag/receipt/print/' . $record->id);?>">
-								<i class="fa fa-check-square-o"></i> Mark as Receipt Printed</a>
-					</li><li class="divider"></li>
+
+	                <?php if($record->receipt_flag_printed == IQB_FLAG_OFF):?>
+		                <li>
+			                <a href="#"
+			                	data-toggle="tooltip"
+								title="Mark as Receipt Printed"
+								class="trg-row-action"
+								data-confirm="true"
+								data-message="Are you sure you want to do this? <br/>Once you do this, printing receipt gives a copy."
+								data-url="<?php echo site_url('ac_invoices/printed/receipt/' . $record->id);?>">
+									<i class="fa fa-check-square-o"></i> Mark as Receipt Printed</a>
+						</li>
+					<?php endif?><li class="divider"></li>
 		        <?php endif?>
 
 		        <?php if( $this->dx_auth->is_authorized('ac_invoices', 'explore.invoice') ): ?>
