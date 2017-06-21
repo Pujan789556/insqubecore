@@ -290,6 +290,7 @@ $config['DX_permissions'] = [
 			'explore.invoice',
 			'add.invoice',
 			'print.invoice',
+			'print.receipt',
 
 			/**
 			 * Reporting Permissions

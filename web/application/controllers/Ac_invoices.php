@@ -293,9 +293,7 @@ class Ac_invoices extends MY_Controller
 		$this->dx_auth->is_authorized('ac_invoices', 'explore.invoice', TRUE);
 
 		$policy_id 	= (int)$policy_id;
-		$this->ac_invoice_model->clear_cache();
 		$records = $this->ac_invoice_model->rows_by_policy($policy_id);
-		// echo $this->db->last_query();exit;
 		$data = [
 			'records' 					=> $records,
 			'policy_id' 				=> $policy_id,
@@ -692,16 +690,37 @@ class Ac_invoices extends MY_Controller
 	/**
 	 * Print Invoice
 	 *
+	 * @param string $type  invoice|receipt
 	 * @param integer $id  Invoice ID
 	 * @return void
 	 */
-    public function print($id, $action="print")
+    public function print($type, $id)
     {
+		/**
+		 * Valid Type?
+		 */
+    	if( !in_array($type, ['invoice', 'receipt']) )
+		{
+			$this->template->render_404();
+		}
+
     	/**
 		 * Check Permissions
 		 */
-		$this->dx_auth->is_authorized('ac_invoices', 'print.invoice', TRUE);
+    	$permission = "print.{$type}";
+		$this->dx_auth->is_authorized('ac_invoices', $permission, TRUE);
 
+
+		/**
+		 * Call Individual Print Method
+		 */
+		$method =  "_print_{$type}";
+		return $this->$method($id);
+
+    }
+
+    private function _print_invoice($id)
+    {
     	/**
 		 * Main Record (Complete Invoice)
 		 */
@@ -736,13 +755,8 @@ class Ac_invoices extends MY_Controller
 	 * @param integer $id  Invoice ID
 	 * @return void
 	 */
-    public function receipt($id)
+    private function _print_receipt($id)
     {
-    	/**
-		 * Check Permissions
-		 */
-		$this->dx_auth->is_authorized('ac_invoices', 'print.invoice', TRUE);
-
     	/**
 		 * Main Record (Complete Invoice)
 		 */
@@ -769,6 +783,10 @@ class Ac_invoices extends MY_Controller
 
 		_RECEIPT__pdf($data, 'print');
     }
+
+	// --------------------------------------------------------------------
+
+
 }
 
 

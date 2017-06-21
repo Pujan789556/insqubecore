@@ -294,9 +294,7 @@ class Ac_vouchers extends MY_Controller
 		$this->dx_auth->is_authorized('ac_vouchers', 'explore.voucher', TRUE);
 
 		$policy_id 	= (int)$policy_id;
-		$this->ac_voucher_model->clear_cache();
 		$records = $this->ac_voucher_model->rows_by_policy($policy_id);
-		// echo $this->db->last_query();exit;
 		$data = [
 			'records' 					=> $records,
 			'policy_id' 				=> $policy_id,

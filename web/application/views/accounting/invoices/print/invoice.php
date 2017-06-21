@@ -45,7 +45,7 @@
                     <td colspan="2" align="left">
                         <img style="margin-bottom: 20px;" src="<?php echo site_url('public/app/images/logo.png') ?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
                     </td>
-                    <td align="right"><h2>Invoice</h2></td>
+                    <td align="right"><h2>Invoice # <?php echo $record->invoice_code?></h2></td>
                 </tr>
                 <tr>
                     <td>
@@ -65,7 +65,6 @@
                     </td>
                     <td align="right">
                         Invoice Date: <strong><?php echo $record->invoice_date?></strong><br/>
-                        Invoice # <strong><?php echo $record->invoice_code?></strong><br/>
                         Policy # <strong><?php echo $record->policy_code?></strong><br/>
                         Branch: <strong><?php echo $record->branch_name?></strong>
                     </td>

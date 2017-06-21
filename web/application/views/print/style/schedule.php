@@ -16,8 +16,11 @@
         border-collapse: collapse;
         width: 100%;
     }
+    .margin-t-10{margin-top:10px;}
+    .text-right{text-align: right}
+    .text-left{text-align: left}
 
-    table.margin-b-10{margin-bottom:10pt;}
+    table.margin-b-10,.margin-b-10{margin-bottom:10pt;}
     p { margin: 0pt; }
 
     td { vertical-align: top; padding: 3px; border:0.1mm solid #000000;}
@@ -43,6 +46,7 @@
     .table-footer td.border-t{border-top: 0.1mm solid #999;}
 
     /* -- Receipt Styles --*/
+    .receipt-box{border: 0.1mm solid #666; padding:10px;}
     p.receipt-description {font-weight:14px; font-style: italic;}
     p.receipt-description strong{font-size: 16px; font-style: normal;}
 
