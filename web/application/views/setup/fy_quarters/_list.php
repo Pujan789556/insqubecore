@@ -11,6 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<th>Starts at (EN)</th>
 		<th>Ends at (EN)</th>
 		<th>Quarter</th>
+		<th>Action</th>
 	</tr>
 	<?php
 	/**

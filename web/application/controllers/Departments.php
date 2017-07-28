@@ -74,7 +74,7 @@ class Departments extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Edit a Role
+	 * Edit Record
 	 *
 	 *
 	 * @param integer $id
@@ -108,7 +108,7 @@ class Departments extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Add a new Role
+	 * Add a new Record
 	 *
 	 * @return void
 	 */

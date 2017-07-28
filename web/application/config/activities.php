@@ -201,6 +201,17 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to Departments
+	 */
+	'fy_quarter' => [
+		'_uri' => 'fy_quarters/',
+		'_table' => 'master_fy_quarters',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited'
+	]],
+
+	/**
 	 * Activities related to Object
 	 */
 	'object' => [

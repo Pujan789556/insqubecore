@@ -24,4 +24,16 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 	<td><?php echo $record->starts_at;?></td>
 	<td><?php echo $record->ends_at;?></td>
 	<td><?php echo fiscal_year_quarters_dropdown()[$record->quarter];?></td>
+	<td class="ins-action">
+		<a href="#"
+			data-toggle="tooltip"
+			title="Edit Quarter"
+			class="trg-dialog-edit action"
+			data-title='<i class="fa fa-pencil-square-o"></i> Edit Quarter'
+			data-url="<?php echo site_url('fy_quarters/edit/' . $record->id);?>"
+			data-form=".form-iqb-general">
+			<i class="fa fa-pencil-square-o"></i>
+			<span class="hidden-xs">Edit</span>
+		</a>
+	</td>
 </tr>
