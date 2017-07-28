@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Policy Transaction : Row Actions
  */
+
+$flag__fresh_or_renewal = in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]);
 ?>
 <?php
 /**
@@ -23,15 +25,21 @@ if( is_policy_txn_editable($record->status, $record->flag_current, FALSE) ):
         data-form="#_form-premium">
         <i class="fa fa-dollar"></i> Premium</a>
 
-    <a href="#"
-        title="Edit Transaction/Endorsement"
-        data-toggle="tooltip"
-        class="btn btn-sm btn-round trg-dialog-edit"
-        data-box-size="large"
-        data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $policy_record->code?>'
-        data-url="<?php echo site_url('policy_txn/edit/' . $record->id);?>"
-        data-form="#_form-policy_txn">
-        <i class="fa fa-dollar"></i> Edit</a>
+    <?php
+    /**
+     * Can't Edit Fresh/New Policy Transaction
+     */
+    if( !$flag__fresh_or_renewal ):?>
+        <a href="#"
+            title="Edit Transaction/Endorsement"
+            data-toggle="tooltip"
+            class="btn btn-sm btn-round trg-dialog-edit"
+            data-box-size="large"
+            data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $policy_record->code?>'
+            data-url="<?php echo site_url('policy_txn/edit/' . $record->id);?>"
+            data-form="#_form-policy_txn">
+            <i class="fa fa-dollar"></i> Edit</a>
+    <?php endif?>
 <?php
 endif;
 
@@ -40,7 +48,7 @@ endif;
 /**
  * Status "Back to Draft"
  */
-if( $record->status === IQB_POLICY_TXN_STATUS_UNVERIFIED && $this->dx_auth->is_authorized('policy_txn', 'status.to.draft') ): ?>
+if( !$flag__fresh_or_renewal && $record->status === IQB_POLICY_TXN_STATUS_UNVERIFIED && $this->dx_auth->is_authorized('policy_txn', 'status.to.draft') ): ?>
     <a href="#"
         title="Back to Draft"
         data-toggle="tooltip"
@@ -57,7 +65,7 @@ endif;
 /**
  * Status "Send to Verify"
  */
-if( $record->status === IQB_POLICY_TXN_STATUS_DRAFT && $this->dx_auth->is_authorized('policy_txn', 'status.to.unverified') ): ?>
+if( !$flag__fresh_or_renewal && $record->status === IQB_POLICY_TXN_STATUS_DRAFT && $this->dx_auth->is_authorized('policy_txn', 'status.to.unverified') ): ?>
     <a href="#"
         title="Send to Verify"
         data-toggle="tooltip"
@@ -74,7 +82,7 @@ endif;
 /**
  * Status "Back to Un-verified"
  */
-if( $record->status === IQB_POLICY_TXN_STATUS_VERIFIED && $this->dx_auth->is_authorized('policy_txn', 'status.to.unverified') ): ?>
+if( !$flag__fresh_or_renewal && $record->status === IQB_POLICY_TXN_STATUS_VERIFIED && $this->dx_auth->is_authorized('policy_txn', 'status.to.unverified') ): ?>
     <a href="#"
         title="Back to Un-verified"
         data-toggle="tooltip"
@@ -91,7 +99,7 @@ endif;
 /**
  * Status "to Verified"
  */
-if( $record->status === IQB_POLICY_TXN_STATUS_UNVERIFIED && $this->dx_auth->is_authorized('policy_txn', 'status.to.verified') ): ?>
+if( !$flag__fresh_or_renewal && $record->status === IQB_POLICY_TXN_STATUS_UNVERIFIED && $this->dx_auth->is_authorized('policy_txn', 'status.to.verified') ): ?>
     <a href="#"
         title="Verify Debit Note"
         data-toggle="tooltip"
@@ -110,13 +118,20 @@ $__flag_ri_approval_constraint = _POLICY__ri_approval_constraint($record);
 /**
  * Actions on "Verified" Status
  */
-if( $record->status === IQB_POLICY_TXN_STATUS_VERIFIED && $__flag_ri_approval_constraint == FALSE && $this->dx_auth->is_authorized('policy_txn', 'status.to.approved') ): ?>
+if(
+    !$flag__fresh_or_renewal
+        &&
+    $record->status === IQB_POLICY_TXN_STATUS_VERIFIED
+        &&
+    $__flag_ri_approval_constraint == FALSE
+        &&
+    $this->dx_auth->is_authorized('policy_txn', 'status.to.approved') ): ?>
     <a href="#"
             data-toggle="tooltip"
-            title="Approve Debit Note. This will approve the debit note and generate transaction code."
+            title="Approve The Transaction/Endorsement."
             data-confirm="true"
             class="btn btn-sm btn-success btn-round trg-dialog-action"
-            data-message="Are you sure you want to APPROVE this debit note?"
+            data-message="Are you sure you want to APPROVE this Transaction/Endorsement?"
             data-url="<?php echo site_url('policy_txn/status/' . $record->id . '/' . IQB_POLICY_TXN_STATUS_APPROVED );?>"
         ><i class="fa fa-check-square-o"></i> Approve</a>
 <?php
@@ -127,7 +142,12 @@ endif;
 /**
  * RI-Aproval Required?
  */
-if( $record->status === IQB_POLICY_TXN_STATUS_VERIFIED && $__flag_ri_approval_constraint == TRUE && $this->dx_auth->is_authorized('policy_txn', 'status.to.ri.approved') ):
+if(
+    $record->status === IQB_POLICY_TXN_STATUS_VERIFIED
+        &&
+    $__flag_ri_approval_constraint == TRUE
+        &&
+    $this->dx_auth->is_authorized('policy_txn', 'status.to.ri.approved') ):
  ?>
     <a href="#"
         title="RI Approve"

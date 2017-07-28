@@ -307,7 +307,7 @@ class Policy_txn_model extends MY_Model
         switch ($to_status)
         {
             case IQB_POLICY_TXN_STATUS_DRAFT:
-                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
+                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_UNVERIFIED;;
                 break;
 
             case IQB_POLICY_TXN_STATUS_UNVERIFIED:

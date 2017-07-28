@@ -1382,7 +1382,7 @@ class Policies extends MY_Controller
 			{
 				if( !$txn_record->amt_total_premium )
 				{
-					$__flag_passed = FALSE;
+					$__flag_passed 		= FALSE;
 					$failed_message 	= 'Please Update Policy Premium First!';
 				}
 			}
