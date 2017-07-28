@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	        <span class="pull-left">Invoice Details</span>
             <span class="pull-right">
                 <?php if( $this->dx_auth->is_authorized('ac_invoices', 'print.invoice') ): ?>
-                        <a href="<?php echo site_url('ac_invoices/print/' . $record->id)?>"
+                        <a href="<?php echo site_url('ac_invoices/print/invoice/' . $record->id)?>"
                             title="Print Invoice"
                             class="btn btn-sm bg-navy"
                             target="_blank"
