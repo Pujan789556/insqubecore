@@ -922,4 +922,132 @@ class Portfolio extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+    /**
+     * Duplicate Portfolio Settings form Old Fiscal Year Settings
+     *
+     * @return void
+     */
+    public function duplicate_settings($source_fiscal_year_id)
+    {
+    	$this->load->model('portfolio_setting_model');
+
+		// Valid Record ?
+		$source_fiscal_year_id 		= (int)$source_fiscal_year_id;
+		$source_record 				= $this->portfolio_setting_model->get_row_single($source_fiscal_year_id);
+
+        if(!$source_record)
+        {
+            $this->template->render_404();
+        }
+
+        $rules = [
+            [
+                'field' => 'fiscal_yr_id',
+                'label' => 'Fiscal Year',
+                'rules' => 'trim|required|integer|max_length[3]|callback__cb_settings_check_duplicate',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown(),
+                '_required' => true
+            ]
+        ];
+
+        if( $this->input->post() )
+        {
+            $this->form_validation->set_rules($rules);
+            if( $this->form_validation->run() === TRUE )
+            {
+                $data = $this->input->post();
+
+                $batch_data                 = [];
+                $source_settings 			= $this->portfolio_setting_model->get_src_list_by_fiscal_year($source_fiscal_year_id);
+                $destination_fiscal_year_id = $this->input->post('fiscal_yr_id');
+
+                foreach($source_settings as $src)
+                {
+                    $source_record =(array)$src;
+
+                    // Set Fiscal Year
+                    $source_record['fiscal_yr_id'] = $destination_fiscal_year_id;
+
+                    // Remoe Unnecessary Fields
+                    unset($source_record['id']);
+                    unset($source_record['created_at']);
+                    unset($source_record['created_by']);
+                    unset($source_record['updated_at']);
+                    unset($source_record['updated_by']);
+
+                    $batch_data[] = $source_record;
+                }
+
+                $batch_data = array_filter($batch_data);
+                $done = $this->portfolio_setting_model->insert_batch($batch_data, TRUE);
+
+                if(!$done)
+                {
+                    $status = 'error';
+                    $message = 'Could not update.';
+                }
+                else
+                {
+                    // Clear Cache
+                    $this->portfolio_setting_model->clear_cache();
+
+                    $status = 'success';
+                    $message = 'Successfully Updated.';
+                }
+            }
+            else
+            {
+                $status = 'error';
+                $message = 'Validation Error.';
+            }
+
+            // Success HTML
+            if($status === 'success' )
+            {
+                $ajax_data = [
+                    'message' => $message,
+                    'status'  => $status,
+                    'updateSection' => true,
+                    'hideBootbox' => true
+                ];
+
+                $records = $this->portfolio_setting_model->get_row_list();
+				$html = $this->load->view('setup/portfolio/_list_settings', ['records' => $records], TRUE);
+
+                $ajax_data['updateSectionData'] = [
+                    'box'       => '#iqb-data-list',
+                    'method'    => 'html',
+                    'html'      => $html
+                ];
+                return $this->template->json($ajax_data);
+            }
+            else
+            {
+                $form_data = [
+                    'form_elements'         => $rules,
+                    'record'                => null,
+                    'source_record'         => $source_record
+                ];
+                return $this->template->json([
+                    'status'        => $status,
+                    'message'       => $message,
+                    'reloadForm'    => true,
+                    'form'          => $this->load->view('setup/portfolio/_form_duplicate', $form_data, TRUE)
+                ]);
+            }
+        }
+
+        // Let's render the form
+        $json_data['form'] = $this->load->view('setup/portfolio/_form_duplicate',
+            [
+                'form_elements'         => $rules,
+                'record'                => null,
+                'source_record'         => $source_record
+            ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+    }
+
 }
