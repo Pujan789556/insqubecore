@@ -81,7 +81,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 									<i class="fa fa-check-square-o"></i> Mark as Invoice Printed</a>
 						</li>
 					<?php endif;?><li class="divider"></li>
+				<?php endif?>
 
+				<?php if( (int)$record->flag_paid === IQB_FLAG_ON && $this->dx_auth->is_authorized('ac_invoices', 'print.receipt') ): ?>
 					<li>
 		                <a href="<?php echo site_url('ac_invoices/print/receipt/' . $record->id)?>"
 		                    title="Print Receipt"
@@ -91,7 +93,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		                </a>
 	                </li>
 
-	                <?php if($record->receipt_flag_printed == IQB_FLAG_OFF):?>
+	                <?php if( $record->receipt_flag_printed == IQB_FLAG_OFF):?>
 		                <li>
 			                <a href="#"
 			                	data-toggle="tooltip"
