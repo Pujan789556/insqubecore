@@ -521,8 +521,20 @@ class Ac_voucher_model extends MY_Model
     public function before_insert__defaults($data)
     {
         $this->load->library('Token');
-        $fy_record  = $this->fiscal_year_model->get_fiscal_year($data['voucher_date']);
-        $fy_quarter = $this->fy_quarter_model->get_quarter_by_date($data['voucher_date']);
+
+        $voucher_date = $data['voucher_date'];
+
+        $fy_record  = $this->fiscal_year_model->get_fiscal_year($voucher_date);
+        if(!$fy_record)
+        {
+            throw new Exception("Exception [Model: Ac_voucher_model][Method: before_insert__defaults()]: Fiscal Year not found for supplied voucher date ({$voucher_date}).");
+        }
+
+        $fy_quarter = $this->fy_quarter_model->get_quarter_by_date($voucher_date);
+        if(!$fy_quarter)
+        {
+            throw new Exception("Exception [Model: Ac_voucher_model][Method: before_insert__defaults()]: Fiscal Year Quarter not found for supplied voucher date ({$voucher_date}).");
+        }
 
         // Voucher Code
         $data['voucher_code']      = strtoupper($this->token->generate(10));

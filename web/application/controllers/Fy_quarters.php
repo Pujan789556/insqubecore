@@ -69,8 +69,6 @@ class Fy_quarters extends MY_Controller
 		/**
 		 * Normal Form Render
 		 */
-		// this will generate cache name: mc_master_fiscal_yrs_all
-		$this->fy_quarter_model->clear_cache();
 		$records = $this->fy_quarter_model->get_all();
 		$records = $records ? $records : [];
 		$this->template->partial(

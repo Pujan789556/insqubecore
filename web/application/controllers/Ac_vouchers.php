@@ -481,8 +481,9 @@ class Ac_vouchers extends MY_Controller
 					} catch (Exception $e) {
 
 						return $this->template->json([
-							'status' => $status,
-							'message' => $e->getMessage()
+							'title' 	=> 'Exception Occured!',
+							'status' 	=> $status,
+							'message' 	=> $e->getMessage()
 						]);
 					}
 				}
