@@ -309,9 +309,10 @@ class Ac_voucher_model extends MY_Model
      *      b. Insert Voucher Details - Debit, Credit
      *
      * @param array $data
+     * @param int   $policy_id (if voucher generated for policy transaction)
      * @return mixed
      */
-    public function add($data)
+    public function add($data, $policy_id=NULL)
     {
 
         /**
@@ -382,6 +383,16 @@ class Ac_voucher_model extends MY_Model
 
                     // --------------------------------------------------------------------
 
+                    /**
+                     * Task 4: Clear Cache (For this Policy)
+                     */
+                    if($policy_id)
+                    {
+                        $cache_var = 'ac_voucher_list_by_policy_'.$policy_id;
+                        $this->clear_cache($cache_var);
+                    }
+
+                    // --------------------------------------------------------------------
 
                 /**
                  * Complete transactions or Rollback

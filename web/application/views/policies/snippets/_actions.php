@@ -147,7 +147,7 @@ if( $record->status === IQB_POLICY_STATUS_VERIFIED && $__flag_ri_approval_constr
         data-confirm="true"
         class="btn btn-danger btn-round trg-dialog-action"
         data-message="Are you sure you want to APPROVE the RI-Constraints?"
-        data-url="<?php echo site_url('policy_txn/status/' . $record->id . '/' . IQB_POLICY_TXN_STATUS_RI_APPROVED . '/policy_tab_overview' );?>"
+        data-url="<?php echo site_url('policy_txn/status/' . $txn_record->id . '/' . IQB_POLICY_TXN_STATUS_RI_APPROVED . '/tab-policy-overview' );?>"
     ><i class="fa fa-check-square-o"></i> RI-Approve</a>
 <?php
 endif;

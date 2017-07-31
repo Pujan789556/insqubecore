@@ -307,12 +307,20 @@ class Policy_txn extends MY_Controller
 				 */
 				if( $txn_type !== IQB_POLICY_TXN_TYPE_ET )
 				{
-					// Remove All the transactional Fields
+					// Nullify All the transactional Fields
 					$txn_fields = ['amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat'];
 					foreach($txn_fields as $key)
 					{
-						unset($data[$key]);
+						$data[$key] = NULL;
 					}
+				}
+				else
+				{
+					/**
+					 * Compute VAT
+					 */
+					$this->load->model('ac_duties_and_tax_model');
+					$data['amt_vat'] 	= $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $data['amt_total_premium']);
 				}
 
         		// Insert or Update?
@@ -355,8 +363,9 @@ class Policy_txn extends MY_Controller
 					else
 					{
 						// Get Updated Record
-						$record = $this->policy_txn_model->get($record->id);
-						$success_html = $this->load->view('policy_txn/_single_row', ['record' => $record], TRUE);
+						$record 		= $this->policy_txn_model->get($record->id);
+						$policy_record 	= $this->policy_model->get($record->policy_id);
+						$html 			= $this->load->view('policy_txn/_single_row', ['record' => $record, 'policy_record' => $policy_record], TRUE);
 
 						return $this->template->json([
 							'status' 		=> $status,
@@ -365,9 +374,9 @@ class Policy_txn extends MY_Controller
 							'hideBootbox' 	=> true,
 							'updateSection' => true,
 							'updateSectionData' => [
-								'box' 		=> '#_data-row-policy_txn' . $record->id,
+								'box' 		=> '#_data-row-policy_txn-' . $record->id,
 								'method' 	=> 'replaceWith',
-								'html'		=> $success_html
+								'html'		=> $html
 							]
 						]);
 					}
@@ -951,11 +960,17 @@ class Policy_txn extends MY_Controller
 	 * @param string $ref 	Where does this requrest come from?
 	 * @return json
 	 */
-	public function status($policy_id, $to_status_code, $ref)
+	public function status($id, $to_status_code, $ref='tab-policy-transactions')
 	{
-		// Current Policy Transaction Record and Has valid Type?
-		$txn_record = $this->policy_txn_model->get_current_txn_by_policy($policy_id);
-		if( !$txn_record  )
+		$id = (int)$id;
+		$txn_record = $this->policy_txn_model->get($id);
+		if(!$txn_record)
+		{
+			$this->template->render_404();
+		}
+
+		// is This Current Transaction?
+		if( $txn_record->flag_current != IQB_FLAG_ON  )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
@@ -988,16 +1003,15 @@ class Policy_txn extends MY_Controller
 				 * Updated Transaction Record
 				 */
 				$txn_record = $this->policy_txn_model->get($txn_record->id);
+				$policy_record = $this->policy_model->get($txn_record->policy_id);
 
 				/**
 				 * What to reload/render after success?
 				 * -----------------------------------
 				 * 	1. RI Approval Triggered from Policy Overview Tab
 				 */
-				if( $ref = 'policy_tab_overview' )
+				if( $ref == 'tab-policy-overview' )
 				{
-					$policy_record = $this->policy_model->get($txn_record->policy_id);
-
 					/**
 					 * Update View
 					 */
@@ -1024,11 +1038,19 @@ class Policy_txn extends MY_Controller
 				}
 				else
 				{
+					// Replace the Row
+					$html = $this->load->view('policy_txn/_single_row', ['record' => $txn_record, 'policy_record' => $policy_record], TRUE);
 					return $this->template->json([
-						'status' 	=> 'error',
-						'title' 	=> '@TODO',
-						'message' 	=> 'Please update other reference return'
-					], 400);
+						'message' 	=> 'Successfully Updated!',
+						'status'  	=> 'success',
+						'multipleUpdate' => [
+							[
+								'box' 		=> '#_data-row-policy_txn-' . $txn_record->id,
+								'method' 	=> 'replaceWith',
+								'html' 		=> $html
+							]
+						]
+					]);
 				}
 			}
 
@@ -1063,7 +1085,6 @@ class Policy_txn extends MY_Controller
 			 * ------------------------------
 			 *
 			 */
-
 			$status_keys = array_keys(get_policy_txn_status_dropdown(FALSE));
 
 			// Valid Status Code?
@@ -1074,6 +1095,15 @@ class Policy_txn extends MY_Controller
 					'message' 	=> 'Invalid Status Code!'
 				], 403);
 			}
+
+			/**
+			 * Admin?
+			 */
+			if($this->dx_auth->is_admin())
+			{
+				return TRUE;
+			}
+
 
 			// Valid Permission?
 			$__flag_valid_permission = FALSE;
@@ -1170,7 +1200,7 @@ class Policy_txn extends MY_Controller
 				], 400);
 			}
 
-			return $__flag_pass;
+			return $__flag_passed;
 
 		}
 
@@ -1514,7 +1544,7 @@ class Policy_txn extends MY_Controller
 			/**
 			 * Task 1: Save Voucher and Generate Voucher Code
 			 */
-			$voucher_id = $this->ac_voucher_model->add($voucher_data);
+			$voucher_id = $this->ac_voucher_model->add($voucher_data, $policy_record->id);
 
 		} catch (Exception $e) {
 
@@ -1795,7 +1825,7 @@ class Policy_txn extends MY_Controller
 			/**
 			 * Task 1: Save Invoice and Generate Invoice Code
 			 */
-			$invoice_id = $this->ac_invoice_model->add($invoice_data, $invoice_details_data);
+			$invoice_id = $this->ac_invoice_model->add($invoice_data, $invoice_details_data, $policy_record->id);
 
 		} catch (Exception $e) {
 
@@ -2203,11 +2233,10 @@ class Policy_txn extends MY_Controller
          */
 
         try {
-
-            /**
+        	/**
              * Task 1: Save Voucher and Generate Voucher Code
              */
-            $voucher_id = $this->ac_voucher_model->add($voucher_data);
+            $voucher_id = $this->ac_voucher_model->add($voucher_data, $policy_record->id);
 
         } catch (Exception $e) {
 
@@ -2285,7 +2314,14 @@ class Policy_txn extends MY_Controller
                     try{
 
                     	$this->ac_invoice_model->update_flag($invoice_record->id, 'flag_paid', IQB_FLAG_ON);
-                        $this->policy_model->update_status($policy_record->id, IQB_POLICY_STATUS_ACTIVE);
+
+                    	/**
+                    	 * Update Policy's Status to Active if This is Fresh/Renewal
+                    	 */
+                    	if( in_array($txn_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+                    	{
+                    		$this->policy_model->update_status($policy_record->id, IQB_POLICY_STATUS_ACTIVE);
+                    	}
                         $this->policy_txn_model->update_status_direct($txn_record->id, IQB_POLICY_TXN_STATUS_ACTIVE);
 
                     } catch (Exception $e) {
@@ -2342,6 +2378,15 @@ class Policy_txn extends MY_Controller
                  */
                 if( !$flag_exception )
                 {
+
+                	/**
+                	 * Clear Cache - Invoices List by Policy
+                	 */
+                	// ac_invoice_model
+                	$cache_var = 'ac_invoice_list_by_policy_'.$policy_record->id;
+                    $this->ac_invoice_model->clear_cache($cache_var);
+
+
                     // try{
 
                     //     $this->policy_model->update_status($policy_record->id, IQB_POLICY_STATUS_ACTIVE);

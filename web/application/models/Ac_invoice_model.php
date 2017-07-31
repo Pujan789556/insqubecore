@@ -233,10 +233,12 @@ class Ac_invoice_model extends MY_Model
      *      a. Insert Master Record, Update Invoice Code
      *      b. Insert Invoice Details
      *
-     * @param array $data
+     * @param array $master_data
+     * @param array $batch_data_details
+     * @param int   $policy_id (if invoice generated for policy transaction)
      * @return mixed
      */
-    public function add($master_data, $batch_data_details)
+    public function add($master_data, $batch_data_details, $policy_id=NULL)
     {
         /**
          * !!! IMPORTANT
@@ -284,6 +286,17 @@ class Ac_invoice_model extends MY_Model
                      * Task 3: Log Activity
                      */
                     $this->log_activity($id, 'C');
+
+                    // --------------------------------------------------------------------
+
+                    /**
+                     * Task 4: Clear Cache (For this Policy)
+                     */
+                    if($policy_id)
+                    {
+                        $cache_var = 'ac_invoice_list_by_policy_'.$policy_id;
+                        $this->clear_cache($cache_var);
+                    }
 
                     // --------------------------------------------------------------------
 
