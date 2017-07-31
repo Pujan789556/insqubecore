@@ -15,6 +15,11 @@ $flag__fresh_or_renewal = in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH
 if( is_policy_txn_editable($record->status, $record->flag_current, FALSE) ):
     $update_premium_url = 'policy_txn/premium/' . $record->txn_type . '/' . $record->policy_id;
 ?>
+    <?php
+    /**
+     * Updating Premium is only on Fresh/Renewal Transaction
+     */
+    if( $flag__fresh_or_renewal ):?>
     <a href="#"
         title="Update Premium"
         data-toggle="tooltip"
@@ -24,6 +29,7 @@ if( is_policy_txn_editable($record->status, $record->flag_current, FALSE) ):
         data-url="<?php echo site_url($update_premium_url);?>"
         data-form="#_form-premium">
         <i class="fa fa-dollar"></i> Premium</a>
+    <?php endif?>
 
     <?php
     /**
@@ -36,7 +42,7 @@ if( is_policy_txn_editable($record->status, $record->flag_current, FALSE) ):
             class="btn btn-sm btn-round trg-dialog-edit"
             data-box-size="large"
             data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $policy_record->code?>'
-            data-url="<?php echo site_url('policy_txn/edit/' . $record->id);?>"
+            data-url="<?php echo site_url('policy_txn/edit_endorsement/' . $record->id);?>"
             data-form="#_form-policy_txn">
             <i class="fa fa-dollar"></i> Edit</a>
     <?php endif?>

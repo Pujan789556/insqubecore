@@ -197,6 +197,7 @@ $config['DX_permissions'] = [
 			 * CRUD Operation Permissions
 			 */
 			'explore.transaction',
+			'add.transaction',
 			'edit.draft.transaction',
 			'edit.unverified.transaction',
 			'delete.draft.transaction',
@@ -222,8 +223,6 @@ $config['DX_permissions'] = [
 			'generate.policy.voucher',
 			'generate.policy.invoice',
 			'make.policy.payment',
-
-
 		],
 
 		/**

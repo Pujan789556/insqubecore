@@ -83,7 +83,7 @@ class Policy_txn extends MY_Controller
 		$data = [
 			'records' 					=> $records,
 			'policy_record' 			=> $policy_record,
-			'add_url' 					=> 'policy_txn/add/' . $policy_id,
+			'add_url' 					=> 'policy_txn/add_endorsement/' . $policy_id,
 		];
 		$html = $this->load->view('policy_txn/_list_widget', $data, TRUE);
 		$ajax_data = [
@@ -141,7 +141,249 @@ class Policy_txn extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
-	// CRUD OPERATIONS
+	// MANAGE ENDORSEMENT
+	// --------------------------------------------------------------------
+
+
+	/**
+	 * Edit a Recrod
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function edit_endorsement($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->policy_txn_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->branch_id);
+
+
+		/**
+		 * Check Permissions & Editability
+		 */
+		is_policy_txn_editable($record->status, $record->flag_current);
+
+
+
+		// Form Submitted? Save the data
+		$this->_save_endorsement($record->policy_id, 'edit', $record);
+
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('policy_txn/forms/_form_endorsement',
+			[
+				'form_elements' => $this->policy_txn_model->validation_rules,
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Add a new Record
+	 *
+	 * @return void
+	 */
+	public function add_endorsement($policy_id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('policy_txn', 'add.transaction') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Can I Add
+		 */
+		$policy_id = (int)$policy_id;
+		if( !$this->_can_add_endorsement($policy_id) )
+		{
+			return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'You can not add new endorsement as you have unfinished current endorsement.'], 403);
+		}
+
+		$record = NULL;
+
+		// Form Submitted? Save the data
+		$this->_save_endorsement($policy_id, 'add');
+
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('policy_txn/forms/_form_endorsement',
+			[
+				'form_elements' => $this->policy_txn_model->validation_rules,
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+		/**
+		 * Can I add Endorsement
+		 *
+		 * Check whether I can add an endorsement for supplied policy.
+		 * This is to validate if we already have an non-active endorsement.
+		 *
+		 * @param integer $policy_id
+		 * @return bool
+		 */
+		private function _can_add_endorsement($policy_id)
+		{
+			$current_txn = $this->policy_txn_model->get_current_txn_by_policy($policy_id);
+
+			return $current_txn->status === IQB_POLICY_TXN_STATUS_ACTIVE;
+		}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Save a Record
+	 *
+	 * @param string $action [add|edit]
+	 * @param object|null $record Record Object or NULL
+	 * @return array
+	 */
+	private function _save_endorsement($policy_id, $action, $record = NULL)
+	{
+		// Valid action?
+		if( !in_array($action, array('add', 'edit')))
+		{
+			return $this->template->json(['status' => 'error', 'message' => 'Invalid Action!']);
+		}
+
+		/**
+		 * Form Submitted?
+		 */
+		if( $this->input->post() )
+		{
+			/**
+			 * Valid Policy?
+			 */
+			$policy_id = (int)$policy_id;
+			if( !$this->policy_model->exists($policy_id) )
+			{
+				return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'Policy does not exists.']);
+			}
+
+			$done = FALSE;
+
+			/**
+			 * Validation Rules - Set according to the endorsement type
+			 */
+			$txn_type = (int)$this->input->post('txn_type');
+			$v_rules_all = $this->policy_txn_model->validation_rules;
+			if( $txn_type == IQB_POLICY_TXN_TYPE_ET )
+			{
+				$v_rules = array_merge($v_rules_all['basic'], $v_rules_all['transaction']);
+			}
+			else
+			{
+				$v_rules = $v_rules_all['basic'];
+			}
+
+			$this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+				$data = $this->input->post();
+				$data['policy_id'] = $policy_id;
+
+				/**
+				 * Prepare Data - Based on Type
+				 */
+				if( $txn_type !== IQB_POLICY_TXN_TYPE_ET )
+				{
+					// Remove All the transactional Fields
+					$txn_fields = ['amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat'];
+					foreach($txn_fields as $key)
+					{
+						unset($data[$key]);
+					}
+				}
+
+        		// Insert or Update?
+				if($action === 'add')
+				{
+					$done = $this->policy_txn_model->save_endorsement($data, TRUE); // No Validation on Model
+				}
+				else
+				{
+					// Now Update Data
+					$done = $this->policy_txn_model->update($record->id, $data, TRUE);
+				}
+
+	        	if(!$done)
+				{
+					return $this->template->json(['status' => 'error', 'message' => 'Could not update.']);
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+
+					if($action === 'add')
+					{
+						// Refresh the list page and close bootbox
+						$return = $this->index($policy_id, TRUE);
+						return $this->template->json([
+							'status' 		=> $status,
+							'message' 		=> $message,
+							'reloadForm' 	=> false,
+							'hideBootbox' 	=> true,
+							'updateSection' => true,
+							'updateSectionData' => [
+								'box' 		=> '#tab-policy-transactions',
+								'method' 	=> 'html',
+								'html'		=> $return['html']
+							]
+						]);
+					}
+					else
+					{
+						// Get Updated Record
+						$record = $this->policy_txn_model->get($record->id);
+						$success_html = $this->load->view('policy_txn/_single_row', ['record' => $record], TRUE);
+
+						return $this->template->json([
+							'status' 		=> $status,
+							'message' 		=> $message,
+							'reloadForm' 	=> false,
+							'hideBootbox' 	=> true,
+							'updateSection' => true,
+							'updateSectionData' => [
+								'box' 		=> '#_data-row-policy_txn' . $record->id,
+								'method' 	=> 'replaceWith',
+								'html'		=> $success_html
+							]
+						]);
+					}
+				}
+        	}
+        	else
+        	{
+        		return $this->template->json(['status' => 'error', 'message' => validation_errors()]);
+        	}
+		}
+	}
+
+
+
+	// --------------------------------------------------------------------
+	// SAVE PREMIUM FUNCTIONS
 	// --------------------------------------------------------------------
 
 	/**
@@ -232,12 +474,6 @@ class Policy_txn extends MY_Controller
 		$this->__render_premium_form($policy_record, $txn_record, $crf_record);
 	}
 
-
-
-
-
-	// --------------------------------------------------------------------
-	//  SAVE PREMIUM FUNCTIONS
 	// --------------------------------------------------------------------
 
 		/**

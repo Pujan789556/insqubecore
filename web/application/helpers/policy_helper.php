@@ -153,7 +153,7 @@ if ( ! function_exists('get_policy_txn_status_text'))
 if ( ! function_exists('get_policy_txn_type_dropdown'))
 {
 	/**
-	 * Get Policy Transaction Status Dropdown
+	 * Get Policy Transaction Type Dropdown
 	 *
 	 * @return	array
 	 */
@@ -162,8 +162,31 @@ if ( ! function_exists('get_policy_txn_type_dropdown'))
 		$dropdown = [
 			IQB_POLICY_TXN_TYPE_FRESH 		=> 'Fresh',
 			IQB_POLICY_TXN_TYPE_RENEWAL 	=> 'Renewal',
-			IQB_POLICY_TXN_TYPE_ET 			=> 'Endorsement-TXNL',
-			IQB_POLICY_TXN_TYPE_EG 			=> 'Endorsement-GNRL'
+			IQB_POLICY_TXN_TYPE_ET 			=> 'Endorsement - Transactional',
+			IQB_POLICY_TXN_TYPE_EG 			=> 'Endorsement - General'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('get_policy_txn_type_endorsement_only_dropdown'))
+{
+	/**
+	 * Get Policy Transaction Type (Endorsement Only) Dropdown
+	 *
+	 * @return	array
+	 */
+	function get_policy_txn_type_endorsement_only_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_POLICY_TXN_TYPE_ET 			=> 'Endorsement - Transactional',
+			IQB_POLICY_TXN_TYPE_EG 			=> 'Endorsement - General'
 		];
 
 		if($flag_blank_select)

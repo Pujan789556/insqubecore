@@ -13,9 +13,9 @@ class Policy_txn_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    protected $after_insert  = ['clear_cache'];
-    protected $after_update  = ['clear_cache'];
-    protected $after_delete  = ['clear_cache'];
+    // protected $after_insert  = ['clear_cache'];
+    // protected $after_update  = ['clear_cache'];
+    // protected $after_delete  = ['clear_cache'];
 
     protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval', 'flag_current', 'status', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'approved_at', 'approved_by', 'updated_at', 'updated_by'];
 
@@ -46,6 +46,94 @@ class Policy_txn_model extends MY_Model
         $this->load->helper('object');
 
         $this->load->model('policy_crf_model');
+
+        // Set validation rules
+        $this->validation_rules();
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Set Validation Rules
+     *
+     * @return void
+     */
+    public function validation_rules()
+    {
+        $txn_type_dropdown = get_policy_txn_type_endorsement_only_dropdown(FALSE);
+        $this->validation_rules = [
+
+            /**
+             * Basic Information
+             */
+            'basic' => [
+                [
+                    'field' => 'txn_type',
+                    'label' => 'Endorsement / Transaction Type',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list['. implode(',',array_keys($txn_type_dropdown)) .']',
+                    '_type'     => 'dropdown',
+                    '_id'       => '_txn_type',
+                    '_data'     => IQB_BLANK_SELECT + $txn_type_dropdown,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'txn_details',
+                    'label' => 'Transaction Details (सम्पुष्टि विवरण )',
+                    'rules' => 'trim|required|htmlspecialchars',
+                    '_id'       => '_txn_details',
+                    '_type'     => 'textarea',
+                    '_required' => true
+                ]
+            ],
+
+            /**
+             * Transactional Information
+             */
+            'transaction' => [
+                [
+                    'field' => 'amt_sum_insured',
+                    'label' => 'Sum Insured (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type' => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'amt_total_premium',
+                    'label' => 'Premium Amount (added/reduced) (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type' => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'amt_pool_premium',
+                    'label' => 'Pool Premium Amount (added/reduced) (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type' => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'amt_commissionable',
+                    'label' => 'Commissionable Amount (added/reduced) (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type' => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'amt_agent_commission',
+                    'label' => 'Agent Commission Amount (added/reduced) (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type' => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'amt_stamp_duty',
+                    'label' => 'Stamp Duty',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type' => 'text',
+                    '_required' => true
+                ],
+            ]
+        ];
     }
 
     // ----------------------------------------------------------------
@@ -352,6 +440,76 @@ class Policy_txn_model extends MY_Model
             return $this->db->where('id', $id)
                         ->update($this->table_name, $data);
         }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Save Endorsement/Transaction
+     *
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
+    public function save_endorsement($data)
+    {
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+        $transaction_status = TRUE;
+
+        /**
+         * Disable DB Debugging
+         */
+        $this->db->db_debug = FALSE;
+        $this->db->trans_start();
+
+
+                /**
+                 * Task 1: Add Txn Data
+                 */
+                $id = parent::insert($data, TRUE);
+
+                /**
+                 * Task 2: Update flag_current
+                 */
+                $this->_update_flag_current($id, $data['policy_id']);
+
+                /**
+                 * Clear Cache
+                 */
+                $cache_var = 'policy_txn_'.$data['policy_id'];
+                $this->clear_cache($cache_var);
+
+        /**
+         * Complete transactions or Rollback
+         */
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            $transaction_status = FALSE;
+        }
+
+        /**
+         * Restore DB Debug Configuration
+         */
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        return $transaction_status;
+    }
+
+    // --------------------------------------------------------------------
+
+    private function _update_flag_current($id, $policy_id)
+    {
+        return $this->db->set('flag_current', IQB_FLAG_OFF)
+                        ->where('id !=', $id)
+                        ->where('policy_id', $policy_id)
+                        ->update($this->table_name);
+    }
 
     // --------------------------------------------------------------------
 

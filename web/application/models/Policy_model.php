@@ -1287,6 +1287,20 @@ class Policy_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Check if Policy exists by Supplied ID
+     *
+     * @param integer $id
+     * @return mixed
+     */
+    public function exists($id)
+    {
+        return $this->db->where('id', $id)
+                        ->count_all_results($this->table_name);
+    }
+
+    // ----------------------------------------------------------------
+
 
     /**
      * Delete Cache on Update/Delete Records
