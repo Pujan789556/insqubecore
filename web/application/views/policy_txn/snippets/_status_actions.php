@@ -176,7 +176,7 @@ if( $record->status === IQB_POLICY_TXN_STATUS_APPROVED ): ?>
     /**
      * If transaction is related to financial txn (new, renewal, txnal), We generate Voucher
      */
-    if( $record->txn_type !== IQB_POLICY_TXN_TYPE_EG &&  $this->dx_auth->is_authorized('policy_txn', 'generate.transaction.voucher') ): ?>
+    if( (int)$record->txn_type !== IQB_POLICY_TXN_TYPE_EG &&  $this->dx_auth->is_authorized('policy_txn', 'generate.transaction.voucher') ): ?>
         <a href="#"
             title="Generate Voucher"
             data-toggle="tooltip"

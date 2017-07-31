@@ -48,8 +48,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             /**
              * Load Form Components
              */
+            $txn_elements = $form_elements['transaction'];
+            $txn_elements[0]['_default'] = $policy_record->cur_amt_sum_insured;
+            $txn_elements[0]['_help_text'] = "The current <strong>Sum Insured Amount</strong> is Rs. <strong class='text-red'>{$policy_record->cur_amt_sum_insured}</strong>.<br/>Please do change it if necessary for this transaction.";
             $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements'     => $form_elements['transaction'],
+                'form_elements'     => $txn_elements,
                 'form_record'       => $record,
                 'grid_label'        => 'col-sm-4',
                 'grid_form_control' => 'col-sm-8'
