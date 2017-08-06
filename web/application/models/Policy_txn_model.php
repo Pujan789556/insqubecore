@@ -17,7 +17,7 @@ class Policy_txn_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval', 'flag_current', 'status', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'approved_at', 'approved_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval', 'flag_current', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'approved_at', 'approved_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -501,13 +501,33 @@ class Policy_txn_model extends MY_Model
         return $transaction_status;
     }
 
+        // --------------------------------------------------------------------
+
+        private function _update_flag_current($id, $policy_id)
+        {
+            return $this->db->set('flag_current', IQB_FLAG_OFF)
+                            ->where('id !=', $id)
+                            ->where('policy_id', $policy_id)
+                            ->update($this->table_name);
+        }
+
     // --------------------------------------------------------------------
 
-    private function _update_flag_current($id, $policy_id)
+    /**
+     * Save Endorsement Audit Data
+     * @param int $id   Transaction ID
+     * @param string $audit_field Audit Field Name
+     * @param string $audit_data JSON Encoded Data
+     * @return bool
+     */
+    public function save_endorsement_audit($id, $audit_field, $audit_data)
     {
-        return $this->db->set('flag_current', IQB_FLAG_OFF)
-                        ->where('id !=', $id)
-                        ->where('policy_id', $policy_id)
+        if( !in_array($audit_field, ['audit_policy', 'audit_object', 'audit_customer']))
+        {
+            return FALSE;
+        }
+        return $this->db->set($audit_field, $audit_data)
+                        ->where('id', $id)
                         ->update($this->table_name);
     }
 

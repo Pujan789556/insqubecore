@@ -12,16 +12,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         ],
                         // Hidden Fields
                         isset($record) ? ['id' => $record->id] : []); ?>
-
-    <?php
-    /**
-     * Load Form Components
-     */
-    // $this->load->view('templates/_common/_form_components_horz', [
-    //     'form_elements' => $form_elements,
-    //     'form_record'   => $record
-    // ]);
-    ?>
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">
           <h4 class="box-title">Supply Basic Information</h4>
@@ -79,11 +69,4 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             });
         }
     });
-
-    // Initialize Select2
-    // $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
-    //     //Initialize Select2 Elements
-    //     $('select[data-ddstyle="select"]').select2();
-    //     $('.bootbox.modal').removeAttr('tabindex'); // modal workaround
-    // });
 </script>

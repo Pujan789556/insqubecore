@@ -174,6 +174,21 @@ class Object_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Update Endorsement Changes on Policy Table
+     *
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
+    public function commit_endorsement($id, $data)
+    {
+        return $this->db->where('id', $id)
+                        ->update($this->table_name, $data);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Is object editable?
      * --------------------
      *

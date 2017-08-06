@@ -417,6 +417,55 @@ class Policy_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get Endorsement Validation Rules
+     *
+     * @return array
+     */
+    public function get_endorsement_validation_rules()
+    {
+        return  [
+                    [
+                        'field' => 'proposed_date',
+                        'label' => 'Policy Proposed Date',
+                        'rules' => 'trim|required|valid_date',
+                        '_type'             => 'date',
+                        '_default'          => date('Y-m-d'),
+                        '_extra_attributes' => 'data-provide="datepicker-inline"',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'issued_datetime',
+                        'label' => 'Policy Issue Date & Time',
+                        'rules' => 'trim|required|valid_date',
+                        '_type'             => 'datetime',
+                        '_default'          => date('Y-m-d H:i:00'),
+                        '_extra_attributes' => 'data-provide="datetimepicker-inline"',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'start_datetime',
+                        'label' => 'Policy Start Date & Time',
+                        'rules' => 'trim|required|valid_date',
+                        '_type'             => 'datetime',
+                        '_default'          => date('Y-m-d H:i:00'),
+                        '_extra_attributes' => 'data-provide="datetimepicker-inline"',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'end_datetime',
+                        'label' => 'Policy End Date & Time',
+                        'rules' => 'trim|required|valid_date|callback__cb_valid_policy_duration',
+                        '_type'             => 'datetime',
+                        '_default'          => date('Y-m-d H:i:00', strtotime( '+1 year', strtotime( date('Y-m-d H:i:00') ) ) ),
+                        '_extra_attributes' => 'data-provide="datetimepicker-inline"',
+                        '_required' => true
+                    ]
+                ];
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Add a Fresh/Renewal Policy Debit Note(Draft)
      *
      * @param array $data
@@ -823,6 +872,21 @@ class Policy_model extends MY_Model
     // ----------------------------------------------------------------
 
     public function update_current_txn_data($id, $data)
+    {
+        return $this->db->where('id', $id)
+                        ->update($this->table_name, $data);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Update Endorsement Changes on Policy Table
+     *
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
+    public function commit_endorsement($id, $data)
     {
         return $this->db->where('id', $id)
                         ->update($this->table_name, $data);
@@ -1290,6 +1354,17 @@ class Policy_model extends MY_Model
                      ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
                      ->where('P.id', $id)
                      ->get()->row();
+    }
+
+    // ----------------------------------------------------------------
+
+
+    public function get_customer_object_id($id)
+    {
+         return $this->db->select( 'P.id, P.customer_id, P.object_id')
+                        ->from($this->table_name . ' as P')
+                        ->where('P.id', $id)
+                        ->get()->row();
     }
 
     // ----------------------------------------------------------------

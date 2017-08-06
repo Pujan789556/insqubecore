@@ -328,6 +328,7 @@ class Policy_txn extends MY_Controller
         		// Insert or Update?
 				if($action === 'add')
 				{
+					// echo '<pre>'; print_r($data);exit;
 					$done = $this->policy_txn_model->save_endorsement($data, TRUE); // No Validation on Model
 				}
 				else
@@ -1048,6 +1049,23 @@ class Policy_txn extends MY_Controller
 
 			if( $this->policy_txn_model->update_status($txn_record->policy_id, $to_status_code) )
 			{
+
+				/**
+				 * Post Tasks on Transaction Activation
+				 * -------------------------------------
+				 *
+				 * If this is not a Fresh/Renewal Transaction, we also have to update the
+				 * 	- policy (from audit_policy field if any data)
+				 * 	- object (from audit_object field if any data)
+				 * 	- customer (from audit_customer field if any data)
+				 */
+				if( in_array($txn_record->txn_type, [IQB_POLICY_TXN_TYPE_ET, IQB_POLICY_TXN_TYPE_EG]) && $to_status_code ==IQB_POLICY_TXN_STATUS_APPROVED )
+				{
+					$this->_commit_endorsement_audit($txn_record);
+				}
+
+
+
 				/**
 				 * Updated Transaction Record
 				 */
@@ -1116,6 +1134,57 @@ class Policy_txn extends MY_Controller
 			'status' 	=> 'error',
 			'message' 	=> 'Could not be updated!'
 		], 400);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Commit Endorsement Audit Information
+	 *
+	 * On final activation of the status on endorsement of any kind, we need
+	 * to update changes made on policy, object or customer from audit data
+	 * hold by this txn record
+	 *
+	 * @param object $txn_record
+	 * @return void
+	 */
+	private function _commit_endorsement_audit($txn_record)
+	{
+		/**
+		 * Task 1: Policy Changes
+		 */
+		$audit_policy = $txn_record->audit_policy ? json_decode($txn_record->audit_policy) : NULL;
+		if( $audit_policy )
+		{
+			$data = (array)$audit_policy->new;
+			$this->policy_model->commit_endorsement($txn_record->policy_id, $data);
+		}
+
+		/**
+		 * Get Customer ID and Object ID
+		 */
+		$obj_cust = $this->policy_model->get_customer_object_id($txn_record->policy_id);
+
+		/**
+		 * Task 2: Object Changes
+		 */
+		$audit_object = $txn_record->audit_object ? json_decode($txn_record->audit_object) : NULL;
+		if( $audit_object )
+		{
+			$data = (array)$audit_object->new;
+			$this->object_model->commit_endorsement($obj_cust->object_id, $data);
+		}
+
+		/**
+		 * Task 3: Customer Changes
+		 */
+		$audit_customer = $txn_record->audit_customer ? json_decode($txn_record->audit_customer) : NULL;
+		if( $audit_customer )
+		{
+			$this->load->model('customer_model');
+			$data = (array)$audit_customer->new;
+			$this->customer_model->commit_endorsement($obj_cust->object_id, $data);
+		}
 	}
 
 	// --------------------------------------------------------------------

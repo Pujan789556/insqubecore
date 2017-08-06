@@ -549,6 +549,196 @@ class Policies extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
+	 * Edit a Recrod from Endorsement
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function edit_endorsement($id)
+	{
+		// Capture the ID
+		$id = (int)$id;
+
+		// Valid Record ?
+		$record = $this->policy_model->row($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Policy not found!'
+			],404);
+		}
+
+		$txn_record = $this->policy_txn_model->get_current_txn_by_policy($record->id);
+		if(!$txn_record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Policy Transaction/Endorsement not found!'
+			],404);
+		}
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->branch_id);
+
+
+		/**
+		 * @TODO - Check Editable Permission?
+		 */
+		// is_policy_editable($record->status);
+
+
+		/**
+         * Do we have audit data available? If yes, pass it instead of policy's original data
+         */
+		$edit_record = $record; // We need to pass the original record for getting old data.
+        $audit_record = $txn_record->audit_policy ? json_decode($txn_record->audit_policy) : NULL;
+        if($audit_record)
+        {
+            // Get the New data
+            $new_data = (array)$audit_record->new;
+
+            // Overwrite the Policy record with this data
+            foreach($new_data as $key=>$value)
+            {
+            	$edit_record->{$key} = $value;
+            }
+
+            // Build datetime fields
+            $fields = ['start', 'end', 'issued'];
+            foreach($fields as $f)
+            {
+                $datetime_field = "{$f}_datetime";
+                $date = "{$f}_date";
+                $time = "{$f}_time";
+                $edit_record->{$datetime_field} = $edit_record->{$date} . ' ' . $edit_record->{$time};
+            }
+        }
+
+		// Validation Rule
+		$v_rules = $this->policy_model->get_endorsement_validation_rules();
+		$form_data = [
+			'form_elements' => $v_rules,
+			'record' 		=> $edit_record
+		];
+
+		// Form Submitted? Save the data
+		$this->_save_endorsement($form_data, $v_rules, $record);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Save a Record from Endorsement
+	 *
+	 */
+	private function _save_endorsement($form_data, $v_rules, $record)
+	{
+		/**
+		 * Form Submitted?
+		 */
+		$return_data = [];
+		$record = $form_data['record'];
+
+		if( $this->input->post() )
+		{
+			$done = FALSE;
+
+			// echo '<pre>'; print_r($v_rules);exit;
+
+			$this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$data = $this->input->post();
+        		$audit_data 	= $this->_get_endorsement_audit_data($record, $data);
+        		$txn_record 	= $this->policy_txn_model->get_current_txn_by_policy($record->id);
+
+        		/**
+        		 * Save Data
+        		 */
+        		$done = $this->policy_txn_model->save_endorsement_audit($txn_record->id, 'audit_policy', $audit_data);
+
+	        	if(!$done)
+				{
+					$status = 'error';
+					$message = 'Could not update.';
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+				}
+
+				return $this->template->json([
+					'status' 		=> $status,
+					'message' 		=> $message,
+					'updateSection' => false,
+					'hideBootbox' 	=> true
+				]);
+        	}
+        	else
+        	{
+        		return $this->template->json([
+					'status' 		=> 'error',
+					'message' 		=> validation_errors()
+				]);
+        	}
+		}
+
+		/**
+		 * Render The Form
+		 */
+		$json_data = [
+			'form' => $this->load->view('policies/_form_endorsement', $form_data, TRUE)
+		];
+		$this->template->json($json_data);
+	}
+
+		private function _get_endorsement_audit_data($old_record, $post_data)
+		{
+			$fields 	= ['proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time'];
+			$old_data 	= [];
+			$new_data 	= [];
+			$old_record = (array)$old_record;
+			$post_data 	= $this->__refactor_datetime_fields($post_data);
+			foreach($fields as $key)
+			{
+				$old_data[$key] = $old_record[$key];
+				$new_data[$key] = $post_data[$key];
+			}
+
+			return json_encode([
+				'new' => $new_data,
+				'old' => $old_data
+			]);
+		}
+
+		private function __refactor_datetime_fields($data)
+        {
+            // Dates
+            $data['issued_date']    = date('Y-m-d', strtotime($data['issued_datetime']));
+            $data['start_date']     = date('Y-m-d', strtotime($data['start_datetime']));
+            $data['end_date']       = date('Y-m-d', strtotime($data['end_datetime']));
+
+            // Times
+            $data['issued_time']    = date('H:i:00', strtotime($data['issued_datetime']));
+            $data['start_time']     = date('H:i:00', strtotime($data['start_datetime']));
+            $data['end_time']       = date('H:i:00', strtotime($data['end_datetime']));
+
+            // unset
+            unset($data['issued_datetime']);
+            unset($data['start_datetime']);
+            unset($data['end_datetime']);
+
+            return $data;
+        }
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Delete a Policy
 	 *
 	 * Only Draft Version of a Policy can be deleted.
