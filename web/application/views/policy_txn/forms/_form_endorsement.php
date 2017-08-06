@@ -31,6 +31,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
     <div class="box box-solid box-bordered <?php echo isset($record->txn_type) && $record->txn_type == IQB_POLICY_TXN_TYPE_ET ? '' : 'hide' ?>" id="box-txn">
         <div class="box-header with-border">
+          <h4 class="box-title">Existing Transaction Summary</h4>
+        </div>
+        <div class="box-body bg-gray">
+            <table class="table table-responsive table-condensed">
+                <tbody>
+                    <tr><th>Sum Insured Amount (Rs)</th><td class="text-right"><?php echo $policy_record->cur_amt_sum_insured;?></td></tr>
+                    <tr><th>Total Premium Amount (Rs)</th><td class="text-right"><?php echo $policy_record->cur_amt_total_premium;?></td></tr>
+                    <tr><th>Pool Premium Amount (Rs)</th><td class="text-right"><?php echo $policy_record->cur_amt_pool_premium;?></td></tr>
+                    <tr><th>Commissionable Amount (Rs)</th><td class="text-right"><?php echo $policy_record->cur_amt_commissionable;?></td></tr>
+                    <tr><th>Agent Commission Amount (Rs)</th><td class="text-right"><?php echo $policy_record->cur_amt_agent_commission;?></td></tr>
+                    <tr><th>VAT Amount (Rs)</th><td class="text-right"><?php echo $policy_record->cur_amt_vat;?></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="box-header with-border">
           <h4 class="box-title">Supply Transactional Information</h4>
         </div>
         <div class="box-body">
@@ -39,8 +54,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
              * Load Form Components
              */
             $txn_elements = $form_elements['transaction'];
-            $txn_elements[0]['_default'] = $policy_record->cur_amt_sum_insured;
-            $txn_elements[0]['_help_text'] = "The current <strong>Sum Insured Amount</strong> is Rs. <strong class='text-red'>{$policy_record->cur_amt_sum_insured}</strong>.<br/>Please do change it if necessary for this transaction.";
             $this->load->view('templates/_common/_form_components_horz', [
                 'form_elements'     => $txn_elements,
                 'form_record'       => $record,

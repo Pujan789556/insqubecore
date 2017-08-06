@@ -91,13 +91,6 @@ class Policy_txn_model extends MY_Model
              */
             'transaction' => [
                 [
-                    'field' => 'amt_sum_insured',
-                    'label' => 'Sum Insured (Rs.)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_type' => 'text',
-                    '_required' => true
-                ],
-                [
                     'field' => 'amt_total_premium',
                     'label' => 'Premium Amount (added/reduced) (Rs.)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
@@ -114,13 +107,6 @@ class Policy_txn_model extends MY_Model
                 [
                     'field' => 'amt_commissionable',
                     'label' => 'Commissionable Amount (added/reduced) (Rs.)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_type' => 'text',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'amt_agent_commission',
-                    'label' => 'Agent Commission Amount (added/reduced) (Rs.)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                     '_type' => 'text',
                     '_required' => true

@@ -173,10 +173,13 @@ class Policy_txn extends MY_Controller
 		 */
 		is_policy_txn_editable($record->status, $record->flag_current);
 
-
+		/**
+		 * Policy Record
+		 */
+		$policy_record = $this->policy_model->get($record->policy_id);
 
 		// Form Submitted? Save the data
-		$this->_save_endorsement($record->policy_id, 'edit', $record);
+		$this->_save_endorsement('edit', $policy_record, $record);
 
 
 		// No form Submitted?
@@ -184,7 +187,7 @@ class Policy_txn extends MY_Controller
 			[
 				'form_elements' => $this->policy_txn_model->validation_rules,
 				'record' 		=> $record,
-				'policy_record' => $this->policy_model->get($record->policy_id)
+				'policy_record' => $policy_record
 			], TRUE);
 
 		// Return HTML
@@ -219,8 +222,13 @@ class Policy_txn extends MY_Controller
 
 		$record = NULL;
 
+		/**
+		 * Policy Record
+		 */
+		$policy_record = $this->policy_model->get($policy_id);
+
 		// Form Submitted? Save the data
-		$this->_save_endorsement($policy_id, 'add');
+		$this->_save_endorsement('add', $policy_record, $record);
 
 
 		// No form Submitted?
@@ -260,7 +268,7 @@ class Policy_txn extends MY_Controller
 	 * @param object|null $record Record Object or NULL
 	 * @return array
 	 */
-	private function _save_endorsement($policy_id, $action, $record = NULL)
+	private function _save_endorsement($action, $policy_record, $record = NULL)
 	{
 		// Valid action?
 		if( !in_array($action, array('add', 'edit')))
@@ -273,15 +281,6 @@ class Policy_txn extends MY_Controller
 		 */
 		if( $this->input->post() )
 		{
-			/**
-			 * Valid Policy?
-			 */
-			$policy_id = (int)$policy_id;
-			if( !$this->policy_model->exists($policy_id) )
-			{
-				return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'Policy does not exists.']);
-			}
-
 			$done = FALSE;
 
 			/**
@@ -302,7 +301,7 @@ class Policy_txn extends MY_Controller
 			if($this->form_validation->run() === TRUE )
         	{
 				$data = $this->input->post();
-				$data['policy_id'] = $policy_id;
+				$data['policy_id'] = $policy_record->id;
 
 				/**
 				 * Prepare Data - Based on Type
@@ -310,7 +309,7 @@ class Policy_txn extends MY_Controller
 				if( $txn_type !== IQB_POLICY_TXN_TYPE_ET )
 				{
 					// Nullify All the transactional Fields
-					$txn_fields = ['amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat'];
+					$txn_fields = ['amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat'];
 					foreach($txn_fields as $key)
 					{
 						$data[$key] = NULL;
@@ -319,10 +318,9 @@ class Policy_txn extends MY_Controller
 				else
 				{
 					/**
-					 * Compute VAT
+					 * Compute Sum Insured, Agent Commission, VAT
 					 */
-					$this->load->model('ac_duties_and_tax_model');
-					$data['amt_vat'] 	= $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $data['amt_total_premium']);
+					$data = $this->_prepare_et_data($policy_record, $data);
 				}
 
         		// Insert or Update?
@@ -349,7 +347,7 @@ class Policy_txn extends MY_Controller
 					if($action === 'add')
 					{
 						// Refresh the list page and close bootbox
-						$return = $this->index($policy_id, TRUE);
+						$return = $this->index($policy_record->id, TRUE);
 						return $this->template->json([
 							'status' 		=> $status,
 							'message' 		=> $message,
@@ -367,7 +365,7 @@ class Policy_txn extends MY_Controller
 					{
 						// Get Updated Record
 						$record 		= $this->policy_txn_model->get($record->id);
-						$policy_record 	= $this->policy_model->get($record->policy_id);
+						$policy_record 	= $this->policy_model->get($policy_record->id);
 						$html 			= $this->load->view('policy_txn/_single_row', ['record' => $record, 'policy_record' => $policy_record], TRUE);
 
 						return $this->template->json([
@@ -391,6 +389,35 @@ class Policy_txn extends MY_Controller
         	}
 		}
 	}
+		/**
+		 * Prepare Transactional Endorsement Data
+		 *
+		 * Compute Sum Insured, Agent Commission, VAT
+		 *
+		 * @param object $policy_record
+		 * @param array $data
+		 * @return array
+		 */
+		private function _prepare_et_data($policy_record, $data)
+		{
+			/**
+			 * Agent Commission
+			 */
+			$data['amt_agent_commission'] = 0.00;
+			if($policy_record->agent_id)
+			{
+				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+				$data['amt_agent_commission'] 	= ( $data['amt_commissionable'] * $pfs_record->agent_commission)/100.00;
+			}
+
+			/**
+			 * Compute VAT
+			 */
+			$this->load->model('ac_duties_and_tax_model');
+			$data['amt_vat'] 	= $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $data['amt_total_premium']);
+
+			return $data;
+		}
 
 
 
@@ -945,7 +972,7 @@ class Policy_txn extends MY_Controller
 		 */
 		private function _prepare_current_txn_data($txn_data, $policy_record = NULL)
 		{
-			$txn_fields = ['amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat'];
+			$txn_fields = ['amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat'];
 
 			$txn_data = (array)$txn_data; // convert into array if object is passed
 
@@ -961,7 +988,6 @@ class Policy_txn extends MY_Controller
 			if($policy_record)
 			{
 				$policy_record = (array)$policy_record;
-				array_shift($txn_fields); // remove sum_insured field
 				foreach($txn_fields as $key)
 				{
 					$cur_key = 'cur_' . $key;
@@ -1150,15 +1176,6 @@ class Policy_txn extends MY_Controller
 	 */
 	private function _commit_endorsement_audit($txn_record)
 	{
-		/**
-		 * Task 1: Policy Changes
-		 */
-		$audit_policy = $txn_record->audit_policy ? json_decode($txn_record->audit_policy) : NULL;
-		if( $audit_policy )
-		{
-			$data = (array)$audit_policy->new;
-			$this->policy_model->commit_endorsement($txn_record->policy_id, $data);
-		}
 
 		/**
 		 * Get Customer ID and Object ID
@@ -1166,24 +1183,61 @@ class Policy_txn extends MY_Controller
 		$obj_cust = $this->policy_model->get_customer_object_id($txn_record->policy_id);
 
 		/**
-		 * Task 2: Object Changes
+		 * Task 1: Object Changes
 		 */
+		$amt_sum_insured = FALSE;
 		$audit_object = $txn_record->audit_object ? json_decode($txn_record->audit_object) : NULL;
 		if( $audit_object )
 		{
 			$data = (array)$audit_object->new;
+			$amt_sum_insured = $data['amt_sum_insured'];
 			$this->object_model->commit_endorsement($obj_cust->object_id, $data);
 		}
 
 		/**
-		 * Task 3: Customer Changes
+		 * Task 2: Customer Changes
 		 */
-		$audit_customer = $txn_record->audit_customer ? json_decode($txn_record->audit_customer) : NULL;
-		if( $audit_customer )
+		// $audit_customer = $txn_record->audit_customer ? json_decode($txn_record->audit_customer) : NULL;
+		// if( $audit_customer )
+		// {
+		// 	$this->load->model('customer_model');
+		// 	$data = (array)$audit_customer->new;
+		// 	$this->customer_model->commit_endorsement($obj_cust->customer_id, $data);
+		// }
+
+		/**
+		 * Task 3: Policy Changes
+		 */
+		$audit_policy = $txn_record->audit_policy ? json_decode($txn_record->audit_policy) : NULL;
+		$policy_data = [];
+		if( $audit_policy )
 		{
-			$this->load->model('customer_model');
-			$data = (array)$audit_customer->new;
-			$this->customer_model->commit_endorsement($obj_cust->object_id, $data);
+			$policy_data = (array)$audit_policy->new;
+		}
+
+		/**
+		 * Update Current Sum Insured Amount From Object
+		 */
+		if( $amt_sum_insured !== FALSE )
+		{
+			$policy_data['cur_amt_sum_insured'] = $amt_sum_insured;
+		}
+
+		/**
+		 * Update Current Transactional Information if TXN_TYPE is TRANSACTIONAL
+		 */
+		if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_ET )
+		{
+			$policy_record = $this->policy_model->get($txn_record->policy_id);
+			$cur_txn_data  = $this->_prepare_current_txn_data($txn_record, $policy_record);
+
+			$policy_data = array_merge($policy_data, $cur_txn_data);
+		}
+
+		// Update Policy Table
+		if( $policy_data )
+		{
+			$this->policy_model->commit_endorsement($txn_record->policy_id, $policy_data);
 		}
 	}
 
@@ -1736,29 +1790,6 @@ class Policy_txn extends MY_Controller
 					try{
 
 						$this->policy_txn_model->update_status_direct($txn_record->id, IQB_POLICY_TXN_STATUS_VOUCHERED);
-
-					} catch (Exception $e) {
-
-						$flag_exception = TRUE;
-						$message = $e->getMessage();
-					}
-				}
-
-                // --------------------------------------------------------------------
-
-				/**
-				 * Task 5: Update Current Transaction Amount on Policy Record
-				 * 			if it is not fresh/renewal
-				 */
-				if( !$flag_exception )
-				{
-					try{
-
-						if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_ET )
-						{
-							$cur_txn_data = $this->_prepare_current_txn_data($txn_record, $policy_record);
-							$this->policy_model->update_current_txn_data($policy_record->id, $cur_txn_data);
-						}
 
 					} catch (Exception $e) {
 
