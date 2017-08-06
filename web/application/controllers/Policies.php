@@ -586,9 +586,9 @@ class Policies extends MY_Controller
 
 
 		/**
-		 * @TODO - Check Editable Permission?
+		 * Editable Permission? We should check permission of Txn not of Policy
 		 */
-		// is_policy_editable($record->status);
+		is_policy_txn_editable($txn_record->status, $txn_record->flag_current);
 
 
 		/**
@@ -626,7 +626,7 @@ class Policies extends MY_Controller
 		];
 
 		// Form Submitted? Save the data
-		$this->_save_endorsement($form_data, $v_rules, $record);
+		$this->_save_endorsement($form_data, $v_rules, $record, $txn_record);
 	}
 
 	// --------------------------------------------------------------------
@@ -635,7 +635,7 @@ class Policies extends MY_Controller
 	 * Save a Record from Endorsement
 	 *
 	 */
-	private function _save_endorsement($form_data, $v_rules, $record)
+	private function _save_endorsement($form_data, $v_rules, $record, $txn_record)
 	{
 		/**
 		 * Form Submitted?
@@ -654,7 +654,6 @@ class Policies extends MY_Controller
         	{
         		$data = $this->input->post();
         		$audit_data 	= $this->_get_endorsement_audit_data($record, $data);
-        		$txn_record 	= $this->policy_txn_model->get_current_txn_by_policy($record->id);
 
         		/**
         		 * Save Data

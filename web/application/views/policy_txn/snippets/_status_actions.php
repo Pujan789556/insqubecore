@@ -52,28 +52,28 @@ if( is_policy_txn_editable($record->status, $record->flag_current, FALSE) ):
         title="Edit Policy Information"
         data-toggle="tooltip"
         data-box-size="large"
-        data-title='<i class="fa fa-pencil-square-o"></i> Edit Policy - <?php echo $policy_record->code?>'
+        data-title='<i class="fa fa-pencil-square-o"></i> Edit Policy Info for Endorsement- <?php echo $policy_record->code?>'
         data-url="<?php echo site_url('policies/edit_endorsement/' . $record->policy_id );?>"
         data-form="#_form-policy">
         <i class="fa fa-pencil-square-o"></i> Policy</a>
 
     <a href="#"
-            title="Edit Transaction/Endorsement"
+            title="Edit Object Information"
             data-toggle="tooltip"
             class="action trg-dialog-edit"
             data-box-size="large"
-            data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $policy_record->code?>'
-            data-url="<?php echo site_url('policy_txn/edit_endorsement/' . $record->id);?>"
-            data-form="#_form-policy_txn">
+            data-title='<i class="fa fa-pencil-square-o"></i> Edit Object Info for Endorsement - <?php echo $policy_record->code?>'
+            data-url="<?php echo site_url('objects/edit_endorsement/' . $policy_record->id . '/' . $record->id . '/' . $policy_record->object_id);?>"
+            data-form="#_form-object">
             <i class="fa fa-pencil-square-o"></i> Object</a>
 
     <a href="#"
-            title="Edit Transaction/Endorsement"
+            title="Edit Customer Information"
             data-toggle="tooltip"
             class="action trg-dialog-edit"
             data-box-size="large"
-            data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $policy_record->code?>'
-            data-url="<?php echo site_url('policy_txn/edit_endorsement/' . $record->id);?>"
+            data-title='<i class="fa fa-pencil-square-o"></i> Edit Customer Info for Endorsement - <?php echo $policy_record->code?>'
+            data-url="<?php echo site_url('customers/edit_endorsement/' . $policy_record->customer_id);?>"
             data-form="#_form-policy_txn">
             <i class="fa fa-pencil-square-o"></i> Customer</a>
 &nbsp;

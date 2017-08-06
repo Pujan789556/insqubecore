@@ -414,8 +414,9 @@ class Objects extends MY_Controller
 		 * Prepare Common Form Data to pass to form view
 		 */
 		$action_url = 'objects/edit/' . $record->id . '/' . $from_widget;
+		$v_rules = $this->object_model->validation_rules['edit'];
 		$form_data = [
-			'form_elements' 	=> $this->object_model->validation_rules['edit'],
+			'form_elements' 	=> $v_rules,
 			'record' 			=> $record,
 			'portfolio_record' 	=> $portfolio_record,
 			'action' 			=> 'edit',
@@ -427,7 +428,7 @@ class Objects extends MY_Controller
 		];
 
 		// Form Submitted? Save the data else load the form
-		$this->_save($customer_record, $form_data);
+		$this->_save($customer_record, $form_data, $v_rules);
 	}
 
 	// --------------------------------------------------------------------
@@ -500,8 +501,9 @@ class Objects extends MY_Controller
 		 * Prepare Common Form Data to pass to form view
 		 */
 		$action_url = 'objects/add/' . $customer_id . '/' . $from_widget . '/' . $portfolio_id;
+		$v_rules = $this->object_model->validation_rules[$from_widget === 'n' ? 'add' : 'add_widget'];
 		$form_data = [
-			'form_elements' 	=> $this->object_model->validation_rules[$from_widget === 'n' ? 'add' : 'add_widget'],
+			'form_elements' 	=> $v_rules,
 			'record' 			=> $record,
 			'portfolio_record' 	=> $portfolio_record,
 			'action' 			=> 'add',
@@ -512,7 +514,7 @@ class Objects extends MY_Controller
 		];
 
 		// Form Submitted? Save the data else load the form
-		$this->_save($customer_record, $form_data);
+		$this->_save($customer_record, $form_data, $v_rules);
 	}
 
 	// --------------------------------------------------------------------
@@ -526,17 +528,17 @@ class Objects extends MY_Controller
 	 * @param char 	$from_widget
 	 * @return array
 	 */
-	private function _save($customer_record, $form_data)
+	private function _save($customer_record, $form_data, $v_rules)
 	{
 		// Valid action?
 		$action 		= $form_data['action'];
 		$from_widget 	= $form_data['from_widget'];
 		if( !in_array($action, array('add', 'edit')) || !in_array($from_widget, ['y', 'n'])  )
 		{
-			return [
+			return $this->template->json([
 				'status' => 'error',
 				'message' => 'Invalid action!'
-			];
+			],404);
 		}
 
 		/**
@@ -544,11 +546,19 @@ class Objects extends MY_Controller
 		 */
 		if( $this->input->post() )
 		{
-
 			$record = $form_data['record'];
 			if($action === 'add')
 			{
 				$portfolio_id = (int)$this->input->post('portfolio_id');
+
+				if( !$portfolio_id )
+				{
+					return $this->template->json([
+						'title' => 'Validation Error!',
+						'status' => 'error',
+						'message' => 'Please select Portfolio first.'
+					],404);
+				}
 			}
 			else
 			{
@@ -556,7 +566,7 @@ class Objects extends MY_Controller
 			}
 
 			$done 		= FALSE;
-			$v_rules 	= array_merge($this->object_model->validation_rules, _OBJ_validation_rules($portfolio_id, TRUE));
+			$v_rules 	= array_merge($v_rules, _OBJ_validation_rules($portfolio_id, TRUE));
             $this->form_validation->set_rules($v_rules);
 
 			if($this->form_validation->run() === TRUE )
@@ -684,6 +694,201 @@ class Objects extends MY_Controller
 		];
 		$this->template->json($json_data);
 	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Edit a Recrod from Endorsement
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function edit_endorsement($policy_id, $txn_id, $id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('objects', 'edit.object') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->object_model->get_for_endorsement($policy_id, $txn_id, $id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Object not found!'
+			],404);
+		}
+
+		 // The above query validates the flag_current, so we get directly txn data here
+		$this->load->model('policy_txn_model');
+		$txn_record = $this->policy_txn_model->get($txn_id);
+		if(!$txn_record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Policy Transaction/Endorsement not found!'
+			],404);
+		}
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->branch_id);
+
+
+		/**
+		 * Editable Permission? We should check permission of Txn not of Policy
+		 */
+		is_policy_txn_editable($txn_record->status, $txn_record->flag_current);
+
+
+		/**
+         * Do we have audit data available? If yes, pass it instead of policy's original data
+         */
+		$edit_record = $record; // We need to pass the original record for getting old data.
+        $audit_record = $txn_record->audit_object ? json_decode($txn_record->audit_object) : NULL;
+        if($audit_record)
+        {
+            // Get the New data
+            $new_data = (array)$audit_record->new;
+
+            // Overwrite the Policy record with this data
+            foreach($new_data as $key=>$value)
+            {
+            	$edit_record->{$key} = $value;
+            }
+        }
+
+
+        /**
+		 * Portfolio Record
+		 */
+		$portfolio_record 		= $this->portfolio_model->find($record->portfolio_id);
+
+
+		/**
+		 * Prepare Common Form Data to pass to form view
+		 */
+		$from_widget = 'n';
+		$action_url = current_url();
+		$v_rules = $this->object_model->validation_rules['edit'];
+		$form_data = [
+			'form_elements' 	=> $v_rules,
+			'record' 			=> $record,
+			'portfolio_record' 	=> $portfolio_record,
+			'action' 			=> 'edit',
+			'action_url' 		=> $action_url,
+			'from_widget' 		=> $from_widget,
+
+			// Attribute Elements
+			'html_form_attribute_components' => $this->get_attribute_form($record->portfolio_id, 'html', json_decode($record->attributes))
+		];
+
+
+		// $this->_save(NULL, $form_data);
+
+
+
+		// Form Submitted? Save the data
+		$this->_save_endorsement($form_data, $v_rules, $record, $txn_record);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Save a Record from Endorsement
+	 *
+	 */
+	private function _save_endorsement($form_data, $v_rules, $record, $txn_record)
+	{
+		/**
+		 * Form Submitted?
+		 */
+		$return_data = [];
+		$record = $form_data['record'];
+
+		if( $this->input->post() )
+		{
+			$done = FALSE;
+
+			$v_rules 	= array_merge($v_rules, _OBJ_validation_rules($record->portfolio_id, TRUE));
+			$this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$data = $this->input->post();
+
+        		/**
+        		 * Prepare Post Data
+        		 */
+        		$post_data['attributes'] = json_encode($data['object']);
+	    		$post_data['amt_sum_insured'] = _OBJ_sum_insured_amount($record->portfolio_id, $data['object']);
+        		$audit_data 	= $this->_get_endorsement_audit_data($record, $post_data);
+
+        		/**
+        		 * Save Data
+        		 */
+        		$done = $this->policy_txn_model->save_endorsement_audit($txn_record->id, 'audit_object', $audit_data);
+
+	        	if(!$done)
+				{
+					$status = 'error';
+					$message = 'Could not update.';
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+				}
+
+				return $this->template->json([
+					'status' 		=> $status,
+					'message' 		=> $message,
+					'updateSection' => false,
+					'hideBootbox' 	=> true
+				]);
+        	}
+        	else
+        	{
+        		return $this->template->json([
+					'status' 		=> 'error',
+					'message' 		=> validation_errors()
+				]);
+        	}
+		}
+
+		/**
+		 * Render The Form
+		 */
+		$json_data = [
+			'form' => $this->load->view('objects/_form_box', $form_data, TRUE)
+		];
+		$this->template->json($json_data);
+	}
+
+		private function _get_endorsement_audit_data($old_record, $post_data)
+		{
+			$fields 	= ['attributes', 'amt_sum_insured'];
+			$old_data 	= [];
+			$new_data 	= [];
+			$old_record = (array)$old_record;
+			// $post_data 	= $this->__refactor_datetime_fields($post_data);
+			foreach($fields as $key)
+			{
+				$old_data[$key] = $old_record[$key];
+				$new_data[$key] = $post_data[$key];
+			}
+
+			return json_encode([
+				'new' => $new_data,
+				'old' => $old_data
+			]);
+		}
 
 
 	// --------------------------------------------------------------------

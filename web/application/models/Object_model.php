@@ -317,6 +317,32 @@ class Object_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get record for Endorsement Edit
+     *
+     * @param integer $policy_id
+     * @param integer $txn_id
+     * @param integer $id
+     * @return object
+     */
+    public function get_for_endorsement( $policy_id, $txn_id, $id )
+    {
+        $where = [
+            'O.id'              => $id,
+            'P.id'              => $policy_id,
+            'PTXN.id'           => $txn_id,
+            'PTXN.flag_current' => IQB_FLAG_ON
+        ];
+        return $this->db->select("O.*, P.branch_id")
+                 ->from($this->table_name . ' as O')
+                 ->join('dt_policies P', 'P.object_id = O.id')
+                 ->join('dt_policy_txn PTXN', 'P.id = PTXN.policy_id')
+                 ->where($where)
+                 ->get()->row();
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Get all data for specified customer
      *
      * @param integer $customer_id
