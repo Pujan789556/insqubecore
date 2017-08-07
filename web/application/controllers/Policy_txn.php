@@ -419,6 +419,82 @@ class Policy_txn extends MY_Controller
 			return $data;
 		}
 
+	// --------------------------------------------------------------------
+
+	/**
+	 * Delete a Policy Transaction Draft (Non Fresh/Renewal)
+	 *
+	 * Only Draft Version of a Policy can be deleted.
+	 *
+	 * @param integer $id
+	 * @return json
+	 */
+	public function delete($id)
+	{
+		$id = (int)$id;
+		$record = $this->policy_txn_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->branch_id);
+
+
+		/**
+		 * Check Permissions
+		 *
+		 * Deletable Status
+		 * 		draft
+		 *
+		 * Deletable Type
+		 * 		Endorsement General/Transactional
+		 *
+		 * Deletable Permission
+		 * 		delete.draft.transaction
+		 */
+
+		// Deletable Status?
+		if(
+			$record->status !== IQB_POLICY_TXN_STATUS_DRAFT
+							||
+			!in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_ET, IQB_POLICY_TXN_TYPE_EG])
+							||
+			!$this->dx_auth->is_authorized('policy_txn', 'delete.draft.transaction')
+		)
+		{
+			$this->dx_auth->deny_access();
+		}
+
+
+		$data = [
+			'status' 	=> 'error',
+			'message' 	=> 'You cannot delete the default records.'
+		];
+
+		$done = $this->policy_txn_model->delete($record);
+
+		if($done)
+		{
+			$data = [
+				'status' 	=> 'success',
+				'message' 	=> 'Successfully deleted!',
+				'removeRow' => true,
+				'rowId'		=> '#_data-row-policy_txn-'.$record->id
+			];
+		}
+		else
+		{
+			$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be deleted. It might have references to other module(s)/component(s).'
+			];
+		}
+		return $this->template->json($data);
+	}
 
 
 	// --------------------------------------------------------------------

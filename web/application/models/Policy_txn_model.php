@@ -461,7 +461,12 @@ class Policy_txn_model extends MY_Model
                 $this->_update_flag_current($id, $data['policy_id']);
 
                 /**
-                 * Clear Cache
+                 * Task 3: Log activity
+                 */
+                $this->log_activity($id, 'C');
+
+                /**
+                 * Task 4: Clear Cache
                  */
                 $cache_var = 'policy_txn_'.$data['policy_id'];
                 $this->clear_cache($cache_var);
@@ -549,6 +554,11 @@ class Policy_txn_model extends MY_Model
                  * Task 2: Update TXN Data
                  */
                 parent::update($id, $txn_data, TRUE);
+
+                /**
+                 * Task 3: Log activity
+                 */
+                $this->log_activity($id, 'E');
 
         /**
          * Complete transactions or Rollback
@@ -727,33 +737,55 @@ class Policy_txn_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function delete($id = NULL)
+    public function delete($id_or_record = NULL)
     {
-        $id = intval($id);
-        if( !safe_to_delete( get_class(), $id ) )
-        {
-            return FALSE;
-        }
-
-        $record = $this->get($id);
+        $record = is_numeric($id_or_record) ? $this->get( (int)$id_or_record ) : $id_or_record;
         if(!$record)
         {
             return FALSE;
         }
 
+        // Safe to Delete?
+        if( !safe_to_delete( get_class(), $record->id ) )
+        {
+            return FALSE;
+        }
+
+
         // Disable DB Debug for transaction to work
         $this->db->db_debug = FALSE;
+        $status             = TRUE;
 
-        $status = TRUE;
-
-        // Use automatic transaction
+        /**
+         * Start Transaction
+         */
         $this->db->trans_start();
 
-            parent::delete($id);
-            $this->log_activity($id, 'D');
+            /**
+             * Task 1: Delete Draft Policy Txn Record
+             */
+            parent::delete($record->id);
 
+            /**
+             * Task 2: Update Activity Log
+             */
+            $this->log_activity($record->id, 'D');
+
+            /**
+             * Task 3: Update Current Flag to Heighest ID of txn for this policy
+             */
+            $this->_set_flag_current($record->policy_id);
+
+            /**
+             * Task 4: Clear Cache for this Policy (List of txn for this policy)
+             */
+            $cache_var = 'policy_txn_'.$record->policy_id;
+            $this->clear_cache($cache_var);
+
+        /**
+         * Complete Transaction
+         */
         $this->db->trans_complete();
-
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
@@ -766,6 +798,24 @@ class Policy_txn_model extends MY_Model
         // return result/status
         return $status;
     }
+
+        private function _set_flag_current($policy_id)
+        {
+            // How it works?
+            //
+            // UPDATE wins
+            // SET prevmonth_top=1
+            // ORDER BY month_wins DESC
+            // LIMIT 1
+
+            $sql = "UPDATE {$this->table_name} " .
+                    "SET flag_current = ? " .
+                    "WHERE policy_id = ? " .
+                    "ORDER BY id DESC " .
+                    "LIMIT 1";
+
+            return $this->db->query($sql, array(IQB_FLAG_ON, $policy_id));
+        }
 
     // ----------------------------------------------------------------
 

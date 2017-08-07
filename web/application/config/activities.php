@@ -236,6 +236,18 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to Policy Transaction
+	 */
+	'policy_txn' => [
+		'_uri' => 'policy_txn/',
+		'_table' => 'dt_policy_txn',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
+	/**
 	 * Activities related to Portfolio
 	 */
 	'portfolio' => [

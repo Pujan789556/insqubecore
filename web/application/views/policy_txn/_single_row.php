@@ -8,7 +8,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<?php if( $this->dx_auth->is_admin() ): ?>
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
-	<td><?php echo get_policy_txn_type_text($record->txn_type);?></td>
+	<td>
+		<?php if($record->flag_current == IQB_FLAG_ON): ?>
+			<i class="fa fa-circle text-green" data-toggle="tooltip" title="Current Endorsement/Transaction"></i>
+		<?php endif;?>
+		<?php echo get_policy_txn_type_text($record->txn_type);?>
+
+	</td>
 	<td><?php echo active_inactive_text($record->flag_ri_approval);?></td>
 	<td><?php echo get_policy_txn_status_text($record->status);?></td>
 	<td class="ins-action">

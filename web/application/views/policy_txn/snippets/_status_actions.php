@@ -36,6 +36,18 @@ if( is_policy_txn_editable($record->status, $record->flag_current, FALSE) ):
      * Can't Edit Fresh/New Policy Transaction
      */
     if( !$flag__fresh_or_renewal ):?>
+
+        <?php if($record->status == IQB_POLICY_TXN_STATUS_DRAFT): ?>
+        <a href="#"
+            title="Delete Transaction/Endorsement"
+            data-toggle="tooltip"
+            class="action trg-row-action"
+            data-confirm="true"
+            data-url="<?php echo site_url('policy_txn/delete/' . $record->id);?>">
+                <i class="fa fa-trash-o"></i>
+                <span>Delete</span></a>
+        <?php endif; ?>
+
         <a href="#"
             title="Edit Transaction/Endorsement"
             data-toggle="tooltip"
