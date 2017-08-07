@@ -701,6 +701,8 @@ class Objects extends MY_Controller
 	 * Edit a Recrod from Endorsement
 	 *
 	 *
+	 * @param integer $policy_id
+	 * @param integer $txn_id
 	 * @param integer $id
 	 * @return void
 	 */
@@ -750,9 +752,11 @@ class Objects extends MY_Controller
 
 		/**
          * Do we have audit data available? If yes, pass it instead of policy's original data
+         *
+         * !!!NOTE: We need to pass the original record for getting old data. That's why clone.
          */
-		$edit_record = $record; // We need to pass the original record for getting old data.
-        $audit_record = $txn_record->audit_object ? json_decode($txn_record->audit_object) : NULL;
+		$edit_record 	= clone $record;
+        $audit_record 	= $txn_record->audit_object ? json_decode($txn_record->audit_object) : NULL;
         if($audit_record)
         {
             // Get the New data
@@ -780,20 +784,15 @@ class Objects extends MY_Controller
 		$v_rules = $this->object_model->validation_rules['edit'];
 		$form_data = [
 			'form_elements' 	=> $v_rules,
-			'record' 			=> $record,
+			'record' 			=> $edit_record,
 			'portfolio_record' 	=> $portfolio_record,
 			'action' 			=> 'edit',
 			'action_url' 		=> $action_url,
 			'from_widget' 		=> $from_widget,
 
 			// Attribute Elements
-			'html_form_attribute_components' => $this->get_attribute_form($record->portfolio_id, 'html', json_decode($record->attributes))
+			'html_form_attribute_components' => $this->get_attribute_form($record->portfolio_id, 'html', json_decode($edit_record->attributes))
 		];
-
-
-		// $this->_save(NULL, $form_data);
-
-
 
 		// Form Submitted? Save the data
 		$this->_save_endorsement($form_data, $v_rules, $record, $txn_record);
@@ -810,9 +809,6 @@ class Objects extends MY_Controller
 		/**
 		 * Form Submitted?
 		 */
-		$return_data = [];
-		$record = $form_data['record'];
-
 		if( $this->input->post() )
 		{
 			$done = FALSE;
@@ -826,9 +822,9 @@ class Objects extends MY_Controller
         		/**
         		 * Prepare Post Data
         		 */
-        		$post_data['attributes'] = json_encode($data['object']);
-	    		$post_data['amt_sum_insured'] = _OBJ_sum_insured_amount($record->portfolio_id, $data['object']);
-        		$audit_data 	= $this->_get_endorsement_audit_data($record, $post_data);
+        		$post_data['attributes'] 		= json_encode($data['object']);
+	    		$post_data['amt_sum_insured'] 	= _OBJ_sum_insured_amount($record->portfolio_id, $data['object']);
+        		$audit_data 					= $this->_get_endorsement_audit_data($record, $post_data);
 
         		/**
         		 * Save Data
@@ -877,7 +873,6 @@ class Objects extends MY_Controller
 			$old_data 	= [];
 			$new_data 	= [];
 			$old_record = (array)$old_record;
-			// $post_data 	= $this->__refactor_datetime_fields($post_data);
 			foreach($fields as $key)
 			{
 				$old_data[$key] = $old_record[$key];

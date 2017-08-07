@@ -73,8 +73,8 @@ if( is_policy_txn_editable($record->status, $record->flag_current, FALSE) ):
             class="action trg-dialog-edit"
             data-box-size="large"
             data-title='<i class="fa fa-pencil-square-o"></i> Edit Customer Info for Endorsement - <?php echo $policy_record->code?>'
-            data-url="<?php echo site_url('customers/edit_endorsement/' . $policy_record->customer_id);?>"
-            data-form="#_form-policy_txn">
+            data-url="<?php echo site_url('customers/edit_endorsement/' . $policy_record->id . '/' . $record->id . '/' . $policy_record->customer_id);?>"
+            data-form="#_form-customer">
             <i class="fa fa-pencil-square-o"></i> Customer</a>
 &nbsp;
 <?php

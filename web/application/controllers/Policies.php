@@ -593,8 +593,10 @@ class Policies extends MY_Controller
 
 		/**
          * Do we have audit data available? If yes, pass it instead of policy's original data
+         *
+         * !!!NOTE: We need to pass the original record for getting old data. That's why clone.
          */
-		$edit_record = $record; // We need to pass the original record for getting old data.
+		$edit_record = clone $record; // We need to pass the original record for getting old data.
         $audit_record = $txn_record->audit_policy ? json_decode($txn_record->audit_policy) : NULL;
         if($audit_record)
         {
@@ -640,9 +642,6 @@ class Policies extends MY_Controller
 		/**
 		 * Form Submitted?
 		 */
-		$return_data = [];
-		$record = $form_data['record'];
-
 		if( $this->input->post() )
 		{
 			$done = FALSE;

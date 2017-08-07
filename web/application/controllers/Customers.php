@@ -300,7 +300,7 @@ class Customers extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('customers', 'edit.customer') )
+		if( !$this->dx_auth->is_authorized('customers', 'edit.customer') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -340,7 +340,7 @@ class Customers extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('customers', 'add.customer') )
+		if( !$this->dx_auth->is_authorized('customers', 'add.customer') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -527,6 +527,196 @@ class Customers extends MY_Controller
 				'delete_old' => TRUE
 			];
 			return upload_insqube_media($options);
+		}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Edit a Recrod from Endorsement
+	 *
+	 *
+	 * @param integer $policy_id
+	 * @param integer $txn_id
+	 * @param integer $id
+	 * @return void
+	 */
+	public function edit_endorsement($policy_id, $txn_id, $id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('customers', 'edit.customer') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->customer_model->get_for_endorsement($policy_id, $txn_id, $id);
+
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Object not found!'
+			],404);
+		}
+
+		 // The above query validates the flag_current, so we get directly txn data here
+		$this->load->model('policy_txn_model');
+		$txn_record = $this->policy_txn_model->get($txn_id);
+		if(!$txn_record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Policy Transaction/Endorsement not found!'
+			],404);
+		}
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->policy_branch_id);
+
+
+		/**
+		 * Editable Permission? We should check permission of Txn not of Policy
+		 */
+		is_policy_txn_editable($txn_record->status, $txn_record->flag_current);
+
+
+		/**
+         * Do we have audit data available? If yes, pass it instead of policy's original data
+         *
+         * !!!NOTE: We need to pass the original record for getting old data. That's why clone.
+         */
+		$edit_record = clone $record;
+        $audit_record = $txn_record->audit_customer ? json_decode($txn_record->audit_customer) : NULL;
+        if($audit_record)
+        {
+            // Get the New data
+            $new_data = (array)$audit_record->new;
+
+            // Overwrite the Policy record with this data
+            foreach($new_data as $key=>$value)
+            {
+            	$edit_record->{$key} = $value;
+            }
+        }
+
+		/**
+		 * Prepare Common Form Data to pass to form view
+		 */
+		$v_rules 	= $this->customer_model->validation_rules;
+		$form_data = [
+			'form_elements' 	=> $v_rules,
+			'record' 			=> $edit_record
+		];
+
+		// Form Submitted? Save the data
+		$this->_save_endorsement($form_data, $v_rules, $record, $txn_record);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Save a Record from Endorsement
+	 *
+	 */
+	private function _save_endorsement($form_data, $v_rules, $record, $txn_record)
+	{
+		/**
+		 * Form Submitted?
+		 */
+		$edit_record = $form_data['record'];
+		if( $this->input->post() )
+		{
+			$done = FALSE;
+
+			// Extract Old Profile Picture if any
+			$picture = $edit_record->picture ?? NULL;
+
+			$v_rules = array_merge($v_rules, get_contact_form_validation_rules());
+			$this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+
+        		/**
+				 * Upload Image If any?
+				 */
+				$upload_result 	= $this->_upload_profile_picture($picture);
+				$status 		= $upload_result['status'];
+				$message 		= $upload_result['message'];
+				$files 			= $upload_result['files'];
+				$picture 		= $status === 'success' ? $files[0] : $picture;
+
+				if( $status === 'success' || $status === 'no_file_selected')
+	            {
+	            	$data = $this->input->post();
+        			$data['picture'] = $picture;
+        			$audit_data 	= $this->_get_endorsement_audit_data($record, $data);
+
+        			/**
+	        		 * Save Data
+	        		 */
+	        		$done = $this->policy_txn_model->save_endorsement_audit($txn_record->id, 'audit_customer', $audit_data);
+
+	        		if(!$done)
+					{
+						$status = 'error';
+						$message = 'Could not update.';
+					}
+					else
+					{
+						$status = 'success';
+						$message = 'Successfully Updated.';
+					}
+        		}
+
+				return $this->template->json([
+					'status' 		=> $status,
+					'message' 		=> $message,
+					'updateSection' => false,
+					'hideBootbox' 	=> true
+				]);
+        	}
+        	else
+        	{
+        		return $this->template->json([
+					'status' 		=> 'error',
+					'message' 		=> validation_errors()
+				]);
+        	}
+		}
+
+		/**
+		 * Render The Form
+		 */
+		$json_data = [
+			'form' => $this->load->view('customers/_form_box', $form_data, TRUE)
+		];
+		$this->template->json($json_data);
+	}
+
+		private function _get_endorsement_audit_data($old_record, $post_data)
+		{
+			$fields 	= ['type', 'pan', 'full_name', 'picture', 'profession', 'contact', 'company_reg_no', 'citizenship_no', 'passport_no'];
+			$old_data 	= [];
+			$new_data 	= [];
+			$old_record = (array)$old_record;
+
+			// Prepare Contact Data
+			$post_data 	= $this->customer_model->prepare_contact_data($post_data);
+			foreach($fields as $key)
+			{
+				$old_data[$key] = $old_record[$key];
+				$new_data[$key] = $post_data[$key];
+			}
+
+			return json_encode([
+				'new' => $new_data,
+				'old' => $old_data
+			]);
 		}
 
 	// --------------------------------------------------------------------

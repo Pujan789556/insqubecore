@@ -1197,13 +1197,13 @@ class Policy_txn extends MY_Controller
 		/**
 		 * Task 2: Customer Changes
 		 */
-		// $audit_customer = $txn_record->audit_customer ? json_decode($txn_record->audit_customer) : NULL;
-		// if( $audit_customer )
-		// {
-		// 	$this->load->model('customer_model');
-		// 	$data = (array)$audit_customer->new;
-		// 	$this->customer_model->commit_endorsement($obj_cust->customer_id, $data);
-		// }
+		$audit_customer = $txn_record->audit_customer ? json_decode($txn_record->audit_customer) : NULL;
+		if( $audit_customer )
+		{
+			$this->load->model('customer_model');
+			$data = (array)$audit_customer->new;
+			$this->customer_model->commit_endorsement($obj_cust->customer_id, $data);
+		}
 
 		/**
 		 * Task 3: Policy Changes

@@ -229,6 +229,31 @@ class Customer_model extends MY_Model
                         ->update($this->table_name, $data);
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Get record for Endorsement Edit
+     *
+     * @param integer $policy_id
+     * @param integer $txn_id
+     * @param integer $id
+     * @return object
+     */
+    public function get_for_endorsement( $policy_id, $txn_id, $id )
+    {
+        $where = [
+            'C.id'              => $id,
+            'P.id'              => $policy_id,
+            'PTXN.id'           => $txn_id,
+            'PTXN.flag_current' => IQB_FLAG_ON
+        ];
+        return $this->db->select("C.*, P.branch_id as policy_branch_id")
+                 ->from($this->table_name . ' as C')
+                 ->join('dt_policies P', 'P.customer_id = C.id')
+                 ->join('dt_policy_txn PTXN', 'P.id = PTXN.policy_id')
+                 ->where($where)
+                 ->get()->row();
+    }
 
     // ----------------------------------------------------------------
 
