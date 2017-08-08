@@ -62,6 +62,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             ]);
             ?>
         </div>
+        <div class="box-footer">
+            <p class="text-red">NOTE: VAT will be calculated automatically!</p>
+        </div>
     </div>
 
     <button type="submit" class="hide">Submit</button>

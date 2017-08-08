@@ -99,8 +99,12 @@ if ( ! function_exists('log_email'))
 	 */
 	function log_email($log)
 	{
-
 		$log_file = MAIL_LOG_PATH;
+
+		if ( !file_exists($log_file) ) {
+            throw new Exception('Exception Occured - [Helper: MY_email_helper][Method: log_email()]: File not found: ' . $log_file);
+        }
+
 		$handle = fopen($log_file, 'a+');
 	    if ( $handle == false) {
 	        throw new Exception('Exception [Helper: MY_email_helper][Method: log_email()]: Could not open file: ' . $log_file);

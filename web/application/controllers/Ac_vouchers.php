@@ -90,7 +90,7 @@ class Ac_vouchers extends MY_Controller
 			$params = array_merge($params, $filter_data['data']);
 		}
 
-		// @TODO - Only data belonging to me!!!
+		// Only data belonging to me!!!
 		$records = $this->ac_voucher_model->rows($params);
 		$records = $records ? $records : [];
 		$total = count($records);

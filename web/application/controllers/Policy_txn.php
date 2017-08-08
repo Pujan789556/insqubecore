@@ -1174,6 +1174,17 @@ class Policy_txn extends MY_Controller
 				$txn_record = $this->policy_txn_model->get($txn_record->id);
 				$policy_record = $this->policy_model->get($txn_record->policy_id);
 
+
+				/**
+				 * SEND SMS on General Transaction Activation
+				 */
+				if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_EG && $to_status_code === IQB_POLICY_TXN_STATUS_ACTIVE )
+				{
+					$this->_sms_activation($txn_record, $policy_record);
+				}
+
+
+
 				/**
 				 * What to reload/render after success?
 				 * -----------------------------------
@@ -2620,35 +2631,7 @@ class Policy_txn extends MY_Controller
 
                 // --------------------------------------------------------------------
 
-                /**
-                 * Task 6: @TODO
-                 * SMS Customer with his Policy CODE and Expiration Date with Portfolio
-                 */
-                if( !$flag_exception )
-                {
 
-                	/**
-                	 * Clear Cache - Invoices List by Policy
-                	 */
-                	// ac_invoice_model
-                	$cache_var = 'ac_invoice_list_by_policy_'.$policy_record->id;
-                    $this->ac_invoice_model->clear_cache($cache_var);
-
-
-                    // try{
-
-                    //     $this->policy_model->update_status($policy_record->id, IQB_POLICY_STATUS_ACTIVE);
-                    //     $this->policy_txn_model->update_status_direct($txn_record->id, IQB_POLICY_TXN_STATUS_ACTIVE);
-
-                    // } catch (Exception $e) {
-
-                    //     $flag_exception = TRUE;
-                    //     $message = $e->getMessage();
-                    // }
-                }
-
-
-                // --------------------------------------------------------------------
 
             /**
              * Complete transactions or Rollback
@@ -2671,6 +2654,20 @@ class Policy_txn extends MY_Controller
             else
             {
                     $this->db->trans_commit();
+
+
+                    /**
+                     * Post Commit Tasks
+                     * -----------------
+                     *
+                     * 1. Clear Cache
+                     * 2. Send SMS
+                     */
+                    $cache_var = 'ac_invoice_list_by_policy_'.$policy_record->id;
+                    $this->ac_invoice_model->clear_cache($cache_var);
+
+                    // Send SMS
+                    $this->_sms_activation($txn_record, $policy_record, $invoice_record);
             }
 
             /**
@@ -2713,57 +2710,111 @@ class Policy_txn extends MY_Controller
         return $this->template->json($ajax_data);
     }
 
-    private function _payment_form( $invoice_data )
-    {
-        $form_data = [
-            'form_elements' => $this->_payment_rules(),
-            'record' 		=> NULL,
-            'invoice_data' 	=> $invoice_data
-        ];
-
-        /**
-         * Render The Form
+    	/**
+         * Send Activation SMS
+         * ---------------------
+         * Case 1: Fresh/Renewal/Transactional - After making payment, it gets activated automatically
+         * Case 2: General Endorsement - After activating
+         *
+         * @param object $txn_record
+         * @param object $policy_record
+         * @return bool
          */
-        $json_data = [
-            'form' => $this->load->view('accounting/invoices/_form_payment', $form_data, TRUE)
-        ];
-        $this->template->json($json_data);
-    }
+    	private function _sms_activation($txn_record, $policy_record, $invoice_record = NULL)
+    	{
+    		$customer_name 		= $policy_record->customer_name;
+    		$customer_contact 	= $policy_record->customer_contact ? json_decode($policy_record->customer_contact) : NULL;
+    		$mobile 			= $customer_contact->mobile ? $customer_contact->mobile : NULL;
 
-        private function _payment_rules()
-        {
+    		if( !$mobile )
+    		{
+    			return FALSE;
+    		}
 
-        	$received_in_dropdown = ac_payment_receipt_mode_dropdown(FALSE);
-            return [
-                [
-                    'field' => 'narration',
-                    'label' => 'Narration',
-                    'rules' => 'trim|max_length[255]',
-                    '_type' => 'textarea',
-                    'rows'  => '3',
-                ],
-                [
-                    'field' => 'adjustment_amount',
-                    'label' => 'Adjustment Amount',
-                    'rules' => 'trim|prep_decimal|decimal|max_length[20]',
-                    '_type' => 'text',
-                ],
-                [
-                    'field' => 'received_in',
-                    'label' => 'Received In',
-                    'rules' => 'trim|required|alpha|exact_length[1]|in_list[' . implode(',', array_keys($received_in_dropdown)) . ']',
-                    '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + $received_in_dropdown,
-                    '_required' => true
-                ],
-                [
-                    'field' => 'received_in_date',
-                    'label' => 'Dated (Cheque/Draft)',
-                    'rules' => 'trim|valid_date',
-                    '_type'             => 'date',
-                    '_extra_attributes' => 'data-provide="datepicker-inline"',
-                    '_required' => false
-                ],
-            ];
-        }
+    		$message = "Dear {$customer_name}," . PHP_EOL;
+
+    		if( in_array($txn_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+        	{
+        		$message .= "Your Policy has been issued." . PHP_EOL .
+        					"Policy No: " . $policy_record->code . PHP_EOL .
+        					"Premium Paid(Rs): " . $invoice_record->amount . PHP_EOL .
+        					"Expires on : " . $policy_record->end_date . PHP_EOL;
+        	}
+        	else if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_ET )
+        	{
+        		$message .= "Your Policy Endorsement has been issued." . PHP_EOL .
+        					"Policy No: " . $policy_record->code . PHP_EOL .
+        					"Amount Paid(Rs): " . $invoice_record->amount . PHP_EOL;
+        	}
+        	else
+        	{
+        		$message .= "Your Policy Endorsement has been issued." . PHP_EOL .
+        					"Policy No: " . $policy_record->code . PHP_EOL;
+        	}
+
+        	/**
+        	 * Add Signature
+        	 */
+        	$message .= PHP_EOL . SMS_SIGNATURE;
+
+        	/**
+        	 * Let's Fire the SMS
+        	 */
+        	$this->load->helper('sms');
+        	$result = send_sms($mobile, $message);
+    	}
+
+	    private function _payment_form( $invoice_data )
+	    {
+	        $form_data = [
+	            'form_elements' => $this->_payment_rules(),
+	            'record' 		=> NULL,
+	            'invoice_data' 	=> $invoice_data
+	        ];
+
+	        /**
+	         * Render The Form
+	         */
+	        $json_data = [
+	            'form' => $this->load->view('accounting/invoices/_form_payment', $form_data, TRUE)
+	        ];
+	        $this->template->json($json_data);
+	    }
+
+	        private function _payment_rules()
+	        {
+
+	        	$received_in_dropdown = ac_payment_receipt_mode_dropdown(FALSE);
+	            return [
+	                [
+	                    'field' => 'narration',
+	                    'label' => 'Narration',
+	                    'rules' => 'trim|max_length[255]',
+	                    '_type' => 'textarea',
+	                    'rows'  => '3',
+	                ],
+	                [
+	                    'field' => 'adjustment_amount',
+	                    'label' => 'Adjustment Amount',
+	                    'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+	                    '_type' => 'text',
+	                ],
+	                [
+	                    'field' => 'received_in',
+	                    'label' => 'Received In',
+	                    'rules' => 'trim|required|alpha|exact_length[1]|in_list[' . implode(',', array_keys($received_in_dropdown)) . ']',
+	                    '_type'     => 'dropdown',
+	                    '_data'     => IQB_BLANK_SELECT + $received_in_dropdown,
+	                    '_required' => true
+	                ],
+	                [
+	                    'field' => 'received_in_date',
+	                    'label' => 'Dated (Cheque/Draft)',
+	                    'rules' => 'trim|valid_date',
+	                    '_type'             => 'date',
+	                    '_extra_attributes' => 'data-provide="datepicker-inline"',
+	                    '_required' => false
+	                ],
+	            ];
+	        }
 }
