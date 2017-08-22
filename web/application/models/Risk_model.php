@@ -111,7 +111,7 @@ class Risk_model extends MY_Model
         $list = [];
         foreach($records as $record)
         {
-            $list["{$record->id}"] = $record->name;
+            $list["{$record->id}"] = $record->name . ' (' . risk_type_dropdown(FALSE)[$record->type] . ')';
         }
         return $list;
     }
