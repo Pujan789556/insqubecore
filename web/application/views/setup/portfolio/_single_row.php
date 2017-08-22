@@ -33,6 +33,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<i class="fa fa-dollar"></i>
 				<span class="hidden-xs">Accounts</span>
 			</a>
+
+			<a href="#"
+				title="Edit Portfolio Specific Risks"
+				data-toggle="tooltip"
+				data-box-size="large"
+				class="trg-dialog-edit action"
+				data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio Specific Risks - <?php echo $record->name_en?>'
+				data-url="<?php echo site_url('portfolio/risks/' . $record->id);?>"
+				data-form=".form-iqb-general">
+				<i class="fa fa-flag"></i>
+				<span class="hidden-xs">Risks</span>
+			</a>
 		<?php endif?>
 
 		<?php if(safe_to_delete( 'Portfolio_model', $record->id )):?>

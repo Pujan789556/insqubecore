@@ -156,6 +156,23 @@ foreach($form_elements as $element):?>
                     echo '</label>';
                     break;
 
+                case 'checkbox-group':
+                    $element_config['class'] = 'icheck'; // Add icheck style
+                    // unset placeholder
+                    unset($element_config['placeholder']);
+                    $checkbox_data = $element['_data'];
+                    $checked_values = $element['_checkbox_value']; // Must be an array of value
+                    $label_class = isset($element['_list_inline']) && $element['_list_inline'] == true ? 'margin-r-10' : 'col-xs-12';
+                    foreach($checkbox_data as $key=>$label_text)
+                    {
+                        $checked = in_array($key, $checked_values);
+                        echo '<label class="'.$label_class.'">' .
+                                form_checkbox($element_config, $key, $checked, $extra_attributes) .
+                                $label_text .
+                             '</label>';
+                    }
+                    break;
+
 
                 case 'radio':
                     $element_config['class'] = 'icheck'; // Add icheck style

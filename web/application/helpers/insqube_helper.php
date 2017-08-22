@@ -476,6 +476,32 @@ if ( ! function_exists('fiscal_year_quarters_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('risk_type_dropdown'))
+{
+    /**
+     * Get Risk Type Dropdown
+     *
+     *
+     * @param bool $flag_blank_select   Whether to append blank select
+     * @return  bool
+     */
+    function risk_type_dropdown( $flag_blank_select = true)
+    {
+        $dropdown = [
+
+            IQB_RISK_TYPE_BASIC     => 'Basic',
+            IQB_RISK_TYPE_POOL      => 'Pool'
+        ];
+
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('_COMPANY_type_dropdown'))
 {
     /**

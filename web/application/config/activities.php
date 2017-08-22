@@ -284,6 +284,18 @@ $config['insqb_activity_types'] = [
 			'D' => 'deleted'
 	]],
 
+	/**
+	 * Activities related to Risks
+	 */
+	'risk' => [
+		'_uri' => 'risks/',
+		'_table' => 'master_risks',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
 
 	/**
 	 * Activities related to Roles

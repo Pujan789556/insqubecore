@@ -19,7 +19,7 @@ class Portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'risk_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -69,6 +69,9 @@ class Portfolio_model extends MY_Model
         $account_id_ce_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_CLAIM_EXPENSE);
 
 
+        $this->load->model('risk_model');
+        $risk_dropdown = $this->risk_model->dropdown();
+
 
         $this->validation_rules = [
             'basic' => [
@@ -102,6 +105,26 @@ class Portfolio_model extends MY_Model
                     '_required' => true
                 ]
             ],
+
+            /**
+             * Risk Validation Rules
+             */
+            'risks' => [
+                [
+                    'field' => 'risks[]',
+                    'label' => 'Portfolio Risks',
+                    'rules' => 'trim|required|integer|max_length[11]',
+                    '_type'     => 'checkbox-group',
+                    '_data'     => $risk_dropdown,
+                    '_list_inline' => false,
+                    '_checkbox_value' => [],
+                    '_required' => true
+                ]
+            ],
+
+            /**
+             * Account IDs for this Portfolio - Validation Rules
+             */
             'accounts' => [
 
                 /**

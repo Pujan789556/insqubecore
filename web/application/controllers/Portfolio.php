@@ -171,6 +171,43 @@ class Portfolio extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
+	 * Edit a Portfolio Specific Accounts
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function risks($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->portfolio_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('risks', $record);
+
+		// Add already checked values
+		$rules = $this->portfolio_model->validation_rules['risks'];
+		$rules[0]['_checkbox_value'] = $record->risk_ids ? explode(',', $record->risk_ids) : [];
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('setup/portfolio/_form',
+			[
+				'form_elements' => $rules,
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Save a Record
 	 *
 	 * @param string $action [add|edit]
@@ -180,12 +217,12 @@ class Portfolio extends MY_Controller
 	private function _save($action, $record = NULL)
 	{
 		// Valid action?
-		if( !in_array($action, array('add', 'edit', 'accounts')))
+		if( !in_array($action, array('add', 'edit', 'accounts', 'risks')))
 		{
-			return [
+			return $this->template->json([
 				'status' => 'error',
 				'message' => 'Invalid action!'
-			];
+			],404);
 		}
 
 		/**
@@ -197,7 +234,7 @@ class Portfolio extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->portfolio_model->validation_rules[ in_array($action, ['add', 'edit']) ? 'basic' : 'accounts'];
+			$rules = $this->_v_rule($action);
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
@@ -223,9 +260,19 @@ class Portfolio extends MY_Controller
 					// Now Update Data
 					$done = $this->portfolio_model->save_accounts($record->id, $data) && $this->portfolio_model->log_activity($record->id, 'E');
 				}
+				else if ($action === 'risks')
+				{
+					// Nullify Account ID if nothing supplied
+					$risk_data = [
+						'risk_ids' => $data['risks'] ? implode(',', $data['risks']) : NULL
+					];
+
+					// Now Update Data
+					$done = $this->portfolio_model->save_accounts($record->id, $risk_data) && $this->portfolio_model->log_activity($record->id, 'E');
+				}
 				else
 				{
-					// Now Update Data
+					// Basic Information Edit Mode
 					$done = $this->portfolio_model->update($record->id, $data, TRUE) && $this->portfolio_model->log_activity($record->id, 'E');
 				}
 
@@ -242,8 +289,11 @@ class Portfolio extends MY_Controller
 			}
 			else
 			{
-				$status = 'error';
-				$message = 'Validation Error.';
+				return $this->template->json([
+					'title'  => 'Validation Failed!',
+					'status' => 'error',
+					'message' => validation_errors()
+				]);
 			}
 
 			// Success HTML
@@ -266,37 +316,47 @@ class Portfolio extends MY_Controller
 			$return_data = [
 				'status' 		=> $status,
 				'message' 		=> $message,
-				'reloadForm' 	=> $status === 'error',
-				'hideBootbox' 	=> $status === 'success',
-				'updateSection' => $status === 'success',
-				'updateSectionData'	=> $status === 'success'
-										? 	[
-												'box' 	=> $action === 'add'
-															? '#iqb-data-list'
-															: '#_data-row-' . $record->id,
-												'html' 	=> $success_html,
+				'reloadForm' 	=> false,
+				'hideBootbox' 	=> true,
+				'updateSection' => true,
+				'updateSectionData'	=> [
+					'box' 	=> $action === 'add'
+								? '#iqb-data-list'
+								: '#_data-row-' . $record->id,
+					'html' 	=> $success_html,
 
-												//
-												// How to Work with success html?
-												// Jquery Method 	html|replaceWith|append|prepend etc.
-												//
-												'method' 	=> $action === 'add' ? 'html' : 'replaceWith'
-											]
-										: NULL,
-				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/portfolio/_form',
-											[
-												'form_elements' => $rules,
-												'record' 		=> $record
-											], TRUE)
-									: 	null
-
+					//
+					// How to Work with success html?
+					// Jquery Method 	html|replaceWith|append|prepend etc.
+					//
+					'method' 	=> $action === 'add' ? 'html' : 'replaceWith'
+				]
 			];
 		}
 
 		return $return_data;
 	}
+		private function _v_rule($action)
+		{
+			$rules = [];
+			switch($action)
+			{
+				case 'add':
+				case 'edit':
+					$rules = $this->portfolio_model->validation_rules['basic'];
+					break;
 
+				case 'accounts':
+				case 'risks':
+					$rules = $this->portfolio_model->validation_rules[$action];
+					break;
+
+				default:
+					break;
+			}
+
+			return $rules;
+		}
 	// --------------------------------------------------------------------
 
     /**
