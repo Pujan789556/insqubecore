@@ -851,7 +851,12 @@ class Policies extends MY_Controller
 					'ppo' => $ppo
 				]);
 			}
-			$this->template->render_404('', 'Incorrect Portfolio');
+
+			$this->template->json([
+				'title'  => 'Not Found!',
+				'status' => 'error',
+				'message' => 'Either "Portfolio" or "Policy Packages" not found for supplied portfolio.'
+			], 404);
 		}
 
 		// --------------------------------------------------------------------

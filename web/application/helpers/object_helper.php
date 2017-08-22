@@ -162,7 +162,8 @@ if ( ! function_exists('_OBJ_policy_package_dropdown'))
 	 */
 	function _OBJ_policy_package_dropdown( $portfolio_id, $flag_blank_select = true )
 	{
-		$dropdown = [];
+		$portfolio_id 	= (int)$portfolio_id;
+		$dropdown 		= [];
 
 		/**
 		 * MOTOR
@@ -177,6 +178,45 @@ if ( ! function_exists('_OBJ_policy_package_dropdown'))
 			$dropdown = _OBJ_MOTOR_policy_package_dropdown($flag_blank_select);
 		}
 
+		/**
+		 * FIRE
+		 * -----
+		 * For all type of FIRE portfolios, we do not need any policy package
+		 */
+		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		{
+			// Load Portfolio Helper
+			load_portfolio_helper($portfolio_id);
+
+			$dropdown = _OBJ_NA_policy_package_dropdown($flag_blank_select);
+		}
+
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_NA_policy_package_dropdown'))
+{
+	/**
+	 * Get Not-Applicable Policy Packages for Portfolios
+	 * which do not require any packages
+	 *
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	bool
+	 */
+	function _OBJ_NA_policy_package_dropdown( $flag_blank_select = true)
+	{
+		$dropdown = [
+			IQB_POLICY_PACKAGE_NOT_APPLICABLE  	=> 'Not Applicable'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
 		return $dropdown;
 	}
 }

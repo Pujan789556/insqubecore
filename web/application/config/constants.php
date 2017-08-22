@@ -187,7 +187,29 @@ define('IQB_MASTER_PORTFOLIO_MOTOR_ID',        6);
 
 /*
 |--------------------------------------------------------------------------
-| MOTOR PORTFOLIO - SUB-PORTFOLIO CODE, ID
+| FIRE PORTFOLIO - SUB-PORTFOLIOS ID
+|--------------------------------------------------------------------------
+|
+| WARNING: Should be exactly same as in database, add here if you add in db
+|
+*/
+define('IQB_SUB_PORTFOLIO_ELECTRICAL_EQUIPMENT_ID', 34);
+define('IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID', 35);
+define('IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID', 36);
+define('IQB_SUB_PORTFOLIO_FIRE_LOP_ID', 37);
+
+// SUB PORTFOLIO LIST
+define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE',  [
+	IQB_SUB_PORTFOLIO_ELECTRICAL_EQUIPMENT_ID 	=> 'Electrical Equipment',
+	IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID 			=> 'Fire General',
+	IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID 		=> "Householder's Policy (FIRE)",
+	IQB_SUB_PORTFOLIO_FIRE_LOP_ID 				=> "Loss of Profit (FIRE)"
+]);
+
+
+/*
+|--------------------------------------------------------------------------
+| MOTOR PORTFOLIO - SUB-PORTFOLIOS ID
 |--------------------------------------------------------------------------
 |
 | WARNING: Should be exactly same as in database, add here if you add in db
@@ -203,12 +225,6 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR',  [
 	IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID 	=> 'Private Vehicle',
 	IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID => 'Commercial Vehicle'
 ]);
-
-
-
-define('IQB_PORTFOLIO_OWNERSHIP_GOVT',      'G');
-define('IQB_PORTFOLIO_OWNERSHIP_NON_GOVT',  'N');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -305,6 +321,9 @@ defined('IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT')   OR define('IQB_POLICY_OB
 // POLICY PACKAGES - Third Party | Comprehensive
 defined('IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE')       OR define('IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE',    'CP');
 defined('IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY')         OR define('IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY',      'TP');
+
+// POLICY PACKAGE - NOT APPLICABLE
+defined('IQB_POLICY_PACKAGE_NOT_APPLICABLE')         OR define('IQB_POLICY_PACKAGE_NOT_APPLICABLE',      'NA');
 
 
 /*
