@@ -63,6 +63,25 @@ class District_model extends MY_Model
         return $list;
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Dropdown List
+     */
+    public function dropdown()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $records = $this->get_all();
+        $list = [];
+        foreach($records as $record)
+        {
+            $list["{$record->id}"] = $record->name_en;
+        }
+        return $list;
+    }
+
 	// --------------------------------------------------------------------
 
     /**
