@@ -175,7 +175,7 @@ class Objects extends MY_Controller
 	}
 
 	// Find Widget
-	function find( $customer_id, $portfolio_id, $sub_portfolio_id )
+	function find( $customer_id, $portfolio_id )
 	{
 		/**
 		 * Check Permissions
@@ -202,10 +202,10 @@ class Objects extends MY_Controller
 			$this->template->render_404('', 'Please select customer first.');
 		}
 		$data = [
-			'records' 					=> $this->object_model->get_by_customer($customer_record->id),
+			'records' 					=> $this->object_model->get_by_customer($customer_record->id, $portfolio_id),
 			'customer_record' 			=> $customer_record,
 			'portfolio_record' 		 	=> $portfolio_record,
-			'add_url' 					=> 'objects/add/' . $customer_id . '/y/' . $portfolio_id . '/' . $sub_portfolio_id,
+			'add_url' 					=> 'objects/add/' . $customer_id . '/y/' . $portfolio_id,
 			'_flag__show_widget_row' 	=> TRUE
 		];
 		$html = $this->load->view('objects/_find_widget', $data, TRUE);
@@ -392,9 +392,6 @@ class Objects extends MY_Controller
 		} catch (Exception $e) {
 			$this->template->json(['status' => 'error', 'title' => 'Exception Occured', 'message' => $e->getMessage()], 404);
 		}
-
-
-
 
 
 		// Valid Customer Record ?
@@ -1004,11 +1001,11 @@ class Objects extends MY_Controller
 		public function get_attribute_form( $portfolio_id, $method  = 'json', $attributes = NULL )
 		{
 			// Valid Record ?
-			$portfolio_id = (int)$portfolio_id;
+			$portfolio_id 	= (int)$portfolio_id;
+			$form_elements 	= _OBJ_validation_rules($portfolio_id);
+			$form_partial 	= _OBJ_attribute_form($portfolio_id);
 
-			$form_elements = _OBJ_validation_rules($portfolio_id);
-			$form_partial = _OBJ_attribute_form($portfolio_id);
-
+			// echo '<pre>'; print_r($form_elements);exit;
 
 			// No form Submitted?
 			$html = $this->load->view($form_partial,
