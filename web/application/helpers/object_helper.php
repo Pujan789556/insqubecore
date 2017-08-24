@@ -36,7 +36,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
 		/**
 		 * MOTOR
 		 * -----
-		 * For all type of motor portfolios, we have same package list
+		 * Snippet Text
 		 */
 		if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
@@ -44,6 +44,19 @@ if ( ! function_exists('_OBJ_row_snippet'))
 			load_portfolio_helper($record->portfolio_id);
 
 			$snippet = _OBJ_MOTOR_row_snippet($record, $_flag__show_widget_row);
+		}
+
+		/**
+		 * FIRE
+		 * -----
+		 * Snippet Text
+		 */
+		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		{
+			// Load Portfolio Helper
+			load_portfolio_helper($record->portfolio_id);
+
+			$snippet = _OBJ_FIRE_row_snippet($record, $_flag__show_widget_row);
 		}
 
 		return $snippet;
@@ -71,7 +84,7 @@ if ( ! function_exists('_OBJ_select_text'))
 		/**
 		 * MOTOR
 		 * -----
-		 * For all type of motor portfolios, we have same package list
+		 * Select Text
 		 */
 		if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
@@ -79,6 +92,19 @@ if ( ! function_exists('_OBJ_select_text'))
 			load_portfolio_helper($record->portfolio_id);
 
 			$snippet = _OBJ_MOTOR_select_text($record);
+		}
+
+		/**
+		 * FIRE
+		 * -----
+		 * Select Text
+		 */
+		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		{
+			// Load Portfolio Helper
+			load_portfolio_helper($record->portfolio_id);
+
+			$snippet = _OBJ_FIRE_select_text($record);
 		}
 
 		return $snippet;
@@ -105,7 +131,7 @@ if ( ! function_exists('_OBJ_validation_rules'))
 		/**
 		 * MOTOR
 		 * -----
-		 * For all type of motor portfolios, we have same package list
+		 * For all type of motor portfolios, we have same validation rules
 		 */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
@@ -114,6 +140,22 @@ if ( ! function_exists('_OBJ_validation_rules'))
 
 			$v_rules = _OBJ_MOTOR_validation_rules( $portfolio_id, $formatted );
 		}
+
+
+		/**
+		 * FIRE
+		 * -----
+		 * For all type of FIRE portfolios, we have same validation rules
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		{
+			// Load Portfolio Helper
+			load_portfolio_helper($portfolio_id);
+
+			$v_rules = _OBJ_FIRE_validation_rules( $portfolio_id, $formatted );
+		}
+
+
 		return $v_rules;
 	}
 }
@@ -137,11 +179,21 @@ if ( ! function_exists('_OBJ_attribute_form'))
 		/**
 		 * MOTOR
 		 * -----
-		 * For all type of motor portfolios, we have same package list
+		 * For all type of motor portfolios, we have same object form
 		 */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
 			$attribute_form = 'objects/forms/_form_object_motor';
+		}
+
+		/**
+		 * FIRE
+		 * -----
+		 * For all type of fire portfolios, we have same object form
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		{
+			$attribute_form = 'objects/forms/_form_object_fire';
 		}
 
 		return $attribute_form;
@@ -183,7 +235,7 @@ if ( ! function_exists('_OBJ_policy_package_dropdown'))
 		 * -----
 		 * For all type of FIRE portfolios, we do not need any policy package
 		 */
-		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
 			// Load Portfolio Helper
 			load_portfolio_helper($portfolio_id);
@@ -241,7 +293,7 @@ if ( ! function_exists('_OBJ_sum_insured_amount'))
 		/**
 		 * MOTOR
 		 * -----
-		 * For all type of motor portfolios, we have same package list
+		 * Compute Sum Insured Amount For this Policy Object (Motor)
 		 */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
@@ -249,6 +301,19 @@ if ( ! function_exists('_OBJ_sum_insured_amount'))
 			load_portfolio_helper($portfolio_id);
 
 			$amt_sum_insured = _OBJ_MOTOR_sum_insured_amount($portfolio_id, $data);
+		}
+
+		/**
+		 * FIRE
+		 * -----
+		 * Compute Sum Insured Amount For this Policy Object (Fire Items, Buildings etc)
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		{
+			// Load Portfolio Helper
+			load_portfolio_helper($portfolio_id);
+
+			$amt_sum_insured = _OBJ_FIRE_sum_insured_amount($portfolio_id, $data);
 		}
 
 		return $amt_sum_insured;
@@ -277,8 +342,6 @@ if ( ! function_exists('_OBJ_transactional_attributes'))
 
 		/**
 		 * MOTOR
-		 * -----
-		 * For all type of motor portfolios, we have same package list
 		 */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
@@ -286,6 +349,17 @@ if ( ! function_exists('_OBJ_transactional_attributes'))
 			load_portfolio_helper($portfolio_id);
 
 			$attributes = _OBJ_MOTOR_transactional_attributes($portfolio_id);
+		}
+
+		/**
+		 * FIRE
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		{
+			// Load Portfolio Helper
+			load_portfolio_helper($portfolio_id);
+
+			$amt_sum_insured = _OBJ_FIRE_transactional_attributes($portfolio_id);
 		}
 
 		return $attributes;
