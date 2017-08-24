@@ -346,20 +346,29 @@ class Object_model extends MY_Model
      * Get all data for specified customer
      *
      * @param integer $customer_id
+     * @param integer $portfolio_id
      * @return mixed
      */
-    public function get_by_customer( $customer_id )
+    public function get_by_customer( $customer_id, $portfolio_id = NULL )
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
+        $where = [
+            'O.customer_id' => $customer_id
+        ];
         $cache_name = 'object_customer_' . $customer_id;
+        if($portfolio_id)
+        {
+            $cache_name             .= '_' . $portfolio_id;
+            $where['O.portfolio_id'] = $portfolio_id;
+        }
 
         $list = $this->get_cache($cache_name);
         if(!$list)
         {
             $this->_prepare_row_select();
-            $list = $this->db->where('O.customer_id', $customer_id)
+            $list = $this->db->where($where)
                              ->order_by('O.id', 'desc')
                              ->get()->result();
 
