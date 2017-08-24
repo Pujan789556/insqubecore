@@ -306,17 +306,16 @@ $('#_find-object').on('click', function(e){
     InsQube.options.__btn_loading = $this;
 
     var c = $('#customer-id').val(),
-        p = $('#_portfolio-id').val(),
-        sp = $('#_sub-portfolio-id').val();
+        p = $('#_portfolio-id').val()
 
-    if( p == '' || c == '' || sp == '')
+    if( p == '' || c == '')
     {
-        toastr.error('Please select Portfolio, Sub-Portfolio, & Customer first.');
+        toastr.error('Please select Portfolio & Customer first.');
         // Reset Loading
         $this.button('reset');
         return false;
     }
-    var url = '<?php echo base_url()?>objects/find/' + c + '/'+ p + '/' + sp;
+    var url = '<?php echo base_url()?>objects/find/' + c + '/'+ p;
 
     $.getJSON(url, function(r){
         if( typeof r.html !== 'undefined' && r.html != '' ){
