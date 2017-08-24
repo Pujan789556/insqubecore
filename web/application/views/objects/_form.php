@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <?php echo form_open( $action_url,
                         [
-                            'class' => 'form-horizontal form-iqb-general',
+                            'class' => 'form-iqb-general',
                             'id'    => '_form-object',
                             'data-pc' => '#form-box-object' // parent container ID
                         ],

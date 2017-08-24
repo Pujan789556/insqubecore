@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<a href="#"
 					title="Edit Basic Information"
 					class="trg-dialog-edit action"
-					data-box-size="large"
+					data-box-size="full-width"
 					data-title='<i class="fa fa-pencil-square-o"></i> Edit Basic Information'
 					data-url="<?php echo site_url('objects/edit/' . $record->id);?>"
 					data-form="#_form-object">
