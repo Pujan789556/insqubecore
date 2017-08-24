@@ -502,6 +502,30 @@ if ( ! function_exists('risk_type_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('district_dropdown'))
+{
+    /**
+     * Get Districts Dropdown
+     *
+     *
+     * @param bool $flag_blank_select   Whether to append blank select
+     * @return  bool
+     */
+    function district_dropdown( $flag_blank_select = true)
+    {
+        $CI =& get_instance();
+        $CI->load->model('district_model');
+        $dropdown  = $CI->district_model->dropdown();
+
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('_COMPANY_type_dropdown'))
 {
     /**
@@ -695,6 +719,16 @@ if ( ! function_exists('load_portfolio_helper'))
         if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
         {
             $CI->load->helper('motor');
+        }
+
+        /**
+         * FIRE
+         * -----
+         * Fire Portfolio Helper Functions
+         */
+        if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+        {
+            $CI->load->helper('fire');
         }
     }
 }
