@@ -455,35 +455,8 @@ if ( ! function_exists('_OBJ_FIRE_transactional_attributes'))
 		echo '@TODO: _OBJ_FIRE_transactional_attributes'; exit;
 		return  [
 
-			// Vehicle Ownership
-			'ownership',
-
-			// Disable Friendly Vehicle?
-			'flag_mcy_df',
-
-			// Engine Capacity Unig
-			'ec_unit',
-
-			// Engine Capacity
-			'engine_capacity',
-
-			// Vehicle Price
-			'price_vehicle',
-
-			// Accessories Price
-			'price_accessories',
-
-			// Carrying Uning
-			'carrying_unit',
-
-			// Carrying Capacity
-			'carrying_capacity',
-
-			// Staff Count
-			'staff_count',
-
-			// Trailer Price
-			'trailer_price'
+			// Each Item's Sum Insured Value
+			'sum_insured'
 		];
 	}
 }

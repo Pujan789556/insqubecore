@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Object Snippet: Fire Popover
 */
-$districts 	= district_dropdown(FALSE);
+$districts 	= district_dropdown();
 $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 ?>
 <div class="box-body" style="overflow-x: scroll;">
@@ -68,11 +68,11 @@ $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 	        			<td><?php echo $land_building->plot_no[$i]?></td>
 	        			<td><?php echo $land_building->house_no[$i]?></td>
 	        			<td><?php echo $land_building->tole[$i]?></td>
-	        			<td><?php echo $districts[$land_building->district[$i]]?></td>
+	        			<td><?php echo $land_building->district[$i] ? $districts[ $land_building->district[$i] ] : ''?></td>
 	        			<td><?php echo $land_building->vdc[$i]?></td>
 	        			<td><?php echo $land_building->ward_no[$i]?></td>
 	        			<td><?php echo $land_building->storey_no[$i]?></td>
-	        			<td><?php echo _OBJ_FIRE_item_building_category_dropdown(FALSE)[$land_building->category[$i]]?></td>
+	        			<td><?php echo $land_building->category[$i] ? _OBJ_FIRE_item_building_category_dropdown()[ $land_building->category[$i] ] : ''?></td>
 	        			<td><?php echo $land_building->used_for[$i]?></td>
 	        		</tr>
 	        <?php
