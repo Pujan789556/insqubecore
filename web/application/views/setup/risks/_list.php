@@ -9,6 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<th>ID</th>
 		<th>Name</th>
 		<th>Type</th>
+		<th>Agent Commission</th>
 		<th>Actions</th>
 	</tr>
 	<?php

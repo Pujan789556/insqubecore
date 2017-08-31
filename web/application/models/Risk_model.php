@@ -17,7 +17,7 @@ class Risk_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'name', 'type', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'name', 'type', 'agent_commission', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -47,7 +47,7 @@ class Risk_model extends MY_Model
     public function validation_rules()
     {
         $type_dropdown = risk_type_dropdown(FALSE);
-
+        $agent_commission_dropdown = _FLAG_on_off_dropdwon(FALSE);
         $this->validation_rules = [
             [
                 'field' => 'name',
@@ -63,7 +63,17 @@ class Risk_model extends MY_Model
                 '_type'     => 'dropdown',
                 '_data'     => IQB_BLANK_SELECT + $type_dropdown,
                 '_required' => true
+            ],
+            [
+                'field' => 'agent_commission',
+                'label' => 'Apply Agent Commission',
+                'rules' => 'trim|required|integer|exact_length[1]|in_list['.implode(',',array_keys($agent_commission_dropdown)).']',
+                '_type'     => 'radio',
+                '_data'     => $agent_commission_dropdown,
+                '_show_label'   => true,
+                '_required'     => true
             ]
+
         ];
     }
 

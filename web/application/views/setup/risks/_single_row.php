@@ -14,6 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		data-url="<?php echo site_url('risks/edit/' . $record->id);?>"
 		data-form=".form-iqb-general"><?php echo $record->name;?></a></td>
 	<td><?php echo risk_type_dropdown(FALSE)[$record->type];?></td>
+	<td><?php echo _FLAG_on_off_dropdwon(FALSE)[$record->agent_commission];?></td>
 	<td class="ins-action">
 		<a href="#"
 			data-toggle="tooltip"
