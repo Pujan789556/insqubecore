@@ -95,6 +95,10 @@ foreach($form_elements as $element):?>
 
         switch($element['_type'])
         {
+            case 'hidden':
+                echo form_hidden($element_config['name'], $value);
+                break;
+
             case 'text':
                 echo form_input($element_config, $value, $extra_attributes);
                 break;
