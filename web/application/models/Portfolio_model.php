@@ -443,6 +443,48 @@ class Portfolio_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Get Risks Dropdown for this portfolio
+     *
+     * @param integer $id
+     * @return array
+     */
+    public function dropdown_risks($id)
+    {
+        $dropdown   = [];
+        $record     = $this->find($id);
+        if($record->risk_ids)
+        {
+            $this->load->model('risk_model');
+            $risk_ids = explode(',', $record->risk_ids);
+            $dropdown = $this->risk_model->dropdown_selected_ids($risk_ids);
+        }
+        return $dropdown;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get all risks records for this portfolio
+     *
+     * @param integer $id
+     * @return array
+     */
+    public function portfolio_risks($id)
+    {
+        $list   = [];
+        $record     = $this->find($id);
+        if($record->risk_ids)
+        {
+            $this->load->model('risk_model');
+            $risk_ids = explode(',', $record->risk_ids);
+            $list = $this->risk_model->get_selected_ids($risk_ids);
+        }
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
+
     public function get_code($id)
     {
         $record = $this->find($id);
