@@ -436,6 +436,36 @@ if ( ! function_exists('_OBJ_FIRE_sum_insured_amount'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('_FIRE_compute_premium_per_risk_per_item'))
+{
+	/**
+	 * Compute Single Risk Premium per Item
+	 *
+	 * @param decimal 	$item_sum_insured Sum Inusred Amount of a Fire Item
+	 * @param decimal 	$rate
+	 * @return chars 	$rate_base PT|RT [Per Thousand | Percent]
+	 */
+	function _FIRE_compute_premium_per_risk_per_item( $item_sum_insured, $rate, $rate_base )
+	{
+		$premium = 0.00;
+		/**
+		 * Rate Per Thousand of Sum Insured Amount
+		 */
+		if($rate_base == 'PT')
+		{
+			$premium = ( $item_sum_insured / 1000.00 ) * $rate;
+		}
+		else
+		{
+			$premium = ( $item_sum_insured * $rate ) / 100.00;
+		}
+
+		return $premium;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_OBJ_FIRE_transactional_attributes'))
 {
 	/**
@@ -473,20 +503,24 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 	 *
 	 * @param object $policy_record 	Policy Record
 	 * @param object $pfs_record		Portfolio Setting Record
-	 * @param object $tariff_record 	Portfolio Tariff Record
-	 * @param bool $formatted 			Return Sectioned or Formatted
+	 * @param object $policy_object		Policy Object Record
+	 * @param array $portfolio_risks	Portfolio Risks
+	 * @param bool $for_processing		For Form Processing
 	 * @param string $return 			Return all rules or policy package specific
 	 * @return array
 	 */
-	function _TXN_FIRE_premium_validation_rules($policy_record, $pfs_record, $tariff_record, $formatted = true, $return = 'specific' )
+	function _TXN_FIRE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, $for_form_processing = FALSE )
 	{
-		echo '@TODO: _TXN_FIRE_premium_validation_rules'; exit;
-
 		$CI =& get_instance();
 
 		// Let's have the Endorsement Templates
 		$CI->load->model('endorsement_template_model');
 		$template_dropdown = $CI->endorsement_template_model->dropdown( $policy_record->portfolio_id );
+
+		$rate_base_dropdown = [
+			'PT'	=> 'Per Thousand',
+			'RT'	=> 'Percent'
+		];
 
 		$validation_rules = [
 
@@ -495,7 +529,15 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 			 * ----------------------------
 			 * Sampusti Bibaran and Remarks are common to all type of policy package.
 			 */
-			'common_all' => [
+			'basic' => [
+				[
+	                'field' => 'amt_stamp_duty',
+	                'label' => 'Stamp Duty(Rs.)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+	                '_type'     => 'text',
+	                '_default' 	=> $pfs_record->stamp_duty,
+	                '_required' => true
+	            ],
 				[
 	                'field' => 'txn_details',
 	                'label' => 'Details/सम्पुष्टि विवरण',
@@ -523,178 +565,69 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 	            ]
 			],
 
-
-
 			/**
-			 * Third Party Validation Rules
-			 * ----------------------------
-			 * We only need stamp duty. The rest are auto computed from tariff.
+			 * Premium Validation Rules - Template
 			 */
-			'third_party' => [
-				[
-	                'field' => 'amt_stamp_duty',
-	                'label' => 'Stamp Duty(Rs.)',
-	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
-	                '_type'     => 'text',
-	                '_default' 	=> $pfs_record->stamp_duty,
+			'premium' => [
+                [
+	                'field' => 'premium[risk]',
+	                'label' => 'Rate',
+	                'rules' => 'trim|integer|max_length[8]',
+	                '_type'     => 'hidden',
+	                '_key' 		=> 'risk',
 	                '_required' => true
-	            ]
-			],
-
-			/**
-			 * Comprehensive Common Validation Rules
-			 * ---------------------------------------
-			 * These rules apply to MCY/PVC/CVC
-			 */
-			'comprehensive_common' => [
-				[
-                    'field' => 'other_cost_fields[dr_voluntary_excess]',
-                    'label' => 'Voluntary Excess',
-                    'rules' => 'trim|prep_decimal|decimal|max_length[5]',
-                    '_key' 		=> 'dr_voluntary_excess',
-                    '_type'     => 'dropdown',
-                    '_data' 	=> _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess),
-                    '_required' => false
-                ],
-                [
-                    'field' => 'other_cost_fields[no_claim_discount]',
-                    'label' => 'No Claim Discount',
-                    'rules' => 'trim|prep_decimal|decimal|max_length[5]',
-                    '_key' 		=> 'no_claim_discount',
-                    '_type'     => 'dropdown',
-                    '_data' 	=> _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount),
-                    '_required' => false
-                ],
-                [
-                    'field' => 'other_cost_fields[flag_risk_pool]',
-                    'label' => 'Pool Risk (जोखिम समूह बीमा)',
-                    'rules' => 'trim|integer|in_list[1]',
-                    '_key' 		=> 'flag_risk_pool',
-                    '_type'     => 'checkbox',
-                    '_checkbox_value' 	=> '1',
-                    '_required' => false,
-                    '_help_text' => '<small>This covers both (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा) & (आतंककारी/विध्वंशात्मक कार्य जोखिम बीमा) </small>'
-                ],
-                [
-	                'field' => 'amt_stamp_duty',
-	                'label' => 'Stamp Duty(Rs.)',
-	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+	            ],
+	            [
+	                'field' => 'premium[rate]',
+	                'label' => 'Rate',
+	                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
 	                '_type'     => 'text',
-	                '_default' 	=> $pfs_record->stamp_duty,
+	                '_key' 		=> 'rate',
 	                '_required' => true
-	            ]
-			],
-
-			/**
-			 * Comprehensive PVC Only Validation Rules
-			 * ---------------------------------------
-			 * These rules apply to Private Vehicle
-			 */
-			'comprehensive_pvc' => [
-
-				// Commercial Use
-				[
-                    'field' => 'other_cost_fields[flag_commercial_use]',
-                    'label' => 'Commercial Use (निजी प्रयोजनको लागि भाडामा दिएको)',
-                    'rules' => 'trim|integer|in_list[1]',
-                    '_key' 		=> 'flag_commercial_use',
-                    '_type'     => 'checkbox',
-                    '_checkbox_value' 	=> '1',
+	            ],
+	            [
+                    'field' => 'premium[rate_base]',
+                    'label' => 'Premium Rate Base',
+                    'rules' => 'trim|alpha|exact_length[2]|in_list['.implode(',', array_keys($rate_base_dropdown)).']',
+                    '_key' 		=> 'rate_base',
+                    '_type'     => 'dropdown',
+                    '_data' 	=> $rate_base_dropdown,
                     '_required' => false
                 ],
-
-                // Pay for Towing
-				[
-                    'field' => 'other_cost_fields[flag_towing]',
-                    'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
-                    'rules' => 'trim|integer|in_list[1]',
-                    '_key' 		=> 'flag_towing',
-                    '_type'     => 'checkbox',
-                    '_checkbox_value' 	=> '1',
-                    '_required' => false
-                ]
-			],
-
-			/**
-			 * Comprehensive CVC Only Validation Rules
-			 * ---------------------------------------
-			 * These rules apply to Commercial Vehicle
-			 */
-			'comprehensive_cvc' => [
-				// Private Use
-				[
-                    'field' => 'other_cost_fields[flag_private_use]',
-                    'label' => 'Private Use',
-                    'rules' => 'trim|integer|in_list[1]',
-                    '_key' 		=> 'flag_private_use',
-                    '_type'     => 'checkbox',
-                    '_checkbox_value' 	=> '1',
-                    '_required' => false,
-                    '_help_text' => '<small>* कार्यालय, पर्यटन र निजी प्रयोजनमा मात्र प्रयोग हुने सवारी साधनको तथा एम्बुलेन्स र शववाहनको ब्यापक बीमा गर्दा शरुु बीमाशुल्कको २५ प्रतिशत छुटहुनेछ ।<br/>** निजी प्रयोेजनको लागि प्रयोग गर्ने सवारी साधन तथा दमकलको ब्यापक बीमा गर्दा शुरु बीमाशुल्कको २५ प्रतिशत छुटहुनेछ ।</small>'
-                ],
-
-                // Pay for Towing
-				[
-                    'field' => 'other_cost_fields[flag_towing]',
-                    'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
-                    'rules' => 'trim|integer|in_list[1]',
-                    '_key' 		=> 'flag_towing',
-                    '_type'     => 'checkbox',
-                    '_checkbox_value' 	=> '1',
-                    '_required' => false
-                ]
 			]
 		];
 
 		/**
-		 * Do we need to return all validation rules or Policy Package Specific only?
+		 * Build Form Validation Rules for Form Processing
 		 */
-		$rules = [];
-		if( $return === 'specific')
+		if( $for_form_processing )
 		{
-			if($policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
+			$rules = $validation_rules['basic'];
+
+			/**
+			 * Premium Validation Rules
+			 */
+			$premium_elements 	= $validation_rules['premium'];
+			$object_attributes 	= $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+			$items 				= $object_attributes->items;
+			$item_count 		= count($items->category);
+
+			// Per Item We have validation rules
+			for($i=0; $i < $item_count; $i++ )
 			{
-				$rules['third_party'] = $validation_rules['third_party'];
-				$rules['common_all'] = $validation_rules['common_all'];
-			}
-			else
-			{
-				$rules['comprehensive_common'] = $validation_rules['comprehensive_common'];
-
-				// Portfolio Specific Rules
-				if( (int)$policy_record->portfolio_id === IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID )
+				// Loop through each portfolio risks
+				foreach($portfolio_risks as $risk_id=>$risk_name)
 				{
-					$rules['comprehensive_pvc'] = $validation_rules['comprehensive_pvc'];
+					foreach ($premium_elements as $elem)
+                    {
+                    	$elem['field'] .= "[{$risk_id}][{$i}]";
+                    	$rules[] = $elem;
+                    }
 				}
-				elseif( (int)$policy_record->portfolio_id === IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID )
-				{
-					$rules['comprehensive_cvc'] = $validation_rules['comprehensive_cvc'];
-				}
-
-				// common to all
-				$rules['common_all'] = $validation_rules['common_all'];
 			}
-		}
-		else
-		{
-			$rules = $validation_rules;
-		}
-
-		/**
-		 * Return Formatted or Sectioned
-		 */
-		if( !$formatted )
-		{
 			return $rules;
 		}
-
-		$v_rules = [];
-		foreach($rules as $section=>$r)
-		{
-			$v_rules = array_merge($v_rules, $r);
-		}
-
-		return $v_rules;
+		return $validation_rules;
 
 	}
 }
