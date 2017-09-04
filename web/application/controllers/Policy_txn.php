@@ -403,8 +403,8 @@ class Policy_txn extends MY_Controller
 			/**
 			 * Agent Commission
 			 */
-			$data['amt_agent_commission'] = 0.00;
-			if($policy_record->agent_id)
+			$data['amt_agent_commission'] = NULL;
+			if( !empty($policy_record->agent_id) && $policy_record->flag_dc ==  IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 			{
 				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 				$data['amt_agent_commission'] 	= ( $data['amt_commissionable'] * $pfs_record->agent_commission)/100.00;
@@ -413,8 +413,8 @@ class Policy_txn extends MY_Controller
 			/**
 			 * Compute VAT
 			 */
-			$this->load->model('ac_duties_and_tax_model');
-			$data['amt_vat'] 	= $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $data['amt_total_premium']);
+			$this->load->helper('account');
+			$data['amt_vat'] = ac_compute_tax(IQB_AC_DNT_ID_VAT, $data['amt_total_premium']+ $data['amt_stamp_duty']);
 
 			return $data;
 		}
@@ -608,13 +608,29 @@ class Policy_txn extends MY_Controller
 				$done = FALSE;
 
 				/**
-				 * MOTOR
-				 * -----
-				 * For all type of motor portfolios, we have same package list
+				 * MOTOR PORTFOLIOS
+				 * ----------------
 				 */
 				if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 				{
 					$done = $this->__save_premium_MOTOR( $policy_record, $txn_record, $crf_record );
+				}
+
+				/**
+				 * FIRE PORTFOLIOS
+				 * ---------------
+				 */
+				else if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+				{
+					$done = $this->__save_premium_FIRE( $policy_record, $txn_record, $crf_record );
+				}
+
+				else
+				{
+					return $this->template->json([
+						'status' 	=> 'error',
+						'message' 	=> 'Policy_txn::__save_premium() - No method defined for supplied portfolio!'
+					], 400);
 				}
 
 
@@ -779,6 +795,340 @@ class Policy_txn extends MY_Controller
 			}
 		}
 
+		// --------------------------------------------------------------------
+
+		/**
+		 * Fire Portfolio : Save a Policy Transaction Record For Given Policy
+		 *
+		 *	!!! Important: Fresh/Renewal Only
+		 *
+		 * @param object $policy_record  	Policy Record
+		 * @param object $txn_record 	 	Policy Transaction Record
+		 * @param object $crf_record 		Policy Cost Reference Record
+		 * @return json
+		 */
+		private function __save_premium_FIRE($policy_record, $txn_record, $crf_record)
+		{
+			/**
+			 * Form Submitted?
+			 */
+			$return_data = [];
+
+			if( $this->input->post() )
+			{
+
+				/**
+				 * Policy Object Record
+				 */
+				$policy_object 		= $this->__get_policy_object($policy_record);
+
+				/**
+				 * Portfolio Setting Record
+				 */
+				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+				/**
+				 * Portfolio Risks
+				 */
+				$portfolio_risks = $this->portfolio_model->dropdown_risks($policy_record->portfolio_id);
+
+				/**
+				 * Validation Rules for Form Processing
+				 */
+				$this->load->helper('fire');
+				$validation_rules = _TXN_FIRE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, TRUE );
+	            $this->form_validation->set_rules($validation_rules);
+
+	            // echo '<pre>';print_r($validation_rules);exit;
+
+				if($this->form_validation->run() === TRUE )
+	        	{
+
+					// Premium Data
+					$post_data = $this->input->post();
+
+					/**
+					 * Do we have a valid method?
+					 */
+					try{
+
+						/**
+						 * Compute Premium From Post Data
+						 * ------------------------------
+						 * 	From the Portfolio Risks - We compute two type of premiums
+						 * 	a. Pool Premium
+						 *  b. Base Premium
+						 */
+
+
+						/**
+						 * Portfolio Risks Rows
+						 */
+						$portfolio_risks = $this->portfolio_model->portfolio_risks($policy_record->portfolio_id);
+
+						/**
+						 * Fire Items with Sum Insured
+						 */
+						$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+						$items              = $object_attributes->items;
+						$item_count         = count($items->category);
+
+
+
+						/**
+						 * Let's Loop Through each Fire Item
+						 */
+						$premium_computation_table 	= [];
+						$base_premium 				= 0.00;
+						$pool_premium 				= 0.00;
+						$commissionable_premium 	= 0.00;
+						$direct_discount 			= 0.00;
+						$agent_commission 			= 0.00;
+
+						for($i=0; $i < $item_count; $i++ )
+						{
+							$item_sum_insured 	= $items->sum_insured[$i];
+							foreach($portfolio_risks as $pr)
+							{
+								$rate = $post_data['premium']['rate'][$pr->id][$i];
+
+								// Compute only if rate is supplied
+								if($rate)
+								{
+									$rate_base = $post_data['premium']['rate_base'][$pr->id][$i];
+									$premium = _FIRE_compute_premium_per_risk_per_item($item_sum_insured, $rate, $rate_base);
+
+									// Assign to Pool or Base based on Risk Type
+									if( $pr->type == IQB_RISK_TYPE_BASIC )
+									{
+										$base_premium += $premium;
+									}
+									else
+									{
+										$pool_premium += $premium;
+									}
+
+									// Commissionable Premium?
+									if($pr->agent_commission == IQB_FLAG_ON )
+									{
+										$commissionable_premium += $premium;
+									}
+								}
+							}
+						}
+
+						/**
+						 * Direct Discount or Agent Commission?
+						 * ------------------------------------
+						 *
+						 * Note: Direct Discount applies only on Base Premium
+						 */
+						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+						{
+							$direct_discount = ( $base_premium * $pfs_record->direct_discount ) / 100.00 ;
+							$base_premium -= $direct_discount;
+
+							// NULLIFY Commissionable premium, Agent Commission
+							$commissionable_premium = NULL;
+							$agent_commission = NULL;
+						}
+						else
+						{
+							$agent_commission = ( $commissionable_premium * $pfs_record->agent_commission ) / 100.00;
+						}
+
+
+						/**
+						 * Let's Compute the Total Premium
+						 */
+						$total_premium 	= $base_premium + $pool_premium;
+						$taxable_amount = $total_premium + $post_data['amt_stamp_duty'];
+
+						/**
+						 * Compute VAT
+						 */
+						$this->load->helper('account');
+						$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+						/**
+						 * Prepare Transactional Data
+						 */
+						$txn_data = [
+							'amt_total_premium' 	=> $total_premium,
+							'amt_pool_premium' 		=> $pool_premium,
+							'amt_commissionable'	=> $commissionable_premium,
+							'amt_agent_commission'  => $agent_commission,
+							'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+							'amt_vat' 				=> $amount_vat,
+							'txn_details' 			=> $post_data['txn_details'],
+							'remarks' 				=> $post_data['remarks'],
+						];
+
+
+						/**
+						 * Premium Computation Table
+						 * -------------------------
+						 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+						 */
+						$premium_computation_table = json_encode($post_data['premium']);
+						$txn_data['premium_computation_table'] = $premium_computation_table;
+
+
+
+						/**
+						 * Schedule Data
+						 *
+						 * 	Property Details
+						 * 	------------------------------------
+						 * 	| Property | Sum Insured | Premium |
+						 * 	------------------------------------
+						 *  |		   | 			 |		   |
+						 * 	------------------------------------
+						 *
+						 * 	Risk Details
+						 * 	------------------
+						 * 	| Risk | Premium |
+						 * 	------------------
+						 * 	|	   |		 |
+						 * 	------------------
+						 */
+						$property_table = [];
+						for($i=0; $i < $item_count; $i++ )
+						{
+							$item_sum_insured 		= $items->sum_insured[$i];
+							$property_category 		= _OBJ_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ];
+							$single_property_row 	= [ $property_category, $items->sum_insured[$i] ];
+
+							$per_property_premium 		= 0.00;
+							$per_property_base_premium 	= 0.00;
+							$per_property_pool_premium 	= 0.00;
+
+							foreach($portfolio_risks as $pr)
+							{
+								$rate = $post_data['premium']['rate'][$pr->id][$i];
+
+								// Compute only if rate is supplied
+								if($rate)
+								{
+									$rate_base = $post_data['premium']['rate_base'][$pr->id][$i];
+									$premium = _FIRE_compute_premium_per_risk_per_item($item_sum_insured, $rate, $rate_base);
+
+									// Assign to Pool or Base based on Risk Type
+									if( $pr->type == IQB_RISK_TYPE_BASIC )
+									{
+										$per_property_base_premium += $premium;
+									}
+									else
+									{
+										$per_property_pool_premium += $premium;
+									}
+								}
+							}
+
+							/**
+							 * Direct Discount Applies?
+							 */
+							if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+							{
+								$direct_discount 			= ( $per_property_base_premium * $pfs_record->direct_discount ) / 100.00 ;
+								$per_property_base_premium -= $direct_discount;
+							}
+
+							$per_property_premium 	= $per_property_base_premium  + $per_property_pool_premium;
+							$single_property_row[] 	= $per_property_premium;
+							$property_table[] 		= $single_property_row;
+						}
+
+						// --------------------------------------------------------------------------------------------
+
+						$risk_table = [];
+						foreach($portfolio_risks as $pr)
+						{
+							$per_risk_premium 		= 0.00;
+							$per_risk_base_premium 	= 0.00;
+							$per_risk_pool_premium 	= 0.00;
+
+							for($i=0; $i < $item_count; $i++ )
+							{
+								$item_sum_insured 	= $items->sum_insured[$i];
+								$rate 				= $post_data['premium']['rate'][$pr->id][$i];
+
+								// Compute only if rate is supplied
+								if($rate)
+								{
+									$rate_base = $post_data['premium']['rate_base'][$pr->id][$i];
+									$premium = _FIRE_compute_premium_per_risk_per_item($item_sum_insured, $rate, $rate_base);
+
+									// Assign to Pool or Base based on Risk Type
+									if( $pr->type == IQB_RISK_TYPE_BASIC )
+									{
+										$per_risk_base_premium += $premium;
+									}
+									else
+									{
+										$per_risk_pool_premium += $premium;
+									}
+								}
+							}
+
+							/**
+							 * Direct Discount Applies?
+							 */
+							if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+							{
+								$direct_discount 		= ( $per_risk_base_premium * $pfs_record->direct_discount ) / 100.00 ;
+								$per_risk_base_premium 	-= $direct_discount;
+							}
+							$per_risk_premium 	= $per_risk_base_premium  + $per_risk_pool_premium;
+
+
+							/**
+							 * Include the risk only with premium
+							 */
+							if( $per_risk_premium )
+							{
+								$risk_table[] 		= [$pr->name, $per_risk_premium];
+							}
+						}
+
+						$cost_calculation_table = json_encode([
+							'property_table' 	=> $property_table,
+							'risk_table'		=> $risk_table
+						]);
+
+						$txn_data['cost_calculation_table'] = $cost_calculation_table;
+
+						$crf_data = NULL;
+						return $this->policy_txn_model->save($txn_record->id, $crf_data, $txn_data);
+
+
+						/**
+						 * @TODO
+						 *
+						 * 1. Build RI Distribution Data For This Policy
+						 * 2. RI Approval Constraint for this Policy
+						 */
+
+					} catch (Exception $e){
+
+						return $this->template->json([
+							'status' 	=> 'error',
+							'message' 	=> $e->getMessage()
+						], 404);
+					}
+	        	}
+	        	else
+	        	{
+	        		return $this->template->json([
+						'status' 	=> 'error',
+						'title' 	=> 'Validation Error!',
+						'message' 	=> validation_errors()
+					]);
+	        	}
+			}
+		}
+
 	// --------------- END: SAVE PREMIUM FUNCTIONS --------------------
 
 
@@ -803,8 +1153,12 @@ class Policy_txn extends MY_Controller
 		 */
 		$policy_object = $this->__get_policy_object($policy_record);
 
+		// Let's get all risks of this portfolio
+		$portfolio_risks = $this->portfolio_model->dropdown_risks($policy_record->portfolio_id);
+
+
 		// Let's get the premium goodies for given portfolio
-		$premium_goodies = $this->__premium_goodies($policy_record, $policy_object);
+		$premium_goodies = $this->__premium_goodies($policy_record, $policy_object, $portfolio_risks);
 
 		// Valid Goodies?
 		if( empty($premium_goodies) )
@@ -816,13 +1170,14 @@ class Policy_txn extends MY_Controller
 		}
 
 		// Policy Transaction Form
-		$form_view = $this->__premium_form_view_by_portfolio($policy_record->portfolio_id);
+		$form_view = _POLICY__partial_view__premium_form($policy_record->portfolio_id);
 
 
 
 		// Let's render the form
         $json_data['form'] = $this->load->view($form_view, [
 								                'form_elements'         => $premium_goodies['validation_rules'],
+								                'portfolio_risks' 		=> $portfolio_risks,
 								                'policy_record'         => $policy_record,
 								                'txn_record'        	=> $txn_record,
 								                'crf_record'        	=> $crf_record,
@@ -850,21 +1205,38 @@ class Policy_txn extends MY_Controller
 		 *
 		 * @param object $policy_record Policy Record
 		 * @param object $policy_object Policy Object Record
+		 * @param array $portfolio_risks Portfolio Risks
 		 *
 		 * @return	array
 		 */
-		private function __premium_goodies($policy_record, $policy_object)
+		private function __premium_goodies($policy_record, $policy_object, $portfolio_risks=[])
 		{
 			$goodies = [];
 
 			/**
-			 * MOTOR
-			 * -----
-			 * For all type of motor portfolios, we have same package list
+			 * MOTOR PORTFOLIOS
+			 * ----------------
 			 */
 			if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 			{
 				$goodies = $this->__premium_goodies_MOTOR($policy_record, $policy_object);
+			}
+
+			/**
+			 * FIRE PORTFOLIOS
+			 * ---------------
+			 */
+			else if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+			{
+				$goodies = $this->__premium_goodies_FIRE($policy_record, $policy_object, $portfolio_risks);
+			}
+
+			else
+			{
+				return $this->template->json([
+					'status' 	=> 'error',
+					'message' 	=> 'Policy_txn::__premium_goodies() - No data found for supplied portfolio!'
+				], 400);
 			}
 
 
@@ -940,6 +1312,40 @@ class Policy_txn extends MY_Controller
 			];
 		}
 
+		// --------------------------------------------------------------------
+
+		/**
+		 * Get Policy Policy Transaction Goodies for FIRE
+		 *
+		 * Get the following goodies for the Motor Portfolio
+		 * 		1. Validation Rules
+		 * 		2. Tariff Record if Applies
+		 *
+		 * @param object $policy_record Policy Record
+		 * @param object $policy_object Policy Object Record
+		 * @param object $portfolio_risks Portfolio Risks
+		 *
+		 * @return	array
+		 */
+		private function __premium_goodies_FIRE($policy_record, $policy_object, $portfolio_risks)
+		{
+			$this->load->helper('fire');
+
+			// Portfolio Setting Record
+			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+			// Let's Get the Validation Rules
+			$validation_rules = _TXN_FIRE_premium_validation_rules( $policy_record, $pfs_record, $policy_object, $portfolio_risks );
+
+			// echo '<pre>'; print_r($validation_rules);exit;
+
+			// Return the goodies
+			return  [
+				'validation_rules' 	=> $validation_rules,
+				'tariff_record' 	=> NULL
+			];
+		}
+
 	//  ------------------- END: PREMIUM GOODIES FUNCTIONS -------------------------
 
 
@@ -948,28 +1354,6 @@ class Policy_txn extends MY_Controller
 	// PRIVATE CRUD HELPER FUNCTIONS
 	// --------------------------------------------------------------------
 
-		/**
-		 * Get Policy Transaction Premium Form View
-		 *
-		 * @param id $portfolio_id Portfolio ID
-		 * @return string
-		 */
-		private function __premium_form_view_by_portfolio($portfolio_id)
-		{
-			$form_view = '';
-
-			/**
-			 * MOTOR
-			 * -----
-			 * For all type of motor portfolios, we have same package list
-			 */
-			if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
-			{
-				$form_view = 'policy_txn/forms/_form_premium_MOTOR';
-			}
-
-			return $form_view;
-		}
 
 		// --------------------------------------------------------------------
 
@@ -1090,9 +1474,9 @@ class Policy_txn extends MY_Controller
         	/**
 			 * Task 1: Compute VAT ON Taxable Amount
 			 */
-        	$this->load->model('ac_duties_and_tax_model');
+        	$this->load->helper('account');
 	        $taxable_amount 		= $txn_data['amt_total_premium'] + $txn_data['amt_stamp_duty'];
-	        $txn_data['amt_vat'] 	= $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+	        $txn_data['amt_vat'] 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
 	        return $txn_data;
 		}
@@ -1657,6 +2041,18 @@ class Policy_txn extends MY_Controller
         ];
 
 		// --------------------------------------------------------------------
+
+        /**
+         * Check if portfolio has "Direct Premium Income Account ID"
+         */
+        if( !$portfolio_record->account_id_dpi )
+        {
+			return $this->template->json([
+				'title' 	=> 'Direct Premium Income Account Missing!',
+				'status' 	=> 'error',
+				'message' 	=> "Please add portfolio 'Direct Premium Income Account' for portfolio ({$portfolio_record->name_en}) from Master Setup > Portfolio"
+			], 404);
+        }
 
         /**
          * Credit Rows
