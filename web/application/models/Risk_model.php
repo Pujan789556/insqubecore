@@ -126,6 +126,57 @@ class Risk_model extends MY_Model
         return $list;
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Dropdown List of Selected IDs
+     */
+    public function dropdown_selected_ids($ids)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        sort($ids);
+        $cache_var = 'risks_sel_' . implode('', $ids);
+        $list = $this->get_cache($cache_var);
+        if(!$list)
+        {
+            $records = $this->get_selected_ids($ids);
+            $list = [];
+            foreach($records as $record)
+            {
+                $list["{$record->id}"] = $record->name . ' (' . risk_type_dropdown(FALSE)[$record->type] . ')';
+            }
+            $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
+        }
+        return $list;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get List by Selected IDs
+     */
+    public function get_selected_ids($ids)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        sort($ids);
+        $cache_var = 'risks_sel_rows_' . implode('', $ids);
+        $list = $this->get_cache($cache_var);
+        if(!$list)
+        {
+            $list = $this->db->select('id, name, type, agent_commission')
+                            ->from($this->table_name)
+                            ->where_in('id', $ids)
+                            ->get()->result();
+
+            $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
+        }
+        return $list;
+    }
+
 	// --------------------------------------------------------------------
 
     /**
@@ -134,7 +185,8 @@ class Risk_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'risks_all'
+            'risks_all',
+            'risks_sel_*'
         ];
         // cache name without prefix
         foreach($cache_names as $cache)
