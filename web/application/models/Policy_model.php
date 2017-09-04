@@ -871,14 +871,6 @@ class Policy_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function update_current_txn_data($id, $data)
-    {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, $data);
-    }
-
-    // ----------------------------------------------------------------
-
     /**
      * Update Endorsement Changes on Policy Table
      *

@@ -746,15 +746,6 @@ class Policy_txn extends MY_Controller
 							$txn_data = $this->_prepare_txn_data($policy_record, $txn_record, $crf_data, $post_data);
 							$done 	  = $this->policy_txn_model->save($txn_record->id, $crf_data, $txn_data);
 
-							if($done)
-							{
-								/**
-								 * Update Current Transaction Amounts
-								 */
-								$cur_txn_data = $this->_prepare_current_txn_data($txn_data);
-								$this->policy_model->update_current_txn_data($policy_record->id, $cur_txn_data);
-							}
-
 							return $done;
 
 							/**
@@ -763,8 +754,6 @@ class Policy_txn extends MY_Controller
 							 * 1. Build RI Distribution Data For This Policy
 							 * 2. RI Approval Constraint for this Policy
 							 */
-
-
 
 						} catch (Exception $e){
 
@@ -1424,40 +1413,7 @@ class Policy_txn extends MY_Controller
 	        return $txn_data;
 		}
 
-		/**
-		 * Prepare Current Transaction Data From Transaction Data
-		 *
-		 * @param array $txn_data
-		 * @return array
-		 */
-		private function _prepare_current_txn_data($txn_data, $policy_record = NULL)
-		{
-			$txn_fields = ['amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat'];
-
-			$txn_data = (array)$txn_data; // convert into array if object is passed
-
-			$cur_txn_data = [];
-			foreach($txn_fields as $key)
-			{
-				$cur_txn_data['cur_' . $key] = $txn_data[$key];
-			}
-
-			/**
-			 * Adjust if Policy Record is Supplied
-			 */
-			if($policy_record)
-			{
-				$policy_record = (array)$policy_record;
-				foreach($txn_fields as $key)
-				{
-					$cur_key = 'cur_' . $key;
-
-					$cur_txn_data[$cur_key] += $policy_record[$cur_key];
-				}
-			}
-
-			return $cur_txn_data;
-		}
+		// --------------------------------------------------------------------
 
 		private function _crf_transfer_full($crf_data)
 		{
@@ -1692,17 +1648,6 @@ class Policy_txn extends MY_Controller
 		if( $amt_sum_insured !== FALSE )
 		{
 			$policy_data['cur_amt_sum_insured'] = $amt_sum_insured;
-		}
-
-		/**
-		 * Update Current Transactional Information if TXN_TYPE is TRANSACTIONAL
-		 */
-		if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_ET )
-		{
-			$policy_record = $this->policy_model->get($txn_record->policy_id);
-			$cur_txn_data  = $this->_prepare_current_txn_data($txn_record, $policy_record);
-
-			$policy_data = array_merge($policy_data, $cur_txn_data);
 		}
 
 		// Update Policy Table

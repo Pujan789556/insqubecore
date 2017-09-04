@@ -106,15 +106,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </div>
     </div>
 
-    <div class="box-body bg-gray-light no-padding-b">
-        <?php
-        /**
-         * Current Premium Info
-         */
-        $this->load->view('policies/snippets/_policy_current_financial_card', ['record' => $record]);
-        ?>
-    </div>
-
     <div class="box-body bg-gray-light">
         <?php
         /**
