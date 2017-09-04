@@ -456,16 +456,64 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 		$partial_view = '';
 
 		/**
-		 * MOTOR
-		 * -----
-		 * For all type of motor portfolios, we have same package list
+		 * MOTOR PORTFOLIOS
+		 * -----------------
 		 */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
 			$view_prefix = $view_for === 'print' ? '_print' : '';
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MOTOR";
 		}
+
+		/**
+		 * FIRE PORTFOLIOS
+		 * ---------------
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		{
+			$view_prefix = $view_for === 'print' ? '_print' : '';
+			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_FIRE";
+		}
+
+
 		return $partial_view;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__partial_view__premium_form'))
+{
+	/**
+	 * Get Policy Transaction Premium Form View
+	 *
+	 * @param id $portfolio_id Portfolio ID
+	 * @return	string
+	 */
+	function _POLICY__partial_view__premium_form( $portfolio_id )
+	{
+		$form_view = '';
+
+		/**
+		 * MOTOR PORTFOLIOS
+		 * ----------------
+		 * For all type of motor portfolios, we have same package list
+		 */
+		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		{
+			$form_view = 'policy_txn/forms/_form_premium_MOTOR';
+		}
+
+		/**
+		 * FIRE PORTFOLIOS
+		 * ---------------
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		{
+			$form_view = 'policy_txn/forms/_form_premium_FIRE';
+		}
+
+		return $form_view;
 	}
 }
 
@@ -771,6 +819,14 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID:
 			case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID:
 					$schedule_view = 'policies/print/schedule_MOTOR';
+				break;
+
+			// Fire
+			case IQB_SUB_PORTFOLIO_ELECTRICAL_EQUIPMENT_ID:
+			case IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID:
+			case IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID:
+			case IQB_SUB_PORTFOLIO_FIRE_LOP_ID:
+					$schedule_view = 'policies/print/schedule_FIRE';
 				break;
 
 			default:
