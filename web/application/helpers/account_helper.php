@@ -359,6 +359,29 @@ if ( ! function_exists('number_to_words'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('ac_compute_tax'))
+{
+	/**
+	 * Compute Tax Based on TaxID and Suppplied Amount
+	 *
+	 * @return	decimal
+	 */
+	function ac_compute_tax( $duty_and_tax_id, $amount )
+	{
+		$CI =& get_instance();
+
+		/**
+		 * Compute TAX
+		 */
+		$CI->load->model('ac_duties_and_tax_model');
+		$tax = $CI->ac_duties_and_tax_model->compute_tax($duty_and_tax_id, $amount);
+
+		return $tax;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_INVOICE__pdf'))
 {
     /**
