@@ -92,23 +92,32 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
     </div>
 
     <?php
-    /**
-     * Merge other_cost_fields JSON Object to Default columns to pass to form elements
-     */
-    $other_cost_fields = $crf_record->other_cost_fields ? json_decode($crf_record->other_cost_fields) : NULL;
-    $merged_crf_record = (object) array_merge((array) $crf_record, (array) $other_cost_fields);
-
-    // Add Values From TXN Table [txn_details, remarks]
-    $merged_crf_record->txn_details = $txn_record->txn_details;
-    $merged_crf_record->remarks     = $txn_record->remarks;
 
     /**
-     * Load Form Components
+     * Load Form Components - Basic Elements
      */
     $this->load->view('templates/_common/_form_components_horz', [
-        'form_elements'     => $form_elements,
-        'form_record'       => $merged_crf_record
+        'form_elements'     => $form_elements['basic'],
+        'form_record'       => $txn_record
     ]);
+
+
+    /**
+     * Comprehensive Premium Information
+     */
+    if( $policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE )
+    {
+        $premium_computation_table = $txn_record->premium_computation_table ? json_decode($txn_record->premium_computation_table) : NULL;
+
+        /**
+         * Load Form Components
+         */
+        $this->load->view('templates/_common/_form_components_horz', [
+            'form_elements'     => $form_elements['premium'],
+            'form_record'       => $premium_computation_table
+        ]);
+    }
+
     ?>
 
     <button type="submit" class="hide">Submit</button>

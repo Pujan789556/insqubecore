@@ -563,18 +563,6 @@ class Policy_txn extends MY_Controller
 			], 400);
 		}
 
-		// Let's get the Cost Reference Record for this Policy
-		$crf_record = $this->policy_crf_model->get($txn_record->id);
-
-		// No CRF Record? You can't move further. You must have one
-		if( !$crf_record )
-		{
-			return $this->template->json([
-				'status' 	=> 'error',
-				'message' 	=> 'No cost reference information found for this Policy.<br/>Please create one first and proceed.'
-			], 400);
-		}
-
 		/**
 		 * Policy Belongs to Me? i.e. My Branch? OR Terminate
 		 */
@@ -582,11 +570,11 @@ class Policy_txn extends MY_Controller
 
 
 		// Post? Save Premium
-		$this->__save_premium($policy_record, $txn_record, $crf_record);
+		$this->__save_premium($policy_record, $txn_record);
 
 
 		// Render Form
-		$this->__render_premium_form($policy_record, $txn_record, $crf_record);
+		$this->__render_premium_form($policy_record, $txn_record);
 	}
 
 	// --------------------------------------------------------------------
@@ -598,10 +586,9 @@ class Policy_txn extends MY_Controller
 		 *
 		 * @param object $policy_record 	Policy Record
 		 * @param object $txn_record 		Policy Transaction Record
-		 * @param object $crf_record 		Policy Cost Reference Record
 		 * @return mixed
 		 */
-		private function __save_premium($policy_record, $txn_record, $crf_record)
+		private function __save_premium($policy_record, $txn_record)
 		{
 			if( $this->input->post() )
 			{
@@ -613,7 +600,7 @@ class Policy_txn extends MY_Controller
 				 */
 				if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 				{
-					$done = $this->__save_premium_MOTOR( $policy_record, $txn_record, $crf_record );
+					$done = $this->__save_premium_MOTOR( $policy_record, $txn_record );
 				}
 
 				/**
@@ -622,7 +609,7 @@ class Policy_txn extends MY_Controller
 				 */
 				else if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 				{
-					$done = $this->__save_premium_FIRE( $policy_record, $txn_record, $crf_record );
+					$done = $this->__save_premium_FIRE( $policy_record, $txn_record );
 				}
 
 				else
@@ -681,10 +668,9 @@ class Policy_txn extends MY_Controller
 		 *
 		 * @param object $policy_record  Policy Record
 		 * @param object $txn_record 	 Policy Transaction Record
-		 * @param object $crf_record 		Policy Cost Reference Record
 		 * @return json
 		 */
-		private function __save_premium_MOTOR($policy_record, $txn_record, $crf_record)
+		private function __save_premium_MOTOR($policy_record, $txn_record)
 		{
 			/**
 			 * Form Submitted?
@@ -702,7 +688,13 @@ class Policy_txn extends MY_Controller
 				$v_rules 			= $premium_goodies['validation_rules'];
 				$tariff_record 		= $premium_goodies['tariff_record'];
 
-	            $this->form_validation->set_rules($v_rules);
+				// Format Validation Rules
+				$rules = [];
+				foreach($v_rules as $section=>$r)
+				{
+					$rules = array_merge($rules, $r);
+				}
+	            $this->form_validation->set_rules($rules);
 				if($this->form_validation->run() === TRUE )
 	        	{
 	        		// Portfolio Settings Record For Given Fiscal Year and Portfolio
@@ -724,27 +716,17 @@ class Policy_txn extends MY_Controller
 							/**
 							 * Get the Cost Reference Data
 							 */
-							$crf_data = call_user_func($method, $policy_record, $policy_object, $tariff_record, $pfs_record, $post_data);
+							$txn_data = call_user_func($method, $policy_record, $policy_object, $tariff_record, $pfs_record, $post_data);
+
 
 							/**
-							 * Save CRF Data
-							 * -----------------
-							 *
-							 * Task 1: Build CRF Data
-							 * 		Copy the computed data to Cost Reference Table with "transfer_type" = "Take Whole Amount"
-							 *
-							 * Task 2: Build Txn Data
-							 *		Transfer CRF data to TXN Table based on transfer type
-							 *
-							 * Task 3: Update CRF and TXN data
-							 *
-							 * Task 4: Update RI-Distribution for this Policy
+							 * Compute VAT ON Taxable Amount
 							 */
-							$crf_data['transfer_type'] 		= IQB_POLICY_CRF_TRANSFER_TYPE_FULL;
-							$crf_data['computation_type'] 	= IQB_POLICY_CRF_COMPUTE_AUTO;
+				        	$this->load->helper('account');
+					        $taxable_amount 		= $txn_data['amt_total_premium'] + $txn_data['amt_stamp_duty'];
+					        $txn_data['amt_vat'] 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
-							$txn_data = $this->_prepare_txn_data($policy_record, $txn_record, $crf_data, $post_data);
-							$done 	  = $this->policy_txn_model->save($txn_record->id, $crf_data, $txn_data);
+							$done 	  = $this->policy_txn_model->save($txn_record->id, $txn_data);
 
 							return $done;
 
@@ -773,13 +755,11 @@ class Policy_txn extends MY_Controller
 	        	}
 	        	else
 	        	{
-	        		// Reload Form With Validation Error
-	        		$json_extra = [
-						'status' 		=> 'error',
-						'message' 		=> 'Validation Error.',
-						'reloadForm' 	=> true
-					];
-					return $this->__render_premium_form($policy_record, $txn_record, $crf_record, $json_extra);
+	        		return $this->template->json([
+						'status' 	=> 'error',
+						'title' 	=> 'Validation Error!',
+						'message' 	=> validation_errors()
+					]);
 	        	}
 			}
 		}
@@ -793,10 +773,9 @@ class Policy_txn extends MY_Controller
 		 *
 		 * @param object $policy_record  	Policy Record
 		 * @param object $txn_record 	 	Policy Transaction Record
-		 * @param object $crf_record 		Policy Cost Reference Record
 		 * @return json
 		 */
-		private function __save_premium_FIRE($policy_record, $txn_record, $crf_record)
+		private function __save_premium_FIRE($policy_record, $txn_record)
 		{
 			/**
 			 * Form Submitted?
@@ -966,7 +945,7 @@ class Policy_txn extends MY_Controller
 
 
 						/**
-						 * Schedule Data
+						 * Cost Calculation Table - Schedule Data
 						 *
 						 * 	Property Details
 						 * 	------------------------------------
@@ -1088,8 +1067,7 @@ class Policy_txn extends MY_Controller
 
 						$txn_data['cost_calculation_table'] = $cost_calculation_table;
 
-						$crf_data = NULL;
-						return $this->policy_txn_model->save($txn_record->id, $crf_data, $txn_data);
+						return $this->policy_txn_model->save($txn_record->id, $txn_data);
 
 
 						/**
@@ -1131,11 +1109,10 @@ class Policy_txn extends MY_Controller
 	 *
 	 * @param object 	$policy_record 	Policy Record
 	 * @param object 	$txn_record Policy Transaction Record
-	 * @param object 	$crf_record Policy Cost Reference Record
 	 * @param array 	$json_extra 	Extra Data to Pass as JSON
 	 * @return type
 	 */
-	private function __render_premium_form($policy_record, $txn_record, $crf_record, $json_extra=[])
+	private function __render_premium_form($policy_record, $txn_record, $json_extra=[])
 	{
 		/**
 		 *  Let's Load The Policy Transaction Form For this Record
@@ -1169,7 +1146,6 @@ class Policy_txn extends MY_Controller
 								                'portfolio_risks' 		=> $portfolio_risks,
 								                'policy_record'         => $policy_record,
 								                'txn_record'        	=> $txn_record,
-								                'crf_record'        	=> $crf_record,
 								                'policy_object' 		=> $policy_object,
 								                'tariff_record' 		=> $premium_goodies['tariff_record']
 								            ], TRUE);
@@ -1364,78 +1340,6 @@ class Policy_txn extends MY_Controller
 			return $object;
 		}
 
-		// --------------------------------------------------------------------
-
-		/**
-		 * Prepare TXN Data
-		 *
-		 * Prepare transactional data based on the supplied crf data and other post data
-		 *
-		 * @param object $policy_record
-		 * @param object $txn_record
-		 * @param array $crf_data
-		 * @param array $post_data
-		 * @return array
-		 */
-		private function _prepare_txn_data($policy_record, $txn_record, $crf_data, $post_data)
-		{
-			$transfer_type = $crf_data['transfer_type'];
-	        if( !$transfer_type )
-	        {
-	            throw new Exception("Exception [Controller: Policy_txn][Method: _prepare_txn_data()]: Invalid Transfer Type!");
-	        }
-
-	        /**
-	         * Compute TXN data based on "transfer_type"
-	         */
-	        $txn_data = [];
-	        switch($transfer_type)
-	        {
-	            case IQB_POLICY_CRF_TRANSFER_TYPE_FULL:
-	            	$txn_data = $this->_crf_transfer_full($crf_data);
-	                break;
-
-	            case IQB_POLICY_CRF_TRANSFER_TYPE_PRORATA_ON_DIFF:
-	                break;
-
-	            case IQB_POLICY_CRF_TRANSFER_TYPE_SHORT_TERM_RATE_ON_FULL:
-	                break;
-
-	            case IQB_POLICY_CRF_TRANSFER_TYPE_DIRECT_DIFF:
-	                break;
-	        }
-
-	        /**
-	         * TXN Specific Post Data
-	         */
-	        $txn_data['txn_details'] 	= $post_data['txn_details'];
-	        $txn_data['remarks'] 		= $post_data['remarks'];
-	        return $txn_data;
-		}
-
-		// --------------------------------------------------------------------
-
-		private function _crf_transfer_full($crf_data)
-		{
-			$txn_data = [];
-
-			/**
-			 * Task 1: Simply Copy all data from CRF to TXN
-			 */
-			foreach(Policy_crf_model::$fields_to_txn_transfer as $field)
-        	{
-        		$txn_data[$field] = $crf_data[$field] ?? NULL;
-        	}
-
-        	/**
-			 * Task 1: Compute VAT ON Taxable Amount
-			 */
-        	$this->load->helper('account');
-	        $taxable_amount 		= $txn_data['amt_total_premium'] + $txn_data['amt_stamp_duty'];
-	        $txn_data['amt_vat'] 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
-	        return $txn_data;
-		}
 
 	// --------------------- END: PRIVATE CRUD HELPER FUNCTIONS --------------------
 

@@ -196,7 +196,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 		$attributes = json_decode($policy_object->attributes);
 
 		// Form Posted Data - Extra Fields Required to Perform Cost Calculation
-		$post_data_other_cost_fields = $data['other_cost_fields'] ?? NULL;
+		$premium_computation_table = $data['premium'] ?? NULL;
 
 		// Tariff Extracts
 		$default_tariff = json_decode($tariff_record->tariff);
@@ -240,7 +240,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
         }
 
         // No Claim Discount - Years & Rate
-        $no_claim_discount 		= $post_data_other_cost_fields['no_claim_discount'] ?? 0;
+        $no_claim_discount 		= $premium_computation_table['no_claim_discount'] ?? 0;
         $no_claim_discount 		= $no_claim_discount ? $no_claim_discount : 0;
 		$year_no_claim_discount = $no_claim_discount ? _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
 
@@ -296,7 +296,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 
 			// Discount on Voluntary Excess : discount_KHA
 			$__premium_A_row_4 				= 0.00;
-			$dr_voluntary_excess 		= $post_data_other_cost_fields['dr_voluntary_excess'] ?? 0.00;
+			$dr_voluntary_excess 		= $premium_computation_table['dr_voluntary_excess'] ?? 0.00;
 			$amount_voluntary_excess 	= $dr_voluntary_excess ? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess] : 0.00;
 
 			if($dr_voluntary_excess)
@@ -407,7 +407,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 				'title_en' 	=> 'Pool risk insurance amounted to'
 			];
 
-			$flag_risk_pool = $post_data_other_cost_fields['flag_risk_pool'] ?? NULL;
+			$flag_risk_pool = $premium_computation_table['flag_risk_pool'] ?? NULL;
 			$premium_risk_mob = 0.00;
 			$premium_risk_terorrism = 0.00;
 			$premium_for_insured_covered_on_terorrism = 0.00;
@@ -574,7 +574,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 			'amt_sum_insured' 		=> $policy_object->amt_sum_insured,
 			'amt_total_premium'  	=> $amt_total_premium,
 			'amt_stamp_duty' 		=> $amt_stamp_duty,
-			'other_cost_fields' 	=> $post_data_other_cost_fields ? json_encode($post_data_other_cost_fields) : NULL,
+			'premium_computation_table' 	=> $premium_computation_table ? json_encode($premium_computation_table) : NULL,
 			'amt_pool_premium' 		=> $premium_I_total
 		];
 
@@ -616,8 +616,10 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 			}
 		}
 
-		// Any Remarks?
-		$CRF_PREMIUM_DATA['remarks'] = $__remarks;
+		// Common TXN Data
+		$CRF_PREMIUM_DATA['txn_details'] 	= $data['txn_details'];
+        $CRF_PREMIUM_DATA['remarks'] 		= $data['remarks'];
+		$CRF_PREMIUM_DATA['remarks'] 		= $__remarks;
 
 		/**
 		 * SHORT TERM POLICY?
@@ -653,7 +655,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 		$attributes = json_decode($policy_object->attributes);
 
 		// Form Posted Data - Extra Fields Required to Perform Cost Calculation
-		$post_data_other_cost_fields = $data['other_cost_fields'] ?? NULL;
+		$premium_computation_table = $data['premium'] ?? NULL;
 
 
 		// Tariff Extracts
@@ -714,7 +716,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
         }
 
         // No Claim Discount - Years & Rate
-        $no_claim_discount 		= $post_data_other_cost_fields['no_claim_discount'] ?? 0;
+        $no_claim_discount 		= $premium_computation_table['no_claim_discount'] ?? 0;
         $no_claim_discount 		= $no_claim_discount ? $no_claim_discount : 0;
 		$year_no_claim_discount = $no_claim_discount ? _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
 
@@ -815,7 +817,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 
 
 			// Private on Hire (Commercial Use)
-			$flag_commercial_use = $post_data_other_cost_fields['flag_commercial_use'] ?? FALSE;
+			$flag_commercial_use = $premium_computation_table['flag_commercial_use'] ?? FALSE;
 			$__premium_A_row_8 = 0.00;
 			if( $flag_commercial_use )
 			{
@@ -837,7 +839,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 
 
 			// Discount on Voluntary Excess - GA ko X%
-			$dr_voluntary_excess 		= $post_data_other_cost_fields['dr_voluntary_excess'] ?? FALSE;
+			$dr_voluntary_excess 		= $premium_computation_table['dr_voluntary_excess'] ?? FALSE;
 			$amount_voluntary_excess 	= $dr_voluntary_excess
 											? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess]
 											: 0.00;
@@ -906,7 +908,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 
 
 			// Towing
-			$flag_towing = $post_data_other_cost_fields['flag_towing'] ?? FALSE;
+			$flag_towing = $premium_computation_table['flag_towing'] ?? FALSE;
 			$__premium_A_row_16 = 0.00;
 			if( $flag_towing )
 			{
@@ -1027,7 +1029,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 				'title_en' 	=> 'Pool risk insurance amounted to'
 			];
 
-			$flag_risk_pool = $post_data_other_cost_fields['flag_risk_pool'] ?? NULL;
+			$flag_risk_pool = $premium_computation_table['flag_risk_pool'] ?? NULL;
 			$__premium_U_row_1 = 0.00;
 			$__premium_U_row_2 = 0.00;
 			$__premium_U_row_3 = 0.00;
@@ -1157,7 +1159,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 			'amt_sum_insured' 		=> $policy_object->amt_sum_insured,
 			'amt_total_premium'  	=> $amt_total_premium,
 			'amt_stamp_duty' 		=> $amt_stamp_duty,
-			'other_cost_fields' 	=> $post_data_other_cost_fields ? json_encode($post_data_other_cost_fields) : NULL,
+			'premium_computation_table' 	=> $premium_computation_table ? json_encode($premium_computation_table) : NULL,
 			'amt_pool_premium' 		=> $premium_U_total
 		];
 
@@ -1205,8 +1207,11 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 			}
 		}
 
-		// Any Remarks?
-		$CRF_PREMIUM_DATA['remarks'] = $__remarks;
+		// Common TXN Data
+		$CRF_PREMIUM_DATA['txn_details'] 	= $data['txn_details'];
+        $CRF_PREMIUM_DATA['remarks'] 		= $data['remarks'];
+		$CRF_PREMIUM_DATA['remarks'] 		= $__remarks;
+
 
 		/**
 		 * SHORT TERM POLICY?
@@ -1242,7 +1247,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
         $object_attributes = json_decode($policy_object->attributes);
 
         // Form Posted Data - Extra Fields Required to Perform Cost Calculation
-        $post_data_other_cost_fields = $data['other_cost_fields'] ?? NULL;
+        $premium_computation_table = $data['premium'] ?? NULL;
 
 
         // Tariff Extracts
@@ -1275,7 +1280,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
         $primary_tariff_vehicle = _PO_MOTOR_CVC_primary_tariff_vehicle($object_attributes, $default_tariff, $vehicle_age_in_yrs);
 
         // No Claim Discount - Years & Rate
-        $no_claim_discount      = $post_data_other_cost_fields['no_claim_discount'] ?? 0;
+        $no_claim_discount      = $premium_computation_table['no_claim_discount'] ?? 0;
         $no_claim_discount      = $no_claim_discount ? $no_claim_discount : 0;
         $year_no_claim_discount = $no_claim_discount ? _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, false, '')[$no_claim_discount] : 0;
 
@@ -1450,7 +1455,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
             // ----------------------------------------------------------------------------------
 
             // Discount on Voluntary Excess - GA ko X%
-            $dr_voluntary_excess        = $post_data_other_cost_fields['dr_voluntary_excess'] ?? FALSE;
+            $dr_voluntary_excess        = $premium_computation_table['dr_voluntary_excess'] ?? FALSE;
             $amount_voluntary_excess    = $dr_voluntary_excess
                                             ? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess]
                                             : 0.00;
@@ -1516,7 +1521,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
                     case IQB_MOTOR_CVC_TYPE_TRACTOR_POWER_TRILLER:
                     case IQB_MOTOR_CVC_TYPE_TEMPO:
                     case IQB_MOTOR_CVC_TYPE_PASSENGER_CARRIER:
-                        $flag_private_use = $post_data_other_cost_fields['flag_private_use'] ?? FALSE;
+                        $flag_private_use = $premium_computation_table['flag_private_use'] ?? FALSE;
                         $statement = "निजी प्रयोजनमा प्रयोग गरे वापत छुट: “घ” को {$tariff_record->dr_cvc_on_personal_use} प्रतिशत";
                         if( $flag_private_use )
                         {
@@ -1566,7 +1571,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
             }
 
             // Towing
-            $flag_towing = $post_data_other_cost_fields['flag_towing'] ?? FALSE;
+            $flag_towing = $premium_computation_table['flag_towing'] ?? FALSE;
             $__premium_A_row_towing = 0.00;
             if( $flag_towing )
             {
@@ -1712,8 +1717,8 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
                 'title_en'  => 'Pool risk insurance amounted to'
             ];
 
-            $flag_risk_mob          = $post_data_other_cost_fields['flag_risk_mob'] ?? NULL;
-            $flag_risk_terorrism    = $post_data_other_cost_fields['flag_risk_terorrism'] ?? NULL;
+            $flag_risk_mob          = $premium_computation_table['flag_risk_mob'] ?? NULL;
+            $flag_risk_terorrism    = $premium_computation_table['flag_risk_terorrism'] ?? NULL;
 
             // Mob/Strike
             $__premium_OO_row_1 = 0.00;
@@ -1721,7 +1726,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
             $__premium_OO_row_3 = 0.00;
             $__premium_OO_row_4 = 0.00;
             $__premium_OO_row_5 = 0.00;
-            $flag_risk_pool = $post_data_other_cost_fields['flag_risk_pool'] ?? NULL;
+            $flag_risk_pool = $premium_computation_table['flag_risk_pool'] ?? NULL;
             if($flag_risk_pool)
             {
             	// Mob/Strike
@@ -1849,7 +1854,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
         	'amt_sum_insured' 		=> $policy_object->amt_sum_insured,
             'amt_total_premium'  	=> $amt_total_premium,
             'amt_stamp_duty'    	=> $amt_stamp_duty,
-            'other_cost_fields'  	=> $post_data_other_cost_fields ? json_encode($post_data_other_cost_fields) : NULL,
+            'premium_computation_table'  	=> $premium_computation_table ? json_encode($premium_computation_table) : NULL,
             'amt_pool_premium' 		=> $premium_OO_total
         ];
 
@@ -1901,8 +1906,10 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
             }
         }
 
-        // Any Remarks?
-		$CRF_PREMIUM_DATA['remarks'] = $__remarks;
+		// Common TXN Data
+		$CRF_PREMIUM_DATA['txn_details'] 	= $data['txn_details'];
+        $CRF_PREMIUM_DATA['remarks'] 		= $data['remarks'];
+		$CRF_PREMIUM_DATA['remarks'] 		= $__remarks;
 
 
         /**
@@ -2674,10 +2681,9 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 	 * @param object $pfs_record		Portfolio Setting Record
 	 * @param object $tariff_record 	Portfolio Tariff Record
 	 * @param bool $formatted 			Return Sectioned or Formatted
-	 * @param string $return 			Return all rules or policy package specific
 	 * @return array
 	 */
-	function _TXN_MOTOR_premium_validation_rules($policy_record, $pfs_record, $tariff_record, $formatted = true, $return = 'specific' )
+	function _TXN_MOTOR_premium_validation_rules($policy_record, $pfs_record, $tariff_record, $formatted = false)
 	{
 		$CI =& get_instance();
 
@@ -2691,8 +2697,17 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 			 * Common to All Package Type
 			 * ----------------------------
 			 * Sampusti Bibaran and Remarks are common to all type of policy package.
+			 * This is the only required validation for Third Party
 			 */
-			'common_all' => [
+			'basic' => [
+				[
+	                'field' => 'amt_stamp_duty',
+	                'label' => 'Stamp Duty(Rs.)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+	                '_type'     => 'text',
+	                '_default' 	=> $pfs_record->stamp_duty,
+	                '_required' => true
+	            ],
 				[
 	                'field' => 'txn_details',
 	                'label' => 'Details/सम्पुष्टि विवरण',
@@ -2727,16 +2742,16 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 			 * ----------------------------
 			 * We only need stamp duty. The rest are auto computed from tariff.
 			 */
-			'third_party' => [
-				[
-	                'field' => 'amt_stamp_duty',
-	                'label' => 'Stamp Duty(Rs.)',
-	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
-	                '_type'     => 'text',
-	                '_default' 	=> $pfs_record->stamp_duty,
-	                '_required' => true
-	            ]
-			],
+			// 'third_party' => [
+			// 	[
+	  //               'field' => 'amt_stamp_duty',
+	  //               'label' => 'Stamp Duty(Rs.)',
+	  //               'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+	  //               '_type'     => 'text',
+	  //               '_default' 	=> $pfs_record->stamp_duty,
+	  //               '_required' => true
+	  //           ]
+			// ],
 
 			/**
 			 * Comprehensive Common Validation Rules
@@ -2745,7 +2760,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 			 */
 			'comprehensive_common' => [
 				[
-                    'field' => 'other_cost_fields[dr_voluntary_excess]',
+                    'field' => 'premium[dr_voluntary_excess]',
                     'label' => 'Voluntary Excess',
                     'rules' => 'trim|prep_decimal|decimal|max_length[5]',
                     '_key' 		=> 'dr_voluntary_excess',
@@ -2754,7 +2769,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
                     '_required' => false
                 ],
                 [
-                    'field' => 'other_cost_fields[no_claim_discount]',
+                    'field' => 'premium[no_claim_discount]',
                     'label' => 'No Claim Discount',
                     'rules' => 'trim|prep_decimal|decimal|max_length[5]',
                     '_key' 		=> 'no_claim_discount',
@@ -2763,7 +2778,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
                     '_required' => false
                 ],
                 [
-                    'field' => 'other_cost_fields[flag_risk_pool]',
+                    'field' => 'premium[flag_risk_pool]',
                     'label' => 'Pool Risk (जोखिम समूह बीमा)',
                     'rules' => 'trim|integer|in_list[1]',
                     '_key' 		=> 'flag_risk_pool',
@@ -2772,14 +2787,14 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
                     '_required' => false,
                     '_help_text' => '<small>This covers both (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा) & (आतंककारी/विध्वंशात्मक कार्य जोखिम बीमा) </small>'
                 ],
-                [
-	                'field' => 'amt_stamp_duty',
-	                'label' => 'Stamp Duty(Rs.)',
-	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
-	                '_type'     => 'text',
-	                '_default' 	=> $pfs_record->stamp_duty,
-	                '_required' => true
-	            ]
+             //    [
+	            //     'field' => 'amt_stamp_duty',
+	            //     'label' => 'Stamp Duty(Rs.)',
+	            //     'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+	            //     '_type'     => 'text',
+	            //     '_default' 	=> $pfs_record->stamp_duty,
+	            //     '_required' => true
+	            // ]
 			],
 
 			/**
@@ -2791,7 +2806,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 
 				// Commercial Use
 				[
-                    'field' => 'other_cost_fields[flag_commercial_use]',
+                    'field' => 'premium[flag_commercial_use]',
                     'label' => 'Commercial Use (निजी प्रयोजनको लागि भाडामा दिएको)',
                     'rules' => 'trim|integer|in_list[1]',
                     '_key' 		=> 'flag_commercial_use',
@@ -2802,7 +2817,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 
                 // Pay for Towing
 				[
-                    'field' => 'other_cost_fields[flag_towing]',
+                    'field' => 'premium[flag_towing]',
                     'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
                     'rules' => 'trim|integer|in_list[1]',
                     '_key' 		=> 'flag_towing',
@@ -2820,7 +2835,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 			'comprehensive_cvc' => [
 				// Private Use
 				[
-                    'field' => 'other_cost_fields[flag_private_use]',
+                    'field' => 'premium[flag_private_use]',
                     'label' => 'Private Use',
                     'rules' => 'trim|integer|in_list[1]',
                     '_key' 		=> 'flag_private_use',
@@ -2832,7 +2847,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 
                 // Pay for Towing
 				[
-                    'field' => 'other_cost_fields[flag_towing]',
+                    'field' => 'premium[flag_towing]',
                     'label' => 'Towing (दुर्घटना भएको सवारी साधनलाई सडकसम्म निकाल्दा लाग्ने खर्चको बीमा)',
                     'rules' => 'trim|integer|in_list[1]',
                     '_key' 		=> 'flag_towing',
@@ -2844,37 +2859,30 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 		];
 
 		/**
-		 * Do we need to return all validation rules or Policy Package Specific only?
+		 * Common validation rules for all type of policy package and portfolios
 		 */
-		$rules = [];
-		if( $return === 'specific')
+		$rules['basic'] = $validation_rules['basic'];
+		if($policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
-			if($policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
-			{
-				$rules['third_party'] = $validation_rules['third_party'];
-				$rules['common_all'] = $validation_rules['common_all'];
-			}
-			else
-			{
-				$rules['comprehensive_common'] = $validation_rules['comprehensive_common'];
+			/**
+			 * Let's add premium validation fields
+			 */
+			$rules['premium'] = $validation_rules['comprehensive_common'];
 
-				// Portfolio Specific Rules
-				if( (int)$policy_record->portfolio_id === IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID )
-				{
-					$rules['comprehensive_pvc'] = $validation_rules['comprehensive_pvc'];
-				}
-				elseif( (int)$policy_record->portfolio_id === IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID )
-				{
-					$rules['comprehensive_cvc'] = $validation_rules['comprehensive_cvc'];
-				}
-
-				// common to all
-				$rules['common_all'] = $validation_rules['common_all'];
+			// Portfolio Specific Rules
+			if( (int)$policy_record->portfolio_id === IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID )
+			{
+				// $rules['comprehensive_pvc'] = $validation_rules['comprehensive_pvc'];
+				$rules['premium'] = array_merge($rules['premium'], $validation_rules['comprehensive_pvc']);
 			}
-		}
-		else
-		{
-			$rules = $validation_rules;
+			elseif( (int)$policy_record->portfolio_id === IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID )
+			{
+				// $rules['comprehensive_cvc'] = $validation_rules['comprehensive_cvc'];
+				$rules['premium'] = array_merge($rules['premium'], $validation_rules['comprehensive_cvc']);
+			}
+
+			// common to all
+			// $rules['common_all'] = $validation_rules['common_all'];
 		}
 
 		/**
@@ -2890,7 +2898,6 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 		{
 			$v_rules = array_merge($v_rules, $r);
 		}
-
 		return $v_rules;
 
 	}

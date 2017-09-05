@@ -45,7 +45,6 @@ class Policy_txn_model extends MY_Model
         $this->load->helper('policy');
         $this->load->helper('object');
 
-        $this->load->model('policy_crf_model');
 
         // Set validation rules
         $this->validation_rules();
@@ -201,12 +200,7 @@ class Policy_txn_model extends MY_Model
                      ->update($this->table_name, $reset_data);
 
             /**
-             * Task 2: Reset Policy Cost Reference Record
-             */
-            $this->policy_crf_model->reset($record->id);
-
-            /**
-             * Task 3: Clear Cache (Speciic to this Policy ID)
+             * Task 2: Clear Cache (Speciic to this Policy ID)
              */
             $cache_var = 'policy_txn_' . $policy_id;
             $this->clear_cache($cache_var);
@@ -531,7 +525,7 @@ class Policy_txn_model extends MY_Model
      * @param array $data
      * @return bool
      */
-    public function save($id, $crf_data, $txn_data)
+    public function save($id, $txn_data)
     {
         /**
          * ==================== TRANSACTIONS BEGIN =========================
@@ -544,19 +538,13 @@ class Policy_txn_model extends MY_Model
         $this->db->db_debug = FALSE;
         $this->db->trans_start();
 
-
                 /**
-                 * Task 1: Update CRF Data
-                 */
-                // $this->policy_crf_model->save($id, $crf_data);
-
-                /**
-                 * Task 2: Update TXN Data
+                 * Task 1: Update TXN Data
                  */
                 parent::update($id, $txn_data, TRUE);
 
                 /**
-                 * Task 3: Log activity
+                 * Task 2: Log activity
                  */
                 $this->log_activity($id, 'E');
 
