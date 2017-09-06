@@ -585,7 +585,7 @@ class Objects extends MY_Controller
         		/**
 				 * Compute Sum Insured Amount
 				 */
-        		$object_data['amt_sum_insured'] = _OBJ_sum_insured_amount($portfolio_id, $data['object']);
+        		$object_data['amt_sum_insured'] = _OBJ_compute_sum_insured_amount($portfolio_id, $data['object']);
 
         		// Insert or Update?
 				if($action === 'add')
@@ -820,7 +820,7 @@ class Objects extends MY_Controller
         		 * Prepare Post Data
         		 */
         		$post_data['attributes'] 		= json_encode($data['object']);
-	    		$post_data['amt_sum_insured'] 	= _OBJ_sum_insured_amount($record->portfolio_id, $data['object']);
+	    		$post_data['amt_sum_insured'] 	= _OBJ_compute_sum_insured_amount($record->portfolio_id, $data['object']);
         		$audit_data 					= $this->_get_endorsement_audit_data($record, $post_data);
 
         		/**
