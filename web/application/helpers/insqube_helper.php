@@ -726,9 +726,19 @@ if ( ! function_exists('load_portfolio_helper'))
          * -----
          * Fire Portfolio Helper Functions
          */
-        if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
         {
             $CI->load->helper('fire');
+        }
+
+        /**
+         * MARINE
+         * -----
+         * Marine Portfolio Helper Functions
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+        {
+            $CI->load->helper('marine');
         }
     }
 }

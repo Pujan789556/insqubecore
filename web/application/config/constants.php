@@ -209,6 +209,30 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE',  [
 
 /*
 |--------------------------------------------------------------------------
+| MARINE PORTFOLIO - SUB-PORTFOLIOS ID
+|--------------------------------------------------------------------------
+|
+| WARNING: Should be exactly same as in database, add here if you add in db
+|
+*/
+define('IQB_SUB_PORTFOLIO_MARINE_AIR_TRANSIT_ID', 38);
+define('IQB_SUB_PORTFOLIO_MARINE_MARINE_TRANSIT_ID', 39);
+define('IQB_SUB_PORTFOLIO_MARINE_OPEN_MARINE_ID', 40);
+define('IQB_SUB_PORTFOLIO_MARINE_ROAD_AIR_TRANSIT_ID', 41);
+define('IQB_SUB_PORTFOLIO_MARINE_ROAD_TANSIT_ID', 42);
+
+// SUB PORTFOLIO LIST
+define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE',  [
+	IQB_SUB_PORTFOLIO_MARINE_AIR_TRANSIT_ID 		=> 'Air Transit',
+	IQB_SUB_PORTFOLIO_MARINE_MARINE_TRANSIT_ID 		=> 'Marine Transit',
+	IQB_SUB_PORTFOLIO_MARINE_OPEN_MARINE_ID 		=> 'Open Marine',
+	IQB_SUB_PORTFOLIO_MARINE_ROAD_AIR_TRANSIT_ID 	=> 'Road/Air Transit'
+	IQB_SUB_PORTFOLIO_MARINE_ROAD_TANSIT_ID			=>  'Road Transit'
+]);
+
+
+/*
+|--------------------------------------------------------------------------
 | MOTOR PORTFOLIO - SUB-PORTFOLIOS ID
 |--------------------------------------------------------------------------
 |
