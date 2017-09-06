@@ -33,6 +33,9 @@ if ( ! function_exists('_OBJ_row_snippet'))
 	{
 		$snippet = '';
 
+		// Load Portfolio Helper
+		load_portfolio_helper($record->portfolio_id);
+
 		/**
 		 * MOTOR
 		 * -----
@@ -40,9 +43,6 @@ if ( ! function_exists('_OBJ_row_snippet'))
 		 */
 		if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
-			// Load Portfolio Helper
-			load_portfolio_helper($record->portfolio_id);
-
 			$snippet = _OBJ_MOTOR_row_snippet($record, $_flag__show_widget_row);
 		}
 
@@ -53,10 +53,17 @@ if ( ! function_exists('_OBJ_row_snippet'))
 		 */
 		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
-			// Load Portfolio Helper
-			load_portfolio_helper($record->portfolio_id);
-
 			$snippet = _OBJ_FIRE_row_snippet($record, $_flag__show_widget_row);
+		}
+
+		/**
+		 * MARINE
+		 * -----
+		 * Snippet Text
+		 */
+		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+		{
+			$snippet = _OBJ_MARINE_row_snippet($record, $_flag__show_widget_row);
 		}
 
 		return $snippet;
@@ -81,6 +88,9 @@ if ( ! function_exists('_OBJ_select_text'))
 	{
 		$snippet = '';
 
+		// Load Portfolio Helper
+		load_portfolio_helper($record->portfolio_id);
+
 		/**
 		 * MOTOR
 		 * -----
@@ -88,9 +98,6 @@ if ( ! function_exists('_OBJ_select_text'))
 		 */
 		if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
-			// Load Portfolio Helper
-			load_portfolio_helper($record->portfolio_id);
-
 			$snippet = _OBJ_MOTOR_select_text($record);
 		}
 
@@ -101,10 +108,17 @@ if ( ! function_exists('_OBJ_select_text'))
 		 */
 		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
-			// Load Portfolio Helper
-			load_portfolio_helper($record->portfolio_id);
-
 			$snippet = _OBJ_FIRE_select_text($record);
+		}
+
+		/**
+		 * MARINE
+		 * -----
+		 * SELECT Text
+		 */
+		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+		{
+			$snippet = _OBJ_MARINE_select_text($record);
 		}
 
 		return $snippet;
@@ -128,6 +142,9 @@ if ( ! function_exists('_OBJ_validation_rules'))
 	{
 		$v_rules = [];
 
+		// Load Portfolio Helper
+		load_portfolio_helper($portfolio_id);
+
 		/**
 		 * MOTOR
 		 * -----
@@ -135,9 +152,6 @@ if ( ! function_exists('_OBJ_validation_rules'))
 		 */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
-			// Load Portfolio Helper
-			load_portfolio_helper($portfolio_id);
-
 			$v_rules = _OBJ_MOTOR_validation_rules( $portfolio_id, $formatted );
 		}
 
@@ -149,9 +163,6 @@ if ( ! function_exists('_OBJ_validation_rules'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
-			// Load Portfolio Helper
-			load_portfolio_helper($portfolio_id);
-
 			$v_rules = _OBJ_FIRE_validation_rules( $portfolio_id, $formatted );
 		}
 
@@ -162,9 +173,6 @@ if ( ! function_exists('_OBJ_validation_rules'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
-			// Load Portfolio Helper
-			load_portfolio_helper($portfolio_id);
-
 			$v_rules = _OBJ_MARINE_validation_rules( $portfolio_id, $formatted );
 		}
 
@@ -209,6 +217,16 @@ if ( ! function_exists('_OBJ_attribute_form'))
 			$attribute_form = 'objects/forms/_form_object_fire';
 		}
 
+		/**
+		 * MARINE
+		 * -----
+		 * For all type of marine portfolios, we have same object form
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+		{
+			$attribute_form = 'objects/forms/_form_object_marine';
+		}
+
 		return $attribute_form;
 	}
 }
@@ -250,9 +268,16 @@ if ( ! function_exists('_OBJ_policy_package_dropdown'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
-			// Load Portfolio Helper
-			load_portfolio_helper($portfolio_id);
+			$dropdown = _OBJ_NA_policy_package_dropdown($flag_blank_select);
+		}
 
+		/**
+		 * MARINE
+		 * -----
+		 * For all type of MARINE portfolios, we do not need any policy package
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+		{
 			$dropdown = _OBJ_NA_policy_package_dropdown($flag_blank_select);
 		}
 
@@ -303,6 +328,9 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 	{
 		$amt_sum_insured =  0.00;
 
+		// Load Portfolio Helper
+		load_portfolio_helper($portfolio_id);
+
 		/**
 		 * MOTOR
 		 * -----
@@ -310,9 +338,6 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 		 */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
-			// Load Portfolio Helper
-			load_portfolio_helper($portfolio_id);
-
 			$amt_sum_insured = _OBJ_MOTOR_compute_sum_insured_amount($portfolio_id, $data);
 		}
 
@@ -323,10 +348,17 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
-			// Load Portfolio Helper
-			load_portfolio_helper($portfolio_id);
-
 			$amt_sum_insured = _OBJ_FIRE_compute_sum_insured_amount($portfolio_id, $data);
+		}
+
+		/**
+		 * MARINE
+		 * -----
+		 * Compute Sum Insured Amount For this Policy Object
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+		{
+			$amt_sum_insured = _OBJ_MARINE_compute_sum_insured_amount($portfolio_id, $data);
 		}
 
 		return $amt_sum_insured;
