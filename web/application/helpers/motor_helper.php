@@ -2614,59 +2614,6 @@ if ( ! function_exists('_OBJ_MOTOR_carrying_unit_dropdown'))
 	}
 }
 
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_OBJ_MOTOR_transactional_attributes'))
-{
-	/**
-	 * Get the list of transactional attributes for Motor Portfolio
-	 *
-	 * These are the object attributes, whose change will affect on
-	 * 	- Sum Insured Amount
-	 * 	- Premium
-	 *
-	 * For tariff-portfolio, we must need this list to generate cost reference table.
-	 *
-	 * @param integer $portfolio_id  Portfolio ID
-	 * @return float
-	 */
-	function _OBJ_MOTOR_transactional_attributes( $portfolio_id )
-	{
-		return  [
-
-			// Vehicle Ownership
-			'ownership',
-
-			// Disable Friendly Vehicle?
-			'flag_mcy_df',
-
-			// Engine Capacity Unig
-			'ec_unit',
-
-			// Engine Capacity
-			'engine_capacity',
-
-			// Vehicle Price
-			'price_vehicle',
-
-			// Accessories Price
-			'price_accessories',
-
-			// Carrying Uning
-			'carrying_unit',
-
-			// Carrying Capacity
-			'carrying_capacity',
-
-			// Staff Count
-			'staff_count',
-
-			// Trailer Price
-			'trailer_price'
-		];
-	}
-}
-
 
 // ------------------------------------------------------------------------
 // POLICY TRANSACTION HELPER FUNCTIONS FOR MOTOR PORTFOLIO

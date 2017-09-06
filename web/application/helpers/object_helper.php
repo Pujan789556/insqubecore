@@ -335,48 +335,4 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_transactional_attributes'))
-{
-	/**
-	 * Get the list of transactional attributes
-	 *
-	 * These are the object attributes, whose change will affect on
-	 * 	- Sum Insured Amount
-	 * 	- Premium
-	 *
-	 * For tariff-portfolio, we must need this list to generate cost reference table.
-	 *
-	 * @param integer $portfolio_id  Portfolio ID
-	 * @return float
-	 */
-	function _OBJ_transactional_attributes( $portfolio_id )
-	{
-		$attributes =  [];
-
-		/**
-		 * MOTOR
-		 */
-		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
-		{
-			// Load Portfolio Helper
-			load_portfolio_helper($portfolio_id);
-
-			$attributes = _OBJ_MOTOR_transactional_attributes($portfolio_id);
-		}
-
-		/**
-		 * FIRE
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
-		{
-			// Load Portfolio Helper
-			load_portfolio_helper($portfolio_id);
-
-			$amt_sum_insured = _OBJ_FIRE_transactional_attributes($portfolio_id);
-		}
-
-		return $attributes;
-	}
-}
-
 

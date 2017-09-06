@@ -464,33 +464,6 @@ if ( ! function_exists('_FIRE_compute_premium_per_risk_per_item'))
 	}
 }
 
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_OBJ_FIRE_transactional_attributes'))
-{
-	/**
-	 * Get the list of transactional attributes for FIRE Portfolio
-	 *
-	 * These are the object attributes, whose change will affect on
-	 * 	- Sum Insured Amount
-	 * 	- Premium
-	 *
-	 * For tariff-portfolio, we must need this list to generate cost reference table.
-	 *
-	 * @param integer $portfolio_id  Portfolio ID
-	 * @return float
-	 */
-	function _OBJ_FIRE_transactional_attributes( $portfolio_id )
-	{
-		echo '@TODO: _OBJ_FIRE_transactional_attributes'; exit;
-		return  [
-
-			// Each Item's Sum Insured Value
-			'sum_insured'
-		];
-	}
-}
-
 
 // ------------------------------------------------------------------------
 // POLICY TRANSACTION HELPER FUNCTIONS
