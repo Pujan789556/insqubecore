@@ -2404,7 +2404,7 @@ if ( ! function_exists('_OBJ_MOTOR_policy_package_dropdown'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_MOTOR_sum_insured_amount'))
+if ( ! function_exists('_OBJ_MOTOR_compute_sum_insured_amount'))
 {
 	/**
 	 * Get Sum Insured Amount of Policy Object - Motor Portfolio
@@ -2415,7 +2415,7 @@ if ( ! function_exists('_OBJ_MOTOR_sum_insured_amount'))
 	 * @param array $data 	Object Data
 	 * @return float
 	 */
-	function _OBJ_MOTOR_sum_insured_amount( $portfolio_id, $data )
+	function _OBJ_MOTOR_compute_sum_insured_amount( $portfolio_id, $data )
 	{
 		$price_vehicle 		= $data['price_vehicle'] 		? floatval($data['price_vehicle']) : 0.00;
 		$price_accessories 	= $data['price_accessories'] 	? floatval($data['price_accessories']) : 0.00;

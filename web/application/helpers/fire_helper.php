@@ -408,10 +408,10 @@ if ( ! function_exists('_OBJ_FIRE_item_ownership_dropdown'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_FIRE_sum_insured_amount'))
+if ( ! function_exists('_OBJ_FIRE_compute_sum_insured_amount'))
 {
 	/**
-	 * Get Sum Insured Amount of Policy Object - FIRE Portfolio
+	 * Compute Sum Insured Amount of Policy Object - FIRE Portfolio
 	 *
 	 * Compute sum insured amount based on object's portfolio and return.
 	 *
@@ -419,7 +419,7 @@ if ( ! function_exists('_OBJ_FIRE_sum_insured_amount'))
 	 * @param array $data 	Object Data
 	 * @return float
 	 */
-	function _OBJ_FIRE_sum_insured_amount( $portfolio_id, $data )
+	function _OBJ_FIRE_compute_sum_insured_amount( $portfolio_id, $data )
 	{
 		/**
 		 * A single Fire Policy may hold multiple Items

@@ -155,6 +155,19 @@ if ( ! function_exists('_OBJ_validation_rules'))
 			$v_rules = _OBJ_FIRE_validation_rules( $portfolio_id, $formatted );
 		}
 
+		/**
+		 * MARINE
+		 * -----
+		 * For all type of MARINE portfolios, we have same validation rules
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+		{
+			// Load Portfolio Helper
+			load_portfolio_helper($portfolio_id);
+
+			$v_rules = _OBJ_MARINE_validation_rules( $portfolio_id, $formatted );
+		}
+
 
 		return $v_rules;
 	}
@@ -275,7 +288,7 @@ if ( ! function_exists('_OBJ_NA_policy_package_dropdown'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_sum_insured_amount'))
+if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 {
 	/**
 	 * Get Sum Insured Amount of Policy Object
@@ -286,7 +299,7 @@ if ( ! function_exists('_OBJ_sum_insured_amount'))
 	 * @param array $data 	Object Data
 	 * @return float
 	 */
-	function _OBJ_sum_insured_amount( $portfolio_id, $data )
+	function _OBJ_compute_sum_insured_amount( $portfolio_id, $data )
 	{
 		$amt_sum_insured =  0.00;
 
@@ -300,7 +313,7 @@ if ( ! function_exists('_OBJ_sum_insured_amount'))
 			// Load Portfolio Helper
 			load_portfolio_helper($portfolio_id);
 
-			$amt_sum_insured = _OBJ_MOTOR_sum_insured_amount($portfolio_id, $data);
+			$amt_sum_insured = _OBJ_MOTOR_compute_sum_insured_amount($portfolio_id, $data);
 		}
 
 		/**
@@ -313,7 +326,7 @@ if ( ! function_exists('_OBJ_sum_insured_amount'))
 			// Load Portfolio Helper
 			load_portfolio_helper($portfolio_id);
 
-			$amt_sum_insured = _OBJ_FIRE_sum_insured_amount($portfolio_id, $data);
+			$amt_sum_insured = _OBJ_FIRE_compute_sum_insured_amount($portfolio_id, $data);
 		}
 
 		return $amt_sum_insured;
