@@ -15,7 +15,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Update Premium
  * ---------------
- * Allowed Status: draft | unverified
+ * Allowed Status: draft
  */
 if( is_policy_editable($record->status, FALSE) ):
     $txn_type = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL:   IQB_POLICY_TXN_TYPE_FRESH;
@@ -38,7 +38,13 @@ endif;
 /**
  * Status "Back to Draft"
  */
-if( $record->status === IQB_POLICY_STATUS_VERIFIED && $this->dx_auth->is_authorized('policies', 'status.to.draft') ): ?>
+if(
+    $record->status === IQB_POLICY_STATUS_VERIFIED
+        &&
+    $this->dx_auth->is_authorized('policies', 'status.to.draft')
+        &&
+    $txn_record->status === IQB_POLICY_TXN_STATUS_VERIFIED
+): ?>
     <a href="#"
         title="Back to Draft"
         data-confirm="true"
