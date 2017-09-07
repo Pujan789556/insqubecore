@@ -1832,7 +1832,7 @@ class Policy_txn extends MY_Controller
 
         $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
         $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
-        $agent_commission_amount 					= $txn_record->amt_agent_commission;
+        $agent_commission_amount 					= $txn_record->amt_agent_commission ?? NULL;
 
 		// --------------------------------------------------------------------
 
@@ -1984,8 +1984,10 @@ class Policy_txn extends MY_Controller
 
         /**
          * Additional Debit/Credit Rows if Agent Commission Apply?
+         *
+         * NOTE: You must have $agent_commission_amount (NOT NULL or Non Zero Value)
          */
-        if( $policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $policy_record->agent_id )
+        if( $agent_commission_amount &&  $policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $policy_record->agent_id )
         {
         	// Agency Commission
         	$dr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION;
