@@ -1417,7 +1417,10 @@ class Policy_txn extends MY_Controller
 				$txn_record = $this->policy_txn_model->get($txn_record->id);
 				$policy_record = $this->policy_model->get($txn_record->policy_id);
 
-
+				/**
+				 * Load Portfolio Specific Helper File
+				 */
+				load_portfolio_helper($policy_record->portfolio_id);
 
 				/**
 				 * What to reload/render after success?

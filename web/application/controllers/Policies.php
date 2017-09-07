@@ -1398,6 +1398,13 @@ class Policies extends MY_Controller
 				 */
 				$record = $this->policy_model->get($id);
 				$view = 'policies/tabs/_tab_overview';
+
+				/**
+				 * Load Portfolio Specific Helper File
+				 */
+				load_portfolio_helper($record->portfolio_id);
+
+
 				/**
 				 * Get the Policy Fresh/Renewal Txn Record
 				 */
@@ -1533,15 +1540,10 @@ class Policies extends MY_Controller
 		private function __status_qualifies($to_updown_status, $record, $terminate_on_fail = TRUE)
 		{
 			/**
-			 * Get the Current Txn Record
-			 */
-			$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy($record->id, IQB_POLICY_TXN_TYPE_FRESH);
-
-			/**
 			 * Qualifies the status ladder?
 			 */
-			$__flag_passed 	= $this->policy_model->status_qualifies($txn_record->status, $to_updown_status);
-			$failed_message = '';
+			$__flag_passed 	= $this->policy_model->status_qualifies($record->status, $to_updown_status);
+			$failed_message = 'Status does not qualifies to upgrade/downgrade.';
 
 			/**
 			 *  You can not manually update/downgrade the following status
@@ -1558,6 +1560,11 @@ class Policies extends MY_Controller
 			{
 				$failed_message = 'No manually status update/downgrade to supplied status is not allowed.';
 			}
+
+			/**
+			 * Get the Current Txn Record
+			 */
+			$txn_record = $__flag_passed === TRUE ? $this->policy_txn_model->get_fresh_renewal_by_policy($record->id, IQB_POLICY_TXN_TYPE_FRESH) : NULL;
 
 			/**
 			 * Premium Must be Updated Before Verifying
