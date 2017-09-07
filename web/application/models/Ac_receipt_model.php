@@ -15,7 +15,7 @@ class Ac_receipt_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'receipt_code', 'invoice_id', 'customer_id', 'adjustment_amount', 'amount', 'received_in', 'received_in_date', 'flag_printed', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'receipt_code', 'invoice_id', 'customer_id', 'adjustment_amount', 'amount', 'received_in', 'received_in_date', 'received_in_ref', 'flag_printed', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 

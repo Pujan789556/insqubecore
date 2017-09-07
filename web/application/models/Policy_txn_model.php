@@ -533,12 +533,10 @@ class Policy_txn_model extends MY_Model
         /**
          * Task 1: Object Changes
          */
-        $amt_sum_insured = FALSE;
         $audit_object = $record->audit_object ? json_decode($record->audit_object) : NULL;
         if( $audit_object )
         {
             $data = (array)$audit_object->new;
-            $amt_sum_insured = $data['amt_sum_insured'];
             $this->object_model->commit_endorsement($obj_cust->object_id, $data);
         }
 
@@ -561,14 +559,6 @@ class Policy_txn_model extends MY_Model
         if( $audit_policy )
         {
             $policy_data = (array)$audit_policy->new;
-        }
-
-        /**
-         * Update Current Sum Insured Amount From Object
-         */
-        if( $amt_sum_insured !== FALSE )
-        {
-            $policy_data['cur_amt_sum_insured'] = $amt_sum_insured;
         }
 
         // Update Policy Table

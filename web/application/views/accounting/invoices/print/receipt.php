@@ -71,9 +71,16 @@
             <div class="col-xs-12 table-responsive receipt-box">
                 <p class="receipt-description">
                     Received with thanks from <strong class="border-b"><?php echo $invoice_record->customer_full_name?></strong>,
+
                     a sum of rupees <strong class="border-b"><?php echo ucfirst( number_to_words( number_format($invoice_record->amount, 2, '.', '') ) );?> (<?php echo number_format($invoice_record->amount, 2, '.', '')?>)</strong>
-                    in <strong class="border-b"><?php echo IQB_AC_PAYMENT_RECEIPT_MODES[$record->received_in]?></strong>
+
+                    in <strong class="border-b"> <?php echo IQB_AC_PAYMENT_RECEIPT_MODES[$record->received_in]?></strong>
+                    <?php if($record->received_in_ref):?>
+                        <span class="border-b">( Ref: <?php echo $record->received_in_ref ?>)</span>
+                    <?php endif ?>
+
                     dated <strong class="border-b"><?php echo $record->received_in_date ?? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'?></strong>
+
                     against Policy/Invoice No. <strong class="border-b"><?php echo $invoice_record->policy_code?> / <?php echo $invoice_record->invoice_code?></strong>.
                 </p>
             </div>

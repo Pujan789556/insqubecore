@@ -2779,7 +2779,6 @@ class Policy_txn extends MY_Controller
              * Disable DB Debugging
              */
             $this->db->db_debug = FALSE;
-            // $this->db->trans_start();
             $this->db->trans_begin();
 
 
@@ -2843,6 +2842,7 @@ class Policy_txn extends MY_Controller
                 		'amount' 			=> $invoice_record->amount,
                 		'received_in'		=> $payment_data['received_in'],
                 		'received_in_date'	=> $payment_data['received_in_date'] ? $payment_data['received_in_date'] : NULL,
+                		'received_in_ref' 	=> $payment_data['received_in_ref'] ? $payment_data['received_in_ref'] : NULL,
                 	];
                 	$this->load->model('ac_receipt_model');
                     try{
@@ -3056,6 +3056,13 @@ class Policy_txn extends MY_Controller
 	                    '_extra_attributes' => 'data-provide="datepicker-inline"',
 	                    '_required' => false
 	                ],
+	                [
+	                    'field' => 'received_in_ref',
+	                    'label' => 'Reference (Cheque No./Draft No.)',
+	                    'rules' => 'trim|max_length[100]',
+	                    '_type' => 'text',
+	                ]
+
 	            ];
 	        }
 }

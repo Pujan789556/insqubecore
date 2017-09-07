@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'proposer', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'cur_amt_sum_insured', 'cur_amt_total_premium', 'cur_amt_pool_premium', 'cur_amt_commissionable', 'cur_amt_agent_commission', 'cur_amt_stamp_duty', 'cur_amt_vat', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'proposer', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
     protected $validation_rules = [];
 
