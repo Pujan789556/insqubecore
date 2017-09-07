@@ -95,10 +95,11 @@ if($trailer_elements):
         if(et === 'ifChecked' || $this.prop('checked') === true){
             $reg_field.val('TO BE INTIMATED');
             $reg_date_field.val('');
-
             $reg_box.hide(500);
             $reg_date_box.hide(500);
-        }else{
+        }else if(typeof et === 'undefined' || et === 'ifUnchecked'){
+            $reg_field.val('');
+            $reg_date_field.val('');
             $reg_box.show(500);
             $reg_date_box.show(500);
         }
