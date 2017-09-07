@@ -175,7 +175,7 @@ if(
             data-message="Are you sure you want to do this?<br/>This will automatically generate VOUCHER for this transaction."
             data-url="<?php echo site_url('policy_txn/voucher/' . $record->id );?>"
         ><i class="fa fa-money"></i> Voucher</a>
-    <?php else if($this->dx_auth->is_authorized('policy_txn', 'status.to.active')): ?>
+    <?php elseif($this->dx_auth->is_authorized('policy_txn', 'status.to.active')): ?>
         <a href="#"
             title="Activate Transaction/Endorsement"
             data-toggle="tooltip"
