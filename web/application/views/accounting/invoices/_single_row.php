@@ -21,6 +21,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<i class="fa fa-pencil-square-o margin-r-5"></i><i class="fa fa-caret-down"></i></button>
 			<ul class="dropdown-menu pull-right" role="menu">
 				<?php
+				$policy_id = $record->policy_id ?? ( $policy_id ?? NULL );
+				if($policy_id):?>
+					<li>
+		                <a href="<?php echo site_url('policies/schedule/' . $policy_id  );?>"
+		                    title="Print Schedule"
+		                    target="_blank"
+		                    data-toggle="tooltip">
+		                    <i class="fa fa-print"></i> Print Schedule
+		                </a>
+	                </li><li class="divider"></li>
+				<?php
+				endif;
+
 				/**
 				 * Internal Voucher - Policy Voucher to Generate Invoice
 				 */

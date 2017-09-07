@@ -109,6 +109,7 @@ class Ac_invoices extends MY_Controller
 		}
 
 		$data = [
+			'policy_id' => NULL,
 			'records' => $records,
 			'next_id' => $next_id,
 			'next_url' => $next_id ? site_url( 'ac_invoices/page/r/' . $next_id ) : NULL
@@ -794,7 +795,7 @@ class Ac_invoices extends MY_Controller
 	//  FLAG AS PRINT
 	// --------------------------------------------------------------------
 
-    public function printed($type, $id)
+    public function printed($type, $id, $policy_id = NULL)
     {
     	/**
 		 * Valid Type?
@@ -868,7 +869,7 @@ class Ac_invoices extends MY_Controller
 		/**
 		 * Update The Row
 		 */
-		$row_html = $this->load->view('accounting/invoices/_single_row', ['record' => $record], TRUE);
+		$row_html = $this->load->view('accounting/invoices/_single_row', ['record' => $record, 'policy_id' => $policy_id], TRUE);
 		$ajax_data = [
 			'message' => 'Successfully Updated',
 			'status'  => 'success',
