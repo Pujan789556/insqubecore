@@ -1404,6 +1404,12 @@ class Policy_txn extends MY_Controller
 
 			if( $this->policy_txn_model->update_status($txn_record, $to_status_code) )
 			{
+				/**
+				 * Updated Transaction & Policy Record
+				 */
+				$txn_record = $this->policy_txn_model->get($txn_record->id);
+				$policy_record = $this->policy_model->get($txn_record->policy_id);
+
 
 				/**
 				 * Post Tasks on Transaction Activation
@@ -1420,11 +1426,6 @@ class Policy_txn extends MY_Controller
 					$this->_sms_activation($txn_record, $policy_record);
 				}
 
-				/**
-				 * Updated Transaction & Policy Record
-				 */
-				$txn_record = $this->policy_txn_model->get($txn_record->id);
-				$policy_record = $this->policy_model->get($txn_record->policy_id);
 
 				/**
 				 * Load Portfolio Specific Helper File
