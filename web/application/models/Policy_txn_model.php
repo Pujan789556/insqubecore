@@ -753,6 +753,23 @@ class Policy_txn_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Get RI-Approval Flag for Given Policy
+     *
+     * @param integer $policy_id
+     * @return integer
+     */
+    public function get_flag_ri_approval_by_policy($policy_id)
+    {
+        return $this->db->select('PTXN.flag_ri_approval')
+                        ->from($this->table_name . ' AS PTXN')
+                        ->where('PTXN.policy_id', $policy_id)
+                        ->limit(1)
+                        ->get()->row()->flag_ri_approval;
+    }
+
+    // ----------------------------------------------------------------
+
 
     /**
      * Delete Cache on Update/Delete Records

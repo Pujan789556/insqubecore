@@ -327,6 +327,15 @@ class Policy_txn extends MY_Controller
 				if($action === 'add')
 				{
 					// echo '<pre>'; print_r($data);exit;
+
+					/**
+					 * RI-Approval Required?
+					 *
+					 * If Fresh/Renewal Transaction has RI-Approval Flag set, we must set this
+					 * for all the subsequent endorsements regardless of their types
+					 */
+					$data['flag_ri_approval'] = $this->policy_txn_model->get_flag_ri_approval_by_policy( $policy_record->id );
+
 					$done = $this->policy_txn_model->save_endorsement($data, TRUE); // No Validation on Model
 				}
 				else
