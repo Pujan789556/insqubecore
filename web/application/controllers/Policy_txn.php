@@ -1620,11 +1620,11 @@ class Policy_txn extends MY_Controller
 			{
 				if( (int)$txn_record->flag_ri_approval === IQB_FLAG_ON )
 				{
-					$__flag_passed = $txn_record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED
+					$__flag_passed = $txn_record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED;
 				}
 				else
 				{
-					$__flag_passed = $txn_record->status === IQB_POLICY_TXN_STATUS_VERIFIED
+					$__flag_passed = $txn_record->status === IQB_POLICY_TXN_STATUS_VERIFIED;
 				}
 			}
 
