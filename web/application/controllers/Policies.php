@@ -1258,6 +1258,11 @@ class Policies extends MY_Controller
 			], 404);
 		}
 
+		/**
+		 * Load Portfolio Specific Helper File
+		 */
+		load_portfolio_helper($record->portfolio_id);
+
 
 
 		$data = [
