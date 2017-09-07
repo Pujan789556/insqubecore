@@ -1087,7 +1087,7 @@ class Policy_model extends MY_Model
          */
         $policy_type    = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH;
         $params         = [$policy_type, $record->id, $this->dx_auth->get_user_id()];
-        $sql            = "SELECT `f_generate_policy_number`(?, ?, ?, ?) AS policy_code";
+        $sql            = "SELECT `f_generate_policy_number`(?, ?, ?) AS policy_code";
         $result         = mysqli_store_procedure('select', $sql, $params);
 
         /**
