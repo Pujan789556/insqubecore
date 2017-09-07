@@ -363,6 +363,7 @@ $(document).on('ifChecked', 'input[name="flag_dc"]', function(e){
 // Initialize Select2
 $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
     //Initialize Select2 Elements
+    $("#_portfolio-id").select2();
     $("#_marketing-staff").select2();
     $("#_agent-id").select2();
     $("#_creditor-id").select2();
