@@ -1393,7 +1393,7 @@ class Policy_txn extends MY_Controller
 		 */
 		try {
 
-			if( $this->policy_txn_model->update_status($txn_record->policy_id, $to_status_code) )
+			if( $this->policy_txn_model->update_status($txn_record, $to_status_code) )
 			{
 
 				/**
@@ -1698,7 +1698,7 @@ class Policy_txn extends MY_Controller
 		$authorized_status = ( $txn_record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED )
 								||
 							 ( $txn_record->status === IQB_POLICY_TXN_STATUS_VERIFIED && (int)$txn_record->flag_ri_approval === IQB_FLAG_OFF );
-		if( $authorized_status )
+		if( !$authorized_status )
 		{
 			return $this->template->json([
 				'title' 	=> 'Unauthorized Transaction Status!',
@@ -2076,7 +2076,7 @@ class Policy_txn extends MY_Controller
 				{
 					try{
 
-						$this->policy_txn_model->update_status($txn_record->id, IQB_POLICY_TXN_STATUS_VOUCHERED);
+						$this->policy_txn_model->update_status($txn_record, IQB_POLICY_TXN_STATUS_VOUCHERED);
 
 					} catch (Exception $e) {
 
@@ -2145,6 +2145,11 @@ class Policy_txn extends MY_Controller
 
 
 		// --------------------------------------------------------------------
+
+        /**
+		 * Load Portfolio Specific Helper File
+		 */
+		load_portfolio_helper($policy_record->portfolio_id);
 
 		/**
 		 * Reload the Policy Overview Tab, Update Transaction Row (Replace)
@@ -2359,7 +2364,7 @@ class Policy_txn extends MY_Controller
 				 */
 				try{
 
-					$this->policy_txn_model->update_status($txn_record->id, IQB_POLICY_TXN_STATUS_INVOICED);
+					$this->policy_txn_model->update_status($txn_record, IQB_POLICY_TXN_STATUS_INVOICED);
 
 				} catch (Exception $e) {
 
@@ -2442,6 +2447,11 @@ class Policy_txn extends MY_Controller
 
 
 		// --------------------------------------------------------------------
+
+        /**
+		 * Load Portfolio Specific Helper File
+		 */
+		load_portfolio_helper($policy_record->portfolio_id);
 
 		/**
 		 * Reload the Policy Overview Tab, Update Transaction Row (Replace)
@@ -2797,7 +2807,7 @@ class Policy_txn extends MY_Controller
                     try{
 
                     	$this->ac_invoice_model->update_flag($invoice_record->id, 'flag_paid', IQB_FLAG_ON);
-                        $this->policy_txn_model->update_status($txn_record->id, IQB_POLICY_TXN_STATUS_ACTIVE);
+                        $this->policy_txn_model->update_status($txn_record, IQB_POLICY_TXN_STATUS_ACTIVE);
 
                     } catch (Exception $e) {
 
@@ -2897,6 +2907,11 @@ class Policy_txn extends MY_Controller
 
 
         // --------------------------------------------------------------------
+
+        /**
+		 * Load Portfolio Specific Helper File
+		 */
+		load_portfolio_helper($policy_record->portfolio_id);
 
         /**
          * Reload the Policy Overview Tab, Update Transaction Row (Replace)
