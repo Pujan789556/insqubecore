@@ -27,9 +27,7 @@ if ( ! function_exists('get_policy_status_dropdown'))
 		$dropdown = [
 
 			IQB_POLICY_STATUS_DRAFT 		=> 'Draft',
-			IQB_POLICY_STATUS_UNVERIFIED 	=> 'Unverified',
 			IQB_POLICY_STATUS_VERIFIED 		=> 'Verified',
-			IQB_POLICY_STATUS_APPROVED 		=> 'Approved',
 			IQB_POLICY_STATUS_ACTIVE 		=> 'Active',
 			IQB_POLICY_STATUS_CANCELED 		=> 'Canceled',
 			IQB_POLICY_STATUS_EXPIRED 		=> 'Expired'
@@ -60,7 +58,7 @@ if ( ! function_exists('get_policy_status_text'))
 
 		if($formatted && $text != '')
 		{
-			if( in_array($key, [IQB_POLICY_STATUS_APPROVED, IQB_POLICY_STATUS_ACTIVE]) )
+			if( in_array($key, [IQB_POLICY_STATUS_VERIFIED, IQB_POLICY_STATUS_ACTIVE]) )
 			{
 				// Green
 				$css_class = 'text-green';
@@ -99,10 +97,8 @@ if ( ! function_exists('get_policy_txn_status_dropdown'))
 	{
 		$dropdown = [
 			IQB_POLICY_TXN_STATUS_DRAFT			=> 'Draft',
-			IQB_POLICY_TXN_STATUS_UNVERIFIED	=> 'Unverified',
 			IQB_POLICY_TXN_STATUS_VERIFIED		=> 'Verified',
 			IQB_POLICY_TXN_STATUS_RI_APPROVED	=> 'RI Approved',
-			IQB_POLICY_TXN_STATUS_APPROVED		=> 'Approved',
 			IQB_POLICY_TXN_STATUS_VOUCHERED		=> 'Vouchered',
 			IQB_POLICY_TXN_STATUS_INVOICED		=> 'Invoiced',
 			IQB_POLICY_TXN_STATUS_ACTIVE		=> 'Active'
@@ -132,7 +128,7 @@ if ( ! function_exists('get_policy_txn_status_text'))
 
 		if($formatted && $text != '')
 		{
-			if( in_array($key, [IQB_POLICY_TXN_STATUS_APPROVED, IQB_POLICY_TXN_STATUS_VOUCHERED, IQB_POLICY_TXN_STATUS_INVOICED, IQB_POLICY_TXN_STATUS_ACTIVE]) )
+			if( in_array($key, [IQB_POLICY_TXN_STATUS_RI_APPROVED, IQB_POLICY_TXN_STATUS_VOUCHERED, IQB_POLICY_TXN_STATUS_INVOICED, IQB_POLICY_TXN_STATUS_ACTIVE]) )
 			{
 				// Green
 				$css_class = 'text-green';
@@ -319,27 +315,19 @@ if ( ! function_exists('is_policy_editable'))
 
 		// Editable Permissions ?
 		$__flag_authorized 		= FALSE;
-		$__flag_editable_status = FALSE;
 
 		/**
 		 * Check Permissions
 		 *
 		 * Editable Status
-		 * 		draft | unverified
+		 * 		draft
 		 *
 		 * Editable Permissions Are
-		 * 		edit.draft.policy | edit.unverified.policy
+		 * 		edit.draft.policy
 		 */
-		$editable_status 		= [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED];
-
-		// Editable Status?
-		if( in_array($status, $editable_status) )
-		{
-			$__flag_editable_status = TRUE;
-		}
 
 		// Editable Permissions ?
-		if( $__flag_editable_status )
+		if( $status ===  IQB_POLICY_STATUS_DRAFT )
 		{
 			if(
 				$CI->dx_auth->is_admin()
@@ -347,11 +335,6 @@ if ( ! function_exists('is_policy_editable'))
 				||
 
 				( $status === IQB_POLICY_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('policies', 'edit.draft.policy') )
-
-				||
-
-				( $status === IQB_POLICY_STATUS_UNVERIFIED &&  $CI->dx_auth->is_authorized('policies', 'edit.unverified.policy') )
-
 			)
 			{
 				$__flag_authorized = TRUE;
@@ -389,28 +372,21 @@ if ( ! function_exists('is_policy_txn_editable'))
 
 		// Editable Permissions ?
 		$__flag_authorized 		= FALSE;
-		$__flag_editable_status = FALSE;
+
 
 
 		/**
 		 * Check Permissions
 		 *
 		 * Editable Status
-		 * 		draft | unverified
+		 * 		draft
 		 *
 		 * Editable Permissions Are
-		 * 		edit.draft.transaction | edit.unverified.transaction
+		 * 		edit.draft.transaction
 		 */
-		$editable_status 	= [IQB_POLICY_TXN_STATUS_DRAFT, IQB_POLICY_TXN_STATUS_UNVERIFIED];
-
-		// Editable Status? Must be Current Transaction
-		if( in_array($status, $editable_status) && $flag_current == IQB_FLAG_ON)
-		{
-			$__flag_editable_status = TRUE;
-		}
 
 		// Editable Permissions ?
-		if( $__flag_editable_status )
+		if( $status === IQB_POLICY_TXN_STATUS_DRAFT )
 		{
 			if(
 				$CI->dx_auth->is_admin()
@@ -418,10 +394,6 @@ if ( ! function_exists('is_policy_txn_editable'))
 				||
 
 				( $status === IQB_POLICY_TXN_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('policy_txn', 'edit.draft.transaction') )
-
-				||
-
-				( $status === IQB_POLICY_TXN_STATUS_UNVERIFIED &&  $CI->dx_auth->is_authorized('policy_txn', 'edit.unverified.transaction') )
 
 			)
 			{

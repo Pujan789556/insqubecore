@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
 			<i class="fa fa-pencil-square-o margin-r-5"></i><i class="fa fa-caret-down"></i></button>
 			<ul class="dropdown-menu pull-right" role="menu">
-				<?php if( in_array($record->status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_UNVERIFIED]) && $this->dx_auth->is_authorized_any('policies', ['edit.draft.policy', 'edit.unverified.policy']) ): ?>
+				<?php if( $record->status === IQB_POLICY_STATUS_DRAFT && $this->dx_auth->is_authorized('policies', 'edit.draft.policy') ): ?>
 					<li>
 						<a href="#"
 							title="Edit Basic Information"

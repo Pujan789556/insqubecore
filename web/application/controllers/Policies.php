@@ -1487,16 +1487,8 @@ class Policies extends MY_Controller
 					$permission_name = 'status.to.draft';
 					break;
 
-				case IQB_POLICY_STATUS_UNVERIFIED:
-					$permission_name = 'status.to.unverified';
-					break;
-
 				case IQB_POLICY_STATUS_VERIFIED:
 					$permission_name = 'status.to.verified';
-					break;
-
-				case IQB_POLICY_STATUS_APPROVED:
-					$permission_name = 'status.to.approved';
 					break;
 
 				case IQB_POLICY_STATUS_ACTIVE:
@@ -1563,14 +1555,12 @@ class Policies extends MY_Controller
 			}
 
 			/**
-			 * Premium Not Updated on Draft/Unverified State?
+			 * Premium Must be Updated Before Verifying
 			 */
 			if(
 				$__flag_passed === TRUE
 					&&
-				( $record->status === IQB_POLICY_STATUS_DRAFT && $to_updown_status === IQB_POLICY_STATUS_UNVERIFIED )
-					||
-				( $record->status === IQB_POLICY_STATUS_UNVERIFIED && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
+				( $record->status === IQB_POLICY_STATUS_DRAFT && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
 			)
 			{
 				if( !$txn_record->amt_total_premium )
@@ -1580,22 +1570,20 @@ class Policies extends MY_Controller
 				}
 			}
 
+
 			/**
-			 * RI Approval Constraint?
+			 * !!! You can not downgrade status from "Verified" if TXN has been  "RI-Approved" or "Vouchered"
 			 */
 			if(
 				$__flag_passed === TRUE
 					&&
-				$txn_record->flag_ri_approval == IQB_FLAG_ON
+				( $record->status === IQB_POLICY_STATUS_VERIFIED  && $to_updown_status === IQB_POLICY_STATUS_DRAFT )
 					&&
-				$to_updown_status === IQB_POLICY_STATUS_APPROVED
-					&&
-				$txn_record->status !== IQB_POLICY_TXN_STATUS_RI_APPROVED
-
+				in_array($txn_record->status, [IQB_POLICY_TXN_STATUS_RI_APPROVED, IQB_POLICY_TXN_STATUS_VOUCHERED] )
 			)
 			{
-				$__flag_passed = FALSE;
-				$failed_message 	= 'RI Approval is Needed for PID Approval.';
+				$__flag_passed 		= FALSE;
+				$failed_message 	= 'You cannot downgrade policy status once you have "RI-Approved" or "Voucher Generated"!';
 			}
 
 			/**

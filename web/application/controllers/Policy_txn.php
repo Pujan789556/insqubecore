@@ -1400,32 +1400,22 @@ class Policy_txn extends MY_Controller
 				 * Post Tasks on Transaction Activation
 				 * -------------------------------------
 				 *
-				 * If this is not a Fresh/Renewal Transaction, we also have to update the
+				 * If this is not a General Endorsement Transaction, we also have to update the
 				 * 	- policy (from audit_policy field if any data)
 				 * 	- object (from audit_object field if any data)
 				 * 	- customer (from audit_customer field if any data)
+				 * 	- SEND SMS on General Transaction Activation
 				 */
-				if( in_array($txn_record->txn_type, [IQB_POLICY_TXN_TYPE_ET, IQB_POLICY_TXN_TYPE_EG]) && $to_status_code ==IQB_POLICY_TXN_STATUS_APPROVED )
-				{
-					$this->_commit_endorsement_audit($txn_record);
-				}
-
-
-
-				/**
-				 * Updated Transaction Record
-				 */
-				$txn_record = $this->policy_txn_model->get($txn_record->id);
-				$policy_record = $this->policy_model->get($txn_record->policy_id);
-
-
-				/**
-				 * SEND SMS on General Transaction Activation
-				 */
-				if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_EG && $to_status_code === IQB_POLICY_TXN_STATUS_ACTIVE )
+				if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_EG && $to_status_code ==IQB_POLICY_TXN_STATUS_ACTIVE )
 				{
 					$this->_sms_activation($txn_record, $policy_record);
 				}
+
+				/**
+				 * Updated Transaction & Policy Record
+				 */
+				$txn_record = $this->policy_txn_model->get($txn_record->id);
+				$policy_record = $this->policy_model->get($txn_record->policy_id);
 
 
 
@@ -1495,74 +1485,6 @@ class Policy_txn extends MY_Controller
 
 	// --------------------------------------------------------------------
 
-	/**
-	 * Commit Endorsement Audit Information
-	 *
-	 * On final activation of the status on endorsement of any kind, we need
-	 * to update changes made on policy, object or customer from audit data
-	 * hold by this txn record
-	 *
-	 * @param object $txn_record
-	 * @return void
-	 */
-	private function _commit_endorsement_audit($txn_record)
-	{
-
-		/**
-		 * Get Customer ID and Object ID
-		 */
-		$obj_cust = $this->policy_model->get_customer_object_id($txn_record->policy_id);
-
-		/**
-		 * Task 1: Object Changes
-		 */
-		$amt_sum_insured = FALSE;
-		$audit_object = $txn_record->audit_object ? json_decode($txn_record->audit_object) : NULL;
-		if( $audit_object )
-		{
-			$data = (array)$audit_object->new;
-			$amt_sum_insured = $data['amt_sum_insured'];
-			$this->object_model->commit_endorsement($obj_cust->object_id, $data);
-		}
-
-		/**
-		 * Task 2: Customer Changes
-		 */
-		$audit_customer = $txn_record->audit_customer ? json_decode($txn_record->audit_customer) : NULL;
-		if( $audit_customer )
-		{
-			$this->load->model('customer_model');
-			$data = (array)$audit_customer->new;
-			$this->customer_model->commit_endorsement($obj_cust->customer_id, $data);
-		}
-
-		/**
-		 * Task 3: Policy Changes
-		 */
-		$audit_policy = $txn_record->audit_policy ? json_decode($txn_record->audit_policy) : NULL;
-		$policy_data = [];
-		if( $audit_policy )
-		{
-			$policy_data = (array)$audit_policy->new;
-		}
-
-		/**
-		 * Update Current Sum Insured Amount From Object
-		 */
-		if( $amt_sum_insured !== FALSE )
-		{
-			$policy_data['cur_amt_sum_insured'] = $amt_sum_insured;
-		}
-
-		// Update Policy Table
-		if( $policy_data )
-		{
-			$this->policy_model->commit_endorsement($txn_record->policy_id, $policy_data);
-		}
-	}
-
-	// --------------------------------------------------------------------
-
 		/**
 		 * Check Status up/down permission
 		 *
@@ -1614,10 +1536,6 @@ class Policy_txn extends MY_Controller
 					$permission_name = 'status.to.ri.approved';
 					break;
 
-				case IQB_POLICY_TXN_STATUS_APPROVED:
-					$permission_name = 'status.to.approved';
-					break;
-
 				case IQB_POLICY_TXN_STATUS_VOUCHERED:
 					$permission_name = 'status.to.vouchered';
 					break;
@@ -1626,7 +1544,7 @@ class Policy_txn extends MY_Controller
 					$permission_name = 'status.to.invoiced';
 					break;
 
-				case IQB_POLICY_STATUS_ACTIVE:
+				case IQB_POLICY_TXN_STATUS_ACTIVE:
 					$permission_name = 'status.to.active';
 					break;
 
@@ -1668,20 +1586,48 @@ class Policy_txn extends MY_Controller
 			{
 				/**
 				 * FRESH/RENEWAL Policy Transaction
-				 * 	Draft/Unverified/Verified/Approved are automatically triggered from
+				 * 	Draft/Verified are automatically triggered from
 				 * 	Policy Status Update Method
 				 */
 				if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_FRESH  || $txn_record->txn_type == IQB_POLICY_TXN_TYPE_RENEWAL )
 				{
 					$__flag_passed = !in_array($to_updown_status, [
 						IQB_POLICY_TXN_STATUS_DRAFT,
-						IQB_POLICY_TXN_STATUS_UNVERIFIED,
 						IQB_POLICY_TXN_STATUS_VERIFIED,
-						IQB_POLICY_TXN_STATUS_APPROVED,
 						IQB_POLICY_TXN_STATUS_ACTIVE
 					]);
 				}
 			}
+
+			/**
+			 * Can not Update Transactional Status Directly using status function
+			 */
+			if( $__flag_passed )
+			{
+				$__flag_passed = !in_array($to_updown_status, [
+					IQB_POLICY_TXN_STATUS_VOUCHERED,
+					IQB_POLICY_TXN_STATUS_INVOICED
+				]);
+			}
+
+			/**
+			 * General Endorsement
+			 * Activate Status
+			 *
+			 * !!! If RI-Approval Constraint Required, It should Come from That Status else from Verified
+			 */
+			if( $__flag_passed && $to_updown_status === IQB_POLICY_TXN_STATUS_ACTIVE && $txn_record->txn_type == IQB_POLICY_TXN_TYPE_EG )
+			{
+				if( (int)$txn_record->flag_ri_approval === IQB_FLAG_ON )
+				{
+					$__flag_passed = $txn_record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED
+				}
+				else
+				{
+					$__flag_passed = $txn_record->status === IQB_POLICY_TXN_STATUS_VERIFIED
+				}
+			}
+
 
 			if( !$__flag_passed && $terminate_on_fail )
 			{
@@ -1745,12 +1691,16 @@ class Policy_txn extends MY_Controller
 		/**
 		 * Record Status Authorized to Generate Voucher?
 		 */
-		if($txn_record->status !== IQB_POLICY_TXN_STATUS_APPROVED)
+
+		$authorized_status = ( $txn_record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED )
+								||
+							 ( $txn_record->status === IQB_POLICY_TXN_STATUS_VERIFIED && (int)$txn_record->flag_ri_approval === IQB_FLAG_OFF );
+		if( $authorized_status )
 		{
 			return $this->template->json([
-				'title' 	=> 'OOPS!',
+				'title' 	=> 'Unauthorized Transaction Status!',
 				'status' 	=> 'error',
-				'message' 	=> 'You can not perform this action.'
+				'message' 	=> 'This transaction does not have authorized status to perform this action.'
 			], 404);
 		}
 
@@ -2123,7 +2073,31 @@ class Policy_txn extends MY_Controller
 				{
 					try{
 
-						$this->policy_txn_model->update_status_direct($txn_record->id, IQB_POLICY_TXN_STATUS_VOUCHERED);
+						$this->policy_txn_model->update_status($txn_record->id, IQB_POLICY_TXN_STATUS_VOUCHERED);
+
+					} catch (Exception $e) {
+
+						$flag_exception = TRUE;
+						$message = $e->getMessage();
+					}
+				}
+
+                // --------------------------------------------------------------------
+
+				/**
+				 * Task 5: Generate Policy Number
+				 *
+				 * NOTE: Policy TXN must be fresh or Renewal
+				 */
+				if( !$flag_exception && in_array($txn_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+				{
+					try{
+
+						$policy_code = $this->policy_model->generate_policy_number( $policy_record );
+						if($policy_code)
+						{
+							$policy_record->code = $policy_code;
+						}
 
 					} catch (Exception $e) {
 
@@ -2382,7 +2356,7 @@ class Policy_txn extends MY_Controller
 				 */
 				try{
 
-					$this->policy_txn_model->update_status_direct($txn_record->id, IQB_POLICY_TXN_STATUS_INVOICED);
+					$this->policy_txn_model->update_status($txn_record->id, IQB_POLICY_TXN_STATUS_INVOICED);
 
 				} catch (Exception $e) {
 
@@ -2812,23 +2786,15 @@ class Policy_txn extends MY_Controller
                 /**
                  * Task 4:
                  * 		Update Invoice Paid Flat to "ON"
-                 *      Update Policy Status to "Active"
-                 *      Update Transaction Status to "Active", Clean Cache
+                 *      Update Policy Status to "Active" (if Fresh or Renewal )
+                 *      Update Transaction Status to "Active", Clean Cache, (Commit endorsement if ET or EG)
                  */
                 if( !$flag_exception )
                 {
                     try{
 
                     	$this->ac_invoice_model->update_flag($invoice_record->id, 'flag_paid', IQB_FLAG_ON);
-
-                    	/**
-                    	 * Update Policy's Status to Active if This is Fresh/Renewal
-                    	 */
-                    	if( in_array($txn_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
-                    	{
-                    		$this->policy_model->update_status($policy_record->id, IQB_POLICY_STATUS_ACTIVE);
-                    	}
-                        $this->policy_txn_model->update_status_direct($txn_record->id, IQB_POLICY_TXN_STATUS_ACTIVE);
+                        $this->policy_txn_model->update_status($txn_record->id, IQB_POLICY_TXN_STATUS_ACTIVE);
 
                     } catch (Exception $e) {
 

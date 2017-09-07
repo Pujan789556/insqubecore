@@ -271,9 +271,7 @@ define('IQB_MOTOR_CVC_TYPE_CONSTRUCTION_EQUIPMENT',     'CE');      // Construct
 |--------------------------------------------------------------------------
 */
 defined('IQB_POLICY_STATUS_DRAFT')          OR define('IQB_POLICY_STATUS_DRAFT',        'D');
-defined('IQB_POLICY_STATUS_UNVERIFIED')     OR define('IQB_POLICY_STATUS_UNVERIFIED',   'U');
 defined('IQB_POLICY_STATUS_VERIFIED')       OR define('IQB_POLICY_STATUS_VERIFIED',     'V');
-defined('IQB_POLICY_STATUS_APPROVED')       OR define('IQB_POLICY_STATUS_APPROVED',     'P');
 defined('IQB_POLICY_STATUS_ACTIVE')         OR define('IQB_POLICY_STATUS_ACTIVE',       'A');
 defined('IQB_POLICY_STATUS_CANCELED')       OR define('IQB_POLICY_STATUS_CANCELED',     'C');
 defined('IQB_POLICY_STATUS_EXPIRED')        OR define('IQB_POLICY_STATUS_EXPIRED',      'E');
@@ -284,10 +282,8 @@ defined('IQB_POLICY_STATUS_EXPIRED')        OR define('IQB_POLICY_STATUS_EXPIRED
 |--------------------------------------------------------------------------
 */
 defined('IQB_POLICY_TXN_STATUS_DRAFT')          OR define('IQB_POLICY_TXN_STATUS_DRAFT',        'D');
-defined('IQB_POLICY_TXN_STATUS_UNVERIFIED')     OR define('IQB_POLICY_TXN_STATUS_UNVERIFIED',   'U');
 defined('IQB_POLICY_TXN_STATUS_VERIFIED')       OR define('IQB_POLICY_TXN_STATUS_VERIFIED',     'V');
 defined('IQB_POLICY_TXN_STATUS_RI_APPROVED')    OR define('IQB_POLICY_TXN_STATUS_RI_APPROVED',  'R');
-defined('IQB_POLICY_TXN_STATUS_APPROVED')    	OR define('IQB_POLICY_TXN_STATUS_APPROVED',  	'P');
 defined('IQB_POLICY_TXN_STATUS_VOUCHERED')    	OR define('IQB_POLICY_TXN_STATUS_VOUCHERED',  	'H');
 defined('IQB_POLICY_TXN_STATUS_INVOICED')    	OR define('IQB_POLICY_TXN_STATUS_INVOICED',  	'I');
 defined('IQB_POLICY_TXN_STATUS_ACTIVE')         OR define('IQB_POLICY_TXN_STATUS_ACTIVE',       'A');

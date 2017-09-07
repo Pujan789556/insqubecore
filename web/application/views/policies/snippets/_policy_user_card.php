@@ -20,7 +20,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <th>Sold By</th>
                     <th>Prepared By</th>
                     <th>Verified By</th>
-                    <th>Approved By</th>
                 </tr>
             </thead>
             <tbody>
@@ -68,29 +67,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             }
                             // Date
                             $user_info[] = 'Date: ' . $record->verified_at;
-                            echo implode('<br/>', $user_info);
-                        }
-                        else
-                        {
-                            echo '-';
-                        }
-
-                        ?>
-                    </td>
-                    <td>
-                        <?php
-                        // Approved By
-                        if($record->approved_by)
-                        {
-                            $user_info = [];
-                            $user_info[] = $record->approved_by_username . " - {$record->approved_by_code}";
-                            $profile = $record->approved_by_profile ? json_decode($record->approved_by_profile) : NULL;
-                            if($profile)
-                            {
-                                $user_info[] = $profile->name . ', ' . $profile->designation;
-                            }
-                            // Date
-                            $user_info[] = 'Date: ' . $record->approved_at;
                             echo implode('<br/>', $user_info);
                         }
                         else

@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'proposer', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'cur_amt_sum_insured', 'cur_amt_total_premium', 'cur_amt_pool_premium', 'cur_amt_commissionable', 'cur_amt_agent_commission', 'cur_amt_stamp_duty', 'cur_amt_vat', 'created_at', 'created_by', 'verified_at', 'verified_by', 'approved_at', 'approved_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'proposer', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'cur_amt_sum_insured', 'cur_amt_total_premium', 'cur_amt_pool_premium', 'cur_amt_commissionable', 'cur_amt_agent_commission', 'cur_amt_stamp_duty', 'cur_amt_vat', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
     protected $validation_rules = [];
 
@@ -932,23 +932,15 @@ class Policy_model extends MY_Model
         switch ($to_status)
         {
             case IQB_POLICY_STATUS_DRAFT:
-                $flag_qualifies = $current_status === IQB_POLICY_STATUS_UNVERIFIED;
-                break;
-
-            case IQB_POLICY_STATUS_UNVERIFIED:
-                $flag_qualifies = in_array($current_status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_VERIFIED]);
-                break;
-
-            case IQB_POLICY_STATUS_VERIFIED:
-                $flag_qualifies = $current_status === IQB_POLICY_STATUS_UNVERIFIED;
-                break;
-
-            case IQB_POLICY_STATUS_APPROVED:
                 $flag_qualifies = $current_status === IQB_POLICY_STATUS_VERIFIED;
                 break;
 
+            case IQB_POLICY_STATUS_VERIFIED:
+                $flag_qualifies = $current_status === IQB_POLICY_STATUS_DRAFT;
+                break;
+
             case IQB_POLICY_STATUS_ACTIVE:
-                $flag_qualifies = $current_status === IQB_POLICY_STATUS_APPROVED;
+                $flag_qualifies = $current_status === IQB_POLICY_STATUS_VERIFIED;
                 break;
 
             case IQB_POLICY_STATUS_CANCELED:
@@ -999,21 +991,13 @@ class Policy_model extends MY_Model
                  * to Draft
                  */
                 case IQB_POLICY_STATUS_DRAFT:
-                    $this->_to_status($record->id, $base_data);
-                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_DRAFT);
-                    break;
-
-
-                /**
-                 * to Unverified
-                 */
-                case IQB_POLICY_STATUS_UNVERIFIED:
                     $base_data['verified_at'] = NULL;
                     $base_data['verified_by'] = NULL;
                     $this->_to_status($record->id, $base_data);
 
-                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_UNVERIFIED);
 
+                    // Txn Status to draft, Editable Object & Customer
+                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_DRAFT);
                     $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
                     $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
                     break;
@@ -1025,63 +1009,12 @@ class Policy_model extends MY_Model
                 case IQB_POLICY_STATUS_VERIFIED:
                     $base_data['verified_at'] = $this->set_date();
                     $base_data['verified_by'] = $this->dx_auth->get_user_id();
-                    $base_data['approved_at'] = NULL;
-                    $base_data['approved_by'] = NULL;
                     $this->_to_status($record->id, $base_data);
 
                     $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_VERIFIED);
-
                     $this->object_model->update_lock($record->object_id, IQB_FLAG_LOCKED);
                     $this->customer_model->update_lock($record->customer_id, IQB_FLAG_LOCKED);
                     break;
-
-
-                /**
-                 * to Approved
-                 */
-                case IQB_POLICY_STATUS_APPROVED:
-                    /**
-                     * This is the case when a policy status is upgraded from "verified".
-                     *
-                     * !!! NOTE: The Txn Record's RI Approval Constraint must met.
-                     *
-                     * So, the following tasks are carried out:
-                     *      1. Policy Record [Status -> Approved, Approved date/user -> current]
-                     *      2. Generate Policy Number
-                     *      3. Save Original Schedule PDF
-                     *
-                     * !!! NOTE: Both the tasks are done by calling the stored function.
-                     */
-                    $policy_type    = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH;
-                    $params         = [$policy_type, $record->id, $this->dx_auth->get_user_id(), IQB_POLICY_STATUS_APPROVED];
-                    $sql            = "SELECT `f_generate_policy_number`(?, ?, ?, ?) AS policy_code";
-                    $result         = mysqli_store_procedure('select', $sql, $params);
-
-                    /**
-                     * Save Original Schedule PDF
-                     */
-                    $result_row = $result[0];
-                    if($result_row->policy_code)
-                    {
-                        // Update Transaction Status
-                        $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_APPROVED);
-
-                        /**
-                         * Updated Records - Policy and Policy Transaction
-                         */
-                        $record     = $this->get($record->id);
-                        $txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
-
-                        /**
-                         * Save a Fresh PDF copy
-                         */
-                        _POLICY__schedule_pdf([
-                                'record'        => $record,
-                                'txn_record'    => $txn_record
-                            ], 'save');
-                    }
-                    break;
-
 
                 /**
                  * to Active
@@ -1118,7 +1051,6 @@ class Policy_model extends MY_Model
                     ->update($this->table_name, $data);
     }
 
-
     // ----------------------------------------------------------------
 
         private function _to_status($id, $data)
@@ -1129,6 +1061,58 @@ class Policy_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Generate Policy Number
+     *
+     * @param type $id_or_record
+     * @return mixed
+     */
+    public function generate_policy_number($id_or_record)
+    {
+        $record = is_numeric($id_or_record) ? $this->get( (int)$id_or_record ) : $id_or_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Policy_model][Method: generate_policy_number()]: Policy record could not be found.");
+        }
+
+        /**
+         * !!! NOTE: The Txn Record's RI Approval Constraint must met.
+         *
+         * So, the following tasks are carried out:
+         *      1. Generate Policy Number
+         *      2. Save Original Schedule PDF
+         *
+         * !!! NOTE: Both the tasks are done by calling the stored function.
+         */
+        $policy_type    = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH;
+        $params         = [$policy_type, $record->id, $this->dx_auth->get_user_id()];
+        $sql            = "SELECT `f_generate_policy_number`(?, ?, ?, ?) AS policy_code";
+        $result         = mysqli_store_procedure('select', $sql, $params);
+
+        /**
+         * Save Original Schedule PDF
+         */
+        $result_row = $result[0];
+        if($result_row->policy_code)
+        {
+            /**
+             * Updated Records - Policy and Policy Transaction
+             */
+            $record     = $this->get($record->id);
+            $txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+
+            /**
+             * Save a Fresh PDF copy
+             */
+            _POLICY__schedule_pdf([
+                    'record'        => $record,
+                    'txn_record'    => $txn_record
+                ], 'save');
+        }
+
+        return $result_row->policy_code;
+    }
 
 
 
@@ -1314,12 +1298,6 @@ class Policy_model extends MY_Model
 
 
                             /**
-                             * User Table - Approved By User Info (username, code, name)
-                             */
-                            "AU.username as approved_by_username, AU.code as approved_by_code, AU.profile as approved_by_profile, " .
-
-
-                            /**
                              * Agent Table (agent_id, name, picture, bs code, ud code, contact, active, type)
                              */
                             "A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type, " .
@@ -1339,7 +1317,6 @@ class Policy_model extends MY_Model
                      ->join('auth_users SU', 'SU.id = P.sold_by')
                      ->join('auth_users CU', 'CU.id = P.created_by')
                      ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
-                     ->join('auth_users AU', 'AU.id = P.approved_by', 'left')
                      ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
                      ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
                      ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')

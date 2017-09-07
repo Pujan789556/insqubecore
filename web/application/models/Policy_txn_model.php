@@ -17,7 +17,7 @@ class Policy_txn_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval', 'flag_current', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'approved_at', 'approved_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval', 'flag_current', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -267,27 +267,6 @@ class Policy_txn_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Update Status of Transaction Record
-     *
-     * @param Integer|Object $txn_id_or_txn_record    Transaction ID or Transaction Record
-     * @param Char $to_status_flag
-     * @return mixed
-     */
-    public function update_status_direct($txn_id_or_txn_record, $to_status_flag)
-    {
-        $record = is_numeric($txn_id_or_txn_record) ? $this->get( (int)$txn_id_or_txn_record ) : $txn_id_or_txn_record;
-
-        if(!$record)
-        {
-            throw new Exception("Exception [Model: Policy_txn_model][Method: update_status_direct()]: Current TXN record could not be found.");
-        }
-
-        return $this->update_status($record, $to_status_flag);
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
      * Update Policy Transaction Status
      *
      * !!! NOTE: We can only change status of current Transaction Record
@@ -324,7 +303,6 @@ class Policy_txn_model extends MY_Model
              * Reset Verified date/user to NULL
              */
             case IQB_POLICY_TXN_STATUS_DRAFT:
-            case IQB_POLICY_TXN_STATUS_UNVERIFIED:
                 $data['verified_at'] = NULL;
                 $data['verified_by'] = NULL;
                 break;
@@ -347,13 +325,6 @@ class Policy_txn_model extends MY_Model
                 $data['ri_approved_by'] = $this->dx_auth->get_user_id();
             break;
 
-            /**
-             * Update approved date/user
-             */
-            case IQB_POLICY_TXN_STATUS_ACTIVE:
-                $data['approved_at'] = $this->set_date();
-                $data['approved_by'] = $this->dx_auth->get_user_id();
-            break;
 
             default:
                 break;
@@ -363,7 +334,38 @@ class Policy_txn_model extends MY_Model
          * Update Status and Clear Cache Specific to this Policy ID
          */
         $cache_var = 'policy_txn_' . $record->policy_id;
-        return $this->_to_status($record->id, $data) && $this->clear_cache($cache_var);
+
+        if( $this->_to_status($record->id, $data) )
+        {
+            /**
+             * Post Status Update Tasks
+             * ------------------------
+             *
+             * If this is activate status
+             *      - Endorsement Record, we need to commit the changes
+             *      - Fresh/Renewal - Activate Policy Record
+             *
+             */
+            if( $to_status_flag === IQB_POLICY_TXN_STATUS_ACTIVE )
+            {
+
+                if( in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_ET, IQB_POLICY_TXN_TYPE_EG]) )
+                {
+                    $this->_commit_endorsement_audit($record);
+                }
+                else
+                {
+                    $this->policy_model->update_status($record->policy_id, IQB_POLICY_STATUS_ACTIVE);
+                }
+            }
+
+            // CLEAR CACHE
+            $this->clear_cache($cache_var);
+
+            return TRUE;
+        }
+
+        return FALSE;
     }
 
     // ----------------------------------------------------------------
@@ -375,27 +377,19 @@ class Policy_txn_model extends MY_Model
         switch ($to_status)
         {
             case IQB_POLICY_TXN_STATUS_DRAFT:
-                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_UNVERIFIED;;
-                break;
-
-            case IQB_POLICY_TXN_STATUS_UNVERIFIED:
-                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_DRAFT, IQB_POLICY_TXN_STATUS_VERIFIED]);
+                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_VERIFIED;
                 break;
 
             case IQB_POLICY_TXN_STATUS_VERIFIED:
-                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_UNVERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
+                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_DRAFT;
                 break;
 
             case IQB_POLICY_TXN_STATUS_RI_APPROVED:
                 $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_VERIFIED;
                 break;
 
-            case IQB_POLICY_TXN_STATUS_APPROVED:
-                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
-                break;
-
             case IQB_POLICY_TXN_STATUS_VOUCHERED:
-                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_APPROVED;
+                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
                 break;
 
             case IQB_POLICY_TXN_STATUS_INVOICED:
@@ -404,7 +398,7 @@ class Policy_txn_model extends MY_Model
 
             // For non-txnal endorsement, its from approved
             case IQB_POLICY_TXN_STATUS_ACTIVE:
-                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_APPROVED, IQB_POLICY_TXN_STATUS_INVOICED]);
+                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED, IQB_POLICY_TXN_STATUS_INVOICED]);
                 break;
 
             default:
@@ -514,6 +508,74 @@ class Policy_txn_model extends MY_Model
         return $this->db->set($audit_field, $audit_data)
                         ->where('id', $id)
                         ->update($this->table_name);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Commit Endorsement Audit Information
+     *
+     * On final activation of the status on endorsement of any kind, we need
+     * to update changes made on policy, object or customer from audit data
+     * hold by this txn record
+     *
+     * @param object $record
+     * @return void
+     */
+    private function _commit_endorsement_audit($record)
+    {
+
+        /**
+         * Get Customer ID and Object ID
+         */
+        $obj_cust = $this->policy_model->get_customer_object_id($record->policy_id);
+
+        /**
+         * Task 1: Object Changes
+         */
+        $amt_sum_insured = FALSE;
+        $audit_object = $record->audit_object ? json_decode($record->audit_object) : NULL;
+        if( $audit_object )
+        {
+            $data = (array)$audit_object->new;
+            $amt_sum_insured = $data['amt_sum_insured'];
+            $this->object_model->commit_endorsement($obj_cust->object_id, $data);
+        }
+
+        /**
+         * Task 2: Customer Changes
+         */
+        $audit_customer = $record->audit_customer ? json_decode($record->audit_customer) : NULL;
+        if( $audit_customer )
+        {
+            $this->load->model('customer_model');
+            $data = (array)$audit_customer->new;
+            $this->customer_model->commit_endorsement($obj_cust->customer_id, $data);
+        }
+
+        /**
+         * Task 3: Policy Changes
+         */
+        $audit_policy = $record->audit_policy ? json_decode($record->audit_policy) : NULL;
+        $policy_data = [];
+        if( $audit_policy )
+        {
+            $policy_data = (array)$audit_policy->new;
+        }
+
+        /**
+         * Update Current Sum Insured Amount From Object
+         */
+        if( $amt_sum_insured !== FALSE )
+        {
+            $policy_data['cur_amt_sum_insured'] = $amt_sum_insured;
+        }
+
+        // Update Policy Table
+        if( $policy_data )
+        {
+            $this->policy_model->commit_endorsement($record->policy_id, $policy_data);
+        }
     }
 
     // --------------------------------------------------------------------
