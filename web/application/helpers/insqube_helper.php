@@ -68,6 +68,24 @@ if ( ! function_exists('set_menu_active'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('is_valid_date_format'))
+{
+    /**
+     * Check if supplied string is a Valid Date
+     *
+     * @param string $date Date
+     * @param string $format Date Format to Check against
+     * @return bool
+     */
+    function is_valid_date_format( $date, $format = 'Y-m-d H:i:s' )
+    {
+        $d = DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) == $date;
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('str_to_nepdate'))
 {
 	/**
