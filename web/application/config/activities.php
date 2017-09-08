@@ -201,6 +201,16 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to District
+	 */
+	'exchange_rate' => [
+		'_uri' => 'exchange_rates/',
+		'_table' => 'master_exchange_rates',
+		'_actions' => [
+			'E' => 'edited'
+	]],
+
+	/**
 	 * Activities related to Departments
 	 */
 	'fy_quarter' => [
