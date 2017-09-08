@@ -21,16 +21,19 @@ if ( ! function_exists('dropdown_base_currency'))
     /**
      * Get Base Currency Dropdown for specific date.
      *
+     * If no date is supplied, it will give todays currency dropdown.
+     *
      * @param string $date
      * @param bool $flag_blank_select
      * @return array
      */
-    function dropdown_base_currency( string $date, bool $flag_blank_select = true )
+    function dropdown_base_currency( string $date = NULL, bool $flag_blank_select = true )
     {
         $CI =& get_instance();
 
         $CI->load->model('exchange_rate_model');
 
+        $date           = $date ?? date('Y-m-d');
         $row            = $CI->exchange_rate_model->get_by_date($date);
         $exchange_rates = json_decode($row->exchange_rates ?? []);
         $dropdown       = [];
