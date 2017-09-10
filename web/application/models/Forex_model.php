@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Exchange_rate_model extends MY_Model
+class Forex_model extends MY_Model
 {
-    protected $table_name = 'master_exchange_rates';
+    protected $table_name = 'master_forex_rates';
 
     protected $set_created = true;
 
@@ -61,7 +61,7 @@ class Exchange_rate_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_var = 'xchange_rates_' . str_replace('-', '', $date);
+        $cache_var = 'forex_rates_' . str_replace('-', '', $date);
         $row = $this->get_cache($cache_var);
         if(!$row)
         {
@@ -79,7 +79,7 @@ class Exchange_rate_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'xchange_rates_*'
+            'forex_rates_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

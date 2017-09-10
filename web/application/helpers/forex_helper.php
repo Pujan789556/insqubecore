@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * InsQube Exchange Rate Helper Functions
+ * InsQube Forex Helper Functions
  *
  * 	This will have general helper functions required
  *
@@ -31,10 +31,10 @@ if ( ! function_exists('dropdown_base_currency'))
     {
         $CI =& get_instance();
 
-        $CI->load->model('exchange_rate_model');
+        $CI->load->model('forex_model');
 
         $date           = $date ?? date('Y-m-d');
-        $row            = $CI->exchange_rate_model->get_by_date($date);
+        $row            = $CI->forex_model->get_by_date($date);
         $exchange_rates = json_decode($row->exchange_rates ?? []);
         $dropdown       = [];
 
@@ -53,7 +53,7 @@ if ( ! function_exists('dropdown_base_currency'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('get_exchange_rate_by_base_currency'))
+if ( ! function_exists('get_forex_rate_by_base_currency'))
 {
     /**
      * Get Exchange Rate Data for Given Base Currency for Specific date
@@ -62,14 +62,14 @@ if ( ! function_exists('get_exchange_rate_by_base_currency'))
      * @param string $currency
      * @return object
      */
-    function get_exchange_rate_by_base_currency( string $date, string $currency )
+    function get_forex_rate_by_base_currency( string $date, string $currency )
     {
         $CI =& get_instance();
 
-        $CI->load->model('exchange_rate_model');
+        $CI->load->model('forex_model');
 
-        $row            = $CI->exchange_rate_model->get_by_date($date);
-        $exchange_rates = json_decode($row->exchange_rates ?? []);
+        $row            = $CI->forex_model->get_by_date($date);
+        $exchange_rates = json_decode($row->exchange_rates ?? '[]'); // If no data, we should have an empty array
         $single_rate    = NULL;
 
         $currency = strtoupper($currency);
