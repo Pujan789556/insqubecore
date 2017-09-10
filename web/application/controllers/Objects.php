@@ -585,7 +585,16 @@ class Objects extends MY_Controller
         		/**
 				 * Compute Sum Insured Amount
 				 */
-        		$object_data['amt_sum_insured'] = _OBJ_compute_sum_insured_amount($portfolio_id, $data['object']);
+        		try {
+
+					$object_data['amt_sum_insured'] = _OBJ_compute_sum_insured_amount($portfolio_id, $data['object']);
+
+				} catch (Exception $e) {
+
+					return $this->template->json(['status' => 'error', 'title' => 'Exception Occured!', 'message' => $e->getMessage()], 404);
+				}
+
+        		// echo '<pre>'; print_r($object_data);exit;
 
         		// Insert or Update?
 				if($action === 'add')
@@ -820,7 +829,19 @@ class Objects extends MY_Controller
         		 * Prepare Post Data
         		 */
         		$post_data['attributes'] 		= json_encode($data['object']);
-	    		$post_data['amt_sum_insured'] 	= _OBJ_compute_sum_insured_amount($record->portfolio_id, $data['object']);
+
+        		/**
+				 * Compute Sum Insured Amount
+				 */
+        		try {
+
+					$post_data['amt_sum_insured'] 	= _OBJ_compute_sum_insured_amount($record->portfolio_id, $data['object']);
+
+				} catch (Exception $e) {
+
+					return $this->template->json(['status' => 'error', 'title' => 'Exception Occured!', 'message' => $e->getMessage()], 404);
+				}
+
         		$audit_data 					= $this->_get_endorsement_audit_data($record, $post_data);
 
         		/**
