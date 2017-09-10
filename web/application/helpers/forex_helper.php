@@ -85,6 +85,32 @@ if ( ! function_exists('get_forex_rate_by_base_currency'))
     }
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('forex_conversion'))
+{
+    /**
+     * Convert the given amount on Base Currency into Target Currency
+     * @param string $date
+     * @param string $currency
+     * @param float $amount
+     * @return decimal
+     */
+    function forex_conversion(string $date, string $currency,  float $amount )
+    {
+        $forex  = get_forex_rate_by_base_currency($date, $currency);
+
+        if( !$forex )
+        {
+            throw new Exception("Exception [Helper: forex_helper][Method: forex_conversion()]: No Forex data found for the date ({$date}).");
+        }
+        else
+        {
+            $amount = ( $forex->TargetSell / $forex->BaseValue ) * $amount;
+        }
+        return $amount;
+    }
+}
 
 // ------------------------------------------------------------------------
 
