@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Portfolio: Settings : Index View
+* Portfolio: Settings - By Fiscal Year : Index View
 */
 ?>
 <div class="row">
@@ -18,13 +18,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						?>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
-						<a href="#" title="Add New Portfolio Settings"
-							class="btn btn-success btn-round trg-dialog-edit"
-							data-box-size="large"
-							data-title='<i class="fa fa-pencil-square-o"></i> Add New Portfolio Settings'
-							data-url="<?php echo site_url('portfolio/add_settings/');?>"
-							data-form=".form-iqb-general"
-						><i class="ion-plus-circled"></i> Add</a>
+						<a
+							data-toggle="tooltip"
+							href="<?php echo site_url('portfolio/settings/');?>" title="Back to Portfolio Settings"
+							class="btn btn-warning btn-round" >
+							<i class="fa fa-chevron-left"></i> Back</a>
 					</div>
 				</div>
 			</div>
@@ -34,7 +32,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/portfolio/_list_settings');
+				$this->load->view('setup/portfolio/_list_settings_fy');
 				?>
 			</div>
 			<!-- /.box-body -->

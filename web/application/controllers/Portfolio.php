@@ -452,31 +452,92 @@ class Portfolio extends MY_Controller
      * List of all portfolio settings fiscal-year-wise
      * @return void
      */
-    public function settings()
+    public function settings( $mode="default", $fiscal_yr_id = NULL)
     {
-    	// Site Meta
-    	$this->data['site_title'] = 'Master Setup | Portfolio Settings';
+
+    	if( !in_array($mode, ['default', 'fy']) )
+    	{
+    		return $this->template->json(['status' => 'error', 'message' => 'Invalid modes!'], 404);
+    	}
 
     	$this->load->model('portfolio_setting_model');
+
     	/**
     	 * Update Nav Data
     	 */
     	$this->_navigation['level_2'] = 'settings';
     	$this->active_nav_primary($this->_navigation);
 
-    	$records = $this->portfolio_setting_model->get_row_list();
-
-
-		$this->template->partial(
-							'content_header',
-							'templates/_common/_content_header',
-							[
-								'content_header' => 'Manage Portfolio Settings',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Portfolio' => 'portfolio', 'Settings' => NULL]
-						])
-						->partial('content', 'setup/portfolio/_settings', compact('records'))
-						->render($this->data);
+    	/**
+    	 * Based on Mode, We Either List Index or All portfolios Per Fiscal year
+    	 */
+    	if($mode == 'default')
+    	{
+    		return $this->_settings_default();
+    	}
+    	else
+    	{
+    		return $this->_settings_fy($fiscal_yr_id);
+    	}
   	}
+
+  	// --------------------------------------------------------------------
+
+  		/**
+  		 * Default Portfolio Setting List Function
+  		 *
+  		 * This function list all settings by Fiscal Year as a default listing method.
+  		 *
+  		 * @return void
+  		 */
+  		private function _settings_default()
+  		{
+  			// Site Meta
+	    	$this->data['site_title'] = 'Master Setup | Portfolio Settings';
+
+
+	    	$records = $this->portfolio_setting_model->get_row_list();
+			$this->template->partial(
+								'content_header',
+								'templates/_common/_content_header',
+								[
+									'content_header' => 'Manage Portfolio Settings',
+									'breadcrumbs' => ['Master Setup' => NULL, 'Portfolio' => 'portfolio', 'Settings' => NULL]
+							])
+							->partial('content', 'setup/portfolio/_settings_default', compact('records'))
+							->render($this->data);
+  		}
+
+	// --------------------------------------------------------------------
+
+  		/**
+  		 * List all portfolio settings for given fiscal year
+  		 *
+  		 * This function list all settings by Fiscal Year as a default listing method.
+  		 *
+  		 * @return void
+  		 */
+  		private function _settings_fy($fiscal_yr_id)
+  		{
+  			// Site Meta
+	    	$this->data['site_title'] = 'Master Setup | List of Portfolio Settings By Fiscal Year';
+
+	    	$fiscal_yr_id 	= (int)$fiscal_yr_id;
+	    	$records 		= $this->portfolio_setting_model->get_list_by_fiscal_year($fiscal_yr_id);
+
+	    	$content_header = 'Manage Portfolio Settings - ' .  $records[0]->fy_code_np . '(' . $records[0]->fy_code_en . ')';
+
+
+			$this->template->partial(
+								'content_header',
+								'templates/_common/_content_header',
+								[
+									'content_header' => $content_header,
+									'breadcrumbs' => ['Master Setup' => NULL, 'Portfolio' => 'portfolio', 'Settings' => NULL]
+							])
+							->partial('content', 'setup/portfolio/_settings_fy', compact('records'))
+							->render($this->data);
+  		}
 
   	// --------------------------------------------------------------------
 
@@ -495,19 +556,15 @@ class Portfolio extends MY_Controller
 		$json_data = $this->_save_settings('add');
 
 
-
 		$portfolios_tree 		= $this->portfolio_model->dropdown_children_tree();
 		$children_portfolios 	= $this->portfolio_model->dropdown_children();
 
-		// Short term policy rate Validation Rules
-		$spr_validation_rules = $this->__settings_stpr_validation_rules($children_portfolios, []);
-
-		$json_data['form'] = $this->load->view('setup/portfolio/_form_settings',
+		$json_data['form'] 	= $this->load->view('setup/portfolio/_form_settings',
 			[
-				'form_elements' 			=> $this->portfolio_setting_model->fy_validation_rules(),
-				'sectioned_elements' 		=> $this->portfolio_setting_model->sectioned_validation_rules(),
-				'spr_validation_rules' 		=> $spr_validation_rules,
+
+				'form_elements' 		=> $this->portfolio_setting_model->validation_rules,
 				'portfolios_tree' 		=> $portfolios_tree,
+				'settings' 				=> [],
 				'action' 				=> 'add',
 				'record' 				=> $record
 			], TRUE);
@@ -515,114 +572,6 @@ class Portfolio extends MY_Controller
 		// Return HTML
 		$this->template->json($json_data);
 	}
-
-	// --------------------------------------------------------------------
-
-		/**
-		 * Get Short Term Policy Rate - Validation Rules
-		 *
-		 * @param array $child_portfolios Portfolio Dropdown (All Children)
-		 * @return array
-		 */
-		private function __settings_stpr_validation_rules($child_portfolios, $settings=[], $formatted=false)
-		{
-			$spr_validation_rules = [];
-
-			foreach($child_portfolios as $portfolio_id=>$portfolio_name)
-			{
-				/**
-				 * If Formatted, We only return to Run Validation Rule
-				 */
-				if($formatted)
-				{
-					$spr_validation_rules = array_merge($spr_validation_rules, $this->__settings_stpr_validation_rule_single($portfolio_id));
-				}
-				else
-				{
-					$counter_spr = 0;
-                    $stpr_post_data = $this->input->post("stpr[PORT_{$portfolio_id}]");
-                    if($settings)
-                    {
-                    	foreach($settings as $t)
-		                {
-		                	if( $t->portfolio_id == $portfolio_id)
-		                    {
-	                    		// Format: [{"title":"One Week", "duration": 7, "rate": 10.00}]
-	                            $short_term_policy_rate_list = $t->short_term_policy_rate ? json_decode($t->short_term_policy_rate) : [];
-	                            foreach($short_term_policy_rate_list as $spr)
-	                            {
-	                            	$spr_data = [
-	                            		'title' 	=> $stpr_post_data['title'][$counter_spr] ?? $spr->title,
-	                            		'duration' 	=> $stpr_post_data['duration'][$counter_spr] ?? $spr->duration,
-	                            		'rate' 		=> $stpr_post_data['rate'][$counter_spr] ?? $spr->rate
-	                            	];
-
-	                            	$spr_validation_rules["PORT_{$portfolio_id}"][] = $this->__settings_stpr_validation_rule_single($portfolio_id, $spr_data);
-
-	                                $counter_spr++;
-	                            }
-		                    }
-		                }
-                    }
-
-
-	                // Let's check if we have still more element per portfolio - On post request
-	                // Or Post on Add
-	                $counter_spr_post_total = count($stpr_post_data['title'] ?? []);
-	                if($counter_spr_post_total > $counter_spr)
-	                {
-	                	for($i = $counter_spr; $i < $counter_spr_post_total; $i++)
-	                	{
-	                		$spr_data = [
-                        		'title' 	=> $stpr_post_data['title'][$i] ?? '',
-                        		'duration' 	=> $stpr_post_data['duration'][$i] ?? '',
-                        		'rate' 		=> $stpr_post_data['rate'][$i] ?? ''
-                        	];
-                            $spr_validation_rules["PORT_{$portfolio_id}"][] = $this->__settings_stpr_validation_rule_single($portfolio_id, $spr_data);
-	                	}
-	                }
-
-	                // If empty, get the default validation rules
-	                if( !isset($spr_validation_rules["PORT_{$portfolio_id}"]) || empty($spr_validation_rules["PORT_{$portfolio_id}"]) )
-	                {
-	                	$spr_validation_rules["PORT_{$portfolio_id}"][] = $this->__settings_stpr_validation_rule_single($portfolio_id);
-	                }
-				}
-			}
-
-			// echo '<pre>'; print_r($spr_validation_rules);exit;
-			return $spr_validation_rules;
-		}
-
-		private function __settings_stpr_validation_rule_single($portfolio_id, $data=[])
-		{
-			return [
-                [
-                    'field'     => "stpr[PORT_{$portfolio_id}][title][]",
-                    'label'     => 'Title',
-                    'rules' 	=> 'trim|required|max_length[50]',
-                    'value'     => $data['title'] ?? '',
-                    'type'      => 'text',
-                    '_required' => true
-                ],
-                [
-                    'field'     => "stpr[PORT_{$portfolio_id}][duration][]",
-                    'label'     => 'Duration (Days)',
-                    'rules' 	=> 'trim|required|integer|max_length[3]',
-                    'value'     => $data['duration'] ?? '',
-                    'type'      => 'text',
-                    '_required' => true
-                ],
-                [
-                    'field'     => "stpr[PORT_{$portfolio_id}][rate][]",
-                    'label'     => 'Rate (%)',
-                    'rules' 	=> 'trim|required|prep_decimal|decimal|max_length[5]',
-                    'value'     => $data['rate'] ?? '',
-                    'type'      => 'text',
-                    '_required' => true
-                ]
-            ];
-		}
 
 	// --------------------------------------------------------------------
 
@@ -647,7 +596,7 @@ class Portfolio extends MY_Controller
 		}
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save_settings('edit', $record, $settings, $settings);
+		$json_data = $this->_save_settings('edit', $record, $settings);
 
 
 		// No form Submitted?
@@ -655,17 +604,18 @@ class Portfolio extends MY_Controller
 		$portfolios_tree 		= $this->portfolio_model->dropdown_children_tree();
 		$children_portfolios 	= $this->portfolio_model->dropdown_children();
 
-		$rules = $this->portfolio_setting_model->validation_rules;
-		$rules[0]['_data'] = IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown();
+		// $rules = $this->portfolio_setting_model->validation_rules;
+		// $rules[0]['_data'] = IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown();
 
 		// Short term policy rate Validation Rules
-		$spr_validation_rules = $this->__settings_stpr_validation_rules($children_portfolios, $settings);
+		// $spr_validation_rules = $this->__settings_stpr_validation_rules($children_portfolios, $settings);
 
 		$json_data['form'] = $this->load->view('setup/portfolio/_form_settings',
 			[
-				'form_elements' 			=> $this->portfolio_setting_model->fy_validation_rules(),
-				'sectioned_elements' 		=> $this->portfolio_setting_model->sectioned_validation_rules(),
-				'spr_validation_rules' 		=> $spr_validation_rules,
+				'form_elements' 			=> $this->portfolio_setting_model->validation_rules,
+				// 'form_elements_ORIG' 		=> $this->portfolio_setting_model->fy_validation_rules(),
+				// 'sectioned_elements' 		=> $this->portfolio_setting_model->sectioned_validation_rules(),
+				// 'spr_validation_rules' 		=> $spr_validation_rules,
 				'action' 			=> 'edit',
 				'portfolios_tree' 	=> $portfolios_tree,
 				'settings' 			=> $settings,
@@ -712,104 +662,66 @@ class Portfolio extends MY_Controller
 
 			$done = FALSE;
 
-			$rules = $this->portfolio_setting_model->validation_rules;
+			$rules = $this->portfolio_setting_model->get_validation_rules(['fiscal_yr', 'basic'], TRUE);
 
-			// Short term policy rate Validation Rules
-			$spr_validation_rules = $this->__settings_stpr_validation_rules($children_portfolios, [], true);
-
-			// Merge both rules
-			$v_rules = array_merge($rules, $spr_validation_rules);
-
-			$this->form_validation->set_rules($v_rules);
+			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
 				$data = $this->input->post();
 
-				$fiscal_yr_id 		= $this->input->post('fiscal_yr_id');
-				$agent_commission 	= $this->input->post('agent_commission');
-				$bs_service_charge 	= $this->input->post('bs_service_charge');
-				$direct_discount 	= $this->input->post('direct_discount');
-				$stamp_duty  		= $this->input->post('stamp_duty');
-				$default_duration  	= $this->input->post('default_duration');
-				$flag_short_term  	= $this->input->post('flag_short_term');
+				$fiscal_yr_id 			= $this->input->post('fiscal_yr_id');
+				$agent_commission 		= $this->input->post('agent_commission');
+				$bs_service_charge 		= $this->input->post('bs_service_charge');
+				$direct_discount 		= $this->input->post('direct_discount');
+				$stamp_duty  			= $this->input->post('stamp_duty');
+				$flag_default_duration 	= $this->input->post('flag_default_duration');
+				$default_duration  		= $this->input->post('default_duration');
+				$flag_short_term  		= $this->input->post('flag_short_term');
 
 
-
-				// Insert or Update?
+				/**
+				 * Prepare Data
+				 */
 				if($action === 'add')
 				{
+					$batch_data = [];
 					$i = 0;
 					foreach($children_portfolios as $portfolio_id => $portfolio_name)
 					{
-						$data = [
-							'fiscal_yr_id' 		=> $fiscal_yr_id,
-							'portfolio_id'    	=> $portfolio_id,
-							'agent_commission' 	=> $agent_commission[$i],
-							'bs_service_charge' => $bs_service_charge[$i],
-							'direct_discount' 	=> $direct_discount[$i],
-							'stamp_duty' 		=> $stamp_duty[$i],
-							'default_duration' 	=> $default_duration[$i],
-							'flag_short_term' 	=> $flag_short_term[$i]
+						$batch_data[] = [
+							'fiscal_yr_id' 				=> $fiscal_yr_id,
+							'portfolio_id'    			=> $portfolio_id,
+							'agent_commission' 			=> $agent_commission[$i],
+							'bs_service_charge' 		=> $bs_service_charge[$i],
+							'direct_discount' 			=> $direct_discount[$i],
+							'stamp_duty' 				=> $stamp_duty[$i],
+							'flag_default_duration' 	=> $flag_default_duration[$i],
+							'default_duration' 			=> $default_duration[$i],
+							'flag_short_term' 			=> $flag_short_term[$i]
 						];
-
-						// Short Term Policy Rate
-						$spr_post_data = $this->input->post("stpr[PORT_{$portfolio_id}]");
-						$spr_count = count($spr_post_data['title']?? []);
-						$spr_data = [];
-						for($j=0; $j<$spr_count; $j++)
-						{
-							$spr_data[] = [
-								'title' 	=> $spr_post_data['title'][$j],
-								'duration' 	=> $spr_post_data['duration'][$j],
-								'rate' 		=> $spr_post_data['rate'][$j],
-							];
-						}
-						$json_spr_data = !empty($spr_data) ? json_encode($spr_data) : NULL;
-
-						// Add to update data
-						$data['short_term_policy_rate']  = $json_spr_data;
-
-						$done = $this->portfolio_setting_model->insert($data, TRUE); // No Validation on Model
-
-						// Activity Log
-						$done ? $this->portfolio_setting_model->log_activity($done, 'C'): '';
 						$i++;
 					}
+
+					$done = $this->portfolio_setting_model->insert_batch($batch_data, TRUE); // No Validation on Model
 				}
 				else
 				{
-					// Now Update Data
-					$setting_ids = $this->input->post('setting_ids');
 					$i = 0;
+					$setting_ids = $this->input->post('setting_id');
 					foreach($children_portfolios as $portfolio_id => $portfolio_name)
 					{
-						$data = [
-							'agent_commission' 	=> $agent_commission[$i],
-							'bs_service_charge' => $bs_service_charge[$i],
-							'direct_discount' 	=> $direct_discount[$i],
-							'stamp_duty' 		=> $stamp_duty[$i],
-							'default_duration' 	=> $default_duration[$i],
-							'flag_short_term' 	=> $flag_short_term[$i]
+						$single_data = [
+							'agent_commission' 			=> $agent_commission[$i],
+							'bs_service_charge' 		=> $bs_service_charge[$i],
+							'direct_discount' 			=> $direct_discount[$i],
+							'stamp_duty' 				=> $stamp_duty[$i],
+							'flag_default_duration' 	=> $flag_default_duration[$i],
+							'default_duration' 			=> $default_duration[$i],
+							'flag_short_term' 			=> $flag_short_term[$i]
 						];
+
 						$setting_id = $setting_ids[$i];
-
-						// Short Term Policy Rate
-						$spr_post_data = $this->input->post("stpr[PORT_{$portfolio_id}]");
-						$spr_count = count($spr_post_data['title'] ?? []);
-						$spr_data = [];
-						for($j=0; $j<$spr_count; $j++)
-						{
-							$spr_data[] = [
-								'title' 	=> $spr_post_data['title'][$j],
-								'duration' 	=> $spr_post_data['duration'][$j],
-								'rate' 		=> $spr_post_data['rate'][$j],
-							];
-						}
-						$json_spr_data = !empty($spr_data) ? json_encode($spr_data) : NULL;
-
-						// Add to update data
-						$data['short_term_policy_rate'] = $json_spr_data;
-						$done = $this->portfolio_setting_model->update($setting_id, $data, TRUE) && $this->portfolio_setting_model->log_activity($setting_id, 'E');
+						$done = $this->portfolio_setting_model->update($setting_id, $single_data, TRUE) && $this->portfolio_setting_model->log_activity($setting_id, 'E');
 
 						$i++;
 					}
@@ -829,7 +741,7 @@ class Portfolio extends MY_Controller
 			else
 			{
 				$status = 'error';
-				$message = 'Validation Error.';
+				$message = validation_errors();
 			}
 
 			// Success HTML
@@ -839,24 +751,20 @@ class Portfolio extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->portfolio_setting_model->get_row_list();
-					$success_html = $this->load->view('setup/portfolio/_list_settings', ['records' => $records], TRUE);
+					$success_html = $this->load->view('setup/portfolio/_list_settings_default', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->portfolio_setting_model->get_row_single($fiscal_yr_id);
-					$success_html = $this->load->view('setup/portfolio/_single_row_settings', ['record' => $record], TRUE);
+					$success_html = $this->load->view('setup/portfolio/_single_row_settings_default', ['record' => $record], TRUE);
 				}
 			}
 
-			$rules 				= $this->portfolio_setting_model->validation_rules;
-			$rules[0]['_data'] 	= IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown();
-			$settings 			= $record ? $this->portfolio_setting_model->get_list_by_fiscal_year($record->fiscal_yr_id) : NULL;
-			$spr_validation_rules = $this->__settings_stpr_validation_rules($children_portfolios, $settings);
 			$return_data = [
 				'status' 		=> $status,
 				'message' 		=> $message,
-				'reloadForm' 	=> $status === 'error',
+				'reloadForm' 	=> false,
 				'hideBootbox' 	=> $status === 'success',
 				'updateSection' => $status === 'success',
 				'updateSectionData'	=> $status === 'success'
@@ -872,20 +780,7 @@ class Portfolio extends MY_Controller
 												//
 												'method' 	=> $action === 'add' ? 'html' : 'replaceWith'
 											]
-										: NULL,
-				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/portfolio/_form_settings',
-											[
-												'form_elements' 			=> $this->portfolio_setting_model->fy_validation_rules(),
-												'sectioned_elements' 		=> $this->portfolio_setting_model->sectioned_validation_rules(),
-												'record' 		=> $record,
-												'action' 		=> $action,
-												'portfolios_tree' 	=> $portfolios_tree,
-												'settings' 		=> $settings,
-												'spr_validation_rules' => $spr_validation_rules
-											], TRUE)
-									: 	null
-
+										: NULL
 			];
 		}
 
@@ -905,9 +800,9 @@ class Portfolio extends MY_Controller
     {
     	$this->load->model('portfolio_setting_model');
     	$fiscal_yr_id = strtoupper( $fiscal_yr_id ? $fiscal_yr_id : $this->input->post('fiscal_yr_id') );
-    	$setting_ids = $this->input->post('setting_ids');
+    	$setting_id = $this->input->post('setting_id');
 
-        if( $this->portfolio_setting_model->check_duplicate(['fiscal_yr_id' => $fiscal_yr_id], $setting_ids))
+        if( $this->portfolio_setting_model->check_duplicate(['fiscal_yr_id' => $fiscal_yr_id], $setting_id))
         {
             $this->form_validation->set_message('_cb_settings_check_duplicate', 'The %s already exists.');
             return FALSE;
@@ -1073,7 +968,7 @@ class Portfolio extends MY_Controller
                 ];
 
                 $records = $this->portfolio_setting_model->get_row_list();
-				$html = $this->load->view('setup/portfolio/_list_settings', ['records' => $records], TRUE);
+				$html = $this->load->view('setup/portfolio/_list_settings_default', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -1109,5 +1004,125 @@ class Portfolio extends MY_Controller
         // Return HTML
         $this->template->json($json_data);
     }
+
+    // --------------------------------------------------------------------
+
+	/**
+	 * Configure Short-term Policy Rate - Per Portfolio Settings
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function configure_settings_spr($id)
+	{
+		$this->load->model('portfolio_setting_model');
+
+		// Valid Record ?
+		$id 	= (int)$id;
+		$record = $this->portfolio_setting_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		// Validation Rules
+		$v_rules = $this->__settings_spr_validation_rules();
+		if( $this->input->post() )
+		{
+			$this->form_validation->set_rules($v_rules);
+			if( $this->form_validation->run() === TRUE )
+			{
+				$spr_post = $this->input->post('spr');
+
+				$count = count($spr_post['title']);
+
+				$spr_data = [];
+
+				for($i = 0; $i < $count; $i++)
+				{
+					$spr_data[] = [
+						'title' 	=> $spr_post['title'][$i],
+						'duration' 	=> $spr_post['duration'][$i],
+						'rate' 		=> $spr_post['rate'][$i],
+					];
+				}
+
+				$data = [ 'short_term_policy_rate' => json_encode($spr_data) ];
+				$done = $this->portfolio_setting_model->update($id, $data, TRUE);
+
+				if($done)
+				{
+					$status 	= 'success';
+					$message 	= 'Successfully updated.';
+				}
+				else
+				{
+					$status 	= 'error';
+					$message 	= 'Could not be updated.';
+				}
+			}
+			else
+			{
+				$status 	= 'error';
+				$message 	= validation_errors();
+			}
+
+			$return_data = [
+				'status' 		=> $status,
+				'message' 		=> $message,
+				'reloadForm' 	=> false,
+				'hideBootbox' 	=> $status === 'success',
+				'updateSection' => false
+			];
+
+			return $this->template->json($return_data);
+		}
+
+		$json_data['form'] = $this->load->view('setup/portfolio/_form_settings_spr',
+								[
+									'form_elements' 	=> $v_rules,
+									'record' 			=> $record
+								], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Get Short Term Policy Rate - Validation Rules
+		 *
+		 * @return array
+		 */
+		private function __settings_spr_validation_rules()
+		{
+			return [
+                [
+                    'field'     => "spr[title][]",
+                    'label'     => 'Title',
+                    'rules' 	=> 'trim|required|max_length[50]',
+                    '_type'      => 'text',
+                    '_key' 		=> 'title',
+                    '_required' => true
+                ],
+                [
+                    'field'     => "spr[duration][]",
+                    'label'     => 'Duration (Days)',
+                    'rules' 	=> 'trim|required|integer|max_length[3]',
+                    '_type'      => 'text',
+                    '_key' 		=> 'duration',
+                    '_required' => true
+                ],
+                [
+                    'field'     => "spr[rate][]",
+                    'label'     => 'Rate (%)',
+                    'rules' 	=> 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'      => 'text',
+                    '_key' 		=> 'rate',
+                    '_required' => true
+                ]
+            ];
+		}
 
 }

@@ -16,7 +16,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<a href="#"
 			data-toggle="tooltip"
 			title="Edit Portfolio Settings"
-			data-box-size="large"
+			data-box-size="full-width"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio Settings'
 			data-url="<?php echo site_url('portfolio/edit_settings/' . $record->fiscal_yr_id);?>"
@@ -43,6 +43,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-form=".form-iqb-general">
 			<i class="fa fa-copy"></i>
 			<span class="hidden-xs">Duplicate</span>
+		</a>
+		<a href="<?php echo site_url('portfolio/settings/fy/' . $record->fiscal_yr_id);?>"
+			class="action"
+			data-toggle="tooltip"
+			title="List all Portfolio Settings for this Fiscal Year">
+			<i class="fa fa-list"></i>
+			<span class="hidden-xs">List All</span>
 		</a>
 	</td>
 </tr>
