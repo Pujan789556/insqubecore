@@ -4,12 +4,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Object Snippet: Marine Popover
 */
 $attributes 	= $record->attributes ? json_decode($record->attributes) : NULL;
-
 $form_elements 		= _OBJ_MARINE_validation_rules($record->portfolio_id);
+
+$ref = $ref ?? '';
+if($ref === 'policy_overview_tab')
+{
+    $col = 'col-xs-12';
+}
+else
+{
+    $col = 'col-md-6';
+}
 ?>
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="<?php echo $col ?>">
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
                 <h4 class="box-title">Basic Information</h4>
@@ -52,7 +61,7 @@ $form_elements 		= _OBJ_MARINE_validation_rules($record->portfolio_id);
         </div>
     </div>
 
-    <div class="col-md-6">
+    <div class="<?php echo $col ?>">
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
                 <h4 class="box-title">Sum Insured Details</h4>

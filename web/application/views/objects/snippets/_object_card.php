@@ -31,7 +31,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         /**
         * Policy Object Details
         */
-        $this->load->view('objects/snippets/_popup', ['record' => $record]);
+        $this->load->view('objects/snippets/_popup', ['record' => $record, 'ref' => 'policy_overview_tab']);
         ?>
     </div>
 </div>
