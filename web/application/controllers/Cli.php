@@ -42,21 +42,21 @@ class Cli extends CI_Controller
 	// -------------------------------------------------------------------------------------
 
 	/**
-	 * Import Today's Exchange Rate from NRB
+	 * Import Today's Forex Rate from NRB
 	 *
 	 * If No date is supplied, it bring's today's Exchange rate
 	 *
 	 * Usage(dev/production):
-	 * 		$ php index.php cli exchange_rate
-	 * 		$ php index.php cli exchange_rate '2016-02-09'
+	 * 		$ php index.php cli import_forex_rates
+	 * 		$ php index.php cli import_forex_rates '2016-02-09'
 	 *
-	 * 		$ CI_ENV=production php index.php cli exchange_rate
-	 * 		$ CI_ENV=production php index.php cli exchange_rate '2016-02-09'
+	 * 		$ CI_ENV=production php index.php cli import_forex_rates
+	 * 		$ CI_ENV=production php index.php cli import_forex_rates '2016-02-09'
 	 *
 	 * @param date $date=NULL
 	 * @return void
 	 */
-	public function exchange_rate( $date=NULL )
+	public function import_forex_rates( $date=NULL )
 	{
 		$api 	= 'https://nrb.org.np/exportForexJSON.php';
 		$date 	= $date ?? date('Y-m-d');
@@ -73,13 +73,13 @@ class Cli extends CI_Controller
 		/**
 		 * Load Model
 		 */
-		$this->load->model('exchange_rate_model');
+		$this->load->model('forex_model');
 
 
 		/**
 		 * Check Duplicate
 		 */
-		if( $this->exchange_rate_model->check_duplicate(['exchange_date' => $date]) )
+		if( $this->forex_model->check_duplicate(['exchange_date' => $date]) )
     	{
 			echo("ERROR - Data already exists for date({$date}).\n");
 			exit(1);
@@ -106,8 +106,8 @@ class Cli extends CI_Controller
         echo("OK.\n");
 
 
-        $exchange_rates = $result['Conversion']['Currency'] ?? NULL;
-        if($exchange_rates)
+        $forex_rates = $result['Conversion']['Currency'] ?? NULL;
+        if($forex_rates)
         {
         	/**
         	 * Let's Import Into Database
@@ -115,7 +115,7 @@ class Cli extends CI_Controller
         	echo("Formatting data to import... ");
 
 	        	// Remove Date form each array
-		        foreach($exchange_rates as &$single)
+		        foreach($forex_rates as &$single)
 		        {
 		            unset($single['Date']);
 		        }
@@ -129,9 +129,9 @@ class Cli extends CI_Controller
 
     			$exchange_data = [
     				'exchange_date' 	=> $date,
-    				'exchange_rates' 	=> json_encode($exchange_rates)
+    				'exchange_rates' 	=> json_encode($forex_rates)
     			];
-        		$done = $this->exchange_rate_model->insert($exchange_data, TRUE);
+        		$done = $this->forex_model->insert($exchange_data, TRUE);
 
         	echo( $done ? "OK.\n" : "FAILED.\n");
         }
