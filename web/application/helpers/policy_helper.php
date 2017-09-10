@@ -447,6 +447,15 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_FIRE";
 		}
 
+		/**
+		 * MARINE PORTFOLIOS
+		 * -----------------
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+		{
+			$view_prefix = $view_for === 'print' ? '_print' : '';
+			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MARINE";
+		}
 
 		return $partial_view;
 	}
