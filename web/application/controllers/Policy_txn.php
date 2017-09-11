@@ -1205,6 +1205,14 @@ class Policy_txn extends MY_Controller
 				$goodies = $this->__premium_goodies_FIRE($policy_record, $policy_object, $portfolio_risks);
 			}
 
+			/**
+			 * MARINE PORTFOLIOS
+			 * ---------------
+			 */
+			else if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+			{
+				$goodies = $this->__premium_goodies_MARINE($policy_record, $policy_object, $portfolio_risks);
+			}
 			else
 			{
 				return $this->template->json([
