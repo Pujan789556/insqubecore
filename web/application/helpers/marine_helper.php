@@ -369,15 +369,6 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        '_data' 	=> IQB_BLANK_SELECT + $insurance_cover_type_dropdown,
 			        '_required' => true
 			    ],
-		    	[
-			        'field' => 'object[risk][clauses]',
-			        '_key' => 'clauses',
-			        'label' => 'Clauses',
-			        'rules' => 'trim|required|max_length[500]',
-			        'rows' 		=> 4,
-			        '_type'     => 'textarea',
-			        '_required' => true
-			    ],
 			    [
 			        'field' => 'object[risk][warranties]',
 			        '_key' => 'warranties',
@@ -396,7 +387,19 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        '_data' 	=> IQB_BLANK_SELECT + $deductible_excess_dropdown,
 			        '_required' => true
 			    ],
+			    [
+			        'field' => 'object[risk][clauses][]',
+			        '_key' => 'clauses',
+			        'label' => 'Clauses',
+			        'rules' => 'trim|required|max_length[500]',
+			        '_type'     => 'checkbox-group',
+			        '_data' 	=> _OBJ_MARINE_clauses_list(FALSE),
+			        '_checkbox_value' 	=> [],
+			        '_required' 		=> true
+			    ],
 		    ],
+
+
 
 
 
@@ -410,6 +413,7 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'label' => 'Surveyor Name',
 			        'rules' => 'trim|required|max_length[100]',
 			        '_type'     => 'text',
+			        '_default' 	=> "As appointed by CO's Head Office Kathmandu, Nepal",
 			        '_required' => true
 			    ],
 			    [
@@ -418,6 +422,7 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'label' => 'Contact Person',
 			        'rules' => 'trim|required|max_length[100]',
 			        '_type'     => 'text',
+			        '_default' 	=> "As arranged by CO's Head Office Kathmandu, Nepal",
 			        '_required' => true
 			    ],
 			    [
@@ -426,6 +431,7 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'label' => 'Address',
 			        'rules' => 'trim|required|max_length[150]',
 			        '_type'     => 'text',
+			        '_default' 	=> "Kathmandu, Nepal",
 			        '_required' => true
 			    ]
 		    ]
@@ -719,4 +725,59 @@ if ( ! function_exists('_TXN_MARINE_premium_validation_rules'))
 
 	}
 }
+
+
+// ------------------------------------------------------------------------
+// PORTFOLIO SPECIFIC HELPER FUNCTIONS
+// ------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MARINE_clauses_list'))
+{
+	/**
+	 * Get Policy Object - MARINE - Clauses Dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	array
+	 */
+	function _OBJ_MARINE_clauses_list( $flag_blank_select = true )
+	{
+		$dropdown = [
+			'1' => 'Institute Cargo Clauses A',
+			'2' => 'Institute Cargo Clauses B',
+			'3' => 'Institute Cargo Clauses C',
+			'4' => 'Institute Cargo Clauses (Air)',
+			'5' => 'Inland Transit (Rail or Road) Clause A',
+			'6' => 'Inland Transit (Rail or Road) Clause B',
+			'7' => 'Inland Transit (Rail or Road) Clause C (Fire Risk only)',
+			'8' => 'Institute War Clauses (Cargo)',
+			'9' => 'Notice of Cancellation and Automatic Termination Clause',
+			'10' => 'Institute Strikes Clauses (Cargo)',
+			'11' => 'Institute War Cancellation Clause (Cargo)',
+			'12' => 'Institute War Clauses ( Air Cargo)',
+			'13' => 'Institute Strikes Clauses (Air Cargo)',
+			'14' => 'Strikes, Riots and Civil Commotions Clause',
+			'15' => 'Institute Classification Clause',
+			'16' => 'Pre-despatch Survey Clause',
+			'17' => 'Extension of Cover Beyond Seven Days Clause',
+			'18' => 'Theft, Pilferage and Non- delivery Clause',
+			'19' => 'Non-delivery Clause',
+			'20' => 'Water Damage Clause',
+			'21' => 'Institute Replacement Clause',
+			'22' => 'Institute Replacement Clause (Second Hand Machinery)',
+			'23' => 'Duty Insurance Clause',
+			'24' => 'Quarantine Insurance Clause',
+			'25' => 'Termination of Transit Clause (Terrorissm)'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+
 

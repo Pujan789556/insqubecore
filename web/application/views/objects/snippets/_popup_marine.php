@@ -100,6 +100,11 @@ else
             	<?php
             	$section_elements 		= $form_elements['risk'];
 				$section_object 		= $attributes->risk;
+                $clauses = $section_object->clauses;
+
+                // Remove Cluases
+                unset($section_elements[count($section_elements)-1]);
+                unset($section_object->clauses);
             	foreach($section_elements as $elem): ?>
             		<tr>
             			<th><?php echo $elem['label']; ?></th>
@@ -115,6 +120,21 @@ else
             			?></td>
             		</tr>
         		<?php endforeach ?>
+                <tr>
+                    <th>Clauses</th>
+                    <td>
+                        <?php
+                        $clauses_list = [];
+                        $i = 1;
+                        foreach($clauses as $cls )
+                        {
+                            $clauses_list[] = $i . '. ' . _OBJ_MARINE_clauses_list(FALSE)[$cls];
+                            $i++;
+                        }
+                        echo implode('<br/>', $clauses_list);
+                        ?>
+                    </td>
+                </tr>
             </table>
         </div>
 
