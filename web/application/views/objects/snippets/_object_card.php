@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     class="trg-dialog-edit btn btn-primary btn-sm"
                     title="Edit Object Information"
                     data-toggle="tooltip"
-                    data-box-size="large"
+                    data-box-size="full-width"
                     data-title='<i class="fa fa-pencil-square-o"></i> Edit Object'
                     data-url="<?php echo site_url('objects/edit/' . $record->id . '/y');?>"
                     data-form="#_form-object">
