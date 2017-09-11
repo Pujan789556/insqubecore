@@ -176,6 +176,10 @@ if ( ! function_exists('_OBJ_validation_rules'))
 			$v_rules = _OBJ_MARINE_validation_rules( $portfolio_id, $formatted );
 		}
 
+		else
+		{
+			throw new Exception("Exception [Helper: object_helper][Method: _OBJ_validation_rules()]: No validation method defined for supplied portfolio.");
+		}
 
 		return $v_rules;
 	}
@@ -225,6 +229,10 @@ if ( ! function_exists('_OBJ_attribute_form'))
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
 			$attribute_form = 'objects/forms/_form_object_marine';
+		}
+		else
+		{
+			throw new Exception("Exception [Helper: object_helper][Method: _OBJ_attribute_form()]: No attribute form defined for supplied portfolio.");
 		}
 
 		return $attribute_form;

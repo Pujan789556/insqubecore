@@ -563,7 +563,21 @@ class Objects extends MY_Controller
 			}
 
 			$done 		= FALSE;
-			$v_rules 	= array_merge($v_rules, _OBJ_validation_rules($portfolio_id, TRUE));
+
+			/**
+			 * Object Validation Rules
+			 */
+			try {
+
+				$obj_v_rules 	= _OBJ_validation_rules($portfolio_id, TRUE);
+
+			} catch (Exception $e) {
+
+				return $this->template->json(['status' => 'error', 'title' => 'Exception Occured', 'message' => $e->getMessage()], 404);
+			}
+
+
+			$v_rules 	= array_merge($v_rules, $obj_v_rules);
             $this->form_validation->set_rules($v_rules);
 
 			if($this->form_validation->run() === TRUE )
@@ -819,7 +833,19 @@ class Objects extends MY_Controller
 		{
 			$done = FALSE;
 
-			$v_rules 	= array_merge($v_rules, _OBJ_validation_rules($record->portfolio_id, TRUE));
+			/**
+			 * Object Validation Rules
+			 */
+			try {
+
+				$obj_v_rules 	= _OBJ_validation_rules($record->portfolio_id, TRUE);
+
+			} catch (Exception $e) {
+
+				return $this->template->json(['status' => 'error', 'title' => 'Exception Occured', 'message' => $e->getMessage()], 404);
+			}
+
+			$v_rules 	= array_merge($v_rules, $obj_v_rules);
 			$this->form_validation->set_rules($v_rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -1023,10 +1049,31 @@ class Objects extends MY_Controller
 		{
 			// Valid Record ?
 			$portfolio_id 	= (int)$portfolio_id;
-			$form_elements 	= _OBJ_validation_rules($portfolio_id);
-			$form_partial 	= _OBJ_attribute_form($portfolio_id);
 
-			// echo '<pre>'; print_r($form_elements);exit;
+			/**
+			 * Validation Rules
+			 */
+			try {
+
+				$form_elements 	= _OBJ_validation_rules($portfolio_id);
+
+			} catch (Exception $e) {
+
+				return $this->template->json(['status' => 'error', 'title' => 'Exception Occured', 'message' => $e->getMessage()], 404);
+			}
+
+			/**
+			 * Object Attribute Form
+			 */
+			try {
+
+				$form_partial 	= _OBJ_attribute_form($portfolio_id);
+
+			} catch (Exception $e) {
+
+				return $this->template->json(['status' => 'error', 'title' => 'Exception Occured', 'message' => $e->getMessage()], 404);
+			}
+
 
 			// No form Submitted?
 			$html = $this->load->view($form_partial,
