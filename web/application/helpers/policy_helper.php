@@ -494,6 +494,20 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
 			$form_view = 'policy_txn/forms/_form_premium_FIRE';
 		}
 
+		/**
+		 * MARINE
+		 * ------
+		 */
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+		{
+			$form_view = 'policy_txn/forms/_form_premium_MARINE';
+		}
+
+		else
+		{
+			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__partial_view__premium_form()]: No premium form defined for supplied portfolio.");
+		}
+
 		return $form_view;
 	}
 }

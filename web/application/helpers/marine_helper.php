@@ -539,11 +539,13 @@ if ( ! function_exists('_OBJ_MARINE_compute_sum_insured_amount'))
 	 *
 	 * Compute sum insured amount based on object's portfolio and return.
 	 *
-	 * @param integer $portfolio_id  Portfolio ID
-	 * @param array $data 	Object Data
+	 * @param integer 	$portfolio_id  Portfolio ID
+	 * @param array 	$data 	Object Data
+	 * @param string 	$mode 	What to Compute [all|except_duty|duty_only]
+	 * @param bool 		$forex_convert 	Convert sum insured into NPR
 	 * @return float
 	 */
-	function _OBJ_MARINE_compute_sum_insured_amount( $portfolio_id, $data )
+	function _OBJ_MARINE_compute_sum_insured_amount( $portfolio_id, $data, $mode = 'all', $forex_convert = TRUE )
 	{
 		/**
 		 * Compute Sum Insured Amount
@@ -570,15 +572,46 @@ if ( ! function_exists('_OBJ_MARINE_compute_sum_insured_amount'))
 
 		$F 	= ( $E * floatval($sum_insured_src['duty']) ) / 100.00;
 
-		$SI = $E + $F;
 
 		/**
-		 * Let's Convert it into NRS
+		 * We return the sum insured amount as:
+		 *
+		 * 	1. Complete Sum Insured Amount (all)
+		 * 	2. Invoice value + tolerance_limit + Incremental cost (except_duty)
+		 * 	3. Duty Amount (duty_only)
+		 *
+		 * 	2. & 3. are required while computinig premium
 		 */
-		$date = date('Y-m-d');
-		$amt_sum_insured = forex_conversion($date, $currency, $SI);
+		switch ($mode)
+		{
+			case 'all':
+				$SI = $E + $F;
+				break;
 
-		return $amt_sum_insured;
+			case 'except_duty':
+				$SI = $E;
+				break;
+
+			case 'duty_only':
+				$SI = $F;
+				break;
+
+			// Nothing Supplied, Return Complete Sum Insured Amount
+			default:
+				$SI = $E + $F;
+				break;
+		}
+
+		if( $forex_convert )
+		{
+			/**
+			 * Let's Convert it into NRS
+			 */
+			$date = date('Y-m-d');
+			$SI = forex_conversion($date, $currency, $SI);
+		}
+
+		return $SI;
 	}
 }
 
@@ -595,15 +628,11 @@ if ( ! function_exists('_TXN_MARINE_premium_validation_rules'))
 	 * @param object $policy_record 	Policy Record
 	 * @param object $pfs_record		Portfolio Setting Record
 	 * @param object $policy_object		Policy Object Record
-	 * @param array $portfolio_risks	Portfolio Risks
 	 * @param bool $for_processing		For Form Processing
-	 * @param string $return 			Return all rules or policy package specific
 	 * @return array
 	 */
-	function _TXN_MARINE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, $for_form_processing = FALSE )
+	function _TXN_MARINE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $for_form_processing = FALSE )
 	{
-
-		echo '@TODO: _TXN_MARINE_premium_validation_rules'; exit;
 
 		$CI =& get_instance();
 
@@ -611,12 +640,82 @@ if ( ! function_exists('_TXN_MARINE_premium_validation_rules'))
 		$CI->load->model('endorsement_template_model');
 		$template_dropdown = $CI->endorsement_template_model->dropdown( $policy_record->portfolio_id );
 
-		$rate_base_dropdown = [
-			'PT'	=> 'Per Thousand',
-			'RT'	=> 'Percent'
-		];
+		$default_discount_dropdown = _OBJ_MARINE_premium_default_discount_dropdown('label', FALSE);
 
 		$validation_rules = [
+			/**
+			 * Premium Validation Rules - Template
+			 */
+			'premium' => [
+                [
+	                'field' => 'premium[default_rate]',
+	                'label' => 'Specified premium rate (as per S.N....of Schedule 6)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'default_rate',
+	                '_required' => true
+	            ],
+	            [
+                    'field' => 'premium[default_discount]',
+                    'label' => 'Discount(%)',
+                    'rules' => 'trim|alpha|in_list['.implode(',', array_keys($default_discount_dropdown)).']',
+                    '_key' 		=> 'default_discount',
+                    '_type'     => 'dropdown',
+                    '_data' 	=> IQB_BLANK_SELECT + $default_discount_dropdown,
+                    '_required' => false
+                ],
+	            [
+	                'field' => 'premium[container_discount]',
+	                'label' => 'Container discount(%)',
+	                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'container_discount',
+	                '_default' 	=> '10',
+	                '_required' => false
+	            ],
+	            [
+	                'field' => 'premium[additional_rate1]',
+	                'label' => 'Additional premium rate for W & SRCC or SRCC(%)',
+	                'rules' => 'trim|prep_decimal|decimal|max_length[5]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'additional_rate1',
+	                '_required' => false
+	            ],
+	            [
+	                'field' => 'premium[additional_rate2]',
+	                'label' => 'Additional premium rate for other i.(%)',
+	                'rules' => 'trim|prep_decimal|decimal|max_length[5]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'additional_rate2',
+	                '_required' => false
+	            ],
+	            [
+	                'field' => 'premium[additional_rate3]',
+	                'label' => 'Additional premium rate for other ii.(%)',
+	                'rules' => 'trim|prep_decimal|decimal|max_length[5]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'additional_rate3',
+	                '_required' => false
+	            ],
+	            [
+	                'field' => 'premium[direct_business_discount]',
+	                'label' => 'Direct business discount(%)',
+	                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'direct_business_discount',
+	                '_default' 	=> '10',
+	                '_required' => false
+	            ],
+	            [
+	                'field' => 'premium[large_sum_insured_discount]',
+	                'label' => 'Large Sum Insured Discount(%)',
+	                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'large_sum_insured_discount',
+	                '_default' 	=> '20',
+	                '_required' => false
+	            ]
+			],
 
 			/**
 			 * Common to All Package Type
@@ -657,37 +756,6 @@ if ( ! function_exists('_TXN_MARINE_premium_validation_rules'))
 	                '_type'     => 'textarea',
 	                '_required' => false
 	            ]
-			],
-
-			/**
-			 * Premium Validation Rules - Template
-			 */
-			'premium' => [
-                [
-	                'field' => 'premium[risk]',
-	                'label' => 'Rate',
-	                'rules' => 'trim|integer|max_length[8]',
-	                '_type'     => 'hidden',
-	                '_key' 		=> 'risk',
-	                '_required' => true
-	            ],
-	            [
-	                'field' => 'premium[rate]',
-	                'label' => 'Rate',
-	                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
-	                '_type'     => 'text',
-	                '_key' 		=> 'rate',
-	                '_required' => true
-	            ],
-	            [
-                    'field' => 'premium[rate_base]',
-                    'label' => 'Premium Rate Base',
-                    'rules' => 'trim|alpha|exact_length[2]|in_list['.implode(',', array_keys($rate_base_dropdown)).']',
-                    '_key' 		=> 'rate_base',
-                    '_type'     => 'dropdown',
-                    '_data' 	=> $rate_base_dropdown,
-                    '_required' => false
-                ],
 			]
 		];
 
@@ -696,33 +764,66 @@ if ( ! function_exists('_TXN_MARINE_premium_validation_rules'))
 		 */
 		if( $for_form_processing )
 		{
-			$rules = $validation_rules['basic'];
-
-			/**
-			 * Premium Validation Rules
-			 */
-			$premium_elements 	= $validation_rules['premium'];
-			$object_attributes 	= $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-			$items 				= $object_attributes->items;
-			$item_count 		= count($items->category);
-
-			// Per Item We have validation rules
-			for($i=0; $i < $item_count; $i++ )
+			$rules_formatted = [];
+			foreach ($validation_rules as $section=> $section_rules)
 			{
-				// Loop through each portfolio risks
-				foreach($portfolio_risks as $risk_id=>$risk_name)
-				{
-					foreach ($premium_elements as $elem)
-                    {
-                    	$elem['field'] .= "[{$risk_id}][{$i}]";
-                    	$rules[] = $elem;
-                    }
-				}
+				$rules_formatted = array_merge($rules_formatted, $section_rules);
 			}
-			return $rules;
+			return $rules_formatted;
 		}
 		return $validation_rules;
 
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MARINE_premium_default_discount_dropdown'))
+{
+	/**
+	 * Premium Helper - MARINE - Default Discount dropdown
+	 *
+	 * @param string $type 	dropdown type [rate list or label list]
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	array
+	 */
+	function _OBJ_MARINE_premium_default_discount_dropdown( $type="both", $flag_blank_select = true )
+	{
+		$list = [
+			'a' => ['label' => 'Air transit discount(20%)', 'rate' => '20'],
+			'b' => ['label' => 'Inland transit within Nepal (limited distance) discount(30%)', 'rate' => '30'],
+			'c' => ['label' => 'Inland transit within Nepal discount(25%)', 'rate' => '25'],
+			'd' => ['label' => 'Inland transit discount(20%)', 'rate' => '20'],
+		];
+
+		$dropdown = [];
+
+		if($type === "both")
+		{
+			return $list;
+		}
+		// Label Dropdown
+		else if($type === 'label')
+		{
+			foreach($list as $key=>$detail)
+			{
+				$dropdown[$key] = $detail['label'];
+			}
+		}
+		// Rate dropdown
+		else
+		{
+			foreach($list as $key=>$detail)
+			{
+				$dropdown[$key] = $detail['rate'];
+			}
+		}
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
 	}
 }
 

@@ -621,6 +621,15 @@ class Policy_txn extends MY_Controller
 					$done = $this->__save_premium_FIRE( $policy_record, $txn_record );
 				}
 
+				/**
+				 * MARINE PORTFOLIOS
+				 * ---------------
+				 */
+				else if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+				{
+					$done = $this->__save_premium_MARINE( $policy_record, $txn_record );
+				}
+
 				else
 				{
 					return $this->template->json([
@@ -1105,6 +1114,319 @@ class Policy_txn extends MY_Controller
 			}
 		}
 
+		// --------------------------------------------------------------------
+
+		/**
+		 * Update Policy Premium Information - Marine
+		 *
+		 *	!!! Important: Fresh/Renewal Only
+		 *
+		 * @param object $policy_record  	Policy Record
+		 * @param object $txn_record 	 	Policy Transaction Record
+		 * @return json
+		 */
+		private function __save_premium_MARINE($policy_record, $txn_record)
+		{
+			/**
+			 * Form Submitted?
+			 */
+			$return_data = [];
+
+			if( $this->input->post() )
+			{
+
+				/**
+				 * Policy Object Record
+				 */
+				$policy_object 		= $this->__get_policy_object($policy_record);
+
+				/**
+				 * Portfolio Setting Record
+				 */
+				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+
+				/**
+				 * Validation Rules for Form Processing
+				 */
+				$this->load->helper('marine');
+				$validation_rules = _TXN_MARINE_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
+	            $this->form_validation->set_rules($validation_rules);
+
+	            // echo '<pre>';print_r($validation_rules);exit;
+
+				if($this->form_validation->run() === TRUE )
+	        	{
+
+					// Premium Data
+					$post_data = $this->input->post();
+
+					/**
+					 * Do we have a valid method?
+					 */
+					try{
+
+						/**
+						 * Compute Premium From Post Data
+						 * ------------------------------
+						 */
+						$cost_calculation_table 	= [];
+						$premium_computation_table 	= [];
+
+
+						/**
+						 * Extract Information from Object
+						 */
+						$object_attributes   = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+						$SI 				 = floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
+
+
+						// Get the post premium data
+						$post_premium 				= $post_data['premium'];
+						$default_rate 				= floatval($post_premium['default_rate']);
+						$default_discount 			= $post_premium['default_discount'];
+						$container_discount 		= floatval($post_premium['container_discount']);
+						$additional_rate1 			= floatval($post_premium['additional_rate1']);
+						$additional_rate2 			= floatval($post_premium['additional_rate2']);
+						$additional_rate3 			= floatval($post_premium['additional_rate3']);
+						$direct_business_discount 	= floatval($post_premium['direct_business_discount']);
+						$large_sum_insured_discount = floatval($post_premium['large_sum_insured_discount']);
+
+						// A = SI X Default Rate %
+						$A = ( $SI * $default_rate ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "A. Specified premium rate (as per S.N....of Schedule 6)({$default_rate}%)",
+							'value' => $A
+						];
+
+
+						// B = X% of A
+						$B = 0.00;
+						$default_discount_label = 'Discount on A (0%)';
+						if($default_discount)
+						{
+							$default_discount_rate 	= _OBJ_MARINE_premium_default_discount_dropdown('rate', FALSE)[$default_discount];
+							$default_discount_label = _OBJ_MARINE_premium_default_discount_dropdown('label', FALSE)[$default_discount];
+							$B = ( $A * $default_discount_rate ) / 100.00;
+						}
+						$cost_calculation_table[] = [
+							'label' => "B. {$default_discount_label}",
+							'value' => $B
+						];
+
+						// C = A - B
+						$C = $A - $B;
+						$cost_calculation_table[] = [
+							'label' => "C. (A - B)",
+							'value' => $C
+						];
+
+						// D = X% of C
+						$D = ( $C * $container_discount ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "D. Container discount ({$container_discount}% of C)",
+							'value' => $B
+						];
+
+						// E = C - D
+						$E = $C - $D;
+						$cost_calculation_table[] = [
+							'label' => "E. (C - D)",
+							'value' => $E
+						];
+
+
+						// F = X% of SI
+						$F = ( $SI * $additional_rate1 ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "F. Additional premium for W& SRCC or SRCC ({$additional_rate1}%)",
+							'value' => $F
+						];
+
+						// G = X% of SI
+						$G = ( $SI * $additional_rate2 ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "G. Additional premium for Other i. ({$additional_rate2}%)",
+							'value' => $G
+						];
+
+						// H = X% of SI
+						$H = ( $SI * $additional_rate3 ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "H. Additional premium for Other ii. ({$additional_rate3}%)",
+							'value' => $H
+						];
+
+						// I = E + F + G + H
+						$I = $E + $F + $G + $H;
+						$cost_calculation_table[] = [
+							'label' => "I. Applicable premium rate (E+F+G+H)",
+							'value' => $I
+						];
+
+						// Applicable Premium Rate (%)
+						$APR = ( $I / $SI ) * 100.00;
+
+						// Sum Insured Components
+						$si_components['sum_insured'] = (array)$object_attributes->sum_insured;;
+
+						// Sum Insured Amount in Base Currency
+						$SI_BASE = _OBJ_MARINE_compute_sum_insured_amount( $policy_record->portfolio_id, $si_components, 'all', FALSE );
+
+						// Conversion Rate = $SI/$SI_BASE;
+						$conversion_rate = $SI / $SI_BASE;
+
+						// Invoice value + incremental cost
+						$J_value 	= _OBJ_MARINE_compute_sum_insured_amount( $policy_record->portfolio_id, $si_components, 'except_duty', FALSE );
+						$J_value 	= $J_value * $conversion_rate;
+						$J 			= ( $J_value * $APR ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "J. Premium for other than duty insurance(Rs.)",
+							'value' => $J
+						];
+
+						// Duty in Amount
+						$K_value 	= _OBJ_MARINE_compute_sum_insured_amount( $policy_record->portfolio_id, $si_components, 'duty_only', FALSE );
+						$K_value 	= $K_value * $conversion_rate;
+						$K 			= ( $K_value * $APR ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "K. Premium for duty insurance (Rs.)",
+							'value' => $K
+						];
+
+						// L = J + K
+						$L = $J + $K;
+						$cost_calculation_table[] = [
+							'label' => "L. (J + K)",
+							'value' => $L
+						];
+
+						// M = X% of L
+						$M = ( $L * $direct_business_discount ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "M. Direct business discount ({$direct_business_discount}% of L)",
+							'value' => $M
+						];
+
+						// N = X% of M
+						$N = ( $M * $large_sum_insured_discount ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "N. Large Sum Insured Discount ({$large_sum_insured_discount}% of M)",
+							'value' => $N
+						];
+
+						// Net Premium = Applicable Premium
+						$NET_PREMIUM = $I - $M - $N;
+						$cost_calculation_table[] = [
+							'label' => "O. Premium)",
+							'value' => $NET_PREMIUM
+						];
+
+
+
+
+						/**
+						 * Direct Discount or Agent Commission?
+						 * ------------------------------------
+						 * Agent Commission or Direct Discount
+						 * applies on NET Premium
+						 */
+						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+						{
+							// @TODO - is M direct discount we are talking about or separate?
+							$direct_discount = ( $NET_PREMIUM * $pfs_record->direct_discount ) / 100.00 ;
+							$NET_PREMIUM -= $direct_discount;
+
+
+							// Direct Discount
+							$cost_calculation_table[] = [
+								'label' => "P. Direct Discount ({$pfs_record->direct_discount}% of Premium)",
+								'value' => $direct_discount
+							];
+
+							// Net Premium after Direct Discount
+							$cost_calculation_table[] = [
+								'label' => "Q. Net Premium (O - P)",
+								'value' => $NET_PREMIUM
+							];
+
+							// NULLIFY Commissionable premium, Agent Commission
+							$commissionable_premium = NULL;
+							$agent_commission = NULL;
+						}
+						else
+						{
+							$commissionable_premium = $NET_PREMIUM;
+							$agent_commission 		= ( $NET_PREMIUM * $pfs_record->agent_commission ) / 100.00;
+						}
+
+						/**
+						 * Compute VAT
+						 */
+						$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
+						$this->load->helper('account');
+						$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+						/**
+						 * Prepare Transactional Data
+						 *
+						 * @TODO: What is Pool Premium Amount?
+						 */
+						$txn_data = [
+							'amt_total_premium' 	=> $NET_PREMIUM,
+							'amt_pool_premium' 		=> 0.00,
+							'amt_commissionable'	=> $commissionable_premium,
+							'amt_agent_commission'  => $agent_commission,
+							'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+							'amt_vat' 				=> $amount_vat,
+							'txn_details' 			=> $post_data['txn_details'],
+							'remarks' 				=> $post_data['remarks'],
+						];
+
+
+						/**
+						 * Premium Computation Table
+						 * -------------------------
+						 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+						 */
+						$premium_computation_table = json_encode($post_premium);
+						$txn_data['premium_computation_table'] = $premium_computation_table;
+
+
+						/**
+						 * Cost Calculation Table
+						 */
+						$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+						return $this->policy_txn_model->save($txn_record->id, $txn_data);
+
+
+						/**
+						 * @TODO
+						 *
+						 * 1. Build RI Distribution Data For This Policy
+						 * 2. RI Approval Constraint for this Policy
+						 */
+
+					} catch (Exception $e){
+
+						return $this->template->json([
+							'status' 	=> 'error',
+							'message' 	=> $e->getMessage()
+						], 404);
+					}
+	        	}
+	        	else
+	        	{
+	        		return $this->template->json([
+						'status' 	=> 'error',
+						'title' 	=> 'Validation Error!',
+						'message' 	=> validation_errors()
+					]);
+	        	}
+			}
+		}
+
 	// --------------- END: SAVE PREMIUM FUNCTIONS --------------------
 
 
@@ -1211,8 +1533,12 @@ class Policy_txn extends MY_Controller
 			 */
 			else if( in_array($policy_record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 			{
-				$goodies = $this->__premium_goodies_MARINE($policy_record, $policy_object, $portfolio_risks);
+				$goodies = $this->__premium_goodies_MARINE($policy_record, $policy_object);
 			}
+
+			/**
+			 * Show error Message
+			 */
 			else
 			{
 				return $this->template->json([
@@ -1318,6 +1644,39 @@ class Policy_txn extends MY_Controller
 
 			// Let's Get the Validation Rules
 			$validation_rules = _TXN_FIRE_premium_validation_rules( $policy_record, $pfs_record, $policy_object, $portfolio_risks );
+
+			// echo '<pre>'; print_r($validation_rules);exit;
+
+			// Return the goodies
+			return  [
+				'validation_rules' 	=> $validation_rules,
+				'tariff_record' 	=> NULL
+			];
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Get Policy Policy Transaction Goodies for FIRE
+		 *
+		 * Get the following goodies for the Motor Portfolio
+		 * 		1. Validation Rules
+		 * 		2. Tariff Record if Applies
+		 *
+		 * @param object $policy_record Policy Record
+		 * @param object $policy_object Policy Object Record
+		 *
+		 * @return	array
+		 */
+		private function __premium_goodies_MARINE($policy_record, $policy_object)
+		{
+			$this->load->helper('marine');
+
+			// Portfolio Setting Record
+			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+			// Let's Get the Validation Rules
+			$validation_rules = _TXN_MARINE_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
 
 			// echo '<pre>'; print_r($validation_rules);exit;
 
