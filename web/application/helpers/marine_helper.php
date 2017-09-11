@@ -156,7 +156,7 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 		$mode_of_transit_dropdown 		= _OBJ_MARINE_mode_of_transit_dropdown( FALSE );
 		$insurance_cover_type_dropdown 	= _OBJ_MARINE_insurance_cover_type_dropdown( FALSE );
 		$deductible_excess_dropdown 	= _OBJ_MARINE_deductible_excess_dropdown( FALSE );
-		$invoice_currency_dropdown 		= dropdown_base_currency( NULL, FALSE );
+		$invoice_currency_dropdown 		= dropdown_base_currency( FALSE );
 
 		$v_rules = [
 			/**
