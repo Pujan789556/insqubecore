@@ -333,15 +333,15 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			    [
 			        'field' => 'object[sum_insured][tolerance_limit]',
 			        '_key' => 'tolerance_limit',
-			        'label' => 'Tolerance Limit',
-			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+			        'label' => 'Tolerance Limit (%)',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
 			        '_type'     => 'text',
 			        '_required' => true
 			    ],
 			    [
 			        'field' => 'object[sum_insured][incremental_cost]',
 			        '_key' => 'incremental_cost',
-			        'label' => 'Incremental Costs(% of Invoice Value)',
+			        'label' => 'Incremental Costs(%)',
 			        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
 			        '_type'     => 'text',
 			        '_required' => true
@@ -349,8 +349,8 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			    [
 			        'field' => 'object[sum_insured][duty]',
 			        '_key' => 'duty',
-			        'label' => 'Duty Amount (payable at arrival)',
-			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+			        'label' => 'Duty Amount (%)',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
 			        '_type'     => 'text',
 			        '_required' => true
 			    ]
@@ -540,34 +540,37 @@ if ( ! function_exists('_OBJ_MARINE_compute_sum_insured_amount'))
 	function _OBJ_MARINE_compute_sum_insured_amount( $portfolio_id, $data )
 	{
 		/**
-		 * @TODO: Finalize the Formula
+		 * Compute Sum Insured Amount
 		 *
-		 * Current Assumptions are:
-		 * 	- Incremental Cost = (Invoice Value + Tolerance Limit) * X%
-		 * 	- Duty Amount in Same Currency too
+		 * 	A = Invoice Value
+		 * 	B = Tolerance Limit (% of Invoice Value)
+		 * 	C = A + B
+		 * 	D = Incremental Cost (% of C)
+		 * 	E = C + D
+		 *  F = Duty ( % of E )
 		 *
-		 * Sum Insured = ( (Invoice Value + Tolerance Limit) * (100 + incremental_cost) / 100 ) + Duty Amount
+		 * 	SI = E + F
 		 */
 
-		$sum_insured_src = $data['sum_insured'];
-
+		$sum_insured_src 	= $data['sum_insured'];
 		$currency 			= $sum_insured_src['currency'];
-		$invoice_value 		= $sum_insured_src['invoice_value'];
-		$tolerance_limit 	= ( $invoice_value * $sum_insured_src['tolerance_limit'] ) / 100.00;
-		$incremental_cost 	= ( $invoice_value +  $tolerance_limit ) * $sum_insured_src['incremental_cost'] / 100.00;
-		$duty 				= $sum_insured_src['duty'];
 
-		/**
-		 * Let's Compute the Sum Insured Amount in Selected Currency
-		 */
-		$amt_sum_insured 	= $invoice_value + $tolerance_limit + $incremental_cost + $duty;
+		$A 	= $sum_insured_src['invoice_value'];
+		$B 	= ( $A * floatval($sum_insured_src['tolerance_limit']) ) / 100.00;
+		$C 	= $A + $B;
 
+		$D 	= ( $C * floatval($sum_insured_src['incremental_cost']) ) / 100.00;
+		$E 	= $C + $D;
+
+		$F 	= ( $E * floatval($sum_insured_src['duty']) ) / 100.00;
+
+		$SI = $E + $F;
 
 		/**
 		 * Let's Convert it into NRS
 		 */
 		$date = date('Y-m-d');
-		$amt_sum_insured = forex_conversion($date, $currency, $amt_sum_insured);
+		$amt_sum_insured = forex_conversion($date, $currency, $SI);
 
 		return $amt_sum_insured;
 	}

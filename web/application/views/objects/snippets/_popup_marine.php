@@ -73,7 +73,7 @@ else
             	foreach($section_elements as $elem): ?>
             		<tr>
             			<th><?php echo $elem['label']; ?></th>
-            			<td><?php
+            			<td class="text-right"><?php
             				if($elem['_type'] == 'dropdown')
             				{
             					echo $elem['_data'][$section_object->{$elem['_key']}];
@@ -85,6 +85,10 @@ else
             			?></td>
             		</tr>
         		<?php endforeach ?>
+                <tr>
+                    <th>Sum Insured Amount (NRS)</th>
+                    <td class="text-right"><strong><?php echo number_format($record->amt_sum_insured, 2, '.', '') ?></strong></td>
+                </tr>
             </table>
         </div>
 
