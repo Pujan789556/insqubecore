@@ -553,7 +553,7 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 	            [
 	                'field' => 'premium[rate]',
 	                'label' => 'Rate',
-	                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+	                'rules' => 'trim|prep_decimal|decimal|max_length[5]',
 	                '_type'     => 'text',
 	                '_key' 		=> 'rate',
 	                '_required' => true
