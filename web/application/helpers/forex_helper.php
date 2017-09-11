@@ -19,29 +19,36 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 if ( ! function_exists('dropdown_base_currency'))
 {
     /**
-     * Get Base Currency Dropdown for specific date.
+     * Get Base Currency Dropdown.
      *
-     * If no date is supplied, it will give todays currency dropdown.
-     *
-     * @param string $date
      * @param bool $flag_blank_select
      * @return array
      */
-    function dropdown_base_currency( string $date = NULL, bool $flag_blank_select = true )
+    function dropdown_base_currency( bool $flag_blank_select = true )
     {
-        $CI =& get_instance();
-
-        $CI->load->model('forex_model');
-
-        $date           = $date ?? date('Y-m-d');
-        $row            = $CI->forex_model->get_by_date($date);
-        $exchange_rates = json_decode($row->exchange_rates ?? []);
-        $dropdown       = [];
-
-        foreach( $exchange_rates  as $r )
-        {
-            $dropdown[$r->BaseCurrency] = $r->BaseCurrency;
-        }
+        $dropdown = [
+            'INR' => 'INR',
+            'USD' => 'USD',
+            'EUR' => 'EUR',
+            'GBP' => 'GBP',
+            'CHF' => 'CHF',
+            'AUD' => 'AUD',
+            'CAD' => 'CAD',
+            'SGD' => 'SGD',
+            'JPY' => 'JPY',
+            'CNY' => 'CNY',
+            'SAR' => 'SAR',
+            'QAR' => 'QAR',
+            'THB' => 'THB',
+            'AED' => 'AED',
+            'MYR' => 'MYR',
+            'KRW' => 'KRW',
+            'SEK' => 'SEK',
+            'DKK' => 'DKK',
+            'HKD' => 'HKD',
+            'KWD' => 'KWD',
+            'BHD' => 'BHD'
+        ];
 
         if($flag_blank_select)
         {
