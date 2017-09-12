@@ -824,6 +824,16 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 					$schedule_view = 'policies/print/schedule_FIRE';
 				break;
 
+			// Marine
+			case IQB_SUB_PORTFOLIO_MARINE_AIR_TRANSIT_ID:
+			case IQB_SUB_PORTFOLIO_MARINE_MARINE_TRANSIT_ID:
+			case IQB_SUB_PORTFOLIO_MARINE_OPEN_MARINE_ID:
+			case IQB_SUB_PORTFOLIO_MARINE_ROAD_AIR_TRANSIT_ID:
+			case IQB_SUB_PORTFOLIO_MARINE_ROAD_TANSIT_ID:
+				$schedule_view = 'policies/print/schedule_MARINE';
+				break;
+
+
 			default:
 				# code...
 				break;

@@ -1,0 +1,281 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+/**
+ * Schedule Print : MARINE
+ */
+
+$this->load->helper('forex');
+$this->load->helper('marine');
+
+$object_attributes      = json_decode($record->object_attributes);
+$schedule_table_title   = 'Marine Insurance Policy (Schedule)';
+
+?>
+
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="utf-8">
+    <?php
+    /**
+     * Load Styles (inline)
+     */
+    $this->load->view('print/style/schedule');
+
+    /**
+     * Header & Footer
+     */
+    $creator_text = ( $record->created_by_profile_name ?? $record->created_by_username ) . ' - ' . $record->created_by_code;
+
+    $verifier_text = $record->verified_by_code
+                        ? ( $record->verified_by_profile_name ?? $record->verified_by_username ) . ' - ' . $record->verified_by_code
+                        : '';
+
+    $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $record->branch_name;
+
+    $header_footer = '<htmlpagefooter name="myfooter">
+                        <table class="table table-footer no-border">
+                            <tr>
+                                <td align="left"> Created By: ' . $creator_text . ' </td>
+                                <td align="right"> Verified By: ' . $verifier_text . ' </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="border-t">'. get_contact_widget_two_lines($record->branch_contact, $branch_contact_prefix) .'</td>
+                            </tr>
+                        </table>
+                    </htmlpagefooter>
+                    <sethtmlpagefooter name="myfooter" value="on" />';
+    ?>
+    </head>
+    <body>
+        <!--mpdf
+            <?php echo $header_footer?>
+        mpdf-->
+        <?php
+        /**
+         * Policy Schedule
+         */
+        ?>
+        <table class="table" width="100%">
+            <thead><tr><td colspan="3" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
+            <tbody>
+
+                <tr>
+                    <td>Date: <?php echo $record->start_date?></td>
+                    <td>Issued at: <?php echo $record->branch_name ?></td>
+                    <td>Date of Questionnaire: <?php echo $object_attributes->date_qn ?></td>
+                </tr>
+                <tr>
+                    <td colspan="2">Policy No.: <?php echo $record->code;?></td>
+
+                    <?php
+                    /**
+                     * Agent Details
+                     */
+                    $agent_text = implode(', ', array_filter([$record->agent_name, $record->agent_ud_code]));
+                    ?>
+                    <td>Agent: <?php echo $agent_text;?> </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <strong>Name and address of Insured</strong><br/>
+                        <?php
+                        /**
+                         * If Policy Object is Financed or on Loan, The financial Institute will be "Insured Party"
+                         * and the customer will be "Account Party"
+                         */
+                        if($record->flag_on_credit === 'Y')
+                        {
+                            echo '<strong>INS.: ' . $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name) . '</strong><br/>';
+                            echo '<br/>' . get_contact_widget($record->creditor_branch_contact, true, true) . '<br/>';
+
+                            // Care of
+                            echo '<strong>A/C.: ' . $this->security->xss_clean($record->customer_name) . '<br/></strong>';
+                            echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
+
+                            echo  $record->care_of ? '<br/>C/O.: ' . $this->security->xss_clean($record->care_of) : '';
+                        }
+                        else
+                        {
+                            echo $this->security->xss_clean($record->customer_name) . '<br/>';
+                            echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
+                        }
+                        ?>
+                    </td>
+                    <td>
+                        Bill No.: <br/>
+                        Receipt No.:
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <?php
+                        $si_components = $object_attributes->sum_insured;
+                        ?>
+                        <table class="table table-condensed no-border">
+                            <tr><td colspan="2"><strong>Sum Insured</strong></td></tr>
+                            <tr>
+                                <td>Invoice Value:</td>
+                                <td><?php echo $si_components->currency . ' ' . $si_components->invoice_value ?></td>
+                            </tr>
+                            <tr>
+                                <td>Incidental Cost:</td>
+                                <td><?php echo $si_components->incremental_cost ?>% INCREMENTAL COST of ( INVOICE VALUE + ( <?php echo $si_components->tolerance_limit ?> % TOLERANCE LIMIT of INVOICE VALUE ) )</td>
+                            </tr>
+                            <tr>
+                                <td>Duty:</td>
+                                <td><?php echo $si_components->duty ?> %</td>
+                            </tr>
+                            <tr>
+                                <td>Total (NPR):</td>
+                                <td>
+                                    <?php
+                                    $forex = get_forex_rate_by_base_currency($record->start_date, $si_components->currency);
+                                    echo number_format((float)$record->object_amt_sum_insured, 2, '.', ''),
+                                         " ({$forex->BaseCurrency} {$forex->BaseValue} = {$forex->TargetCurrency} {$forex->TargetSell})";
+
+                                    ?>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table class="table table-condensed no-border">
+                            <tr>
+                                <td>Premium</td>
+                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></td>
+                            </tr>
+                            <tr>
+                                <td>Stamp Duty</td>
+                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_stamp_duty, 2, '.', '')?></td>
+                            </tr>
+                            <tr>
+                                <td>13% VAT</td>
+                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_vat, 2, '.', '')?></td>
+                            </tr>
+                            <tr><td colspan="2"><hr/></td></tr>
+                            <tr>
+                                <td class="border-t"><strong>TOTAL (NRs.)</strong></td>
+                                <td class="text-right border-t"><strong><?php echo number_format( (float)( $txn_record->amt_stamp_duty + $txn_record->amt_total_premium + $txn_record->amt_vat ) , 2, '.', '');?></strong></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="3">
+                        <strong>Subject matter insured/Interest</strong><br/>
+                        <?php echo nl2br($object_attributes->description); ?>
+                        <?php echo nl2br($object_attributes->packing); ?>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Marks &amp; Numbers</td>
+                    <td colspan="2"> <?php echo $object_attributes->marks_numbers ?></td>
+                </tr>
+
+                <tr>
+                    <td class="text-right">
+                        <strong>Voyage</strong> From:<br/>
+                        To
+                    </td>
+                    <td colspan="2">
+                        <?php echo $object_attributes->transit->from ?><br/>
+                        <?php echo $object_attributes->transit->to ?>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Invoice No. &amp; Date</td>
+                    <td colspan="2">
+                        <?php echo $object_attributes->transit->invoice_no, ', ', $object_attributes->transit->invoice_date ?>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>LC No. &amp; Date</td>
+                    <td colspan="2">
+                        <?php echo $object_attributes->transit->lc_no, ', ', $object_attributes->transit->lc_date ?>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>B/L No./C/N No./AW/B No./R/R No. &amp; Date</td>
+                    <td colspan="2">
+                        <?php echo $object_attributes->transit->bl_no, ', ', $object_attributes->transit->bl_date ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Vessel and / or Conveyance</td>
+                    <td colspan="2">
+                        <?php echo $object_attributes->transit->vessel ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Estimated Date of Departure</td>
+                    <td colspan="2">
+                        <?php echo $object_attributes->date_dept ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <small>Terms of Insurance: Subject to the following clauses listed and attached hereto and printed warranties below;</small><br/><br/>
+                        <strong>Clauses:</strong><br/>
+                        <?php
+                        $clauses_list = [];
+                        $i = 1;
+                        foreach($object_attributes->risk->clauses as $cls )
+                        {
+                            $clauses_list[] = $i . '. ' . _OBJ_MARINE_clauses_list(FALSE)[$cls];
+                            $i++;
+                        }
+                        echo implode('<br/>', $clauses_list);
+                        ?><br/><br/>
+                        <strong>Warranties:</strong><br/>
+                        <?php echo $object_attributes->risk->warranties; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Deductible Excess</td>
+                    <td colspan="2">
+                        <?php echo _OBJ_MARINE_deductible_excess_dropdown(FALSE)[$object_attributes->risk->deductible_excess] ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Surveyor Name <br>
+                        Contact Person <br>
+                        Address
+                    </td>
+                    <td colspan="2">
+                        <?php
+                        echo $object_attributes->surveyor->name, '<br>',
+                             $object_attributes->surveyor->contact_person, '<br>',
+                             $object_attributes->surveyor->address;
+                        ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Claims payable at</td>
+                    <td colspan="2">
+                        <?php echo $object_attributes->claim_payable_at ?>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table no-border" width="100%">
+            <tr>
+                <td width="50%">Office Seal:</td>
+                <td>
+                    Signed for and on behalf of the <br><strong><?php echo $this->settings->orgn_name_en?></strong>
+                    <br><br><br>
+                    Authorized Signature
+                    <br>
+                    Name:<br>
+                    Designation:
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>
