@@ -1189,13 +1189,12 @@ class Policy_txn extends MY_Controller
 						$additional_rate1 			= floatval($post_premium['additional_rate1']);
 						$additional_rate2 			= floatval($post_premium['additional_rate2']);
 						$additional_rate3 			= floatval($post_premium['additional_rate3']);
-						$direct_business_discount 	= floatval($post_premium['direct_business_discount']);
 						$large_sum_insured_discount = floatval($post_premium['large_sum_insured_discount']);
 
 						// A = SI X Default Rate %
 						$A = ( $SI * $default_rate ) / 100.00;
 						$cost_calculation_table[] = [
-							'label' => "A. Specified premium rate (as per S.N....of Schedule 6)({$default_rate}%)",
+							'label' => "A. Specified premium rate({$default_rate}%)",
 							'value' => $A
 						];
 
@@ -1267,64 +1266,6 @@ class Policy_txn extends MY_Controller
 						// Applicable Premium Rate (%)
 						$APR = ( $I / $SI ) * 100.00;
 
-						// Sum Insured Components
-						$si_components['sum_insured'] = (array)$object_attributes->sum_insured;;
-
-						// Sum Insured Amount in Base Currency
-						$SI_BASE = _OBJ_MARINE_compute_sum_insured_amount( $policy_record->portfolio_id, $si_components, 'all', FALSE );
-
-						// Conversion Rate = $SI/$SI_BASE;
-						$conversion_rate = $SI / $SI_BASE;
-
-						// Invoice value + incremental cost
-						$J_value 	= _OBJ_MARINE_compute_sum_insured_amount( $policy_record->portfolio_id, $si_components, 'except_duty', FALSE );
-						$J_value 	= $J_value * $conversion_rate;
-						$J 			= ( $J_value * $APR ) / 100.00;
-						$cost_calculation_table[] = [
-							'label' => "J. Premium for other than duty insurance(Rs.)",
-							'value' => $J
-						];
-
-						// Duty in Amount
-						$K_value 	= _OBJ_MARINE_compute_sum_insured_amount( $policy_record->portfolio_id, $si_components, 'duty_only', FALSE );
-						$K_value 	= $K_value * $conversion_rate;
-						$K 			= ( $K_value * $APR ) / 100.00;
-						$cost_calculation_table[] = [
-							'label' => "K. Premium for duty insurance (Rs.)",
-							'value' => $K
-						];
-
-						// L = J + K
-						$L = $J + $K;
-						$cost_calculation_table[] = [
-							'label' => "L. (J + K)",
-							'value' => $L
-						];
-
-						// M = X% of L
-						$M = ( $L * $direct_business_discount ) / 100.00;
-						$cost_calculation_table[] = [
-							'label' => "M. Direct business discount ({$direct_business_discount}% of L)",
-							'value' => $M
-						];
-
-						// N = X% of M
-						$N = ( $M * $large_sum_insured_discount ) / 100.00;
-						$cost_calculation_table[] = [
-							'label' => "N. Large Sum Insured Discount ({$large_sum_insured_discount}% of M)",
-							'value' => $N
-						];
-
-						// Net Premium = Applicable Premium
-						$NET_PREMIUM = $I - $M - $N;
-						$cost_calculation_table[] = [
-							'label' => "O. Premium)",
-							'value' => $NET_PREMIUM
-						];
-
-
-
-
 						/**
 						 * Direct Discount or Agent Commission?
 						 * ------------------------------------
@@ -1333,21 +1274,12 @@ class Policy_txn extends MY_Controller
 						 */
 						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 						{
-							// @TODO - is M direct discount we are talking about or separate?
-							$direct_discount = ( $NET_PREMIUM * $pfs_record->direct_discount ) / 100.00 ;
-							$NET_PREMIUM -= $direct_discount;
+							// Direct Business Discount/Direct Discount
+							$J = ( $I * $pfs_record->direct_discount ) / 100.00 ;
 
-
-							// Direct Discount
 							$cost_calculation_table[] = [
-								'label' => "P. Direct Discount ({$pfs_record->direct_discount}% of Premium)",
-								'value' => $direct_discount
-							];
-
-							// Net Premium after Direct Discount
-							$cost_calculation_table[] = [
-								'label' => "Q. Net Premium (O - P)",
-								'value' => $NET_PREMIUM
+								'label' => "J. Direct business discount ({$pfs_record->direct_discount}% of I)",
+								'value' => $J
 							];
 
 							// NULLIFY Commissionable premium, Agent Commission
@@ -1356,9 +1288,40 @@ class Policy_txn extends MY_Controller
 						}
 						else
 						{
+							$J = 0.00;
+						}
+
+
+						// K = I - J
+						$K = $I - $J;
+
+
+						// Large Sum Insured Discount
+						// L = X% of K
+						$L = ( $K * $large_sum_insured_discount ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "L. Large Sum Insured Discount ({$large_sum_insured_discount}%)",
+							'value' => $L
+						];
+
+						// Net Premium = Applicable Premium
+						$NET_PREMIUM = $K - $L;
+						$cost_calculation_table[] = [
+							'label' => "Premium",
+							'value' => $NET_PREMIUM
+						];
+
+
+						/**
+						 * Agent Commission if Applies?
+						 */
+						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
+						{
 							$commissionable_premium = $NET_PREMIUM;
 							$agent_commission 		= ( $NET_PREMIUM * $pfs_record->agent_commission ) / 100.00;
 						}
+
+
 
 						/**
 						 * Compute VAT
