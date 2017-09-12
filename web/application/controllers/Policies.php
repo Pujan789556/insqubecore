@@ -1340,7 +1340,17 @@ class Policies extends MY_Controller
 		/**
 		 * Render Print View
 		 */
-		_POLICY__schedule_pdf($data, 'print');
+		try {
+
+			_POLICY__schedule_pdf($data, 'print');
+		}
+		catch (Exception $e) {
+
+			return $this->template->json([
+				'status' => 'error',
+				'message' => $e->getMessage()
+			], 404);
+		}
     }
 
 
