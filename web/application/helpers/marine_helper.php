@@ -698,15 +698,6 @@ if ( ! function_exists('_TXN_MARINE_premium_validation_rules'))
 	                '_required' => false
 	            ],
 	            [
-	                'field' => 'premium[direct_business_discount]',
-	                'label' => 'Direct business discount(%)',
-	                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
-	                '_type'     => 'text',
-	                '_key' 		=> 'direct_business_discount',
-	                '_default' 	=> '10',
-	                '_required' => false
-	            ],
-	            [
 	                'field' => 'premium[large_sum_insured_discount]',
 	                'label' => 'Large Sum Insured Discount(%)',
 	                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
