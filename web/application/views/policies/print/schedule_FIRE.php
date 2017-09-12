@@ -1,50 +1,11 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Schedule Print : Motor - Motorcycle
+ * Schedule Print : FIRE
  */
-
-$object_attributes = json_decode($record->object_attributes);
-
-$premium_attributes = json_decode($record->premium_attributes);
-
-
-/**
- * Sub Portfolio-wise  Statements
- */
-$usage_limitation = '';
-$driver_limitation = '';
-$reaffirm_numbers = '';
+$object_attributes      = json_decode($record->object_attributes);
 $schedule_table_title   = 'अग्नि बीमालेखको तालिका (सेड्युल)';
-$cost_table_title = '';
-switch ($record->portfolio_id)
-{
-    case IQB_SUB_PORTFOLIO_MOTORCYCLE_ID:
-        $schedule_table_title   = 'अग्नि बीमालेखको तालिका (सेड्युल)';
-        $usage_limitation       = 'यस बीमालेख अन्तर्गत रक्षावरण गरिएको सवारी साधन भाडा, इनाम, संगठनात्मक दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षण वा ढुवानी कार्यसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।';
-        $driver_limitation      = 'निम्नमध्ये कुनैः–(क) बीमित स्वयं वा (ख) बीमितको साधारण जानकारी र वा सहमतिले सवारी साधन चलाउने व्यक्ति । <br/>चालकसंग उक्त मोटरसाइकल चलाउने अनुमतिपत्र भएको र त्यस्तो अनुमतिपत्र राख्न वा प्राप्त गर्न अयोग्य नठहरिएको हुनुपर्नेछ ।';
-        $cost_table_title       = "मोटरसाइकलको बीमाशुल्क गणना तालिका";
-        break;
-
-    case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID:
-        $schedule_table_title   = 'निजी सवारी साधन बीमालेखको तालिका (सेड्युल)';
-        $usage_limitation       = 'यस बीमालेख अन्तर्गत रक्षावरण गरिएको सवारी साधन भाडा, इनाम, संगठनात्मक दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षण वा ढुवानी कार्यसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।';
-        $driver_limitation      = 'निम्नमध्ये कुनैः– (क) बीमित स्वयं वा (ख) बीमितको आदेश वा अनुमतिले सवारी साधन चलाउने व्यक्ति ।<br/>चालकसंग उक्त सवारी साधन चलाउने अनुमतिपत्र भएको र यस्तो अनुमतिपत्र राख्न वा प्राप्त गर्न अयोग्य नठहरिएको हुनुपर्नेछ ।';
-        $cost_table_title       = "निजी सवारी साधनको बीमाशुल्क गणना तालिका";
-        break;
-
-    case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID:
-
-        $schedule_table_title   = 'व्यावसायिक सवारी साधन बीमालेखको तालिका (सेड्युल)';
-        $usage_limitation       = 'यस बीमालेख अन्तर्गत रक्षावरण गरिएको व्यावसायिक सवारी साधन दौड, प्रतियोगिता, टिकाउ परीक्षण, गति परीक्षणसंग सम्बन्धित कुनै प्रयोजनमा प्रयोग गर्न पाइने छैन ।';
-        $driver_limitation      = 'निम्नमध्ये कुनैः– (क) बीमित स्वयं वा (ख) बीमितको आदेश वा अनुमतिले सवारी साधन चलाउने व्यक्ति ।<br/>चालकसंग उक्त व्यवसायिक सवारी साधन चलाउने अनुमतिपत्र भएको र यस्तो अनुमतिपत्र राख्न वा प्राप्त गर्न अयोग्य नठहरिएको हुनुपर्नेछ ।';
-        $cost_table_title       = "व्यावसायिक सवारी साधनको बीमाशुल्क गणना तालिका";
-        break;
-
-    default:
-        # code...
-        break;
-}
 ?>
+
 <!DOCTYPE html>
 <html>
     <head>
