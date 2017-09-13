@@ -53,6 +53,30 @@ if ( ! function_exists('form_date'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('form_file'))
+{
+	/**
+	 * File Input Field
+	 *
+	 * @param	mixed
+	 * @param	string
+	 * @param	mixed
+	 * @return	string
+	 */
+	function form_file($data = '', $value = '', $extra = '')
+	{
+		$defaults = array(
+			'type' => 'file',
+			'name' => is_array($data) ? '' : $data,
+			'value' => $value
+		);
+
+		return '<input '._parse_form_attributes($data, $defaults)._attributes_to_string($extra)." />\n";
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('form_url'))
 {
 	/**
@@ -77,7 +101,7 @@ if ( ! function_exists('form_switch'))
 {
 	/**
 	 * On/Off Checkbox Switch
-	 * 
+	 *
 	 * attribute ID must be passed on $data param
 	 *
 	 * @param	mixed
@@ -108,7 +132,7 @@ if ( ! function_exists('field_compulsary_text'))
 {
 	/**
 	 * Get Compulsory Text on Form Label
-	 * 
+	 *
 	 * @param bool $flag If true, we return the compulsory text
 	 * @return string
 	 */
@@ -124,9 +148,9 @@ if ( ! function_exists('permission_text'))
 {
 	/**
 	 * Get Permission into Formatted text
-	 * 
+	 *
 	 * Example: create.user --> Create user
-	 * 
+	 *
 	 * @param string $permission Permission String
 	 * @return string
 	 */
