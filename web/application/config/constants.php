@@ -185,6 +185,36 @@ define('IQB_MASTER_PORTFOLIO_MARINE_ID',       4);
 define('IQB_MASTER_PORTFOLIO_MISC_ID',         5);
 define('IQB_MASTER_PORTFOLIO_MOTOR_ID',        6);
 
+
+/*
+|--------------------------------------------------------------------------
+| ENGINEERING PORTFOLIO - SUB-PORTFOLIOS IDS
+|--------------------------------------------------------------------------
+|
+| WARNING: Should be exactly same as in database, add here if you add in db
+|
+*/
+define('IQB_SUB_PORTFOLIO_ENG_BL_ID', 	26); 	// Boiler Explosion
+define('IQB_SUB_PORTFOLIO_ENG_CAR_ID', 	27);	// Contractor All Risks
+define('IQB_SUB_PORTFOLIO_ENG_CPM_ID', 	28); 	// Contractor P & M
+define('IQB_SUB_PORTFOLIO_ENG_EEI_ID', 	29);	// Electronic Equipment Insurance
+define('IQB_SUB_PORTFOLIO_ENG_EAR_ID', 	30); 	// Erection All Risks
+define('IQB_SUB_PORTFOLIO_ENG_MB_ID',  	31); 	// Machine Breakdown
+define('IQB_SUB_PORTFOLIO_ENG_LOP_ID', 	32); 	// Loss of Profit
+
+
+// SUB PORTFOLIO LIST
+define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__ENG',  [
+
+	IQB_SUB_PORTFOLIO_ENG_BL_ID 	=> 'Boiler Explosion',
+	IQB_SUB_PORTFOLIO_ENG_CAR_ID 	=> 'Contractor All Risks',
+	IQB_SUB_PORTFOLIO_ENG_CPM_ID 	=> 'Contractor Plant & Machinery',
+	IQB_SUB_PORTFOLIO_ENG_EEI_ID 	=> 'Electronic Equipment Insurance',
+	IQB_SUB_PORTFOLIO_ENG_EAR_ID 	=> 'Erection All Risks',
+	IQB_SUB_PORTFOLIO_ENG_MB_ID 	=> 'Machinery Breakdown',
+	IQB_SUB_PORTFOLIO_ENG_LOP_ID 	=> 'Loss of Profit(ENG)'
+]);
+
 /*
 |--------------------------------------------------------------------------
 | FIRE PORTFOLIO - SUB-PORTFOLIOS ID
