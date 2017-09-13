@@ -736,7 +736,7 @@ if ( ! function_exists('load_portfolio_helper'))
          */
         if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
         {
-            $CI->load->helper('motor');
+            $CI->load->helper('ph_motor');
         }
 
         /**
@@ -746,7 +746,7 @@ if ( ! function_exists('load_portfolio_helper'))
          */
         else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
         {
-            $CI->load->helper('fire');
+            $CI->load->helper('ph_fire');
         }
 
         /**
@@ -756,7 +756,7 @@ if ( ! function_exists('load_portfolio_helper'))
          */
         else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
         {
-            $CI->load->helper('marine');
+            $CI->load->helper('ph_marine');
         }
     }
 }

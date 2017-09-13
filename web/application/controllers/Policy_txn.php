@@ -44,7 +44,6 @@ class Policy_txn extends MY_Controller
 		$this->load->config('policy');
 		$this->load->helper('policy');
 		$this->load->helper('object');
-		$this->load->helper('motor');
 
 		// Image Path
         $this->_upload_path = INSQUBE_MEDIA_PATH . 'policies/';
@@ -715,6 +714,8 @@ class Policy_txn extends MY_Controller
 	            $this->form_validation->set_rules($rules);
 				if($this->form_validation->run() === TRUE )
 	        	{
+	        		$this->load->helper('ph_motor');
+
 	        		// Portfolio Settings Record For Given Fiscal Year and Portfolio
 					$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 
@@ -821,7 +822,7 @@ class Policy_txn extends MY_Controller
 				/**
 				 * Validation Rules for Form Processing
 				 */
-				$this->load->helper('fire');
+				$this->load->helper('ph_fire');
 				$validation_rules = _TXN_FIRE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, TRUE );
 	            $this->form_validation->set_rules($validation_rules);
 
@@ -1149,7 +1150,7 @@ class Policy_txn extends MY_Controller
 				/**
 				 * Validation Rules for Form Processing
 				 */
-				$this->load->helper('marine');
+				$this->load->helper('ph_marine');
 				$validation_rules = _TXN_MARINE_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
 	            $this->form_validation->set_rules($validation_rules);
 
@@ -1600,7 +1601,7 @@ class Policy_txn extends MY_Controller
 		 */
 		private function __premium_goodies_FIRE($policy_record, $policy_object, $portfolio_risks)
 		{
-			$this->load->helper('fire');
+			$this->load->helper('ph_fire');
 
 			// Portfolio Setting Record
 			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
@@ -1633,7 +1634,7 @@ class Policy_txn extends MY_Controller
 		 */
 		private function __premium_goodies_MARINE($policy_record, $policy_object)
 		{
-			$this->load->helper('marine');
+			$this->load->helper('ph_marine');
 
 			// Portfolio Setting Record
 			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);

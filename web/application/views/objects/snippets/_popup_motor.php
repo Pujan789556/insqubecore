@@ -5,7 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 
 // Let's load helper if not already loaded
-$this->load->helper('motor');
+$this->load->helper('ph_motor');
 
 $attributes = $record->attributes ? json_decode($record->attributes, TRUE) : NULL;
 $v_rules = _OBJ_MOTOR_validation_rules($record->portfolio_id, TRUE);

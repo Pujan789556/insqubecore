@@ -45,7 +45,7 @@ class Tariff_motor_model extends MY_Model
     {
         parent::__construct();
 
-        $this->load->helper('motor');
+        $this->load->helper('ph_motor');
 
         // Valication Rule
         $this->validation_rules();

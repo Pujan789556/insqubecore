@@ -4,7 +4,7 @@
  */
 
 $this->load->helper('forex');
-$this->load->helper('marine');
+$this->load->helper('ph_marine');
 
 $object_attributes      = json_decode($record->object_attributes);
 $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
