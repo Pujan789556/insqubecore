@@ -598,24 +598,13 @@ class Portfolio extends MY_Controller
 		// Form Submitted? Save the data
 		$json_data = $this->_save_settings('edit', $record, $settings);
 
-
 		// No form Submitted?
-
 		$portfolios_tree 		= $this->portfolio_model->dropdown_children_tree();
 		$children_portfolios 	= $this->portfolio_model->dropdown_children();
-
-		// $rules = $this->portfolio_setting_model->validation_rules;
-		// $rules[0]['_data'] = IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown();
-
-		// Short term policy rate Validation Rules
-		// $spr_validation_rules = $this->__settings_stpr_validation_rules($children_portfolios, $settings);
 
 		$json_data['form'] = $this->load->view('setup/portfolio/_form_settings',
 			[
 				'form_elements' 			=> $this->portfolio_setting_model->validation_rules,
-				// 'form_elements_ORIG' 		=> $this->portfolio_setting_model->fy_validation_rules(),
-				// 'sectioned_elements' 		=> $this->portfolio_setting_model->sectioned_validation_rules(),
-				// 'spr_validation_rules' 		=> $spr_validation_rules,
 				'action' 			=> 'edit',
 				'portfolios_tree' 	=> $portfolios_tree,
 				'settings' 			=> $settings,
@@ -673,6 +662,7 @@ class Portfolio extends MY_Controller
 				$agent_commission 		= $this->input->post('agent_commission');
 				$bs_service_charge 		= $this->input->post('bs_service_charge');
 				$direct_discount 		= $this->input->post('direct_discount');
+				$pool_premium 			= $this->input->post('pool_premium');
 				$stamp_duty  			= $this->input->post('stamp_duty');
 				$flag_default_duration 	= $this->input->post('flag_default_duration');
 				$default_duration  		= $this->input->post('default_duration');
@@ -694,6 +684,7 @@ class Portfolio extends MY_Controller
 							'agent_commission' 			=> $agent_commission[$i],
 							'bs_service_charge' 		=> $bs_service_charge[$i],
 							'direct_discount' 			=> $direct_discount[$i],
+							'pool_premium' 				=> $pool_premium[$i],
 							'stamp_duty' 				=> $stamp_duty[$i],
 							'flag_default_duration' 	=> $flag_default_duration[$i],
 							'default_duration' 			=> $default_duration[$i],
@@ -714,6 +705,7 @@ class Portfolio extends MY_Controller
 							'agent_commission' 			=> $agent_commission[$i],
 							'bs_service_charge' 		=> $bs_service_charge[$i],
 							'direct_discount' 			=> $direct_discount[$i],
+							'pool_premium' 				=> $pool_premium[$i],
 							'stamp_duty' 				=> $stamp_duty[$i],
 							'flag_default_duration' 	=> $flag_default_duration[$i],
 							'default_duration' 			=> $default_duration[$i],
