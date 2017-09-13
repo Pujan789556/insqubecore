@@ -1761,7 +1761,9 @@ class Policy_txn extends MY_Controller
 				/**
 				 * Load Portfolio Specific Helper File
 				 */
-				load_portfolio_helper($policy_record->portfolio_id);
+				try { load_portfolio_helper($policy_record->portfolio_id);} catch (Exception $e) {
+					return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
+				}
 
 				/**
 				 * What to reload/render after success?
@@ -2490,7 +2492,9 @@ class Policy_txn extends MY_Controller
         /**
 		 * Load Portfolio Specific Helper File
 		 */
-		load_portfolio_helper($policy_record->portfolio_id);
+        try { load_portfolio_helper($policy_record->portfolio_id);} catch (Exception $e) {
+			return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
+		}
 
 		/**
 		 * Reload the Policy Overview Tab, Update Transaction Row (Replace)
@@ -2792,7 +2796,10 @@ class Policy_txn extends MY_Controller
         /**
 		 * Load Portfolio Specific Helper File
 		 */
-		load_portfolio_helper($policy_record->portfolio_id);
+        try { load_portfolio_helper($policy_record->portfolio_id);} catch (Exception $e) {
+			return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
+		}
+
 
 		/**
 		 * Reload the Policy Overview Tab, Update Transaction Row (Replace)
@@ -3252,7 +3259,10 @@ class Policy_txn extends MY_Controller
         /**
 		 * Load Portfolio Specific Helper File
 		 */
-		load_portfolio_helper($policy_record->portfolio_id);
+        try { load_portfolio_helper($policy_record->portfolio_id);} catch (Exception $e) {
+			return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
+		}
+
 
         /**
          * Reload the Policy Overview Tab, Update Transaction Row (Replace)

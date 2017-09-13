@@ -1265,7 +1265,10 @@ class Policies extends MY_Controller
 		/**
 		 * Load Portfolio Specific Helper File
 		 */
-		load_portfolio_helper($record->portfolio_id);
+		try { load_portfolio_helper($record->portfolio_id);} catch (Exception $e) {
+			return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
+		}
+
 
 
 
@@ -1416,7 +1419,9 @@ class Policies extends MY_Controller
 				/**
 				 * Load Portfolio Specific Helper File
 				 */
-				load_portfolio_helper($record->portfolio_id);
+				try { load_portfolio_helper($record->portfolio_id);} catch (Exception $e) {
+					return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
+				}
 
 
 				/**
@@ -1427,10 +1432,7 @@ class Policies extends MY_Controller
 					$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 				} catch (Exception $e) {
 
-					return $this->template->json([
-						'status' => 'error',
-						'message' => $e->getMessage()
-					], 404);
+					return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage() ], 404);
 				}
 
 				$html = $this->load->view($view, ['record' => $record, 'txn_record' => $txn_record], TRUE);
