@@ -77,6 +77,10 @@ switch($element['_type'])
         echo form_hidden($element_config['name'], $value);
         break;
 
+    case 'file':
+        echo form_file($element_config, $value, $extra_attributes);
+        break;
+
     case 'text':
         echo form_input($element_config, $value, $extra_attributes);
         break;
