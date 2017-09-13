@@ -758,6 +758,24 @@ if ( ! function_exists('load_portfolio_helper'))
         {
             $CI->load->helper('ph_marine');
         }
+
+        /**
+         * ENGINEERING
+         * ------------
+         * Engineering Portfolio Helper Functions
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__ENG)) )
+        {
+            $CI->load->helper('ph_engineering');
+        }
+
+        /**
+         * Throw Exception Else
+         */
+        else
+        {
+            throw new Exception("Exception [Helper: insqube_helper][Method: load_portfolio_helper()]: No helper file defined for supplied portfolio.");
+        }
     }
 }
 
