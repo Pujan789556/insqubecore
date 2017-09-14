@@ -66,6 +66,24 @@ if ( ! function_exists('_OBJ_row_snippet'))
 			$snippet = _OBJ_MARINE_row_snippet($record, $_flag__show_widget_row);
 		}
 
+		/**
+         * ENGINEERING - BOILER EXPLOSION
+         * ------------------------------
+         * Snippet Text
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+        {
+            $snippet = _OBJ_ENG_BL_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
+         * Throw Exception
+         */
+        else
+		{
+			throw new Exception("Exception [Helper: object_helper][Method: _OBJ_row_snippet()]: No row snippet method defined for supplied portfolio.");
+		}
+
 		return $snippet;
 	}
 }
@@ -119,6 +137,24 @@ if ( ! function_exists('_OBJ_select_text'))
 		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
 			$snippet = _OBJ_MARINE_select_text($record);
+		}
+
+		/**
+         * ENGINEERING - BOILER EXPLOSION
+         * ------------------------------
+         * SELECT Text
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+        {
+            $snippet = _OBJ_ENG_BL_select_text($record);
+        }
+
+        /**
+         * Throw Exception
+         */
+        else
+		{
+			throw new Exception("Exception [Helper: object_helper][Method: _OBJ_select_text()]: No select text method defined for supplied portfolio.");
 		}
 
 		return $snippet;
@@ -176,6 +212,19 @@ if ( ! function_exists('_OBJ_validation_rules'))
 			$v_rules = _OBJ_MARINE_validation_rules( $portfolio_id, $formatted );
 		}
 
+		/**
+         * ENGINEERING - BOILER EXPLOSION
+         * ------------------------------
+         * Sub-portfolio wise Validation Rules
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+        {
+            $v_rules = _OBJ_ENG_BL_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
+         * Throw Exception
+         */
 		else
 		{
 			throw new Exception("Exception [Helper: object_helper][Method: _OBJ_validation_rules()]: No validation method defined for supplied portfolio.");
@@ -230,6 +279,20 @@ if ( ! function_exists('_OBJ_attribute_form'))
 		{
 			$attribute_form = 'objects/forms/_form_object_marine';
 		}
+
+		/**
+         * ENGINEERING - BOILER EXPLOSION
+         * ------------------------------
+         * Sub-portfolio wise object form
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_eng_bl';
+        }
+
+        /**
+         * Throw Exception
+         */
 		else
 		{
 			throw new Exception("Exception [Helper: object_helper][Method: _OBJ_attribute_form()]: No attribute form defined for supplied portfolio.");
@@ -289,6 +352,14 @@ if ( ! function_exists('_OBJ_policy_package_dropdown'))
 			$dropdown = _OBJ_NA_policy_package_dropdown($flag_blank_select);
 		}
 
+		/**
+         * Not applicable policy package dropdown
+         */
+		else
+		{
+			$dropdown = _OBJ_NA_policy_package_dropdown($flag_blank_select);
+		}
+
 		return $dropdown;
 	}
 }
@@ -342,7 +413,6 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 		/**
 		 * MOTOR
 		 * -----
-		 * Compute Sum Insured Amount For this Policy Object (Motor)
 		 */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
@@ -352,7 +422,6 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 		/**
 		 * FIRE
 		 * -----
-		 * Compute Sum Insured Amount For this Policy Object (Fire Items, Buildings etc)
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
@@ -362,11 +431,28 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 		/**
 		 * MARINE
 		 * -----
-		 * Compute Sum Insured Amount For this Policy Object
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
 			$amt_sum_insured = _OBJ_MARINE_compute_sum_insured_amount($portfolio_id, $data);
+		}
+
+		/**
+         * ENGINEERING - BOILER EXPLOSION
+         * ------------------------------
+         * Sub-portfolio wise computation
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+        {
+            $amt_sum_insured = _OBJ_ENG_BL_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * Throw Exception
+         */
+		else
+		{
+			throw new Exception("Exception [Helper: object_helper][Method: _OBJ_compute_sum_insured_amount()]: No sum insured amount computing method defined for supplied portfolio.");
 		}
 
 		return $amt_sum_insured;
