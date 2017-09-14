@@ -729,6 +729,8 @@ if ( ! function_exists('load_portfolio_helper'))
 
         $CI =& get_instance();
 
+        $portfolio_id = (int)$portfolio_id;
+
         /**
          * MOTOR
          * -----
@@ -760,13 +762,13 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
-         * ENGINEERING
-         * ------------
-         * Engineering Portfolio Helper Functions
+         * ENGINEERING - BOILER EXPLOSION
+         * ------------------------------
+         * Engineering Sub Portfolio Helper Functions
          */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__ENG)) )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
-            $CI->load->helper('ph_engineering');
+            $CI->load->helper('ph_eng_bl');
         }
 
         /**
