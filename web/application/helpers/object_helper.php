@@ -392,6 +392,63 @@ if ( ! function_exists('_OBJ_NA_policy_package_dropdown'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('_OBJ_pre_save_tasks'))
+{
+	/**
+	 * Object Pre Save Tasks
+	 *
+	 * Perform tasks that are required before saving a policy objects.
+	 * Return the processed data for further computation or saving in DB
+	 *
+	 * @param int $portfolio_id
+	 * @param array $data 		Post Data
+	 * @return array
+	 */
+	function _OBJ_pre_save_tasks( int $portfolio_id, array $data )
+	{
+		$portfolio_id 		= (int)$portfolio_id;
+		$method 	= '';
+
+		/**
+		 * Find Portfolio Specific Method
+		 */
+		switch ($portfolio_id)
+		{
+			/**
+	         * ENGINEERING - BOILER EXPLOSION
+	         * ------------------------------
+	         * SELECT Text
+	         */
+			case IQB_SUB_PORTFOLIO_ENG_BL_ID:
+				$method = '_OBJ_ENG_BL_pre_save_tasks';
+				break;
+
+			default:
+				# code...
+				break;
+		}
+
+		/**
+		 * Call portfolio specific pre save tasks method (if any)
+		 */
+		if( $method )
+		{
+			// Load Portfolio Helper
+			load_portfolio_helper($portfolio_id);
+
+			$data = call_user_func_array( $method, array($data) );
+		}
+
+		/**
+		 * ELSE Simply return the original data "AS IT IS"
+		 */
+		return $data;
+
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 {
 	/**
