@@ -13,6 +13,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Objects extends MY_Controller
 {
+	/**
+	 * Files Upload Path
+	 */
+	public static $upload_path = INSQUBE_MEDIA_PATH . 'objects/';
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -40,8 +47,6 @@ class Objects extends MY_Controller
 		$this->load->model('object_model');
 		$this->load->model('portfolio_model');
 
-		// Image Path
-        $this->_upload_path = INSQUBE_MEDIA_PATH . 'objects/';
 	}
 
 	// --------------------------------------------------------------------
@@ -562,7 +567,7 @@ class Objects extends MY_Controller
 				$portfolio_id = (int)$record->portfolio_id;
 			}
 
-			$done 		= FALSE;
+			$done = FALSE;
 
 			/**
 			 * Object Validation Rules
@@ -592,6 +597,20 @@ class Objects extends MY_Controller
 						'customer_id'  		=> $customer_record->id
 					];
 				}
+
+
+				/**
+				 * Perform Object Pre Save Tasks
+				 */
+				try {
+
+					$data = _OBJ_pre_save_tasks($portfolio_id, $data);
+
+				} catch (Exception $e) {
+
+					return $this->template->json(['status' => 'error', 'title' => 'Exception Occured!', 'message' => $e->getMessage()], 404);
+				}
+
 
 				// Object attributes
         		$object_data['attributes'] = json_encode($data['object']);

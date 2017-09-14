@@ -13,6 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Endorsement_templates extends MY_Controller
 {
+
 	function __construct()
 	{
 		parent::__construct();
@@ -43,9 +44,6 @@ class Endorsement_templates extends MY_Controller
 		$this->load->model('endorsement_template_model');
 		$this->load->model('portfolio_model');
         $this->load->helper('policy');
-
-		// Image Path
-        $this->_upload_path = INSQUBE_MEDIA_PATH . 'endorsement_templates/';
 	}
 
 	// --------------------------------------------------------------------

@@ -15,6 +15,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Policy_txn extends MY_Controller
 {
+	/**
+	 * Files Upload Path
+	 */
+	public static $upload_path = INSQUBE_MEDIA_PATH . 'policy_txn/';
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -44,9 +51,6 @@ class Policy_txn extends MY_Controller
 		$this->load->config('policy');
 		$this->load->helper('policy');
 		$this->load->helper('object');
-
-		// Image Path
-        $this->_upload_path = INSQUBE_MEDIA_PATH . 'policies/';
 	}
 
 	// --------------------------------------------------------------------

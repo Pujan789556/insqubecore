@@ -13,6 +13,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Companies extends MY_Controller
 {
+	/**
+	 * Files Upload Path
+	 */
+	public static $upload_path = INSQUBE_MEDIA_PATH . 'companies/';
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -36,9 +43,6 @@ class Companies extends MY_Controller
 		// Load Model
 		$this->load->model('company_model');
 		$this->load->model('company_branch_model');
-
-		// Image Path
-        $this->_upload_path = INSQUBE_MEDIA_PATH . 'companies/';
 	}
 
 	// --------------------------------------------------------------------
@@ -474,7 +478,7 @@ class Companies extends MY_Controller
 			$options = [
 				'config' => [
 					'encrypt_name' => TRUE,
-	                'upload_path' => $this->_upload_path,
+	                'upload_path' => self::$upload_path,
 	                'allowed_types' => 'gif|jpg|jpeg|png',
 	                'max_size' => '2048'
 				],
@@ -535,7 +539,7 @@ class Companies extends MY_Controller
 			 */
 			if($record->picture)
 			{
-				delete_insqube_document($this->_upload_path . $record->picture);
+				delete_insqube_document(self::$upload_path . $record->picture);
 			}
 
 			$data = [
