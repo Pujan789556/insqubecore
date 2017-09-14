@@ -107,12 +107,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     })(jQuery);
     </script>
 <?php endif;?>
-
 <script type="text/javascript">
     // Datepicker
     $('.input-group.date').datepicker({
         autoclose: true,
         todayHighlight: true,
         format: 'yyyy-mm-dd'
+    });
+
+    // Initialize Select2 if any
+    $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
+        //Initialize Select2 Elements
+        $('select[data-ddstyle="select"]').select2();
+        $('.bootbox.modal').removeAttr('tabindex'); // modal workaround
     });
 </script>

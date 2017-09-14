@@ -71,6 +71,7 @@ class Object_model extends MY_Model
                     'field' => 'portfolio_id',
                     'label' => 'Portfolio',
                     'rules' => 'trim|required|integer|max_length[11]',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
                     '_type'     => 'dropdown',
                     '_id'       => '_object-portfolio-id',
                     '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_children_tree(),
