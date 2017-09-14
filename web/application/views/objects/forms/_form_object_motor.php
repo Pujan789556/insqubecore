@@ -4,85 +4,105 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Object - Motor
  */
 ?>
+<div class="row">
+    <div class="col-md-6">
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">Vehicle Common Information</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <?php
+                /**
+                 * Vehicle Information
+                 */
+                $vehicle_elements = $form_elements['vehicle-common'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $vehicle_elements,
+                    'form_record'   => $record
+                ]);
+                ?>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <?php
+        /**
+         * Vehicle Specific Information - CVC Type
+         */
+        $vehicle_cvc_elements = $form_elements['vehicle-cvc'] ?? NULL;
+        if($vehicle_cvc_elements):
+        ?>
+            <div class="box box-solid box-bordered">
+                <div class="box-header with-border">
+                    <h4 class="box-title">Vehicle Specific Information - Types</h4>
+                </div>
+                <div class="box-body form-horizontal">
+                    <?php
+                    $this->load->view('templates/_common/_form_components_horz', [
+                        'form_elements' => $vehicle_cvc_elements,
+                        'form_record'   => $record
+                    ]);
+                    ?>
+                </div>
+            </div>
+        <?php endif ?>
 
-<div class="box-header with-border">
-    <h3 class="box-title">Vehicle Common Information</h3>
+        <?php
+        /**
+         * Vehicle Specific Information - Staff Count
+         */
+        $staff_elements = $form_elements['staff'] ?? NULL;
+        if($staff_elements):
+        ?>
+            <div class="box box-solid box-bordered" id="__staff-box">
+                <div class="box-header with-border">
+                    <h4 class="box-title">Vehicle Specific Information - Staff Count</h4>
+                </div>
+                <div class="box-body form-horizontal">
+                    <p class="help-block"><i class="fa fa-info-circle"></i> Please supply staff count if this is commercial vehicle.</p>
+                    <?php
+                    /**
+                     * Vehicle Information
+                     */
+                    $this->load->view('templates/_common/_form_components_horz', [
+                        'form_elements' => $staff_elements,
+                        'form_record'   => $record
+                    ]);
+                    ?>
+                </div>
+            </div>
+        <?php endif ?>
+
+        <?php
+        /**
+         * Vehicle Specific Information - Trailer Info
+         */
+        $trailer_elements = $form_elements['trailer'] ?? NULL;
+        if($trailer_elements):
+        ?>
+            <div class="box box-solid box-bordered" id="__trailer-box">
+                <div class="box-header with-border">
+                    <h4 class="box-title">Vehicle Specific Information - Trailer/Trolly Information</h4>
+                </div>
+                <div class="box-body form-horizontal">
+                    <p class="help-block"><i class="fa fa-info-circle"></i> Please supply trailer/trolly price if this vehicle has any.</p>
+                    <?php
+                    /**
+                     * Vehicle Information
+                     */
+
+                    $this->load->view('templates/_common/_form_components_horz', [
+                        'form_elements' => $trailer_elements,
+                        'form_record'   => $record
+                    ]);
+                    ?>
+                </div>
+            </div>
+        <?php endif ?>
+    </div>
 </div>
-<?php
-/**
- * Vehicle Information
- */
-$vehicle_elements = $form_elements['vehicle-common'];
-$this->load->view('templates/_common/_form_components_horz', [
-    'form_elements' => $vehicle_elements,
-    'form_record'   => $record
-]);
 
-/**
- * Vehicle Specific Information - CVC Type
- */
-$vehicle_cvc_elements = $form_elements['vehicle-cvc'] ?? NULL;
-if($vehicle_cvc_elements):
-?>
 
-    <div class="box-header with-border">
-        <h3 class="box-title">Vehicle Specific Information - Types</h3>
-    </div>
-    <?php
-    $this->load->view('templates/_common/_form_components_horz', [
-        'form_elements' => $vehicle_cvc_elements,
-        'form_record'   => $record
-    ]);
-endif;
-
-/**
- * Vehicle Specific Information - Staff Count
- */
-$staff_elements = $form_elements['staff'] ?? NULL;
-
-if($staff_elements):
-?>
-    <div id="__staff-box">
-        <div class="box-header with-border">
-            <h3 class="box-title">Vehicle Specific Information - Staff Count</h3>
-        </div>
-        <p class="help-block"><i class="fa fa-info-circle"></i> Please supply staff count if this is commercial vehicle.</p>
-        <?php
-        /**
-         * Vehicle Information
-         */
-        $this->load->view('templates/_common/_form_components_horz', [
-            'form_elements' => $staff_elements,
-            'form_record'   => $record
-        ]);
-        ?>
-    </div>
-<?php
-endif;
-
-/**
- * Vehicle Specific Information - Trailer Info
- */
-$trailer_elements = $form_elements['trailer'] ?? NULL;
-if($trailer_elements):
-?>
-    <div id="__trailer-box">
-        <div class="box-header with-border">
-            <h3 class="box-title">Vehicle Specific Information - Trailer/Trolly Information</h3>
-        </div>
-        <p class="help-block"><i class="fa fa-info-circle"></i> Please supply trailer/trolly price if this vehicle has any.</p>
-        <?php
-        /**
-         * Vehicle Information
-         */
-
-        $this->load->view('templates/_common/_form_components_horz', [
-            'form_elements' => $trailer_elements,
-            'form_record'   => $record
-        ]);
-        ?>
-    </div>
-<?php endif?>
 <script type="text/javascript">
 
     function _po_to_be_intimated(d, et){
