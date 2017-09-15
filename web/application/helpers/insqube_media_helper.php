@@ -309,6 +309,39 @@ if ( ! function_exists('is_valid_file_extension'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('excel_to_array'))
+{
+    /**
+     * Read Excel File and Load data into array
+     *
+     * @param string $filename Excel File
+     * @return array
+     */
+    function excel_to_array($filename)
+    {
+        $CI =& get_instance();
+
+        // Let's load excel library
+        $CI->load->library('excel');
+
+        // Create excel reader object
+        $excelReader = PHPExcel_IOFactory::createReaderForFile($filename);
+
+        // If we dont need any formatting on the data
+        $excelReader->setReadDataOnly();
+
+        // Load file
+        $excelObj = $excelReader->load($filename);
+
+        // Get active sheet data into arry
+        $data_sheet = $excelObj->getActiveSheet()->toArray(null, true,true,true);
+
+        return $data_sheet;
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('insqube_js'))
 {
     /**
