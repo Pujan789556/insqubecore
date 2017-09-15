@@ -30,7 +30,7 @@ if ( ! function_exists('upload_insqube_media'))
      *          //
      *          'config' => [
      *              'encrypt_name' => TRUE,
-     *              'upload_path' => $this->_upload_path, // Module Upload Path
+     *              'upload_path' => <Module upload path>, // Module Upload Path
      *              'allowed_types' => 'gif|jpg|png',
      *              'max_size' => '2048'
      *          ],
@@ -281,6 +281,30 @@ if ( ! function_exists('thumbnail_name'))
 
 		return $base . $thumb_fix . $extension;
 	}
+}
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('is_valid_file_extension'))
+{
+    /**
+     * IS Valid File Extension?
+     *
+     * Check to make sure the file extenion is one of the supplied extensions
+     *
+     * @param string $filename      Filename with extension
+     * @param array $extensions     Extensions to check against
+     * @return type
+     */
+    function is_valid_file_extension( string $filename, array $extensions )
+    {
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+
+        if( !in_array($ext, $extensions) )
+        {
+            return FALSE;
+        }
+        return TRUE;
+    }
 }
 
 // ------------------------------------------------------------------------
