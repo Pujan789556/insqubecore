@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Customer
  */
 ?>
-<?php echo form_open( $action_url,
+<?php echo form_open_multipart( $action_url,
                         [
                             'class' => 'form-iqb-general',
                             'id'    => '_form-object',

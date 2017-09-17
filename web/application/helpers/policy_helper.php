@@ -457,6 +457,25 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MARINE";
 		}
 
+		/**
+         * ENGINEERING - BOILER EXPLOSION
+         * ------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+        {
+            $view_prefix = $view_for === 'print' ? '_print' : '';
+			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_BL";
+        }
+
+        /**
+         * Throw Exception
+         */
+		else
+		{
+			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__partial_view__cost_calculation_table()]: No Cost Calculation Table View defined for supplied portfolio.");
+		}
+
 		return $partial_view;
 	}
 }
@@ -502,6 +521,16 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
 		{
 			$form_view = 'policy_txn/forms/_form_premium_MARINE';
 		}
+
+		/**
+         * ENGINEERING - BOILER EXPLOSION
+         * ------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_ENG_BL';
+        }
 
 		else
 		{
@@ -831,6 +860,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			case IQB_SUB_PORTFOLIO_MARINE_ROAD_AIR_TRANSIT_ID:
 			case IQB_SUB_PORTFOLIO_MARINE_ROAD_TANSIT_ID:
 				$schedule_view = 'policies/print/schedule_MARINE';
+				break;
+
+			// ENGINEERING - BOILER EXPLOSION
+	        case IQB_SUB_PORTFOLIO_ENG_BL_ID:
+	        	$schedule_view = 'policies/print/schedule_ENG_BL';
 				break;
 
 
