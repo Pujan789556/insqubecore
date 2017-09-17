@@ -1110,7 +1110,7 @@ class Policies extends MY_Controller
 			{
 				$difference         = $end_timestamp - $start_timestamp;
 		        $days               = floor($difference / (60 * 60 * 24));
-		        $default_duration 	= (int)$pfs_record->flag_default_duration;
+		        $default_duration 	= (int)$pfs_record->default_duration;
 		    	if( $days > $default_duration )
 		    	{
 		    		$this->form_validation->set_message('_cb_valid_policy_duration', "End date should not be higher than portfolio's default duration ({$default_duration} days)");
