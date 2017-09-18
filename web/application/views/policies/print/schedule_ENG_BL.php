@@ -178,7 +178,7 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                         $items              = $object_attributes->third_party ?? NULL;
                         $item_count         = count( $items->limit ?? [] );
                         ?>
-                        <strong>1. THIRD PARTY LIABILITY</strong><br>
+                        <strong>2. THIRD PARTY LIABILITY</strong><br>
                         <table class="table table-condensed">
                             <thead>
                                 <tr>
