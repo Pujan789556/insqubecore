@@ -78,62 +78,6 @@ if ( ! function_exists('_PO_MOTOR_no_claim_discount_dropdown'))
 	}
 }
 
-// ------------------------------------------------------------------------
-
-
-if ( ! function_exists('_PO_MOTOR_compute_short_term_premium'))
-{
-	/**
-	 * MOTOR PORTFOLIO: Compute Short Term Policy Premium
-	 *
-	 * @param object $policy_record Policy Record
-	 * @param object $pfs_record Portfolio Settings Record
-	 * @param array $cost_table Cost Table computed by Specific cost table function
-	 * @return	array
-	 */
-	function _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $cost_table )
-	{
-		/**
-		 * SHORT TERM POLICY?
-		 * ---------------------
-		 *
-		 * If the policy is short term policy, we have to calculate the short term values
-		 *
-		 */
-		$CI =& get_instance();
-        $CI->load->model('fiscal_year_model');
-		$fy_record = $CI->fiscal_year_model->get_fiscal_year( $policy_record->issued_date );
-		$short_term_info = _POLICY__get_short_term_info( $policy_record->portfolio_id, $fy_record, $policy_record->start_date, $policy_record->end_date );
-
-		if(
-			$pfs_record->flag_short_term === IQB_FLAG_YES
-			&&
-			$short_term_info['flag'] === IQB_FLAG_YES
-			&&
-			$policy_record->flag_short_term === IQB_FLAG_YES )
-		{
-			$short_term_record = $short_term_info['record'];
-
-			$short_term_rate = $short_term_record->rate ?? 100.00;
-			$short_term_rate = (float)$short_term_rate;
-
-			// Compute Total Amount
-			$cost_table['amt_total_premium'] = ($cost_table['amt_total_premium'] * $short_term_rate)/100.00;
-
-
-			// Update Commissionable Amount and Commission
-			$amt_commissionable = $cost_table['amt_commissionable'] ?? NULL;
-			if($amt_commissionable)
-			{
-				$cost_table['amt_commissionable'] 	= ($cost_table['amt_commissionable'] * $short_term_rate)/100.00;
-				$cost_table['amt_agent_commission'] = ($cost_table['amt_commissionable'] * $pfs_record->agent_commission)/100.00;
-			}
-		}
-
-		return $cost_table;
-	}
-}
-
 
 // ------------------------------------------------------------------------
 // TARIFF BASED COST COMPUTATION FUNCTIONS
@@ -628,7 +572,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 		 * If the policy is short term policy, we have to calculate the short term values
 		 *
 		 */
-		$CRF_PREMIUM_DATA = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $CRF_PREMIUM_DATA );
+		$CRF_PREMIUM_DATA = _POLICY__compute_short_term_premium( $policy_record, $pfs_record, $CRF_PREMIUM_DATA );
 
 		return $CRF_PREMIUM_DATA;
 	}
@@ -1220,7 +1164,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 		 * If the policy is short term policy, we have to calculate the short term values
 		 *
 		 */
-		$CRF_PREMIUM_DATA = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $CRF_PREMIUM_DATA );
+		$CRF_PREMIUM_DATA = _POLICY__compute_short_term_premium( $policy_record, $pfs_record, $CRF_PREMIUM_DATA );
 
 		return $CRF_PREMIUM_DATA;
 	}
@@ -1919,7 +1863,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
 		 * If the policy is short term policy, we have to calculate the short term values
 		 *
 		 */
-		$CRF_PREMIUM_DATA = _PO_MOTOR_compute_short_term_premium( $policy_record, $pfs_record, $CRF_PREMIUM_DATA );
+		$CRF_PREMIUM_DATA = _POLICY__compute_short_term_premium( $policy_record, $pfs_record, $CRF_PREMIUM_DATA );
 
         return $CRF_PREMIUM_DATA;
     }
