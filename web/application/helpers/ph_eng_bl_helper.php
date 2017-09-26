@@ -543,7 +543,7 @@ if ( ! function_exists('_TXN_ENG_BL_premium_validation_rules'))
                     'field' => 'premium[flag_pool_risk]',
                     'label' => 'Pool Risk',
                     'rules' => 'trim|integer|in_list[1]',
-                    '_key' 		=> 'flag_risk_pool',
+                    '_key' 		=> 'flag_pool_risk',
                     '_type'     => 'checkbox',
                     '_checkbox_value' 	=> '1',
                     '_required' => false,
