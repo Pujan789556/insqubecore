@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Policy: Details - Policy Premium Overview Card - CONTRACTOR PLANT & MACHINARY (ENG)
+* Policy: Details - Policy Premium Overview Card - ELECTRONIC EQUIPMENT INSURANCE (ENG)
 */
 $cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn_record->cost_calculation_table) : NULL;
 ?>

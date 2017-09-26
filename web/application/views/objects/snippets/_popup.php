@@ -51,3 +51,13 @@ else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
 {
     $this->load->view('objects/snippets/_popup_eng_cpm', $data);
 }
+
+/**
+ * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+ * ---------------------------------------------
+ */
+else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+{
+    $this->load->view('objects/snippets/_popup_eng_eei', $data);
+}
+

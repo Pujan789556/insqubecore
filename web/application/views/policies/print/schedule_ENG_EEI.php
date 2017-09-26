@@ -1,11 +1,11 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Schedule Print : ENGINEERING - CONTRACTOR PLANT & MACHINARY
+ * Schedule Print : ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
  */
-$this->load->helper('ph_eng_cpm');
+$this->load->helper('ph_eng_eei');
 
 $object_attributes      = json_decode($record->object_attributes);
-$schedule_table_title   = 'Contractor Plant & Machinary (Schedule)';
+$schedule_table_title   = 'Electronic Equipment Insurance (Schedule)';
 
 ?>
 
@@ -128,7 +128,7 @@ $schedule_table_title   = 'Contractor Plant & Machinary (Schedule)';
                     </td>
                 </tr>
                 <?php
-                $form_elements = _OBJ_ENG_CPM_validation_rules($record->portfolio_id);
+                $form_elements = _OBJ_ENG_EEI_validation_rules($record->portfolio_id);
 
                 /**
                  * Item List

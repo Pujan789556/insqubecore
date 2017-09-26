@@ -480,6 +480,17 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
         }
 
         /**
+         * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+         * ---------------------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+        {
+            $view_prefix = $view_for === 'print' ? '_print' : '';
+			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_EEI";
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -551,6 +562,16 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_ENG_CPM';
+        }
+
+        /**
+         * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+         * ---------------------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_ENG_EEI';
         }
 
 		else
@@ -946,6 +967,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			// ENGINEERING - CONTRACTOR PLANT & MACHINARY
 	        case IQB_SUB_PORTFOLIO_ENG_CPM_ID:
 	        	$schedule_view = 'policies/print/schedule_ENG_CPM';
+				break;
+
+			// ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+			case IQB_SUB_PORTFOLIO_ENG_EEI_ID:
+				$schedule_view = 'policies/print/schedule_ENG_EEI';
 				break;
 
 

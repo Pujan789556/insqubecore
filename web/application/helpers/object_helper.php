@@ -82,6 +82,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+         * ---------------------------------------------
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+        {
+            $snippet = _OBJ_ENG_EEI_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * Throw Exception
          */
         else
@@ -157,6 +166,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
             $snippet = _OBJ_ENG_CPM_select_text($record);
+        }
+
+        /**
+         * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+         * ---------------------------------------------
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+        {
+            $snippet = _OBJ_ENG_EEI_select_text($record);
         }
 
         /**
@@ -243,6 +261,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+        {
+            $v_rules = _OBJ_ENG_EEI_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -318,6 +345,16 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
             $attribute_form = 'objects/forms/_form_object_eng_cpm';
+        }
+
+        /**
+         * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+         * ---------------------------------------------
+         * Sub-portfolio wise object form
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_eng_eei';
         }
 
         /**
@@ -419,9 +456,10 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
 	 *
 	 * @param int $portfolio_id
 	 * @param array $data 		Post Data
+	 * @param object $record 	Object Record (for edit mode)
 	 * @return array
 	 */
-	function _OBJ_pre_save_tasks( int $portfolio_id, array $data )
+	function _OBJ_pre_save_tasks( int $portfolio_id, array $data, $record = NULL )
 	{
 		$portfolio_id 		= (int)$portfolio_id;
 		$method 	= '';
@@ -434,10 +472,17 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
 			/**
 	         * ENGINEERING - BOILER EXPLOSION
 	         * ------------------------------
-	         * SELECT Text
 	         */
 			case IQB_SUB_PORTFOLIO_ENG_BL_ID:
 				$method = '_OBJ_ENG_BL_pre_save_tasks';
+				break;
+
+			/**
+	         * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+	         * ---------------------------------------------
+	         */
+			case IQB_SUB_PORTFOLIO_ENG_EEI_ID:
+				$method = '_OBJ_ENG_EEI_pre_save_tasks';
 				break;
 
 			default:
@@ -453,7 +498,7 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
 			// Load Portfolio Helper
 			load_portfolio_helper($portfolio_id);
 
-			$data = call_user_func_array( $method, array($data) );
+			$data = call_user_func_array( $method, array($data, $record) );
 		}
 
 		/**
@@ -529,6 +574,16 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
             $amt_sum_insured = _OBJ_ENG_CPM_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+         * ---------------------------------------------
+         * Sub-portfolio wise computation
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+        {
+            $amt_sum_insured = _OBJ_ENG_EEI_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * InsQube Contractor Plant & Machinary - Engineering Portfolio Helper Functions
+ * InsQube ELECTRONIC EQUIPMENT INSURANCE - Engineering Portfolio Helper Functions
  *
  * This file contains helper functions related to Engineering Portfolio
  *
@@ -21,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // ------------------------------------------------------------------------
 
 
-if ( ! function_exists('_OBJ_ENG_CPM_row_snippet'))
+if ( ! function_exists('_OBJ_ENG_EEI_row_snippet'))
 {
 	/**
 	 * Get Policy Object - ENGINEERING - Row Snippet
@@ -32,16 +32,16 @@ if ( ! function_exists('_OBJ_ENG_CPM_row_snippet'))
 	 * @param bool $_flag__show_widget_row 	is this Widget Row? or Regular List Row?
 	 * @return	html
 	 */
-	function _OBJ_ENG_CPM_row_snippet( $record, $_flag__show_widget_row = FALSE )
+	function _OBJ_ENG_EEI_row_snippet( $record, $_flag__show_widget_row = FALSE )
 	{
 		$CI =& get_instance();
-		return $CI->load->view('objects/snippets/_row_eng_cpm', ['record' => $record, '_flag__show_widget_row' => $_flag__show_widget_row], TRUE);
+		return $CI->load->view('objects/snippets/_row_eng_eei', ['record' => $record, '_flag__show_widget_row' => $_flag__show_widget_row], TRUE);
 	}
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_ENG_CPM_select_text'))
+if ( ! function_exists('_OBJ_ENG_EEI_select_text'))
 {
 	/**
 	 * Get Policy Object - ENGINEERING - Selection Text or Summary Text
@@ -52,7 +52,7 @@ if ( ! function_exists('_OBJ_ENG_CPM_select_text'))
 	 * @param bool $record 	Object Record
 	 * @return	html
 	 */
-	function _OBJ_ENG_CPM_select_text( $record )
+	function _OBJ_ENG_EEI_select_text( $record )
 	{
 		$attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 		$transit 		= $attributes->transit ?? NULL;
@@ -70,7 +70,7 @@ if ( ! function_exists('_OBJ_ENG_CPM_select_text'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_ENG_CPM_validation_rules'))
+if ( ! function_exists('_OBJ_ENG_EEI_validation_rules'))
 {
 	/**
 	 * Get Policy Object - ENGINEERING - Validation Rules
@@ -81,7 +81,7 @@ if ( ! function_exists('_OBJ_ENG_CPM_validation_rules'))
 	 * @param bool $formatted  Should Return the Formatted Validation Rule ( if multi senction rules )
 	 * @return	bool
 	 */
-	function _OBJ_ENG_CPM_validation_rules( $portfolio_id, $formatted = FALSE )
+	function _OBJ_ENG_EEI_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
 		$CI =& get_instance();
 
@@ -102,7 +102,15 @@ if ( ! function_exists('_OBJ_ENG_CPM_validation_rules'))
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
-			    ]
+			    ],
+			    [
+			        'field' => 'document',
+			        '_key' => 'document',
+			        'label' => 'Upload Item List File (.xls or .xlsx)',
+			        'rules' => '',
+			        '_type'     => 'file',
+			        '_required' => false
+			    ],
 		    ],
 
 
@@ -113,7 +121,7 @@ if ( ! function_exists('_OBJ_ENG_CPM_validation_rules'))
 			    [
 			        'field' => 'object[item][description]',
 			        '_key' => 'description',
-			        'label' => 'Description',
+			        'label' => 'Item Summary',
 			        'rules' => 'trim|required|htmlspecialchars|max_length[300]',
 			        '_type' => 'textarea',
 			        'rows' 	=> 4,
@@ -159,10 +167,78 @@ if ( ! function_exists('_OBJ_ENG_CPM_validation_rules'))
 	}
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_ENG_EEI_pre_save_tasks'))
+{
+	/**
+	 * Object Pre Save Tasks
+	 *
+	 * Perform tasks that are required before saving a policy objects.
+	 * Return the processed data for further computation or saving in DB
+	 *
+	 * @param array $data 		Post Data
+	 * @param object $record 	Object Record (for edit mode)
+	 * @return array
+	 */
+	function _OBJ_ENG_EEI_pre_save_tasks( array $data, $record )
+	{
+		/**
+		 * Task : Upload Excel File of Item List, and save
+		 * 		  the name back to Object attributes to access it later
+		 *
+		 */
+		$attributes 	= json_decode($record->attributes ?? NULL);
+		$old_document 	= $attributes->document ?? NULL;
+
+
+		$options = [
+			'config' => [
+				'encrypt_name' 	=> TRUE,
+                'upload_path' 	=> Objects::$data_path,
+                'allowed_types' => 'xls|xlsx',
+                'max_size' 		=> '2048'
+			],
+			'form_field' => 'document',
+
+			'create_thumb' => FALSE,
+
+			// Delete Old file
+			'old_files' => $old_document ? [$old_document] : [],
+			'delete_old' => TRUE
+		];
+		$upload_result = upload_insqube_media($options);
+
+		$status 		= $upload_result['status'];
+		$message 		= $upload_result['message'];
+		$files 			= $upload_result['files'];
+
+		if( $status === 'success' )
+        {
+        	$document = $files[0];
+        	$data['object']['document'] = $document;
+        }
+
+        /**
+         * No File Selected in Edit Mode, Use the old one
+         */
+        else if( $status === 'no_file_selected' &&  isset($record->id) )
+        {
+			// Old Document as it is
+			$data['object']['document'] = $old_document;
+        }
+        else{
+        	throw new Exception("Exception [Helper: ph_eng_eei_helper][Method: _OBJ_ENG_EEI_pre_save_tasks()]: " . $message );
+        }
+
+		return $data;
+	}
+}
+
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_ENG_CPM_compute_sum_insured_amount'))
+if ( ! function_exists('_OBJ_ENG_EEI_compute_sum_insured_amount'))
 {
 	/**
 	 * Get Sum Insured Amount of Policy Object - ENGINEERING Portfolio
@@ -175,7 +251,7 @@ if ( ! function_exists('_OBJ_ENG_CPM_compute_sum_insured_amount'))
 	 * @param bool 		$forex_convert 	Convert sum insured into NPR
 	 * @return float
 	 */
-	function _OBJ_ENG_CPM_compute_sum_insured_amount( $portfolio_id, $data )
+	function _OBJ_ENG_EEI_compute_sum_insured_amount( $portfolio_id, $data )
 	{
 		/**
 		 * We have single item, so it's SI is the object's total SI
@@ -191,7 +267,7 @@ if ( ! function_exists('_OBJ_ENG_CPM_compute_sum_insured_amount'))
 // POLICY TRANSACTION HELPER FUNCTIONS
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_TXN_ENG_CPM_premium_validation_rules'))
+if ( ! function_exists('_TXN_ENG_EEI_premium_validation_rules'))
 {
 	/**
 	 * Get Policy TXN Validation Rules for Premium Add/Update for ENGINEERING Portfolio
@@ -202,7 +278,7 @@ if ( ! function_exists('_TXN_ENG_CPM_premium_validation_rules'))
 	 * @param bool $for_processing		For Form Processing
 	 * @return array
 	 */
-	function _TXN_ENG_CPM_premium_validation_rules($policy_record, $pfs_record, $policy_object, $for_form_processing = FALSE )
+	function _TXN_ENG_EEI_premium_validation_rules($policy_record, $pfs_record, $policy_object, $for_form_processing = FALSE )
 	{
 		$CI =& get_instance();
 

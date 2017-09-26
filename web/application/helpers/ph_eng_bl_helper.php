@@ -285,9 +285,10 @@ if ( ! function_exists('_OBJ_ENG_BL_pre_save_tasks'))
 	 * Return the processed data for further computation or saving in DB
 	 *
 	 * @param array $data 		Post Data
+	 * @param object $record 	Object Record (for edit mode)
 	 * @return array
 	 */
-	function _OBJ_ENG_BL_pre_save_tasks( array $data )
+	function _OBJ_ENG_BL_pre_save_tasks( array $data, $record = NULL )
 	{
 		/**
 		 * Task : Read Excel File from Upload and Render into data list

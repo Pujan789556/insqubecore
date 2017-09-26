@@ -18,6 +18,11 @@ class Objects extends MY_Controller
 	 */
 	public static $upload_path = INSQUBE_MEDIA_PATH . 'objects/';
 
+	/**
+	 * Data Files Upload Path
+	 */
+	public static $data_path = INSQUBE_DATA_PATH . 'objects/';
+
 	// --------------------------------------------------------------------
 
 	function __construct()
@@ -604,7 +609,7 @@ class Objects extends MY_Controller
 				 */
 				try {
 
-					$data = _OBJ_pre_save_tasks($portfolio_id, $data);
+					$data = _OBJ_pre_save_tasks($portfolio_id, $data, $record);
 
 				} catch (Exception $e) {
 
