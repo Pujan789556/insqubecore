@@ -772,6 +772,16 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * ENGINEERING - CONTRACTOR PLANT & MACHINARY
+         * ------------------------------------------
+         * Engineering Sub Portfolio Helper Functions
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+        {
+            $CI->load->helper('ph_eng_cpm');
+        }
+
+        /**
          * Throw Exception Else
          */
         else

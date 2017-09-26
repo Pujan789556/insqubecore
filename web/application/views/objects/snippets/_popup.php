@@ -37,9 +37,17 @@ else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO
 /**
  * ENGINEERING - BOILER EXPLOSION
  * ------------------------------
- * Sub-portfolio wise computation
  */
 else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
 {
     $this->load->view('objects/snippets/_popup_eng_bl', $data);
+}
+
+/**
+ * ENGINEERING - CONTRACTOR PLANT & MACHINARY
+ * ------------------------------------------
+ */
+else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+{
+    $this->load->view('objects/snippets/_popup_eng_cpm', $data);
 }

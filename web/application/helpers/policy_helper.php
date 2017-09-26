@@ -469,6 +469,17 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
         }
 
         /**
+         * ENGINEERING - CONTRACTOR PLANT & MACHINARY
+         * ------------------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+        {
+            $view_prefix = $view_for === 'print' ? '_print' : '';
+			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_CPM";
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -530,6 +541,16 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_ENG_BL';
+        }
+
+        /**
+         * ENGINEERING - CONTRACTOR PLANT & MACHINARY
+         * ------------------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_ENG_CPM';
         }
 
 		else
@@ -757,7 +778,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
     {
     	if( !in_array($action, ['save', 'print', 'download']) )
     	{
-    		throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: Invalid Action({$action}).");
+    		throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__schedule_pdf()]: Invalid Action({$action}).");
     	}
 
     	$CI =& get_instance();
@@ -816,7 +837,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
 		}
 		else
 		{
-			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: No schedule view exists for given portfolio({$record->portfolio_name}).");
+			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__schedule_pdf()]: No schedule view exists for given portfolio({$record->portfolio_name}).");
 		}
     }
 }
@@ -865,6 +886,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			// ENGINEERING - BOILER EXPLOSION
 	        case IQB_SUB_PORTFOLIO_ENG_BL_ID:
 	        	$schedule_view = 'policies/print/schedule_ENG_BL';
+				break;
+
+			// ENGINEERING - CONTRACTOR PLANT & MACHINARY
+	        case IQB_SUB_PORTFOLIO_ENG_CPM_ID:
+	        	$schedule_view = 'policies/print/schedule_ENG_CPM';
 				break;
 
 

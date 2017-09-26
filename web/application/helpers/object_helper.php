@@ -39,7 +39,6 @@ if ( ! function_exists('_OBJ_row_snippet'))
 		/**
 		 * MOTOR
 		 * -----
-		 * Snippet Text
 		 */
 		if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
@@ -49,7 +48,6 @@ if ( ! function_exists('_OBJ_row_snippet'))
 		/**
 		 * FIRE
 		 * -----
-		 * Snippet Text
 		 */
 		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
@@ -59,7 +57,6 @@ if ( ! function_exists('_OBJ_row_snippet'))
 		/**
 		 * MARINE
 		 * -----
-		 * Snippet Text
 		 */
 		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
@@ -69,11 +66,19 @@ if ( ! function_exists('_OBJ_row_snippet'))
 		/**
          * ENGINEERING - BOILER EXPLOSION
          * ------------------------------
-         * Snippet Text
          */
         else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
             $snippet = _OBJ_ENG_BL_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
+         * ENGINEERING - CONTRACTOR PLANT & MACHINARY
+         * ------------------------------------------
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+        {
+            $snippet = _OBJ_ENG_CPM_row_snippet($record, $_flag__show_widget_row);
         }
 
         /**
@@ -112,7 +117,6 @@ if ( ! function_exists('_OBJ_select_text'))
 		/**
 		 * MOTOR
 		 * -----
-		 * Select Text
 		 */
 		if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
@@ -122,7 +126,6 @@ if ( ! function_exists('_OBJ_select_text'))
 		/**
 		 * FIRE
 		 * -----
-		 * Select Text
 		 */
 		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
@@ -131,8 +134,7 @@ if ( ! function_exists('_OBJ_select_text'))
 
 		/**
 		 * MARINE
-		 * -----
-		 * SELECT Text
+		 * -------
 		 */
 		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
@@ -142,11 +144,19 @@ if ( ! function_exists('_OBJ_select_text'))
 		/**
          * ENGINEERING - BOILER EXPLOSION
          * ------------------------------
-         * SELECT Text
          */
         else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
             $snippet = _OBJ_ENG_BL_select_text($record);
+        }
+
+        /**
+         * ENGINEERING - CONTRACTOR PLANT & MACHINARY
+         * ------------------------------------------
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+        {
+            $snippet = _OBJ_ENG_CPM_select_text($record);
         }
 
         /**
@@ -223,6 +233,16 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * ENGINEERING - CONTRACTOR PLANT & MACHINARY
+         * ------------------------------------------
+         * Sub-portfolio wise Validation Rules
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+        {
+            $v_rules = _OBJ_ENG_CPM_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -291,6 +311,16 @@ if ( ! function_exists('_OBJ_attribute_form'))
         }
 
         /**
+         * ENGINEERING - CONTRACTOR PLANT & MACHINARY
+         * ------------------------------------------
+         * Sub-portfolio wise object form
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_eng_cpm';
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -333,27 +363,14 @@ if ( ! function_exists('_OBJ_policy_package_dropdown'))
 		}
 
 		/**
-		 * FIRE
-		 * -----
-		 * For all type of FIRE portfolios, we do not need any policy package
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
-		{
-			$dropdown = _OBJ_NA_policy_package_dropdown($flag_blank_select);
-		}
-
-		/**
-		 * MARINE
-		 * -----
-		 * For all type of MARINE portfolios, we do not need any policy package
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
-		{
-			$dropdown = _OBJ_NA_policy_package_dropdown($flag_blank_select);
-		}
-
-		/**
          * Not applicable policy package dropdown
+         *
+         * Portfolio That Do not  apply policy packages:
+         *
+         * 	1. FIRE (all)
+         * 	2. MARINE (all)
+         * 	3. ENGINEERING (all)
+         *
          */
 		else
 		{
@@ -502,6 +519,16 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
             $amt_sum_insured = _OBJ_ENG_BL_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * ENGINEERING - CONTRACTOR PLANT & MACHINARY
+         * ------------------------------------------
+         * Sub-portfolio wise computation
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+        {
+            $amt_sum_insured = _OBJ_ENG_CPM_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
