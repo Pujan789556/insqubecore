@@ -68,7 +68,7 @@ if($settings)
     <?php
     $basic_elements = $form_elements['basic'];
     ?>
-    <table class="table table-responsive table-condensed table-bordered">
+    <table class="table table-responsive table-hover table-condensed table-bordered">
         <thead>
             <tr>
                 <?php foreach($basic_elements as $elem):?>
