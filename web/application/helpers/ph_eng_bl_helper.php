@@ -132,7 +132,7 @@ if ( ! function_exists('_OBJ_ENG_BL_validation_rules'))
 			        'field' => 'object[items][description][]',
 			        '_key' => 'description',
 			        'label' => 'Description',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[500]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true

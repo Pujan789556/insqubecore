@@ -122,7 +122,7 @@ if ( ! function_exists('_OBJ_ENG_EEI_validation_rules'))
 			        'field' => 'object[item][description]',
 			        '_key' => 'description',
 			        'label' => 'Item Summary',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[500]',
 			        '_type' => 'textarea',
 			        'rows' 	=> 4,
 			        '_show_label' 	=> false,
