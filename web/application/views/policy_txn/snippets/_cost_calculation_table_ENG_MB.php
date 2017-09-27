@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Policy: Details - Policy Premium Overview Card - BOILER EXPLOSION (ENG)
+* Policy: Details - Policy Premium Overview Card - MACHINE BREAKDOWN (ENG)
 */
 $cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn_record->cost_calculation_table) : NULL;
 ?>

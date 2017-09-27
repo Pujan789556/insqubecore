@@ -91,6 +91,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * ENGINEERING - MACHINE BREAKDOWN
+         * ---------------------------------------------
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+        {
+            $snippet = _OBJ_ENG_MB_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * Throw Exception
          */
         else
@@ -175,6 +184,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
             $snippet = _OBJ_ENG_EEI_select_text($record);
+        }
+
+        /**
+         * ENGINEERING - MACHINE BREAKDOWN
+         * ---------------------------------------------
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+        {
+            $snippet = _OBJ_ENG_MB_select_text($record);
         }
 
         /**
@@ -270,6 +288,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * ENGINEERING - MACHINE BREAKDOWN
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+        {
+            $v_rules = _OBJ_ENG_MB_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -355,6 +382,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
             $attribute_form = 'objects/forms/_form_object_eng_eei';
+        }
+
+        /**
+         * ENGINEERING - MACHINE BREAKDOWN
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_eng_mb';
         }
 
         /**
@@ -485,6 +521,14 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
 				$method = '_OBJ_ENG_EEI_pre_save_tasks';
 				break;
 
+			/**
+	         * ENGINEERING - MACHINE BREAKDOWN
+	         * ---------------------------------------------
+	         */
+			case IQB_SUB_PORTFOLIO_ENG_MB_ID:
+				$method = '_OBJ_ENG_MB_pre_save_tasks';
+				break;
+
 			default:
 				# code...
 				break;
@@ -584,6 +628,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
             $amt_sum_insured = _OBJ_ENG_EEI_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * ENGINEERING - MACHINE BREAKDOWN
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+        {
+            $amt_sum_insured = _OBJ_ENG_MB_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

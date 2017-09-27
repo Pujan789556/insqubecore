@@ -491,6 +491,16 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
         }
 
         /**
+         * ENGINEERING - MACHINE BREAKDOWN
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+        {
+            $view_prefix = $view_for === 'print' ? '_print' : '';
+			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_MB";
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -572,6 +582,15 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_ENG_EEI';
+        }
+
+        /**
+         * ENGINEERING - MACHINE BREAKDOWN
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_ENG_MB';
         }
 
 		else
@@ -972,6 +991,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			// ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
 			case IQB_SUB_PORTFOLIO_ENG_EEI_ID:
 				$schedule_view = 'policies/print/schedule_ENG_EEI';
+				break;
+
+			// ENGINEERING - MACHINE BREAKDOWN
+			case IQB_SUB_PORTFOLIO_ENG_MB_ID:
+				$schedule_view = 'policies/print/schedule_ENG_MB';
 				break;
 
 

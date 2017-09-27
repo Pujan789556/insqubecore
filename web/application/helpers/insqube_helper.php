@@ -792,6 +792,16 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * ENGINEERING - MACHINE BREAKDOWN
+         * ---------------------------------------------
+         * Engineering Sub Portfolio Helper Functions
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+        {
+            $CI->load->helper('ph_eng_mb');
+        }
+
+        /**
          * Throw Exception Else
          */
         else

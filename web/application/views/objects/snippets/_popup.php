@@ -61,3 +61,12 @@ else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
     $this->load->view('objects/snippets/_popup_eng_eei', $data);
 }
 
+/**
+ * ENGINEERING - MACHINE BREAKDOWN
+ * ---------------------------------------------
+ */
+else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+{
+    $this->load->view('objects/snippets/_popup_eng_mb', $data);
+}
+

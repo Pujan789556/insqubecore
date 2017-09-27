@@ -168,8 +168,17 @@ class Object_model extends MY_Model
             'updated_by'    => $this->dx_auth->get_user_id(),
             'updated_at'    => $this->set_date()
         ];
-        return $this->db->where('id', $id)
+        $done = $this->db->where('id', $id)
                         ->update($this->table_name, $data);
+
+        /**
+         * Clear Cache for customer belonging to this object
+         */
+        $record = $this->row($id);
+        $data['fields']['customer_id'] = $record->customer_id;
+        $this->clear_cache($data);
+
+        return $done;
     }
 
     // ----------------------------------------------------------------
