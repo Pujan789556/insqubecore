@@ -55,7 +55,6 @@ if ( ! function_exists('_OBJ_ENG_MB_select_text'))
 	function _OBJ_ENG_MB_select_text( $record )
 	{
 		$attributes = $record->attributes ? json_decode($record->attributes) : NULL;
-		$transit 		= $attributes->transit ?? NULL;
 
 		$snippet = [
 			'<strong>' . $attributes->risk_locaiton . '</strong>',
