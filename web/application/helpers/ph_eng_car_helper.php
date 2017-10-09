@@ -443,7 +443,7 @@ if ( ! function_exists('_TXN_ENG_CAR_premium_validation_rules'))
 				[
 			        'field' => 'premium[items][sn][]',
 			        '_key' => 'sn',
-			        'label' => 'S.N.',
+			        'label' => 'Item Title',
 			        'rules' => 'trim|required|htmlspecialchars|max_length[10]',
 			        '_type' => 'hidden',
 			        '_data' 		=> $insured_items_dropdown,
