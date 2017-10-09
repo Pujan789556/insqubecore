@@ -19,6 +19,7 @@
     .margin-t-10{margin-top:10px;}
     .text-right{text-align: right}
     .text-left{text-align: left}
+    .text-bold{font-weight: bold;}
 
     table.margin-b-10,.margin-b-10{margin-bottom:10pt;}
     p { margin: 0pt; }
