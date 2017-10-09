@@ -802,6 +802,16 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * ENGINEERING - ERECTION ALL RISKS
+         * ---------------------------------------------
+         * Engineering Sub Portfolio Helper Functions
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+        {
+            $CI->load->helper('ph_eng_ear');
+        }
+
+        /**
          * ENGINEERING - MACHINE BREAKDOWN
          * ---------------------------------------------
          * Engineering Sub Portfolio Helper Functions

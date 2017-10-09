@@ -425,7 +425,8 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 	 */
 	function _POLICY__partial_view__cost_calculation_table( $portfolio_id, $view_for = 'regular' )
 	{
-		$partial_view = '';
+		$partial_view 	= '';
+		$view_prefix 	= $view_for === 'print' ? '_print' : '';
 
 		/**
 		 * MOTOR PORTFOLIOS
@@ -433,7 +434,6 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 		 */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
-			$view_prefix = $view_for === 'print' ? '_print' : '';
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MOTOR";
 		}
 
@@ -443,7 +443,6 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
-			$view_prefix = $view_for === 'print' ? '_print' : '';
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_FIRE";
 		}
 
@@ -453,7 +452,6 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
-			$view_prefix = $view_for === 'print' ? '_print' : '';
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MARINE";
 		}
 
@@ -464,7 +462,6 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
-            $view_prefix = $view_for === 'print' ? '_print' : '';
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_BL";
         }
 
@@ -475,7 +472,6 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
         {
-            $view_prefix = $view_for === 'print' ? '_print' : '';
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_CAR";
         }
 
@@ -486,7 +482,6 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
-            $view_prefix = $view_for === 'print' ? '_print' : '';
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_CPM";
         }
 
@@ -497,17 +492,26 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
-            $view_prefix = $view_for === 'print' ? '_print' : '';
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_EEI";
+        }
+
+        /**
+         * ENGINEERING - ERECTION ALL RISKS
+         * ---------------------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+        {
+			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_EAR";
         }
 
         /**
          * ENGINEERING - MACHINE BREAKDOWN
          * ---------------------------------------------
+         * Sub-portfolio wise view
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
-            $view_prefix = $view_for === 'print' ? '_print' : '';
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_MB";
         }
 
@@ -603,6 +607,16 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_ENG_EEI';
+        }
+
+        /**
+         * ENGINEERING - ERECTION ALL RISKS
+         * ---------------------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+        {
+			$form_view = 'policy_txn/forms/_form_premium_ENG_EAR';
         }
 
         /**
@@ -1017,6 +1031,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			// ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
 			case IQB_SUB_PORTFOLIO_ENG_EEI_ID:
 				$schedule_view = 'policies/print/schedule_ENG_EEI';
+				break;
+
+			// ENGINEERING - ERECTION ALL RISKS
+			case IQB_SUB_PORTFOLIO_ENG_EAR_ID:
+				$schedule_view = 'policies/print/schedule_ENG_EAR';
 				break;
 
 			// ENGINEERING - MACHINE BREAKDOWN

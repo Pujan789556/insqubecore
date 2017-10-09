@@ -71,6 +71,15 @@ else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
 }
 
 /**
+ * ENGINEERING - ERECTION ALL RISKS
+ * ---------------------------------------------
+ */
+else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+{
+    $this->load->view('objects/snippets/_popup_eng_ear', $data);
+}
+
+/**
  * ENGINEERING - MACHINE BREAKDOWN
  * ---------------------------------------------
  */

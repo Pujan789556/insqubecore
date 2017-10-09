@@ -100,6 +100,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * ENGINEERING - ERECTION ALL RISKS
+         * ---------------------------------------------
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+        {
+            $snippet = _OBJ_ENG_EAR_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * ENGINEERING - MACHINE BREAKDOWN
          * ---------------------------------------------
          */
@@ -202,6 +211,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
             $snippet = _OBJ_ENG_EEI_select_text($record);
+        }
+
+        /**
+         * ENGINEERING - ERECTION ALL RISKS
+         * ---------------------------------------------
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+        {
+            $snippet = _OBJ_ENG_EAR_select_text($record);
         }
 
         /**
@@ -315,6 +333,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * ENGINEERING - ERECTION ALL RISKS
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+        {
+            $v_rules = _OBJ_ENG_EAR_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * ENGINEERING - MACHINE BREAKDOWN
          * ---------------------------------------------
          */
@@ -418,6 +445,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
             $attribute_form = 'objects/forms/_form_object_eng_eei';
+        }
+
+        /**
+         * ENGINEERING - ERECTION ALL RISKS
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_eng_ear';
         }
 
         /**
@@ -673,6 +709,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
             $amt_sum_insured = _OBJ_ENG_EEI_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * ENGINEERING - ERECTION ALL RISKS
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+        {
+            $amt_sum_insured = _OBJ_ENG_EAR_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
