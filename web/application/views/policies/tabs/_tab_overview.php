@@ -26,7 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-sm-6 col-md-8">
+		<div class="col-sm-6 col-md-7">
 			<?php
 			/**
 			 * Policy Overvivew Card
@@ -42,7 +42,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<h3 class="text-red">@TODO: Current RI Distribution Table</h3>
 			<h3 class="text-red">@TODO: Fresh Policy सम्पुष्टि विवरण</h3>
 		</div>
-		<div class="col-sm-6 col-md-4 no-padding-l-col-sm no-padding-l-col-md">
+		<div class="col-sm-6 col-md-5 no-padding-l-col-sm no-padding-l-col-md">
 			<?php
 
 			/**
