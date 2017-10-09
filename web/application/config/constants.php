@@ -178,12 +178,33 @@ define('IQB_COMPANY_ID_BEEMA_SAMITI',  1);
 |--------------------------------------------------------------------------
 |
 */
-define('IQB_MASTER_PORTFOLIO_AGRICULTURE_ID',  1);
-define('IQB_MASTER_PORTFOLIO_ENGINEERING_ID',  2);
-define('IQB_MASTER_PORTFOLIO_FIRE_ID',         3);
-define('IQB_MASTER_PORTFOLIO_MARINE_ID',       4);
-define('IQB_MASTER_PORTFOLIO_MISC_ID',         5);
-define('IQB_MASTER_PORTFOLIO_MOTOR_ID',        6);
+define('IQB_MASTER_PORTFOLIO_AGR_ID',  		1);
+define('IQB_MASTER_PORTFOLIO_ENG_ID',  		2);
+define('IQB_MASTER_PORTFOLIO_FIRE_ID',      3);
+define('IQB_MASTER_PORTFOLIO_MARINE_ID',    4);
+define('IQB_MASTER_PORTFOLIO_MISC_ID',      5);
+define('IQB_MASTER_PORTFOLIO_MOTOR_ID',     6);
+
+
+/*
+|--------------------------------------------------------------------------
+| AGRICULTURE PORTFOLIO - SUB-PORTFOLIOS IDS
+|--------------------------------------------------------------------------
+|
+| WARNING: Should be exactly same as in database, add here if you add in db
+|
+*/
+define('IQB_SUB_PORTFOLIO_AGR_CTL_ID', 	9); 	// Cattle
+define('IQB_SUB_PORTFOLIO_AGR_FISH_ID', 10); 	// Fish
+define('IQB_SUB_PORTFOLIO_AGR_FRT_ID', 	11); 	// Fruit
+define('IQB_SUB_PORTFOLIO_AGR_MSRM_ID', 12); 	// Mushroom
+define('IQB_SUB_PORTFOLIO_AGR_PTO_ID', 	13); 	// Potato
+define('IQB_SUB_PORTFOLIO_AGR_PLTR_ID', 14); 	// Poultry
+define('IQB_SUB_PORTFOLIO_AGR_RICE_ID', 15); 	// Rice
+define('IQB_SUB_PORTFOLIO_AGR_VEG_ID', 	16); 	// Vegetable
+define('IQB_SUB_PORTFOLIO_AGR_WHT_ID', 	17); 	// Wheat
+define('IQB_SUB_PORTFOLIO_AGR_MAIZ_ID', 18); 	// Maize
+define('IQB_SUB_PORTFOLIO_AGR_BEE_ID', 	19); 	// Bee
 
 
 /*
@@ -223,17 +244,17 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__ENG',  [
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_FIRE_ELECTRICAL_EQUIPMENT_ID', 33);
-define('IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID', 34);
-define('IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID', 35);
-define('IQB_SUB_PORTFOLIO_FIRE_LOP_ID', 36);
+define('IQB_SUB_PORTFOLIO_FIRE_ELECTRICAL_EQUIPMENT_ID', 	33); 	// Electrical Equipment
+define('IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID', 				34); 	// Fire General
+define('IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID', 			35);	// Householder Policy
+define('IQB_SUB_PORTFOLIO_FIRE_LOP_ID', 					36); 	// Loss of Profit - Fire
 
 // SUB PORTFOLIO LIST
 define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE',  [
 	IQB_SUB_PORTFOLIO_FIRE_ELECTRICAL_EQUIPMENT_ID 	=> 'Electrical Equipment',
-	IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID 			=> 'Fire General',
-	IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID 		=> "Householder's Policy (FIRE)",
-	IQB_SUB_PORTFOLIO_FIRE_LOP_ID 				=> "Loss of Profit (FIRE)"
+	IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID 				=> 'Fire General',
+	IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID 			=> "Householder's Policy (FIRE)",
+	IQB_SUB_PORTFOLIO_FIRE_LOP_ID 					=> "Loss of Profit (FIRE)"
 ]);
 
 
@@ -245,11 +266,11 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE',  [
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_MARINE_AIR_TRANSIT_ID', 37);
-define('IQB_SUB_PORTFOLIO_MARINE_MARINE_TRANSIT_ID', 38);
-define('IQB_SUB_PORTFOLIO_MARINE_OPEN_MARINE_ID', 39);
-define('IQB_SUB_PORTFOLIO_MARINE_ROAD_AIR_TRANSIT_ID', 40);
-define('IQB_SUB_PORTFOLIO_MARINE_ROAD_TANSIT_ID', 41);
+define('IQB_SUB_PORTFOLIO_MARINE_AIR_TRANSIT_ID', 		37); 	// Air Transit
+define('IQB_SUB_PORTFOLIO_MARINE_MARINE_TRANSIT_ID', 	38); 	// Marine Transit
+define('IQB_SUB_PORTFOLIO_MARINE_OPEN_MARINE_ID', 		39);	// Open Marine
+define('IQB_SUB_PORTFOLIO_MARINE_ROAD_AIR_TRANSIT_ID', 	40);	// Road Air Transit
+define('IQB_SUB_PORTFOLIO_MARINE_ROAD_TANSIT_ID', 		41); 	// Marine Roat Transit
 
 // SUB PORTFOLIO LIST
 define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE',  [
@@ -269,9 +290,9 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE',  [
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_MOTORCYCLE_ID',          		64);
-define('IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID',     		65);
-define('IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID',  		66);
+define('IQB_SUB_PORTFOLIO_MOTORCYCLE_ID',          		64); 	// Motorcycle
+define('IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID',     		65); 	// Private Vehicle
+define('IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID',  		66);	// Commercial Vehicle
 
 // SUB PORTFOLIO LIST
 define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR',  [
