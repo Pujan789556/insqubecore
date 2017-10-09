@@ -643,6 +643,15 @@ class Policy_txn extends MY_Controller
 		        }
 
 		        /**
+		         * ENGINEERING - CONTRACTOR ALL RISK
+		         * ---------------------------------------------
+		         */
+		        else if( $policy_record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+		        {
+		            $done = $this->__save_premium_ENG_CAR( $policy_record, $txn_record );
+		        }
+
+		        /**
 		         * ENGINEERING - CONTRACTOR PLANT & MACHINARY
 		         * ------------------------------------------
 		         */
@@ -1665,6 +1674,243 @@ class Policy_txn extends MY_Controller
 		// --------------------------------------------------------------------
 
 		/**
+		 * Update Policy Premium Information - ENGINEERING - CONTRACTOR ALL RISK
+		 *
+		 *	!!! Important: Fresh/Renewal Only
+		 *
+		 * @param object $policy_record  	Policy Record
+		 * @param object $txn_record 	 	Policy Transaction Record
+		 * @return json
+		 */
+		private function __save_premium_ENG_CAR($policy_record, $txn_record)
+		{
+			/**
+			 * Form Submitted?
+			 */
+			$return_data = [];
+
+			if( $this->input->post() )
+			{
+
+				/**
+				 * Policy Object Record
+				 */
+				$policy_object 		= $this->__get_policy_object($policy_record);
+
+				/**
+				 * Portfolio Setting Record
+				 */
+				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+
+				/**
+				 * Validation Rules for Form Processing
+				 */
+				$this->load->helper('ph_eng_car');
+				$validation_rules = _TXN_ENG_CAR_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
+	            $this->form_validation->set_rules($validation_rules);
+
+	            // echo '<pre>';print_r($validation_rules);exit;
+
+				if($this->form_validation->run() === TRUE )
+	        	{
+
+					// Premium Data
+					$post_data = $this->input->post();
+
+					/**
+					 * Do we have a valid method?
+					 */
+					try{
+
+						/**
+						 * Compute Premium From Post Data
+						 * ------------------------------
+						 */
+						$cost_calculation_table 	= [];
+						$premium_computation_table 	= [];
+
+
+						/**
+						 * Extract Information from Object
+						 * 	A. Object Atrributes
+						 * 	B. Sum Insured Amount
+						 * 	C. Third party liability Amount
+						 */
+						$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+						$SI 				= floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
+						$TPL_AMOUNT 		= _OBJ_ENG_CAR_compute_tpl_amount($object_attributes->third_party->limit ?? []);
+
+
+						/**
+						 * Get post premium Data
+						 * 	a. Default Premium (All items in total)
+						 * 	b. Third party Rate
+						 * 	c. Pool Premium Flag
+						 * 	d. Other common data
+						 */
+						$post_premium 				= $post_data['premium'];
+						$items_premium 				= _OBJ_ENG_CAR_compute_premium_total_by_items($post_premium['items'], $object_attributes->items);
+						$tp_rate 					= floatval($post_premium['tp_rate']);
+						$flag_pool_risk 			= $post_premium['flag_pool_risk'] ?? 0;
+
+
+						// A = Default Premium for all item
+						$A = $items_premium;
+						$cost_calculation_table[] = [
+							'label' => "A. Gross Premium",
+							'value' => $A
+						];
+
+						// B = TP X TP Rate %
+						$B = ( $TPL_AMOUNT * $tp_rate ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "B. Third Party Rate ({$tp_rate}%)",
+							'value' => $B
+						];
+
+						// C = A + B
+						$C = $A + $B;
+						$cost_calculation_table[] = [
+							'label' => "C. Total Gross Premium",
+							'value' => $C
+						];
+
+
+						/**
+						 * Direct Discount or Agent Commission?
+						 * ------------------------------------
+						 * Agent Commission or Direct Discount
+						 * applies on NET Premium
+						 */
+						$D = 0.00;
+						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+						{
+							// Direct Discount
+							$D = ( $C * $pfs_record->direct_discount ) / 100.00 ;
+
+							// NULLIFY Commissionable premium, Agent Commission
+							$commissionable_premium = NULL;
+							$agent_commission = NULL;
+						}
+						else
+						{
+							$commissionable_premium = $C;
+							$agent_commission 		= ( $C * $pfs_record->agent_commission ) / 100.00;
+						}
+
+						$cost_calculation_table[] = [
+							'label' => "D. Direct discount ({$pfs_record->direct_discount}%)",
+							'value' => $D
+						];
+
+						// E = C - D
+						$E = $C - $D;
+						$cost_calculation_table[] = [
+							'label' => "E. (C - D)",
+							'value' => $E
+						];
+
+						/**
+						 * Pool Premium
+						 */
+						$POOL_PREMIUM = 0.00;
+						if($flag_pool_risk)
+						{
+							// Pool Premium = x% of Default Premium (A - 4.3 Debris removal (of insured property))
+							$pool_rate = floatval($pfs_record->pool_premium);
+
+
+							// Debris Premium
+							$debris_key 	= array_search('i4.3', $object_attributes->items->sn); // $key = 2;
+							$si_debris 		= floatval($object_attributes->items->sum_insured[$debris_key]);
+							$debris_rate 	= floatval($post_premium['items']['rate'][$debris_key]);
+							$debris_premium = ($si_debris * $debris_rate ) / 100.00;
+
+							$POOL_PREMIUM = ( ($A - $debris_premium) * $pool_rate ) / 100.00;
+						}
+						$cost_calculation_table[] = [
+							'label' => "F. Pool Premium",
+							'value' => $POOL_PREMIUM
+						];
+
+						$NET_PREMIUM = $E + $POOL_PREMIUM;
+						$cost_calculation_table[] = [
+							'label' => "G. Net Premium",
+							'value' => $NET_PREMIUM
+						];
+
+
+						/**
+						 * Compute VAT
+						 */
+						$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
+						$this->load->helper('account');
+						$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+						/**
+						 * Prepare Transactional Data
+						 *
+						 * @TODO: What is Pool Premium Amount?
+						 */
+						$txn_data = [
+							'amt_total_premium' 	=> $NET_PREMIUM,
+							'amt_pool_premium' 		=> $POOL_PREMIUM,
+							'amt_commissionable'	=> $commissionable_premium,
+							'amt_agent_commission'  => $agent_commission,
+							'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+							'amt_vat' 				=> $amount_vat,
+							'txn_details' 			=> $post_data['txn_details'],
+							'remarks' 				=> $post_data['remarks'],
+						];
+
+
+						/**
+						 * Premium Computation Table
+						 * -------------------------
+						 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+						 */
+						$premium_computation_table = json_encode($post_premium);
+						$txn_data['premium_computation_table'] = $premium_computation_table;
+
+
+						/**
+						 * Cost Calculation Table
+						 */
+						$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+						return $this->policy_txn_model->save($txn_record->id, $txn_data);
+
+
+						/**
+						 * @TODO
+						 *
+						 * 1. Build RI Distribution Data For This Policy
+						 * 2. RI Approval Constraint for this Policy
+						 */
+
+					} catch (Exception $e){
+
+						return $this->template->json([
+							'status' 	=> 'error',
+							'message' 	=> $e->getMessage()
+						], 404);
+					}
+	        	}
+	        	else
+	        	{
+	        		return $this->template->json([
+						'status' 	=> 'error',
+						'title' 	=> 'Validation Error!',
+						'message' 	=> validation_errors()
+					]);
+	        	}
+			}
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
 		 * Update Policy Premium Information - ENGINEERING - CONTRACTOR PLANT & MACHINARY
 		 *
 		 *	!!! Important: Fresh/Renewal Only
@@ -2424,6 +2670,15 @@ class Policy_txn extends MY_Controller
 			}
 
 			/**
+	         * ENGINEERING - CONTRACTOR ALL RISK
+	         * ---------------------------------------------
+	         */
+	        else if( $policy_record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+	        {
+	            $goodies = $this->__premium_goodies_ENG_CAR($policy_record, $policy_object);
+	        }
+
+			/**
 			 * CONTRACTOR PLANT & MACHINARY (ENGINEERING)
 			 * -------------------------------------------
 			 */
@@ -2627,6 +2882,42 @@ class Policy_txn extends MY_Controller
 
 			// Let's Get the Validation Rules
 			$validation_rules = _TXN_ENG_BL_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
+
+			// echo '<pre>'; print_r($validation_rules);exit;
+
+			// Return the goodies
+			return  [
+				'validation_rules' 	=> $validation_rules,
+				'tariff_record' 	=> NULL
+			];
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Get Policy Policy Transaction Goodies for Boiler Explosion
+		 *
+		 * Portfolio 		: ENGINEERING
+		 * Sub-Portfolio	: CONTRACTOR ALL RISK
+		 *
+		 * Get the following goodies for the Motor Portfolio
+		 * 		1. Validation Rules
+		 * 		2. Tariff Record if Applies
+		 *
+		 * @param object $policy_record Policy Record
+		 * @param object $policy_object Policy Object Record
+		 *
+		 * @return	array
+		 */
+		private function __premium_goodies_ENG_CAR($policy_record, $policy_object)
+		{
+			$this->load->helper('ph_eng_car');
+
+			// Portfolio Setting Record
+			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+			// Let's Get the Validation Rules
+			$validation_rules = _TXN_ENG_CAR_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
 
 			// echo '<pre>'; print_r($validation_rules);exit;
 

@@ -44,6 +44,15 @@ else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
 }
 
 /**
+ * ENGINEERING - CONTRACTOR ALL RISK
+ * ---------------------------------------------
+ */
+else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+{
+    $this->load->view('objects/snippets/_popup_eng_car', $data);
+}
+
+/**
  * ENGINEERING - CONTRACTOR PLANT & MACHINARY
  * ------------------------------------------
  */

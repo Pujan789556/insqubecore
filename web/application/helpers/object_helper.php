@@ -73,6 +73,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * ENGINEERING - CONTRACTOR ALL RISK
+         * ---------------------------------------------
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+        {
+            $snippet = _OBJ_ENG_CAR_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * ENGINEERING - CONTRACTOR PLANT & MACHINARY
          * ------------------------------------------
          */
@@ -166,6 +175,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
             $snippet = _OBJ_ENG_BL_select_text($record);
+        }
+
+        /**
+         * ENGINEERING - CONTRACTOR ALL RISK
+         * ---------------------------------------------
+         */
+        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+        {
+            $snippet = _OBJ_ENG_CAR_select_text($record);
         }
 
         /**
@@ -269,6 +287,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * ENGINEERING - CONTRACTOR ALL RISK
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+        {
+            $v_rules = _OBJ_ENG_CAR_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * ENGINEERING - CONTRACTOR PLANT & MACHINARY
          * ------------------------------------------
          * Sub-portfolio wise Validation Rules
@@ -362,6 +389,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
             $attribute_form = 'objects/forms/_form_object_eng_bl';
+        }
+
+        /**
+         * ENGINEERING - CONTRACTOR ALL RISK
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_eng_car';
         }
 
         /**
@@ -608,6 +644,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
             $amt_sum_insured = _OBJ_ENG_BL_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * ENGINEERING - CONTRACTOR ALL RISK
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+        {
+            $amt_sum_insured = _OBJ_ENG_CAR_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

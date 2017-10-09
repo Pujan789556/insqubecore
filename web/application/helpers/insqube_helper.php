@@ -772,6 +772,16 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * ENGINEERING - CONTRACTOR ALL RISK
+         * ---------------------------------------------
+         * Engineering Sub Portfolio Helper Functions
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+        {
+            $CI->load->helper('ph_eng_car');
+        }
+
+        /**
          * ENGINEERING - CONTRACTOR PLANT & MACHINARY
          * ------------------------------------------
          * Engineering Sub Portfolio Helper Functions

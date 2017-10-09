@@ -469,6 +469,17 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
         }
 
         /**
+         * ENGINEERING - CONTRACTOR ALL RISK
+         * ---------------------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+        {
+            $view_prefix = $view_for === 'print' ? '_print' : '';
+			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_CAR";
+        }
+
+        /**
          * ENGINEERING - CONTRACTOR PLANT & MACHINARY
          * ------------------------------------------
          * Sub-portfolio wise view
@@ -562,6 +573,16 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_ENG_BL';
+        }
+
+        /**
+         * ENGINEERING - CONTRACTOR ALL RISK
+         * ---------------------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_ENG_CAR';
         }
 
         /**
@@ -981,6 +1002,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			// ENGINEERING - BOILER EXPLOSION
 	        case IQB_SUB_PORTFOLIO_ENG_BL_ID:
 	        	$schedule_view = 'policies/print/schedule_ENG_BL';
+				break;
+
+			// ENGINEERING - CONTRACTOR ALL RISK
+			case IQB_SUB_PORTFOLIO_ENG_CAR_ID:
+				$schedule_view = 'policies/print/schedule_ENG_CAR';
 				break;
 
 			// ENGINEERING - CONTRACTOR PLANT & MACHINARY

@@ -1,11 +1,11 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Schedule Print : ENGINEERING - BOILER EXPLOSION
+ * Schedule Print : ENGINEERING - CONTRACTOR ALL RISK
  */
-$this->load->helper('ph_eng_bl');
+$this->load->helper('ph_eng_car');
 
 $object_attributes      = json_decode($record->object_attributes);
-$schedule_table_title   = 'Boiler Explosion (Schedule)';
+$schedule_table_title   = "Contractor's All Risks (Schedule)";
 
 ?>
 
@@ -69,7 +69,7 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                 </tr>
                 <tr>
                     <td>
-                        <strong>Name and address of Insured</strong><br/>
+                        <strong>Name and address of Insured (Contractor)</strong><br/>
                         <?php
                         /**
                          * If Policy Object is Financed or on Loan, The financial Institute will be "Insured Party"
@@ -92,8 +92,16 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                             echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                         }
                         ?>
+                        <br/><strong>Name and address of Principal</strong><br/>
+                        <?php echo nl2br(htmlspecialchars($object_attributes->principal)) ?>
                     </td>
                     <td>
+                        <strong>Contract Title:</strong><br>
+                        <?php echo nl2br(htmlspecialchars($object_attributes->contract_title)) ?><br><br>
+
+                        <strong>Contract No.:</strong><br>
+                        <?php echo nl2br(htmlspecialchars($object_attributes->contract_no)) ?><br><br>
+
                         <strong>Location of Risk:</strong><br>
                         <?php echo nl2br(htmlspecialchars($object_attributes->risk_locaiton)) ?>
                     </td>
@@ -102,8 +110,8 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                 <tr>
                     <td>
                         <strong>Period of Insurance:</strong><br>
-                        From: : <?php echo $record->start_date ?><br>
-                        To: : <?php echo $record->end_date ?>
+                        From: <strong><?php echo $record->start_date ?></strong><br>
+                        To: <strong><?php echo $record->end_date ?></strong> <em>plus <strong><?php echo $object_attributes->maintenance_period ?></strong> months maintenance period.</em>
                     </td>
                     <td>
                         <table class="table table-condensed no-border">
@@ -128,7 +136,7 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                     </td>
                 </tr>
                 <?php
-                $form_elements = _OBJ_ENG_BL_validation_rules($record->portfolio_id);
+                $form_elements = _OBJ_ENG_CAR_validation_rules($record->portfolio_id);
 
                 /**
                  * Item List
@@ -136,10 +144,13 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                 $section_elements   = $form_elements['items'];
                 $items              = $object_attributes->items ?? NULL;
                 $item_count         = count( $items->sum_insured ?? [] );
+
+                $insured_items_dropdown = _OBJ_ENG_CAR_insured_items_dropdown(true, false);
+                $insured_items_dropdown_g = _OBJ_ENG_CAR_insured_items_dropdown(false, true);
                 ?>
                 <tr>
                     <td colspan="2">
-                        <strong>1. BOILER AND PRESSURE PLANT</strong><br>
+                        <strong>SECTION I - MATERIAL DAMAGE</strong><br>
                         <table class="table table-condensed">
                             <thead>
                                 <tr>
@@ -148,24 +159,39 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                                     <?php endforeach; ?>
                                 </tr>
                             </thead>
-
                             <tbody>
-                                <?php for ($i=0; $i < $item_count; $i++): ?>
-                                    <tr>
-                                        <?php foreach($section_elements as $elem):
-                                            $key =  $elem['_key'];
-                                            $value = $items->{$key}[$i];
-                                        ?>
+                                <?php
+                                unset($section_elements[0]); // remove sn field
+                                $i = 0;
+                                foreach($insured_items_dropdown_g as $title => $groups): ?>
 
-                                            <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                                <?php echo $value?>
-                                            </td>
-                                        <?php endforeach ?>
-                                    </tr>
-                                <?php endfor ?>
+                                    <tr><th colspan="3" class="text-left"><?php echo $title ?></th></tr>
+
+                                    <?php foreach($groups as $sn=>$label ): ?>
+                                        <tr>
+                                            <td><?php echo $label ?></td>
+                                            <?php foreach($section_elements as $elem):
+                                                    $key =  $elem['_key'];
+                                                    $value = $items->{$key}[$i];
+                                                ?>
+                                                    <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : 'text-left' ?>>
+                                                        <?php echo $value?>
+                                                    </td>
+                                                <?php endforeach ?>
+                                        </tr>
+                                    <?php
+                                    $i++;
+                                    endforeach;
+                                endforeach; ?>
                                 <tr>
-                                    <td colspan="4" class="text-bold">Total Sum Insured Amount(Rs.)</td>
+                                    <td class="text-bold">Total Sum Insured Amount(Rs.)</td>
                                     <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2, '.', '') ?></td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td>Risks - AOG</td>
+                                    <td class="text-right"><?php echo number_format($record->object_amt_sum_insured, 2, '.', '') ?></td>
+                                    <td><?php echo $attributes->risk->deductibles; ?></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -178,7 +204,7 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                         $items              = $object_attributes->third_party ?? NULL;
                         $item_count         = count( $items->limit ?? [] );
                         ?>
-                        <strong>2. THIRD PARTY LIABILITY</strong><br>
+                        <strong>SECTION II - THIRD PARTY LIABILITY</strong><br>
                         <table class="table table-condensed">
                             <thead>
                                 <tr>
@@ -190,7 +216,7 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
 
                             <tbody>
                                 <?php
-                                $total_tp_liability =  _OBJ_ENG_BL_compute_tpl_amount($object_attributes->third_party->limit ?? []);
+                                $total_tp_liability =  _OBJ_ENG_CAR_compute_tpl_amount($object_attributes->third_party->limit ?? []);
                                 for ($i=0; $i < $item_count; $i++): ?>
                                     <tr>
                                         <?php
