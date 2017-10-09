@@ -427,6 +427,9 @@ if ( ! function_exists('_OBJ_ENG_BL_compute_tpl_amount'))
 	{
 		$total_tpl_amount 	= 0.00;
 
+		// We do not compute 1.2 on Total ( which is the second item on the list)
+		unset($data[1]);
+
 		foreach($data as $si_per_item)
 		{
 			// Clean all formatting ( as data can come from excel sheet with comma on thousands eg. 10,00,000.00 )
