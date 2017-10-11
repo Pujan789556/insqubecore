@@ -85,9 +85,17 @@ class tariff_agriculture_model extends MY_Model
              */
             'tariff' => [
                 [
-                    'field' => 'tariff[type][]',
-                    '_key'  => 'type',
-                    'label' => 'Type/Category',
+                    'field' => 'tariff[code][]',
+                    '_key'  => 'code',
+                    'label' => 'Type/Category Code',
+                    'rules' => 'trim|required|alpha|strtoupper|max_length[20]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[name][]',
+                    '_key'  => 'name',
+                    'label' => 'Type/Category Name',
                     'rules' => 'trim|required|htmlspecialchars|max_length[100]',
                     '_type'     => 'text',
                     '_required' => true
@@ -196,27 +204,58 @@ class tariff_agriculture_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    // public function get_single($fiscal_yr_id, $portfolio_id)
-    // {
-    //     /**
-    //      * Get Cached Result, If no, cache the query result
-    //      */
-    //     $cache_name = 'trfagrs_' . $fiscal_yr_id . '_' . $portfolio_id;
-    //     $row        = $this->get_cache($cache_name);
-    //     if(!$row)
-    //     {
-    //         $where = [
-    //             'portfolio_id'  => $portfolio_id,
-    //             'fiscal_yr_id'  => $fiscal_yr_id,
-    //         ];
-    //         $row = $this->db->select('PTAGR.*')
-    //                     ->from($this->table_name . ' PTAGR')
-    //                     ->where($where)
-    //                     ->get()->row();
-    //         $this->write_cache($row, $cache_name, CACHE_DURATION_DAY);
-    //     }
-    //     return $row;
-    // }
+    /**
+     * Get Type Dropdown for Given Fiscal Year/Portfolio
+     *
+     * @param int $fiscal_yr_id
+     * @param int $portfolio_id
+     * @return array
+     */
+    public function type_dropdown($fiscal_yr_id, $portfolio_id)
+    {
+        $dropdown   = [];
+        $row        = $this->get_by_fy_portfolio($fiscal_yr_id, $portfolio_id);
+        $tariff     = json_decode($row->tariff ?? '[]');
+        foreach($tariff as $st)
+        {
+            $dropdown[$st->code] = $st->name;
+        }
+        return $dropdown;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Record for Given Fiscal Year/Portfolio
+     *
+     * @param int $fiscal_yr_id
+     * @param int $portfolio_id
+     * @return object
+     */
+    public function get_by_fy_portfolio($fiscal_yr_id, $portfolio_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'trfagr_bfp_' . $fiscal_yr_id . '_' . $portfolio_id;
+        $row        = $this->get_cache($cache_name);
+
+        if(!$row)
+        {
+            $where = [
+                'portfolio_id'  => $portfolio_id,
+                'fiscal_yr_id'  => $fiscal_yr_id,
+            ];
+            $row = $this->db->select('PTAGR.*')
+                        ->from($this->table_name . ' PTAGR')
+                        ->where($where)
+                        ->get()->row();
+
+            $this->write_cache($row, $cache_name, CACHE_DURATION_DAY);
+        }
+        return $row;
+    }
+
     // ----------------------------------------------------------------
 
 
@@ -240,7 +279,7 @@ class tariff_agriculture_model extends MY_Model
     {
         $cache_names = [
             'trfagr_index_list',
-            'trfagrs_*'
+            'trfagr_bfp_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

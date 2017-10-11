@@ -443,19 +443,33 @@ class Tariff extends MY_Controller
 
             if( $this->form_validation->run() === TRUE )
             {
-                $data = $this->input->post();
+                $data   = $this->input->post();
+                $tariff = $data['tariff'];
+
+                /**
+                 * Check if we have duplicate code?
+                 */
+                if( count($tariff['code']) != count(array_unique($tariff['code'])) )
+                {
+                    return $this->template->json([
+                        'status'        => 'error',
+                        'message'       => 'Code must be unique.'
+                    ]);
+                }
+
 
                 $post_data = [];
+
                 /**
                  * Prepare Tariff
                  */
-                $tariff         = $data['tariff'];
-                $tariff_count   = count($tariff['type']);
+                $tariff_count   = count($tariff['name']);
                 $tariff_data    = [];
                 for($i = 0; $i < $tariff_count; $i++)
                 {
                     $single_tarrif = [
-                        'type'      => $tariff['type'][$i],
+                        'code'      => strtoupper($tariff['code'][$i]),
+                        'name'      => $tariff['name'][$i],
                         'rate'      => $tariff['rate'][$i],
                     ];
 
