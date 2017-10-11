@@ -194,17 +194,22 @@ define('IQB_MASTER_PORTFOLIO_MOTOR_ID',     6);
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_AGR_CTL_ID', 	9); 	// Cattle
-define('IQB_SUB_PORTFOLIO_AGR_FISH_ID', 10); 	// Fish
-define('IQB_SUB_PORTFOLIO_AGR_FRT_ID', 	11); 	// Fruit
-define('IQB_SUB_PORTFOLIO_AGR_MSRM_ID', 12); 	// Mushroom
-define('IQB_SUB_PORTFOLIO_AGR_PTO_ID', 	13); 	// Potato
-define('IQB_SUB_PORTFOLIO_AGR_PLTR_ID', 14); 	// Poultry
-define('IQB_SUB_PORTFOLIO_AGR_RICE_ID', 15); 	// Rice
-define('IQB_SUB_PORTFOLIO_AGR_VEG_ID', 	16); 	// Vegetable
-define('IQB_SUB_PORTFOLIO_AGR_WHT_ID', 	17); 	// Wheat
-define('IQB_SUB_PORTFOLIO_AGR_MAIZ_ID', 18); 	// Maize
-define('IQB_SUB_PORTFOLIO_AGR_BEE_ID', 	19); 	// Bee
+define('IQB_SUB_PORTFOLIO_AGR_CROP_ID', 9); 	// Crop
+define('IQB_SUB_PORTFOLIO_AGR_CTL_ID', 	10); 	// Cattle
+define('IQB_SUB_PORTFOLIO_AGR_PLTR_ID', 11); 	// Poultry
+define('IQB_SUB_PORTFOLIO_AGR_FISH_ID', 12); 	// Fish (Pisciculture)
+define('IQB_SUB_PORTFOLIO_AGR_BEE_ID', 	13); 	// Bee (Apiculture)
+
+// SUB PORTFOLIO LIST - AGRICULTURE - CROP PORTFOLIOS
+define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR',  [
+
+	IQB_SUB_PORTFOLIO_AGR_CROP_ID 	=> 'Crop',
+	IQB_SUB_PORTFOLIO_AGR_CTL_ID 	=> 'Cattle',
+	IQB_SUB_PORTFOLIO_AGR_PLTR_ID 	=> 'Poultry',
+	IQB_SUB_PORTFOLIO_AGR_FISH_ID 	=> 'Fish',
+	IQB_SUB_PORTFOLIO_AGR_BEE_ID 	=> 'Bee'
+]);
+
 
 
 /*
@@ -215,13 +220,13 @@ define('IQB_SUB_PORTFOLIO_AGR_BEE_ID', 	19); 	// Bee
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_ENG_BL_ID', 	26); 	// Boiler Explosion
-define('IQB_SUB_PORTFOLIO_ENG_CAR_ID', 	27);	// Contractor All Risks
-define('IQB_SUB_PORTFOLIO_ENG_CPM_ID', 	28); 	// Contractor P & M
-define('IQB_SUB_PORTFOLIO_ENG_EEI_ID', 	29);	// Electronic Equipment Insurance
-define('IQB_SUB_PORTFOLIO_ENG_EAR_ID', 	30); 	// Erection All Risks
-define('IQB_SUB_PORTFOLIO_ENG_MB_ID',  	31); 	// Machine Breakdown
-define('IQB_SUB_PORTFOLIO_ENG_LOP_ID', 	32); 	// Loss of Profit
+define('IQB_SUB_PORTFOLIO_ENG_BL_ID', 	20); 	// Boiler Explosion
+define('IQB_SUB_PORTFOLIO_ENG_CAR_ID', 	21);	// Contractor All Risks
+define('IQB_SUB_PORTFOLIO_ENG_CPM_ID', 	22); 	// Contractor P & M
+define('IQB_SUB_PORTFOLIO_ENG_EEI_ID', 	23);	// Electronic Equipment Insurance
+define('IQB_SUB_PORTFOLIO_ENG_EAR_ID', 	24); 	// Erection All Risks
+define('IQB_SUB_PORTFOLIO_ENG_MB_ID',  	25); 	// Machine Breakdown
+define('IQB_SUB_PORTFOLIO_ENG_LOP_ID', 	26); 	// Loss of Profit
 
 
 // SUB PORTFOLIO LIST
@@ -244,10 +249,10 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__ENG',  [
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_FIRE_ELECTRICAL_EQUIPMENT_ID', 	33); 	// Electrical Equipment
-define('IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID', 				34); 	// Fire General
-define('IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID', 			35);	// Householder Policy
-define('IQB_SUB_PORTFOLIO_FIRE_LOP_ID', 					36); 	// Loss of Profit - Fire
+define('IQB_SUB_PORTFOLIO_FIRE_ELECTRICAL_EQUIPMENT_ID', 	27); 	// Electrical Equipment
+define('IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID', 				28); 	// Fire General
+define('IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID', 			29);	// Householder Policy
+define('IQB_SUB_PORTFOLIO_FIRE_LOP_ID', 					30); 	// Loss of Profit - Fire
 
 // SUB PORTFOLIO LIST
 define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE',  [
@@ -266,11 +271,11 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE',  [
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_MARINE_AIR_TRANSIT_ID', 		37); 	// Air Transit
-define('IQB_SUB_PORTFOLIO_MARINE_MARINE_TRANSIT_ID', 	38); 	// Marine Transit
-define('IQB_SUB_PORTFOLIO_MARINE_OPEN_MARINE_ID', 		39);	// Open Marine
-define('IQB_SUB_PORTFOLIO_MARINE_ROAD_AIR_TRANSIT_ID', 	40);	// Road Air Transit
-define('IQB_SUB_PORTFOLIO_MARINE_ROAD_TANSIT_ID', 		41); 	// Marine Roat Transit
+define('IQB_SUB_PORTFOLIO_MARINE_AIR_TRANSIT_ID', 		31); 	// Air Transit
+define('IQB_SUB_PORTFOLIO_MARINE_MARINE_TRANSIT_ID', 	32); 	// Marine Transit
+define('IQB_SUB_PORTFOLIO_MARINE_OPEN_MARINE_ID', 		33);	// Open Marine
+define('IQB_SUB_PORTFOLIO_MARINE_ROAD_AIR_TRANSIT_ID', 	34);	// Road Air Transit
+define('IQB_SUB_PORTFOLIO_MARINE_ROAD_TANSIT_ID', 		35); 	// Marine Roat Transit
 
 // SUB PORTFOLIO LIST
 define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE',  [
@@ -290,9 +295,9 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE',  [
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_MOTORCYCLE_ID',          		64); 	// Motorcycle
-define('IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID',     		65); 	// Private Vehicle
-define('IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID',  		66);	// Commercial Vehicle
+define('IQB_SUB_PORTFOLIO_MOTORCYCLE_ID',          		58); 	// Motorcycle
+define('IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID',     		59); 	// Private Vehicle
+define('IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID',  		60);	// Commercial Vehicle
 
 // SUB PORTFOLIO LIST
 define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR',  [
