@@ -732,11 +732,21 @@ if ( ! function_exists('load_portfolio_helper'))
         $portfolio_id = (int)$portfolio_id;
 
         /**
+         * AGRICULTURE - CROP SUB-PORTFOLIOS
+         * ---------------------------------
+         * We have a single helper file for all crop sub-portfolios
+         */
+        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+        {
+            $CI->load->helper('ph_agr_crop');
+        }
+
+        /**
          * MOTOR
          * -----
          * We have a single helper file for motor portfolio
          */
-        if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
         {
             $CI->load->helper('ph_motor');
         }

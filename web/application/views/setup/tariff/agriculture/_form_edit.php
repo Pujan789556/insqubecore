@@ -48,7 +48,7 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
         </div>
         <?php
         $section_elements   = $form_elements['tariff'];
-        $tariff = $record->tariff ? json_decode($record->tariff, TRUE) : NULL;
+        $tariff = $record->tariff ? json_decode($record->tariff) : NULL;
         ?>
         <table class="table table-bordered table-condensed no-margin">
             <thead>
@@ -71,7 +71,7 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
                              */
                             $this->load->view('templates/_common/_form_components_table', [
                                 'form_elements' => $section_elements,
-                                'form_record'   => (object)$single_tarrif
+                                'form_record'   => $single_tarrif
                             ]);
 
                             if($i == 0):?>

@@ -4,14 +4,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Object Snippet: Object Popover
 */
 
-$data = ['record' => $record, 'ref' => $ref ?? ''];
+$data           = ['record' => $record, 'ref' => $ref ?? ''];
+$portfolio_id   = (int)$record->portfolio_id;
+
+/**
+ * AGRICULTURE - CROP SUB-PORTFOLIOS
+ * ---------------------------------
+ * For all type of crop portfolios, we have same snippet
+ */
+if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+{
+    $this->load->view('objects/snippets/_popup_agr_crop', $data);
+}
 
 /**
  * MOTOR PORTFOLIOS
  * ----------------
  * For all type of motor portfolios, we have same snippet
  */
-if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 {
 	$this->load->view('objects/snippets/_popup_motor', $data);
 }
@@ -20,7 +31,7 @@ if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST
  * FIRE PORTFOLIOS
  * ----------------
  */
-else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 {
 	$this->load->view('objects/snippets/_popup_fire', $data);
 }
@@ -29,7 +40,7 @@ else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO
  * MARINE PORTFOLIOS
  * ----------------
  */
-else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 {
 	$this->load->view('objects/snippets/_popup_marine', $data);
 }
@@ -38,7 +49,7 @@ else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO
  * ENGINEERING - BOILER EXPLOSION
  * ------------------------------
  */
-else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
 {
     $this->load->view('objects/snippets/_popup_eng_bl', $data);
 }
@@ -47,7 +58,7 @@ else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
  * ENGINEERING - CONTRACTOR ALL RISK
  * ---------------------------------------------
  */
-else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
 {
     $this->load->view('objects/snippets/_popup_eng_car', $data);
 }
@@ -56,7 +67,7 @@ else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
  * ENGINEERING - CONTRACTOR PLANT & MACHINARY
  * ------------------------------------------
  */
-else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
 {
     $this->load->view('objects/snippets/_popup_eng_cpm', $data);
 }
@@ -65,7 +76,7 @@ else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
  * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
  * ---------------------------------------------
  */
-else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
 {
     $this->load->view('objects/snippets/_popup_eng_eei', $data);
 }
@@ -74,7 +85,7 @@ else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
  * ENGINEERING - ERECTION ALL RISKS
  * ---------------------------------------------
  */
-else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
 {
     $this->load->view('objects/snippets/_popup_eng_ear', $data);
 }
@@ -83,7 +94,7 @@ else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
  * ENGINEERING - MACHINE BREAKDOWN
  * ---------------------------------------------
  */
-else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
 {
     $this->load->view('objects/snippets/_popup_eng_mb', $data);
 }

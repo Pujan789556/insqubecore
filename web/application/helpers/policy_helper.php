@@ -429,10 +429,19 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 		$view_prefix 	= $view_for === 'print' ? '_print' : '';
 
 		/**
+         * AGRICULTURE - CROP SUB-PORTFOLIO
+         * ---------------------------------
+         */
+        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+        {
+            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_AGR_CROP";
+        }
+
+		/**
 		 * MOTOR PORTFOLIOS
 		 * -----------------
 		 */
-		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
 			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MOTOR";
 		}
@@ -542,11 +551,20 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
 		$form_view = '';
 
 		/**
+         * AGRICULTURE - CROP SUB-PORTFOLIO
+         * ---------------------------------
+         */
+        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_AGR_CROP';
+        }
+
+		/**
 		 * MOTOR PORTFOLIOS
 		 * ----------------
 		 * For all type of motor portfolios, we have same package list
 		 */
-		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
 			$form_view = 'policy_txn/forms/_form_premium_MOTOR';
 		}
@@ -989,6 +1007,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 
 		switch ($portfolio_id)
 		{
+			// AGRICULTURE - CROP
+			case IQB_SUB_PORTFOLIO_AGR_CROP_ID:
+				$schedule_view = 'policies/print/schedule_AGR_CROP';
+				break;
+
 			// Motor
 			case IQB_SUB_PORTFOLIO_MOTORCYCLE_ID:
 			case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID:

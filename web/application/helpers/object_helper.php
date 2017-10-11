@@ -31,16 +31,27 @@ if ( ! function_exists('_OBJ_row_snippet'))
 	 */
 	function _OBJ_row_snippet( $record, $_flag__show_widget_row = FALSE )
 	{
-		$snippet = '';
+		$snippet      = '';
+        $portfolio_id = (int)$record->portfolio_id;
 
 		// Load Portfolio Helper
-		load_portfolio_helper($record->portfolio_id);
+		load_portfolio_helper($portfolio_id);
+
+		/**
+         * AGRICULTURE - CROP SUB-PORTFOLIO
+         * ---------------------------------
+         */
+        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+        {
+            $snippet = _OBJ_AGR_CROP_row_snippet($record, $_flag__show_widget_row);
+        }
+
 
 		/**
 		 * MOTOR
 		 * -----
 		 */
-		if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
 			$snippet = _OBJ_MOTOR_row_snippet($record, $_flag__show_widget_row);
 		}
@@ -49,7 +60,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
 		 * FIRE
 		 * -----
 		 */
-		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
 			$snippet = _OBJ_FIRE_row_snippet($record, $_flag__show_widget_row);
 		}
@@ -58,7 +69,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
 		 * MARINE
 		 * -----
 		 */
-		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
 			$snippet = _OBJ_MARINE_row_snippet($record, $_flag__show_widget_row);
 		}
@@ -67,7 +78,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
          * ENGINEERING - BOILER EXPLOSION
          * ------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
             $snippet = _OBJ_ENG_BL_row_snippet($record, $_flag__show_widget_row);
         }
@@ -76,7 +87,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
          * ENGINEERING - CONTRACTOR ALL RISK
          * ---------------------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
         {
             $snippet = _OBJ_ENG_CAR_row_snippet($record, $_flag__show_widget_row);
         }
@@ -85,7 +96,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
          * ENGINEERING - CONTRACTOR PLANT & MACHINARY
          * ------------------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
             $snippet = _OBJ_ENG_CPM_row_snippet($record, $_flag__show_widget_row);
         }
@@ -94,7 +105,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
          * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
          * ---------------------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
             $snippet = _OBJ_ENG_EEI_row_snippet($record, $_flag__show_widget_row);
         }
@@ -103,7 +114,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
          * ENGINEERING - ERECTION ALL RISKS
          * ---------------------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
         {
             $snippet = _OBJ_ENG_EAR_row_snippet($record, $_flag__show_widget_row);
         }
@@ -112,7 +123,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
          * ENGINEERING - MACHINE BREAKDOWN
          * ---------------------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
             $snippet = _OBJ_ENG_MB_row_snippet($record, $_flag__show_widget_row);
         }
@@ -145,16 +156,26 @@ if ( ! function_exists('_OBJ_select_text'))
 	 */
 	function _OBJ_select_text( $record )
 	{
-		$snippet = '';
+		$snippet      = '';
+        $portfolio_id = (int)$record->portfolio_id;
 
 		// Load Portfolio Helper
-		load_portfolio_helper($record->portfolio_id);
+		load_portfolio_helper($portfolio_id);
+
+		/**
+         * AGRICULTURE - CROP SUB-PORTFOLIOS
+         * ---------------------------------
+         */
+        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+        {
+            $snippet = _OBJ_AGR_CROP_select_text($record);
+        }
 
 		/**
 		 * MOTOR
 		 * -----
 		 */
-		if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
 			$snippet = _OBJ_MOTOR_select_text($record);
 		}
@@ -163,7 +184,7 @@ if ( ! function_exists('_OBJ_select_text'))
 		 * FIRE
 		 * -----
 		 */
-		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 		{
 			$snippet = _OBJ_FIRE_select_text($record);
 		}
@@ -172,7 +193,7 @@ if ( ! function_exists('_OBJ_select_text'))
 		 * MARINE
 		 * -------
 		 */
-		else if( in_array($record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
 			$snippet = _OBJ_MARINE_select_text($record);
 		}
@@ -181,7 +202,7 @@ if ( ! function_exists('_OBJ_select_text'))
          * ENGINEERING - BOILER EXPLOSION
          * ------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
             $snippet = _OBJ_ENG_BL_select_text($record);
         }
@@ -190,7 +211,7 @@ if ( ! function_exists('_OBJ_select_text'))
          * ENGINEERING - CONTRACTOR ALL RISK
          * ---------------------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
         {
             $snippet = _OBJ_ENG_CAR_select_text($record);
         }
@@ -199,7 +220,7 @@ if ( ! function_exists('_OBJ_select_text'))
          * ENGINEERING - CONTRACTOR PLANT & MACHINARY
          * ------------------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
             $snippet = _OBJ_ENG_CPM_select_text($record);
         }
@@ -208,7 +229,7 @@ if ( ! function_exists('_OBJ_select_text'))
          * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
          * ---------------------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
             $snippet = _OBJ_ENG_EEI_select_text($record);
         }
@@ -217,7 +238,7 @@ if ( ! function_exists('_OBJ_select_text'))
          * ENGINEERING - ERECTION ALL RISKS
          * ---------------------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
         {
             $snippet = _OBJ_ENG_EAR_select_text($record);
         }
@@ -226,7 +247,7 @@ if ( ! function_exists('_OBJ_select_text'))
          * ENGINEERING - MACHINE BREAKDOWN
          * ---------------------------------------------
          */
-        else if( $record->portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
             $snippet = _OBJ_ENG_MB_select_text($record);
         }
@@ -264,11 +285,20 @@ if ( ! function_exists('_OBJ_validation_rules'))
 		load_portfolio_helper($portfolio_id);
 
 		/**
+         * AGRICULTURE - CROP SUB-PORTFOLIOS
+         * ---------------------------------
+         */
+        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+        {
+            $v_rules = _OBJ_AGR_CROP_validation_rules( $portfolio_id, $formatted );
+        }
+
+		/**
 		 * MOTOR
 		 * -----
 		 * For all type of motor portfolios, we have same validation rules
 		 */
-		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
 			$v_rules = _OBJ_MOTOR_validation_rules( $portfolio_id, $formatted );
 		}
@@ -379,11 +409,20 @@ if ( ! function_exists('_OBJ_attribute_form'))
 		$attribute_form = '';
 
 		/**
+         * AGRICULTURE - CROP SUB-PORTFOLIOS
+         * ---------------------------------
+         */
+        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_agr_crop';
+        }
+
+		/**
 		 * MOTOR
 		 * -----
 		 * For all type of motor portfolios, we have same object form
 		 */
-		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
 			$attribute_form = 'objects/forms/_form_object_motor';
 		}
@@ -646,10 +685,20 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 		load_portfolio_helper($portfolio_id);
 
 		/**
+         * AGRICULTURE - CROP SUB-PORTFOLIOS
+         * ---------------------------------
+         */
+        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+        {
+            $amt_sum_insured = _OBJ_AGR_CROP_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+
+		/**
 		 * MOTOR
 		 * -----
 		 */
-		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
 			$amt_sum_insured = _OBJ_MOTOR_compute_sum_insured_amount($portfolio_id, $data);
 		}
