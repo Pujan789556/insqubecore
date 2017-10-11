@@ -1,10 +1,24 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Departments:  Single Row
+* Tariff:  Motor - Single Row
 */
+
+/**
+ * Check if this is Current Fiscal Year
+ */
+$flag_current_fiscal_year = $this->current_fiscal_year->id == $record->fiscal_yr_id;
+
+$current_class = $flag_current_fiscal_year ? 'text-success text-bold' : '';
+$current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 ?>
-<tr data-name="<?php echo $record->fiscal_yr_id;?>" class="searchable" data-id="<?php echo $record->fiscal_yr_id; ?>" id="_data-row-<?php echo $record->fiscal_yr_id;?>">
+<tr
+	data-name="<?php echo $record->fiscal_yr_id;?>"
+	class="searchable <?php echo $current_class;?>"
+	title="<?php echo $current_title?>"
+	<?php echo $flag_current_fiscal_year ? 'data-toggle="tooltip"' : ''?>
+	data-id="<?php echo $record->fiscal_yr_id; ?>"
+	id="_data-row-<?php echo $record->fiscal_yr_id;?>">
 	<td><?php echo $record->code_np . " ({$record->code_en})";?></td>
 	<td class="ins-action">
 		<a href="<?php echo site_url('tariff/motor/details/' . $record->fiscal_yr_id);?>"
