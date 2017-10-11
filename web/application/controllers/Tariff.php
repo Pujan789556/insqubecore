@@ -64,11 +64,524 @@ class Tariff extends MY_Controller
 	}
 
     // --------------------------------------------------------------------
+    // TARIFF (AGRICULTURE - CROP) - EXPLORE AND CRUD OPERATIONS
+    // --------------------------------------------------------------------
+
+    /**
+     * Tariff - Agriculture
+     *
+     * List of all portfolio tariff fiscal-year-wise
+     * @return void
+     */
+    public function agriculture( $method = "", $id_or_fy_id=null )
+    {
+        // Check if we have details Method?
+        /**
+         * Valid Method?
+         *      Methods: add | edit | details | flush
+         *
+         * Urls
+         *      /tariff/agriculture
+         *      /tariff/agriculture/add
+         *      /tariff/agriculture/details/<fiscal_year_id>
+         *      /tariff/agriculture/duplicate/<fiscal_year_id>
+         *      /tariff/agriculture/edit/<record_id>
+         *      /tariff/agriculture/flush
+         */
+        if( !empty($method) && !in_array($method, ['add', 'edit', 'duplicate', 'details', 'flush']))
+        {
+            $this->template->render_404();
+        }
+
+        // Call the method other than "default"
+        if( $method )
+        {
+            $method_name = '__agriculture__' . $method;
+            return $this->{$method_name}($id_or_fy_id);
+        }
+
+
+        // Site Meta
+        $this->data['site_title'] = 'Master Setup | Tariff - Agriculture';
+
+        $this->load->model('tariff_agriculture_model');
+
+        /**
+         * Update Nav Data
+         */
+        $this->_navigation['level_3'] = 'agriculture';
+        $this->active_nav_primary($this->_navigation);
+
+        $records = $this->tariff_agriculture_model->get_index_rows();
+
+
+        $this->template->partial(
+                            'content_header',
+                            'templates/_common/_content_header',
+                            [
+                                'content_header' => 'Tariff - Agriculture',
+                                'breadcrumbs' => ['Master Setup' => NULL, 'Tariff' => NULL, 'Agriculture' => NULL]
+                        ])
+                        ->partial('content', 'setup/tariff/agriculture/_index', compact('records'))
+                        ->render($this->data);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * List all tariff belonging to a single fiscal year
+     *
+     * @param integer $fiscal_year_id
+     * @return void
+     */
+    private function __agriculture__details($fiscal_year_id)
+    {
+
+        $fiscal_year_id = (int)$fiscal_year_id;
+        $this->load->model('tariff_agriculture_model');
+        $records   = $this->tariff_agriculture_model->get_list_by_fiscal_year_rows($fiscal_year_id);
+        if(!$records)
+        {
+            $this->template->render_404();
+        }
+
+        $single = $records[0];
+        $fiscal_year_text = $single->fy_code_np . "({$single->fy_code_en})";
+
+        // Site Meta
+        $this->data['site_title'] = 'Master Setup | Agriculture Tariff - FY ' . $fiscal_year_text;
+
+        $this->load->model('tariff_agriculture_model');
+
+
+        /**
+         * Update Nav Data
+         */
+        $this->_navigation['level_3'] = 'agriculture';
+        $this->active_nav_primary($this->_navigation);
+
+        // echo '<pre>'; print_r($this->_navigation);exit;
+
+        $this->template->partial(
+                            'content_header',
+                            'templates/_common/_content_header',
+                            [
+                                'content_header' => 'Agriculture Tariff - FY - ' . $fiscal_year_text,
+                                'breadcrumbs' => ['Master Setup' => NULL, 'Tariff' => NULL, 'Agriculture' => 'tariff/agriculture', 'Details' => NULL]
+                        ])
+                        ->partial('content', 'setup/tariff/agriculture/_index_by_fiscal_year', compact('records'))
+                        ->render($this->data);
+    }
+
+    // --------------------------------------------------------------------
+
+
+    /**
+     * Add Default Tarrif Data
+     *
+     * @return void
+     */
+    private function __agriculture__add()
+    {
+        $this->load->model('tariff_agriculture_model');
+        $rules = $this->tariff_agriculture_model->insert_validate_rules;
+
+        if( $this->input->post() )
+        {
+            $this->form_validation->set_rules($rules);
+            if( $this->form_validation->run() === TRUE )
+            {
+                $data = $this->input->post();
+
+                $fiscal_yr_id = $this->input->post('fiscal_yr_id');
+
+                /**
+                 * Insert Default Batch
+                 */
+                $this->load->model('portfolio_model');
+                $portfolio_dropdown = $this->portfolio_model->dropdown_children(IQB_MASTER_PORTFOLIO_AGR_ID, 'id');
+
+
+                $batch_data = [];
+
+                // For all Agriculture Portfolios
+                foreach ($portfolio_dropdown as $portfolio_id=>$ptext)
+                {
+                    $batch_data[] = [
+                        'fiscal_yr_id'      => $fiscal_yr_id,
+                        'portfolio_id'      => $portfolio_id
+                    ];
+                }
+
+                $batch_data = array_filter($batch_data);
+                $done = $this->tariff_agriculture_model->insert_batch($batch_data, TRUE);
+
+                if(!$done)
+                {
+                    $status = 'error';
+                    $message = 'Could not update.';
+                }
+                else
+                {
+                    // Clear Cache
+                    $this->tariff_agriculture_model->clear_cache();
+
+                    $status = 'success';
+                    $message = 'Successfully Updated.';
+                }
+            }
+            else
+            {
+                $status = 'error';
+                $message = 'Validation Error.';
+            }
+
+            // Success HTML
+            if($status === 'success' )
+            {
+                $ajax_data = [
+                    'message' => $message,
+                    'status'  => $status,
+                    'updateSection' => true,
+                    'hideBootbox' => true
+                ];
+
+                $records    = $this->tariff_agriculture_model->get_index_rows();
+                $html       = $this->load->view('setup/tariff/agriculture/_list', ['records' => $records], TRUE);
+
+                $ajax_data['updateSectionData'] = [
+                    'box'       => '#iqb-data-list',
+                    'method'    => 'html',
+                    'html'      => $html
+                ];
+                return $this->template->json($ajax_data);
+            }
+            else
+            {
+                $form_data = [
+                    'form_elements'         => $rules,
+                    'record'                => null
+                ];
+                return $this->template->json([
+                    'status'        => $status,
+                    'message'       => $message,
+                    'reloadForm'    => true,
+                    'form'          => $this->load->view('setup/tariff/agriculture/_form_add', $form_data, TRUE)
+                ]);
+            }
+        }
+
+        // Let's render the form
+        $json_data['form'] = $this->load->view('setup/tariff/agriculture/_form_add',
+            [
+                'form_elements'         => $rules,
+                'record'                => null
+            ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Duplicate Agriculture Tariff form Old Fiscal Year
+     *
+     * @return void
+     */
+    private function __agriculture__duplicate($source_fiscal_year_id)
+    {
+        $this->load->model('tariff_agriculture_model');
+        // Valid Record ?
+        $source_fiscal_year_id   = (int)$source_fiscal_year_id;
+        $source_record             = $this->tariff_agriculture_model->get_fiscal_year_row($source_fiscal_year_id);
+
+        if(!$source_record)
+        {
+            $this->template->render_404();
+        }
+
+        $rules = $this->tariff_agriculture_model->insert_validate_rules;
+
+        if( $this->input->post() )
+        {
+            $this->form_validation->set_rules($rules);
+            if( $this->form_validation->run() === TRUE )
+            {
+                $data = $this->input->post();
+
+                $batch_data                 = [];
+                $source_tarrif              = $this->tariff_agriculture_model->get_list_by_fiscal_year($source_fiscal_year_id);
+                $destination_fiscal_year_id = $this->input->post('fiscal_yr_id');
+
+                foreach($source_tarrif as $src)
+                {
+                    $source_record =(array)$src;
+
+                    // Set Fiscal Year
+                    $source_record['fiscal_yr_id'] = $destination_fiscal_year_id;
+
+                    // Remoe Unnecessary Fields
+                    unset($source_record['id']);
+                    unset($source_record['created_at']);
+                    unset($source_record['created_by']);
+                    unset($source_record['updated_at']);
+                    unset($source_record['updated_by']);
+
+                    $batch_data[] = $source_record;
+                }
+
+                $batch_data = array_filter($batch_data);
+                $done = $this->tariff_agriculture_model->insert_batch($batch_data, TRUE);
+
+                if(!$done)
+                {
+
+                    $status = 'error';
+                    $message = 'Could not update.';
+                }
+                else
+                {
+                    // Clear Cache
+                    $this->tariff_agriculture_model->clear_cache();
+
+                    $status = 'success';
+                    $message = 'Successfully Updated.';
+                }
+            }
+            else
+            {
+                $status = 'error';
+                $message = 'Validation Error.';
+            }
+
+            // Success HTML
+            if($status === 'success' )
+            {
+                $ajax_data = [
+                    'message' => $message,
+                    'status'  => $status,
+                    'updateSection' => true,
+                    'hideBootbox' => true
+                ];
+
+                $records    = $this->tariff_agriculture_model->get_index_rows();
+                $html       = $this->load->view('setup/tariff/agriculture/_list', ['records' => $records], TRUE);
+
+                $ajax_data['updateSectionData'] = [
+                    'box'       => '#iqb-data-list',
+                    'method'    => 'html',
+                    'html'      => $html
+                ];
+                return $this->template->json($ajax_data);
+            }
+            else
+            {
+                $form_data = [
+                    'form_elements'         => $rules,
+                    'record'                => null,
+                    'source_record'         => $source_record
+                ];
+                return $this->template->json([
+                    'status'        => $status,
+                    'message'       => $message,
+                    'reloadForm'    => true,
+                    'form'          => $this->load->view('setup/tariff/agriculture/_form_duplicate', $form_data, TRUE)
+                ]);
+            }
+        }
+
+        // Let's render the form
+        $json_data['form'] = $this->load->view('setup/tariff/agriculture/_form_duplicate',
+            [
+                'form_elements'         => $rules,
+                'record'                => null,
+                'source_record'         => $source_record
+            ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Add Default Tarrif Data
+     *
+     * @return void
+     */
+    private function __agriculture__edit($id)
+    {
+        $this->load->model('tariff_agriculture_model');
+
+        // Valid Record ?
+        $id = (int)$id;
+        $record = $this->tariff_agriculture_model->get($id);
+        if(!$record)
+        {
+            $this->template->render_404();
+        }
+
+
+        $rules = $this->tariff_agriculture_model->validation_rules;
+
+        if( $this->input->post() )
+        {
+            /**
+             * Forma Validation Rule
+             */
+            $v_rules = [];
+            foreach($rules as $group_name => $rule)
+            {
+                $v_rules = array_merge($v_rules, $rule);
+            }
+            $this->form_validation->set_rules($v_rules);
+
+            $data = $this->input->post();
+
+            // echo '<pre>'; print_r($data);exit;
+
+            if( $this->form_validation->run() === TRUE )
+            {
+                $data = $this->input->post();
+
+                $post_data = [];
+                /**
+                 * Prepare Tariff
+                 */
+                $tariff         = $data['tariff'];
+                $tariff_count   = count($tariff['type']);
+                $tariff_data    = [];
+                for($i = 0; $i < $tariff_count; $i++)
+                {
+                    $single_tarrif = [
+                        'type'      => $tariff['type'][$i],
+                        'rate'      => $tariff['rate'][$i],
+                    ];
+
+                    $tariff_data[] = $single_tarrif;
+                }
+
+                $post_data['tariff'] = json_encode($tariff_data);
+
+                // Activate Tariff
+                $post_data['active'] = $data['active'] ?? 0;
+
+                $done = $this->tariff_agriculture_model->update($record->id, $post_data, TRUE);
+
+                if(!$done)
+                {
+
+                    $status = 'error';
+                    $message = 'Could not update.';
+                }
+                else
+                {
+                    // Clear Cache
+                    $this->tariff_agriculture_model->clear_cache();
+
+                    $status = 'success';
+                    $message = 'Successfully Updated.';
+                }
+            }
+            else
+            {
+                $status = 'error';
+                $message = 'Validation Error.';
+            }
+
+            // Success HTML
+            if($status === 'success' )
+            {
+                $ajax_data = [
+                    'message' => $message,
+                    'status'  => $status,
+                    'updateSection' => true,
+                    'hideBootbox' => true
+                ];
+
+                $records   = $this->tariff_agriculture_model->get_list_by_fiscal_year_rows($record->fiscal_yr_id);
+                $html       = $this->load->view('setup/tariff/agriculture/_list_by_fiscal_year', ['records' => $records], TRUE);
+
+                $ajax_data['updateSectionData'] = [
+                    'box'       => '#iqb-data-list',
+                    'method'    => 'html',
+                    'html'      => $html
+                ];
+                return $this->template->json($ajax_data);
+            }
+            else
+            {
+                $form_data = [
+                    'form_elements'         => $rules,
+                    'record'                => $record
+                ];
+                return $this->template->json([
+                    'status'        => $status,
+                    // 'message'       => $message,
+                    'message'       => validation_errors(),
+                    // 'reloadForm'    => true,
+                    // 'form'          => $this->load->view('setup/tariff/agriculture/_form_edit', $form_data, TRUE)
+                ]);
+            }
+        }
+
+        // Let's render the form
+        $json_data['form'] = $this->load->view('setup/tariff/agriculture/_form_edit',
+            [
+                'form_elements'         => $rules,
+                'record'                => $record
+            ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    private function __agriculture__flush($id)
+    {
+        $this->load->model('tariff_agriculture_model');
+
+        $this->tariff_agriculture_model->clear_cache();
+        redirect('tariff/agriculture');
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Callback - Check Agriculture Tariff Duplicate
+     *
+     * @param string $code
+     * @param integer|null $id
+     * @return bool
+     */
+    public function _cb_tariff_agriculture_check_duplicate($fiscal_yr_id, $id=NULL)
+    {
+        $this->load->model('portfolio_setting_model');
+        $fiscal_yr_id = strtoupper( $fiscal_yr_id ? $fiscal_yr_id : $this->input->post('fiscal_yr_id') );
+        $tariff_ids = $this->input->post('tariff_ids');
+
+        if( $this->tariff_agriculture_model->check_duplicate(['fiscal_yr_id' => $fiscal_yr_id], $tariff_ids))
+        {
+            $this->form_validation->set_message('_cb_tariff_agriculture_check_duplicate', 'The %s already exists.');
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+
+    // --------------------------------------------------------------------
     // TARIFF (MOTOR) - EXPLORE AND CRUD OPERATIONS
     // --------------------------------------------------------------------
 
     /**
-     * Tariff Tariff - Motor
+     * Tariff - Motor
      *
      * List of all portfolio tariff fiscal-year-wise
      * @return void

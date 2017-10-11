@@ -178,6 +178,12 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                                       </span>
                                                 </a>
                                                 <ul class="treeview-menu">
+                                                      <li class="<?php echo set_menu_active($nav_level_3, 'agriculture');?>">
+                                                            <a href="<?php echo site_url('tariff/agriculture');?>">
+                                                                  <i class="fa fa-circle-o"></i> Agriculture
+                                                            </a>
+                                                      </li>
+
                                                       <li class="<?php echo set_menu_active($nav_level_3, 'motor');?>">
                                                             <a href="<?php echo site_url('tariff/motor');?>">
                                                                   <i class="fa fa-circle-o"></i> Motor
