@@ -211,6 +211,7 @@ class Portfolio_setting_model extends MY_Model
                                 ->from($this->table_name . ' PS')
                                 ->join('master_fiscal_yrs FY', 'FY.id = PS.fiscal_yr_id')
                                 ->group_by('PS.fiscal_yr_id')
+                                ->order_by('PS.fiscal_yr_id', 'desc')
                                 ->get()->result();
             $this->write_cache($list, 'pfs_row_list', CACHE_DURATION_DAY);
         }
