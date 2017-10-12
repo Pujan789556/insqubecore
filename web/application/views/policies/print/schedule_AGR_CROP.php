@@ -3,6 +3,8 @@
  * Schedule Print : Agriculture - Crop
  */
 
+$this->load->helper('ph_agr_crop');
+
 $object_attributes  = json_decode($record->object_attributes);
 $premium_attributes = json_decode($record->premium_attributes);
 
@@ -172,6 +174,45 @@ $schedule_table_title   = 'बाली/फलफुलको बीमाले
                             </tr>
                         </table>
                     </td>
+                </tr>
+            </tbody>
+        </table><br/>
+
+        <table class="table">
+            <?php
+            $section_elements  = _OBJ_AGR_CROP_validation_rules($record->portfolio_id)['items'];
+            $items              = $object_attributes->items ?? NULL;
+            $item_count         = count( $items->sum_insured ?? [] );
+            ?>
+            <thead>
+                <tr>
+                    <td colspan="5" class="text-bold">बीमीत बाली/फलफुलको विवरण</td>
+                </tr>
+                <tr>
+                        <td class="text-bold">क्र. सं.</td>
+                        <?php foreach($section_elements as $elem): ?>
+                            <td class="text-bold"><?php echo $elem['label'] ?></td>
+                        <?php endforeach; ?>
+                    </tr>
+            </thead>
+            <tbody>
+                <?php for ($i=0; $i < $item_count; $i++): ?>
+                    <tr>
+                        <td><?php echo $i+1; ?></td>
+                        <?php foreach($section_elements as $elem):
+                            $key =  $elem['_key'];
+                            $value = $items->{$key}[$i];
+                        ?>
+
+                            <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
+                                <?php echo $value?>
+                            </td>
+                        <?php endforeach ?>
+                    </tr>
+                <?php endfor ?>
+                <tr>
+                    <td colspan="4" class="text-bold">जम्मा बीमांक रकम(रु)</td>
+                    <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2, '.', '') ?></td>
                 </tr>
             </tbody>
         </table><br/>
