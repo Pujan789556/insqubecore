@@ -90,7 +90,7 @@ if ( ! function_exists('_OBJ_AGR_CROP_validation_rules'))
 		$post 	= $CI->input->post();
 		$object = $post['object'] ?? NULL;
 
-		$type_dropdown 		= _OBJ_AGR_CROP_type_dropdown();
+		$type_dropdown 		= _OBJ_AGR_CROP_type_dropdown(false);
 		$ownership_dropdown = _OBJ_AGR_CROP_ownership_dropdown(false);
 		$yesno_dropdown 	= _FLAG_yes_no_dropdwon(false);
 
@@ -155,9 +155,9 @@ if ( ! function_exists('_OBJ_AGR_CROP_validation_rules'))
                     'field' => 'object[crop_type]',
                     '_key' => 'crop_type',
                     'label' => 'बाली/फलफुलको किसिम',
-                    'rules' => 'trim|required|htmlspecialchars|max_length[50]',
+                    'rules' => 'trim|required|alpha|in_list['.implode(',', array_keys($type_dropdown)).']',
                     '_type'     => 'dropdown',
-                    '_data'     => $type_dropdown,
+                    '_data'     => IQB_BLANK_SELECT + $type_dropdown,
                     '_show_label' 	=> true,
                     '_required' => true
                 ],
