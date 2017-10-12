@@ -270,6 +270,14 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[investment_amount]',
+			        '_key' => 'investment_amount',
+			        'label' => 'लिएको ऋणको रकम(रू.)',
+			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+			        '_type'     => 'text',
+			        '_required' => false
 			    ]
 		    ],
 

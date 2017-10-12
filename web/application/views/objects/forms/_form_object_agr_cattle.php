@@ -210,7 +210,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     {
         var $fg = $(textbox).closest('.form-group'),
             checked = $(trigger).iCheck('update')[0].checked,
-            chkValue = '';
+            chkValue = '',
+            txtLoan = '',
+            $tg = null;
+
+        if( textbox == 'textarea[name="object[invester_details]"]'){
+            txtLoan = 'input[name="object[investment_amount]"]';
+            $tg = $(txtLoan).closest('.form-group');
+        }
 
         if( checked ){
             chkValue = $(trigger).val();
@@ -218,9 +225,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         if(  chkValue === match ){
             $fg.fadeIn();
+            if(txtLoan){
+                $tg.fadeIn();
+            }
         }else{
             $fg.fadeOut();
             $(textbox).val('');
+
+            if(txtLoan){
+                $tg.fadeOut();
+                $(txtLoan).val('');
+            }
         }
     }
 
