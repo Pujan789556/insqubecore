@@ -732,9 +732,8 @@ if ( ! function_exists('load_portfolio_helper'))
         $portfolio_id = (int)$portfolio_id;
 
         /**
-         * AGRICULTURE - CROP SUB-PORTFOLIOS
+         * AGRICULTURE - CROP SUB-PORTFOLIO
          * ---------------------------------
-         * We have a single helper file for all crop sub-portfolios
          */
         if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
         {
@@ -742,13 +741,21 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
-         * AGRICULTURE - CATTLE SUB-PORTFOLIOS
-         * ---------------------------------
-         * We have a single helper file for all crop sub-portfolios
+         * AGRICULTURE - CATTLE SUB-PORTFOLIO
+         * -----------------------------------
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
         {
             $CI->load->helper('ph_agr_cattle');
+        }
+
+        /**
+         * AGRICULTURE - POULTRY SUB-PORTFOLIO
+         * -----------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
+        {
+            $CI->load->helper('ph_agr_poultry');
         }
 
         /**

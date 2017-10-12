@@ -55,6 +55,14 @@ if ( ! function_exists('_OBJ_row_snippet'))
             $snippet = _OBJ_AGR_CATTLE_row_snippet($record, $_flag__show_widget_row);
         }
 
+        /**
+         * AGRICULTURE - POULTRY SUB-PORTFOLIO
+         * -----------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
+        {
+            $snippet = _OBJ_AGR_POULTRY_row_snippet($record, $_flag__show_widget_row);
+        }
 
 		/**
 		 * MOTOR
@@ -189,6 +197,15 @@ if ( ! function_exists('_OBJ_select_text'))
             $snippet = _OBJ_AGR_CATTLE_select_text($record);
         }
 
+        /**
+         * AGRICULTURE - POULTRY SUB-PORTFOLIO
+         * -----------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
+        {
+            $snippet = _OBJ_AGR_POULTRY_select_text($record);
+        }
+
 		/**
 		 * MOTOR
 		 * -----
@@ -318,6 +335,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
         {
             $v_rules = _OBJ_AGR_CATTLE_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
+         * AGRICULTURE - POULTRY SUB-PORTFOLIO
+         * -----------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
+        {
+            $v_rules = _OBJ_AGR_POULTRY_validation_rules( $portfolio_id, $formatted );
         }
 
 		/**
@@ -451,6 +477,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
         {
             $attribute_form = 'objects/forms/_form_object_agr_cattle';
+        }
+
+        /**
+         * AGRICULTURE - POULTRY SUB-PORTFOLIO
+         * -----------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_agr_poultry';
         }
 
 		/**
@@ -736,6 +771,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
         {
             $amt_sum_insured = _OBJ_AGR_CATTLE_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * AGRICULTURE - POULTRY SUB-PORTFOLIO
+         * -----------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
+        {
+            $amt_sum_insured = _OBJ_AGR_POULTRY_compute_sum_insured_amount($portfolio_id, $data);
         }
 
 

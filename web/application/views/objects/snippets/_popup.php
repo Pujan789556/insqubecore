@@ -26,6 +26,15 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
 }
 
 /**
+ * AGRICULTURE - POULTRY SUB-PORTFOLIO
+ * -----------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
+{
+    $this->load->view('objects/snippets/_popup_agr_poultry', $data);
+}
+
+/**
  * MOTOR PORTFOLIOS
  * ----------------
  * For all type of motor portfolios, we have same snippet
