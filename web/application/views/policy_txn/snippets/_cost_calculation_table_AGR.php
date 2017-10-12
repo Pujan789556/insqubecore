@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Policy: Details - Policy Premium Overview Card - CROP (AGRICULTURE)
+* Policy: Details - Policy Premium Overview Card - AGRICULTURE (All sub-portfolios)
 */
 $cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn_record->cost_calculation_table) : NULL;
 ?>

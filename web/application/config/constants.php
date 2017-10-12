@@ -194,20 +194,20 @@ define('IQB_MASTER_PORTFOLIO_MOTOR_ID',     6);
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_AGR_CROP_ID', 9); 	// Crop
-define('IQB_SUB_PORTFOLIO_AGR_CTL_ID', 	10); 	// Cattle
-define('IQB_SUB_PORTFOLIO_AGR_PLTR_ID', 11); 	// Poultry
-define('IQB_SUB_PORTFOLIO_AGR_FISH_ID', 12); 	// Fish (Pisciculture)
-define('IQB_SUB_PORTFOLIO_AGR_BEE_ID', 	13); 	// Bee (Apiculture)
+define('IQB_SUB_PORTFOLIO_AGR_CROP_ID', 	9); 	// Crop
+define('IQB_SUB_PORTFOLIO_AGR_CATTLE_ID', 	10); 	// Cattle
+define('IQB_SUB_PORTFOLIO_AGR_POULTRY_ID', 	11); 	// Poultry
+define('IQB_SUB_PORTFOLIO_AGR_FISH_ID', 	12); 	// Fish (Pisciculture)
+define('IQB_SUB_PORTFOLIO_AGR_BEE_ID', 		13); 	// Bee (Apiculture)
 
 // SUB PORTFOLIO LIST - AGRICULTURE - CROP PORTFOLIOS
 define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR',  [
 
-	IQB_SUB_PORTFOLIO_AGR_CROP_ID 	=> 'Crop',
-	IQB_SUB_PORTFOLIO_AGR_CTL_ID 	=> 'Cattle',
-	IQB_SUB_PORTFOLIO_AGR_PLTR_ID 	=> 'Poultry',
-	IQB_SUB_PORTFOLIO_AGR_FISH_ID 	=> 'Fish',
-	IQB_SUB_PORTFOLIO_AGR_BEE_ID 	=> 'Bee'
+	IQB_SUB_PORTFOLIO_AGR_CROP_ID 		=> 'Crop',
+	IQB_SUB_PORTFOLIO_AGR_CATTLE_ID 	=> 'Cattle',
+	IQB_SUB_PORTFOLIO_AGR_POULTRY_ID 	=> 'Poultry',
+	IQB_SUB_PORTFOLIO_AGR_FISH_ID 		=> 'Fish',
+	IQB_SUB_PORTFOLIO_AGR_BEE_ID 		=> 'Bee'
 ]);
 
 

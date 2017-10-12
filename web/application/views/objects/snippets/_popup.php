@@ -8,13 +8,21 @@ $data           = ['record' => $record, 'ref' => $ref ?? ''];
 $portfolio_id   = (int)$record->portfolio_id;
 
 /**
- * AGRICULTURE - CROP SUB-PORTFOLIOS
+ * AGRICULTURE - CROP SUB-PORTFOLIO
  * ---------------------------------
- * For all type of crop portfolios, we have same snippet
  */
 if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
 {
     $this->load->view('objects/snippets/_popup_agr_crop', $data);
+}
+
+/**
+ * AGRICULTURE - CATTLE SUB-PORTFOLIO
+ * ---------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
+{
+    $this->load->view('objects/snippets/_popup_agr_cattle', $data);
 }
 
 /**

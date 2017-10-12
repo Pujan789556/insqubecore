@@ -429,17 +429,17 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 		$view_prefix 	= $view_for === 'print' ? '_print' : '';
 
 		/**
-         * AGRICULTURE - CROP SUB-PORTFOLIO
+         * AGRICULTURE - ALL SUB-PORTFOLIOs
          * ---------------------------------
          */
-        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
-        {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_AGR_CROP";
-        }
+		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR)) )
+		{
+			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_AGR";
+		}
 
 		/**
-		 * MOTOR PORTFOLIOS
-		 * -----------------
+		 * MOTOR PORTFOLIOS- ALL SUB-PORTFOLIOs
+         * ------------------------------------
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
@@ -551,13 +551,13 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
 		$form_view = '';
 
 		/**
-         * AGRICULTURE - CROP SUB-PORTFOLIO
+         * AGRICULTURE - ALL SUB-PORTFOLIOs
          * ---------------------------------
          */
-        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
-        {
-            $form_view = 'policy_txn/forms/_form_premium_AGR_CROP';
-        }
+		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR)) )
+		{
+			$form_view = 'policy_txn/forms/_form_premium_AGR';
+		}
 
 		/**
 		 * MOTOR PORTFOLIOS
@@ -1007,9 +1007,14 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 
 		switch ($portfolio_id)
 		{
-			// AGRICULTURE - CROP
+			// AGRICULTURE - CROP SUB-PORTFOLIO
 			case IQB_SUB_PORTFOLIO_AGR_CROP_ID:
 				$schedule_view = 'policies/print/schedule_AGR_CROP';
+				break;
+
+			// AGRICULTURE - CATTLE SUB-PORTFOLIO
+			case IQB_SUB_PORTFOLIO_AGR_CATTLE_ID:
+				$schedule_view = 'policies/print/schedule_AGR_CATTLE';
 				break;
 
 			// Motor

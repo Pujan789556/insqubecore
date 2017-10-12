@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : AGRICULTURE - CROP Policy Premium
+ * Form : AGRICULTURE - ALL SUB-PORTFOLIOs - Policy Premium
  */
 $object_attributes          = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
 $premium_computation_table  = $txn_record->premium_computation_table ? json_decode($txn_record->premium_computation_table) : NULL;

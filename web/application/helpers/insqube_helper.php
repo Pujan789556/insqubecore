@@ -742,6 +742,16 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * AGRICULTURE - CATTLE SUB-PORTFOLIOS
+         * ---------------------------------
+         * We have a single helper file for all crop sub-portfolios
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
+        {
+            $CI->load->helper('ph_agr_cattle');
+        }
+
+        /**
          * MOTOR
          * -----
          * We have a single helper file for motor portfolio
