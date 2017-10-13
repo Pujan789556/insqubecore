@@ -65,6 +65,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * AGRICULTURE - FISH(Pisciculture) SUB-PORTFOLIO
+         * ----------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
+        {
+            $snippet = _OBJ_AGR_FISH_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * AGRICULTURE - BEE(Apiculture) SUB-PORTFOLIO
          * -------------------------------------------
          */
@@ -213,6 +222,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
         {
             $snippet = _OBJ_AGR_POULTRY_select_text($record);
+        }
+
+        /**
+         * AGRICULTURE - FISH(Pisciculture) SUB-PORTFOLIO
+         * ----------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
+        {
+            $snippet = _OBJ_AGR_FISH_select_text($record);
         }
 
         /**
@@ -365,6 +383,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * AGRICULTURE - FISH(Pisciculture) SUB-PORTFOLIO
+         * ----------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
+        {
+            $v_rules = _OBJ_AGR_FISH_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * AGRICULTURE - BEE(Apiculture) SUB-PORTFOLIO
          * -------------------------------------------
          */
@@ -513,6 +540,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
         {
             $attribute_form = 'objects/forms/_form_object_agr_poultry';
+        }
+
+        /**
+         * AGRICULTURE - FISH(Pisciculture) SUB-PORTFOLIO
+         * ----------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_agr_fish';
         }
 
         /**
@@ -816,6 +852,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
         {
             $amt_sum_insured = _OBJ_AGR_POULTRY_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * AGRICULTURE - FISH(Pisciculture) SUB-PORTFOLIO
+         * ----------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
+        {
+            $amt_sum_insured = _OBJ_AGR_FISH_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

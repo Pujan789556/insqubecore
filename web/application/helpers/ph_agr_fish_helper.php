@@ -2,16 +2,16 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * InsQube Agriculture Cattle Portfolio Helper Functions
+ * InsQube Agriculture Fish Portfolio Helper Functions
  *
- * This file contains helper functions related to Agriculture's Cattle Sub-Portfolio.
+ * This file contains helper functions related to Agriculture's Fish Sub-Portfolio.
  *
  *
  * @package			InsQube
  * @subpackage		Helpers
  * @category		Helpers
  * @portfolio 		Agriculture
- * @sub-portfolio 	Cattle
+ * @sub-portfolio 	Fish(Pisciculture)
  * @author			IP Bastola <ip.bastola@gmail.com>
  * @link
  */
@@ -22,7 +22,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // ------------------------------------------------------------------------
 
 
-if ( ! function_exists('_OBJ_AGR_CATTLE_row_snippet'))
+if ( ! function_exists('_OBJ_AGR_FISH_row_snippet'))
 {
 	/**
 	 * Get Policy Object - Row Snippet
@@ -33,16 +33,16 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_row_snippet'))
 	 * @param bool $_flag__show_widget_row 	is this Widget Row? or Regular List Row?
 	 * @return	html
 	 */
-	function _OBJ_AGR_CATTLE_row_snippet( $record, $_flag__show_widget_row = FALSE )
+	function _OBJ_AGR_FISH_row_snippet( $record, $_flag__show_widget_row = FALSE )
 	{
 		$CI =& get_instance();
-		return $CI->load->view('objects/snippets/_row_agr_cattle', ['record' => $record, '_flag__show_widget_row' => $_flag__show_widget_row], TRUE);
+		return $CI->load->view('objects/snippets/_row_agr_fish', ['record' => $record, '_flag__show_widget_row' => $_flag__show_widget_row], TRUE);
 	}
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_AGR_CATTLE_select_text'))
+if ( ! function_exists('_OBJ_AGR_FISH_select_text'))
 {
 	/**
 	 * Get Policy Object -  - Selection Text or Summary Text
@@ -53,13 +53,13 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_select_text'))
 	 * @param bool $record 	Object Record
 	 * @return	html
 	 */
-	function _OBJ_AGR_CATTLE_select_text( $record )
+	function _OBJ_AGR_FISH_select_text( $record )
 	{
 		$attributes = $record->attributes ? json_decode($record->attributes) : NULL;
-		$cattle_type 	= $attributes->cattle_type;
+		$fish_type 	= $attributes->fish_type;
 
 		$snippet = [
-			'<strong>' . $cattle_type . '</strong>',
+			'<strong>' . $fish_type . '</strong>',
 			'Sum Insured(NRS): ' . '<strong>' . $record->amt_sum_insured . '</strong>'
 		];
 
@@ -71,7 +71,7 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_select_text'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
+if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 {
 	/**
 	 * Get Policy Object -  - Validation Rules
@@ -82,7 +82,7 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
 	 * @param bool $formatted  Should Return the Formatted Validation Rule ( if multi senction rules )
 	 * @return	bool
 	 */
-	function _OBJ_AGR_CATTLE_validation_rules( $portfolio_id, $formatted = FALSE )
+	function _OBJ_AGR_FISH_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
 		$CI =& get_instance();
 
@@ -90,26 +90,16 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
 		$post 	= $CI->input->post();
 		$object = $post['object'] ?? NULL;
 
-		$keep_type_dropdown = _OBJ_AGR_CATTLE_keep_type_dropdown(FALSE);
-		$type_dropdown 		= _OBJ_AGR_CATTLE_type_dropdown(FALSE);
-		$ownership_dropdown = _OBJ_AGR_CATTLE_ownership_dropdown(false);
+		$type_dropdown 		= _OBJ_AGR_FISH_type_dropdown(FALSE);
+		$ownership_dropdown = _OBJ_AGR_FISH_ownership_dropdown(false);
 		$yesno_dropdown 	= _FLAG_yes_no_dropdwon(false);
 
 		$v_rules = [
 
 		    /**
-		     * Cattle Items Details
+		     * Poultry Items Details
 		     */
 		    'items' => [
-			    [
-			        'field' => 'object[items][name][]',
-			        '_key' => 'name',
-			        'label' => 'नाम',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
-			        '_type' => 'text',
-			        '_show_label' 	=> false,
-			        '_required' 	=> true
-			    ],
 			    [
 			        'field' => 'object[items][breed][]',
 			        '_key' => 'breed',
@@ -120,56 +110,55 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
 			        '_required' 	=> true
 			    ],
 			    [
-			        'field' => 'object[items][age][]',
-			        '_key' => 'age',
-			        'label' => 'उमेर',
+			        'field' => 'object[items][rearing_technology][]',
+			        '_key' => 'rearing_technology',
+			        'label' => 'पालन प्रविधि',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[150]',
+			        '_type' => 'text',
+			        '_show_label' 	=> false,
+			        '_required' 	=> true
+			    ],
+			    [
+			        'field' => 'object[items][area][]',
+			        '_key' => 'area',
+			        'label' => 'जलासयको क्षेत्रफल',
 			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ],
 			    [
-			        'field' => 'object[items][height][]',
-			        '_key' => 'height',
-			        'label' => 'उचाइ',
+			        'field' => 'object[items][stock_no][]',
+			        '_key' => 'stock_no',
+			        'label' => 'स्टक गरेको माछाको संख्या',
 			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ],
 			    [
-			        'field' => 'object[items][color][]',
-			        '_key' => 'color',
-			        'label' => 'रंग',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
+			        'field' => 'object[items][living_rate][]',
+			        '_key' => 'living_rate',
+			        'label' => 'बाच्ने दर (%)',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ],
 			    [
-                    'field' => 'object[items][keep_type][]',
-                    '_key' => 'keep_type',
-                    'label' => 'पालिएको तरिका',
-                    'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys($keep_type_dropdown)).']',
-                    '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + $keep_type_dropdown,
-                    '_show_label' 	=> false,
-                    '_required' => true
-                ],
-                [
-			        'field' => 'object[items][sign][]',
-			        '_key' => 'sign',
-			        'label' => 'संकेत पट्टा',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
+			        'field' => 'object[items][avg_weight][]',
+			        '_key' => 'avg_weight',
+			        'label' => 'औसत तौल (ग्राम)',
+			        'rules' => 'trim|required|integer|max_length[5]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ],
 			    [
-			        'field' => 'object[items][health_stat][]',
-			        '_key' => 'health_stat',
-			        'label' => 'हालको स्वास्थ्य स्थिति',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
+			        'field' => 'object[items][total_production][]',
+			        '_key' => 'total_production',
+			        'label' => 'कुल उत्पादन (के. जी.)',
+			        'rules' => 'trim|required|integer|max_length[10]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -190,53 +179,62 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
 			 */
 			'basic' =>[
 				[
-                    'field' => 'object[cattle_type]',
-                    '_key' => 'cattle_type',
-                    'label' => 'पशुधनको किसिम',
+                    'field' => 'object[fish_type]',
+                    '_key' => 'fish_type',
+                    'label' => 'माछाको किसिम',
                     'rules' => 'trim|required|alpha|in_list['.implode(',', array_keys($type_dropdown)).']',
                     '_type'     => 'dropdown',
                     '_data'     => IQB_BLANK_SELECT + $type_dropdown,
                     '_required' => true
                 ],
                 [
-                    'field' => 'object[cattle_usage]',
-                    '_key' => 'cattle_usage',
-                    'label' => 'पशुधनको प्रयोजन(दूध/मासु/प्रजनन/पशुश्रम/ऊन)',
-                    'rules' => 'trim|required|htmlspecialchars|max_length[150]',
-                    '_type'     => 'text',
-                    '_required' => true
-                ],
-				[
 			        'field' => 'object[risk_locaiton]',
 			        '_key' => 'risk_locaiton',
-			        'label' => 'पशुधन पालिएको गोठको वास्तविक ठेगाना',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
-			        'rows' 		=> 4,
-			        '_type'     => 'textarea',
-			        '_required' => true
-			    ],
-				[
-			        'field' => 'object[farmhouse_structure]',
-			        '_key' => 'farmhouse_structure',
-			        'label' => 'पशुधन राखिने गोठको बनवटको विवरण',
+			        'label' => 'माछा पालिएको स्थानको वास्तविक ठेगाना',
 			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
 			    ],
 			    [
-			        'field' => 'object[cattle_disease]',
-			        '_key' => 'cattle_disease',
-			        'label' => 'पशुधनमा लागेको रोगको विवरण',
+			        'field' => 'object[fingerling_source]',
+			        '_key' => 'fingerling_source',
+			        'label' => 'माछा भुराको स्रोत',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[fish_disease]',
+			        '_key' => 'fish_disease',
+			        'label' => 'माछामा लागेको रोगको विवरण',
 			        'rules' => 'trim|htmlspecialchars|max_length[500]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => false
 			    ],
+			    [
+                    'field' => 'object[flag_insure_fish_pond]',
+                    'label' => 'पोखरी/रेसवेको पनि बीमा गर्ने?',
+                    'rules' => 'trim|integer|in_list[1]',
+                    '_key' 		=> 'flag_insure_fish_pond',
+                    '_id' 		=> 'flag_insure_fish_pond',
+                    '_type'     => 'checkbox',
+                    '_checkbox_value' 	=> '1',
+                    '_required' => false,
+                ],
+                [
+			        'field' => 'object[fish_pond_sum_insured]',
+			        '_key' => 'fish_pond_sum_insured',
+			        'label' => 'पोखरी/रेसवेको मुल्य(रु)',
+			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
 				[
                     'field' => 'object[flag_ownership]',
                     '_key' => 'flag_ownership',
-                    'label' => 'पशुधनको स्वामित्व',
+                    'label' => 'माछाको स्वामित्व',
                     'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys($ownership_dropdown)).']',
                     '_type'     => 'radio',
                     '_data'     => $ownership_dropdown,
@@ -304,7 +302,7 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
 			    [
 			        'field' => 'object[fclt_distance]',
 			        '_key' => 'fclt_distance',
-			        'label' => 'कृषि सेवा केन्द्रबाट पशुधन राखिने गोठसम्मको अन्दाजी दूरी',
+			        'label' => 'कृषि सेवा केन्द्रबाट माछा पालिएको स्थानसम्मको अन्दाजी दूरी',
 			        'rules' => 'trim|htmlspecialchars|max_length[100]',
 			        '_type'     => 'text',
 			        '_required' => false
@@ -312,7 +310,7 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
 			    [
 			        'field' => 'object[fclt_inspection_report]',
 			        '_key' => 'fclt_inspection_report',
-			        'label' => 'सरकारी वा निजी कृषि प्राविधकद्वारा बीमित पशुहरूलाई गरिने चेकजाँचको विवरण',
+			        'label' => 'सरकारी वा निजी कृषि प्राविधकद्वारा बीमित माछाहरूलाई गरिने चेकजाँचको विवरण',
 			        'rules' => 'trim|htmlspecialchars|max_length[500]',
 			        '_type'     => 'textarea',
 			        'rows' 		=> 4,
@@ -345,7 +343,7 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
 			    [
 			        'field' => 'object[damages][quantity][]',
 			        '_key' => 'quantity',
-			        'label' => 'मृत्यु भएको परिमाण',
+			        'label' => 'नोक्सान भएको माछाको अनुमानित संख्या र तौल',
 			        'rules' => 'trim|htmlspecialchars|max_length[300]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
@@ -373,22 +371,22 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_AGR_CATTLE_type_dropdown'))
+if ( ! function_exists('_OBJ_AGR_FISH_type_dropdown'))
 {
 	/**
-	 * Get Cattle Type Dropdown
+	 * Get Poultry Type Dropdown
 	 *
 	 *
 	 * @param bool $flag_blank_select 	Whether to append blank select
 	 * @return	bool
 	 */
-	function _OBJ_AGR_CATTLE_type_dropdown( $flag_blank_select = true )
+	function _OBJ_AGR_FISH_type_dropdown( $flag_blank_select = true )
 	{
 		$CI =& get_instance();
 
 		$CI->load->model('tariff_agriculture_model');
 
-		$dropdown = $CI->tariff_agriculture_model->type_dropdown($CI->current_fiscal_year->id, IQB_SUB_PORTFOLIO_AGR_CATTLE_ID);
+		$dropdown = $CI->tariff_agriculture_model->type_dropdown($CI->current_fiscal_year->id, IQB_SUB_PORTFOLIO_AGR_FISH_ID);
 
 		if($flag_blank_select)
 		{
@@ -400,39 +398,16 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_type_dropdown'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_AGR_CATTLE_keep_type_dropdown'))
+if ( ! function_exists('_OBJ_AGR_FISH_ownership_dropdown'))
 {
 	/**
-	 * Get Cattle Ownership Dropdown
+	 * Get Poultry Ownership Dropdown
 	 *
 	 *
 	 * @param bool $flag_blank_select 	Whether to append blank select
 	 * @return	bool
 	 */
-	function _OBJ_AGR_CATTLE_keep_type_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = ['B' => 'बँधुवा', 'C' => 'चरन'];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_OBJ_AGR_CATTLE_ownership_dropdown'))
-{
-	/**
-	 * Get Cattle Ownership Dropdown
-	 *
-	 *
-	 * @param bool $flag_blank_select 	Whether to append blank select
-	 * @return	bool
-	 */
-	function _OBJ_AGR_CATTLE_ownership_dropdown( $flag_blank_select = true )
+	function _OBJ_AGR_FISH_ownership_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = ['S' => 'एकल स्वामित्व', 'J' => 'साझेदारी'];
 
@@ -446,7 +421,7 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_ownership_dropdown'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_AGR_CATTLE_compute_sum_insured_amount'))
+if ( ! function_exists('_OBJ_AGR_FISH_compute_sum_insured_amount'))
 {
 	/**
 	 * Get Sum Insured Amount of Policy Object -  Portfolio
@@ -455,17 +430,39 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_compute_sum_insured_amount'))
 	 *
 	 * @param integer 	$portfolio_id  Portfolio ID
 	 * @param array 	$data 	Object Data
-	 * @param string 	$mode 	What to Compute [all|except_duty|duty_only]
-	 * @param bool 		$forex_convert 	Convert sum insured into NPR
 	 * @return float
 	 */
-	function _OBJ_AGR_CATTLE_compute_sum_insured_amount( $portfolio_id, $data )
+	function _OBJ_AGR_FISH_compute_sum_insured_amount( $portfolio_id, $data )
 	{
 		/**
-		 * Sum up all the item's sum insured amount to get the total Sum Insured
-		 * Amount
+		 * Items' Total Sum Insured Amount
 		 */
-		$items_sum_insured 	= $data['items']['sum_insured'] ?? [];
+		$items = (object)$data['items'];
+		$amt_sum_insured = _OBJ_AGR_FISH_items_only_sum_insured_amount($items);
+
+		/**
+		 * Do you want to insure fish pond too?
+		 */
+		$object_attributes 	= (object)$data;
+		$amt_sum_insured 	+= _OBJ_AGR_FISH_pond_sum_insured_amount($object_attributes);
+
+		return $amt_sum_insured;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_AGR_FISH_items_only_sum_insured_amount'))
+{
+	/**
+	 * Get items's only Sum Insured Amount
+	 *
+	 * @param array  $items 	Item List
+	 * @return float
+	 */
+	function _OBJ_AGR_FISH_items_only_sum_insured_amount( $items )
+	{
+		$items_sum_insured 	= $items->sum_insured ?? [];
 		$amt_sum_insured 	= 0.00;
 
 		foreach($items_sum_insured as $si_per_item)
@@ -474,6 +471,34 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_compute_sum_insured_amount'))
 			$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 			$amt_sum_insured +=  $si_per_item;
 		}
+
+
+		return $amt_sum_insured;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_AGR_FISH_pond_sum_insured_amount'))
+{
+	/**
+	 * Get Fish Pond's Sum Insured Amount
+	 *
+	 * @param array  $object  Object attributes
+	 * @return float
+	 */
+	function _OBJ_AGR_FISH_pond_sum_insured_amount( $object_attributes )
+	{
+		/**
+		 * Do you want to insure fish pond too?
+		 */
+		$amt_sum_insured 		= 0.00;
+		$flag_insure_fish_pond 	= intval($object_attributes->flag_insure_fish_pond ?? 0);
+		if($flag_insure_fish_pond)
+		{
+			$amt_sum_insured = floatval($object_attributes->fish_pond_sum_insured ?? 0.00);
+		}
+
 		return $amt_sum_insured;
 	}
 }
@@ -483,7 +508,7 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_compute_sum_insured_amount'))
 // POLICY TRANSACTION HELPER FUNCTIONS
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_TXN_AGR_CATTLE_premium_validation_rules'))
+if ( ! function_exists('_TXN_AGR_FISH_premium_validation_rules'))
 {
 	/**
 	 * Get Policy TXN Validation Rules for Premium Add/Update for  Portfolio
@@ -494,7 +519,7 @@ if ( ! function_exists('_TXN_AGR_CATTLE_premium_validation_rules'))
 	 * @param bool $for_processing		For Form Processing
 	 * @return array
 	 */
-	function _TXN_AGR_CATTLE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $for_form_processing = FALSE )
+	function _TXN_AGR_FISH_premium_validation_rules($policy_record, $pfs_record, $policy_object, $for_form_processing = FALSE )
 	{
 		$CI =& get_instance();
 
@@ -565,26 +590,26 @@ if ( ! function_exists('_TXN_AGR_CATTLE_premium_validation_rules'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_AGR_CATTLE_tariff_by_type'))
+if ( ! function_exists('_OBJ_AGR_FISH_tariff_by_type'))
 {
 	/**
-	 * Get Tariff for supplied cattle type
+	 * Get Tariff for supplied fish type
 	 *
-	 * @param alpha $cattle_code 	Cattle Type Code
+	 * @param alpha $fish_code 	Poultry Type Code
 	 * @return	Object
 	 */
-	function _OBJ_AGR_CATTLE_tariff_by_type( $cattle_code )
+	function _OBJ_AGR_FISH_tariff_by_type( $fish_code )
 	{
 		$CI =& get_instance();
 
 		$CI->load->model('tariff_agriculture_model');
-		$tariff_record = $CI->tariff_agriculture_model->get_by_fy_portfolio($CI->current_fiscal_year->id, IQB_SUB_PORTFOLIO_AGR_CATTLE_ID);
+		$tariff_record = $CI->tariff_agriculture_model->get_by_fy_portfolio($CI->current_fiscal_year->id, IQB_SUB_PORTFOLIO_AGR_FISH_ID);
 		$tariff     	= json_decode($tariff_record->tariff ?? '[]');
 		$valid_tariff 	= NULL;
 
 		foreach($tariff as $single_tariff)
 		{
-			if(strtoupper($single_tariff->code) == strtoupper($cattle_code))
+			if(strtoupper($single_tariff->code) == strtoupper($fish_code))
 			{
 				$valid_tariff = $single_tariff;
 				break;
@@ -593,7 +618,7 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_tariff_by_type'))
 
 		if( !$valid_tariff)
 		{
-			throw new Exception("Exception [Helper: ph_agr_cattle_helper][Method: _OBJ_AGR_CATTLE_tariff_by_type()]: No Tariff found for supplied cattle ({$cattle_code})");
+			throw new Exception("Exception [Helper: ph_agr_fish_helper][Method: _OBJ_AGR_FISH_tariff_by_type()]: No Tariff found for supplied fish ({$fish_code})");
 		}
 
 		return $valid_tariff;

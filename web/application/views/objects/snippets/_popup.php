@@ -35,6 +35,15 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
 }
 
 /**
+ * AGRICULTURE - FISH(Pisciculture) SUB-PORTFOLIO
+ * ----------------------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
+{
+    $this->load->view('objects/snippets/_popup_agr_fish', $data);
+}
+
+/**
  * AGRICULTURE - BEE(Apiculture) SUB-PORTFOLIO
  * -------------------------------------------
  */
