@@ -203,24 +203,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     });
 
     // On form load toggle field
-    __toggle_field('input[name="object[flag_investment]"]', 'Y', 'textarea[name="object[invester_details]"]');
-    __toggle_field('input[name="object[flag_ownership]"]', 'J', 'textarea[name="object[partner_details]"]');
+    __toggle_field('input[name="object[flag_investment]"]:checked', 'Y', 'textarea[name="object[invester_details]"]');
+    __toggle_field('input[name="object[flag_ownership]"]:checked', 'J', 'textarea[name="object[partner_details]"]');
 
     function __toggle_field(trigger, match, textbox)
     {
         var $fg = $(textbox).closest('.form-group'),
-            checked = $(trigger).iCheck('update')[0].checked,
-            chkValue = '',
+            chkValue = $(trigger).val(),
             txtLoan = '',
             $tg = null;
 
         if( textbox == 'textarea[name="object[invester_details]"]'){
             txtLoan = 'input[name="object[investment_amount]"]';
             $tg = $(txtLoan).closest('.form-group');
-        }
-
-        if( checked ){
-            chkValue = $(trigger).val();
         }
 
         if(  chkValue === match ){
