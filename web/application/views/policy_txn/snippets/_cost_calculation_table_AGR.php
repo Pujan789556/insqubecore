@@ -12,7 +12,7 @@ $cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn
 
 				<?php foreach($cost_calculation_table as $row):?>
 					<tr>
-						<th><?php echo $row->label ?></th>
+						<th class="text-left"><?php echo $row->label ?></th>
 						<td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
 					</tr>
 				<?php endforeach ?>

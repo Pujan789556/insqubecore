@@ -759,6 +759,15 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * AGRICULTURE - BEE(Apiculture) SUB-PORTFOLIO
+         * -------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
+        {
+            $CI->load->helper('ph_agr_bee');
+        }
+
+        /**
          * MOTOR
          * -----
          * We have a single helper file for motor portfolio

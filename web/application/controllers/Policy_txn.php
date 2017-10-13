@@ -636,6 +636,15 @@ class Policy_txn extends MY_Controller
 		            $done = $this->__save_premium_AGR_POULTRY($policy_record, $txn_record);
 		        }
 
+		        /**
+		         * AGRICULTURE - BEE(Apiculture) SUB-PORTFOLIO
+		         * -------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
+		        {
+		            $done = $this->__save_premium_AGR_BEE($policy_record, $txn_record);
+		        }
+
 				/**
 				 * MOTOR PORTFOLIOS
 				 * ----------------
@@ -1241,6 +1250,218 @@ class Policy_txn extends MY_Controller
 				 * Validation Rules for Form Processing
 				 */
 				$validation_rules = _TXN_AGR_POULTRY_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
+	            $this->form_validation->set_rules($validation_rules);
+
+	            // echo '<pre>';print_r($validation_rules);exit;
+
+				if($this->form_validation->run() === TRUE )
+	        	{
+
+					// Premium Data
+					$post_data = $this->input->post();
+
+					/**
+					 * Do we have a valid method?
+					 */
+					try{
+
+						/**
+						 * Compute Premium From Post Data
+						 * ------------------------------
+						 */
+						$cost_calculation_table 	= [];
+						$premium_computation_table 	= [];
+
+
+						/**
+						 * Extract Information from Object
+						 * 	A. Sum Insured Amount
+						 */
+						$SI = floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
+
+						/**
+						 * Get Tariff Rate
+						 */
+						$default_rate 	= floatval($tariff->rate);
+
+
+						// A = SI X Default Rate %
+						$A = ( $SI * $default_rate ) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "क. बीमा शुल्क ({$default_rate}%)",
+							'value' => $A
+						];
+
+
+
+						/**
+						 * Direct Discount or Agent Commission?
+						 * ------------------------------------
+						 * Agent Commission or Direct Discount
+						 * applies on NET Premium
+						 */
+						$B = 0.00;
+						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+						{
+							// Direct Discount
+							$B = ( $A * $pfs_record->direct_discount ) / 100.00 ;
+
+							// NULLIFY Commissionable premium, Agent Commission
+							$commissionable_premium = NULL;
+							$agent_commission = NULL;
+						}
+						else
+						{
+							$commissionable_premium = $A;
+							$agent_commission 		= ( $A * $pfs_record->agent_commission ) / 100.00;
+						}
+
+						$cost_calculation_table[] = [
+							'label' => "ख. प्रत्यक्ष छूट ({$pfs_record->direct_discount}%)",
+							'value' => $B
+						];
+
+						// C = A - B
+						$C = $A - $B;
+						$cost_calculation_table[] = [
+							'label' => "ग. (क - ख)",
+							'value' => $C
+						];
+
+
+						// D = 75% of C
+						$D = ($C * 75) / 100.00;
+						$cost_calculation_table[] = [
+							'label' => "घ. ग को ७५% ले हुन आउने छुट",
+							'value' => $D
+						];
+
+						// NET PREMIUM = C - D
+						$NET_PREMIUM = $C - $D;
+						$cost_calculation_table[] = [
+							'label' => "ङ. जम्मा (ग - घ)",
+							'value' => $NET_PREMIUM
+						];
+
+
+						/**
+						 * Compute VAT
+						 */
+						$taxable_amount = $post_data['amt_stamp_duty']; // Vat applies only for Ticket
+						$this->load->helper('account');
+						$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+						/**
+						 * Prepare Transactional Data
+						 */
+						$txn_data = [
+							'amt_total_premium' 	=> $NET_PREMIUM,
+							'amt_pool_premium' 		=> 0.00,
+							'amt_commissionable'	=> $commissionable_premium,
+							'amt_agent_commission'  => $agent_commission,
+							'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+							'amt_vat' 				=> $amount_vat,
+							'txn_details' 			=> $post_data['txn_details'],
+							'remarks' 				=> $post_data['remarks'],
+						];
+
+
+						/**
+						 * Premium Computation Table
+						 * -------------------------
+						 * NOT Applicable!!!
+						 */
+						$premium_computation_table = NULL;
+						$txn_data['premium_computation_table'] = $premium_computation_table;
+
+
+						/**
+						 * Cost Calculation Table
+						 */
+						$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+						return $this->policy_txn_model->save($txn_record->id, $txn_data);
+
+
+						/**
+						 * @TODO
+						 *
+						 * 1. Build RI Distribution Data For This Policy
+						 * 2. RI Approval Constraint for this Policy
+						 */
+
+					} catch (Exception $e){
+
+						return $this->template->json([
+							'status' 	=> 'error',
+							'message' 	=> $e->getMessage()
+						], 404);
+					}
+	        	}
+	        	else
+	        	{
+	        		return $this->template->json([
+						'status' 	=> 'error',
+						'title' 	=> 'Validation Error!',
+						'message' 	=> validation_errors()
+					]);
+	        	}
+			}
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Update Policy Premium Information - AGRICULTURE - BEE
+		 *
+		 *	!!! Important: Fresh/Renewal Only
+		 *
+		 * @param object $policy_record  	Policy Record
+		 * @param object $txn_record 	 	Policy Transaction Record
+		 * @return json
+		 */
+		private function __save_premium_AGR_BEE($policy_record, $txn_record)
+		{
+			/**
+			 * Form Submitted?
+			 */
+			$return_data = [];
+
+			if( $this->input->post() )
+			{
+				/**
+				 * Policy Object Record
+				 */
+				$policy_object 		= $this->__get_policy_object($policy_record);
+				$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+
+				/**
+				 * Portfolio Setting Record
+				 */
+				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+
+				/**
+				 * Tariff Record
+				 */
+				try {
+
+					$tariff = _OBJ_AGR_BEE_tariff_by_type($object_attributes->bee_type);
+
+				} catch (Exception $e) {
+
+					return $this->template->json([
+                        'status'        => 'error',
+                        'title' 		=> 'Exception Occured',
+                        'message' 	=> $e->getMessage()
+                    ], 404);
+				}
+
+
+				/**
+				 * Validation Rules for Form Processing
+				 */
+				$validation_rules = _TXN_AGR_BEE_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
 	            $this->form_validation->set_rules($validation_rules);
 
 	            // echo '<pre>';print_r($validation_rules);exit;
@@ -3565,6 +3786,16 @@ class Policy_txn extends MY_Controller
 	            $goodies = $this->__premium_goodies_AGR_POULTRY($policy_record, $policy_object);
 	        }
 
+	        /**
+	         * AGRICULTURE - BEE(Apiculture) SUB-PORTFOLIO
+	         * -------------------------------------------
+	         */
+	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
+	        {
+	            $goodies = $this->__premium_goodies_AGR_BEE($policy_record, $policy_object);
+	        }
+
+
 			/**
 			 * MOTOR PORTFOLIOS
 			 * ----------------
@@ -3832,6 +4063,66 @@ class Policy_txn extends MY_Controller
 
 			// Let's Get the Validation Rules
 			$validation_rules = _TXN_AGR_POULTRY_premium_validation_rules( $policy_record, $pfs_record, $tariff_record );
+
+
+			// Return the goodies
+			return  [
+				'validation_rules' 	=> $validation_rules,
+				'tariff_record' 	=> $tariff_record
+			];
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Get Policy Policy Transaction Goodies for BEE (Agriculture)
+		 *
+		 * Get the following goodies for the Poultry Portfolio
+		 * 		1. Validation Rules
+		 * 		2. Tariff Record if Applies
+		 *
+		 * @param object $policy_record Policy Record
+		 * @param object $policy_object Policy Object Record
+		 *
+		 * @return	array
+		 */
+		private function __premium_goodies_AGR_BEE($policy_record, $policy_object)
+		{
+			// Tariff Configuration for this Portfolio
+			$this->load->model('tariff_agriculture_model');
+			$tariff_record = $this->tariff_agriculture_model->get_by_fy_portfolio( $policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+			// Valid Tariff?
+			$__flag_valid_tariff = TRUE;
+			if( !$tariff_record )
+			{
+				$message 	= 'Tariff Configuration for this Portfolio is not found.';
+				$title 		= 'Tariff Not Found!';
+				$__flag_valid_tariff = FALSE;
+			}
+			else if( $tariff_record->active == IQB_STATUS_INACTIVE )
+			{
+				$message = 'Tariff Configuration for this Portfolio is <strong>Inactive</strong>.';
+				$title = 'Tariff Not Active!';
+				$__flag_valid_tariff = FALSE;
+			}
+
+			if( !$__flag_valid_tariff )
+			{
+				$message .= '<br/><br/>Portfolio: <strong>BEE</strong> <br/>' .
+							'Sub-Portfolio: <strong>' . $policy_record->portfolio_name . '</strong> <br/>' .
+							'<br/>Please contact <strong>IT Department</strong> for further assistance.';
+
+				$this->template->json(['error' => 'not_found', 'message' => $message, 'title' => $title], 404);
+				exit(1);
+			}
+
+
+			// Portfolio Setting Record
+			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+			// Let's Get the Validation Rules
+			$validation_rules = _TXN_AGR_BEE_premium_validation_rules( $policy_record, $pfs_record, $tariff_record );
 
 
 			// Return the goodies

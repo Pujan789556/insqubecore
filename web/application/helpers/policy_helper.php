@@ -1022,6 +1022,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 				$schedule_view = 'policies/print/schedule_AGR_POULTRY';
 				break;
 
+			// AGRICULTURE - BEE SUB-PORTFOLIO
+			case IQB_SUB_PORTFOLIO_AGR_BEE_ID:
+				$schedule_view = 'policies/print/schedule_AGR_BEE';
+				break;
+
 			// Motor
 			case IQB_SUB_PORTFOLIO_MOTORCYCLE_ID:
 			case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID:
