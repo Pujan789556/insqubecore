@@ -28,7 +28,7 @@ $cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn
 				                <td class="text-right"><strong><?php echo number_format( (float)$txn_record->amt_stamp_duty, 2, '.', '')?></strong></td>
 				            </tr>
 				            <tr>
-				                <td class="text-right"><strong>मु. अ. क. (VAT)</strong></td>
+				                <td class="text-right"><strong>टिकटको मु. अ. क. (VAT)</strong></td>
 				                <td class="text-right"><strong><?php echo number_format( (float)$txn_record->amt_vat, 2, '.', '');?></strong></td>
 				            </tr>
 				            <tr>

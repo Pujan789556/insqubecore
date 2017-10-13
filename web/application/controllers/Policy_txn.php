@@ -914,7 +914,7 @@ class Policy_txn extends MY_Controller
 						/**
 						 * Compute VAT
 						 */
-						$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
+						$taxable_amount = $post_data['amt_stamp_duty']; // Vat applies only for Ticket
 						$this->load->helper('account');
 						$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
@@ -1126,7 +1126,7 @@ class Policy_txn extends MY_Controller
 						/**
 						 * Compute VAT
 						 */
-						$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
+						$taxable_amount = $post_data['amt_stamp_duty']; // Vat applies only for Ticket
 						$this->load->helper('account');
 						$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
@@ -1338,7 +1338,7 @@ class Policy_txn extends MY_Controller
 						/**
 						 * Compute VAT
 						 */
-						$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
+						$taxable_amount = $post_data['amt_stamp_duty']; // Vat applies only for Ticket
 						$this->load->helper('account');
 						$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
