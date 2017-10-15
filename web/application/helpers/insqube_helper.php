@@ -777,16 +777,6 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
-         * MOTOR
-         * -----
-         * We have a single helper file for motor portfolio
-         */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
-        {
-            $CI->load->helper('ph_motor');
-        }
-
-        /**
          * FIRE
          * -----
          * Fire Portfolio Helper Functions
@@ -864,6 +854,26 @@ if ( ! function_exists('load_portfolio_helper'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
             $CI->load->helper('ph_eng_mb');
+        }
+
+        /**
+         * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+         * ---------------------------------------------
+         * MISC Sub Portfolio Helper Functions
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
+        {
+            $CI->load->helper('ph_misc_gpa');
+        }
+
+        /**
+         * MOTOR
+         * -----
+         * We have a single helper file for motor portfolio
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+        {
+            $CI->load->helper('ph_motor');
         }
 
         /**

@@ -134,3 +134,12 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
     $this->load->view('objects/snippets/_popup_eng_mb', $data);
 }
 
+/**
+ * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+ * ---------------------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
+{
+    $this->load->view('objects/snippets/_popup_misc_gpa', $data);
+}
+

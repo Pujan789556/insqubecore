@@ -97,12 +97,12 @@ defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest auto
 | 		1 month = 86400 * 30 	= 2592000
 |
 */
-define('CACHE_DURATION_HR', 3600);
-define('CACHE_DURATION_6HRS', 21600);
-define('CACHE_DURATION_HALF_DAY', 43200);
-define('CACHE_DURATION_DAY', 86400);
-define('CACHE_DURATION_WEEK', 604800);
-define('CACHE_DURATION_MONTH', 2592000);
+define('CACHE_DURATION_HR', 		3600);
+define('CACHE_DURATION_6HRS', 		21600);
+define('CACHE_DURATION_HALF_DAY', 	43200);
+define('CACHE_DURATION_DAY', 		86400);
+define('CACHE_DURATION_WEEK', 		604800);
+define('CACHE_DURATION_MONTH', 		2592000);
 
 /*
 |--------------------------------------------------------------------------
@@ -110,7 +110,7 @@ define('CACHE_DURATION_MONTH', 2592000);
 |--------------------------------------------------------------------------
 |
 */
-define('IQB_BLANK_SELECT', 	['' => 'Select...']);
+define('IQB_BLANK_SELECT', 	[''  => 'Select...']);
 define('IQB_ZERO_SELECT', 	['0' => 'Select...']);
 
 
@@ -148,7 +148,7 @@ define('IQB_FLAG_UNLOCKED',	0);
 |
 */
 define('IQB_RISK_TYPE_BASIC',       1);
-define('IQB_RISK_TYPE_POOL',         2);
+define('IQB_RISK_TYPE_POOL',        2);
 
 
 /*
@@ -179,11 +179,13 @@ define('IQB_COMPANY_ID_BEEMA_SAMITI',  1);
 |
 */
 define('IQB_MASTER_PORTFOLIO_AGR_ID',  		1);
-define('IQB_MASTER_PORTFOLIO_ENG_ID',  		2);
-define('IQB_MASTER_PORTFOLIO_FIRE_ID',      3);
-define('IQB_MASTER_PORTFOLIO_MARINE_ID',    4);
-define('IQB_MASTER_PORTFOLIO_MISC_ID',      5);
-define('IQB_MASTER_PORTFOLIO_MOTOR_ID',     6);
+define('IQB_MASTER_PORTFOLIO_AVIATION_ID',  2);
+define('IQB_MASTER_PORTFOLIO_ENG_ID',  		3);
+define('IQB_MASTER_PORTFOLIO_FIRE_ID',      4);
+define('IQB_MASTER_PORTFOLIO_MARINE_ID',    5);
+define('IQB_MASTER_PORTFOLIO_MICRO_ID',     6);
+define('IQB_MASTER_PORTFOLIO_MISC_ID',      7);
+define('IQB_MASTER_PORTFOLIO_MOTOR_ID',     8);
 
 
 /*
@@ -285,6 +287,18 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE',  [
 	IQB_SUB_PORTFOLIO_MARINE_ROAD_AIR_TRANSIT_ID 	=> 'Road/Air Transit',
 	IQB_SUB_PORTFOLIO_MARINE_ROAD_TANSIT_ID			=>  'Road Transit'
 ]);
+
+
+/*
+|--------------------------------------------------------------------------
+| MISCELLANEOUS PORTFOLIO - SUB-PORTFOLIOS IDS
+|--------------------------------------------------------------------------
+|
+| WARNING: Should be exactly same as in database, add here if you add in db
+|
+*/
+define('IQB_SUB_PORTFOLIO_MISC_GPA_ID', 	47); 	// Group Personnel Accident
+
 
 
 /*

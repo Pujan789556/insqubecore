@@ -164,6 +164,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
+        {
+            $snippet = _OBJ_MISC_GPA_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * Throw Exception
          */
         else
@@ -321,6 +330,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
             $snippet = _OBJ_ENG_MB_select_text($record);
+        }
+
+        /**
+         * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
+        {
+            $snippet = _OBJ_MISC_GPA_select_text($record);
         }
 
         /**
@@ -488,6 +506,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
+        {
+            $v_rules = _OBJ_MISC_GPA_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -648,6 +675,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         }
 
         /**
+         * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_misc_gpa';
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -782,6 +818,14 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
 			case IQB_SUB_PORTFOLIO_ENG_MB_ID:
 				$method = '_OBJ_ENG_MB_pre_save_tasks';
 				break;
+
+            /**
+             * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+             * ---------------------------------------------
+             */
+            case IQB_SUB_PORTFOLIO_MISC_GPA_ID:
+                $method = '_OBJ_MISC_GPA_pre_save_tasks';
+                break;
 
 			default:
 				# code...
@@ -955,6 +999,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
             $amt_sum_insured = _OBJ_ENG_MB_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
+        {
+            $amt_sum_insured = _OBJ_MISC_GPA_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

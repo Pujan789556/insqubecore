@@ -12,7 +12,7 @@
 .no-padding-b{padding-bottom: 0px !important;}
 .no-shadow{box-shadow: none;}
 .hr-medium{margin-top:10px; margin-bottom: 10px;}
-
+.scroll-x{overflow-x: scroll;}
 
 
 /* ------------------------------ */
