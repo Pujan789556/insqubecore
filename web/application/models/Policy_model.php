@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'proposer', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
     protected $validation_rules = [];
 
@@ -200,8 +200,25 @@ class Policy_model extends MY_Model
                     [
                         'field' => 'proposer',
                         'label' => 'Proposed By',
-                        'rules' => 'trim|max_length[255]',
+                        'rules' => 'trim|htmlspecialchars|max_length[255]',
                         '_id'       => 'proposer-text',
+                        '_type'     => 'text',
+                        '_required' => false
+                    ],
+                    [
+                        'field' => 'proposer_address',
+                        'label' => 'Address',
+                        'rules' => 'trim|htmlspecialchars|max_length[250]',
+                        '_id'       => 'proposer-address',
+                        '_type'     => 'textarea',
+                        'rows'      => 4,
+                        '_required' => false
+                    ],
+                    [
+                        'field' => 'proposer_profession',
+                        'label' => 'Profession',
+                        'rules' => 'trim|htmlspecialchars|max_length[100]',
+                        '_id'       => 'proposer-profession',
                         '_type'     => 'text',
                         '_required' => false
                     ]

@@ -33,7 +33,7 @@ echo form_open( $this->uri->uri_string(),
 
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">
-          <h4 class="box-title">Select Customer</h4>
+          <h4 class="box-title">Proposer Information</h4>
         </div>
         <div class="box-body">
             <?php
@@ -46,6 +46,14 @@ echo form_open( $this->uri->uri_string(),
                 'form_record'   => $record
             ]);
             ?>
+        </div>
+    </div>
+
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
+          <h4 class="box-title">Select Customer</h4>
+        </div>
+        <div class="box-body">
             <div id="_customer-box">
                 <div class="form-group <?php echo form_error('customer_id') ? 'has-error' : '';?>">
                   <label class="col-sm-2 control-label">Customer<?php echo field_compulsary_text( TRUE )?></label>
