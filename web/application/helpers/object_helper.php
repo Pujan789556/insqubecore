@@ -173,6 +173,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+        {
+            $snippet = _OBJ_MISC_PA_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * Throw Exception
          */
         else
@@ -339,6 +348,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
         {
             $snippet = _OBJ_MISC_GPA_select_text($record);
+        }
+
+        /**
+         * MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+        {
+            $snippet = _OBJ_MISC_PA_select_text($record);
         }
 
         /**
@@ -515,6 +533,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+        {
+            $v_rules = _OBJ_MISC_PA_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -681,6 +708,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
         {
             $attribute_form = 'objects/forms/_form_object_misc_gpa';
+        }
+
+        /**
+         * MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_misc_pa';
         }
 
         /**
@@ -1008,6 +1044,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
         {
             $amt_sum_insured = _OBJ_MISC_GPA_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+        {
+            $amt_sum_insured = _OBJ_MISC_PA_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

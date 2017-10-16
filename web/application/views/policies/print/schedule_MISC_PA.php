@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Schedule Print : MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+ * Schedule Print : MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
  */
 
 $this->load->helper('ph_misc_gpa');
@@ -8,7 +8,7 @@ $this->load->helper('ph_misc_gpa');
 $object_attributes  = json_decode($record->object_attributes);
 $premium_attributes = json_decode($record->premium_attributes);
 
-$schedule_table_title   = 'सामुहिक दुर्घटना बीमालेख';
+$schedule_table_title   = 'व्यक्तिगत दुर्घटना बीमालेख';
 
 ?>
 <!DOCTYPE html>
@@ -78,7 +78,7 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                         <table class="table" width="100%">
                             <tr>
                                 <td>
-                                    <h4 class="border-b">बीमालेख धारक (Policy Holder) संस्थाको</h4><br/>
+                                    <h4 class="border-b">बीमितको</h4><br/>
                                     नाम ठेगाना:<br/>
                                     <?php
                                     /**
@@ -107,16 +107,22 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
 
                             <tr>
                                 <td>
-                                    <strong>यस बीमालेखले रक्षावरण गरेका बीमितहरु</strong><br/>
-                                    संलग्न बीमितको विवरण सूचि बमोजिम ।
+                                    <strong>इच्छाएको ब्यक्तिको</strong><br/>
+                                    नाम थर : <?php echo htmlspecialchars($object_attributes->nominee) ?><br>
+                                    पिताको नाम थर: <?php echo htmlspecialchars($object_attributes->nominee_father) ?><br>
+                                    आमाको नाम थर: <?php echo htmlspecialchars($object_attributes->nominee_mother) ?><br>
+                                    बीमित र इच्छाएको ब्यक्ति बीचको नाता: <?php echo htmlspecialchars($object_attributes->nominee_relation) ?>
                                 </td>
                             </tr>
 
                             <tr>
                                 <td>
-                                    <strong></strong><br/>
-                                    बीमांक रकम (रु): <?php echo number_format((float)$record->object_amt_sum_insured, 2, '.', '')?><br>
-                                    (संलग्न बीमितको विवरण सूचि बमोजिम ।)
+                                    बीमांक रकम (रु): <?php echo number_format((float)$record->object_amt_sum_insured, 2, '.', '')?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    लाभ: <?php echo htmlspecialchars($object_attributes->benefits) ?>
                                 </td>
                             </tr>
 

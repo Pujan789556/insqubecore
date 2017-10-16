@@ -867,6 +867,16 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+         * ---------------------------------------------
+         * MISC Sub Portfolio Helper Functions
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+        {
+            $CI->load->helper('ph_misc_pa');
+        }
+
+        /**
          * MOTOR
          * -----
          * We have a single helper file for motor portfolio

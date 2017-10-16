@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * InsQube MACHINE BREAKDOWN - MISCELLANEOUS Portfolio Helper Functions
+ * InsQube MISCELLANEOUS Portfolio Helper Functions
  *
  * This file contains helper functions related to MISCELLANEOUS Portfolio
  *

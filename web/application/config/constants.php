@@ -298,6 +298,7 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE',  [
 |
 */
 define('IQB_SUB_PORTFOLIO_MISC_GPA_ID', 	47); 	// Group Personnel Accident
+define('IQB_SUB_PORTFOLIO_MISC_PA_ID', 		52); 	// Personnel Accident
 
 
 

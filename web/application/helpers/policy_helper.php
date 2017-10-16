@@ -535,6 +535,16 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
         }
 
         /**
+         * MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+         * ---------------------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+        {
+            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_PA";
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -663,6 +673,15 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_MISC_GPA';
+        }
+
+        /**
+         * MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_MISC_PA';
         }
 
 
@@ -1109,6 +1128,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			// MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
 			case IQB_SUB_PORTFOLIO_MISC_GPA_ID:
 				$schedule_view = 'policies/print/schedule_MISC_GPA';
+				break;
+
+			// MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+			case IQB_SUB_PORTFOLIO_MISC_PA_ID:
+				$schedule_view = 'policies/print/schedule_MISC_PA';
 				break;
 
 			default:

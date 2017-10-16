@@ -744,6 +744,15 @@ class Policy_txn extends MY_Controller
 		            $done = $this->__save_premium_MISC_GPA( $policy_record, $txn_record );
 		        }
 
+		        /**
+		         * MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+		         * ---------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+		        {
+		            $done = $this->__save_premium_MISC_PA( $policy_record, $txn_record );
+		        }
+
 				else
 				{
 					return $this->template->json([
@@ -4107,6 +4116,204 @@ class Policy_txn extends MY_Controller
 			}
 		}
 
+		// --------------------------------------------------------------------
+
+		/**
+		 * Update Policy Premium Information - MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+		 *
+		 *	!!! Important: Fresh/Renewal Only
+		 *
+		 * @param object $policy_record  	Policy Record
+		 * @param object $txn_record 	 	Policy Transaction Record
+		 * @return json
+		 */
+		private function __save_premium_MISC_PA($policy_record, $txn_record)
+		{
+			/**
+			 * Form Submitted?
+			 */
+			$return_data = [];
+
+			if( $this->input->post() )
+			{
+
+				/**
+				 * Policy Object Record
+				 */
+				$policy_object 		= $this->__get_policy_object($policy_record);
+
+				/**
+				 * Portfolio Setting Record
+				 */
+				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+
+				/**
+				 * Validation Rules for Form Processing
+				 */
+				$validation_rules = _TXN_MISC_PA_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
+	            $this->form_validation->set_rules($validation_rules);
+
+	            // echo '<pre>';print_r($validation_rules);exit;
+
+				if($this->form_validation->run() === TRUE )
+	        	{
+
+					// Premium Data
+					$post_data = $this->input->post();
+
+					/**
+					 * Do we have a valid method?
+					 */
+					try{
+
+						/**
+						 * Compute Premium From Post Data
+						 * ------------------------------
+						 */
+						$cost_calculation_table 	= [];
+						$premium_computation_table 	= [];
+
+
+						/**
+						 * Extract Information from Object
+						 * 	A. Object Atrributes
+						 * 	B. Sum Insured Amount
+						 */
+						$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+						$SI 				= floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
+
+
+						/**
+						 * Get post premium Data
+						 * 	a. Default Rate (X Rs per Thousand)
+						 * 	b. Pool Premium Rate (Y Rs per Thousand)
+						 */
+						$post_premium 				= $post_data['premium'];
+						$default_rate 				= floatval($post_premium['default_rate']);
+						$pool_rate 					= floatval($post_premium['pool_rate']);
+
+						// SI in Thousands
+						$SIK = $SI / 1000;
+
+						// A =  SIK X Default Rate
+						$A = $SIK * $default_rate;
+						$cost_calculation_table[] = [
+							'label' => "जोखिम समूह वाहेकको बीमाशुल्क",
+							'value' => $A
+						];
+
+						// B = SIK X Pool Rate
+						$B = $SIK * $pool_rate;
+						$cost_calculation_table[] = [
+							'label' => "जोखिम समूहको बीमाशुल्क",
+							'value' => $B
+						];
+						$POOL_PREMIUM = $B;
+
+						/**
+						 * Direct Discount or Agent Commission?
+						 * ------------------------------------
+						 * Agent Commission or Direct Discount
+						 * applies on Basic Premium
+						 */
+						$C = 0.00;
+						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+						{
+							// Direct Discount
+							$C = ( $A * $pfs_record->direct_discount ) / 100.00 ;
+
+							// NULLIFY Commissionable premium, Agent Commission
+							$commissionable_premium = NULL;
+							$agent_commission = NULL;
+						}
+						else
+						{
+							$commissionable_premium = $A;
+							$agent_commission 		= ( $A * $pfs_record->agent_commission ) / 100.00;
+						}
+
+						$cost_calculation_table[] = [
+							'label' => "प्रत्यक्ष छुट ({$pfs_record->direct_discount}%)",
+							'value' => $C
+						];
+
+
+						// Net Premium
+						$NET_PREMIUM = $A + $B - $C;
+						$cost_calculation_table[] = [
+							'label' => "कुल बीमाशुल्क",
+							'value' => $NET_PREMIUM
+						];
+
+
+						/**
+						 * Compute VAT
+						 */
+						$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
+						$this->load->helper('account');
+						$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+						/**
+						 * Prepare Transactional Data
+						 *
+						 * @TODO: What is Pool Premium Amount?
+						 */
+						$txn_data = [
+							'amt_total_premium' 	=> $NET_PREMIUM,
+							'amt_pool_premium' 		=> $POOL_PREMIUM,
+							'amt_commissionable'	=> $commissionable_premium,
+							'amt_agent_commission'  => $agent_commission,
+							'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+							'amt_vat' 				=> $amount_vat,
+							'txn_details' 			=> $post_data['txn_details'],
+							'remarks' 				=> $post_data['remarks'],
+						];
+
+
+						/**
+						 * Premium Computation Table
+						 * -------------------------
+						 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+						 */
+						$premium_computation_table = json_encode($post_premium);
+						$txn_data['premium_computation_table'] = $premium_computation_table;
+
+
+						/**
+						 * Cost Calculation Table
+						 */
+						$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+						return $this->policy_txn_model->save($txn_record->id, $txn_data);
+
+
+						/**
+						 * @TODO
+						 *
+						 * 1. Build RI Distribution Data For This Policy
+						 * 2. RI Approval Constraint for this Policy
+						 */
+
+					} catch (Exception $e){
+
+						return $this->template->json([
+							'status' 	=> 'error',
+							'message' 	=> $e->getMessage()
+						], 404);
+					}
+	        	}
+	        	else
+	        	{
+	        		return $this->template->json([
+						'status' 	=> 'error',
+						'title' 	=> 'Validation Error!',
+						'message' 	=> validation_errors()
+					]);
+	        	}
+			}
+		}
+
 	// --------------- END: SAVE PREMIUM FUNCTIONS --------------------
 
 
@@ -4333,6 +4540,15 @@ class Policy_txn extends MY_Controller
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
 	        {
 	            $goodies = $this->__premium_goodies_MISC_GPA($policy_record, $policy_object);
+	        }
+
+	        /**
+	         * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+	         * ---------------------------------------------
+	         */
+	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+	        {
+	            $goodies = $this->__premium_goodies_MISC_PA($policy_record, $policy_object);
 	        }
 
 			/**
@@ -5007,6 +5223,39 @@ class Policy_txn extends MY_Controller
 
 			// Let's Get the Validation Rules
 			$validation_rules = _TXN_MISC_GPA_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
+
+
+			// Return the goodies
+			return  [
+				'validation_rules' 	=> $validation_rules,
+				'tariff_record' 	=> NULL
+			];
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Get Policy Policy Transaction Goodies for Boiler Explosion
+		 *
+		 * Portfolio 		: MISCELLANEOUS
+		 * Sub-Portfolio	: PERSONNEL ACCIDENT(PA)
+		 *
+		 * Get the following goodies for the Motor Portfolio
+		 * 		1. Validation Rules
+		 * 		2. Tariff Record if Applies
+		 *
+		 * @param object $policy_record Policy Record
+		 * @param object $policy_object Policy Object Record
+		 *
+		 * @return	array
+		 */
+		private function __premium_goodies_MISC_PA($policy_record, $policy_object)
+		{
+			// Portfolio Setting Record
+			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+			// Let's Get the Validation Rules
+			$validation_rules = _TXN_MISC_PA_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
 
 
 			// Return the goodies
