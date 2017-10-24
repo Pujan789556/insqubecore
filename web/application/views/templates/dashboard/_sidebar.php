@@ -184,6 +184,12 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                                             </a>
                                                       </li>
 
+                                                      <li class="<?php echo set_menu_active($nav_level_3, 'misc_bb');?>">
+                                                            <a href="<?php echo site_url('tariff/misc_bb');?>">
+                                                                  <i class="fa fa-circle-o"></i> MISC - Banker's Blanket
+                                                            </a>
+                                                      </li>
+
                                                       <li class="<?php echo set_menu_active($nav_level_3, 'motor');?>">
                                                             <a href="<?php echo site_url('tariff/motor');?>">
                                                                   <i class="fa fa-circle-o"></i> Motor
