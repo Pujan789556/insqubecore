@@ -155,23 +155,6 @@ if ( ! function_exists('_OBJ_MISC_PA_validation_rules'))
 		$fromatted_v_rules = [];
 		if($formatted === TRUE)
 		{
-			/**
-			 * If excel file uploaded, we do not need any validation rules!
-			 * But to run the function "$this->form_validation->run()", let's
-			 * build a dummy validation rule
-			 */
-			if( $CI->input->post() && !empty($_FILES['document']['name']) )
-			{
-				unset($v_rules);
-				$v_rules['dummy'] = [
-					[
-				        'field' => 'dummy',
-				        '_key' => 'dummy',
-				        'rules' => 'alpha',
-				    ]
-				];
-			}
-
 			foreach ($v_rules as $key=>$section)
 			{
 				$fromatted_v_rules = array_merge($fromatted_v_rules, $section);
