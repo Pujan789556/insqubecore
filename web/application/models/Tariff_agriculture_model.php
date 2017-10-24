@@ -45,7 +45,6 @@ class tariff_agriculture_model extends MY_Model
     {
         parent::__construct();
 
-        $this->load->helper('ph_motor');
 
         // Valication Rule
         $this->validation_rules();
