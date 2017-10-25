@@ -856,6 +856,17 @@ if ( ! function_exists('load_portfolio_helper'))
             $CI->load->helper('ph_eng_mb');
         }
 
+
+        /**
+         * MISCELLANEOUS - BANKER'S BLANKET(BB)
+         * -------------------------------------
+         * MISC Sub Portfolio Helper Functions
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
+        {
+            $CI->load->helper('ph_misc_bb');
+        }
+
         /**
          * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
          * ---------------------------------------------

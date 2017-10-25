@@ -46,61 +46,15 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
         <div class="box-header with-border">
             <h4 class="box-title">Tariff Details</h4>
         </div>
-        <?php
-        $section_elements   = $form_elements['tariff'];
-        $tariff = json_decode($record->tariff ?? '[]');
-        ?>
-        <table class="table table-bordered table-condensed no-margin">
-            <thead>
-                <tr>
-                    <?php foreach($section_elements as $elem): ?>
-                        <th><?php echo $elem['label'] ?></th>
-                    <?php endforeach ?>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                if($tariff):
-                    $i = 0;
-                    foreach($tariff as $single_tarrif):?>
-                        <tr <?php echo $i == 0 ? 'id="__misc_bb_tariff_row"' : '' ?>>
-                            <?php
-                            /**
-                             * Single Row
-                             */
-                            $this->load->view('templates/_common/_form_components_table', [
-                                'form_elements' => $section_elements,
-                                'form_record'   => $single_tarrif
-                            ]);
-
-                            if($i == 0):?>
-                                <td>&nbsp;</td>
-                            <?php else:?>
-                                <td width="10%"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'><i class="fa fa-trash"></i></a></td>
-                            <?php endif;?>
-                        </tr>
-                    <?php
-                    $i++;
-                    endforeach;
-                else:?>
-                    <tr id="__misc_bb_tariff_row">
-                        <?php
-                        /**
-                         * Single Row (Default)
-                         */
-                        $this->load->view('templates/_common/_form_components_table', [
-                            'form_elements' => $section_elements,
-                            'form_record'   => NULL
-                        ]);
-                        ?>
-                        <td>&nbsp;</td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-        <div class="box-footer bg-info">
-            <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__misc_bb_tariff_row', this)">Add More</a>
+        <div class="box-body form-horizontal">
+            <?php
+            $section_elements   = $form_elements['tariff'];
+            $tariff_record = json_decode($record->tariff ?? NULL);
+            $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements'     => $section_elements,
+                    'form_record'       => $tariff_record
+            ]);
+            ?>
         </div>
     </div>
     <button type="submit" class="hide">Submit</button>

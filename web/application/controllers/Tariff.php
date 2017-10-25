@@ -765,40 +765,12 @@ class Tariff extends MY_Controller
                 $data   = $this->input->post();
                 $tariff = $data['tariff'];
 
-                /**
-                 * Check if we have duplicate code?
-                 */
-                if( count($tariff['code']) != count(array_unique($tariff['code'])) )
-                {
-                    return $this->template->json([
-                        'status'        => 'error',
-                        'message'       => 'Code must be unique.'
-                    ]);
-                }
 
 
-                $post_data = [];
-
-                /**
-                 * Prepare Tariff
-                 */
-                $tariff_count   = count($tariff['name']);
-                $tariff_data    = [];
-                for($i = 0; $i < $tariff_count; $i++)
-                {
-                    $single_tarrif = [
-                        'code'      => strtoupper($tariff['code'][$i]),
-                        'name'      => $tariff['name'][$i],
-                        'rate'      => $tariff['rate'][$i],
-                    ];
-
-                    $tariff_data[] = $single_tarrif;
-                }
-
-                $post_data['tariff'] = json_encode($tariff_data);
-
-                // Activate Tariff
-                $post_data['active'] = $data['active'] ?? 0;
+                $post_data = [
+                    'tariff' => json_encode($tariff),
+                    'active' => $data['active'] ?? 0
+                ];
 
 
                 /**

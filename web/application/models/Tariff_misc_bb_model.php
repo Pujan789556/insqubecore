@@ -105,29 +105,29 @@ class Tariff_misc_bb_model extends MY_Model
              */
             'tariff' => [
                 [
-                    'field' => 'tariff[code][]',
-                    '_key'  => 'code',
-                    'label' => 'Code',
-                    'rules' => 'trim|required|alpha_numeric|strtoupper|max_length[20]',
-                    '_type'     => 'text',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'tariff[name][]',
-                    '_key'  => 'name',
-                    'label' => 'Name',
-                    'rules' => 'trim|required|htmlspecialchars|max_length[100]',
-                    '_type'     => 'text',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'tariff[rate][]',
-                    '_key'  => 'rate',
-                    'label' => 'Premium Rate(%)',
+                    'field' => 'tariff[basic]',
+                    '_key'  => 'basic',
+                    'label' => 'Basic Premium Rate(%)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
+                [
+                    'field' => 'tariff[cip]',
+                    '_key'  => 'cip',
+                    'label' => 'Cash in Premises Premium Rate(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[cit]',
+                    '_key'  => 'cit',
+                    'label' => 'Cash in Transit Premium Rate(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
             ]
         ];
 
@@ -204,6 +204,39 @@ class Tariff_misc_bb_model extends MY_Model
                         ->get()->row();
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Record for Given Fiscal Year/Portfolio
+     *
+     * @param int $fiscal_yr_id
+     * @param int $portfolio_id
+     * @return object
+     */
+    public function get_by_fy_portfolio($fiscal_yr_id, $portfolio_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'trfmisc_bb_bfp_' . $fiscal_yr_id . '_' . $portfolio_id;
+        $row        = $this->get_cache($cache_name);
+
+        if(!$row)
+        {
+            $where = [
+                'portfolio_id'  => $portfolio_id,
+                'fiscal_yr_id'  => $fiscal_yr_id,
+            ];
+            $row = $this->db->select('PTMISCBB.*')
+                        ->from($this->table_name . ' PTMISCBB')
+                        ->where($where)
+                        ->get()->row();
+
+            $this->write_cache($row, $cache_name, CACHE_DURATION_DAY);
+        }
+        return $row;
+    }
+
 
     // ----------------------------------------------------------------
 
@@ -227,7 +260,8 @@ class Tariff_misc_bb_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'trfmisc_bb_index_list'
+            'trfmisc_bb_index_list',
+            'trfmisc_bb_bfp_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

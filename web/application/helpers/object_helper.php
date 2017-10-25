@@ -164,6 +164,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * MISCELLANEOUS - BANKER'S BLANKET(BB)
+         * -------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
+        {
+            $snippet = _OBJ_MISC_BB_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
          * ---------------------------------------------
          */
@@ -339,6 +348,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
             $snippet = _OBJ_ENG_MB_select_text($record);
+        }
+
+        /**
+         * MISCELLANEOUS - BANKER'S BLANKET(BB)
+         * -------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
+        {
+            $snippet = _OBJ_MISC_BB_select_text($record);
         }
 
         /**
@@ -524,6 +542,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * MISCELLANEOUS - BANKER'S BLANKET(BB)
+         * -------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
+        {
+            $v_rules = _OBJ_MISC_BB_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
          * ---------------------------------------------
          */
@@ -699,6 +726,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
             $attribute_form = 'objects/forms/_form_object_eng_mb';
+        }
+
+        /**
+         * MISCELLANEOUS - BANKER'S BLANKET(BB)
+         * -------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_misc_bb';
         }
 
         /**
@@ -1035,6 +1071,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
             $amt_sum_insured = _OBJ_ENG_MB_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * MISCELLANEOUS - BANKER'S BLANKET(BB)
+         * -------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
+        {
+            $amt_sum_insured = _OBJ_MISC_BB_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

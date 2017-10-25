@@ -525,6 +525,16 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
         }
 
         /**
+         * MISCELLANEOUS - BANKER'S BLANKET(BB)
+         * -------------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
+        {
+            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_BB";
+        }
+
+        /**
          * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
          * ---------------------------------------------
          * Sub-portfolio wise view
@@ -664,6 +674,16 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_ENG_MB';
+        }
+
+        /**
+         * MISCELLANEOUS - BANKER'S BLANKET(BB)
+         * -------------------------------------
+         * Sub-portfolio wise view
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_MISC_BB';
         }
 
         /**
@@ -1123,6 +1143,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			// ENGINEERING - MACHINE BREAKDOWN
 			case IQB_SUB_PORTFOLIO_ENG_MB_ID:
 				$schedule_view = 'policies/print/schedule_ENG_MB';
+				break;
+
+			// MISCELLANEOUS - BANKER'S BLANKET(BB)
+			case IQB_SUB_PORTFOLIO_MISC_BB_ID:
+				$schedule_view = 'policies/print/schedule_MISC_BB';
 				break;
 
 			// MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)

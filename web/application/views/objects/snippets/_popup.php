@@ -135,6 +135,15 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
 }
 
 /**
+ * MISCELLANEOUS - BANKER'S BLANKET(BB)
+ * -------------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
+{
+    $this->load->view('objects/snippets/_popup_misc_bb', $data);
+}
+
+/**
  * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
  * ---------------------------------------------
  */
