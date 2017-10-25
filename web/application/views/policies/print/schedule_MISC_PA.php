@@ -3,7 +3,6 @@
  * Schedule Print : MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
  */
 
-$this->load->helper('ph_misc_gpa');
 
 $object_attributes  = json_decode($record->object_attributes);
 $premium_attributes = json_decode($record->premium_attributes);
