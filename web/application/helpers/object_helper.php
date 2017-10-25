@@ -191,6 +191,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * MISCELLANEOUS - PUBLIC LIABILITY(PL)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
+        {
+            $snippet = _OBJ_MISC_PL_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * Throw Exception
          */
         else
@@ -375,6 +384,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
         {
             $snippet = _OBJ_MISC_PA_select_text($record);
+        }
+
+        /**
+         * MISCELLANEOUS - PUBLIC LIABILITY(PL)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
+        {
+            $snippet = _OBJ_MISC_PL_select_text($record);
         }
 
         /**
@@ -569,6 +587,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * MISCELLANEOUS - PUBLIC LIABILITY(PL)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
+        {
+            $v_rules = _OBJ_MISC_PL_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -753,6 +780,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
         {
             $attribute_form = 'objects/forms/_form_object_misc_pa';
+        }
+
+        /**
+         * MISCELLANEOUS - PUBLIC LIABILITY(PL)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_misc_pl';
         }
 
         /**
@@ -1098,6 +1134,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
         {
             $amt_sum_insured = _OBJ_MISC_PA_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * MISCELLANEOUS - PUBLIC LIABILITY(PL)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
+        {
+            $amt_sum_insured = _OBJ_MISC_PL_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

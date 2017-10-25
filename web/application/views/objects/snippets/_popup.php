@@ -161,3 +161,12 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
     $this->load->view('objects/snippets/_popup_misc_pa', $data);
 }
 
+/**
+ * MISCELLANEOUS - PUBLIC LIABILITY(PL)
+ * ----------------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
+{
+    $this->load->view('objects/snippets/_popup_misc_pl', $data);
+}
+

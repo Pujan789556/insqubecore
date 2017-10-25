@@ -300,6 +300,7 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE',  [
 define('IQB_SUB_PORTFOLIO_MISC_BB_ID', 		39); 	// Banker's Blanket
 define('IQB_SUB_PORTFOLIO_MISC_GPA_ID', 	47); 	// Group Personnel Accident
 define('IQB_SUB_PORTFOLIO_MISC_PA_ID', 		52); 	// Personnel Accident
+define('IQB_SUB_PORTFOLIO_MISC_PL_ID', 		55); 	// Personnel Accident
 
 
 
