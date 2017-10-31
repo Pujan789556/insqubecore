@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Object Snippet: Boiler Explosion(ENG) Popover
 */
+$this->load->helper('ph_eng_bl');
 $attributes 	= $record->attributes ? json_decode($record->attributes) : NULL;
 $form_elements 	= _OBJ_ENG_BL_validation_rules($record->portfolio_id);
 
@@ -162,7 +163,7 @@ else
                             }
                             else
                             {
-                                echo $section_object->{$elem['_key']};
+                                echo $section_object->{$elem['_key']} ?? '';
                             }
                         ?></td>
                     </tr>

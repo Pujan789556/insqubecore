@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Object Snippet: Marine Popover
 */
+$this->load->helper('ph_marine');
 $attributes 	= $record->attributes ? json_decode($record->attributes) : NULL;
 $form_elements 		= _OBJ_MARINE_validation_rules($record->portfolio_id);
 

@@ -549,3 +549,39 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 	}
 }
 
+// --------------------------------------------------------------------
+
+if ( ! function_exists('_TXN_FIRE_premium_goodies'))
+{
+	/**
+	 * Get Policy Policy Transaction Goodies
+	 *
+	 * Get the following goodies
+	 * 		1. Validation Rules
+	 *
+	 * @param object $policy_record Policy Record
+	 * @param object $policy_object Policy Object Record
+	 * @param object $portfolio_risks Portfolio Risks
+	 *
+	 * @return	array
+	 */
+	function _TXN_FIRE_premium_goodies($policy_record, $policy_object, $portfolio_risks)
+	{
+		$CI =& get_instance();
+
+		// Portfolio Setting Record
+		$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+		// Let's Get the Validation Rules
+		$validation_rules = _TXN_FIRE_premium_validation_rules( $policy_record, $pfs_record, $policy_object, $portfolio_risks );
+
+
+		// Return the goodies
+		return  [
+			'status' 			=> 'success',
+			'validation_rules' 	=> $validation_rules,
+			'tariff_record' 	=> NULL
+		];
+	}
+}
+

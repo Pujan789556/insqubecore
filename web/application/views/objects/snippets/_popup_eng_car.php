@@ -176,7 +176,7 @@ else
                             }
                             else
                             {
-                                echo $section_object->{$elem['_key']};
+                                echo $section_object->{$elem['_key']} ?? '';
                             }
                         ?></td>
                     </tr>

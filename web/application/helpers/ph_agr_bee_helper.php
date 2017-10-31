@@ -476,6 +476,71 @@ if ( ! function_exists('_TXN_AGR_BEE_premium_validation_rules'))
 	}
 }
 
+// --------------------------------------------------------------------
+
+if ( ! function_exists('_TXN_AGR_BEE_premium_goodies'))
+{
+	/**
+	 * Get Policy Policy Transaction Goodies
+	 *
+	 * Get the following goodies
+	 * 		1. Validation Rules
+	 * 		2. Tariff Record if Applies
+	 *
+	 * @param object $policy_record Policy Record
+	 * @param object $policy_object Policy Object Record
+	 *
+	 * @return	array
+	 */
+	function _TXN_AGR_BEE_premium_goodies($policy_record, $policy_object)
+	{
+		$CI =& get_instance();
+
+		// Tariff Configuration for this Portfolio
+		$CI->load->model('tariff_agriculture_model');
+		$tariff_record = $CI->tariff_agriculture_model->get_by_fy_portfolio( $policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+		// Valid Tariff?
+		$__flag_valid_tariff = TRUE;
+		if( !$tariff_record )
+		{
+			$message 	= 'Tariff Configuration for this Portfolio is not found.';
+			$title 		= 'Tariff Not Found!';
+			$__flag_valid_tariff = FALSE;
+		}
+		else if( $tariff_record->active == IQB_STATUS_INACTIVE )
+		{
+			$message 	= 'Tariff Configuration for this Portfolio is <strong>Inactive</strong>.';
+			$title 		= 'Tariff Not Active!';
+			$__flag_valid_tariff = FALSE;
+		}
+
+		if( !$__flag_valid_tariff )
+		{
+			$message .= '<br/><br/>Portfolio: <strong>BEE</strong> <br/>' .
+						'Sub-Portfolio: <strong>' . $policy_record->portfolio_name . '</strong> <br/>' .
+						'<br/>Please contact <strong>IT Department</strong> for further assistance.';
+
+			return ['status' => 'error', 'message' => $message, 'title' => $title];
+		}
+
+
+		// Portfolio Setting Record
+		$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+		// Let's Get the Validation Rules
+		$validation_rules = _TXN_AGR_BEE_premium_validation_rules( $policy_record, $pfs_record, $tariff_record );
+
+
+		// Return the goodies
+		return  [
+			'status' 			=> 'success',
+			'validation_rules' 	=> $validation_rules,
+			'tariff_record' 	=> $tariff_record
+		];
+	}
+}
+
 // ------------------------------------------------------------------------
 
 if ( ! function_exists('_OBJ_AGR_BEE_tariff_by_type'))

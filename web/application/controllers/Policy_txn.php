@@ -4050,7 +4050,7 @@ class Policy_txn extends MY_Controller
 
 						// Additional Premium - Cash in Transit
 						$cost_calculation_table[] = [
-							'label' => "C. Additional Premium - Cash in Transit Rate ({$premium_cit}%)",
+							'label' => "C. Additional Premium - Cash in Transit Rate ({$rate_cit}%)",
 							'value' => $premium_cit
 						];
 
@@ -4833,13 +4833,10 @@ class Policy_txn extends MY_Controller
 		// Let's get the premium goodies for given portfolio
 		$premium_goodies = $this->__premium_goodies($policy_record, $policy_object, $portfolio_risks);
 
-		// Valid Goodies?
-		if( empty($premium_goodies) )
+		// Not Valid Goodies?
+		if( $premium_goodies['status'] === 'error' )
 		{
-			return $this->template->json([
-				'status' 	=> 'error',
-				'message' 	=> 'No portfolio configuration found for this transaction.'
-			], 400);
+			return $this->template->json($premium_goodies, 400);
 		}
 
 		// Policy Transaction Form
@@ -4901,7 +4898,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
 	        {
-	            $goodies = $this->__premium_goodies_AGR_CROP($policy_record, $policy_object);
+	            $goodies = _TXN_AGR_CROP_premium_goodies($policy_record, $policy_object);
 	        }
 
 	        /**
@@ -4910,7 +4907,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
 	        {
-	            $goodies = $this->__premium_goodies_AGR_CATTLE($policy_record, $policy_object);
+	            $goodies = _TXN_AGR_CATTLE_premium_goodies($policy_record, $policy_object);
 	        }
 
 	        /**
@@ -4919,7 +4916,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
 	        {
-	            $goodies = $this->__premium_goodies_AGR_POULTRY($policy_record, $policy_object);
+	            $goodies = _TXN_AGR_POULTRY_premium_goodies($policy_record, $policy_object);
 	        }
 
 	        /**
@@ -4928,7 +4925,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
 	        {
-	            $goodies = $this->__premium_goodies_AGR_FISH($policy_record, $policy_object);
+	            $goodies = _TXN_AGR_FISH_premium_goodies($policy_record, $policy_object);
 	        }
 
 	        /**
@@ -4937,7 +4934,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
 	        {
-	            $goodies = $this->__premium_goodies_AGR_BEE($policy_record, $policy_object);
+	            $goodies = _TXN_AGR_BEE_premium_goodies($policy_record, $policy_object);
 	        }
 
 
@@ -4947,7 +4944,7 @@ class Policy_txn extends MY_Controller
 			 */
 			else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 			{
-				$goodies = $this->__premium_goodies_MOTOR($policy_record, $policy_object);
+				$goodies = _TXN_MOTOR_premium_goodies($policy_record, $policy_object);
 			}
 
 			/**
@@ -4956,7 +4953,7 @@ class Policy_txn extends MY_Controller
 			 */
 			else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
 			{
-				$goodies = $this->__premium_goodies_FIRE($policy_record, $policy_object, $portfolio_risks);
+				$goodies = _TXN_FIRE_premium_goodies($policy_record, $policy_object, $portfolio_risks);
 			}
 
 			/**
@@ -4965,7 +4962,7 @@ class Policy_txn extends MY_Controller
 			 */
 			else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 			{
-				$goodies = $this->__premium_goodies_MARINE($policy_record, $policy_object);
+				$goodies = _TXN_MARINE_premium_goodies($policy_record, $policy_object);
 			}
 
 			/**
@@ -4974,7 +4971,7 @@ class Policy_txn extends MY_Controller
 			 */
 			else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
 			{
-				$goodies = $this->__premium_goodies_ENG_BL($policy_record, $policy_object);
+				$goodies = _TXN_ENG_BL_premium_goodies($policy_record, $policy_object);
 			}
 
 			/**
@@ -4983,7 +4980,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
 	        {
-	            $goodies = $this->__premium_goodies_ENG_CAR($policy_record, $policy_object);
+	            $goodies = _TXN_ENG_CAR_premium_goodies($policy_record, $policy_object);
 	        }
 
 			/**
@@ -4992,7 +4989,7 @@ class Policy_txn extends MY_Controller
 			 */
 			else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
 			{
-				$goodies = $this->__premium_goodies_ENG_CPM($policy_record, $policy_object);
+				$goodies = _TXN_ENG_CPM_premium_goodies($policy_record, $policy_object);
 			}
 
 			/**
@@ -5001,7 +4998,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
 	        {
-	            $goodies = $this->__premium_goodies_ENG_EEI($policy_record, $policy_object);
+	            $goodies = _TXN_ENG_EEI_premium_goodies($policy_record, $policy_object);
 	        }
 
 	        /**
@@ -5010,7 +5007,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
 	        {
-				$goodies = $this->__premium_goodies_ENG_EAR($policy_record, $policy_object);
+				$goodies = _TXN_ENG_EAR_premium_goodies($policy_record, $policy_object);
 	        }
 
 	        /**
@@ -5019,7 +5016,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
 	        {
-	            $goodies = $this->__premium_goodies_ENG_MB($policy_record, $policy_object);
+	            $goodies = _TXN_ENG_MB_premium_goodies($policy_record, $policy_object);
 	        }
 
 	        /**
@@ -5028,7 +5025,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
 	        {
-	            $goodies = $this->__premium_goodies_MISC_BB($policy_record, $policy_object, $portfolio_risks);
+	            $goodies = _TXN_MISC_BB_premium_goodies($policy_record, $policy_object, $portfolio_risks);
 	        }
 
 	        /**
@@ -5037,7 +5034,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
 	        {
-	            $goodies = $this->__premium_goodies_MISC_GPA($policy_record, $policy_object);
+	        	$goodies = _TXN_MISC_GPA_premium_goodies($policy_record, $policy_object);
 	        }
 
 	        /**
@@ -5046,7 +5043,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
 	        {
-	            $goodies = $this->__premium_goodies_MISC_PA($policy_record, $policy_object);
+	            $goodies = _TXN_MISC_PA_premium_goodies($policy_record, $policy_object);
 	        }
 
 	        /**
@@ -5055,7 +5052,7 @@ class Policy_txn extends MY_Controller
 	         */
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
 	        {
-	            $goodies = $this->__premium_goodies_MISC_PL($policy_record, $policy_object);
+	            $goodies = _TXN_MISC_PL_premium_goodies($policy_record, $policy_object);
 	        }
 
 			/**
@@ -5069,800 +5066,7 @@ class Policy_txn extends MY_Controller
 				], 400);
 			}
 
-
 			return $goodies;
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for CROP (Agriculture)
-		 *
-		 * Get the following goodies for the Crop Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_AGR_CROP($policy_record, $policy_object)
-		{
-			// Tariff Configuration for this Portfolio
-			$this->load->model('tariff_agriculture_model');
-			$tariff_record = $this->tariff_agriculture_model->get_by_fy_portfolio( $policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Valid Tariff?
-			$__flag_valid_tariff = TRUE;
-			if( !$tariff_record )
-			{
-				$message 	= 'Tariff Configuration for this Portfolio is not found.';
-				$title 		= 'Tariff Not Found!';
-				$__flag_valid_tariff = FALSE;
-			}
-			else if( $tariff_record->active == IQB_STATUS_INACTIVE )
-			{
-				$message = 'Tariff Configuration for this Portfolio is <strong>Inactive</strong>.';
-				$title = 'Tariff Not Active!';
-				$__flag_valid_tariff = FALSE;
-			}
-
-			if( !$__flag_valid_tariff )
-			{
-				$message .= '<br/><br/>Portfolio: <strong>CROP</strong> <br/>' .
-							'Sub-Portfolio: <strong>' . $policy_record->portfolio_name . '</strong> <br/>' .
-							'<br/>Please contact <strong>IT Department</strong> for further assistance.';
-
-				$this->template->json(['error' => 'not_found', 'message' => $message, 'title' => $title], 404);
-				exit(1);
-			}
-
-
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_AGR_CROP_premium_validation_rules( $policy_record, $pfs_record, $tariff_record );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> $tariff_record
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for CATTLE (Agriculture)
-		 *
-		 * Get the following goodies for the Crop Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_AGR_CATTLE($policy_record, $policy_object)
-		{
-			// Tariff Configuration for this Portfolio
-			$this->load->model('tariff_agriculture_model');
-			$tariff_record = $this->tariff_agriculture_model->get_by_fy_portfolio( $policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Valid Tariff?
-			$__flag_valid_tariff = TRUE;
-			if( !$tariff_record )
-			{
-				$message 	= 'Tariff Configuration for this Portfolio is not found.';
-				$title 		= 'Tariff Not Found!';
-				$__flag_valid_tariff = FALSE;
-			}
-			else if( $tariff_record->active == IQB_STATUS_INACTIVE )
-			{
-				$message = 'Tariff Configuration for this Portfolio is <strong>Inactive</strong>.';
-				$title = 'Tariff Not Active!';
-				$__flag_valid_tariff = FALSE;
-			}
-
-			if( !$__flag_valid_tariff )
-			{
-				$message .= '<br/><br/>Portfolio: <strong>CATTLE</strong> <br/>' .
-							'Sub-Portfolio: <strong>' . $policy_record->portfolio_name . '</strong> <br/>' .
-							'<br/>Please contact <strong>IT Department</strong> for further assistance.';
-
-				$this->template->json(['error' => 'not_found', 'message' => $message, 'title' => $title], 404);
-				exit(1);
-			}
-
-
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_AGR_CATTLE_premium_validation_rules( $policy_record, $pfs_record, $tariff_record );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> $tariff_record
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for POULTRY (Agriculture)
-		 *
-		 * Get the following goodies for the Poultry Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_AGR_POULTRY($policy_record, $policy_object)
-		{
-			// Tariff Configuration for this Portfolio
-			$this->load->model('tariff_agriculture_model');
-			$tariff_record = $this->tariff_agriculture_model->get_by_fy_portfolio( $policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Valid Tariff?
-			$__flag_valid_tariff = TRUE;
-			if( !$tariff_record )
-			{
-				$message 	= 'Tariff Configuration for this Portfolio is not found.';
-				$title 		= 'Tariff Not Found!';
-				$__flag_valid_tariff = FALSE;
-			}
-			else if( $tariff_record->active == IQB_STATUS_INACTIVE )
-			{
-				$message = 'Tariff Configuration for this Portfolio is <strong>Inactive</strong>.';
-				$title = 'Tariff Not Active!';
-				$__flag_valid_tariff = FALSE;
-			}
-
-			if( !$__flag_valid_tariff )
-			{
-				$message .= '<br/><br/>Portfolio: <strong>POULTRY</strong> <br/>' .
-							'Sub-Portfolio: <strong>' . $policy_record->portfolio_name . '</strong> <br/>' .
-							'<br/>Please contact <strong>IT Department</strong> for further assistance.';
-
-				$this->template->json(['error' => 'not_found', 'message' => $message, 'title' => $title], 404);
-				exit(1);
-			}
-
-
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_AGR_POULTRY_premium_validation_rules( $policy_record, $pfs_record, $tariff_record );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> $tariff_record
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for FISH (Agriculture)
-		 *
-		 * Get the following goodies for the Fish Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_AGR_FISH($policy_record, $policy_object)
-		{
-			// Tariff Configuration for this Portfolio
-			$this->load->model('tariff_agriculture_model');
-			$tariff_record = $this->tariff_agriculture_model->get_by_fy_portfolio( $policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Valid Tariff?
-			$__flag_valid_tariff = TRUE;
-			if( !$tariff_record )
-			{
-				$message 	= 'Tariff Configuration for this Portfolio is not found.';
-				$title 		= 'Tariff Not Found!';
-				$__flag_valid_tariff = FALSE;
-			}
-			else if( $tariff_record->active == IQB_STATUS_INACTIVE )
-			{
-				$message = 'Tariff Configuration for this Portfolio is <strong>Inactive</strong>.';
-				$title = 'Tariff Not Active!';
-				$__flag_valid_tariff = FALSE;
-			}
-
-			if( !$__flag_valid_tariff )
-			{
-				$message .= '<br/><br/>Portfolio: <strong>FISH</strong> <br/>' .
-							'Sub-Portfolio: <strong>' . $policy_record->portfolio_name . '</strong> <br/>' .
-							'<br/>Please contact <strong>IT Department</strong> for further assistance.';
-
-				$this->template->json(['error' => 'not_found', 'message' => $message, 'title' => $title], 404);
-				exit(1);
-			}
-
-
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_AGR_FISH_premium_validation_rules( $policy_record, $pfs_record, $tariff_record );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> $tariff_record
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for BEE (Agriculture)
-		 *
-		 * Get the following goodies for the Poultry Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_AGR_BEE($policy_record, $policy_object)
-		{
-			// Tariff Configuration for this Portfolio
-			$this->load->model('tariff_agriculture_model');
-			$tariff_record = $this->tariff_agriculture_model->get_by_fy_portfolio( $policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Valid Tariff?
-			$__flag_valid_tariff = TRUE;
-			if( !$tariff_record )
-			{
-				$message 	= 'Tariff Configuration for this Portfolio is not found.';
-				$title 		= 'Tariff Not Found!';
-				$__flag_valid_tariff = FALSE;
-			}
-			else if( $tariff_record->active == IQB_STATUS_INACTIVE )
-			{
-				$message = 'Tariff Configuration for this Portfolio is <strong>Inactive</strong>.';
-				$title = 'Tariff Not Active!';
-				$__flag_valid_tariff = FALSE;
-			}
-
-			if( !$__flag_valid_tariff )
-			{
-				$message .= '<br/><br/>Portfolio: <strong>BEE</strong> <br/>' .
-							'Sub-Portfolio: <strong>' . $policy_record->portfolio_name . '</strong> <br/>' .
-							'<br/>Please contact <strong>IT Department</strong> for further assistance.';
-
-				$this->template->json(['error' => 'not_found', 'message' => $message, 'title' => $title], 404);
-				exit(1);
-			}
-
-
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_AGR_BEE_premium_validation_rules( $policy_record, $pfs_record, $tariff_record );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> $tariff_record
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for MOTOR
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_MOTOR($policy_record, $policy_object)
-		{
-
-			// Object Attributes
-			$attributes = json_decode($policy_object->attributes);
-
-			// Tariff Configuration for this Portfolio
-			$this->load->model('tariff_motor_model');
-			$tariff_record = $this->tariff_motor_model->get_single(
-															$policy_record->fiscal_yr_id,
-															$attributes->ownership,
-															$policy_record->portfolio_id,
-															$attributes->cvc_type ?? NULL
-														);
-
-			// Valid Tariff?
-			$__flag_valid_tariff = TRUE;
-			if( !$tariff_record )
-			{
-				$message 	= 'Tariff Configuration for this Portfolio is not found.';
-				$title 		= 'Tariff Not Found!';
-				$__flag_valid_tariff = FALSE;
-			}
-			else if( $tariff_record->active == IQB_STATUS_INACTIVE )
-			{
-				$message = 'Tariff Configuration for this Portfolio is <strong>Inactive</strong>.';
-				$title = 'Tariff Not Active!';
-				$__flag_valid_tariff = FALSE;
-			}
-
-			if( !$__flag_valid_tariff )
-			{
-				$message .= '<br/><br/>Portfolio: <strong>MOTOR</strong> <br/>' .
-							'Sub-Portfolio: <strong>' . $policy_record->portfolio_name . '</strong> <br/>' .
-							'<br/>Please contact <strong>IT Department</strong> for further assistance.';
-
-				$this->template->json(['error' => 'not_found', 'message' => $message, 'title' => $title], 404);
-				exit(1);
-			}
-
-
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_MOTOR_premium_validation_rules( $policy_record, $pfs_record, $tariff_record );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> $tariff_record
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for FIRE
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 * @param object $portfolio_risks Portfolio Risks
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_FIRE($policy_record, $policy_object, $portfolio_risks)
-		{
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_FIRE_premium_validation_rules( $policy_record, $pfs_record, $policy_object, $portfolio_risks );
-
-			// echo '<pre>'; print_r($validation_rules);exit;
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> NULL
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for FIRE
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_MARINE($policy_record, $policy_object)
-		{
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_MARINE_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
-
-			// echo '<pre>'; print_r($validation_rules);exit;
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> NULL
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for Boiler Explosion
-		 *
-		 * Portfolio 		: ENGINEERING
-		 * Sub-Portfolio	: BOILDER EXPLOSION
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_ENG_BL($policy_record, $policy_object)
-		{
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_ENG_BL_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
-
-			// echo '<pre>'; print_r($validation_rules);exit;
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> NULL
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for Boiler Explosion
-		 *
-		 * Portfolio 		: ENGINEERING
-		 * Sub-Portfolio	: CONTRACTOR ALL RISK
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_ENG_CAR($policy_record, $policy_object)
-		{
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_ENG_CAR_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
-
-			// echo '<pre>'; print_r($validation_rules);exit;
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> NULL
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for Boiler Explosion
-		 *
-		 * Portfolio 		: ENGINEERING
-		 * Sub-Portfolio	: CONTRACTOR PLANT & MACHINARY
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_ENG_CPM($policy_record, $policy_object)
-		{
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_ENG_CPM_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> NULL
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for Boiler Explosion
-		 *
-		 * Portfolio 		: ENGINEERING
-		 * Sub-Portfolio	: CONTRACTOR PLANT & MACHINARY
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_ENG_EEI($policy_record, $policy_object)
-		{
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_ENG_EEI_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> NULL
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for Boiler Explosion
-		 *
-		 * Portfolio 		: ENGINEERING
-		 * Sub-Portfolio	: CONTRACTOR ALL RISK
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_ENG_EAR($policy_record, $policy_object)
-		{
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_ENG_EAR_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
-
-			// echo '<pre>'; print_r($validation_rules);exit;
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> NULL
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for Boiler Explosion
-		 *
-		 * Portfolio 		: ENGINEERING
-		 * Sub-Portfolio	: MACHINE BREAKDOWN
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_ENG_MB($policy_record, $policy_object)
-		{
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_ENG_MB_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> NULL
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for Banker's Blanket (Misc)
-		 *
-		 * Get the following goodies for the Crop Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_MISC_BB($policy_record, $policy_object, $portfolio_risks)
-		{
-			// Tariff Configuration for this Portfolio
-			$this->load->model('tariff_misc_bb_model');
-			$tariff_record = $this->tariff_misc_bb_model->get_by_fy_portfolio( $policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Valid Tariff?
-			$__flag_valid_tariff = TRUE;
-			if( !$tariff_record )
-			{
-				$message 	= 'Tariff Configuration for this Portfolio is not found.';
-				$title 		= 'Tariff Not Found!';
-				$__flag_valid_tariff = FALSE;
-			}
-			else if( $tariff_record->active == IQB_STATUS_INACTIVE )
-			{
-				$message = 'Tariff Configuration for this Portfolio is <strong>Inactive</strong>.';
-				$title = 'Tariff Not Active!';
-				$__flag_valid_tariff = FALSE;
-			}
-
-			if( !$__flag_valid_tariff )
-			{
-				$message .= '<br/><br/>Portfolio: <strong>Miscellaneous</strong> <br/>' .
-							'Sub-Portfolio: <strong>' . $policy_record->portfolio_name . '</strong> <br/>' .
-							'<br/>Please contact <strong>IT Department</strong> for further assistance.';
-
-				$this->template->json(['error' => 'not_found', 'message' => $message, 'title' => $title], 404);
-				exit(1);
-			}
-
-
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_MISC_BB_premium_validation_rules( $policy_record, $pfs_record, $tariff_record, $portfolio_risks );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> $tariff_record
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for Boiler Explosion
-		 *
-		 * Portfolio 		: MISCELLANEOUS
-		 * Sub-Portfolio	: GROUP PERSONNEL ACCIDENT(GPA)
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_MISC_GPA($policy_record, $policy_object)
-		{
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_MISC_GPA_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> NULL
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for Boiler Explosion
-		 *
-		 * Portfolio 		: MISCELLANEOUS
-		 * Sub-Portfolio	: PERSONNEL ACCIDENT(PA)
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_MISC_PA($policy_record, $policy_object)
-		{
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_MISC_PA_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> NULL
-			];
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Get Policy Policy Transaction Goodies for Boiler Explosion
-		 *
-		 * Portfolio 		: MISCELLANEOUS
-		 * Sub-Portfolio	: PUBLIC LIABILITY(PL)
-		 *
-		 * Get the following goodies for the Motor Portfolio
-		 * 		1. Validation Rules
-		 * 		2. Tariff Record if Applies
-		 *
-		 * @param object $policy_record Policy Record
-		 * @param object $policy_object Policy Object Record
-		 *
-		 * @return	array
-		 */
-		private function __premium_goodies_MISC_PL($policy_record, $policy_object)
-		{
-			// Portfolio Setting Record
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			// Let's Get the Validation Rules
-			$validation_rules = _TXN_MISC_PL_premium_validation_rules( $policy_record, $pfs_record, $policy_object );
-
-
-			// Return the goodies
-			return  [
-				'validation_rules' 	=> $validation_rules,
-				'tariff_record' 	=> NULL
-			];
 		}
 
 	//  ------------------- END: PREMIUM GOODIES FUNCTIONS -------------------------

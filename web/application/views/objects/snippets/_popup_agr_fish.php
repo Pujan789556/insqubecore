@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Object Snippet: FISH SUB-PORTFOLIO (AGRICULTURE)
 */
+$this->load->helper('ph_agr_fish');
 $attributes 	= $record->attributes ? json_decode($record->attributes) : NULL;
 $form_elements 	= _OBJ_AGR_FISH_validation_rules($record->portfolio_id);
 
