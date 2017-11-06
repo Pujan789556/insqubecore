@@ -13,6 +13,32 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @link
  */
 
+// ------------------------------------------------------------------------
+// POLICY RELATED OBJECT HELPER FUNCTIONS
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('get_object_from_policy_record'))
+{
+    /**
+     * Get Policy Object
+     *
+     * @param object $policy_record Policy Record
+     * @return object   Policy Object
+     */
+    function get_object_from_policy_record( $policy_record )
+    {
+        // Policy Record contains the following columns by prefixing "object_"
+        $object_columns = ['id', 'portfolio_id', 'customer_id', 'attributes', 'amt_sum_insured', 'flag_locked'];
+        $object = new StdClass();
+        foreach($object_columns as $column )
+        {
+            $object->{$column} = $policy_record->{'object_' . $column};
+        }
+        return $object;
+    }
+}
+
+
 
 // ------------------------------------------------------------------------
 // GENERAL OBJECT HELPERS

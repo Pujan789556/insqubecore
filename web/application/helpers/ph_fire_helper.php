@@ -585,3 +585,338 @@ if ( ! function_exists('_TXN_FIRE_premium_goodies'))
 	}
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('__save_premium_FIRE'))
+{
+	/**
+	 * Fire Portfolio : Save a Policy Transaction Record For Given Policy
+	 *
+	 *	!!! Important: Fresh/Renewal Only
+	 *
+	 * @param object $policy_record  	Policy Record
+	 * @param object $txn_record 	 	Policy Transaction Record
+	 * @return json
+	 */
+	function __save_premium_FIRE($policy_record, $txn_record)
+	{
+		$CI =& get_instance();
+
+		/**
+		 * Form Submitted?
+		 */
+		$return_data = [];
+
+		if( $CI->input->post() )
+		{
+
+			/**
+			 * Policy Object Record
+			 */
+			$policy_object 		= get_object_from_policy_record($policy_record);
+
+			/**
+			 * Portfolio Setting Record
+			 */
+			$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+			/**
+			 * Portfolio Risks
+			 */
+			$portfolio_risks = $CI->portfolio_model->dropdown_risks($policy_record->portfolio_id);
+
+			/**
+			 * Validation Rules for Form Processing
+			 */
+			$validation_rules = _TXN_FIRE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, TRUE );
+            $CI->form_validation->set_rules($validation_rules);
+
+            // echo '<pre>';print_r($validation_rules);exit;
+
+			if($CI->form_validation->run() === TRUE )
+        	{
+
+				// Premium Data
+				$post_data = $CI->input->post();
+
+				/**
+				 * Do we have a valid method?
+				 */
+				try{
+
+					/**
+					 * Compute Premium From Post Data
+					 * ------------------------------
+					 * 	From the Portfolio Risks - We compute two type of premiums
+					 * 	a. Pool Premium
+					 *  b. Base Premium
+					 */
+
+
+					/**
+					 * Portfolio Risks Rows
+					 */
+					$portfolio_risks = $CI->portfolio_model->portfolio_risks($policy_record->portfolio_id);
+
+					/**
+					 * Fire Items with Sum Insured
+					 */
+					$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+					$items              = $object_attributes->items;
+					$item_count         = count($items->category);
+
+
+
+					/**
+					 * Let's Loop Through each Fire Item
+					 */
+					$premium_computation_table 	= [];
+					$base_premium 				= 0.00;
+					$pool_premium 				= 0.00;
+					$commissionable_premium 	= 0.00;
+					$direct_discount 			= 0.00;
+					$agent_commission 			= 0.00;
+
+					for($i=0; $i < $item_count; $i++ )
+					{
+						$item_sum_insured 	= $items->sum_insured[$i];
+						foreach($portfolio_risks as $pr)
+						{
+							$rate = $post_data['premium']['rate'][$pr->id][$i];
+
+							// Compute only if rate is supplied
+							if($rate)
+							{
+								$rate_base = $post_data['premium']['rate_base'][$pr->id][$i];
+								$premium = _FIRE_compute_premium_per_risk_per_item($item_sum_insured, $rate, $rate_base);
+
+								// Assign to Pool or Base based on Risk Type
+								if( $pr->type == IQB_RISK_TYPE_BASIC )
+								{
+									$base_premium += $premium;
+								}
+								else
+								{
+									$pool_premium += $premium;
+								}
+
+								// Commissionable Premium?
+								if($pr->agent_commission == IQB_FLAG_ON )
+								{
+									$commissionable_premium += $premium;
+								}
+							}
+						}
+					}
+
+					/**
+					 * Direct Discount or Agent Commission?
+					 * ------------------------------------
+					 *
+					 * Note: Direct Discount applies only on Base Premium
+					 */
+					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+					{
+						$direct_discount = ( $base_premium * $pfs_record->direct_discount ) / 100.00 ;
+						$base_premium -= $direct_discount;
+
+						// NULLIFY Commissionable premium, Agent Commission
+						$commissionable_premium = NULL;
+						$agent_commission = NULL;
+					}
+					else
+					{
+						$agent_commission = ( $commissionable_premium * $pfs_record->agent_commission ) / 100.00;
+					}
+
+
+					/**
+					 * Let's Compute the Total Premium
+					 */
+					$total_premium 	= $base_premium + $pool_premium;
+					$taxable_amount = $total_premium + $post_data['amt_stamp_duty'];
+
+					/**
+					 * Compute VAT
+					 */
+					$CI->load->helper('account');
+					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+					/**
+					 * Prepare Transactional Data
+					 */
+					$txn_data = [
+						'amt_total_premium' 	=> $total_premium,
+						'amt_pool_premium' 		=> $pool_premium,
+						'amt_commissionable'	=> $commissionable_premium,
+						'amt_agent_commission'  => $agent_commission,
+						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+						'amt_vat' 				=> $amount_vat,
+						'txn_details' 			=> $post_data['txn_details'],
+						'remarks' 				=> $post_data['remarks'],
+					];
+
+
+					/**
+					 * Premium Computation Table
+					 * -------------------------
+					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+					 */
+					$premium_computation_table = json_encode($post_data['premium']);
+					$txn_data['premium_computation_table'] = $premium_computation_table;
+
+
+
+					/**
+					 * Cost Calculation Table - Schedule Data
+					 *
+					 * 	Property Details
+					 * 	------------------------------------
+					 * 	| Property | Sum Insured | Premium |
+					 * 	------------------------------------
+					 *  |		   | 			 |		   |
+					 * 	------------------------------------
+					 *
+					 * 	Risk Details
+					 * 	------------------
+					 * 	| Risk | Premium |
+					 * 	------------------
+					 * 	|	   |		 |
+					 * 	------------------
+					 */
+					$property_table = [];
+					for($i=0; $i < $item_count; $i++ )
+					{
+						$item_sum_insured 		= $items->sum_insured[$i];
+						$property_category 		= _OBJ_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ];
+						$single_property_row 	= [ $property_category, $items->sum_insured[$i] ];
+
+						$per_property_premium 		= 0.00;
+						$per_property_base_premium 	= 0.00;
+						$per_property_pool_premium 	= 0.00;
+
+						foreach($portfolio_risks as $pr)
+						{
+							$rate = $post_data['premium']['rate'][$pr->id][$i];
+
+							// Compute only if rate is supplied
+							if($rate)
+							{
+								$rate_base = $post_data['premium']['rate_base'][$pr->id][$i];
+								$premium = _FIRE_compute_premium_per_risk_per_item($item_sum_insured, $rate, $rate_base);
+
+								// Assign to Pool or Base based on Risk Type
+								if( $pr->type == IQB_RISK_TYPE_BASIC )
+								{
+									$per_property_base_premium += $premium;
+								}
+								else
+								{
+									$per_property_pool_premium += $premium;
+								}
+							}
+						}
+
+						/**
+						 * Direct Discount Applies?
+						 */
+						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+						{
+							$direct_discount 			= ( $per_property_base_premium * $pfs_record->direct_discount ) / 100.00 ;
+							$per_property_base_premium -= $direct_discount;
+						}
+
+						$per_property_premium 	= $per_property_base_premium  + $per_property_pool_premium;
+						$single_property_row[] 	= $per_property_premium;
+						$property_table[] 		= $single_property_row;
+					}
+
+					// --------------------------------------------------------------------------------------------
+
+					$risk_table = [];
+					foreach($portfolio_risks as $pr)
+					{
+						$per_risk_premium 		= 0.00;
+						$per_risk_base_premium 	= 0.00;
+						$per_risk_pool_premium 	= 0.00;
+
+						for($i=0; $i < $item_count; $i++ )
+						{
+							$item_sum_insured 	= $items->sum_insured[$i];
+							$rate 				= $post_data['premium']['rate'][$pr->id][$i];
+
+							// Compute only if rate is supplied
+							if($rate)
+							{
+								$rate_base = $post_data['premium']['rate_base'][$pr->id][$i];
+								$premium = _FIRE_compute_premium_per_risk_per_item($item_sum_insured, $rate, $rate_base);
+
+								// Assign to Pool or Base based on Risk Type
+								if( $pr->type == IQB_RISK_TYPE_BASIC )
+								{
+									$per_risk_base_premium += $premium;
+								}
+								else
+								{
+									$per_risk_pool_premium += $premium;
+								}
+							}
+						}
+
+						/**
+						 * Direct Discount Applies?
+						 */
+						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+						{
+							$direct_discount 		= ( $per_risk_base_premium * $pfs_record->direct_discount ) / 100.00 ;
+							$per_risk_base_premium 	-= $direct_discount;
+						}
+						$per_risk_premium 	= $per_risk_base_premium  + $per_risk_pool_premium;
+
+
+						/**
+						 * Include the risk only with premium
+						 */
+						if( $per_risk_premium )
+						{
+							$risk_table[] 		= [$pr->name, $per_risk_premium];
+						}
+					}
+
+					$cost_calculation_table = json_encode([
+						'property_table' 	=> $property_table,
+						'risk_table'		=> $risk_table
+					]);
+
+					$txn_data['cost_calculation_table'] = $cost_calculation_table;
+
+					return $CI->policy_txn_model->save($txn_record->id, $txn_data);
+
+
+					/**
+					 * @TODO
+					 *
+					 * 1. Build RI Distribution Data For This Policy
+					 * 2. RI Approval Constraint for this Policy
+					 */
+
+				} catch (Exception $e){
+
+					return $CI->template->json([
+						'status' 	=> 'error',
+						'message' 	=> $e->getMessage()
+					], 404);
+				}
+        	}
+        	else
+        	{
+        		return $CI->template->json([
+					'status' 	=> 'error',
+					'title' 	=> 'Validation Error!',
+					'message' 	=> validation_errors()
+				]);
+        	}
+		}
+	}
+}

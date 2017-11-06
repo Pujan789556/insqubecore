@@ -800,6 +800,286 @@ if ( ! function_exists('_OBJ_MARINE_premium_default_discount_dropdown'))
 
 
 // ------------------------------------------------------------------------
+
+if ( ! function_exists('__save_premium_MARINE'))
+{
+	/**
+	 * Update Policy Premium Information - Marine
+	 *
+	 *	!!! Important: Fresh/Renewal Only
+	 *
+	 * @param object $policy_record  	Policy Record
+	 * @param object $txn_record 	 	Policy Transaction Record
+	 * @return json
+	 */
+	function __save_premium_MARINE($policy_record, $txn_record)
+	{
+		$CI =& get_instance();
+
+		/**
+		 * Form Submitted?
+		 */
+		$return_data = [];
+
+		if( $CI->input->post() )
+		{
+
+			/**
+			 * Policy Object Record
+			 */
+			$policy_object 		= get_object_from_policy_record($policy_record);
+
+			/**
+			 * Portfolio Setting Record
+			 */
+			$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+
+			/**
+			 * Validation Rules for Form Processing
+			 */
+			$validation_rules = _TXN_MARINE_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
+            $CI->form_validation->set_rules($validation_rules);
+
+            // echo '<pre>';print_r($validation_rules);exit;
+
+			if($CI->form_validation->run() === TRUE )
+        	{
+
+				// Premium Data
+				$post_data = $CI->input->post();
+
+				/**
+				 * Do we have a valid method?
+				 */
+				try{
+
+					/**
+					 * Compute Premium From Post Data
+					 * ------------------------------
+					 */
+					$cost_calculation_table 	= [];
+					$premium_computation_table 	= [];
+
+
+					/**
+					 * Extract Information from Object
+					 */
+					$object_attributes   = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+					$SI 				 = floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
+
+
+					// Get the post premium data
+					$post_premium 				= $post_data['premium'];
+					$default_rate 				= floatval($post_premium['default_rate']);
+					$default_discount 			= $post_premium['default_discount'];
+					$container_discount 		= floatval($post_premium['container_discount']);
+					$additional_rate1 			= floatval($post_premium['additional_rate1']);
+					$additional_rate2 			= floatval($post_premium['additional_rate2']);
+					$additional_rate3 			= floatval($post_premium['additional_rate3']);
+					$large_sum_insured_discount = floatval($post_premium['large_sum_insured_discount']);
+
+					// A = SI X Default Rate %
+					$A = ( $SI * $default_rate ) / 100.00;
+					$cost_calculation_table[] = [
+						'label' => "A. Specified premium rate({$default_rate}%)",
+						'value' => $A
+					];
+
+
+					// B = X% of A
+					$B = 0.00;
+					$default_discount_label = 'Discount on A (0%)';
+					if($default_discount)
+					{
+						$default_discount_rate 	= _OBJ_MARINE_premium_default_discount_dropdown('rate', FALSE)[$default_discount];
+						$default_discount_label = _OBJ_MARINE_premium_default_discount_dropdown('label', FALSE)[$default_discount];
+						$B = ( $A * $default_discount_rate ) / 100.00;
+					}
+					$cost_calculation_table[] = [
+						'label' => "B. {$default_discount_label}",
+						'value' => $B
+					];
+
+					// C = A - B
+					$C = $A - $B;
+					$cost_calculation_table[] = [
+						'label' => "C. (A - B)",
+						'value' => $C
+					];
+
+					// D = X% of C
+					$D = ( $C * $container_discount ) / 100.00;
+					$cost_calculation_table[] = [
+						'label' => "D. Container discount ({$container_discount}% of C)",
+						'value' => $B
+					];
+
+					// E = C - D
+					$E = $C - $D;
+					$cost_calculation_table[] = [
+						'label' => "E. (C - D)",
+						'value' => $E
+					];
+
+
+					// F = X% of SI
+					$F = ( $SI * $additional_rate1 ) / 100.00;
+					$cost_calculation_table[] = [
+						'label' => "F. Additional premium for W& SRCC or SRCC ({$additional_rate1}%)",
+						'value' => $F
+					];
+
+					// G = X% of SI
+					$G = ( $SI * $additional_rate2 ) / 100.00;
+					$cost_calculation_table[] = [
+						'label' => "G. Additional premium for Other i. ({$additional_rate2}%)",
+						'value' => $G
+					];
+
+					// H = X% of SI
+					$H = ( $SI * $additional_rate3 ) / 100.00;
+					$cost_calculation_table[] = [
+						'label' => "H. Additional premium for Other ii. ({$additional_rate3}%)",
+						'value' => $H
+					];
+
+					// I = E + F + G + H
+					$I = $E + $F + $G + $H;
+					$cost_calculation_table[] = [
+						'label' => "I. Applicable premium rate (E+F+G+H)",
+						'value' => $I
+					];
+
+					// Applicable Premium Rate (%)
+					$APR = ( $I / $SI ) * 100.00;
+
+					/**
+					 * Direct Discount or Agent Commission?
+					 * ------------------------------------
+					 * Agent Commission or Direct Discount
+					 * applies on NET Premium
+					 */
+					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+					{
+						// Direct Business Discount/Direct Discount
+						$J = ( $I * $pfs_record->direct_discount ) / 100.00 ;
+
+						$cost_calculation_table[] = [
+							'label' => "J. Direct business discount ({$pfs_record->direct_discount}% of I)",
+							'value' => $J
+						];
+
+						// NULLIFY Commissionable premium, Agent Commission
+						$commissionable_premium = NULL;
+						$agent_commission = NULL;
+					}
+					else
+					{
+						$J = 0.00;
+					}
+
+
+					// K = I - J
+					$K = $I - $J;
+
+
+					// Large Sum Insured Discount
+					// L = X% of K
+					$L = ( $K * $large_sum_insured_discount ) / 100.00;
+					$cost_calculation_table[] = [
+						'label' => "L. Large Sum Insured Discount ({$large_sum_insured_discount}%)",
+						'value' => $L
+					];
+
+					// Net Premium = Applicable Premium
+					$NET_PREMIUM = $K - $L;
+					$cost_calculation_table[] = [
+						'label' => "Premium",
+						'value' => $NET_PREMIUM
+					];
+
+
+					/**
+					 * Agent Commission if Applies?
+					 */
+					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
+					{
+						$commissionable_premium = $NET_PREMIUM;
+						$agent_commission 		= ( $NET_PREMIUM * $pfs_record->agent_commission ) / 100.00;
+					}
+
+
+
+					/**
+					 * Compute VAT
+					 */
+					$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
+					$CI->load->helper('account');
+					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+					/**
+					 * Prepare Transactional Data
+					 *
+					 * @TODO: What is Pool Premium Amount?
+					 */
+					$txn_data = [
+						'amt_total_premium' 	=> $NET_PREMIUM,
+						'amt_pool_premium' 		=> 0.00,
+						'amt_commissionable'	=> $commissionable_premium,
+						'amt_agent_commission'  => $agent_commission,
+						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+						'amt_vat' 				=> $amount_vat,
+						'txn_details' 			=> $post_data['txn_details'],
+						'remarks' 				=> $post_data['remarks'],
+					];
+
+
+					/**
+					 * Premium Computation Table
+					 * -------------------------
+					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+					 */
+					$premium_computation_table = json_encode($post_premium);
+					$txn_data['premium_computation_table'] = $premium_computation_table;
+
+
+					/**
+					 * Cost Calculation Table
+					 */
+					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+					return $CI->policy_txn_model->save($txn_record->id, $txn_data);
+
+
+					/**
+					 * @TODO
+					 *
+					 * 1. Build RI Distribution Data For This Policy
+					 * 2. RI Approval Constraint for this Policy
+					 */
+
+				} catch (Exception $e){
+
+					return $CI->template->json([
+						'status' 	=> 'error',
+						'message' 	=> $e->getMessage()
+					], 404);
+				}
+        	}
+        	else
+        	{
+        		return $CI->template->json([
+					'status' 	=> 'error',
+					'title' 	=> 'Validation Error!',
+					'message' 	=> validation_errors()
+				]);
+        	}
+		}
+	}
+}
+
+// ------------------------------------------------------------------------
 // PORTFOLIO SPECIFIC HELPER FUNCTIONS
 // ------------------------------------------------------------------------
 

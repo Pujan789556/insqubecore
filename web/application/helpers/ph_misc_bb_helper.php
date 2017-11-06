@@ -406,6 +406,296 @@ if ( ! function_exists('_TXN_MISC_BB_premium_goodies'))
 	}
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('__save_premium_MISC_BB'))
+{
+	/**
+	 * Banker's Blanket Portfolio : Save a Policy Transaction Record For Given Policy
+	 *
+	 *	!!! Important: Fresh/Renewal Only
+	 *
+	 * @param object $policy_record  	Policy Record
+	 * @param object $txn_record 	 	Policy Transaction Record
+	 * @return json
+	 */
+	function __save_premium_MISC_BB($policy_record, $txn_record)
+	{
+		$CI =& get_instance();
+
+		/**
+		 * Form Submitted?
+		 */
+		$return_data = [];
+
+		if( $CI->input->post() )
+		{
+
+			/**
+			 * Policy Object Record
+			 */
+			$policy_object 		= get_object_from_policy_record($policy_record);
+
+			/**
+			 * Portfolio Setting Record
+			 */
+			$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+			/**
+			 * Portfolio Risks
+			 */
+			$portfolio_risks = $CI->portfolio_model->dropdown_risks($policy_record->portfolio_id);
+
+			/**
+			 * Validation Rules for Form Processing
+			 */
+			$validation_rules = _TXN_MISC_BB_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, TRUE );
+            $CI->form_validation->set_rules($validation_rules);
+
+            // echo '<pre>';print_r($validation_rules);exit;
+
+			if($CI->form_validation->run() === TRUE )
+        	{
+
+				// Premium Data
+				$post_data = $CI->input->post();
+
+				try{
+
+					/**
+					 * Post Premium Data
+					 */
+					$post_premium  = $post_data['premium'];
+
+
+					/**
+					 * Sum Insured Amount
+					 */
+					$object_attributes  	= $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+					$object_amt_sum_insured = $policy_object->amt_sum_insured;
+
+
+					/**
+					 * Tariff Data
+					 */
+					$CI->load->model('tariff_misc_bb_model');
+					$tariff_record = $CI->tariff_misc_bb_model->get_by_fy_portfolio( $policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+					$tariff   	= json_decode($tariff_record->tariff ?? NULL);
+
+					/**
+					 * Compute Premium From Post Data
+					 * ------------------------------
+					 * 	From the Portfolio Risks - We compute two type of premiums
+					 * 	a. Base Premium
+					 * 	b. Other Risk Premium
+					 *  c. Pool Premium
+					 */
+
+					// Basic, Cash in Primeses, Cash in Transit - SI
+					$si_basic 	= floatval($object_attributes->sum_insured->basic ?? 0.00);
+					$si_cip 	= floatval($object_attributes->sum_insured->cip ?? 0.00);
+					$si_cit 	= floatval($object_attributes->sum_insured->cit ?? 0.00);
+
+					// Tariff Rate for those SI
+					$rate_basic = floatval($tariff->basic ?? 0.00);
+					$rate_cip 	= floatval($tariff->cip ?? 0.00);
+					$rate_cit 	= floatval($tariff->cit ?? 0.00);
+
+					// Forgery & Dishonesty
+					$forgery_dishonesty_rate 	= $post_premium['forgery_dishonesty'];
+					$flag_pool_risk 			= $post_premium['flag_pool_risk'] ?? 0;
+
+
+					$premium_basic 	= ( $si_basic * $rate_basic ) / 100.00;
+					$premium_cip 	= ( $si_cip * $rate_cip ) / 100.00;
+					$premium_cit 	= ( $si_cit * $rate_cit ) / 100.00;
+
+					// Basic Premium
+					$cost_calculation_table[] = [
+						'label' => "A. Basic Premium Rate ({$rate_basic}%)",
+						'value' => $premium_basic
+					];
+
+					// Additional Premium - Cash in Premises
+					$cost_calculation_table[] = [
+						'label' => "B. Additional Premium - Cash in Premises Rate ({$rate_cip}%)",
+						'value' => $premium_cip
+					];
+
+					// Additional Premium - Cash in Transit
+					$cost_calculation_table[] = [
+						'label' => "C. Additional Premium - Cash in Transit Rate ({$rate_cit}%)",
+						'value' => $premium_cit
+					];
+
+
+					// D = A + B + C
+					$D = $premium_basic + $premium_cip + $premium_cit;
+					$cost_calculation_table[] = [
+						'label' => "D. (A+B+C)",
+						'value' => $D
+					];
+
+					// Forgery & Dishonesty
+					// E = Forgery Rate X Total Staff
+					$E =  intval($object_attributes->staff_count) * $forgery_dishonesty_rate;
+					$cost_calculation_table[] = [
+						'label' => "E. Forgery & Dishonesty (Rs. {$forgery_dishonesty_rate} per Staff)",
+						'value' => $E
+					];
+
+					/**
+					 * Additional Risks' Premium
+					 */
+					$cost_calculation_table[] = [
+						'label' => "<strong>Additional Risks</strong>",
+						'value' => ''
+					];
+					$additional_risk_premium = 0.00;
+					foreach($portfolio_risks as $risk_id=>$risk_name)
+					{
+						$rate = $post_data['premium']['others']['rate'][$risk_id];
+
+						// Compute only if rate is supplied
+						if($rate)
+						{
+							$per_risk_premium = ( $rate * $object_amt_sum_insured ) / 100.00;
+							$additional_risk_premium += $per_risk_premium;
+
+							$cost_calculation_table[] = [
+								'label' => "$risk_name ({$rate}%)",
+								'value' => $per_risk_premium
+							];
+						}
+					}
+
+					$F = $additional_risk_premium;
+					$cost_calculation_table[] = [
+						'label' => "F. Total Additional Risk Premium",
+						'value' => $F
+					];
+
+					// G = E + F
+					$G = $E + $F;
+					$cost_calculation_table[] = [
+						'label' => "G. (E + F)",
+						'value' => $G
+					];
+
+
+
+					/**
+					 * Direct Discount or Agent Commission?, Pool Premium
+					 * --------------------------------------------------
+					 *
+					 * Note: Direct Discount applies only on Base Premium
+					 */
+					$commissionable_premium = NULL;
+					$agent_commission 		= NULL;
+					$POOL_PREMIUM 			= 0.00;
+					$direct_discount 		= 0.00;
+					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+					{
+						$direct_discount = ( $G * $pfs_record->direct_discount ) / 100.00 ;
+						$G -= $direct_discount;
+					}
+					else
+					{
+						$commissionable_premium = $G;
+						$agent_commission 		= ( $G * $pfs_record->agent_commission ) / 100.00;
+					}
+
+					$cost_calculation_table[] = [
+						'label' => "H. Direct discount ({$pfs_record->direct_discount}%)",
+						'value' => $direct_discount
+					];
+
+					/**
+					 * Pool Premium
+					 */
+					if($flag_pool_risk)
+					{
+						// Pool Premium = x% of Default Premium (A-B)
+						$pool_rate = floatval($pfs_record->pool_premium);
+						$POOL_PREMIUM = ( $object_amt_sum_insured * $pool_rate ) / 100.00;
+					}
+					$cost_calculation_table[] = [
+						'label' => "I. Pool Premium",
+						'value' => $POOL_PREMIUM
+					];
+
+					$NET_PREMIUM = $G + $POOL_PREMIUM;
+					$cost_calculation_table[] = [
+						'label' => "E. Net Premium",
+						'value' => $NET_PREMIUM
+					];
+
+					/**
+					 * Compute VAT
+					 */
+					$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
+					$CI->load->helper('account');
+					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+					/**
+					 * Prepare Transactional Data
+					 */
+					$txn_data = [
+						'amt_total_premium' 	=> $NET_PREMIUM,
+						'amt_pool_premium' 		=> $POOL_PREMIUM,
+						'amt_commissionable'	=> $commissionable_premium,
+						'amt_agent_commission'  => $agent_commission,
+						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+						'amt_vat' 				=> $amount_vat,
+						'txn_details' 			=> $post_data['txn_details'],
+						'remarks' 				=> $post_data['remarks'],
+					];
+
+
+					/**
+					 * Premium Computation Table
+					 * -------------------------
+					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+					 */
+					$premium_computation_table = json_encode($post_premium);
+					$txn_data['premium_computation_table'] = $premium_computation_table;
+
+
+					/**
+					 * Cost Calculation Table
+					 */
+					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+					return $CI->policy_txn_model->save($txn_record->id, $txn_data);
+
+
+					/**
+					 * @TODO
+					 *
+					 * 1. Build RI Distribution Data For This Policy
+					 * 2. RI Approval Constraint for this Policy
+					 */
+
+				} catch (Exception $e){
+
+					return $CI->template->json([
+						'status' 	=> 'error',
+						'message' 	=> $e->getMessage()
+					], 404);
+				}
+        	}
+        	else
+        	{
+        		return $CI->template->json([
+					'status' 	=> 'error',
+					'title' 	=> 'Validation Error!',
+					'message' 	=> validation_errors()
+				]);
+        	}
+		}
+	}
+}
+
 
 // ------------------------------------------------------------------------
 // PORTFOLIO SPECIFIC HELPER FUNCTIONS

@@ -2867,3 +2867,115 @@ if ( ! function_exists('_TXN_MOTOR_premium_goodies'))
 	}
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('__save_premium_MOTOR'))
+{
+	/**
+	 * Motor Portfolio : Save a Policy Transaction Record For Given Policy
+	 *
+	 *	!!! Important: Fresh/Renewal Only
+	 *
+	 * @param object $policy_record  Policy Record
+	 * @param object $txn_record 	 Policy Transaction Record
+	 * @return json
+	 */
+	function __save_premium_MOTOR($policy_record, $txn_record)
+	{
+		$CI =& get_instance();
+
+		/**
+		 * Form Submitted?
+		 */
+		$return_data = [];
+
+		if( $CI->input->post() )
+		{
+
+			/**
+			 * Let's get the Required Records
+			 */
+			$policy_object 		= get_object_from_policy_record($policy_record);
+			$premium_goodies 	= _TXN_MOTOR_premium_goodies($policy_record, $policy_object);
+
+			$v_rules 			= $premium_goodies['validation_rules'];
+			$tariff_record 		= $premium_goodies['tariff_record'];
+
+			// Format Validation Rules
+			$rules = [];
+			foreach($v_rules as $section=>$r)
+			{
+				$rules = array_merge($rules, $r);
+			}
+            $CI->form_validation->set_rules($rules);
+			if($CI->form_validation->run() === TRUE )
+        	{
+
+        		// Portfolio Settings Record For Given Fiscal Year and Portfolio
+				$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+				// Premium Data
+				$post_data = $CI->input->post();
+
+				// Method to compute premium data
+				$method = _PO_MOTOR_crf_compute_method($policy_record->portfolio_id);
+
+				/**
+				 * Do we have a valid method?
+				 */
+				if($method)
+				{
+					try{
+
+						/**
+						 * Get the Cost Reference Data
+						 */
+						$txn_data = call_user_func($method, $policy_record, $policy_object, $tariff_record, $pfs_record, $post_data);
+
+
+						/**
+						 * Compute VAT ON Taxable Amount
+						 */
+			        	$CI->load->helper('account');
+				        $taxable_amount 		= $txn_data['amt_total_premium'] + $txn_data['amt_stamp_duty'];
+				        $txn_data['amt_vat'] 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+						$done 	  = $CI->policy_txn_model->save($txn_record->id, $txn_data);
+
+						return $done;
+
+						/**
+						 * @TODO
+						 *
+						 * 1. Build RI Distribution Data For This Policy
+						 * 2. RI Approval Constraint for this Policy
+						 */
+
+					} catch (Exception $e){
+
+						return $CI->template->json([
+							'status' 	=> 'error',
+							'message' 	=> $e->getMessage()
+						], 404);
+					}
+				}
+				else
+				{
+					return $CI->template->json([
+						'status' 	=> 'error',
+						'message' 	=> "No CRF computation method found for specified MOTOR portfolio!"
+					], 404);
+				}
+        	}
+        	else
+        	{
+        		return $CI->template->json([
+					'status' 	=> 'error',
+					'title' 	=> 'Validation Error!',
+					'message' 	=> validation_errors()
+				]);
+        	}
+		}
+	}
+}
+

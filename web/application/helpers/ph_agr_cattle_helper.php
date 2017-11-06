@@ -665,6 +665,224 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_tariff_by_type'))
 	}
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('__save_premium_AGR_CATTLE'))
+{
+	/**
+	 * Update Policy Premium Information - AGRICULTURE - CATTLE
+	 *
+	 *	!!! Important: Fresh/Renewal Only
+	 *
+	 * @param object $policy_record  	Policy Record
+	 * @param object $txn_record 	 	Policy Transaction Record
+	 * @return json
+	 */
+	function __save_premium_AGR_CATTLE($policy_record, $txn_record)
+	{
+		$CI =& get_instance();
+
+		/**
+		 * Form Submitted?
+		 */
+		$return_data = [];
+
+		if( $CI->input->post() )
+		{
+			/**
+			 * Policy Object Record
+			 */
+			$policy_object 		= get_object_from_policy_record($policy_record);
+			$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+
+			/**
+			 * Portfolio Setting Record
+			 */
+			$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+
+			/**
+			 * Tariff Record
+			 */
+			try {
+
+				$tariff = _OBJ_AGR_CATTLE_tariff_by_type($object_attributes->cattle_type);
+
+			} catch (Exception $e) {
+
+				return $CI->template->json([
+                    'status'        => 'error',
+                    'title' 		=> 'Exception Occured',
+                    'message' 	=> $e->getMessage()
+                ], 404);
+			}
+
+
+			/**
+			 * Validation Rules for Form Processing
+			 */
+			$validation_rules = _TXN_AGR_CATTLE_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
+            $CI->form_validation->set_rules($validation_rules);
+
+            // echo '<pre>';print_r($validation_rules);exit;
+
+			if($CI->form_validation->run() === TRUE )
+        	{
+
+				// Premium Data
+				$post_data = $CI->input->post();
+
+				/**
+				 * Do we have a valid method?
+				 */
+				try{
+
+					/**
+					 * Compute Premium From Post Data
+					 * ------------------------------
+					 */
+					$cost_calculation_table 	= [];
+					$premium_computation_table 	= [];
+
+
+					/**
+					 * Extract Information from Object
+					 * 	A. Sum Insured Amount
+					 */
+					$SI = floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
+
+					/**
+					 * Get Tariff Rate
+					 */
+					$default_rate 	= floatval($tariff->rate);
+
+
+					// A = SI X Default Rate %
+					$A = ( $SI * $default_rate ) / 100.00;
+					$cost_calculation_table[] = [
+						'label' => "क. बीमा शुल्क ({$default_rate}%)",
+						'value' => $A
+					];
+
+
+
+					/**
+					 * Direct Discount or Agent Commission?
+					 * ------------------------------------
+					 * Agent Commission or Direct Discount
+					 * applies on NET Premium
+					 */
+					$B = 0.00;
+					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+					{
+						// Direct Discount
+						$B = ( $A * $pfs_record->direct_discount ) / 100.00 ;
+
+						// NULLIFY Commissionable premium, Agent Commission
+						$commissionable_premium = NULL;
+						$agent_commission = NULL;
+					}
+					else
+					{
+						$commissionable_premium = $A;
+						$agent_commission 		= ( $A * $pfs_record->agent_commission ) / 100.00;
+					}
+
+					$cost_calculation_table[] = [
+						'label' => "ख. प्रत्यक्ष छूट ({$pfs_record->direct_discount}%)",
+						'value' => $B
+					];
+
+					// C = A - B
+					$C = $A - $B;
+					$cost_calculation_table[] = [
+						'label' => "ग. (क - ख)",
+						'value' => $C
+					];
+
+
+					// D = 75% of C
+					$D = ($C * 75) / 100.00;
+					$cost_calculation_table[] = [
+						'label' => "घ. ग को ७५% ले हुन आउने छुट",
+						'value' => $D
+					];
+
+					// NET PREMIUM = C - D
+					$NET_PREMIUM = $C - $D;
+					$cost_calculation_table[] = [
+						'label' => "ङ. जम्मा (ग - घ)",
+						'value' => $NET_PREMIUM
+					];
+
+
+					/**
+					 * Compute VAT
+					 */
+					$taxable_amount = $post_data['amt_stamp_duty']; // Vat applies only for Ticket
+					$CI->load->helper('account');
+					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+					/**
+					 * Prepare Transactional Data
+					 */
+					$txn_data = [
+						'amt_total_premium' 	=> $NET_PREMIUM,
+						'amt_pool_premium' 		=> 0.00,
+						'amt_commissionable'	=> $commissionable_premium,
+						'amt_agent_commission'  => $agent_commission,
+						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+						'amt_vat' 				=> $amount_vat,
+						'txn_details' 			=> $post_data['txn_details'],
+						'remarks' 				=> $post_data['remarks'],
+					];
+
+
+					/**
+					 * Premium Computation Table
+					 * -------------------------
+					 * NOT Applicable!!!
+					 */
+					$premium_computation_table = NULL;
+					$txn_data['premium_computation_table'] = $premium_computation_table;
+
+
+					/**
+					 * Cost Calculation Table
+					 */
+					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+					return $CI->policy_txn_model->save($txn_record->id, $txn_data);
+
+
+					/**
+					 * @TODO
+					 *
+					 * 1. Build RI Distribution Data For This Policy
+					 * 2. RI Approval Constraint for this Policy
+					 */
+
+				} catch (Exception $e){
+
+					return $CI->template->json([
+						'status' 	=> 'error',
+						'message' 	=> $e->getMessage()
+					], 404);
+				}
+        	}
+        	else
+        	{
+        		return $CI->template->json([
+					'status' 	=> 'error',
+					'title' 	=> 'Validation Error!',
+					'message' 	=> validation_errors()
+				]);
+        	}
+		}
+	}
+}
+
+
 
 // ------------------------------------------------------------------------
 // PORTFOLIO SPECIFIC HELPER FUNCTIONS
