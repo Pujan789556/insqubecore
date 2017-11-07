@@ -84,12 +84,6 @@ if ( ! function_exists('_OBJ_FIRE_validation_rules'))
 	 */
 	function _OBJ_FIRE_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
-		$CI =& get_instance();
-
-		// Validation Rules on Form Post Change on interdependent components
-		$post = $CI->input->post();
-		$object = $post['object'] ?? NULL;
-
 		$category_dropdown 	= _OBJ_FIRE_item_category_dropdown( FALSE );
 		$ownership_dropdown = _OBJ_FIRE_item_ownership_dropdown( FALSE );
 		$conscat_dropdown 	= _OBJ_FIRE_item_building_category_dropdown( FALSE );
