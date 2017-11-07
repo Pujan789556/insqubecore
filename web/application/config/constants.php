@@ -300,14 +300,17 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE',  [
 define('IQB_SUB_PORTFOLIO_MISC_BB_ID', 		39); 	// Banker's Blanket
 define('IQB_SUB_PORTFOLIO_MISC_BRGJWL_ID', 	40); 	// Burglary - Jewelry
 define('IQB_SUB_PORTFOLIO_MISC_BRGHB_ID', 	41); 	// Burglary - Housebreaking
+define('IQB_SUB_PORTFOLIO_MISC_CT_ID', 		42); 	// Cash in Transit
+define('IQB_SUB_PORTFOLIO_MISC_CS_ID', 		43); 	// Cash in Safe
 define('IQB_SUB_PORTFOLIO_MISC_GPA_ID', 	47); 	// Group Personnel Accident
 define('IQB_SUB_PORTFOLIO_MISC_PA_ID', 		52); 	// Personnel Accident
 define('IQB_SUB_PORTFOLIO_MISC_PL_ID', 		55); 	// Personnel Accident
 define('IQB_SUB_PORTFOLIO_MISC_BRGCS_ID', 	61); 	// Burglary - Cash in Safe
+define('IQB_SUB_PORTFOLIO_MISC_CC_ID', 		62); 	// Cash in Counter
 
 
 // SUB PORTFOLIO LIST Burglary (Jewelry, Housebreaking, Cash in Safe)
-define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG',  [
+define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG',  [
 	IQB_SUB_PORTFOLIO_MISC_BRGJWL_ID 		=> 'Burglary - Jewelry',
 	IQB_SUB_PORTFOLIO_MISC_BRGHB_ID 		=> 'Burglary - Housebreaking',
 	IQB_SUB_PORTFOLIO_MISC_BRGCS_ID 		=> 'Burglary - Cash in Safe'

@@ -790,7 +790,7 @@ if ( ! function_exists('load_portfolio_helper'))
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
             $CI->load->helper('ph_misc_brg');
         }

@@ -130,7 +130,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
             $snippet = _OBJ_MISC_BRG_row_snippet($record, $_flag__show_widget_row);
         }
@@ -335,7 +335,7 @@ if ( ! function_exists('_OBJ_select_text'))
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
             $snippet = _OBJ_MISC_BRG_select_text($record);
         }
@@ -541,7 +541,7 @@ if ( ! function_exists('_OBJ_validation_rules'))
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
             $v_rules = _OBJ_MISC_BRG_validation_rules( $portfolio_id, $formatted );
         }
@@ -745,7 +745,7 @@ if ( ! function_exists('_OBJ_attribute_form'))
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
             $attribute_form = 'objects/forms/_form_object_misc_brg';
         }
@@ -1109,7 +1109,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
             $amt_sum_insured = _OBJ_MISC_BRG_compute_sum_insured_amount($portfolio_id, $data);
         }

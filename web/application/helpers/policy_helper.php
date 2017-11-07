@@ -459,7 +459,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
             $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_BRG";
         }
@@ -630,7 +630,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
             $form_view = 'policy_txn/forms/_form_premium_MISC_BRG';
         }
