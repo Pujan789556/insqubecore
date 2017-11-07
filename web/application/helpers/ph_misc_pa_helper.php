@@ -81,12 +81,6 @@ if ( ! function_exists('_OBJ_MISC_PA_validation_rules'))
 	 */
 	function _OBJ_MISC_PA_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
-		$CI =& get_instance();
-
-		// Validation Rules on Form Post Change on interdependent components
-		$post 	= $CI->input->post();
-		$object = $post['object'] ?? NULL;
-
 		$v_rules = [
 
 			/**

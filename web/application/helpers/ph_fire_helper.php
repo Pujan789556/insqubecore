@@ -193,7 +193,7 @@ if ( ! function_exists('_OBJ_FIRE_validation_rules'))
 			        'field' => 'object[land_building][district][]',
 			        '_key' => 'district',
 			        'label' => 'District',
-			        'rules' => 'trim|numeric|exact_length[2]|in_list['. implode(',', array_keys($district_dropdown)) .']',
+			        'rules' => 'trim|numeric|max_length[2]|in_list['. implode(',', array_keys($district_dropdown)) .']',
 			        '_type'     => 'dropdown',
 			        '_data' 	=> IQB_BLANK_SELECT + $district_dropdown,
 			        '_show_label' 	=> false,
