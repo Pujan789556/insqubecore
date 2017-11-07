@@ -787,6 +787,15 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+         * --------------------------------------------------
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        {
+            $CI->load->helper('ph_misc_brg');
+        }
+
+        /**
          * MARINE
          * -----
          * Marine Portfolio Helper Functions

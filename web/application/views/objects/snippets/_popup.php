@@ -72,6 +72,15 @@ else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__F
 }
 
 /**
+ * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+ * --------------------------------------------------
+ */
+else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+{
+    $this->load->view('objects/snippets/_popup_misc_brg', $data);
+}
+
+/**
  * MARINE PORTFOLIOS
  * ----------------
  */

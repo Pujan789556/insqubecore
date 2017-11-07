@@ -1,80 +1,23 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : Object - Fire
+ * Form : Object - Burglary (Jewelry, Housebreaking, Cash in Safe)
  */
 ?>
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-6">
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
-                <h4 class="box-title">Item Details</h4>
+                <h4 class="box-title">Basic Information</h4>
             </div>
-            <table class="table table-bordered table-condensed no-margin">
-                <thead>
-                    <tr>
-                        <th>Item Category<?php echo field_compulsary_text( TRUE )?></th>
-                        <th>Sum Insured(Rs.)<?php echo field_compulsary_text( TRUE )?></th>
-                        <th>Ownership<?php echo field_compulsary_text( TRUE )?></th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
+            <div class="box-body form-horizontal">
                 <?php
-                $item_form_elements     = $form_elements['items'];
-                $items                  = $record->items ?? NULL;
-                $item_count             = count( $items->category ?? [] );
+                $section_elements = $form_elements['basic'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $section_elements,
+                    'form_record'   => $record
+                ]);
                 ?>
-                <tbody class="form-inline">
-                    <?php
-                        if($item_count):
-                            for ($i=0; $i < $item_count; $i++):?>
-                            <tr <?php echo $i == 0 ? 'id="__fire_items_row"' : '' ?>>
-                                <?php foreach($item_form_elements as $single_element):?>
-                                    <td>
-                                        <?php
-                                        /**
-                                         * Load Single Element
-                                         */
-                                        $single_element['_default']    = $items->{$single_element['_key']}[$i] ?? '';
-                                        $single_element['_value']      = $single_element['_default'];
-                                        $this->load->view('templates/_common/_form_components_inline', [
-                                            'form_elements' => [$single_element],
-                                            'form_record'   => NULL
-                                        ]);
-                                        ?>
-                                    </td>
-                                <?php
-                                endforeach;
-                                if($i == 0):?>
-                                    <td>&nbsp;</td>
-                                <?php else:?>
-                                    <td width="10%" align="right"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'>Remove</a></td>
-                                <?php endif;?>
-                            </tr>
-                        <?php
-                            endfor;
-                        else:?>
-                            <tr id="__fire_items_row">
-                                <?php foreach($item_form_elements as $single_element):?>
-                                    <td>
-                                        <?php
-                                        /**
-                                         * Load Single Element
-                                         */
-                                        $this->load->view('templates/_common/_form_components_inline', [
-                                            'form_elements' => [$single_element],
-                                            'form_record'   => NULL
-                                        ]);
-                                        ?>
-                                    </td>
-                                <?php endforeach?>
-                                <td>&nbsp;</td>
-                            </tr>
-                        <?php endif;?>
-                </tbody>
-            </table>
-            <div class="box-footer bg-info">
-                <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__fire_items_row', this)">Add More</a>
             </div>
         </div>
     </div>
@@ -112,7 +55,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <?php
                     if($item_count):
                         for ($i=0; $i < $item_count; $i++):?>
-                        <tr <?php echo $i == 0 ? 'id="__fire_land_building_row"' : '' ?>>
+                        <tr <?php echo $i == 0 ? 'id="__brg_land_building_row"' : '' ?>>
                             <?php foreach($land_building_owner_elements as $single_element):?>
                                 <td>
                                     <?php
@@ -138,7 +81,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <?php
                         endfor;
                     else:?>
-                        <tr id="__fire_land_building_row">
+                        <tr id="__brg_land_building_row">
                             <?php foreach($land_building_owner_elements as $single_element):?>
                                 <td>
                                     <?php
@@ -160,7 +103,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     </div>
 
     <div class="box-footer bg-info">
-        <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__fire_land_building_row', this)">Add More</a>
+        <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__brg_land_building_row', this)">Add More</a>
     </div>
 </div>
 

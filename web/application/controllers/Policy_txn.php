@@ -673,6 +673,15 @@ class Policy_txn extends MY_Controller
 				}
 
 				/**
+		         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+		         * --------------------------------------------------
+		         */
+		        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+		        {
+		            $done = __save_premium_MISC_BRG( $policy_record, $txn_record );
+		        }
+
+				/**
 				 * MARINE PORTFOLIOS
 				 * ---------------
 				 */
@@ -970,6 +979,15 @@ class Policy_txn extends MY_Controller
 			{
 				$goodies = _TXN_FIRE_premium_goodies($policy_record, $policy_object, $portfolio_risks);
 			}
+
+			/**
+	         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+	         * --------------------------------------------------
+	         */
+	        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+	        {
+	            $goodies = _TXN_MISC_BRG_premium_goodies($policy_record, $policy_object);
+	        }
 
 			/**
 			 * MARINE PORTFOLIOS

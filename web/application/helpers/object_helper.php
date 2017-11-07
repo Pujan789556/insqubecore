@@ -126,6 +126,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
 			$snippet = _OBJ_FIRE_row_snippet($record, $_flag__show_widget_row);
 		}
 
+        /**
+         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+         * --------------------------------------------------
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        {
+            $snippet = _OBJ_MISC_BRG_row_snippet($record, $_flag__show_widget_row);
+        }
+
 		/**
 		 * MARINE
 		 * -----
@@ -321,6 +330,15 @@ if ( ! function_exists('_OBJ_select_text'))
 		{
 			$snippet = _OBJ_FIRE_select_text($record);
 		}
+
+        /**
+         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+         * --------------------------------------------------
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        {
+            $snippet = _OBJ_MISC_BRG_select_text($record);
+        }
 
 		/**
 		 * MARINE
@@ -519,6 +537,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
 			$v_rules = _OBJ_FIRE_validation_rules( $portfolio_id, $formatted );
 		}
 
+        /**
+         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+         * --------------------------------------------------
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        {
+            $v_rules = _OBJ_MISC_BRG_validation_rules( $portfolio_id, $formatted );
+        }
+
 		/**
 		 * MARINE
 		 * -----
@@ -713,6 +740,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
 		{
 			$attribute_form = 'objects/forms/_form_object_fire';
 		}
+
+        /**
+         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+         * --------------------------------------------------
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        {
+            $attribute_form = 'objects/forms/_form_object_misc_brg';
+        }
 
 		/**
 		 * MARINE
@@ -1068,6 +1104,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 		{
 			$amt_sum_insured = _OBJ_FIRE_compute_sum_insured_amount($portfolio_id, $data);
 		}
+
+        /**
+         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+         * --------------------------------------------------
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__BRG)) )
+        {
+            $amt_sum_insured = _OBJ_MISC_BRG_compute_sum_insured_amount($portfolio_id, $data);
+        }
 
 		/**
 		 * MARINE
