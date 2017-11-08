@@ -787,15 +787,6 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
-         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
-         * --------------------------------------------------
-         */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
-        {
-            $CI->load->helper('ph_misc_brg');
-        }
-
-        /**
          * MARINE
          * -----
          * Marine Portfolio Helper Functions
@@ -906,6 +897,23 @@ if ( ! function_exists('load_portfolio_helper'))
             $CI->load->helper('ph_misc_pl');
         }
 
+        /**
+         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+         * --------------------------------------------------
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
+        {
+            $CI->load->helper('ph_misc_brg');
+        }
+
+        /**
+         * MISCELLANEOUS - CASH IN TRANSIT
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
+        {
+            $CI->load->helper('ph_misc_ct');
+        }
 
         /**
          * MOTOR

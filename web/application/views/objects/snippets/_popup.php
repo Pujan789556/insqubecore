@@ -179,3 +179,12 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
     $this->load->view('objects/snippets/_popup_misc_pl', $data);
 }
 
+/**
+ * MISCELLANEOUS - CASH IN TRANSIT
+ * -------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
+{
+    $this->load->view('objects/snippets/_popup_misc_ct', $data);
+}
+

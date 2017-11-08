@@ -573,6 +573,15 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
         }
 
         /**
+         * MISCELLANEOUS - CASH IN TRANSIT
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
+        {
+            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_CT";
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -738,6 +747,15 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_MISC_PL';
+        }
+
+        /**
+         * MISCELLANEOUS - CASH IN TRANSIT
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_MISC_CT';
         }
 
 
@@ -1206,6 +1224,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			// MISCELLANEOUS - PUBLIC LIABILITY(PL)
 			case IQB_SUB_PORTFOLIO_MISC_PL_ID:
 				$schedule_view = 'policies/print/schedule_MISC_PL';
+				break;
+
+			// MISCELLANEOUS - CASH IN TRANSIT
+			case IQB_SUB_PORTFOLIO_MISC_CT_ID:
+				$schedule_view = 'policies/print/schedule_MISC_CT';
 				break;
 
 			default:

@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Schedule Print : BURGLARY
+ * Schedule Print : MISCELLANEOUS - CASH IN TRANSIT
  */
 $object_attributes      = json_decode($record->object_attributes);
 $schedule_table_title   = $record->portfolio_name . ' बीमालेखको अनुसुची (सेड्युल)';
@@ -94,15 +94,8 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
 
                             <tr>
                                 <td>
-                                    <strong>बीमाको विषयवस्तु रहेको स्थान, भवन वा सम्पत्तिको विवरण</strong><br/>
-                                    <?php
-
-                                    $object = (object)[
-                                        'attributes' => $record->object_attributes
-                                    ];
-
-                                    $this->load->view('objects/snippets/_schedule_snippet_brg', ['record' => $object ]);
-                                     ?>
+                                    <strong>प्रयोग हुने स्थान</strong><br/>
+                                    <?php echo nl2br( htmlspecialchars($object_attributes->risk_locaiton) ); ?>
                                 </td>
                             </tr>
                             <tr>
