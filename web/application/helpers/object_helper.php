@@ -253,6 +253,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * MISCELLANEOUS - CASH IN COUNTER
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
+        {
+            $snippet = _OBJ_MISC_CC_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * Throw Exception
          */
         else
@@ -473,6 +482,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
         {
             $snippet = _OBJ_MISC_CS_select_text($record);
+        }
+
+        /**
+         * MISCELLANEOUS - CASH IN COUNTER
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
+        {
+            $snippet = _OBJ_MISC_CC_select_text($record);
         }
 
         /**
@@ -703,6 +721,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * MISCELLANEOUS - CASH IN COUNTER
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
+        {
+            $v_rules = _OBJ_MISC_CC_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -923,6 +950,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
         {
             $attribute_form = 'objects/forms/_form_object_misc_cs';
+        }
+
+        /**
+         * MISCELLANEOUS - CASH IN COUNTER
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_misc_cc';
         }
 
         /**
@@ -1304,6 +1340,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
         {
             $amt_sum_insured = _OBJ_MISC_CS_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * MISCELLANEOUS - CASH IN COUNTER
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
+        {
+            $amt_sum_insured = _OBJ_MISC_CC_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

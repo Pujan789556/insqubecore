@@ -197,3 +197,12 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
     $this->load->view('objects/snippets/_popup_misc_cs', $data);
 }
 
+/**
+ * MISCELLANEOUS - CASH IN COUNTER
+ * -------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
+{
+    $this->load->view('objects/snippets/_popup_misc_cc', $data);
+}
+

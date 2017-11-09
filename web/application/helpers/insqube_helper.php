@@ -925,6 +925,15 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * MISCELLANEOUS - CASH IN COUNTER
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
+        {
+            $CI->load->helper('ph_misc_cc');
+        }
+
+        /**
          * MOTOR
          * -----
          * We have a single helper file for motor portfolio
