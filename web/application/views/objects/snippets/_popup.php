@@ -188,3 +188,12 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
     $this->load->view('objects/snippets/_popup_misc_ct', $data);
 }
 
+/**
+ * MISCELLANEOUS - CASH IN SAFE
+ * -------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
+{
+    $this->load->view('objects/snippets/_popup_misc_cs', $data);
+}
+

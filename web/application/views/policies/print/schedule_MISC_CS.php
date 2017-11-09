@@ -1,9 +1,9 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Schedule Print : FIRE
+ * Schedule Print : MISCELLANEOUS - CASH IN SAFE
  */
 $object_attributes      = json_decode($record->object_attributes);
-$schedule_table_title   = 'अग्नि बीमालेखको तालिका (सेड्युल)';
+$schedule_table_title   = $record->portfolio_name . ' बीमालेखको अनुसुची (सेड्युल)';
 ?>
 
 <!DOCTYPE html>
@@ -87,27 +87,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                             </tr>
                             <tr>
                                 <td>
-                                    पेशा: <?php echo $record->customer_profession;?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <strong>बीमा योग्य हित रहेको बैंक/वित्तीय संस्थाको विवरण</strong> <br/>
-                                    नाम: <br/>
-                                    ठेगाना:
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <strong>बीमाको विषयवस्तु रहेको स्थान, भवन वा सम्पत्तिको विवरण</strong><br/>
-                                    <?php
-
-                                    $object = (object)[
-                                        'attributes' => $record->object_attributes
-                                    ];
-
-                                    $this->load->view('objects/snippets/_schedule_snippet_fire', ['record' => $object ]);
-                                     ?>
+                                    बिमांक रकम (रु): <strong><?php echo number_format( (float)$record->object_amt_sum_insured, 2, '.', '');?></strong>
                                 </td>
                             </tr>
                             <tr>
@@ -165,7 +145,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                             <tr>
                                 <td>
                                     <?php
-                                    $this->load->view('policy_txn/snippets/_schedule_cost_calculation_table_risks_FIRE', ['txn_record' => $txn_record]);
+                                    $this->load->view('policy_txn/snippets/_schedule_cost_calculation_table_risks_MISC_CS', ['txn_record' => $txn_record]);
                                     ?>
                                 </td>
                             </tr>
@@ -174,20 +154,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                 </tr>
 
                 <tr>
-                    <td colspan="2">
-                        <strong>बीमालेखले रक्षावरण गरेको सम्पत्तिको विवरण</strong>
-                        <?php
-                        $this->load->view('policy_txn/snippets/_schedule_cost_calculation_table_property_FIRE', ['txn_record' => $txn_record]);
-                        ?>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td colspan="2">
-                        <strong>बीमाशुल्कको हिसाब</strong>: <br>
-                        <strong>संलग्न सम्पुष्टीहरु</strong>: <br>
-                        <strong>बन्देज (Warranty)</strong>:
-                    </td>
+                    <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)) ?></td>
                 </tr>
             </tbody>
         </table>
