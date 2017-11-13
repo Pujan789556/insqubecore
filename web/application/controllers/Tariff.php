@@ -982,6 +982,397 @@ class Tariff extends MY_Controller
     }
 
 
+    // --------------------------------------------------------------------
+    // TARIFF (MISC - EXPEDITION PERSONNEL ACCIDENT) - EXPLORE AND CRUD OPERATIONS
+    // --------------------------------------------------------------------
+
+    /**
+     * Tariff - MISC - EXPEDITION PERSONNEL ACCIDENT
+     *
+     * List of all portfolio tariff fiscal-year-wise
+     * @return void
+     */
+    public function misc_epa( $method = "", $id_or_fy_id=null )
+    {
+        // Check if we have details Method?
+        /**
+         * Valid Method?
+         *      Methods: add | edit | details | flush
+         *
+         * Urls
+         *      /tariff/misc_epa
+         *      /tariff/misc_epa/add
+         *      /tariff/misc_epa/duplicate/<record_id>
+         *      /tariff/misc_epa/edit/<record_id>
+         *      /tariff/misc_epa/flush
+         */
+        if( !empty($method) && !in_array($method, ['add', 'edit', 'duplicate', 'flush']))
+        {
+            $this->template->render_404();
+        }
+
+        // Call the method other than "default"
+        if( $method )
+        {
+            $method_name = '__misc_epa__' . $method;
+            return $this->{$method_name}($id_or_fy_id);
+        }
+
+
+        // Site Meta
+        $this->data['site_title'] = 'Master Setup | Tariff - Misc (Expedition Personnel Accident)';
+
+        $this->load->model('tariff_misc_epa_model');
+
+        /**
+         * Update Nav Data
+         */
+        $this->_navigation['level_3'] = 'misc_epa';
+        $this->active_nav_primary($this->_navigation);
+
+        $records = $this->tariff_misc_epa_model->get_index_rows();
+
+
+        $this->template->partial(
+                            'content_header',
+                            'templates/_common/_content_header',
+                            [
+                                'content_header' => 'Tariff - Misc (Expedition Personnel Accident)',
+                                'breadcrumbs' => ['Master Setup' => NULL, 'Tariff' => NULL, 'Misc (Expedition Personnel Accident)' => NULL]
+                        ])
+                        ->partial('content', 'setup/tariff/misc_epa/_index', compact('records'))
+                        ->render($this->data);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    private function __misc_epa__flush($id)
+    {
+        $this->load->model('tariff_misc_epa_model');
+
+        $this->tariff_misc_epa_model->clear_cache();
+        redirect('tariff/misc_epa');
+    }
+
+     // --------------------------------------------------------------------
+
+
+    /**
+     * Add Tarrif Data
+     *
+     * @return void
+     */
+    private function __misc_epa__add()
+    {
+        $this->load->model('tariff_misc_epa_model');
+        $this->load->model('portfolio_model');
+
+        $portfolio_record = $this->portfolio_model->find(IQB_SUB_PORTFOLIO_MISC_EPA_ID);
+
+        /**
+         * Form Posted? Let's Save it
+         */
+        $this->__misc_epa__save('add');
+
+        // Let's render the form
+        $json_data['form'] = $this->load->view('setup/tariff/misc_epa/_form',
+            [
+                'form_elements'         => $this->tariff_misc_epa_model->validation_rules('add'),
+                'record'                => NULL,
+                'portfolio_record'     => $portfolio_record
+            ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Edit Tarrif Data
+     *
+     * @param int $id
+     * @return void
+     */
+    private function __misc_epa__edit($id)
+    {
+        $this->load->model('tariff_misc_epa_model');
+        $this->load->model('portfolio_model');
+
+        // Valid Record ?
+        $id = (int)$id;
+        $record = $this->tariff_misc_epa_model->get($id);
+        if(!$record)
+        {
+            $this->template->render_404();
+        }
+
+        $portfolio_record = $this->portfolio_model->find(IQB_SUB_PORTFOLIO_MISC_EPA_ID);
+
+        /**
+         * Form Posted? Let's Save it
+         */
+        $this->__misc_epa__save('edit', $record);
+
+        // Let's render the form
+        $json_data['form'] = $this->load->view('setup/tariff/misc_epa/_form',
+            [
+                'form_elements'         => $this->tariff_misc_epa_model->validation_rules('edit'),
+                'record'                => $record,
+                'portfolio_record'     => $portfolio_record
+            ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Save Tarrif Data
+     *
+     * @param string    $action
+     * @param object    $record
+     * @return void
+     */
+    private function __misc_epa__save($action, $record=NULL)
+    {
+        if( $this->input->post() )
+        {
+            /**
+             * Forma Validation Rule
+             */
+            $v_rules = $this->tariff_misc_epa_model->validation_rules($action, true);
+            $this->form_validation->set_rules($v_rules);
+
+            $data = $this->input->post();
+
+            if( $this->form_validation->run() === TRUE )
+            {
+                $data   = $this->input->post();
+                $tariff = $data['tariff'];
+
+
+
+                $post_data = [
+                    'tariff' => json_encode($tariff),
+                    'active' => $data['active'] ?? 0
+                ];
+
+
+                /**
+                 * Add or Edit
+                 */
+                if($action == 'add')
+                {
+                    // Add Portfolio ID
+                    $post_data['portfolio_id'] = IQB_SUB_PORTFOLIO_MISC_EPA_ID;
+                    $post_data['fiscal_yr_id'] = $data['fiscal_yr_id'];
+                    $done = $this->tariff_misc_epa_model->insert($post_data, TRUE);
+                }
+                else
+                {
+                    $done = $this->tariff_misc_epa_model->update($record->id, $post_data, TRUE);
+                }
+
+                if(!$done)
+                {
+                    $status = 'error';
+                    $message = 'Could not update.';
+                }
+                else
+                {
+                    // Clear Cache
+                    $this->tariff_misc_epa_model->clear_cache();
+
+                    $status = 'success';
+                    $message = 'Successfully Updated.';
+                }
+            }
+            else
+            {
+                $status = 'error';
+                $message = validation_errors();
+            }
+
+            // Success HTML
+            if($status === 'success' )
+            {
+                $ajax_data = [
+                    'message' => $message,
+                    'status'  => $status,
+                    'updateSection' => true,
+                    'hideBootbox' => true
+                ];
+
+                $records   = $this->tariff_misc_epa_model->get_index_rows();
+                $html       = $this->load->view('setup/tariff/misc_epa/_list', ['records' => $records], TRUE);
+
+                $ajax_data['updateSectionData'] = [
+                    'box'       => '#iqb-data-list',
+                    'method'    => 'html',
+                    'html'      => $html
+                ];
+                return $this->template->json($ajax_data);
+            }
+            else
+            {
+                return $this->template->json([
+                    'status'        => $status,
+                    'message'       => $message,
+                ]);
+            }
+        }
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Duplicate Misc (Expedition Personnel Accident) Tariff form Old Fiscal Year
+     *
+     * @return void
+     */
+    private function __misc_epa__duplicate($source_id)
+    {
+        $this->load->model('tariff_misc_epa_model');
+        // Valid Record ?
+        $source_id      = (int)$source_id;
+        $source_record  = $this->tariff_misc_epa_model->get($source_id);
+
+        if(!$source_record)
+        {
+            $this->template->render_404();
+        }
+
+        $rules = $this->tariff_misc_epa_model->duplicate_validation_rules();
+
+        if( $this->input->post() )
+        {
+            $this->form_validation->set_rules($rules);
+            if( $this->form_validation->run() === TRUE )
+            {
+                $data = $this->input->post();
+
+                $batch_data                 = [];
+                $destination_fiscal_year_id = $this->input->post('fiscal_yr_id');
+
+
+                // Only Data Row from Traiff Table
+                $src  = $this->tariff_misc_epa_model->find($source_record->id);
+                $post_data =(array)$src;
+
+                // Set Fiscal Year with Newly supplied value
+                $post_data['fiscal_yr_id'] = $destination_fiscal_year_id;
+
+                // Remoe Unnecessary Fields
+                unset($post_data['id']);
+                unset($post_data['created_at']);
+                unset($post_data['created_by']);
+                unset($post_data['updated_at']);
+                unset($post_data['updated_by']);
+
+                $done = $this->tariff_misc_epa_model->insert($post_data, TRUE);
+
+                if(!$done)
+                {
+                    $status = 'error';
+                    $message = 'Could not update.';
+                }
+                else
+                {
+                    // Clear Cache
+                    $this->tariff_misc_epa_model->clear_cache();
+
+                    $status = 'success';
+                    $message = 'Successfully Updated.';
+                }
+            }
+            else
+            {
+                $status = 'error';
+                $message = validation_errors();
+            }
+
+            // Success HTML
+            if($status === 'success' )
+            {
+                $ajax_data = [
+                    'message' => $message,
+                    'status'  => $status,
+                    'updateSection' => true,
+                    'hideBootbox' => true
+                ];
+
+                $records    = $this->tariff_misc_epa_model->get_index_rows();
+                $html       = $this->load->view('setup/tariff/misc_epa/_list', ['records' => $records], TRUE);
+
+                $ajax_data['updateSectionData'] = [
+                    'box'       => '#iqb-data-list',
+                    'method'    => 'html',
+                    'html'      => $html
+                ];
+                return $this->template->json($ajax_data);
+            }
+            else
+            {
+                $form_data = [
+                    'form_elements'         => $rules,
+                    'record'                => null,
+                    'source_record'         => $source_record
+                ];
+                return $this->template->json([
+                    'status'        => $status,
+                    'message'       => $message,
+                    'reloadForm'    => true,
+                    'form'          => $this->load->view('setup/tariff/misc_epa/_form_duplicate', $form_data, TRUE)
+                ]);
+            }
+        }
+
+        // Let's render the form
+        $json_data['form'] = $this->load->view('setup/tariff/misc_epa/_form_duplicate',
+            [
+                'form_elements'         => $rules,
+                'record'                => null,
+                'source_record'         => $source_record
+            ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+    }
+
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Callback - Check Misc (Expedition Personnel Accident) Tariff Duplicate
+     *
+     * @param string $code
+     * @param integer|null $id
+     * @return bool
+     */
+    public function _cb_tariff_misc_epa_check_duplicate($fiscal_yr_id, $id=NULL)
+    {
+        $fiscal_yr_id = intval( $fiscal_yr_id ? $fiscal_yr_id : $this->input->post('fiscal_yr_id') );
+
+        $where = [
+            'fiscal_yr_id' => $fiscal_yr_id,
+            'portfolio_id' => IQB_SUB_PORTFOLIO_MISC_EPA_ID
+        ];
+        if( $this->tariff_misc_epa_model->check_duplicate($where))
+        {
+            $this->form_validation->set_message('_cb_tariff_misc_epa_check_duplicate', 'The %s already exists.');
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+
 
 
 
