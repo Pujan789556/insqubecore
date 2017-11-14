@@ -165,12 +165,6 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                                 </a>
                                           </li>
 
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'tmi_plans');?>">
-                                                <a href="<?php echo site_url('tmi_plans');?>" title="Manage Travel Medical Insurance Plans">
-                                                      <i class="fa fa-circle-o"></i> TMI Plans
-                                                </a>
-                                          </li>
-
                                           <li class="<?php echo set_menu_active($nav_level_2, 'endorsement_templates');?>">
                                                 <a href="<?php echo site_url('endorsement_templates');?>">
                                                       <i class="fa fa-circle-o"></i> Endorsement Templates
@@ -200,6 +194,12 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                                       <li class="<?php echo set_menu_active($nav_level_3, 'misc_epa');?>">
                                                             <a href="<?php echo site_url('tariff/misc_epa');?>">
                                                                   <i class="fa fa-circle-o"></i> MISC - Expedition Personnel Accident
+                                                            </a>
+                                                      </li>
+
+                                                      <li class="<?php echo set_menu_active($nav_level_3, 'tmi_plans');?>">
+                                                            <a href="<?php echo site_url('tmi_plans');?>" title="Manage Travel Medical Insurance Plans & Tariff">
+                                                                  <i class="fa fa-circle-o"></i> TMI Plans/Tariff
                                                             </a>
                                                       </li>
 

@@ -19,7 +19,7 @@ class Tmi_plan_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'parent_id', 'code', 'name', 'active', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'parent_id', 'code', 'name', 'tariff_medical', 'tariff_package', 'active', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -52,35 +52,101 @@ class Tmi_plan_model extends MY_Model
         $parent_dropdown = $this->dropdown_parent();
 
         $this->validation_rules = [
-            [
-                'field' => 'parent_id',
-                'label' => 'Parent Plan',
-                'rules' => 'trim|integer|max_length[8]|in_list[' . implode(',', array_keys($parent_dropdown)) . ']',
-                '_type'     => 'dropdown',
-                '_data'     => IQB_BLANK_SELECT + $parent_dropdown,
-                '_required' => true
+
+            'basic' => [
+                [
+                    'field' => 'parent_id',
+                    'label' => 'Parent Plan',
+                    'rules' => 'trim|integer|max_length[8]|in_list[' . implode(',', array_keys($parent_dropdown)) . ']',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $parent_dropdown,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'name',
+                    'label' => 'Plan Name',
+                    'rules' => 'trim|required|max_length[100]|ucfirst',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'code',
+                    'label' => 'Plan Code',
+                    'rules' => 'trim|required|alpha|max_length[15]|strtoupper|callback_check_duplicate',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'active',
+                    'label' => 'Activate Plan',
+                    'rules' => 'trim|integer|in_list[1]',
+                    '_type' => 'switch',
+                    '_checkbox_value' => '1'
+                ]
             ],
-            [
-                'field' => 'name',
-                'label' => 'Plan Name',
-                'rules' => 'trim|required|max_length[100]|ucfirst',
-                '_type'     => 'text',
-                '_required' => true
-            ],
-            [
-                'field' => 'code',
-                'label' => 'Plan Code',
-                'rules' => 'trim|required|alpha|max_length[15]|strtoupper|callback_check_duplicate',
-                '_type'     => 'text',
-                '_required' => true
-            ],
-            [
-                'field' => 'active',
-                'label' => 'Activate Plan',
-                'rules' => 'trim|integer|in_list[1]',
-                '_type' => 'switch',
-                '_checkbox_value' => '1'
+
+            /**
+             * Tariff Validation Rules
+             *
+             * Format: [
+             *  {
+             *      DayMin:xxx,
+             *      DayMax:xxx,
+             *      AgeBand5_40Rate:aaa,
+             *      AgeBand41_60Rate:bbb,
+             *      AgeBand61_70Rate:ccc
+             *  },
+             *  ...
+             * ]
+             */
+            'tariff' => [
+                [
+                    'field' => 'tariff[day_min][]',
+                    '_key'  => 'day_min',
+                    'label' => 'Days (min)',
+                    'rules' => 'trim|required|integer|max_length[3]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[day_max][]',
+                    '_key'  => 'day_max',
+                    'label' => 'Days (max)',
+                    'rules' => 'trim|required|integer|max_length[3]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[age_5_40_rate][]',
+                    '_key'  => 'age_5_40_rate',
+                    'label' => 'Age Band (5-40) Rate (USD)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[age_41_60_rate][]',
+                    '_key'  => 'age_41_60_rate',
+                    'label' => 'Age Band (41-60) Rate (USD)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[age_61_70_rate][]',
+                    '_key'  => 'age_61_70_rate',
+                    'label' => 'Age Band (61-70) Rate (USD)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
             ]
+
         ];
     }
 
@@ -130,7 +196,18 @@ class Tmi_plan_model extends MY_Model
         return $record;
     }
 
+    public function update_tariff($id, $data)
+    {
 
+        $result = $this->db->set($data)
+                        ->where('id', $id)
+                        ->update($this->table_name);
+
+        // Clean Cache
+        $this->clear_cache();
+
+        return $result;
+    }
 
     // ----------------------------------------------------------------
 

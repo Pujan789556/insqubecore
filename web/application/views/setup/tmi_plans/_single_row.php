@@ -21,5 +21,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
 		</a>
+
+		<?php if($record->parent_id): ?>
+			<a href="#"
+				title="Edit Medical Tariff"
+				data-toggle="tooltip"
+				data-box-size="large"
+				class="trg-dialog-edit action"
+				data-title='<i class="fa fa-pencil-square-o"></i> Edit Medical Tariff - <?php echo $record->name?> (<?php echo $record->parent_name ?>)'
+				data-url="<?php echo site_url($this->router->class . '/tariff/m/' . $record->id);?>"
+				data-form=".form-iqb-general">
+				<i class="fa fa-list"></i>
+				<span class="hidden-xs">Medical Tariff</span>
+			</a>
+
+			<a href="#"
+				title="Edit Package Tariff"
+				data-toggle="tooltip"
+				data-box-size="large"
+				class="trg-dialog-edit action"
+				data-title='<i class="fa fa-pencil-square-o"></i> Edit Package Tariff - <?php echo $record->name?> (<?php echo $record->parent_name ?>)'
+				data-url="<?php echo site_url($this->router->class . '/tariff/p/' . $record->id);?>"
+				data-form=".form-iqb-general">
+				<i class="fa fa-list"></i>
+				<span class="hidden-xs">Package Tariff</span>
+			</a>
+		<?php endif?>
 	</td>
 </tr>

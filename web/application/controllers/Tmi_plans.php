@@ -36,7 +36,8 @@ class Tmi_plans extends MY_Controller
         $this->_navigation = [
 			'level_0' => 'master_setup',
 			'level_1' => 'portfolio',
-			'level_2' => $this->router->class
+			'level_2' => 'tariff',
+			'level_3' => $this->router->class
 		];
 		$this->active_nav_primary($this->_navigation);
 
@@ -100,7 +101,7 @@ class Tmi_plans extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view( $this->_module_view_path . '_form',
 			[
-				'form_elements' => $this->tmi_plan_model->validation_rules,
+				'form_elements' => $this->tmi_plan_model->validation_rules['basic'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -126,7 +127,7 @@ class Tmi_plans extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view($this->_module_view_path . '_form',
 			[
-				'form_elements' => $this->tmi_plan_model->validation_rules,
+				'form_elements' => $this->tmi_plan_model->validation_rules['basic'],
 				'record' 		=> $record
 			], TRUE);
 
@@ -137,16 +138,51 @@ class Tmi_plans extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
+	 * Edit a Portfolio Specific Accounts
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function tariff($type, $id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->tmi_plan_model->find($id);
+		if( !$record || !in_array($type, ['m', 'p']) )
+		{
+			$this->template->render_404();
+		}
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('tariff', $record, $type);
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view($this->_module_view_path . '_form_tariff',
+			[
+				'form_elements' => $this->tmi_plan_model->validation_rules['tariff'],
+				'record' 		=> $record,
+				'type' 			=> $type
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+
+	/**
 	 * Save a Record
 	 *
 	 * @param string $action [add|edit]
 	 * @param object|null $record Record Object or NULL
 	 * @return array
 	 */
-	private function _save($action, $record = NULL)
+	private function _save($action, $record = NULL, $tariff_type=NULL)
 	{
 		// Valid action?
-		if( !in_array($action, array('add', 'edit', 'accounts', 'risks')))
+		if( !in_array($action, array('add', 'edit', 'tariff')))
 		{
 			return $this->template->json([
 				'status' => 'error',
@@ -163,7 +199,7 @@ class Tmi_plans extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->tmi_plan_model->validation_rules;
+			$rules = $this->tmi_plan_model->validation_rules[ in_array($action, ['add', 'edit']) ? 'basic' : 'tariff' ];
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
@@ -181,10 +217,26 @@ class Tmi_plans extends MY_Controller
 					// Activity Log
 					$done ? $this->tmi_plan_model->log_activity($done, 'C'): '';
 				}
-				else
+				else if($action === 'edit')
 				{
 					// Basic Information Edit Mode
 					$done = $this->tmi_plan_model->update($record->id, $data, TRUE) && $this->tmi_plan_model->log_activity($record->id, 'E');
+				}
+
+				/**
+				 * Tariff Save
+				 */
+				else
+				{
+					/**
+					 * Build Tariff Structure
+					 */
+					$structured_tariff = $this->_build_tariff_data();
+					$tariff_data = [];
+					$tariff_data[ $tariff_type == 'm' ? 'tariff_medical' : 'tariff_package' ] = json_encode($structured_tariff);
+
+					// Basic Information Edit Mode
+					$done = $this->tmi_plan_model->update_tariff($record->id, $tariff_data) && $this->tmi_plan_model->log_activity($record->id, 'E');
 				}
 
 				if(!$done)
@@ -247,6 +299,28 @@ class Tmi_plans extends MY_Controller
 
 		return $return_data;
 	}
+
+		private function _build_tariff_data()
+		{
+			$post_tariff = $this->input->post('tariff');
+			$item_count = count($post_tariff['day_min']);
+
+			$structured_tariff = [];
+			$form_elements = $this->tmi_plan_model->validation_rules['tariff'];
+			for($i = 0; $i < $item_count; $i++)
+			{
+				$single_tariff = [];
+				foreach($form_elements as $elem)
+				{
+					$key = $elem['_key'];
+
+					$single_tariff[$key] = $post_tariff[$key][$i];
+				}
+				$structured_tariff[] = $single_tariff;
+			}
+
+			return $structured_tariff;
+		}
 	// --------------------------------------------------------------------
 
     /**
