@@ -138,9 +138,10 @@ class Tmi_plans extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Edit a Portfolio Specific Accounts
+	 * Edit Tariff for the supplied Plan
 	 *
 	 *
+	 * @param char $type 	m: medical, p: package policy
 	 * @param integer $id
 	 * @return void
 	 */
@@ -171,6 +172,39 @@ class Tmi_plans extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Edit Benefits for the supplied Plan
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function benefits($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->tmi_plan_model->find($id);
+		if( !$record )
+		{
+			$this->template->render_404();
+		}
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('benefits', $record);
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view($this->_module_view_path . '_form_benefits',
+			[
+				'form_elements' => $this->tmi_plan_model->validation_rules['benefits'],
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
 
 	/**
 	 * Save a Record
@@ -182,7 +216,7 @@ class Tmi_plans extends MY_Controller
 	private function _save($action, $record = NULL, $tariff_type=NULL)
 	{
 		// Valid action?
-		if( !in_array($action, array('add', 'edit', 'tariff')))
+		if( !in_array($action, array('add', 'edit', 'tariff', 'benefits')))
 		{
 			return $this->template->json([
 				'status' => 'error',
@@ -199,7 +233,7 @@ class Tmi_plans extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->tmi_plan_model->validation_rules[ in_array($action, ['add', 'edit']) ? 'basic' : 'tariff' ];
+			$rules = $this->_v_rule($action);
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
@@ -226,7 +260,7 @@ class Tmi_plans extends MY_Controller
 				/**
 				 * Tariff Save
 				 */
-				else
+				else if($action === 'tariff')
 				{
 					/**
 					 * Build Tariff Structure
@@ -236,7 +270,23 @@ class Tmi_plans extends MY_Controller
 					$tariff_data[ $tariff_type == 'm' ? 'tariff_medical' : 'tariff_package' ] = json_encode($structured_tariff);
 
 					// Basic Information Edit Mode
-					$done = $this->tmi_plan_model->update_tariff($record->id, $tariff_data) && $this->tmi_plan_model->log_activity($record->id, 'E');
+					$done = $this->tmi_plan_model->update_tariff_benefits($record->id, $tariff_data) && $this->tmi_plan_model->log_activity($record->id, 'E');
+				}
+
+				/**
+				 * Benefits
+				 */
+				else
+				{
+					/**
+					 * Build Benefit Structure
+					 */
+					$structured_benefits = $this->_build_benefit_data();
+					$benefit_data = [
+						'benefits' => json_encode($structured_benefits)
+					];
+					// Basic Information Edit Mode
+					$done = $this->tmi_plan_model->update_tariff_benefits($record->id, $benefit_data) && $this->tmi_plan_model->log_activity($record->id, 'E');
 				}
 
 				if(!$done)
@@ -300,6 +350,28 @@ class Tmi_plans extends MY_Controller
 		return $return_data;
 	}
 
+		private function _v_rule($action)
+		{
+			$rules = [];
+			switch($action)
+			{
+				case 'add':
+				case 'edit':
+					$rules = $this->tmi_plan_model->validation_rules['basic'];
+					break;
+
+				case 'tariff':
+				case 'benefits':
+					$rules = $this->tmi_plan_model->validation_rules[$action];
+					break;
+
+				default:
+					break;
+			}
+
+			return $rules;
+		}
+
 		private function _build_tariff_data()
 		{
 			$post_tariff = $this->input->post('tariff');
@@ -320,6 +392,28 @@ class Tmi_plans extends MY_Controller
 			}
 
 			return $structured_tariff;
+		}
+
+		private function _build_benefit_data()
+		{
+			$post_benefits = $this->input->post('benefits');
+			$item_count = count($post_benefits['section']);
+
+			$structured_benefits = [];
+			$form_elements = $this->tmi_plan_model->validation_rules['benefits'];
+			for($i = 0; $i < $item_count; $i++)
+			{
+				$single_benefits = [];
+				foreach($form_elements as $elem)
+				{
+					$key = $elem['_key'];
+
+					$single_benefits[$key] = $post_benefits[$key][$i];
+				}
+				$structured_benefits[] = $single_benefits;
+			}
+
+			return $structured_benefits;
 		}
 	// --------------------------------------------------------------------
 

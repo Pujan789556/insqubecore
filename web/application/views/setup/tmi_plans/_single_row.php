@@ -45,6 +45,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				data-form=".form-iqb-general">
 				<i class="fa fa-list"></i>
 				<span class="hidden-xs">Package Tariff</span>
+
+			<a href="#"
+				title="Edit Schedule of Benefits"
+				data-toggle="tooltip"
+				data-box-size="large"
+				class="trg-dialog-edit action"
+				data-title='<i class="fa fa-pencil-square-o"></i> Edit Schedule of Benefits - <?php echo $record->name?> (<?php echo $record->parent_name ?>)'
+				data-url="<?php echo site_url($this->router->class . '/benefits/' . $record->id);?>"
+				data-form=".form-iqb-general">
+				<i class="fa fa-dollar"></i>
+				<span class="hidden-xs">Benefits</span>
 			</a>
 		<?php endif?>
 	</td>

@@ -19,7 +19,7 @@ class Tmi_plan_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'parent_id', 'code', 'name', 'tariff_medical', 'tariff_package', 'active', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'parent_id', 'code', 'name', 'tariff_medical', 'tariff_package', 'benefits', 'active', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -145,8 +145,60 @@ class Tmi_plan_model extends MY_Model
                     '_show_label' => false,
                     '_required' => true
                 ],
-            ]
+            ],
 
+            /**
+             * Benefits Validation Rules
+             *
+             * Format: [
+             *  {
+             *      SectionCover:xxx,
+             *      Benefit:xxx,
+             *      MaxSumInsured:aaa,
+             *      Excess:bbb
+             *  },
+             *  ...
+             * ]
+             */
+            'benefits' => [
+                [
+                    'field' => 'benefits[section][]',
+                    '_key'  => 'section',
+                    'label' => 'Section of Cover',
+                    'rules' => 'trim|required|htmlspecialchars|max_length[10]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'benefits[benefit][]',
+                    '_key'  => 'benefit',
+                    'label' => 'Benefit',
+                    'rules' => 'trim|required|htmlspecialchars|max_length[500]',
+                    '_type'     => 'textarea',
+                    'rows'      => 4,
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'benefits[max_sum_insured][]',
+                    '_key'  => 'max_sum_insured',
+                    'label' => 'Max. Sum Insured (USD)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'benefits[excess][]',
+                    '_key'  => 'excess',
+                    'label' => 'Excess',
+                    'rules' => 'trim|required|htmlspecialchars|max_length[200]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ]
+            ]
         ];
     }
 
@@ -196,9 +248,10 @@ class Tmi_plan_model extends MY_Model
         return $record;
     }
 
-    public function update_tariff($id, $data)
-    {
+    // ----------------------------------------------------------------
 
+    public function update_tariff_benefits($id, $data)
+    {
         $result = $this->db->set($data)
                         ->where('id', $id)
                         ->update($this->table_name);
