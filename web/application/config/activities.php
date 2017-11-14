@@ -269,6 +269,7 @@ $config['insqb_activity_types'] = [
 			'D' => 'deleted'
 	]],
 
+
 	/**
 	 * RI Setup - Pools
 	 */
@@ -355,6 +356,17 @@ $config['insqb_activity_types'] = [
 			'C' => 'added',
 			'E' => 'edited',
 			'D' => 'deleted'
+	]],
+
+	/**
+	 * Activities related to TMI Plans
+	 */
+	'tmi_plan' => [
+		'_uri' => 'tmi_plans/',
+		'_table' => 'master_tmi_plans',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
 	]],
 
 	/**
