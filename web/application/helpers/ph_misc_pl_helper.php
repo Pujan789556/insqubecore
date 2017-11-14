@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * InsQube Contractor All Risk - Miscellaneous Portfolio Helper Functions
+ * InsQube Miscellaneous Portfolio Helper Functions
  *
  * This file contains helper functions related to Miscellaneous Portfolio
  *

@@ -807,6 +807,15 @@ class Policy_txn extends MY_Controller
 		            $done = __save_premium_MISC_CC( $policy_record, $txn_record );
 		        }
 
+		        /**
+		         * MISCELLANEOUS - EXPEDITION PERSONNEL ACCIDENT(EPA)
+		         * --------------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
+		        {
+		            $done = __save_premium_MISC_EPA( $policy_record, $txn_record );
+		        }
+
 				else
 				{
 					return $this->template->json([
@@ -1140,6 +1149,15 @@ class Policy_txn extends MY_Controller
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
 	        {
 	            $goodies = _TXN_MISC_CC_premium_goodies($policy_record, $policy_object, $portfolio_risks);
+	        }
+
+	        /**
+	         * MISCELLANEOUS - EXPEDITION PERSONNEL ACCIDENT(EPA)
+	         * --------------------------------------------------
+	         */
+	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
+	        {
+	            $goodies = _TXN_MISC_EPA_premium_goodies($policy_record, $policy_object);
 	        }
 
 			/**

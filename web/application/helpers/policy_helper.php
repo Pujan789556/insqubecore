@@ -600,6 +600,15 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
         }
 
         /**
+         * MISCELLANEOUS - EXPEDITION PERSONNEL ACCIDENT(EPA)
+         * --------------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
+        {
+            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_EPA";
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -792,6 +801,15 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_MISC_CC';
+        }
+
+        /**
+         * MISCELLANEOUS - EXPEDITION PERSONNEL ACCIDENT(EPA)
+         * --------------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_MISC_EPA';
         }
 
 
@@ -1277,6 +1295,10 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 				$schedule_view = 'policies/print/schedule_MISC_CC';
 				break;
 
+			// MISCELLANEOUS - EXPEDITION PERSONNEL ACCIDENT(EPA)
+			case IQB_SUB_PORTFOLIO_MISC_EPA_ID:
+				$schedule_view = 'policies/print/schedule_MISC_EPA';
+				break;
 
 			default:
 				# code...

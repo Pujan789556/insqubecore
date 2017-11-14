@@ -356,8 +356,6 @@ if ( ! function_exists('_OBJ_ENG_CAR_compute_sum_insured_amount'))
 	 *
 	 * @param integer 	$portfolio_id  Portfolio ID
 	 * @param array 	$data 	Object Data
-	 * @param string 	$mode 	What to Compute [all|except_duty|duty_only]
-	 * @param bool 		$forex_convert 	Convert sum insured into NPR
 	 * @return float
 	 */
 	function _OBJ_ENG_CAR_compute_sum_insured_amount( $portfolio_id, $data )

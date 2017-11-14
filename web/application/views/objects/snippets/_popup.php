@@ -206,3 +206,12 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
     $this->load->view('objects/snippets/_popup_misc_cc', $data);
 }
 
+/**
+ * MISCELLANEOUS - EXPEDITION PERSONNEL ACCIDENT(EPA)
+ * --------------------------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
+{
+    $this->load->view('objects/snippets/_popup_misc_epa', $data);
+}
+

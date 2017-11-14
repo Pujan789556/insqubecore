@@ -394,7 +394,7 @@ if ( ! function_exists('_TXN_MISC_BB_premium_goodies'))
 		$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 
 		// Let's Get the Validation Rules
-		$validation_rules = _TXN_MISC_BB_premium_validation_rules( $policy_record, $pfs_record, $tariff_record, $portfolio_risks );
+		$validation_rules = _TXN_MISC_BB_premium_validation_rules( $policy_record, $pfs_record, $policy_object, $portfolio_risks );
 
 
 		// Return the goodies
