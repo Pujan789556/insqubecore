@@ -271,6 +271,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
+         * --------------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
+        {
+            $snippet = _OBJ_MISC_TMI_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * Throw Exception
          */
         else
@@ -509,6 +518,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
         {
             $snippet = _OBJ_MISC_EPA_select_text($record);
+        }
+
+        /**
+         * MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
+         * --------------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
+        {
+            $snippet = _OBJ_MISC_TMI_select_text($record);
         }
 
         /**
@@ -757,6 +775,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
+         * --------------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
+        {
+            $v_rules = _OBJ_MISC_TMI_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -995,6 +1022,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
         {
             $attribute_form = 'objects/forms/_form_object_misc_epa';
+        }
+
+        /**
+         * MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
+         * --------------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_misc_tmi';
         }
 
         /**
@@ -1403,6 +1439,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
         {
             $amt_sum_insured = _OBJ_MISC_EPA_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
+         * --------------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
+        {
+            $amt_sum_insured = _OBJ_MISC_TMI_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

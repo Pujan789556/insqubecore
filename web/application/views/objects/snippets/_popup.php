@@ -215,3 +215,12 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
     $this->load->view('objects/snippets/_popup_misc_epa', $data);
 }
 
+/**
+ * MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
+ * --------------------------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
+{
+    $this->load->view('objects/snippets/_popup_misc_tmi', $data);
+}
+

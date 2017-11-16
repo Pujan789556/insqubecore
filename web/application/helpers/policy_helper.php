@@ -609,6 +609,15 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
         }
 
         /**
+         * MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
+         * --------------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
+        {
+            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_TMI";
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -810,6 +819,15 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_MISC_EPA';
+        }
+
+        /**
+         * MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
+         * --------------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_MISC_TMI';
         }
 
 
@@ -1298,6 +1316,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			// MISCELLANEOUS - EXPEDITION PERSONNEL ACCIDENT(EPA)
 			case IQB_SUB_PORTFOLIO_MISC_EPA_ID:
 				$schedule_view = 'policies/print/schedule_MISC_EPA';
+				break;
+
+			// MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
+			case IQB_SUB_PORTFOLIO_MISC_TMI_ID:
+				$schedule_view = 'policies/print/schedule_MISC_TMI';
 				break;
 
 			default:
