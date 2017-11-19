@@ -315,9 +315,10 @@ if ( ! function_exists('excel_to_array'))
      * Read Excel File and Load data into array
      *
      * @param string $filename Excel File
+     * @param string $mode Read Active Sheet or All Data Sheet or specific index
      * @return array
      */
-    function excel_to_array($filename)
+    function excel_to_array($filename, $mode_or_index = 'activeSheet')
     {
         $CI =& get_instance();
 
@@ -333,8 +334,39 @@ if ( ! function_exists('excel_to_array'))
         // Load file
         $excelObj = $excelReader->load($filename);
 
-        // Get active sheet data into arry
-        $data_sheet = $excelObj->getActiveSheet()->toArray(null, true,true,true);
+        $data_sheet = [];
+
+        // Extract data based on mode
+        if( $mode_or_index == 'activeSheet' )
+        {
+            // Get active sheet data into arry
+            $data_sheet = $excelObj->getActiveSheet()->toArray(null, true,true,true);
+        }
+        else if( $mode_or_index == 'allSheets' )
+        {
+            // Iterate through All worksheet and dump data
+            foreach ($excelObj->getWorksheetIterator() as $worksheet)
+            {
+                $worksheet_title = $worksheet->getTitle();
+                $data_sheet[$worksheet_title] = $worksheet->toArray(null, true,true,true);
+            }
+        }
+        else if( is_numeric ($mode_or_index) )
+        {
+            // Set active index as supplied one
+            $total_sheets   = $excelObj->getSheetCount();
+            $sheet_index    = (int)$mode_or_index;
+
+            // If supplied sheet index falls within total sheets
+            if( $sheet_index <= $total_sheets - 1)
+            {
+                // Set active index to
+                $excelObj->setActiveSheetIndex( $sheet_index );
+
+                // Get active sheet data into arry
+                $data_sheet = $excelObj->getActiveSheet()->toArray(null, true,true,true);
+            }
+        }
 
         return $data_sheet;
     }
