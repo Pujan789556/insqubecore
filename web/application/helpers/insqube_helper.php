@@ -961,6 +961,15 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+        {
+            $CI->load->helper('ph_misc_hi');
+        }
+
+        /**
          * MOTOR
          * -----
          * We have a single helper file for motor portfolio

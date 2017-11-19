@@ -305,6 +305,7 @@ define('IQB_SUB_PORTFOLIO_MISC_CS_ID', 		43); 	// Cash in Safe
 define('IQB_SUB_PORTFOLIO_MISC_EPA_ID', 	44); 	// Expedition Personnel Accident
 define('IQB_SUB_PORTFOLIO_MISC_FG_ID', 		46); 	// Fidelity Guarantee
 define('IQB_SUB_PORTFOLIO_MISC_GPA_ID', 	47); 	// Group Personnel Accident
+define('IQB_SUB_PORTFOLIO_MISC_HI_ID', 		48); 	// Health Insurance (MISC)
 define('IQB_SUB_PORTFOLIO_MISC_PA_ID', 		52); 	// Personnel Accident
 define('IQB_SUB_PORTFOLIO_MISC_PL_ID', 		55); 	// Public Liability
 define('IQB_SUB_PORTFOLIO_MISC_TMI_ID', 	56); 	// Travel Medical Insurance

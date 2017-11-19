@@ -834,6 +834,15 @@ class Policy_txn extends MY_Controller
 		            $done = __save_premium_MISC_FG( $policy_record, $txn_record );
 		        }
 
+		        /**
+		         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+		         * ----------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+		        {
+		            $done = __save_premium_MISC_HI( $policy_record, $txn_record );
+		        }
+
 				else
 				{
 					return $this->template->json([
@@ -1194,6 +1203,15 @@ class Policy_txn extends MY_Controller
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
 	        {
 	            $goodies = _TXN_MISC_FG_premium_goodies($policy_record, $policy_object);
+	        }
+
+	        /**
+	         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+	         * ----------------------------------------
+	         */
+	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+	        {
+	            $goodies = _TXN_MISC_HI_premium_goodies($policy_record, $policy_object);
 	        }
 
 			/**

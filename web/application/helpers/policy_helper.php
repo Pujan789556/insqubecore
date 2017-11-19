@@ -627,6 +627,15 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
         }
 
         /**
+         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+        {
+            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_HI";
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -846,6 +855,15 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_MISC_FG';
+        }
+
+        /**
+         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_MISC_HI';
         }
 
 
@@ -1344,6 +1362,11 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			// MISCELLANEOUS - FIDELITY GUARANTEE (FG)
 			case IQB_SUB_PORTFOLIO_MISC_FG_ID:
 				$schedule_view = 'policies/print/schedule_MISC_FG';
+				break;
+
+			// MISCELLANEOUS - HEALTH INSURANCE (HI)
+			case IQB_SUB_PORTFOLIO_MISC_HI_ID:
+				$schedule_view = 'policies/print/schedule_MISC_HI';
 				break;
 
 

@@ -289,6 +289,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+        {
+            $snippet = _OBJ_MISC_HI_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * Throw Exception
          */
         else
@@ -545,6 +554,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
         {
             $snippet = _OBJ_MISC_FG_select_text($record);
+        }
+
+        /**
+         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+        {
+            $snippet = _OBJ_MISC_HI_select_text($record);
         }
 
         /**
@@ -811,6 +829,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+        {
+            $v_rules = _OBJ_MISC_HI_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -1070,6 +1097,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         }
 
         /**
+         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_misc_hi';
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -1227,6 +1263,15 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
              */
             case IQB_SUB_PORTFOLIO_MISC_FG_ID:
                 $method = '_OBJ_MISC_FG_pre_save_tasks';
+                break;
+
+
+            /**
+             * MISCELLANEOUS - HEALTH INSURANCE (HI)
+             * ----------------------------------------
+             */
+            case IQB_SUB_PORTFOLIO_MISC_HI_ID:
+                $method = '_OBJ_MISC_HI_pre_save_tasks';
                 break;
 
 			default:
@@ -1500,6 +1545,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
         {
             $amt_sum_insured = _OBJ_MISC_FG_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+        {
+            $amt_sum_insured = _OBJ_MISC_HI_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

@@ -233,3 +233,12 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
     $this->load->view('objects/snippets/_popup_misc_fg', $data);
 }
 
+/**
+ * MISCELLANEOUS - HEALTH INSURANCE (HI)
+ * ----------------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+{
+    $this->load->view('objects/snippets/_popup_misc_hi', $data);
+}
+
