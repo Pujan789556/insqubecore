@@ -952,6 +952,15 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+        {
+            $CI->load->helper('ph_misc_fg');
+        }
+
+        /**
          * MOTOR
          * -----
          * We have a single helper file for motor portfolio

@@ -618,6 +618,15 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
         }
 
         /**
+         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+        {
+            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_FG";
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -828,6 +837,15 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
         {
             $form_view = 'policy_txn/forms/_form_premium_MISC_TMI';
+        }
+
+        /**
+         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_MISC_FG';
         }
 
 
@@ -1322,6 +1340,12 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 			case IQB_SUB_PORTFOLIO_MISC_TMI_ID:
 				$schedule_view = 'policies/print/schedule_MISC_TMI';
 				break;
+
+			// MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+			case IQB_SUB_PORTFOLIO_MISC_FG_ID:
+				$schedule_view = 'policies/print/schedule_MISC_FG';
+				break;
+
 
 			default:
 				# code...

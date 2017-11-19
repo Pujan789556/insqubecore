@@ -280,6 +280,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+        {
+            $snippet = _OBJ_MISC_FG_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * Throw Exception
          */
         else
@@ -527,6 +536,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
         {
             $snippet = _OBJ_MISC_TMI_select_text($record);
+        }
+
+        /**
+         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+        {
+            $snippet = _OBJ_MISC_FG_select_text($record);
         }
 
         /**
@@ -784,6 +802,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+        {
+            $v_rules = _OBJ_MISC_FG_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -1034,6 +1061,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         }
 
         /**
+         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_misc_fg';
+        }
+
+        /**
          * Throw Exception
          */
 		else
@@ -1185,6 +1221,13 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
                 $method = '_OBJ_MISC_EPA_pre_save_tasks';
                 break;
 
+            /**
+             * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+             * ----------------------------------------
+             */
+            case IQB_SUB_PORTFOLIO_MISC_FG_ID:
+                $method = '_OBJ_MISC_FG_pre_save_tasks';
+                break;
 
 			default:
 				# code...
@@ -1448,6 +1491,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
         {
             $amt_sum_insured = _OBJ_MISC_TMI_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+        {
+            $amt_sum_insured = _OBJ_MISC_FG_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

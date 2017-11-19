@@ -825,6 +825,14 @@ class Policy_txn extends MY_Controller
 		            $done = __save_premium_MISC_TMI( $policy_record, $txn_record );
 		        }
 
+		        /**
+		         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+		         * ----------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+		        {
+		            $done = __save_premium_MISC_FG( $policy_record, $txn_record );
+		        }
 
 				else
 				{
@@ -1177,6 +1185,15 @@ class Policy_txn extends MY_Controller
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
 	        {
 	            $goodies = _TXN_MISC_TMI_premium_goodies($policy_record, $policy_object);
+	        }
+
+	        /**
+	         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+	         * ----------------------------------------
+	         */
+	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+	        {
+	            $goodies = _TXN_MISC_FG_premium_goodies($policy_record, $policy_object);
 	        }
 
 			/**

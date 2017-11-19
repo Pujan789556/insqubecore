@@ -224,3 +224,12 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
     $this->load->view('objects/snippets/_popup_misc_tmi', $data);
 }
 
+/**
+ * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+ * ----------------------------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+{
+    $this->load->view('objects/snippets/_popup_misc_fg', $data);
+}
+
