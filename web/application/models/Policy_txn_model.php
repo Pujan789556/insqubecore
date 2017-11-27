@@ -662,6 +662,34 @@ class Policy_txn_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
+     * Get Policy Transaction Record(s)
+     *
+     * This function is mainly used to get all the active records
+     * for Endorsement Printing.
+     *
+     * @param int $id
+     * @return array
+     */
+    public function get_many_by($where)
+    {
+        $this->db->select('PTXN.*, P.branch_id, P.code')
+                    ->from($this->table_name . ' AS PTXN')
+                    ->join('dt_policies P', 'P.id = PTXN.policy_id')
+                    ->where($where);
+
+        /**
+         * Apply User Scope
+         */
+        $this->dx_auth->apply_user_scope('P');
+
+        // Get the damn result
+        return $this->db->order_by('PTXN.id', 'DESC')
+                        ->get()->result();
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
      * Get All Transactions Rows for Supplied Policy
      *
      * @param int $policy_id

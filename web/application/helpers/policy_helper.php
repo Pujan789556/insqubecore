@@ -1124,6 +1124,96 @@ if ( ! function_exists('_POLICY__ri_approval_constraint'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('_POLICY__endorsement_pdf'))
+{
+    /**
+     * Print Policy Endorsement/Transaction PDF
+     *
+     * @param array $data
+     * @return  void
+     */
+    function _POLICY__endorsement_pdf( $data )
+    {
+    	$CI =& get_instance();
+
+		/**
+		 * Extract Policy Record and Policy Transaction Record
+		 */
+		$records 		= $data['records'];
+		$type 			= $data['type'];
+
+		if( $type == 'single' )
+		{
+			// check if this is not fresh/renewal transaction
+			$record = $records[0] ?? NULL;
+
+			if($record && in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+			{
+				throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__endorsement_pdf()]: You can not have endrosement print of FRESH/RENEWAL Transaction/endorsement.");
+			}
+		}
+
+		$schedule_view 	= 'policy_txn/print/endorsement';
+
+		$record = $records[0] ?? NULL;
+
+		if( $record )
+		{
+			$CI->load->library('pdf');
+	        $mpdf = $CI->pdf->load();
+	        // $mpdf->SetMargins(10, 10, 5);
+	        $mpdf->SetMargins(10, 5, 10, 5);
+	        $mpdf->margin_header = 5;
+	        $mpdf->margin_footer = 5;
+	        $mpdf->SetProtection(array('print'));
+	        $mpdf->SetTitle("Policy Endorsement - {$record->code}");
+	        $mpdf->SetAuthor($CI->settings->orgn_name_en);
+
+	        /**
+	         * Only Active Endorsement Does not have watermark!!!
+	         */
+	        if( $record->status !== IQB_POLICY_TXN_STATUS_ACTIVE )
+	        {
+	        	$mpdf->SetWatermarkText( 'ENDORSEMENT - ' . strtoupper(get_policy_txn_status_text($record->status)) );
+	        }
+
+	        $mpdf->showWatermarkText = true;
+	        $mpdf->watermark_font = 'DejaVuSansCondensed';
+	        $mpdf->watermarkTextAlpha = 0.1;
+	        $mpdf->SetDisplayMode('fullpage');
+
+	        $html = $CI->load->view( $schedule_view, $data, TRUE);
+	        $mpdf->WriteHTML($html);
+
+	        $filename = "endorsement-all-{$record->code}.pdf";
+	        // $mpdf->Output($filename,'D');      // make it to DOWNLOAD
+	        $mpdf->Output();      // make it to DOWNLOAD
+		}
+		else
+		{
+			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__endorsement_pdf()]: No endorsement found.");
+		}
+
+
+
+        // if( $action === 'save' )
+        // {
+        // 	$save_full_path = rtrim(INSQUBE_DATA_PATH, '/') . '/policies/' . $filename;
+        // 	$mpdf->Output($save_full_path,'F');
+        // }
+        // else if($action === 'download')
+        // {
+		// 		$mpdf->Output($filename,'D');      // make it to DOWNLOAD
+        // }
+        // else
+        // {
+        // 	$mpdf->Output();
+        // }
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_POLICY__schedule_pdf'))
 {
     /**

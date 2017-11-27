@@ -217,6 +217,11 @@ $config['DX_permissions'] = [
 			'generate.policy.voucher',
 			'generate.policy.invoice',
 			'make.policy.payment',
+
+			/**
+			 * Endorsement Print
+			 */
+			'print.endorsement'
 		],
 
 		/**

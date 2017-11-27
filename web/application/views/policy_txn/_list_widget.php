@@ -19,6 +19,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						?>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
+
+						<?php if( $this->dx_auth->is_authorized('policy_txn', 'print.endorsement') ): ?>
+							<a href="<?php echo site_url($print_url);?>"
+								target="_blank"
+								title="Print all active endorsement/transactions"
+								data-toggle="tooltip"
+								class="btn bg-navy btn-round"
+							><i class="fa fa-print"></i> Print All</a>
+						<?php endif?>
+
 						<?php if( $this->dx_auth->is_authorized('policy_txn', 'add.transaction') ): ?>
 							<a href="#"
 								title="Add New Transaction"

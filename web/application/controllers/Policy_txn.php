@@ -87,6 +87,7 @@ class Policy_txn extends MY_Controller
 			'records' 					=> $records,
 			'policy_record' 			=> $policy_record,
 			'add_url' 					=> 'policy_txn/add_endorsement/' . $policy_id,
+			'print_url' 				=> 'policy_txn/print/all/' . $policy_id,
 		];
 		$html = $this->load->view('policy_txn/_list_widget', $data, TRUE);
 		$ajax_data = [
@@ -1229,6 +1230,91 @@ class Policy_txn extends MY_Controller
 		}
 
 	//  ------------------- END: PREMIUM GOODIES FUNCTIONS -------------------------
+
+
+	// --------------------------------------------------------------------
+	//  ENDORSEMENT/TRANSACTION PRINT(PDF)
+	// --------------------------------------------------------------------
+
+	/**
+	 * Print Endorsement(s)
+	 *
+	 * Based on the type supplied, either print all endorsement/transactions or single one
+	 *
+	 * 		$type 	all|single
+	 * 		$key 	Policy ID (type=all), Policy TXN ID (type=single)
+	 *
+	 * Please note that if type is set "all", it will print all active endorsement only
+	 *
+	 * @param string $type
+	 * @param integer $key
+	 * @return void
+	 */
+	public function print($type, $key)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('policy_txn', 'print.endorsement') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Valid Type?
+		 */
+		if( !in_array($type, ['all', 'single']) )
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Get Transaction Records or Record based on type
+		 */
+		$key = (int)$key;
+		if( $type === 'all' )
+		{
+			$where = [
+				'P.id' 			=> $key,
+				'PTXN.status' 	=> IQB_POLICY_TXN_STATUS_ACTIVE
+			];
+		}
+		else
+		{
+			$where = [
+				'PTXN.id' 	=> $key
+			];
+		}
+
+		$records = $this->policy_txn_model->get_many_by($where);
+
+		$data = [
+			'records' 	=> $records,
+			'type' 		=> $type
+		];
+
+
+		/**
+		 * Render Print View
+		 */
+		try {
+
+			_POLICY__endorsement_pdf($data);
+		}
+		catch (Exception $e) {
+
+			return $this->template->json([
+				'status' => 'error',
+				'message' => $e->getMessage()
+			], 404);
+		}
+	}
+
+
+
+	//  ------------------- END: ENDORSEMENT/TRANSACTION PRINT(PDF) -------------------------
+
+
 
 
 	// --------------------------------------------------------------------

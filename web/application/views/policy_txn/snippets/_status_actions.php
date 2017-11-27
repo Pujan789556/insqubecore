@@ -89,7 +89,22 @@ if( is_policy_txn_editable($record->status, $record->flag_current, FALSE) ):
             data-url="<?php echo site_url('customers/edit_endorsement/' . $policy_record->id . '/' . $record->id . '/' . $policy_record->customer_id);?>"
             data-form="#_form-customer">
             <i class="fa fa-pencil-square-o"></i> Customer</a>
-&nbsp;
+<?php
+endif;
+
+// ------------------------------------------------------------------------------
+
+/**
+ * Print Endorsement/Transaction
+ */
+if( $this->dx_auth->is_authorized('policy_txn', 'print.endorsement') && !$flag__fresh_or_renewal ):?>
+
+    <a href="<?php echo site_url('policy_txn/print/single/' . $record->id );?>"
+            target="_blank"
+            title="Print this endorsement/transaction"
+            class="action"
+            data-toggle="tooltip"
+        ><i class="fa fa-print"></i> Print</a>
 <?php
 endif;
 
