@@ -433,7 +433,7 @@ if ( ! function_exists('_INVOICE__pdf'))
         $filename =  "invoice-{$record->invoice_code}.pdf";
         if( $action === 'save' )
         {
-            $save_full_path = rtrim(INSQUBE_DATA_PATH, '/') . '/invoices/' . $filename;
+            $save_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/invoices/' . $filename;
             $mpdf->Output($save_full_path,'F');
         }
         else if($action === 'download')
@@ -499,7 +499,7 @@ if ( ! function_exists('_RECEIPT__pdf'))
         $filename =  "receipt-{$record->receipt_code}.pdf";
         if( $action === 'save' )
         {
-            $save_full_path = rtrim(INSQUBE_DATA_PATH, '/') . '/receipts/' . $filename;
+            $save_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/receipts/' . $filename;
             $mpdf->Output($save_full_path,'F');
         }
         else if($action === 'download')

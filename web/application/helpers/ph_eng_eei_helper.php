@@ -194,7 +194,7 @@ if ( ! function_exists('_OBJ_ENG_EEI_pre_save_tasks'))
 		$options = [
 			'config' => [
 				'encrypt_name' 	=> TRUE,
-                'upload_path' 	=> Objects::$data_path,
+                'upload_path' 	=> Objects::$upload_path,
                 'allowed_types' => 'xls|xlsx',
                 'max_size' 		=> '2048'
 			],

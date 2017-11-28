@@ -21,10 +21,6 @@ __wiki
 .env-dev
 
 
-# Media Folder
-#-------------------------
-media
-
 # IDE Files
 #-------------------------
 /nbproject/

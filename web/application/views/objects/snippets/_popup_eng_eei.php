@@ -83,7 +83,7 @@ else
             </div>
             <table class="table table-bordered table-condensed no-margin">
                 <?php
-                $excel_data = excel_to_array(INSQUBE_DATA_PATH . 'objects/' . $attributes->document);
+                $excel_data = excel_to_array(INSQUBE_MEDIA_PATH . 'objects/' . $attributes->document);
                 $header_row = array_shift($excel_data);
                 $row_count = count($excel_data);
                 ?>

@@ -1198,7 +1198,7 @@ if ( ! function_exists('_POLICY__endorsement_pdf'))
 
         // if( $action === 'save' )
         // {
-        // 	$save_full_path = rtrim(INSQUBE_DATA_PATH, '/') . '/policies/' . $filename;
+        // 	$save_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/policies/' . $filename;
         // 	$mpdf->Output($save_full_path,'F');
         // }
         // else if($action === 'download')
@@ -1278,11 +1278,11 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
 
 	        $html = $CI->load->view( $schedule_view, $data, TRUE);
 	        $mpdf->WriteHTML($html);
-	        // $filename = $data_path . "policy-{$record->code}.pdf";
+	        // $filename = $upload_path . "policy-{$record->code}.pdf";
 	        $filename = "policy-{$record->code}.pdf";
 	        if( $action === 'save' )
 	        {
-	        	$save_full_path = rtrim(INSQUBE_DATA_PATH, '/') . '/policies/' . $filename;
+	        	$save_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/policies/' . $filename;
 	        	$mpdf->Output($save_full_path,'F');
 	        }
 	        else if($action === 'download')

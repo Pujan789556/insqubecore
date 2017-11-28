@@ -18,11 +18,6 @@ class Objects extends MY_Controller
 	 */
 	public static $upload_path = INSQUBE_MEDIA_PATH . 'objects/';
 
-	/**
-	 * Data Files Upload Path
-	 */
-	public static $data_path = INSQUBE_DATA_PATH . 'objects/';
-
 	// --------------------------------------------------------------------
 
 	function __construct()

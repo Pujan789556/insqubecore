@@ -215,7 +215,7 @@ if ( ! function_exists('_OBJ_MISC_HI_pre_save_tasks'))
 		$options = [
 			'config' => [
 				'encrypt_name' 	=> TRUE,
-                'upload_path' 	=> Objects::$data_path,
+                'upload_path' 	=> Objects::$upload_path,
                 'allowed_types' => 'xls|xlsx',
                 'max_size' 		=> '4098'
 			],
@@ -244,7 +244,7 @@ if ( ! function_exists('_OBJ_MISC_HI_pre_save_tasks'))
         	 *
         	 * !!! This is required to compute Premium Amount, Sum Insured Amount
         	 */
-        	$excel_file = Objects::$data_path . $document;
+        	$excel_file = Objects::$upload_path . $document;
         	$items 		= _OBJ_MISC_HI_excel_to_items( $excel_file );
         	$data['object']['items'] = $items;
         }
