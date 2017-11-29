@@ -521,7 +521,30 @@ class Policies extends MY_Controller
 									? 'policies/_single_row'
 									: 'policies/tabs/_tab_overview';
 
-					$html = $this->load->view($view, ['record' => $record], TRUE);
+					$view_data = [
+						'record' => $record
+					];
+					if($from_widget === 'y')
+					{
+						/**
+						 * Get the Policy Fresh/Renewal Txn Record
+						 */
+						try {
+
+							$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+
+						} catch (Exception $e) {
+
+							return $this->template->json([
+								'status' => 'error',
+								'message' => $e->getMessage()
+							], 404);
+						}
+
+						$view_data['txn_record'] = $txn_record;
+					}
+
+					$html = $this->load->view($view, $view_data, TRUE);
 					$ajax_data['updateSectionData']  = [
 						'box' 		=> $from_widget === 'n' ? '#_data-row-policy-' . $record->id : '#tab-policy-overview-inner',
 						'method' 	=> 'replaceWith',
