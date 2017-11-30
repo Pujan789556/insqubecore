@@ -409,7 +409,7 @@ class Customers extends MY_Controller
 			// Extract Old Profile Picture if any
 			$picture = $record->picture ?? NULL;
 
-			$rules = array_merge($this->customer_model->validation_rules, get_contact_form_validation_rules());
+			$rules = array_merge($this->customer_model->validation_rules, get_contact_form_validation_rules(['mobile' => 'required|']));
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{

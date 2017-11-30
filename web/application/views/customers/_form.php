@@ -58,39 +58,36 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <script type="text/javascript">
 (function($){
 
-    var $regbox = $('input[type="text"][name="company_reg_no"]').closest('.form-group'),
-        $ctznbox = $('input[type="text"][name="citizenship_no"]').closest('.form-group'),
-        $ppbox = $('input[type="text"][name="passport_no"]').closest('.form-group'),
+    var $ref_i = $('input[data-ref="I"]'),
+        $ref_c = $('input[data-ref="C"]'),
+        $ref_i_box = $ref_i.closest('.form-group'),
+        $ref_c_box = $ref_c.closest('.form-group'),
         initial_type = $("input[type=radio][name=type]:checked").val();
+
     if(typeof initial_type === 'undefined'){
-        $regbox.hide();
-        $ctznbox.hide();
-        $ppbox.hide();
+        // hide both types
+        $ref_i_box.hide();
+        $ref_c_box.hide();
     }
     else if(initial_type === 'I'){
-        $regbox.hide();
+        $ref_c_box.hide();
     }else{
-        $ctznbox.hide();
-        $ppbox.hide();
+        $ref_i_box.hide();
     }
 
     // Toggle fields according to type
     $('input[type=radio][name=type]').on('ifChanged', function() {
         if (this.value == 'C') {
-            $regbox.fadeIn();
-            $ctznbox.fadeOut(function(){
-                $('input[type="text"][name="citizenship_no"]').val('');
-            });
-            $ppbox.fadeOut(function(){
-                $('input[type="text"][name="passport_no"]').val('');
-            });
+            $ref_c_box.show();
+            $ref_i_box.hide(function(){
+                $ref_i.val('');
+            })
         }
         else {
-            $ctznbox.fadeIn();
-            $ppbox.fadeIn();
-            $regbox.fadeOut(function(){
-                $('input[type="text"][name="company_reg_no"]').val('');
-            });
+            $ref_i_box.show();
+            $ref_c_box.hide(function(){
+                $ref_c.val('');
+            })
         }
     });
 

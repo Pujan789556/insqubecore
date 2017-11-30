@@ -29,9 +29,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <td class="text-bold">Code</td>
                     <td class="text-right"><?php echo $record->code?></td>
                 </tr>
+                <?php if($record->type == 'I'): ?>
+                    <tr>
+                        <td class="text-bold">Grandfather</td>
+                        <td class="text-right"><?php echo $record->grandfather_name?></td>
+                    </tr>
+                    <tr>
+                        <td class="text-bold">Father</td>
+                        <td class="text-right"><?php echo $record->father_name?></td>
+                    </tr>
+                    <tr>
+                        <td class="text-bold">Mother</td>
+                        <td class="text-right"><?php echo $record->mother_name?></td>
+                    </tr>
+                <?php endif; ?>
                 <tr>
                     <td class="text-bold">Type</td>
-                    <td class="text-right"><?php echo $record->type == '1' ? 'Individual' : 'Compamy';?></td>
+                    <td class="text-right"><?php echo $record->type == 'I' ? 'Individual' : 'Compamy';?></td>
                 </tr>
                 <?php if($record->type == 'C'):?>
                     <tr>
