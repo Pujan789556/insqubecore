@@ -111,6 +111,21 @@ class MY_Form_validation extends CI_Form_validation {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Valid Mobile Number
+	 *
+	 * 10 digit mobile number, must start with 98/97
+	 *
+	 * @param	string
+	 * @return	bool
+	 */
+	public function valid_mobile($str)
+	{
+		return preg_match('/^(98|97)[0-9]{8}$/', $str) ? TRUE : FALSE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Prep Decimal
 	 *
 	 * If supplied value is numeric, convert this number into a decimal number
