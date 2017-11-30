@@ -252,12 +252,20 @@ if ( ! function_exists('get_contact_form_validation_rules'))
 	 * We are using contacts as JSON Column on corresponding tables.
 	 * So, we need to have a common point to manage form fields, formatting
 	 * and display of contact cards
+     *
+     *  Field Validation rules
+     *
+     *  $options = [
+     *      'mobile' => 'required|' // must end with | at end
+     *  ]
+     *
 	 *
-	 * @param void
+	 * @param array
 	 * @return array
 	 */
-	function get_contact_form_validation_rules(  )
+	function get_contact_form_validation_rules( $options = [] )
 	{
+        $mobile_required = $options['mobile'] ?? '';
 		return [
             [
                 'field'     => 'contacts[address1]',
@@ -302,7 +310,7 @@ if ( ! function_exists('get_contact_form_validation_rules'))
             [
                 'field'     => 'contacts[mobile]',
                 'label'     => 'Mobile',
-                'rules'     => 'trim|max_length[10]'
+                'rules'     => 'trim|'.$mobile_required.'valid_mobile|max_length[10]'
             ],
             [
                 'field'     => 'contacts[email]',
