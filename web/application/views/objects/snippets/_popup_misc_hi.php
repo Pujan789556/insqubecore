@@ -27,7 +27,7 @@ else
                 <tr>
                     <th>Staff List File</th>
                     <td>
-                        <?php echo anchor('downloads/objects/' . $attributes->document, 'Download', 'target="_blank"') ?>
+                        <?php echo anchor('objects/download/' . $attributes->document, 'Download', 'target="_blank"') ?>
                     </td>
                 </tr>
             </table>

@@ -51,20 +51,7 @@ if ( ! function_exists('_OBJ_FIRE_select_text'))
 	 */
 	function _OBJ_FIRE_select_text( $record )
 	{
-		$attributes = $record->attributes ? json_decode($record->attributes) : NULL;
-		$items 		= $attributes->items ?? NULL;
-		$item_count = count( $items->category ?? [] );
-		$snippet = [];
-		for($i = 0; $i < $item_count; $i++ )
-		{
-			$snippet[] = '<strong>' .
-							_OBJ_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ] .
-						'</strong>, ' .
-						_OBJ_FIRE_item_ownership_dropdown(FALSE)[ $items->ownership[$i] ] . ', ' .
-						'<em>Rs. ' . $items->sum_insured[$i] . '</em>';
-		}
-		$snippet = implode('<br/>', $snippet);
-
+		$snippet = '';
 		return $snippet;
 	}
 }
@@ -84,46 +71,56 @@ if ( ! function_exists('_OBJ_FIRE_validation_rules'))
 	 */
 	function _OBJ_FIRE_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
-		$category_dropdown 	= _OBJ_FIRE_item_category_dropdown( FALSE );
-		$ownership_dropdown = _OBJ_FIRE_item_ownership_dropdown( FALSE );
+		$CI =& get_instance();
+
+
 		$conscat_dropdown 	= _OBJ_FIRE_item_building_category_dropdown( FALSE );
 		$district_dropdown 	= district_dropdown( FALSE );
 
 		$v_rules = [
 			/**
-			 * Item List
+			 * Basic Data
 			 */
-			'items' =>[
+			'basic' =>[
 				[
-			        'field' => 'object[items][category][]',
-			        '_key' => 'category',
-			        'label' => 'Item Category',
-			        'rules' => 'trim|required|alpha|in_list['. implode(',', array_keys($category_dropdown)) .']',
-			        '_type'     => 'dropdown',
-			        '_data' 	=> IQB_BLANK_SELECT + $category_dropdown,
-			        '_show_label' 	=> false,
+			        'field' => 'object[item_attached]',
+			        '_key' => 'item_attached',
+			        'label' => 'Source Of Item List',
+			        'rules' => 'trim|required|alpha|exact_length[1]|in_list[N,Y]',
+			        '_data' 	=> ['N' => 'Manual entry', 'Y' => 'Upload file'],
+			        '_type'     => 'radio',
+			        '_show_label' => true,
 			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[items][sum_insured][]',
-			        '_key' => 'sum_insured',
-			        'label' => 'Item Price(Sum Insured)',
-			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[items][ownership][]',
-			        '_key' => 'ownership',
-			        'label' => 'Item Ownership',
-			        'rules' => 'trim|required|alpha|in_list['. implode(',', array_keys($ownership_dropdown)) .']',
-			        '_type'     => 'dropdown',
-			        '_data' 	=> IQB_BLANK_SELECT + $ownership_dropdown,
-			        '_show_label' 	=> false,
-			        '_required' 	=> true
 			    ]
 		    ],
+
+		    /**
+			 * Basic Data
+			 */
+			'items_file' =>[
+				[
+			        'field' => 'object[sum_insured]',
+			        '_key' => 'sum_insured',
+			        'label' => 'Total Sum Insured (Rs.)',
+			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+				[
+			        'field' => 'document',
+			        '_key' => 'document',
+			        'label' => 'Upload Item List File (.xls or .xlsx)',
+			        'rules' => '',
+			        '_type'     => 'file',
+			        '_required' => false
+			    ],
+		    ],
+
+			/**
+			 * Item List
+			 */
+			'items_manual' => _OBJ_FIRE_manual_item_v_rules(),
 
 		    /**
 		     * Land Owner Details (Building)
@@ -252,14 +249,94 @@ if ( ! function_exists('_OBJ_FIRE_validation_rules'))
 		$fromatted_v_rules = [];
 		if($formatted === TRUE)
 		{
+			/**
+			 * If excel file uploaded or item_attached as Y (edit), we do not need 'items_manual' validation rules
+			 */
+			// $post = object[item_attached]
+			if( $CI->input->post() && $CI->input->post('object[item_attached]') == 'Y' )
+			{
+				// Set validation rules as non-required
+				$v_rules['items_manual'] = _OBJ_FIRE_manual_item_v_rules(TRUE);
+
+				// Set total sum insured field as compulsory
+				$v_rules['items_file'][0]['rules'] = 'trim|required|prep_decimal|decimal|max_length[20]';
+			}
+
 			foreach ($v_rules as $key=>$section)
 			{
 				$fromatted_v_rules = array_merge($fromatted_v_rules, $section);
 			}
+
+			// echo '<pre>'; print_r($fromatted_v_rules);exit;
+
 			return $fromatted_v_rules;
 		}
 
 		return $v_rules;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_FIRE_manual_item_v_rules'))
+{
+	/**
+	 * Get manual item validation rules
+	 *
+	 * If file is uploaded, then all field are non-required
+	 *
+	 * @param bool $file_uploaded 	Whether file is uploaded
+	 * @return	array
+	 */
+	function _OBJ_FIRE_manual_item_v_rules( $file_uploaded = false )
+	{
+		$category_dropdown 	= _OBJ_FIRE_item_category_dropdown( FALSE );
+		$ownership_dropdown = _OBJ_FIRE_item_ownership_dropdown( FALSE );
+		$required = $file_uploaded ? '' : 'required|';
+
+		$rules = [
+			[
+		        'field' => 'object[items][category][]',
+		        '_key' => 'category',
+		        'label' => 'Item Category',
+		        'rules' => 'trim|'.$required.'alpha|in_list['. implode(',', array_keys($category_dropdown)) .']',
+		        '_type'     => 'dropdown',
+		        '_data' 	=> IQB_BLANK_SELECT + $category_dropdown,
+		        '_show_label' 	=> false,
+		        '_required' => true
+		    ],
+		    [
+		        'field' => 'object[items][description][]',
+		        '_key' => 'description',
+		        'label' => 'Item Description',
+		        'rules' => 'trim|htmlspecialchars|max_length[500]',
+		        '_type'     => 'textarea',
+		        'rows' 		=> 4,
+		        '_show_label' 	=> false,
+		        '_required' => false
+		    ],
+		    [
+		        'field' => 'object[items][sum_insured][]',
+		        '_key' => 'sum_insured',
+		        'label' => 'Item Price(Sum Insured)',
+		        'rules' => 'trim|'.$required.'prep_decimal|decimal|max_length[20]',
+		        '_type'     => 'text',
+		        '_show_label' 	=> false,
+		        '_required' => true
+		    ],
+		    [
+		        'field' => 'object[items][ownership][]',
+		        '_key' => 'ownership',
+		        'label' => 'Item Ownership',
+		        'rules' => 'trim|'.$required.'alpha|in_list['. implode(',', array_keys($ownership_dropdown)) .']',
+		        '_type'     => 'dropdown',
+		        '_data' 	=> IQB_BLANK_SELECT + $ownership_dropdown,
+		        '_show_label' 	=> false,
+		        '_required' 	=> true
+		    ]
+	    ];
+
+	    return $rules;
 	}
 }
 
@@ -346,6 +423,90 @@ if ( ! function_exists('_OBJ_FIRE_item_ownership_dropdown'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('_OBJ_FIRE_pre_save_tasks'))
+{
+	/**
+	 * Object Pre Save Tasks
+	 *
+	 * Perform tasks that are required before saving a policy objects.
+	 * Return the processed data for further computation or saving in DB
+	 *
+	 * If items are saved as attachment, we upload the excel file.
+	 *
+	 * @param array $data 		Post Data
+	 * @param object $record 	Object Record (for edit mode)
+	 * @return array
+	 */
+	function _OBJ_FIRE_pre_save_tasks( array $data, $record )
+	{
+		$CI =& get_instance();
+
+		/**
+		 * Task : Upload Excel File of Item List, and save
+		 * 		  the name back to Object attributes to access it later
+		 *
+		 */
+		$attributes 	= json_decode($record->attributes ?? NULL);
+		$old_document 	= $attributes->document ?? NULL;
+
+		$options = [
+			'config' => [
+				'encrypt_name' 	=> TRUE,
+                'upload_path' 	=> Objects::$upload_path,
+                'allowed_types' => 'xls|xlsx',
+                'max_size' 		=> '2048'
+			],
+			'form_field' => 'document',
+
+			'create_thumb' => FALSE,
+
+			// Delete Old file
+			'old_files' => $old_document ? [$old_document] : [],
+			'delete_old' => TRUE
+		];
+		$upload_result = upload_insqube_media($options);
+
+		$status 		= $upload_result['status'];
+		$message 		= $upload_result['message'];
+		$files 			= $upload_result['files'];
+
+		/**
+		 * One must upload if "item_attached" flag is set on "Add" mode
+		 */
+		if( $CI->input->post('object[item_attached]') == 'Y' )
+		{
+			// Unset items attributues
+			unset($data['object']['items']);
+
+
+			if( $status === 'success' )
+	        {
+	        	$document = $files[0];
+	        	$data['object']['document'] = $document;
+	        }
+	        /**
+	         * No File Selected in Edit Mode, Use the old one
+	         */
+	        else if( $status === 'no_file_selected' &&  isset($record->id) )
+	        {
+				// Old Document as it is
+				$data['object']['document'] = $old_document;
+	        }
+	        else
+	        {
+	        	/**
+	        	 * You must upload a file in "Add" mode if "item_attached" is set.
+	        	 */
+	        	throw new Exception("Exception [Helper: ph_fire_helper][Method: _OBJ_FIRE_pre_save_tasks()]: " . $message );
+	        }
+		}
+
+		return $data;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_OBJ_FIRE_compute_sum_insured_amount'))
 {
 	/**
@@ -359,6 +520,20 @@ if ( ! function_exists('_OBJ_FIRE_compute_sum_insured_amount'))
 	 */
 	function _OBJ_FIRE_compute_sum_insured_amount( $portfolio_id, $data )
 	{
+		$CI =& get_instance();
+
+		/**
+		 * If "item_attached" is Set, we have one placeholder to compute sum_insured value,
+		 * else we compute from all items
+		 *
+		 */
+		if ( $CI->input->post('object[item_attached]') == 'Y' )
+		{
+			$amt_sum_insured = floatval($data['sum_insured']);
+			return $amt_sum_insured;
+		}
+
+
 		/**
 		 * A single Fire Policy may hold multiple Items
 		 */

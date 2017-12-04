@@ -1217,6 +1217,17 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
 		 */
 		switch ($portfolio_id)
 		{
+            /**
+             * FIRE PORTFOLIOS
+             * ------------------------------
+             */
+            case IQB_SUB_PORTFOLIO_FIRE_ELECTRICAL_EQUIPMENT_ID:
+            case IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID:
+            case IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID:
+            case IQB_SUB_PORTFOLIO_FIRE_LOP_ID:
+                $method = '_OBJ_FIRE_pre_save_tasks';
+                break;
+
 			/**
 	         * ENGINEERING - BOILER EXPLOSION
 	         * ------------------------------

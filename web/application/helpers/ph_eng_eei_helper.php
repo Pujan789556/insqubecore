@@ -84,10 +84,6 @@ if ( ! function_exists('_OBJ_ENG_EEI_validation_rules'))
 	{
 		$CI =& get_instance();
 
-		// Validation Rules on Form Post Change on interdependent components
-		$post 	= $CI->input->post();
-		$object = $post['object'] ?? NULL;
-
 		$v_rules = [
 			/**
 			 * Basic Data

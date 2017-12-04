@@ -3,9 +3,60 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Form : Object - Fire
  */
+$item_form_elements     = $form_elements['items_manual'];
+$old_document = $record->document ?? NULL;
+
 ?>
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-6">
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">Basic Information</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <?php
+                $section_elements = $form_elements['basic'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $section_elements,
+                    'form_record'   => $record
+                ]);
+                ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8" id="_ib_upload">
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">Upload Item List</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <?php
+                $section_elements = $form_elements['items_file'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $section_elements,
+                    'form_record'   => $record
+                ]);
+
+                if($old_document):
+                ?>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Download existing Item List</label>
+                    <div class="col-sm-10">
+                        <p class="form-control-static">
+                            <?php echo anchor('objects/download/'.$old_document, 'Download', ['target' => '_blank']); ?>
+                        </p>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8" id="_ib_manual">
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
                 <h4 class="box-title">Item Details</h4>
@@ -13,14 +64,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <table class="table table-bordered table-condensed no-margin">
                 <thead>
                     <tr>
-                        <th>Item Category<?php echo field_compulsary_text( TRUE )?></th>
-                        <th>Sum Insured(Rs.)<?php echo field_compulsary_text( TRUE )?></th>
-                        <th>Ownership<?php echo field_compulsary_text( TRUE )?></th>
+                        <?php foreach($item_form_elements as $elem): ?>
+                            <th>
+                                <?php echo $elem['label'] . field_compulsary_text($elem['_required']) ?>
+                            </th>
+                        <?php endforeach; ?>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <?php
-                $item_form_elements     = $form_elements['items'];
                 $items                  = $record->items ?? NULL;
                 $item_count             = count( $items->category ?? [] );
                 ?>
@@ -163,6 +215,44 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__fire_land_building_row', this)">Add More</a>
     </div>
 </div>
+
+<script type="text/javascript">
+(function($){
+
+    var $ref_u_box = $('#_ib_upload'),
+        $ref_m_box = $('#_ib_manual'),
+        initial_type = $('input[type=radio][name="object[item_attached]"]:checked').val();
+
+    if(typeof initial_type === 'undefined'){
+        // hide both types
+        $ref_u_box.hide();
+        $ref_m_box.hide();
+    }
+    else if(initial_type == 'N'){
+        $ref_u_box.hide();
+    }else{
+        $ref_m_box.hide();
+    }
+
+    // Toggle fields according to type
+    $('input[type=radio][name="object[item_attached]"]').on('ifChanged', function() {
+        if (this.value == 'N') {
+            $ref_u_box.hide();
+            $ref_m_box.show();
+        }
+        else {
+            $ref_u_box.show();
+            $ref_m_box.hide();
+        }
+    });
+
+    // Fullname copy to Contact Field
+    $('input[name="full_name"]').on('keyup', function(){
+        $('input[name="contacts[contact_name]"]').val($(this).val());
+    });
+
+})(jQuery);
+</script>
 
 <script type="text/javascript">
     /**

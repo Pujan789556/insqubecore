@@ -7,32 +7,43 @@ $districts 	= district_dropdown();
 $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 ?>
 <div class="box-body" style="overflow-x: scroll;">
-	<table class="table table-bordered table-condensed no-margin">
-	    <thead>
-	        <tr>
-	            <th>Item Category</th>
-	            <th>Sum Insured(Rs.)</th>
-	            <th>Ownership</th>
-	        </tr>
-	    </thead>
-	    <?php
-	    $items     	= $attributes->items ?? NULL;
-	    $item_count	= count( $items->category ?? [] );
-	    ?>
-	    <tbody class="form-inline">
-	        <?php
-	        if($item_count):
-	            for ($i=0; $i < $item_count; $i++):?>
-	            	<tr>
-	            		<td><?php echo _OBJ_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
-	            		<td><?php echo _OBJ_FIRE_item_ownership_dropdown(FALSE)[ $items->ownership[$i] ]; ?></td>
-	            		<td>Rs. <?php echo $items->sum_insured[$i]; ?></td>
-	            	</tr>
-	            <?php
-	            endfor;
-	        endif;?>
-	    </tbody>
-	</table>
+	<?php if($attributes->item_attached === 'Y'): ?>
+		<table class="table table-bordered table-condensed no-margin">
+		    <tr>
+		        <th>Download Item List</th>
+		        <td>
+		            <?php echo anchor('objects/download/' . $attributes->document, 'Download', 'target="_blank"') ?>
+		        </td>
+		    </tr>
+		</table>
+	<?php else: ?>
+		<table class="table table-bordered table-condensed no-margin">
+		    <thead>
+		        <tr>
+		            <th>Item Category</th>
+		            <th>Sum Insured(Rs.)</th>
+		            <th>Ownership</th>
+		        </tr>
+		    </thead>
+		    <?php
+		    $items     	= $attributes->items ?? NULL;
+		    $item_count	= count( $items->category ?? [] );
+		    ?>
+		    <tbody class="form-inline">
+		        <?php
+		        if($item_count):
+		            for ($i=0; $i < $item_count; $i++):?>
+		            	<tr>
+		            		<td><?php echo _OBJ_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
+		            		<td><?php echo _OBJ_FIRE_item_ownership_dropdown(FALSE)[ $items->ownership[$i] ]; ?></td>
+		            		<td>Rs. <?php echo $items->sum_insured[$i]; ?></td>
+		            	</tr>
+		            <?php
+		            endfor;
+		        endif;?>
+		    </tbody>
+		</table>
+	<?php endif; ?>
 </div>
 
 <div class="box-body" style="overflow-x: scroll;">
