@@ -1156,4 +1156,35 @@ class Objects extends MY_Controller
 						->render($this->data);
 
     }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Download a file related to Object
+     *
+     * @param string $filename
+     * @return void
+     */
+	public function download($filename)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('objects', 'explore.object') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		// Let's Download
+		$this->load->helper('download');
+        $download_file = self::$upload_path . $filename;
+        if( file_exists($download_file) )
+        {
+            force_download($download_file, NULL, true);
+        }
+        else
+        {
+        	$this->template->render_404('', "Sorry! File Not Found.");
+        }
+	}
 }
