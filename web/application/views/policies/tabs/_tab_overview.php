@@ -67,6 +67,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			$customer_record = (object)[
 				'id' 				=> $record->customer_id,
 				'full_name' 		=> $record->customer_name,
+				'grandfather_name' 	=> $record->customer_grandfather_name,
+				'father_name'		=> $record->customer_father_name,
+				'mother_name'		=> $record->customer_mother_name,
 				'picture' 			=> $record->customer_picture,
 				'code' 				=> $record->customer_code,
 				'type' 				=> $record->customer_type,
