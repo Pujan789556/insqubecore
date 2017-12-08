@@ -44,7 +44,7 @@ foreach($form_elements as $element):?>
         $element_config = array(
             'name'          => $element['field'],
             'class'         => 'form-control',
-            'placeholder'   => $element['label']
+            'placeholder'   => $element['_placeholder'] ?? $element['label']
         );
 
         /**

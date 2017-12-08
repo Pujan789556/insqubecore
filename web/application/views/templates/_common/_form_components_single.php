@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $element_config = array(
     'name'          => $element['field'],
     'class'         => 'form-control',
-    'placeholder'   => $element['label']
+    'placeholder'   => $element['_placeholder'] ?? $element['label']
 );
 
 /**
@@ -124,9 +124,11 @@ switch($element['_type'])
         // unset placeholder
         unset($element_config['placeholder']);
         $checked = $element['_checkbox_value'] == $value;
+        // Show/Hide element Label
+        $show_label = $element['_show_label'] ?? TRUE; // Default : True
         echo '<label>';
             echo form_checkbox($element_config, $element['_checkbox_value'], $checked, $extra_attributes);
-            echo $element['label'];
+            echo $show_label ? $element['label'] : '';
         echo '</label>';
         break;
 
