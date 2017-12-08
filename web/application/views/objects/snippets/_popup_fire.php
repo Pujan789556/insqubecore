@@ -10,6 +10,12 @@ $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 	<?php if($attributes->item_attached === 'Y'): ?>
 		<table class="table table-bordered table-condensed no-margin">
 		    <tr>
+		        <th>Total Sum Insured (Rs)</th>
+		        <td>
+		            <?php echo $attributes->sum_insured; ?>
+		        </td>
+		    </tr>
+		    <tr>
 		        <th>Download Item List</th>
 		        <td>
 		            <?php echo anchor('objects/download/' . $attributes->document, 'Download', 'target="_blank"') ?>

@@ -5,7 +5,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 $item_form_elements     = $form_elements['items_manual'];
 $old_document = $record->document ?? NULL;
-
 ?>
 <div class="row">
     <div class="col-md-6">

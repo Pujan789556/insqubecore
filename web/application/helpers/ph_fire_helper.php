@@ -87,7 +87,7 @@ if ( ! function_exists('_OBJ_FIRE_validation_rules'))
 			        '_key' => 'item_attached',
 			        'label' => 'Source Of Item List',
 			        'rules' => 'trim|required|alpha|exact_length[1]|in_list[N,Y]',
-			        '_data' 	=> ['N' => 'Manual entry', 'Y' => 'Upload file'],
+			        '_data' 	=> ['N' => 'Manual entry', 'Y' => 'Excel data file'],
 			        '_type'     => 'radio',
 			        '_show_label' => true,
 			        '_required' => true
@@ -383,7 +383,7 @@ if ( ! function_exists('_OBJ_FIRE_item_category_dropdown'))
 		$dropdown = [
 			'BWALL' => 'Boundary Wall',
 			'BLDNG' => 'Building',
-			'GOODS'	=> 'Goods',
+			'GOODS'	=> 'Goods/Stock',
 			'MCNRY' => 'Machinary',
 			'OTH' 	=> 'Others'
 		];
@@ -603,60 +603,282 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 		$CI->load->model('endorsement_template_model');
 		$template_dropdown = $CI->endorsement_template_model->dropdown( $policy_record->portfolio_id );
 
-		$rate_base_dropdown = [
-			'PT'	=> 'Per Thousand',
-			'RT'	=> 'Percent'
+		$basic_rules = [
+			[
+                'field' => 'amt_stamp_duty',
+                'label' => 'Stamp Duty(Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                '_type'     => 'text',
+                '_default' 	=> $pfs_record->stamp_duty,
+                '_required' => true
+            ],
+			[
+                'field' => 'txn_details',
+                'label' => 'Details/सम्पुष्टि विवरण',
+                'rules' => 'trim|required|htmlspecialchars',
+                '_type'     => 'textarea',
+                '_id'		=> 'txn-details',
+                '_required' => true
+            ],
+            [
+                'field' => 'template_reference',
+                'label' => 'Load from endorsement templates',
+                'rules' => 'trim|integer|max_length[8]',
+                '_key' 		=> 'template_reference',
+                '_id'		=> 'template-reference',
+                '_type'     => 'dropdown',
+                '_data' 	=> IQB_BLANK_SELECT + $template_dropdown,
+                '_required' => false
+            ],
+            [
+                'field' => 'remarks',
+                'label' => 'Remarks/कैफियत',
+                'rules' => 'trim|htmlspecialchars',
+                '_type'     => 'textarea',
+                '_required' => false
+            ]
 		];
 
-		$validation_rules = [
+		// Get validation rules based on the type (Manual Item entry or File Upload)
+		$object_attributes 	= json_decode($policy_object->attributes ?? NULL);
+		// echo '<pre>'; print_r($object_attributes);exit;
+
+		if( $object_attributes->item_attached === 'Y')
+		{
+			$rules = _TXN_FIRE_premium_v_rules_file($basic_rules, $portfolio_risks, $for_form_processing );
+		}
+		else
+		{
+			$rules = _TXN_FIRE_premium_v_rules_manual($basic_rules, $policy_object, $portfolio_risks, $for_form_processing );
+		}
+
+		return $rules;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_TXN_FIRE_premium_v_rules_file'))
+{
+	/**
+	 * Premium Validation Rules for File Upload
+	 *
+	 * @param array $basic_rules 		Basic Validation Rules
+	 * @param array $portfolio_risks	Portfolio Risks
+	 * @param bool $for_processing		For Form Processing
+	 * @return array
+	 */
+	function _TXN_FIRE_premium_v_rules_file($basic_rules, $portfolio_risks, $for_form_processing = FALSE )
+	{
+		$v_rules = [
 
 			/**
 			 * Common to All Package Type
 			 * ----------------------------
 			 * Sampusti Bibaran and Remarks are common to all type of policy package.
 			 */
-			'basic' => [
-				[
-	                'field' => 'amt_stamp_duty',
-	                'label' => 'Stamp Duty(Rs.)',
-	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+			'basic' => $basic_rules,
+
+
+			// ---------------------------------------------------------------------
+			// FILE UPLOAD PREMIUM VALIDATION RULES
+			// ---------------------------------------------------------------------
+
+
+			/**
+			 * Discounts/Additional Chanrge Rates
+			 * 	NWL(+) : Night Working Load (% of Fire Risk Premium) Premium
+			 * 	FFA(-) : Fire Fighting Appliance (% of Fire Risk Premium) Discount
+			 * 	SDD(-) : Stock Declaration Discount (% of total premium of Stock/Goods premium)
+			 */
+			'premium_file_additional_rates' => [
+                [
+	                'field' => 'premium[file][nwl_rate]',
+	                'label' => 'NWL (Night Working Load)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
 	                '_type'     => 'text',
-	                '_default' 	=> $pfs_record->stamp_duty,
-	                '_required' => true
-	            ],
-				[
-	                'field' => 'txn_details',
-	                'label' => 'Details/सम्पुष्टि विवरण',
-	                'rules' => 'trim|required|htmlspecialchars',
-	                '_type'     => 'textarea',
-	                '_id'		=> 'txn-details',
+	                '_key' 		=> 'nwl_rate',
+	                '_placeholder' => 'NWL Rate(%)',
 	                '_required' => true
 	            ],
 	            [
-                    'field' => 'template_reference',
-                    'label' => 'Load from endorsement templates',
-                    'rules' => 'trim|integer|max_length[8]',
-                    '_key' 		=> 'template_reference',
-                    '_id'		=> 'template-reference',
-                    '_type'     => 'dropdown',
-                    '_data' 	=> IQB_BLANK_SELECT + $template_dropdown,
-                    '_required' => false
-                ],
+	                'field' => 'premium[file][ffa_rate]',
+	                'label' => 'FFA (Fire Fighting Appliance)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'ffa_rate',
+	                '_placeholder' => 'FFA Rate(%)',
+	                '_required' => true
+	            ],
 	            [
-	                'field' => 'remarks',
-	                'label' => 'Remarks/कैफियत',
-	                'rules' => 'trim|htmlspecialchars',
-	                '_type'     => 'textarea',
-	                '_required' => false
+	                'field' => 'premium[file][sdd_rate]',
+	                'label' => 'SDD (Stock Declaration Discount)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'sdd_rate',
+	                '_placeholder' => 'SDD Rate (%)',
+	                '_required' => true
+	            ]
+			],
+
+			/**
+			 * Discounts/Additional Chanrge Amount
+			 */
+			'premium_file_additional_amount' => [
+                [
+	                'field' => 'premium[file][nwl_amount]',
+	                'label' => 'NWL (Night Working Load - Fire Only) (Rs.)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'nwl_amount',
+	                '_placeholder' => 'NWL (Rs.)',
+	                '_show_label' => false,
+	                '_required' => true
+	            ],
+	            [
+	                'field' => 'premium[file][ffa_amount]',
+	                'label' => 'FFA (Fire Fighting Appliance - Fire Only) (Rs.)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'ffa_amount',
+	                '_placeholder' => 'FFA (Rs.)',
+	                '_show_label' => false,
+	                '_required' => true
+	            ],
+	            [
+	                'field' => 'premium[file][sdd_amount]',
+	                'label' => 'SDD (Stock Declaration Discount) (Rs.)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'sdd_amount',
+	                '_placeholder' => 'SDD (Rs.)',
+	                '_show_label' => false,
+	                '_required' => true
+	            ]
+			],
+
+			/**
+			 * Premium File Risks
+			 */
+			'premium_file_risks' => [
+                [
+	                'field' => 'premium[file][risk]',
+	                'label' => 'Risk',
+	                'rules' => 'trim|required|integer|max_length[8]',
+	                '_type'     => 'hidden',
+	                '_key' 		=> 'risk',
+	                '_required' => true
+	            ],
+	            [
+	                'field' => 'premium[file][premium]',
+	                'label' => 'Premium (Rs.)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'premium',
+	                '_required' => true
+	            ]
+			],
+		];
+
+		/**
+		 * Build Form Validation Rules for Form Processing
+		 */
+		if( $for_form_processing )
+		{
+			$rules = array_merge( $v_rules['basic'], $v_rules['premium_file_additional_rates'], $v_rules['premium_file_additional_amount']);
+
+			/**
+			 * Append Risk validation rules
+			 */
+			$premium_file_risks_elements = $v_rules['premium_file_risks'];
+
+			// Loop through each portfolio risks
+			foreach($portfolio_risks as $risk_id=>$risk_name)
+			{
+				foreach ($premium_file_risks_elements as $elem)
+                {
+                	$elem['field'] .= "[{$risk_id}]";
+                	$rules[] = $elem;
+                }
+			}
+			return $rules;
+		}
+		return $v_rules;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_TXN_FIRE_premium_v_rules_manual'))
+{
+	/**
+	 * Premium Validation Rules for Manual Item Entry
+	 *
+	 * @param array $basic_rules 		Basic Validation Rules
+	 * @param object $policy_object		Policy Object Record
+	 * @param array $portfolio_risks	Portfolio Risks
+	 * @param bool $for_processing		For Form Processing
+	 * @return array
+	 */
+	function _TXN_FIRE_premium_v_rules_manual($basic_rules, $policy_object, $portfolio_risks, $for_form_processing = FALSE )
+	{
+
+		$v_rules = [
+
+			/**
+			 * Common to All Package Type
+			 * ----------------------------
+			 * Sampusti Bibaran and Remarks are common to all type of policy package.
+			 */
+			'basic' => $basic_rules,
+
+
+			// ---------------------------------------------------------------------
+			// MANUAL ITEM ENTRY PREMIUM VALIDATION RULES
+			// ---------------------------------------------------------------------
+
+			/**
+			 * Discounts/Additional Chanrge Rates
+			 * 	NWL(+) : Night Working Load (% of Fire Risk Premium) Premium
+			 * 	FFA(-) : Fire Fighting Appliance (% of Fire Risk Premium) Discount
+			 * 	SDD(-) : Stock Declaration Discount (% of total premium of Stock/Goods premium)
+			 */
+			'premium_manual_additional_rates' => [
+                [
+	                'field' => 'premium[manual][nwl_rate]',
+	                'label' => 'NWL (Night Working Load)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'nwl_rate',
+	                '_placeholder' => 'NWL Rate(%)',
+	                '_required' => true
+	            ],
+	            [
+	                'field' => 'premium[manual][ffa_rate]',
+	                'label' => 'FFA (Fire Fighting Appliance)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'ffa_rate',
+	                '_placeholder' => 'FFA Rate(%)',
+	                '_required' => true
+	            ],
+	            [
+	                'field' => 'premium[manual][sdd_rate]',
+	                'label' => 'SDD (Stock Declaration Discount)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'sdd_rate',
+	                '_placeholder' => 'SDD Rate (%)',
+	                '_required' => true
 	            ]
 			],
 
 			/**
 			 * Premium Validation Rules - Template
 			 */
-			'premium' => [
+			'premium_manual_risks' => [
                 [
-	                'field' => 'premium[risk]',
+	                'field' => 'premium[manual][risk]',
 	                'label' => 'Rate',
 	                'rules' => 'trim|integer|max_length[8]',
 	                '_type'     => 'hidden',
@@ -664,7 +886,7 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 	                '_required' => true
 	            ],
 	            [
-	                'field' => 'premium[rate]',
+	                'field' => 'premium[manual][rate]',
 	                'label' => 'Rate',
 	                'rules' => 'trim|prep_decimal|decimal|max_length[5]',
 	                '_type'     => 'text',
@@ -672,14 +894,35 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 	                '_required' => true
 	            ],
 	            [
-                    'field' => 'premium[rate_base]',
-                    'label' => 'Premium Rate Base',
-                    'rules' => 'trim|alpha|exact_length[2]|in_list['.implode(',', array_keys($rate_base_dropdown)).']',
-                    '_key' 		=> 'rate_base',
-                    '_type'     => 'dropdown',
-                    '_data' 	=> $rate_base_dropdown,
-                    '_required' => false
-                ],
+	                'field' => 'premium[manual][nwl_apply]',
+	                'label' => 'Apply NWL',
+	                'rules' => 'trim|integer|exact_length[1]|in_list[1]',
+	                '_type'     => 'checkbox',
+	                '_key' 		=> 'nwl_apply',
+	                '_checkbox_value' => '1',
+	                '_show_label' => false,
+	                '_required' => false
+	            ],
+	            [
+	                'field' => 'premium[manual][ffa_apply]',
+	                'label' => 'Apply FFA',
+	                'rules' => 'trim|integer|exact_length[1]|in_list[1]',
+	                '_type'     => 'checkbox',
+	                '_key' 		=> 'ffa_apply',
+	                '_checkbox_value' => '1',
+	                '_show_label' => false,
+	                '_required' => false
+	            ],
+	            [
+	                'field' => 'premium[manual][sdd_apply]',
+	                'label' => 'Apply SDD',
+	                'rules' => 'trim|integer|exact_length[1]|in_list[1]',
+	                '_type'     => 'checkbox',
+	                '_key' 		=> 'sdd_apply',
+	                '_checkbox_value' => '1',
+	                '_show_label' => false,
+	                '_required' => false
+	            ],
 			]
 		];
 
@@ -688,12 +931,12 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 		 */
 		if( $for_form_processing )
 		{
-			$rules = $validation_rules['basic'];
+			$rules = array_merge( $v_rules['basic'], $v_rules['premium_manual_additional_rates']);
 
 			/**
 			 * Premium Validation Rules
 			 */
-			$premium_elements 	= $validation_rules['premium'];
+			$premium_manual_risks_elements 	= $v_rules['premium_manual_risks'];
 			$object_attributes 	= $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
 			$items 				= $object_attributes->items;
 			$item_count 		= count($items->category);
@@ -704,7 +947,7 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 				// Loop through each portfolio risks
 				foreach($portfolio_risks as $risk_id=>$risk_name)
 				{
-					foreach ($premium_elements as $elem)
+					foreach ($premium_manual_risks_elements as $elem)
                     {
                     	$elem['field'] .= "[{$risk_id}][{$i}]";
                     	$rules[] = $elem;
@@ -713,8 +956,7 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 			}
 			return $rules;
 		}
-		return $validation_rules;
-
+		return $v_rules;
 	}
 }
 
@@ -806,7 +1048,8 @@ if ( ! function_exists('__save_premium_FIRE'))
         	{
 
 				// Premium Data
-				$post_data = $CI->input->post();
+				$post_data 		= $CI->input->post();
+				$premium_data 	= $post_data['premium'];
 
 				/**
 				 * Do we have a valid method?
@@ -831,52 +1074,112 @@ if ( ! function_exists('__save_premium_FIRE'))
 					 * Fire Items with Sum Insured
 					 */
 					$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-					$items              = $object_attributes->items;
-					$item_count         = count($items->category);
-
-
 
 					/**
-					 * Let's Loop Through each Fire Item
+					 * Initialization of Computational Variables
 					 */
-					$premium_computation_table 	= [];
-					$base_premium 				= 0.00;
-					$pool_premium 				= 0.00;
-					$commissionable_premium 	= 0.00;
-					$direct_discount 			= 0.00;
-					$agent_commission 			= 0.00;
+					$GROSS_PREMIUM 	= 0.00; // Gross Premium (Without Pool Premium)
+					$POOL_PREMIUM  	= 0.00; // Pool Premium
 
-					for($i=0; $i < $item_count; $i++ )
+					// Additional discount/charge rates & amounts
+					$NWL_RATE 		= 0.00;
+					$FFA_RATE 		= 0.00;
+					$SDD_RATE 		= 0.00;
+					$NWL_AMOUNT 	= 0.00;
+					$FFA_AMOUNT 	= 0.00;
+					$SDD_AMOUNT 	= 0.00;
+
+					/**
+					 * -------------------------------------------------------------------------------------
+					 * CASE A : FIRE ITEMS AS FILE UPLOAD
+					 * -------------------------------------------------------------------------------------
+					 */
+					if( $object_attributes->item_attached === 'Y' )
 					{
-						$item_sum_insured 	= $items->sum_insured[$i];
+						// Get additional discount/charge rate & amount
+						$NWL_RATE 		= $premium_data['file']['nwl_rate'];
+						$FFA_RATE 		= $premium_data['file']['ffa_rate'];
+						$SDD_RATE 		= $premium_data['file']['sdd_rate'];
+						$NWL_AMOUNT 	= $premium_data['file']['nwl_amount'];
+						$FFA_AMOUNT 	= $premium_data['file']['ffa_amount'];
+						$SDD_AMOUNT 	= $premium_data['file']['sdd_amount'];
+
+						// Compute Gross and Pool Premium
 						foreach($portfolio_risks as $pr)
 						{
-							$rate = $post_data['premium']['rate'][$pr->id][$i];
+							$premium = floatval($premium_data['file']['premium'][$pr->id]);
 
-							// Compute only if rate is supplied
-							if($rate)
+							// Assign to Pool or Base based on Risk Type
+							if( $pr->type == IQB_RISK_TYPE_BASIC )
 							{
-								$rate_base = $post_data['premium']['rate_base'][$pr->id][$i];
-								$premium = _FIRE_compute_premium_per_risk_per_item($item_sum_insured, $rate, $rate_base);
+								$GROSS_PREMIUM += $premium;
+							}
+							else
+							{
+								$POOL_PREMIUM += $premium;
+							}
+						}
+					}
 
-								// Assign to Pool or Base based on Risk Type
-								if( $pr->type == IQB_RISK_TYPE_BASIC )
-								{
-									$base_premium += $premium;
-								}
-								else
-								{
-									$pool_premium += $premium;
-								}
+					/**
+					 * -------------------------------------------------------------------------------------
+					 * CASE B : FIRE ITEMS AS MANUAL ENTRY
+					 * -------------------------------------------------------------------------------------
+					 */
+					else
+					{
+						// Get additional discount/charge rate & amount
+						$NWL_RATE 		= $premium_data['manual']['nwl_rate'];
+						$FFA_RATE 		= $premium_data['manual']['ffa_rate'];
+						$SDD_RATE 		= $premium_data['manual']['sdd_rate'];
 
-								// Commissionable Premium?
-								if($pr->agent_commission == IQB_FLAG_ON )
+
+						// Get Fire Items
+						$items              = $object_attributes->items;
+						$item_count         = count($items->category);
+
+						for($i=0; $i < $item_count; $i++ )
+						{
+							$item_sum_insured 	= $items->sum_insured[$i];
+							foreach($portfolio_risks as $pr)
+							{
+								$rate = floatval($premium_data['manual']['rate'][$pr->id][$i]);
+								// Compute only if rate is supplied
+								if($rate)
 								{
-									$commissionable_premium += $premium;
+									$premium 	= $item_sum_insured * $rate / 100.00;
+
+									// Assign to Pool or Base based on Risk Type
+									if( $pr->type == IQB_RISK_TYPE_BASIC )
+									{
+										$GROSS_PREMIUM += $premium;
+									}
+									else
+									{
+										$POOL_PREMIUM += $premium;
+									}
+
+									// Additional Charges/Discount (Per Risk Per Item)
+									$nwl_apply = $premium_data['manual']['nwl_apply'][$pr->id][$i] ?? NULL;
+									$ffa_apply = $premium_data['manual']['ffa_apply'][$pr->id][$i] ?? NULL;
+									$sdd_apply = $premium_data['manual']['sdd_apply'][$pr->id][$i] ?? NULL;
+
+									$NWL_AMOUNT 	+= $nwl_apply ? ( $premium * $NWL_RATE / 100.00 ) : 0;
+									$FFA_AMOUNT 	+= $ffa_apply ? ( $premium * $FFA_RATE / 100.00 ) : 0;
+									$SDD_AMOUNT 	+= $sdd_apply ? ( $premium * $SDD_RATE / 100.00 ) : 0;
 								}
 							}
 						}
 					}
+
+
+					/**
+					 * Other computational data
+					 */
+					$premium_computation_table 	= [];
+					$COMMISSIONABLE_PREMIUM 	= NULL;
+					$AGENT_COMMISSION 			= NULL;
+					$DIRECT_DISCOUNT 			= 0.00;
 
 					/**
 					 * Direct Discount or Agent Commission?
@@ -886,42 +1189,42 @@ if ( ! function_exists('__save_premium_FIRE'))
 					 */
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 					{
-						$direct_discount = ( $base_premium * $pfs_record->direct_discount ) / 100.00 ;
-						$base_premium -= $direct_discount;
+						$DIRECT_DISCOUNT = ( $GROSS_PREMIUM * $pfs_record->direct_discount ) / 100.00 ;
 
 						// NULLIFY Commissionable premium, Agent Commission
-						$commissionable_premium = NULL;
-						$agent_commission = NULL;
+						$COMMISSIONABLE_PREMIUM = NULL;
+						$AGENT_COMMISSION 		= NULL;
 					}
 					else
 					{
-						$agent_commission = ( $commissionable_premium * $pfs_record->agent_commission ) / 100.00;
+						$COMMISSIONABLE_PREMIUM = $GROSS_PREMIUM;
+						$AGENT_COMMISSION = ( $COMMISSIONABLE_PREMIUM * $pfs_record->agent_commission ) / 100.00;
 					}
 
 
 					/**
 					 * Let's Compute the Total Premium
 					 */
-					$total_premium 	= $base_premium + $pool_premium;
-					$taxable_amount = $total_premium + $post_data['amt_stamp_duty'];
+					$NET_PREMIUM 	= $GROSS_PREMIUM - $DIRECT_DISCOUNT + $NWL_AMOUNT - $FFA_AMOUNT - $SDD_AMOUNT + $POOL_PREMIUM ;
+					$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
 
 					/**
 					 * Compute VAT
 					 */
 					$CI->load->helper('account');
-					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+					$AMOUNT_VAT = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
 
 					/**
 					 * Prepare Transactional Data
 					 */
 					$txn_data = [
-						'amt_total_premium' 	=> $total_premium,
-						'amt_pool_premium' 		=> $pool_premium,
-						'amt_commissionable'	=> $commissionable_premium,
-						'amt_agent_commission'  => $agent_commission,
+						'amt_total_premium' 	=> $NET_PREMIUM,
+						'amt_pool_premium' 		=> $POOL_PREMIUM,
+						'amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
+						'amt_agent_commission'  => $AGENT_COMMISSION,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-						'amt_vat' 				=> $amount_vat,
+						'amt_vat' 				=> $AMOUNT_VAT,
 						'txn_details' 			=> $post_data['txn_details'],
 						'remarks' 				=> $post_data['remarks'],
 					];
@@ -934,6 +1237,48 @@ if ( ! function_exists('__save_premium_FIRE'))
 					 */
 					$premium_computation_table = json_encode($post_data['premium']);
 					$txn_data['premium_computation_table'] = $premium_computation_table;
+
+
+
+					/**
+					 * Cost calculation Table
+					 *
+					 * It holds three section:
+					 * 	a. Summary Table
+					 * 	b. Risk wise summary Table
+					 * 	c. Property wise summary Table
+					 */
+
+					$summary_table = [
+						[
+							'label' => "GROSS PREMIUM",
+							'value' => $GROSS_PREMIUM
+						],
+						[
+							'label' => "DIRECT DISCOUNT ({$pfs_record->direct_discount}%)",
+							'value' => $DIRECT_DISCOUNT
+						],
+						[
+							'label' => "NWL - Fire Only ({$NWL_RATE}%)",
+							'value' => $NWL_AMOUNT
+						],
+						[
+							'label' => "FFA - Fire Only ({$FFA_RATE}%)",
+							'value' => $FFA_AMOUNT
+						],
+						[
+							'label' => "SDD - Fire Only ({$SDD_RATE}%)",
+							'value' => $SDD_AMOUNT
+						],
+						[
+							'label' => "POOL PREMIUM",
+							'value' => $SDD_AMOUNT
+						],
+						[
+							'label' => "NET PREMIUM",
+							'value' => $NET_PREMIUM
+						]
+					];
 
 
 
@@ -955,105 +1300,142 @@ if ( ! function_exists('__save_premium_FIRE'))
 					 * 	------------------
 					 */
 					$property_table = [];
-					for($i=0; $i < $item_count; $i++ )
+					$risk_table = [];
+
+					if( $object_attributes->item_attached === 'Y' )
 					{
-						$item_sum_insured 		= $items->sum_insured[$i];
-						$property_category 		= _OBJ_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ];
-						$single_property_row 	= [ $property_category, $items->sum_insured[$i] ];
-
-						$per_property_premium 		= 0.00;
-						$per_property_base_premium 	= 0.00;
-						$per_property_pool_premium 	= 0.00;
-
+						// Only Risk Table
+						// Compute Gross and Pool Premium
 						foreach($portfolio_risks as $pr)
 						{
-							$rate = $post_data['premium']['rate'][$pr->id][$i];
+							$per_risk_premium = floatval($premium_data['file']['premium'][$pr->id]);
+							$per_risk_base_premium 	= 0.00;
+							$per_risk_pool_premium 	= 0.00;
 
-							// Compute only if rate is supplied
-							if($rate)
+							// Assign to Pool or Base based on Risk Type
+							if( $pr->type == IQB_RISK_TYPE_BASIC )
 							{
-								$rate_base = $post_data['premium']['rate_base'][$pr->id][$i];
-								$premium = _FIRE_compute_premium_per_risk_per_item($item_sum_insured, $rate, $rate_base);
-
-								// Assign to Pool or Base based on Risk Type
-								if( $pr->type == IQB_RISK_TYPE_BASIC )
-								{
-									$per_property_base_premium += $premium;
-								}
-								else
-								{
-									$per_property_pool_premium += $premium;
-								}
+								$per_risk_base_premium = $per_risk_premium;
 							}
-						}
+							else
+							{
+								$per_risk_pool_premium = $per_risk_premium;
+							}
 
-						/**
-						 * Direct Discount Applies?
-						 */
-						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
-						{
-							$direct_discount 			= ( $per_property_base_premium * $pfs_record->direct_discount ) / 100.00 ;
-							$per_property_base_premium -= $direct_discount;
+							/**
+							 * Direct Discount Applies?
+							 */
+							if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+							{
+								$direct_discount 		= ( $per_risk_base_premium * $pfs_record->direct_discount ) / 100.00 ;
+								$per_risk_base_premium 	-= $direct_discount;
+							}
+							$per_risk_premium 	= $per_risk_base_premium  + $per_risk_pool_premium;
+							$risk_table[] 		= [$pr->name, $per_risk_premium];
 						}
-
-						$per_property_premium 	= $per_property_base_premium  + $per_property_pool_premium;
-						$single_property_row[] 	= $per_property_premium;
-						$property_table[] 		= $single_property_row;
 					}
-
-					// --------------------------------------------------------------------------------------------
-
-					$risk_table = [];
-					foreach($portfolio_risks as $pr)
+					else
 					{
-						$per_risk_premium 		= 0.00;
-						$per_risk_base_premium 	= 0.00;
-						$per_risk_pool_premium 	= 0.00;
 
 						for($i=0; $i < $item_count; $i++ )
 						{
-							$item_sum_insured 	= $items->sum_insured[$i];
-							$rate 				= $post_data['premium']['rate'][$pr->id][$i];
+							$item_sum_insured 		= $items->sum_insured[$i];
+							$property_category 		= _OBJ_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ];
+							$single_property_row 	= [ $property_category, $items->sum_insured[$i] ];
 
-							// Compute only if rate is supplied
-							if($rate)
+							$per_property_premium 		= 0.00;
+							$per_property_base_premium 	= 0.00;
+							$per_property_pool_premium 	= 0.00;
+
+							foreach($portfolio_risks as $pr)
 							{
-								$rate_base = $post_data['premium']['rate_base'][$pr->id][$i];
-								$premium = _FIRE_compute_premium_per_risk_per_item($item_sum_insured, $rate, $rate_base);
+								$rate = floatval($premium_data['manual']['rate'][$pr->id][$i]);
 
-								// Assign to Pool or Base based on Risk Type
-								if( $pr->type == IQB_RISK_TYPE_BASIC )
+								// Compute only if rate is supplied
+								if($rate)
 								{
-									$per_risk_base_premium += $premium;
-								}
-								else
-								{
-									$per_risk_pool_premium += $premium;
+									$premium 	= $item_sum_insured * $rate / 100.00;
+
+									// Assign to Pool or Base based on Risk Type
+									if( $pr->type == IQB_RISK_TYPE_BASIC )
+									{
+										$per_property_base_premium += $premium;
+									}
+									else
+									{
+										$per_property_pool_premium += $premium;
+									}
 								}
 							}
+
+							/**
+							 * Direct Discount Applies?
+							 */
+							if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+							{
+								$direct_discount 			= ( $per_property_base_premium * $pfs_record->direct_discount ) / 100.00 ;
+								$per_property_base_premium -= $direct_discount;
+							}
+
+							$per_property_premium 	= $per_property_base_premium  + $per_property_pool_premium;
+							$single_property_row[] 	= $per_property_premium;
+							$property_table[] 		= $single_property_row;
 						}
 
-						/**
-						 * Direct Discount Applies?
-						 */
-						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
-						{
-							$direct_discount 		= ( $per_risk_base_premium * $pfs_record->direct_discount ) / 100.00 ;
-							$per_risk_base_premium 	-= $direct_discount;
-						}
-						$per_risk_premium 	= $per_risk_base_premium  + $per_risk_pool_premium;
+						// --------------------------------------------------------------------------------------------
 
 
-						/**
-						 * Include the risk only with premium
-						 */
-						if( $per_risk_premium )
+						foreach($portfolio_risks as $pr)
 						{
-							$risk_table[] 		= [$pr->name, $per_risk_premium];
+							$per_risk_premium 		= 0.00;
+							$per_risk_base_premium 	= 0.00;
+							$per_risk_pool_premium 	= 0.00;
+
+							for($i=0; $i < $item_count; $i++ )
+							{
+								$item_sum_insured 	= $items->sum_insured[$i];
+								$rate = floatval($premium_data['manual']['rate'][$pr->id][$i]);
+
+								// Compute only if rate is supplied
+								if($rate)
+								{
+									$premium 	= $item_sum_insured * $rate / 100.00;
+
+									// Assign to Pool or Base based on Risk Type
+									if( $pr->type == IQB_RISK_TYPE_BASIC )
+									{
+										$per_risk_base_premium += $premium;
+									}
+									else
+									{
+										$per_risk_pool_premium += $premium;
+									}
+								}
+							}
+
+							/**
+							 * Direct Discount Applies?
+							 */
+							if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
+							{
+								$direct_discount 		= ( $per_risk_base_premium * $pfs_record->direct_discount ) / 100.00 ;
+								$per_risk_base_premium 	-= $direct_discount;
+							}
+							$per_risk_premium 	= $per_risk_base_premium  + $per_risk_pool_premium;
+
+
+							/**
+							 * Include the risk only with premium
+							 */
+							if( $per_risk_premium )
+							{
+								$risk_table[] 		= [$pr->name, $per_risk_premium];
+							}
 						}
 					}
 
 					$cost_calculation_table = json_encode([
+						'summary_table' 	=> $summary_table,
 						'property_table' 	=> $property_table,
 						'risk_table'		=> $risk_table
 					]);
