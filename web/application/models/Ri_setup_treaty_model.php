@@ -1344,6 +1344,7 @@ class Ri_setup_treaty_model extends MY_Model
                         ->from(self::$table_treaty_distribution . ' TD')
                         ->join('master_companies C', 'C.id = TD.company_id')
                         ->where('TD.treaty_id', $id)
+                        ->order_by('TD.flag_leader', 'DESC')
                         ->get()->result();
     }
 

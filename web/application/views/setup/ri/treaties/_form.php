@@ -56,7 +56,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $broker_form_element['label']            = $broker_name;
                 $broker_form_element['_value']           = in_array($broker_id, $treaty_borkers) ? $broker_id : '';
 
-                $this->load->view('templates/_common/_form_components_horz', [
+                $this->load->view('templates/_common/_form_components_inline', [
                     'form_elements' => [$broker_form_element],
                     'form_record'   => NULL
                 ]);
@@ -80,7 +80,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $portfolio_form_element['label']            = $portfolio_name;
                 $portfolio_form_element['_value']           = in_array($portfolio_id, $treaty_portfolios) ? $portfolio_id : '';
 
-                $this->load->view('templates/_common/_form_components_horz', [
+                $this->load->view('templates/_common/_form_components_inline', [
                     'form_elements' => [$portfolio_form_element],
                     'form_record'   => NULL
                 ]);
