@@ -3,8 +3,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Setup - RI - Treaties :  Single Row
 */
+/**
+ * Check if this is Current Fiscal Year
+ */
+$flag_current_fiscal_year = $this->current_fiscal_year->id == $record->fiscal_yr_id;
+
+$current_class = $flag_current_fiscal_year ? 'text-success text-bold' : '';
+$current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 ?>
-<tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
+<tr class="searchable <?php echo $current_class;?>"
+	title="<?php echo $current_title?>"
+	<?php echo $flag_current_fiscal_year ? 'data-toggle="tooltip"' : ''?>
+	data-id="<?php echo $record->id; ?>"
+	id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
 	<td>
 		<a href="<?php echo site_url('ri_setup_treaties/details/' . $record->id);?>" title="View Treaty Details">

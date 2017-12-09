@@ -1230,7 +1230,7 @@ class Ri_setup_treaty_model extends MY_Model
         }
 
         return $this->db->limit($this->settings->per_page+1)
-                        ->order_by('T.id', 'desc')
+                        ->order_by('T.fiscal_yr_id', 'desc')
                         ->get()->result();
     }
 
