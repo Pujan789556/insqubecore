@@ -1308,7 +1308,34 @@ class Ri_setup_treaty_model extends MY_Model
 
     public function get_portfolios_by_treaty($id)
     {
-        return $this->db->select(
+
+        $this->_treaty_portfolios_select();
+
+        return $this->db
+                        ->where('T.id', $id)
+                        ->get()->result();
+    }
+
+    // --------------------------------------------------------------------
+
+    public function get_treaty_by_portfolio($portfolio_id)
+    {
+
+        $this->_treaty_portfolios_select();
+
+        return $this->db
+                        ->where('P.id', $portfolio_id)
+                        ->get()->row();
+    }
+
+    // --------------------------------------------------------------------
+
+    private function _treaty_portfolios_select()
+    {
+        $this->db->select(
+                            // Treaty Details
+                            'T.id, T.name as treaty_name, T.fiscal_yr_id, T.treaty_type_id, T.treaty_effective_date, ' .
+
                             // Treaty Portfolio Config
                             'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amount, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_line, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
 
@@ -1316,11 +1343,10 @@ class Ri_setup_treaty_model extends MY_Model
                             'P.code as portfolio_code, P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np, ' .
                             'PP.code as protfolio_parent_code, PP.name_en as portfolio_parent_name_en, PP.name_np as portfolio_parent_name_np'
                             )
-                        ->from(self::$table_treaty_portfolios . ' AS TP')
+                        ->from($this->table_name . ' AS T')
+                        ->join(self::$table_treaty_portfolios . ' TP', 'T.id = TP.treaty_id' )
                         ->join('master_portfolio P', 'P.id = TP.portfolio_id')
-                        ->join('master_portfolio PP', 'P.parent_id = PP.id', 'left')
-                        ->where('TP.treaty_id', $id)
-                        ->get()->result();
+                        ->join('master_portfolio PP', 'P.parent_id = PP.id', 'left');
     }
 
     // --------------------------------------------------------------------
