@@ -73,7 +73,7 @@ class Customers extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('ac_parties', 'explore.ac_party') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('customers', 'explore.ac_party') )
 		{
 			$this->dx_auth->deny_access();
 		}
