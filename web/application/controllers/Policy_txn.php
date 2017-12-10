@@ -531,7 +531,7 @@ class Policy_txn extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('policy_txn', 'edit.transaction') )
+		if( !$this->dx_auth->is_authorized('policy_txn', 'edit.draft.transaction') )
 		{
 			$this->dx_auth->deny_access();
 		}
