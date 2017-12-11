@@ -170,6 +170,7 @@ class Risk_model extends MY_Model
             $list = $this->db->select('id, name, type, agent_commission')
                             ->from($this->table_name)
                             ->where_in('id', $ids)
+                            ->order_by('type', 'ASC')
                             ->get()->result();
 
             $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);

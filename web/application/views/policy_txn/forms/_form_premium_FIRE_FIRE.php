@@ -263,7 +263,7 @@ $premium_computation_table_arr  = json_decode($txn_record->premium_computation_t
                                 if($premium_computation_table_arr)
                                 {
                                     // Riskwise Data
-                                    $rate        = $premium_computation_table_arr['manual']['rate'][$risk_id];
+                                    $rate        = $premium_computation_table_arr['manual']['rate'][$risk_id] ?? [];
                                     $nwl_apply   = $premium_computation_table_arr['manual']['nwl_apply'][$risk_id] ?? [];
                                     $ffa_apply   = $premium_computation_table_arr['manual']['ffa_apply'][$risk_id] ?? [];
                                     $sdd_apply   = $premium_computation_table_arr['manual']['sdd_apply'][$risk_id] ?? [];
@@ -271,7 +271,7 @@ $premium_computation_table_arr  = json_decode($txn_record->premium_computation_t
                                     // echo '<pre>'; print_r($sdd_apply); echo '</pre>';
 
                                     // Apply to each element (except first one)
-                                    $formatted_premium_elements[1]['_default'] = $rate[$i];
+                                    $formatted_premium_elements[1]['_default'] = $rate[$i] ?? '';
                                     $formatted_premium_elements[2]['_default'] = $nwl_apply[$i] ?? '';
                                     $formatted_premium_elements[3]['_default'] = $ffa_apply[$i] ?? '';
                                     $formatted_premium_elements[4]['_default'] = $sdd_apply[$i] ?? '';
