@@ -19,7 +19,7 @@ class Ri_setup_treaty_model extends MY_Model
      * Other table Fillables
      */
     // Tax and Commission Tables
-    protected static $tnc_fillables = ['qs_comm_ri_quota', 'qs_comm_ri_surplus_1', 'qs_comm_ri_surplus_2', 'qs_comm_ri_surplus_3', 'qs_tax_ri_quota', 'qs_tax_ri_surplus_1', 'qs_tax_ri_surplus_2', 'qs_tax_ri_surplus_3', 'qs_comm_ib_quota', 'qs_comm_ib_surplus_1', 'qs_comm_ib_surplus_2', 'qs_comm_ib_surplus_3', 'qs_piop_quota', 'qs_piop_surplus_1', 'qs_piop_surplus_2', 'qs_piop_surplus_3', 'qs_piol_quota', 'qs_piol_surplus_1', 'qs_piol_surplus_2', 'qs_piol_surplus_3', 'qs_pio_ib_cp_quota', 'qs_pio_ib_cp_surplus_1', 'qs_pio_ib_cp_surplus_2', 'qs_pio_ib_cp_surplus_3', 'qs_profit_comm_quota', 'qs_profit_comm_surplus_1', 'qs_profit_comm_surplus_2', 'qs_profit_comm_surplus_3', 'flag_qs_comm_scale_quota', 'flag_qs_comm_scale_surplus_1', 'flag_qs_comm_scale_surplus_2', 'flag_qs_comm_scale_surplus_3', 'eol_min_n_deposit_amt_l1', 'eol_min_n_deposit_amt_l2', 'eol_min_n_deposit_amt_l3', 'eol_min_n_deposit_amt_l4', 'eol_premium_mode_l1', 'eol_premium_mode_l2', 'eol_premium_mode_l3', 'eol_premium_mode_l4', 'eol_min_rate_l1', 'eol_min_rate_l2', 'eol_min_rate_l3', 'eol_min_rate_l4', 'eol_max_rate_l1', 'eol_max_rate_l2', 'eol_max_rate_l3', 'eol_max_rate_l4', 'eol_fixed_rate_l1', 'eol_fixed_rate_l2', 'eol_fixed_rate_l3', 'eol_fixed_rate_l4', 'eol_loading_factor_l1', 'eol_loading_factor_l2', 'eol_loading_factor_l3', 'eol_loading_factor_l4', 'eol_tax_ri_l1', 'eol_tax_ri_l2', 'eol_tax_ri_l3', 'eol_tax_ri_l4', 'eol_comm_ib_l1', 'eol_comm_ib_l2', 'eol_comm_ib_l3', 'eol_comm_ib_l4', 'flag_eol_rr_l1', 'flag_eol_rr_l2', 'flag_eol_rr_l3', 'flag_eol_rr_l4'];
+    protected static $tnc_fillables = ['qs_comm_ri_quota', 'qs_comm_ri_surplus_1', 'qs_comm_ri_surplus_2', 'qs_comm_ri_surplus_3', 'qs_tax_ri_quota', 'qs_tax_ri_surplus_1', 'qs_tax_ri_surplus_2', 'qs_tax_ri_surplus_3', 'qs_tax_ib_quota', 'qs_tax_ib_surplus_1', 'qs_tax_ib_surplus_2', 'qs_tax_ib_surplus_3', 'flag_qs_comm_scale_quota', 'flag_qs_comm_scale_surplus_1', 'flag_qs_comm_scale_surplus_2', 'flag_qs_comm_scale_surplus_3', 'eol_min_n_deposit_amt_l1', 'eol_min_n_deposit_amt_l2', 'eol_min_n_deposit_amt_l3', 'eol_min_n_deposit_amt_l4', 'eol_premium_mode_l1', 'eol_premium_mode_l2', 'eol_premium_mode_l3', 'eol_premium_mode_l4', 'eol_min_rate_l1', 'eol_min_rate_l2', 'eol_min_rate_l3', 'eol_min_rate_l4', 'eol_max_rate_l1', 'eol_max_rate_l2', 'eol_max_rate_l3', 'eol_max_rate_l4', 'eol_fixed_rate_l1', 'eol_fixed_rate_l2', 'eol_fixed_rate_l3', 'eol_fixed_rate_l4', 'eol_loading_factor_l1', 'eol_loading_factor_l2', 'eol_loading_factor_l3', 'eol_loading_factor_l4', 'eol_tax_ri_l1', 'eol_tax_ri_l2', 'eol_tax_ri_l3', 'eol_tax_ri_l4', 'eol_comm_ib_l1', 'eol_comm_ib_l2', 'eol_comm_ib_l3', 'eol_comm_ib_l4', 'flag_eol_rr_l1', 'flag_eol_rr_l2', 'flag_eol_rr_l3', 'flag_eol_rr_l4'];
 
     protected $set_created = true;
     protected $set_modified = true;
@@ -614,38 +614,14 @@ class Ri_setup_treaty_model extends MY_Model
                     '_type'     => 'text',
                     '_required' => true
                 ],
-                'qs_comm_ib'    => [
-                    'label' => 'Insurance Board Commission(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-                    '_type'     => 'text',
-                    '_required' => true
-                ],
-                'qs_piop'    => [
-                    'label' => 'Portfolio In & Out Premium(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-                    '_type'     => 'text',
-                    '_required' => true
-                ],
-                'qs_piol'    => [
-                    'label' => 'Portfolio In & Out Loss(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-                    '_type'     => 'text',
-                    '_required' => true
-                ],
-                'qs_pio_ib_cp'    => [
-                    'label' => 'Portfolio In & Out IB Claim Provision(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-                    '_type'     => 'text',
-                    '_required' => true
-                ],
-                'qs_profit_comm'    => [
-                    'label' => 'Profit Commission(%)',
+                'qs_tax_ib'    => [
+                    'label' => 'IB Tax(%)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 'flag_qs_comm_scale' => [
-                    'label' => 'Apply Commission Scale',
+                    'label' => 'Apply Sliding Scale Commission',
                     'rules' => 'trim|required|integer|exact_length[1]|in_list[0,1]',
                     '_type'     => 'dropdown',
                     '_data'     => IQB_BLANK_SELECT + [0 => 'No', 1 => 'Yes'],
@@ -1277,6 +1253,26 @@ class Ri_setup_treaty_model extends MY_Model
                 ->join('master_fiscal_yrs FY', 'FY.id = T.fiscal_yr_id')
                 ->join(self::$table_treaty_types . ' TT', 'TT.id = T.treaty_type_id')
                 ->where('T.id', $id)
+                ->get()->row();
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Details of a Treaty Tax and Commission
+     *
+     * @param integer $id
+     * @return object
+     */
+    public function get_treaty_tax_commission($treaty_id)
+    {
+        return $this->db->select(
+
+                        // Treaty Tax and Commission - all fields except treaty_id
+                        'TTNC.*'
+                        )
+                ->from(self::$table_treaty_tax_and_commission . ' AS TTNC')
+                ->where('TTNC.treaty_id', $treaty_id)
                 ->get()->row();
     }
 

@@ -22,12 +22,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		$tnc_col_prefix = [
 			'qs_comm_ri' 	=> 'RI Commission(%)',
 			'qs_tax_ri'		=> 'RI Tax (%)',
-			'qs_comm_ib' 	=> 'Insurance Board Commission(%)',
-			'qs_piop'		=> 'Portfolio In & Out Premium(%)',
-			'qs_piol'		=> 'Portfolio In & Out Loss (%)',
-			'qs_pio_ib_cp'			=> 'Portfolio In & Out IB Claim Provision (%)',
-			'qs_profit_comm' 		=> 'Profit Commission (%)',
-			'flag_qs_comm_scale' 	=> ['label' => 'Apply Commission Scale?', 'callback' => 'yes_no_text']
+			'qs_tax_ib' 	=> 'IB Tax(%)',
+			'flag_qs_comm_scale' 	=> ['label' => 'Apply Sliding Commission Scale?', 'callback' => 'yes_no_text']
 		];
 
 		$tnc_col_postfix = ['quota','surplus_1', 'surplus_2', 'surplus_3'];
