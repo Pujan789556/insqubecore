@@ -127,6 +127,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * FIRE - HOUSEHOLDER
+         * -------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        {
+            $snippet = _OBJ_FIRE_HHP_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
@@ -392,6 +401,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
         {
             $snippet = _OBJ_FIRE_FIRE_select_text($record);
+        }
+
+        /**
+         * FIRE - HOUSEHOLDER
+         * -------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        {
+            $snippet = _OBJ_FIRE_HHP_select_text($record);
         }
 
         /**
@@ -662,6 +680,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * FIRE - HOUSEHOLDER
+         * -------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        {
+            $v_rules = _OBJ_FIRE_HHP_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
@@ -928,6 +955,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         }
 
         /**
+         * FIRE - HOUSEHOLDER
+         * -------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_fire_hhp';
+        }
+
+        /**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
@@ -1181,10 +1217,6 @@ if ( ! function_exists('_OBJ_NA_policy_package_dropdown'))
 			IQB_POLICY_PACKAGE_NOT_APPLICABLE  	=> 'Not Applicable'
 		];
 
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
 		return $dropdown;
 	}
 }
@@ -1220,6 +1252,14 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
              */
             case IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID:
                 $method = '_OBJ_FIRE_FIRE_pre_save_tasks';
+                break;
+
+            /**
+             * FIRE - HOUSEHOLDER
+             * -------------------
+             */
+            case IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID:
+                $method = '_OBJ_FIRE_HHP_pre_save_tasks';
                 break;
 
 			/**
@@ -1385,6 +1425,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
         {
             $amt_sum_insured = _OBJ_FIRE_FIRE_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * FIRE - HOUSEHOLDER
+         * -------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        {
+            $amt_sum_insured = _OBJ_FIRE_HHP_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

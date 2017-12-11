@@ -4,11 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy: Details - Policy Premium Overview Card - FIRE
 */
 $cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn_record->cost_calculation_table) : NULL;
-$property_table = NULL;
 $risk_table     = NULL;
 if($cost_calculation_table)
 {
-    $property_table = $cost_calculation_table->property_table;
     $risk_table     = $cost_calculation_table->risk_table;
 }
 ?>

@@ -270,7 +270,7 @@ $('#_portfolio-id').on('change', function(e){
 
             // Update policy package options
             if(r.status == 'success' && typeof r.ppo !== 'undefined'){
-                $('#_policy-package-id').append($('<option>', {value: '',text : 'Select...'}));
+                r.blank ? $('#_policy-package-id').append($('<option>', {value: '',text : 'Select...'})) : '';
                 $.each(r.ppo, function(key, value) {
 
                     $('#_policy-package-id').append($('<option>', {

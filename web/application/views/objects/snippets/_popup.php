@@ -71,6 +71,15 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
     $this->load->view('objects/snippets/_popup_fire_fire', $data);
 }
 
+/**
+ * FIRE - HOUSEHOLDER
+ * -------------------
+ */
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+{
+    $this->load->view('objects/snippets/_popup_fire_hhp', $data);
+}
+
 
 /**
  * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE

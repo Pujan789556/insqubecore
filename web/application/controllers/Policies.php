@@ -875,7 +875,8 @@ class Policies extends MY_Controller
 			{
 				$this->template->json([
 					'status' => 'success',
-					'ppo' => $ppo
+					'ppo' => $ppo,
+					'blank' => count($ppo) !== 1 // Show '' => 'Select...' option or not
 				]);
 			}
 

@@ -1,10 +1,10 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Schedule Print : FIRE
+ * Schedule Print : FIRE - HOUSEHOLDER
  */
 $this->load->helper('ph_fire_fire');
 $object_attributes      = json_decode($record->object_attributes);
-$schedule_table_title   = 'अग्नि बीमालेखको तालिका (सेड्युल)';
+$schedule_table_title   = 'गार्हस्थ बीमालेख';
 ?>
 
 <!DOCTYPE html>
@@ -159,34 +159,34 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                 <tr>
                     <td colspan="2">
                         <strong>बीमालेखले रक्षावरण गरेको सम्पत्तिको विवरण</strong>
-                        <?php if($object_attributes->item_attached === 'N'): ?>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <td>सम्पत्ति</td>
-                                        <td align="right">बीमांक (रु)</td>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <td>सम्पत्ति</td>
+                                    <td>विवरण</td>
+                                    <td align="right">बीमांक (रु)</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $items      = $object_attributes->items ?? NULL;
+                                $item_count = count( $items->category ?? [] );
+                                if($item_count):
+                                    for ($i=0; $i < $item_count; $i++):?>
+                                        <tr>
+                                            <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
+                                            <td><?php echo nl2br($items->description[$i]) ?></td>
+                                            <td align="right"><?php echo $items->sum_insured[$i]; ?></td>
+                                        </tr>
                                     <?php
-                                    $items      = $object_attributes->items ?? NULL;
-                                    $item_count = count( $items->category ?? [] );
-                                    if($item_count):
-                                        for ($i=0; $i < $item_count; $i++):?>
-                                            <tr>
-                                                <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
-                                                <td align="right"><?php echo $items->sum_insured[$i]; ?></td>
-                                            </tr>
-                                        <?php
-                                        endfor;
-                                    endif;?>
-                                    <tr>
-                                        <td colspan="2" align="right">जम्मा बीमांक (रु)</td>
-                                        <td align="right"><?php echo  $record->object_amt_sum_insured;?></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        <?php endif;?>
+                                    endfor;
+                                endif;?>
+                                <tr>
+                                    <td colspan="2" align="right">जम्मा बीमांक (रु)</td>
+                                    <td align="right"><?php echo  $record->object_amt_sum_insured;?></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </td>
                 </tr>
 

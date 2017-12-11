@@ -551,36 +551,6 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_compute_sum_insured_amount'))
 	}
 }
 
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_FIRE_FIRE_compute_premium_per_risk_per_item'))
-{
-	/**
-	 * Compute Single Risk Premium per Item
-	 *
-	 * @param decimal 	$item_sum_insured Sum Inusred Amount of a Fire Item
-	 * @param decimal 	$rate
-	 * @return chars 	$rate_base PT|RT [Per Thousand | Percent]
-	 */
-	function _FIRE_FIRE_compute_premium_per_risk_per_item( $item_sum_insured, $rate, $rate_base )
-	{
-		$premium = 0.00;
-		/**
-		 * Rate Per Thousand of Sum Insured Amount
-		 */
-		if($rate_base == 'PT')
-		{
-			$premium = ( $item_sum_insured / 1000.00 ) * $rate;
-		}
-		else
-		{
-			$premium = ( $item_sum_insured * $rate ) / 100.00;
-		}
-
-		return $premium;
-	}
-}
-
 
 // ------------------------------------------------------------------------
 // POLICY TRANSACTION HELPER FUNCTIONS
@@ -1260,11 +1230,18 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 						[
 							'label' => "GROSS PREMIUM",
 							'value' => $GROSS_PREMIUM
-						],
-						[
+						]
+					];
+
+					if($DIRECT_DISCOUNT)
+					{
+						$summary_table[] = [
 							'label' => "DIRECT DISCOUNT ({$pfs_record->direct_discount}%)",
 							'value' => $DIRECT_DISCOUNT
-						],
+						];
+					}
+
+					$summary_table = array_merge($summary_table, [
 						[
 							'label' => "NWL - Fire Only ({$NWL_RATE}%)",
 							'value' => $NWL_AMOUNT
@@ -1279,13 +1256,13 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 						],
 						[
 							'label' => "POOL PREMIUM",
-							'value' => $SDD_AMOUNT
+							'value' => $POOL_PREMIUM
 						],
 						[
 							'label' => "NET PREMIUM",
 							'value' => $NET_PREMIUM
 						]
-					];
+					]);
 
 
 

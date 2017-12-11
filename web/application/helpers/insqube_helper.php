@@ -794,6 +794,15 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * FIRE - HOUSEHOLDER
+         * -------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        {
+            $CI->load->helper('ph_fire_hhp');
+        }
+
+        /**
          * MARINE
          * -----
          * Marine Portfolio Helper Functions

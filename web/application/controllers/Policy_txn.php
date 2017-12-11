@@ -673,6 +673,15 @@ class Policy_txn extends MY_Controller
 		            $done = __save_premium_FIRE_FIRE( $policy_record, $txn_record );
 		        }
 
+		        /**
+		         * FIRE - HOUSEHOLDER
+		         * -------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+		        {
+		            $done = __save_premium_FIRE_HHP( $policy_record, $txn_record );
+		        }
+
 				/**
 		         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
 		         * --------------------------------------------------
@@ -1042,6 +1051,15 @@ class Policy_txn extends MY_Controller
 	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
 	        {
 	            $goodies = _TXN_FIRE_FIRE_premium_goodies($policy_record, $policy_object, $portfolio_risks);
+	        }
+
+	        /**
+	         * FIRE - HOUSEHOLDER
+	         * -------------------
+	         */
+	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+	        {
+	            $goodies = _TXN_FIRE_HHP_premium_goodies($policy_record, $policy_object, $portfolio_risks);
 	        }
 
 			/**
