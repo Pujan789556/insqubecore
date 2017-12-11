@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : FIRE Policy Premium
+ * Premium Form : FIRE - FIRE
  */
 $object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
 $premium_computation_table      = json_decode($txn_record->premium_computation_table ?? NULL);
@@ -62,8 +62,8 @@ $premium_computation_table_arr  = json_decode($txn_record->premium_computation_t
                             <tbody>
                                 <?php for($i=0; $i < $item_count; $i++ ): ?>
                                     <tr>
-                                        <td><?php echo _OBJ_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
-                                        <td><?php echo _OBJ_FIRE_item_ownership_dropdown(FALSE)[ $items->ownership[$i] ]; ?></td>
+                                        <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
+                                        <td><?php echo _OBJ_FIRE_FIRE_item_ownership_dropdown(FALSE)[ $items->ownership[$i] ]; ?></td>
                                         <td>Rs. <?php echo $items->sum_insured[$i]; ?></td>
                                     </tr>
                                 <?php endfor; ?>
@@ -102,7 +102,7 @@ $premium_computation_table_arr  = json_decode($txn_record->premium_computation_t
                          * Additional Charge/Discount Rates
                          */
                         $premium_file_additional_rates = $form_elements['premium_file_additional_rates'];
-                        $form_section_record = $premium_computation_table->file;
+                        $form_section_record = $premium_computation_table->file ?? NULL;
 
                         $this->load->view('templates/_common/_form_components_horz', [
                             'form_elements' => $premium_file_additional_rates,
@@ -205,7 +205,7 @@ $premium_computation_table_arr  = json_decode($txn_record->premium_computation_t
                 /**
                  * Additional Charge/Discount Rates
                  */
-                $form_section_record = $premium_computation_table->manual;
+                $form_section_record = $premium_computation_table->manual ?? NULL;
                 $premium_manual_additional_rates = $form_elements['premium_manual_additional_rates'];
                 $this->load->view('templates/_common/_form_components_horz', [
                     'form_elements' => $premium_manual_additional_rates,
@@ -219,14 +219,14 @@ $premium_computation_table_arr  = json_decode($txn_record->premium_computation_t
         <?php for($i=0; $i < $item_count; $i++ ): ?>
             <div class="box box-solid box-bordered">
                 <div class="box-header with-border">
-                    <h4 class="box-title"><?php echo _OBJ_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?> <em>( Sum Insured Rs. <?php echo $items->sum_insured[$i]; ?>)</em> - Premium Table</h4>
+                    <h4 class="box-title"><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?> <em>( Sum Insured Rs. <?php echo $items->sum_insured[$i]; ?>)</em> - Premium Table</h4>
                 </div>
                 <div class="box-body form-inline" style="overflow-x: scroll;">
                     <table class="table table-responsive table-condensed table-bordered">
                         <thead>
                             <tr>
                                 <th>Risk</th>
-                                <th>Rate</th>
+                                <th>Rate (Rs. Per Thousand)</th>
                                 <th>Apply NWL?</th>
                                 <th>Apply FFA?</th>
                                 <th>Apply SDD?</th>

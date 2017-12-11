@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // ------------------------------------------------------------------------
 
 
-if ( ! function_exists('_OBJ_FIRE_row_snippet'))
+if ( ! function_exists('_OBJ_FIRE_FIRE_row_snippet'))
 {
 	/**
 	 * Get Policy Object - Fire - Row Snippet
@@ -29,16 +29,16 @@ if ( ! function_exists('_OBJ_FIRE_row_snippet'))
 	 * @param bool $_flag__show_widget_row 	is this Widget Row? or Regular List Row?
 	 * @return	html
 	 */
-	function _OBJ_FIRE_row_snippet( $record, $_flag__show_widget_row = FALSE )
+	function _OBJ_FIRE_FIRE_row_snippet( $record, $_flag__show_widget_row = FALSE )
 	{
 		$CI =& get_instance();
-		return $CI->load->view('objects/snippets/_row_fire', ['record' => $record, '_flag__show_widget_row' => $_flag__show_widget_row], TRUE);
+		return $CI->load->view('objects/snippets/_row_fire_fire', ['record' => $record, '_flag__show_widget_row' => $_flag__show_widget_row], TRUE);
 	}
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_FIRE_select_text'))
+if ( ! function_exists('_OBJ_FIRE_FIRE_select_text'))
 {
 	/**
 	 * Get Policy Object - FIRE - Selection Text or Summary Text
@@ -49,16 +49,20 @@ if ( ! function_exists('_OBJ_FIRE_select_text'))
 	 * @param bool $record 	Object Record
 	 * @return	html
 	 */
-	function _OBJ_FIRE_select_text( $record )
+	function _OBJ_FIRE_FIRE_select_text( $record )
 	{
-		$snippet = '';
+		$snippet = [
+			'Sum Insured(NRS): ' . '<strong>' . $record->amt_sum_insured . '</strong>'
+		];
+		$snippet = implode('<br/>', $snippet);
+
 		return $snippet;
 	}
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_FIRE_validation_rules'))
+if ( ! function_exists('_OBJ_FIRE_FIRE_validation_rules'))
 {
 	/**
 	 * Get Policy Object - FIRE - Validation Rules
@@ -69,12 +73,12 @@ if ( ! function_exists('_OBJ_FIRE_validation_rules'))
 	 * @param bool $formatted  Should Return the Formatted Validation Rule ( if multi senction rules )
 	 * @return	bool
 	 */
-	function _OBJ_FIRE_validation_rules( $portfolio_id, $formatted = FALSE )
+	function _OBJ_FIRE_FIRE_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
 		$CI =& get_instance();
 
 
-		$conscat_dropdown 	= _OBJ_FIRE_item_building_category_dropdown( FALSE );
+		$conscat_dropdown 	= _OBJ_FIRE_FIRE_item_building_category_dropdown( FALSE );
 		$district_dropdown 	= district_dropdown( FALSE );
 
 		$v_rules = [
@@ -120,7 +124,7 @@ if ( ! function_exists('_OBJ_FIRE_validation_rules'))
 			/**
 			 * Item List
 			 */
-			'items_manual' => _OBJ_FIRE_manual_item_v_rules(),
+			'items_manual' => _OBJ_FIRE_FIRE_manual_item_v_rules(),
 
 		    /**
 		     * Land Owner Details (Building)
@@ -218,7 +222,7 @@ if ( ! function_exists('_OBJ_FIRE_validation_rules'))
 			        'field' => 'object[land_building][storey_no][]',
 			        '_key' => 'storey_no',
 			        'label' => 'No. of Stories',
-			        'rules' => 'trim|integer|max_length[4]',
+			        'rules' => 'trim|numeric|max_length[5]',
 			        '_type'     => 'text',
 			        '_show_label' 	=> false,
 			        '_required' => true
@@ -256,7 +260,7 @@ if ( ! function_exists('_OBJ_FIRE_validation_rules'))
 			if( $CI->input->post() && $CI->input->post('object[item_attached]') == 'Y' )
 			{
 				// Set validation rules as non-required
-				$v_rules['items_manual'] = _OBJ_FIRE_manual_item_v_rules(TRUE);
+				$v_rules['items_manual'] = _OBJ_FIRE_FIRE_manual_item_v_rules(TRUE);
 
 				// Set total sum insured field as compulsory
 				$v_rules['items_file'][0]['rules'] = 'trim|required|prep_decimal|decimal|max_length[20]';
@@ -278,7 +282,7 @@ if ( ! function_exists('_OBJ_FIRE_validation_rules'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_FIRE_manual_item_v_rules'))
+if ( ! function_exists('_OBJ_FIRE_FIRE_manual_item_v_rules'))
 {
 	/**
 	 * Get manual item validation rules
@@ -288,10 +292,10 @@ if ( ! function_exists('_OBJ_FIRE_manual_item_v_rules'))
 	 * @param bool $file_uploaded 	Whether file is uploaded
 	 * @return	array
 	 */
-	function _OBJ_FIRE_manual_item_v_rules( $file_uploaded = false )
+	function _OBJ_FIRE_FIRE_manual_item_v_rules( $file_uploaded = false )
 	{
-		$category_dropdown 	= _OBJ_FIRE_item_category_dropdown( FALSE );
-		$ownership_dropdown = _OBJ_FIRE_item_ownership_dropdown( FALSE );
+		$category_dropdown 	= _OBJ_FIRE_FIRE_item_category_dropdown( FALSE );
+		$ownership_dropdown = _OBJ_FIRE_FIRE_item_ownership_dropdown( FALSE );
 		$required = $file_uploaded ? '' : 'required|';
 
 		$rules = [
@@ -342,7 +346,7 @@ if ( ! function_exists('_OBJ_FIRE_manual_item_v_rules'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_FIRE_item_building_category_dropdown'))
+if ( ! function_exists('_OBJ_FIRE_FIRE_item_building_category_dropdown'))
 {
 	/**
 	 * Get Policy Object - FIRE - Object's Item Building Construction category dropdown
@@ -350,7 +354,7 @@ if ( ! function_exists('_OBJ_FIRE_item_building_category_dropdown'))
 	 * @param bool $flag_blank_select 	Whether to append blank select
 	 * @return	array
 	 */
-	function _OBJ_FIRE_item_building_category_dropdown( $flag_blank_select = true )
+	function _OBJ_FIRE_FIRE_item_building_category_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 			'1' => 'First',
@@ -370,7 +374,7 @@ if ( ! function_exists('_OBJ_FIRE_item_building_category_dropdown'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_FIRE_item_category_dropdown'))
+if ( ! function_exists('_OBJ_FIRE_FIRE_item_category_dropdown'))
 {
 	/**
 	 * Get Policy Object - FIRE - Object's Item category dropdown
@@ -378,7 +382,7 @@ if ( ! function_exists('_OBJ_FIRE_item_category_dropdown'))
 	 * @param bool $flag_blank_select 	Whether to append blank select
 	 * @return	array
 	 */
-	function _OBJ_FIRE_item_category_dropdown( $flag_blank_select = true )
+	function _OBJ_FIRE_FIRE_item_category_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 			'BWALL' => 'Boundary Wall',
@@ -398,7 +402,7 @@ if ( ! function_exists('_OBJ_FIRE_item_category_dropdown'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_FIRE_item_ownership_dropdown'))
+if ( ! function_exists('_OBJ_FIRE_FIRE_item_ownership_dropdown'))
 {
 	/**
 	 * Get Policy Object - FIRE - Object's Item ownership dropdown
@@ -406,7 +410,7 @@ if ( ! function_exists('_OBJ_FIRE_item_ownership_dropdown'))
 	 * @param bool $flag_blank_select 	Whether to append blank select
 	 * @return	array
 	 */
-	function _OBJ_FIRE_item_ownership_dropdown( $flag_blank_select = true )
+	function _OBJ_FIRE_FIRE_item_ownership_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 			'O' => 'Owned',
@@ -423,7 +427,7 @@ if ( ! function_exists('_OBJ_FIRE_item_ownership_dropdown'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_FIRE_pre_save_tasks'))
+if ( ! function_exists('_OBJ_FIRE_FIRE_pre_save_tasks'))
 {
 	/**
 	 * Object Pre Save Tasks
@@ -437,7 +441,7 @@ if ( ! function_exists('_OBJ_FIRE_pre_save_tasks'))
 	 * @param object $record 	Object Record (for edit mode)
 	 * @return array
 	 */
-	function _OBJ_FIRE_pre_save_tasks( array $data, $record )
+	function _OBJ_FIRE_FIRE_pre_save_tasks( array $data, $record )
 	{
 		$CI =& get_instance();
 
@@ -497,7 +501,7 @@ if ( ! function_exists('_OBJ_FIRE_pre_save_tasks'))
 	        	/**
 	        	 * You must upload a file in "Add" mode if "item_attached" is set.
 	        	 */
-	        	throw new Exception("Exception [Helper: ph_fire_helper][Method: _OBJ_FIRE_pre_save_tasks()]: " . $message );
+	        	throw new Exception("Exception [Helper: ph_FIRE_FIRE_helper][Method: _OBJ_FIRE_FIRE_pre_save_tasks()]: " . $message );
 	        }
 		}
 
@@ -507,7 +511,7 @@ if ( ! function_exists('_OBJ_FIRE_pre_save_tasks'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_FIRE_compute_sum_insured_amount'))
+if ( ! function_exists('_OBJ_FIRE_FIRE_compute_sum_insured_amount'))
 {
 	/**
 	 * Compute Sum Insured Amount of Policy Object - FIRE Portfolio
@@ -518,7 +522,7 @@ if ( ! function_exists('_OBJ_FIRE_compute_sum_insured_amount'))
 	 * @param array $data 	Object Data
 	 * @return float
 	 */
-	function _OBJ_FIRE_compute_sum_insured_amount( $portfolio_id, $data )
+	function _OBJ_FIRE_FIRE_compute_sum_insured_amount( $portfolio_id, $data )
 	{
 		$CI =& get_instance();
 
@@ -549,7 +553,7 @@ if ( ! function_exists('_OBJ_FIRE_compute_sum_insured_amount'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_FIRE_compute_premium_per_risk_per_item'))
+if ( ! function_exists('_FIRE_FIRE_compute_premium_per_risk_per_item'))
 {
 	/**
 	 * Compute Single Risk Premium per Item
@@ -558,7 +562,7 @@ if ( ! function_exists('_FIRE_compute_premium_per_risk_per_item'))
 	 * @param decimal 	$rate
 	 * @return chars 	$rate_base PT|RT [Per Thousand | Percent]
 	 */
-	function _FIRE_compute_premium_per_risk_per_item( $item_sum_insured, $rate, $rate_base )
+	function _FIRE_FIRE_compute_premium_per_risk_per_item( $item_sum_insured, $rate, $rate_base )
 	{
 		$premium = 0.00;
 		/**
@@ -582,7 +586,7 @@ if ( ! function_exists('_FIRE_compute_premium_per_risk_per_item'))
 // POLICY TRANSACTION HELPER FUNCTIONS
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
+if ( ! function_exists('_TXN_FIRE_FIRE_premium_validation_rules'))
 {
 	/**
 	 * Get Policy TXN Validation Rules for Premium Add/Update for FIRE Portfolio
@@ -595,7 +599,7 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 	 * @param string $return 			Return all rules or policy package specific
 	 * @return array
 	 */
-	function _TXN_FIRE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, $for_form_processing = FALSE )
+	function _TXN_FIRE_FIRE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, $for_form_processing = FALSE )
 	{
 		$CI =& get_instance();
 
@@ -645,11 +649,11 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 
 		if( $object_attributes->item_attached === 'Y')
 		{
-			$rules = _TXN_FIRE_premium_v_rules_file($basic_rules, $portfolio_risks, $for_form_processing );
+			$rules = _TXN_FIRE_FIRE_premium_v_rules_file($basic_rules, $portfolio_risks, $for_form_processing );
 		}
 		else
 		{
-			$rules = _TXN_FIRE_premium_v_rules_manual($basic_rules, $policy_object, $portfolio_risks, $for_form_processing );
+			$rules = _TXN_FIRE_FIRE_premium_v_rules_manual($basic_rules, $policy_object, $portfolio_risks, $for_form_processing );
 		}
 
 		return $rules;
@@ -658,7 +662,7 @@ if ( ! function_exists('_TXN_FIRE_premium_validation_rules'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_TXN_FIRE_premium_v_rules_file'))
+if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_file'))
 {
 	/**
 	 * Premium Validation Rules for File Upload
@@ -668,7 +672,7 @@ if ( ! function_exists('_TXN_FIRE_premium_v_rules_file'))
 	 * @param bool $for_processing		For Form Processing
 	 * @return array
 	 */
-	function _TXN_FIRE_premium_v_rules_file($basic_rules, $portfolio_risks, $for_form_processing = FALSE )
+	function _TXN_FIRE_FIRE_premium_v_rules_file($basic_rules, $portfolio_risks, $for_form_processing = FALSE )
 	{
 		$v_rules = [
 
@@ -809,7 +813,7 @@ if ( ! function_exists('_TXN_FIRE_premium_v_rules_file'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_TXN_FIRE_premium_v_rules_manual'))
+if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 {
 	/**
 	 * Premium Validation Rules for Manual Item Entry
@@ -820,7 +824,7 @@ if ( ! function_exists('_TXN_FIRE_premium_v_rules_manual'))
 	 * @param bool $for_processing		For Form Processing
 	 * @return array
 	 */
-	function _TXN_FIRE_premium_v_rules_manual($basic_rules, $policy_object, $portfolio_risks, $for_form_processing = FALSE )
+	function _TXN_FIRE_FIRE_premium_v_rules_manual($basic_rules, $policy_object, $portfolio_risks, $for_form_processing = FALSE )
 	{
 
 		$v_rules = [
@@ -962,7 +966,7 @@ if ( ! function_exists('_TXN_FIRE_premium_v_rules_manual'))
 
 // --------------------------------------------------------------------
 
-if ( ! function_exists('_TXN_FIRE_premium_goodies'))
+if ( ! function_exists('_TXN_FIRE_FIRE_premium_goodies'))
 {
 	/**
 	 * Get Policy Policy Transaction Goodies
@@ -976,7 +980,7 @@ if ( ! function_exists('_TXN_FIRE_premium_goodies'))
 	 *
 	 * @return	array
 	 */
-	function _TXN_FIRE_premium_goodies($policy_record, $policy_object, $portfolio_risks)
+	function _TXN_FIRE_FIRE_premium_goodies($policy_record, $policy_object, $portfolio_risks)
 	{
 		$CI =& get_instance();
 
@@ -984,7 +988,7 @@ if ( ! function_exists('_TXN_FIRE_premium_goodies'))
 		$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 
 		// Let's Get the Validation Rules
-		$validation_rules = _TXN_FIRE_premium_validation_rules( $policy_record, $pfs_record, $policy_object, $portfolio_risks );
+		$validation_rules = _TXN_FIRE_FIRE_premium_validation_rules( $policy_record, $pfs_record, $policy_object, $portfolio_risks );
 
 
 		// Return the goodies
@@ -998,7 +1002,7 @@ if ( ! function_exists('_TXN_FIRE_premium_goodies'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('__save_premium_FIRE'))
+if ( ! function_exists('__save_premium_FIRE_FIRE'))
 {
 	/**
 	 * Fire Portfolio : Save a Policy Transaction Record For Given Policy
@@ -1009,7 +1013,7 @@ if ( ! function_exists('__save_premium_FIRE'))
 	 * @param object $txn_record 	 	Policy Transaction Record
 	 * @return json
 	 */
-	function __save_premium_FIRE($policy_record, $txn_record)
+	function __save_premium_FIRE_FIRE($policy_record, $txn_record)
 	{
 		$CI =& get_instance();
 
@@ -1039,7 +1043,7 @@ if ( ! function_exists('__save_premium_FIRE'))
 			/**
 			 * Validation Rules for Form Processing
 			 */
-			$validation_rules = _TXN_FIRE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, TRUE );
+			$validation_rules = _TXN_FIRE_FIRE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, TRUE );
             $CI->form_validation->set_rules($validation_rules);
 
             // echo '<pre>';print_r($validation_rules);exit;
@@ -1143,11 +1147,13 @@ if ( ! function_exists('__save_premium_FIRE'))
 							$item_sum_insured 	= $items->sum_insured[$i];
 							foreach($portfolio_risks as $pr)
 							{
+								// Rate is Per Thousand of Sum Insured
 								$rate = floatval($premium_data['manual']['rate'][$pr->id][$i]);
+
 								// Compute only if rate is supplied
 								if($rate)
 								{
-									$premium 	= $item_sum_insured * $rate / 100.00;
+									$premium = $item_sum_insured * $rate / 1000.00;
 
 									// Assign to Pool or Base based on Risk Type
 									if( $pr->type == IQB_RISK_TYPE_BASIC )
@@ -1219,6 +1225,7 @@ if ( ! function_exists('__save_premium_FIRE'))
 					 * Prepare Transactional Data
 					 */
 					$txn_data = [
+						'amt_sum_insured' 		=> $policy_object->amt_sum_insured,
 						'amt_total_premium' 	=> $NET_PREMIUM,
 						'amt_pool_premium' 		=> $POOL_PREMIUM,
 						'amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
@@ -1340,7 +1347,7 @@ if ( ! function_exists('__save_premium_FIRE'))
 						for($i=0; $i < $item_count; $i++ )
 						{
 							$item_sum_insured 		= $items->sum_insured[$i];
-							$property_category 		= _OBJ_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ];
+							$property_category 		= _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ];
 							$single_property_row 	= [ $property_category, $items->sum_insured[$i] ];
 
 							$per_property_premium 		= 0.00;
@@ -1354,7 +1361,8 @@ if ( ! function_exists('__save_premium_FIRE'))
 								// Compute only if rate is supplied
 								if($rate)
 								{
-									$premium 	= $item_sum_insured * $rate / 100.00;
+									// Rate is Per Thousand
+									$premium = $item_sum_insured * $rate / 1000.00;
 
 									// Assign to Pool or Base based on Risk Type
 									if( $pr->type == IQB_RISK_TYPE_BASIC )
@@ -1399,7 +1407,8 @@ if ( ! function_exists('__save_premium_FIRE'))
 								// Compute only if rate is supplied
 								if($rate)
 								{
-									$premium 	= $item_sum_insured * $rate / 100.00;
+									// Rate is Per Thousand
+									$premium = $item_sum_insured * $rate / 1000.00;
 
 									// Assign to Pool or Base based on Risk Type
 									if( $pr->type == IQB_RISK_TYPE_BASIC )
@@ -1442,8 +1451,9 @@ if ( ! function_exists('__save_premium_FIRE'))
 
 					$txn_data['cost_calculation_table'] = $cost_calculation_table;
 
-					return $CI->policy_txn_model->save($txn_record->id, $txn_data);
+					$done = $CI->policy_txn_model->save($txn_record->id, $txn_data);
 
+					return $done;
 
 					/**
 					 * @TODO

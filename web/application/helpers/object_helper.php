@@ -117,14 +117,14 @@ if ( ! function_exists('_OBJ_row_snippet'))
 			$snippet = _OBJ_MOTOR_row_snippet($record, $_flag__show_widget_row);
 		}
 
-		/**
-		 * FIRE
-		 * -----
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
-		{
-			$snippet = _OBJ_FIRE_row_snippet($record, $_flag__show_widget_row);
-		}
+        /**
+         * FIRE - FIRE
+         * -------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        {
+            $snippet = _OBJ_FIRE_FIRE_row_snippet($record, $_flag__show_widget_row);
+        }
 
         /**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
@@ -385,14 +385,14 @@ if ( ! function_exists('_OBJ_select_text'))
 			$snippet = _OBJ_MOTOR_select_text($record);
 		}
 
-		/**
-		 * FIRE
-		 * -----
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
-		{
-			$snippet = _OBJ_FIRE_select_text($record);
-		}
+        /**
+         * FIRE - FIRE
+         * -------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        {
+            $snippet = _OBJ_FIRE_FIRE_select_text($record);
+        }
 
         /**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
@@ -652,16 +652,14 @@ if ( ! function_exists('_OBJ_validation_rules'))
 			$v_rules = _OBJ_MOTOR_validation_rules( $portfolio_id, $formatted );
 		}
 
-
-		/**
-		 * FIRE
-		 * -----
-		 * For all type of FIRE portfolios, we have same validation rules
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
-		{
-			$v_rules = _OBJ_FIRE_validation_rules( $portfolio_id, $formatted );
-		}
+        /**
+         * FIRE - FIRE
+         * -------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        {
+            $v_rules = _OBJ_FIRE_FIRE_validation_rules( $portfolio_id, $formatted );
+        }
 
         /**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
@@ -920,15 +918,14 @@ if ( ! function_exists('_OBJ_attribute_form'))
 			$attribute_form = 'objects/forms/_form_object_motor';
 		}
 
-		/**
-		 * FIRE
-		 * -----
-		 * For all type of fire portfolios, we have same object form
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
-		{
-			$attribute_form = 'objects/forms/_form_object_fire';
-		}
+        /**
+         * FIRE - FIRE
+         * -------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_fire_fire';
+        }
 
         /**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
@@ -1218,14 +1215,11 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
 		switch ($portfolio_id)
 		{
             /**
-             * FIRE PORTFOLIOS
-             * ------------------------------
+             * FIRE - FIRE
+             * -------------
              */
-            case IQB_SUB_PORTFOLIO_FIRE_ELECTRICAL_EQUIPMENT_ID:
             case IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID:
-            case IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID:
-            case IQB_SUB_PORTFOLIO_FIRE_LOP_ID:
-                $method = '_OBJ_FIRE_pre_save_tasks';
+                $method = '_OBJ_FIRE_FIRE_pre_save_tasks';
                 break;
 
 			/**
@@ -1384,14 +1378,14 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 			$amt_sum_insured = _OBJ_MOTOR_compute_sum_insured_amount($portfolio_id, $data);
 		}
 
-		/**
-		 * FIRE
-		 * -----
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
-		{
-			$amt_sum_insured = _OBJ_FIRE_compute_sum_insured_amount($portfolio_id, $data);
-		}
+        /**
+         * FIRE - FIRE
+         * -------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        {
+            $amt_sum_insured = _OBJ_FIRE_FIRE_compute_sum_insured_amount($portfolio_id, $data);
+        }
 
         /**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE

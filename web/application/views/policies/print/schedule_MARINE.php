@@ -65,7 +65,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                     <td><strong>Date of Questionnaire:</strong> <?php echo $object_attributes->date_qn ?></td>
                 </tr>
                 <tr>
-                    <td colspan="2"><strong>Policy No.:</strong> <?php echo $record->code;?></td>
+                    <td colspan="2"><strong><?php echo policy_nr_title($record->status, 'en')?>:</strong> <?php echo $record->code;?></td>
 
                     <?php
                     /**

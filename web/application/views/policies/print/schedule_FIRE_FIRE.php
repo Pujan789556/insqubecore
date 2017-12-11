@@ -2,6 +2,7 @@
 /**
  * Schedule Print : FIRE
  */
+$this->load->helper('ph_fire_fire');
 $object_attributes      = json_decode($record->object_attributes);
 $schedule_table_title   = 'अग्नि बीमालेखको तालिका (सेड्युल)';
 ?>
@@ -53,35 +54,16 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
         <table class="table" width="100%">
             <thead><tr><td colspan="2" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
             <tbody>
-                <tr><td colspan="2">बीमालेख नं.: <?php echo $record->code;?></td></tr>
+                <tr><td colspan="2"><?php echo policy_nr_title($record->status)?>: <?php echo $record->code;?></td></tr>
                 <tr>
                     <td width="50%" class="no-padding">
                         <table class="table" width="100%">
                             <tr>
                                 <td>
-                                    <strong>बीमीतको विवरण</strong><br/>
-                                    नाम थर, ठेगाना:<br/>
+                                    <strong>बीमीतको विवरण (नाम थर, ठेगाना):</strong><br/>
                                     <?php
-                                    /**
-                                     * If Policy Object is Financed or on Loan, The financial Institute will be "Insured Party"
-                                     * and the customer will be "Account Party"
-                                     */
-                                    if($record->flag_on_credit === 'Y')
-                                    {
-                                        echo '<strong>INS.: ' . $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name) . '</strong><br/>';
-                                        echo '<br/>' . get_contact_widget($record->creditor_branch_contact, true, true) . '<br/>';
-
-                                        // Care of
-                                        echo '<strong>A/C.: ' . $this->security->xss_clean($record->customer_name) . '<br/></strong>';
-                                        echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
-
-                                        echo  $record->care_of ? '<br/>C/O.: ' . $this->security->xss_clean($record->care_of) : '';
-                                    }
-                                    else
-                                    {
-                                        echo $this->security->xss_clean($record->customer_name) . '<br/>';
-                                        echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
-                                    }
+                                    echo $this->security->xss_clean($record->customer_name) . '<br/>';
+                                    echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                                     ?>
                                 </td>
                             </tr>
@@ -93,8 +75,9 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                             <tr>
                                 <td>
                                     <strong>बीमा योग्य हित रहेको बैंक/वित्तीय संस्थाको विवरण</strong> <br/>
-                                    नाम: <br/>
-                                    ठेगाना:
+                                    <strong>नाम:</strong>
+                                    <?php echo implode(',', array_filter([$this->security->xss_clean($record->creditor_name), $this->security->xss_clean($record->creditor_branch_name)])); ?><br/>
+                                    <strong>ठेगाना:</strong> <?php echo get_contact_widget($record->creditor_branch_contact, true, true); ?>
                                 </td>
                             </tr>
                             <tr>
@@ -126,7 +109,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                             </tr>
 
                             <tr>
-                                <td>प्रस्तावकको नाम: <?php echo nl2br($this->security->xss_clean($record->proposer));?></td>
+                                <td>प्रस्तावकको नाम: <?php echo $record->proposer ? $this->security->xss_clean($record->proposer) : $this->security->xss_clean($record->customer_name);?></td>
                             </tr>
 
                             <tr>
@@ -176,29 +159,42 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                 <tr>
                     <td colspan="2">
                         <strong>बीमालेखले रक्षावरण गरेको सम्पत्तिको विवरण</strong>
-                        <?php
-                        $this->load->view('policy_txn/snippets/_schedule_cost_calculation_table_property_FIRE', ['txn_record' => $txn_record]);
-                        ?>
+                        <?php if($object_attributes->item_attached === 'N'): ?>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <td>सम्पत्ति</td>
+                                        <td align="right">बीमांक (रु)</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $items      = $object_attributes->items ?? NULL;
+                                    $item_count = count( $items->category ?? [] );
+                                    if($item_count):
+                                        for ($i=0; $i < $item_count; $i++):?>
+                                            <tr>
+                                                <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
+                                                <td align="right">Rs. <?php echo $items->sum_insured[$i]; ?></td>
+                                            </tr>
+                                        <?php
+                                        endfor;
+                                    endif;?>
+                                </tbody>
+                            </table>
+                        <?php endif;?>
                     </td>
                 </tr>
 
                 <tr>
-                    <td colspan="2">
-                        <strong>बीमाशुल्कको हिसाब</strong>: <br>
-                        <strong>संलग्न सम्पुष्टीहरु</strong>: <br>
-                        <strong>बन्देज (Warranty)</strong>:
-                    </td>
+                    <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)); ?></td>
                 </tr>
             </tbody>
         </table>
         <p style="text-align: center;">यस तालिकामा उल्लेख भएको प्रयोगको सीमा उल्लघंन भएमा बीमकले बीमितलाई क्षतिपूर्ति दिनेछैन ।</p>
-        <table class="table">
+        <table class="table no-border">
             <tr>
-                <td width="50%">
-                    कर बिजक नं: <br/>
-                    मिति:<br/>
-                    रु.:
-                </td>
+                <td width="50%">&nbsp;</td>
                 <td align="left">
                     <h4 class="underline"><?php echo $this->settings->orgn_name_np?> तर्फबाट अधिकार प्राप्त अधिकारीको</h4>
                     <p style="line-height: 30px">दस्तखत:</p>

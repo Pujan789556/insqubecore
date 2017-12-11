@@ -63,13 +63,14 @@ else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__M
 }
 
 /**
- * FIRE PORTFOLIOS
- * ----------------
+ * FIRE - FIRE
+ * -------------
  */
-else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
 {
-	$this->load->view('objects/snippets/_popup_fire', $data);
+    $this->load->view('objects/snippets/_popup_fire_fire', $data);
 }
+
 
 /**
  * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE

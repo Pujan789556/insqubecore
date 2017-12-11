@@ -447,13 +447,13 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 		}
 
 		/**
-		 * FIRE PORTFOLIOS
-		 * ---------------
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
-		{
-			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_FIRE";
-		}
+         * FIRE - FIRE
+         * -------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        {
+            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_FIRE_FIRE";
+        }
 
 		/**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
@@ -681,13 +681,13 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
 		}
 
 		/**
-		 * FIRE PORTFOLIOS
-		 * ---------------
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
-		{
-			$form_view = 'policy_txn/forms/_form_premium_FIRE';
-		}
+         * FIRE - FIRE
+         * -------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        {
+            $form_view = 'policy_txn/forms/_form_premium_FIRE_FIRE';
+        }
 
 		/**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
@@ -1350,12 +1350,9 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 					$schedule_view = 'policies/print/schedule_MOTOR';
 				break;
 
-			// Fire
-			case IQB_SUB_PORTFOLIO_FIRE_ELECTRICAL_EQUIPMENT_ID:
+			// FIRE - FIRE
 			case IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID:
-			case IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID:
-			case IQB_SUB_PORTFOLIO_FIRE_LOP_ID:
-					$schedule_view = 'policies/print/schedule_FIRE';
+					$schedule_view = 'policies/print/schedule_FIRE_FIRE';
 				break;
 
 			// Burglary
@@ -1469,7 +1466,41 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
     }
 }
 
+
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('policy_nr_title'))
+{
+	/**
+	 * Get policy number title based on policy status
+	 *
+	 * If status is draft/verify - it will show label as "Debit No" else "Policy No"
+	 *
+	 * @param char $status 	Policy Status
+	 * @param string $lang 	Language
+	 * @return	bool
+	 */
+	function policy_nr_title( $status, $lang = 'np' )
+	{
+		if( in_array($status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_VERIFIED]) )
+		{
+			$label = [
+				'np' => 'डेबिट नोट नं.',
+				'en' => 'Debit Note No.'
+			];
+		}
+		else
+		{
+			$label = [
+				'np' => 'बीमालेख नं.',
+				'en' => 'Policy No.'
+			];
+		}
+
+		return $label[$lang];
+	}
+}
+
+// ------------------------------------------------------------------------
 
 

@@ -785,13 +785,12 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
-         * FIRE
-         * -----
-         * Fire Portfolio Helper Functions
+         * FIRE - FIRE
+         * -------------
          */
-        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
         {
-            $CI->load->helper('ph_fire');
+            $CI->load->helper('ph_fire_fire');
         }
 
         /**

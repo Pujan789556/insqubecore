@@ -27,8 +27,8 @@ $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 		    <thead>
 		        <tr>
 		            <th>Item Category</th>
-		            <th>Sum Insured(Rs.)</th>
 		            <th>Ownership</th>
+		            <th>Sum Insured(Rs.)</th>
 		        </tr>
 		    </thead>
 		    <?php
@@ -40,8 +40,8 @@ $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 		        if($item_count):
 		            for ($i=0; $i < $item_count; $i++):?>
 		            	<tr>
-		            		<td><?php echo _OBJ_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
-		            		<td><?php echo _OBJ_FIRE_item_ownership_dropdown(FALSE)[ $items->ownership[$i] ]; ?></td>
+		            		<td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
+		            		<td><?php echo _OBJ_FIRE_FIRE_item_ownership_dropdown(FALSE)[ $items->ownership[$i] ]; ?></td>
 		            		<td>Rs. <?php echo $items->sum_insured[$i]; ?></td>
 		            	</tr>
 		            <?php
@@ -89,7 +89,7 @@ $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 	        			<td><?php echo $land_building->vdc[$i]?></td>
 	        			<td><?php echo $land_building->ward_no[$i]?></td>
 	        			<td><?php echo $land_building->storey_no[$i]?></td>
-	        			<td><?php echo $land_building->category[$i] ? _OBJ_FIRE_item_building_category_dropdown()[ $land_building->category[$i] ] : ''?></td>
+	        			<td><?php echo $land_building->category[$i] ? _OBJ_FIRE_FIRE_item_building_category_dropdown()[ $land_building->category[$i] ] : ''?></td>
 	        			<td><?php echo $land_building->used_for[$i]?></td>
 	        		</tr>
 	        <?php

@@ -665,13 +665,13 @@ class Policy_txn extends MY_Controller
 				}
 
 				/**
-				 * FIRE PORTFOLIOS
-				 * ---------------
-				 */
-				else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
-				{
-					$done = __save_premium_FIRE( $policy_record, $txn_record );
-				}
+		         * FIRE - FIRE
+		         * -------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+		        {
+		            $done = __save_premium_FIRE_FIRE( $policy_record, $txn_record );
+		        }
 
 				/**
 		         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
@@ -1036,13 +1036,13 @@ class Policy_txn extends MY_Controller
 			}
 
 			/**
-			 * FIRE PORTFOLIOS
-			 * ---------------
-			 */
-			else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE)) )
-			{
-				$goodies = _TXN_FIRE_premium_goodies($policy_record, $policy_object, $portfolio_risks);
-			}
+	         * FIRE - FIRE
+	         * -------------
+	         */
+	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+	        {
+	            $goodies = _TXN_FIRE_FIRE_premium_goodies($policy_record, $policy_object, $portfolio_risks);
+	        }
 
 			/**
 	         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE

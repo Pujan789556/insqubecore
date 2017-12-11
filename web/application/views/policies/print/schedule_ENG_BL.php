@@ -57,7 +57,7 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
             <thead><tr><td colspan="3" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
             <tbody>
                 <tr>
-                    <td><strong>Policy No.:</strong> <?php echo $record->code;?></td>
+                    <td><strong><?php echo policy_nr_title($record->status, 'en')?>:</strong> <?php echo $record->code;?></td>
 
                     <?php
                     /**
