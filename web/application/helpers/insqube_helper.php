@@ -203,7 +203,7 @@ if ( ! function_exists('get_contact_form_fields'))
 			],
 			[
 				'name' 		=> 'contacts[phones]',
-		        'label' 	=> 'Phone(s)',
+		        'label' 	=> 'Phone(s) (English Only)',
 		        '_key' 		=> 'phones',
 		        '_type' 	=> 'text',
 		        '_required' => false,
@@ -211,7 +211,7 @@ if ( ! function_exists('get_contact_form_fields'))
 			],
 			[
 				'name' 		=> 'contacts[fax]',
-		        'label' 	=> 'Fax(es)',
+		        'label' 	=> 'Fax(es) (English Only)',
 		        '_key' 		=> 'fax',
 		        '_type' 	=> 'text',
 		        '_required' => false,
@@ -219,21 +219,21 @@ if ( ! function_exists('get_contact_form_fields'))
 			],
 			[
 				'name' 		=> 'contacts[mobile]',
-		        'label' 	=> 'Mobile',
+		        'label' 	=> 'Mobile (English Only)',
 		        '_key' 		=> 'mobile',
 		        '_type' 	=> 'text',
 		        '_required' => false
 			],
 			[
 				'name' 		=> 'contacts[email]',
-		        'label' 	=> 'Email',
+		        'label' 	=> 'Email (English Only)',
 		        '_key' 		=> 'email',
 		        '_type' 	=> 'text',
 		        '_required' => false
 			],
 			[
 				'name' 		=> 'contacts[web]',
-		        'label' 	=> 'Website',
+		        'label' 	=> 'Website (English Only)',
 		        '_key' 		=> 'web',
 		        '_type' 	=> 'text',
 		        '_required' => false
