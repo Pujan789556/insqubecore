@@ -251,14 +251,12 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__ENG',  [
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_FIRE_ELECTRICAL_EQUIPMENT_ID', 	27); 	// Electrical Equipment
-define('IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID', 				28); 	// Fire General
-define('IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID', 			29);	// Householder Policy
-define('IQB_SUB_PORTFOLIO_FIRE_LOP_ID', 					30); 	// Loss of Profit - Fire
+define('IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID', 				27); 	// Fire General
+define('IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID', 			28);	// Householder Policy
+define('IQB_SUB_PORTFOLIO_FIRE_LOP_ID', 					29); 	// Loss of Profit - Fire
 
 // SUB PORTFOLIO LIST
 define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE',  [
-	IQB_SUB_PORTFOLIO_FIRE_ELECTRICAL_EQUIPMENT_ID 	=> 'Electrical Equipment',
 	IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID 				=> 'Fire General',
 	IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID 			=> "Householder's Policy (FIRE)",
 	IQB_SUB_PORTFOLIO_FIRE_LOP_ID 					=> "Loss of Profit (FIRE)"
@@ -273,11 +271,11 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE',  [
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_MARINE_AIR_TRANSIT_ID', 		31); 	// Air Transit
-define('IQB_SUB_PORTFOLIO_MARINE_MARINE_TRANSIT_ID', 	32); 	// Marine Transit
-define('IQB_SUB_PORTFOLIO_MARINE_OPEN_MARINE_ID', 		33);	// Open Marine
-define('IQB_SUB_PORTFOLIO_MARINE_ROAD_AIR_TRANSIT_ID', 	34);	// Road Air Transit
-define('IQB_SUB_PORTFOLIO_MARINE_ROAD_TANSIT_ID', 		35); 	// Marine Roat Transit
+define('IQB_SUB_PORTFOLIO_MARINE_AIR_TRANSIT_ID', 		30); 	// Air Transit
+define('IQB_SUB_PORTFOLIO_MARINE_MARINE_TRANSIT_ID', 	31); 	// Marine Transit
+define('IQB_SUB_PORTFOLIO_MARINE_OPEN_MARINE_ID', 		32);	// Open Marine
+define('IQB_SUB_PORTFOLIO_MARINE_ROAD_AIR_TRANSIT_ID', 	33);	// Road Air Transit
+define('IQB_SUB_PORTFOLIO_MARINE_ROAD_TANSIT_ID', 		34); 	// Marine Roat Transit
 
 // SUB PORTFOLIO LIST
 define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE',  [
@@ -297,20 +295,20 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE',  [
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_MISC_BB_ID', 		39); 	// Banker's Blanket
-define('IQB_SUB_PORTFOLIO_MISC_BRGJWL_ID', 	40); 	// Burglary - Jewelry
-define('IQB_SUB_PORTFOLIO_MISC_BRGHB_ID', 	41); 	// Burglary - Housebreaking
-define('IQB_SUB_PORTFOLIO_MISC_CT_ID', 		42); 	// Cash in Transit
-define('IQB_SUB_PORTFOLIO_MISC_CS_ID', 		43); 	// Cash in Safe
-define('IQB_SUB_PORTFOLIO_MISC_EPA_ID', 	44); 	// Expedition Personnel Accident
-define('IQB_SUB_PORTFOLIO_MISC_FG_ID', 		46); 	// Fidelity Guarantee
-define('IQB_SUB_PORTFOLIO_MISC_GPA_ID', 	47); 	// Group Personnel Accident
-define('IQB_SUB_PORTFOLIO_MISC_HI_ID', 		48); 	// Health Insurance (MISC)
-define('IQB_SUB_PORTFOLIO_MISC_PA_ID', 		52); 	// Personnel Accident
-define('IQB_SUB_PORTFOLIO_MISC_PL_ID', 		55); 	// Public Liability
-define('IQB_SUB_PORTFOLIO_MISC_TMI_ID', 	56); 	// Travel Medical Insurance
-define('IQB_SUB_PORTFOLIO_MISC_BRGCS_ID', 	61); 	// Burglary - Cash in Safe
-define('IQB_SUB_PORTFOLIO_MISC_CC_ID', 		62); 	// Cash in Counter
+define('IQB_SUB_PORTFOLIO_MISC_BB_ID', 		38); 	// Banker's Blanket
+define('IQB_SUB_PORTFOLIO_MISC_BRGJWL_ID', 	39); 	// Burglary - Jewelry
+define('IQB_SUB_PORTFOLIO_MISC_BRGHB_ID', 	40); 	// Burglary - Housebreaking
+define('IQB_SUB_PORTFOLIO_MISC_CT_ID', 		41); 	// Cash in Transit
+define('IQB_SUB_PORTFOLIO_MISC_CS_ID', 		42); 	// Cash in Safe
+define('IQB_SUB_PORTFOLIO_MISC_EPA_ID', 	43); 	// Expedition Personnel Accident
+define('IQB_SUB_PORTFOLIO_MISC_FG_ID', 		45); 	// Fidelity Guarantee
+define('IQB_SUB_PORTFOLIO_MISC_GPA_ID', 	46); 	// Group Personnel Accident
+define('IQB_SUB_PORTFOLIO_MISC_HI_ID', 		47); 	// Health Insurance (MISC)
+define('IQB_SUB_PORTFOLIO_MISC_PA_ID', 		51); 	// Personnel Accident
+define('IQB_SUB_PORTFOLIO_MISC_PL_ID', 		54); 	// Public Liability
+define('IQB_SUB_PORTFOLIO_MISC_TMI_ID', 	55); 	// Travel Medical Insurance
+define('IQB_SUB_PORTFOLIO_MISC_BRGCS_ID', 	60); 	// Burglary - Cash in Safe
+define('IQB_SUB_PORTFOLIO_MISC_CC_ID', 		61); 	// Cash in Counter
 
 
 // SUB PORTFOLIO LIST Burglary (Jewelry, Housebreaking, Cash in Safe)
@@ -329,9 +327,9 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG',  [
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_MOTORCYCLE_ID',          		58); 	// Motorcycle
-define('IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID',     		59); 	// Private Vehicle
-define('IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID',  		60);	// Commercial Vehicle
+define('IQB_SUB_PORTFOLIO_MOTORCYCLE_ID',          		57); 	// Motorcycle
+define('IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID',     		58); 	// Private Vehicle
+define('IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID',  		59);	// Commercial Vehicle
 
 // SUB PORTFOLIO LIST
 define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR',  [
