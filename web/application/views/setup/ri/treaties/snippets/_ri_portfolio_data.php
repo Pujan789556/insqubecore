@@ -14,9 +14,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<th>Compulsory Cession Apply?</th>
 			<th>Compulsory Cession(%)</th>
 			<th>Compulsory Cession(Max Amount)</th>
+			<th>Treaty Maximum Capacity</th>
 			<th>Maximum Retention Amount</th>
 			<th>Defnied Retention Amount</th>
-			<th>Line Reference</th>
+			<th>Defined Retention Apply?</th>
 			<th>QS Retention(%)</th>
 			<th>QS Quota(%)</th>
 			<th>Surplus 1st Line</th>
@@ -41,10 +42,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<td><?php echo yes_no_text($portfolio->flag_claim_recover_from_ri, '-')?></td>
 				<td><?php echo yes_no_text($portfolio->flag_comp_cession_apply, '-')?></td>
 				<td><?php echo $portfolio->comp_cession_percent;?></td>
-				<td><?php echo $portfolio->comp_cession_max_amount;?></td>
+				<td><?php echo $portfolio->comp_cession_max_amt;?></td>
+				<td><?php echo $portfolio->treaty_max_capacity_amt;?></td>
 				<td><?php echo $portfolio->qs_max_ret_amt;?></td>
 				<td><?php echo $portfolio->qs_def_ret_amt;?></td>
-				<td><?php echo $portfolio->flag_qs_line ? ri_qs_surplus_line_reference_dropdown(false)[$portfolio->flag_qs_line] : '-';?></td>
+				<td><?php echo $portfolio->flag_qs_def_ret_apply ? yes_no_text(false)[$portfolio->flag_qs_def_ret_apply] : '-';?></td>
 				<td><?php echo $portfolio->qs_retention_percent;?></td>
 				<td><?php echo $portfolio->qs_quota_percent;?></td>
 				<td><?php echo $portfolio->qs_lines_1;?></td>

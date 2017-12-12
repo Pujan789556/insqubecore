@@ -256,10 +256,19 @@ class Ri_setup_treaty_model extends MY_Model
                     '_required'         => true
                 ],
                 [
-                    'field' => 'comp_cession_max_amount[]',
+                    'field' => 'comp_cession_max_amt[]',
                     'label' => 'Compulsory Max Amount',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_field'            => 'comp_cession_max_amount',
+                    '_field'            => 'comp_cession_max_amt',
+                    '_type'             => 'text',
+                    '_show_label'       => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'treaty_max_capacity_amt[]',
+                    'label' => 'Treaty Maximum Capacity',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_field'            => 'treaty_max_capacity_amt',
                     '_type'             => 'text',
                     '_show_label'       => false,
                     '_required'         => true
@@ -325,6 +334,19 @@ class Ri_setup_treaty_model extends MY_Model
                     '_type'             => 'text',
                     '_show_label'       => false,
                     '_required'         => true
+                ],
+                /**
+                 * Apply flat retention ?
+                 */
+                [
+                    'field' => 'flag_qs_def_ret_apply[]',
+                    'label' => 'Apply defined retention?',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdwon(false)) ) . ']',
+                    '_field'        => 'flag_qs_def_ret_apply',
+                    '_type'         => 'dropdown',
+                    '_show_label'   => false,
+                    '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
+                    '_required'     => true
                 ],
                 [
                     'field' => 'qs_lines_1[]',
@@ -404,16 +426,16 @@ class Ri_setup_treaty_model extends MY_Model
                 ],
 
                 /**
-                 * Surplus Reference Line (Max/Def retention as One Line or Quota % as One surplus Line)
+                 * Apply flat retention ?
                  */
                 [
-                    'field' => 'flag_qs_line[]',
-                    'label' => 'Surplus Line Reference',
-                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(ri_qs_surplus_line_reference_dropdown(false)) ) . ']',
-                    '_field'        => 'flag_qs_line',
+                    'field' => 'flag_qs_def_ret_apply[]',
+                    'label' => 'Apply defined retention?',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdwon(false)) ) . ']',
+                    '_field'        => 'flag_qs_def_ret_apply',
                     '_type'         => 'dropdown',
                     '_show_label'   => false,
-                    '_data'         => IQB_BLANK_SELECT + ri_qs_surplus_line_reference_dropdown(),
+                    '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
                     '_required'     => true
                 ],
 
@@ -1038,7 +1060,7 @@ class Ri_setup_treaty_model extends MY_Model
     public function save_treaty_portfolios($id, $data)
     {
         $status                     = TRUE;
-        $treaty_portfolio_fillables = ['ac_basic','flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amount', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_line', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
+        $treaty_portfolio_fillables = ['ac_basic','flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'treaty_max_capacity_amt', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
 
         $total_portfolios           = count($data['portfolio_ids']);
         $treaty_id                  = $id;
@@ -1333,7 +1355,7 @@ class Ri_setup_treaty_model extends MY_Model
                             'T.id, T.name as treaty_name, T.fiscal_yr_id, T.treaty_type_id, T.treaty_effective_date, ' .
 
                             // Treaty Portfolio Config
-                            'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amount, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_line, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
+                            'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amt, TP.treaty_max_capacity_amt, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_def_ret_apply, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
 
                             // Portfolio Detail
                             'P.code as portfolio_code, P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np, ' .
