@@ -383,6 +383,7 @@ defined('IQB_POLICY_TXN_STATUS_ACTIVE')         OR define('IQB_POLICY_TXN_STATUS
 */
 defined('IQB_POLICY_FLAG_DC_AGENT_COMMISSION')  OR define('IQB_POLICY_FLAG_DC_AGENT_COMMISSION',    'C');
 defined('IQB_POLICY_FLAG_DC_DIRECT')    		OR define('IQB_POLICY_FLAG_DC_DIRECT',      		'D');
+defined('IQB_POLICY_FLAG_DC_NONE')    			OR define('IQB_POLICY_FLAG_DC_NONE',      			'N');
 
 
 /*

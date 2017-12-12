@@ -895,7 +895,7 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 						$direct_discount = ( $PREMIUM_TOTAL * $pfs_record->direct_discount ) / 100.00 ;
 						$PREMIUM_TOTAL -= $direct_discount;
 					}
-					else
+					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
 						$commissionable_premium = $PREMIUM_TOTAL;
 						$agent_commission 		= ( $PREMIUM_TOTAL * $pfs_record->agent_commission ) / 100.00;

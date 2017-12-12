@@ -86,6 +86,36 @@ if ( ! function_exists('get_policy_status_text'))
 }
 
 // ------------------------------------------------------------------------
+
+if ( ! function_exists('get_policy_flag_dc_dropdown'))
+{
+	/**
+	 * Get Policy's flag_dc dropdown
+	 * The flag values indicate whether the policy has any of the following:
+	 * 	- Corporate/direct discount
+	 * 	- Agent commission
+	 * 	- None
+	 *
+	 * @return	bool
+	 */
+	function get_policy_flag_dc_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+
+			IQB_POLICY_FLAG_DC_AGENT_COMMISSION => 'Agent Commission',
+			IQB_POLICY_FLAG_DC_DIRECT 			=> 'Direct/Corporate Discount',
+			IQB_POLICY_FLAG_DC_NONE 			=> 'None'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('get_policy_txn_status_dropdown'))
 {
 	/**

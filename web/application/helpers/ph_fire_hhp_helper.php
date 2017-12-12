@@ -752,12 +752,8 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 					{
 						$DIRECT_DISCOUNT = ( $GROSS_PREMIUM * $pfs_record->direct_discount ) / 100.00 ;
-
-						// NULLIFY Commissionable premium, Agent Commission
-						$COMMISSIONABLE_PREMIUM = NULL;
-						$AGENT_COMMISSION 		= NULL;
 					}
-					else
+					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
 						$COMMISSIONABLE_PREMIUM = $GROSS_PREMIUM;
 						$AGENT_COMMISSION = ( $COMMISSIONABLE_PREMIUM * $pfs_record->agent_commission ) / 100.00;

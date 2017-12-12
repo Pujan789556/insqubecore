@@ -952,7 +952,9 @@ if ( ! function_exists('__save_premium_MARINE'))
 					];
 
 					// Applicable Premium Rate (%)
-					$APR = ( $I / $SI ) * 100.00;
+					$APR 					= ( $I / $SI ) * 100.00;
+
+
 
 					/**
 					 * Direct Discount or Agent Commission?
@@ -960,6 +962,7 @@ if ( ! function_exists('__save_premium_MARINE'))
 					 * Agent Commission or Direct Discount
 					 * applies on NET Premium
 					 */
+					$J = 0.00;
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 					{
 						// Direct Business Discount/Direct Discount
@@ -969,14 +972,6 @@ if ( ! function_exists('__save_premium_MARINE'))
 							'label' => "J. Direct business discount ({$pfs_record->direct_discount}% of I)",
 							'value' => $J
 						];
-
-						// NULLIFY Commissionable premium, Agent Commission
-						$commissionable_premium = NULL;
-						$agent_commission = NULL;
-					}
-					else
-					{
-						$J = 0.00;
 					}
 
 
@@ -1003,6 +998,8 @@ if ( ! function_exists('__save_premium_MARINE'))
 					/**
 					 * Agent Commission if Applies?
 					 */
+					$commissionable_premium = NULL;
+					$agent_commission 		= NULL;
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
 						$commissionable_premium = $NET_PREMIUM;

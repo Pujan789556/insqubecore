@@ -612,17 +612,15 @@ if ( ! function_exists('__save_premium_MISC_HI'))
 					 * Agent Commission or Direct Discount
 					 * applies on Basic Premium
 					 */
-					$DD = 0.00;
+					$DD 					= 0.00;
+					$commissionable_premium = NULL;
+					$agent_commission 		= NULL;
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 					{
 						// Direct Discount
 						$DD = ( $GROSS_PREMIUM * $pfs_record->direct_discount ) / 100.00 ;
-
-						// NULLIFY Commissionable premium, Agent Commission
-						$commissionable_premium = NULL;
-						$agent_commission = NULL;
 					}
-					else
+					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
 						$commissionable_premium = $GROSS_PREMIUM;
 						$agent_commission 		= ( $GROSS_PREMIUM * $pfs_record->agent_commission ) / 100.00;

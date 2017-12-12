@@ -123,7 +123,7 @@ class Policy_model extends MY_Model
             if($this->input->post())
             {
                 $flag_dc = $this->input->post('flag_dc');
-                if($flag_dc == IQB_POLICY_FLAG_DC_DIRECT)
+                if( in_array($flag_dc, [IQB_POLICY_FLAG_DC_DIRECT, IQB_POLICY_FLAG_DC_NONE]) )
                 {
                     $agent_validation = 'trim|integer|max_length[11]';
                 }
@@ -381,10 +381,10 @@ class Policy_model extends MY_Model
                     [
                         'field' => 'flag_dc',
                         'label' => 'Direct Discount or Agent Commission',
-                        'rules' => 'trim|required|alpha|exact_length[1]|in_list[D,C]',
+                        'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode( ',', array_keys( get_policy_flag_dc_dropdown(false) ) ).']',
                         '_id'       => '_flag-dc',
                         '_type'     => 'radio',
-                        '_data'     => [ 'C' => 'Agent Commission', 'D' => 'Direct Discount'],
+                        '_data'     => get_policy_flag_dc_dropdown(false),
                         '_required' => true
                     ],
                     [
