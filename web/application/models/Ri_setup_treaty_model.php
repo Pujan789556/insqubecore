@@ -277,24 +277,7 @@ class Ri_setup_treaty_model extends MY_Model
 
             // Treaty Portfolios: "Quota" Only Fields
             'portfolios_qt' => [
-                [
-                    'field' => 'qs_max_ret_amt[]',
-                    'label' => 'Maximum Retention Amount',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_field'            => 'qs_max_ret_amt',
-                    '_type'             => 'text',
-                    '_show_label'   => false,
-                    '_required'         => true
-                ],
-                [
-                    'field' => 'qs_def_ret_amt[]',
-                    'label' => 'Defined Retention Amount',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]|less_than[qs_max_ret_amt[]]',
-                    '_field'            => 'qs_def_ret_amt',
-                    '_type'             => 'text',
-                    '_show_label'       => false,
-                    '_required'         => true
-                ],
+
                 [
                     'field' => 'qs_retention_percent[]',
                     'label' => 'Quota Retention(%)',
@@ -386,7 +369,7 @@ class Ri_setup_treaty_model extends MY_Model
                  */
                 [
                     'field' => 'qs_max_ret_amt[]',
-                    'label' => 'Maximum Retention Amount',
+                    'label' => 'Maximum Quota/Retention Amount',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                     '_field'            => 'qs_max_ret_amt',
                     '_type'             => 'text',
@@ -395,7 +378,7 @@ class Ri_setup_treaty_model extends MY_Model
                 ],
                 [
                     'field' => 'qs_def_ret_amt[]',
-                    'label' => 'Defined Retention Amount',
+                    'label' => 'Defined Quota/Retention Amount',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]|less_than[qs_max_ret_amt[]]',
                     '_field'            => 'qs_def_ret_amt',
                     '_type'             => 'text',
