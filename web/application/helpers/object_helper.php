@@ -136,6 +136,15 @@ if ( ! function_exists('_OBJ_row_snippet'))
         }
 
         /**
+         * FIRE - LOSS OF PROFIT
+         * ----------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        {
+            $snippet = _OBJ_FIRE_LOP_row_snippet($record, $_flag__show_widget_row);
+        }
+
+        /**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
@@ -410,6 +419,15 @@ if ( ! function_exists('_OBJ_select_text'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
         {
             $snippet = _OBJ_FIRE_HHP_select_text($record);
+        }
+
+        /**
+         * FIRE - LOSS OF PROFIT
+         * ----------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        {
+            $snippet = _OBJ_FIRE_LOP_select_text($record);
         }
 
         /**
@@ -689,6 +707,15 @@ if ( ! function_exists('_OBJ_validation_rules'))
         }
 
         /**
+         * FIRE - LOSS OF PROFIT
+         * ----------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        {
+            $v_rules = _OBJ_FIRE_LOP_validation_rules( $portfolio_id, $formatted );
+        }
+
+        /**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
          * --------------------------------------------------
          */
@@ -961,6 +988,15 @@ if ( ! function_exists('_OBJ_attribute_form'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
         {
             $attribute_form = 'objects/forms/_form_object_fire_hhp';
+        }
+
+        /**
+         * FIRE - LOSS OF PROFIT
+         * ----------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        {
+            $attribute_form = 'objects/forms/_form_object_fire_lop';
         }
 
         /**
@@ -1434,6 +1470,15 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
         {
             $amt_sum_insured = _OBJ_FIRE_HHP_compute_sum_insured_amount($portfolio_id, $data);
+        }
+
+        /**
+         * FIRE - LOSS OF PROFIT
+         * ----------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        {
+            $amt_sum_insured = _OBJ_FIRE_LOP_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

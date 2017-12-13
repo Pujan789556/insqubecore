@@ -803,6 +803,15 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
+         * FIRE - LOSS OF PROFIT
+         * ----------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        {
+            $CI->load->helper('ph_fire_lop');
+        }
+
+        /**
          * MARINE
          * -----
          * Marine Portfolio Helper Functions
