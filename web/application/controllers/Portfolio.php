@@ -13,6 +13,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Portfolio extends MY_Controller
 {
+	/**
+	 * Files Upload Path
+	 */
+	public static $upload_path = INSQUBE_MEDIA_PATH . 'portfolio/';
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -240,6 +247,33 @@ class Portfolio extends MY_Controller
 			{
 				$data = $this->input->post();
 
+				/**
+				 * File upload in add/edit mode
+				 */
+				$file_toc = $record->file_toc ?? NULL;
+				if( in_array($action, ['add', 'edit']) )
+				{
+					/**
+					 * Upload toc file if any?
+					 */
+					$upload_result 	= $this->_upload_file($file_toc);
+					$status 		= $upload_result['status'];
+					$message 		= $upload_result['message'];
+
+					if( $status === 'error')
+					{
+						return $this->template->json([
+							'title'  	=> 'Upload Failed!',
+							'status' 	=> $status,
+							'message' 	=> $message
+						]);
+					}
+
+					$files 			= $upload_result['files'];
+					$file_toc = $status === 'success' ? $files[0] : $file_toc;
+					$data['file_toc'] = $file_toc;
+				}
+
 				// Insert or Update?
 				if($action === 'add')
 				{
@@ -286,6 +320,7 @@ class Portfolio extends MY_Controller
 					$status = 'success';
 					$message = 'Successfully Updated.';
 				}
+
 			}
 			else
 			{
@@ -336,6 +371,12 @@ class Portfolio extends MY_Controller
 
 		return $return_data;
 	}
+		/**
+		 * Validation rules
+		 *
+		 * @param string $action
+		 * @return array
+		 */
 		private function _v_rule($action)
 		{
 			$rules = [];
@@ -357,6 +398,35 @@ class Portfolio extends MY_Controller
 
 			return $rules;
 		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Sub-function: Upload Company Profile Picture
+		 *
+		 * @param string|null $old_document
+		 * @return array
+		 */
+		private function _upload_file( $old_document = NULL )
+		{
+			$options = [
+				'config' => [
+					'encrypt_name' => TRUE,
+	                'upload_path' => self::$upload_path,
+	                'allowed_types' => 'doc|docx|pdf',
+	                'max_size' => '2048'
+				],
+				'form_field' => 'file_toc',
+
+				'create_thumb' => FALSE,
+
+				// Delete Old file
+				'old_files' => $old_document ? [$old_document] : [],
+				'delete_old' => TRUE
+			];
+			return upload_insqube_media($options);
+		}
+
 	// --------------------------------------------------------------------
 
     /**
