@@ -11,6 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<th>Name (NP)</th>
 		<th>Code</th>
 		<th>Parent Portfolio</th>
+		<th title="Terms & Condition Document">TOC</th>
 		<th>Actions</th>
 	</tr>
 	<?php

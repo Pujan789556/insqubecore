@@ -10,6 +10,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->name_np;?></td>
 	<td><?php echo $record->code;?></td>
 	<td><?php echo $record->parent_name ?? '-';?></td>
+	<td>
+		<?php
+		if( $record->file_toc )
+		{
+			echo anchor('downloads/get/portfolio/' . $record->file_toc, '<i class="fa fa-fw fa-download"></i> Download', 'target="_blank" title="Download terms & conditions document"');
+		}
+		else
+		{
+			echo '-';
+		}
+		?>
+	</td>
 	<td class="ins-action">
 		<a href="#"
 			title="Edit portfolio"
