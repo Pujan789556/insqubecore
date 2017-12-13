@@ -13,9 +13,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         isset($record) ? ['id' => $record->id] : []); ?>
 
     <div class="form-group">
-        <label for="logo" class="col-sm-2 control-label">Terms &nbsp; Condition Document</label>
+        <label for="logo" class="col-sm-2 control-label">Terms & Condition Document</label>
         <div class="col-sm-10 col-md-6">
             <input type="file" id="file_toc" name="file_toc">
+            <p class="help-block">Only doc, docx, pdf file allowed.</p>
             <?php if(isset($record->file_toc)  && !empty($record->file_toc) ):?>
                 <p><?php echo anchor('downloads/get/portfolio/' . $record->file_toc, 'Download', 'target="_blank"') ?></p>
             <?php endif?>
