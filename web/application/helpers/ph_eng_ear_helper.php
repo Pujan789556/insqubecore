@@ -164,16 +164,7 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 			        '_default' => 0,
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
-			    ],
-			    [
-			        'field' => 'object[items][deductibles][]',
-			        '_key' => 'deductibles',
-			        'label' => 'Deductibles',
-			        'rules' => 'trim|htmlspecialchars|max_length[500]',
-			        '_type' => 'text',
-			        '_show_label' 	=> false,
-			        '_required' 	=> false
-			    ],
+			    ]
 		    ],
 
 		    /**

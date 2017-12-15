@@ -194,6 +194,7 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                                                         <?php echo $value?>
                                                     </td>
                                                 <?php endforeach ?>
+                                                <td>&nbsp;</td>
                                         </tr>
                                     <?php
                                     $i++;
@@ -202,12 +203,13 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                                 <tr>
                                     <td class="text-bold">Total Sum Insured Amount(Rs.)</td>
                                     <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2, '.', '') ?></td>
-                                    <td>&nbsp;</td>
                                 </tr>
                                 <tr>
-                                    <td>Risks - AOG</td>
+                                    <td>
+                                        AOG - Earthquake, volcanism, tsunami, storm, cyclone, flood, inundation, landslide <br>
+                                        <i>(<?php echo $object_attributes->risk->deductibles; ?>)</i>
+                                    </td>
                                     <td class="text-right"><?php echo number_format($record->object_amt_sum_insured, 2, '.', '') ?></td>
-                                    <td><?php echo $attributes->risk->deductibles; ?></td>
                                 </tr>
                             </tbody>
                         </table>

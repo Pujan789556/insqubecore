@@ -76,6 +76,7 @@ else
                                             <?php echo $value?>
                                         </td>
                                     <?php endforeach ?>
+                                    <td>&nbsp;</td>
                             </tr>
                         <?php
                         $i++;
@@ -176,7 +177,7 @@ else
                             }
                             else
                             {
-                                echo $section_object->{$elem['_key']};
+                                echo $section_object->{$elem['_key']} ?? '';
                             }
                         ?></td>
                     </tr>
