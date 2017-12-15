@@ -53,8 +53,8 @@ else
     $value = $element['_default'] ?? '';
 }
 
-// Do we have _value field?
-if( $value  == '' )
+// Do we have _value field? It should be exactly BLANK (ZERO might come as defualt value)
+if( $value  === '' )
 {
     $value = $element['_value'] ?? '';
 }
