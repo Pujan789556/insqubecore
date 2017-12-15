@@ -19,7 +19,7 @@ cd $WEB_ROOT
 #
 # Import Forex Data from NRB
 #
-echo 'Importing forex from NRB ...'
+echo $(date)" - Importing forex from NRB ..."
 php index.php cli import_forex_rates
 
 
