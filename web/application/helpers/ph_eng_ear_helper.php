@@ -96,6 +96,15 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 			 * Basic Data
 			 */
 			'basic' =>[
+				[
+			        'field' => 'object[principal]',
+			        '_key' => 'principal',
+			        'label' => 'Name & Address of Pricipal',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        'rows' 		=> 4,
+			        '_type'     => 'textarea',
+			        '_required' => true
+			    ],
 			    [
 			        'field' => 'object[risk_locaiton]',
 			        '_key' => 'risk_locaiton',
@@ -104,6 +113,22 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[contract_title]',
+			        '_key' => 'contract_title',
+			        'label' => 'Contract Title',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        '_type' => 'text',
+			        '_required' 	=> true
+			    ],
+			    [
+			        'field' => 'object[contract_no]',
+			        '_key' => 'contract_no',
+			        'label' => 'Contract No.',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
+			        '_type' => 'text',
+			        '_required' 	=> true
 			    ],
 			    [
 			        'field' => 'object[maintenance_period]',
@@ -207,9 +232,10 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 		    	[
 			        'field' => 'object[others][limit_per_event]',
 			        '_key' => 'limit_per_event',
-			        'label' => 'Per Event Limit (Rs.)',
-			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+			        'label' => 'Limit per event',
+			        'rules' => 'trim|htmlspecialchars|max_length[200]',
 			        '_type'     => 'text',
+			        '_default' 	=> 'Per event limit is restricted upto Rs. ___ only.',
 			        '_required' => false
 			    ],
 			    [
@@ -719,17 +745,17 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 					{
 						// Direct Discount
 						$D = ( $C * $pfs_record->direct_discount ) / 100.00 ;
+
+						$cost_calculation_table[] = [
+							'label' => "D. Direct discount ({$pfs_record->direct_discount}%)",
+							'value' => $D
+						];
 					}
 					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
 						$commissionable_premium = $C;
 						$agent_commission 		= ( $C * $pfs_record->agent_commission ) / 100.00;
 					}
-
-					$cost_calculation_table[] = [
-						'label' => "D. Direct discount ({$pfs_record->direct_discount}%)",
-						'value' => $D
-					];
 
 					// E = C - D
 					$E = $C - $D;
@@ -741,22 +767,21 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 					/**
 					 * Pool Premium
 					 */
-					$POOL_PREMIUM = 0.00;
+					$POOL_PREMIUM 	= 0.00;
+					$pool_rate 		= 0.00;
 					if($flag_pool_risk)
 					{
-						// Pool Premium = x% of Default Premium (A - 2. Clearance & Removal of Debris )
+						// Pool Premium = x% of Default SI (A - 2. Clearance & Removal of Debris )
 						$pool_rate = floatval($pfs_record->pool_premium);
 
 						// Debris Premium
 						$debris_key 	= array_search('I2', $object_attributes->items->sn); // $key = 2;
 						$si_debris 		= floatval($object_attributes->items->sum_insured[$debris_key]);
-						$debris_rate 	= floatval($post_premium['items']['rate'][$debris_key]);
-						$debris_premium = ($si_debris * $debris_rate ) / 100.00;
 
-						$POOL_PREMIUM = ( ($A - $debris_premium) * $pool_rate ) / 100.00;
+						$POOL_PREMIUM = ( ($SI - $si_debris) * $pool_rate ) / 100.00;
 					}
 					$cost_calculation_table[] = [
-						'label' => "F. Pool Premium",
+						'label' => "F. Pool Premium ({$pool_rate})",
 						'value' => $POOL_PREMIUM
 					];
 

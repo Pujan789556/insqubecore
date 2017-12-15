@@ -174,6 +174,11 @@ $schedule_table_title   = 'Machine Breakdown (Schedule)';
                 <tr>
                     <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)); ?></td>
                 </tr>
+                <tr>
+                    <td colspan="2">
+                        In witness whereof the undersigned acting on behalf and under the Authority of the Company that hereunder set his hand at <span style="text-decoration: underline; font-weight: bold"><?php echo $record->branch_name; ?></span> on this <span style="text-decoration: underline; font-weight: bold"><?php echo date('jS', strtotime($record->issued_date) ); ?></span> day of <span style="text-decoration: underline; font-weight: bold"><?php echo date('F, Y', strtotime($record->issued_date) ); ?></span>.
+                    </td>
+                </tr>
             </tbody>
         </table>
         <table class="table no-border" width="100%">

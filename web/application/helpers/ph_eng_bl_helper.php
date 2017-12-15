@@ -206,9 +206,10 @@ if ( ! function_exists('_OBJ_ENG_BL_validation_rules'))
 		    	[
 			        'field' => 'object[others][limit_per_event]',
 			        '_key' => 'limit_per_event',
-			        'label' => 'Per Event Limit (Rs.)',
-			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+			        'label' => 'Limit per event',
+			        'rules' => 'trim|htmlspecialchars|max_length[200]',
 			        '_type'     => 'text',
+			        '_default' 	=> 'Per event limit is restricted upto Rs. ___ only.',
 			        '_required' => false
 			    ],
 			    [

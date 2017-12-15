@@ -161,6 +161,7 @@ if ( ! function_exists('_OBJ_ENG_CAR_validation_rules'))
 			        'label' => 'Sum Insured(Rs)',
 			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 			        '_type' => 'text',
+			        '_default' => 0,
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ],
@@ -211,6 +212,7 @@ if ( ! function_exists('_OBJ_ENG_CAR_validation_rules'))
 			        'label' => 'Limit of Indemnity (Rs.)',
 			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 			        '_type'     => 'text',
+			        '_default' 	=> 0,
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ],
@@ -232,9 +234,10 @@ if ( ! function_exists('_OBJ_ENG_CAR_validation_rules'))
 		    	[
 			        'field' => 'object[others][limit_per_event]',
 			        '_key' => 'limit_per_event',
-			        'label' => 'Per Event Limit (Rs.)',
-			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+			        'label' => 'Limit per event',
+			        'rules' => 'trim|htmlspecialchars|max_length[200]',
 			        '_type'     => 'text',
+			        '_default' 	=> 'Per event limit is restricted upto Rs. ___ only.',
 			        '_required' => false
 			    ],
 			    [
@@ -453,6 +456,7 @@ if ( ! function_exists('_TXN_ENG_CAR_premium_validation_rules'))
 	                'label' => 'Default Premium Rate (%)',
 	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 	                '_type'     => 'text',
+	                '_default' 	=> 0,
 	                '_key' 		=> 'rate',
 	                '_required' => true
 	            ]
@@ -468,6 +472,7 @@ if ( ! function_exists('_TXN_ENG_CAR_premium_validation_rules'))
 	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 	                '_type'     => 'text',
 	                '_key' 		=> 'tp_rate',
+	                '_default' 	=> 0,
 	                '_required' => true
 	            ],
 	            [
@@ -728,18 +733,16 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 					{
 						// Direct Discount
 						$D = ( $C * $pfs_record->direct_discount ) / 100.00 ;
-
+						$cost_calculation_table[] = [
+							'label' => "D. Direct discount ({$pfs_record->direct_discount}%)",
+							'value' => $D
+						];
 					}
 					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
 						$commissionable_premium = $C;
 						$agent_commission 		= ( $C * $pfs_record->agent_commission ) / 100.00;
 					}
-
-					$cost_calculation_table[] = [
-						'label' => "D. Direct discount ({$pfs_record->direct_discount}%)",
-						'value' => $D
-					];
 
 					// E = C - D
 					$E = $C - $D;
@@ -751,7 +754,8 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 					/**
 					 * Pool Premium
 					 */
-					$POOL_PREMIUM = 0.00;
+					$POOL_PREMIUM 	= 0.00;
+					$pool_rate 		= 0.00;
 					if($flag_pool_risk)
 					{
 						// Pool Premium = x% of Default Premium (A - 4.3 Debris removal (of insured property))
@@ -761,13 +765,12 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 						// Debris Premium
 						$debris_key 	= array_search('i4.3', $object_attributes->items->sn); // $key = 2;
 						$si_debris 		= floatval($object_attributes->items->sum_insured[$debris_key]);
-						$debris_rate 	= floatval($post_premium['items']['rate'][$debris_key]);
-						$debris_premium = ($si_debris * $debris_rate ) / 100.00;
 
-						$POOL_PREMIUM = ( ($A - $debris_premium) * $pool_rate ) / 100.00;
+
+						$POOL_PREMIUM = ( ($SI - $si_debris) * $pool_rate ) / 100.00;
 					}
 					$cost_calculation_table[] = [
-						'label' => "F. Pool Premium",
+						'label' => "F. Pool Premium ({$pool_rate})",
 						'value' => $POOL_PREMIUM
 					];
 

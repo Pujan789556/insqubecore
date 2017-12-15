@@ -69,7 +69,6 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                 </tr>
                 <tr>
                     <td>
-                        <strong>Name and address of Insured</strong><br/>
                         <?php
                         /**
                          * If Policy Object is Financed or on Loan, The financial Institute will be "Insured Party"
@@ -77,23 +76,29 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                          */
                         if($record->flag_on_credit === 'Y')
                         {
-                            echo '<strong>INS.: ' . $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name) . '</strong><br/>';
-                            echo '<br/>' . get_contact_widget($record->creditor_branch_contact, true, true) . '<br/>';
-
-                            // Care of
-                            echo '<strong>A/C.: ' . $this->security->xss_clean($record->customer_name) . '<br/></strong>';
-                            echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
-
-                            echo  $record->care_of ? '<br/>C/O.: ' . $this->security->xss_clean($record->care_of) : '';
+                            // Bank
+                            echo '<strong>Name and address of Financer</strong><br/>',
+                                $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name),
+                                    get_contact_widget($record->creditor_branch_contact, true, true), '<br/>';
                         }
-                        else
-                        {
-                            echo $this->security->xss_clean($record->customer_name) . '<br/>';
-                            echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
-                        }
+                        ?>
+
+                        <br/><strong>Name and address of Principal</strong><br/>
+                        <?php echo nl2br(htmlspecialchars($object_attributes->principal)) ?>
+
+                        <br/><br/><strong>Name and address of Contractor</strong><br/>
+                        <?php
+                        echo $this->security->xss_clean($record->customer_name),
+                            '<br/>' . get_contact_widget($record->customer_contact, true, true);
                         ?>
                     </td>
                     <td>
+                        <strong>Contract Title:</strong><br>
+                        <?php echo nl2br(htmlspecialchars($object_attributes->contract_title)) ?><br><br>
+
+                        <strong>Contract No.:</strong><br>
+                        <?php echo nl2br(htmlspecialchars($object_attributes->contract_no)) ?><br><br>
+
                         <strong>Location of Risk:</strong><br>
                         <?php echo nl2br(htmlspecialchars($object_attributes->risk_locaiton)) ?>
                     </td>
@@ -106,6 +111,25 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                         To: <strong><?php echo $record->end_date ?></strong> <em>plus <strong><?php echo $object_attributes->maintenance_period ?></strong> months maintenance period.</em>
                     </td>
                     <td>
+                        <?php $cost_calculation_table = json_decode($txn_record->cost_calculation_table ?? NULL);
+                        if($cost_calculation_table):?>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <td colspan="2"><strong>COST CALCULATION TABLE</strong></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach($cost_calculation_table as $row):?>
+                                        <tr>
+                                            <td><?php echo $row->label ?></td>
+                                            <td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                </tbody>
+                            </table><br>
+                        <?php endif ?>
+
                         <table class="table table-condensed no-border">
                             <tr>
                                 <td><strong>Premium</strong></td>
@@ -249,7 +273,15 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                     </td>
                 </tr>
                 <tr>
+                    <td colspan="2"><?php echo htmlspecialchars($object_attributes->others->limit_per_event); ?></td>
+                </tr>
+                <tr>
                     <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)); ?></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        In witness whereof the undersigned acting on behalf and under the Authority of the Company that hereunder set his hand at <span style="text-decoration: underline; font-weight: bold"><?php echo $record->branch_name; ?></span> on this <span style="text-decoration: underline; font-weight: bold"><?php echo date('jS', strtotime($record->issued_date) ); ?></span> day of <span style="text-decoration: underline; font-weight: bold"><?php echo date('F, Y', strtotime($record->issued_date) ); ?></span>.
+                    </td>
                 </tr>
             </tbody>
         </table>

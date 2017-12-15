@@ -63,13 +63,13 @@ $premium_computation_table  = $txn_record->premium_computation_table ? json_deco
                 </tr>
             </thead>
             <tbody>
-                <?php foreach($insured_items_dropdown as $group_title=>$item_groups): ?>
+                <?php
+                $i = 0;
+                foreach($insured_items_dropdown as $group_title=>$item_groups): ?>
                     <tr>
                         <th colspan="3"><strong><?php echo $group_title ?></strong></th>
                     </tr>
-                    <?php
-                    $i = 0;
-                    foreach($item_groups as $key=>$label): ?>
+                    <?php foreach($item_groups as $key=>$label): ?>
                         <tr>
                             <?php
                             /**
@@ -98,7 +98,7 @@ $premium_computation_table  = $txn_record->premium_computation_table ? json_deco
                             // Item's Sum Insured Amount
                             echo '<td class="text-right">' . $object_attributes->items->sum_insured[$i] . '</td>';
 
-                            $i++;
+                            $i++; // Go to next item;
                             ?>
                         </tr>
                     <?php endforeach ?>
