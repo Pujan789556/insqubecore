@@ -39,7 +39,7 @@ else
     <div class="col-sm-12">
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
-                <h4 class="box-title">Item Details</h4>
+                <h4 class="box-title">Section I - Item Details</h4>
             </div>
             <table class="table table-bordered table-condensed no-margin">
                 <?php
@@ -100,7 +100,7 @@ else
     <div class="<?php echo $col ?>">
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
-                <h4 class="box-title">Third Party Liability</h4>
+                <h4 class="box-title">Section II - Third Party Liability</h4>
             </div>
             <table class="table table-bordered table-condensed no-margin">
                 <?php
@@ -158,6 +158,62 @@ else
             </table>
         </div>
     </div>
+
+    <div class="<?php echo $col ?>">
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">Excess for Section I and II</h4>
+            </div>
+            <table class="table table-bordered table-condensed no-margin">
+                <?php
+                $section_elements   = $form_elements['excess'];
+                $items              = $attributes->excess ?? NULL;
+                $item_count         = count( $items->percent ?? [] );
+                ?>
+                <thead>
+                    <tr>
+                        <?php foreach($section_elements as $elem): ?>
+                            <th><?php echo $elem['label'] ?></th>
+                        <?php endforeach; ?>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php for ($i=0; $i < $item_count; $i++): ?>
+                        <tr>
+                            <?php
+                            foreach($section_elements as $elem):
+                                $key =  $elem['_key'];
+                                $value = $items->{$key}[$i];
+
+                                // If we have dropdown, load label from this
+                                $dd_data = $elem['_data'] ?? NULL;
+                                if( $dd_data )
+                                {
+                                    $value = $dd_data[$value] ?? $value;
+                                }
+
+                                // Format Number
+                                if( $key == 'percent' || $key == 'amount' )
+                                {
+                                    $value  = (float) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+
+                                    // format this to echo
+                                    $value = number_format($value, 2, '.', '');
+                                }
+                            ?>
+
+                                <td <?php echo ($key == 'percent' || $key == 'amount') ? 'class="text-right"' : '' ?>>
+                                    <?php echo $value?>
+                                </td>
+                            <?php endforeach ?>
+                        </tr>
+                    <?php endfor ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="<?php echo $col ?>">
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">

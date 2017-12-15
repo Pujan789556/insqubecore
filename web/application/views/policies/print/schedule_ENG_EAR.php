@@ -181,7 +181,7 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                                 $i = 0;
                                 foreach($insured_items_dropdown_g as $title => $groups): ?>
 
-                                    <tr><th colspan="3" class="text-left"><?php echo $title ?></th></tr>
+                                    <tr><th colspan="2" class="text-left"><?php echo $title ?></th></tr>
 
                                     <?php foreach($groups as $sn=>$label ): ?>
                                         <tr>
@@ -194,7 +194,6 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                                                         <?php echo $value?>
                                                     </td>
                                                 <?php endforeach ?>
-                                                <td>&nbsp;</td>
                                         </tr>
                                     <?php
                                     $i++;
@@ -276,6 +275,58 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                 </tr>
                 <tr>
                     <td colspan="2"><?php echo htmlspecialchars($object_attributes->others->limit_per_event); ?></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <?php
+                        $section_elements   = $form_elements['excess'];
+                        $items              = $object_attributes->excess ?? NULL;
+                        $item_count         = count( $items->percent ?? [] );
+                        ?>
+                        <strong>EXCESS for Section I and II</strong><br>
+                        <table class="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <?php foreach($section_elements as $elem): ?>
+                                        <td><?php echo $elem['label'] ?></td>
+                                    <?php endforeach; ?>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <?php for ($i=0; $i < $item_count; $i++): ?>
+                                        <tr>
+                                            <?php
+                                            foreach($section_elements as $elem):
+                                                $key =  $elem['_key'];
+                                                $value = $items->{$key}[$i];
+
+                                                // If we have dropdown, load label from this
+                                                $dd_data = $elem['_data'] ?? NULL;
+                                                if( $dd_data )
+                                                {
+                                                    $value = $dd_data[$value] ?? $value;
+                                                }
+
+                                                // Format Number
+                                                if( $key == 'percent' || $key == 'amount' )
+                                                {
+                                                    $value  = (float) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+
+                                                    // format this to echo
+                                                    $value = number_format($value, 2, '.', '');
+                                                }
+                                            ?>
+
+                                                <td <?php echo ($key == 'percent' || $key == 'amount') ? 'class="text-right"' : '' ?>>
+                                                    <?php echo $value?>
+                                                </td>
+                                            <?php endforeach ?>
+                                        </tr>
+                                    <?php endfor ?>
+                            </tbody>
+                        </table>
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)); ?></td>

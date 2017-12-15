@@ -90,6 +90,8 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 
 		$tbl_liabilities_dropdown 	= _OBJ_ENG_EAR_thirdparty_liability_dropdown(FALSE);
 		$insured_items_dropdown 	= _OBJ_ENG_EAR_insured_items_dropdown(FALSE);
+		$excess_dropdown 			= _OBJ_ENG_EAR_excess_dropdown(FALSE);
+
 
 		$v_rules = [
 			/**
@@ -219,6 +221,42 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 		    ],
 
 		    /**
+		     * Excess for Section I & II
+		     */
+		    'excess' => [
+		    	[
+			        'field' => 'object[excess][sn][]',
+			        '_key' => 'sn',
+			        'label' => 'Excess Title',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[10]',
+			        '_type' => 'hidden',
+			        '_data' 		=> $excess_dropdown,
+			        '_show_label' 	=> false,
+			        '_required' 	=> true
+			    ],
+		    	[
+			        'field' => 'object[excess][percent][]',
+			        '_key' => 'percent',
+			        'label' => 'Percent(%)',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+			        '_type'     => 'text',
+			        '_default' 	=> 0,
+			        '_show_label' 	=> false,
+			        '_required' 	=> true
+			    ],
+		    	[
+			        'field' => 'object[excess][amount][]',
+			        '_key' => 'amount',
+			        'label' => 'Minimum Amount (Rs.)',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+			        '_type'     => 'text',
+			        '_default' 	=> 0,
+			        '_show_label' 	=> false,
+			        '_required' 	=> true
+			    ]
+		    ],
+
+		    /**
 		     * Other Information
 		     */
 		    'others' => [
@@ -317,6 +355,33 @@ if ( ! function_exists('_OBJ_ENG_EAR_insured_items_dropdown'))
 			}
 			$dropdown = $dd;
 		}
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_ENG_EAR_excess_dropdown'))
+{
+	/**
+	 * Excess dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	array
+	 */
+	function _OBJ_ENG_EAR_excess_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			'j.a' 	=> 'A. For storage & erection claims',
+			'j.b' 	=> 'B. For testing period claims',
+			'j.c' 	=> 'For Acts of God claims (as per Memo 6)',
+			'j.c' 	=> 'For fire/explosion claims'
+		];
 
 		if($flag_blank_select)
 		{

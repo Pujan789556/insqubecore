@@ -296,7 +296,7 @@ if ( ! function_exists('_OBJ_ENG_CAR_insured_items_dropdown'))
 
 			'4. Extensions (on First loss Indemnity basis)' => [
 				'i4.1' => '4.1 Express Freight, Overtime (Memo 5)',
-				'i4.2' => '4.2 Principal‟s Surrounding Property (Memo 7)',
+				'i4.2' => '4.2 Principal\'s Surrounding Property (Memo 7)',
 				'i4.3' => '4.3 Debris removal (of insured property)',
 				'i4.4' => '4.4 Any other extension (e.g. Escalation, Air Freight, Addl. Custom Duty, Maintenance visits or extended maintenance cover as per forms attached )'
 			]
