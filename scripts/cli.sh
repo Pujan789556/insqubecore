@@ -6,7 +6,7 @@
 #
 # Example Usage (cront tab record) - Every 07:30 AM
 #
-# 				30 7 * * * sh /home/insqube/repo/insqube-core/cli.sh
+# 				30 7 * * * sh /home/insqube/repo/insqube-core/scripts/cli.sh
 #
 
 WEB_ROOT=/var/www/html/neco.insqube.local/web
@@ -20,7 +20,7 @@ cd $WEB_ROOT
 # Import Forex Data from NRB
 #
 echo 'Importing forex from NRB ...'
-index.php cli import_forex_rates
+php index.php cli import_forex_rates
 
 
 
