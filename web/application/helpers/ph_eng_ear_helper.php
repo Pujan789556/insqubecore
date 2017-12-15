@@ -161,6 +161,7 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 			        'label' => 'Sum Insured(Rs)',
 			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 			        '_type' => 'text',
+			        '_default' => 0,
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ],
@@ -211,6 +212,7 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 			        'label' => 'Limit of Indemnity (Rs.)',
 			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 			        '_type'     => 'text',
+			        '_default' 	=> 0,
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ],
@@ -469,6 +471,7 @@ if ( ! function_exists('_TXN_ENG_EAR_premium_validation_rules'))
 	                'label' => 'Default Premium Rate (%)',
 	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 	                '_type'     => 'text',
+	                '_default' 	=> 0,
 	                '_key' 		=> 'rate',
 	                '_required' => true
 	            ]
@@ -483,6 +486,7 @@ if ( ! function_exists('_TXN_ENG_EAR_premium_validation_rules'))
 	                'label' => 'Third Party Liability Rate',
 	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 	                '_type'     => 'text',
+	                '_default' 	=> 0,
 	                '_key' 		=> 'tp_rate',
 	                '_required' => true
 	            ],
