@@ -701,23 +701,20 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 					// A = Default Premium for all item
 					$A = $items_premium;
 					$cost_calculation_table[] = [
-						'label' => "A. Gross Premium",
+						'label' => "Gross Premium",
 						'value' => $A
 					];
 
 					// B = TP X TP Rate %
 					$B = ( $TPL_AMOUNT * $tp_rate ) / 100.00;
 					$cost_calculation_table[] = [
-						'label' => "B. Third Party Rate ({$tp_rate}%)",
+						'label' => "Third Party Premium",
 						'value' => $B
 					];
 
 					// C = A + B
 					$C = $A + $B;
-					$cost_calculation_table[] = [
-						'label' => "C. Total Gross Premium",
-						'value' => $C
-					];
+
 
 
 					/**
@@ -734,7 +731,7 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 						// Direct Discount
 						$D = ( $C * $pfs_record->direct_discount ) / 100.00 ;
 						$cost_calculation_table[] = [
-							'label' => "D. Direct discount ({$pfs_record->direct_discount}%)",
+							'label' => "Direct discount ({$pfs_record->direct_discount}%)",
 							'value' => $D
 						];
 					}
@@ -746,10 +743,7 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 
 					// E = C - D
 					$E = $C - $D;
-					$cost_calculation_table[] = [
-						'label' => "E. (C - D)",
-						'value' => $E
-					];
+
 
 					/**
 					 * Pool Premium
@@ -770,13 +764,13 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 						$POOL_PREMIUM = ( ($SI - $si_debris) * $pool_rate ) / 100.00;
 					}
 					$cost_calculation_table[] = [
-						'label' => "F. Pool Premium ({$pool_rate})",
+						'label' => "Pool Premium ({$pool_rate})",
 						'value' => $POOL_PREMIUM
 					];
 
 					$NET_PREMIUM = $E + $POOL_PREMIUM;
 					$cost_calculation_table[] = [
-						'label' => "G. Net Premium",
+						'label' => "Net Premium",
 						'value' => $NET_PREMIUM
 					];
 
