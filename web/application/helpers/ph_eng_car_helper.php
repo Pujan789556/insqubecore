@@ -764,7 +764,7 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 						$POOL_PREMIUM = ( ($SI - $si_debris) * $pool_rate ) / 100.00;
 					}
 					$cost_calculation_table[] = [
-						'label' => "Pool Premium ({$pool_rate})",
+						'label' => "Pool Premium",
 						'value' => $POOL_PREMIUM
 					];
 
