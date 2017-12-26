@@ -7,7 +7,8 @@ $cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn
 $risk_table     = NULL;
 if($cost_calculation_table)
 {
-    $risk_table     = $cost_calculation_table->risk_table;
+    $risk_table       = $cost_calculation_table->risk_table;
+    $summary_table    = $cost_calculation_table->summary_table;
 }
 ?>
 <table class="table no-margin table-bordered">
@@ -35,6 +36,25 @@ if($cost_calculation_table)
                    </td>
                 </tr>
             <?php endif ?>
+            <?php if($summary_table): ?>
+              <tr>
+                   <td class="no-padding margin-b-10">
+                      <table class="table no-margin table-bordered">
+                          <thead>
+                            <tr>
+                              <th colspan="2"><h4>बीमा शुल्क गणना</h4></th>
+                            </tr>
+                          </thead>
+                          <?php foreach($summary_table as $row):?>
+                              <tr>
+                                  <td class="text-left"><?php echo $row->label ?></td>
+                                  <td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+                              </tr>
+                          <?php endforeach ?>
+                      </table>
+                   </td>
+             </tr>
+            <?php endif; ?>
             <tr>
                 <td class="no-padding">
                     <table class="table no-margin table-bordered table-condensed">
