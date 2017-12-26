@@ -72,7 +72,7 @@ class Portfolio_setting_model extends MY_Model
                 [
                     'field' => 'agent_commission[]',
                     'label' => 'Agent Commission(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal4|decimal|max_length[8]',
                     '_key'      => 'agent_commission',
                     '_type'     => 'text',
                     '_required' => true
@@ -80,7 +80,7 @@ class Portfolio_setting_model extends MY_Model
                 [
                     'field' => 'bs_service_charge[]',
                     'label' => 'Beema Samiti Service Charge(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal4|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_key'      => 'bs_service_charge',
                     '_required' => true
@@ -88,7 +88,7 @@ class Portfolio_setting_model extends MY_Model
                 [
                     'field' => 'direct_discount[]',
                     'label' => 'Direct Discount(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal4|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_key'      => 'direct_discount',
                     '_required' => true
@@ -96,7 +96,7 @@ class Portfolio_setting_model extends MY_Model
                 [
                     'field' => 'pool_premium[]',
                     'label' => 'Pool Premium(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal4|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_key'      => 'pool_premium',
                     '_required' => true
