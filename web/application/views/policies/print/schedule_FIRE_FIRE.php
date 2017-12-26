@@ -164,6 +164,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                                 <thead>
                                     <tr>
                                         <td>सम्पत्ति</td>
+                                        <td>विवरण</td>
                                         <td align="right">बीमांक (रु)</td>
                                     </tr>
                                 </thead>
@@ -175,6 +176,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                                         for ($i=0; $i < $item_count; $i++):?>
                                             <tr>
                                                 <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
+                                                <td><?php echo nl2br(htmlspecialchars($items->description[$i])); ?></td>
                                                 <td align="right"><?php echo $items->sum_insured[$i]; ?></td>
                                             </tr>
                                         <?php
