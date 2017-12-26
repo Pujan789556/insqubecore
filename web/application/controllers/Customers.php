@@ -167,23 +167,23 @@ class Customers extends MY_Controller
 		            'label' => 'Company Reg Number',
 		            'rules' => 'trim|max_length[20]',
 		            '_type'     => 'text',
-		            '_extra_attributes' => ['data-hideonload' => 'yes'],
+		            '_extra_attributes' => ['data-hideonload' => 'yes', 'data-ref' => 'C'],
 		            '_required' => false
 		        ],
 		        [
-		            'field' => 'filter_citizenship_no',
-		            'label' => 'Citizenship Number',
+		            'field' => 'filter_identification_no',
+		            'label' => 'Citizenship/Passport Number',
 		            'rules' => 'trim|max_length[20]',
 		            '_type'     => 'text',
-		            '_extra_attributes' => ['data-hideonload' =>'yes'],
+		            '_extra_attributes' => ['data-hideonload' =>'yes', 'data-ref' => 'I'],
 		            '_required' => false
 		        ],
 		        [
-		            'field' => 'filter_passport_no',
-		            'label' => 'Passport Number',
+		            'field' => 'filter_dob',
+		            'label' => 'Date of Birth',
 		            'rules' => 'trim|alpha_dash|max_length[20]',
 		            '_type'     => 'text',
-		            '_extra_attributes' => ['data-hideonload' =>'yes'],
+		            '_extra_attributes' => ['data-hideonload' =>'yes', 'data-ref' => 'I'],
 		            '_required' => false
 		        ],
 	            [
@@ -211,8 +211,8 @@ class Customers extends MY_Controller
 						'code' 				=> $this->input->post('filter_code') ?? NULL,
 						'type' 				=> $this->input->post('filter_type') ?? NULL,
 						'company_reg_no' 	=> $this->input->post('filter_company_reg_no') ?? NULL,
-						'citizenship_no' 	=> $this->input->post('filter_citizenship_no') ?? NULL,
-						'passport_no' 		=> $this->input->post('filter_passport_no') ?? NULL,
+						'identification_no' => $this->input->post('filter_identification_no') ?? NULL,
+						'dob' 				=> $this->input->post('filter_dob') ?? NULL,
 						'keywords' 			=> $this->input->post('filter_keywords') ?? ''
 					];
 				}

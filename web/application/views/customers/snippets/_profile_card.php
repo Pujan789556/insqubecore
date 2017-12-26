@@ -42,6 +42,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <td class="text-bold">Mother</td>
                         <td class="text-right"><?php echo $record->mother_name?></td>
                     </tr>
+                    <tr>
+                        <td class="text-bold">Spouse</td>
+                        <td class="text-right"><?php echo $record->spouse_name?></td>
+                    </tr>
                 <?php endif; ?>
                 <tr>
                     <td class="text-bold">Type</td>
@@ -54,12 +58,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </tr>
                 <?php else:?>
                     <tr>
-                        <td class="text-bold">Citizenship No.</td>
-                        <td class="text-right"><?php echo $record->citizenship_no?></td>
+                        <td class="text-bold">Citizenship/Passport No.</td>
+                        <td class="text-right"><?php echo $record->identification_no?></td>
                     </tr>
                     <tr>
-                        <td class="text-bold">Passport No.</td>
-                        <td class="text-right"><?php echo $record->passport_no?></td>
+                        <td class="text-bold">DOB</td>
+                        <td class="text-right"><?php echo $record->dob?></td>
                     </tr>
                 <?php endif?>
                 <tr>

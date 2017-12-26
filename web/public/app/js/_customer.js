@@ -1,38 +1,37 @@
 /**
  * InsQube: Customer Management
+ *
+ * Version: 1.0
  */
 
 // Hide Element on Load if any
 $('[data-hideonload=yes]').closest('.form-group').hide();
 
 
-// Customer List Search Filter
+// Type Filter Change
 $(document).on('change', '#filter-type', function(e){
-    var $this = $(this),
-    	val = $this.val(),
-    	$regbox = $('input[type="text"][name="filter_company_reg_no"]').closest('.form-group'),
-        $ctznbox = $('input[type="text"][name="filter_citizenship_no"]').closest('.form-group'),
-        $ppbox = $('input[type="text"][name="filter_passport_no"]').closest('.form-group');
+    var $ref_both = $('[data-hideonload=yes]'),
+        $ref_i = $('input[data-ref="I"]'),
+        $ref_c = $('input[data-ref="C"]'),
+        $ref_i_box = $ref_i.closest('.form-group'),
+        $ref_c_box = $ref_c.closest('.form-group');
 
-    if (val == 'C') {
-		$regbox.show();
-		$ctznbox.hide();
-		$ppbox.hide();
-		$('input[type="text"][name="filter_passport_no"]').val('');
-		$('input[type="text"][name="filter_citizenship_no"]').val('');
-	}
-  	else if (val == 'I') {
-		$ctznbox.show();
-		$ppbox.show();
-		$regbox.hide();
-		$('input[type="text"][name="filter_company_reg_no"]').val('');
-      }
-  	else{
-  		$regbox.hide();
-      	$ctznbox.hide();
-      	$ppbox.hide();
-      	$('[data-hideonload=yes]').val('');
-  	}
+    if (this.value == 'C') {
+        $ref_c_box.show();
+        $ref_i_box.hide(function(){
+            $ref_i.val('');
+        })
+    }
+    else if (this.value == 'I'){
+        $ref_i_box.show();
+        $ref_c_box.hide(function(){
+            $ref_c.val('');
+        })
+    }
+    else{
+      $ref_both.closest('.form-group').hide();
+      $ref_both.val('');
+    }
 });
 
 $(document).on('click', '#_btn-filter-reset', function(){

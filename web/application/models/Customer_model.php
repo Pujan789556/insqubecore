@@ -19,90 +19,9 @@ class Customer_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'branch_id', 'code', 'type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'picture', 'profession', 'contact', 'company_reg_no', 'citizenship_no', 'passport_no', 'fts', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'branch_id', 'code', 'type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'contact', 'fts', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
-    protected $validation_rules = [
-        [
-            'field' => 'type',
-            'label' => 'Customer Type',
-            'rules' => 'trim|required|alpha|exact_length[1]|in_list[I,C]',
-            '_type'     => 'radio',
-            '_data'     => [ 'I' => 'Individual', 'C' => 'Company'],
-            '_required' => true
-        ],
-        [
-            'field' => 'full_name',
-            'label' => 'Full Name',
-            'rules' => 'trim|required|max_length[150]',
-            '_type'     => 'text',
-            '_required' => true
-        ],
-        [
-            'field' => 'grandfather_name',
-            'label' => 'Grandfather Name',
-            'rules' => 'trim|max_length[150]',
-            '_type'     => 'text',
-            '_extra_attributes' => 'data-ref="I"',
-            '_required' => false
-        ],
-        [
-            'field' => 'father_name',
-            'label' => 'Father Name',
-            'rules' => 'trim|max_length[150]',
-            '_type'     => 'text',
-            '_extra_attributes' => 'data-ref="I"',
-            '_required' => false
-        ],
-        [
-            'field' => 'mother_name',
-            'label' => 'Mother Name',
-            'rules' => 'trim|max_length[150]',
-            '_type'     => 'text',
-            '_extra_attributes' => 'data-ref="I"',
-            '_required' => false
-        ],
-
-        // If type is Company
-        [
-            'field' => 'company_reg_no',
-            'label' => 'Company Reg Number',
-            'rules' => 'trim|max_length[20]',
-            '_type'     => 'text',
-            '_extra_attributes' => 'data-ref="C"',
-            '_required' => false
-        ],
-        [
-            'field' => 'citizenship_no',
-            'label' => 'Citizenship Number',
-            'rules' => 'trim|max_length[20]',
-            '_type'     => 'text',
-            '_extra_attributes' => 'data-ref="I"',
-            '_required' => false
-        ],
-        [
-            'field' => 'passport_no',
-            'label' => 'Passport Number',
-            'rules' => 'trim|alpha_dash|max_length[20]',
-            '_type'     => 'text',
-            '_extra_attributes' => 'data-ref="I"',
-            '_required' => false
-        ],
-
-        [
-            'field' => 'pan',
-            'label' => 'PAN',
-            'rules' => 'trim|alpha_dash|max_length[20]',
-            '_type'     => 'text',
-            '_required' => false
-        ],
-        [
-            'field' => 'profession',
-            'label' => 'Profession / Field of Experties',
-            'rules' => 'trim|max_length[50]',
-            '_type'     => 'text',
-            '_required' => false
-        ]
-    ];
+    protected $validation_rules = [];
 
 
     /**
@@ -121,8 +40,125 @@ class Customer_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+
+        // Validation rules
+        $this->validation_rules();
     }
 
+
+    // ----------------------------------------------------------------
+
+    public function validation_rules()
+    {
+        $this->load->model('country_model');
+        $countries = $this->country_model->dropdown();
+        $this->validation_rules = [
+            [
+                'field' => 'type',
+                'label' => 'Customer Type',
+                'rules' => 'trim|required|alpha|exact_length[1]|in_list[I,C]',
+                '_type'     => 'radio',
+                '_data'     => [ 'I' => 'Individual', 'C' => 'Company'],
+                '_required' => true
+            ],
+            [
+                'field' => 'full_name',
+                'label' => 'Full Name',
+                'rules' => 'trim|required|max_length[150]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+
+            /**
+             * Individual Only Fields
+             */
+            [
+                'field'     => 'nationality',
+                'label'     => 'Nationality',
+                'rules'     => 'trim|required|alpha|exact_length[2]',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_BLANK_SELECT + $countries,
+                '_default'  => 'NP',
+                '_extra_attributes' => 'data-ref="I"',
+                '_required' => true
+            ],
+            [
+                'field' => 'grandfather_name',
+                'label' => 'Grandfather Name',
+                'rules' => 'trim|max_length[150]',
+                '_type'     => 'text',
+                '_extra_attributes' => 'data-ref="I"',
+                '_required' => false
+            ],
+            [
+                'field' => 'father_name',
+                'label' => 'Father Name',
+                'rules' => 'trim|required|max_length[150]',
+                '_type'     => 'text',
+                '_extra_attributes' => 'data-ref="I"',
+                '_required' => true
+            ],
+            [
+                'field' => 'mother_name',
+                'label' => 'Mother Name',
+                'rules' => 'trim|max_length[150]',
+                '_type'     => 'text',
+                '_extra_attributes' => 'data-ref="I"',
+                '_required' => false
+            ],
+            [
+                'field' => 'spouse_name',
+                'label' => 'Spouse Name',
+                'rules' => 'trim|max_length[150]',
+                '_type'     => 'text',
+                '_extra_attributes' => 'data-ref="I"',
+                '_required' => false
+            ],
+            [
+                'field' => 'identification_no',
+                'label' => 'Citizenship/Passport Number',
+                'rules' => 'trim|max_length[40]',
+                '_type'     => 'text',
+                '_extra_attributes' => 'data-ref="I"',
+                '_required' => false
+            ],
+            [
+                'field' => 'dob',
+                'label' => 'Date of Birth(AD/BS)',
+                'rules' => 'trim|alpha_dash|max_length[10]',
+                '_type'     => 'text',
+                '_extra_attributes' => 'data-ref="I"',
+                '_help_text' => 'Valid date example: 2040-09-09',
+                '_required' => false
+            ],
+
+            /**
+             * Company Only Fields
+             */
+            [
+                'field' => 'company_reg_no',
+                'label' => 'Company Reg Number',
+                'rules' => 'trim|max_length[20]',
+                '_type'     => 'text',
+                '_extra_attributes' => 'data-ref="C"',
+                '_required' => false
+            ],
+            [
+                'field' => 'pan',
+                'label' => 'PAN',
+                'rules' => 'trim|alpha_dash|max_length[20]',
+                '_type'     => 'text',
+                '_required' => false
+            ],
+            [
+                'field' => 'profession',
+                'label' => 'Profession / Field of Experties',
+                'rules' => 'trim|max_length[50]',
+                '_type'     => 'text',
+                '_required' => false
+            ]
+        ];
+    }
 
     // ----------------------------------------------------------------
 
@@ -310,7 +346,7 @@ class Customer_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('C.id, C.code, C.pan, C.full_name, C.picture, C.type, C.profession, C.company_reg_no, C.citizenship_no, C.passport_no, C.contact, C.flag_locked')
+        $this->db->select('C.id, C.code, C.pan, C.full_name, C.picture, C.type, C.profession, C.company_reg_no, C.identification_no, C.dob, C.contact, C.flag_locked')
                  ->from($this->table_name . ' as C');
 
 
@@ -340,16 +376,16 @@ class Customer_model extends MY_Model
                 $this->db->where(['C.company_reg_no' =>  $company_reg_no]);
             }
 
-            $citizenship_no = $params['citizenship_no'] ?? NULL;
-            if( $citizenship_no )
+            $identification_no = $params['identification_no'] ?? NULL;
+            if( $identification_no )
             {
-                $this->db->where(['C.citizenship_no' =>  $citizenship_no]);
+                $this->db->where(['C.identification_no' =>  $identification_no]);
             }
 
-            $passport_no = $params['passport_no'] ?? NULL;
-            if( $passport_no )
+            $dob = $params['dob'] ?? NULL;
+            if( $dob )
             {
-                $this->db->where(['C.passport_no' =>  $passport_no]);
+                $this->db->where(['C.dob' =>  $dob]);
             }
 
             $keywords = $params['keywords'] ?? '';

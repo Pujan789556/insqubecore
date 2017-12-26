@@ -26,8 +26,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<?php if($record->type == 'C'):?>
 			<br/>Company Reg. No. <strong><?php echo $record->company_reg_no?></strong>
 		<?php else:?>
-			<br/>Citizenship No. <strong><?php echo $record->citizenship_no?></strong><br/>
-			Passport No. <strong><?php echo $record->passport_no?></strong>
+			<br/>Citizenship/Passport No.: <strong><?php echo $record->identification_no?></strong><br/>
+			DOB: <strong><?php echo $record->dob?></strong>
 		<?php endif?>
 	</td>
 	<td><?php echo $record->profession;?></td>

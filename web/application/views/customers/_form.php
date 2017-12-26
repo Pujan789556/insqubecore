@@ -58,7 +58,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <script type="text/javascript">
 (function($){
 
-    var $ref_i = $('input[data-ref="I"]'),
+    var $ref_i = $('input[data-ref="I"], select[data-ref="I"]'),
         $ref_c = $('input[data-ref="C"]'),
         $ref_i_box = $ref_i.closest('.form-group'),
         $ref_c_box = $ref_c.closest('.form-group'),
