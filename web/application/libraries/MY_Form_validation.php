@@ -142,4 +142,25 @@ class MY_Form_validation extends CI_Form_validation {
 		}
 		return $str;
 	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Prep Decimal upto 4 decimal point
+	 *
+	 * If supplied value is numeric, convert this number into a decimal number
+	 * having decimal point upto 4
+	 *
+	 * @param	string
+	 * @return	string
+	 */
+	public function prep_decimal4($str = '')
+	{
+		//  Number but not Decimal
+		if( is_numeric( $str ) && floor( $str ) == $str )
+		{
+			$str = number_format($str, 4, '.', '');
+		}
+		return $str;
+	}
 }
