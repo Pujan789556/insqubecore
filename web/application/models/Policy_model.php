@@ -1295,7 +1295,7 @@ class Policy_model extends MY_Model
                              * Customer Table (code, name, type, pan, picture, pfrofession, contact,
                              * company reg no, citizenship no, passport no, lock flag)
                              */
-                            "C.code as customer_code, C.full_name as customer_name, C.grandfather_name as customer_grandfather_name, C.father_name as customer_father_name, C.mother_name as customer_mother_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.citizenship_no, C.passport_no, C.flag_locked AS customer_flag_locked, " .
+                            "C.code as customer_code, C.full_name as customer_name, C.grandfather_name as customer_grandfather_name, C.father_name as customer_father_name, C.mother_name as customer_mother_name, C.spouse_name as customer_spouse_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.identification_no, C.dob, C.flag_locked AS customer_flag_locked, " .
 
 
                             /**
