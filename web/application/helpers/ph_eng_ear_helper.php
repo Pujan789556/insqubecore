@@ -166,6 +166,15 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 			        '_default' => 0,
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
+			    ],
+			    [
+			        'field' => 'object[items][deductibles][]',
+			        '_key' => 'deductibles',
+			        'label' => 'Deductibles',
+			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        '_type' => 'text',
+			        '_show_label' 	=> false,
+			        '_required' 	=> false
 			    ]
 		    ],
 
@@ -215,42 +224,6 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 			        'label' => 'Deductibles',
 			        'rules' => 'trim|htmlspecialchars|max_length[150]',
 			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' 	=> true
-			    ]
-		    ],
-
-		    /**
-		     * Excess for Section I & II
-		     */
-		    'excess' => [
-		    	[
-			        'field' => 'object[excess][sn][]',
-			        '_key' => 'sn',
-			        'label' => 'Excess Title',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[10]',
-			        '_type' => 'hidden',
-			        '_data' 		=> $excess_dropdown,
-			        '_show_label' 	=> false,
-			        '_required' 	=> true
-			    ],
-		    	[
-			        'field' => 'object[excess][percent][]',
-			        '_key' => 'percent',
-			        'label' => 'Percent(%)',
-			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-			        '_type'     => 'text',
-			        '_default' 	=> 0,
-			        '_show_label' 	=> false,
-			        '_required' 	=> true
-			    ],
-		    	[
-			        'field' => 'object[excess][amount][]',
-			        '_key' => 'amount',
-			        'label' => 'Minimum Amount (Rs.)',
-			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-			        '_type'     => 'text',
-			        '_default' 	=> 0,
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ]
@@ -773,23 +746,20 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 					// A = Default Premium for all item
 					$A = $items_premium;
 					$cost_calculation_table[] = [
-						'label' => "A. Gross Premium",
+						'label' => "Premium",
 						'value' => $A
 					];
 
 					// B = TP X TP Rate %
 					$B = ( $TPL_AMOUNT * $tp_rate ) / 100.00;
 					$cost_calculation_table[] = [
-						'label' => "B. Third Party Rate ({$tp_rate}%)",
+						'label' => "Third Party Premium",
 						'value' => $B
 					];
 
 					// C = A + B
 					$C = $A + $B;
-					$cost_calculation_table[] = [
-						'label' => "C. Total Gross Premium",
-						'value' => $C
-					];
+
 
 
 					/**
@@ -807,7 +777,7 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 						$D = ( $C * $pfs_record->direct_discount ) / 100.00 ;
 
 						$cost_calculation_table[] = [
-							'label' => "D. Direct discount ({$pfs_record->direct_discount}%)",
+							'label' => "Direct Discount",
 							'value' => $D
 						];
 					}
@@ -819,10 +789,7 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 
 					// E = C - D
 					$E = $C - $D;
-					$cost_calculation_table[] = [
-						'label' => "E. (C - D)",
-						'value' => $E
-					];
+
 
 					/**
 					 * Pool Premium
@@ -841,13 +808,13 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 						$POOL_PREMIUM = ( ($SI - $si_debris) * $pool_rate ) / 100.00;
 					}
 					$cost_calculation_table[] = [
-						'label' => "F. Pool Premium ({$pool_rate})",
+						'label' => "Pool Premium",
 						'value' => $POOL_PREMIUM
 					];
 
 					$NET_PREMIUM = $E + $POOL_PREMIUM;
 					$cost_calculation_table[] = [
-						'label' => "G. Net Premium",
+						'label' => "Net Premium",
 						'value' => $NET_PREMIUM
 					];
 

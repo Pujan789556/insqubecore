@@ -81,60 +81,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
-                <h4 class="box-title">EXCESS for Section I and II</h4>
-            </div>
-            <?php
-            $section_elements   = $form_elements['excess'];
-            $excess_dropdown    = $section_elements[0]['_data'];
-            $excess_objects     = $record->excess ?? NULL;
-            ?>
-            <table class="table table-bordered table-condensed no-margin">
-                <thead>
-                    <tr>
-                        <?php foreach($section_elements as $elem): ?>
-                            <th><?php echo $elem['label'] ?></th>
-                        <?php endforeach ?>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $i = 0;
-                    foreach($excess_dropdown as $key=>$label): ?>
-                        <tr>
-                            <?php
-                            /**
-                             * Create a Record for Third Single Row object, (edit mode)
-                             */
-                            $row_record = NULL;
-                            if($excess_objects)
-                            {
-                                $row_record = (object)[];
-                                foreach ($section_elements as $elem)
-                                {
-                                    $row_record->{$elem['_key']} = $excess_objects->{$elem['_key']}[$i];
-                                }
-                            }
-                            else
-                            {
-                                $section_elements[0]['_default'] = $key;
-                            }
-                            $section_elements[0]['_extra_html_below']   = $label;
-
-                            $this->load->view('templates/_common/_form_components_table', [
-                                'form_elements' => $section_elements,
-                                'form_record'   => $row_record
-                            ]);
-
-                            $i++;
-                            ?>
-                        </tr>
-                    <?php endforeach ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="box box-solid box-bordered">
-            <div class="box-header with-border">
                 <h4 class="box-title">Other Details</h4>
             </div>
             <div class="box-body form-horizontal">
@@ -189,7 +135,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     $item_row_record = (object)[];
                                     foreach ($section_elements as $elem)
                                     {
-                                        $item_row_record->{$elem['_key']} = $item_objects->{$elem['_key']}[$i];
+                                        $item_row_record->{$elem['_key']} = $item_objects->{$elem['_key']}[$i] ?? '';
                                     }
                                 }
                                 else

@@ -731,7 +731,7 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 						// Direct Discount
 						$D = ( $C * $pfs_record->direct_discount ) / 100.00 ;
 						$cost_calculation_table[] = [
-							'label' => "Direct discount ({$pfs_record->direct_discount}%)",
+							'label' => "Direct Discount",
 							'value' => $D
 						];
 					}

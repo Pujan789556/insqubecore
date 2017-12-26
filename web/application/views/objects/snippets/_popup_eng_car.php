@@ -87,7 +87,7 @@ else
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
-                        <td>Risks - AOG</td>
+                        <td>AOG - Earthquake, volcanism, tsunami, storm, cyclone, flood, inundation, landslide</td>
                         <td class="text-right"><?php echo number_format($record->amt_sum_insured, 2, '.', '') ?></td>
                         <td><?php echo $attributes->risk->deductibles; ?></td>
                     </tr>

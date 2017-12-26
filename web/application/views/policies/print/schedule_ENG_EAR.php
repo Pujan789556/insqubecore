@@ -79,11 +79,11 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                             // Bank
                             echo '<strong>Name and address of Financer</strong><br/>',
                                 $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name),
-                                    get_contact_widget($record->creditor_branch_contact, true, true), '<br/>';
+                                    get_contact_widget($record->creditor_branch_contact, true, true), '<br/><br/>';
                         }
                         ?>
 
-                        <br/><strong>Name and address of Principal</strong><br/>
+                        <strong>Name and address of Principal</strong><br/>
                         <?php echo nl2br(htmlspecialchars($object_attributes->principal)) ?>
 
                         <br/><br/><strong>Name and address of Contractor</strong><br/>
@@ -202,16 +202,16 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                                 <tr>
                                     <td class="text-bold">Total Sum Insured Amount(Rs.)</td>
                                     <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2, '.', '') ?></td>
+                                    <td>&nbsp;</td>
                                 </tr>
                                 <tr>
-                                    <td>
-                                        AOG - Earthquake, volcanism, tsunami, storm, cyclone, flood, inundation, landslide <br>
-                                        <i>(<?php echo $object_attributes->risk->deductibles; ?>)</i>
-                                    </td>
+                                    <td><sup>(1)</sup>AOG - Earthquake, volcanism, tsunami, storm, cyclone, flood, inundation, landslide</td>
                                     <td class="text-right"><?php echo number_format($record->object_amt_sum_insured, 2, '.', '') ?></td>
+                                    <td><?php echo $object_attributes->risk->deductibles; ?></td>
                                 </tr>
                             </tbody>
                         </table>
+                        <p><sup>(1)</sup> <i style="font-size: 8pt">Limit of indemnity in respect of each and every loss or damage and/or series of losses or damages arising out of any one envent.</i></p>
                     </td>
                 </tr>
                 <tr>
@@ -226,7 +226,12 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                             <thead>
                                 <tr>
                                     <?php foreach($section_elements as $elem): ?>
-                                        <td><?php echo $elem['label'] ?></td>
+                                        <td>
+                                            <?php if($elem['_key'] == 'limit'): ?>
+                                                <sup>(2)</sup>
+                                            <?php endif; ?>
+                                            <?php echo $elem['label'] ?>
+                                        </td>
                                     <?php endforeach; ?>
                                 </tr>
                             </thead>
@@ -271,63 +276,13 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                                 </tr>
                             </tbody>
                         </table>
+                        <p><sup>(2)</sup> <i style="font-size: 8pt">Limit of indemnity in respect of any one accident or series of accidents arising out of one event.</i></p>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2"><?php echo htmlspecialchars($object_attributes->others->limit_per_event); ?></td>
                 </tr>
-                <tr>
-                    <td colspan="2">
-                        <?php
-                        $section_elements   = $form_elements['excess'];
-                        $items              = $object_attributes->excess ?? NULL;
-                        $item_count         = count( $items->percent ?? [] );
-                        ?>
-                        <strong>EXCESS for Section I and II</strong><br>
-                        <table class="table table-condensed">
-                            <thead>
-                                <tr>
-                                    <?php foreach($section_elements as $elem): ?>
-                                        <td><?php echo $elem['label'] ?></td>
-                                    <?php endforeach; ?>
-                                </tr>
-                            </thead>
 
-                            <tbody>
-                                <?php for ($i=0; $i < $item_count; $i++): ?>
-                                        <tr>
-                                            <?php
-                                            foreach($section_elements as $elem):
-                                                $key =  $elem['_key'];
-                                                $value = $items->{$key}[$i];
-
-                                                // If we have dropdown, load label from this
-                                                $dd_data = $elem['_data'] ?? NULL;
-                                                if( $dd_data )
-                                                {
-                                                    $value = $dd_data[$value] ?? $value;
-                                                }
-
-                                                // Format Number
-                                                if( $key == 'percent' || $key == 'amount' )
-                                                {
-                                                    $value  = (float) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-
-                                                    // format this to echo
-                                                    $value = number_format($value, 2, '.', '');
-                                                }
-                                            ?>
-
-                                                <td <?php echo ($key == 'percent' || $key == 'amount') ? 'class="text-right"' : '' ?>>
-                                                    <?php echo $value?>
-                                                </td>
-                                            <?php endforeach ?>
-                                        </tr>
-                                    <?php endfor ?>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
                 <tr>
                     <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)); ?></td>
                 </tr>

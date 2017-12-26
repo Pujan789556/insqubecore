@@ -79,11 +79,11 @@ $schedule_table_title   = "Contractor's All Risks (Schedule)";
                             // Bank
                             echo '<strong>Name and address of Financer</strong><br/>',
                                 $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name),
-                                    get_contact_widget($record->creditor_branch_contact, true, true), '<br/>';
+                                    get_contact_widget($record->creditor_branch_contact, true, true), '<br/><br/>';
                         }
                         ?>
 
-                        <br/><strong>Name and address of Principal</strong><br/>
+                        <strong>Name and address of Principal</strong><br/>
                         <?php echo nl2br(htmlspecialchars($object_attributes->principal)) ?>
 
                         <br/><br/><strong>Name and address of Contractor</strong><br/>
