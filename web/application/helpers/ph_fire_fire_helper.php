@@ -720,12 +720,22 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_file'))
 	                '_required' => true
 	            ],
 	            [
-	                'field' => 'premium[file][sdd_amount]',
-	                'label' => 'SDD (Stock Declaration Discount) (Rs.)',
+	                'field' => 'premium[file][sdd_amount_regular]',
+	                'label' => 'SDD (Regular Premium) (Rs.)',
 	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 	                '_type'     => 'text',
-	                '_key' 		=> 'sdd_amount',
-	                '_placeholder' => 'SDD (Rs.)',
+	                '_key' 		=> 'sdd_amount_regular',
+	                '_placeholder' => 'SDD - REGULAR (Rs.)',
+	                '_show_label' => false,
+	                '_required' => true
+	            ],
+	            [
+	                'field' => 'premium[file][sdd_amount_pool]',
+	                'label' => 'SDD (Pool Premium) (Rs.)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'sdd_amount_pool',
+	                '_placeholder' => 'SDD - POOL (Rs.)',
 	                '_show_label' => false,
 	                '_required' => true
 	            ]
@@ -1052,8 +1062,11 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					/**
 					 * Initialization of Computational Variables
 					 */
-					$GROSS_PREMIUM 	= 0.00; // Gross Premium (Without Pool Premium)
-					$POOL_PREMIUM  	= 0.00; // Pool Premium
+					$GROSS_REGULAR_PREMIUM 	= 0.00; // Gross Premium (Without Pool Premium)
+					$GROSS_POOL_PREMIUM  	= 0.00; // Pool Premium
+
+					$NET_REGULAR_PREMIUM 	= 0.00; // Net Premium (Without Pool Premium)
+					$NET_POOL_PREMIUM  		= 0.00; // Net Pool Premium
 
 					// Additional discount/charge rates & amounts
 					$NWL_RATE 		= 0.00;
@@ -1061,7 +1074,12 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					$SDD_RATE 		= 0.00;
 					$NWL_AMOUNT 	= 0.00;
 					$FFA_AMOUNT 	= 0.00;
-					$SDD_AMOUNT 	= 0.00;
+					$SDD_AMOUNT_REGULAR 	= 0.00;
+					$SDD_AMOUNT_POOL 		= 0.00;
+
+					// Risk Distribution Table
+					$risk_table = [];
+
 
 					/**
 					 * -------------------------------------------------------------------------------------
@@ -1071,28 +1089,37 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					if( $object_attributes->item_attached === 'Y' )
 					{
 						// Get additional discount/charge rate & amount
-						$NWL_RATE 		= $premium_data['file']['nwl_rate'];
-						$FFA_RATE 		= $premium_data['file']['ffa_rate'];
-						$SDD_RATE 		= $premium_data['file']['sdd_rate'];
-						$NWL_AMOUNT 	= $premium_data['file']['nwl_amount'];
-						$FFA_AMOUNT 	= $premium_data['file']['ffa_amount'];
-						$SDD_AMOUNT 	= $premium_data['file']['sdd_amount'];
+						$NWL_RATE 		= floatval($premium_data['file']['nwl_rate']);
+						$FFA_RATE 		= floatval($premium_data['file']['ffa_rate']);
+						$SDD_RATE 		= floatval($premium_data['file']['sdd_rate']);
+						$NWL_AMOUNT 	= floatval($premium_data['file']['nwl_amount']);
+						$FFA_AMOUNT 	= floatval($premium_data['file']['ffa_amount']);
+						$SDD_AMOUNT_REGULAR 	= floatval($premium_data['file']['sdd_amount_regular']);
+						$SDD_AMOUNT_POOL 		= floatval($premium_data['file']['sdd_amount_pool']);
 
-						// Compute Gross and Pool Premium
+						// GROSS - Regular & Pool
 						foreach($portfolio_risks as $pr)
 						{
-							$premium = floatval($premium_data['file']['premium'][$pr->id]);
+							$premium_per_risk = floatval($premium_data['file']['premium'][$pr->id]);
 
-							// Assign to Pool or Base based on Risk Type
+
 							if( $pr->type == IQB_RISK_TYPE_BASIC )
 							{
-								$GROSS_PREMIUM += $premium;
+								$GROSS_REGULAR_PREMIUM += $premium_per_risk;
 							}
 							else
 							{
-								$POOL_PREMIUM += $premium;
+								$GROSS_POOL_PREMIUM += $premium_per_risk;
 							}
+
+
+							// Update Risk Table
+							$risk_table[] 		= [$pr->name, $premium_per_risk];
 						}
+
+						// NET - Regular & Pool
+						$NET_REGULAR_PREMIUM 	= $GROSS_REGULAR_PREMIUM + $NWL_AMOUNT - $FFA_AMOUNT - $SDD_AMOUNT_REGULAR;
+						$NET_POOL_PREMIUM 		= $GROSS_POOL_PREMIUM  - $SDD_AMOUNT_POOL;
 					}
 
 					/**
@@ -1112,9 +1139,13 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 						$items              = $object_attributes->items;
 						$item_count         = count($items->category);
 
+						// Risk table tmp
+						$risk_table_tmp = [];
+
 						for($i=0; $i < $item_count; $i++ )
 						{
 							$item_sum_insured 	= $items->sum_insured[$i];
+
 							foreach($portfolio_risks as $pr)
 							{
 								// Rate is Per Thousand of Sum Insured
@@ -1123,16 +1154,21 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 								// Compute only if rate is supplied
 								if($rate)
 								{
-									$premium = $item_sum_insured * $rate / 1000.00;
+									$premium_per_risk = $item_sum_insured * $rate / 1000.00;
 
-									// Assign to Pool or Base based on Risk Type
+
+									// Risk table tmp
+									$risk_table_tmp[$pr->name] = $risk_table_tmp[$pr->name] ?? 0.00;
+									$risk_table_tmp[$pr->name] += $premium_per_risk;
+
+									// GROSS - Regular & Pool
 									if( $pr->type == IQB_RISK_TYPE_BASIC )
 									{
-										$GROSS_PREMIUM += $premium;
+										$GROSS_REGULAR_PREMIUM += $premium_per_risk;
 									}
 									else
 									{
-										$POOL_PREMIUM += $premium;
+										$GROSS_POOL_PREMIUM += $premium_per_risk;
 									}
 
 									// Additional Charges/Discount (Per Risk Per Item)
@@ -1140,11 +1176,61 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 									$ffa_apply = $premium_data['manual']['ffa_apply'][$pr->id][$i] ?? NULL;
 									$sdd_apply = $premium_data['manual']['sdd_apply'][$pr->id][$i] ?? NULL;
 
-									$NWL_AMOUNT 	+= $nwl_apply ? ( $premium * $NWL_RATE / 100.00 ) : 0;
-									$FFA_AMOUNT 	+= $ffa_apply ? ( $premium * $FFA_RATE / 100.00 ) : 0;
-									$SDD_AMOUNT 	+= $sdd_apply ? ( $premium * $SDD_RATE / 100.00 ) : 0;
+									/**
+									 * NWL Compute
+									 */
+									if($nwl_apply)
+									{
+										$nwl_per_risk 		= $premium_per_risk * $NWL_RATE / 100.00;
+										$premium_per_risk 	+= $nwl_per_risk;
+										$NWL_AMOUNT 		+= $nwl_per_risk;
+									}
+
+									/**
+									 * FFA Compute
+									 */
+									if($ffa_apply)
+									{
+										$ffa_per_risk 		= $premium_per_risk * $FFA_RATE / 100.00;
+										$premium_per_risk 	-= $ffa_per_risk;
+										$FFA_AMOUNT 		+= $ffa_per_risk;
+									}
+
+									/**
+									 * SDD Compute
+									 */
+									if($sdd_apply)
+									{
+										$sdd_per_risk 		= $premium_per_risk * $SDD_RATE / 100.00;
+										$premium_per_risk 	-= $sdd_per_risk;
+
+										if( $pr->type == IQB_RISK_TYPE_BASIC )
+										{
+											$SDD_AMOUNT_REGULAR += $sdd_per_risk;
+										}
+										else
+										{
+											$SDD_AMOUNT_POOL += $sdd_per_risk;
+										}
+									}
+
+									// NET - Regular & Pool
+									if( $pr->type == IQB_RISK_TYPE_BASIC )
+									{
+										$NET_REGULAR_PREMIUM += $premium_per_risk;
+									}
+									else
+									{
+										$NET_POOL_PREMIUM += $premium_per_risk;
+									}
 								}
 							}
+						}
+
+						// Update Risk Table
+						foreach($risk_table_tmp as $key=>$value)
+						{
+							$risk_table[] 		= [$key, $value];
 						}
 					}
 
@@ -1165,11 +1251,11 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					 */
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 					{
-						$DIRECT_DISCOUNT = ( $GROSS_PREMIUM * $pfs_record->direct_discount ) / 100.00;
+						$DIRECT_DISCOUNT = ( $NET_REGULAR_PREMIUM * $pfs_record->direct_discount ) / 100.00;
 					}
 					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
-						$COMMISSIONABLE_PREMIUM = $GROSS_PREMIUM;
+						$COMMISSIONABLE_PREMIUM = $NET_REGULAR_PREMIUM;
 						$AGENT_COMMISSION = ( $COMMISSIONABLE_PREMIUM * $pfs_record->agent_commission ) / 100.00;
 					}
 
@@ -1177,7 +1263,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					/**
 					 * Let's Compute the Total Premium
 					 */
-					$NET_PREMIUM 	= $GROSS_PREMIUM - $DIRECT_DISCOUNT + $NWL_AMOUNT - $FFA_AMOUNT - $SDD_AMOUNT + $POOL_PREMIUM ;
+					$NET_PREMIUM 	= $NET_REGULAR_PREMIUM - $DIRECT_DISCOUNT + $NET_POOL_PREMIUM;
 					$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
 
 					/**
@@ -1193,7 +1279,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					$txn_data = [
 						'amt_sum_insured' 		=> $policy_object->amt_sum_insured,
 						'amt_total_premium' 	=> $NET_PREMIUM,
-						'amt_pool_premium' 		=> $POOL_PREMIUM,
+						'amt_pool_premium' 		=> $NET_POOL_PREMIUM,
 						'amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
 						'amt_agent_commission'  => $AGENT_COMMISSION,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
@@ -1224,18 +1310,12 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 					$summary_table = [
 						[
-							'label' => "GROSS PREMIUM",
-							'value' => $GROSS_PREMIUM
+							'label' => "PREMIUM",
+							'value' => $GROSS_REGULAR_PREMIUM
 						]
 					];
 
-					if($DIRECT_DISCOUNT)
-					{
-						$summary_table[] = [
-							'label' => "DIRECT DISCOUNT ({$pfs_record->direct_discount}%)",
-							'value' => $DIRECT_DISCOUNT
-						];
-					}
+
 
 					$summary_table = array_merge($summary_table, [
 						[
@@ -1247,19 +1327,26 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 							'value' => $FFA_AMOUNT
 						],
 						[
-							'label' => "SDD - Fire Only ({$SDD_RATE}%)",
-							'value' => $SDD_AMOUNT
+							'label' => "SDD - Regular ({$SDD_RATE}%)",
+							'value' => $SDD_AMOUNT_REGULAR
+						],
+						[
+							'label' => "SDD - Pool ({$SDD_RATE}%)",
+							'value' => $SDD_AMOUNT_POOL
 						],
 						[
 							'label' => "POOL PREMIUM",
-							'value' => $POOL_PREMIUM
-						],
-						[
-							'label' => "NET PREMIUM",
-							'value' => $NET_PREMIUM
+							'value' => $NET_POOL_PREMIUM
 						]
 					]);
 
+					if($DIRECT_DISCOUNT)
+					{
+						$summary_table[] = [
+							'label' => "DIRECT DISCOUNT ({$pfs_record->direct_discount}%)",
+							'value' => $DIRECT_DISCOUNT
+						];
+					}
 
 
 					/**
@@ -1272,7 +1359,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					 *  |		   | 			 |		   |
 					 * 	------------------------------------
 					 *
-					 * 	Risk Details
+					 * 	Risk Details - Computed Above
 					 * 	------------------
 					 * 	| Risk | Premium |
 					 * 	------------------
@@ -1280,43 +1367,10 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					 * 	------------------
 					 */
 					$property_table = [];
-					$risk_table = [];
 
-					if( $object_attributes->item_attached === 'Y' )
+					// Property table for manual item entry
+					if( $object_attributes->item_attached === 'N' )
 					{
-						// Only Risk Table
-						// Compute Gross and Pool Premium
-						foreach($portfolio_risks as $pr)
-						{
-							$per_risk_premium = floatval($premium_data['file']['premium'][$pr->id]);
-							$per_risk_base_premium 	= 0.00;
-							$per_risk_pool_premium 	= 0.00;
-
-							// Assign to Pool or Base based on Risk Type
-							if( $pr->type == IQB_RISK_TYPE_BASIC )
-							{
-								$per_risk_base_premium = $per_risk_premium;
-							}
-							else
-							{
-								$per_risk_pool_premium = $per_risk_premium;
-							}
-
-							/**
-							 * Direct Discount Applies?
-							 */
-							if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
-							{
-								$direct_discount 		= ( $per_risk_base_premium * $pfs_record->direct_discount ) / 100.00 ;
-								$per_risk_base_premium 	-= $direct_discount;
-							}
-							$per_risk_premium 	= $per_risk_base_premium  + $per_risk_pool_premium;
-							$risk_table[] 		= [$pr->name, $per_risk_premium];
-						}
-					}
-					else
-					{
-
 						for($i=0; $i < $item_count; $i++ )
 						{
 							$item_sum_insured 		= $items->sum_insured[$i];
@@ -1349,70 +1403,9 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 								}
 							}
 
-							/**
-							 * Direct Discount Applies?
-							 */
-							if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
-							{
-								$direct_discount 			= ( $per_property_base_premium * $pfs_record->direct_discount ) / 100.00 ;
-								$per_property_base_premium -= $direct_discount;
-							}
-
 							$per_property_premium 	= $per_property_base_premium  + $per_property_pool_premium;
 							$single_property_row[] 	= $per_property_premium;
 							$property_table[] 		= $single_property_row;
-						}
-
-						// --------------------------------------------------------------------------------------------
-
-
-						foreach($portfolio_risks as $pr)
-						{
-							$per_risk_premium 		= 0.00;
-							$per_risk_base_premium 	= 0.00;
-							$per_risk_pool_premium 	= 0.00;
-
-							for($i=0; $i < $item_count; $i++ )
-							{
-								$item_sum_insured 	= $items->sum_insured[$i];
-								$rate = floatval($premium_data['manual']['rate'][$pr->id][$i]);
-
-								// Compute only if rate is supplied
-								if($rate)
-								{
-									// Rate is Per Thousand
-									$premium = $item_sum_insured * $rate / 1000.00;
-
-									// Assign to Pool or Base based on Risk Type
-									if( $pr->type == IQB_RISK_TYPE_BASIC )
-									{
-										$per_risk_base_premium += $premium;
-									}
-									else
-									{
-										$per_risk_pool_premium += $premium;
-									}
-								}
-							}
-
-							/**
-							 * Direct Discount Applies?
-							 */
-							if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
-							{
-								$direct_discount 		= ( $per_risk_base_premium * $pfs_record->direct_discount ) / 100.00 ;
-								$per_risk_base_premium 	-= $direct_discount;
-							}
-							$per_risk_premium 	= $per_risk_base_premium  + $per_risk_pool_premium;
-
-
-							/**
-							 * Include the risk only with premium
-							 */
-							if( $per_risk_premium )
-							{
-								$risk_table[] 		= [$pr->name, $per_risk_premium];
-							}
 						}
 					}
 
