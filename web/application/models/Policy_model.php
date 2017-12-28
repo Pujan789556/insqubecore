@@ -376,7 +376,7 @@ class Policy_model extends MY_Model
                     [
                         'field' => 'sold_by',
                         'label' => 'Marketing Staff',
-                        'rules' => 'trim|required|integer|max_length[11]',
+                        'rules' => 'trim|integer|max_length[11]',
                         '_id'       => '_marketing-staff',
                         '_extra_attributes' => 'style="width:100%; display:block"',
                         '_type'     => 'dropdown',
@@ -666,6 +666,11 @@ class Policy_model extends MY_Model
          */
         $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
 
+        /**
+         * No marketing staff select?
+         */
+        $data['sold_by'] = $data['sold_by'] ? $data['sold_by'] : NULL;
+
         return $data;
     }
 
@@ -709,6 +714,11 @@ class Policy_model extends MY_Model
             $data['creditor_id']        = NULL;
             $data['creditor_branch_id'] = NULL;
         }
+
+        /**
+         * No marketing staff select?
+         */
+        $data['sold_by'] = $data['sold_by'] ? $data['sold_by'] : NULL;
 
 
         return $data;
@@ -1339,7 +1349,7 @@ class Policy_model extends MY_Model
                      ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
                      ->join('dt_objects O', 'O.id = P.object_id')
                      ->join('dt_customers C', 'C.id = P.customer_id')
-                     ->join('auth_users SU', 'SU.id = P.sold_by')
+                     ->join('auth_users SU', 'SU.id = P.sold_by', 'left')
                      ->join('auth_users CU', 'CU.id = P.created_by')
                      ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
                      ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
