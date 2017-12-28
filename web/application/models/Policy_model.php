@@ -156,6 +156,11 @@ class Policy_model extends MY_Model
 
             $creditor_branch_dropdown   = $creditor_id ? IQB_BLANK_SELECT + $this->company_branch_model->dropdown_by_company($creditor_id) : IQB_BLANK_SELECT;
 
+            /**
+             * Default End Duration as 1 Year (including start date)
+             */
+            $end_date = new DateTime('today + 364 days');
+            $default_end_datetime  = $end_date->format('Y-m-d') . ' 23:59:00';
 
             // Set the Validation Rules
             $this->validation_rules = [
@@ -358,7 +363,7 @@ class Policy_model extends MY_Model
                         'label' => 'Policy End Date & Time',
                         'rules' => 'trim|required|valid_date|callback__cb_valid_policy_duration',
                         '_type'             => 'datetime',
-                        '_default'          => date('Y-m-d H:i:00', strtotime( '+1 year', strtotime( date('Y-m-d H:i:00') ) ) ),
+                        '_default'          => $default_end_datetime,
                         '_extra_attributes' => 'data-provide="datetimepicker-inline"',
                         '_required' => true
                     ]
@@ -721,7 +726,9 @@ class Policy_model extends MY_Model
             // Times
             $data['issued_time']    = date('H:i:00', strtotime($data['issued_datetime']));
             $data['start_time']     = date('H:i:00', strtotime($data['start_datetime']));
-            $data['end_time']       = date('H:i:00', strtotime($data['end_datetime']));
+
+            // End time is always 23:59:00
+            $data['end_time']       = '23:59:00';   // date('H:i:00', strtotime($data['end_datetime']));
 
             // unset
             unset($data['issued_datetime']);
