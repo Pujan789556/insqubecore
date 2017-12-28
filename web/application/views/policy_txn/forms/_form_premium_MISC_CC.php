@@ -41,7 +41,7 @@ $premium_computation_table = $txn_record->premium_computation_table ? json_decod
 
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">
-            <h4 class="box-title">Premium Table</h4>
+            <h4 class="box-title">Premium Table (Risk-wise)</h4>
         </div>
         <div class="box-body form-inline" style="overflow-x: scroll;">
             <table class="table table-responsive table-condensed table-bordered">
@@ -104,21 +104,30 @@ $premium_computation_table = $txn_record->premium_computation_table ? json_decod
         </div>
     </div>
 
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
+            <h4 class="box-title">Pool Premium</h4>
+        </div>
+        <div class="box-body">
+            <?php
+            /**
+             * Load Form Components - Pool Premium
+             */
+            $this->load->view('templates/_common/_form_components_horz', [
+                'form_elements'     => $form_elements['pool'],
+                'form_record'       => (object)$premium_computation_table
+            ]);
+            ?>
+        </div>
+    </div>
+
     <?php
     /**
-     * Load Form Components - Pool Premium
+     * Load TXN Common Elements
      */
-    $this->load->view('templates/_common/_form_components_horz', [
-        'form_elements'     => $form_elements['pool'],
-        'form_record'       => (object)$premium_computation_table
-    ]);
-
-    /**
-     * Load Form Components - Basic Elements
-     */
-    $this->load->view('templates/_common/_form_components_horz', [
-        'form_elements'     => $form_elements['basic'],
-        'form_record'       => $txn_record
+    $this->load->view('policy_txn/forms/_form_txn_common', [
+        'txn_record'        => $txn_record,
+        'form_elements'     => $form_elements['basic']
     ]);
     ?>
     <button type="submit" class="hide">Submit</button>

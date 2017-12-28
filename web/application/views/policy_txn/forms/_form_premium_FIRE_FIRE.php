@@ -296,24 +296,17 @@ $premium_computation_table_arr  = json_decode($txn_record->premium_computation_t
         <?php endfor; ?>
     <?php endif; ?>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-            <h4 class="box-title">General Information</h4>
-        </div>
-        <div class="box-body">
-            <?php
-            /**
-             * Load Form Components - Basic Elements
-             */
-            $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements'     => $form_elements['basic'],
-                'form_record'       => $txn_record,
-                'grid_label'        => 'col-sm-4',
-                'grid_form_control' => 'col-sm-8'
-            ]);
-            ?>
-        </div>
-    </div>
+
+    <?php
+    /**
+     * Load TXN Common Elements
+     */
+    $this->load->view('policy_txn/forms/_form_txn_common', [
+        'txn_record'        => $txn_record,
+        'form_elements'     => $form_elements['basic']
+    ]);
+    ?>
+
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
 

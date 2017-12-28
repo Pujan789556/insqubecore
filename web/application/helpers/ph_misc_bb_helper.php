@@ -212,12 +212,6 @@ if ( ! function_exists('_TXN_MISC_BB_premium_validation_rules'))
 	 */
 	function _TXN_MISC_BB_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, $for_form_processing = FALSE )
 	{
-		$CI =& get_instance();
-
-		// Let's have the Endorsement Templates
-		$CI->load->model('endorsement_template_model');
-		$template_dropdown = $CI->endorsement_template_model->dropdown( $policy_record->portfolio_id );
-
 
 		$validation_rules = [
 
@@ -273,41 +267,7 @@ if ( ! function_exists('_TXN_MISC_BB_premium_validation_rules'))
 			 * ----------------------------
 			 * Sampusti Bibaran and Remarks are common to all type of policy package.
 			 */
-			'basic' => [
-				[
-	                'field' => 'amt_stamp_duty',
-	                'label' => 'Stamp Duty(Rs.)',
-	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
-	                '_type'     => 'text',
-	                '_default' 	=> $pfs_record->stamp_duty,
-	                '_required' => true
-	            ],
-				[
-	                'field' => 'txn_details',
-	                'label' => 'Details/सम्पुष्टि विवरण',
-	                'rules' => 'trim|required|htmlspecialchars',
-	                '_type'     => 'textarea',
-	                '_id'		=> 'txn-details',
-	                '_required' => true
-	            ],
-	            [
-                    'field' => 'template_reference',
-                    'label' => 'Load from endorsement templates',
-                    'rules' => 'trim|integer|max_length[8]',
-                    '_key' 		=> 'template_reference',
-                    '_id'		=> 'template-reference',
-                    '_type'     => 'dropdown',
-                    '_data' 	=> IQB_BLANK_SELECT + $template_dropdown,
-                    '_required' => false
-                ],
-	            [
-	                'field' => 'remarks',
-	                'label' => 'Remarks/कैफियत',
-	                'rules' => 'trim|htmlspecialchars',
-	                '_type'     => 'textarea',
-	                '_required' => false
-	            ]
-			]
+			'basic' => basic_premium_validation_rules( $policy_record->portfolio_id, $pfs_record )
 		];
 
 		/**

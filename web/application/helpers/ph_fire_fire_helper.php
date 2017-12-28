@@ -577,45 +577,13 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_validation_rules'))
 		$CI->load->model('endorsement_template_model');
 		$template_dropdown = $CI->endorsement_template_model->dropdown( $policy_record->portfolio_id );
 
-		$basic_rules = [
-			[
-                'field' => 'amt_stamp_duty',
-                'label' => 'Stamp Duty(Rs.)',
-                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
-                '_type'     => 'text',
-                '_default' 	=> $pfs_record->stamp_duty,
-                '_required' => true
-            ],
-			[
-                'field' => 'txn_details',
-                'label' => 'Details/सम्पुष्टि विवरण',
-                'rules' => 'trim|required|htmlspecialchars',
-                '_type'     => 'textarea',
-                '_id'		=> 'txn-details',
-                '_required' => true
-            ],
-            [
-                'field' => 'template_reference',
-                'label' => 'Load from endorsement templates',
-                'rules' => 'trim|integer|max_length[8]',
-                '_key' 		=> 'template_reference',
-                '_id'		=> 'template-reference',
-                '_type'     => 'dropdown',
-                '_data' 	=> IQB_BLANK_SELECT + $template_dropdown,
-                '_required' => false
-            ],
-            [
-                'field' => 'remarks',
-                'label' => 'Remarks/कैफियत',
-                'rules' => 'trim|htmlspecialchars',
-                '_type'     => 'textarea',
-                '_required' => false
-            ]
-		];
+
+		// Basic/Common Validation Rules
+		$basic_rules = basic_premium_validation_rules( $policy_record->portfolio_id, $pfs_record );
+
 
 		// Get validation rules based on the type (Manual Item entry or File Upload)
 		$object_attributes 	= json_decode($policy_object->attributes ?? NULL);
-		// echo '<pre>'; print_r($object_attributes);exit;
 
 		if( $object_attributes->item_attached === 'Y')
 		{

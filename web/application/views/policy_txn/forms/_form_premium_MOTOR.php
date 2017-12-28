@@ -14,110 +14,116 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
         // Hidden Fields
         isset($policy_record) ? ['id' => $policy_record->id] : []);
 ?>
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Portfolio</label>
-        <div class="col-sm-10">
-            <p class="form-control-static"><?php echo $policy_record->portfolio_name;?></p>
-        </div>
-    </div>
-    <?php if($policy_record->portfolio_id === IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID):?>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">CVC Type</label>
-            <div class="col-sm-10">
-            <p class="form-control-static"><?php echo $object_attributes->cvc_type ? _OBJ_MOTOR_CVC_type_dropdown(FALSE)[$object_attributes->cvc_type] : '-'?></p>
-            </div>
-        </div>
-    <?php endif?>
 
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Ownership</label>
-        <div class="col-sm-10">
-        <p class="form-control-static"><?php echo _OBJ_MOTOR_ownership_dropdown(FALSE)[$object_attributes->ownership]?></p>
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
+            <h4 class="box-title">Policy Summary</h4>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Engine Capacity</label>
-        <div class="col-sm-10">
-        <p class="form-control-static"><?php echo $object_attributes->engine_capacity . ' ' . $object_attributes->ec_unit?></p>
-        </div>
+        <table class="table table-responsive table-condensed">
+            <tbody>
+                <tr>
+                    <th>Portfolio</th>
+                    <td><?php echo $policy_record->portfolio_name;?></td>
+                </tr>
+
+                <?php if($policy_record->portfolio_id === IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID):?>
+                    <tr>
+                        <th>CVC Type</th>
+                        <td>
+                            <?php echo $object_attributes->cvc_type ? _OBJ_MOTOR_CVC_type_dropdown(FALSE)[$object_attributes->cvc_type] : '-'?>
+                        </td>
+                    </tr>
+                <?php endif?>
+
+                <tr>
+                    <th>Ownership</th>
+                    <td><?php echo _OBJ_MOTOR_ownership_dropdown(FALSE)[$object_attributes->ownership]?></td>
+                </tr>
+
+                <tr>
+                    <th>Engine Capacity</th>
+                    <td><?php echo $object_attributes->engine_capacity . ' ' . $object_attributes->ec_unit?></td>
+                </tr>
+
+                <tr>
+                    <th>Policy Package</th>
+                    <td><?php echo _OBJ_policy_package_dropdown($policy_record->portfolio_id)[$policy_record->policy_package]?></td>
+                </tr>
+
+                <?php
+                // Find the Thirdparty Discount
+                $tariff = json_decode($tariff_record->tariff, true);
+                $third_party_premium = 0.00;
+                foreach ($tariff as $t)
+                {
+                    if( $object_attributes->engine_capacity >= $t['ec_min'] && $object_attributes->engine_capacity <= $t['ec_max'])
+                    {
+                        $third_party_premium = $t['third_party'];
+                        break;
+                    }
+                }
+                ?>
+                <tr>
+                    <th>Third Party Premium</th>
+                    <td>Rs. <?php echo $third_party_premium?></td>
+                </tr>
+
+                <tr>
+                    <th>Sum Insured Value (Rs.)</th>
+                    <td>
+                        <p class="form-control-static">Rs. <?php echo $policy_object->amt_sum_insured;?></p>
+                        <p class="help-box">
+                            When Sum Insured Value is below or equal to Rs. <strong>1 Lakh (100000.00)</strong> then the Stamp Duty = should be <strong>Rs. 10</strong>.
+                            If its greater it should be <strong>Rs. 20</strong>.<br/><br/>
+                            <code>
+                                IF Sum Insured <= 100000 Then  <strong>Stamp Duty = Rs. 10</strong> <br/>
+                                Else <strong>Stamp Duty = Rs. 10</strong>
+                            </code>
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Direct Discount</th>
+                    <td><?php echo $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT ? 'Yes' : 'No';?></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Policy Package</label>
-        <div class="col-sm-10">
-        <p class="form-control-static"><?php echo _OBJ_policy_package_dropdown($policy_record->portfolio_id)[$policy_record->policy_package]?></p>
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
+            <h4 class="box-title">Premium Information</h4>
+        </div>
+        <div class="box-body">
+            <?php
+            /**
+             * Comprehensive Premium Information
+             */
+            if( $policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE )
+            {
+                $premium_computation_table = $txn_record->premium_computation_table ? json_decode($txn_record->premium_computation_table) : NULL;
+
+                /**
+                 * Load Form Components
+                 */
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements'     => $form_elements['premium'],
+                    'form_record'       => $premium_computation_table
+                ]);
+            }
+            ?>
         </div>
     </div>
 
     <?php
-    // Find the Thirdparty Discount
-    $tariff = json_decode($tariff_record->tariff, true);
-    $third_party_premium = 0.00;
-    foreach ($tariff as $t)
-    {
-        if( $object_attributes->engine_capacity >= $t['ec_min'] && $object_attributes->engine_capacity <= $t['ec_max'])
-        {
-            $third_party_premium = $t['third_party'];
-            break;
-        }
-    }
-    ?>
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Third Party Premium</label>
-        <div class="col-sm-10">
-        <p class="form-control-static">Rs. <?php echo $third_party_premium?></p>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Sum Insured Value (Rs.)</label>
-        <div class="col-sm-10">
-        <p class="form-control-static">Rs. <?php echo $policy_object->amt_sum_insured;?></p>
-        <p class="help-box">
-            When Sum Insured Value is below or equal to Rs. <strong>1 Lakh (100000.00)</strong> then the Stamp Duty = should be <strong>Rs. 10</strong>.
-            If its greater it should be <strong>Rs. 20</strong>.<br/><br/>
-            <code>
-                IF Sum Insured <= 100000 Then  <strong>Stamp Duty = Rs. 10</strong> <br/>
-                Else <strong>Stamp Duty = Rs. 10</strong>
-            </code>
-        </p>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Direct Discount</label>
-        <div class="col-sm-10">
-        <p class="form-control-static"><?php echo $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT ? 'Yes' : 'No';?></p>
-        </div>
-    </div>
-
-    <?php
-
     /**
-     * Load Form Components - Basic Elements
+     * Load TXN Common Elements
      */
-    $this->load->view('templates/_common/_form_components_horz', [
-        'form_elements'     => $form_elements['basic'],
-        'form_record'       => $txn_record
+    $this->load->view('policy_txn/forms/_form_txn_common', [
+        'txn_record'        => $txn_record,
+        'form_elements'     => $form_elements['basic']
     ]);
-
-
-    /**
-     * Comprehensive Premium Information
-     */
-    if( $policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE )
-    {
-        $premium_computation_table = $txn_record->premium_computation_table ? json_decode($txn_record->premium_computation_table) : NULL;
-
-        /**
-         * Load Form Components
-         */
-        $this->load->view('templates/_common/_form_components_horz', [
-            'form_elements'     => $form_elements['premium'],
-            'form_record'       => $premium_computation_table
-        ]);
-    }
-
     ?>
 
     <button type="submit" class="hide">Submit</button>

@@ -1580,4 +1580,63 @@ if ( ! function_exists('policy_nr_title'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('basic_premium_validation_rules'))
+{
+	/**
+	 * Get common/basic premium validation rules for all portfolios
+	 *
+	 * @param integer $portfolio_id 	Portfolio ID
+	 * @param object $pfs_record		Portfolio Setting Record
+	 * @return	array
+	 */
+	function basic_premium_validation_rules( $portfolio_id, $pfs_record )
+	{
+		$CI =& get_instance();
+
+		// Let's have the Endorsement Templates
+		$CI->load->model('endorsement_template_model');
+		$template_dropdown = $CI->endorsement_template_model->dropdown( $portfolio_id );
+
+		$basic_rules = [
+			[
+                'field' => 'amt_stamp_duty',
+                'label' => 'Stamp Duty(Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                '_type'     => 'text',
+                '_default' 	=> $pfs_record->stamp_duty,
+                '_required' => true
+            ],
+			[
+                'field' => 'txn_details',
+                'label' => 'Details/सम्पुष्टि विवरण',
+                'rules' => 'trim|required|htmlspecialchars',
+                '_type'     => 'textarea',
+                '_id'		=> 'txn-details',
+                '_required' => true
+            ],
+            [
+                'field' => 'template_reference',
+                'label' => 'Load from endorsement templates',
+                'rules' => 'trim|integer|max_length[8]',
+                '_key' 		=> 'template_reference',
+                '_id'		=> 'template-reference',
+                '_type'     => 'dropdown',
+                '_data' 	=> IQB_BLANK_SELECT + $template_dropdown,
+                '_required' => false
+            ],
+            [
+                'field' => 'remarks',
+                'label' => 'Remarks/कैफियत',
+                'rules' => 'trim|htmlspecialchars',
+                '_type'     => 'textarea',
+                '_required' => false
+            ]
+		];
+
+		return $basic_rules;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 
