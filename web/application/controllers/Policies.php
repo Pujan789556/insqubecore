@@ -186,7 +186,8 @@ class Policies extends MY_Controller
 		{
 			$this->load->model('portfolio_model');
 
-			$select = ['' => 'Select ...'];
+			$status_dropdown = get_policy_status_dropdown(false);
+
 			$filters = [
 				[
 	                'field' => 'filter_type',
@@ -199,10 +200,10 @@ class Policies extends MY_Controller
 	            [
 	                'field' => 'filter_status',
 	                'label' => 'Policy Status',
-	                'rules' => 'trim|alpha|exact_length[1]|in_list[D,A,E]',
+	                'rules' => 'trim|alpha|exact_length[1]|in_list['.implode(',',array_keys($status_dropdown)).']',
 	                '_id'       => 'filter-status',
 	                '_type'     => 'dropdown',
-	                '_data'     => get_policy_status_dropdown(),
+	                '_data'     => IQB_BLANK_SELECT + $status_dropdown,
 	            ],
 				[
 	                'field' => 'filter_portfolio_id',
@@ -210,7 +211,7 @@ class Policies extends MY_Controller
 	                'rules' => 'trim|integer|max_length[11]',
 	                '_id'       => 'filter-status',
 	                '_type'     => 'dropdown',
-	                '_data'     => $select + $this->portfolio_model->dropdown_parent(),
+	                '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_children_tree(),
 	            ],
 	            [
 		            'field' => 'filter_code',
@@ -257,9 +258,10 @@ class Policies extends MY_Controller
 					$data['data'] = [
 						'code' 				=> $this->input->post('filter_code') ?? NULL,
 						'type' 				=> $this->input->post('filter_type') ?? NULL,
-						'company_reg_no' 	=> $this->input->post('filter_company_reg_no') ?? NULL,
-						'citizenship_no' 	=> $this->input->post('filter_citizenship_no') ?? NULL,
-						'passport_no' 		=> $this->input->post('filter_passport_no') ?? NULL,
+						'status' 			=> $this->input->post('filter_status') ?? NULL,
+						'portfolio_id' 		=> $this->input->post('filter_portfolio_id') ?? NULL,
+						'start_date' 		=> $this->input->post('filter_start_date') ?? NULL,
+						'end_date' 			=> $this->input->post('filter_end_date') ?? NULL,
 						'keywords' 			=> $this->input->post('filter_keywords') ?? ''
 					];
 					$data['status'] = 'success';

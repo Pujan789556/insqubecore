@@ -1284,29 +1284,35 @@ class Policy_model extends MY_Model
                 $this->db->like('LOWER(P.code)', strtolower($code), 'after');
             }
 
-            // $type = $params['type'] ?? NULL;
-            // if( $type )
-            // {
-            //     $this->db->where(['P.type' =>  $type]);
-            // }
+            $type = $params['type'] ?? NULL;
+            if( $type )
+            {
+                $this->db->where(['P.type' =>  $type]);
+            }
 
-            // $company_reg_no = $params['company_reg_no'] ?? NULL;
-            // if( $company_reg_no )
-            // {
-            //     $this->db->where(['P.company_reg_no' =>  $company_reg_no]);
-            // }
+            $status = $params['status'] ?? NULL;
+            if( $status )
+            {
+                $this->db->where(['P.status' =>  $status]);
+            }
 
-            // $citizenship_no = $params['citizenship_no'] ?? NULL;
-            // if( $citizenship_no )
-            // {
-            //     $this->db->where(['P.citizenship_no' =>  $citizenship_no]);
-            // }
+            $portfolio_id = $params['portfolio_id'] ?? NULL;
+            if( $portfolio_id )
+            {
+                $this->db->where(['P.portfolio_id' =>  $portfolio_id]);
+            }
 
-            // $passport_no = $params['passport_no'] ?? NULL;
-            // if( $passport_no )
-            // {
-            //     $this->db->where(['P.passport_no' =>  $passport_no]);
-            // }
+            $start_date = $params['start_date'] ?? NULL;
+            if( $start_date )
+            {
+                $this->db->where(['P.start_date >=' =>  $start_date]);
+            }
+
+            $end_date = $params['end_date'] ?? NULL;
+            if( $end_date )
+            {
+                $this->db->where(['P.end_date <=' =>  $end_date]);
+            }
 
             // $keywords = $params['keywords'] ?? '';
             // if( $keywords )
