@@ -140,9 +140,6 @@ echo form_open( $this->uri->uri_string(),
     </div>
 
 
-
-
-
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">
           <h4 class="box-title">Select Duration</h4>
@@ -217,6 +214,7 @@ function __toggle_creditor_info(){
         $box.fadeOut();
         $('#_creditor-id').prop('selectedIndex',0).trigger('change');
         $('#_care-of-text').val('');
+        $('#_other-creditors').val('');
     }else{
         $box.fadeIn();
     }

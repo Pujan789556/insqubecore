@@ -71,25 +71,21 @@ $schedule_table_title   = 'Electronic Equipment Insurance (Schedule)';
                     <td>
                         <strong>Name and address of Insured</strong><br/>
                         <?php
+                        echo $this->security->xss_clean($record->customer_name) ,
+                                '<br/>' , get_contact_widget($record->customer_contact, true, true);
+
                         /**
                          * If Policy Object is Financed or on Loan, The financial Institute will be "Insured Party"
                          * and the customer will be "Account Party"
                          */
                         if($record->flag_on_credit === 'Y')
                         {
-                            echo '<strong>INS.: ' . $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name) . '</strong><br/>';
-                            echo '<br/>' . get_contact_widget($record->creditor_branch_contact, true, true) . '<br/>';
-
-                            // Care of
-                            echo '<strong>A/C.: ' . $this->security->xss_clean($record->customer_name) . '<br/></strong>';
-                            echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
+                            echo '<br/><strong>Name and address of Financer(s)</strong><br/>',
+                                $this->security->xss_clean($record->creditor_name) , ', ' , $this->security->xss_clean($record->creditor_branch_name), '<br/>',
+                                get_contact_widget($record->creditor_branch_contact, true, true) , '<br/>' ,
+                                nl2br($this->security->xss_clean($record->other_creditors));
 
                             echo  $record->care_of ? '<br/>C/O.: ' . $this->security->xss_clean($record->care_of) : '';
-                        }
-                        else
-                        {
-                            echo $this->security->xss_clean($record->customer_name) . '<br/>';
-                            echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                         }
                         ?>
                     </td>

@@ -57,11 +57,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </tr>
                         <?php if($record->flag_on_credit === 'Y'):?>
                             <tr>
-                                <td class="text-bold">Insured Party</td>
-                                <td><?php echo $this->security->xss_clean($record->creditor_name);?>, <?php echo $this->security->xss_clean($record->creditor_branch_name);?></td>
+                                <td class="text-bold">Primary Financer</td>
+                                <td>
+                                    <?php echo $this->security->xss_clean($record->creditor_name);?>, <?php echo $this->security->xss_clean($record->creditor_branch_name); ?>
+                                </td>
                             </tr>
                             <tr>
-                                <td class="text-bold">Account Party</td>
+                                <td class="text-bold">Other Financer(s)</td>
+                                <td><?php echo nl2br($this->security->xss_clean($record->other_creditors));?></td>
+                            </tr>
+                            <tr>
+                                <td class="text-bold">Insured Party</td>
                                 <td><?php echo $this->security->xss_clean($record->customer_name);?></td>
                             </tr>
                              <tr>

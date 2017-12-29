@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
     protected $validation_rules = [];
 
@@ -275,7 +275,7 @@ class Policy_model extends MY_Model
                 'creditor_info' => [
                     [
                         'field' => 'creditor_id',
-                        'label' => 'Creditor Company',
+                        'label' => 'Primary Financer(Bank/Finance Institution)',
                         'rules' => $creditor_validation,
                         '_id'       => '_creditor-id',
                         '_extra_attributes' => 'style="width:100%; display:block"',
@@ -286,7 +286,7 @@ class Policy_model extends MY_Model
                     ],
                     [
                         'field' => 'creditor_branch_id',
-                        'label' => 'Company Branch',
+                        'label' => 'Financer Branch',
                         'rules' => $creditor_branch_validation,
                         '_id'       => '_creditor-branch-id',
                         '_extra_attributes' => 'style="width:100%; display:block"',
@@ -294,6 +294,17 @@ class Policy_model extends MY_Model
                         '_data'     => $creditor_branch_dropdown,
                         '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Company Branch" of selected "Creditor Company" if not available in this list and try again.',
                         '_required' => true
+                    ],
+                    [
+                        'field' => 'other_creditors',
+                        'label' => 'Other Financers',
+                        'rules' => 'trim|htmlspecialchars|max_length[500]',
+                        '_id'               => '_other-creditors',
+                        '_extra_attributes' => 'style="width:100%; display:block"',
+                        '_type'     => 'textarea',
+                        'rows'      => 4,
+                        '_help_text' => '<i class="fa fa-info-circle"></i> If you have more than one financers, please mention here with branch information.',
+                        '_required' => false
                     ],
                     [
                         'field' => 'care_of',
@@ -652,6 +663,7 @@ class Policy_model extends MY_Model
         {
             $data['creditor_id']        = NULL;
             $data['creditor_branch_id'] = NULL;
+            $data['other_creditors']    = NULL;
         }
 
 
@@ -713,6 +725,7 @@ class Policy_model extends MY_Model
         {
             $data['creditor_id']        = NULL;
             $data['creditor_branch_id'] = NULL;
+            $data['other_creditors']    = NULL;
         }
 
         /**
