@@ -343,7 +343,7 @@ class Policy_model extends MY_Model
                     [
                         'field' => 'issued_datetime',
                         'label' => 'Policy Issue Date & Time',
-                        'rules' => 'trim|required|valid_date|callback__cb_valid_backdate',
+                        'rules' => 'trim|required|valid_date',
                         '_type'             => 'datetime',
                         '_default'          => date('Y-m-d H:i:00'),
                         '_extra_attributes' => 'data-provide="datetimepicker-inline"',
@@ -352,7 +352,7 @@ class Policy_model extends MY_Model
                     [
                         'field' => 'start_datetime',
                         'label' => 'Policy Start Date & Time',
-                        'rules' => 'trim|required|valid_date|callback__cb_valid_backdate',
+                        'rules' => 'trim|required|valid_date',
                         '_type'             => 'datetime',
                         '_default'          => date('Y-m-d H:i:00'),
                         '_extra_attributes' => 'data-provide="datetimepicker-inline"',
@@ -1055,6 +1055,36 @@ class Policy_model extends MY_Model
                  * to Active
                  */
                 case IQB_POLICY_STATUS_ACTIVE:
+                    /**
+                     * Process Back-date
+                     */
+                    $base_data  = $this->_backdate($record, $base_data);
+                    $done       = $this->_to_status($record->id, $base_data);
+
+                    /**
+                     * Save original Schedule as PDF
+                     */
+                    if($done)
+                    {
+                        /**
+                         * Updated Records - Policy and Policy Transaction
+                         */
+                        $record     = $this->get($record->id);
+                        $txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+
+                        /**
+                         * Save a Fresh PDF copy
+                         */
+                        _POLICY__schedule_pdf([
+                                'record'        => $record,
+                                'txn_record'    => $txn_record
+                            ], 'save');
+                    }
+                    break;
+
+                /**
+                 * to Cancel/Expire
+                 */
                 case IQB_POLICY_STATUS_CANCELED:
                 case IQB_POLICY_STATUS_EXPIRED:
                     $this->_to_status($record->id, $base_data);
@@ -1080,10 +1110,6 @@ class Policy_model extends MY_Model
          */
 
         return $transaction_status;
-
-
-        return $this->db->where('id', $id)
-                    ->update($this->table_name, $data);
     }
 
     // ----------------------------------------------------------------
@@ -1092,6 +1118,80 @@ class Policy_model extends MY_Model
         {
             return $this->db->where('id', $id)
                     ->update($this->table_name, $data);
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Validate and process Back-date
+         *
+         * If user has supplied backdate, please make sure that :
+         *      1. The user is allowed to enter Backdate
+         *      2. If so, the supplied date should be withing backdate limit
+         *
+         * @param object    $record Policy Record
+         * @param array     $data
+         * @return array
+         */
+        public function _backdate($record, $data)
+        {
+            $data['start_date']     = $this->_backdate_process($record->start_date);
+            $data['issued_date']    = $this->_backdate_process($record->issued_date);
+
+            return $data;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Process back-date validation
+         *
+         * @param date     $date
+         * @return array
+         */
+        public function _backdate_process($date)
+        {
+            $timestamp      = strtotime($date);
+
+            /**
+             * Not a past date? or Backdate not allowed?
+             * -----------------------------------------
+             * Simply return today's date
+             */
+            $today              = date('Y-m-d');
+            $dateonly_timestamp = strtotime(date('Y-m-d', $timestamp));
+            $today_timestamp    = strtotime($today);
+            if( ($today_timestamp <=  $dateonly_timestamp) || !$this->dx_auth->is_backdate_allowed() )
+            {
+                return $today;
+            }
+
+
+            /**
+             * Backdate Limit Set by Administrator?
+             */
+            $back_date_limit = $this->settings->back_date_limit;
+            if( !$back_date_limit || !valid_date($back_date_limit) )
+            {
+                throw new Exception('Exception [Model: Policy_model][Method: _valid_backdate()]: "Back Date Limit" is not setup properly.<br/>Please contact Administrator for further assistance.');
+            }
+
+            /**
+             * Within Backdate Range?
+             * ----------------------
+             * i.e. Back Date <= Supplied Date
+             */
+            $back_date_timestamp = strtotime($back_date_limit);
+
+            if($timestamp < $back_date_timestamp )
+            {
+                throw new Exception('Exception [Model: Policy_model][Method: _valid_backdate()]: Supplied date(policy issue date and/or policy start date) can not exceed "Back Date Limit".');
+            }
+
+            /**
+             * Date is withing backdate limit range, simply return it as it is.
+             */
+            return $date;
         }
 
     // ----------------------------------------------------------------
@@ -1129,22 +1229,6 @@ class Policy_model extends MY_Model
          * Save Original Schedule PDF
          */
         $result_row = $result[0];
-        if($result_row->policy_code)
-        {
-            /**
-             * Updated Records - Policy and Policy Transaction
-             */
-            $record     = $this->get($record->id);
-            $txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
-
-            /**
-             * Save a Fresh PDF copy
-             */
-            _POLICY__schedule_pdf([
-                    'record'        => $record,
-                    'txn_record'    => $txn_record
-                ], 'save');
-        }
 
         return $result_row->policy_code;
     }
