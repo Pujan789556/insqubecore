@@ -25,6 +25,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							data-url="<?php echo site_url('portfolio/add_settings/');?>"
 							data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
+						<a href="<?php echo site_url( $this->router->class . '/flush_settings/' );?>" title="Flush Cache"
+							class="btn btn-success btn-round"
+							data-toggle="tooltip"
+						><i class="fa fa-trash-o"></i> Flush Cache</a>
 					</div>
 				</div>
 			</div>

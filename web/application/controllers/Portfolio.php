@@ -611,6 +611,20 @@ class Portfolio extends MY_Controller
 
   	// --------------------------------------------------------------------
 
+    /**
+     * Flush Cache Data - Portfolio Settings
+     *
+     * @return void
+     */
+    public function flush_settings()
+    {
+    	$this->load->model('portfolio_setting_model');
+        $this->portfolio_setting_model->clear_cache();
+        redirect($this->router->class . '/settings' );
+    }
+
+  	// --------------------------------------------------------------------
+
 	/**
 	 * Add new Settings for a Specific Fiscal Year
 	 *
@@ -737,6 +751,7 @@ class Portfolio extends MY_Controller
 				$flag_default_duration 	= $this->input->post('flag_default_duration');
 				$default_duration  		= $this->input->post('default_duration');
 				$flag_short_term  		= $this->input->post('flag_short_term');
+				$flag_installment  		= $this->input->post('flag_installment');
 
 
 				/**
@@ -758,7 +773,8 @@ class Portfolio extends MY_Controller
 							'stamp_duty' 				=> $stamp_duty[$i],
 							'flag_default_duration' 	=> $flag_default_duration[$i],
 							'default_duration' 			=> $default_duration[$i],
-							'flag_short_term' 			=> $flag_short_term[$i]
+							'flag_short_term' 			=> $flag_short_term[$i],
+							'flag_installment' 			=> $flag_installment[$i]
 						];
 						$i++;
 					}
@@ -779,7 +795,8 @@ class Portfolio extends MY_Controller
 							'stamp_duty' 				=> $stamp_duty[$i],
 							'flag_default_duration' 	=> $flag_default_duration[$i],
 							'default_duration' 			=> $default_duration[$i],
-							'flag_short_term' 			=> $flag_short_term[$i]
+							'flag_short_term' 			=> $flag_short_term[$i],
+							'flag_installment' 			=> $flag_installment[$i]
 						];
 
 						$setting_id = $setting_ids[$i];
