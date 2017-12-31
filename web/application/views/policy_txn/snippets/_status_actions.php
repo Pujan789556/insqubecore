@@ -23,7 +23,7 @@ if( is_policy_txn_editable($record->status, $record->flag_current, FALSE) ):
     <a href="#"
         title="Update Premium"
         data-toggle="tooltip"
-        class="btn btn-sm btn-round trg-dialog-edit"
+        class="action trg-dialog-edit"
         data-box-size="large"
         data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $policy_record->code?>'
         data-url="<?php echo site_url($update_premium_url);?>"
