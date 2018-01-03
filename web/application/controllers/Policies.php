@@ -190,14 +190,6 @@ class Policies extends MY_Controller
 
 			$filters = [
 				[
-	                'field' => 'filter_type',
-	                'label' => 'Policy Type',
-	                'rules' => 'trim|alpha|exact_length[1]|in_list[N,R]',
-	                '_id'       => 'filter-type',
-	                '_type'     => 'dropdown',
-	                '_data'     => [ '' => 'Select...', 'N' => 'New', 'R' => 'Renewal'],
-	            ],
-	            [
 	                'field' => 'filter_status',
 	                'label' => 'Policy Status',
 	                'rules' => 'trim|alpha|exact_length[1]|in_list['.implode(',',array_keys($status_dropdown)).']',
@@ -257,7 +249,6 @@ class Policies extends MY_Controller
 				{
 					$data['data'] = [
 						'code' 				=> $this->input->post('filter_code') ?? NULL,
-						'type' 				=> $this->input->post('filter_type') ?? NULL,
 						'status' 			=> $this->input->post('filter_status') ?? NULL,
 						'portfolio_id' 		=> $this->input->post('filter_portfolio_id') ?? NULL,
 						'start_date' 		=> $this->input->post('filter_start_date') ?? NULL,

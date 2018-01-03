@@ -1284,12 +1284,6 @@ class Policy_model extends MY_Model
                 $this->db->like('LOWER(P.code)', strtolower($code), 'after');
             }
 
-            $type = $params['type'] ?? NULL;
-            if( $type )
-            {
-                $this->db->where(['P.type' =>  $type]);
-            }
-
             $status = $params['status'] ?? NULL;
             if( $status )
             {
