@@ -191,7 +191,7 @@ class Policy_txn_installment_model extends MY_Model
     {
         return $this->db->select('PTI.*, P.branch_id')
                         ->from($this->table_name . ' AS PTI')
-                        ->join('dt_policy_txn PTXN', 'PTXN.id = PTI.policy_txn_id')
+                        ->join('dt_policy_transactions PTXN', 'PTXN.id = PTI.policy_txn_id')
                         ->join('dt_policies P', 'P.id = PTXN.policy_id')
                         ->where('PTI.id', $id)
                         ->get()->row();
@@ -229,7 +229,7 @@ class Policy_txn_installment_model extends MY_Model
         {
             $this->db->select('PTI.*, P.branch_id, P.code')
                     ->from($this->table_name . ' AS PTI')
-                    ->join('dt_policy_txn PTXN', 'PTXN.id = PTI.policy_txn_id')
+                    ->join('dt_policy_transactions PTXN', 'PTXN.id = PTI.policy_txn_id')
                         ->join('dt_policies P', 'P.id = PTXN.policy_id')
                     ->where('PTI.policy_txn_id', $policy_txn_id);
 

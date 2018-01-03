@@ -423,7 +423,7 @@ if ( ! function_exists('is_policy_txn_editable'))
 
 				||
 
-				( $status === IQB_POLICY_TXN_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('policy_txn', 'edit.draft.transaction') )
+				( $status === IQB_POLICY_TXN_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('policy_transactions', 'edit.draft.transaction') )
 
 			)
 			{
@@ -464,7 +464,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR)) )
 		{
-			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_AGR";
+			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_AGR";
 		}
 
 		/**
@@ -473,7 +473,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
-			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MOTOR";
+			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MOTOR";
 		}
 
 		/**
@@ -482,7 +482,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_FIRE_FIRE";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_FIRE_FIRE";
         }
 
         /**
@@ -491,7 +491,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_FIRE_HHP";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_FIRE_HHP";
         }
 
         /**
@@ -500,7 +500,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_FIRE_LOP";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_FIRE_LOP";
         }
 
 		/**
@@ -509,7 +509,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_BRG";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_BRG";
         }
 
 		/**
@@ -518,7 +518,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
-			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MARINE";
+			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MARINE";
 		}
 
 		/**
@@ -528,7 +528,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
-			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_BL";
+			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_BL";
         }
 
         /**
@@ -538,7 +538,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
         {
-			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_CAR";
+			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_CAR";
         }
 
         /**
@@ -548,7 +548,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
-			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_CPM";
+			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_CPM";
         }
 
         /**
@@ -558,7 +558,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
-			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_EEI";
+			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_EEI";
         }
 
         /**
@@ -568,7 +568,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
         {
-			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_EAR";
+			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_EAR";
         }
 
         /**
@@ -578,7 +578,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
-			$partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_ENG_MB";
+			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_MB";
         }
 
         /**
@@ -588,7 +588,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_BB";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_BB";
         }
 
         /**
@@ -598,7 +598,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_GPA";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_GPA";
         }
 
         /**
@@ -608,7 +608,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_PA";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_PA";
         }
 
         /**
@@ -617,7 +617,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_PL";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_PL";
         }
 
         /**
@@ -626,7 +626,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_CT";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_CT";
         }
 
         /**
@@ -635,7 +635,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_CS";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_CS";
         }
 
         /**
@@ -644,7 +644,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_CC";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_CC";
         }
 
         /**
@@ -653,7 +653,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_EPA";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_EPA";
         }
 
         /**
@@ -662,7 +662,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_TMI";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_TMI";
         }
 
         /**
@@ -671,7 +671,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_FG";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_FG";
         }
 
         /**
@@ -680,7 +680,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
         {
-            $partial_view = "policy_txn/snippets/{$view_prefix}_cost_calculation_table_MISC_HI";
+            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_HI";
         }
 
         /**
@@ -715,7 +715,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR)) )
 		{
-			$form_view = 'policy_txn/forms/_form_premium_AGR';
+			$form_view = 'policy_transactions/forms/_form_premium_AGR';
 		}
 
 		/**
@@ -725,7 +725,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
-			$form_view = 'policy_txn/forms/_form_premium_MOTOR';
+			$form_view = 'policy_transactions/forms/_form_premium_MOTOR';
 		}
 
 		/**
@@ -734,7 +734,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_FIRE_FIRE';
+            $form_view = 'policy_transactions/forms/_form_premium_FIRE_FIRE';
         }
 
         /**
@@ -743,7 +743,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_FIRE_HHP';
+            $form_view = 'policy_transactions/forms/_form_premium_FIRE_HHP';
         }
 
         /**
@@ -752,7 +752,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_FIRE_LOP';
+            $form_view = 'policy_transactions/forms/_form_premium_FIRE_LOP';
         }
 
 		/**
@@ -761,7 +761,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_BRG';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_BRG';
         }
 
 		/**
@@ -770,7 +770,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
-			$form_view = 'policy_txn/forms/_form_premium_MARINE';
+			$form_view = 'policy_transactions/forms/_form_premium_MARINE';
 		}
 
 		/**
@@ -780,7 +780,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_ENG_BL';
+            $form_view = 'policy_transactions/forms/_form_premium_ENG_BL';
         }
 
         /**
@@ -790,7 +790,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_ENG_CAR';
+            $form_view = 'policy_transactions/forms/_form_premium_ENG_CAR';
         }
 
         /**
@@ -800,7 +800,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_ENG_CPM';
+            $form_view = 'policy_transactions/forms/_form_premium_ENG_CPM';
         }
 
         /**
@@ -810,7 +810,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_ENG_EEI';
+            $form_view = 'policy_transactions/forms/_form_premium_ENG_EEI';
         }
 
         /**
@@ -820,7 +820,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
         {
-			$form_view = 'policy_txn/forms/_form_premium_ENG_EAR';
+			$form_view = 'policy_transactions/forms/_form_premium_ENG_EAR';
         }
 
         /**
@@ -829,7 +829,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_ENG_MB';
+            $form_view = 'policy_transactions/forms/_form_premium_ENG_MB';
         }
 
         /**
@@ -839,7 +839,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_BB';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_BB';
         }
 
         /**
@@ -848,7 +848,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_GPA';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_GPA';
         }
 
         /**
@@ -857,7 +857,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_PA';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_PA';
         }
 
         /**
@@ -866,7 +866,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_PL';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_PL';
         }
 
         /**
@@ -875,7 +875,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_CT';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_CT';
         }
 
         /**
@@ -884,7 +884,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_CS';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_CS';
         }
 
         /**
@@ -893,7 +893,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_CC';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_CC';
         }
 
         /**
@@ -902,7 +902,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_EPA';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_EPA';
         }
 
         /**
@@ -911,7 +911,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_TMI';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_TMI';
         }
 
         /**
@@ -920,7 +920,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_FG';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_FG';
         }
 
         /**
@@ -929,7 +929,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
         {
-            $form_view = 'policy_txn/forms/_form_premium_MISC_HI';
+            $form_view = 'policy_transactions/forms/_form_premium_MISC_HI';
         }
 
 
@@ -1182,9 +1182,9 @@ if ( ! function_exists('_POLICY__ri_approval_constraint'))
 	function _POLICY__ri_approval_constraint( $policy_id_or_txn_record )
 	{
 		$CI =& get_instance();
-		$CI->load->model('policy_txn_model');
+		$CI->load->model('policy_transaction_model');
 
-		return $CI->policy_txn_model->ri_approved($policy_id_or_txn_record) != TRUE;
+		return $CI->policy_transaction_model->ri_approved($policy_id_or_txn_record) != TRUE;
 	}
 }
 
@@ -1219,7 +1219,7 @@ if ( ! function_exists('_POLICY__endorsement_pdf'))
 			}
 		}
 
-		$schedule_view 	= 'policy_txn/print/endorsement';
+		$schedule_view 	= 'policy_transactions/print/endorsement';
 
 		$record = $records[0] ?? NULL;
 

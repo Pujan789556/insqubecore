@@ -1400,7 +1400,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 					$txn_data['cost_calculation_table'] = $cost_calculation_table;
 
-					$done = $CI->policy_txn_model->save($txn_record->id, $txn_data);
+					$done = $CI->policy_transaction_model->save($txn_record->id, $txn_data);
 
 					return $done;
 

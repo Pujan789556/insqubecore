@@ -189,7 +189,7 @@ $config['DX_permissions'] = [
 		/**
 		 * Policy Transaction/Endorsement
 		 */
-		'policy_txn' => [
+		'policy_transactions' => [
 
 			/**
 			 * CRUD Operation Permissions

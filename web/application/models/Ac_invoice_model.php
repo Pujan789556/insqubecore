@@ -615,7 +615,7 @@ class Ac_invoice_model extends MY_Model
             return $this->db->select('PTXN.id AS policy_txn_id, PTXN.policy_id')
                         ->join('ac_vouchers V', 'V.id = I.voucher_id')
                         ->join('rel_policy_txn__voucher RELPTXNVHR', 'RELPTXNVHR.voucher_id = I.voucher_id')
-                        ->join('dt_policy_txn PTXN', 'RELPTXNVHR.policy_txn_id = PTXN.id')
+                        ->join('dt_policy_transactions PTXN', 'RELPTXNVHR.policy_txn_id = PTXN.id')
                         ->where('PTXN.policy_id', $policy_id)
                         ->where('I.flag_complete', IQB_FLAG_ON)
                         ->where('V.flag_complete', IQB_FLAG_ON)
@@ -649,7 +649,7 @@ class Ac_invoice_model extends MY_Model
                         )
                     ->join('ac_vouchers V', 'V.id = I.voucher_id')
                     ->join('rel_policy_txn__voucher RELPTXNVHR', 'RELPTXNVHR.voucher_id = I.voucher_id')
-                    ->join('dt_policy_txn PTXN', 'RELPTXNVHR.policy_txn_id = PTXN.id')
+                    ->join('dt_policy_transactions PTXN', 'RELPTXNVHR.policy_txn_id = PTXN.id')
                     ->join('dt_policies POLICY', 'POLICY.id = PTXN.policy_id')
                     ->join('dt_customers CST', 'CST.id = I.customer_id');
 

@@ -139,8 +139,8 @@ class Object_model extends MY_Model
 
             if($policy_record && is_policy_editable($policy_record->status, FALSE) === TRUE)
             {
-                $this->load->model('policy_txn_model');
-                $this->policy_txn_model->reset($policy_record->id);
+                $this->load->model('policy_transaction_model');
+                $this->policy_transaction_model->reset($policy_record->id);
             }
         }
         return FALSE;
@@ -345,7 +345,7 @@ class Object_model extends MY_Model
         return $this->db->select("O.*, P.branch_id")
                  ->from($this->table_name . ' as O')
                  ->join('dt_policies P', 'P.object_id = O.id')
-                 ->join('dt_policy_txn PTXN', 'P.id = PTXN.policy_id')
+                 ->join('dt_policy_transactions PTXN', 'P.id = PTXN.policy_id')
                  ->where($where)
                  ->get()->row();
     }

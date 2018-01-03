@@ -37,7 +37,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			/**
 			 * Render Cost Calculation Table
 			 */
-			$this->load->view('policy_txn/_cost_calculation_table', ['txn_record' => $txn_record, 'policy_record' => $record]);
+			$this->load->view('policy_transactions/_cost_calculation_table', ['txn_record' => $txn_record, 'policy_record' => $record]);
 			?>
 			<h3 class="text-red">@TODO: Current RI Distribution Table</h3>
 			<h3 class="text-red">@TODO: Fresh Policy सम्पुष्टि विवरण</h3>

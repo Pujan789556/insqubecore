@@ -148,7 +148,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                             <tr>
                                 <td>
                                     <?php
-                                    $this->load->view('policy_txn/snippets/_schedule_cost_calculation_table_risks_FIRE', ['txn_record' => $txn_record]);
+                                    $this->load->view('policy_transactions/snippets/_schedule_cost_calculation_table_risks_FIRE', ['txn_record' => $txn_record]);
                                     ?>
                                 </td>
                             </tr>

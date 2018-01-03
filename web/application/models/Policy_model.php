@@ -49,7 +49,7 @@ class Policy_model extends MY_Model
         // Dependent Model
         $this->load->model('object_model');
         $this->load->model('customer_model');
-        $this->load->model('policy_txn_model');
+        $this->load->model('policy_transaction_model');
     }
 
 
@@ -1045,7 +1045,7 @@ class Policy_model extends MY_Model
 
 
                     // Txn Status to draft, Editable Object & Customer
-                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_DRAFT);
+                    $this->policy_transaction_model->update_status($record->id, IQB_POLICY_TXN_STATUS_DRAFT);
                     $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
                     $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
                     break;
@@ -1059,7 +1059,7 @@ class Policy_model extends MY_Model
                     $base_data['verified_by'] = $this->dx_auth->get_user_id();
                     $this->_to_status($record->id, $base_data);
 
-                    $this->policy_txn_model->update_status($record->id, IQB_POLICY_TXN_STATUS_VERIFIED);
+                    $this->policy_transaction_model->update_status($record->id, IQB_POLICY_TXN_STATUS_VERIFIED);
                     $this->object_model->update_lock($record->object_id, IQB_FLAG_LOCKED);
                     $this->customer_model->update_lock($record->customer_id, IQB_FLAG_LOCKED);
                     break;
@@ -1083,7 +1083,7 @@ class Policy_model extends MY_Model
                          * Updated Records - Policy and Policy Transaction
                          */
                         $record     = $this->get($record->id);
-                        $txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+                        $txn_record = $this->policy_transaction_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 
                         /**
                          * Save a Fresh PDF copy

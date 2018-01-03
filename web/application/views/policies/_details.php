@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</li>
 				<li role="presentation">
 					<a href="#tab-policy-transactions"
-						data-url="<?php echo site_url('policy_txn/'. $record->id)?>"
+						data-url="<?php echo site_url('policy_transactions/'. $record->id)?>"
 						data-load-method="get"
 						data-box="#tab-policy-transactions"
 						data-method="html"

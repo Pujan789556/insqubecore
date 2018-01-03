@@ -313,7 +313,7 @@ class Customer_model extends MY_Model
         return $this->db->select("C.*, P.branch_id as policy_branch_id")
                  ->from($this->table_name . ' as C')
                  ->join('dt_policies P', 'P.customer_id = C.id')
-                 ->join('dt_policy_txn PTXN', 'P.id = PTXN.policy_id')
+                 ->join('dt_policy_transactions PTXN', 'P.id = PTXN.policy_id')
                  ->where($where)
                  ->get()->row();
     }

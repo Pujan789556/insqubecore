@@ -55,7 +55,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						&&
 
 					// Has Permission
-					$this->dx_auth->is_authorized('policy_txn', 'make.policy.payment')
+					$this->dx_auth->is_authorized('policy_transactions', 'make.policy.payment')
 
 				):?>
 					<li>
@@ -66,7 +66,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				            data-form="#_form-payment"
 				            data-box-size="large"
 				            data-title='<i class="fa fa-pencil-square-o"></i> Make a Payment'
-				            data-url="<?php echo site_url('policy_txn/payment/' . $record->policy_txn_id  . '/' . $record->id );?>"
+				            data-url="<?php echo site_url('policy_transactions/payment/' . $record->policy_txn_id  . '/' . $record->id );?>"
 				        ><i class="fa fa-list-alt"></i> Payment</a>
 			        </li><li class="divider"></li>
 				<?php endif;?>

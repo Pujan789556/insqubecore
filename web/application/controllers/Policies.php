@@ -41,7 +41,7 @@ class Policies extends MY_Controller
 		// Load Model
 		$this->load->model('policy_model');
 		$this->load->model('object_model');
-		$this->load->model('policy_txn_model');
+		$this->load->model('policy_transaction_model');
 
 		// Policy Configuration/Helper
 		$this->load->config('policy');
@@ -524,7 +524,7 @@ class Policies extends MY_Controller
 						 */
 						try {
 
-							$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+							$txn_record = $this->policy_transaction_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 
 						} catch (Exception $e) {
 
@@ -590,7 +590,7 @@ class Policies extends MY_Controller
 			],404);
 		}
 
-		$txn_record = $this->policy_txn_model->get_current_txn_by_policy($record->id);
+		$txn_record = $this->policy_transaction_model->get_current_txn_by_policy($record->id);
 		if(!$txn_record)
 		{
 			return $this->template->json([
@@ -677,7 +677,7 @@ class Policies extends MY_Controller
         		/**
         		 * Save Data
         		 */
-        		$done = $this->policy_txn_model->save_endorsement_audit($txn_record->id, 'audit_policy', $audit_data);
+        		$done = $this->policy_transaction_model->save_endorsement_audit($txn_record->id, 'audit_policy', $audit_data);
 
 	        	if(!$done)
 				{
@@ -946,7 +946,7 @@ class Policies extends MY_Controller
 			if( $__flag_reset === TRUE )
 			{
 
-				return $this->policy_txn_model->reset($before_update->id);
+				return $this->policy_transaction_model->reset($before_update->id);
 			}
 			return TRUE;
 		}
@@ -1273,7 +1273,7 @@ class Policies extends MY_Controller
 		 */
 		try {
 
-			$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+			$txn_record = $this->policy_transaction_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 
 		} catch (Exception $e) {
 
@@ -1346,7 +1346,7 @@ class Policies extends MY_Controller
 		 */
 		try {
 
-			$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+			$txn_record = $this->policy_transaction_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 
 		} catch (Exception $e) {
 
@@ -1450,7 +1450,7 @@ class Policies extends MY_Controller
 				 */
 				try {
 
-					$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+					$txn_record = $this->policy_transaction_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 				} catch (Exception $e) {
 
 					return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage() ], 404);
@@ -1601,7 +1601,7 @@ class Policies extends MY_Controller
 			/**
 			 * Get the Current Txn Record
 			 */
-			$txn_record = $__flag_passed === TRUE ? $this->policy_txn_model->get_fresh_renewal_by_policy($record->id, IQB_POLICY_TXN_TYPE_FRESH) : NULL;
+			$txn_record = $__flag_passed === TRUE ? $this->policy_transaction_model->get_fresh_renewal_by_policy($record->id, IQB_POLICY_TXN_TYPE_FRESH) : NULL;
 
 			/**
 			 * Premium Must be Updated Before Verifying

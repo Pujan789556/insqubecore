@@ -2906,7 +2906,7 @@ if ( ! function_exists('__save_premium_MOTOR'))
 				        $taxable_amount 		= $txn_data['amt_total_premium'] + $txn_data['amt_stamp_duty'];
 				        $txn_data['amt_vat'] 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
-						$done 	  = $CI->policy_txn_model->save($txn_record->id, $txn_data);
+						$done 	  = $CI->policy_transaction_model->save($txn_record->id, $txn_data);
 
 						return $done;
 

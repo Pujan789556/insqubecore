@@ -22,7 +22,7 @@ __wiki
 
 
 # IDE Files
-#-------------------------
+# -------------------------
 /nbproject/
 .idea/*
 
@@ -33,3 +33,7 @@ __wiki
 *.stTheme.cache
 *.sublime-workspace
 *.sublime-project
+
+# Other Working Files
+# ----------------------
+tasklist-add-new-portfolio.numbers

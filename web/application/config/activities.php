@@ -248,9 +248,9 @@ $config['insqb_activity_types'] = [
 	/**
 	 * Activities related to Policy Transaction
 	 */
-	'policy_txn' => [
-		'_uri' => 'policy_txn/',
-		'_table' => 'dt_policy_txn',
+	'policy_transactions' => [
+		'_uri' => 'policy_transactions/',
+		'_table' => 'dt_policy_transactions',
 		'_actions' => [
 			'C' => 'added',
 			'E' => 'edited',

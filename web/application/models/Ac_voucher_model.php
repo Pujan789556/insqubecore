@@ -755,7 +755,7 @@ class Ac_voucher_model extends MY_Model
             // Policy Related JOIN
             return $this->db->select('RPV.flag_invoiced, RPV.policy_txn_id, PTXN.policy_id')
                         ->join('rel_policy_txn__voucher RPV', 'RPV.voucher_id = V.id')
-                        ->join('dt_policy_txn PTXN', 'RPV.policy_txn_id = PTXN.id')
+                        ->join('dt_policy_transactions PTXN', 'RPV.policy_txn_id = PTXN.id')
                         ->where('PTXN.policy_id', $policy_id)
                         ->where('V.flag_complete', IQB_FLAG_ON)
                         ->order_by('V.id', 'DESC')

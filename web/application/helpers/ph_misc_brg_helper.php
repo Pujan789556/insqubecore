@@ -550,7 +550,7 @@ if ( ! function_exists('__save_premium_MISC_BRG'))
 					 * Cost Calculation Table
 					 */
 					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
-					return $CI->policy_txn_model->save($txn_record->id, $txn_data);
+					return $CI->policy_transaction_model->save($txn_record->id, $txn_data);
 
 
 					/**

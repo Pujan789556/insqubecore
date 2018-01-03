@@ -567,8 +567,8 @@ class Customers extends MY_Controller
 		}
 
 		 // The above query validates the flag_current, so we get directly txn data here
-		$this->load->model('policy_txn_model');
-		$txn_record = $this->policy_txn_model->get($txn_id);
+		$this->load->model('policy_transaction_model');
+		$txn_record = $this->policy_transaction_model->get($txn_id);
 		if(!$txn_record)
 		{
 			return $this->template->json([
@@ -663,7 +663,7 @@ class Customers extends MY_Controller
         			/**
 	        		 * Save Data
 	        		 */
-	        		$done = $this->policy_txn_model->save_endorsement_audit($txn_record->id, 'audit_customer', $audit_data);
+	        		$done = $this->policy_transaction_model->save_endorsement_audit($txn_record->id, 'audit_customer', $audit_data);
 
 	        		if(!$done)
 					{

@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 if( is_policy_editable($record->status, FALSE) ):
     $txn_type = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL:   IQB_POLICY_TXN_TYPE_FRESH;
-    $update_premium_url = 'policy_txn/premium/' . $txn_type . '/' . $record->id;
+    $update_premium_url = 'policy_transactions/premium/' . $txn_type . '/' . $record->id;
 ?>
     <a href="#"
         title="Update Premium"
@@ -86,7 +86,7 @@ endif;
  *  1. Update Txn Status to IQB_POLICY_TXN_STATUS_RI_APPROVED
  */
 $__flag_ri_approval_constraint = _POLICY__ri_approval_constraint($record->id);
-if( $record->status === IQB_POLICY_STATUS_VERIFIED && $__flag_ri_approval_constraint == TRUE && $this->dx_auth->is_authorized('policy_txn', 'status.to.ri.approved') ):
+if( $record->status === IQB_POLICY_STATUS_VERIFIED && $__flag_ri_approval_constraint == TRUE && $this->dx_auth->is_authorized('policy_transactions', 'status.to.ri.approved') ):
  ?>
     <a href="#"
         title="RI Approve"
@@ -94,7 +94,7 @@ if( $record->status === IQB_POLICY_STATUS_VERIFIED && $__flag_ri_approval_constr
         data-confirm="true"
         class="btn btn-danger btn-round trg-dialog-action"
         data-message="Are you sure you want to APPROVE the RI-Constraints?"
-        data-url="<?php echo site_url('policy_txn/status/' . $txn_record->id . '/' . IQB_POLICY_TXN_STATUS_RI_APPROVED . '/tab-policy-overview' );?>"
+        data-url="<?php echo site_url('policy_transactions/status/' . $txn_record->id . '/' . IQB_POLICY_TXN_STATUS_RI_APPROVED . '/tab-policy-overview' );?>"
     ><i class="fa fa-check-square-o"></i> RI-Approve</a>
 <?php
 endif;
