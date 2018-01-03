@@ -1657,9 +1657,9 @@ if ( ! function_exists('installment_validation_rules'))
 			$CI =& get_instance();
 
 			// Let's have the Endorsement Templates
-			$CI->load->model('policy_txn_installment_model');
+			$CI->load->model('policy_installment_model');
 
-			$rules = $CI->policy_txn_installment_model->validation_rules;
+			$rules = $CI->policy_installment_model->validation_rules;
 		}
 
 		return $rules;
@@ -1679,9 +1679,9 @@ if ( ! function_exists('get_installments_by_txn'))
 	function get_installments_by_txn( $policy_txn_id )
 	{
 		$CI =& get_instance();
-		$CI->load->model('policy_txn_installment_model');
+		$CI->load->model('policy_installment_model');
 
-		return $CI->policy_txn_installment_model->get_many_by_txn($policy_txn_id);
+		return $CI->policy_installment_model->get_many_by_policy_transaction($policy_txn_id);
 	}
 }
 

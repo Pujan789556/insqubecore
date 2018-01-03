@@ -926,7 +926,7 @@ class Policy_transactions extends MY_Controller
 		 */
 		private function _save_installments($policy_record, $txn_record)
 		{
-			$this->load->model('policy_txn_installment_model');
+			$this->load->model('policy_installment_model');
 
 			/**
 			 * Portfolio Setting Record
@@ -957,7 +957,7 @@ class Policy_transactions extends MY_Controller
 				];
 			}
 
-			return $this->policy_txn_installment_model->build($txn_record, $installment_data);
+			return $this->policy_installment_model->build($txn_record, $installment_data);
 		}
 
 		// --------------------------------------------------------------------

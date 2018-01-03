@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Policy_txn_installment_model extends MY_Model
+class Policy_installment_model extends MY_Model
 {
-    protected $table_name = 'dt_policy_txn_installments';
+    protected $table_name = 'dt_policy_installments';
 
     protected $set_created = true;
 
@@ -17,7 +17,7 @@ class Policy_txn_installment_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_txn_id', 'installment_date', 'percent', 'amt_total_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_transaction_id', 'installment_date', 'percent', 'amt_total_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -89,11 +89,11 @@ class Policy_txn_installment_model extends MY_Model
     /**
      * Build Installments for a Policy Transaction
      *
-     * @param object $txn_record
+     * @param object $policy_transaction_record
      * @param array $installment_data
      * @return bool
      */
-    public function build($txn_record, $installment_data)
+    public function build($policy_transaction_record, $installment_data)
     {
         /**
          * ==================== TRANSACTIONS BEGIN =========================
@@ -109,7 +109,7 @@ class Policy_txn_installment_model extends MY_Model
                 /**
                  * Task 1: Delete Old installments
                  */
-                parent::delete_by(['policy_txn_id' => $txn_record->id]);
+                parent::delete_by(['policy_transaction_id' => $policy_transaction_record->id]);
 
                 /**
                  * Task 2: Build Batch Insert For Installments
@@ -123,15 +123,15 @@ class Policy_txn_installment_model extends MY_Model
                     $installment_date       = $dates[$i];
                     $percent                = $percents[$i];
 
-                    $amt_total_premium      = ( $txn_record->amt_total_premium * $percent ) / 100.00;
+                    $amt_total_premium      = ( $policy_transaction_record->amt_total_premium * $percent ) / 100.00;
 
-                    $amt_pool_premium       = $txn_record->amt_pool_premium
-                                                ? ( $txn_record->amt_pool_premium * $percent ) / 100.00 : NULL;
+                    $amt_pool_premium       = $policy_transaction_record->amt_pool_premium
+                                                ? ( $policy_transaction_record->amt_pool_premium * $percent ) / 100.00 : NULL;
 
-                    $amt_agent_commission   = $txn_record->amt_agent_commission
-                                                ? ( $txn_record->amt_agent_commission * $percent ) / 100.00 : NULL;
+                    $amt_agent_commission   = $policy_transaction_record->amt_agent_commission
+                                                ? ( $policy_transaction_record->amt_agent_commission * $percent ) / 100.00 : NULL;
 
-                    $amt_stamp_duty         = $i === 0 ? $txn_record->amt_stamp_duty : NULL;
+                    $amt_stamp_duty         = $i === 0 ? $policy_transaction_record->amt_stamp_duty : NULL;
 
                     // Compute VAT
                     $taxable_amount = $amt_total_premium + floatval($amt_stamp_duty);
@@ -139,7 +139,7 @@ class Policy_txn_installment_model extends MY_Model
                     $amt_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
                     $batch_data[] = [
-                        'policy_txn_id'         => $txn_record->id,
+                        'policy_transaction_id' => $policy_transaction_record->id,
                         'installment_date'      => $installment_date,
                         'percent'               => $percent,
                         'amt_total_premium'     => $amt_total_premium,
@@ -155,7 +155,7 @@ class Policy_txn_installment_model extends MY_Model
                 /**
                  * Task 3: Delete Cache
                  */
-                $cache_key = 'ptxi_bytxn_' . $txn_record->id;
+                $cache_key = 'ptxi_bytxn_' . $policy_transaction_record->id;
                 $this->delete_cache($cache_key);
 
         /**
@@ -191,7 +191,7 @@ class Policy_txn_installment_model extends MY_Model
     {
         return $this->db->select('PTI.*, P.branch_id')
                         ->from($this->table_name . ' AS PTI')
-                        ->join('dt_policy_transactions PTXN', 'PTXN.id = PTI.policy_txn_id')
+                        ->join('dt_policy_transactions PTXN', 'PTXN.id = PTI.policy_transaction_id')
                         ->join('dt_policies P', 'P.id = PTXN.policy_id')
                         ->where('PTI.id', $id)
                         ->get()->row();
@@ -206,16 +206,16 @@ class Policy_txn_installment_model extends MY_Model
      * @param int $id
      * @return array
      */
-    public function get_many_by_txn($policy_txn_id)
+    public function get_many_by_policy_transaction($policy_transaction_id)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_var  = 'ptxi_bytxn_'.$policy_txn_id;
+        $cache_var  = 'ptxi_bytxn_'.$policy_transaction_id;
         $rows       = $this->get_cache($cache_var);
         if(!$rows)
         {
-            $rows = $this->_rows($policy_txn_id);
+            $rows = $this->_rows($policy_transaction_id);
 
             if($rows)
             {
@@ -225,13 +225,13 @@ class Policy_txn_installment_model extends MY_Model
         return $rows;
     }
 
-        private function _rows($policy_txn_id)
+        private function _rows($policy_transaction_id)
         {
             $this->db->select('PTI.*, P.branch_id, P.code')
                     ->from($this->table_name . ' AS PTI')
-                    ->join('dt_policy_transactions PTXN', 'PTXN.id = PTI.policy_txn_id')
+                    ->join('dt_policy_transactions PTXN', 'PTXN.id = PTI.policy_transaction_id')
                         ->join('dt_policies P', 'P.id = PTXN.policy_id')
-                    ->where('PTI.policy_txn_id', $policy_txn_id);
+                    ->where('PTI.policy_transaction_id', $policy_transaction_id);
 
             /**
              * Apply User Scope
@@ -281,7 +281,7 @@ class Policy_txn_installment_model extends MY_Model
 
         // Save Activity Log
         $activity_log = [
-            'module' => 'policy_txn_installments',
+            'module' => 'policy_installments',
             'module_id' => $id,
             'action' => $action
         ];
