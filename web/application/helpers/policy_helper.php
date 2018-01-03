@@ -1639,4 +1639,52 @@ if ( ! function_exists('basic_premium_validation_rules'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('installment_validation_rules'))
+{
+	/**
+	 * Get premium installment validation rules for all portfolios
+	 *
+	 * @param integer $portfolio_id 	Portfolio ID
+	 * @param object $pfs_record		Portfolio Setting Record
+	 * @return	array
+	 */
+	function installment_validation_rules( $portfolio_id, $pfs_record )
+	{
+		$rules = [];
+
+		if($pfs_record->flag_installment === IQB_FLAG_YES )
+		{
+			$CI =& get_instance();
+
+			// Let's have the Endorsement Templates
+			$CI->load->model('policy_txn_installment_model');
+
+			$rules = $CI->policy_txn_installment_model->validation_rules;
+		}
+
+		return $rules;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('get_installments_by_txn'))
+{
+	/**
+	 * Get the list of installments by a policy transaction
+	 *
+	 * @param integer $policy_txn_id 	Policy TXN ID
+	 * @return	array
+	 */
+	function get_installments_by_txn( $policy_txn_id )
+	{
+		$CI =& get_instance();
+		$CI->load->model('policy_txn_installment_model');
+
+		return $CI->policy_txn_installment_model->get_many_by_txn($policy_txn_id);
+	}
+}
+
+// ------------------------------------------------------------------------
+
 

@@ -2586,6 +2586,11 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 			 */
 			'basic' => basic_premium_validation_rules( $policy_record->portfolio_id, $pfs_record ),
 
+			/**
+			 * Installment Validation Rules (Common to all portfolios)
+			 */
+			'installments' => installment_validation_rules( $policy_record->portfolio_id, $pfs_record ),
+
 
 
 			/**
@@ -2712,7 +2717,8 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 		/**
 		 * Common validation rules for all type of policy package and portfolios
 		 */
-		$rules['basic'] = $validation_rules['basic'];
+		$rules['basic'] 		= $validation_rules['basic'];
+		$rules['installments'] 	= $validation_rules['installments'];
 		if($policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			/**

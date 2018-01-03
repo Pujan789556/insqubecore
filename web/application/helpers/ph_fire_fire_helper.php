@@ -621,6 +621,11 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_file'))
 			 */
 			'basic' => $basic_rules,
 
+			/**
+			 * Installment Validation Rules (Common to all portfolios)
+			 */
+			'installments' => installment_validation_rules( $policy_record->portfolio_id, $pfs_record ),
+
 
 			// ---------------------------------------------------------------------
 			// FILE UPLOAD PREMIUM VALIDATION RULES
@@ -783,6 +788,11 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 			 * Sampusti Bibaran and Remarks are common to all type of policy package.
 			 */
 			'basic' => $basic_rules,
+
+			/**
+			 * Installment Validation Rules (Common to all portfolios)
+			 */
+			'installments' => installment_validation_rules( $policy_record->portfolio_id, $pfs_record ),
 
 
 			// ---------------------------------------------------------------------

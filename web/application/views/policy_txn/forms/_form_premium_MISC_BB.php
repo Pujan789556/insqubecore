@@ -9,7 +9,7 @@ $premium_computation_table = $txn_record->premium_computation_table ? json_decod
 ?>
 <?php echo form_open( $this->uri->uri_string(),
         [
-            'class' => 'form-horizontal form-iqb-general',
+            'class' => 'form-iqb-general',
             'id'    => '_form-premium',
             'data-pc' => '.bootbox-body' // parent container ID
         ],
@@ -136,6 +136,12 @@ $premium_computation_table = $txn_record->premium_computation_table ? json_decod
         'txn_record'        => $txn_record,
         'form_elements'     => $form_elements['basic']
     ]);
+
+    /**
+     * Other Common Components
+     *  1. Premium Installments
+     */
+    echo $common_components;
     ?>
 
     <button type="submit" class="hide">Submit</button>

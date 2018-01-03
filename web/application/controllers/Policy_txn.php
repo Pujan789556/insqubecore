@@ -873,41 +873,154 @@ class Policy_txn extends MY_Controller
 
 				if($done)
 				{
+
+					/**
+					 * Build and Update Installments
+					 */
+					// Get Updated TXN Record
+					$txn_record 		= $this->policy_txn_model->get($txn_record->id);
+					try {
+
+						$this->_save_installments($policy_record, $txn_record);
+
+					} catch (Exception $e) {
+						return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
+					}
+
 					$ajax_data = [
 						'message' 		=> 'Successfully Updated.',
 						'status'  		=> 'success',
 						'updateSection' => true,
-						'hideBootbox' 	=> true
-					];
-
-					/**
-					 * Get the Policy Fresh/Renewal Txn Record
-					 */
-					try {
-
-						$txn_record = $this->policy_txn_model->get_fresh_renewal_by_policy( $policy_record->id, $policy_record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
-
-					} catch (Exception $e) {
-
-						return $this->template->json([
-							'status' => 'error',
-							'message' => $e->getMessage()
-						], 404);
-					}
-
-					/**
-					 * Policy Cost Calculation Table
-					 */
-					$ajax_data['updateSectionData']  = [
-						'box' 		=> '#_premium-card',
-						'method' 	=> 'replaceWith',
-						'html'		=> $this->load->view('policy_txn/_cost_calculation_table', ['txn_record' => $txn_record, 'policy_record' => $policy_record], TRUE)
+						'hideBootbox' 	=> true,
+						'updateSectionData' => [
+							/**
+							 * Policy Cost Calculation Table
+							 */
+							'box' 		=> '#_premium-card',
+							'method' 	=> 'replaceWith',
+							'html'		=> $this->load->view('policy_txn/_cost_calculation_table', ['txn_record' => $txn_record, 'policy_record' => $policy_record], TRUE)
+						]
 					];
 
 					return $this->template->json($ajax_data);
 				}
 			}
 		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Save Premium Installments
+		 *
+		 * Every portfolio is installment based.
+		 * Default number of installment is 1.
+		 *
+		 * If you want to have multiple installments allowed for particular portoflio,
+		 * you can do so by allowing multiple installments via settings:
+		 *
+		 * 	Master Setup >> Portfolio >> Portfolio Settings
+		 *
+		 * @param object $policy_record
+		 * @param object $txn_record
+		 * @return mixed
+		 */
+		private function _save_installments($policy_record, $txn_record)
+		{
+			$this->load->model('policy_txn_installment_model');
+
+			/**
+			 * Portfolio Setting Record
+			 */
+			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+			if($pfs_record->flag_installment === IQB_FLAG_YES )
+			{
+				// Get Multiple Installments
+				$dates = $this->input->post('installment_date') ?? NULL;
+				$percents = $this->input->post('percent') ?? NULL;
+
+				if(empty($dates) OR empty($percents))
+				{
+					throw new Exception("Exception [Controller:Policy_txn][Method: _save_installments()]: No installment data found. <br/>You integrate and supply installment information on premium for of this PORTFOLIO.");
+				}
+
+				$installment_data = [
+					'dates' 	=> $dates,
+					'percents' 	=> $percents,
+				];
+			}
+			else
+			{
+				// Single Installment
+				$installment_data = [
+					'dates' 	=> [$policy_record->issued_date],
+					'percents' 	=> [100],
+				];
+			}
+
+			return $this->policy_txn_installment_model->build($txn_record, $installment_data);
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Callback Validation Function - Check if total Installment is 100%
+		 *
+		 * @param mixed $str
+		 * @return bool
+		 */
+		public function _cb_installment_complete($str)
+		{
+			$post_percent 		= $this->input->post('percent');
+			$installment_dates 	= $this->input->post('installment_date');
+
+			$default_count = count($installment_dates);
+			$unique_count = count( array_unique( array_filter($installment_dates)) );
+
+			// Installment date duplicate?
+	        if( $unique_count != $default_count )
+	        {
+	            $this->form_validation->set_message('_cb_installment_complete', 'Duplicate/Empty Installment Date.');
+	            return FALSE;
+	        }
+
+	        // Installment Date Order
+	        $first_date = $installment_dates[0];
+	        $invalid_date_order = FALSE;
+	        for($i =0; $i < $default_count - 1; $i++)
+	        {
+	        	$second_date = $installment_dates[$i+1];
+	        	if(strtotime($first_date) > strtotime($second_date))
+	        	{
+	        		$this->form_validation->set_message('_cb_installment_complete', 'Invalid installment date order. First installment date should be earlier than Second installment date and so on.');
+	        		$invalid_date_order = TRUE;
+	        		break;
+	        	}
+	        	// Check next consecutive pair [(a1,a2), (a2,a3), ... (an-1, an)] where a1 < a2 and so on
+	        	$first_date = $second_date;
+	        }
+	        if( $invalid_date_order )
+	        {
+	        	return FALSE;
+	        }
+
+
+
+			$total = 0;
+			foreach($post_percent as $percent)
+			{
+				$total += (float)$percent;
+			}
+			$total = (int)$total;
+
+			// 100% ?
+	        if( $total != 100 )
+	        {
+	            $this->form_validation->set_message('_cb_installment_complete', 'The TOTAL of all installment must be equal to 100.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
+
 
 	// --------------- END: SAVE PREMIUM FUNCTIONS --------------------
 
@@ -945,6 +1058,12 @@ class Policy_txn extends MY_Controller
 			return $this->template->json($premium_goodies, 400);
 		}
 
+		/**
+		 * Portfolio Settings Record
+		 */
+		$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+
 		// Policy Transaction Form
 		try{
 			$form_view = _POLICY__partial_view__premium_form($policy_record->portfolio_id);
@@ -954,8 +1073,19 @@ class Policy_txn extends MY_Controller
 			return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
 		}
 
-
-
+		/**
+         * Common Views:
+         *
+         * 	1. Premium Installment Section
+         */
+		$common_components = '';
+        if($pfs_record->flag_installment === IQB_FLAG_YES )
+		{
+	        $common_components = $this->load->view('policy_txn/forms/_form_txn_installments', [
+	            'txn_record'        => $txn_record,
+	            'form_elements'     => $premium_goodies['validation_rules']['installments']
+	        ], TRUE);
+	    }
 
 		// Let's render the form
         $json_data['form'] = $this->load->view($form_view, [
@@ -964,8 +1094,13 @@ class Policy_txn extends MY_Controller
 								                'policy_record'         => $policy_record,
 								                'txn_record'        	=> $txn_record,
 								                'policy_object' 		=> $policy_object,
-								                'tariff_record' 		=> $premium_goodies['tariff_record']
+								                'tariff_record' 		=> $premium_goodies['tariff_record'],
+								                'common_components' 	=> $common_components
 								            ], TRUE);
+
+
+
+
 
         $json_data = array_merge($json_data, $json_extra);
 

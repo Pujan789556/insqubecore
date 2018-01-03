@@ -302,7 +302,12 @@ if ( ! function_exists('_TXN_ENG_EEI_premium_validation_rules'))
 			 * ----------------------------
 			 * Sampusti Bibaran and Remarks are common to all type of policy package.
 			 */
-			'basic' => basic_premium_validation_rules( $policy_record->portfolio_id, $pfs_record )
+			'basic' => basic_premium_validation_rules( $policy_record->portfolio_id, $pfs_record ),
+
+			/**
+			 * Installment Validation Rules (Common to all portfolios)
+			 */
+			'installments' => installment_validation_rules( $policy_record->portfolio_id, $pfs_record )
 		];
 
 		/**

@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Policy TXN - Common TXN Fields
  */
 ?>
-<div class="box box-solid box-bordered">
+<div class="box box-solid box-bordered form-horizontal">
     <div class="box-header with-border">
         <h4 class="box-title">General Information</h4>
     </div>
