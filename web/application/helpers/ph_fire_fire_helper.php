@@ -581,17 +581,20 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_validation_rules'))
 		// Basic/Common Validation Rules
 		$basic_rules = basic_premium_validation_rules( $policy_record->portfolio_id, $pfs_record );
 
+		// Installment Rules
+		$installment_rules = installment_validation_rules( $policy_record->portfolio_id, $pfs_record );
+
 
 		// Get validation rules based on the type (Manual Item entry or File Upload)
 		$object_attributes 	= json_decode($policy_object->attributes ?? NULL);
 
 		if( $object_attributes->item_attached === 'Y')
 		{
-			$rules = _TXN_FIRE_FIRE_premium_v_rules_file($basic_rules, $portfolio_risks, $for_form_processing );
+			$rules = _TXN_FIRE_FIRE_premium_v_rules_file($basic_rules, $installment_rules, $portfolio_risks, $for_form_processing );
 		}
 		else
 		{
-			$rules = _TXN_FIRE_FIRE_premium_v_rules_manual($basic_rules, $policy_object, $portfolio_risks, $for_form_processing );
+			$rules = _TXN_FIRE_FIRE_premium_v_rules_manual($basic_rules, $installment_rules, $policy_object, $portfolio_risks, $for_form_processing );
 		}
 
 		return $rules;
@@ -606,11 +609,12 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_file'))
 	 * Premium Validation Rules for File Upload
 	 *
 	 * @param array $basic_rules 		Basic Validation Rules
+	 * @param array $installment_rules 	Installment Validation Rules
 	 * @param array $portfolio_risks	Portfolio Risks
 	 * @param bool $for_processing		For Form Processing
 	 * @return array
 	 */
-	function _TXN_FIRE_FIRE_premium_v_rules_file($basic_rules, $portfolio_risks, $for_form_processing = FALSE )
+	function _TXN_FIRE_FIRE_premium_v_rules_file($basic_rules, $installment_rules, $portfolio_risks, $for_form_processing = FALSE )
 	{
 		$v_rules = [
 
@@ -624,7 +628,7 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_file'))
 			/**
 			 * Installment Validation Rules (Common to all portfolios)
 			 */
-			'installments' => installment_validation_rules( $policy_record->portfolio_id, $pfs_record ),
+			'installments' => $installment_rules,
 
 
 			// ---------------------------------------------------------------------
@@ -772,12 +776,13 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 	 * Premium Validation Rules for Manual Item Entry
 	 *
 	 * @param array $basic_rules 		Basic Validation Rules
+	 * @param array $installment_rules 	Installment Validation Rules
 	 * @param object $policy_object		Policy Object Record
 	 * @param array $portfolio_risks	Portfolio Risks
 	 * @param bool $for_processing		For Form Processing
 	 * @return array
 	 */
-	function _TXN_FIRE_FIRE_premium_v_rules_manual($basic_rules, $policy_object, $portfolio_risks, $for_form_processing = FALSE )
+	function _TXN_FIRE_FIRE_premium_v_rules_manual($basic_rules, $installment_rules, $policy_object, $portfolio_risks, $for_form_processing = FALSE )
 	{
 
 		$v_rules = [
@@ -792,7 +797,7 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 			/**
 			 * Installment Validation Rules (Common to all portfolios)
 			 */
-			'installments' => installment_validation_rules( $policy_record->portfolio_id, $pfs_record ),
+			'installments' => $installment_rules,
 
 
 			// ---------------------------------------------------------------------
