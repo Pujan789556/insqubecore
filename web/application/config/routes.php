@@ -64,4 +64,9 @@ $route['profile'] = 'users/profile';
  */
 $route['policy_transactions/(:num)'] = 'policy_transactions/index/$1';
 
+/**
+ * Policy Installment Routes
+ */
+$route['policy_installments/(:num)'] = 'policy_installments/index/$1';
+
 

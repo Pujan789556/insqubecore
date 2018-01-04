@@ -378,6 +378,17 @@ defined('IQB_POLICY_TXN_STATUS_ACTIVE')         OR define('IQB_POLICY_TXN_STATUS
 
 /*
 |--------------------------------------------------------------------------
+| POLICY INSTALLMENT STATUS CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_POLICY_INSTALLMENT_STATUS_DRAFT')          OR define('IQB_POLICY_INSTALLMENT_STATUS_DRAFT',        'D');
+defined('IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED')    	OR define('IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED',  	'V');
+defined('IQB_POLICY_INSTALLMENT_STATUS_INVOICED')    	OR define('IQB_POLICY_INSTALLMENT_STATUS_INVOICED',  	'I');
+defined('IQB_POLICY_INSTALLMENT_STATUS_PAID')         OR define('IQB_POLICY_INSTALLMENT_STATUS_PAID',       	'P');
+
+
+/*
+|--------------------------------------------------------------------------
 | POLICY FLAG DIRECT DISCOUNT, AGENT COMMISSION CONSTANTS
 |--------------------------------------------------------------------------
 */

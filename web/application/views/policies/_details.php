@@ -22,6 +22,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						data-toggle="tab">Transactions</a>
 				</li>
 				<li role="presentation">
+					<a href="#tab-policy-installments"
+						data-url="<?php echo site_url('policy_installments/'. $record->id)?>"
+						data-load-method="get"
+						data-box="#tab-policy-installments"
+						data-method="html"
+						aria-controls="tab-policy-installments"
+						role="tab"
+						data-toggle="tab">Installments</a>
+				</li>
+				<li role="presentation">
 					<a href="#tab-policy-vouchers"
 						data-url="<?php echo site_url('ac_vouchers/by_policy/'. $record->id)?>"
 						data-load-method="get"
@@ -65,6 +75,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</div>
 
 				<div class="tab-pane" id="tab-policy-transactions">
+
+				</div>
+
+				<div class="tab-pane" id="tab-policy-installments">
 
 				</div>
 

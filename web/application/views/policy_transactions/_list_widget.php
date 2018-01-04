@@ -6,17 +6,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <div class="row" id="list-widget-policy_transactions">
 	<div class="col-xs-12">
-		<div class="box no-border">
-			<div class="box-header gray">
-				<h2 class="page-header">Transactions/Endorsements</h2>
-				<div class="row">
+		<div class="box">
+			<div class="box-header with-border gray bg-gray">
+				<div class="row page-header">
 					<div class="col-sm-6">
-						<?php
-						/**
-						 * Load Live Search UI
-						 */
-						$this->load->view('templates/_common/_live_search',['options' => json_encode(['rows'=>'#search-result-policy_transactions tr.searchable'])]);
-						?>
+						<h3 class="no-margin-t no-margin-b">Manage Transactions/Endorsements</h3>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
 
@@ -49,6 +43,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							data-toggle="tooltip"
 						><i class="fa fa-trash-o"></i> Flush Cache</a>
 					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-sm-6">
+						<?php
+						/**
+						 * Load Live Search UI
+						 */
+						$this->load->view('templates/_common/_live_search',['options' => json_encode(['rows'=>'#search-result-policy_transactions tr.searchable'])]);
+						?>
+					</div>
+
 				</div>
 			</div>
 			<!-- /.box-header -->

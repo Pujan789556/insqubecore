@@ -208,57 +208,6 @@ class Policy_transaction_model extends MY_Model
 
     // --------------------------------------------------------------------
 
-    /**
-     * RI Approval Required?
-     *
-     * Check if the transaction required RI Approval.
-     *
-     * @param integer|object $policy_id_or_record   Policy ID or Transaction Record
-     * @return bool
-     */
-    public function ri_approval_required($policy_id_or_record)
-    {
-        $record = is_numeric($policy_id_or_record) ? $this->get_current_txn_by_policy( (int)$policy_id_or_record ): $policy_id_or_record;
-        $approval_required  = FALSE;
-
-        if( $record )
-        {
-            $approval_required = (int)$record->flag_ri_approval === IQB_FLAG_ON;
-        }
-
-        return $approval_required;
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * RI Approved?
-     *
-     * Check if the transaction is RI Approved (if required).
-     * If RI approval is not required for this txn record,
-     * it will simply return TRUE.
-     *
-     *
-     * @param integer|object $policy_id_or_record   Policy ID or Transaction Record
-     * @return bool
-     */
-    public function ri_approved( $policy_id_or_record )
-    {
-        $record = is_numeric($policy_id_or_record) ? $this->get_current_txn_by_policy( (int)$policy_id_or_record ): $policy_id_or_record;
-        $approved  = TRUE;
-
-        // First check if it requires RI Approval
-        if( $this->ri_approval_required($record) )
-        {
-            // Transaction status must be "RI Approved"
-            $approved = $record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED;
-        }
-
-        return $approved;
-    }
-
-    // --------------------------------------------------------------------
-
     public function is_editable($status)
     {
         return $status === IQB_POLICY_TXN_STATUS_DRAFT;
@@ -333,7 +282,7 @@ class Policy_transaction_model extends MY_Model
         /**
          * Update Status and Clear Cache Specific to this Policy ID
          */
-        $cache_var = 'p_txn_' . $record->policy_id;
+
 
         if( $this->_to_status($record->id, $data) )
         {
@@ -359,8 +308,18 @@ class Policy_transaction_model extends MY_Model
                 }
             }
 
-            // CLEAR CACHE
+            /**
+             * Cleare Caches
+             *
+             *      1. List of transaction by this policy
+             *      2. List of installment by this policy
+             */
+            $cache_var = 'p_txn_' . $record->policy_id;
             $this->clear_cache($cache_var);
+
+            $this->load->model('policy_installment_model');
+            $cache_var = 'ptxi_bypolicy_' . $record->policy_id;
+            $this->policy_installment_model->clear_cache($cache_var);
 
             return TRUE;
         }

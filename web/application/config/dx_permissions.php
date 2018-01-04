@@ -187,6 +187,27 @@ $config['DX_permissions'] = [
 		],
 
 		/**
+		 * Policy Installments
+		 */
+		'policy_installments' => [
+
+			/**
+			 * CRUD Operation Permissions
+			 */
+			'explore.installment',
+
+			/**
+			 * Accounting Permissions
+			 * 	1. Generate Policy Voucher
+			 * 	1. Generate Policy Invoice
+			 * 	2. Make payment agains each installment
+			 */
+			'generate.policy.voucher',
+			'generate.policy.invoice',
+			'make.policy.payment',
+		],
+
+		/**
 		 * Policy Transaction/Endorsement
 		 */
 		'policy_transactions' => [

@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Policy Transaction Controller
+ * Policy Installment Controller
  *
  * We use this controller to work with the policy premium.
  *
@@ -13,12 +13,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Policy_transactions extends MY_Controller
+class Policy_installments extends MY_Controller
 {
 	/**
 	 * Files Upload Path
 	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'policy_transactions/';
+	public static $upload_path = INSQUBE_MEDIA_PATH . 'policy_installments/';
 
 	// --------------------------------------------------------------------
 
@@ -33,21 +33,21 @@ class Policy_transactions extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Policy Transaction';
+        $this->data['site_title'] = 'Policy Installment';
 
         // Setup Navigation
 		$this->active_nav_primary([
 			'level_0' => 'policies',
 		]);
 
-		// Load Model
+		// Load Models
 		$this->load->model('policy_model');
-		$this->load->model('policy_transaction_model');
+		$this->load->model('policy_installment_model');
+		$this->load->model('policy_installment_model');
 		$this->load->model('portfolio_setting_model');
-		// $this->load->model('premium_model');
 		$this->load->model('object_model');
 
-		// Policy Configuration/Helper
+		// Policy Helpers
 		$this->load->config('policy');
 		$this->load->helper('policy');
 		$this->load->helper('object');
@@ -60,7 +60,7 @@ class Policy_transactions extends MY_Controller
 	/**
 	 * Default Method
 	 *
-	 * List all Policy Transaction Records for supplied Policy
+	 * List all Policy Installment Records for supplied Policy
 	 *
 	 * @return JSON
 	 */
@@ -69,7 +69,7 @@ class Policy_transactions extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('policy_transactions', 'explore.transaction') )
+		if( !$this->dx_auth->is_authorized('policy_installments', 'explore.installment') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -81,15 +81,17 @@ class Policy_transactions extends MY_Controller
 			$this->template->render_404();
 		}
 
-		$records 	= $this->policy_transaction_model->rows($policy_id);
+		$records 	= $this->policy_installment_model->get_many_by_policy($policy_id);
 
+		// $txn_record = $this->policy_transaction_model->get($txn_record->id);
+
+
+		// echo $this->db->last_query();exit;
 		$data = [
 			'records' 					=> $records,
-			'policy_record' 			=> $policy_record,
-			'add_url' 					=> 'policy_transactions/add_endorsement/' . $policy_id,
-			'print_url' 				=> 'policy_transactions/print/all/' . $policy_id,
+			'policy_record' 			=> $policy_record
 		];
-		$html = $this->load->view('policy_transactions/_list_widget', $data, TRUE);
+		$html = $this->load->view('policy_installments/_list_widget', $data, TRUE);
 		$ajax_data = [
 			'status' => 'success',
 			'html'   => $html
@@ -114,14 +116,14 @@ class Policy_transactions extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('policy_transactions', 'explore.transaction') )
+		if( !$this->dx_auth->is_authorized('policy_installments', 'explore.installment') )
 		{
 			$this->dx_auth->deny_access();
 		}
 
 		$policy_id = $policy_id ? (int)$policy_id : NULL;
-		$cache_var = $policy_id ? 'p_txn_' . $policy_id : NULL;
-		$this->policy_transaction_model->clear_cache($cache_var);
+		$cache_var = $policy_id ? 'ptxi_bypolicy_' . $policy_id : NULL;
+		$this->policy_installment_model->clear_cache($cache_var);
 
 		if($policy_id)
 		{
@@ -130,7 +132,7 @@ class Policy_transactions extends MY_Controller
 				'status' => 'success',
 				'message' 	=> 'Successfully flushed the cache.',
 				'reloadRow' => true,
-				'rowId' 	=> '#list-widget-policy_transactions',
+				'rowId' 	=> '#list-widget-policy_installments',
 				'row' 		=> $ajax_data['html']
 			];
 
@@ -160,7 +162,7 @@ class Policy_transactions extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->policy_transaction_model->get($id);
+		$record = $this->policy_installment_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -187,9 +189,9 @@ class Policy_transactions extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('policy_transactions/forms/_form_endorsement',
+		$json_data['form'] = $this->load->view('policy_installments/forms/_form_endorsement',
 			[
-				'form_elements' => $this->policy_transaction_model->validation_rules,
+				'form_elements' => $this->policy_installment_model->validation_rules,
 				'record' 		=> $record,
 				'policy_record' => $policy_record
 			], TRUE);
@@ -210,7 +212,7 @@ class Policy_transactions extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('policy_transactions', 'add.transaction') )
+		if( !$this->dx_auth->is_authorized('policy_installments', 'add.installment') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -236,9 +238,9 @@ class Policy_transactions extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('policy_transactions/forms/_form_endorsement',
+		$json_data['form'] = $this->load->view('policy_installments/forms/_form_endorsement',
 			[
-				'form_elements' => $this->policy_transaction_model->validation_rules,
+				'form_elements' => $this->policy_installment_model->validation_rules,
 				'record' 		=> $record,
 				'policy_record' => $this->policy_model->get($policy_id)
 			], TRUE);
@@ -258,7 +260,7 @@ class Policy_transactions extends MY_Controller
 		 */
 		private function _can_add_endorsement($policy_id)
 		{
-			$current_txn = $this->policy_transaction_model->get_current_txn_by_policy($policy_id);
+			$current_txn = $this->policy_installment_model->get_current_txn_by_policy($policy_id);
 
 			return $current_txn->status === IQB_POLICY_TXN_STATUS_ACTIVE;
 		}
@@ -291,10 +293,10 @@ class Policy_transactions extends MY_Controller
 			 * Validation Rules - Set according to the endorsement type
 			 */
 			$txn_type = (int)$this->input->post('txn_type');
-			$v_rules_all = $this->policy_transaction_model->validation_rules;
+			$v_rules_all = $this->policy_installment_model->validation_rules;
 			if( $txn_type == IQB_POLICY_TXN_TYPE_ET )
 			{
-				$v_rules = array_merge($v_rules_all['basic'], $v_rules_all['transaction']);
+				$v_rules = array_merge($v_rules_all['basic'], $v_rules_all['installment']);
 			}
 			else
 			{
@@ -335,17 +337,17 @@ class Policy_transactions extends MY_Controller
 					/**
 					 * RI-Approval Required?
 					 *
-					 * If Fresh/Renewal Transaction has RI-Approval Flag set, we must set this
+					 * If Fresh/Renewal Installment has RI-Approval Flag set, we must set this
 					 * for all the subsequent endorsements regardless of their types
 					 */
-					$data['flag_ri_approval'] = $this->policy_transaction_model->get_flag_ri_approval_by_policy( $policy_record->id );
+					$data['flag_ri_approval'] = $this->policy_installment_model->get_flag_ri_approval_by_policy( $policy_record->id );
 
-					$done = $this->policy_transaction_model->save_endorsement($data, TRUE); // No Validation on Model
+					$done = $this->policy_installment_model->save_endorsement($data, TRUE); // No Validation on Model
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->policy_transaction_model->update($record->id, $data, TRUE);
+					$done = $this->policy_installment_model->update($record->id, $data, TRUE);
 				}
 
 	        	if(!$done)
@@ -377,9 +379,9 @@ class Policy_transactions extends MY_Controller
 					else
 					{
 						// Get Updated Record
-						$record 		= $this->policy_transaction_model->get($record->id);
+						$record 		= $this->policy_installment_model->get($record->id);
 						$policy_record 	= $this->policy_model->get($policy_record->id);
-						$html 			= $this->load->view('policy_transactions/_single_row', ['record' => $record, 'policy_record' => $policy_record], TRUE);
+						$html 			= $this->load->view('policy_installments/_single_row', ['record' => $record, 'policy_record' => $policy_record], TRUE);
 
 						return $this->template->json([
 							'status' 		=> $status,
@@ -388,7 +390,7 @@ class Policy_transactions extends MY_Controller
 							'hideBootbox' 	=> true,
 							'updateSection' => true,
 							'updateSectionData' => [
-								'box' 		=> '#_data-row-policy_transactions-' . $record->id,
+								'box' 		=> '#_data-row-policy_installments-' . $record->id,
 								'method' 	=> 'replaceWith',
 								'html'		=> $html
 							]
@@ -435,7 +437,7 @@ class Policy_transactions extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Delete a Policy Transaction Draft (Non Fresh/Renewal)
+	 * Delete a Policy Installment Draft (Non Fresh/Renewal)
 	 *
 	 * Only Draft Version of a Policy can be deleted.
 	 *
@@ -445,7 +447,7 @@ class Policy_transactions extends MY_Controller
 	public function delete($id)
 	{
 		$id = (int)$id;
-		$record = $this->policy_transaction_model->get($id);
+		$record = $this->policy_installment_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -467,7 +469,7 @@ class Policy_transactions extends MY_Controller
 		 * 		Endorsement General/Transactional
 		 *
 		 * Deletable Permission
-		 * 		delete.draft.transaction
+		 * 		delete.draft.installment
 		 */
 
 		// Deletable Status?
@@ -476,7 +478,7 @@ class Policy_transactions extends MY_Controller
 							||
 			!in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_ET, IQB_POLICY_TXN_TYPE_EG])
 							||
-			!$this->dx_auth->is_authorized('policy_transactions', 'delete.draft.transaction')
+			!$this->dx_auth->is_authorized('policy_installments', 'delete.draft.installment')
 		)
 		{
 			$this->dx_auth->deny_access();
@@ -488,7 +490,7 @@ class Policy_transactions extends MY_Controller
 			'message' 	=> 'You cannot delete the default records.'
 		];
 
-		$done = $this->policy_transaction_model->delete($record);
+		$done = $this->policy_installment_model->delete($record);
 
 		if($done)
 		{
@@ -496,7 +498,7 @@ class Policy_transactions extends MY_Controller
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
 				'removeRow' => true,
-				'rowId'		=> '#_data-row-policy_transactions-'.$record->id
+				'rowId'		=> '#_data-row-policy_installments-'.$record->id
 			];
 		}
 		else
@@ -515,14 +517,14 @@ class Policy_transactions extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Re-Build Policy Transaction Premium
+	 * Re-Build Policy Installment Premium
 	 *
-	 * This method is used to edit the transaction table.
+	 * This method is used to edit the installment table.
 	 * This method only applies for Fresh/Renewal Record.
 	 *
 	 * !!! Important: Fresh/Renewal Only
 	 *
-	 * @param char $txn_type Transaction Type
+	 * @param char $txn_type Installment Type
 	 * @param integer $id Policy ID
 	 * @return void
 	 */
@@ -531,17 +533,17 @@ class Policy_transactions extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('policy_transactions', 'edit.draft.transaction') )
+		if( !$this->dx_auth->is_authorized('policy_installments', 'edit.draft.installment') )
 		{
 			$this->dx_auth->deny_access();
 		}
 
-		// Valid Transaction Type (Fresh & Renewal Only)
+		// Valid Installment Type (Fresh & Renewal Only)
 		if( !in_array( $txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL] ) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
-				'message' 	=> 'Invalid Transaction Type!'
+				'message' 	=> 'Invalid Installment Type!'
 			], 400);
 		}
 
@@ -556,23 +558,23 @@ class Policy_transactions extends MY_Controller
 			], 400);
 		}
 
-		// Current Policy Transaction Record and Has valid Type?
-		$txn_record = $this->policy_transaction_model->get_current_txn_by_policy($policy_record->id);
+		// Current Policy Installment Record and Has valid Type?
+		$txn_record = $this->policy_installment_model->get_current_txn_by_policy($policy_record->id);
 		if( !$txn_record || !in_array( $txn_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL] ) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
-				'message' 	=> 'Invalid Current Policy Transaction Record! OR Invalid Record Type!'
+				'message' 	=> 'Invalid Current Policy Installment Record! OR Invalid Record Type!'
 			], 400);
 		}
 
 
 		// Record Editable?
-		if( !$this->policy_transaction_model->is_editable($txn_record->status) )
+		if( !$this->policy_installment_model->is_editable($txn_record->status) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
-				'message' 	=> 'You can only edit Draft Transaction!'
+				'message' 	=> 'You can only edit Draft Installment!'
 			], 400);
 		}
 
@@ -598,7 +600,7 @@ class Policy_transactions extends MY_Controller
 		 * !!! Important: Fresh/Renewal Only
 		 *
 		 * @param object $policy_record 	Policy Record
-		 * @param object $txn_record 		Policy Transaction Record
+		 * @param object $txn_record 		Policy Installment Record
 		 * @return mixed
 		 */
 		private function __save_premium($policy_record, $txn_record)
@@ -866,7 +868,7 @@ class Policy_transactions extends MY_Controller
 				{
 					return $this->template->json([
 						'status' 	=> 'error',
-						'message' 	=> 'Policy_transactions::__save_premium() - No method defined for supplied portfolio!'
+						'message' 	=> 'Policy_installments::__save_premium() - No method defined for supplied portfolio!'
 					], 400);
 				}
 
@@ -878,7 +880,7 @@ class Policy_transactions extends MY_Controller
 					 * Build and Update Installments
 					 */
 					// Get Updated TXN Record
-					$txn_record 		= $this->policy_transaction_model->get($txn_record->id);
+					$txn_record 		= $this->policy_installment_model->get($txn_record->id);
 					try {
 
 						$this->_save_installments($policy_record, $txn_record);
@@ -898,66 +900,13 @@ class Policy_transactions extends MY_Controller
 							 */
 							'box' 		=> '#_premium-card',
 							'method' 	=> 'replaceWith',
-							'html'		=> $this->load->view('policy_transactions/_cost_calculation_table', ['txn_record' => $txn_record, 'policy_record' => $policy_record], TRUE)
+							'html'		=> $this->load->view('policy_installments/_cost_calculation_table', ['txn_record' => $txn_record, 'policy_record' => $policy_record], TRUE)
 						]
 					];
 
 					return $this->template->json($ajax_data);
 				}
 			}
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Save Premium Installments
-		 *
-		 * Every portfolio is installment based.
-		 * Default number of installment is 1.
-		 *
-		 * If you want to have multiple installments allowed for particular portoflio,
-		 * you can do so by allowing multiple installments via settings:
-		 *
-		 * 	Master Setup >> Portfolio >> Portfolio Settings
-		 *
-		 * @param object $policy_record
-		 * @param object $txn_record
-		 * @return mixed
-		 */
-		private function _save_installments($policy_record, $txn_record)
-		{
-			$this->load->model('policy_installment_model');
-
-			/**
-			 * Portfolio Setting Record
-			 */
-			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-			if($pfs_record->flag_installment === IQB_FLAG_YES )
-			{
-				// Get Multiple Installments
-				$dates = $this->input->post('installment_date') ?? NULL;
-				$percents = $this->input->post('percent') ?? NULL;
-
-				if(empty($dates) OR empty($percents))
-				{
-					throw new Exception("Exception [Controller:Policy_transactions][Method: _save_installments()]: No installment data found. <br/>You integrate and supply installment information on premium for of this PORTFOLIO.");
-				}
-
-				$installment_data = [
-					'dates' 	=> $dates,
-					'percents' 	=> $percents,
-				];
-			}
-			else
-			{
-				// Single Installment
-				$installment_data = [
-					'dates' 	=> [$policy_record->issued_date],
-					'percents' 	=> [100],
-				];
-			}
-
-			return $this->policy_installment_model->build($txn_record, $installment_data);
 		}
 
 		// --------------------------------------------------------------------
@@ -1034,14 +983,14 @@ class Policy_transactions extends MY_Controller
 	 * 	2. Transactional Endorsement
 	 *
 	 * @param object 	$policy_record 	Policy Record
-	 * @param object 	$txn_record Policy Transaction Record
+	 * @param object 	$txn_record Policy Installment Record
 	 * @param array 	$json_extra 	Extra Data to Pass as JSON
 	 * @return type
 	 */
 	private function __render_premium_form($policy_record, $txn_record, $json_extra=[])
 	{
 		/**
-		 *  Let's Load The Policy Transaction Form For this Record
+		 *  Let's Load The Policy Installment Form For this Record
 		 */
 		$policy_object = get_object_from_policy_record($policy_record);
 
@@ -1064,7 +1013,7 @@ class Policy_transactions extends MY_Controller
 		$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 
 
-		// Policy Transaction Form
+		// Policy Installment Form
 		try{
 			$form_view = _POLICY__partial_view__premium_form($policy_record->portfolio_id);
 		}
@@ -1081,7 +1030,7 @@ class Policy_transactions extends MY_Controller
 		$common_components = '';
         if($pfs_record->flag_installment === IQB_FLAG_YES )
 		{
-	        $common_components = $this->load->view('policy_transactions/forms/_form_txn_installments', [
+	        $common_components = $this->load->view('policy_installments/forms/_form_txn_installments', [
 	            'txn_record'        => $txn_record,
 	            'form_elements'     => $premium_goodies['validation_rules']['installments']
 	        ], TRUE);
@@ -1114,7 +1063,7 @@ class Policy_transactions extends MY_Controller
 	// --------------------------------------------------------------------
 
 		/**
-		 * Get Policy Policy Transaction Goodies
+		 * Get Policy Policy Installment Goodies
 		 *
 		 * Get the following goodies for the Given Portfolio of Supplied Policy
 		 * 		1. Validation Rules
@@ -1393,7 +1342,7 @@ class Policy_transactions extends MY_Controller
 			{
 				return $this->template->json([
 					'status' 	=> 'error',
-					'message' 	=> 'Policy_transactions::__premium_goodies() - No data found for supplied portfolio!'
+					'message' 	=> 'Policy_installments::__premium_goodies() - No data found for supplied portfolio!'
 				], 400);
 			}
 
@@ -1426,7 +1375,7 @@ class Policy_transactions extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('policy_transactions', 'print.endorsement') )
+		if( !$this->dx_auth->is_authorized('policy_installments', 'print.endorsement') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -1440,7 +1389,7 @@ class Policy_transactions extends MY_Controller
 		}
 
 		/**
-		 * Get Transaction Records or Record based on type
+		 * Get Installment Records or Record based on type
 		 */
 		$key = (int)$key;
 		if( $type === 'all' )
@@ -1457,7 +1406,7 @@ class Policy_transactions extends MY_Controller
 			];
 		}
 
-		$records = $this->policy_transaction_model->get_many_by($where);
+		$records = $this->policy_installment_model->get_many_by($where);
 
 		$data = [
 			'records' 	=> $records,
@@ -1503,18 +1452,18 @@ class Policy_transactions extends MY_Controller
 	public function status($id, $to_status_code, $ref='tab-policy-transactions')
 	{
 		$id = (int)$id;
-		$txn_record = $this->policy_transaction_model->get($id);
+		$txn_record = $this->policy_installment_model->get($id);
 		if(!$txn_record)
 		{
 			$this->template->render_404();
 		}
 
-		// is This Current Transaction?
+		// is This Current Installment?
 		if( $txn_record->flag_current != IQB_FLAG_ON  )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
-				'message' 	=> 'Invalid Current Policy Transaction Record!'
+				'message' 	=> 'Invalid Current Policy Installment Record!'
 			], 400);
 		}
 
@@ -1537,24 +1486,24 @@ class Policy_transactions extends MY_Controller
 		 */
 		try {
 
-			if( $this->policy_transaction_model->update_status($txn_record, $to_status_code) )
+			if( $this->policy_installment_model->update_status($txn_record, $to_status_code) )
 			{
 				/**
-				 * Updated Transaction & Policy Record
+				 * Updated Installment & Policy Record
 				 */
-				$txn_record = $this->policy_transaction_model->get($txn_record->id);
+				$txn_record = $this->policy_installment_model->get($txn_record->id);
 				$policy_record = $this->policy_model->get($txn_record->policy_id);
 
 
 				/**
-				 * Post Tasks on Transaction Activation
+				 * Post Tasks on Installment Activation
 				 * -------------------------------------
 				 *
-				 * If this is not a General Endorsement Transaction, we also have to update the
+				 * If this is not a General Endorsement Installment, we also have to update the
 				 * 	- policy (from audit_policy field if any data)
 				 * 	- object (from audit_object field if any data)
 				 * 	- customer (from audit_customer field if any data)
-				 * 	- SEND SMS on General Transaction Activation
+				 * 	- SEND SMS on General Installment Activation
 				 */
 				if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_EG && $to_status_code ==IQB_POLICY_TXN_STATUS_ACTIVE )
 				{
@@ -1603,13 +1552,13 @@ class Policy_transactions extends MY_Controller
 				else
 				{
 					// Replace the Row
-					$html = $this->load->view('policy_transactions/_single_row', ['record' => $txn_record, 'policy_record' => $policy_record], TRUE);
+					$html = $this->load->view('policy_installments/_single_row', ['record' => $txn_record, 'policy_record' => $policy_record], TRUE);
 					return $this->template->json([
 						'message' 	=> 'Successfully Updated!',
 						'status'  	=> 'success',
 						'multipleUpdate' => [
 							[
-								'box' 		=> '#_data-row-policy_transactions-' . $txn_record->id,
+								'box' 		=> '#_data-row-policy_installments-' . $txn_record->id,
 								'method' 	=> 'replaceWith',
 								'html' 		=> $html
 							]
@@ -1701,7 +1650,7 @@ class Policy_transactions extends MY_Controller
 				default:
 					break;
 			}
-			if( $permission_name !== ''  && $this->dx_auth->is_authorized('policy_transactions', $permission_name) )
+			if( $permission_name !== ''  && $this->dx_auth->is_authorized('policy_installments', $permission_name) )
 			{
 				$__flag_valid_permission = TRUE;
 			}
@@ -1724,18 +1673,18 @@ class Policy_transactions extends MY_Controller
 		 * follow the logic accordingly.
 		 *
 		 * @param alpha $to_updown_status Status Code to UP/DOWN
-		 * @param object $txn_record Policy Transaction Record
+		 * @param object $txn_record Policy Installment Record
 		 * @param bool $terminate_on_fail Terminate right here on fails
 		 * @return mixed
 		 */
 		private function __status_qualifies($to_updown_status, $txn_record, $terminate_on_fail = TRUE)
 		{
-			$__flag_passed = $this->policy_transaction_model->status_qualifies($txn_record->status, $to_updown_status);
+			$__flag_passed = $this->policy_installment_model->status_qualifies($txn_record->status, $to_updown_status);
 
 			if( $__flag_passed )
 			{
 				/**
-				 * FRESH/RENEWAL Policy Transaction
+				 * FRESH/RENEWAL Policy Installment
 				 * 	Draft/Verified are automatically triggered from
 				 * 	Policy Status Update Method
 				 */
@@ -1783,8 +1732,8 @@ class Policy_transactions extends MY_Controller
 			{
 				return $this->template->json([
 					'status' 	=> 'error',
-					'title' 	=> 'Invalid Status Transaction',
-					'message' 	=> 'You can not swith to the state from this state of transaction.'
+					'title' 	=> 'Invalid Status Installment',
+					'message' 	=> 'You can not swith to the state from this state of installment.'
 				], 400);
 			}
 
@@ -1810,7 +1759,7 @@ class Policy_transactions extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('policy_transactions', 'generate.policy.voucher') )
+		if( !$this->dx_auth->is_authorized('policy_installments', 'generate.policy.voucher') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -1819,7 +1768,7 @@ class Policy_transactions extends MY_Controller
 		 * Get the Policy Fresh/Renewal Txn Record
 		 */
 		$id 		= (int)$id;
-		$txn_record = $this->policy_transaction_model->get( $id );
+		$txn_record = $this->policy_installment_model->get( $id );
 		if(!$txn_record)
 		{
 			$this->template->render_404();
@@ -1848,9 +1797,9 @@ class Policy_transactions extends MY_Controller
 		if( !$authorized_status )
 		{
 			return $this->template->json([
-				'title' 	=> 'Unauthorized Transaction Status!',
+				'title' 	=> 'Unauthorized Installment Status!',
 				'status' 	=> 'error',
-				'message' 	=> 'This transaction does not have authorized status to perform this action.'
+				'message' 	=> 'This installment does not have authorized status to perform this action.'
 			], 404);
 		}
 
@@ -1863,14 +1812,14 @@ class Policy_transactions extends MY_Controller
 		$this->load->model('rel_policy_txn__voucher_model');
 
 		/**
-		 * Check if Voucher already generated for this Transaction
+		 * Check if Voucher already generated for this Installment
 		 */
 		if( $this->rel_policy_txn__voucher_model->voucher_exists($txn_record->id))
 		{
 			return $this->template->json([
 				'title' 	=> 'OOPS!',
 				'status' 	=> 'error',
-				'message' 	=> 'Voucher already exists for this Transaction/Endorsement.'
+				'message' 	=> 'Voucher already exists for this Installment/Endorsement.'
 			], 404);
 		}
 
@@ -2174,7 +2123,7 @@ class Policy_transactions extends MY_Controller
 		 * 		voucher internal relation with policy txn record and  update
 		 * 		policy status.
 		 *
-		 * 		Please note that, if any of transaction fails or exception
+		 * 		Please note that, if any of installment fails or exception
 		 * 		happens, we rollback and disable voucher. (We can not delete
 		 * 		voucher as we need to maintain sequential order for audit trail)
 		 * --------------------------------------------------------------------
@@ -2197,7 +2146,7 @@ class Policy_transactions extends MY_Controller
                 // --------------------------------------------------------------------
 
             	/**
-				 * Task 2: Add Voucher-Policy Transaction Relation
+				 * Task 2: Add Voucher-Policy Installment Relation
 				 */
 
 				try {
@@ -2217,13 +2166,13 @@ class Policy_transactions extends MY_Controller
                 // --------------------------------------------------------------------
 
 				/**
-				 * Task 4: Update Transaction Status to "Vouchered", Clean Cache
+				 * Task 4: Update Installment Status to "Vouchered", Clean Cache
 				 */
 				if( !$flag_exception )
 				{
 					try{
 
-						$this->policy_transaction_model->update_status($txn_record, IQB_POLICY_TXN_STATUS_VOUCHERED);
+						$this->policy_installment_model->update_status($txn_record, IQB_POLICY_TXN_STATUS_VOUCHERED);
 
 					} catch (Exception $e) {
 
@@ -2301,11 +2250,11 @@ class Policy_transactions extends MY_Controller
 		}
 
 		/**
-		 * Reload the Policy Overview Tab, Update Transaction Row (Replace)
+		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
 		 */
 		$txn_record->status = IQB_POLICY_TXN_STATUS_VOUCHERED;
 		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'txn_record' => $txn_record], TRUE);
-		$html_txn_row 		= $this->load->view('policy_transactions/_single_row', ['policy_record' => $policy_record, 'record' => $txn_record], TRUE);
+		$html_txn_row 		= $this->load->view('policy_installments/_single_row', ['policy_record' => $policy_record, 'record' => $txn_record], TRUE);
 		$ajax_data = [
 			'message' 	=> 'Successfully Updated!',
 			'status'  	=> 'success',
@@ -2316,7 +2265,7 @@ class Policy_transactions extends MY_Controller
 					'html' 		=> $html_tab_ovrview
 				],
 				[
-					'box' 		=> '#_data-row-policy_transactions-' . $txn_record->id,
+					'box' 		=> '#_data-row-policy_installments-' . $txn_record->id,
 					'method' 	=> 'replaceWith',
 					'html' 		=> $html_txn_row
 				]
@@ -2339,7 +2288,7 @@ class Policy_transactions extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('policy_transactions', 'generate.policy.invoice') )
+		if( !$this->dx_auth->is_authorized('policy_installments', 'generate.policy.invoice') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -2351,7 +2300,7 @@ class Policy_transactions extends MY_Controller
 		 */
 		$id 		= (int)$id;
 		$voucher_id = (int)$voucher_id;
-		$txn_record = $this->policy_transaction_model->get( $id );
+		$txn_record = $this->policy_installment_model->get( $id );
 		if(!$txn_record)
 		{
 			$this->template->render_404();
@@ -2360,7 +2309,7 @@ class Policy_transactions extends MY_Controller
 		// --------------------------------------------------------------------
 
 		/**
-		 * Get Voucher Record By Policy Transaction Relation
+		 * Get Voucher Record By Policy Installment Relation
 		 */
 		$this->load->model('ac_voucher_model');
 		$voucher_record = $this->ac_voucher_model->get_voucher_by_policy_txn_relation($txn_record->id, $voucher_id);
@@ -2484,9 +2433,9 @@ class Policy_transactions extends MY_Controller
 		 * NOTE
 		 * 		We perform post voucher add tasks which are mainly to update
 		 * 		voucher internal relation with policy txn record and  update
-		 * 		policy transaction status.
+		 * 		policy installment status.
 		 *
-		 * 		Please note that, if any of transaction fails or exception
+		 * 		Please note that, if any of installment fails or exception
 		 * 		happens, we rollback and disable voucher. (We can not delete
 		 * 		voucher as we need to maintain sequential order for audit trail)
 		 * --------------------------------------------------------------------
@@ -2509,11 +2458,11 @@ class Policy_transactions extends MY_Controller
                 // --------------------------------------------------------------------
 
 				/**
-				 * Task 2: Update Transaction Status to "Invoiced", Clean Cache
+				 * Task 2: Update Installment Status to "Invoiced", Clean Cache
 				 */
 				try{
 
-					$this->policy_transaction_model->update_status($txn_record, IQB_POLICY_TXN_STATUS_INVOICED);
+					$this->policy_installment_model->update_status($txn_record, IQB_POLICY_TXN_STATUS_INVOICED);
 
 				} catch (Exception $e) {
 
@@ -2577,7 +2526,7 @@ class Policy_transactions extends MY_Controller
             	return $this->template->json([
 					'title' 	=> 'Something went wrong!',
 					'status' 	=> 'error',
-					'message' 	=> $message ? $message : 'Could not update policy transaction status or voucher relation flag'
+					'message' 	=> $message ? $message : 'Could not update policy installment status or voucher relation flag'
 				]);
 			}
 			else
@@ -2606,7 +2555,7 @@ class Policy_transactions extends MY_Controller
 
 
 		/**
-		 * Reload the Policy Overview Tab, Update Transaction Row (Replace)
+		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
 		 */
 		$txn_record->status = IQB_POLICY_TXN_STATUS_INVOICED;
 		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'txn_record' => $txn_record], TRUE);
@@ -2640,7 +2589,7 @@ class Policy_transactions extends MY_Controller
         /**
          * Check Permissions
          */
-        if( !$this->dx_auth->is_authorized('policy_transactions', 'make.policy.payment') )
+        if( !$this->dx_auth->is_authorized('policy_installments', 'make.policy.payment') )
         {
             $this->dx_auth->deny_access();
         }
@@ -2650,7 +2599,7 @@ class Policy_transactions extends MY_Controller
          */
         $id         = (int)$id;
         $invoice_id = (int)$invoice_id;
-        $txn_record = $this->policy_transaction_model->get( $id );
+        $txn_record = $this->policy_installment_model->get( $id );
         if(!$txn_record)
         {
             $this->template->render_404();
@@ -2905,7 +2854,7 @@ class Policy_transactions extends MY_Controller
          *      voucher internal relation with policy txn record and  update
          *      policy status.
          *
-         *      Please note that, if any of transaction fails or exception
+         *      Please note that, if any of installment fails or exception
          *      happens, we rollback and disable voucher. (We can not delete
          *      voucher as we need to maintain sequential order for audit trail)
          * --------------------------------------------------------------------
@@ -2927,7 +2876,7 @@ class Policy_transactions extends MY_Controller
                 // --------------------------------------------------------------------
 
                 /**
-                 * Task 2: Add Voucher-Policy Transaction Relation
+                 * Task 2: Add Voucher-Policy Installment Relation
                  */
 
                 try {
@@ -2951,14 +2900,14 @@ class Policy_transactions extends MY_Controller
                  * Task 4:
                  * 		Update Invoice Paid Flat to "ON"
                  *      Update Policy Status to "Active" (if Fresh or Renewal )
-                 *      Update Transaction Status to "Active", Clean Cache, (Commit endorsement if ET or EG)
+                 *      Update Installment Status to "Active", Clean Cache, (Commit endorsement if ET or EG)
                  */
                 if( !$flag_exception )
                 {
                     try{
 
                     	$this->ac_invoice_model->update_flag($invoice_record->id, 'flag_paid', IQB_FLAG_ON);
-                        $this->policy_transaction_model->update_status($txn_record, IQB_POLICY_TXN_STATUS_ACTIVE);
+                        $this->policy_installment_model->update_status($txn_record, IQB_POLICY_TXN_STATUS_ACTIVE);
 
                     } catch (Exception $e) {
 
@@ -3069,7 +3018,7 @@ class Policy_transactions extends MY_Controller
 
 
         /**
-         * Reload the Policy Overview Tab, Update Transaction Row (Replace)
+         * Reload the Policy Overview Tab, Update Installment Row (Replace)
          */
         $txn_record->status         = IQB_POLICY_TXN_STATUS_ACTIVE;
         $policy_record->status      = IQB_POLICY_STATUS_ACTIVE;

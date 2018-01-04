@@ -13,8 +13,8 @@ class Policy_installment_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    protected $after_insert  = ['clear_cache'];
-    protected $after_update  = ['clear_cache'];
+    // protected $after_insert  = ['clear_cache'];
+    // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
     protected $fields = ['id', 'policy_transaction_id', 'installment_date', 'percent', 'amt_total_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
@@ -155,8 +155,12 @@ class Policy_installment_model extends MY_Model
                 /**
                  * Task 3: Delete Cache
                  */
-                $cache_key = 'ptxi_bytxn_' . $policy_transaction_record->id;
-                $this->delete_cache($cache_key);
+                $cache_keys = [
+                    'ptxi_bytxn_' . $policy_transaction_record->id,
+                    'ptxi_fst_stts_bytxn_' . $policy_transaction_record->id,
+                    'ptxi_bypolicy_' . $policy_transaction_record->policy_id
+                ];
+                $this->clear_cache($cache_keys);
 
         /**
          * Complete transactions or Rollback
@@ -180,6 +184,39 @@ class Policy_installment_model extends MY_Model
     }
 
     // --------------------------------------------------------------------
+
+    /**
+     * Get the status of first installment belonging to this policy transaction
+     *
+     * @param int $policy_transaction_id
+     * @return char
+     */
+    public function first_installment_status($policy_transaction_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var  = 'ptxi_fst_stts_bytxn_' . $policy_transaction_id;
+        $status       = $this->get_cache($cache_var);
+        if(!$status)
+        {
+            $status = $this->db->select('PTI.status')
+                        ->from($this->table_name . ' AS PTI')
+                        ->where('PTI.policy_transaction_id', $policy_transaction_id)
+                        ->where('PTI.flag_first', IQB_FLAG_ON)
+                        ->get()->row()->status;
+
+            if($status)
+            {
+                $this->write_cache($status, $cache_var, CACHE_DURATION_HR);
+            }
+        }
+        return $status;
+    }
+
+
+    // --------------------------------------------------------------------
+
 
     /**
      * Get single record
@@ -215,7 +252,7 @@ class Policy_installment_model extends MY_Model
         $rows       = $this->get_cache($cache_var);
         if(!$rows)
         {
-            $rows = $this->_rows($policy_transaction_id);
+            $rows = $this->_rows(['PTI.policy_transaction_id' => $policy_transaction_id]);
 
             if($rows)
             {
@@ -225,36 +262,89 @@ class Policy_installment_model extends MY_Model
         return $rows;
     }
 
-        private function _rows($policy_transaction_id)
+    // ----------------------------------------------------------------
+
+
+
+    /**
+     * Get All Transactions Rows for Supplied Policy
+     *
+     * @param int $policy_id
+     * @return type
+     */
+    public function get_many_by_policy($policy_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var = 'ptxi_bypolicy_'.$policy_id;
+        $rows = $this->get_cache($cache_var);
+        if(!$rows)
         {
-            $this->db->select('PTI.*, P.branch_id, P.code')
+            $rows = $this->_rows(['P.id' => $policy_id]);
+
+            if($rows)
+            {
+                $this->write_cache($rows, $cache_var, CACHE_DURATION_HR);
+            }
+        }
+        return $rows;
+    }
+
+    // --------------------------------------------------------------------
+
+        /**
+         * Get Rows from Database
+         *
+         * @param array $where
+         * @return mixed
+         */
+        private function _rows($where)
+        {
+            $this->db->select('PTI.*, P.branch_id, P.code AS policy_code, PTXN.flag_current as policy_transaction_flag_current, PTXN.status AS policy_transaction_status, PTXN.flag_ri_approval AS policy_transaction_flag_ri_approval')
                     ->from($this->table_name . ' AS PTI')
                     ->join('dt_policy_transactions PTXN', 'PTXN.id = PTI.policy_transaction_id')
-                        ->join('dt_policies P', 'P.id = PTXN.policy_id')
-                    ->where('PTI.policy_transaction_id', $policy_transaction_id);
+                    ->join('dt_policies P', 'P.id = PTXN.policy_id')
+                    ->where($where);
 
             /**
              * Apply User Scope
              */
             $this->dx_auth->apply_user_scope('P');
 
-            // Get the damn result
-            return $this->db->order_by('PTI.flag_first', 'DESC')
+            // Get the damn result (Latest Transaction with first installment date order)
+            return $this->db->order_by('PTI.installment_date', 'ASC')
+                            ->order_by('PTI.policy_transaction_id', 'DESC')
                             ->get()->result();
         }
 
-
-    // ----------------------------------------------------------------
+    // --------------------------------------------------------------------
 
 
     /**
      * Delete Cache on Update/Delete Records
      */
-    public function clear_cache(  )
+    public function clear_cache( $data=null )
     {
-        $cache_names = [
-            'ptxi_bytxn_*'
-        ];
+        /**
+         * If no data supplied, delete all caches
+         */
+        if( !$data )
+        {
+            $cache_names = [
+                'ptxi_bytxn_*',
+                'ptxi_fst_stts_bytxn_*',
+                'ptxi_bypolicy_*'
+            ];
+        }
+        else
+        {
+            /**
+             * If data supplied, we only delete the supplied
+             * caches
+             */
+            $cache_names = is_array($data) ? $data : [$data];
+        }
         // cache name without prefix
         foreach($cache_names as $cache)
         {

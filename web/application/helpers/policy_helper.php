@@ -326,6 +326,64 @@ if ( ! function_exists('get_policy_crf_computation_type_text'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('get_policy_installment_status_dropdown'))
+{
+	/**
+	 * Get Policy Transaction Status Dropdown
+	 *
+	 * @return	bool
+	 */
+	function get_policy_installment_status_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_POLICY_INSTALLMENT_STATUS_DRAFT			=> 'Due',
+			IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED		=> 'Vouchered',
+			IQB_POLICY_INSTALLMENT_STATUS_INVOICED		=> 'Invoiced',
+			IQB_POLICY_INSTALLMENT_STATUS_PAID			=> 'Paid'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('get_policy_installment_status_text'))
+{
+	/**
+	 * Get Policy Transaction Status Text
+	 *
+	 * @return	string
+	 */
+	function get_policy_installment_status_text( $key, $formatted = FALSE, $sentence = FALSE )
+	{
+		$list = get_policy_installment_status_dropdown();
+
+		$text = $list[$key] ?? '';
+
+		if($formatted && $text != '')
+		{
+			if( in_array($key, [IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED, IQB_POLICY_INSTALLMENT_STATUS_INVOICED, IQB_POLICY_INSTALLMENT_STATUS_PAID]) )
+			{
+				// Green
+				$css_class = 'text-green';
+			}
+			else
+			{
+				// Orange
+				$css_class = 'text-orange';
+			}
+
+			$text = '<strong class="'.$css_class.'">'.$text.'</strong>';
+		}
+		return $text;
+	}
+}
+
+// ------------------------------------------------------------------------
 
 if ( ! function_exists('is_policy_editable'))
 {
@@ -1164,27 +1222,93 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
     }
 }
 
+
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_POLICY__ri_approval_constraint'))
+if ( ! function_exists('_POLICY_TRANSACTION__ri_approval_constraint'))
 {
 	/**
-	 * RI Approval Constraint on Policy
+	 * RI Approval Constraint on Policy Transaction
 	 *
-	 * Check if the current policy transaction record requires RI Approval and is Approved
+	 * Check if the policy transaction record requires RI Approval and is Approved
 	 * i.e.
 	 * 		if RI Approval required and not approved yet, it returns TRUE
 	 * 		FALSE otherwise.
 	 *
-	 * @param char $policy_id_or_txn_record 	Policy ID or Txn Record
+	 * @param char 	$status 			Policy Transaction Status
+	 * @param int 	$flag_ri_approval 	Policy Transaction flag_ri_approval
 	 * @return	bool
 	 */
-	function _POLICY__ri_approval_constraint( $policy_id_or_txn_record )
+	function _POLICY_TRANSACTION__ri_approval_constraint( $status, $flag_ri_approval )
 	{
-		$CI =& get_instance();
-		$CI->load->model('policy_transaction_model');
+		$constraint = FALSE;
 
-		return $CI->policy_transaction_model->ri_approved($policy_id_or_txn_record) != TRUE;
+        // First check if it requires RI Approval
+        if( (int)$flag_ri_approval === IQB_FLAG_ON )
+        {
+            // Transaction status must be "RI Approved"
+            $constraint = $status !== IQB_POLICY_TXN_STATUS_RI_APPROVED;
+        }
+
+        return $constraint;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY_INSTALLMENT__voucher_constraint'))
+{
+	/**
+	 * Check voucher constraint for a policy installment
+	 *
+	 * Logic:
+	 *
+	 *  Case 1: First Installment
+	 *      The first installment is only eligible for voucher if policy transaction record is eligible
+	 *      i.e. either ri_approved or no ri_approval constraint with verified status
+	 *
+	 *  Case 2: Other installmemnts
+	 *      The first installment of this transaction record has to be paid.
+	 *
+	 * 	NOTE: You can only generate voucher for the given installment, only if voucher constraint is TRUE
+	 *
+	 *
+	 * @param object 	$record 	Policy Installment Record
+	 * @return	bool
+	 */
+	function _POLICY_INSTALLMENT__voucher_constraint( $record )
+	{
+		$passed = FALSE;
+
+		/**
+		 * Case 1: First Installment
+		 */
+		if( $record->flag_first == IQB_FLAG_ON )
+		{
+			$ri_approval_constraint = _POLICY_TRANSACTION__ri_approval_constraint($record->policy_transaction_status, $record->policy_transaction_flag_ri_approval);
+
+			$passed = 	($record->policy_transaction_status === IQB_POLICY_TXN_STATUS_RI_APPROVED)
+					        ||
+				    	(	$record->policy_transaction_status === IQB_POLICY_TXN_STATUS_VERIFIED
+				    			&&
+		    				$ri_approval_constraint == FALSE
+		    			);
+		}
+		/**
+		 * Case 2: Other Installment
+		 */
+		else
+		{
+			$CI =& get_instance();
+			$CI->load->model('policy_installment_model');
+
+			$first_installment_status = $CI->policy_installment_model->first_installment_status($record->policy_transaction_id);
+
+			$passed = $first_installment_status === IQB_POLICY_INSTALLMENT_STATUS_PAID;
+
+		}
+
+		return $passed;
 	}
 }
 

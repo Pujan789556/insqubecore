@@ -147,7 +147,7 @@ endif;
 /**
  * RI-Aproval Required?
  */
-$__flag_ri_approval_constraint = _POLICY__ri_approval_constraint($record);
+$__flag_ri_approval_constraint = _POLICY_TRANSACTION__ri_approval_constraint($record->status, $record->flag_ri_approval);
 
 if(
     $record->status === IQB_POLICY_TXN_STATUS_VERIFIED
@@ -176,21 +176,12 @@ if(
     $record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED
         ||
     ($record->status === IQB_POLICY_TXN_STATUS_VERIFIED && $__flag_ri_approval_constraint == FALSE )
-): ?>
-    <?php
+):
+
     /**
-     * If transaction is related to financial txn (new, renewal, txnal), We generate Voucher
+     * Let's activate the general endorsement
      */
-    if( (int)$record->txn_type !== IQB_POLICY_TXN_TYPE_EG &&  $this->dx_auth->is_authorized('policy_transactions', 'generate.transaction.voucher') ): ?>
-        <a href="#"
-            title="Generate Voucher"
-            data-toggle="tooltip"
-            data-confirm="true"
-            class="btn btn-sm btn-success btn-round trg-dialog-action"
-            data-message="Are you sure you want to do this?<br/>This will automatically generate VOUCHER for this transaction."
-            data-url="<?php echo site_url('policy_transactions/voucher/' . $record->id );?>"
-        ><i class="fa fa-money"></i> Voucher</a>
-    <?php elseif($this->dx_auth->is_authorized('policy_transactions', 'status.to.active')): ?>
+    if( (int)$record->txn_type === IQB_POLICY_TXN_TYPE_EG && $this->dx_auth->is_authorized('policy_transactions', 'status.to.active')): ?>
         <a href="#"
             title="Activate Transaction/Endorsement"
             data-toggle="tooltip"
@@ -199,5 +190,4 @@ if(
             data-url="<?php echo site_url('policy_transactions/status/' . $record->id  . '/' . IQB_POLICY_TXN_STATUS_ACTIVE );?>"
         ><i class="fa fa-check-square-o"></i> Activate</a>
     <?php endif?>
-<?php
-endif;
+<?php endif?>

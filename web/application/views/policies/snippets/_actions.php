@@ -85,7 +85,7 @@ endif;
  *
  *  1. Update Txn Status to IQB_POLICY_TXN_STATUS_RI_APPROVED
  */
-$__flag_ri_approval_constraint = _POLICY__ri_approval_constraint($record->id);
+$__flag_ri_approval_constraint = _POLICY_TRANSACTION__ri_approval_constraint($txn_record->status, $txn_record->flag_ri_approval);
 if( $record->status === IQB_POLICY_STATUS_VERIFIED && $__flag_ri_approval_constraint == TRUE && $this->dx_auth->is_authorized('policy_transactions', 'status.to.ri.approved') ):
  ?>
     <a href="#"
