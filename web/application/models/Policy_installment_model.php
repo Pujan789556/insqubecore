@@ -356,6 +356,21 @@ class Policy_installment_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Delete a Record
+     *
+     * We do not allow direct delete of a installment
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function delete($id)
+    {
+        return FALSE;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Log Activity
      *
      * Log activities
