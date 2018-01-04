@@ -69,13 +69,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 				&&
 
-			// Must have Policy Transaction ID
-			isset($record->policy_txn_id) && (int)$record->policy_txn_id !== IQB_FLAG_OFF
+			// Must have Policy Installment ID
+			isset($record->policy_installment_id) && (int)$record->policy_installment_id !== IQB_FLAG_OFF
 
 				&&
 
 			// Has Permission
-			$this->dx_auth->is_authorized('policy_transactions', 'generate.policy.invoice')
+			$this->dx_auth->is_authorized('policy_installments', 'generate.policy.invoice')
 
 		):?>
 			<a href="#"
@@ -84,7 +84,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	            data-confirm="true"
 	            class="btn btn-sm btn-success btn-round trg-dialog-action"
 	            data-message="Are you sure you want to Genrate Invoice for this policy?<br/>This will automatically generate INVOICE for this Policy."
-	            data-url="<?php echo site_url('policy_transactions/invoice/' . $record->policy_txn_id  . '/' . $record->id );?>"
+	            data-url="<?php echo site_url('policy_installments/invoice/' . $record->policy_installment_id  . '/' . $record->id );?>"
 	        ><i class="fa fa-list-alt"></i> Invoice</a>
 		<?php endif;?>
 

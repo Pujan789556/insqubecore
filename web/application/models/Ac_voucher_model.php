@@ -753,9 +753,10 @@ class Ac_voucher_model extends MY_Model
             $this->_row_select();
 
             // Policy Related JOIN
-            return $this->db->select('RPV.flag_invoiced, RPV.policy_txn_id, PTXN.policy_id')
+            return $this->db->select('RPV.flag_invoiced, RPV.policy_installment_id, PTXN.policy_id')
                         ->join('rel_policy_installment_voucher RPV', 'RPV.voucher_id = V.id')
-                        ->join('dt_policy_transactions PTXN', 'RPV.policy_txn_id = PTXN.id')
+                        ->join('dt_policy_installments PTI', 'RPV.policy_installment_id = PTI.id')
+                        ->join('dt_policy_transactions PTXN', 'PTI.policy_transaction_id = PTXN.id')
                         ->where('PTXN.policy_id', $policy_id)
                         ->where('V.flag_complete', IQB_FLAG_ON)
                         ->order_by('V.id', 'DESC')
@@ -790,7 +791,7 @@ class Ac_voucher_model extends MY_Model
 
     // --------------------------------------------------------------------
 
-    public function get_voucher_by_policy_txn_relation($policy_txn_id, $voucher_id)
+    public function get_voucher_by_policy_installment($policy_installment_id, $voucher_id)
     {
         return $this->db->select(
 
@@ -815,7 +816,7 @@ class Ac_voucher_model extends MY_Model
             ->join('master_branches B', 'B.id = V.branch_id')
             ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id')
             ->where([
-                'REL.policy_txn_id' => $policy_txn_id,
+                'REL.policy_installment_id' => $policy_installment_id,
                 'REL.voucher_id'    => $voucher_id,
                 'V.id'              => $voucher_id,
                 'V.flag_complete'   => IQB_FLAG_ON

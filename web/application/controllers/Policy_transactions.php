@@ -2363,7 +2363,7 @@ class Policy_transactions extends MY_Controller
 		 * Get Voucher Record By Policy Transaction Relation
 		 */
 		$this->load->model('ac_voucher_model');
-		$voucher_record = $this->ac_voucher_model->get_voucher_by_policy_txn_relation($txn_record->id, $voucher_id);
+		$voucher_record = $this->ac_voucher_model->get_voucher_by_policy_installment($txn_record->id, $voucher_id);
 		if(!$voucher_record)
 		{
 			$this->template->render_404();
