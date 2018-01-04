@@ -497,9 +497,18 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Get the Policy Fresh/Renewal Txn Record
 		 */
-		$id 		= (int)$id;
-		$txn_record = $this->policy_installment_model->get( $id );
-		if(!$txn_record)
+		$id 				= (int)$id;
+		$installment_record = $this->policy_installment_model->get( $id );
+		if(!$installment_record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Get the transaction record
+		 */
+		$transaction_record = $this->policy_transaction_model->get( $installment_record->policy_transaction_id );
+		if(!$transaction_record)
 		{
 			$this->template->render_404();
 		}
@@ -509,7 +518,7 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Policy Record
 		 */
-		$policy_record = $this->policy_model->get($txn_record->policy_id);
+		$policy_record = $this->policy_model->get($installment_record->policy_id);
 		if(!$policy_record)
 		{
 			$this->template->render_404();
@@ -521,9 +530,7 @@ class Policy_installments extends MY_Controller
 		 * Record Status Authorized to Generate Voucher?
 		 */
 
-		$authorized_status = ( $txn_record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED )
-								||
-							 ( $txn_record->status === IQB_POLICY_TXN_STATUS_VERIFIED && (int)$txn_record->flag_ri_approval === IQB_FLAG_OFF );
+		$authorized_status = _POLICY_INSTALLMENT__voucher_constraint($installment_record);
 		if( !$authorized_status )
 		{
 			return $this->template->json([
@@ -539,12 +546,12 @@ class Policy_installments extends MY_Controller
 		 * Load voucher models
 		 */
 		$this->load->model('ac_voucher_model');
-		$this->load->model('rel_policy_txn__voucher_model');
+		$this->load->model('rel_policy_installment_voucher_model');
 
 		/**
 		 * Check if Voucher already generated for this Installment
 		 */
-		if( $this->rel_policy_txn__voucher_model->voucher_exists($txn_record->id))
+		if( $this->rel_policy_installment_voucher_model->voucher_exists($installment_record->id))
 		{
 			return $this->template->json([
 				'title' 	=> 'OOPS!',
@@ -591,7 +598,14 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Let's Build Policy Voucher
 		 */
-		$narration = 'POLICY VOUCHER - POLICY CODE : ' . $policy_record->code;
+		$narration = 'POLICY VOUCHER - POLICY CODE : ';
+
+		// policy code if not second installment
+		if($installment_record->flag_first == IQB_FLAG_OFF)
+		{
+			$narration .= $policy_record->code;
+		}
+
 		$voucher_data = [
             'voucher_date'      => date('Y-m-d'),
             'voucher_type_id'   => IQB_AC_VOUCHER_TYPE_PRI,
@@ -605,13 +619,13 @@ class Policy_installments extends MY_Controller
         /**
          * Voucher Amount Computation
          */
-        $gross_premium_amount 		= $txn_record->amt_total_premium;
-        $stamp_income_amount 		= $txn_record->amt_stamp_duty;
-        $vat_payable_amount 		= $txn_record->amt_vat;
+        $gross_premium_amount 		= $installment_record->amt_total_premium;
+        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
+        $vat_payable_amount 		= $installment_record->amt_vat;
 
         $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
         $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
-        $agent_commission_amount 					= $txn_record->amt_agent_commission ?? NULL;
+        $agent_commission_amount 					= $installment_record->amt_agent_commission ?? NULL;
 
 		// --------------------------------------------------------------------
 
@@ -882,10 +896,10 @@ class Policy_installments extends MY_Controller
 				try {
 
 					$relation_data = [
-						'policy_txn_id' => $txn_record->id,
-						'voucher_id' 	=> $voucher_id
+						'policy_installment_id' => $installment_record->id,
+						'voucher_id' 			=> $voucher_id
 					];
-					$this->rel_policy_txn__voucher_model->add($relation_data);
+					$this->rel_policy_installment_voucher_model->add($relation_data);
 
 				} catch (Exception $e) {
 
@@ -902,7 +916,16 @@ class Policy_installments extends MY_Controller
 				{
 					try{
 
-						$this->policy_installment_model->update_status($txn_record, IQB_POLICY_TXN_STATUS_VOUCHERED);
+						/**
+						 * If first installment of this transaction
+						 */
+						if($installment_record->flag_first == IQB_FLAG_ON)
+						{
+							$this->policy_transaction_model->update_status($transaction_record, IQB_POLICY_TXN_STATUS_VOUCHERED);
+						}
+
+						// Update installment status
+						$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED);
 
 					} catch (Exception $e) {
 
@@ -916,9 +939,15 @@ class Policy_installments extends MY_Controller
 				/**
 				 * Task 5: Generate Policy Number
 				 *
-				 * NOTE: Policy TXN must be fresh or Renewal
+				 * NOTE: Policy TXN must be fresh or Renewal & First Installment
 				 */
-				if( !$flag_exception && in_array($txn_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+				if(
+						$flag_exception == FALSE
+							&&
+						$installment_record->flag_first == IQB_FLAG_ON
+							&&
+						in_array($transaction_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL])
+					)
 				{
 					try{
 
@@ -926,6 +955,10 @@ class Policy_installments extends MY_Controller
 						if($policy_code)
 						{
 							$policy_record->code = $policy_code;
+
+							// Update Voucher Narration
+							$narration .= $policy_code;
+							$this->ac_voucher_model->update($voucher_id, ['narration' => $narration], TRUE);
 						}
 
 					} catch (Exception $e) {
@@ -982,9 +1015,13 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
 		 */
-		$txn_record->status = IQB_POLICY_TXN_STATUS_VOUCHERED;
-		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'txn_record' => $txn_record], TRUE);
-		$html_txn_row 		= $this->load->view('policy_installments/_single_row', ['policy_record' => $policy_record, 'record' => $txn_record], TRUE);
+		$installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED;
+		$installment_record->policy_transaction_status 	= IQB_POLICY_TXN_STATUS_VOUCHERED;
+		$transaction_record->status 					= IQB_POLICY_TXN_STATUS_VOUCHERED;
+
+		$html_tab_ovrview = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'txn_record' => $transaction_record], TRUE);
+		$html_txn_row 	  = $this->load->view('policy_installments/_single_row', ['policy_record' => $policy_record, 'record' => $installment_record], TRUE);
+
 		$ajax_data = [
 			'message' 	=> 'Successfully Updated!',
 			'status'  	=> 'success',
@@ -995,7 +1032,7 @@ class Policy_installments extends MY_Controller
 					'html' 		=> $html_tab_ovrview
 				],
 				[
-					'box' 		=> '#_data-row-policy_installments-' . $txn_record->id,
+					'box' 		=> '#_data-row-policy_installments-' . $installment_record->id,
 					'method' 	=> 'replaceWith',
 					'html' 		=> $html_txn_row
 				]
@@ -1207,12 +1244,12 @@ class Policy_installments extends MY_Controller
                  */
                 if( !$flag_exception )
 				{
-					$this->load->model('rel_policy_txn__voucher_model');
+					$this->load->model('rel_policy_installment_voucher_model');
 					$rel_base_where = [
 						'policy_txn_id' => $txn_record->id,
 						'voucher_id' 	=> $voucher_id
 					];
-	                $this->rel_policy_txn__voucher_model->update_by($rel_base_where, [
+	                $this->rel_policy_installment_voucher_model->update_by($rel_base_where, [
 	                	'flag_invoiced' => IQB_FLAG_ON
 	            	]);
 
@@ -1384,7 +1421,7 @@ class Policy_installments extends MY_Controller
          * Load voucher models
          */
         $this->load->model('ac_voucher_model');
-        $this->load->model('rel_policy_txn__voucher_model');
+        $this->load->model('rel_policy_installment_voucher_model');
 
         // --------------------------------------------------------------------
 
@@ -1616,7 +1653,7 @@ class Policy_installments extends MY_Controller
                         'voucher_id'    => $voucher_id,
                         'flag_invoiced' => IQB_FLAG_NOT_REQUIRED
                     ];
-                    $this->rel_policy_txn__voucher_model->add($relation_data);
+                    $this->rel_policy_installment_voucher_model->add($relation_data);
 
                 } catch (Exception $e) {
 

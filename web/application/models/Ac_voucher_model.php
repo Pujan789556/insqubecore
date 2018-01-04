@@ -754,7 +754,7 @@ class Ac_voucher_model extends MY_Model
 
             // Policy Related JOIN
             return $this->db->select('RPV.flag_invoiced, RPV.policy_txn_id, PTXN.policy_id')
-                        ->join('rel_policy_txn__voucher RPV', 'RPV.voucher_id = V.id')
+                        ->join('rel_policy_installment_voucher RPV', 'RPV.voucher_id = V.id')
                         ->join('dt_policy_transactions PTXN', 'RPV.policy_txn_id = PTXN.id')
                         ->where('PTXN.policy_id', $policy_id)
                         ->where('V.flag_complete', IQB_FLAG_ON)
@@ -810,7 +810,7 @@ class Ac_voucher_model extends MY_Model
                 'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
             )
             ->from($this->table_name . ' AS V')
-            ->join('rel_policy_txn__voucher REL', 'V.id = REL.voucher_id')
+            ->join('rel_policy_installment_voucher REL', 'V.id = REL.voucher_id')
             ->join('ac_voucher_types VT', 'VT.id = V.voucher_type_id')
             ->join('master_branches B', 'B.id = V.branch_id')
             ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id')

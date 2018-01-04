@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Rel_policy_txn__voucher_model extends MY_Model
+class Rel_policy_installment_voucher_model extends MY_Model
 {
-    protected $table_name   = 'rel_policy_txn__voucher';
+    protected $table_name   = 'rel_policy_installment_voucher';
     protected $set_created  = FALSE;
     protected $set_modified = FALSE;
     protected $log_user     = FALSE;
@@ -15,7 +15,7 @@ class Rel_policy_txn__voucher_model extends MY_Model
     protected $after_update  = [];
     protected $after_delete  = [];
 
-    protected $fields = ['policy_txn_id', 'voucher_id', 'flag_invoiced'];
+    protected $fields = ['policy_installment_id', 'voucher_id', 'flag_invoiced'];
 
     protected $validation_rules = [];
 
@@ -57,7 +57,7 @@ class Rel_policy_txn__voucher_model extends MY_Model
         $done = $this->db->insert($this->table_name, $data);
         if( !$done )
         {
-            throw new Exception("Exception [Model: Rel_policy_txn__voucher_model][Method: add()]: Could not insert record.");
+            throw new Exception("Exception [Model: Rel_policy_installment_voucher_model][Method: add()]: Could not insert record.");
         }
 
         // return result/status
@@ -69,15 +69,15 @@ class Rel_policy_txn__voucher_model extends MY_Model
     /**
      * Check if Voucher Exists for Given Transaction ID
      *
-     * @param integer $policy_txn_id
+     * @param integer $policy_installment_id
      * @return integer
      */
-    public function voucher_exists($policy_txn_id)
+    public function voucher_exists($policy_installment_id)
     {
         return $this->db
                         ->from($this->table_name . ' AS REL')
                         ->join('ac_vouchers V', 'V.id = REL.voucher_id')
-                        ->where('REL.policy_txn_id', $policy_txn_id)
+                        ->where('REL.policy_installment_id', $policy_installment_id)
                         ->where('V.flag_complete', IQB_FLAG_ON)
                         ->count_all_results();
     }

@@ -186,6 +186,96 @@ class Policy_installment_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
+     * Update Policy Transaction Status
+     *
+     * !!! NOTE: We can only change status of current Transaction Record
+     *
+     * @param integer $policy_id_or_txn_record Policy ID or Transaction Record
+     * @param alpha $to_status_flag Status Code
+     * @return bool
+     */
+    public function update_status($id_or_record, $to_status_flag)
+    {
+        // Get the Policy Record
+        $record = is_numeric($id_or_record) ? $this->get( (int)$id_or_record ) : $id_or_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Policy_installment_model][Method: update_status()]: Installment record could not be found.");
+        }
+
+        // Status Qualified?
+        if( !$this->status_qualifies($record->status, $to_status_flag) )
+        {
+            throw new Exception("Exception [Model:Policy_installment_model][Method: update_status()]: Current Status does not qualify to upgrade/downgrade.");
+        }
+
+        $data = [
+            'status'        => $to_status_flag,
+            'updated_by'    => $this->dx_auth->get_user_id(),
+            'updated_at'    => $this->set_date()
+        ];
+
+        /**
+         * Update Status and Clear Cache Specific to this Policy ID
+         */
+        if( $this->_to_status($record->id, $data) )
+        {
+            /**
+             * Delete Caches
+             */
+            $cache_keys = [
+                'ptxi_bytxn_' . $record->id,
+                'ptxi_fst_stts_bytxn_' . $record->id,
+                'ptxi_bypolicy_' . $record->policy_id
+            ];
+            $this->clear_cache($cache_keys);
+
+            return TRUE;
+        }
+
+        return FALSE;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function status_qualifies($current_status, $to_status)
+    {
+        $flag_qualifies = FALSE;
+
+        switch ($to_status)
+        {
+            case IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED:
+                $flag_qualifies = $current_status === IQB_POLICY_INSTALLMENT_STATUS_DRAFT;
+                break;
+
+            case IQB_POLICY_TXN_STATUS_INVOICED:
+                $flag_qualifies = $current_status === IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED;
+                break;
+
+            // For non-txnal endorsement, its from approved
+            case IQB_POLICY_INSTALLMENT_STATUS_PAID:
+                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_INVOICED;
+                break;
+
+            default:
+                break;
+        }
+        return $flag_qualifies;
+    }
+
+        // ----------------------------------------------------------------
+
+        private function _to_status($id, $data)
+        {
+            return $this->db->where('id', $id)
+                        ->update($this->table_name, $data);
+        }
+
+
+    // --------------------------------------------------------------------
+
+    /**
      * Get the status of first installment belonging to this policy transaction
      *
      * @param int $policy_transaction_id
@@ -226,7 +316,7 @@ class Policy_installment_model extends MY_Model
      */
     public function get($id)
     {
-        return $this->db->select('PTI.*, P.branch_id')
+        return $this->db->select('PTI.*, P.id AS policy_id, P.branch_id, P.code AS policy_code, PTXN.flag_current as policy_transaction_flag_current, PTXN.status AS policy_transaction_status, PTXN.flag_ri_approval AS policy_transaction_flag_ri_approval')
                         ->from($this->table_name . ' AS PTI')
                         ->join('dt_policy_transactions PTXN', 'PTXN.id = PTI.policy_transaction_id')
                         ->join('dt_policies P', 'P.id = PTXN.policy_id')

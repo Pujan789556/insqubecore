@@ -1860,12 +1860,12 @@ class Policy_transactions extends MY_Controller
 		 * Load voucher models
 		 */
 		$this->load->model('ac_voucher_model');
-		$this->load->model('rel_policy_txn__voucher_model');
+		$this->load->model('rel_policy_installment_voucher_model');
 
 		/**
 		 * Check if Voucher already generated for this Transaction
 		 */
-		if( $this->rel_policy_txn__voucher_model->voucher_exists($txn_record->id))
+		if( $this->rel_policy_installment_voucher_model->voucher_exists($txn_record->id))
 		{
 			return $this->template->json([
 				'title' 	=> 'OOPS!',
@@ -2206,7 +2206,7 @@ class Policy_transactions extends MY_Controller
 						'policy_txn_id' => $txn_record->id,
 						'voucher_id' 	=> $voucher_id
 					];
-					$this->rel_policy_txn__voucher_model->add($relation_data);
+					$this->rel_policy_installment_voucher_model->add($relation_data);
 
 				} catch (Exception $e) {
 
@@ -2528,12 +2528,12 @@ class Policy_transactions extends MY_Controller
                  */
                 if( !$flag_exception )
 				{
-					$this->load->model('rel_policy_txn__voucher_model');
+					$this->load->model('rel_policy_installment_voucher_model');
 					$rel_base_where = [
 						'policy_txn_id' => $txn_record->id,
 						'voucher_id' 	=> $voucher_id
 					];
-	                $this->rel_policy_txn__voucher_model->update_by($rel_base_where, [
+	                $this->rel_policy_installment_voucher_model->update_by($rel_base_where, [
 	                	'flag_invoiced' => IQB_FLAG_ON
 	            	]);
 
@@ -2705,7 +2705,7 @@ class Policy_transactions extends MY_Controller
          * Load voucher models
          */
         $this->load->model('ac_voucher_model');
-        $this->load->model('rel_policy_txn__voucher_model');
+        $this->load->model('rel_policy_installment_voucher_model');
 
         // --------------------------------------------------------------------
 
@@ -2937,7 +2937,7 @@ class Policy_transactions extends MY_Controller
                         'voucher_id'    => $voucher_id,
                         'flag_invoiced' => IQB_FLAG_NOT_REQUIRED
                     ];
-                    $this->rel_policy_txn__voucher_model->add($relation_data);
+                    $this->rel_policy_installment_voucher_model->add($relation_data);
 
                 } catch (Exception $e) {
 
