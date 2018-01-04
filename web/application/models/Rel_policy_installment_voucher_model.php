@@ -64,6 +64,21 @@ class Rel_policy_installment_voucher_model extends MY_Model
         return $done;
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Update flag_invoiced to ON/OFF
+     *
+     * @param array $where
+     * @param int $to_status
+     * @return bool
+     */
+    public function flag_invoiced($where, $to_status)
+    {
+        return $this->db->where($where)
+                        ->update($this->table_name, ['flag_invoiced' => $to_status]);
+    }
+
 	// --------------------------------------------------------------------
 
     /**

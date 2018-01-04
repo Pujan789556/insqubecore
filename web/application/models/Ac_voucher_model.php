@@ -738,6 +738,8 @@ class Ac_voucher_model extends MY_Model
                 $this->write_cache($rows, $cache_var, CACHE_DURATION_HR);
             }
         }
+        // $rows = $this->_rows_by_policy($policy_id);
+        // echo $this->db->last_query();exit;
         return $rows;
     }
 

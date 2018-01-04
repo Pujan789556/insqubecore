@@ -50,7 +50,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						&&
 
 					// Must have Policy Transaction ID
-					isset($record->policy_txn_id) && (int)$record->policy_txn_id !== IQB_FLAG_OFF
+					isset($record->policy_transaction_id) && (int)$record->policy_transaction_id !== IQB_FLAG_OFF
 
 						&&
 

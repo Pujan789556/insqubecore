@@ -614,8 +614,9 @@ class Ac_invoice_model extends MY_Model
             // Policy Related JOIN
             return $this->db->select('PTXN.id AS policy_txn_id, PTXN.policy_id')
                         ->join('ac_vouchers V', 'V.id = I.voucher_id')
-                        ->join('rel_policy_installment_voucher RELPTXNVHR', 'RELPTXNVHR.voucher_id = I.voucher_id')
-                        ->join('dt_policy_transactions PTXN', 'RELPTXNVHR.policy_txn_id = PTXN.id')
+                        ->join('rel_policy_installment_voucher REL', 'REL.voucher_id = I.voucher_id')
+                        ->join('dt_policy_installments PTI', 'REL.policy_installment_id = PTI.id')
+                        ->join('dt_policy_transactions PTXN', 'PTI.policy_transaction_id = PTXN.id')
                         ->where('PTXN.policy_id', $policy_id)
                         ->where('I.flag_complete', IQB_FLAG_ON)
                         ->where('V.flag_complete', IQB_FLAG_ON)
@@ -639,7 +640,7 @@ class Ac_invoice_model extends MY_Model
                             'B.contacts as branch_contact, ' .
 
                             // Policy Transaction ID, Policy ID
-                            'PTXN.id AS policy_txn_id, PTXN.policy_id, ' .
+                            'PTI.policy_transaction_id, PTXN.policy_id, ' .
 
                             // Policy Code
                             'POLICY.code AS policy_code, ' .
@@ -648,8 +649,9 @@ class Ac_invoice_model extends MY_Model
                             'CST.full_name AS customer_full_name, CST.contact as customer_contact'
                         )
                     ->join('ac_vouchers V', 'V.id = I.voucher_id')
-                    ->join('rel_policy_installment_voucher RELPTXNVHR', 'RELPTXNVHR.voucher_id = I.voucher_id')
-                    ->join('dt_policy_transactions PTXN', 'RELPTXNVHR.policy_txn_id = PTXN.id')
+                    ->join('rel_policy_installment_voucher REL', 'REL.voucher_id = I.voucher_id')
+                    ->join('dt_policy_installments PTI', 'REL.policy_installment_id = PTI.id')
+                    ->join('dt_policy_transactions PTXN', 'PTI.policy_transaction_id = PTXN.id')
                     ->join('dt_policies POLICY', 'POLICY.id = PTXN.policy_id')
                     ->join('dt_customers CST', 'CST.id = I.customer_id');
 
