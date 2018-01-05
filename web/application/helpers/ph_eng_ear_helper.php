@@ -188,7 +188,7 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 			        'label' => 'Risk Deductible',
 			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
 			        '_type' => 'text',
-			        '_default' => 'Rs. _____ of EAR only.',
+			        '_default' => '__% of claim amount subject to minimum of Rs. ______',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ]
@@ -711,7 +711,7 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 					// A = Default Premium for all item
 					$A = $items_premium;
 					$cost_calculation_table[] = [
-						'label' => "Premium",
+						'label' => "Basic Premium",
 						'value' => $A
 					];
 

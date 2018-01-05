@@ -76,7 +76,7 @@ $schedule_table_title   = "Erection All Risks (Schedule)";
                          */
                         if($record->flag_on_credit === 'Y')
                         {
-                            echo '<br/><strong>Name and address of Financer(s)</strong><br/>',
+                            echo '<strong>Name and address of Financer(s)</strong><br/>',
                                 $this->security->xss_clean($record->creditor_name) , ', ' , $this->security->xss_clean($record->creditor_branch_name), '<br/>',
                                 get_contact_widget($record->creditor_branch_contact, true, true) , '<br/>' ,
                                 nl2br($this->security->xss_clean($record->other_creditors));
