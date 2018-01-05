@@ -666,7 +666,7 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 					// A = Default Premium for all item
 					$A = $items_premium;
 					$cost_calculation_table[] = [
-						'label' => "Gross Premium",
+						'label' => "Basic Premium",
 						'value' => $A
 					];
 
