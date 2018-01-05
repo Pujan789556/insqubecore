@@ -188,7 +188,7 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 			        'label' => 'Risk Deductible',
 			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
 			        '_type' => 'text',
-			        '_default' => '__% of claim amount subject to minimum of Rs. ______',
+			        '_default' => '__% of claim amount subject to minimum of Rs. ______.',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ]
