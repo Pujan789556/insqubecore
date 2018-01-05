@@ -471,24 +471,12 @@ class Object_model extends MY_Model
     /**
      * Delete Cache on Update/Delete Records
      */
-    public function clear_cache($data=null)
+    public function clear_cache()
     {
-        /**
-         * Cache Clearance Logic:
-         *
-         * Every cache object belongs to specific customer ID.
-         * So, when we add/edit/delete a object, we only need to
-         * clear cache of the specific customer's object cache
-         */
-        $cache_names = [];
-        $id = $data['id'] ?? null;
-        $customer_id = $data['fields']['customer_id'] ?? '*';
-        if( !$customer_id)
-        {
-            $record = $this->row($id);
-            $customer_id = $record->customer_id;
-        }
-        $cache_names[] = 'object_customer_' . $customer_id;
+        $cache_names = [
+            'object_customer_*',
+        ];
+
     	// cache name without prefix
         foreach($cache_names as $cache)
         {
