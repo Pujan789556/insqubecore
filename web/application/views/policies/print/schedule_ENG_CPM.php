@@ -159,7 +159,7 @@ $schedule_table_title   = 'Contractor Plant & Machinary (Schedule)';
                                 <tr>
                                     <td class="text-bold">Total Sum Insured Amount(Rs.)</td>
                                     <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2, '.', '') ?></td>
-                                    <td>&nbsp;</td>
+                                    <td colspan="2">&nbsp;</td>
                                 </tr>
                             </tbody>
                         </table>

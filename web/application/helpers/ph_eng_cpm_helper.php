@@ -129,9 +129,19 @@ if ( ! function_exists('_OBJ_ENG_CPM_validation_rules'))
 			        '_required' 	=> true
 			    ],
 			    [
-			        'field' => 'object[item][excess]',
-			        '_key' => 'excess',
-			        'label' => 'Excess',
+			        'field' => 'object[item][excess_normal]',
+			        '_key' => 'excess_normal',
+			        'label' => 'Excess Normal',
+			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        '_type' => 'textarea',
+			        'rows' 	=> 4,
+			        '_show_label' 	=> false,
+			        '_required' 	=> true
+			    ],
+			    [
+			        'field' => 'object[item][excess_aog]',
+			        '_key' => 'excess_aog',
+			        'label' => 'Excess AOG',
 			        'rules' => 'trim|htmlspecialchars|max_length[500]',
 			        '_type' => 'textarea',
 			        'rows' 	=> 4,
@@ -421,7 +431,7 @@ if ( ! function_exists('__save_premium_ENG_CPM'))
 					{
 						// Pool Premium = x% of Default Premium (A-B)
 						$pool_rate = floatval($pfs_record->pool_premium);
-						$POOL_PREMIUM = ( $C * $pool_rate ) / 100.00;
+						$POOL_PREMIUM = ( $SI * $pool_rate ) / 100.00;
 					}
 					$cost_calculation_table[] = [
 						'label' => "Pool Premium",
