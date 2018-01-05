@@ -162,6 +162,16 @@ if ( ! function_exists('_OBJ_ENG_BL_validation_rules'))
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
+			    ],
+			    [
+			        'field' => 'object[items][excess][]',
+			        '_key' => 'excess',
+			        'label' => 'Excess',
+			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        '_type' => 'textarea',
+			        'rows' 	=> 4,
+			        '_show_label' 	=> false,
+			        '_required' 	=> true
 			    ]
 		    ],
 
@@ -326,6 +336,7 @@ if ( ! function_exists('_OBJ_ENG_BL_pre_save_tasks'))
 		            [C] => Regd. No
 		            [D] => Year of Make
 		            [E] => Sum Insured
+		            [F] => Excess
 		        )
 		        */
 
@@ -335,7 +346,7 @@ if ( ! function_exists('_OBJ_ENG_BL_pre_save_tasks'))
 		        /**
 		         * Format data to save into JSON Object Items
 		         */
-		        $excel_columns = [ 'A'=>'sn', 'B' => 'description', 'C' => 'regd_no', 'D' => 'make_year', 'E' => 'sum_insured' ];
+		        $excel_columns = [ 'A'=>'sn', 'B' => 'description', 'C' => 'regd_no', 'D' => 'make_year', 'E' => 'sum_insured', 'F' => 'excess' ];
 		        $items = [];
 		        foreach($excel_data as $row)
 		        {
@@ -700,7 +711,7 @@ if ( ! function_exists('__save_premium_ENG_BL'))
 					{
 						// Pool Premium = x% of Default Premium (A)
 						$pool_rate = floatval($pfs_record->pool_premium);
-						$POOL_PREMIUM = ( $A * $pool_rate ) / 100.00;
+						$POOL_PREMIUM = ( $SI * $pool_rate ) / 100.00;
 					}
 					$cost_calculation_table[] = [
 						'label' => "Pool Premium",

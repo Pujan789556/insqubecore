@@ -102,6 +102,24 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                         To: : <?php echo $record->end_date ?>
                     </td>
                     <td>
+                        <?php $cost_calculation_table = json_decode($txn_record->cost_calculation_table ?? NULL);
+                        if($cost_calculation_table):?>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <td colspan="2"><strong>COST CALCULATION TABLE</strong></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach($cost_calculation_table as $row):?>
+                                        <tr>
+                                            <td><?php echo $row->label ?></td>
+                                            <td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                </tbody>
+                            </table><br>
+                        <?php endif ?>
                         <table class="table table-condensed no-border">
                             <tr>
                                 <td><strong>Premium</strong></td>
@@ -162,6 +180,7 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                                 <tr>
                                     <td colspan="4" class="text-bold">Total Sum Insured Amount(Rs.)</td>
                                     <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2, '.', '') ?></td>
+                                    <td>&nbsp;</td>
                                 </tr>
                             </tbody>
                         </table>

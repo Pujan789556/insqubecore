@@ -30,10 +30,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <th>Regd. No.</th>
                             <th>Year of Make</th>
                             <th>Sum Insured(Rs)</th>
+                            <th>Excess</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
+                            <td>...</td>
                             <td>...</td>
                             <td>...</td>
                             <td>...</td>

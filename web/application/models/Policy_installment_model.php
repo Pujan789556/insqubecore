@@ -78,6 +78,7 @@ class Policy_installment_model extends MY_Model
                 '_key'  => 'percent',
                 'rules' => 'trim|required|prep_decimal|decimal|max_length[6]|callback__cb_installment_complete',
                 '_type' => 'text',
+                '_default' => 100,
                 '_required' => true,
                 '_show_label' => false
             ],
