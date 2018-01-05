@@ -612,7 +612,7 @@ class Ac_invoice_model extends MY_Model
             $this->_row_select();
 
             // Policy Related JOIN
-            return $this->db->select('PTXN.id AS policy_txn_id, PTXN.policy_id')
+            return $this->db->select('REL.policy_installment_id, PTXN.policy_id')
                         ->join('ac_vouchers V', 'V.id = I.voucher_id')
                         ->join('rel_policy_installment_voucher REL', 'REL.voucher_id = I.voucher_id')
                         ->join('dt_policy_installments PTI', 'REL.policy_installment_id = PTI.id')

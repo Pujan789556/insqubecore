@@ -1269,6 +1269,7 @@ if ( ! function_exists('_POLICY_INSTALLMENT__voucher_constraint'))
 	 *
 	 *  Case 2: Other installmemnts
 	 *      The first installment of this transaction record has to be paid.
+	 * 		And its status must be draft
 	 *
 	 * 	NOTE: You can only generate voucher for the given installment, only if voucher constraint is TRUE
 	 *
@@ -1304,8 +1305,11 @@ if ( ! function_exists('_POLICY_INSTALLMENT__voucher_constraint'))
 
 			$first_installment_status = $CI->policy_installment_model->first_installment_status($record->policy_transaction_id);
 
-			$passed = $first_installment_status === IQB_POLICY_INSTALLMENT_STATUS_PAID;
-
+			$passed = 	(
+							$first_installment_status === IQB_POLICY_INSTALLMENT_STATUS_PAID
+								&&
+							$record->status === IQB_POLICY_INSTALLMENT_STATUS_DRAFT
+						);
 		}
 
 		return $passed;
@@ -1797,15 +1801,15 @@ if ( ! function_exists('get_installments_by_txn'))
 	/**
 	 * Get the list of installments by a policy transaction
 	 *
-	 * @param integer $policy_txn_id 	Policy TXN ID
+	 * @param integer $policy_installment_id 	Policy TXN ID
 	 * @return	array
 	 */
-	function get_installments_by_txn( $policy_txn_id )
+	function get_installments_by_txn( $policy_installment_id )
 	{
 		$CI =& get_instance();
 		$CI->load->model('policy_installment_model');
 
-		return $CI->policy_installment_model->get_many_by_policy_transaction($policy_txn_id);
+		return $CI->policy_installment_model->get_many_by_policy_transaction($policy_installment_id);
 	}
 }
 

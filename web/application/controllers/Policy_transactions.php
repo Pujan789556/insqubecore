@@ -2203,7 +2203,7 @@ class Policy_transactions extends MY_Controller
 				try {
 
 					$relation_data = [
-						'policy_txn_id' => $txn_record->id,
+						'policy_installment_id' => $txn_record->id,
 						'voucher_id' 	=> $voucher_id
 					];
 					$this->rel_policy_installment_voucher_model->add($relation_data);
@@ -2530,7 +2530,7 @@ class Policy_transactions extends MY_Controller
 				{
 					$this->load->model('rel_policy_installment_voucher_model');
 					$rel_base_where = [
-						'policy_txn_id' => $txn_record->id,
+						'policy_installment_id' => $txn_record->id,
 						'voucher_id' 	=> $voucher_id
 					];
 	                $this->rel_policy_installment_voucher_model->update_by($rel_base_where, [
@@ -2933,7 +2933,7 @@ class Policy_transactions extends MY_Controller
                 try {
 
                     $relation_data = [
-                        'policy_txn_id' => $txn_record->id,
+                        'policy_installment_id' => $txn_record->id,
                         'voucher_id'    => $voucher_id,
                         'flag_invoiced' => IQB_FLAG_NOT_REQUIRED
                     ];

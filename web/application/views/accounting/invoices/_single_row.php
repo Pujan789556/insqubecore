@@ -9,6 +9,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<td><?php echo $record->id;?></td>
 		<?php endif;?>
 	<td><?php echo anchor('ac_invoices/details/'.$record->id, $record->invoice_code, ['target' => '_blank']);?></td>
+	<td>
+		<?php
+		$reference = [];
+		if(isset($record->policy_installment_id))
+		{
+			$reference[] = "Installment ID: " . $record->policy_installment_id;
+		}
+		if(isset($record->voucher_id))
+		{
+			$reference[] = "Voucher ID: " . $record->voucher_id;
+		}
+
+		echo implode('<br/>', $reference);
+		?>
+	</td>
 	<td><?php echo $record->branch_name;?></td>
 	<td><?php echo $record->invoice_date;?></td>
 	<td><?php echo invoice_complete_flag_text($record->flag_complete);?></td>
@@ -50,12 +65,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						&&
 
 					// Must have Policy Transaction ID
-					isset($record->policy_transaction_id) && (int)$record->policy_transaction_id !== IQB_FLAG_OFF
+					isset($record->policy_installment_id) && (int)$record->policy_installment_id !== IQB_FLAG_OFF
 
 						&&
 
 					// Has Permission
-					$this->dx_auth->is_authorized('policy_transactions', 'make.policy.payment')
+					$this->dx_auth->is_authorized('policy_installments', 'make.policy.payment')
 
 				):?>
 					<li>
@@ -66,7 +81,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				            data-form="#_form-payment"
 				            data-box-size="large"
 				            data-title='<i class="fa fa-pencil-square-o"></i> Make a Payment'
-				            data-url="<?php echo site_url('policy_transactions/payment/' . $record->policy_txn_id  . '/' . $record->id );?>"
+				            data-url="<?php echo site_url('policy_installments/payment/' . $record->policy_installment_id  . '/' . $record->id );?>"
 				        ><i class="fa fa-list-alt"></i> Payment</a>
 			        </li><li class="divider"></li>
 				<?php endif;?>

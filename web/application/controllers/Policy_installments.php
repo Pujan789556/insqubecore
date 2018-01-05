@@ -166,314 +166,6 @@ class Policy_installments extends MY_Controller
 	}
 
 
-
-	// --------------------------------------------------------------------
-	//  STATUS UPGRADE/DOWNGRADE
-	// --------------------------------------------------------------------
-
-	/**
-	 * Upgrade/Downgrade Status of a Policy Txn Record
-	 *
-	 * @param integer $id Policy ID
-	 * @param char $to_status_code Status Code
-	 * @param string $ref 	Where does this requrest come from?
-	 * @return json
-	 */
-	public function status($id, $to_status_code, $ref='tab-policy-transactions')
-	{
-		$id = (int)$id;
-		$txn_record = $this->policy_installment_model->get($id);
-		if(!$txn_record)
-		{
-			$this->template->render_404();
-		}
-
-		// is This Current Installment?
-		if( $txn_record->flag_current != IQB_FLAG_ON  )
-		{
-			return $this->template->json([
-				'status' 	=> 'error',
-				'message' 	=> 'Invalid Current Policy Installment Record!'
-			], 400);
-		}
-
-		/**
-		 * Check Permission
-		 * -----------------
-		 * You need to have permission to modify the given status.
-		 */
-		$this->__check_status_permission($to_status_code, $txn_record);
-
-
-		/**
-		 * Meet the Status Pre-Requisite ?
-		 */
-		$this->__status_qualifies($to_status_code, $txn_record);
-
-
-		/**
-		 * Let's Update the Status
-		 */
-		try {
-
-			if( $this->policy_installment_model->update_status($txn_record, $to_status_code) )
-			{
-				/**
-				 * Updated Installment & Policy Record
-				 */
-				$txn_record = $this->policy_installment_model->get($txn_record->id);
-				$policy_record = $this->policy_model->get($txn_record->policy_id);
-
-
-				/**
-				 * Post Tasks on Installment Activation
-				 * -------------------------------------
-				 *
-				 * If this is not a General Endorsement Installment, we also have to update the
-				 * 	- policy (from audit_policy field if any data)
-				 * 	- object (from audit_object field if any data)
-				 * 	- customer (from audit_customer field if any data)
-				 * 	- SEND SMS on General Installment Activation
-				 */
-				if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_EG && $to_status_code ==IQB_POLICY_TXN_STATUS_ACTIVE )
-				{
-					$this->_sms_activation($txn_record, $policy_record);
-				}
-
-
-				/**
-				 * Load Portfolio Specific Helper File
-				 */
-				try { load_portfolio_helper($policy_record->portfolio_id);} catch (Exception $e) {
-					return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
-				}
-
-				/**
-				 * What to reload/render after success?
-				 * -----------------------------------
-				 * 	1. RI Approval Triggered from Policy Overview Tab
-				 */
-				if( $ref == 'tab-policy-overview' )
-				{
-					/**
-					 * Update View
-					 */
-					$view = 'policies/tabs/_tab_overview';
-					$html = $this->load->view($view, ['record' => $policy_record, 'txn_record' => $txn_record], TRUE);
-
-					$ajax_data = [
-						'message' 	=> 'Successfully Updated!',
-						'status'  	=> 'success',
-						'multipleUpdate' => [
-							[
-								'box' 		=> '#tab-policy-overview-inner',
-								'method' 	=> 'replaceWith',
-								'html' 		=> $html
-							],
-							[
-								'box' 		=> '#page-title-policy-code',
-								'method' 	=> 'html',
-								'html' 		=> $policy_record->code
-							]
-						]
-					];
-					return $this->template->json($ajax_data);
-				}
-				else
-				{
-					// Replace the Row
-					$html = $this->load->view('policy_installments/_single_row', ['record' => $txn_record, 'policy_record' => $policy_record], TRUE);
-					return $this->template->json([
-						'message' 	=> 'Successfully Updated!',
-						'status'  	=> 'success',
-						'multipleUpdate' => [
-							[
-								'box' 		=> '#_data-row-policy_installments-' . $txn_record->id,
-								'method' 	=> 'replaceWith',
-								'html' 		=> $html
-							]
-						]
-					]);
-				}
-			}
-
-		} catch (Exception $e) {
-
-			return $this->template->json([
-				'status' 	=> 'error',
-				'title' 	=> 'Exception Occured.',
-				'message' 	=> $e->getMessage()
-			], 400);
-		}
-
-		return $this->template->json([
-			'status' 	=> 'error',
-			'message' 	=> 'Could not be updated!'
-		], 400);
-	}
-
-	// --------------------------------------------------------------------
-
-		/**
-		 * Check Status up/down permission
-		 *
-		 * @param alpha $to_updown_status Status Code to UP/DOWN
-		 * @param bool $terminate_on_fail Terminate right here on fails
-		 * @return mixed
-		 */
-		private function __check_status_permission($to_updown_status, $terminate_on_fail = TRUE)
-		{
-			/**
-			 * Check Permission
-			 * ------------------------------
-			 *
-			 */
-			$status_keys = array_keys(get_policy_txn_status_dropdown(FALSE));
-
-			// Valid Status Code?
-			if( !in_array($to_updown_status, $status_keys ) )
-			{
-				return $this->template->json([
-					'status' 	=> 'error',
-					'message' 	=> 'Invalid Status Code!'
-				], 403);
-			}
-
-			/**
-			 * Admin?
-			 */
-			if($this->dx_auth->is_admin())
-			{
-				return TRUE;
-			}
-
-
-			// Valid Permission?
-			$__flag_valid_permission = FALSE;
-			$permission_name 	= '';
-			switch ($to_updown_status)
-			{
-				case IQB_POLICY_TXN_STATUS_DRAFT:
-					$permission_name = 'status.to.draft';
-					break;
-
-				case IQB_POLICY_TXN_STATUS_VERIFIED:
-					$permission_name = 'status.to.verified';
-					break;
-
-				case IQB_POLICY_TXN_STATUS_RI_APPROVED:
-					$permission_name = 'status.to.ri.approved';
-					break;
-
-				case IQB_POLICY_TXN_STATUS_VOUCHERED:
-					$permission_name = 'status.to.vouchered';
-					break;
-
-				case IQB_POLICY_TXN_STATUS_INVOICED:
-					$permission_name = 'status.to.invoiced';
-					break;
-
-				case IQB_POLICY_TXN_STATUS_ACTIVE:
-					$permission_name = 'status.to.active';
-					break;
-
-				default:
-					break;
-			}
-			if( $permission_name !== ''  && $this->dx_auth->is_authorized('policy_installments', $permission_name) )
-			{
-				$__flag_valid_permission = TRUE;
-			}
-
-			if( !$__flag_valid_permission && $terminate_on_fail )
-			{
-				$this->dx_auth->deny_access();
-			}
-
-			return $__flag_valid_permission;
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Status Qualifies to UP/DOWN
-		 *
-		 * This is very important that not all type of policy txn has manu status
-		 * up/down facility. So we have to look into the type of Policy Txn Record Type and
-		 * follow the logic accordingly.
-		 *
-		 * @param alpha $to_updown_status Status Code to UP/DOWN
-		 * @param object $txn_record Policy Installment Record
-		 * @param bool $terminate_on_fail Terminate right here on fails
-		 * @return mixed
-		 */
-		private function __status_qualifies($to_updown_status, $txn_record, $terminate_on_fail = TRUE)
-		{
-			$__flag_passed = $this->policy_installment_model->status_qualifies($txn_record->status, $to_updown_status);
-
-			if( $__flag_passed )
-			{
-				/**
-				 * FRESH/RENEWAL Policy Installment
-				 * 	Draft/Verified are automatically triggered from
-				 * 	Policy Status Update Method
-				 */
-				if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_FRESH  || $txn_record->txn_type == IQB_POLICY_TXN_TYPE_RENEWAL )
-				{
-					$__flag_passed = !in_array($to_updown_status, [
-						IQB_POLICY_TXN_STATUS_DRAFT,
-						IQB_POLICY_TXN_STATUS_VERIFIED,
-						IQB_POLICY_TXN_STATUS_ACTIVE
-					]);
-				}
-			}
-
-			/**
-			 * Can not Update Transactional Status Directly using status function
-			 */
-			if( $__flag_passed )
-			{
-				$__flag_passed = !in_array($to_updown_status, [
-					IQB_POLICY_TXN_STATUS_VOUCHERED,
-					IQB_POLICY_TXN_STATUS_INVOICED
-				]);
-			}
-
-			/**
-			 * General Endorsement
-			 * Activate Status
-			 *
-			 * !!! If RI-Approval Constraint Required, It should Come from That Status else from Verified
-			 */
-			if( $__flag_passed && $to_updown_status === IQB_POLICY_TXN_STATUS_ACTIVE && $txn_record->txn_type == IQB_POLICY_TXN_TYPE_EG )
-			{
-				if( (int)$txn_record->flag_ri_approval === IQB_FLAG_ON )
-				{
-					$__flag_passed = $txn_record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED;
-				}
-				else
-				{
-					$__flag_passed = $txn_record->status === IQB_POLICY_TXN_STATUS_VERIFIED;
-				}
-			}
-
-
-			if( !$__flag_passed && $terminate_on_fail )
-			{
-				return $this->template->json([
-					'status' 	=> 'error',
-					'title' 	=> 'Invalid Status Installment',
-					'message' 	=> 'You can not swith to the state from this state of installment.'
-				], 400);
-			}
-
-			return $__flag_passed;
-
-		}
-
-	// --------------------- END: STATUS UPGRADE/DOWNGRADE --------------------
-
-
 	// --------------------------------------------------------------------
 	//  POLICY Voucher & Invoice
 	// --------------------------------------------------------------------
@@ -1373,6 +1065,13 @@ class Policy_installments extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Make Installment Payment
+	 *
+	 * @param int $id Installment ID
+	 * @param int $invoice_id Invoice ID
+	 * @return mixed
+	 */
 	public function payment($id, $invoice_id)
     {
         /**
@@ -1384,22 +1083,30 @@ class Policy_installments extends MY_Controller
         }
 
         /**
-         * Get the Policy Fresh/Renewal Txn Record
+         * Get the Policy Installment Record
          */
         $id         = (int)$id;
         $invoice_id = (int)$invoice_id;
-        $txn_record = $this->policy_installment_model->get( $id );
-        if(!$txn_record)
-        {
-            $this->template->render_404();
-        }
+        $installment_record = $this->policy_installment_model->get( $id );
+		if(!$installment_record)
+		{
+			$this->template->render_404();
+		}
+        /**
+		 * Get the transaction record
+		 */
+		$transaction_record = $this->policy_transaction_model->get( $installment_record->policy_transaction_id );
+		if(!$transaction_record)
+		{
+			$this->template->render_404();
+		}
 
         // --------------------------------------------------------------------
 
         /**
          * Policy Record
          */
-        $policy_record = $this->policy_model->get($txn_record->policy_id);
+        $policy_record = $this->policy_model->get($transaction_record->policy_id);
         if(!$policy_record)
         {
             $this->template->render_404();
@@ -1410,7 +1117,7 @@ class Policy_installments extends MY_Controller
         /**
          * Record Status Authorized to Make Payment?
          */
-        if($txn_record->status !== IQB_POLICY_TXN_STATUS_INVOICED)
+        if($installment_record->status !== IQB_POLICY_INSTALLMENT_STATUS_INVOICED)
         {
             return $this->template->json([
                 'title'     => 'OOPS!',
@@ -1671,9 +1378,9 @@ class Policy_installments extends MY_Controller
                 try {
 
                     $relation_data = [
-                        'policy_txn_id' => $txn_record->id,
-                        'voucher_id'    => $voucher_id,
-                        'flag_invoiced' => IQB_FLAG_NOT_REQUIRED
+                        'policy_installment_id' => $installment_record->id,
+                        'voucher_id'    		=> $voucher_id,
+                        'flag_invoiced' 		=> IQB_FLAG_NOT_REQUIRED
                     ];
                     $this->rel_policy_installment_voucher_model->add($relation_data);
 
@@ -1689,14 +1396,22 @@ class Policy_installments extends MY_Controller
                  * Task 4:
                  * 		Update Invoice Paid Flat to "ON"
                  *      Update Policy Status to "Active" (if Fresh or Renewal )
-                 *      Update Installment Status to "Active", Clean Cache, (Commit endorsement if ET or EG)
+                 *      Update Installment Status to "Paid", Clean Cache, (Commit endorsement if ET or EG)
                  */
                 if( !$flag_exception )
                 {
                     try{
 
                     	$this->ac_invoice_model->update_flag($invoice_record->id, 'flag_paid', IQB_FLAG_ON);
-                        $this->policy_installment_model->update_status($txn_record, IQB_POLICY_TXN_STATUS_ACTIVE);
+
+                    	/**
+						 * If first installment of this transaction, activate the transaction
+						 */
+						if($installment_record->flag_first == IQB_FLAG_ON)
+						{
+							$this->policy_transaction_model->update_status($transaction_record, IQB_POLICY_TXN_STATUS_ACTIVE);
+						}
+                        $this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_PAID);
 
                     } catch (Exception $e) {
 
@@ -1783,7 +1498,7 @@ class Policy_installments extends MY_Controller
                     $this->ac_invoice_model->clear_cache($cache_var);
 
                     // Send SMS
-                    $this->_sms_activation($txn_record, $policy_record, $invoice_record);
+                    $this->_sms_activation($transaction_record, $policy_record, $invoice_record, $installment_record);
             }
 
             /**
@@ -1809,11 +1524,14 @@ class Policy_installments extends MY_Controller
         /**
          * Reload the Policy Overview Tab, Update Installment Row (Replace)
          */
-        $txn_record->status         = IQB_POLICY_TXN_STATUS_ACTIVE;
-        $policy_record->status      = IQB_POLICY_STATUS_ACTIVE;
-        $invoice_record->flag_paid  = IQB_FLAG_ON;
-        $html_tab_ovrview           = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'txn_record' => $txn_record], TRUE);
-        $html_invoice_row       	= $this->load->view('accounting/invoices/_single_row', ['record' => $invoice_record], TRUE);
+        $installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_PAID;
+		$installment_record->policy_transaction_status 	= IQB_POLICY_TXN_STATUS_ACTIVE;
+        $transaction_record->status 					= IQB_POLICY_TXN_STATUS_ACTIVE;
+        $policy_record->status      					= IQB_POLICY_STATUS_ACTIVE;
+        $invoice_record->flag_paid  					= IQB_FLAG_ON;
+
+        $html_tab_ovrview   = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'txn_record' => $transaction_record], TRUE);
+        $html_invoice_row 	= $this->load->view('accounting/invoices/_single_row', ['record' => $invoice_record], TRUE);
         $ajax_data = [
             'message'   => 'Successfully Updated!',
             'status'    => 'success',
@@ -1840,11 +1558,13 @@ class Policy_installments extends MY_Controller
          * Case 1: Fresh/Renewal/Transactional - After making payment, it gets activated automatically
          * Case 2: General Endorsement - After activating
          *
-         * @param object $txn_record
+         * @param object $transaction_record
          * @param object $policy_record
+         * @param object $invoice_record
+         * @param object $installment_record
          * @return bool
          */
-    	private function _sms_activation($txn_record, $policy_record, $invoice_record = NULL)
+    	private function _sms_activation( $transaction_record, $policy_record, $invoice_record = NULL, $installment_record = NULL)
     	{
     		$customer_name 		= $policy_record->customer_name;
     		$customer_contact 	= $policy_record->customer_contact ? json_decode($policy_record->customer_contact) : NULL;
@@ -1857,18 +1577,33 @@ class Policy_installments extends MY_Controller
 
     		$message = "Dear {$customer_name}," . PHP_EOL;
 
-    		if( in_array($txn_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+    		if( in_array($transaction_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
         	{
-        		$message .= "Your Policy has been issued." . PHP_EOL .
-        					"Policy No: " . $policy_record->code . PHP_EOL .
-        					"Premium Paid(Rs): " . $invoice_record->amount . PHP_EOL .
-        					"Expires on : " . $policy_record->end_date . PHP_EOL;
+
+        		// First Installment
+        		if($installment_record->flag_first == IQB_FLAG_ON)
+				{
+					$message .= "Your Policy has been issued." . PHP_EOL .
+	        					"Policy No: " . $policy_record->code . PHP_EOL .
+	        					"Premium Paid(Rs): " . $invoice_record->amount . PHP_EOL .
+	        					"Expires on : " . $policy_record->end_date . PHP_EOL;
+				}
+
+				// Other Installment
+				else
+				{
+					$message .= "Your Policy installment has been issued." . PHP_EOL .
+	        					"Policy No: " . $policy_record->code . PHP_EOL .
+	        					"Premium Paid(Rs): " . $invoice_record->amount . PHP_EOL;
+				}
+
+
         	}
-        	else if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_ET )
+        	else if( $transaction_record->txn_type == IQB_POLICY_TXN_TYPE_ET )
         	{
         		$message .= "Your Policy Endorsement has been issued." . PHP_EOL .
         					"Policy No: " . $policy_record->code . PHP_EOL .
-        					"Amount Paid(Rs): " . $invoice_record->amount . PHP_EOL;
+        					"Premium Paid(Rs): " . $invoice_record->amount . PHP_EOL;
         	}
         	else
         	{

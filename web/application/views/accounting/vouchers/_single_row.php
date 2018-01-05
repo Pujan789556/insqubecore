@@ -9,6 +9,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<td><?php echo $record->id;?></td>
 		<?php endif;?>
 	<td><?php echo anchor('ac_vouchers/details/'.$record->id, $record->voucher_code, ['target' => '_blank']);?></td>
+	<td>
+		<?php
+		if(isset($record->policy_installment_id))
+		{
+			echo "Installment ID: ", $record->policy_installment_id;
+		}
+		?>
+	</td>
 	<td><?php echo $record->branch_name;?></td>
 	<td><?php echo $record->voucher_type_name;?></td>
 	<td><?php echo $record->voucher_date;?></td>

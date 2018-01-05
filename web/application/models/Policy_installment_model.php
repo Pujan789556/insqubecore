@@ -227,7 +227,7 @@ class Policy_installment_model extends MY_Model
              */
             $cache_keys = [
                 'ptxi_bytxn_' . $record->id,
-                'ptxi_fst_stts_bytxn_' . $record->id,
+                'ptxi_fst_stts_bytxn_' . $record->policy_transaction_id,
                 'ptxi_bypolicy_' . $record->policy_id
             ];
             $this->clear_cache($cache_keys);
@@ -296,7 +296,6 @@ class Policy_installment_model extends MY_Model
                         ->where('PTI.policy_transaction_id', $policy_transaction_id)
                         ->where('PTI.flag_first', IQB_FLAG_ON)
                         ->get()->row()->status;
-
             if($status)
             {
                 $this->write_cache($status, $cache_var, CACHE_DURATION_HR);
