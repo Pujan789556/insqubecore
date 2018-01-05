@@ -217,7 +217,7 @@ if ( ! function_exists('_OBJ_ENG_EEI_pre_save_tasks'))
         /**
          * No File Selected in Edit Mode, Use the old one
          */
-        else if( $status === 'no_file_selected' &&  isset($record->id) )
+        else if( $status === 'no_file_selected' )
         {
 			// Old Document as it is
 			$data['object']['document'] = $old_document;
@@ -494,7 +494,7 @@ if ( ! function_exists('__save_premium_ENG_EEI'))
 					{
 						// Pool Premium = x% of Default Premium (A-B)
 						$pool_rate = floatval($pfs_record->pool_premium);
-						$POOL_PREMIUM = ( $C * $pool_rate ) / 100.00;
+						$POOL_PREMIUM = ( $SI * $pool_rate ) / 100.00;
 					}
 					$cost_calculation_table[] = [
 						'label' => "Pool Premium",
