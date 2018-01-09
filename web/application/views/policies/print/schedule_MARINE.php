@@ -140,24 +140,6 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                         </table>
                     </td>
                     <td>
-                        <?php $cost_calculation_table = json_decode($txn_record->cost_calculation_table ?? NULL);
-                        if($cost_calculation_table):?>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <td colspan="2"><strong>COST CALCULATION TABLE</strong></td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach($cost_calculation_table as $row):?>
-                                        <tr>
-                                            <td><?php echo $row->label ?></td>
-                                            <td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
-                                        </tr>
-                                    <?php endforeach ?>
-                                </tbody>
-                            </table><br>
-                        <?php endif ?>
                         <table class="table table-condensed no-border">
                             <tr>
                                 <td><strong>Premium</strong></td>
@@ -194,12 +176,18 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                 </tr>
 
                 <tr>
-                    <td class="text-right">
-                        <strong>Voyage</strong> From:<br/>
-                        To
+                    <td>
+                        <strong>Voyage From</strong>
                     </td>
                     <td>
                         <?php echo $object_attributes->transit->from ?><br/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Voyage To</strong>
+                    </td>
+                    <td>
                         <?php echo $object_attributes->transit->to ?>
                     </td>
                 </tr>
@@ -227,7 +215,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                 <tr>
                     <td><strong>Vessel and / or Conveyance</strong></td>
                     <td>
-                        <?php echo $object_attributes->transit->vessel ?>
+                        <?php echo _OBJ_MARINE_mode_of_transit_dropdown()[$object_attributes->transit->mode]; ?>
                     </td>
                 </tr>
                 <tr>
@@ -248,8 +236,18 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                             $clauses_list[] = $i . '. ' . _OBJ_MARINE_clauses_list(FALSE)[$cls];
                             $i++;
                         }
-                        echo implode('<br/>', $clauses_list);
-                        ?><br/>
+                        // echo implode('<br/>', $clauses_list);
+                        $clause_count   = count($clauses_list);
+                        $firsthalf      = array_slice($clauses_list, 0, $clause_count / 2);
+                        $secondhalf     = array_slice($clauses_list, $clause_count / 2);
+                        ?>
+                        <table class="table no-border">
+                            <tr>
+                                <td><?php echo implode('<br/>', $firsthalf); ?></td>
+                                <td><?php echo implode('<br/>', $secondhalf); ?></td>
+                            </tr>
+                        </table>
+                        <br/>
                         <strong>Warranties:</strong><br/>
                         <?php echo $object_attributes->risk->warranties; ?>
                     </td>
@@ -295,5 +293,24 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                 </td>
             </tr>
         </table>
+        <?php $cost_calculation_table = json_decode($txn_record->cost_calculation_table ?? NULL);
+        if($cost_calculation_table):?>
+            <pagebreak>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <td colspan="2"><strong>COST CALCULATION TABLE</strong></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($cost_calculation_table as $row):?>
+                        <tr>
+                            <td><?php echo $row->label ?></td>
+                            <td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+                        </tr>
+                    <?php endforeach ?>
+                </tbody>
+            </table><br>
+        <?php endif ?>
     </body>
 </html>

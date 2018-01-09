@@ -158,6 +158,7 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'label' => 'Claim Payable at',
 			        'rules' => 'trim|required|max_length[150]',
 			        '_type'     => 'text',
+			        '_default' 	=> "HEAD OFFICE AT KATHMANDU, NEPAL. IN NEPALESE CURRENCY ONLY.",
 			        '_required' => true
 			    ],
 		    ],
@@ -185,8 +186,8 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			    ],
 			    [
 			        'field' => 'object[transit][mode]',
-			        '_key' 	=> 'mode',
-			        'label' => 'Mode of Transit',
+			        '_key' => 'mode',
+			        'label' => 'Vessel and / or Conveyance',
 			        'rules' => 'trim|required|alpha|in_list['. implode(',', array_keys($mode_of_transit_dropdown)) .']',
 			        '_type'     => 'dropdown',
 			        '_data' 	=> IQB_BLANK_SELECT + $mode_of_transit_dropdown,
@@ -242,16 +243,8 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        '_extra_attributes' => 'data-provide="datepicker-inline"',
 			        '_type'             => 'date',
 			        '_required' => false
-			    ],
-			    [
-			        'field' => 'object[transit][vessel]',
-			        '_key' => 'vessel',
-			        'label' => 'Vessel and / or Conveyance',
-			        'rules' => 'trim|max_length[200]',
-			        'rows' 		=> 4,
-			        '_type'     => 'textarea',
-			        '_required' => false
 			    ]
+
 		    ],
 
 		    /**
@@ -410,8 +403,11 @@ if ( ! function_exists('_OBJ_MARINE_deductible_excess_dropdown'))
 	function _OBJ_MARINE_deductible_excess_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
+			'0.5' 	=> 'Subject to 0.5% excess on whole consignment',
 			'1' 	=> 'Subject to 1% excess on whole consignment',
-			'0.5' 	=> 'Subject to 0.5% excess on whole consignment'
+			'2' 	=> 'Subject to 2% excess on whole consignment',
+			'3' 	=> 'Subject to 3% excess on whole consignment'
+
 		];
 
 		if($flag_blank_select)
@@ -435,10 +431,10 @@ if ( ! function_exists('_OBJ_MARINE_mode_of_transit_dropdown'))
 	function _OBJ_MARINE_mode_of_transit_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			'AIR' 	=> 'Air',
-			'RAIL' 	=> 'Rail',
-			'ROAD'	=> 'Road',
-			'SEA' 	=> 'Sea',
+			'AIR' 		=> 'Air',
+			'RAILROAD' 	=> 'Rail/Road',
+			'ROAD'		=> 'Road',
+			'SEA' 		=> 'Sea/Rail/Road',
 		];
 
 		if($flag_blank_select)
