@@ -52,6 +52,22 @@ class Customer_model extends MY_Model
     {
         $this->load->model('country_model');
         $countries = $this->country_model->dropdown();
+
+
+        $post = $this->input->post();
+        $type = $post['type'] ?? NULL;
+
+        $individual_requird = '';
+        if( $type )
+        {
+            if ($type == 'I' )
+            {
+                $individual_requird = '|required';
+            }
+        }
+        $nationality_rules = 'trim' . $individual_requird . '|alpha|exact_length[2]';
+        $father_name_rules = 'trim' . $individual_requird . '|max_length[150]';
+
         $this->validation_rules = [
             [
                 'field' => 'type',
@@ -75,7 +91,7 @@ class Customer_model extends MY_Model
             [
                 'field'     => 'nationality',
                 'label'     => 'Nationality',
-                'rules'     => 'trim|required|alpha|exact_length[2]',
+                'rules'     => $nationality_rules,
                 '_type'     => 'dropdown',
                 '_data'     => IQB_BLANK_SELECT + $countries,
                 '_default'  => 'NP',
@@ -93,7 +109,7 @@ class Customer_model extends MY_Model
             [
                 'field' => 'father_name',
                 'label' => 'Father Name',
-                'rules' => 'trim|required|max_length[150]',
+                'rules' => $father_name_rules,
                 '_type'     => 'text',
                 '_extra_attributes' => 'data-ref="I"',
                 '_required' => true
