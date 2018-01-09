@@ -42,7 +42,7 @@ $premium_computation_table  = $txn_record->premium_computation_table ? json_deco
         <div class="box-header with-border">
             <h4 class="box-title">Premium Information</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
             <?php
             /**
              * Portfolio Specific Premium Fields
