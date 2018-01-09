@@ -67,8 +67,7 @@ $schedule_table_title   = 'बैंकरको क्षतिपूर्त�
                         <table class="table" width="100%">
                             <tr>
                                 <td>
-                                    <h4 class="border-b">बीमितको</h4><br/>
-                                    नाम ठेगाना:<br/>
+                                    <h4>बीमितको नाम ठेगाना</h4>
                                     <?php
                                     /**
                                      * If Policy Object is Financed or on Loan, The financial Institute will be "Insured Party"
@@ -127,9 +126,11 @@ $schedule_table_title   = 'बैंकरको क्षतिपूर्त�
                                     </table>
                                 </td>
                             </tr>
-
-
-
+                            <tr>
+                                <td>
+                                    <strong>कर्मचारी संख्या</strong>: <?php echo $object_attributes->staff_count; ?>
+                                </td>
+                            </tr>
                         </table>
                     </td>
 
@@ -176,9 +177,21 @@ $schedule_table_title   = 'बैंकरको क्षतिपूर्त�
                             <tr>
                                 <td>
                                     <strong>बीमाशुल्क</strong><br>
+                                    <table class="table no-border">
+                                        <tbody>
+                                            <tr>
+                                                <td>Basic Premium</td>
+                                                <td class="text-right"><?php echo number_format( (float)$txn_record->amt_total_premium - $txn_record->amt_pool_premium, 2, '.', '');?></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Pool Premium</td>
+                                                <td class="text-right"><?php echo number_format( (float)$txn_record->amt_pool_premium, 2, '.', '');?></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                     <table class="table no-margin table-bordered table-condensed">
                                         <tr>
-                                            <td width="80%" class="text-right"><strong>बीमा शुल्क</strong></td>
+                                            <td width="80%" class="text-right"><strong>कुल बीमा शुल्क</strong></td>
                                             <td class="text-right"><strong><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></strong></td>
                                         </tr>
                                         <tr>
@@ -202,14 +215,14 @@ $schedule_table_title   = 'बैंकरको क्षतिपूर्त�
 
                 <tr>
                     <td colspan="2">
-                        <strong class="border-b">अधिक (एक्सेस/डिडक्टिवल)</strong><br><br>
+                        <strong>अधिक (एक्सेस/डिडक्टिवल)</strong><br>
                         <?php echo nl2br(htmlspecialchars($object_attributes->excess_deductibles)) ?>
                     </td>
                 </tr>
 
                 <tr>
                     <td colspan="2">
-                        <strong class="border-b">सम्पुष्टीहरु</strong><br><br>
+                        <strong>सम्पुष्टीहरु</strong><br>
                         <?php echo nl2br(htmlspecialchars($txn_record->txn_details)) ?>
                     </td>
                 </tr>

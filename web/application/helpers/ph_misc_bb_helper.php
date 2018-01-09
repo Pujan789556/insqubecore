@@ -255,7 +255,7 @@ if ( ! function_exists('_TXN_MISC_BB_premium_validation_rules'))
 	            [
 	                'field' => 'premium[others][rate]',
 	                'label' => 'Rate',
-	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
 	                '_type'     => 'text',
 	                '_key' 		=> 'rate',
 	                '_required' => true
@@ -540,8 +540,8 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 						'value' => $F
 					];
 
-					// G = E + F
-					$G = $E + $F;
+					// G = D + E + F
+					$G = $D + $E + $F;
 					$cost_calculation_table[] = [
 						'label' => "G. (E + F)",
 						'value' => $G
