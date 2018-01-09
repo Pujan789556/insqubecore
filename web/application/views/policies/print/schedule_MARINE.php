@@ -61,11 +61,10 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
 
                 <tr>
                     <td><strong>Date:</strong> <?php echo $record->start_date?></td>
-                    <td><strong>Issued at:</strong> <?php echo $record->branch_name ?></td>
                     <td><strong>Date of Questionnaire:</strong> <?php echo $object_attributes->date_qn ?></td>
                 </tr>
                 <tr>
-                    <td colspan="2"><strong><?php echo policy_nr_title($record->status, 'en')?>:</strong> <?php echo $record->code;?></td>
+                    <td><strong><?php echo policy_nr_title($record->status, 'en')?>:</strong> <?php echo $record->code;?></td>
 
                     <?php
                     /**
@@ -76,7 +75,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                     <td><strong>Agent:</strong> <?php echo $agent_text;?> </td>
                 </tr>
                 <tr>
-                    <td colspan="2">
+                    <td>
                         <strong>Name and address of Insured</strong><br/>
                         <?php
                         /**
@@ -103,12 +102,13 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                     </td>
                     <td>
                         <strong>Bill No.:</strong> <br/>
-                        <strong>Receipt No.:</strong>
+                        <strong>Receipt No.:</strong><br>
+                        <strong>Issued at:</strong> <?php echo $record->branch_name ?>
                     </td>
                 </tr>
 
                 <tr>
-                    <td colspan="2">
+                    <td>
                         <?php
                         $si_components = $object_attributes->sum_insured;
                         ?>
@@ -140,6 +140,24 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                         </table>
                     </td>
                     <td>
+                        <?php $cost_calculation_table = json_decode($txn_record->cost_calculation_table ?? NULL);
+                        if($cost_calculation_table):?>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <td colspan="2"><strong>COST CALCULATION TABLE</strong></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach($cost_calculation_table as $row):?>
+                                        <tr>
+                                            <td><?php echo $row->label ?></td>
+                                            <td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                </tbody>
+                            </table><br>
+                        <?php endif ?>
                         <table class="table table-condensed no-border">
                             <tr>
                                 <td><strong>Premium</strong></td>
@@ -163,7 +181,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                 </tr>
 
                 <tr>
-                    <td colspan="3">
+                    <td colspan="2">
                         <strong>Subject matter insured/Interest</strong><br/>
                         <?php echo nl2br($object_attributes->description); ?>
                         <?php echo nl2br($object_attributes->packing); ?>
@@ -172,7 +190,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
 
                 <tr>
                     <td><strong>Marks &amp; Numbers</strong></td>
-                    <td colspan="2"> <?php echo $object_attributes->marks_numbers ?></td>
+                    <td> <?php echo $object_attributes->marks_numbers ?></td>
                 </tr>
 
                 <tr>
@@ -180,7 +198,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                         <strong>Voyage</strong> From:<br/>
                         To
                     </td>
-                    <td colspan="2">
+                    <td>
                         <?php echo $object_attributes->transit->from ?><br/>
                         <?php echo $object_attributes->transit->to ?>
                     </td>
@@ -188,38 +206,38 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
 
                 <tr>
                     <td><strong>Invoice No. &amp; Date</strong></td>
-                    <td colspan="2">
+                    <td>
                         <?php echo $object_attributes->transit->invoice_no, ', ', $object_attributes->transit->invoice_date ?>
                     </td>
                 </tr>
 
                 <tr>
                     <td><strong>LC No. &amp; Date</strong></td>
-                    <td colspan="2">
+                    <td>
                         <?php echo $object_attributes->transit->lc_no, ', ', $object_attributes->transit->lc_date ?>
                     </td>
                 </tr>
 
                 <tr>
                     <td><strong>B/L No./C/N No./AW/B No./R/R No. &amp; Date</strong></td>
-                    <td colspan="2">
+                    <td>
                         <?php echo $object_attributes->transit->bl_no, ', ', $object_attributes->transit->bl_date ?>
                     </td>
                 </tr>
                 <tr>
                     <td><strong>Vessel and / or Conveyance</strong></td>
-                    <td colspan="2">
+                    <td>
                         <?php echo $object_attributes->transit->vessel ?>
                     </td>
                 </tr>
                 <tr>
                     <td><strong>Estimated Date of Departure</strong></td>
-                    <td colspan="2">
+                    <td>
                         <?php echo $object_attributes->date_dept ?>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="3">
+                    <td colspan="2">
                         <small>Terms of Insurance: Subject to the following clauses listed and attached hereto and printed warranties below;</small><br/>
                         <strong>Clauses:</strong><br/>
                         <?php
@@ -238,7 +256,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                 </tr>
                 <tr>
                     <td><strong>Deductible Excess</strong></td>
-                    <td colspan="2">
+                    <td>
                         <?php echo _OBJ_MARINE_deductible_excess_dropdown(FALSE)[$object_attributes->risk->deductible_excess] ?>
                     </td>
                 </tr>
@@ -248,7 +266,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                         <strong>Contact Person</strong> <br>
                         <strong>Address</strong>
                     </td>
-                    <td colspan="2">
+                    <td>
                         <?php
                         echo $object_attributes->surveyor->name, '<br>',
                              $object_attributes->surveyor->contact_person, '<br>',
@@ -258,7 +276,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                 </tr>
                 <tr>
                     <td><strong>Claims payable at</strong></td>
-                    <td colspan="2">
+                    <td>
                         <?php echo $object_attributes->claim_payable_at ?>
                     </td>
                 </tr>
