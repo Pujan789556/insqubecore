@@ -20,7 +20,7 @@ $cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn
 				    <td class="no-padding" colspan="2">
 				        <table class="table no-margin table-bordered table-condensed">
 				            <tr>
-				                <td width="80%" class="text-right"><strong>Gross Premium</strong></td>
+				                <td width="80%" class="text-right"><strong>Premium</strong></td>
 				                <td class="text-right"><strong><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></strong></td>
 				            </tr>
 				            <tr>

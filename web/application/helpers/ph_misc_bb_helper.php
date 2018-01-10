@@ -477,45 +477,38 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 
 					// Basic Premium
 					$cost_calculation_table[] = [
-						'label' => "A. Basic Premium Rate ({$rate_basic}%)",
+						'label' => "Basic Premium ({$rate_basic}%)",
 						'value' => $premium_basic
 					];
 
 					// Additional Premium - Cash in Premises
 					$cost_calculation_table[] = [
-						'label' => "B. Additional Premium - Cash in Premises Rate ({$rate_cip}%)",
+						'label' => "Additional Premium - Cash in Premises ({$rate_cip}%)",
 						'value' => $premium_cip
 					];
 
 					// Additional Premium - Cash in Transit
 					$cost_calculation_table[] = [
-						'label' => "C. Additional Premium - Cash in Transit Rate ({$rate_cit}%)",
+						'label' => "Additional Premium - Cash in Transit ({$rate_cit}%)",
 						'value' => $premium_cit
 					];
 
 
 					// D = A + B + C
 					$D = $premium_basic + $premium_cip + $premium_cit;
-					$cost_calculation_table[] = [
-						'label' => "D. (A+B+C)",
-						'value' => $D
-					];
+
 
 					// Forgery & Dishonesty
 					// E = Forgery Rate X Total Staff
 					$E =  intval($object_attributes->staff_count) * $forgery_dishonesty_rate;
 					$cost_calculation_table[] = [
-						'label' => "E. Forgery & Dishonesty (Rs. {$forgery_dishonesty_rate} per Staff)",
+						'label' => "Forgery & Dishonesty (Rs. {$forgery_dishonesty_rate} per Staff)",
 						'value' => $E
 					];
 
 					/**
 					 * Additional Risks' Premium
 					 */
-					$cost_calculation_table[] = [
-						'label' => "<strong>Additional Risks</strong>",
-						'value' => ''
-					];
 					$additional_risk_premium = 0.00;
 					foreach($portfolio_risks as $risk_id=>$risk_name)
 					{
@@ -527,25 +520,21 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 							$per_risk_premium = ( $rate * $object_amt_sum_insured ) / 100.00;
 							$additional_risk_premium += $per_risk_premium;
 
-							$cost_calculation_table[] = [
-								'label' => "$risk_name ({$rate}%)",
-								'value' => $per_risk_premium
-							];
+							if($per_risk_premium)
+							{
+								$cost_calculation_table[] = [
+									'label' => "$risk_name ({$rate}%)",
+									'value' => $per_risk_premium
+								];
+							}
 						}
 					}
 
 					$F = $additional_risk_premium;
-					$cost_calculation_table[] = [
-						'label' => "F. Total Additional Risk Premium",
-						'value' => $F
-					];
 
 					// G = D + E + F
 					$G = $D + $E + $F;
-					$cost_calculation_table[] = [
-						'label' => "G. (E + F)",
-						'value' => $G
-					];
+
 
 
 
@@ -563,6 +552,11 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 					{
 						$direct_discount = ( $G * $pfs_record->direct_discount ) / 100.00 ;
 						$G -= $direct_discount;
+
+						$cost_calculation_table[] = [
+							'label' => "Direct discount ({$pfs_record->direct_discount}%)",
+							'value' => $direct_discount
+						];
 					}
 					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
@@ -570,10 +564,7 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 						$agent_commission 		= ( $G * $pfs_record->agent_commission ) / 100.00;
 					}
 
-					$cost_calculation_table[] = [
-						'label' => "H. Direct discount ({$pfs_record->direct_discount}%)",
-						'value' => $direct_discount
-					];
+
 
 					/**
 					 * Pool Premium
@@ -585,13 +576,13 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 						$POOL_PREMIUM = ( $object_amt_sum_insured * $pool_rate ) / 100.00;
 					}
 					$cost_calculation_table[] = [
-						'label' => "I. Pool Premium",
+						'label' => "Pool Premium",
 						'value' => $POOL_PREMIUM
 					];
 
 					$NET_PREMIUM = $G + $POOL_PREMIUM;
 					$cost_calculation_table[] = [
-						'label' => "E. Net Premium",
+						'label' => "Net Premium",
 						'value' => $NET_PREMIUM
 					];
 

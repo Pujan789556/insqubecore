@@ -176,19 +176,24 @@ $schedule_table_title   = 'बैंकरको क्षतिपूर्त�
 
                             <tr>
                                 <td>
-                                    <strong>बीमाशुल्क</strong><br>
-                                    <table class="table no-border">
-                                        <tbody>
-                                            <tr>
-                                                <td>Basic Premium</td>
-                                                <td class="text-right"><?php echo number_format( (float)$txn_record->amt_total_premium - $txn_record->amt_pool_premium, 2, '.', '');?></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Pool Premium</td>
-                                                <td class="text-right"><?php echo number_format( (float)$txn_record->amt_pool_premium, 2, '.', '');?></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <?php $cost_calculation_table = json_decode($txn_record->cost_calculation_table ?? NULL);
+                                        if($cost_calculation_table):?>
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <td colspan="2"><strong>बीमाशुल्क तालिका</strong></td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach($cost_calculation_table as $row):?>
+                                                        <tr>
+                                                            <td><?php echo $row->label ?></td>
+                                                            <td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+                                                        </tr>
+                                                    <?php endforeach ?>
+                                                </tbody>
+                                            </table><br>
+                                        <?php endif ?>
                                     <table class="table no-margin table-bordered table-condensed">
                                         <tr>
                                             <td width="80%" class="text-right"><strong>कुल बीमा शुल्क</strong></td>
