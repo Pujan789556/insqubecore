@@ -70,7 +70,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         if($item_count):
                             for ($i=0; $i < $item_count; $i++):?>
                             <tr <?php echo $i == 0 ? 'id="__epa_items_row"' : '' ?>>
-                                    <td><?php echo ($i+1); ?></td>
                                 <?php foreach($section_elements as $single_element):?>
                                     <td>
                                         <?php

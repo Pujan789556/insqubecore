@@ -38,6 +38,25 @@ $premium_computation_table  = $txn_record->premium_computation_table ? json_deco
         </table>
     </div>
 
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
+            <h4 class="box-title">Premium Information</h4>
+        </div>
+        <div class="box-body">
+            <?php
+            /**
+             * Portfolio Specific Premium Fields
+             */
+            $this->load->view('templates/_common/_form_components_horz', [
+                'form_elements'     => $form_elements['premium'],
+                'form_record'       => $premium_computation_table,
+                'grid_label'        => 'col-md-4',
+                'grid_form_control' => 'col-md-8'
+            ]);
+            ?>
+        </div>
+    </div>
+
     <?php
     /**
      * Load TXN Common Elements

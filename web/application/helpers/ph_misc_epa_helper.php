@@ -101,9 +101,17 @@ if ( ! function_exists('_OBJ_MISC_EPA_validation_rules'))
 			 */
 			'basic' =>[
 				[
+			        'field' => 'object[trek_route]',
+			        '_key' => 'trek_route',
+			        'label' => 'Trek Route',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[200]',
+			        '_type' => 'text',
+			        '_required' 	=> true
+			    ],
+			    [
 			        'field' => 'object[peak_no]',
 			        '_key' => 'peak_no',
-			        'label' => 'Peak Number',
+			        'label' => 'Number of Peak',
 			        'rules' => 'trim|required|integer|max_length[3]',
 			        '_type' => 'text',
 			        '_required' 	=> true
@@ -165,6 +173,15 @@ if ( ! function_exists('_OBJ_MISC_EPA_validation_rules'))
 			        '_key' => 'name',
 			        'label' => 'बीमित कर्मचारीको नाम थर',
 			        'rules' => 'trim|required|htmlspecialchars|max_length[150]',
+			        '_type' => 'text',
+			        '_show_label' 	=> false,
+			        '_required' 	=> true
+			    ],
+			    [
+			        'field' => 'object[items][address][]',
+			        '_key' => 'address',
+			        'label' => 'ठेगाना',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[200]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -592,6 +609,21 @@ if ( ! function_exists('_TXN_MISC_EPA_premium_validation_rules'))
 	{
 		$validation_rules = [
 			/**
+			 * Premium Validation Rules - Template
+			 */
+			'premium' => [
+                [
+                    'field' => 'premium[flag_pool_risk]',
+                    'label' => 'Pool Risk',
+                    'rules' => 'trim|integer|in_list[1]',
+                    '_key' 		=> 'flag_pool_risk',
+                    '_type'     => 'checkbox',
+                    '_checkbox_value' 	=> '1',
+                    '_required' => false,
+                ]
+			],
+
+			/**
 			 * Common to All Package Type
 			 * ----------------------------
 			 * Sampusti Bibaran and Remarks are common to all type of policy package.
@@ -747,6 +779,15 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 					$tariff_record 	= $CI->tariff_misc_epa_model->get_by_fy_portfolio( $policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 					$tariff   		= json_decode($tariff_record->tariff ?? NULL);
 
+					/**
+					 * Get post premium Data
+					 * 	a. Default Rate
+					 * 	b. Pool Premium Flag
+					 * 	c. Other common data
+					 */
+					$post_premium 				= $post_data['premium'] ?? [];
+					$flag_pool_risk 			= $post_premium['flag_pool_risk'] ?? 0;
+
 
 					/**
 					 * Sum Insured Amounts
@@ -757,7 +798,7 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 					 * 	e. Resuce Sum Insured
 					 */
 					$object_attributes  	= $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-					$object_amt_sum_insured = $policy_object->amt_sum_insured;
+					$SI 				= $policy_object->amt_sum_insured;
 
 					$SI_BC_ABOVE 	= _OBJ_MISC_EPA_sum_insured_amount_by_type('E', $object_attributes->items);
 					$SI_BC_NAMED 	= _OBJ_MISC_EPA_sum_insured_amount_by_type('TN', $object_attributes->items);
@@ -795,7 +836,7 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 					];
 
 					$cost_calculation_table[] = [
-						'label' => "Base Camp Staff (Named) Premium (Amount Rs. {$SI_BC_UNNAMED}, Rate {$tariff->bc_unnamed}% )",
+						'label' => "Base Camp Staff (Un-Named) Premium (Amount Rs. {$SI_BC_UNNAMED}, Rate {$tariff->bc_unnamed}% )",
 						'value' => $PRERMIUM_BC_UNNAMED
 					];
 
@@ -805,7 +846,7 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 					];
 
 					$cost_calculation_table[] = [
-						'label' => "Medical Premium (Amount Rs. {$SI_RESCUE}, Rate {$tariff->rescue}% )",
+						'label' => "Rescue Premium (Amount Rs. {$SI_RESCUE}, Rate {$tariff->rescue}% )",
 						'value' => $PRERMIUM_RESCUE
 					];
 
@@ -821,8 +862,9 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 					/**
 					 * Additional Peaks Premium
 					 */
-					$ADDITIONAL_PEAK_PREMIUM = 0.00;
-					$additional_peak_no = $object_attributes->peak_no - 1;
+					$ADDITIONAL_PEAK_PREMIUM 	= 0.00;
+					$additional_peak_rate 		= 0.00;
+					$additional_peak_no 		= $object_attributes->peak_no - 1;
 					if($additional_peak_no >= 1)
 					{
 						// Per additional peak 25% of GROSS PREMIUM
@@ -870,12 +912,57 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 						'value' => $direct_discount
 					];
 
+					/**
+					 * Pool Premium
+					 */
+					$POOL_PREMIUM = 0.00;
+					if($flag_pool_risk)
+					{
+						// Pool Premium = x% of Default Premium (A-B)
+						$pool_rate = floatval($pfs_record->pool_premium);
+						$POOL_PREMIUM = ( $SI * $pool_rate ) / 100.00;
+					}
+					$cost_calculation_table[] = [
+						'label' => "Pool Premium",
+						'value' => $POOL_PREMIUM
+					];
+
 
 					// NET PREMIUM
 					$cost_calculation_table[] = [
 						'label' => "NET PREMIUM",
 						'value' => $PREMIUM_TOTAL
 					];
+
+
+
+					/**
+					 * Build Schedule's Cost Tabale
+					 */
+					$schedule_cost_table = [
+						[
+							'label' => "Basic Premium",
+							'value' => $PREMIUM_1
+						],
+						[
+							'label' => "Additional Premium",
+							'value' => $ADDITIONAL_PEAK_PREMIUM
+						],
+						[
+							'label' => "Direct discount",
+							'value' => $direct_discount
+						],
+						[
+							'label' => "Pool Premium",
+							'value' => $POOL_PREMIUM
+						],
+						[
+							'label' => "NET PREMIUM",
+							'value' => $PREMIUM_TOTAL
+						]
+					];
+
+
 
 					/**
 					 * Compute VAT
@@ -905,13 +992,17 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 					 * -------------------------
 					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
 					 */
-					$txn_data['premium_computation_table'] = NULL;
+					$premium_computation_table 				= json_encode($post_premium);
+					$txn_data['premium_computation_table'] 	= $premium_computation_table;
 
 
 					/**
 					 * Cost Calculation Table
 					 */
-					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+					$txn_data['cost_calculation_table'] = json_encode([
+						'cost_calculation_table' 	=> $cost_calculation_table,
+						'schedule_cost_table' 		=> $schedule_cost_table
+					]);
 					return $CI->policy_transaction_model->save($txn_record->id, $txn_data);
 
 

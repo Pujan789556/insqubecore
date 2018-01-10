@@ -8,11 +8,11 @@ $cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn
 <div class="box-body">
 	<table class="table no-margin table-bordered">
 		<tbody id="_premium-details">
-			<?php if($cost_calculation_table): ?>
+			<?php if($cost_calculation_table->cost_calculation_table): ?>
 
-				<?php foreach($cost_calculation_table as $row):?>
+				<?php foreach($cost_calculation_table->cost_calculation_table as $row):?>
 					<tr>
-						<th class="text-left"><?php echo $row->label ?></th>
+						<td class="text-left"><?php echo $row->label ?></td>
 						<td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
 					</tr>
 				<?php endforeach ?>

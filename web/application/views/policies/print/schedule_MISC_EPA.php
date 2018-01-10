@@ -3,6 +3,7 @@
  * Schedule Print : MISCELLANEOUS - EXPEDITION PERSONNEL ACCIDENT(EPA)
  */
 $this->load->helper('ph_misc_epa');
+$this->load->helper('forex');
 $object_attributes  = json_decode($record->object_attributes);
 
 $schedule_table_title   = 'सामुहिक दुर्घटना बीमालेख(EPA)';
@@ -104,12 +105,28 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
 
                             <tr>
                                 <td>
-                                    <strong></strong><br/>
-                                    बीमांक रकम (रु): <?php echo number_format((float)$record->object_amt_sum_insured, 2, '.', '')?><br>
+                                    <strong>Trekking Route:</strong> <?php echo htmlspecialchars($object_attributes->trek_route); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>बीमांक रकम (रु):</strong> <?php echo number_format((float)$record->object_amt_sum_insured, 2, '.', '')?><br>
                                     (संलग्न बीमितको विवरण सूचि बमोजिम ।)
                                 </td>
                             </tr>
 
+                            <?php if ((float)$object_attributes->amt_rescue):?>
+                                <tr>
+                                    <td>
+                                        <?php
+                                        $amt_rescue_npr = forex_conversion($record->issued_date, 'USD', floatval($object_attributes->amt_rescue));
+                                         ?>
+                                        <strong>खोज तथा उद्धार रकम (रु):</strong>
+                                        <?php echo number_format((float)$amt_rescue_npr, 2, '.', '')?>
+                                        (USD <?php echo number_format((float)$object_attributes->amt_rescue, 2, '.', '')?>)
+                                    </td>
+                                </tr>
+                            <?php endif ?>
                             <tr>
                                 <td>
                                     रसिद नं.: <br/>
@@ -161,69 +178,48 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
 
                             <tr>
                                 <td>
-                                    <strong class="border-b">बीमाशुल्क गणना</strong><br><br>
-                                    <?php
-                                    /**
-                                     * Policy Premium Card
-                                     */
-                                    $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($record->portfolio_id);
-                                    $this->load->view($cost_calculation_table_view, ['txn_record' => $txn_record, 'policy_record' => $record, 'title' => $cost_table_title]);
-                                    ?>
+                                    <strong class="border-b">बीमाशुल्क</strong><br><br>
+                                    <?php $cost_calculation_table = json_decode($txn_record->cost_calculation_table ?? NULL);
+                                    if($cost_calculation_table->schedule_cost_table):?>
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <td colspan="2"><strong>COST CALCULATION TABLE</strong></td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach($cost_calculation_table->schedule_cost_table as $row):?>
+                                                    <tr>
+                                                        <td><?php echo $row->label ?></td>
+                                                        <td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+                                                    </tr>
+                                                <?php endforeach ?>
+                                            </tbody>
+                                        </table><br>
+                                    <?php endif ?>
+                                    <table class="table no-margin table-bordered table-condensed">
+                                        <tr>
+                                            <td width="80%" class="text-right"><strong>बीमा शुल्क</strong></td>
+                                            <td class="text-right"><strong><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right"><strong>टिकट दस्तुर</strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( (float)$txn_record->amt_stamp_duty, 2, '.', '')?></strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right"><strong>मु. अ. क. (VAT)</strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( (float)$txn_record->amt_vat, 2, '.', '');?></strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( (float)( $txn_record->amt_stamp_duty + $txn_record->amt_total_premium + $txn_record->amt_vat ) , 2, '.', '');?></strong></td>
+                                        </tr>
+                                    </table>
                                 </td>
                             </tr>
                         </table>
                     </td>
                 </tr>
-                <tr>
-                    <td colspan="2">
-                        <strong>यस बीमालेखले रक्षावरण गरेका बीमितहरु</strong><br/>
-                        <?php
-                        $form_elements = _OBJ_MISC_EPA_validation_rules($record->portfolio_id);
-
-                        /**
-                         * Item List
-                         */
-                        $section_elements   = $form_elements['items'];
-                        // Remove First Element
-                        array_shift($section_elements); // staff_trek_type
-
-                        $items              = $object_attributes->items ?? NULL;
-                        $item_count         = count( $items->sum_insured ?? [] );
-                        ?>
-
-                        <table class="table table-bordered table-condensed no-margin">
-                            <thead>
-                                <tr>
-                                    <td>क्र सं</td>
-                                    <?php foreach($section_elements as $elem): ?>
-                                        <td><?php echo $elem['label'] ?></td>
-                                    <?php endforeach; ?>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <?php for ($i=0; $i < $item_count; $i++): ?>
-                                    <tr>
-                                        <td><?php echo ($i+1) ?></td>
-                                        <?php foreach($section_elements as $elem):
-                                            $key =  $elem['_key'];
-                                            $value = $items->{$key}[$i];
-
-                                            // If dropdown, get the label
-                                            $value = $elem['_type'] == 'dropdown' ? $elem['_data'][$value] : $value;
-                                        ?>
-
-                                            <td <?php echo $key == 'sum_insured' || $key == 'medical' ? 'class="text-right"' : '' ?>>
-                                                <?php echo $value?>
-                                            </td>
-                                        <?php endforeach ?>
-                                    </tr>
-                                <?php endfor ?>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-
                 <tr>
                     <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)) ?></td>
                 </tr>
@@ -258,6 +254,136 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                     <p>दर्जा:</p>
                 </td>
             </tr>
+        </table>
+
+        <pagebreak>
+        <?php
+        $form_elements = _OBJ_MISC_EPA_validation_rules($record->portfolio_id);
+
+        /**
+         * Item List
+         */
+        $section_elements   = $form_elements['items'];
+        // Remove First Element
+        // array_shift($section_elements); // staff_trek_type
+
+        $items              = $object_attributes->items ?? NULL;
+        $item_count         = count( $items->sum_insured ?? [] );
+        ?>
+
+        <table class="table table-bordered table-condensed no-margin">
+            <thead>
+                <tr>
+                    <td colspan="6"><strong>यस बीमालेखले रक्षावरण गरेका बीमितहरु</strong></td>
+                </tr>
+            </thead>
+            <?php
+            $staff_above_bc = [];
+            $staff_bc       = [];
+            for ($i=0; $i < $item_count; $i++)
+            {
+                // Extract Single Object
+                $single_item = new stdClass();
+                foreach($section_elements as $elem)
+                {
+                    $key = $elem['_key'];
+                    $single_item->{$key} = $items->{$key}[$i];
+                }
+                $staff_trek_type = $single_item->staff_trek_type;
+                echo $staff_trek_type;
+                if($staff_trek_type == 'E')
+                {
+                    $staff_above_bc[] = $single_item;
+                }
+                else
+                {
+                    $staff_bc[] = $single_item;
+                }
+            }
+
+            // echo '<pre>';
+            // print_r($staff_above_bc);
+            // print_r($staff_bc);exit;
+
+            // Remove First Two Element
+            array_shift($section_elements); // staff_trek_type
+            array_shift($section_elements); // staff_type
+
+            ?>
+
+            <?php if($staff_above_bc): ?>
+                <thead>
+                    <tr>
+                        <td colspan="6"><strong>Risk Covering above Base Camp (above 19000 feet) also.</strong></td>
+                    </tr>
+                    <tr>
+                        <td>क्र सं</td>
+                        <?php foreach($section_elements as $elem): ?>
+                            <td><?php echo $elem['label'] ?></td>
+                        <?php endforeach; ?>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    <?php
+                    $row_count = 1;
+                    foreach ($staff_above_bc as $single): ?>
+                        <tr>
+                            <td><?php echo $row_count++; ?></td>
+                            <?php foreach($section_elements as $elem):
+
+                                $key =  $elem['_key'];
+                                $value = $single->{$key};
+
+                                // If dropdown, get the label
+                                $value = $elem['_type'] == 'dropdown' ? $elem['_data'][$value] : $value;
+                            ?>
+                                <td <?php echo $key == 'sum_insured' || $key == 'medical' ? 'class="text-right"' : '' ?>>
+                                    <?php echo $value?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+                    <?php endforeach ?>
+                </tbody>
+            <?php endif ?>
+
+            <?php if($staff_bc): ?>
+                <thead>
+                    <tr>
+                        <td colspan="6"><strong>Risk Covering upto Base Camp (upto 19000 feet) only.</strong></td>
+                    </tr>
+                    <tr>
+                        <td>क्र सं</td>
+                        <?php foreach($section_elements as $elem): ?>
+                            <td><?php echo $elem['label'] ?></td>
+                        <?php endforeach; ?>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    <?php
+                    $row_count = 1;
+                    foreach ($staff_bc as $single): ?>
+                        <tr>
+                            <td><?php echo $row_count++; ?></td>
+                            <?php foreach($section_elements as $elem):
+
+                                $key =  $elem['_key'];
+                                $value = $single->{$key};
+
+                                // If dropdown, get the label
+                                $value = $elem['_type'] == 'dropdown' ? $elem['_data'][$value] : $value;
+                            ?>
+                                <td <?php echo $key == 'sum_insured' || $key == 'medical' ? 'class="text-right"' : '' ?>>
+                                    <?php echo $value?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+                    <?php endforeach ?>
+                </tbody>
+            <?php endif ?>
+
+
         </table>
     </body>
 </html>
