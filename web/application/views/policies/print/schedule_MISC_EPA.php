@@ -274,7 +274,7 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
         <table class="table table-bordered table-condensed no-margin">
             <thead>
                 <tr>
-                    <td colspan="6"><strong>यस बीमालेखले रक्षावरण गरेका बीमितहरु</strong></td>
+                    <td colspan="7"><strong>यस बीमालेखले रक्षावरण गरेका बीमितहरु</strong></td>
                 </tr>
             </thead>
             <?php
@@ -314,7 +314,7 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
             <?php if($staff_above_bc): ?>
                 <thead>
                     <tr>
-                        <td colspan="6"><strong>Risk Covering above Base Camp (above 19000 feet) also.</strong></td>
+                        <td colspan="7"><strong>Risk Covering above Base Camp (above 19000 feet) also.</strong></td>
                     </tr>
                     <tr>
                         <td>क्र सं</td>
@@ -350,7 +350,7 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
             <?php if($staff_bc): ?>
                 <thead>
                     <tr>
-                        <td colspan="6"><strong>Risk Covering upto Base Camp (upto 19000 feet) only.</strong></td>
+                        <td colspan="7"><strong>Risk Covering upto Base Camp (upto 19000 feet) only.</strong></td>
                     </tr>
                     <tr>
                         <td>क्र सं</td>
