@@ -169,15 +169,15 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
             if( $attributes->engine_capacity >= $t->ec_min && $attributes->engine_capacity <= $t->ec_max )
             {
                 $premiumm_third_party = $t->third_party;
-                $default_rate = $t->rate->rate;
+                $default_rate = $t->default_rate;
 
-                if( $t->age->age1_min <= $vehicle_age_in_yrs && $vehicle_age_in_yrs <= $t->age->age1_max )
+                if( $t->age1_min <= $vehicle_age_in_yrs && $vehicle_age_in_yrs <= $t->age1_max )
 				{
-					$vehicle_over_age_rate = $t->age->rate1;
+					$vehicle_over_age_rate = $t->rate1;
 				}
-				else if( $t->age->age2_min <= $vehicle_age_in_yrs && $vehicle_age_in_yrs <= $t->age->age2_max )
+				else if( $t->age2_min <= $vehicle_age_in_yrs )
 				{
-					$vehicle_over_age_rate = $t->age->rate2;
+					$vehicle_over_age_rate = $t->rate2;
 				}
                 break;
             }
@@ -630,9 +630,9 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 		// 		Example: First 20 lakhs 1.24% + Rest Amount's 1.6% - Rs. 3000
 		//
 		$minus_amount_according_to_cc 	= 0.00;
-		$base_fragment 					= 0.00;
-		$base_fragment_rate 			= 0.00;
-		$rest_fragment_rate 			= 0.00;
+		$default_si_amount 				= 0.00;
+		$default_si_rate 			= 0.00;
+		$remaining_si_rate 			= 0.00;
 		$premiumm_third_party 			= 0.00;
 		$vehicle_over_age_rate 			= 0.00;
 
@@ -641,19 +641,19 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
         	// Should also match Engine Capacity Type
             if( $attributes->engine_capacity >= $t->ec_min && $attributes->engine_capacity <= $t->ec_max && $attributes->ec_unit === $t->ec_type )
             {
-            	$minus_amount_according_to_cc 			= (float)$t->rate->minus_amount;
-                $base_fragment 							= (float)$t->rate->base_fragment;
-                $base_fragment_rate 					= (float)$t->rate->base_fragment_rate;
-                $rest_fragment_rate 					= (float)$t->rate->rest_fragment_rate;
+            	$minus_amount_according_to_cc 			= (float)$t->minus_amount;
+                $default_si_amount 						= (float)$t->default_si_amount;
+                $default_si_rate 					= (float)$t->default_si_rate;
+                $remaining_si_rate 					= (float)$t->remaining_si_rate;
                 $premiumm_third_party 					= (float)$t->third_party;
 
-                if( $t->age->age1_min <= $vehicle_age_in_yrs && $vehicle_age_in_yrs <= $t->age->age1_max )
+                if( $t->age1_min <= $vehicle_age_in_yrs && $vehicle_age_in_yrs <= $t->age1_max )
 				{
-					$vehicle_over_age_rate = (float)$t->age->rate1;
+					$vehicle_over_age_rate = (float)$t->rate1;
 				}
-				else if( $t->age->age2_min <= $vehicle_age_in_yrs && $vehicle_age_in_yrs <= $t->age->age2_max )
+				else if( $t->age2_min <= $vehicle_age_in_yrs )
 				{
-					$vehicle_over_age_rate = (float)$t->age->rate2;
+					$vehicle_over_age_rate = (float)$t->rate2;
 				}
                 break;
             }
@@ -691,21 +691,21 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 			// Base Premium
 			$__premium_A_row_1 = 0.00;
 			$__premium_A_row_2 = 0.00;
-			if($vehicle_total_price > $base_fragment ) // if Vehicle Price > 20 Lakhs
+			if($vehicle_total_price > $default_si_amount ) // if Vehicle Price > 20 Lakhs
 			{
-				$__premium_A_row_1 = $base_fragment * ($base_fragment_rate / 100.00);
-				$__premium_A_row_2 = ( $vehicle_total_price -  $base_fragment ) * ($rest_fragment_rate/100.00);
+				$__premium_A_row_1 = $default_si_amount * ($default_si_rate / 100.00);
+				$__premium_A_row_2 = ( $vehicle_total_price -  $default_si_amount ) * ($remaining_si_rate/100.00);
 			}
 			else
 			{
-				$__premium_A_row_1 = $vehicle_total_price * ($base_fragment_rate / 100.00);
+				$__premium_A_row_1 = $vehicle_total_price * ($default_si_rate / 100.00);
 			}
 			$__CRF_cc_table__A['sections'][] = [
-				'title' 	=> "सि.सि.अनुसार घोषित मूल्य मध्ये पहिलो बीस लाखसम्मको बीमाशुल्क (घोषित मूल्यको {$base_fragment_rate}%)",
+				'title' 	=> "सि.सि.अनुसार घोषित मूल्य मध्ये पहिलो बीस लाखसम्मको बीमाशुल्क (घोषित मूल्यको {$default_si_rate}%)",
 				'amount' 	=> $__premium_A_row_1
 			];
 			$__CRF_cc_table__A['sections'][] = [
-				'title' 	=> "बाँकी घोषित मूल्यको बीमा शुल्क (बाँकी घोषित मूल्यको {$rest_fragment_rate}%)",
+				'title' 	=> "बाँकी घोषित मूल्यको बीमा शुल्क (बाँकी घोषित मूल्यको {$remaining_si_rate}%)",
 				'amount' 	=> $__premium_A_row_2
 			];
 
@@ -1252,10 +1252,10 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
             ];
 
             // Statement 1 is common for all
-            $statement_1 = "घोषित मूल्य (सरसामान सहित) अनुसार शुरु बीमा शुल्क (घोषित मूल्यको " . $primary_tariff_vehicle['rate'] . " %)";
+            $statement_1 = "घोषित मूल्य (सरसामान सहित) अनुसार शुरु बीमा शुल्क (घोषित मूल्यको " . $primary_tariff_vehicle['default_rate'] . " %)";
 
             // Common Row 1 - Ghosit Mulya ko X %
-            $__premium_A_row_1 = $vehicle_total_price * ($primary_tariff_vehicle['rate'] / 100.00);
+            $__premium_A_row_1 = $vehicle_total_price * ($primary_tariff_vehicle['default_rate'] / 100.00);
             $__CRF_cc_table__A['sections'][] = [
                 'title'     => $statement_1,
                 'amount'    => $__premium_A_row_1
@@ -1883,17 +1883,12 @@ if ( ! function_exists('_PO_MOTOR_CVC_primary_tariff_vehicle'))
      */
     function _PO_MOTOR_CVC_primary_tariff_vehicle($object_attributes, $default_tariff, $vehicle_age_in_yrs=0)
     {
-        $primary_tariff_vehicle['rate']                 = 0.00;
+        $primary_tariff_vehicle['default_rate']         = 0.00;
         $primary_tariff_vehicle['minus_amount']         = 0.00;
         $primary_tariff_vehicle['plus_amount']          = 0.00;
         $primary_tariff_vehicle['ec_threshold']         = 0;
-        $primary_tariff_vehicle['vehicle_capacity']         = 0; // depending upon cvc_type ( )
+        $primary_tariff_vehicle['vehicle_capacity']     = 0; // depending upon cvc_type ( )
         $primary_tariff_vehicle['cost_per_ec_above']    = 0.00;
-
-        $primary_tariff_vehicle['fragmented']             = 'N';
-        $primary_tariff_vehicle['base_fragment']          = 0.00;
-        $primary_tariff_vehicle['base_fragment_rate']     = 0.00;
-        $primary_tariff_vehicle['rest_fragment_rate']     = 0.00;
 
         $primary_tariff_vehicle['third_party']            = 0.00;
         $primary_tariff_vehicle['over_age_rate']          = 0.00;
@@ -1927,27 +1922,24 @@ if ( ! function_exists('_PO_MOTOR_CVC_primary_tariff_vehicle'))
 
             if( $object_attributes->{$capacity_column} >= $t->ec_min && $object_attributes->{$capacity_column} <= $t->ec_max && $capacity_type === TRUE )
             {
-                $primary_tariff_vehicle['rate']                           = (float)$t->rate->rate;
-                $primary_tariff_vehicle['minus_amount']                = (float)$t->rate->minus_amount;
-                $primary_tariff_vehicle['plus_amount']                 = (float)$t->rate->plus_amount;
+                $primary_tariff_vehicle['default_rate']                = (float)$t->rate;
+                $primary_tariff_vehicle['minus_amount']                = (float)$t->minus_amount;
+                $primary_tariff_vehicle['plus_amount']                 = (float)$t->plus_amount;
 
-                $primary_tariff_vehicle['ec_threshold']                      = $t->rate->ec_threshold;
-                $primary_tariff_vehicle['cost_per_ec_above']            = (float)$t->rate->cost_per_ec_above;;
+                $primary_tariff_vehicle['ec_threshold']                 = $t->ec_threshold;
+                $primary_tariff_vehicle['cost_per_ec_above']            = (float)$t->cost_per_ec_above;;
 
-                $primary_tariff_vehicle['fragmented']                          = $t->rate->fragmented;
-                $primary_tariff_vehicle['base_fragment']                          = (float)$t->rate->base_fragment;
-                $primary_tariff_vehicle['base_fragment_rate']                    = (float)$t->rate->base_fragment_rate;
-                $primary_tariff_vehicle['rest_fragment_rate']                     = (float)$t->rate->rest_fragment_rate;
+
 
                 $primary_tariff_vehicle['third_party']                   = (float)$t->third_party;
 
-                if( $t->age->age1_min <= $vehicle_age_in_yrs && $vehicle_age_in_yrs <= $t->age->age1_max )
+                if( $t->age1_min <= $vehicle_age_in_yrs && $vehicle_age_in_yrs <= $t->age1_max )
                 {
-                    $primary_tariff_vehicle['over_age_rate'] = (float)$t->age->rate1;
+                    $primary_tariff_vehicle['over_age_rate'] = (float)$t->rate1;
                 }
-                else if( $t->age->age2_min <= $vehicle_age_in_yrs && $vehicle_age_in_yrs <= $t->age->age2_max )
+                else if( $t->age2_min <= $vehicle_age_in_yrs )
                 {
-                    $primary_tariff_vehicle['over_age_rate'] = (float)$t->age->rate2;
+                    $primary_tariff_vehicle['over_age_rate'] = (float)$t->rate2;
                 }
                 break;
             }

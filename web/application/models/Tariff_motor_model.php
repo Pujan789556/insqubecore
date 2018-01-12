@@ -67,40 +67,6 @@ class Tariff_motor_model extends MY_Model
             /**
              * JSON : Tarrif
              * --------------
-             *
-             * Structure:
-             *  [{
-             *      ec_min: xxx,
-             *      ec_max: yyy,
-             *      rate: {
-             *          ec_type: [CC  | KW | HP | TON] // Engine Capacity Type
-             *          age: nnn,           // Default Max Age
-             *          rate: aaa,                // Ghoshit mulya ko x%
-             *          minus_amount: bbb,          // Amount to Minus
-             *
-             *          // For Tanker
-             *          ec_threshold: ccc,          // Minimum Threshold capacity eg. 3 TON
-             *          cost_per_ec_above: ddd,     // Cost per engine capacity e.g. Rs. 500 Per Ton above 3 Ton
-             *
-             *          // For: Private Vehicle
-             *          //  First 20 lakhs' 1.25 % + Rest's 1.75 - Rx. 5000
-             *          fragmented: true | false,
-             *          base_fragment: xxx,
-             *          base_fragment_rate: yyy,
-             *          rest_fragment_rate: zzz
-             *      },
-             *      age: {
-             *          age1_min: xxx,
-             *          age1_max: yyy,
-             *          rate1: zzz,
-             *          age2_min: aa,
-             *          age2_max: bb,
-             *          rate2:ccc
-             *      },
-             *      third_party: 4000               // Third party Premium
-             *  },{
-             *      ...
-             *  }]
              */
             'tariff' => [
                 [
