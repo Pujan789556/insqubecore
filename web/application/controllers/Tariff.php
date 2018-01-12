@@ -1761,24 +1761,15 @@ class Tariff extends MY_Controller
 			$this->template->render_404();
 		}
 
-
-        $rules = $this->tariff_motor_model->validation_rules;
-
         if( $this->input->post() )
         {
         	/**
         	 * Forma Validation Rule
         	 */
-        	$v_rules = [];
-        	foreach($rules as $group_name => $rule)
-        	{
-        		$v_rules = array_merge($v_rules, $rule);
-        	}
+        	$v_rules = $this->__motor_v_rules($record, TRUE);
             $this->form_validation->set_rules($v_rules);
 
             $data = $this->input->post();
-
-            // echo '<pre>'; print_r($data);exit;
 
             if( $this->form_validation->run() === TRUE )
             {
@@ -1794,30 +1785,41 @@ class Tariff extends MY_Controller
                 for($i = 0; $i < $tariff_count; $i++)
                 {
                 	$single_tarrif = [
-                        'ec_type'   => $tariff['ec_type'][$i],
-                        'ec_min'    => $tariff['ec_min'][$i],
-                        'ec_max'    => $tariff['ec_max'][$i],
-	               		'rate' => [
-							'age' 				=> $tariff['rate']['age'][$i],
-							'rate' 				=> $tariff['rate']['rate'][$i],
-                            'minus_amount'      => $tariff['rate']['minus_amount'][$i],
-							'plus_amount' 		=> $tariff['rate']['plus_amount'][$i],
-							'ec_threshold' 		=> $tariff['rate']['ec_threshold'][$i],
-							'cost_per_ec_above' => $tariff['rate']['cost_per_ec_above'][$i],
-							'fragmented' 		=> $tariff['rate']['fragmented'][$i],
-							'base_fragment' 	=> $tariff['rate']['base_fragment'][$i],
-							'base_fragment_rate' => $tariff['rate']['base_fragment_rate'][$i],
-							'rest_fragment_rate' => $tariff['rate']['rest_fragment_rate'][$i],
-						],
-						'age' => [
-							'age1_min' => $tariff['age']['age1_min'][$i],
-							'age1_max' => $tariff['age']['age1_max'][$i],
-							'rate1' => $tariff['age']['rate1'][$i],
-							'age2_min' => $tariff['age']['age2_min'][$i],
-							'age2_max' => $tariff['age']['age2_max'][$i],
-							'rate2' => $tariff['age']['rate2'][$i]
-						],
-						'third_party' => $tariff['third_party'][$i]
+                        'ec_type'           => $tariff['ec_type'][$i],
+                        'ec_min'            => $tariff['ec_min'][$i],
+                        'ec_max'            => $tariff['ec_max'][$i],
+	               		'default_age_max'    => $tariff['default_age_max'][$i],
+
+                        /**
+                         * Motorcycle/CVC Specific Field
+                         */
+                        'default_rate'      => $tariff['default_rate'][$i] ?? NULL,
+
+
+                        /**
+                         * Private Vechile Specific Fields
+                         */
+                        'default_si_amount' => $tariff['default_si_amount'][$i] ?? NULL,
+                        'default_si_rate'   => $tariff['default_si_rate'][$i] ?? NULL,
+                        'remaining_si_rate' => $tariff['remaining_si_rate'][$i] ?? NULL,
+                        'minus_amount'      => $tariff['minus_amount'][$i] ?? NULL,
+
+                        /**
+                         * Commercial Vechile Specific Fields
+                         */
+                        'plus_amount'       => $tariff['plus_amount'][$i] ?? NULL,
+                        'ec_threshold'      => $tariff['ec_threshold'][$i] ?? NULL,
+                        'cost_per_ec_above' => $tariff['cost_per_ec_above'][$i] ?? NULL,
+
+                        /**
+                         * Common Fields
+                         */
+                        'age1_min'              => $tariff['age1_min'][$i],
+                        'age1_max'              => $tariff['age1_max'][$i],
+                        'rate1'                 => $tariff['rate1'][$i],
+                        'age2_min'              => $tariff['age2_min'][$i],
+                        'rate2'                 => $tariff['rate2'][$i],
+                        'third_party'           => $tariff['third_party'][$i]
                 	];
 
                 	$tariff_data[] = $single_tarrif;
@@ -1826,16 +1828,16 @@ class Tariff extends MY_Controller
                 $post_data['tariff'] = json_encode($tariff_data);
 
                 // Disabled Friendly Discount Rate
-                $post_data['dr_mcy_disabled_friendly'] = $data['dr_mcy_disabled_friendly'];
+                $post_data['dr_mcy_disabled_friendly'] = $data['dr_mcy_disabled_friendly'] ?? NULL;
 
                 // Private Hire - Private Vehicle
-                $post_data['rate_pvc_on_hire'] = $data['rate_pvc_on_hire'];
+                $post_data['rate_pvc_on_hire'] = $data['rate_pvc_on_hire'] ?? NULL;
 
                 // Commercial Vehicle : Personal Use
-                $post_data['dr_cvc_on_personal_use'] = $data['dr_cvc_on_personal_use'];
+                $post_data['dr_cvc_on_personal_use'] = $data['dr_cvc_on_personal_use'] ?? NULL;
 
                 // Towing Premium Amount
-                $post_data['pramt_towing'] = $data['pramt_towing'];
+                $post_data['pramt_towing'] = $data['pramt_towing'] ?? NULL;
 
                 /**
                  * No Claim Discount
@@ -1846,8 +1848,8 @@ class Tariff extends MY_Controller
                 for($i=0; $i< $count; $i++)
                 {
                 	$no_claim_discount_data[] = [
-                		'years' => $no_claim_discount['years'][$i],
-                		'rate' => $no_claim_discount['rate'][$i]
+                		'years'   => $no_claim_discount['years'][$i],
+                		'rate'    => $no_claim_discount['rate'][$i]
                 	];
                 }
                 $post_data['no_claim_discount'] = json_encode($no_claim_discount_data);
@@ -1861,8 +1863,8 @@ class Tariff extends MY_Controller
                 for($i=0; $i< $count; $i++)
                 {
                 	$dr_voluntary_excess_data[] = [
-                		'amount' => $dr_voluntary_excess['amount'][$i],
-                		'rate' => $dr_voluntary_excess['rate'][$i]
+                		'amount'  => $dr_voluntary_excess['amount'][$i],
+                		'rate'    => $dr_voluntary_excess['rate'][$i]
                 	];
                 }
                 $post_data['dr_voluntary_excess'] = json_encode($dr_voluntary_excess_data);
@@ -1878,7 +1880,7 @@ class Tariff extends MY_Controller
                 	$pramt_compulsory_excess_data[] = [
                 		'min_age' => $pramt_compulsory_excess['min_age'][$i],
                 		'max_age' => $pramt_compulsory_excess['max_age'][$i],
-                		'amount' => $pramt_compulsory_excess['amount'][$i]
+                		'amount'  => $pramt_compulsory_excess['amount'][$i]
                 	];
                 }
                 $post_data['pramt_compulsory_excess'] = json_encode($pramt_compulsory_excess_data);
@@ -1898,12 +1900,10 @@ class Tariff extends MY_Controller
                  */
                 $post_data['insured_value_tariff'] = json_encode($data['insured_value_tariff']);
 
-
-
                 /**
                  * Trailer/Trolly Tarrif
                  */
-                $post_data['trolly_tariff'] = json_encode($data['trolly_tariff']);
+                $post_data['trolly_tariff'] = json_encode($data['trolly_tariff'] ?? NULL);
 
                 // Activate Tariff
 	            $post_data['active'] = $data['active'] ?? 0;
@@ -1957,16 +1957,9 @@ class Tariff extends MY_Controller
             }
             else
             {
-                $form_data = [
-                    'form_elements'         => $rules,
-                    'record'                => $record
-                ];
                 return $this->template->json([
                     'status'        => $status,
-                    // 'message'       => $message,
                     'message'       => validation_errors(),
-                    // 'reloadForm'    => true,
-                    // 'form'          => $this->load->view('setup/tariff/motor/_form_edit', $form_data, TRUE)
                 ]);
             }
         }
@@ -1974,13 +1967,42 @@ class Tariff extends MY_Controller
         // Let's render the form
         $json_data['form'] = $this->load->view('setup/tariff/motor/_form_edit',
             [
-                'form_elements'         => $rules,
+                'form_elements'         => $this->__motor_v_rules($record),
                 'record'                => $record
             ], TRUE);
 
         // Return HTML
         $this->template->json($json_data);
     }
+
+    // --------------------------------------------------------------------
+
+    private function __motor_v_rules($record, $formatted = FALSE)
+    {
+        $v_rules        = [];
+        $portfolio_id   = (int)$record->portfolio_id;
+
+        switch ($portfolio_id)
+        {
+            case IQB_SUB_PORTFOLIO_MOTORCYCLE_ID:
+                $v_rules = $this->tariff_motor_model->motorcycle_validation_rules($formatted);
+                break;
+
+            case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID:
+                $v_rules = $this->tariff_motor_model->private_vehicle_validation_rules($formatted);
+                break;
+
+            case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID:
+                $v_rules = $this->tariff_motor_model->commercial_vehicle_validation_rules($formatted);
+                break;
+
+            default:
+                break;
+        }
+
+        return $v_rules;
+    }
+
 
     // --------------------------------------------------------------------
 

@@ -48,9 +48,916 @@ class Tariff_motor_model extends MY_Model
         $this->load->helper('ph_motor');
 
         // Valication Rule
-        $this->validation_rules();
+        // $this->validation_rules();
         $this->insert_validate_rules();
     }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Validation Rules - Motorcycle (Two Wheelers)
+     *
+     * @param type|bool $formatted
+     * @return type
+     */
+    public function motorcycle_validation_rules($formatted = FALSE)
+    {
+        $v_rules = $this->_common_validation_rules();
+        $v_rules += [
+            /**
+             * JSON : Tarrif
+             * --------------
+             *
+             * Structure:
+             *  [{
+             *      ec_min: xxx,
+             *      ec_max: yyy,
+             *      rate: {
+             *          ec_type: [CC  | KW | HP | TON] // Engine Capacity Type
+             *          age: nnn,           // Default Max Age
+             *          rate: aaa,                // Ghoshit mulya ko x%
+             *          minus_amount: bbb,          // Amount to Minus
+             *
+             *          // For Tanker
+             *          ec_threshold: ccc,          // Minimum Threshold capacity eg. 3 TON
+             *          cost_per_ec_above: ddd,     // Cost per engine capacity e.g. Rs. 500 Per Ton above 3 Ton
+             *
+             *          // For: Private Vehicle
+             *          //  First 20 lakhs' 1.25 % + Rest's 1.75 - Rx. 5000
+             *          fragmented: true | false,
+             *          base_fragment: xxx,
+             *          base_fragment_rate: yyy,
+             *          rest_fragment_rate: zzz
+             *      },
+             *      age: {
+             *          age1_min: xxx,
+             *          age1_max: yyy,
+             *          rate1: zzz,
+             *          age2_min: aa,
+             *          age2_max: bb,
+             *          rate2:ccc
+             *      },
+             *      third_party: 4000               // Third party Premium
+             *  },{
+             *      ...
+             *  }]
+             */
+            'tariff' => [
+                [
+                    'field' => 'tariff[ec_type][]',
+                    'label' => 'Engine Capacity Type',
+                    'rules' => 'trim|required|alpha|max_length[2]',
+                    '_type'     => 'dropdown',
+                    '_show_label' => false,
+                    '_key'      => 'ec_type',
+                    '_data'     => _OBJ_MOTOR_ec_unit_tariff_dropdown(),
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[ec_min][]',
+                    'label' => 'Capacity Min (CC|KW|TON)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'ec_min',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[ec_max][]',
+                    'label' => 'Capacity Max (CC|KW|TON)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'ec_max',
+                    '_required' => true
+                ],
+
+                // Default Rate
+                [
+                    'field' => 'tariff[default_age_max][]',
+                    'label' => 'Default Age Max (yrs)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'default_age_max',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[default_rate][]',
+                    'label' => 'Default Premium Rate(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'default_rate',
+                    '_required' => true
+                ],
+
+                // Other Age Range Rate
+                [
+                    'field' => 'tariff[age1_min][]',
+                    'label' => 'Second Age Min(years)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'age1_min',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[age1_max][]',
+                    'label' => 'Second Age Max(years)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'age1_max',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[rate1][]',
+                    'label' => 'Rate on Second Age(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'rate1',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[age2_min][]',
+                    'label' => 'Third Age Min(years)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'age2_min',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[rate2][]',
+                    'label' => 'Rate on Third Age(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'rate2',
+                    '_required' => true
+                ],
+
+                // Third Party Amount
+                [
+                    'field' => 'tariff[third_party][]',
+                    'label' => 'Third Party Premium (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'third_party',
+                    '_required' => true
+                ],
+            ],
+
+            // Disable Friendly Discount
+            'dr_mcy_disabled_friendly' => [
+                [
+                    'field' => 'dr_mcy_disabled_friendly',
+                    'label' => 'Disable Friendly Discount (%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
+            ]
+        ];
+
+        // return formatted?
+        $fromatted_v_rules = [];
+        if($formatted === TRUE)
+        {
+            foreach ($v_rules as $section => $section_rules)
+            {
+                $fromatted_v_rules = array_merge($fromatted_v_rules, $section_rules);
+            }
+            return $fromatted_v_rules;
+        }
+
+        return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Validation Rules - Private Vehicle
+     *
+     * @param bool $formatted
+     * @return type
+     */
+    public function private_vehicle_validation_rules($formatted = FALSE)
+    {
+        $v_rules = $this->_common_validation_rules();
+        $v_rules += [
+            /**
+             * JSON : Tarrif
+             * --------------
+             */
+            'tariff' => [
+                [
+                    'field' => 'tariff[ec_type][]',
+                    'label' => 'Engine Capacity Type',
+                    'rules' => 'trim|required|alpha|max_length[2]',
+                    '_type'     => 'dropdown',
+                    '_show_label' => false,
+                    '_key'      => 'ec_type',
+                    '_data'     => _OBJ_MOTOR_ec_unit_tariff_dropdown(),
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[ec_min][]',
+                    'label' => 'Capacity Min (CC|KW|TON)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'ec_min',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[ec_max][]',
+                    'label' => 'Capacity Max (CC|KW|TON)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'ec_max',
+                    '_required' => true
+                ],
+
+                // Default Rate
+                [
+                    'field' => 'tariff[default_age_max][]',
+                    'label' => 'Default Age Max (yrs)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'default_age_max',
+                    '_required' => true
+                ],
+
+                // SI ko first 20 lakhs
+                [
+                    'field' => 'tariff[default_si_amount][]',
+                    'label' => 'Basic SI Amount (Rs)',
+                    'rules' => 'trim|required|integer|max_length[10]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'default_si_amount',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[default_si_rate][]',
+                    'label' => 'Rate for Basic SI(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'default_si_rate',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[remaining_si_rate][]',
+                    'label' => 'Rate for Remaining SI(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'remaining_si_rate',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[minus_amount][]',
+                    'label' => 'Default To-Minus-Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'minus_amount',
+                    '_required' => true
+                ],
+
+                // Other Age Range Rate
+                [
+                    'field' => 'tariff[age1_min][]',
+                    'label' => 'Second Age Min(years)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'age1_min',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[age1_max][]',
+                    'label' => 'Second Age Max(years)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'age1_max',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[rate1][]',
+                    'label' => 'Rate on Second Age(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'rate1',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[age2_min][]',
+                    'label' => 'Third Age Min(years)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'age2_min',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[rate2][]',
+                    'label' => 'Rate on Third Age(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'rate2',
+                    '_required' => true
+                ],
+
+                // Third Party Amount
+                [
+                    'field' => 'tariff[third_party][]',
+                    'label' => 'Third Party Premium (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'third_party',
+                    '_required' => true
+                ],
+            ],
+
+            // Private Vehicle - Private Hire Rate
+            'rate_pvc_on_hire' => [
+                [
+                    'field' => 'rate_pvc_on_hire',
+                    'label' => 'Private Hire (%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
+            ],
+
+            // Private/Commercial Vehicle - Towing Premium Amount
+            'pramt_towing' => [
+                [
+                    'field' => 'pramt_towing',
+                    'label' => 'Towing Premium Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
+            ],
+
+            /**
+             * Private/Commercial Vehicle - JSON : Trolly/Trailer Tarrif
+             * ---------------------------------------------------------
+             *
+             * Structure:
+             *  {
+             *      rate: 0.123,
+             *      minus_amount: 0.12,
+             *      third_party: 500,
+             *      compulsory_excess: 400
+             *  }
+             */
+            'trolly_tariff' => [
+                [
+                    'field' => 'trolly_tariff[rate]',
+                    'label' => 'Premium Rate (%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'trolly_tariff[minus_amount]',
+                    'label' => 'To Minus Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'trolly_tariff[third_party]',
+                    'label' => 'Third Party Premium (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'trolly_tariff[compulsory_excess]',
+                    'label' => 'Compulsory Excess (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
+            ],
+        ];
+
+        // return formatted?
+        $fromatted_v_rules = [];
+        if($formatted === TRUE)
+        {
+            foreach ($v_rules as $section => $section_rules)
+            {
+                $fromatted_v_rules = array_merge($fromatted_v_rules, $section_rules);
+            }
+            return $fromatted_v_rules;
+        }
+
+        return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Validation Rules - Commercial Vehicle
+     *
+     * @param bool $formatted
+     * @return type
+     */
+    public function commercial_vehicle_validation_rules($formatted = FALSE)
+    {
+        $v_rules = $this->_common_validation_rules();
+        $v_rules += [
+            /**
+             * JSON : Tarrif
+             * --------------
+             */
+            'tariff' => [
+                [
+                    'field' => 'tariff[ec_type][]',
+                    'label' => 'Engine Capacity Type',
+                    'rules' => 'trim|required|alpha|max_length[2]',
+                    '_type'     => 'dropdown',
+                    '_show_label' => false,
+                    '_key'      => 'ec_type',
+                    '_data'     => _OBJ_MOTOR_ec_unit_tariff_dropdown(),
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[ec_min][]',
+                    'label' => 'Capacity Min (CC|KW|TON)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'ec_min',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[ec_max][]',
+                    'label' => 'Capacity Max (CC|KW|TON)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'ec_max',
+                    '_required' => true
+                ],
+
+                // Default Rate
+                [
+                    'field' => 'tariff[default_age_max][]',
+                    'label' => 'Default Age Max (yrs)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'default_age_max',
+                    '_required' => true
+                ],
+
+                // Default Rate
+                [
+                    'field' => 'tariff[default_rate][]',
+                    'label' => 'Default Premium Rate(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'default_rate',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[minus_amount][]',
+                    'label' => 'Default To-Minus-Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'minus_amount',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[plus_amount][]',
+                    'label' => 'Default To-Plus-Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'plus_amount',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[ec_threshold][]',
+                    'label' => 'Default Threshold (CC|KW|TON)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'ec_threshold',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[cost_per_ec_above][]',
+                    'label' => 'Premium per Above Threshold (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'cost_per_ec_above',
+                    '_required' => true
+                ],
+
+                // Other Age Range Rate
+                [
+                    'field' => 'tariff[age1_min][]',
+                    'label' => 'Second Age Min(years)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'age1_min',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[age1_max][]',
+                    'label' => 'Second Age Max(years)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'age1_max',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[rate1][]',
+                    'label' => 'Rate on Second Age(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'rate1',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[age2_min][]',
+                    'label' => 'Third Age Min(years)',
+                    'rules' => 'trim|required|integer|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'age2_min',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'tariff[rate2][]',
+                    'label' => 'Rate on Third Age(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'rate2',
+                    '_required' => true
+                ],
+
+                // Third Party Amount
+                [
+                    'field' => 'tariff[third_party][]',
+                    'label' => 'Third Party Premium (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_key'      => 'third_party',
+                    '_required' => true
+                ],
+            ],
+
+            // Commercial Vehicle - Discount on Personal Use
+            'dr_cvc_on_personal_use' => [
+                [
+                    'field' => 'dr_cvc_on_personal_use',
+                    'label' => 'Discount on Personal Use (%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
+            ],
+
+            // Private/Commercial Vehicle - Towing Premium Amount
+            'pramt_towing' => [
+                [
+                    'field' => 'pramt_towing',
+                    'label' => 'Towing Premium Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
+            ],
+
+            /**
+             * Private/Commercial Vehicle - JSON : Trolly/Trailer Tarrif
+             * ---------------------------------------------------------
+             *
+             * Structure:
+             *  {
+             *      rate: 0.123,
+             *      minus_amount: 0.12,
+             *      third_party: 500,
+             *      compulsory_excess: 400
+             *  }
+             */
+            'trolly_tariff' => [
+                [
+                    'field' => 'trolly_tariff[rate]',
+                    'label' => 'Premium Rate (%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'trolly_tariff[minus_amount]',
+                    'label' => 'To Minus Amount (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'trolly_tariff[third_party]',
+                    'label' => 'Third Party Premium (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'trolly_tariff[compulsory_excess]',
+                    'label' => 'Compulsory Excess (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ]
+            ],
+        ];
+
+        // return formatted?
+        $fromatted_v_rules = [];
+        if($formatted === TRUE)
+        {
+            foreach ($v_rules as $section => $section_rules)
+            {
+                $fromatted_v_rules = array_merge($fromatted_v_rules, $section_rules);
+            }
+            return $fromatted_v_rules;
+        }
+
+        return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+        private function _common_validation_rules()
+        {
+            return [
+
+                /**
+                 * Default Configurations
+                 */
+                'defaults' => [
+                    [
+                        'field' => 'active',
+                        'label' => 'Activate Tariff',
+                        'rules' => 'trim|integer|in_list[1]',
+                        '_type' => 'switch',
+                        '_checkbox_value' => '1'
+                    ],
+                    [
+                        'field' => 'default_premium',
+                        'label' => 'Default Premium Amount (Rs.)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_type'     => 'text',
+                        '_required' => true,
+                        '_help_text' => 'This is the default premium amount for "अ. सवारी साधनको क्षति/हानि–नोक्सानी बिरुद्धको बीमा तथा दुर्घटना बीमा वापत". When the tariff calculation falls below this amount, we use this amount as the premium amount.'
+                    ]
+                ],
+
+                /**
+                 * JSON : No Claim Discount
+                 * -------------------------
+                 *
+                 * Structure:
+                 *  [{
+                 *      years: 1,
+                 *      rate: 20
+                 *  },{
+                 *      ...
+                 *  }]
+                 */
+                'no_claim_discount' => [
+                    [
+                        'field' => 'no_claim_discount[years][]',
+                        'label' => 'Consecutive Years',
+                        'rules' => 'trim|required|integer|max_length[2]',
+                        '_type'     => 'text',
+                        '_key'      => 'years',
+                        '_show_label' => false,
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'no_claim_discount[rate][]',
+                        'label' => 'Premium Rate(%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        '_type'     => 'text',
+                        '_key'      => 'rate',
+                        '_show_label' => false,
+                        '_required' => true
+                    ]
+                ],
+
+
+                /**
+                 * JSON : Voluntary Excess
+                 * -------------------------
+                 *
+                 * Structure:
+                 *  [{
+                 *      amount: 500,
+                 *      rate: 20
+                 *  },{
+                 *      ...
+                 *  }]
+                 */
+                'dr_voluntary_excess' => [
+                    [
+                        'field' => 'dr_voluntary_excess[amount][]',
+                        'label' => 'Voluntary Excess Amount(Rs)',
+                        'rules' => 'trim|required|integer|max_length[10]',
+                        '_type'     => 'text',
+                        '_key'      => 'amount',
+                        '_show_label' => false,
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'dr_voluntary_excess[rate][]',
+                        'label' => 'Voluntary Excess Discount(%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        '_type'     => 'text',
+                        '_key'      => 'rate',
+                        '_show_label' => false,
+                        '_required' => true
+                    ]
+                ],
+
+
+                /**
+                 * JSON : Compulsory Excess
+                 * -------------------------
+                 *
+                 * Structure:
+                 *  [{
+                 *      min_age: 5,
+                 *      max_age: 10,
+                 *      amount: 5000
+                 *  },{
+                 *      ...
+                 *  }]
+                 */
+                'pramt_compulsory_excess' => [
+                    [
+                        'field' => 'pramt_compulsory_excess[min_age][]',
+                        'label' => 'Min Age(years)',
+                        'rules' => 'trim|required|integer|max_length[2]',
+                        '_type'     => 'text',
+                        '_show_label' => false,
+                        '_key'      => 'min_age',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'pramt_compulsory_excess[max_age][]',
+                        'label' => 'Max Age(years)',
+                        'rules' => 'trim|required|integer|max_length[2]',
+                        '_type'     => 'text',
+                        '_show_label' => false,
+                        '_key'      => 'max_age',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'pramt_compulsory_excess[amount][]',
+                        'label' => 'Amount(Rs.)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                        '_type'     => 'text',
+                        '_show_label' => false,
+                        '_key'      => 'amount',
+                        '_required' => true
+                    ]
+                ],
+
+                /**
+                 * JSON : Motor Accident Premium
+                 * -------------------------
+                 *
+                 * Structure:
+                 *  {
+                 *      pramt_driver_accident: 500,
+                 *      pramt_accident_per_staff: 700,
+                 *      pramt_accident_per_passenger: 500
+                 *  }
+                 */
+                'accident_premium' => [
+                    [
+                        'field' => 'accident_premium[pramt_driver_accident]',
+                        'label' => 'Motor Accident Premium: Driver Accident (Rs.)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                        '_type'     => 'text',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'accident_premium[pramt_accident_per_staff]',
+                        'label' => 'Motor Accident Premium: Per Staff Accident (Rs.)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                        '_type'     => 'text',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'accident_premium[pramt_accident_per_passenger]',
+                        'label' => 'Motor Accident Premium: Per Passenger Accident (Rs.)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                        '_type'     => 'text',
+                        '_required' => true
+                    ]
+                ],
+
+                /**
+                 * JSON : Risk Group Rates
+                 * -------------------------
+                 *
+                 * Structure:
+                 *  {
+                 *      rate_mob: 0.123,
+                 *      rate_terrorism: 0.12,
+                 *      rate_additionl_per_thousand_on_extra_rate: 0.25
+                 *  }
+                 */
+                'riks_group' => [
+                    [
+                        'field' => 'riks_group[rate_pool_risk_mob]',
+                        'label' => 'Risk: Pool (%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        '_type'     => 'text',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'riks_group[rate_pool_risk_terorrism]',
+                        'label' => 'Risk: Terrorism (%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        '_type'     => 'text',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'riks_group[rate_additionl_per_thousand_on_extra_rate]',
+                        'label' => 'Risk: Rate Per Thousand on Additional Premium',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                        '_type'     => 'text',
+                        '_required' => true
+                    ]
+                ],
+
+                /**
+                 * JSON : Accident Covered Tariff Amounts
+                 * --------------------------------------
+                 *
+                 * Structure:
+                 *  {
+                 *      rate_mob: 0.123,
+                 *      rate_terrorism: 0.12,
+                 *      rate_additionl_per_thousand_on_extra_rate: 0.25
+                 *  }
+                 */
+                'insured_value_tariff' => [
+                    [
+                        'field' => 'insured_value_tariff[driver]',
+                        'label' => 'Driver Covered Amount (Rs)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                        '_type'     => 'text',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'insured_value_tariff[staff]',
+                        'label' => 'Staff Covered Amount (Rs)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                        '_type'     => 'text',
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'insured_value_tariff[passenger]',
+                        'label' => 'Passenger Covered Amount (Rs)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                        '_type'     => 'text',
+                        '_required' => true
+                    ],
+                ],
+            ];
+        }
 
     // ----------------------------------------------------------------
 
@@ -335,7 +1242,7 @@ class Tariff_motor_model extends MY_Model
                 ]
             ],
 
-            // Vehicle - Towing Premium Amount
+            // Private/Commercial Vehicle - Towing Premium Amount
             'pramt_towing' => [
                 [
                     'field' => 'pramt_towing',
@@ -485,8 +1392,8 @@ class Tariff_motor_model extends MY_Model
 
 
             /**
-             * JSON : Trolly/Trailer Tarrif
-             * ----------------------------
+             * Private/Commercial Vehicle - JSON : Trolly/Trailer Tarrif
+             * ---------------------------------------------------------
              *
              * Structure:
              *  {

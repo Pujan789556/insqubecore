@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<a href="#"
 			data-toggle="tooltip"
 			title="Edit Single Tariff"
-			data-box-size="large"
+			data-box-size="full-width"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Edit Single Tariff'
 			data-url="<?php echo site_url('tariff/motor/edit/' . $record->id);?>"
