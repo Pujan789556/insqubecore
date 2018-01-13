@@ -19,7 +19,7 @@ class Endorsement_template_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'portfolio_id', 'endorsement_type', 'body', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'portfolio_id', 'endorsement_type', 'title', 'body', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -72,9 +72,16 @@ class Endorsement_template_model extends MY_Model
                 '_required' => true
             ],
             [
+                'field' => 'title',
+                'label' => 'Title',
+                'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            [
                 'field' => 'body',
                 'label' => 'Template Text',
-                'rules' => 'trim|required',
+                'rules' => 'trim|required|htmlspecialchars',
                 '_type'     => 'textarea',
                 '_required' => true
             ]
@@ -127,6 +134,12 @@ class Endorsement_template_model extends MY_Model
             {
                 $this->db->where(['ET.endorsement_type' =>  $endorsement_type]);
             }
+
+            $keywords = $params['keywords'] ?? '';
+            if( $keywords )
+            {
+                $this->db->where("MATCH ( ET.`title` ) AGAINST ( '{$keywords}*' IN BOOLEAN MODE)", NULL);
+            }
         }
         return $this->db->limit($this->settings->per_page+1)
                     ->get()->result();
@@ -144,7 +157,7 @@ class Endorsement_template_model extends MY_Model
 
     private function _row_select()
     {
-        $this->db->select('ET.id, ET.portfolio_id, ET.endorsement_type, ET.body, PRT.name_en AS portfolio_name_en')
+        $this->db->select('ET.id, ET.portfolio_id, ET.endorsement_type, ET.title, ET.body, PRT.name_en AS portfolio_name_en')
                  ->from($this->table_name . ' as ET')
                  ->join('master_portfolio AS PRT', 'PRT.id = ET.portfolio_id');
     }
@@ -164,7 +177,7 @@ class Endorsement_template_model extends MY_Model
         $list = $this->get_cache($cache_name);
         if(!$list)
         {
-            $records = $this->db->select('ET.id, ET.portfolio_id, ET.endorsement_type, PRT.name_en AS portfolio_name_en')
+            $records = $this->db->select('ET.id, ET.portfolio_id, ET.endorsement_type, ET.title')
                                  ->from($this->table_name . ' as ET')
                                  ->join('master_portfolio AS PRT', 'PRT.id = ET.portfolio_id')
                                  ->where('ET.portfolio_id', $portfolio_id)
@@ -172,7 +185,7 @@ class Endorsement_template_model extends MY_Model
             $list = [];
             foreach($records as $record)
             {
-                $list["{$record->id}"] = $record->portfolio_name_en . ' - ' . get_policy_txn_type_text($record->endorsement_type);
+                $list["{$record->id}"] = get_policy_txn_type_text($record->endorsement_type) . ' - ' . $record->title  ;
             }
             $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
         }

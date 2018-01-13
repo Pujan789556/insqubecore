@@ -191,7 +191,14 @@ class Endorsement_templates extends MY_Controller
 	                '_type'     => 'dropdown',
 	                '_data'     => IQB_BLANK_SELECT + $e_type_dropdown,
 	                '_required' => false
-	            ]
+	            ],
+	            [
+					'field' => 'filter_keywords',
+			        'label' => 'Keywords <i class="fa fa-info-circle"></i>',
+			        'rules' => 'trim|max_length[250]',
+	                '_type'     => 'text',
+	                '_label_extra' => 'data-toggle="tooltip" data-title="Endorsement title"'
+				],
 			];
 			return $filters;
 		}
@@ -208,7 +215,8 @@ class Endorsement_templates extends MY_Controller
 				{
 					$data['data'] = [
 						'portfolio_id' 		=> $this->input->post('filter_portfolio') ?? NULL,
-						'endorsement_type' 	=> $this->input->post('filter_endorsement_type') ?? NULL
+						'endorsement_type' 	=> $this->input->post('filter_endorsement_type') ?? NULL,
+						'keywords' 			=> $this->input->post('filter_keywords') ?? ''
 					];
 					$data['status'] = 'success';
 				}

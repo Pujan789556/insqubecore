@@ -12,6 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						<?php echo $record->portfolio_name_en;?></a>
 	</td>
 	<td><?php echo get_policy_txn_type_text($record->endorsement_type);?></td>
+	<td><?php echo $record->title; ?></td>
 	<td class="ins-action">
 		<div class="btn-group">
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
