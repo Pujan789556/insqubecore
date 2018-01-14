@@ -307,6 +307,19 @@ class Policy_transaction_model extends MY_Model
                     $this->policy_model->update_status($record->policy_id, IQB_POLICY_STATUS_ACTIVE);
                 }
             }
+            /**
+             * If FRESH/RENEWAL transaction and status is verified,
+             * Update the Sum Insured Value from Policy Object
+             */
+            else if($to_status_flag === IQB_POLICY_TXN_STATUS_VERIFIED)
+            {
+                if( in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+                {
+                    $amt_sum_insured = $this->policy_model->get_sum_insured_by_policy_object($record->policy_id);
+                    parent::update($record->id, ['amt_sum_insured' => $amt_sum_insured], TRUE);
+                }
+            }
+
 
             /**
              * Cleare Caches
@@ -611,7 +624,7 @@ class Policy_transaction_model extends MY_Model
      */
     public function get($id)
     {
-        return $this->db->select('PTXN.*, P.branch_id')
+        return $this->db->select('PTXN.*, P.branch_id, P.portfolio_id')
                         ->from($this->table_name . ' AS PTXN')
                         ->join('dt_policies P', 'P.id = PTXN.policy_id')
                         ->where('PTXN.id', $id)

@@ -1059,6 +1059,9 @@ class Policy_model extends MY_Model
                     $base_data['verified_by'] = $this->dx_auth->get_user_id();
                     $this->_to_status($record->id, $base_data);
 
+                    /**
+                     * Update Transaction Status, Lock Object, Customer
+                     */
                     $this->policy_transaction_model->update_status($record->id, IQB_POLICY_TXN_STATUS_VERIFIED);
                     $this->object_model->update_lock($record->object_id, IQB_FLAG_LOCKED);
                     $this->customer_model->update_lock($record->customer_id, IQB_FLAG_LOCKED);
@@ -1466,6 +1469,18 @@ class Policy_model extends MY_Model
                         ->from($this->table_name . ' as P')
                         ->where('P.id', $id)
                         ->get()->row();
+    }
+
+    // ----------------------------------------------------------------
+
+
+    public function get_sum_insured_by_policy_object($id)
+    {
+        return $this->db->select( 'O.amt_sum_insured')
+                        ->from($this->table_name . ' as P')
+                        ->join('dt_objects O', 'P.object_id = O.id')
+                        ->where('P.id', $id)
+                        ->get()->row()->amt_sum_insured;
     }
 
     // ----------------------------------------------------------------
