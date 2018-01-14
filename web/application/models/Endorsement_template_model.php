@@ -66,7 +66,7 @@ class Endorsement_template_model extends MY_Model
             [
                 'field' => 'endorsement_type',
                 'label' => 'Endorsement Type',
-                'rules' => 'trim|required|integer|max_length[2]|in_list[' . implode(',', array_keys($e_type_dropdown) ) . ']|callback_check_duplicate',
+                'rules' => 'trim|required|integer|max_length[2]|in_list[' . implode(',', array_keys($e_type_dropdown) ) . ']',
                 '_type'     => 'dropdown',
                 '_data'     => IQB_BLANK_SELECT + $e_type_dropdown,
                 '_required' => true
@@ -86,18 +86,6 @@ class Endorsement_template_model extends MY_Model
                 '_required' => true
             ]
         ];
-    }
-
-    // ----------------------------------------------------------------
-
-    public function check_duplicate($where, $id=NULL)
-    {
-        if( $id )
-        {
-            $this->db->where('id !=', $id);
-        }
-        return $this->db->where($where)
-                        ->count_all_results($this->table_name);
     }
 
     // ----------------------------------------------------------------

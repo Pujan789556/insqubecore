@@ -402,42 +402,6 @@ class Endorsement_templates extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-     * Check Duplicate Callback
-     *
-     * @param string $endorsement_type
-     * @param integer|null $id
-     * @return bool
-     */
-    public function check_duplicate($endorsement_type, $id=NULL)
-    {
-
-    	$endorsement_type 	= (int)$endorsement_type;
-    	$portfolio_id   	= (int)$this->input->post('portfolio_id');
-    	$id   				= $id ? (int)$id : (int)$this->input->post('id');
-
-    	// Dependency Met? Must need Portfolio
-    	if( !$portfolio_id )
-    	{
-    		$this->form_validation->set_message('check_duplicate', 'Please select "Portfolio".');
-            return FALSE;
-    	}
-
-    	// Let's see if duplicate exists?
-    	$where = [
-    		'portfolio_id' 		=> $portfolio_id,
-    		'endorsement_type' 	=> $endorsement_type
-    	];
-        if( $this->endorsement_template_model->check_duplicate($where, $id) )
-        {
-        	$this->form_validation->set_message('check_duplicate', 'The %s already exists.');
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Delete a Endorsement Templates
 	 * @param integer $id
 	 * @return json
