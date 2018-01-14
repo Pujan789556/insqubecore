@@ -95,7 +95,7 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
         <div class="box-header with-border">
             <h4 class="box-title">Premium Information</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
             <?php
             /**
              * Comprehensive Premium Information

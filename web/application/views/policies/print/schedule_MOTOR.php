@@ -121,7 +121,6 @@ switch ($record->portfolio_id)
                                         echo $this->security->xss_clean($record->customer_name) . '<br/>';
                                         echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                                     }
-
                                     ?>
                                 </td>
                             </tr>
@@ -188,41 +187,23 @@ switch ($record->portfolio_id)
 
                             <tr>
                                 <td>
-                                    <table class="table no-border">
-                                        <tr><td colspan="2"><h4 class="underline">बीमाशुल्क</h4><br/></td></tr>
-
-                                        <?php foreach($premium_attributes as $section_object):?>
-                                            <tr>
-                                                <td><?php echo $section_object->title_np?></td>
-                                                <td class="cost">
-                                                    रु <?php echo number_format((float)$section_object->sub_total, 2, '.', '');?>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach?>
-
+                                    <table class="table table-condensed no-border">
                                         <tr>
-                                            <td>जम्मा</td>
-                                            <td class="cost border-top">
-                                                रु <?php echo number_format((float)$record->total_amount, 2, '.', '');?>
-                                            </td>
+                                            <td><strong>बीमाशुल्क</strong></td>
+                                            <td class="text-right"><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></td>
                                         </tr>
                                         <tr>
                                             <td>टिकट</td>
-                                            <td class="cost">
-                                                रु <?php echo number_format((float)$record->stamp_duty, 2, '.', '');?>
-                                            </td>
+                                            <td class="text-right"><?php echo number_format((float)$txn_record->amt_stamp_duty, 2, '.', '')?></td>
                                         </tr>
                                         <tr>
                                             <td>मु. अ. क. (VAT)</td>
-                                            <td class="cost">
-                                                रु <?php echo number_format( (float)($record->stamp_duty + $record->total_amount) * 0.13, 2, '.', '');?>
-                                            </td>
+                                            <td class="text-right"><?php echo number_format((float)$txn_record->amt_vat, 2, '.', '')?></td>
                                         </tr>
+                                        <tr><td colspan="2" style="height:2px;"><hr style="margin:0" /></td></tr>
                                         <tr>
-                                            <td class="bold">मु. अ. क.(VAT) सहित जम्मा शुल्क</td>
-                                            <td class="cost border-top bold">
-                                                रु <?php echo number_format( (float)($record->stamp_duty + $record->total_amount) * 1.13, 2, '.', '');?>
-                                            </td>
+                                            <td class="border-t"><strong>मु. अ. क.(VAT) सहित जम्मा शुल्क (रु)</strong></td>
+                                            <td class="text-right border-t"><strong><?php echo number_format( (float)( $txn_record->amt_stamp_duty + $txn_record->amt_total_premium + $txn_record->amt_vat ) , 2, '.', '');?></strong></td>
                                         </tr>
                                     </table>
                                 </td>

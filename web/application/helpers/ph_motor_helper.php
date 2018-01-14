@@ -150,10 +150,11 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 		$vehicle_price_accessories 	= $attributes->price_accessories;
 		$vehicle_total_price  		= $vehicle_price + $vehicle_price_accessories;
 
-		// Vehicle Age
-		$vehicle_registration_date 	= new DateTime($attributes->reg_date);
+		// Vehicle Age (If registration date is there use it otherwise mfd year)
+		$ref_date = $attributes->reg_date ? $attributes->reg_date : $attributes->year_mfd . '-01-01';
+		$vehicle_reference_date 	= new DateTime($ref_date);
 		$today 						= new DateTime(date('Y-m-d'));
-		$interval 					= $vehicle_registration_date->diff($today);
+		$interval 					= $vehicle_reference_date->diff($today);
 		$vehicle_age_in_yrs 		= $interval->y;
 
 		$__remarks = NULL; // Premium Remarks, if tariff calculation falls below default premium
@@ -210,24 +211,23 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 
 			// Default Premium =  X% of Vehicle Price
 			$__premium_A_row_1 =  $vehicle_total_price * ($default_rate/100.00);
-
+			$__CRF_cc_table__A['sections'][] = [
+				'label' 	=> 'क',
+				'title' 	=> "सि.सि.तथा घोषित मूल्य (सरसामान सहित) अनुसार बीमा शुल्क (घोषित मूल्यको {$default_rate}%)",
+				'amount' 	=> $__premium_A_row_1
+			];
 
 			// Additional cost due to vehicle over aging
 			$__premium_A_row_2 = 0.00;
 			if( $vehicle_over_age_rate > 0.00 )
 			{
 				$__premium_A_row_2 = $__premium_A_row_1 * ($vehicle_over_age_rate/100.00);
+				$__CRF_cc_table__A['sections'][] = [
+					'title' 	=> "सवारी साधन {$vehicle_age_in_yrs} वर्ष पुरानो भए वापत थप बीमाशुल्क: “क” को {$vehicle_over_age_rate}%",
+					'amount' 	=> $__premium_A_row_2
+				];
 			}
 
-			$__CRF_cc_table__A['sections'][] = [
-				'label' 	=> 'क',
-				'title' 	=> "सि.सि.तथा घोषित मूल्य (सरसामान सहित) अनुसार बीमा शुल्क (घोषित मूल्यको {$default_rate}%)",
-				'amount' 	=> $__premium_A_row_1
-			];
-			$__CRF_cc_table__A['sections'][] = [
-				'title' 	=> "सवारी साधन {$vehicle_age_in_yrs} वर्ष पुरानो भए वापत थप बीमाशुल्क: “क” को {$vehicle_over_age_rate}%",
-				'amount' 	=> $__premium_A_row_2
-			];
 
 			// Sub Total : ख
 			$__premium_A_row_3 = $__premium_A_row_1 + $__premium_A_row_2;
@@ -616,10 +616,11 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 		// Trolly/Trailer Price
 		$trailer_price 				= $attributes->trailer_price ? (float)$attributes->trailer_price : 0.00;
 
-		// Vehicle Age
-		$vehicle_registration_date 	= new DateTime($attributes->reg_date);
+		// Vehicle Age (If registration date is there use it otherwise mfd year)
+		$ref_date = $attributes->reg_date ? $attributes->reg_date : $attributes->year_mfd . '-01-01';
+		$vehicle_reference_date 	= new DateTime($ref_date);
 		$today 						= new DateTime(date('Y-m-d'));
-		$interval 					= $vehicle_registration_date->diff($today);
+		$interval 					= $vehicle_reference_date->diff($today);
 		$vehicle_age_in_yrs 		= $interval->y;
 
 		$__remarks = NULL; // Premium Remarks, if tariff calculation falls below default premium
@@ -744,11 +745,12 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 			if( $vehicle_over_age_rate > 0.00 )
 			{
 				$__premium_A_row_6 = $__premium_A_row_KA * ($vehicle_over_age_rate/100.00);
+				$__CRF_cc_table__A['sections'][] = [
+					'title' => "सवारी साधन {$vehicle_age_in_yrs} वर्ष पुरानो भए वापत थप बीमाशुल्क: “क” को {$vehicle_over_age_rate}%",
+					'amount' => $__premium_A_row_6
+				];
 			}
-			$__CRF_cc_table__A['sections'][] = [
-				'title' => "सवारी साधन {$vehicle_age_in_yrs} वर्ष पुरानो भए वापत थप बीमाशुल्क: “क” को {$vehicle_over_age_rate}%",
-				'amount' => $__premium_A_row_6
-			];
+
 
 
 			// ख Sub Total
@@ -1208,11 +1210,12 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
         // Trolly/Trailer Price
         $trailer_price              = $object_attributes->trailer_price ? (float)$object_attributes->trailer_price : 0.00;
 
-        // Vehicle Age
-        $vehicle_registration_date  = new DateTime($object_attributes->reg_date);
-        $today                      = new DateTime(date('Y-m-d'));
-        $interval                   = $vehicle_registration_date->diff($today);
-        $vehicle_age_in_yrs         = $interval->y;
+        // Vehicle Age (If registration date is there use it otherwise mfd year)
+		$ref_date = $attributes->reg_date ? $attributes->reg_date : $attributes->year_mfd . '-01-01';
+		$vehicle_reference_date 	= new DateTime($ref_date);
+		$today 						= new DateTime(date('Y-m-d'));
+		$interval 					= $vehicle_reference_date->diff($today);
+		$vehicle_age_in_yrs 		= $interval->y;
 
         $__remarks = NULL; // Premium Remarks, if tariff calculation falls below default premium
 
@@ -1380,11 +1383,13 @@ if ( ! function_exists('_PO_MOTOR_CVC_compute_crf'))
             if( $primary_tariff_vehicle['over_age_rate'] > 0.00 )
             {
                 $__premium_A_row_old_age = $__premium_A_row_KA * ($primary_tariff_vehicle['over_age_rate']/100.00);
+
+                $__CRF_cc_table__A['sections'][] = [
+	                'title' => "सवारी साधन {$vehicle_age_in_yrs} वर्ष पुरानो भए वापत थप बीमाशुल्क: “क” को " . $primary_tariff_vehicle['over_age_rate'] . " %",
+	                'amount' => $__premium_A_row_old_age
+	            ];
             }
-            $__CRF_cc_table__A['sections'][] = [
-                'title' => "सवारी साधन {$vehicle_age_in_yrs} वर्ष पुरानो भए वापत थप बीमाशुल्क: “क” को " . $primary_tariff_vehicle['over_age_rate'] . " %",
-                'amount' => $__premium_A_row_old_age
-            ];
+
 
             //
             // ख Sub Total
