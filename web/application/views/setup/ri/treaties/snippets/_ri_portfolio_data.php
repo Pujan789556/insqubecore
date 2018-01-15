@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Setup - RI - Treaty : RI Portfolios - Data View
 */
+$treaty_type_id =  (int)$portfolios[0]->treaty_type_id;
 ?>
 <table class="table table-striped table-hover table-condensed">
 	<thead>
@@ -18,15 +19,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<th>Maximum Retention Amount</th>
 			<th>Defnied Retention Amount</th>
 			<th>Defined Retention Apply?</th>
-			<th>QS Retention(%)</th>
-			<th>QS Quota(%)</th>
-			<th>Surplus 1st Line</th>
-			<th>Surplus 2nd Line</th>
-			<th>Surplus 3rd Line</th>
-			<th>EOL Amount L1</th>
-			<th>EOL Amount L2</th>
-			<th>EOL Amount L3</th>
-			<th>EOL Amount L4</th>
+
+			<?php if( in_array($treaty_type_id, [IQB_RI_TREATY_TYPE_QT, IQB_RI_TREATY_TYPE_QS]) ): ?>
+				<th>QS Retention(%)</th>
+				<th>QS Quota(%)</th>
+			<?php endif ?>
+
+			<?php if( in_array($treaty_type_id, [IQB_RI_TREATY_TYPE_SP, IQB_RI_TREATY_TYPE_QS]) ): ?>
+				<th>Surplus 1st Line</th>
+				<th>Surplus 2nd Line</th>
+				<th>Surplus 3rd Line</th>
+			<?php endif ?>
+
+			<?php if($treaty_type_id == IQB_RI_TREATY_TYPE_EOL): ?>
+				<th>EOL Amount L1</th>
+				<th>EOL Amount L2</th>
+				<th>EOL Amount L3</th>
+				<th>EOL Amount L4</th>
+			<?php endif ?>
 		</tr>
 	</thead>
 	<tbody>
@@ -38,7 +48,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<td>
 					<?php echo $portfolio->protfolio_parent_code  . ' - ' . $portfolio->portfolio_name_en . "({$portfolio->portfolio_code})"?>
 				</td>
-				<td><?php echo $portfolio->ac_basic ? ri_ac_basic_dropdown(FALSE)[$portfolio->ac_basic]: '-'?></td>
+				<td><?php echo $portfolio->ac_basic ? RI__ac_basic_dropdown(FALSE)[$portfolio->ac_basic]: '-'?></td>
 				<td><?php echo yes_no_text($portfolio->flag_claim_recover_from_ri, '-')?></td>
 				<td><?php echo yes_no_text($portfolio->flag_comp_cession_apply, '-')?></td>
 				<td><?php echo $portfolio->comp_cession_percent;?></td>
@@ -47,15 +57,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<td><?php echo $portfolio->qs_max_ret_amt;?></td>
 				<td><?php echo $portfolio->qs_def_ret_amt;?></td>
 				<td><?php echo $portfolio->flag_qs_def_ret_apply ? yes_no_text(false)[$portfolio->flag_qs_def_ret_apply] : '-';?></td>
-				<td><?php echo $portfolio->qs_retention_percent;?></td>
-				<td><?php echo $portfolio->qs_quota_percent;?></td>
-				<td><?php echo $portfolio->qs_lines_1;?></td>
-				<td><?php echo $portfolio->qs_lines_2;?></td>
-				<td><?php echo $portfolio->qs_lines_3;?></td>
-				<td><?php echo $portfolio->eol_layer_amount_1;?></td>
-				<td><?php echo $portfolio->eol_layer_amount_2;?></td>
-				<td><?php echo $portfolio->eol_layer_amount_3;?></td>
-				<td><?php echo $portfolio->eol_layer_amount_4;?></td>
+
+				<?php if( in_array($treaty_type_id, [IQB_RI_TREATY_TYPE_QT, IQB_RI_TREATY_TYPE_QS]) ): ?>
+					<td><?php echo $portfolio->qs_retention_percent;?></td>
+					<td><?php echo $portfolio->qs_quota_percent;?></td>
+				<?php endif ?>
+
+				<?php if( in_array($treaty_type_id, [IQB_RI_TREATY_TYPE_SP, IQB_RI_TREATY_TYPE_QS]) ): ?>
+					<td><?php echo $portfolio->qs_lines_1;?></td>
+					<td><?php echo $portfolio->qs_lines_2;?></td>
+					<td><?php echo $portfolio->qs_lines_3;?></td>
+				<?php endif ?>
+
+				<?php if($treaty_type_id == IQB_RI_TREATY_TYPE_EOL): ?>
+					<td><?php echo $portfolio->eol_layer_amount_1;?></td>
+					<td><?php echo $portfolio->eol_layer_amount_2;?></td>
+					<td><?php echo $portfolio->eol_layer_amount_3;?></td>
+					<td><?php echo $portfolio->eol_layer_amount_4;?></td>
+				<?php endif ?>
 			</tr>
 		<?php endforeach?>
 	</tbody>

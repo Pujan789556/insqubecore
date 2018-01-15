@@ -1321,12 +1321,23 @@ class Ri_setup_treaty_model extends MY_Model
 
     public function get_treaty_by_portfolio($portfolio_id)
     {
-
-        $this->_treaty_portfolios_select();
-
-        return $this->db
-                        ->where('P.id', $portfolio_id)
-                        ->get()->row();
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var  = 'ri_tbp_' . $portfolio_id;
+        $row       = $this->get_cache($cache_var);
+        if(!$row)
+        {
+            $this->_treaty_portfolios_select();
+            $row = $this->db
+                            ->where('P.id', $portfolio_id)
+                            ->get()->row();
+            if($row)
+            {
+                $this->write_cache($row, $cache_var, CACHE_DURATION_HR);
+            }
+        }
+        return $row;
     }
 
     // --------------------------------------------------------------------
@@ -1383,7 +1394,7 @@ class Ri_setup_treaty_model extends MY_Model
     public function clear_cache($data=null)
     {
         $cache_names = [
-            ''
+            'ri_tbp_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

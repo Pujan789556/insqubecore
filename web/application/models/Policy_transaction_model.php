@@ -313,10 +313,23 @@ class Policy_transaction_model extends MY_Model
              */
             else if($to_status_flag === IQB_POLICY_TXN_STATUS_VERIFIED)
             {
+                /**
+                 * Task 1: FRESH/RENEWAL - Update sum insured amount
+                 * Task 2: FRESH/RENEWAL - RI Approval Constraint
+                 */
+                $amt_sum_insured = $this->policy_model->get_sum_insured_by_policy_object($record->policy_id);
                 if( in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
                 {
-                    $amt_sum_insured = $this->policy_model->get_sum_insured_by_policy_object($record->policy_id);
-                    parent::update($record->id, ['amt_sum_insured' => $amt_sum_insured], TRUE);
+                    /**
+                     * RI Approval Constraint
+                     */
+                    $this->load->helper('ri');
+                    $flag_ri_approval = RI__compute_flag_ri_approval($record->portfolio_id, $amt_sum_insured);
+                    $update_data = [
+                        'amt_sum_insured' => $amt_sum_insured,
+                        'flag_ri_approval' => $flag_ri_approval
+                    ];
+                    parent::update($record->id, $update_data, TRUE);
                 }
             }
 
@@ -607,7 +620,7 @@ class Policy_transaction_model extends MY_Model
             'PTXN.policy_id'    => $policy_id,
             'PTXN.flag_current' => IQB_FLAG_ON
         ];
-        return $this->db->select('PTXN.*, P.branch_id')
+        return $this->db->select('PTXN.*, P.branch_id, P.portfolio_id')
                         ->from($this->table_name . ' AS PTXN')
                         ->join('dt_policies P', 'P.id = PTXN.policy_id')
                         ->where($where)
