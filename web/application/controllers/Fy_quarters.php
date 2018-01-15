@@ -48,9 +48,6 @@ class Fy_quarters extends MY_Controller
 			'level_2' => $this->router->class
 		]);
 
-		// Load Model
-		$this->load->model('fy_quarter_model');
-
 		// Load Activitis Library
 		$this->load->library('activity');
 	}

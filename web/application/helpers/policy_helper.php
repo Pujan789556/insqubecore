@@ -1022,7 +1022,6 @@ if ( ! function_exists('_POLICY__compute_short_term_premium'))
 		 *
 		 */
 		$CI =& get_instance();
-        $CI->load->model('fiscal_year_model');
 		$fy_record = $CI->fiscal_year_model->get_fiscal_year( $policy_record->issued_date );
 		$short_term_info = _POLICY__get_short_term_info( $policy_record->portfolio_id, $fy_record, $policy_record->start_date, $policy_record->end_date );
 

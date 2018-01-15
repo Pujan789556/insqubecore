@@ -48,9 +48,6 @@ class Fiscal_years extends MY_Controller
 			'level_2' => $this->router->class
 		]);
 
-		// Load Model
-		$this->load->model('fiscal_year_model');
-
 		// Load Activitis Library
 		$this->load->library('activity');
 	}

@@ -185,8 +185,6 @@ class MY_Controller extends CI_Controller
          * Get Cached Result, If no, cache the query result
          */
 		$today = date('Y-m-d');
-		$this->load->model('fiscal_year_model');
-		$this->load->model('fy_quarter_model');
         $this->current_fiscal_year = $this->fiscal_year_model->get_fiscal_year($today);
 
         /**
