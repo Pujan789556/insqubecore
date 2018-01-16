@@ -67,7 +67,7 @@ if ( ! function_exists('_OBJ_MARINE_select_text'))
 
 		$transit->bl_no 	? $snippet[] = 'B/L No./Date : ' . $transit->bl_no . '/' . $transit->bl_date : '';
 		$transit->lc_no 	? $snippet[] = 'L/C No./Date : ' . $transit->lc_no . '/' . $transit->lc_date : '';
-		$transit->vessel 	? $snippet[] = 'Vessel. : ' . $transit->vessel : '';
+		$transit->mode 		? $snippet[] = 'Vessel. : ' . _OBJ_MARINE_mode_of_transit_dropdown( FALSE )[$transit->mode] : '';
 
 		$snippet = implode('<br/>', $snippet);
 
