@@ -2134,7 +2134,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'field' => 'object[engine_capacity]',
 			        '_key' => 'engine_capacity',
 			        'label' => 'Engine Capacity',
-			        'rules' => 'trim|required|integer|max_length[5]',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
 			        '_id' 		=> '_motor-engine-capacity',
 			        '_type'     => 'text',
 			        '_required' => true

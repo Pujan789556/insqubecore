@@ -71,7 +71,7 @@
                     echo isset($__section_content_header) ? $__section_content_header : '';
                     ?>
                 </section>
-                <section class="content pad-t-0" id="iqb-primary-content">
+                <section class="content no-padding-t" id="iqb-primary-content">
                     <?php
                     /**
                      * Templete Section: Content
