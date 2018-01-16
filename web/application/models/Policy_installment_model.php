@@ -222,6 +222,15 @@ class Policy_installment_model extends MY_Model
          */
         if( $this->_to_status($record->id, $data) )
         {
+
+            /**
+             * DO RI Distribution on Paid
+             */
+            if( $to_status_flag == IQB_POLICY_INSTALLMENT_STATUS_PAID )
+            {
+                RI__distribute( $record->id );
+            }
+
             /**
              * Delete Caches
              */
@@ -316,7 +325,21 @@ class Policy_installment_model extends MY_Model
      */
     public function get($id)
     {
-        return $this->db->select('PTI.*, P.id AS policy_id, P.branch_id, P.code AS policy_code, PTXN.flag_current as policy_transaction_flag_current, PTXN.status AS policy_transaction_status, PTXN.flag_ri_approval AS policy_transaction_flag_ri_approval')
+        return $this->db->select(
+
+                                // Policy Installment Table Data
+                                'PTI.*, '.
+
+                                // Policy Table Data
+                                'P.id AS policy_id, P.branch_id, P.code AS policy_code, P.portfolio_id, '.
+
+                                // Policy Transaction Table Data
+                                'PTXN.txn_type,
+                                    PTXN.amt_sum_insured as policy_transaction_amt_sum_insured,
+                                    PTXN.flag_current as policy_transaction_flag_current,
+                                    PTXN.status AS policy_transaction_status,
+                                    PTXN.flag_ri_approval AS policy_transaction_flag_ri_approval'
+                            )
                         ->from($this->table_name . ' AS PTI')
                         ->join('dt_policy_transactions PTXN', 'PTXN.id = PTI.policy_transaction_id')
                         ->join('dt_policies P', 'P.id = PTXN.policy_id')
