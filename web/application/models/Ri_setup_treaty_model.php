@@ -1080,6 +1080,17 @@ class Ri_setup_treaty_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
+        else
+        {
+            /**
+             * Clear Cache for all portfolios
+             */
+            $cache_vars = [];
+            foreach($data['portfolio_ids'] as $portfolio_id )
+            {
+                $this->delete_cache('ri_tbp_' . $portfolio_id);
+            }
+        }
 
         // Enable db_debug if on development environment
         $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;

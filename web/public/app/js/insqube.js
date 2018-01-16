@@ -497,6 +497,53 @@ $( document ).ajaxError(function( event, request, settings ) {
         });
  });
 
+/**
+ * Ajax: Load html content on modal (using bootbox)
+ */
+$(document).on('click', '.trg-dialog-popup', function(e){
+    e.preventDefault();
+
+    // Remove any opened tooltip UI (eg. button tooltip)
+    $('div.tooltip[role="tooltip"]').remove();
+
+
+    var $this   = $(this),
+        url     = $this.data('url'),
+        title   = $this.data('title'),
+        size    = $this.data('box-size') ? $this.data('box-size') : '',
+        bootboxClass = 'modal-default';
+
+    // Check if size if full-width
+    if( size === 'full-width' ){
+        size = '';
+        bootboxClass = 'modal-default modal-full-width'
+    }
+
+
+    // Button Loading
+    $this.button('loading');
+    InsQube.options.__btn_loading = $this; // assign loading button so that it is reset on AJAX Error
+
+
+    // Get FORM
+    $.getJSON(url, function(r){
+        if( typeof r.html !== 'undefined'){
+            bootbox.alert({
+                className: bootboxClass,
+                size: size,
+                title:   r.title ? r.title : title,
+                message: r.html,
+                backdrop: false,
+                closeButton: false
+            });
+        }
+
+        // Reset Loading
+        $this.button('reset');
+    });
+});
+
+
  /**
  * Ajax: Delete Record (using bootbox)
  */

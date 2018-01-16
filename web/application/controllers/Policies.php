@@ -208,7 +208,7 @@ class Policies extends MY_Controller
 	            [
 		            'field' => 'filter_code',
 		            'label' => 'Policy Code',
-		            'rules' => 'trim|max_length[21]',
+		            'rules' => 'trim|max_length[40]',
 		            '_type'     => 'text',
 		            '_required' => false
 		        ],

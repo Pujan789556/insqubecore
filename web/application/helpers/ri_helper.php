@@ -250,6 +250,14 @@ if ( ! function_exists('RI__distribute'))
 			throw new Exception("Exception [Helper: ri_helper][Method: RI__distribute()]: No treaty found for supplied portfolio.");
 		}
 
+		/**
+		 * Valid Treaty record?
+		 */
+		if( !RI__valid_treaty_record( $treaty_record ) )
+		{
+			$treaty_type = RI__treaty_types_dropdown(false)[$treaty_record->treaty_type_id];
+			throw new Exception("Exception [Helper: ri_helper][Method: RI__distribute()][{$treaty_record->treaty_name} - {$treaty_type}]: Treaty for this portfolio is not setup properly. Please contact Administrator for this.");
+		}
 
 		/**
 		 * Distribution Logic:
@@ -304,6 +312,77 @@ if ( ! function_exists('RI__distribute'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('RI__valid_treaty_record'))
+{
+	/**
+	 * Valid Treaty Record?
+	 *
+	 * Test if a treaty record is filled with required fields as per treaty type
+	 *
+	 * @param object $treaty_record
+	 * @return bool
+	 */
+	function RI__valid_treaty_record( $treaty_record )
+	{
+		$valid = TRUE;
+
+		$comp_fields = ['ac_basic', 'flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'treaty_max_capacity_amt'];
+		$treaty_comp_fields = [];
+
+		$treaty_type_id = (int)$treaty_record->treaty_type_id;
+		switch($treaty_type_id)
+		{
+			/**
+			 * Surplus, Quota Share & Surplus
+			 */
+			case IQB_RI_TREATY_TYPE_QS:
+				$treaty_comp_fields = ['qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3'];
+				break;
+
+			/**
+			 * Surplus, Quota Share & Surplus
+			 */
+			case IQB_RI_TREATY_TYPE_SP:
+				$treaty_comp_fields = ['qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3'];
+				break;
+
+			/**
+			 * Quota Share
+			 */
+			case IQB_RI_TREATY_TYPE_QT:
+				$treaty_comp_fields = ['qs_retention_percent', 'qs_quota_percent'];
+				break;
+
+			/**
+			 * EOL
+			 */
+			case IQB_RI_TREATY_TYPE_EOL:
+				$treaty_comp_fields = ['eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
+				break;
+
+
+			default:
+				break;
+		}
+		$comp_fields = array_merge($comp_fields, $treaty_comp_fields);
+
+		// Each compulsory fields must not be null
+		foreach($comp_fields as $column )
+		{
+			if($treaty_record->{$column}  === NULL )
+			{
+				$valid = FALSE;
+				break;
+			}
+		}
+
+		return $valid;
+	}
+}
+
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('RI__distribute__QS_SP'))
 {
 	/**
@@ -324,7 +403,7 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 		/**
 		 * SI & Premium Variables
 		 */
-		$si_gross 				= $policy_installment_record->policy_transaction_amt_sum_insured;
+		$si_gross 				= floatval($policy_installment_record->policy_transaction_amt_sum_insured);
 		$si_comp_cession 		= NULL;
 		$si_treaty_total 		= NULL;
 		$si_treaty_retaintion 	= NULL;
@@ -552,7 +631,7 @@ if ( ! function_exists('RI__distribute__QT'))
 		/**
 		 * SI & Premium Variables
 		 */
-		$si_gross 				= $policy_installment_record->policy_transaction_amt_sum_insured;
+		$si_gross 				= floatval($policy_installment_record->policy_transaction_amt_sum_insured);
 		$si_comp_cession 		= NULL;
 		$si_treaty_total 		= NULL;
 		$si_treaty_retaintion 	= NULL;
@@ -673,7 +752,7 @@ if ( ! function_exists('RI__distribute__EOL'))
 		/**
 		 * SI & Premium Variables
 		 */
-		$si_gross 				= $policy_installment_record->policy_transaction_amt_sum_insured;
+		$si_gross 				= floatval($policy_installment_record->policy_transaction_amt_sum_insured);
 		$si_comp_cession 		= NULL;
 		$si_treaty_retaintion 	= NULL;
 

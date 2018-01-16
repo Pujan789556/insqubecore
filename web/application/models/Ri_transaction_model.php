@@ -68,6 +68,12 @@ class Ri_transaction_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Add an RI Transaction
+     *
+     * @param array $data
+     * @return mixed
+     */
     public function add( $data )
     {
         /**
@@ -105,10 +111,7 @@ class Ri_transaction_model extends MY_Model
 
     public function row($id)
     {
-        $this->_row_select();
-
-        return $this->db->where('T.id', $id)
-                 ->get()->row();
+        return $this->get($id);
     }
 
     // ----------------------------------------------------------------
@@ -137,21 +140,21 @@ class Ri_transaction_model extends MY_Model
                 $this->db->where(['T.id <=' => $next_id]);
             }
 
-            $fiscal_yr_id = $params['fiscal_yr_id'] ?? NULL;
-            if( $fiscal_yr_id )
+            $policy_id = $params['policy_id'] ?? NULL;
+            if( $policy_id )
             {
-                $this->db->where(['T.fiscal_yr_id' =>  $fiscal_yr_id]);
+                $this->db->where(['P.id' =>  $policy_id]);
             }
 
-            $treaty_type_id = $params['treaty_type_id'] ?? NULL;
-            if( $treaty_type_id )
+            $policy_code = $params['policy_code'] ?? NULL;
+            if( $policy_code )
             {
-                $this->db->where(['T.treaty_type_id' =>  $treaty_type_id]);
+                $this->db->where(['P.code' =>  $policy_code]);
             }
         }
 
         return $this->db->limit($this->settings->per_page+1)
-                        ->order_by('T.fiscal_yr_id', 'desc')
+                        ->order_by('RTXN.id', 'desc')
                         ->get()->result();
     }
 
@@ -159,11 +162,20 @@ class Ri_transaction_model extends MY_Model
 
     private function _row_select()
     {
-    //     $this->db->select('T.id, T.name, T.fiscal_yr_id, T.treaty_type_id, T.estimated_premium_income, T.treaty_effective_date, T.file, FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, TT.name AS treaty_type_name')
-    //             ->from($this->table_name . ' AS T')
-    //             ->join('master_fiscal_yrs FY', 'FY.id = T.fiscal_yr_id')
-    //             ->join(self::$table_treaty_types . ' TT', 'TT.id = T.treaty_type_id');
-    //
+        $this->db->select(
+                            // RI Transactions Table Data
+                            'RTXN.*, ' .
+
+                            // Policy Table Data
+                            'P.code as policy_code, ' .
+
+                            // Treaty Type table
+                            'TT.name AS treaty_type_name'
+                        )
+                ->from($this->table_name . ' AS RTXN')
+                ->join('dt_policies P', 'P.id = RTXN.policy_id')
+                ->join('ri_setup_treaties T', 'T.id = RTXN.treaty_id')
+                ->join('ri_setup_treaty_types TT', 'TT.id = T.treaty_type_id');
     }
 
     // ----------------------------------------------------------------
@@ -176,31 +188,50 @@ class Ri_transaction_model extends MY_Model
      */
     public function get($id)
     {
-        // return $this->db->select(
+        $this->_row_select();
 
-        //                 // Main table -  all fields
-        //                 'T.*, ' .
-
-        //                 // Treaty Tax and Commission - all fields except treaty_id
-        //                 'TTNC.*, ' .
-
-        //                 // Treaty Commission Scale
-        //                 'TCS.scales as commission_scales, ' .
-
-        //                 // Fiscal year table
-        //                 'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, ' .
-
-        //                 // Treaty Type table
-        //                 'TT.name AS treaty_type_name'
-        //                 )
-        //         ->from($this->table_name . ' AS T')
-        //         ->join(self::$table_treaty_tax_and_commission . ' TTNC', 'TTNC.treaty_id = T.id')
-        //         ->join(self::$table_treaty_commission_scale . ' TCS', 'TCS.treaty_id = T.id')
-        //         ->join('master_fiscal_yrs FY', 'FY.id = T.fiscal_yr_id')
-        //         ->join(self::$table_treaty_types . ' TT', 'TT.id = T.treaty_type_id')
-        //         ->where('T.id', $id)
-        //         ->get()->row();
+        return $this->db->where('RTXN.id', $id)
+                        ->get()->row();
     }
+
+    // ----------------------------------------------------------------
+
+    public function rows_by_policy($policy_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var = 'ri_txn_list_by_policy_'.$policy_id;
+        $rows = $this->get_cache($cache_var);
+        if(!$rows)
+        {
+            $rows = $this->_rows_by_policy($policy_id);
+
+            if($rows)
+            {
+                $this->write_cache($rows, $cache_var, CACHE_DURATION_HR);
+            }
+        }
+        return $rows;
+    }
+
+        /**
+         * Get Rows from Database
+         *
+         * @param int $policy_id
+         * @return array
+         */
+        private function _rows_by_policy($policy_id)
+        {
+            // Common Row Select
+            $this->_row_select();
+
+            // Policy Related JOIN
+            return $this->db->where('P.id', $policy_id)
+                        ->order_by('RTXN.id', 'DESC')
+                        ->get()
+                        ->result();
+        }
 
 
 
@@ -211,10 +242,25 @@ class Ri_transaction_model extends MY_Model
      */
     public function clear_cache($data=null)
     {
-        $cache_names = [
-            ''
-        ];
-    	// cache name without prefix
+        /**
+         * If no data supplied, delete all caches
+         */
+        if( !$data )
+        {
+            $cache_names = [
+                'ri_txn_list_by_policy_*'
+            ];
+        }
+        else
+        {
+            /**
+             * If data supplied, we only delete the supplied
+             * caches
+             */
+            $cache_names = is_array($data) ? $data : [$data];
+        }
+
+        // cache name without prefix
         foreach($cache_names as $cache)
         {
             $this->delete_cache($cache);

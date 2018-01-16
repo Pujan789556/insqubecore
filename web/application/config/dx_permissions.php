@@ -315,6 +315,22 @@ $config['DX_permissions'] = [
 			 */
 		]
 	],
+
+	/**
+	 * Group: Policy
+	 */
+	'RI Permissions' => [
+
+		/**
+		 * Accounts
+		 */
+		'ri_transactions'  => [
+			'explore.transaction',
+			'add.transaction',
+			'edit.transaction',
+			'delete.transaction'
+		],
+	],
 ];
 
 

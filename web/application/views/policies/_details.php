@@ -51,9 +51,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						role="tab"
 						data-toggle="tab">Invoices</a>
 				</li>
+
 				<li role="presentation">
-					<a href="#tab-policy-payments" aria-controls="tab-policy-payments" role="tab"  data-toggle="tab">Payments</a>
+					<a href="#tab-policy-ri_transactions"
+						data-url="<?php echo site_url('ri_transactions/by_policy/'. $record->id)?>"
+						data-load-method="get"
+						data-box="#tab-policy-ri_transactions"
+						data-method="html"
+						aria-controls="tab-policy-ri_transactions"
+						role="tab"
+						data-toggle="tab">RI Transactions</a>
 				</li>
+
 				<li role="presentation">
 					<a href="#tab-policy-claims" aria-controls="tab-policy-claims" role="tab" data-toggle="tab">Claim</a>
 				</li>
@@ -90,7 +99,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 				</div>
 
-				<div class="tab-pane" id="tab-policy-payments">
+				<div class="tab-pane" id="tab-policy-ri_transactions">
 
 				</div>
 
