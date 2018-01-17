@@ -44,6 +44,73 @@ class Forex_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function duplicate_v_rules()
+    {
+        return [
+            [
+                'field' => 'exchange_date',
+                'label' => 'Exchange Date',
+                'rules' => 'trim|required|valid_date|callback__cb_valid_exchange_date',
+                '_type'             => 'date',
+                '_default'          => date('Y-m-d'),
+                '_extra_attributes' => 'data-provide="datepicker-inline"',
+                '_required' => true
+            ]
+        ];
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Data Rows
+     *
+     * Get the filtered resulte set for listing purpose
+     *
+     * @param array $params
+     * @return type
+     */
+    public function rows($params = array())
+    {
+        $this->_row_select();
+
+
+        if(!empty($params))
+        {
+            $next_id = $params['next_id'] ?? NULL;
+            if( $next_id )
+            {
+                $this->db->where(['F.id <=' => $next_id]);
+            }
+
+            $exchange_date = $params['exchange_date'] ?? NULL;
+            if( $exchange_date )
+            {
+                $this->db->where(['F.exchange_date' =>  $exchange_date]);
+            }
+        }
+        return $this->db->limit($this->settings->per_page+1)
+                    ->order_by('F.id', 'desc')
+                    ->get()->result();
+    }
+
+    // --------------------------------------------------------------------
+
+    public function row($id)
+    {
+        $this->_row_select();
+        return $this->db->where('F.id', $id)->get()->row();
+    }
+
+    // --------------------------------------------------------------------
+
+    private function _row_select()
+    {
+        $this->db->select('F.*')
+                 ->from($this->table_name . ' as F');
+    }
+
+    // --------------------------------------------------------------------
+
     public function check_duplicate($where, $ids=NULL)
     {
         if( $ids )
