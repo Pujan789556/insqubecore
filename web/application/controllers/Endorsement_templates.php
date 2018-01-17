@@ -172,7 +172,7 @@ class Endorsement_templates extends MY_Controller
 
 		private function _get_filter_elements()
 		{
-			$e_type_dropdown = get_policy_txn_type_dropdown(false);
+			$e_type_dropdown = get_policy_transaction_type_dropdown(false);
 			$select = ['' => 'Select ...'];
 			$filters = [
 				[
@@ -494,7 +494,7 @@ class Endorsement_templates extends MY_Controller
 		}
 
 		$this->data['site_title'] = 'Endorsement Templates Details | ' . $record->portfolio_name_en;
-		$header_title = 'Endorsement Templates Details <small>' . $record->portfolio_name_en . '</small> - <small>' . get_policy_txn_type_text($record->endorsement_type) . '</small>';
+		$header_title = 'Endorsement Templates Details <small>' . $record->portfolio_name_en . '</small> - <small>' . get_policy_transaction_type_text($record->endorsement_type) . '</small>';
 		$this->template->partial(
 							'content_header',
 							'templates/_common/_content_header',

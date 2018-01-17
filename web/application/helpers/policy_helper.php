@@ -176,14 +176,14 @@ if ( ! function_exists('get_policy_txn_status_text'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_txn_type_dropdown'))
+if ( ! function_exists('get_policy_transaction_type_dropdown'))
 {
 	/**
 	 * Get Policy Transaction Type Dropdown
 	 *
 	 * @return	array
 	 */
-	function get_policy_txn_type_dropdown( $flag_blank_select = true )
+	function get_policy_transaction_type_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 			IQB_POLICY_TXN_TYPE_FRESH 		=> 'Fresh',
@@ -224,100 +224,16 @@ if ( ! function_exists('get_policy_txn_type_endorsement_only_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_txn_type_text'))
+if ( ! function_exists('get_policy_transaction_type_text'))
 {
 	/**
 	 * Get Policy Status Text
 	 *
 	 * @return	string
 	 */
-	function get_policy_txn_type_text( $key, $formatted = FALSE, $sentence = FALSE )
+	function get_policy_transaction_type_text( $key, $formatted = FALSE, $sentence = FALSE )
 	{
-		$list = get_policy_txn_type_dropdown();
-
-		$text = $list[$key] ?? '';
-
-		return $text;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_crf_transfer_type_dropdown'))
-{
-	/**
-	 * Get Policy CRF Transfer Type Dropdown
-	 *
-	 * @return	array
-	 */
-	function get_policy_crf_transfer_type_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = [
-			IQB_POLICY_CRF_TRANSFER_TYPE_FULL 						=> 'Transfer Full Amount',
-			IQB_POLICY_CRF_TRANSFER_TYPE_PRORATA_ON_DIFF 			=> 'Transfer Prorata on Difference',
-			IQB_POLICY_CRF_TRANSFER_TYPE_SHORT_TERM_RATE_ON_FULL 	=> 'Transfer Short Term Rate on Full Amount',
-			IQB_POLICY_CRF_TRANSFER_TYPE_DIRECT_DIFF 				=> 'Transfer Direct Difference'
-		];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_crf_transfer_type_text'))
-{
-	/**
-	 * Get Policy CRF Transfer Type Text
-	 *
-	 * @return	string
-	 */
-	function get_policy_crf_transfer_type_text( $key, $formatted = FALSE, $sentence = FALSE )
-	{
-		$list = get_policy_txn_type_dropdown();
-
-		$text = $list[$key] ?? '';
-
-		return $text;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_crf_computation_type_dropdown'))
-{
-	/**
-	 * Get Policy CRF Computation Type Dropdown
-	 *
-	 * @return	array
-	 */
-	function get_policy_crf_computation_type_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = [
-			IQB_POLICY_CRF_COMPUTE_AUTO 	=> 'Automatic',
-			IQB_POLICY_CRF_COMPUTE_MANUAL 	=> 'Manual'
-		];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_crf_computation_type_text'))
-{
-	/**
-	 * Get Policy CRF Computation Type Text
-	 *
-	 * @return	string
-	 */
-	function get_policy_crf_computation_type_text( $key, $formatted = FALSE, $sentence = FALSE )
-	{
-		$list = get_policy_txn_type_dropdown();
+		$list = get_policy_transaction_type_dropdown();
 
 		$text = $list[$key] ?? '';
 
