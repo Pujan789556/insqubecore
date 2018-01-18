@@ -14,7 +14,7 @@ class Ri_transaction_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'policy_id', 'policy_transaction_id', 'policy_installment_id', 'treaty_id', 'fiscal_yr_id', 'fy_quarter', 'si_gross', 'si_comp_cession', 'si_treaty_total', 'si_treaty_retaintion', 'si_treaty_quota', 'si_treaty_1st_surplus', 'si_treaty_2nd_surplus', 'si_treaty_3rd_surplus', 'si_treaty_fac', 'premium_gross', 'premium_pool', 'premium_net', 'premium_comp_cession', 'premium_treaty_total', 'premium_treaty_retaintion', 'premium_treaty_quota', 'premium_treaty_1st_surplus', 'premium_treaty_2nd_surplus', 'premium_treaty_3rd_surplus', 'premium_treaty_fac', 'commission_quota', 'commission_surplus', 'commission_fac', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'policy_transaction_id', 'policy_installment_id', 'treaty_id', 'fiscal_yr_id', 'fy_quarter', 'si_gross', 'si_comp_cession', 'si_treaty_total', 'si_treaty_retaintion', 'si_treaty_quota', 'si_treaty_1st_surplus', 'si_treaty_2nd_surplus', 'si_treaty_3rd_surplus', 'si_treaty_fac', 'premium_gross', 'premium_pool', 'premium_net', 'premium_comp_cession', 'premium_treaty_total', 'premium_treaty_retaintion', 'premium_treaty_quota', 'premium_treaty_1st_surplus', 'premium_treaty_2nd_surplus', 'premium_treaty_3rd_surplus', 'premium_treaty_fac', 'claim_gross', 'claim_comp_cession', 'claim_treaty_total', 'claim_treaty_retaintion', 'claim_treaty_quota', 'claim_treaty_1st_surplus', 'claim_treaty_2nd_surplus', 'claim_treaty_3rd_surplus', 'claim_treaty_fac', 'commission_quota', 'commission_surplus', 'commission_fac', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -96,7 +96,10 @@ class Ri_transaction_model extends MY_Model
             /**
              * Do we have FAC?
              * ---------------
-             * Create a new FAC config record if not already inserted for this policy
+             *
+             * If we have FAC data, we have to register the FAC.
+             * i.e. if in a single policy during endorsement, if we have new FAC exposure
+             * we have to register it separately.
              */
             $si_treaty_fac = $data['si_treaty_fac'] ?? NULL;
             if( $si_treaty_fac )
@@ -191,6 +194,34 @@ class Ri_transaction_model extends MY_Model
         $this->_row_select();
 
         return $this->db->where('RTXN.id', $id)
+                        ->get()->row();
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get the latest ri transaction build by policy
+     *
+     * i.e. sum of all transactions belonging to this policy
+     *
+     * @param inte $policy_id
+     * @return object
+     */
+    public function latest_build_by_policy($policy_id)
+    {
+        $sum_fields = [];
+        $fields     = ['si_gross', 'si_comp_cession', 'si_treaty_total', 'si_treaty_retaintion', 'si_treaty_quota', 'si_treaty_1st_surplus', 'si_treaty_2nd_surplus', 'si_treaty_3rd_surplus', 'si_treaty_fac', 'premium_gross', 'premium_pool', 'premium_net', 'premium_comp_cession', 'premium_treaty_total', 'premium_treaty_retaintion', 'premium_treaty_quota', 'premium_treaty_1st_surplus', 'premium_treaty_2nd_surplus', 'premium_treaty_3rd_surplus', 'premium_treaty_fac', 'claim_gross', 'claim_comp_cession', 'claim_treaty_total', 'claim_treaty_retaintion', 'claim_treaty_quota', 'claim_treaty_1st_surplus', 'claim_treaty_2nd_surplus', 'claim_treaty_3rd_surplus', 'claim_treaty_fac'];
+
+        // Build SUM Fields
+        foreach($fields as $field )
+        {
+            $sum_fields[] = "SUM({$field}) AS {$field}";
+        }
+        $select =  implode(', ', $sum_fields);
+
+        return $this->db->select($select)
+                        ->from($this->table_name . ' AS RTXN')
+                        ->where('RTXN.policy_id', $policy_id)
                         ->get()->row();
     }
 

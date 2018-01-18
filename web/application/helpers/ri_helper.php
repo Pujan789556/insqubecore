@@ -218,7 +218,10 @@ if ( ! function_exists('RI__compute_flag_ri_approval__QS_SP'))
 if ( ! function_exists('RI__distribute'))
 {
 	/**
-	 * Build/Update RI Distribution
+	 * RI Distribution on a Fresh/Renwal Policy's 1st Installment
+	 *
+	 * @param int $policy_installment_id
+	 * @return mixed
 	 */
 	function RI__distribute( $policy_installment_id )
 	{
@@ -232,7 +235,7 @@ if ( ! function_exists('RI__distribute'))
 		$CI->load->model('ri_transaction_model');
 
 		/**
-		 * Get RI Treaty for this Portfolio
+		 * Get Installment Record
 		 */
 		$policy_installment_record = $CI->policy_installment_model->get( $policy_installment_id );
 		if(!$policy_installment_record)
@@ -259,15 +262,6 @@ if ( ! function_exists('RI__distribute'))
 			throw new Exception("Exception [Helper: ri_helper][Method: RI__distribute()][{$treaty_record->treaty_name} - {$treaty_type}]: Treaty for this portfolio is not setup properly. Please contact Administrator for this.");
 		}
 
-		/**
-		 * Distribution Logic:
-		 *
-		 * 		1. FRESH/Renewal Policy Issue - RI Distribution
-		 * 		2. Endorsement - RI Distribution - @TODO
-		 * 			a. SI increase/decrease
-		 * 			b. Premium increase/decrease
-		 * 			c. SI & Premium increase/decrease
-		 */
 
 		/**
 		 * Build Treaty Distribution based on Treaty Type
@@ -305,8 +299,224 @@ if ( ! function_exists('RI__distribute'))
 
 		if( $ri_data )
 		{
+			/**
+			 * Foreign Relation Data (meta data)
+			 */
+			$relation_data = [
+				'policy_id' 			=> $policy_installment_record->policy_id,
+				'policy_transaction_id' => $policy_installment_record->policy_transaction_id,
+				'policy_installment_id' => $policy_installment_record->id,
+				'treaty_id' 			=> $treaty_record->id,
+				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
+				'fy_quarter' 			=> $CI->current_fy_quarter->quarter
+			];
+			$ri_data = array_merge($ri_data, $relation_data);
+
 			return $CI->ri_transaction_model->add($ri_data);
 		}
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('RI__distribute_endorsement'))
+{
+	/**
+	 * RI Distribute on an Endorsement
+	 *
+	 * @TODO: FAC can not be decreased. How to adjust if FAC is decreased?
+	 *
+	 * @param int $policy_installment_record
+	 * @return mixed
+	 */
+	function RI__distribute_endorsement( $policy_installment_id )
+	{
+		$CI =& get_instance();
+
+		/**
+		 * Load models
+		 */
+		$CI->load->model('policy_installment_model');
+		$CI->load->model('ri_setup_treaty_model');
+		$CI->load->model('ri_transaction_model');
+
+		/**
+		 * Get Installment Record
+		 */
+		$policy_installment_record = $CI->policy_installment_model->get( $policy_installment_id );
+		if(!$policy_installment_record)
+		{
+			throw new Exception("Exception [Helper: ri_helper][Method: RI__distribute()]: No installment record found.");
+		}
+
+
+
+
+		/**
+		 * Get RI Treaty for this Portfolio
+		 */
+		$treaty_record = $CI->ri_setup_treaty_model->get_treaty_by_portfolio($policy_installment_record->portfolio_id);
+		if(!$treaty_record )
+		{
+			// NO Treaty Setup for this portfolio!
+			throw new Exception("Exception [Helper: ri_helper][Method: RI__distribute()]: No treaty found for supplied portfolio.");
+		}
+
+		/**
+		 * Valid Treaty record?
+		 */
+		if( !RI__valid_treaty_record( $treaty_record ) )
+		{
+			$treaty_type = RI__treaty_types_dropdown(false)[$treaty_record->treaty_type_id];
+			throw new Exception("Exception [Helper: ri_helper][Method: RI__distribute()][{$treaty_record->treaty_name} - {$treaty_type}]: Treaty for this portfolio is not setup properly. Please contact Administrator for this.");
+		}
+
+
+
+		/**
+		 * Task 1 : Reflected RI Transaction (Current RI Transaction State)
+		 *
+		 * 	Compute the sum of all ri transactions of this policy
+		 */
+		$ri_transaction_latest 	= $CI->ri_transaction_model->latest_build_by_policy($policy_installment_record->policy_id);
+
+
+		// Last reference values
+		$si_gross 		= $ri_transaction_latest->si_gross ?? 0;
+		$premium_gross 	= $ri_transaction_latest->premium_gross ?? 0;
+		$premium_pool 	= $ri_transaction_latest->premium_pool ?? 0;
+
+		/**
+		 * Task 2: Update Sum Insured ( If SI Changed )
+		 *
+		 * !!!IMPORTANT: It applies only on installments of non-fresh/non-renewal transactions
+		 */
+		if( !in_array( $policy_installment_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL] ) )
+		{
+			if( $policy_installment_record->policy_transaction_amt_sum_insured )
+			{
+				$policy_installment_record->policy_transaction_amt_sum_insured += $si_gross;
+
+				/**
+				 * Charge the premium from policy issue date to today.
+				 *
+				 * NOTE: On Treaty account basic = Clean cut basis
+				 *
+				 * !!!IMPORTANT: It applies only on installments of non-fresh/non-renewal transactions
+				 */
+				if ( $treaty_record->ac_basic == IQB_RI_SETUP_AC_BASIC_TYPE_AY )
+				{
+					$today 				= date('Y-m-d');
+					$policy_start_date 	= $policy_installment_record->policy_start_date;
+					$policy_end_date 	= $policy_installment_record->policy_end_date;
+
+					$duration_consumed 	= date_difference($policy_start_date, $today, 'd') + 1;
+					$policy_duration 	= date_difference($policy_start_date, $policy_end_date, 'd') + 1;
+
+					$charged_premium_gross 	= ($ri_transaction_latest->premium_gross / $policy_duration) * $duration_consumed;
+					$charged_premium_pool 	= ($ri_transaction_latest->premium_pool / $policy_duration) * $duration_consumed;
+
+					$premium_gross 	-= $charged_premium_gross;
+					$premium_pool 	-= $charged_premium_pool;
+				}
+			}
+		}
+		else
+		{
+			// Fresh/Renewal's Installment - the lastes SI GROSS from RI distribution
+			$policy_installment_record->policy_transaction_amt_sum_insured = $si_gross;
+		}
+
+		/**
+		 * Task 3: Update Premium ( If changed )
+		 */
+		if( $policy_installment_record->amt_total_premium )
+		{
+			$policy_installment_record->amt_total_premium 	+= $premium_gross;
+			$policy_installment_record->amt_pool_premium 	+= $premium_pool;
+		}
+
+
+		/**
+		 * Task 4: Build New RI Transaction on the Updated Data
+		 *
+		 */
+		$treaty_type_id = (int)$treaty_record->treaty_type_id;
+		$ri_data 		= [];
+		switch($treaty_type_id)
+		{
+			/**
+			 * Surplus, Quota Share & Surplus
+			 */
+			case IQB_RI_TREATY_TYPE_QS:
+			case IQB_RI_TREATY_TYPE_SP:
+				$ri_data = RI__distribute__QS_SP($policy_installment_record, $treaty_record);
+				break;
+
+			/**
+			 * Quota Share
+			 */
+			case IQB_RI_TREATY_TYPE_QT:
+				$ri_data = RI__distribute__QT($policy_installment_record, $treaty_record);
+				break;
+
+			/**
+			 * EOL
+			 */
+			case IQB_RI_TREATY_TYPE_EOL:
+				$ri_data = RI__distribute__EOL($policy_installment_record, $treaty_record);
+				break;
+
+
+			default:
+				break;
+		}
+
+		if( $ri_data )
+		{
+			/**
+			 * Task 5: Get the difference between ri_transaction_latest & $ri_data
+			 */
+			$ri_data = RI__compute_ri_transaction_net_effect($ri_data, (array)$ri_transaction_latest );
+
+			/**
+			 * Foreign Relation Data (meta data)
+			 */
+			$relation_data = [
+				'policy_id' 			=> $policy_installment_record->policy_id,
+				'policy_transaction_id' => $policy_installment_record->policy_transaction_id,
+				'policy_installment_id' => $policy_installment_record->id,
+				'treaty_id' 			=> $treaty_record->id,
+				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
+				'fy_quarter' 			=> $CI->current_fy_quarter->quarter
+			];
+			$ri_data = array_merge($ri_data, $relation_data);
+
+			return $CI->ri_transaction_model->add($ri_data);
+		}
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('RI__compute_ri_transaction_net_effect'))
+{
+	/**
+	 * Compute the net effect on ri transaction with reference to lastest RI transaction build by policy
+	 *
+	 * @return	string
+	 */
+	function RI__compute_ri_transaction_net_effect( $data1, $data2 )
+	{
+		foreach( $data1 as $key=>$value1 )
+		{
+			$value2 = $data2[$key] ? floatval($data2[$key]) : NULL;
+			if($value2)
+			{
+				$data1[$key] = floatval($data1[$key]) - $value2;
+			}
+		}
+		return $data1;
 	}
 }
 
@@ -424,17 +634,6 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 		$premium_treaty_2nd_surplus = NULL;
 		$premium_treaty_3rd_surplus = NULL;
 		$premium_treaty_fac 		= NULL;
-
-
-		/**
-		 * Fresh/Renewal
-		 * 	- SI - transaction's SI
-		 * 	- Premium - installment premium
-		 *
-		 * @TODO: Endorsement
-		 * 	- Track Changed SI
-		 * 	- Track Changed Premium
-		 */
 
 
 		// Compulsory Cession
@@ -568,17 +767,7 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 		$ri_data = [
 
 			/**
-			 * Foreign Relation Data (meta data)
-			 */
-			'policy_id' 			=> $policy_installment_record->policy_id,
-			'policy_transaction_id' => $policy_installment_record->policy_transaction_id,
-			'policy_installment_id' => $policy_installment_record->id,
-			'treaty_id' 			=> $treaty_record->id,
-			'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
-			'fy_quarter' 			=> $CI->current_fy_quarter->quarter,
-
-			/**
-			 * Distribution Data
+			 * Distribution Data - Exposure (SI)
 			 */
 			'si_gross' 				=> $si_gross,
 			'si_comp_cession' 		=> $si_comp_cession,
@@ -647,18 +836,6 @@ if ( ! function_exists('RI__distribute__QT'))
 		$premium_treaty_quota 		= NULL;
 
 
-
-		/**
-		 * Fresh/Renewal
-		 * 	- SI - transaction's SI
-		 * 	- Premium - installment premium
-		 *
-		 * @TODO: Endorsement
-		 * 	- Track Changed SI
-		 * 	- Track Changed Premium
-		 */
-
-
 		// Compulsory Cession
 		if( $treaty_record->flag_comp_cession_apply == IQB_FLAG_ON )
 		{
@@ -692,17 +869,7 @@ if ( ! function_exists('RI__distribute__QT'))
 		$ri_data = [
 
 			/**
-			 * Foreign Relation Data (meta data)
-			 */
-			'policy_id' 			=> $policy_installment_record->policy_id,
-			'policy_transaction_id' => $policy_installment_record->policy_transaction_id,
-			'policy_installment_id' => $policy_installment_record->id,
-			'treaty_id' 			=> $treaty_record->id,
-			'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
-			'fy_quarter' 			=> $CI->current_fy_quarter->quarter,
-
-			/**
-			 * Distribution Data - Sum Insured
+			 * Distribution Data - Exposure (SI)
 			 */
 			'si_gross' 				=> $si_gross,
 			'si_comp_cession' 		=> $si_comp_cession,
@@ -763,13 +930,6 @@ if ( ! function_exists('RI__distribute__EOL'))
 		$premium_comp_cession 		= NULL;
 		$premium_treaty_retaintion 	= NULL;
 
-		/**
-		 *
-		 * @TODO: Endorsement
-		 * 	- Track Changed SI
-		 * 	- Track Changed Premium
-		 */
-
 
 		// Compulsory Cession
 		if( $treaty_record->flag_comp_cession_apply == IQB_FLAG_ON )
@@ -792,17 +952,7 @@ if ( ! function_exists('RI__distribute__EOL'))
 		$ri_data = [
 
 			/**
-			 * Foreign Relation Data (meta data)
-			 */
-			'policy_id' 			=> $policy_installment_record->policy_id,
-			'policy_transaction_id' => $policy_installment_record->policy_transaction_id,
-			'policy_installment_id' => $policy_installment_record->id,
-			'treaty_id' 			=> $treaty_record->id,
-			'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
-			'fy_quarter' 			=> $CI->current_fy_quarter->quarter,
-
-			/**
-			 * Distribution Data - Sum Insured
+			 * Distribution Data - Exposure (SI)
 			 */
 			'si_gross' 				=> $si_gross,
 			'si_comp_cession' 		=> $si_comp_cession,

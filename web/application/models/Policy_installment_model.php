@@ -228,7 +228,22 @@ class Policy_installment_model extends MY_Model
              */
             if( $to_status_flag == IQB_POLICY_INSTALLMENT_STATUS_PAID )
             {
-                RI__distribute( $record->id );
+                /**
+                 * RI__distribute - Fresh/Renewal Transaction's First Installment
+                 * RI__distribute_endorsement - All other transaction or installments
+                 */
+                if(
+                    in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL])
+                        &&
+                    $record->flag_first == IQB_FLAG_ON
+                )
+                {
+                    RI__distribute( $record->id );
+                }
+                else
+                {
+                    RI__distribute_endorsement($record->id);
+                }
             }
 
             /**
@@ -331,7 +346,7 @@ class Policy_installment_model extends MY_Model
                                 'PTI.*, '.
 
                                 // Policy Table Data
-                                'P.id AS policy_id, P.branch_id, P.code AS policy_code, P.portfolio_id, '.
+                                'P.id AS policy_id, P.branch_id, P.code AS policy_code, P.portfolio_id, P.start_date as policy_start_date, P.end_date as policy_end_date, '.
 
                                 // Policy Transaction Table Data
                                 'PTXN.txn_type,

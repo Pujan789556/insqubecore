@@ -446,7 +446,7 @@ defined('IQB_RI_SETUP_AC_BASIC_TYPE_AY')    OR define('IQB_RI_SETUP_AC_BASIC_TYP
 defined('IQB_RI_SETUP_AC_BASIC_TYPE_LOY')   OR define('IQB_RI_SETUP_AC_BASIC_TYPE_LOY', 2);
 defined('IQB_RI_SETUP_AC_BASIC_TYPE_UWY')	OR define('IQB_RI_SETUP_AC_BASIC_TYPE_UWY', 3);
 defined('IQB_RI_SETUP_AC_BASIC_TYPES')    	OR define('IQB_RI_SETUP_AC_BASIC_TYPES', 	[
-	IQB_RI_SETUP_AC_BASIC_TYPE_AY 	=> 'Accounting Year',
+	IQB_RI_SETUP_AC_BASIC_TYPE_AY 	=> 'Accounting Year (Clean cut basis)',
 	IQB_RI_SETUP_AC_BASIC_TYPE_LOY 	=> 'Loss Occuring Year',
 	IQB_RI_SETUP_AC_BASIC_TYPE_UWY 	=> 'Under Writing Year'
 ]);
