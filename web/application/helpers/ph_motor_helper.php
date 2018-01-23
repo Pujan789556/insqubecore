@@ -2550,7 +2550,7 @@ if ( ! function_exists('_OBJ_MOTOR_ec_unit_tariff_dropdown'))
 	 */
 	function _OBJ_MOTOR_ec_unit_tariff_dropdown( $flag_blank_select = true )
 	{
-		$dropdown = _OBJ_MOTOR_ec_unit_dropdown(FALSE) + ['T' => 'Metric Ton'];
+		$dropdown = _OBJ_MOTOR_ec_unit_dropdown(FALSE) + _OBJ_MOTOR_carrying_unit_dropdown(FALSE);
 
 		if($flag_blank_select)
 		{

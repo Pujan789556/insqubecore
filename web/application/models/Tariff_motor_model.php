@@ -81,7 +81,7 @@ class Tariff_motor_model extends MY_Model
                 ],
                 [
                     'field' => 'tariff[ec_min][]',
-                    'label' => 'Capacity Min (CC|KW|TON)',
+                    'label' => 'Capacity Min (CC)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_show_label' => false,
@@ -90,7 +90,7 @@ class Tariff_motor_model extends MY_Model
                 ],
                 [
                     'field' => 'tariff[ec_max][]',
-                    'label' => 'Capacity Max (CC|KW|TON)',
+                    'label' => 'Capacity Max (CC)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_show_label' => false,
@@ -232,7 +232,7 @@ class Tariff_motor_model extends MY_Model
                 ],
                 [
                     'field' => 'tariff[ec_min][]',
-                    'label' => 'Capacity Min (CC|KW|TON)',
+                    'label' => 'Capacity Min (CC|KW|HP)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_show_label' => false,
@@ -241,7 +241,7 @@ class Tariff_motor_model extends MY_Model
                 ],
                 [
                     'field' => 'tariff[ec_max][]',
-                    'label' => 'Capacity Max (CC|KW|TON)',
+                    'label' => 'Capacity Max (CC|KW|HP)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_show_label' => false,
@@ -466,7 +466,7 @@ class Tariff_motor_model extends MY_Model
                 ],
                 [
                     'field' => 'tariff[ec_min][]',
-                    'label' => 'Capacity Min (CC|KW|TON)',
+                    'label' => 'Capacity Min (CC|KW|TON|HP)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_show_label' => false,
@@ -475,7 +475,7 @@ class Tariff_motor_model extends MY_Model
                 ],
                 [
                     'field' => 'tariff[ec_max][]',
-                    'label' => 'Capacity Max (CC|KW|TON)',
+                    'label' => 'Capacity Max (CC|KW|TON|HP)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_show_label' => false,
