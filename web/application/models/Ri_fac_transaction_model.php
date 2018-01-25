@@ -35,6 +35,8 @@ class Ri_fac_transaction_model extends MY_Model
     {
         parent::__construct();
 
+        $this->load->model('ri_transaction_model');
+
         // Set validation rule
         $this->validation_rules();
     }
@@ -130,6 +132,8 @@ class Ri_fac_transaction_model extends MY_Model
             // Batch Insert distribution data
             $this->batch_insert_fac($ri_transaction_record, $data);
 
+            // Update FAC Registered Flag of RI Transaction Record
+            $this->ri_transaction_model->update_flag_fac_registered($ri_transaction_record->id, IQB_FLAG_ON);
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();

@@ -14,7 +14,7 @@ class Ri_transaction_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'policy_id', 'policy_transaction_id', 'policy_installment_id', 'treaty_id', 'fiscal_yr_id', 'fy_quarter', 'si_gross', 'si_comp_cession', 'si_treaty_total', 'si_treaty_retaintion', 'si_treaty_quota', 'si_treaty_1st_surplus', 'si_treaty_2nd_surplus', 'si_treaty_3rd_surplus', 'si_treaty_fac', 'premium_gross', 'premium_pool', 'premium_net', 'premium_comp_cession', 'premium_treaty_total', 'premium_treaty_retaintion', 'premium_treaty_quota', 'premium_treaty_1st_surplus', 'premium_treaty_2nd_surplus', 'premium_treaty_3rd_surplus', 'premium_treaty_fac', 'claim_gross', 'claim_comp_cession', 'claim_treaty_total', 'claim_treaty_retaintion', 'claim_treaty_quota', 'claim_treaty_1st_surplus', 'claim_treaty_2nd_surplus', 'claim_treaty_3rd_surplus', 'claim_treaty_fac', 'commission_quota', 'commission_surplus', 'commission_fac', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'policy_transaction_id', 'policy_installment_id', 'treaty_id', 'fiscal_yr_id', 'fy_quarter', 'si_gross', 'si_comp_cession', 'si_treaty_total', 'si_treaty_retaintion', 'si_treaty_quota', 'si_treaty_1st_surplus', 'si_treaty_2nd_surplus', 'si_treaty_3rd_surplus', 'si_treaty_fac', 'premium_gross', 'premium_pool', 'premium_net', 'premium_comp_cession', 'premium_treaty_total', 'premium_treaty_retaintion', 'premium_treaty_quota', 'premium_treaty_1st_surplus', 'premium_treaty_2nd_surplus', 'premium_treaty_3rd_surplus', 'premium_treaty_fac', 'claim_gross', 'claim_comp_cession', 'claim_treaty_total', 'claim_treaty_retaintion', 'claim_treaty_quota', 'claim_treaty_1st_surplus', 'claim_treaty_2nd_surplus', 'claim_treaty_3rd_surplus', 'claim_treaty_fac', 'commission_quota', 'commission_surplus', 'commission_fac', 'flag_fac_registered', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -91,6 +91,13 @@ class Ri_transaction_model extends MY_Model
         }
 
         return parent::insert($data, TRUE);
+    }
+
+    // ----------------------------------------------------------------
+
+    public function update_flag_fac_registered($id, $flag)
+    {
+        return parent::update($id, ['flag_fac_registered' => $flag], TRUE);
     }
 
     // ----------------------------------------------------------------
