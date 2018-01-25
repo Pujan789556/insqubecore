@@ -12,14 +12,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->treaty_type_name;?></td>
 	<td class="ins-action">
 		<?php if($record->si_treaty_fac): ?>
-			<a href="#"
-				class="action trg-dialog-edit"
-				data-title='<i class="fa fa-pencil-square-o"></i> Edit FAC Registration'
-				data-box-size="large"
-				data-form="#__form-fac-registration"
-				data-url="<?php echo site_url('ri_transactions/register_fac/'.$record->id); ?>"
-				data-toggle="tooltip"
-				title="Register FAC"><i class="fa fa-pencil-square-o"></i></a>
+
+			<?php if( $this->dx_auth->is_authorized('ri_transactions', 'register.fac') && belong_to_current_fy_quarter($record->fiscal_yr_id, $record->fy_quarter)):?>
+				<a href="#"
+					class="action trg-dialog-edit"
+					data-title='<i class="fa fa-pencil-square-o"></i> Edit FAC Registration'
+					data-box-size="large"
+					data-form="#__form-fac-registration"
+					data-url="<?php echo site_url('ri_transactions/register_fac/'.$record->id); ?>"
+					data-toggle="tooltip"
+					title="Register FAC"><i class="fa fa-pencil-square-o"></i></a>
+			<?php endif ?>
 
 			<a href="#"
 				class="action trg-dialog-popup"
