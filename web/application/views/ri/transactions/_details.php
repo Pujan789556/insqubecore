@@ -36,7 +36,7 @@ $premium_columns = [
         <tbody>
             <tr>
                 <th>Policy Code</th>
-                <td><?php echo $record->policy_code;?></td>
+                <td><?php echo anchor('policies/details/' . $record->policy_id, $record->policy_code, ['target' => '_blank']);?></td>
             </tr>
             <tr>
                 <th>Treaty Type</th>

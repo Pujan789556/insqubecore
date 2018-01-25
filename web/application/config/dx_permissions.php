@@ -322,13 +322,16 @@ $config['DX_permissions'] = [
 	'RI Permissions' => [
 
 		/**
-		 * Accounts
+		 * RI Transactions
 		 */
 		'ri_transactions'  => [
 			'explore.transaction',
 			'add.transaction',
 			'edit.transaction',
-			'delete.transaction'
+			'delete.transaction',
+
+			// FAC related permissions
+			'register.fac'
 		],
 	],
 ];

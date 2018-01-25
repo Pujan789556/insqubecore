@@ -8,12 +8,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<?php if( $this->dx_auth->is_admin() ): ?>
 			<td><?php echo $record->id ;?></td>
 		<?php endif;?>
-	<td><?php echo $record->policy_code;?></td>
+	<td><?php echo anchor('policies/details/' . $record->policy_id, $record->policy_code, ['target' => '_blank']);?></td>
 	<td><?php echo $record->treaty_type_name;?></td>
+	<td class="ins-action">
+		<?php if($record->si_treaty_fac): ?>
+			<a href="#"
+				class="action trg-dialog-edit"
+				data-title='<i class="fa fa-pencil-square-o"></i> Edit FAC Registration'
+				data-box-size="large"
+				data-form="#__form-fac-registration"
+				data-url="<?php echo site_url('ri_transactions/register_fac/'.$record->id); ?>"
+				data-toggle="tooltip"
+				title="Register FAC"><i class="fa fa-pencil-square-o"></i></a>
+
+			<a href="#"
+				class="action trg-dialog-popup"
+				data-toggle="tooltip"
+				data-box-size="large"
+				data-url="<?php echo site_url('ri_transactions/preview_fac/'.$record->id); ?>"
+				title="View FAC Distribution"><i class="fa fa-search"></i></a>
+		<?php endif ?>
+	</td>
 	<td class="ins-action">
 		<?php echo anchor(
 						'#',
-						'<i class="fa fa-th-list"></i> Details',
+						'<i class="fa fa-search"></i> Details',
 						[
 							'class' 		=> 'trg-dialog-popup action',
 							'data-url' 		=> site_url('ri_transactions/details/'.$record->id),

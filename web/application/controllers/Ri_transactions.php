@@ -33,6 +33,7 @@ class Ri_transactions extends MY_Controller
 
 		// Load Model
 		$this->load->model('ri_transaction_model');
+		$this->load->model('ri_fac_transaction_model');
 
 	}
 
@@ -520,7 +521,6 @@ class Ri_transactions extends MY_Controller
 			'record' 	=> $record
 		];
 
-		$html = $this->load->view('ri/transactions/_details', $data, TRUE);
 		$this->template->json([
 			'html' 	=> $this->load->view('ri/transactions/_details', $data, TRUE),
 			'title' => 'RI Transaction Details - ' .  $record->id
@@ -528,6 +528,231 @@ class Ri_transactions extends MY_Controller
     }
 
 	// --------------------------------------------------------------------
+	//  FAC MANAGEMENT
+	// --------------------------------------------------------------------
+
+	/**
+	 * FAC Registration
+	 *
+	 * Manage FAC Registration for a RI Transaction
+	 *
+	 * @param integer $id Treaty ID
+	 * @return void
+	 */
+	public function register_fac($id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		$this->dx_auth->is_authorized('ri_transactions', 'register.fac', TRUE);
+
+		/**
+		 * Main Record & Has FAC?
+		 */
+    	$id 	= (int)$id;
+		$record = $this->ri_transaction_model->get($id);
+		if(!$record || !$record->si_treaty_fac)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * FAC editable? (Must be within current quarter)
+		 */
+		if( !belong_to_current_fy_quarter($record->fiscal_yr_id, $record->fy_quarter) )
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'title'   => 'Action Denied!',
+				'message' => 'You can not modify non-current quarter FAC'
+			], 403);
+		}
+
+
+		/**
+		 * Treaty Distribution
+		 */
+		$fac_distribution = $this->ri_fac_transaction_model->get_fac_by_ri_transaction($id);
+
+		/**
+		 * Prepare Form Data
+		 */
+		$v_rules = $this->ri_fac_transaction_model->validation_rules;
+		$form_data = [
+			'form_elements' 	=> $v_rules,
+			'record' 			=> $record,
+
+			// FAC Distribution
+			'reinsurers' 		=> $this->company_model->dropdown_reinsurers(),
+			'fac_distribution' 	=> $fac_distribution,
+		];
+
+		$return_data = [];
+		if( $this->input->post() )
+		{
+			$done 	= FALSE;
+
+            $this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$data = $this->input->post();
+        		// echo '<pre>'; print_r($data);exit;
+        		$done = $this->ri_fac_transaction_model->register_fac($record, $data);
+
+        		if($done)
+        		{
+        			$ajax_data = [
+						'message' => 'Successfully Updated FAC Registration.',
+						'status'  => 'success',
+						'updateSection' => false,
+						'hideBootbox' => true
+					];
+					return $this->template->json($ajax_data);
+        		}
+        		else
+        		{
+        			// Simply return could not update message. Might be some logical error or db error.
+	        		return $this->template->json([
+	                    'status'        => 'error',
+	                    'message'       => 'Could not update!'
+	                ]);
+        		}
+        	}
+        	else
+        	{
+    			// Simply Return Validation Error
+        		return $this->template->json([
+                    'status'        => 'error',
+                    'message'       => validation_errors()
+                ]);
+        	}
+		}
+
+		// Prepare HTML Form
+		$json_data['form'] = $this->load->view('ri/fac/_form_fac_registration', $form_data, TRUE);
+
+		// Return JSON
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Is FAC Editable?
+		 *
+		 * Conditions for RI Transaction Record:
+		 * 		1. Must have FAC SI & FAC Premium
+		 * 		2. Must be within current quarter of current fiscal year
+		 *
+		 */
+		private function _is_fac_editable($record)
+		{
+			if( !$record->si_treaty_fac )
+			{
+				return FALSE;
+			}
+
+			// Check fy and quarter
+
+			// if( $record->fiscal_yr_id == $this->current_fiscal_year->id )
+
+		}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Callback Validation Function - Check if FAC Distribution is 100%
+		 *
+		 * @param integer $treaty_type_id
+		 * @param integer|null $id
+		 * @return bool
+		 */
+		public function _cb_fac_distribution__complete($str)
+		{
+			$company_id = $this->input->post('company_id');
+			$fac_percent = $this->input->post('fac_percent');
+
+			// Check duplicate Entries
+			$unique_count = count( array_unique($company_id) );
+			if( $unique_count !== count($company_id) )
+			{
+				$this->form_validation->set_message('_cb_fac_distribution__complete', 'Reinsurer can not be duplicate.');
+	            return FALSE;
+			}
+
+			// Lets do the math
+			$percent = [];
+			$i = 0;
+			foreach ($company_id as $rid)
+			{
+				$percent["$rid"] = $fac_percent[$i++];
+			}
+
+			$total = 0;
+			foreach($percent as $rid=>$dp)
+			{
+				$total += (float)$dp;
+			}
+			$total = (int)$total;
+
+			// 100% ?
+	        if( $total != 100 )
+	        {
+	            $this->form_validation->set_message('_cb_fac_distribution__complete', 'The TOTAL of all %s must be equal to 100.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
+
+	// --------------------------------------------------------------------
+
+	/**
+     * View Invoice Details
+     *
+     * @param integer $id
+     * @return void
+     */
+    public function preview_fac($id)
+    {
+    	/**
+		 * Check Permissions
+		 */
+		$this->dx_auth->is_authorized('ri_transactions', 'explore.transaction', TRUE);
+
+		/**
+		 * Main Record & Has FAC?
+		 */
+    	$id 	= (int)$id;
+		$record = $this->ri_transaction_model->get($id);
+		if(!$record || !$record->si_treaty_fac)
+		{
+			$this->template->render_404();
+		}
+
+
+		/**
+		 * FAC Distribution
+		 */
+    	$fac_distribution = $this->ri_fac_transaction_model->get_fac_by_ri_transaction($id);
+
+		/**
+		 * Check if Belongs to me?
+		 */
+		// belongs_to_me( $record->branch_id );
+
+		/**
+		 * FAC Distribution Detail Rows
+		 */
+		$data = [
+			'fac_distribution' 	=> $fac_distribution,
+			'record' 			=> $record
+		];
+
+		$this->template->json([
+			'html' 	=> $this->load->view('ri/fac/_preview', $data, TRUE),
+			'title' => 'FAC Distribution Details'
+		]);
+    }
 
 }
 

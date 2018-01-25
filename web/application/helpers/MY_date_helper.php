@@ -84,3 +84,40 @@ if ( ! function_exists('date_difference'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('belong_to_current_fy_quarter'))
+{
+	/**
+	 * Is a Record belong to Current Fiscal Year's Current Quarter?
+	 *
+	 * @param	int $fiscal_yr_id
+	 * @param	int $quarter
+	 * @return	bool
+	 */
+	function belong_to_current_fy_quarter($fiscal_yr_id, $quarter)
+	{
+		$CI =& get_instance();
+
+		return ($CI->current_fy_quarter->fiscal_yr_id == $fiscal_yr_id) && ($CI->current_fy_quarter->quarter == $quarter);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('is_current_fy_quarter'))
+{
+	/**
+	 * Is supplied date falls under current fy quarter?
+	 *
+	 * @param	date $date
+	 * @return	bool
+	 */
+	function is_current_fy_quarter($date)
+	{
+		$CI =& get_instance();
+
+		return ( strtotime($CI->current_fy_quarter->starts_at) <= strtotime($date) ) && ( strtotime($CI->current_fy_quarter->ends_at) >= strtotime($date) );
+	}
+}
+
+// ------------------------------------------------------------------------
+

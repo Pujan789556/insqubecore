@@ -12,6 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<?php endif;?>
 			<th>Policy Code</th>
 			<th>Treaty Type</th>
+			<th>FAC</th>
 			<th>Action</th>
 		</tr>
 	</thead>

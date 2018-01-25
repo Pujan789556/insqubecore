@@ -35,8 +35,8 @@ class Ri_transaction_model extends MY_Model
     {
         parent::__construct();
 
-        // Dependent Model
-        $this->load->model('ri_fac_config_model');
+        // Dependent Model(s)
+        $this->load->model('ri_fac_transaction_model');
 
         // Set validation rule
         $this->validation_rules();
@@ -90,24 +90,7 @@ class Ri_transaction_model extends MY_Model
             return FALSE;
         }
 
-        $id = parent::insert($data, TRUE);
-        if( $id )
-        {
-            /**
-             * Do we have FAC?
-             * ---------------
-             *
-             * If we have FAC data, we have to register the FAC.
-             * i.e. if in a single policy during endorsement, if we have new FAC exposure
-             * we have to register it separately.
-             */
-            $si_treaty_fac = $data['si_treaty_fac'] ?? NULL;
-            if( $si_treaty_fac )
-            {
-                $this->ri_fac_config_model->add_blank($data['policy_id']);
-            }
-        }
-        return $id;
+        return parent::insert($data, TRUE);
     }
 
     // ----------------------------------------------------------------
