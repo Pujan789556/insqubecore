@@ -58,6 +58,27 @@ if ( ! function_exists('RI__treaty_types_dropdown'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('RI__transaction_premium_type_dropdown'))
+{
+	/**
+	 * Get RI Transaction Premium Type Dropdown
+	 *
+	 * @return	string
+	 */
+	function RI__transaction_premium_type_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = IQB_RI_TRANSACTION_PREMIUM_TYPES;
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('RI__compute_flag_ri_approval'))
 {
 	/**
@@ -308,7 +329,8 @@ if ( ! function_exists('RI__distribute'))
 				'policy_installment_id' => $policy_installment_record->id,
 				'treaty_id' 			=> $treaty_record->id,
 				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
-				'fy_quarter' 			=> $CI->current_fy_quarter->quarter
+				'fy_quarter' 			=> $CI->current_fy_quarter->quarter,
+				'premium_type' 			=> IQB_RI_TRANSACTION_PREMIUM_TYPE_BASIC
 			];
 			$ri_data = array_merge($ri_data, $relation_data);
 
@@ -488,7 +510,8 @@ if ( ! function_exists('RI__distribute_endorsement'))
 				'policy_installment_id' => $policy_installment_record->id,
 				'treaty_id' 			=> $treaty_record->id,
 				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
-				'fy_quarter' 			=> $CI->current_fy_quarter->quarter
+				'fy_quarter' 			=> $CI->current_fy_quarter->quarter,
+				'premium_type' 			=> IQB_RI_TRANSACTION_PREMIUM_TYPE_BASIC
 			];
 			$ri_data = array_merge($ri_data, $relation_data);
 
