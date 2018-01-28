@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * RI Setup - Pool Treaties Controller
+ * RI Setup - Pools Pool Controller
  *
  * This controller falls under "Master Setup" category.
  *
@@ -14,6 +14,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Ri_setup_pools extends MY_Controller
 {
+	/**
+	 * Files Upload Path
+	 */
+	public static $upload_path = INSQUBE_MEDIA_PATH . 'treaties/';
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -109,8 +116,8 @@ class Ri_setup_pools extends MY_Controller
 
 		// DOM Data
 		$dom_data = [
-			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-ri-setup-pool', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-ri-setup-treaty' 			// Filter Form ID
+			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-ri_setup_pools', 		// List box ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-ri_setup_pools' 			// Filter Form ID
 		];
 
 		$data = [
@@ -146,9 +153,6 @@ class Ri_setup_pools extends MY_Controller
 
 		if ( $this->input->is_ajax_request() )
 		{
-
-
-			// $view = $refresh === FALSE ? 'setup/ri/pools/_rows' : 'setup/ri/pools/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$ajax_data = [
 				'status' => 'success',
@@ -186,12 +190,13 @@ class Ri_setup_pools extends MY_Controller
 	                '_required' => false
 	            ],
 	            [
-					'field' => 'filter_keywords',
-			        'label' => 'Keywords <i class="fa fa-info-circle"></i>',
-			        'rules' => 'trim|max_length[80]',
-	                '_type'     => 'text',
-	                '_label_extra' => 'data-toggle="tooltip" data-title="Type pool treaty name"'
-				]
+	                'field' => 'filter_treaty_type_id',
+	                'label' => 'Pool Type',
+	                'rules' => 'trim|integer|max_length[3]',
+	                '_type'     => 'dropdown',
+	                '_data'     => IQB_BLANK_SELECT + IQB_RI_TREATY_TYPES_POOL,
+	                '_required' => false
+	            ],
 			];
 			return $filters;
 		}
@@ -212,8 +217,8 @@ class Ri_setup_pools extends MY_Controller
 				if( $this->form_validation->run() )
 				{
 					$data['data'] = [
-						'fiscal_yr_id' 	=> $this->input->post('filter_fiscal_yr_id') ?? NULL,
-						'keywords' 		=> $this->input->post('filter_keywords') ?? NULL
+						'fiscal_yr_id' 		=> $this->input->post('filter_fiscal_yr_id') ?? NULL,
+						'treaty_type_id' 	=> $this->input->post('filter_treaty_type_id') ?? NULL
 					];
 					$data['status'] = 'success';
 				}
@@ -269,15 +274,12 @@ class Ri_setup_pools extends MY_Controller
 		 * Prepare Form Data
 		 */
 		$form_data = [
-
-			'form_elements' 	=> $this->ri_setup_pool_model->get_validation_rules(['basic', 'portfolios', 'reinsurers']),
+			'form_elements' 	=> $this->ri_setup_pool_model->get_validation_rules(['basic', 'portfolios']),
 			'record' 			=> $record,
 
-			// Pool Portfolios
-			'pool_portfolios' => [],
-
-			// Pool Distribution
-			'pool_distribution' 	=> [],
+			// Portfolios
+			'portfolios' 		=> $this->portfolio_model->dropdown_children(),
+			'treaty_portfolios' => [],
 		];
 
 		// Form Submitted? Save the data
@@ -304,29 +306,21 @@ class Ri_setup_pools extends MY_Controller
 		}
 
 		/**
-		 * Existing Reinsurers Distriution
-		 */
-		$pool_distribution = $this->ri_setup_pool_model->get_pool_distribution_by_pool($id);
-
-		/**
 		 * Existing Portfolios
 		 */
-		$pool_portfolios = $this->ri_setup_pool_model->get_portfolios_by_pool($id);
+		$treaty_portfolios = $this->ri_setup_pool_model->get_portfolios_by_treaty_dropdown($id);
 
 
 		/**
 		 * Prepare Form Data
 		 */
 		$form_data = [
-
-			'form_elements' 	=> $this->ri_setup_pool_model->get_validation_rules(['basic', 'portfolios', 'reinsurers']),
+			'form_elements' 	=> $this->ri_setup_pool_model->get_validation_rules(['basic', 'portfolios']),
 			'record' 			=> $record,
 
-			// Reinsurer Companies
-			'pool_distribution' => $pool_distribution,
-
 			// Portfolios
-			'pool_portfolios' => $pool_portfolios
+			'portfolios' 		=> $this->portfolio_model->dropdown_children(),
+			'treaty_portfolios' => array_keys($treaty_portfolios)
 		];
 
 		// Form Submitted? Save the data
@@ -365,69 +359,87 @@ class Ri_setup_pools extends MY_Controller
 			$done = FALSE;
 			$file = $record->file ?? NULL;
 
-			$rules = $this->ri_setup_pool_model->get_validation_rules_formatted(['basic', 'portfolios', 'reinsurers']);
+			$rules = $this->ri_setup_pool_model->get_validation_rules_formatted(['basic', 'portfolios']);
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
-    			$data = $this->input->post();
+        		/**
+				 * Upload Document If any?
+				 */
+				$upload_result 	= $this->_upload_treaty_document($file);
+				$status 		= $upload_result['status'];
+				$message 		= $upload_result['message'];
+				$files 			= $upload_result['files'];
+				$file = $status === 'success' ? $files[0] : $file;
 
-        		// Insert or Update?
-				if($action === 'add')
-				{
-					$done = $this->ri_setup_pool_model->add($data);
-				}
-				else
-				{
-					// Now Update Data
-					$done = $this->ri_setup_pool_model->edit($record->id, $data);
-				}
+				if( $status === 'success' || $status === 'no_file_selected')
+	            {
+	            	$data = $this->input->post();
+	            	$data['file'] = $file;
 
-	        	if(!$done)
-				{
-					// Simply return error message
-					return $this->template->json([
-						'status' 	=> 'error',
-						'message' 	=> 'Could not update.'
-					]);
-				}
-				else
-				{
-					$status = 'success';
-					$message = 'Successfully Updated.';
+	            	// if no estimated premium income, null it.
+	            	$data['estimated_premium_income'] = $data['estimated_premium_income'] ? $data['estimated_premium_income'] : NULL;
 
+	        		// Insert or Update?
 					if($action === 'add')
 					{
-						// Refresh the list page and close bootbox
-						return $this->page('l', 0, [
-								'message' => $message,
-								'status'  => $status,
-								'hideBootbox' => true,
-								'updateSection' => true,
-								'updateSectionData' => [
-									'box' 		=> '#_iqb-data-list-box-ri-setup-pool',
-									'method' 	=> 'html'
-								]
-							], FALSE);
+						$done = $this->ri_setup_pool_model->add($data);
 					}
 					else
 					{
-						// Get Updated Record
-						$record = $this->ri_setup_pool_model->row($record->id);
-						$success_html = $this->load->view('setup/ri/pools/_single_row', ['record' => $record], TRUE);
-						$ajax_data = [
-							'message' => $message,
-							'status'  => $status,
-							'updateSection' => true,
-							'hideBootbox' => true
-						];
-						$ajax_data['updateSectionData'] = [
-							'box' 		=> '#_data-row-' . $record->id,
-							'method' 	=> 'replaceWith',
-							'html'		=> $success_html
-						];
-						return $this->template->json($ajax_data);
+						// Now Update Data
+						// Get old treaty portfolio
+						$old_data['old_portfolios'] = $form_data['treaty_portfolios'];
+						$done = $this->ri_setup_pool_model->edit($record->id, $data, $old_data);
 					}
-				}
+
+		        	if(!$done)
+					{
+						// Simply return error message
+						return $this->template->json([
+							'status' 	=> 'error',
+							'message' 	=> 'Could not update.'
+						]);
+					}
+					else
+					{
+						$status = 'success';
+						$message = 'Successfully Updated.';
+
+						if($action === 'add')
+						{
+							// Refresh the list page and close bootbox
+							return $this->page('l', 0, [
+									'message' => $message,
+									'status'  => $status,
+									'hideBootbox' => true,
+									'updateSection' => true,
+									'updateSectionData' => [
+										'box' 		=> '#_iqb-data-list-box-ri_setup_pools',
+										'method' 	=> 'html'
+									]
+								], FALSE);
+						}
+						else
+						{
+							// Get Updated Record
+							$record = $this->ri_setup_pool_model->row($record->id);
+							$success_html = $this->load->view('setup/ri/pools/_single_row', ['record' => $record], TRUE);
+							$ajax_data = [
+								'message' => $message,
+								'status'  => $status,
+								'updateSection' => true,
+								'hideBootbox' => true
+							];
+							$ajax_data['updateSectionData'] = [
+								'box' 		=> '#_data-row-' . $record->id,
+								'method' 	=> 'replaceWith',
+								'html'		=> $success_html
+							];
+							return $this->template->json($ajax_data);
+						}
+					}
+	            }
         	}
         	else
         	{
@@ -448,6 +460,101 @@ class Ri_setup_pools extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Manage Distribution
+	 *
+	 * @param integer $id Pool ID
+	 * @return void
+	 */
+	public function distribution($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->ri_setup_pool_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Pool Distribution
+		 */
+		$treaty_distribution = $this->ri_setup_pool_model->get_treaty_distribution_by_treaty($id);
+
+		/**
+		 * Prepare Form Data
+		 */
+		$form_data = [
+			'form_elements' 	=> $this->ri_setup_pool_model->get_validation_rules(['reinsurers']),
+			'record' 			=> $record,
+
+			// Pool Distribution
+			'reinsurers' 			=> $this->company_model->dropdown_reinsurers(),
+			'treaty_distribution' 	=> $treaty_distribution,
+		];
+
+		$return_data = [];
+		if( $this->input->post() )
+		{
+			$done 	= FALSE;
+			$rules 	= $this->ri_setup_pool_model->get_validation_rules_formatted(['reinsurers']);
+
+            $this->form_validation->set_rules($rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$data = $this->input->post();
+        		$done = $this->ri_setup_pool_model->save_treaty_distribution($record->id, $data);
+
+        		if($done)
+        		{
+        			// Update the Distribution Table
+					$treaty_distribution = $this->ri_setup_pool_model->get_treaty_distribution_by_treaty($id);
+					$success_html = $this->load->view('setup/ri/pools/snippets/_ri_distribution_data', ['treaty_distribution' => $treaty_distribution], TRUE);
+
+					$ajax_data = [
+						'message' => 'Successfully Updated',
+						'status'  => 'success',
+						'updateSection' => true,
+						'hideBootbox' => true
+					];
+					$ajax_data['updateSectionData'] = [
+						'box' 		=> '#ri-distribution-data',
+						'method' 	=> 'html',
+						'html'		=> $success_html
+					];
+					return $this->template->json($ajax_data);
+        		}
+        		else
+        		{
+        			// Simply return could not update message. Might be some logical error or db error.
+	        		return $this->template->json([
+	                    'status'        => 'error',
+	                    'message'       => 'Could not update!'
+	                ]);
+        		}
+        	}
+        	else
+        	{
+    			// Simply Return Validation Error
+        		return $this->template->json([
+                    'status'        => 'error',
+                    'message'       => validation_errors()
+                ]);
+        	}
+		}
+
+		// Prepare HTML Form
+		$json_data['form'] = $this->load->view('setup/ri/pools/_form_distribution', $form_data, TRUE);
+
+		// Merge Return Data with Form Data
+		$json_data = array_merge($json_data, $return_data);
+
+		// Return JSON
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
 		/**
 		 * Callback Validation Function - Check if RI Distribution is 100%
 		 *
@@ -457,12 +564,12 @@ class Ri_setup_pools extends MY_Controller
 		 */
 		public function _cb_distribution__complete($str)
 		{
-			$company_ids = $this->input->post('company_id');
+			$reinsurer_ids = $this->input->post('reinsurer_ids');
 			$distribution_percent = $this->input->post('distribution_percent');
 
 			// Check duplicate Entries
-			$unique_count = count( array_unique($company_ids) );
-			if( $unique_count !== count($company_ids) )
+			$unique_count = count( array_unique($reinsurer_ids) );
+			if( $unique_count !== count($reinsurer_ids) )
 			{
 				$this->form_validation->set_message('_cb_distribution__complete', 'Reinsurer can not be duplicate.');
 	            return FALSE;
@@ -471,7 +578,7 @@ class Ri_setup_pools extends MY_Controller
 			// Lets do the math
 			$percent = [];
 			$i = 0;
-			foreach ($company_ids as $rid)
+			foreach ($reinsurer_ids as $rid)
 			{
 				$percent["$rid"] = $distribution_percent[$i++];
 			}
@@ -494,6 +601,194 @@ class Ri_setup_pools extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Manage Portfolios
+	 *
+	 * @param integer $id Pool ID
+	 * @return void
+	 */
+	public function portfolios($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->ri_setup_pool_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Pool Portfolios
+		 */
+		$portfolios = $this->ri_setup_pool_model->get_portfolios_by_treaty($id);
+
+		/**
+		 * Validation Rules/Form Elements Based on the Pool Type
+		 */
+		$v_rules = $this->_portfolio_validation_rules_by_treaty_type($record);
+
+
+		/**
+		 * Prepare Form Data
+		 */
+		$form_data = [
+			'form_elements' 	=> $v_rules,
+			'record' 			=> $record,
+
+			// Pool Portfolio
+			'portfolios' 	=> $portfolios,
+		];
+
+		$return_data = [];
+		if( $this->input->post() )
+		{
+			$done 	= FALSE;
+
+            $this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$data = $this->input->post();
+        		$done = $this->ri_setup_pool_model->save_treaty_portfolios($record->id, $data);
+
+        		if($done)
+        		{
+        			// Update the Portfolio Table
+					$portfolios = $this->ri_setup_pool_model->get_portfolios_by_treaty($id);
+					$success_html = $this->load->view('setup/ri/pools/snippets/_ri_portfolio_data', ['portfolios' => $portfolios], TRUE);
+
+					$ajax_data = [
+						'message' => 'Successfully Updated',
+						'status'  => 'success',
+						'updateSection' => true,
+						'hideBootbox' => true
+					];
+					$ajax_data['updateSectionData'] = [
+						'box' 		=> '#ri-portfolio-data',
+						'method' 	=> 'html',
+						'html'		=> $success_html
+					];
+					return $this->template->json($ajax_data);
+        		}
+        		else
+        		{
+        			// Simply return could not update message. Might be some logical error or db error.
+	        		return $this->template->json([
+	                    'status'        => 'error',
+	                    'message'       => 'Could not update!'
+	                ]);
+        		}
+        	}
+        	else
+        	{
+    			// Simply Return Validation Error
+        		return $this->template->json([
+                    'status'        => 'error',
+                    'message'       => validation_errors()
+                ]);
+        	}
+		}
+
+		// Prepare HTML Form
+		$json_data['form'] = $this->load->view('setup/ri/pools/_form_portfolios', $form_data, TRUE);
+
+		// Merge Return Data with Form Data
+		$json_data = array_merge($json_data, $return_data);
+
+		// Return JSON
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+		private function _portfolio_validation_rules_by_treaty_type($record)
+		{
+
+			$portfolio_dropdown = $this->ri_setup_pool_model->get_portfolios_by_treaty_dropdown($record->id);
+			$v_rules = $this->ri_setup_pool_model->get_validation_rules_formatted(['portfolios_common']);
+
+			// First rule is 'portfolio_ids[]', update validation rule
+			$v_rules[0]['rules'] = 'trim|required|integer|max_length[8]|in_list['.implode(',',array_keys($portfolio_dropdown)).']';
+
+
+			if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_SP )
+			{
+				$v_rules = array_merge($v_rules, $this->ri_setup_pool_model->get_validation_rules_formatted(['portfolios_sp']));
+			}
+			else if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_QT )
+			{
+				$v_rules = array_merge($v_rules, $this->ri_setup_pool_model->get_validation_rules_formatted(['portfolios_qt']));
+			}
+			else if( (int)$record->treaty_type_id === IQB_RI_TREATY_TYPE_QS )
+			{
+				$v_rules = array_merge($v_rules, $this->ri_setup_pool_model->get_validation_rules_formatted(['portfolios_qs']));
+			}
+
+			return $v_rules;
+		}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Sub-function: Upload Company Profile Picture
+		 *
+		 * @param string|null $old_file
+		 * @return array
+		 */
+		private function _upload_treaty_document( $old_file = NULL )
+		{
+			$options = [
+				'config' => [
+					'encrypt_name' => TRUE,
+	                'upload_path' => self::$upload_path,
+	                'allowed_types' => 'pdf',
+	                'max_size' => '4096'
+				],
+				'form_field' => 'file',
+
+				'create_thumb' => FALSE,
+
+				// Delete Old file
+				'old_files' => $old_file ? [$old_file] : [],
+				'delete_old' => TRUE
+			];
+			return upload_insqube_media($options);
+		}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Callback Validation Function - Check Duplicate - [Fiscal Year ID, Pool Type]
+		 *
+		 * Duplicate Condition: [Fiscal Year ID, Pool Type] Should be Unique
+		 *
+		 * @param integer $treaty_type_id
+		 * @param integer|null $id
+		 * @return bool
+		 */
+		public function _cb_treaty_type__check_duplicate($treaty_type_id, $id=NULL)
+		{
+			$treaty_type_id = strtoupper( $treaty_type_id ? $treaty_type_id : $this->input->post('treaty_type_id') );
+	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
+	    	$fiscal_yr_id = (int)$this->input->post('fiscal_yr_id');
+
+	    	// Check if Fiscal Year has not been selected yet?
+	    	if( !$fiscal_yr_id )
+	    	{
+	    		$this->form_validation->set_message('_cb_treaty_type__check_duplicate', 'The Fiscal Year must be supplied along with %s.');
+	            return FALSE;
+	    	}
+
+	    	// Check Duplicate
+	        if( $this->ri_setup_pool_model->check_duplicate(['fiscal_yr_id' => $fiscal_yr_id, 'treaty_type_id' => $treaty_type_id], $id))
+	        {
+	            $this->form_validation->set_message('_cb_treaty_type__check_duplicate', 'The %s already exists for supplied Fiscal Year.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
+
+	// --------------------------------------------------------------------
+
 		/**
 		 * Callback Validation Function - Check Duplicate - Portfolio
 		 *
@@ -505,18 +800,9 @@ class Ri_setup_pools extends MY_Controller
 		 */
 		public function _cb_portfolio__check_duplicate($portfolio_id, $id=NULL)
 		{
-			$portfolio_id = (int)$portfolio_id;
+			$portfolio_id = strtoupper( $portfolio_id ? $portfolio_id : $this->input->post('portfolio_id') );
 	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
 	    	$fiscal_yr_id = (int)$this->input->post('fiscal_yr_id');
-
-			// Check duplicate Entries
-			$portfolio_ids 	= $this->input->post('portfolio_id');
-			$unique_count 	= count( array_unique($portfolio_ids) );
-			if( $unique_count !== count($portfolio_ids) )
-			{
-				$this->form_validation->set_message('_cb_portfolio__check_duplicate', 'Portfolio can not be duplicate.');
-	            return FALSE;
-			}
 
 	    	// Check if Fiscal Year has not been selected yet?
 	    	if( !$fiscal_yr_id )
@@ -525,10 +811,10 @@ class Ri_setup_pools extends MY_Controller
 	            return FALSE;
 	    	}
 
-	    	// Check Duplicate - Treaty Record Exist with given portfolio for given fiscal year other than supplied treaty id
+	    	// Check Duplicate - Pool Record Exist with given portfolio for given fiscal year other than supplied treaty id
 	        if( $this->ri_setup_pool_model->_cb_portfolio__check_duplicate($fiscal_yr_id, $portfolio_id, $id) )
 	        {
-	            $this->form_validation->set_message('_cb_portfolio__check_duplicate', 'The %s already exists for supplied Fiscal Year in another Treaty.');
+	            $this->form_validation->set_message('_cb_portfolio__check_duplicate', 'The %s already exists for supplied Fiscal Year in another Pool.');
 	            return FALSE;
 	        }
 	        return TRUE;
@@ -539,7 +825,7 @@ class Ri_setup_pools extends MY_Controller
 		/**
 		 * Callback Validation Function - Check Duplicate - Name
 		 *
-		 * Duplicate Condition: [Fiscal Year ID, Treaty Type] Should be Unique
+		 * Duplicate Condition: [Fiscal Year ID, Pool Type] Should be Unique
 		 *
 		 * @param integer $name
 		 * @param integer|null $id
@@ -562,7 +848,7 @@ class Ri_setup_pools extends MY_Controller
 	// --------------------------------------------------------------------
 
     /**
-     * View Treaty Details
+     * View Pool Details
      *
      * @param integer $id
      * @return void
@@ -572,7 +858,7 @@ class Ri_setup_pools extends MY_Controller
     	/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('ri_setup_pools', 'explore.pool') )
+		if( !$this->dx_auth->is_authorized('ri_setup_treaties', 'explore.treaty') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -585,12 +871,12 @@ class Ri_setup_pools extends MY_Controller
 		}
 
 		/**
-		 * Treaty Data
+		 * Pool Data
 		 */
 		$data = [
 			'record' 				=> $record,
-			'portfolios' 			=> $this->ri_setup_pool_model->get_portfolios_by_pool($id),
-			'pool_distribution' 	=> $this->ri_setup_pool_model->get_pool_distribution_by_pool($id),
+			'portfolios' 			=> $this->ri_setup_pool_model->get_portfolios_by_treaty($id),
+			'treaty_distribution' 	=> $this->ri_setup_pool_model->get_treaty_distribution_by_treaty($id),
 		];
 
 		$this->data['site_title'] = 'Pool Details | ' . $record->name;
@@ -599,7 +885,7 @@ class Ri_setup_pools extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Pool Details <small>' . $record->name . '</small>',
-								'breadcrumbs' => ['Pool Setup' => 'ri_setup_pools', 'Details' => NULL]
+								'breadcrumbs' => ['Pool Setup' => 'ri_setup_treaties', 'Details' => NULL]
 						])
 						->partial('content', 'setup/ri/pools/_details', $data)
 						->render($this->data);
@@ -657,4 +943,29 @@ class Ri_setup_pools extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+
+	public function download($id)
+	{
+		$record = $this->ri_setup_pool_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		// Let's Download
+		$this->load->helper('download');
+        $download_file = $record->file ? self::$upload_path . $record->file : NULL;
+        if( $download_file && file_exists($download_file) )
+        {
+            force_download($download_file, NULL, true);
+        }
+        else
+        {
+        	$this->template->render_404('', "Sorry! File Not Found.");
+        }
+	}
+
+	// --------------------------------------------------------------------
+
+
 }

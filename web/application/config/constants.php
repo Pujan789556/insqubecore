@@ -463,6 +463,13 @@ defined('IQB_RI_TREATY_TYPES')    	OR define('IQB_RI_TREATY_TYPES', 	[
 	IQB_RI_TREATY_TYPE_EOL 	=> 'Excess of Loss',
 ]);
 
+// TREATY TYPES FOR POOL TREATIES
+defined('IQB_RI_TREATY_TYPES_POOL')    	OR define('IQB_RI_TREATY_TYPES_POOL', 	[
+	IQB_RI_TREATY_TYPE_SP 	=> 'Surplus',
+	IQB_RI_TREATY_TYPE_QT 	=> 'Quota Share',
+	IQB_RI_TREATY_TYPE_QS 	=> 'Quota Share & Surplus'
+]);
+
 /*
 |--------------------------------------------------------------------------
 | VOUCHER TYPE CONSTANTS

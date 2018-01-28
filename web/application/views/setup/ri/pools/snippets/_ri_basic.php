@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Setup - RI - Pool Treaty : Snippet - Basic View
+* Setup - RI - Pool : Snippet - Basic View
 */
 ?>
 <div class="box box-primary">
@@ -13,6 +13,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<tr>
 				<th>Fiscal Year</th>
 				<td class="text-right"><?php echo $record->fy_code_np . " ({$record->fy_code_en})"?></td>
+			</tr>
+			<tr>
+				<th>Treaty Type</th>
+				<td class="text-right"><?php echo $record->treaty_type_name ;?></td>
+			</tr>
+			<tr>
+				<th>Estimated Premium Income</th>
+				<td class="text-right"><?php echo $record->estimated_premium_income ;?></td>
+			</tr>
+			<tr>
+				<th>Treaty Effective Date</th>
+				<td class="text-right"><?php echo $record->treaty_effective_date ;?></td>
 			</tr>
 		</table>
 	</div>

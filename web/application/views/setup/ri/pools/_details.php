@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Setup - RI - Pool Treaty : Details View
+* Setup - RI - Pool : Details View
 */
 ?>
 <div class="row">
@@ -16,9 +16,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="col-md-7">
 		<?php
 		/**
-		 * Pool Distribution
+		 * RI Distribution
 		 */
-		$this->load->view('setup/ri/pools/snippets/_ri_distribution',['record' => $record, 'pool_distribution' => $pool_distribution]);
+		$this->load->view('setup/ri/pools/snippets/_ri_distribution',['record' => $record, 'treaty_distribution' => $treaty_distribution]);
 		?>
 	</div>
 </div>
@@ -27,7 +27,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="col-sm-12">
 		<?php
 		/**
-		 * Pool Portfolios
+		 * RI Portfolios
 		 */
 		$this->load->view('setup/ri/pools/snippets/_ri_portfolios',['record' => $record, 'portfolios' => $portfolios]);
 		?>

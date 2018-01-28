@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Setup - RI - Pools : Content Header
+ * Setup - RI - Treaties : Content Header
  */
 ?>
 <div class="box no-margin">
@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					class="btn btn-success btn-round trg-dialog-edit"
 					data-box-size="large"
 					data-title='<i class="fa fa-pencil-square-o"></i> Add Pool Treaty'
-					data-url="<?php echo site_url('ri_setup_pools/add/');?>"
+					data-url="<?php echo site_url($this->router->class . '/add/');?>"
 					data-form=".form-iqb-general"
 				><i class="ion-plus-circled"></i> Add</a>
 

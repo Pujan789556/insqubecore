@@ -1,12 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : Setup - RI - Pools
+ * Form : Setup - RI - Pool
  */
 ?>
-<style type="text/css">
-table input.form-control, table select.form-control{max-width: 150px;}
-</style>
 <?php echo form_open( $this->uri->uri_string(),
                         [
                             'class' => 'form-iqb-general',
@@ -15,11 +12,23 @@ table input.form-control, table select.form-control{max-width: 150px;}
                         ],
                         // Hidden Fields
                         isset($record) ? ['id' => $record->id] : []); ?>
-    <div class="box box-default box-bordered">
+    <div class="box box-solid box-bordered">
         <div class="box-header with-border">
           <h4 class="box-title">Pool Basic Information</h4>
         </div>
-        <div class="box-body form-horizontal">
+        <div class="box-body form-horizontal ">
+
+            <div class="form-group">
+                <label for="logo" class="col-sm-2 control-label">Treay File</label>
+                <div class="col-sm-10 col-md-6">
+                    <input type="file" name="file">
+                    <p>
+                        <?php if(isset($record->file) && !empty($record->file) ):?>
+                            <a href="<?php echo site_url('ri_setup_treaties/download/' . $record->id);?>" target="_blank">Download Treaty File</a>
+                        <?php endif?>
+                    </p>
+                </div>
+            </div>
             <?php
             /**
              * Load Form Components
@@ -32,29 +41,32 @@ table input.form-control, table select.form-control{max-width: 150px;}
         </div>
     </div>
 
-    <?php
-    /**
-     * Pool Portfolio Table
-     */
-    $this->load->view(  'setup/ri/pools/_form_portfolios_inline',
-                        [
-                            'form_elements'     => $form_elements['portfolios'],
-                            'pool_portfolios' => $pool_portfolios
-                        ]);
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
+          <h4 class="box-title">Select Portfolios</h4>
+        </div>
+        <div class="box-body">
+            <?php
+            $portfolio_form_element = $form_elements['portfolios'][0]; // This is a single element
+            $portfolio_list = $portfolio_form_element['_data'];
+            unset($portfolio_form_element['_data']);
+            foreach($portfolio_list as $portfolio_id=>$portfolio_name)
+            {
+                $portfolio_form_element['_checkbox_value']  = $portfolio_id;
+                $portfolio_form_element['label']            = $portfolio_name;
+                $portfolio_form_element['_value']           = in_array($portfolio_id, $treaty_portfolios) ? $portfolio_id : '';
 
-
-    /**
-     * Pool Distribution Table
-     */
-    $this->load->view(  'setup/ri/pools/_form_distribution_inline',
-                        [
-                            'form_elements'         => $form_elements['reinsurers'],
-                            'pool_distribution'     => $pool_distribution
-                        ]);
-    ?>
-
+                $this->load->view('templates/_common/_form_components_inline', [
+                    'form_elements' => [$portfolio_form_element],
+                    'form_record'   => NULL
+                ]);
+            }
+            ?>
+        </div>
+    </div>
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
+
 <script type="text/javascript">
     // Datepicker
     $('.input-group.date').datepicker({
@@ -62,54 +74,4 @@ table input.form-control, table select.form-control{max-width: 150px;}
         todayHighlight: true,
         format: 'yyyy-mm-dd'
     });
-
-    /**
-     * Do the Math (Show total Percentnage)
-     */
-     $(document).on('keyup', 'input[name="distribution_percent[]"]', function(){
-        __compute_sum();
-     });
-
-    function __compute_sum()
-    {
-        var total = 0.00,
-            $box = $('#__total_box');
-        $('input[name="distribution_percent[]').each(function() {
-            total += parseFloat($(this).val());
-        });
-
-        $box.html(total);
-        if( total == 100 ){
-            $box.removeClass('text-red')
-                .addClass('text-green');
-        }else{
-            $box.removeClass('text-green')
-                .addClass('text-red');
-        }
-     }
-
-    /**
-     * Duplicate Treaty Distribution Row
-     */
-    function __duplicate_tr(src, a)
-    {
-        var $src = $(src),
-            $box = $src.closest('tbody'),
-            html = $src.html(),
-            $row  = $('<tr></tr>');
-
-        $row.html(html);
-
-        // remove last blank td
-        $row.find('td:last').remove();
-
-        // Add Remover Column
-        $row.append('<td width="10%" align="right"><a href="#" class="btn btn-danger btn-sm" onclick=\'$(this).closest("tr").remove();__compute_sum();\'>Remove</a></td>');
-
-        // Append to table body
-        $box.append($row);
-
-        // Update Sum
-        __compute_sum();
-    }
 </script>

@@ -669,7 +669,6 @@ class Ri_setup_treaty_model extends MY_Model
      *      a. Insert Master Record
      *      b. Insert Broker Relation Records
      *      c. Insert Portfolio Configuration (Empty Record)
-     *      d. Insert Reinsurer distribution
      *
      * @param array $data
      * @return mixed
