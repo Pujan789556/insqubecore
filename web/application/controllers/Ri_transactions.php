@@ -33,7 +33,7 @@ class Ri_transactions extends MY_Controller
 
 		// Load Model
 		$this->load->model('ri_transaction_model');
-		$this->load->model('ri_fac_transaction_model');
+		$this->load->model('ri_fac_registration_model');
 
 	}
 
@@ -572,12 +572,12 @@ class Ri_transactions extends MY_Controller
 		/**
 		 * Treaty Distribution
 		 */
-		$fac_distribution = $this->ri_fac_transaction_model->get_fac_by_ri_transaction($id);
+		$fac_distribution = $this->ri_fac_registration_model->get_fac_by_ri_transaction($id);
 
 		/**
 		 * Prepare Form Data
 		 */
-		$v_rules = $this->ri_fac_transaction_model->validation_rules;
+		$v_rules = $this->ri_fac_registration_model->validation_rules;
 		$form_data = [
 			'form_elements' 	=> $v_rules,
 			'record' 			=> $record,
@@ -597,7 +597,7 @@ class Ri_transactions extends MY_Controller
         	{
         		$data = $this->input->post();
         		// echo '<pre>'; print_r($data);exit;
-        		$done = $this->ri_fac_transaction_model->register_fac($record, $data);
+        		$done = $this->ri_fac_registration_model->register_fac($record, $data);
 
         		if($done)
         		{
@@ -733,7 +733,7 @@ class Ri_transactions extends MY_Controller
 		/**
 		 * FAC Distribution
 		 */
-    	$fac_distribution = $this->ri_fac_transaction_model->get_fac_by_ri_transaction($id);
+    	$fac_distribution = $this->ri_fac_registration_model->get_fac_by_ri_transaction($id);
 
 		/**
 		 * Check if Belongs to me?

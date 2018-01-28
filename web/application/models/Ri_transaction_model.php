@@ -36,7 +36,7 @@ class Ri_transaction_model extends MY_Model
         parent::__construct();
 
         // Dependent Model(s)
-        $this->load->model('ri_fac_transaction_model');
+        $this->load->model('ri_fac_registration_model');
 
         // Set validation rule
         $this->validation_rules();

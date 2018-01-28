@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Ri_fac_transaction_model extends MY_Model
+class Ri_fac_registration_model extends MY_Model
 {
-    protected $table_name   = 'dt_ri_fac_transactions';
+    protected $table_name   = 'dt_ri_fac_registrations';
 
     protected $set_created  = true;
     protected $set_modified = true;
