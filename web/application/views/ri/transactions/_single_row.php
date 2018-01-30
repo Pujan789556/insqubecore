@@ -10,6 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<?php endif;?>
 	<td><?php echo anchor('policies/details/' . $record->policy_id, $record->policy_code, ['target' => '_blank']);?></td>
 	<td><?php echo $record->treaty_type_name;?></td>
+	<td><?php echo IQB_RI_TRANSACTION_PREMIUM_TYPES[$record->premium_type];?></td>
 	<td class="ins-action">
 		<?php if($record->si_treaty_fac): ?>
 

@@ -173,7 +173,15 @@ class Ri_transactions extends MY_Controller
 			        'rules' => 'trim|max_length[40]',
 	                '_type'     => 'text',
 	                '_required' => false
-				]
+				],
+				[
+	                'field' => 'filter_premium_type',
+	                'label' => 'Distribution Type',
+	                'rules' => 'trim|integer|max_length[1]',
+	                '_type'     => 'dropdown',
+	                '_data'     => IQB_BLANK_SELECT + IQB_RI_TRANSACTION_PREMIUM_TYPES,
+	                '_required' => false
+	            ]
 			];
 			return $filters;
 		}
@@ -195,7 +203,8 @@ class Ri_transactions extends MY_Controller
 				{
 					$data['data'] = [
 						'policy_id' 	=> $this->input->post('filter_policy_id') ?? NULL,
-						'policy_code' 	=> $this->input->post('filter_policy_code') ?? NULL
+						'policy_code' 	=> $this->input->post('filter_policy_code') ?? NULL,
+						'premium_type' 	=> $this->input->post('filter_premium_type') ?? NULL
 					];
 					$data['status'] = 'success';
 				}
