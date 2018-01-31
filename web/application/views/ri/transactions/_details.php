@@ -42,6 +42,12 @@ $premium_columns = [
                 <th>Treaty Type</th>
                 <td><?php echo $record->treaty_type_name;?></td>
             </tr>
+            <tr>
+                <th>Distribution Type</th>
+                <td class="<?php echo $record->premium_type == IQB_RI_TRANSACTION_PREMIUM_TYPE_BASIC ? 'text-green' : 'text-orange'?>">
+                    <strong><?php echo IQB_RI_TRANSACTION_PREMIUM_TYPES[$record->premium_type];?></strong>
+                </td>
+            </tr>
 
         </tbody>
     </table>
