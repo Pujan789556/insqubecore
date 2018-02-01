@@ -135,6 +135,18 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to Departments
+	 */
+	'claim_scheme' => [
+		'_uri' => 'claim_schemes/',
+		'_table' => 'master_claim_schemes',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
+	/**
 	 * Activities related to Company
 	 */
 	'company' => [

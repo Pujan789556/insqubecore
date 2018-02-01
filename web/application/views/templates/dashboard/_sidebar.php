@@ -123,7 +123,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                               </li>
 
                               <li class="<?php echo set_menu_active($nav_level_1, 'ri');?>">
-                                    <a href="#"><i class="fa fa-arrow-circle-o-down"></i> RI Setup
+                                    <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Re-Insurance
                                           <span class="pull-right-container">
                                                 <i class="fa fa-angle-left pull-right"></i>
                                           </span>
@@ -137,6 +137,19 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           </li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ri_setup_pools');?>">
                                                 <a href="<?php echo site_url('ri_setup_pools');?>"><i class="fa fa-circle-o"></i> Pools</a>
+                                          </li>
+                                    </ul>
+                              </li>
+
+                              <li class="<?php echo set_menu_active($nav_level_1, 'claim');?>">
+                                    <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Claim
+                                          <span class="pull-right-container">
+                                                <i class="fa fa-angle-left pull-right"></i>
+                                          </span>
+                                    </a>
+                                    <ul class="treeview-menu">
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'claim_schemes');?>">
+                                                <a href="<?php echo site_url('claim_schemes');?>"><i class="fa fa-circle-o"></i> Claim Schemes</a>
                                           </li>
                                     </ul>
                               </li>
