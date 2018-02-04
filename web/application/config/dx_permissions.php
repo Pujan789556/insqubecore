@@ -317,7 +317,7 @@ $config['DX_permissions'] = [
 	],
 
 	/**
-	 * Group: Policy
+	 * Group: RI
 	 */
 	'RI Permissions' => [
 
@@ -332,6 +332,30 @@ $config['DX_permissions'] = [
 
 			// FAC related permissions
 			'register.fac'
+		],
+	],
+
+	/**
+	 * Group: Claim
+	 */
+	'Claim Permissions' => [
+
+		/**
+		 * RI Transactions
+		 */
+		'claims'  => [
+			'explore.claim',
+			'add.claim',
+			'edit.claim',
+			'delete.claim',
+
+			// Status Permission
+			'status.to.draft',
+			'status.to.verified',
+			'status.to.approved',
+			'status.to.settled',
+			'status.to.closed',
+			'status.to.withdrawn'
 		],
 	],
 ];

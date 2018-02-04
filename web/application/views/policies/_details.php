@@ -64,7 +64,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</li>
 
 				<li role="presentation">
-					<a href="#tab-policy-claims" aria-controls="tab-policy-claims" role="tab" data-toggle="tab">Claim</a>
+					<a href="#tab-policy-claims"
+						data-url="<?php echo site_url('claims/by_policy/'. $record->id)?>"
+						data-load-method="get"
+						data-box="#tab-policy-claims"
+						data-method="html"
+						aria-controls="tab-policy-claims"
+						role="tab"
+						data-toggle="tab">Claims</a>
 				</li>
 				<li role="presentation">
 					<a href="#tab-policy-docs" aria-controls="tab-policy-docs" role="tab"  data-toggle="tab">Documents</a>

@@ -477,6 +477,25 @@ defined('IQB_RI_TRANSACTION_PREMIUM_TYPES')  OR define('IQB_RI_TRANSACTION_PREMI
 	IQB_RI_TRANSACTION_PREMIUM_TYPE_BASIC 	=> 'Basic',
 	IQB_RI_TRANSACTION_PREMIUM_TYPE_POOL 	=> 'Pool'
 ]);
+
+
+/*
+|--------------------------------------------------------------------------
+| CLAIM STATUS CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_CLAIM_STATUS_DRAFT')           OR define('IQB_CLAIM_STATUS_DRAFT',        	'D');
+defined('IQB_CLAIM_STATUS_VERIFIED')    	OR define('IQB_CLAIM_STATUS_VERIFIED',  	'V');
+defined('IQB_CLAIM_STATUS_APPROVED')    	OR define('IQB_CLAIM_STATUS_APPROVED',  	'A');
+defined('IQB_CLAIM_STATUS_SETTLED')    		OR define('IQB_CLAIM_STATUS_SETTLED',  		'S');
+defined('IQB_CLAIM_STATUS_WITHDRAWN')       OR define('IQB_CLAIM_STATUS_WITHDRAWN',     'W');
+defined('IQB_CLAIM_STATUS_CLOSED')         	OR define('IQB_CLAIM_STATUS_CLOSED',       	'C');
+
+
+
+
+
+
 /*
 |--------------------------------------------------------------------------
 | VOUCHER TYPE CONSTANTS
