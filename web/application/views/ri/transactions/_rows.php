@@ -23,7 +23,7 @@ if($next_id):
 			data-loading-text="Loading ..."
 			data-url="<?php echo $next_url;?>"
 			data-method="append"
-			data-box="#search-result-invoice"
+			data-box="#search-result-ri_transactions"
 			data-self-destruct="true"
 			data-loader-box="#<?php echo $loader_box_id;?>"
 			data-load-method="post"
