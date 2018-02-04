@@ -131,7 +131,7 @@ class Ri_transaction_model extends MY_Model
             $next_id = $params['next_id'] ?? NULL;
             if( $next_id )
             {
-                $this->db->where(['T.id <=' => $next_id]);
+                $this->db->where(['RTXN.id <=' => $next_id]);
             }
 
             $policy_id = $params['policy_id'] ?? NULL;
