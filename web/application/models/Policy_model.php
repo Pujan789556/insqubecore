@@ -605,7 +605,7 @@ class Policy_model extends MY_Model
          *
          * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
          */
-        $policy_code = 'DRAFT/' . $this->dx_auth->get_branch_code() . '/' . $portfolio_code . '/' . $policy_no . '/' . $fy_code_np;
+        $policy_code = 'DRAFT-' . $this->dx_auth->get_branch_code() . '-' . $portfolio_code . '-' . $policy_no . '-' . $fy_code_np;
 
         return $policy_code;
     }
@@ -1456,6 +1456,22 @@ class Policy_model extends MY_Model
                      ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
                      ->where('P.id', $id)
                      ->get()->row();
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get policy status
+     *
+     * @param int $id
+     * @return mixed
+     */
+    public function get_status($id)
+    {
+         return $this->db->select( 'P.status')
+                        ->from($this->table_name . ' as P')
+                        ->where('P.id', $id)
+                        ->get()->row()->status;
     }
 
     // ----------------------------------------------------------------
