@@ -133,14 +133,14 @@ if ( ! function_exists('CLAIM__is_editable'))
 		 * 		draft
 		 *
 		 * Editable Permissions Are
-		 * 		edit.claim
+		 * 		edit.claim.draft
 		 */
 
 		// Editable Permissions ?
 		if(
 			$status === IQB_CLAIM_STATUS_DRAFT
 				&&
-			( $CI->dx_auth->is_admin() || $CI->dx_auth->is_authorized('claims', 'edit.claim') )
+			( $CI->dx_auth->is_admin() || $CI->dx_auth->is_authorized('claims', 'edit.claim.draft') )
 		)
 		{
 			$__flag_authorized = TRUE;

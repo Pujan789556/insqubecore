@@ -110,7 +110,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     if($death_injured):
                         foreach ($death_injured as $single):?>
                             <tr <?php echo $i == 0 ? 'id="__death_injured_row"' : '' ?>>
-                                <?php foreach($form_elements as $elem):?>
+                                <?php foreach($section_elements as $elem):?>
                                     <td>
                                         <?php
                                         /**

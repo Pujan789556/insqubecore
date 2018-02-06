@@ -12,11 +12,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 if( CLAIM__is_editable($record->status, FALSE) ):
 ?>
 
-    <?php if($record->status == IQB_CLAIM_STATUS_DRAFT && $this->dx_auth->is_authorized('claims', 'delete.claim')): ?>
+    <?php if($record->status == IQB_CLAIM_STATUS_DRAFT && $this->dx_auth->is_authorized('claims', 'delete.claim.draft')): ?>
         <a href="#"
             title="Delete Claim Draft"
             data-toggle="tooltip"
-            class="action trg-row-action"
+            class="trg-row-action margin-r-5"
             data-confirm="true"
             data-url="<?php echo site_url('claims/delete/' . $record->id);?>">
                 <i class="fa fa-trash-o"></i>
@@ -26,15 +26,22 @@ if( CLAIM__is_editable($record->status, FALSE) ):
         <a href="#"
             title="Edit Claim Draft"
             data-toggle="tooltip"
-            class="action trg-dialog-edit"
+            class="trg-dialog-edit margin-r-5"
             data-box-size="full-width"
             data-title='<i class="fa fa-pencil-square-o"></i> Edit Claim Draft - <?php echo $record->policy_code?>'
             data-url="<?php echo site_url('claims/edit_draft/' . $record->id);?>"
             data-form="#_form-claims">
             <i class="fa fa-pencil-square-o"></i> Edit</a>
-<?php
-endif;
 
+<?php endif; ?>
+
+<a href="<?php echo site_url('claims/details/' . $record->id);?>"
+    title="View Details"
+    data-toggle="tooltip"
+    class="margin-r-5">
+    <i class="fa fa-list-alt"></i> Details</a>
+
+<?php
 
 // ------------------------------------------------------------------------------
 
@@ -48,7 +55,7 @@ if( $record->status === IQB_CLAIM_STATUS_VERIFIED && $this->dx_auth->is_authoriz
         data-confirm="true"
         class="btn btn-sm bg-maroon btn-round trg-dialog-action"
         data-message="Are you sure you want to do this?<br/>Staff having lower level permission will be able to <strong>edit/delete</strong> this transaction."
-        data-url="<?php echo site_url('claims/status/' . $record->id . '/' . IQB_CLAIM_STATUS_DRAFT );?>"
+        data-url="<?php echo site_url('claims/to_draft/' . $record->id );?>"
     ><i class="fa fa-level-down"></i> To Draft</a>
 <?php
 endif;
@@ -65,7 +72,7 @@ if( $record->status === IQB_CLAIM_STATUS_DRAFT && $this->dx_auth->is_authorized(
         data-confirm="true"
         class="btn btn-sm bg-orange btn-round trg-dialog-action"
         data-message="Are you sure you want to do this?<br/>You can not modify this claim anymore."
-        data-url="<?php echo site_url('claims/status/' . $record->id . '/' . IQB_CLAIM_STATUS_VERIFIED );?>"
+        data-url="<?php echo site_url('claims/verify/' . $record->id  );?>"
     ><i class="fa fa-check-square-o"></i> Verify</a>
 <?php
 endif;

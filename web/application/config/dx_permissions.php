@@ -346,8 +346,8 @@ $config['DX_permissions'] = [
 		'claims'  => [
 			'explore.claim',
 			'add.claim',
-			'edit.claim',
-			'delete.claim',
+			'edit.claim.draft',
+			'delete.claim.draft',
 
 			// Status Permission
 			'status.to.draft',

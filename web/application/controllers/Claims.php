@@ -33,6 +33,7 @@ class Claims extends MY_Controller
 
 		// Load Model
 		$this->load->model('claim_model');
+		$this->load->model('claim_surveyor_model');
 		$this->load->model('policy_model');
 
 		// Helper
@@ -367,7 +368,7 @@ class Claims extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('claims', 'edit.claim') )
+		if( !$this->dx_auth->is_authorized('claims', 'edit.claim.draft') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -587,7 +588,7 @@ class Claims extends MY_Controller
 
 		// Deletable Permission ?
 		$__flag_authorized 		= FALSE;
-		if( $this->dx_auth->is_authorized('claims', 'delete.claim') )
+		if( $this->dx_auth->is_authorized('claims', 'delete.claim.draft') )
 		{
 			$__flag_authorized = TRUE;
 		}
@@ -633,6 +634,265 @@ class Claims extends MY_Controller
 
 
 	// --------------------------------------------------------------------
+	//  STATUS UP/DOWN METHODS
+	// --------------------------------------------------------------------
+
+	public function to_draft($id)
+	{
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+
+		/**
+		 * Check Permission
+		 * -----------------
+		 * You need to have permission to modify the given status.
+		 */
+		$this->__check_status_permission($record->status);
+
+
+
+		/**
+		 * Meet the Status Pre-Requisite ?
+		 */
+		$this->__status_qualifies($record->status, IQB_CLAIM_STATUS_DRAFT );
+
+
+		/**
+		 * Let's Update the Status
+		 */
+		$data = [
+			'status' => IQB_CLAIM_STATUS_DRAFT
+		];
+		$done = $this->claim_model->update_data($id, $data, $record->policy_id);
+
+
+		if( $done )
+		{
+			$record->status = IQB_CLAIM_STATUS_DRAFT;
+			$html = $this->load->view('claims/_single_row', ['record' => $record], TRUE);
+			$ajax_data = [
+				'message' 	=> 'Successfully Updated!',
+				'status'  	=> 'success',
+				'multipleUpdate' => [
+					[
+						'box' 		=> '#_data-row-claims-' . $record->id,
+						'method' 	=> 'replaceWith',
+						'html' 		=> $html
+					]
+				]
+			];
+			return $this->template->json($ajax_data);
+		}
+		else
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Could not update.'
+			]);
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	public function verify($id)
+	{
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+
+		/**
+		 * Check Permission
+		 * -----------------
+		 * You need to have permission to modify the given status.
+		 */
+		$this->__check_status_permission($record->status);
+
+
+
+		/**
+		 * Meet the Status Pre-Requisite ?
+		 */
+		$this->__status_qualifies($record->status, IQB_CLAIM_STATUS_VERIFIED );
+
+
+		/**
+		 * Let's Update the Status
+		 */
+		$done = $this->claim_model->verify($record);
+
+		if( $done )
+		{
+			$record = $this->claim_model->get($record->id);
+			$html = $this->load->view('claims/_single_row', ['record' => $record], TRUE);
+			$ajax_data = [
+				'message' 	=> 'Successfully Updated!',
+				'status'  	=> 'success',
+				'multipleUpdate' => [
+					[
+						'box' 		=> '#_data-row-claims-' . $record->id,
+						'method' 	=> 'replaceWith',
+						'html' 		=> $html
+					]
+				]
+			];
+			return $this->template->json($ajax_data);
+		}
+		else
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Could not update.'
+			]);
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Check Status up/down permission
+		 *
+		 * @param alpha $status Status Code to UP/DOWN
+		 * @return mixed
+		 */
+		private function __check_status_permission($status)
+		{
+			$status_keys = array_keys(CLAIM__status_dropdown(FALSE));
+
+			// Valid Status Code?
+			if( !in_array($status, $status_keys ) )
+			{
+				return $this->template->json([
+					'status' 	=> 'error',
+					'message' 	=> 'Invalid Status Code!'
+				], 403);
+			}
+
+			// Valid Permission?
+			$__flag_valid_permission = FALSE;
+			$permission_name 	= '';
+			switch ($status)
+			{
+				case IQB_CLAIM_STATUS_DRAFT:
+					$permission_name = 'status.to.draft';
+					break;
+
+				case IQB_CLAIM_STATUS_VERIFIED:
+					$permission_name = 'status.to.verified';
+					break;
+
+				case IQB_CLAIM_STATUS_APPROVED:
+					$permission_name = 'status.to.approved';
+					break;
+
+				case IQB_CLAIM_STATUS_SETTLED:
+					$permission_name = 'status.to.settled';
+					break;
+
+				case IQB_CLAIM_STATUS_WITHDRAWN:
+					$permission_name = 'status.to.withdrawn';
+					break;
+
+				case IQB_CLAIM_STATUS_CLOSED:
+					$permission_name = 'status.to.closed';
+					break;
+
+				default:
+					break;
+			}
+			if( $permission_name !== ''  && $this->dx_auth->is_authorized('claims', $permission_name) )
+			{
+				$__flag_valid_permission = TRUE;
+			}
+
+			if( !$__flag_valid_permission )
+			{
+				$this->dx_auth->deny_access();
+			}
+
+			return $__flag_valid_permission;
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Status Qualifies to UP/DOWN
+		 *
+		 * @param char $current_status Current Status of Claim
+		 * @param char $to_status Status to UP/Down
+		 * @param bool $terminate_on_fail Terminate right here on fails
+		 * @return mixed
+		 */
+		public function __status_qualifies($current_status, $to_status, $terminate_on_fail = TRUE)
+	    {
+	        $flag_qualifies = FALSE;
+
+	        switch ($to_status)
+	        {
+	            case IQB_CLAIM_STATUS_DRAFT:
+	                $flag_qualifies = $current_status === IQB_CLAIM_STATUS_VERIFIED;
+	                break;
+
+	            case IQB_CLAIM_STATUS_VERIFIED:
+	                $flag_qualifies = $current_status === IQB_CLAIM_STATUS_DRAFT;
+	                break;
+
+	            case IQB_CLAIM_STATUS_APPROVED:
+	                $flag_qualifies = $current_status === IQB_CLAIM_STATUS_VERIFIED;
+	                break;
+
+                case IQB_CLAIM_STATUS_SETTLED:
+	                $flag_qualifies = $current_status === IQB_CLAIM_STATUS_APPROVED;
+	                break;
+
+                case IQB_CLAIM_STATUS_WITHDRAWN:
+                case IQB_CLAIM_STATUS_CLOSED:
+	                $flag_qualifies = $current_status === IQB_CLAIM_STATUS_VERIFIED;
+	                break;
+
+	            default:
+	                break;
+	        }
+
+	        if( !$flag_qualifies && $terminate_on_fail )
+			{
+				return $this->template->json([
+					'status' 	=> 'error',
+					'title' 	=> 'Invalid Status Transaction',
+					'message' 	=> 'You can not swith to the state from this state of transaction.'
+				], 400);
+			}
+
+
+	        return $flag_qualifies;
+	    }
+
+
+
+	// --------------------------------------------------------------------
 	//  DETAILS
 	// --------------------------------------------------------------------
 
@@ -663,19 +923,34 @@ class Claims extends MY_Controller
 		/**
 		 * Check if Belongs to me?
 		 */
-		// belongs_to_me( $record->branch_id );
+		belongs_to_me( $record->branch_id );
+
+
+		/**
+		 * Get surveyors assigned to this claim
+		 */
+		$surveyors = $this->claim_surveyor_model->get_many_by_claim($record->id);
 
 		/**
 		 * RI Transaction Detail Rows
 		 */
 		$data = [
-			'record' 	=> $record
+			'record' 	=> $record,
+			'surveyors' => $surveyors
 		];
 
-		$this->template->json([
-			'html' 	=> $this->load->view('claims/_details', $data, TRUE),
-			'title' => 'RI Transaction Details - ' .  $record->id
-		]);
+		$page_header = 'Claim Details - <span id="page-title-claim-code">' . $record->claim_code . '</span>';
+
+		$this->data['site_title'] = 'Claim Details | ' . $record->claim_code;
+		$this->template->partial(
+							'content_header',
+							'templates/_common/_content_header',
+							[
+								'content_header' => $page_header,
+								'breadcrumbs' => ['Claims' => 'claims', 'Details' => NULL]
+						])
+						->partial('content', 'claims/_details', $data)
+						->render($this->data);
     }
 
 }

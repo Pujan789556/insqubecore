@@ -404,7 +404,7 @@ class Claim_model extends MY_Model
          *
          * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
          */
-        $data['claim_code'] = 'DRAFT-' . $this->token->generate(28);
+        $data['claim_code'] = 'DRAFT-' . $this->token->generate(10);
 
 
         // Fiscal Year ID
@@ -559,6 +559,141 @@ class Claim_model extends MY_Model
 
 
     // ----------------------------------------------------------------
+
+    /**
+     * Update Claim data on various occassions.
+     * 1. Status
+     * 2. Claim settlement amount/breakdown
+     * 3. Claim Scheme etc
+     */
+    public function update_data($id, $data, $policy_id)
+    {
+        // Updated by/at
+        $data = $this->modified_on(['fields' => $data]);
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Task a: Update Data
+            $done = $this->db->where('id', $id)
+                        ->update($this->table_name, $data);
+
+            // Task b. Insert Broker Relations
+            if($done)
+            {
+                // Log Activity
+                $this->log_activity($id, 'U');
+
+                // Clean Cache by policy belonging to this policy
+                $this->clear_cache( 'claim_list_by_policy_' . $policy_id );
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Update Claim data on various occassions.
+     * 1. Status
+     * 2. Claim settlement amount/breakdown
+     * 3. Claim Scheme etc
+     */
+    public function verify( $record )
+    {
+        $data = [
+            'status' => IQB_CLAIM_STATUS_VERIFIED
+        ];
+
+        // Updated by/at
+        $data = $this->modified_on(['fields' => $data]);
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Task a: Update Status
+            $done = $this->db->where('id', $record->id)
+                        ->update($this->table_name, $data);
+
+            // Task b: Generate Claim Code
+            $code_prefix = strtoupper(substr($record->claim_code, 0, 5));
+            if( $code_prefix === 'DRAFT')
+            {
+                $this->generate_claim_number($record->id);
+            }
+
+            // Task b. Insert Broker Relations
+            if($done)
+            {
+                // Log Activity
+                $this->log_activity($record->id, 'U');
+
+                // Clean Cache by policy belonging to this policy
+                $this->clear_cache( 'claim_list_by_policy_' . $record->policy_id );
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+
+    /**
+     * Generate Claim Number
+     *
+     * @param type $id
+     * @return mixed
+     */
+    public function generate_claim_number($id)
+    {
+        $params         = [$id, $this->dx_auth->get_user_id()];
+        $sql            = "SELECT `f_generate_claim_number`(?, ?) AS claim_code";
+        $result         = mysqli_store_procedure('select', $sql, $params);
+
+        /**
+         * Get the result
+         */
+        $result_row = $result[0];
+
+        return $result_row->claim_code;
+    }
+
+    // ----------------------------------------------------------------
+
 
     public function row($id)
     {

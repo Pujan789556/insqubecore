@@ -10,7 +10,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<?php if( $this->dx_auth->is_admin() ): ?>
 				<th>ID</th>
 			<?php endif;?>
-			<th>Policy Code</th>
+			<th>Claim Code</th>
+			<th>Policy</th>
 			<th>Date of Loss</th>
 			<th>Date of Intimation</th>
 			<th>Status</th>
