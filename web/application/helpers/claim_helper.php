@@ -68,6 +68,31 @@ if ( ! function_exists('CLAIM__death_injured_type_dropdown'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('CLAIM__surveyor_type_dropdown'))
+{
+	/**
+	 * Get Surveyor Type Dropdown
+	 *
+	 * @return	array
+	 */
+	function CLAIM__surveyor_type_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			'P' => 'Preliminary',
+			'F' => 'Final',
+			'R' => 'Re-inspection'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('CLAIM__supporting_docs_dropdown'))
 {
 	/**

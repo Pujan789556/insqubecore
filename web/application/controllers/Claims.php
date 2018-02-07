@@ -440,7 +440,7 @@ class Claims extends MY_Controller
 	private function _save($action, $policy_id, $record = NULL)
 	{
 		// Valid action?
-		if( !in_array($action, array('add_draft', 'edit_draft')))
+		if( !in_array($action, array('add_draft', 'edit_draft', 'close_claim', 'withdraw_claim', 'assign_surveyors')))
 		{
 			$this->template->json([
 				'status' => 'error',
@@ -462,20 +462,39 @@ class Claims extends MY_Controller
 			$this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
-        		$data = $this->input->post();
+        		$data 				= $this->input->post();
+        		$done 				= false;
 
-        		// Insert or Update?
-				if($action === 'add_draft')
-				{
-					$data['policy_id'] = $policy_id;
-					$done = $this->claim_model->add_draft($data);
-				}
-				else
-				{
-					// Now Update Data
-					$data['policy_id'] = $record->policy_id;
-					$done = $this->claim_model->edit_draft($record->id, $data);
-				}
+        		switch ($action)
+        		{
+        			case 'add_draft':
+        				$data['policy_id'] 	= $policy_id;
+						$done = $this->claim_model->add_draft($data);
+        				break;
+
+    				case 'edit_draft':
+    					$data['policy_id'] 	= $policy_id;
+						$done = $this->claim_model->edit_draft($record->id, $data);
+        				break;
+
+    				case 'close_claim':
+    					$data['status'] = IQB_CLAIM_STATUS_CLOSED;
+    					$done = $this->claim_model->update_data($record->id, $data, $policy_id);
+        				break;
+
+    				case 'withdraw_claim':
+    					$data['status'] = IQB_CLAIM_STATUS_WITHDRAWN;
+						$done = $this->claim_model->update_data($record->id, $data, $policy_id);
+        				break;
+
+    				case 'assign_surveyors':
+    					$done = $this->claim_surveyor_model->assign_to_claim($record->id, $data);
+    					break;
+
+        			default:
+        				# code...
+        				break;
+        		}
 
 	        	if(!$done)
 				{
@@ -535,6 +554,18 @@ class Claims extends MY_Controller
 				case 'add_draft':
 				case 'edit_draft':
 					$rules = $this->claim_model->draft_v_rules($formatted);
+					break;
+
+				case 'close_claim':
+					$rules = $this->claim_model->close_v_rules($formatted);
+					break;
+
+				case 'withdraw_claim':
+					$rules = $this->claim_model->withdraw_v_rules($formatted);
+					break;
+
+				case 'assign_surveyors':
+					$rules = $this->claim_surveyor_model->validation_rules;
 					break;
 
 				default:
@@ -637,6 +668,12 @@ class Claims extends MY_Controller
 	//  STATUS UP/DOWN METHODS
 	// --------------------------------------------------------------------
 
+	/**
+	 * Revert claim status to Draft
+	 *
+	 * @param int $id
+	 * @return json
+	 */
 	public function to_draft($id)
 	{
 		/**
@@ -705,6 +742,12 @@ class Claims extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Verify Claim
+	 *
+	 * @param int $id
+	 * @return json
+	 */
 	public function verify($id)
 	{
 		/**
@@ -768,6 +811,117 @@ class Claims extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Close a Claim
+	 *
+	 * @param int $id
+	 * @return json
+	 */
+	public function close($id)
+	{
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+
+		/**
+		 * Check Permission
+		 * -----------------
+		 * You need to have permission to modify the given status.
+		 */
+		$this->__check_status_permission($record->status);
+
+
+
+		/**
+		 * Meet the Status Pre-Requisite ?
+		 */
+		$this->__status_qualifies($record->status, IQB_CLAIM_STATUS_CLOSED );
+
+
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('close_claim', $record->policy_id, $record);
+
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('claims/forms/_form_close_withdraw',
+			[
+				'form_elements' 		=> $this->_v_rules('close_claim'),
+				'record' 				=> $record,
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+
+	/**
+	 * Withdraw a Claim
+	 *
+	 * @param int $id
+	 * @return json
+	 */
+	public function withdraw($id)
+	{
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+
+		/**
+		 * Check Permission
+		 * -----------------
+		 * You need to have permission to modify the given status.
+		 */
+		$this->__check_status_permission($record->status);
+
+
+
+		/**
+		 * Meet the Status Pre-Requisite ?
+		 */
+		$this->__status_qualifies($record->status, IQB_CLAIM_STATUS_WITHDRAWN );
+
+
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('withdraw_claim', $record->policy_id, $record);
+
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('claims/forms/_form_close_withdraw',
+			[
+				'form_elements' 		=> $this->_v_rules('withdraw_claim'),
+				'record' 				=> $record,
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
 
 
 		// --------------------------------------------------------------------
@@ -891,6 +1045,94 @@ class Claims extends MY_Controller
 	    }
 
 
+	// --------------------------------------------------------------------
+
+
+	/**
+	 * Assignn Surveyors on a Claim
+	 *
+	 * @param int $id
+	 * @return json
+	 */
+	public function surveyors($id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('claims', 'assign.claim.surveyors') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+		/**
+		 * Status Qualifies
+		 */
+		if($record->status !== IQB_CLAIM_STATUS_VERIFIED)
+		{
+			$this->dx_auth->deny_access();
+		}
+
+
+		/**
+		 * Get surveyors assigned to this claim
+		 */
+		$surveyors = $this->claim_surveyor_model->get_many_by_claim($record->id);
+
+
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('assign_surveyors', $record->policy_id, $record);
+
+
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('claims/forms/_form_surveyors',
+			[
+				'form_elements' => $this->claim_surveyor_model->validation_rules,
+				'record' 		=> $record,
+				'surveyors' 	=> $surveyors
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+		public function cb_surveyor_duplicate($str)
+		{
+			$surveyor_id = $this->input->post('surveyor_id');
+			$survey_type = $this->input->post('survey_type');
+
+			$total_count = count($surveyor_id);
+			$complex_list = [];
+			for($i = 0; $i< $total_count; $i++ )
+			{
+				$complex_list[] = implode('-', [$surveyor_id[$i], $survey_type[$i]]);
+			}
+
+
+			// Check duplicate Entries
+			$unique_count = count( array_unique($complex_list) );
+			if( $unique_count !== $total_count )
+			{
+				$this->form_validation->set_message('cb_surveyor_duplicate', 'Surveyor can not be Duplicate/Empty.');
+	            return FALSE;
+			}
+
+			return TRUE;
+		}
 
 	// --------------------------------------------------------------------
 	//  DETAILS

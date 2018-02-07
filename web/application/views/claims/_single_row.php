@@ -13,6 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->accident_date;?></td>
 	<td><?php echo $record->intimation_date;?></td>
 	<td><?php echo CLAIM__status_dropdown(FALSE)[$record->status];?></td>
+	<td><?php echo yes_no_text_formatted($record->flag_paid);?></td>
 
 	<td class="ins-action">
 		<?php

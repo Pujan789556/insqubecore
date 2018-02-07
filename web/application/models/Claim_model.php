@@ -16,7 +16,7 @@ class Claim_model extends MY_Model
     // protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'branch_id', 'accident_date', 'accident_time', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'settlement_claim_amount', 'settlement_amount_breakdown', 'status', 'status_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'branch_id', 'accident_date', 'accident_time', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'settlement_claim_amount', 'settlement_amount_breakdown', 'flag_paid', 'status', 'status_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -286,6 +286,7 @@ class Claim_model extends MY_Model
                     '_required' => true
                 ]
             ]
+
        ];
     }
 
@@ -317,6 +318,48 @@ class Claim_model extends MY_Model
         }
 
         return $rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Claim Close Validation Rules
+     *
+     * @param bool $formatted
+     * @return array
+     */
+    public function close_v_rules($formatted = TRUE )
+    {
+        return [
+            [
+                'field' => 'status_remarks',
+                'label' => 'Reason for Claim Close',
+                'rules' => 'trim|required|htmlspecialchars|max_length[5000]',
+                '_type' => 'textarea',
+                '_required' => true
+            ]
+        ];
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Claim Withdraw Validation Rules
+     *
+     * @param bool $formatted
+     * @return array
+     */
+    public function withdraw_v_rules($formatted = TRUE )
+    {
+        return [
+            [
+                'field' => 'status_remarks',
+                'label' => 'Reason for Claim Withdraw',
+                'rules' => 'trim|required|htmlspecialchars|max_length[5000]',
+                '_type' => 'textarea',
+                '_required' => true
+            ]
+        ];
     }
 
     // ----------------------------------------------------------------

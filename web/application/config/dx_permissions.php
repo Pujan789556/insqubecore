@@ -349,6 +349,11 @@ $config['DX_permissions'] = [
 			'edit.claim.draft',
 			'delete.claim.draft',
 
+			// After verify activities
+			'assign.claim.surveyors',
+			'update.claim.settlement',
+			'update.claim.assessment',
+
 			// Status Permission
 			'status.to.draft',
 			'status.to.verified',

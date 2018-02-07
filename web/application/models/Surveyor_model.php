@@ -137,6 +137,32 @@ class Surveyor_model extends MY_Model
                     ->get()->result();
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Dropdown List
+     */
+    public function dropdown()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $records = $this->get_cache('srv_all_dd');
+        if(!$records)
+        {
+            $records = $this->db->select('S.id, S.name')
+                            ->from($this->table_name . ' as S')
+                            ->get()->result();
+            $this->write_cache($records, 'srv_all_dd', CACHE_DURATION_DAY);
+        }
+        $dropdown = [];
+        foreach($records as $record)
+        {
+            $dropdown["{$record->id}"] = $record->name;
+        }
+        return $dropdown;
+    }
+
 	// --------------------------------------------------------------------
 
     /**
@@ -145,7 +171,7 @@ class Surveyor_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'surveyors_all',
+            'srv_all_dd',
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

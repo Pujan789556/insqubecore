@@ -15,6 +15,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<th>Date of Loss</th>
 			<th>Date of Intimation</th>
 			<th>Status</th>
+			<th>Paid</th>
 			<th>Action</th>
 		</tr>
 	</thead>
