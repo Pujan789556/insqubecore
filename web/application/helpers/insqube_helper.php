@@ -663,6 +663,34 @@ if ( ! function_exists('yes_no_text'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('yes_no_text_formatted'))
+{
+    /**
+     * Get Yes/No Text
+     *
+     *
+     * @param char $flag
+     * @return  bool
+     */
+    function yes_no_text_formatted( $flag = NULL )
+    {
+        $title = $flag ?? '';
+
+        if( (string)$flag === IQB_FLAG_YES || (int)$flag === IQB_FLAG_ON )
+        {
+            $css = 'fa-check text-green';
+            $title = 'Yes';
+        }
+        else if( (string)$flag === IQB_FLAG_NO || (int)$flag === IQB_FLAG_OFF )
+        {
+            $css = 'fa-minus text-muted';
+            $title = 'No';
+        }
+        return '<i class="fa '.$css.'" data-toggle="tooltip" title="'.$title.'"></i>';
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('active_inactive_text'))
 {
     /**
