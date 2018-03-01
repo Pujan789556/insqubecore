@@ -16,7 +16,7 @@ class Claim_model extends MY_Model
     // protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'branch_id', 'accident_date', 'accident_time', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'settlement_claim_amount', 'settlement_amount_breakdown', 'flag_paid', 'status', 'status_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'branch_id', 'accident_date', 'accident_time', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'total_surveyor_fee_amount', 'settlement_claim_amount', 'settlement_amount_breakdown', 'flag_paid', 'status', 'status_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -364,6 +364,128 @@ class Claim_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Claim Assessment Validation Rules
+     *
+     * @param bool $formatted
+     * @return array
+     */
+    public function assessment_v_rules($formatted = TRUE )
+    {
+        return [
+            [
+                'field' => 'assessment_brief',
+                'label' => 'Assessment Brief (Report)',
+                'rules' => 'trim|required|htmlspecialchars|max_length[30000]',
+                '_type' => 'textarea',
+                '_required' => true
+            ],
+            [
+                'field' => 'other_info',
+                'label' => 'Other Info',
+                'rules' => 'trim|htmlspecialchars|max_length[20000]',
+                '_type' => 'textarea',
+                '_required' => false
+            ],
+            [
+                'field' => 'supporting_docs[]',
+                'label' => 'Supporting Docs',
+                'rules' => 'trim|required|alpha|max_length[2]',
+                '_type' => 'checkbox-group',
+                '_checkbox_value'   => [],
+                '_data'             => CLAIM__supporting_docs_dropdown(FALSE),
+                '_list_inline'      => FALSE,
+                '_required'         => true,
+
+            ]
+        ];
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Claim Settlement Validation Rules
+     *
+     * @param bool $formatted
+     * @return array
+     */
+    public function settlement_v_rules($formatted = TRUE )
+    {
+        return [
+            [
+                'field' => 'settlement[title][]',
+                'label' => 'Title',
+                'rules' => 'trim|required|htmlspecialchars|max_length[200]',
+                '_key'  => 'title',
+                '_type' => 'text',
+                '_show_label'   => false,
+                '_required'     => true
+            ],
+            [
+                'field' => 'settlement[claimed_amount][]',
+                'label' => 'Claimed Amount',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                '_key'  => 'claimed_amount',
+                '_type' => 'text',
+                '_show_label'   => false,
+                '_required'     => true
+            ],
+            [
+                'field' => 'settlement[assessed_amount][]',
+                'label' => 'Assessed Amount',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                '_key'  => 'assessed_amount',
+                '_type' => 'text',
+                '_show_label'   => false,
+                '_required'     => true
+            ],
+            [
+                'field' => 'settlement[recommended_amount][]',
+                'label' => 'Recommended Amount',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                '_key'  => 'recommended_amount',
+                '_type' => 'text',
+                '_show_label'   => false,
+                '_required'     => true
+            ],
+        ];
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Claim Scheme Validation Rules
+     *
+     * @param bool $formatted
+     * @return array
+     */
+    public function scheme_v_rules($formatted = TRUE )
+    {
+        // Scheme Model
+        $this->load->model('claim_scheme_model');
+        $dropdown = $this->claim_scheme_model->dropdown();
+
+        return [
+            [
+                'field' => 'claim_scheme_id',
+                'label' => 'Claim Scheme',
+                'rules' => 'trim|required|integer|in_list['.implode(',', array_keys($dropdown)).']',
+                '_type' => 'dropdown',
+                '_data' => IQB_BLANK_SELECT + $dropdown,
+                '_required' => true
+            ]
+        ];
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Check Duplicate
+     *
+     * @param array $where
+     * @param int|null $id
+     * @return mixed
+     */
     public function check_duplicate($where, $id=NULL)
     {
         if( $id )
@@ -654,6 +776,49 @@ class Claim_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Update Claim Settlement Data
+     *
+     *  Tasks:
+     *      1. Build Settlement Breakdown - JSON
+     *      2. Compute total settlement amount
+     *
+     * @param int $id Claim ID
+     * @param array $data Post Data
+     * @param int $policy_id
+     * @return bool
+     */
+    public function update_settlement($id, $data, $policy_id)
+    {
+        /**
+         * Build Settlement Breakdown
+         */
+        $settlement_data = $data['settlement'];
+        $count                      = count($settlement_data['title']);
+        $settlement_claim_amount    = 0.00;
+        $brekdown = [];
+
+        for($i=0; $i < $count; $i++)
+        {
+            $settlement_claim_amount += (float)$settlement_data['recommended_amount'][$i];
+            $breakdown[] = [
+                'title'                 => $settlement_data['title'][$i],
+                'claimed_amount'        => $settlement_data['claimed_amount'][$i],
+                'assessed_amount'       => $settlement_data['assessed_amount'][$i],
+                'recommended_amount'    => $settlement_data['recommended_amount'][$i],
+            ];
+        }
+
+        $update_data = [
+            'settlement_claim_amount'       => $settlement_claim_amount,
+            'settlement_amount_breakdown'   => json_encode($breakdown)
+        ];
+
+        return $this->update_data($id, $update_data, $policy_id);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Update Claim data on various occassions.
      * 1. Status
      * 2. Claim settlement amount/breakdown
@@ -795,11 +960,19 @@ class Claim_model extends MY_Model
                             // Claim Table Data
                             'CLM.*, ' .
 
+                            // Claim Scheme Name
+                            'CLMSCM.name AS claim_scheme_name, ' .
+
                             // Policy Table Data
-                            'P.code as policy_code, '
+                            'P.code as policy_code, ' .
+
+                            // Fiscal Year Data
+                            'F.code_np AS fy_code_np, F.code_en AS fy_code_en'
                         )
                 ->from($this->table_name . ' AS CLM')
-                ->join('dt_policies P', 'P.id = CLM.policy_id');
+                ->join('dt_policies P', 'P.id = CLM.policy_id')
+                ->join('master_claim_schemes CLMSCM', 'CLMSCM.id = CLM.claim_scheme_id', 'left')
+                ->join('master_fiscal_yrs F', 'F.id = CLM.fiscal_yr_id');
     }
 
     // ----------------------------------------------------------------

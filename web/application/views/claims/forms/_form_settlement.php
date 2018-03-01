@@ -1,8 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : Claim - Surveyors
+ * Form : Claim - Settlement Breakdown
  */
+$settlement_breakdown = json_decode($record->settlement_amount_breakdown ?? '[]');
 ?>
 <?php echo form_open( $this->uri->uri_string(),
                         [
@@ -17,9 +18,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">
-            <h4 class="box-title">Surveyor(s) Information</h4>
+            <h4 class="box-title">Claim Settlement Breakdown</h4>
         </div>
+
         <div class="box-body" style="overflow-x: scroll;">
+            <p class="text-red">NOTE: Please note that the following breakdown should not include <strong>Surveyor Fee</strong> as it is computed saperately.</p>
             <table class="table table-bordered table-condensed">
                 <thead>
                     <tr>
@@ -29,53 +32,47 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <th>Action</th>
                     </tr>
                 </thead>
-
                 <tbody class="form-inline">
                     <?php
                     $i = 0;
-                    if($surveyors):
-                        foreach ($surveyors as $single):?>
-                            <tr <?php echo $i == 0 ? 'id="__surveyors_row"' : '' ?>>
-                                <?php foreach($form_elements as $elem):?>
+                    if($settlement_breakdown):
+                        foreach ($settlement_breakdown as $single): ?>
+                            <tr <?php echo $i == 0 ? 'id="__settlement_breakdown_row"' : '' ?>>
+                                <?php foreach($form_elements as $element):?>
                                     <td>
                                         <?php
                                         /**
                                          * Load Single Element
                                          */
-                                        $value = $single->{$elem['_key']} ?? '';
-                                        $elem['_default']    = $value;
-                                        $elem['_value']      = $value;
+                                        $element['_default']    = $single->{$element['_key']} ?? '';
+                                        $element['_value']      = $element['_default'];
                                         $this->load->view('templates/_common/_form_components_inline', [
-                                            'form_elements' => [$elem],
+                                            'form_elements' => [$element],
                                             'form_record'   => NULL
                                         ]);
                                         ?>
                                     </td>
                                 <?php
                                 endforeach;
-
-                                // claim_surveyor table's PK
-                                echo '<td class="hide">', form_hidden('ids[]', $single->id), '</td>';
-
                                 if($i == 0):?>
                                     <td>&nbsp;</td>
                                 <?php else:?>
-                                    <td width="10%" align="right"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'>Remove</a></td>
+                                    <td width="10%" align="right"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove();'>Remove</a></td>
                                 <?php endif;?>
                             </tr>
                     <?php
-                            $i++;
+                        $i++;
                         endforeach;
                     else:?>
-                        <tr id="__surveyors_row">
-                            <?php foreach($form_elements as $elem):?>
+                        <tr id="__settlement_breakdown_row">
+                            <?php foreach($form_elements as $element):?>
                                 <td>
                                     <?php
                                     /**
                                      * Load Single Element
                                      */
                                     $this->load->view('templates/_common/_form_components_inline', [
-                                        'form_elements' => [$elem],
+                                        'form_elements' => [$element],
                                         'form_record'   => NULL
                                     ]);
                                     ?>
@@ -88,7 +85,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             </table>
         </div>
         <div class="box-footer bg-info">
-            <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__surveyors_row', this)">Add More</a>
+            <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__settlement_breakdown_row', this)">Add More</a>
         </div>
     </div>
 
@@ -116,5 +113,4 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         // Append to table body
         $box.append($row);
     }
-
 </script>

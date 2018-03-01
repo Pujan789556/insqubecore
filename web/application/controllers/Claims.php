@@ -363,7 +363,7 @@ class Claims extends MY_Controller
 	 *
 	 * @return void
 	 */
-	public function edit_draft($id)
+	public function edit_draft($id, $ref)
 	{
 		/**
 		 * Check Permissions
@@ -398,7 +398,7 @@ class Claims extends MY_Controller
 
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit_draft', $record->policy_id, $record);
+		$json_data = $this->_save('edit_draft', $record->policy_id, $record, $ref);
 
 
 		// No form Submitted?
@@ -435,12 +435,13 @@ class Claims extends MY_Controller
 	 * @param string $action [add|edit]
 	 * @param int $policy_id Policy ID
 	 * @param object|null $record Record Object or NULL
+	 * @param char $ref Request reference (l|d) i.e. from list or detail page
 	 * @return array
 	 */
-	private function _save($action, $policy_id, $record = NULL)
+	private function _save($action, $policy_id, $record = NULL, $ref = 'l')
 	{
 		// Valid action?
-		if( !in_array($action, array('add_draft', 'edit_draft', 'close_claim', 'withdraw_claim', 'assign_surveyors')))
+		if( !in_array($action, array('add_draft', 'edit_draft', 'close_claim', 'withdraw_claim', 'assign_surveyors', 'update_assessment', 'update_settlement', 'update_scheme')))
 		{
 			$this->template->json([
 				'status' => 'error',
@@ -478,18 +479,44 @@ class Claims extends MY_Controller
         				break;
 
     				case 'close_claim':
-    					$data['status'] = IQB_CLAIM_STATUS_CLOSED;
-    					$done = $this->claim_model->update_data($record->id, $data, $policy_id);
+    					$update_data = [
+							'status' 		 => IQB_CLAIM_STATUS_CLOSED,
+							'status_remarks' => $data['status_remarks']
+    					];
+    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
         				break;
 
     				case 'withdraw_claim':
-    					$data['status'] = IQB_CLAIM_STATUS_WITHDRAWN;
-						$done = $this->claim_model->update_data($record->id, $data, $policy_id);
+    					$update_data = [
+							'status' 		 => IQB_CLAIM_STATUS_WITHDRAWN,
+							'status_remarks' => $data['status_remarks']
+    					];
+						$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
         				break;
 
     				case 'assign_surveyors':
     					$done = $this->claim_surveyor_model->assign_to_claim($record->id, $data);
     					break;
+
+					case 'update_assessment':
+						$update_data = [
+							'assessment_brief' 	=> $data['assessment_brief'],
+							'other_info' 		=> $data['other_info'],
+							'supporting_docs' 	=> implode(',', $data['supporting_docs'])
+    					];
+    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
+						break;
+
+					case 'update_settlement':
+						$done = $this->claim_model->update_settlement($record->id, $data, $policy_id);
+						break;
+
+					case 'update_scheme':
+						$update_data = [
+							'claim_scheme_id' 	=> $data['claim_scheme_id']
+    					];
+    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
+						break;
 
         			default:
         				# code...
@@ -524,11 +551,42 @@ class Claims extends MY_Controller
 				];
 
 				$record 		= $this->claim_model->row($action === 'add_draft' ? $done : $record->id);
-				$single_row 	=  'claims/_single_row';
-				$html = $this->load->view($single_row, ['record' => $record], TRUE);
+
+				$view_data 	= ['record' => $record];
+				$partial_view =  'claims/_single_row';
+
+				// If Reference is from Details Page
+				if($ref == 'd')
+				{
+					$partial_view 	=  'claims/_details';
+					$view_data = array_merge( $view_data,
+									[
+									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+									'draft_elements' 	=> $this->claim_model->draft_v_rules()
+									]);
+				}
+
+				// DOM Box
+				$method = 'replaceWith';
+				if($action === 'add_draft')
+				{
+					$box = '#search-result-claims';
+					$method = 'prepend';
+				}
+				else if($ref == 'l')
+				{
+					$box = '#_data-row-claims-' . $record->id;
+				}
+				else
+				{
+					$box = '#claim-details';
+				}
+
+				// Get the html
+				$html = $this->load->view($partial_view, $view_data, TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add_draft' ? '#search-result-claims' : '#_data-row-claims-' . $record->id,
-					'method' 	=> $action === 'add_draft' ? 'prepend' : 'replaceWith',
+					'box' 		=> $box,
+					'method' 	=> $method,
 					'html'		=> $html
 				];
 
@@ -566,6 +624,18 @@ class Claims extends MY_Controller
 
 				case 'assign_surveyors':
 					$rules = $this->claim_surveyor_model->validation_rules;
+					break;
+
+				case 'update_assessment':
+					$rules = $this->claim_model->assessment_v_rules($formatted);
+					break;
+
+				case 'update_settlement':
+					$rules = $this->claim_model->settlement_v_rules($formatted);
+					break;
+
+				case 'update_scheme':
+					$rules = $this->claim_model->scheme_v_rules($formatted);
 					break;
 
 				default:
@@ -674,7 +744,7 @@ class Claims extends MY_Controller
 	 * @param int $id
 	 * @return json
 	 */
-	public function to_draft($id)
+	public function to_draft($id, $ref)
 	{
 		/**
 		 * Get Record
@@ -716,16 +786,43 @@ class Claims extends MY_Controller
 
 		if( $done )
 		{
-			$record->status = IQB_CLAIM_STATUS_DRAFT;
-			$html = $this->load->view('claims/_single_row', ['record' => $record], TRUE);
+			$record 		= $this->claim_model->get($record->id);
+			$view_data 		= ['record' => $record];
+			$partial_view 	=  'claims/_single_row';
+
+			// If Reference is from Details Page
+			if($ref == 'd')
+			{
+				$partial_view 	=  'claims/_details';
+				$view_data = array_merge( $view_data,
+								[
+								'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+								'draft_elements' 	=> $this->claim_model->draft_v_rules()
+								]);
+			}
+
+			// DOM Box
+			$method = 'replaceWith';
+			if($ref == 'l')
+			{
+				$box = '#_data-row-claims-' . $record->id;
+			}
+			else
+			{
+				$box = '#claim-details';
+			}
+
+			// Get the html
+			$html = $this->load->view($partial_view, $view_data, TRUE);
+
 			$ajax_data = [
 				'message' 	=> 'Successfully Updated!',
 				'status'  	=> 'success',
 				'multipleUpdate' => [
 					[
-						'box' 		=> '#_data-row-claims-' . $record->id,
-						'method' 	=> 'replaceWith',
-						'html' 		=> $html
+						'box' 		=> $box,
+						'method' 	=> $method,
+						'html'		=> $html
 					]
 				]
 			];
@@ -748,7 +845,7 @@ class Claims extends MY_Controller
 	 * @param int $id
 	 * @return json
 	 */
-	public function verify($id)
+	public function verify($id, $ref)
 	{
 		/**
 		 * Get Record
@@ -786,16 +883,43 @@ class Claims extends MY_Controller
 
 		if( $done )
 		{
-			$record = $this->claim_model->get($record->id);
-			$html = $this->load->view('claims/_single_row', ['record' => $record], TRUE);
+			$record 		= $this->claim_model->get($record->id);
+			$view_data 		= ['record' => $record];
+			$partial_view 	=  'claims/_single_row';
+
+			// If Reference is from Details Page
+			if($ref == 'd')
+			{
+				$partial_view 	=  'claims/_details';
+				$view_data = array_merge( $view_data,
+								[
+								'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+								'draft_elements' 	=> $this->claim_model->draft_v_rules()
+								]);
+			}
+
+			// DOM Box
+			$method = 'replaceWith';
+			if($ref == 'l')
+			{
+				$box = '#_data-row-claims-' . $record->id;
+			}
+			else
+			{
+				$box = '#claim-details';
+			}
+
+			// Get the html
+			$html = $this->load->view($partial_view, $view_data, TRUE);
+
 			$ajax_data = [
 				'message' 	=> 'Successfully Updated!',
 				'status'  	=> 'success',
 				'multipleUpdate' => [
 					[
-						'box' 		=> '#_data-row-claims-' . $record->id,
-						'method' 	=> 'replaceWith',
-						'html' 		=> $html
+						'box' 		=> $box,
+						'method' 	=> $method,
+						'html'		=> $html
 					]
 				]
 			];
@@ -820,7 +944,7 @@ class Claims extends MY_Controller
 	 * @param int $id
 	 * @return json
 	 */
-	public function close($id)
+	public function close($id, $ref)
 	{
 		/**
 		 * Get Record
@@ -853,7 +977,7 @@ class Claims extends MY_Controller
 
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('close_claim', $record->policy_id, $record);
+		$json_data = $this->_save('close_claim', $record->policy_id, $record, $ref);
 
 
 		// No form Submitted?
@@ -876,7 +1000,7 @@ class Claims extends MY_Controller
 	 * @param int $id
 	 * @return json
 	 */
-	public function withdraw($id)
+	public function withdraw($id, $ref)
 	{
 		/**
 		 * Get Record
@@ -909,7 +1033,7 @@ class Claims extends MY_Controller
 
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('withdraw_claim', $record->policy_id, $record);
+		$json_data = $this->_save('withdraw_claim', $record->policy_id, $record, $ref);
 
 
 		// No form Submitted?
@@ -1054,7 +1178,7 @@ class Claims extends MY_Controller
 	 * @param int $id
 	 * @return json
 	 */
-	public function surveyors($id)
+	public function surveyors($id, $ref)
 	{
 		/**
 		 * Check Permissions
@@ -1094,7 +1218,7 @@ class Claims extends MY_Controller
 
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('assign_surveyors', $record->policy_id, $record);
+		$json_data = $this->_save('assign_surveyors', $record->policy_id, $record, $ref);
 
 
 
@@ -1133,6 +1257,173 @@ class Claims extends MY_Controller
 
 			return TRUE;
 		}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Update Survey assessment
+	 *
+	 * @param int $id
+	 * @return json
+	 */
+	public function assessment($id, $ref)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('claims', 'update.claim.assessment') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+		/**
+		 * Status Qualifies
+		 */
+		if($record->status !== IQB_CLAIM_STATUS_VERIFIED)
+		{
+			$this->dx_auth->deny_access();
+		}
+
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('update_assessment', $record->policy_id, $record, $ref);
+
+		// Supporting Documents (On Edit mode)
+		$form_elements 	= $this->_v_rules('update_assessment');
+		$supporting_docs = explode(',', $record->supporting_docs);
+		$form_elements[2]['_checkbox_value'] = $supporting_docs;
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('claims/forms/_form_assessment',
+			[
+				'form_elements' => $form_elements,
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Update Survey settlement
+	 *
+	 * @param int $id
+	 * @return json
+	 */
+	public function settlement($id, $ref)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('claims', 'update.claim.settlement') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+		/**
+		 * Status Qualifies
+		 */
+		if($record->status !== IQB_CLAIM_STATUS_VERIFIED)
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('update_settlement', $record->policy_id, $record, $ref);
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('claims/forms/_form_settlement',
+			[
+				'form_elements' => $this->_v_rules('update_settlement'),
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Update Survey scheme
+	 *
+	 * @param int $id
+	 * @return json
+	 */
+	public function scheme($id, $ref)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('claims', 'update.claim.scheme') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+		/**
+		 * Status Qualifies
+		 */
+		if($record->status !== IQB_CLAIM_STATUS_VERIFIED)
+		{
+			$this->dx_auth->deny_access();
+		}
+
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('update_scheme', $record->policy_id, $record, $ref);
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('claims/forms/_form_scheme',
+			[
+				'form_elements' => $this->_v_rules('update_scheme'),
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
 
 	// --------------------------------------------------------------------
 	//  DETAILS
@@ -1177,8 +1468,9 @@ class Claims extends MY_Controller
 		 * RI Transaction Detail Rows
 		 */
 		$data = [
-			'record' 	=> $record,
-			'surveyors' => $surveyors
+			'record' 		=> $record,
+			'surveyors' 	=> $surveyors,
+			'draft_elements' => $this->claim_model->draft_v_rules(),
 		];
 
 		$page_header = 'Claim Details - <span id="page-title-claim-code">' . $record->claim_code . '</span>';

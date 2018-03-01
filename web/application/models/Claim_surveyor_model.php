@@ -62,6 +62,17 @@ class Claim_surveyor_model extends MY_Model
                 '_required'     => true
             ],
             [
+                'field' => 'assigned_date[]',
+                '_key'  => 'assigned_date',
+                'label' => 'Assigned Date',
+                'rules' => 'trim|required|valid_date',
+                '_type'             => 'date',
+                '_default'          => date('Y-m-d'),
+                '_extra_attributes' => 'data-provide="datepicker-inline" style="min-width:100px"',
+                '_show_label'       => false,
+                '_required'         => true
+            ],
+            [
                 'field' => 'survey_type[]',
                 '_key' => 'survey_type',
                 'label' => 'Surveyor Type',
@@ -73,7 +84,7 @@ class Claim_surveyor_model extends MY_Model
             ],
             [
                 'field' => 'surveyor_fee[]',
-                '_key' => 'survey_type',
+                '_key' => 'surveyor_fee',
                 'label' => 'Surveyor Fee (Rs.)',
                 'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                 '_type' => 'text',
@@ -94,13 +105,67 @@ class Claim_surveyor_model extends MY_Model
      */
     public function assign_to_claim( $claim_id, $data )
     {
-        return false;
+        // return false;
+        /**
+         * Variables
+         */
+        $to_del_ids         = [];
+        $to_edit_sids        = [];
+        $to_edit_data       = [];
 
+        $post_sids = [];
+        foreach($data['surveyor_id'] as $sid)
+        {
+            $post_sids[] = (int)$sid;
+        }
+
+        /**
+         * Prepare Data
+         */
         $old_surveyors = $this->get_many_by_claim($claim_id);
+        $old_sids = [];
+        foreach($old_surveyors as $single)
+        {
+            $sid = (int)$single->surveyor_id;
+            $old_sids[] = $sid;
+
+            if( !in_array($sid, $post_sids) )
+            {
+                $to_del_ids[] = (int)$single->id;
+            }
+            else
+            {
+                $to_edit_sids[] = $sid;
+
+                // index of this sid
+                $index = array_search($sid, $post_sids);
+                $to_edit_data["{$single->id}"] = [
+                    'assigned_date' => $data['assigned_date'][$index],
+                    'survey_type'   => $data['survey_type'][$index],
+                    'surveyor_fee'  => $data['surveyor_fee'][$index],
+                ];
+            }
+        }
+
+        $to_insert_sids = array_diff($post_sids, $to_edit_sids);
+        $batch_data = [];
+        foreach($to_insert_sids as $sid)
+        {
+            // index of this sid
+            $index = array_search($sid, $post_sids);
+            $batch_data[] = [
+                'claim_id'      => $claim_id,
+                'surveyor_id'   => $sid,
+                'assigned_date' => $data['assigned_date'][$index],
+                'survey_type'   => $data['survey_type'][$index],
+                'surveyor_fee'  => $data['surveyor_fee'][$index],
+            ];
+        }
 
 
         // Disable DB Debug for transaction to work
         $this->db->db_debug = FALSE;
+        $done               = TRUE;
 
         // Use automatic transaction
         $this->db->trans_start();
@@ -108,25 +173,36 @@ class Claim_surveyor_model extends MY_Model
             /**
              * Task 1: Delete old Records(Not in New)
              */
-            parent::delete_by(['claim_id' => $claim_id]);
+            if($to_del_ids)
+            {
+                $this->db->where_in('id', $to_del_ids)
+                        ->delete($this->table_name);
+            }
+
 
             /**
-             * Task 2: Batch Insert New Claim Data
+             * Task 2: Update on Existing Old
              */
-
-
-            // Task a: Insert Claim Data
-            $done = parent::update($id, $data, TRUE);
-
-            // Task b. Insert Broker Relations
-            if($done)
+             if($to_edit_data)
             {
-                // Log Activity
-                $this->log_activity($id, 'U');
-
-                // Clean Cache by this Policy
-                $this->clear_cache( 'srv_lstbyclm_' . $claim_id );
+                foreach($to_edit_data as $id=>$edit_data)
+                {
+                    parent::update($id, $edit_data, TRUE);
+                }
             }
+
+            /**
+             * Task 3: Batch insert new data (if any)
+             */
+            if($batch_data)
+            {
+                parent::insert_batch($batch_data, TRUE);
+            }
+
+            /**
+             * Task 4: Clear cache for this claim
+             */
+            $this->clear_cache( 'srv_lstbyclm_' . $claim_id );
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();

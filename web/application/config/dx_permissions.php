@@ -353,6 +353,7 @@ $config['DX_permissions'] = [
 			'assign.claim.surveyors',
 			'update.claim.settlement',
 			'update.claim.assessment',
+			'update.claim.scheme',
 
 			// Status Permission
 			'status.to.draft',

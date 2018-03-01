@@ -184,4 +184,53 @@ if ( ! function_exists('CLAIM__is_editable'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('CLAIM__approval_constraint'))
+{
+	/**
+	 * Is Claim Eligible to approve?
+	 *
+	 * Check if the given policy claim is valid for approval.
+	 * The following criteria must be met:
+	 *
+	 * 		1. settlement_claim_amount, settlement_amount_breakdown must be set
+     *  	2. claim_scheme_id must be set
+     *  	3. assessment_brief must be set
+	 *
+	 * @param object $record 	Claim Record
+	 * @param bool $terminate_on_fail Terminate Right Here if not editable.
+	 * @return	bool
+	 */
+	function CLAIM__approval_constraint($record, $terminate_on_fail = TRUE )
+	{
+		// Authorized Flag ?
+		$__flag_authorized 		= TRUE;
+
+
+		/**
+		 * Check Claim Criteria
+		 */
+		if(
+			$record->settlement_claim_amount === NULL
+				||
+			$record->claim_scheme_id === NULL
+				||
+			$record->assessment_brief === NULL
+		)
+		{
+			$__flag_authorized = FALSE;
+		}
+
+		// Terminate on Exit?
+		if( $__flag_authorized === FALSE && $terminate_on_fail == TRUE)
+		{
+			$CI->dx_auth->deny_access();
+			exit(1);
+		}
+
+		return $__flag_authorized;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 
