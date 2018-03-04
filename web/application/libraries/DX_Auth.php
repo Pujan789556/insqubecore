@@ -591,7 +591,7 @@ class DX_Auth
 		return $result;
 	}
 
-	function deny_access($uri = 'deny')
+	function deny_access($uri = 'deny', $message='')
 	{
 		$this->ci->load->helper('url');
 
@@ -609,6 +609,7 @@ class DX_Auth
 			// else if I came across using /auth/deny, it will simply show the
 			// same message creating confusion
 			$this->ci->session->set_flashdata('auth_flag_access_deny', TRUE); // added by IP
+			$this->ci->session->set_flashdata('auth_deny_message', $message); // added by IP
 
 			// now redirect to deny location
 			redirect($this->ci->config->item('DX_deny_uri'), 'location');

@@ -505,8 +505,9 @@ class Auth extends MY_Controller
 			$this->dx_auth->deny_access('login');
 		}
 
-		// Check Deny Flag Set?
-		$flag = $this->session->flashdata('auth_flag_access_deny');
+		// Check Deny Flag Set, Message?
+		$flag 		= $this->session->flashdata('auth_flag_access_deny');
+		$message 	= $this->session->flashdata('auth_deny_message');
 
 		if( !$flag )
 		{
@@ -515,7 +516,7 @@ class Auth extends MY_Controller
 
 		$deny_data = [
 			'title' 		=> 'Permission Denied',
-			'auth_message' 	=> 'You do not have sufficient permission to view this resource and/or perform this action.<br/><br/> Go to your ' . anchor('dashboard', 'Dashboard'),
+			'auth_message' 	=> $message ? $message : 'You do not have sufficient permission to view this resource and/or perform this action.<br/><br/> Go to your ' . anchor('dashboard', 'Dashboard'),
 			'alert_type' 	=> 'danger'
 		];
 
