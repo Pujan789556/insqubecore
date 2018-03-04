@@ -936,6 +936,108 @@ class Claims extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Approve a Claim
+	 *
+	 * @param int $id
+	 * @return json
+	 */
+	public function approve($id, $ref)
+	{
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+
+		/**
+		 * Check Permission
+		 * -----------------
+		 * You need to have permission to modify the given status.
+		 */
+		$this->__check_status_permission($record->status);
+
+
+
+		/**
+		 * Meet the Status Pre-Requisite ?
+		 */
+		$this->__status_qualifies($record->status, IQB_CLAIM_STATUS_APPROVED );
+
+
+		/**
+		 * Check approval constraint
+		 */
+		CLAIM__approval_constraint($record);
+
+		/**
+		 * Let's Update the Status
+		 */
+		$done = $this->claim_model->approve($record);
+
+		if( $done )
+		{
+			$record 		= $this->claim_model->get($record->id);
+			$view_data 		= ['record' => $record];
+			$partial_view 	=  'claims/_single_row';
+
+			// If Reference is from Details Page
+			if($ref == 'd')
+			{
+				$partial_view 	=  'claims/_details';
+				$view_data = array_merge( $view_data,
+								[
+								'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+								'draft_elements' 	=> $this->claim_model->draft_v_rules()
+								]);
+			}
+
+			// DOM Box
+			$method = 'replaceWith';
+			if($ref == 'l')
+			{
+				$box = '#_data-row-claims-' . $record->id;
+			}
+			else
+			{
+				$box = '#claim-details';
+			}
+
+			// Get the html
+			$html = $this->load->view($partial_view, $view_data, TRUE);
+
+			$ajax_data = [
+				'message' 	=> 'Successfully Approved!',
+				'status'  	=> 'success',
+				'multipleUpdate' => [
+					[
+						'box' 		=> $box,
+						'method' 	=> $method,
+						'html'		=> $html
+					]
+				]
+			];
+			return $this->template->json($ajax_data);
+		}
+		else
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Could not approve.'
+			]);
+		}
+	}
+
+	// --------------------------------------------------------------------
+
 	// --------------------------------------------------------------------
 
 	/**

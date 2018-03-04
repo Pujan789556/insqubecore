@@ -105,7 +105,8 @@ class Claim_surveyor_model extends MY_Model
      */
     public function assign_to_claim( $claim_id, $data )
     {
-        // return false;
+        $this->load->model('claim_model');
+
         /**
          * Variables
          */
@@ -117,6 +118,12 @@ class Claim_surveyor_model extends MY_Model
         foreach($data['surveyor_id'] as $sid)
         {
             $post_sids[] = (int)$sid;
+        }
+
+        $total_surveyor_fee_amount = 0.00;
+        foreach($data['surveyor_fee'] as $surveyor_fee)
+        {
+            $total_surveyor_fee_amount += (float)$surveyor_fee;
         }
 
         /**
@@ -200,9 +207,19 @@ class Claim_surveyor_model extends MY_Model
             }
 
             /**
-             * Task 4: Clear cache for this claim
+             * Task 4: Update Total Surveyor Fee On Claim Table
+             */
+            $claim_data = [
+                'total_surveyor_fee_amount' => $total_surveyor_fee_amount
+            ];
+            $this->claim_model->update_data($claim_id, $claim_data);
+
+
+            /**
+             * Task 5: Clear cache for this claim
              */
             $this->clear_cache( 'srv_lstbyclm_' . $claim_id );
+
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();

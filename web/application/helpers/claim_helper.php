@@ -223,7 +223,10 @@ if ( ! function_exists('CLAIM__approval_constraint'))
 		// Terminate on Exit?
 		if( $__flag_authorized === FALSE && $terminate_on_fail == TRUE)
 		{
-			$CI->dx_auth->deny_access();
+			$CI =& get_instance();
+
+			$message = 'You must first set "Claim Settlement Amount", "Claim Scheme" & "Settlement Brief" in order to approve a claim.';
+			$CI->dx_auth->deny_access('deny', $message);
 			exit(1);
 		}
 

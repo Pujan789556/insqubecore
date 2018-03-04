@@ -226,11 +226,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  * Load Rows & Next Link (if any)
                  */
                 $this->load->view('claims/_list_surveyors', ['records' => $surveyors]);
-                $total_surveyor_fee = 0;
-                foreach($surveyors as $single)
-                {
-                    $total_surveyor_fee += $single->surveyor_fee;
-                }
                 ?>
             </tbody>
         </table>
@@ -331,11 +326,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             </tr>
                             <tr>
                                 <th colspan="4">Surveyor Fee (Rs.)</th>
-                                <th class="text-right"><?php echo number_format($total_surveyor_fee, 2, '.', '') ?></th>
+                                <th class="text-right"><?php echo number_format($record->total_surveyor_fee_amount, 2, '.', '') ?></th>
                             </tr>
                             <tr>
                                 <th colspan="4">Total Settlement Amount (Rs.)</th>
-                                <th class="text-right"><?php echo number_format($total_surveyor_fee + $record->settlement_claim_amount, 2, '.', '') ?></th>
+                                <th class="text-right"><?php echo number_format($record->total_surveyor_fee_amount + $record->settlement_claim_amount, 2, '.', '') ?></th>
                             </tr>
                         </tfoot>
                     </table>

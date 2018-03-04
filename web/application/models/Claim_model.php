@@ -731,7 +731,7 @@ class Claim_model extends MY_Model
      * 2. Claim settlement amount/breakdown
      * 3. Claim Scheme etc
      */
-    public function update_data($id, $data, $policy_id)
+    public function update_data($id, $data, $policy_id = NULL)
     {
         // Updated by/at
         $data = $this->modified_on(['fields' => $data]);
@@ -753,6 +753,10 @@ class Claim_model extends MY_Model
                 $this->log_activity($id, 'U');
 
                 // Clean Cache by policy belonging to this policy
+                if( !$policy_id )
+                {
+                    $policy_id = $this->policy_id($id);
+                }
                 $this->clear_cache( 'claim_list_by_policy_' . $policy_id );
             }
 
@@ -879,6 +883,66 @@ class Claim_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Approve a Claim
+     *
+     * @param object $record
+     * @return bool
+     */
+    public function approve( $record )
+    {
+        $this->load->model('claim_surveyor_model');
+
+        $data = [
+            'status'                    => IQB_CLAIM_STATUS_APPROVED,
+            'approved_at'               => $this->set_date(),
+            'approved_by'               => $this->dx_auth->get_user_id()
+        ];
+
+        // Updated by/at
+        $data = $this->modified_on(['fields' => $data]);
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Task a: Update Status
+            $done = $this->db->where('id', $record->id)
+                        ->update($this->table_name, $data);
+
+
+
+            // Task b. activity, cache
+            if($done)
+            {
+                // Log Activity
+                $this->log_activity($record->id, 'U');
+
+                // Clean Cache by policy belonging to this policy
+                $this->clear_cache( 'claim_list_by_policy_' . $record->policy_id );
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
 
     /**
      * Generate Claim Number
@@ -906,6 +970,16 @@ class Claim_model extends MY_Model
     public function row($id)
     {
         return $this->get($id);
+    }
+
+    // ----------------------------------------------------------------
+
+    public function policy_id($id)
+    {
+        return $this->db->select('CLM.policy_id')
+                        ->from($this->table_name . ' CLM')
+                        ->where('CLM.id', $id)
+                        ->get()->row()->policy_id;
     }
 
     // ----------------------------------------------------------------
