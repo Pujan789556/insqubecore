@@ -16,7 +16,7 @@ class Claim_model extends MY_Model
     // protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'branch_id', 'accident_date', 'accident_time', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'total_surveyor_fee_amount', 'settlement_claim_amount', 'settlement_amount_breakdown', 'flag_paid', 'status', 'status_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'branch_id', 'accident_date', 'accident_time', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'total_surveyor_fee_amount', 'settlement_claim_amount', 'flag_paid', 'status', 'status_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -68,12 +68,21 @@ class Claim_model extends MY_Model
                     '_required' => true
                 ],
                 [
+                    'field' => 'accident_location',
+                    'label' => 'Accident Location',
+                    'rules' => 'trim|required|htmlspecialchars|max_length[200]',
+                    '_type'     => 'textarea',
+                    'rows'      => 4,
+                    '_required' => true
+                ],
+                [
                     'field' => 'accident_details',
                     'label' => 'Accident Details',
                     'rules' => 'trim|required|htmlspecialchars',
                     '_type'     => 'textarea',
                     '_required' => true
-                ]
+                ],
+
             ],
 
             /**
@@ -404,56 +413,6 @@ class Claim_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Claim Settlement Validation Rules
-     *
-     * @param bool $formatted
-     * @return array
-     */
-    public function settlement_v_rules($formatted = TRUE )
-    {
-        return [
-            [
-                'field' => 'settlement[title][]',
-                'label' => 'Title',
-                'rules' => 'trim|required|htmlspecialchars|max_length[200]',
-                '_key'  => 'title',
-                '_type' => 'text',
-                '_show_label'   => false,
-                '_required'     => true
-            ],
-            [
-                'field' => 'settlement[claimed_amount][]',
-                'label' => 'Claimed Amount',
-                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                '_key'  => 'claimed_amount',
-                '_type' => 'text',
-                '_show_label'   => false,
-                '_required'     => true
-            ],
-            [
-                'field' => 'settlement[assessed_amount][]',
-                'label' => 'Assessed Amount',
-                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                '_key'  => 'assessed_amount',
-                '_type' => 'text',
-                '_show_label'   => false,
-                '_required'     => true
-            ],
-            [
-                'field' => 'settlement[recommended_amount][]',
-                'label' => 'Recommended Amount',
-                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                '_key'  => 'recommended_amount',
-                '_type' => 'text',
-                '_show_label'   => false,
-                '_required'     => true
-            ],
-        ];
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
      * Claim Scheme Validation Rules
      *
      * @param bool $formatted
@@ -507,7 +466,7 @@ class Claim_model extends MY_Model
     public function add_draft( $data )
     {
         // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
+        $this->db->db_debug = TRUE;
         $id                 = FALSE;
 
         // Use automatic transaction
@@ -563,35 +522,38 @@ class Claim_model extends MY_Model
     {
         $this->load->library('Token');
 
+        /**
+         * Build Draft Data
+         */
+        $draft_data = $this->__build_draft_data($data);
 
         /**
-         * Policy Code - Draft One & Policy Number
-         *
-         * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
+         * POLICY ID
          */
-        $data['claim_code'] = 'DRAFT-' . $this->token->generate(10);
+        $draft_data['policy_id'] = $data['policy_id'];
+
+        /**
+         * Claim DRAFT
+         *
+         * Format: DRAFT-<RANDOMCHARS>
+         */
+        $draft_data['claim_code'] = 'DRAFT-' . $this->token->generate(10);
 
 
         // Fiscal Year ID
-        $data['fiscal_yr_id'] = $this->current_fiscal_year->id;
+        $draft_data['fiscal_yr_id'] = $this->current_fiscal_year->id;
 
         // Branch ID
-        $data['branch_id']      = $this->dx_auth->get_branch_id();
-
+        $draft_data['branch_id']      = $this->dx_auth->get_branch_id();
 
         // Status
-        $data['status'] = IQB_CLAIM_STATUS_DRAFT;
+        $draft_data['status'] = IQB_CLAIM_STATUS_DRAFT;
 
-        /**
-         * Death Injured Data
-         */
-        $data['death_injured'] = $this->__build_death_injured_data($data['death_injured']);
+        // Creator Info
+        $draft_data['created_at'] = $data['created_at'];
+        $draft_data['created_by'] = $data['created_by'];
 
-
-        // Refactor Date & time
-        $data = $this->__refactor_datetime_fields($data);
-
-        return $data;
+        return $draft_data;
     }
 
     // ----------------------------------------------------------------
@@ -657,33 +619,57 @@ class Claim_model extends MY_Model
     public function before_update__defaults($data)
     {
         /**
-         * Death Injured Data
+         * Build Draft Data
          */
-        $data['death_injured'] = $this->__build_death_injured_data($data['death_injured']);
+        $draft_data = $this->__build_draft_data($data);
 
+        // Creator Info
+        $draft_data['updated_at'] = $data['updated_at'];
+        $draft_data['updated_by'] = $data['updated_by'];
 
-        // Refactor Date & time
-        $data = $this->__refactor_datetime_fields($data);
-
-        return $data;
+        return $draft_data;
     }
 
 
 
     // ----------------------------------------------------------------
 
+    private function __build_draft_data($data)
+    {
+        $columns = ['accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount'];
+
+        $draft_data = [];
+        foreach($columns as $key)
+        {
+            $draft_data[$key] = $data[$key];
+        }
+
+        return array_merge(
+            /**
+             * Datetime Columns
+             */
+            $this->__refactor_datetime_fields($data),
+
+            /**
+             * Other columns that need no modification
+             */
+            $draft_data,
+
+            /**
+             * Deathinjured json data
+             */
+            $this->__build_death_injured_data($data['death_injured'])
+        );
+    }
+
+    // ----------------------------------------------------------------
+
         private function __refactor_datetime_fields($data)
         {
-            // Date
-            $data['accident_date']    = date('Y-m-d', strtotime($data['accident_date_time']));
-
-            // Time
-            $data['accident_time']    = date('H:i:00', strtotime($data['accident_date_time']));
-
-            // unset
-            unset($data['accident_date_time']);
-
-            return $data;
+            return [
+                'accident_date' => date('Y-m-d', strtotime($data['accident_date_time'])),
+                'accident_time' => date('H:i:00', strtotime($data['accident_date_time']))
+            ];
         }
 
     // ----------------------------------------------------------------
@@ -719,7 +705,7 @@ class Claim_model extends MY_Model
                 $death_injured = json_encode($records);
             }
 
-            return $death_injured;
+            return ['death_injured' => $death_injured];
         }
 
 
@@ -777,48 +763,6 @@ class Claim_model extends MY_Model
         return $done;
     }
 
-    // ----------------------------------------------------------------
-
-    /**
-     * Update Claim Settlement Data
-     *
-     *  Tasks:
-     *      1. Build Settlement Breakdown - JSON
-     *      2. Compute total settlement amount
-     *
-     * @param int $id Claim ID
-     * @param array $data Post Data
-     * @param int $policy_id
-     * @return bool
-     */
-    public function update_settlement($id, $data, $policy_id)
-    {
-        /**
-         * Build Settlement Breakdown
-         */
-        $settlement_data = $data['settlement'];
-        $count                      = count($settlement_data['title']);
-        $settlement_claim_amount    = 0.00;
-        $brekdown = [];
-
-        for($i=0; $i < $count; $i++)
-        {
-            $settlement_claim_amount += (float)$settlement_data['recommended_amount'][$i];
-            $breakdown[] = [
-                'title'                 => $settlement_data['title'][$i],
-                'claimed_amount'        => $settlement_data['claimed_amount'][$i],
-                'assessed_amount'       => $settlement_data['assessed_amount'][$i],
-                'recommended_amount'    => $settlement_data['recommended_amount'][$i],
-            ];
-        }
-
-        $update_data = [
-            'settlement_claim_amount'       => $settlement_claim_amount,
-            'settlement_amount_breakdown'   => json_encode($breakdown)
-        ];
-
-        return $this->update_data($id, $update_data, $policy_id);
-    }
 
     // ----------------------------------------------------------------
 

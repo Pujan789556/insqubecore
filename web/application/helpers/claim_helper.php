@@ -192,7 +192,7 @@ if ( ! function_exists('CLAIM__approval_constraint'))
 	 * Check if the given policy claim is valid for approval.
 	 * The following criteria must be met:
 	 *
-	 * 		1. settlement_claim_amount, settlement_amount_breakdown must be set
+	 * 		1. settlement_claim_amount must be set
      *  	2. claim_scheme_id must be set
      *  	3. assessment_brief must be set
 	 *
@@ -231,6 +231,55 @@ if ( ! function_exists('CLAIM__approval_constraint'))
 		}
 
 		return $__flag_authorized;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__settlement_category_dropdown'))
+{
+	/**
+	 * Get Claim Settlement Category Dropdown
+	 *
+	 * @return	array
+	 */
+	function CLAIM__settlement_category_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			'OD' => 'Own Damage',
+			'TP' => 'Third Party'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__settlement_subcategory_dropdown'))
+{
+	/**
+	 * Get Claim Settlement Category Dropdown
+	 *
+	 * @return	array
+	 */
+	function CLAIM__settlement_subcategory_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			'D' => 'Death',
+			'I' => 'Injury',
+			'P' => 'Property Damage'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
 	}
 }
 

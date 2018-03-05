@@ -136,7 +136,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
              *
              *  Prerequisite
              *  --------------
-             *  1. settlement_claim_amount, settlement_amount_breakdown must be set
+             *  1. settlement_claim_amount must be set
              *  2. claim_scheme_id must be set
              *  3. assessment_brief must be set
              *

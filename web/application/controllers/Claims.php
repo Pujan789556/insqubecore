@@ -34,6 +34,7 @@ class Claims extends MY_Controller
 		// Load Model
 		$this->load->model('claim_model');
 		$this->load->model('claim_surveyor_model');
+		$this->load->model('claim_settlement_model');
 		$this->load->model('policy_model');
 
 		// Helper
@@ -508,7 +509,7 @@ class Claims extends MY_Controller
 						break;
 
 					case 'update_settlement':
-						$done = $this->claim_model->update_settlement($record->id, $data, $policy_id);
+						$done = $this->claim_settlement_model->assign_to_claim($record->id, $data);
 						break;
 
 					case 'update_scheme':
@@ -561,8 +562,9 @@ class Claims extends MY_Controller
 					$partial_view 	=  'claims/_details';
 					$view_data = array_merge( $view_data,
 									[
-									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
-									'draft_elements' 	=> $this->claim_model->draft_v_rules()
+										'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+										'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
+										'draft_elements' 	=> $this->claim_model->draft_v_rules()
 									]);
 				}
 
@@ -631,7 +633,7 @@ class Claims extends MY_Controller
 					break;
 
 				case 'update_settlement':
-					$rules = $this->claim_model->settlement_v_rules($formatted);
+					$rules = $this->claim_settlement_model->validation_rules;
 					break;
 
 				case 'update_scheme':
@@ -796,8 +798,9 @@ class Claims extends MY_Controller
 				$partial_view 	=  'claims/_details';
 				$view_data = array_merge( $view_data,
 								[
-								'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
-								'draft_elements' 	=> $this->claim_model->draft_v_rules()
+									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+									'settlements' 	=> $this->claim_settlement_model->get_many_by_claim($record->id),
+									'draft_elements' 	=> $this->claim_model->draft_v_rules()
 								]);
 			}
 
@@ -893,8 +896,9 @@ class Claims extends MY_Controller
 				$partial_view 	=  'claims/_details';
 				$view_data = array_merge( $view_data,
 								[
-								'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
-								'draft_elements' 	=> $this->claim_model->draft_v_rules()
+									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+									'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
+									'draft_elements' 	=> $this->claim_model->draft_v_rules()
 								]);
 			}
 
@@ -995,8 +999,9 @@ class Claims extends MY_Controller
 				$partial_view 	=  'claims/_details';
 				$view_data = array_merge( $view_data,
 								[
-								'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
-								'draft_elements' 	=> $this->claim_model->draft_v_rules()
+									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+									'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
+									'draft_elements' 	=> $this->claim_model->draft_v_rules()
 								]);
 			}
 
@@ -1312,13 +1317,6 @@ class Claims extends MY_Controller
 		}
 
 
-		/**
-		 * Get surveyors assigned to this claim
-		 */
-		$surveyors = $this->claim_surveyor_model->get_many_by_claim($record->id);
-
-
-
 		// Form Submitted? Save the data
 		$json_data = $this->_save('assign_surveyors', $record->policy_id, $record, $ref);
 
@@ -1329,7 +1327,7 @@ class Claims extends MY_Controller
 			[
 				'form_elements' => $this->claim_surveyor_model->validation_rules,
 				'record' 		=> $record,
-				'surveyors' 	=> $surveyors
+				'surveyors' 	=> $this->claim_surveyor_model->get_many_by_claim($record->id)
 			], TRUE);
 
 		// Return HTML
@@ -1458,6 +1456,7 @@ class Claims extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
+
 		// Form Submitted? Save the data
 		$json_data = $this->_save('update_settlement', $record->policy_id, $record, $ref);
 
@@ -1465,7 +1464,8 @@ class Claims extends MY_Controller
 		$json_data['form'] = $this->load->view('claims/forms/_form_settlement',
 			[
 				'form_elements' => $this->_v_rules('update_settlement'),
-				'record' 		=> $record
+				'record' 		=> $record,
+				'settlements' 	=> $this->claim_settlement_model->get_many_by_claim($record->id)
 			], TRUE);
 
 		// Return HTML
@@ -1562,16 +1562,12 @@ class Claims extends MY_Controller
 
 
 		/**
-		 * Get surveyors assigned to this claim
-		 */
-		$surveyors = $this->claim_surveyor_model->get_many_by_claim($record->id);
-
-		/**
 		 * RI Transaction Detail Rows
 		 */
 		$data = [
 			'record' 		=> $record,
-			'surveyors' 	=> $surveyors,
+			'surveyors' 	=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+			'settlements' 	=> $this->claim_settlement_model->get_many_by_claim($record->id),
 			'draft_elements' => $this->claim_model->draft_v_rules(),
 		];
 

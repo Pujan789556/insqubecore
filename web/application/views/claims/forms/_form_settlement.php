@@ -3,7 +3,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Form : Claim - Settlement Breakdown
  */
-$settlement_breakdown = json_decode($record->settlement_amount_breakdown ?? '[]');
 ?>
 <?php echo form_open( $this->uri->uri_string(),
                         [
@@ -35,9 +34,9 @@ $settlement_breakdown = json_decode($record->settlement_amount_breakdown ?? '[]'
                 <tbody class="form-inline">
                     <?php
                     $i = 0;
-                    if($settlement_breakdown):
-                        foreach ($settlement_breakdown as $single): ?>
-                            <tr <?php echo $i == 0 ? 'id="__settlement_breakdown_row"' : '' ?>>
+                    if($settlements):
+                        foreach ($settlements as $single): ?>
+                            <tr <?php echo $i == 0 ? 'id="__settlements_row"' : '' ?>>
                                 <?php foreach($form_elements as $element):?>
                                     <td>
                                         <?php
@@ -64,7 +63,7 @@ $settlement_breakdown = json_decode($record->settlement_amount_breakdown ?? '[]'
                         $i++;
                         endforeach;
                     else:?>
-                        <tr id="__settlement_breakdown_row">
+                        <tr id="__settlements_row">
                             <?php foreach($form_elements as $element):?>
                                 <td>
                                     <?php
@@ -85,7 +84,7 @@ $settlement_breakdown = json_decode($record->settlement_amount_breakdown ?? '[]'
             </table>
         </div>
         <div class="box-footer bg-info">
-            <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__settlement_breakdown_row', this)">Add More</a>
+            <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__settlements_row', this)">Add More</a>
         </div>
     </div>
 
