@@ -196,6 +196,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <?php endif;?>
 
         <?php endif;?>
+        <?php if($record->status === IQB_CLAIM_STATUS_APPROVED && $this->dx_auth->is_authorized('claims', 'status.to.settled')): ?>
+            <li>
+                    <a href="#"
+                        title="Settle Claim"
+                        data-toggle="tooltip"
+                        data-confirm="true"
+                        class="text-green trg-dialog-action"
+                        data-message="Are you sure you want to do this?<br/>This will generate the account voucher and set status to 'SETTLED'. The action can not be <strong>UNDONE</strong>."
+                        data-url="<?php echo site_url('claims/settle/' . $record->id . '/' . $ref);?>">
+                        <i class="fa fa-dollar"></i> Settle</a>
+                </li>
+        <?php endif;?>
     </ul>
 </div>
 

@@ -16,6 +16,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->type == '1' ? 'Individual' : 'Company';?></td>
 	<td>
 		<?php
+		if($record->flag_vat_registered)
+		{
+			$flag_str = '<i class="fa fa-check text-green" title="Yes" data-toggle="tooltip"></i>';
+		}
+		else
+		{
+			$flag_str = '<i class="fa fa-minus" title="No" data-toggle="tooltip"></i>';
+		}
+		echo $flag_str;
+		?>
+	</td>
+	<td>
+		<?php
 		if($record->active)
 		{
 			$active_str = '<i class="fa fa-circle text-green" title="Active" data-toggle="tooltip"></i>';

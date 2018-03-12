@@ -367,7 +367,16 @@ class Surveyors extends MY_Controller
 			/**
 			 * Validate Post before Uploading Picture
 			 */
-			$rules = array_merge($this->surveyor_model->validation_rules, get_contact_form_validation_rules());
+			$v_rules = $this->surveyor_model->validation_rules;
+
+			// VAT Registered?
+			if($this->input->post('flag_vat_registered') == IQB_FLAG_ON)
+			{
+				$v_rules[3]['rules'] = 'trim|required|max_length[40]';
+			}
+
+
+			$rules = array_merge($v_rules, get_contact_form_validation_rules());
 			$this->form_validation->set_rules($rules);
 
 			if( $this->form_validation->run() === TRUE )
@@ -386,6 +395,9 @@ class Surveyors extends MY_Controller
 
 	            	$data = $this->input->post();
 	            	$data['picture'] = $picture;
+
+	            	// Nullify checkbox if not set
+	            	$data['flag_vat_registered'] = $data['flag_vat_registered'] ?? NULL;
 
 	            	// Insert or Update?
 					if($action === 'add')

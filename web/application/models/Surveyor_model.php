@@ -19,7 +19,7 @@ class Surveyor_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "name", "picture", "type", "active", "contact", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ['id', 'name', 'picture', 'type', 'flag_vat_registered', 'vat_no', 'active', 'contact', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [
         [
@@ -36,6 +36,21 @@ class Surveyor_model extends MY_Model
             '_type'     => 'dropdown',
             '_data'     => [ '' => 'Select...', '1' => 'Individual', '2' => 'Company'],
             '_required' => true
+        ],
+        [
+            'field' => 'flag_vat_registered',
+            'label' => 'Vat Registered',
+            'rules' => 'trim|integer|exact_length[1]|in_list[1]',
+            '_type'           => 'checkbox',
+            '_checkbox_value' => '1',
+            '_required' => true
+        ],
+        [
+            'field' => 'vat_no',
+            'label' => 'VAT Number',
+            'rules' => 'trim|max_length[40]',
+            '_type'     => 'text',
+            '_required' => false
         ],
         [
             'field' => 'active',
@@ -103,7 +118,7 @@ class Surveyor_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('S.id, S.name, S.type, S.active')
+        $this->db->select('S.id, S.name, S.type, S.flag_vat_registered, S.active')
                  ->from($this->table_name . ' as S');
 
         if(!empty($params))
