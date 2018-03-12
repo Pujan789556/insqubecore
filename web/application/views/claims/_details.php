@@ -220,8 +220,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <th>Surveyor</th>
                     <th>Type</th>
                     <th>Assigned Date</th>
-                    <th>Fee (Rs.)</th>
                     <th>Status</th>
+                    <th class="text-right">Fee (Rs.)</th>
                 </tr>
             </thead>
             <tbody id="search-result-claim-surveyors">

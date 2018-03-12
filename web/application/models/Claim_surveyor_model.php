@@ -16,7 +16,7 @@ class Claim_surveyor_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'claim_id', 'surveyor_id', 'survey_type', 'surveyor_fee', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'claim_id', 'surveyor_id', 'survey_type', 'surveyor_fee', 'vat_amount', 'tds_amount', 'status', 'assigned_date', 'vouchered_date', 'paid_date', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -106,6 +106,8 @@ class Claim_surveyor_model extends MY_Model
     public function assign_to_claim( $claim_id, $data )
     {
         $this->load->model('claim_model');
+        $this->load->model('ac_duties_and_tax_model');
+        $this->load->model('surveyor_model');
 
         /**
          * Variables
@@ -151,6 +153,20 @@ class Claim_surveyor_model extends MY_Model
                     'survey_type'   => $data['survey_type'][$index],
                     'surveyor_fee'  => $data['surveyor_fee'][$index],
                 ];
+
+                // TDS and VAT
+                $vat_amount = NULL;
+                $tds_amount = NULL;
+                if($single->flag_vat_registered == IQB_FLAG_ON)
+                {
+                    $vat_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $data['surveyor_fee'][$index]);
+                    $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVR, $data['surveyor_fee'][$index]);
+                }
+                else{
+                    $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVNR, $data['surveyor_fee'][$index]);
+                }
+                $to_edit_data["{$single->id}"]['vat_amount'] = $vat_amount;
+                $to_edit_data["{$single->id}"]['tds_amount'] = $tds_amount;
             }
         }
 
@@ -160,12 +176,28 @@ class Claim_surveyor_model extends MY_Model
         {
             // index of this sid
             $index = array_search($sid, $post_sids);
+            $surveyor = $this->surveyor_model->find($sid);
+
+            // TDS and VAT
+            $vat_amount = NULL;
+            $tds_amount = NULL;
+            if($surveyor->flag_vat_registered == IQB_FLAG_ON)
+            {
+                $vat_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $data['surveyor_fee'][$index]);
+                $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVR, $data['surveyor_fee'][$index]);
+            }
+            else{
+                $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVNR, $data['surveyor_fee'][$index]);
+            }
+
             $batch_data[] = [
                 'claim_id'      => $claim_id,
                 'surveyor_id'   => $sid,
                 'assigned_date' => $data['assigned_date'][$index],
                 'survey_type'   => $data['survey_type'][$index],
                 'surveyor_fee'  => $data['surveyor_fee'][$index],
+                'vat_amount'    => $vat_amount,
+                'tds_amount'    => $tds_amount,
             ];
         }
 
@@ -285,7 +317,7 @@ class Claim_surveyor_model extends MY_Model
         {
             $list = $this->db->select(
                                 'CS.*, ' .
-                                'S.name AS surveyor_name'
+                                'S.name AS surveyor_name, S.flag_vat_registered'
                             )
                             ->from($this->table_name . ' CS')
                             ->join('master_surveyors S', 'S.id = CS.surveyor_id')
