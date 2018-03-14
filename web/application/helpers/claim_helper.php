@@ -285,4 +285,29 @@ if ( ! function_exists('CLAIM__settlement_subcategory_dropdown'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('CLAIM__flag_surveyor_voucher_dropdown'))
+{
+	/**
+	 * Get Claim flag_surveyor_voucher Dropdown
+	 *
+	 * @return	bool
+	 */
+	function CLAIM__flag_surveyor_voucher_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_CLAIM_FLAG_SRV_VOUCHER_NOT_REQUIRED 	=> 'Not Required',
+			IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED 		=> 'Required',
+			IQB_CLAIM_FLAG_SRV_VOUCHER_VOUCHERED 		=> 'Vouchered'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 

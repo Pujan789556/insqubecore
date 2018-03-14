@@ -484,6 +484,12 @@ class Claims extends MY_Controller
 							'status' 		 => IQB_CLAIM_STATUS_CLOSED,
 							'status_remarks' => $data['status_remarks']
     					];
+
+    					// Surveyor Claim Voucher Required?
+    					if($record->total_surveyor_fee_amount)
+    					{
+    						$update_data['flag_surveyor_voucher'] = IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED;
+    					}
     					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
         				break;
 
@@ -492,6 +498,11 @@ class Claims extends MY_Controller
 							'status' 		 => IQB_CLAIM_STATUS_WITHDRAWN,
 							'status_remarks' => $data['status_remarks']
     					];
+    					// Surveyor Claim Voucher Required?
+    					if($record->total_surveyor_fee_amount)
+    					{
+    						$update_data['flag_surveyor_voucher'] = IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED;
+    					}
 						$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
         				break;
 
@@ -1042,6 +1053,413 @@ class Claims extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+
+	/**
+	 * Generate Claim Voucher and Update Status to "Settled"
+	 *
+	 * @param int $id
+	 * @return json
+	 */
+	public function settle($id, $ref)
+	{
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+
+		/**
+		 * Check Permission
+		 * -----------------
+		 * You need to have permission to modify the given status.
+		 */
+		$this->__check_status_permission($record->status);
+
+
+
+		/**
+		 * Meet the Status Pre-Requisite ?
+		 */
+		$this->__status_qualifies($record->status, IQB_CLAIM_STATUS_SETTLED );
+
+
+		/**
+		 * Let's Settle the Claim
+		 */
+		$this->load->model('ac_voucher_model');
+		$this->load->model('rel_claim_voucher_model');
+		$done 		= FALSE;
+		$voucher_id = NULL;
+
+
+		// --------------------------------------------------------------------
+
+        /**
+		 * Task 1: Save Voucher and Generate Voucher Code
+		 */
+		try {
+
+			/**
+			 * Task 1: Save Voucher and Generate Voucher Code
+			 */
+			$voucher_id = $this->claim_model->voucher($record);
+
+		} catch (Exception $e) {
+
+			return $this->template->json([
+				'title' 	=> 'Exception Occured!',
+				'status' 	=> 'error',
+				'message' 	=> $e->getMessage()
+			]);
+		}
+
+		$flag_exception = FALSE;
+		$message = '';
+
+		/**
+		 * --------------------------------------------------------------------
+		 * Post Voucher Add Tasks
+		 *
+		 * NOTE
+		 * 		We perform post voucher add tasks which are
+		 * 			- voucher claim relation data
+		 * 			- claim ri-distribution and status
+		 *
+		 * 		Please note that, if any of subsequent transaction fails or exception
+		 * 		happens, we rollback and disable voucher. (We can not delete
+		 * 		voucher as we need to maintain sequential order for audit trail)
+		 * --------------------------------------------------------------------
+		 */
+
+
+		/**
+         * ==================== MANUAL TRANSACTIONS BEGIN =========================
+         */
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_begin();
+
+
+            	// --------------------------------------------------------------------
+
+            	try {
+
+            		/**
+		             * Task 2: Update Claim-Voucher Relation Data
+		             */
+					$relation_data = [
+						'claim_id' 		=> $record->id,
+						'voucher_id' 	=> $voucher_id
+					];
+					$this->rel_claim_voucher_model->add($relation_data);
+
+					/**
+					 * Task 3: Update Claim-RI Data and Status
+					 */
+					$this->claim_model->settle($record);
+
+				} catch (Exception $e) {
+
+					$flag_exception = TRUE;
+					$message = $e->getMessage();
+				}
+
+				// --------------------------------------------------------------------
+
+            /**
+             * Complete transactions or Rollback
+             */
+			if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
+			{
+		        $this->db->trans_rollback();
+
+		        /**
+            	 * Set Voucher Flag Complete to OFF
+            	 */
+            	$this->ac_voucher_model->disable_voucher($voucher_id);
+
+            	return $this->template->json([
+					'title' 	=> 'Something went wrong!',
+					'status' 	=> 'error',
+					'message' 	=> $message ? $message : 'Could not perform save voucher-claim relation or update claim data'
+				]);
+			}
+			else
+			{
+			        $this->db->trans_commit();
+			}
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== MANUAL TRANSACTIONS END =========================
+         */
+
+
+		if( !$flag_exception )
+		{
+			$record 		= $this->claim_model->get($record->id);
+			$view_data 		= ['record' => $record];
+			$partial_view 	=  'claims/_single_row';
+
+			// If Reference is from Details Page
+			if($ref == 'd')
+			{
+				$partial_view 	=  'claims/_details';
+				$view_data = array_merge( $view_data,
+								[
+									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+									'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
+									'draft_elements' 	=> $this->claim_model->draft_v_rules()
+								]);
+			}
+
+			// DOM Box
+			$method = 'replaceWith';
+			if($ref == 'l')
+			{
+				$box = '#_data-row-claims-' . $record->id;
+			}
+			else
+			{
+				$box = '#claim-details';
+			}
+
+			// Get the html
+			$html = $this->load->view($partial_view, $view_data, TRUE);
+
+			$ajax_data = [
+				'message' 	=> 'Successfully Updated!',
+				'status'  	=> 'success',
+				'multipleUpdate' => [
+					[
+						'box' 		=> $box,
+						'method' 	=> $method,
+						'html'		=> $html
+					]
+				]
+			];
+			return $this->template->json($ajax_data);
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Generate Claim Voucher for surveyor settlement for closed/withdrawn claim
+	 *
+	 * @param int $id
+	 * @return json
+	 */
+	public function voucher_surveyor($id, $ref)
+	{
+		/**
+		 * Get Record, Valid Status & Has Surveyer to settle?
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(
+			!$record
+				||
+			!in_array($record->status, [IQB_CLAIM_STATUS_WITHDRAWN, IQB_CLAIM_STATUS_CLOSED])
+				||
+			$record->flag_surveyor_voucher != IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED )
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found OR Invalid Status OR No surveyors to settle.'
+			],404);
+		}
+
+		/**
+		 * Permission
+		 */
+		if( !$this->dx_auth->is_authorized('claims', 'generate.claim.voucher') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+
+		/**
+		 * Let's Settle the Claim
+		 */
+		$this->load->model('ac_voucher_model');
+		$this->load->model('rel_claim_voucher_model');
+		$done 		= FALSE;
+		$voucher_id = NULL;
+
+
+		// --------------------------------------------------------------------
+
+	    /**
+		 * Task 1: Save Voucher and Generate Voucher Code
+		 */
+		try {
+
+			/**
+			 * Task 1: Save Voucher and Generate Voucher Code
+			 */
+			$voucher_id = $this->claim_model->voucher($record, TRUE);
+
+		} catch (Exception $e) {
+
+			return $this->template->json([
+				'title' 	=> 'Exception Occured!',
+				'status' 	=> 'error',
+				'message' 	=> $e->getMessage()
+			]);
+		}
+
+		$flag_exception = FALSE;
+		$message = '';
+
+		/**
+		 * --------------------------------------------------------------------
+		 * Post Voucher Add Tasks
+		 *
+		 * NOTE
+		 * 		We perform post voucher add tasks which are
+		 * 			- voucher claim relation data
+		 * 			- claim ri-distribution and status
+		 *
+		 * 		Please note that, if any of subsequent transaction fails or exception
+		 * 		happens, we rollback and disable voucher. (We can not delete
+		 * 		voucher as we need to maintain sequential order for audit trail)
+		 * --------------------------------------------------------------------
+		 */
+
+
+		/**
+	     * ==================== MANUAL TRANSACTIONS BEGIN =========================
+	     */
+
+	        /**
+	         * Disable DB Debugging
+	         */
+	        $this->db->db_debug = FALSE;
+	        $this->db->trans_begin();
+
+
+	        	// --------------------------------------------------------------------
+
+	        	try {
+
+	        		/**
+		             * Task 2: Update Claim-Voucher Relation Data
+		             */
+					$relation_data = [
+						'claim_id' 		=> $record->id,
+						'voucher_id' 	=> $voucher_id
+					];
+					$this->rel_claim_voucher_model->add($relation_data);
+
+					/**
+					 * Task 3: Update the Surveyor Voucher Flag
+					 */
+					$update_data = ['flag_surveyor_voucher' => IQB_CLAIM_FLAG_SRV_VOUCHER_VOUCHERED ];
+					$this->claim_model->update_data($record->id, $update_data, $record->policy_id);
+
+				} catch (Exception $e) {
+
+					$flag_exception = TRUE;
+					$message = $e->getMessage();
+				}
+
+				// --------------------------------------------------------------------
+
+	        /**
+	         * Complete transactions or Rollback
+	         */
+			if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
+			{
+		        $this->db->trans_rollback();
+
+		        /**
+	        	 * Set Voucher Flag Complete to OFF
+	        	 */
+	        	$this->ac_voucher_model->disable_voucher($voucher_id);
+
+	        	return $this->template->json([
+					'title' 	=> 'Something went wrong!',
+					'status' 	=> 'error',
+					'message' 	=> $message ? $message : 'Could not perform save voucher-claim relation or update claim data'
+				]);
+			}
+			else
+			{
+			        $this->db->trans_commit();
+			}
+
+	        /**
+	         * Restore DB Debug Configuration
+	         */
+	        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+	    /**
+	     * ==================== MANUAL TRANSACTIONS END =========================
+	     */
+
+
+		if( !$flag_exception )
+		{
+			$record 		= $this->claim_model->get($record->id);
+			$view_data 		= ['record' => $record];
+			$partial_view 	=  'claims/_single_row';
+
+			// If Reference is from Details Page
+			if($ref == 'd')
+			{
+				$partial_view 	=  'claims/_details';
+				$view_data = array_merge( $view_data,
+								[
+									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+									'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
+									'draft_elements' 	=> $this->claim_model->draft_v_rules()
+								]);
+			}
+
+			// DOM Box
+			$method = 'replaceWith';
+			if($ref == 'l')
+			{
+				$box = '#_data-row-claims-' . $record->id;
+			}
+			else
+			{
+				$box = '#claim-details';
+			}
+
+			// Get the html
+			$html = $this->load->view($partial_view, $view_data, TRUE);
+
+			$ajax_data = [
+				'message' 	=> 'Successfully Updated!',
+				'status'  	=> 'success',
+				'multipleUpdate' => [
+					[
+						'box' 		=> $box,
+						'method' 	=> $method,
+						'html'		=> $html
+					]
+				]
+			];
+			return $this->template->json($ajax_data);
+		}
+	}
 
 	// --------------------------------------------------------------------
 

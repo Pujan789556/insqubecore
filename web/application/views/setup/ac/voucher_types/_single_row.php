@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->code;?></td>
 	<td><a href="#"
 		data-toggle="tooltip"
-		title="Edit department"
+		title="Edit Voucher Type"
 		class="trg-dialog-edit"
 		data-title='<i class="fa fa-pencil-square-o"></i> Edit Voucher Type'
 		data-url="<?php echo site_url('ac_voucher_types/edit/' . $record->id);?>"
@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td class="ins-action">
 		<a href="#"
 			data-toggle="tooltip"
-			title="Edit department"
+			title="Edit Voucher Type"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Edit Voucher Type'
 			data-url="<?php echo site_url('ac_voucher_types/edit/' . $record->id);?>"

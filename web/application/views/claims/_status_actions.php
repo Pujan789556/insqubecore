@@ -199,13 +199,39 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <?php if($record->status === IQB_CLAIM_STATUS_APPROVED && $this->dx_auth->is_authorized('claims', 'status.to.settled')): ?>
             <li>
                     <a href="#"
-                        title="Settle Claim"
+                        title="Settle this Claim"
                         data-toggle="tooltip"
                         data-confirm="true"
                         class="text-green trg-dialog-action"
-                        data-message="Are you sure you want to do this?<br/>This will generate the account voucher and set status to 'SETTLED'. The action can not be <strong>UNDONE</strong>."
+                        data-message="Are you sure you want to do this?<br/>This will generate the claim voucher and set status to 'SETTLED'. The action can not be <strong>UNDONE</strong>."
                         data-url="<?php echo site_url('claims/settle/' . $record->id . '/' . $ref);?>">
                         <i class="fa fa-dollar"></i> Settle</a>
+                </li>
+        <?php endif;?>
+
+        <?php
+        /**
+         * Voucher a Claim
+         * ----------------
+         *
+         * When you have a closed/withdrawn claim having surveyor fee assigned to it, You need to generate a Claim Voucher for
+         * surveyor settlement.
+         */
+        if(
+            $record->flag_surveyor_voucher == IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED
+                &&
+            in_array($record->status, [IQB_CLAIM_STATUS_WITHDRAWN, IQB_CLAIM_STATUS_CLOSED])
+                &&
+            $this->dx_auth->is_authorized('claims', 'generate.claim.voucher')): ?>
+            <li>
+                    <a href="#"
+                        title="Generate Claim Voucher"
+                        data-toggle="tooltip"
+                        data-confirm="true"
+                        class="text-green trg-dialog-action"
+                        data-message="Are you sure you want to do this?<br/>This will generate the claim voucher for surveyor settlement. The action can not be <strong>UNDONE</strong>."
+                        data-url="<?php echo site_url('claims/voucher_surveyor/' . $record->id . '/' . $ref);?>">
+                        <i class="fa fa-dollar"></i> Voucher</a>
                 </li>
         <?php endif;?>
     </ul>
