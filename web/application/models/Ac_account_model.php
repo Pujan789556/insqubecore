@@ -191,10 +191,11 @@ class Ac_account_model extends MY_Model
                 }
                 else
                 {
-                    $this->db->group_start()
-                             ->like('AC.name', $keywords, 'after')
-                             ->or_like('ACG.name', $keywords, 'after')
-                             ->group_end();
+                    // $this->db->group_start()
+                    //          ->like('AC.name', $keywords, 'after')
+                    //          ->or_like('ACG.name', $keywords, 'after')
+                    //          ->group_end();
+                     $this->db->where("( MATCH ( AC.name ) AGAINST ( '{$keywords}*' IN BOOLEAN MODE) OR MATCH ( ACG.name ) AGAINST ( '{$keywords}*' IN BOOLEAN MODE)  ) ", NULL);
                 }
 
             }
