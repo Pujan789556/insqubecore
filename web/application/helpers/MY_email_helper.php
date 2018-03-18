@@ -35,6 +35,21 @@ if ( ! function_exists('send_email'))
 		// Configuration
     	$config['mailtype'] = isset($options['mailtype']) ? $options['mailtype'] : 'html';
 		$config['validate'] = TRUE;
+
+		// Mailtrap Configruation if any
+		if( MAIL_DRIVER === 'mailtrap' )
+		{
+			$mailtrap_config = Array(
+				'protocol' 	=> 'smtp',
+				'smtp_host' => MAIL_HOST,
+				'smtp_port' => MAIL_PORT,
+				'smtp_user' => MAIL_USERNAME,
+				'smtp_pass' => MAIL_PASSWORD,
+				'crlf' 		=> "\r\n",
+				'newline' 	=> "\r\n"
+			);
+			$config = array_merge($config, $mailtrap_config);
+		}
 		$CI->email->initialize($config);
 
 		//
