@@ -128,6 +128,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         data-form="#_form-claims">
                         <i class="fa fa-pencil-square-o"></i> Assign Claim Scheme</a>
                 </li>
+
+            <?php
+            endif;
+
+            /**
+             * Update Claim Assessment
+             */
+            if($this->dx_auth->is_authorized('claims', 'update.claim.assessment')): ?>
+                <li class="divider"></li><li><a href="#"
+                    title="Update Claim Assessment"
+                    data-toggle="tooltip"
+                    class="text-green trg-dialog-edit"
+                    data-title='<i class="fa fa-pencil-square-o"></i> Update Claim Assessment - <?php echo $record->claim_code?>'
+                    data-url="<?php echo site_url('claims/assessment/' . $record->id . '/d');?>"
+                    data-box-size="large"
+                    data-form="#_form-claims">
+                    <i class="fa fa-pencil-square-o"></i> Update Claim Assessment</a>
+                </li>
+
             <?php
             endif;
 
