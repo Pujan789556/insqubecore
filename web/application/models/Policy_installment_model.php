@@ -228,6 +228,8 @@ class Policy_installment_model extends MY_Model
              */
             if( $to_status_flag == IQB_POLICY_INSTALLMENT_STATUS_PAID )
             {
+                $this->load->helper('ri');
+
                 /**
                  * RI__distribute - Fresh/Renewal Transaction's First Installment
                  * RI__distribute_endorsement - All other transaction or installments
