@@ -19,7 +19,7 @@ class Portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'risk_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'risk_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -64,7 +64,9 @@ class Portfolio_model extends MY_Model
         $account_id_fpi_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_REINSURANCE_PREMIUM_INCOME);
         $account_id_fce_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_RCE);
 
-        $account_id_pw_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_RECEIVABLE_FROM_REINSURER);
+        $account_id_pw_dropdown     = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_RECEIVABLE_FROM_REINSURER);
+        $account_id_cr_dropdown    = $account_id_pw_dropdown;
+
         $account_id_pe_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_PAYABLE_TO_REINSURER);
         $account_id_ce_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_CLAIM_EXPENSE);
 
@@ -264,6 +266,20 @@ class Portfolio_model extends MY_Model
                     '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
                     '_type'     => 'dropdown',
                     '_data'     => IQB_BLANK_SELECT + $account_id_ce_dropdown,
+                    '_required' => false
+                ],
+
+                /**
+                 * Account ID - Claim Receivable
+                 */
+                [
+                    'field' => 'account_id_cr',
+                    'label' => 'Account Claim Receivable',
+                    'rules' => 'trim|integer|max_length[11]|in_list[' . implode(',', array_keys($account_id_cr_dropdown)) . ']',
+                    '_id'       => 'account_id_cr',
+                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $account_id_cr_dropdown,
                     '_required' => false
                 ]
             ]

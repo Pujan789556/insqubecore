@@ -581,7 +581,7 @@ defined('IQB_AC_ACCOUNT_GROUP_ID_REINSURANCE_PREMIUM_INCOME') OR define('IQB_AC_
 //  Reinsurance Commission Expense (FAC commission Portfolio-wise)
 defined('IQB_AC_ACCOUNT_GROUP_ID_RCE') OR define('IQB_AC_ACCOUNT_GROUP_ID_RCE',	102);
 
-// Receivable From Reinsurer (Portfolio Withdrawl - Portfolio-wise)
+// Receivable From Reinsurer (Portfolio Withdrawl - Portfolio-wise, Portfolio Claim - Portfolio-wise)
 defined('IQB_AC_ACCOUNT_GROUP_ID_RECEIVABLE_FROM_REINSURER') OR define('IQB_AC_ACCOUNT_GROUP_ID_RECEIVABLE_FROM_REINSURER',	32);
 
 // Payable to Reinsurer (Portfolio Entry - Portfolio-wise)
