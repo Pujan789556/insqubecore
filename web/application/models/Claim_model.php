@@ -458,6 +458,19 @@ class Claim_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Check if a policy has any claim
+     *
+     * @param int $policy_id
+     * @return mixed
+     */
+    public function has_policy_claim($policy_id)
+    {
+        return $this->check_duplicate(['policy_id' => $policy_id]);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Add Claim Draft
      *
      * @param array $data
@@ -948,9 +961,9 @@ class Claim_model extends MY_Model
 
         // List of accounts for the portfolio
         $portfolio = $this->portfolio_model->find($record->portfolio_id);
-        if( !$portfolio->account_id_ce || !$portfolio->account_id_pw )
+        if( !$portfolio->account_id_ce || !$portfolio->account_id_cr )
         {
-            throw new Exception("Exception [Model: Claim_model][Method: _voucher()]: Default internal accounts(Claim Expense, Portfolio withdrawl) for this portfolio not found. Please contact Administrator for this.");
+            throw new Exception("Exception [Model: Claim_model][Method: voucher()]: Default internal accounts(Claim Expense, Claim Receivable) for this portfolio not found. Please contact Administrator for this.");
         }
 
 
@@ -993,8 +1006,8 @@ class Claim_model extends MY_Model
             // Claim Expense (Portfolio-wise)
             $portfolio->account_id_ce,
 
-            // Portfolioo Withdrawl (Portfolio-wise)
-            $portfolio->account_id_pw
+            // Claim Receivable (Portfolio-wise)
+            $portfolio->account_id_cr
         ];
         $dr_party_types = [NULL, NULL];
         $dr_parties     = [NULL, NULL];
@@ -1009,7 +1022,7 @@ class Claim_model extends MY_Model
             {
                 $dr_accounts[]      = IQB_AC_ACCOUNT_ID_VAT_PAYABLE;
                 $dr_party_types[]   = IQB_AC_PARTY_TYPE_SURVEYOR;
-                $dr_parties[]       = $single->id;
+                $dr_parties[]       = $single->surveyor_id;
                 $dr_amounts[]       = $vat;
             }
         }
@@ -1045,13 +1058,13 @@ class Claim_model extends MY_Model
             // Surveyor Party
             $cr_accounts[]      = IQB_AC_ACCOUNT_ID_SURVEYOR_PARTY;
             $cr_party_types[]   = IQB_AC_PARTY_TYPE_SURVEYOR;
-            $cr_parties[]       = $single->id;
+            $cr_parties[]       = $single->surveyor_id;
             $cr_amounts[]       = $surveyor_party;
 
             // TDS Payable
             $cr_accounts[]      = IQB_AC_ACCOUNT_ID_TDS_SURVEYOR;
             $cr_party_types[]   = IQB_AC_PARTY_TYPE_SURVEYOR;
-            $cr_parties[]       = $single->id;
+            $cr_parties[]       = $single->surveyor_id;
             $cr_amounts[]       = $tds;
         }
 
