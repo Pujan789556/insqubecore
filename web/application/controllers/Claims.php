@@ -778,7 +778,7 @@ class Claims extends MY_Controller
 		 * -----------------
 		 * You need to have permission to modify the given status.
 		 */
-		$this->__check_status_permission($record->status);
+		$this->__check_status_permission(IQB_CLAIM_STATUS_DRAFT);
 
 
 
@@ -880,7 +880,7 @@ class Claims extends MY_Controller
 		 * -----------------
 		 * You need to have permission to modify the given status.
 		 */
-		$this->__check_status_permission($record->status);
+		$this->__check_status_permission(IQB_CLAIM_STATUS_VERIFIED);
 
 
 
@@ -978,7 +978,7 @@ class Claims extends MY_Controller
 		 * -----------------
 		 * You need to have permission to modify the given status.
 		 */
-		$this->__check_status_permission($record->status);
+		$this->__check_status_permission(IQB_CLAIM_STATUS_APPROVED);
 
 
 
@@ -1081,7 +1081,7 @@ class Claims extends MY_Controller
 		 * -----------------
 		 * You need to have permission to modify the given status.
 		 */
-		$this->__check_status_permission($record->status);
+		$this->__check_status_permission(IQB_CLAIM_STATUS_SETTLED);
 
 
 
@@ -1490,7 +1490,7 @@ class Claims extends MY_Controller
 		 * -----------------
 		 * You need to have permission to modify the given status.
 		 */
-		$this->__check_status_permission($record->status);
+		$this->__check_status_permission(IQB_CLAIM_STATUS_CLOSED);
 
 
 
@@ -1546,7 +1546,7 @@ class Claims extends MY_Controller
 		 * -----------------
 		 * You need to have permission to modify the given status.
 		 */
-		$this->__check_status_permission($record->status);
+		$this->__check_status_permission(IQB_CLAIM_STATUS_WITHDRAWN);
 
 
 
