@@ -15,11 +15,11 @@ class Setting_model extends MY_Model
 
     protected $after_update  = ['clear_cache'];
 
-    protected $fields = ["id", "orgn_name_en", "orgn_name_np", "address", "pan_no", "logo", "per_page", "flag_offline", "offline_message", "admin_email", "from_email", "replyto_email", "noreply_email", "website", "back_date_limit", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ['id', 'orgn_name_en', 'orgn_name_np', 'address', 'pan_no', 'logo', 'per_page', 'flag_offline', 'offline_message', 'admin_email', 'from_email', 'replyto_email', 'noreply_email', 'website', 'back_date_limit', 'bs_company_id', 'bs_company_code', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
-    protected $sections = ['general', 'dates'];
+    protected $sections = ['general', 'dates', 'others'];
 
 
 	// --------------------------------------------------------------------
@@ -149,6 +149,26 @@ class Setting_model extends MY_Model
                     'rules' => 'trim|valid_date',
                     '_type'             => 'date',
                     '_extra_attributes' => 'data-provide="datepicker-inline"',
+                    '_required' => false
+                ]
+            ],
+
+            /**
+             * Others Tab
+             */
+            'others' => [
+                [
+                    'field' => 'bs_company_id',
+                    'label' => 'Beema Samiti - Company ID',
+                    'rules' => 'trim|integer|max_length[11]',
+                    '_type'     => 'text',
+                    '_required' => false
+                ],
+                [
+                    'field' => 'bs_company_code',
+                    'label' => 'Beema Samiti - Company Code',
+                    'rules' => 'trim|alpha_dash|max_length[40]',
+                    '_type'     => 'text',
                     '_required' => false
                 ]
             ],
