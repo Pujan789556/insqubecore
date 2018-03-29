@@ -17,13 +17,17 @@ class Dashboard extends MY_Controller
 
 	function index()
 	{
-
-		// echo '<pre>';print_r($this->data);exit;
-		// $sess_data = $this->session->userdata();
-
 		$this->data['site_title'] = 'Welcome';
 
-		$this->template->render($this->data);
+		$this->load->model('policy_model');
+		// $this->load->helper('policy');
+		$policies 	= $this->policy_model->rows([]);
+
+		$data = ['policies' => $policies];
+		$this->template
+				->partial('content', 'dashboard/_index', $data)
+				->partial('dynamic_js', 'dashboard/_js')
+				->render($this->data);
 	}
 
 }
