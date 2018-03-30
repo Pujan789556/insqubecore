@@ -264,10 +264,15 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                         <i class="fa fa-certificate"></i> <span>Objects</span>
                   </a>
             </li>
+            <li class="<?php echo set_menu_active($nav_level_0, 'claims');?>">
+                  <a href="<?php echo site_url('claims');?>">
+                        <i class="fa fa-warning"></i> <span>Claims</span>
+                  </a>
+            </li>
 
-            <li class="<?php echo set_menu_active($nav_level_0, 'ri');?>">
+            <li class="treeview <?php echo set_menu_active($nav_level_0, 'ri');?>">
                   <a href="#">
-                        <i class="fa fa-book"></i> RI
+                        <i class="fa fa-book"></i> <span>RI</span>
                         <span class="pull-right-container">
                               <i class="fa fa-angle-left pull-right"></i>
                         </span>
@@ -280,9 +285,9 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                   </ul>
             </li>
 
-            <li class="<?php echo set_menu_active($nav_level_0, 'accounting');?>">
+            <li class="treeview <?php echo set_menu_active($nav_level_0, 'accounting');?>">
                   <a href="#">
-                        <i class="fa fa-book"></i> Accounting
+                        <i class="fa fa-book"></i> <span>Accounting</span>
                         <span class="pull-right-container">
                               <i class="fa fa-angle-left pull-right"></i>
                         </span>

@@ -166,15 +166,15 @@ class Claims extends MY_Controller
 		{
 			$filters = [
 				[
-					'field' => 'filter_policy_id',
-			        'label' => 'Policy ID',
-			        'rules' => 'trim|integer|max_length[20]',
+					'field' => 'filter_policy_code',
+			        'label' => 'Policy Code',
+			        'rules' => 'trim|max_length[40]',
 	                '_type'     => 'text',
 	                '_required' => false
 				],
-	            [
-					'field' => 'filter_policy_code',
-			        'label' => 'Policy Code',
+				[
+					'field' => 'filter_claim_code',
+			        'label' => 'Claim Code',
 			        'rules' => 'trim|max_length[40]',
 	                '_type'     => 'text',
 	                '_required' => false
@@ -199,7 +199,7 @@ class Claims extends MY_Controller
 				if( $this->form_validation->run() )
 				{
 					$data['data'] = [
-						'policy_id' 	=> $this->input->post('filter_policy_id') ?? NULL,
+						'claim_code' 	=> $this->input->post('filter_claim_code') ?? NULL,
 						'policy_code' 	=> $this->input->post('filter_policy_code') ?? NULL,
 					];
 					$data['status'] = 'success';

@@ -1194,16 +1194,16 @@ class Claim_model extends MY_Model
                 $this->db->where(['CLM.id <=' => $next_id]);
             }
 
-            $policy_id = $params['policy_id'] ?? NULL;
-            if( $policy_id )
-            {
-                $this->db->where(['P.id' =>  $policy_id]);
-            }
-
             $policy_code = $params['policy_code'] ?? NULL;
             if( $policy_code )
             {
                 $this->db->where(['P.code' =>  $policy_code]);
+            }
+
+            $claim_code = $params['claim_code'] ?? NULL;
+            if( $claim_code )
+            {
+                $this->db->where(['CLM.claim_code' =>  $claim_code]);
             }
         }
 
