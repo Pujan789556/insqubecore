@@ -78,6 +78,8 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           <li class="<?php echo set_menu_active($nav_level_2, 'forex');?>"><a href="<?php echo site_url('forex');?>"><i class="fa fa-circle-o"></i> Forex</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'departments');?>"><a href="<?php echo site_url('departments');?>"><i class="fa fa-circle-o"></i> Departments</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'countries');?>"><a href="<?php echo site_url('countries');?>"><i class="fa fa-globe"></i> Countries</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'states');?>"><a href="<?php echo site_url('states');?>"><i class="fa fa-circle-o"></i> States</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'regions');?>"><a href="<?php echo site_url('regions');?>"><i class="fa fa-circle-o"></i> Regions</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'districts');?>"><a href="<?php echo site_url('districts');?>"><i class="fa fa-circle-o"></i> Districts</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'branches');?>">
                                                 <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Branches
