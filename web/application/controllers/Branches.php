@@ -708,7 +708,7 @@ class Branches extends MY_Controller
 				'name' 			=> $p->name_en,
 				'parent_id' 	=> $p->parent_id
 			];
-			if($p->parent_id == '0')
+			if( !$p->parent_id)
 			{
 				$portfolio["{$p->id}"] = $single;
 			}
