@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class District_model extends MY_Model
+class State_model extends MY_Model
 {
-    protected $table_name = 'master_districts';
+    protected $table_name = 'master_states';
 
     protected $set_created = true;
 
@@ -11,11 +11,11 @@ class District_model extends MY_Model
 
     protected $log_user = true;
 
-    protected $protected_attributes = ['id', "state_id", "code"];
+    protected $protected_attributes = ['id', 'code'];
 
     protected $after_update  = ['clear_cache'];
 
-    protected $fields = ["id", "state_id", "code", "name_en", "name_np", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "code", "name_en", "name_np", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -28,45 +28,23 @@ class District_model extends MY_Model
         [
             'field' => 'name_np',
             'label' => 'Name (NP)',
-            'rules' => 'trim|required|max_length[80]',
+            'rules' => 'trim|max_length[80]',
             '_type' => 'text',
             '_required' => true
         ]
     ];
 
 
-    // --------------------------------------------------------------------
+	// --------------------------------------------------------------------
 
-    /**
-     * Constructor
-     *
-     * @return void
-     */
+	/**
+	 * Constructor
+	 *
+	 * @return void
+	 */
     public function __construct()
     {
         parent::__construct();
-    }
-
-    // ----------------------------------------------------------------
-
-    public function get_all()
-    {
-        /**
-         * Get Cached Result, If no, cache the query result
-         */
-        $list = $this->get_cache('districts_all');
-        if(!$list)
-        {
-            $list = $this->db->select('D.*, S.name_en as state_name_en, R.name_en as region_name_en')
-                            ->from($this->table_name . ' D')
-                            ->join('master_states S', 'S.id = D.state_id')
-                            ->join('master_regions R', 'R.id = D.region_id')
-                            ->order_by('D.code', 'asc')
-                            ->get()->result();
-
-            $this->write_cache($list, 'districts_all', CACHE_DURATION_DAY);
-        }
-        return $list;
     }
 
     // --------------------------------------------------------------------
@@ -88,19 +66,23 @@ class District_model extends MY_Model
         return $list;
     }
 
-
     // ----------------------------------------------------------------
 
-    public function get($id)
+    public function get_all()
     {
-        return $this->db->select('D.*, S.name_en as state_name_en')
-                            ->from($this->table_name . ' D')
-                            ->join('master_states S', 'S.id = D.state_id')
-                            ->where('D.id', $id)
-                            ->get()->row();
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('states_all');
+        if(!$list)
+        {
+            $list = parent::find_all();
+            $this->write_cache($list, 'states_all', CACHE_DURATION_DAY);
+        }
+        return $list;
     }
 
-    // --------------------------------------------------------------------
+	// --------------------------------------------------------------------
 
     public function check_duplicate($where, $id=NULL)
     {
@@ -120,8 +102,8 @@ class District_model extends MY_Model
      */
     public function clear_cache()
     {
-        // cache name without prefix
-        return $this->delete_cache('districts_all');
+    	// cache name without prefix
+        return $this->delete_cache('states_all');
     }
 
     // ----------------------------------------------------------------
@@ -141,7 +123,7 @@ class District_model extends MY_Model
         $action = is_string($action) ? $action : 'E';
         // Save Activity Log
         $activity_log = [
-            'module' => 'district',
+            'module' => 'state',
             'module_id' => $id,
             'action' => $action
         ];

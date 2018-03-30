@@ -2,7 +2,9 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * District Controller
+ * Region Controller
+ *
+ * NOTE: The regions are area provisioned by the Beema Samiti.
  *
  * This controller falls under "Master Setup" category.
  *
@@ -11,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Districts extends MY_Controller
+class Regions extends MY_Controller
 {
 	function __construct()
 	{
@@ -30,7 +32,7 @@ class Districts extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Districts';
+        $this->data['site_title'] = 'Master Setup | Regions';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -40,7 +42,7 @@ class Districts extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('district_model');
+		$this->load->model('region_model');
 
 	}
 
@@ -58,19 +60,15 @@ class Districts extends MY_Controller
 		/**
 		 * Normal Form Render
 		 */
-		// this will generate cache name: mc_master_districts_all
-		$records = $this->district_model->get_all();
-		// echo $this->db->last_query();
-		// echo '<pre>'; print_r($records);exit;
-
+		$records = $this->region_model->get_all();
 		$this->template->partial(
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Manage Districts',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Districts' => NULL]
+								'content_header' => 'Manage Regions',
+								'breadcrumbs' => ['Master Setup' => NULL, 'Regions' => NULL]
 						])
-						->partial('content', 'setup/districts/_index', compact('records'))
+						->partial('content', 'setup/regions/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -80,7 +78,7 @@ class Districts extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->district_model->get($id);
+		$record = $this->region_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -95,14 +93,14 @@ class Districts extends MY_Controller
         	$view = '';
 
         	$data = $this->input->post();
-        	if( $this->district_model->update($id, $data) )
+        	if( $this->region_model->update($id, $data) )
         	{
         		// Update Record
-        		$this->district_model->log_activity($record->id, 'E');
+        		$this->region_model->log_activity($record->id, 'E');
 
         		$status = 'success';
 				$message = 'Successfully Updated.';
-				$record = $this->district_model->get($id);
+				$record = $this->region_model->find($id);
         	}
 			else
 			{
@@ -112,7 +110,7 @@ class Districts extends MY_Controller
 
 
 			$row = $status === 'success'
-						? $this->load->view('setup/districts/_single_row', compact('record'), TRUE)
+						? $this->load->view('setup/regions/_single_row', compact('record'), TRUE)
 						: '';
 
 			$this->template->json([
@@ -123,16 +121,16 @@ class Districts extends MY_Controller
 				'updateSection' => $status === 'success',
 				'updateSectionData'	=> $status === 'success'
 										? 	[
-												'box' => '#_dst-row-' . $record->id,
+												'box' => '#_region-row-' . $record->id,
 												'html' 		=> $row,
 												// Jquery Method 	html|replaceWith|append|prepend etc.
 												'method' 	=> 'replaceWith'
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/districts/_form',
+									? 	$this->load->view('setup/regions/_form',
 											[
-												'form_elements' => $this->district_model->validation_rules,
+												'form_elements' => $this->region_model->validation_rules,
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -141,9 +139,9 @@ class Districts extends MY_Controller
 		}
 
 
-		$form = $this->load->view('setup/districts/_form',
+		$form = $this->load->view('setup/regions/_form',
 			[
-				'form_elements' => $this->district_model->validation_rules,
+				'form_elements' => $this->region_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
@@ -160,29 +158,7 @@ class Districts extends MY_Controller
      */
     public function flush()
     {
-        $this->district_model->clear_cache();
+        $this->region_model->clear_cache();
         redirect($this->router->class);
-    }
-
-	// --------------------------------------------------------------------
-
-	/**
-     * Check Duplicate Callback
-     *
-     * @param string $code
-     * @param integer|null $id
-     * @return bool
-     */
-    public function check_duplicate($code, $id=NULL){
-
-    	$code = strtoupper( $code ? $code : $this->input->post('code') );
-    	$id   = $id ? (int)$id : (int)$this->input->post('id');
-
-        if( $this->district_model->check_duplicate(['code' => $code], $id))
-        {
-            $this->form_validation->set_message('check_duplicate', 'The %s already exists.');
-            return FALSE;
-        }
-        return TRUE;
     }
 }

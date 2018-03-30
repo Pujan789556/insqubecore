@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Districts extends MY_Controller
+class States extends MY_Controller
 {
 	function __construct()
 	{
@@ -30,7 +30,7 @@ class Districts extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Districts';
+        $this->data['site_title'] = 'Master Setup | States';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -40,7 +40,7 @@ class Districts extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('district_model');
+		$this->load->model('state_model');
 
 	}
 
@@ -58,8 +58,8 @@ class Districts extends MY_Controller
 		/**
 		 * Normal Form Render
 		 */
-		// this will generate cache name: mc_master_districts_all
-		$records = $this->district_model->get_all();
+		// this will generate cache name: mc_master_states_all
+		$records = $this->state_model->get_all();
 		// echo $this->db->last_query();
 		// echo '<pre>'; print_r($records);exit;
 
@@ -67,10 +67,10 @@ class Districts extends MY_Controller
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Manage Districts',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Districts' => NULL]
+								'content_header' => 'Manage States',
+								'breadcrumbs' => ['Master Setup' => NULL, 'States' => NULL]
 						])
-						->partial('content', 'setup/districts/_index', compact('records'))
+						->partial('content', 'setup/states/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -80,7 +80,7 @@ class Districts extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->district_model->get($id);
+		$record = $this->state_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -95,14 +95,14 @@ class Districts extends MY_Controller
         	$view = '';
 
         	$data = $this->input->post();
-        	if( $this->district_model->update($id, $data) )
+        	if( $this->state_model->update($id, $data) )
         	{
         		// Update Record
-        		$this->district_model->log_activity($record->id, 'E');
+        		$this->state_model->log_activity($record->id, 'E');
 
         		$status = 'success';
 				$message = 'Successfully Updated.';
-				$record = $this->district_model->get($id);
+				$record = $this->state_model->find($id);
         	}
 			else
 			{
@@ -112,7 +112,7 @@ class Districts extends MY_Controller
 
 
 			$row = $status === 'success'
-						? $this->load->view('setup/districts/_single_row', compact('record'), TRUE)
+						? $this->load->view('setup/states/_single_row', compact('record'), TRUE)
 						: '';
 
 			$this->template->json([
@@ -130,9 +130,9 @@ class Districts extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/districts/_form',
+									? 	$this->load->view('setup/states/_form',
 											[
-												'form_elements' => $this->district_model->validation_rules,
+												'form_elements' => $this->state_model->validation_rules,
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -141,9 +141,9 @@ class Districts extends MY_Controller
 		}
 
 
-		$form = $this->load->view('setup/districts/_form',
+		$form = $this->load->view('setup/states/_form',
 			[
-				'form_elements' => $this->district_model->validation_rules,
+				'form_elements' => $this->state_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
@@ -160,7 +160,7 @@ class Districts extends MY_Controller
      */
     public function flush()
     {
-        $this->district_model->clear_cache();
+        $this->state_model->clear_cache();
         redirect($this->router->class);
     }
 
@@ -178,7 +178,7 @@ class Districts extends MY_Controller
     	$code = strtoupper( $code ? $code : $this->input->post('code') );
     	$id   = $id ? (int)$id : (int)$this->input->post('id');
 
-        if( $this->district_model->check_duplicate(['code' => $code], $id))
+        if( $this->state_model->check_duplicate(['code' => $code], $id))
         {
             $this->form_validation->set_message('check_duplicate', 'The %s already exists.');
             return FALSE;

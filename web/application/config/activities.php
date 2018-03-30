@@ -293,6 +293,16 @@ $config['insqb_activity_types'] = [
 			'D' => 'deleted'
 	]],
 
+	/**
+	 * Activities related to Region
+	 */
+	'region' => [
+		'_uri' => 'regions/',
+		'_table' => 'master_regions',
+		'_actions' => [
+			'E' => 'edited'
+	]],
+
 
 	/**
 	 * RI Setup - Pools
@@ -366,6 +376,16 @@ $config['insqb_activity_types'] = [
 	'setting' => [
 		'_uri' => 'settings/',
 		'_table' => 'master_settings',
+		'_actions' => [
+			'E' => 'edited'
+	]],
+
+	/**
+	 * Activities related to State
+	 */
+	'state' => [
+		'_uri' => 'states/',
+		'_table' => 'master_states',
 		'_actions' => [
 			'E' => 'edited'
 	]],

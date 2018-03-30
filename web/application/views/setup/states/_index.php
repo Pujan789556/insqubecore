@@ -1,8 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Districts: Index View
+* States: Index View
 */
+// echo '<pre>'; print_r($records);exit;
 ?>
 <div class="row">
 	<div class="col-xs-12">
@@ -31,8 +32,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<tr>
 						<th>ID</th>
 						<th>Code</th>
-						<th>State</th>
-						<th>Region</th>
 						<th>Name (EN)</th>
 						<th>Name(NP)</th>
 						<th>Actions</th>
@@ -43,7 +42,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					 */
 					foreach($records as $record)
 					{
-						$this->load->view('setup/districts/_single_row', compact('record'));
+						$this->load->view('setup/states/_single_row', compact('record'));
 					}
 					?>
 				</table>
