@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
     protected $validation_rules = [];
 
@@ -108,6 +108,12 @@ class Policy_model extends MY_Model
             $this->load->model('agent_model');
             $this->load->model('company_model');
             $this->load->model('company_branch_model');
+            $this->load->model('district_model');
+
+            /**
+             * District Dropdown
+             */
+            $district_dropdown = $this->district_model->dropdown();
 
             /**
              * List all marketing staffs of this branch
@@ -247,6 +253,22 @@ class Policy_model extends MY_Model
                         'rules' => 'trim|required',
                         '_id'       => 'customer-text',
                         '_type'     => 'hidden',
+                        '_required' => true
+                    ]
+                ],
+
+                /**
+                 * Risk District Information
+                 */
+                'district' => [
+                    [
+                        'field' => 'district_id',
+                        'label' => 'Risk District',
+                        'rules' => 'trim|required|integer|in_list['. implode(',', array_keys($district_dropdown)) .']',
+                        '_type'     => 'dropdown',
+                        '_id'       => '_district-id',
+                        '_extra_attributes' => 'style="width:100%; display:block"',
+                        '_data'       => IQB_BLANK_SELECT + $district_dropdown,
                         '_required' => true
                     ]
                 ],
@@ -1399,6 +1421,10 @@ class Policy_model extends MY_Model
                              */
                             "PRT.name_en as portfolio_name, PRT.code as portfolio_code, " .
 
+                            /**
+                             * Riks District, State, Region
+                             */
+                            "D.name_en as district_name, ST.name_en as state_name, R.name_en as region_name, " .
 
                             /**
                              * Object Table (attributes, sum insured amount, lock flag)
@@ -1447,6 +1473,9 @@ class Policy_model extends MY_Model
                      ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
                      ->join('dt_objects O', 'O.id = P.object_id')
                      ->join('dt_customers C', 'C.id = P.customer_id')
+                     ->join('master_districts D', 'D.id = P.district_id')
+                     ->join('master_states ST', 'ST.id = D.state_id')
+                     ->join('master_regions R', 'R.id = D.region_id')
                      ->join('auth_users SU', 'SU.id = P.sold_by', 'left')
                      ->join('auth_users CU', 'CU.id = P.created_by')
                      ->join('auth_users VU', 'VU.id = P.verified_by', 'left')

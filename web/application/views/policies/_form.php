@@ -71,6 +71,24 @@ echo form_open( $this->uri->uri_string(),
 
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">
+          <h4 class="box-title">Risk District</h4>
+        </div>
+        <div class="box-body">
+            <?php
+            /**
+             * Load Form Components
+             */
+            $portfolio_elements = $form_elements['district'];
+            $this->load->view('templates/_common/_form_components_horz', [
+                'form_elements' => $portfolio_elements,
+                'form_record'   => $record
+            ]);
+            ?>
+        </div>
+    </div>
+
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
           <h4 class="box-title">Select Portfolio</h4>
         </div>
         <div class="box-body">
@@ -377,6 +395,7 @@ $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", func
     $("#_marketing-staff").select2();
     $("#_agent-id").select2();
     $("#_creditor-id").select2();
+    $("#_district-id").select2();
     $("#_creditor-branch-id").select2();
     $("#_ref-company-id").select2();
 

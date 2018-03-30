@@ -35,6 +35,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <td><?php echo $record->code?></td>
                         </tr>
                         <tr>
+                            <td class="text-bold">Risk District/Region/State</td>
+                            <td><?php echo $record->district_name, ', ', $record->region_name, ', ', $record->state_name?></td>
+                        </tr>
+                        <tr>
                             <td class="text-bold">Portfolio</td>
                             <td><?php echo $record->portfolio_name?></td>
                         </tr>
