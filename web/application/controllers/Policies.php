@@ -1168,7 +1168,7 @@ class Policies extends MY_Controller
 	            return FALSE;
 	    	}
 
-	    	$object_record = $this->object_model->find($object_id);
+	    	$object_record = $this->object_model->row($object_id);
 	    	if(!$object_record)
 	    	{
 	    		$this->form_validation->set_message('_cb_valid_object_defaults', 'You are trying to manipulate CUSTOMER & OBJECT, which unfortunately, DOES NOT WORK!');

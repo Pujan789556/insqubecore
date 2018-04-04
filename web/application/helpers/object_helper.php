@@ -28,12 +28,14 @@ if ( ! function_exists('get_object_from_policy_record'))
     function get_object_from_policy_record( $policy_record )
     {
         // Policy Record contains the following columns by prefixing "object_"
-        $object_columns = ['id', 'portfolio_id', 'customer_id', 'attributes', 'amt_sum_insured', 'flag_locked'];
+        $object_columns = ['id', 'portfolio_id', 'attributes', 'amt_sum_insured', 'flag_locked'];
         $object = new StdClass();
         foreach($object_columns as $column )
         {
             $object->{$column} = $policy_record->{'object_' . $column};
         }
+        // Customer ID
+        $object->customer_id = $policy_record->customer_id;
         return $object;
     }
 }

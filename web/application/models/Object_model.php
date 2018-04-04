@@ -13,13 +13,13 @@ class Object_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    // protected $before_insert = ['prepare_contact_data', 'prepare_customer_defaults', 'prepare_customer_fts_data'];
+    protected $before_insert = [];
+    protected $after_insert  = ['after_insert__defaults', 'clear_cache'];
     protected $before_update = ['before_update__defaults'];
-    protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'portfolio_id', 'customer_id', 'attributes', 'amt_sum_insured', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'portfolio_id', 'attributes', 'amt_sum_insured', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -40,8 +40,6 @@ class Object_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
-
-
 
         // Required Helpers/Configurations
         $this->load->config('policy');
@@ -83,6 +81,49 @@ class Object_model extends MY_Model
             'edit' => []
         ];
     }
+    // --------------------------------------------------------------------
+
+    /**
+     * After Insert Trigger
+     *
+     * Tasks that are to be performed after an object is created
+     *      1. Save Customer-Object Relation
+     *
+     *
+     * @param array $arr_record
+     * @return array
+     */
+    public function after_insert__defaults($arr_record)
+    {
+        /**
+         *
+         * Data Structure
+                Array
+                (
+                    [id] => 10
+                    [fields] => Array
+                        (
+                            [attributes] => ...
+                        )
+
+                    [result] => 1
+                    [method] => insert
+                )
+        */
+
+        $id = $arr_record['id'] ?? NULL;
+        $customer_id = $arr_record['fields']['customer_id'];
+        if($id !== NULL)
+        {
+            $this->load->model('rel_customer_object_model');
+            $this->rel_customer_object_model->insert([
+                'customer_id' => $customer_id,
+                'object_id' => $id
+            ]);
+        }
+        return FALSE;
+    }
+
 
     // --------------------------------------------------------------------
 
@@ -175,8 +216,7 @@ class Object_model extends MY_Model
          * Clear Cache for customer belonging to this object
          */
         $record = $this->row($id);
-        $data['fields']['customer_id'] = $record->customer_id;
-        $this->clear_cache($data);
+        $this->clear_cache();
 
         return $done;
     }
@@ -319,7 +359,7 @@ class Object_model extends MY_Model
      */
     public function row( $id )
     {
-        $this->_prepare_row_select();
+        $this->_row_select();
         return $this->db->where('O.id', $id)
                         ->get()->row();
     }
@@ -365,7 +405,8 @@ class Object_model extends MY_Model
          * Get Cached Result, If no, cache the query result
          */
         $where = [
-            'O.customer_id' => $customer_id
+            'RCO.customer_id' => $customer_id,
+            'RCO.flag_current' => IQB_FLAG_ON
         ];
         $cache_name = 'object_customer_' . $customer_id;
         if($portfolio_id)
@@ -377,7 +418,7 @@ class Object_model extends MY_Model
         $list = $this->get_cache($cache_name);
         if(!$list)
         {
-            $this->_prepare_row_select();
+            $this->_row_select();
             $list = $this->db->where($where)
                              ->order_by('O.id', 'desc')
                              ->get()->result();
@@ -399,7 +440,7 @@ class Object_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->_prepare_row_select();
+        $this->_row_select();
 
         if(!empty($params))
         {
@@ -436,14 +477,17 @@ class Object_model extends MY_Model
      * @param void
      * @return void
      */
-    private function _prepare_row_select( )
+    private function _row_select( )
     {
-        $this->db->select("O.id, O.portfolio_id, O.customer_id, O.attributes, O.amt_sum_insured, O.flag_locked,
+        $this->db->select(
+                            "O.id, O.portfolio_id, O.attributes, O.amt_sum_insured, O.flag_locked,
                             P.code as portfolio_code, P.name_en as portfolio_name,
-                            C.full_name as customer_name")
+                            C.id as customer_id, C.full_name as customer_name")
                  ->from($this->table_name . ' as O')
                  ->join('master_portfolio P', 'P.id = O.portfolio_id')
-                 ->join('dt_customers C', 'O.customer_id = C.id');
+                 ->join('rel_customer__object RCO', 'RCO.object_id = O.id')
+                 ->join('dt_customers C', 'RCO.customer_id = C.id')
+                 ->where('RCO.flag_current', IQB_FLAG_ON);
     }
 
 	// --------------------------------------------------------------------
@@ -521,7 +565,6 @@ class Object_model extends MY_Model
         else
         {
             // Clear cache for this customer
-            $data['fields']['customer_id'] = $record->customer_id;
             $this->clear_cache($data);
 
             $this->log_activity($id, 'D');
