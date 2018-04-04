@@ -86,7 +86,7 @@ class Policy_transactions extends MY_Controller
 		$data = [
 			'records' 					=> $records,
 			'policy_record' 			=> $policy_record,
-			'add_url' 					=> 'policy_transactions/add_endorsement/' . $policy_id,
+			'add_url' 					=> 'policy_transactions/add/' . $policy_id,
 			'print_url' 				=> 'policy_transactions/print/all/' . $policy_id,
 		];
 		$html = $this->load->view('policy_transactions/_list_widget', $data, TRUE);
@@ -156,7 +156,7 @@ class Policy_transactions extends MY_Controller
 	 * @param integer $id
 	 * @return void
 	 */
-	public function edit_endorsement($id)
+	public function edit($id)
 	{
 		// Valid Record ?
 		$id = (int)$id;
@@ -183,13 +183,14 @@ class Policy_transactions extends MY_Controller
 		$policy_record = $this->policy_model->get($record->policy_id);
 
 		// Form Submitted? Save the data
-		$this->_save_endorsement('edit', $policy_record, $record);
+		$txn_type = $record->txn_type;
+		$this->_save($txn_type, $policy_record, 'edit', $record);
 
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('policy_transactions/forms/_form_endorsement',
 			[
-				'form_elements' => $this->policy_transaction_model->validation_rules,
+				'form_elements' => $this->policy_transaction_model->get_v_rules($txn_type),
 				'record' 		=> $record,
 				'policy_record' => $policy_record
 			], TRUE);
@@ -205,7 +206,14 @@ class Policy_transactions extends MY_Controller
 	 *
 	 * @return void
 	 */
-	public function add_endorsement($policy_id)
+	/**
+	 * Add new endorsement
+	 *
+	 * @param int $policy_id
+	 * @param int $txn_type
+	 * @return mixed
+	 */
+	public function add($policy_id, $txn_type)
 	{
 		/**
 		 * Check Permissions
@@ -213,6 +221,17 @@ class Policy_transactions extends MY_Controller
 		if( !$this->dx_auth->is_authorized('policy_transactions', 'add.transaction') )
 		{
 			$this->dx_auth->deny_access();
+		}
+
+
+		/**
+		 * Valid Transaction Type?
+		 */
+		$txn_type = (int)$txn_type;
+		$txn_types = array_keys( get_policy_transaction_type_endorsement_only_dropdown(FALSE) );
+		if( !in_array($txn_type, $txn_types) )
+		{
+			return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'Invalid Endorsement Type.'], 403);
 		}
 
 		/**
@@ -224,28 +243,247 @@ class Policy_transactions extends MY_Controller
 			return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'You can not add new endorsement as you have unfinished current endorsement.'], 403);
 		}
 
-		$record = NULL;
-
 		/**
 		 * Policy Record
 		 */
 		$policy_record = $this->policy_model->get($policy_id);
 
-		// Form Submitted? Save the data
-		$this->_save_endorsement('add', $policy_record, $record);
+
+		$record 	= NULL;
+		$this->_save($txn_type, $policy_record, 'add', $record);
 
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('policy_transactions/forms/_form_endorsement',
 			[
-				'form_elements' => $this->policy_transaction_model->validation_rules,
+				'form_elements' => $this->policy_transaction_model->get_v_rules($txn_type),
 				'record' 		=> $record,
-				'policy_record' => $this->policy_model->get($policy_id)
+				'policy_record' => $policy_record
 			], TRUE);
 
 		// Return HTML
 		$this->template->json($json_data);
 	}
+
+	// --------------------------------------------------------------------
+
+		/**
+		 * Save Endorsement
+		 *
+		 * @param int $txn_type
+		 * @param object $policy_record
+		 * @param string $action
+		 * @param object|null $record
+		 * @return mixed
+		 */
+		private function _save($txn_type, $policy_record, $action, $record = NULL)
+		{
+			$post_data = $this->input->post();
+			if( $this->input->post() )
+			{
+				/**
+				 * Valid Policy ID?
+				 * Coz we need it in ballback
+				 */
+				$policy_id = $post_data['policy_id'];
+				if($policy_id != $policy_record->id)
+				{
+					return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'Invalid policy information.'], 403);
+				}
+
+				$rules = $this->policy_transaction_model->get_v_rules($txn_type, TRUE);
+				$this->form_validation->set_rules($rules);
+				if($this->form_validation->run() === TRUE )
+	        	{
+	        		$data = $this->_prepare_data($txn_type, $post_data);
+
+	        		if($action == 'add')
+	        		{
+	        			$common_data 	= $this->_prepare_common_on_add($policy_record->id, $txn_type);
+	        			$data 		 	= array_merge($common_data, $data);
+	        			$done 			= $this->policy_transaction_model->save_endorsement($data, TRUE);
+	        		}
+	        		else
+	        		{
+	        			// Now Update Data
+						$done = $this->policy_transaction_model->update($record->id, $data, TRUE);
+	        		}
+
+	        		return $this->_return_on_save($action, $done, $policy_record->id, $record->id ?? NULL);
+	        	}
+	        	else
+	        	{
+	        		return $this->template->json(['status' => 'error', 'message' => validation_errors()]);
+	        	}
+			}
+		}
+
+	// --------------------------------------------------------------------
+
+		private function _prepare_common_on_add($policy_id, $txn_type)
+		{
+			return [
+				'policy_id' 		=> $policy_id,
+    			'txn_type'  		=> $txn_type,
+    			'flag_ri_approval' 	=> $this->policy_transaction_model->get_flag_ri_approval_by_policy( $policy_id )
+			];
+		}
+
+	// --------------------------------------------------------------------
+
+		private function _prepare_data($txn_type, $post_data)
+		{
+			$data = [];
+			switch ($txn_type)
+			{
+				case IQB_POLICY_TXN_TYPE_GENERAL:
+					$data = $this->_prepare_data_general($post_data);
+					break;
+
+				case IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER:
+					$data = $this->_prepare_data_ownership_transfer($post_data);
+					break;
+
+				case IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE:
+					$data = $this->_prepare_data_premium_upgrade($post_data);
+					break;
+
+				case IQB_POLICY_TXN_TYPE_PREMIUM_REFUND:
+					$data = $this->_prepare_data_premium_refund($post_data);
+					break;
+
+				case IQB_POLICY_TXN_TYPE_TERMINATE:
+					$data = $this->_prepare_data_terminate($post_data);
+					break;
+
+				default:
+					# code...
+					break;
+			}
+			return $data;
+		}
+
+			private function _prepare_data_general($post_data)
+			{
+				return [
+					'txn_details' => $post_data['txn_details']
+				];
+			}
+
+			private function _prepare_data_ownership_transfer($post_data)
+			{
+				$fields = ['txn_details', 'amt_transfer_fee', 'amt_transfer_ncd', 'transfer_customer_id'];
+				$data = [];
+				foreach($fields as $key)
+				{
+					$data[$key] = $post_data[$key] ?? NULL;
+				}
+				return $data;
+			}
+
+			private function _prepare_data_premium_upgrade($post_data)
+			{
+				$fields = ['txn_details', 'computation_basis'];
+				$data = [];
+				foreach($fields as $key)
+				{
+					$data[$key] = $post_data[$key] ?? NULL;
+				}
+				return $data;
+			}
+
+			private function _prepare_data_premium_refund($post_data)
+			{
+				$fields = ['txn_details', 'computation_basis', 'flag_terminate'];
+				$data = [];
+				foreach($fields as $key)
+				{
+					$data[$key] = $post_data[$key] ?? NULL;
+				}
+				return $data;
+			}
+
+			private function _prepare_data_terminate($post_data)
+			{
+				return [
+					'txn_details' => $post_data['txn_details']
+				];
+			}
+	// --------------------------------------------------------------------
+
+		private function _return_on_save($action, $done, $policy_id, $id = NULL)
+		{
+			if(!$done)
+			{
+				return $this->template->json(['status' => 'error', 'message' => 'Could not update.']);
+			}
+			else
+			{
+				$status = 'success';
+				$message = 'Successfully Updated.';
+
+				if($action === 'add')
+				{
+					// Refresh the list page and close bootbox
+					$return = $this->index($policy_id, TRUE);
+					return $this->template->json([
+						'status' 		=> $status,
+						'message' 		=> $message,
+						'reloadForm' 	=> false,
+						'hideBootbox' 	=> true,
+						'updateSection' => true,
+						'updateSectionData' => [
+							'box' 		=> '#tab-policy-transactions',
+							'method' 	=> 'html',
+							'html'		=> $return['html']
+						]
+					]);
+				}
+				else
+				{
+					// Get Updated Record
+					$record 		= $this->policy_transaction_model->get($id);
+					$policy_record 	= $this->policy_model->get($policy_id);
+					$html 			= $this->load->view('policy_transactions/_single_row', ['record' => $record, 'policy_record' => $policy_record], TRUE);
+
+					return $this->template->json([
+						'status' 		=> $status,
+						'message' 		=> $message,
+						'reloadForm' 	=> false,
+						'hideBootbox' 	=> true,
+						'updateSection' => true,
+						'updateSectionData' => [
+							'box' 		=> '#_data-row-policy_transactions-' . $record->id,
+							'method' 	=> 'replaceWith',
+							'html'		=> $html
+						]
+					]);
+				}
+			}
+		}
+
+	// --------------------------------------------------------------------
+
+		public function cb_valid_transfer_customer( $cutomer_id )
+		{
+			$policy_id = (int)$this->input->post('policy_id');
+
+			$cutomer_id = (int)$cutomer_id;
+			$current_customer_id = (int)$this->policy_model->get_customer_id($policy_id);
+
+			/**
+	    	 * Case I: Proposed Date <= Issued Date
+	    	 */
+	    	if( $cutomer_id === $current_customer_id )
+	    	{
+	    		$this->form_validation->set_message('cb_valid_transfer_customer', 'You can not transfer policy to same customer. Please select another customer.');
+	            return FALSE;
+	    	}
+
+	    	return TRUE;
+		}
+	// --------------------------------------------------------------------
+
 
 		/**
 		 * Can I add Endorsement
@@ -263,145 +501,10 @@ class Policy_transactions extends MY_Controller
 			return $current_txn->status === IQB_POLICY_TXN_STATUS_ACTIVE;
 		}
 
-	// --------------------------------------------------------------------
 
-	/**
-	 * Save a Record
-	 *
-	 * @param string $action [add|edit]
-	 * @param object|null $record Record Object or NULL
-	 * @return array
-	 */
-	private function _save_endorsement($action, $policy_record, $record = NULL)
-	{
-		// Valid action?
-		if( !in_array($action, array('add', 'edit')))
-		{
-			return $this->template->json(['status' => 'error', 'message' => 'Invalid Action!']);
-		}
 
-		/**
-		 * Form Submitted?
-		 */
-		if( $this->input->post() )
-		{
-			$done = FALSE;
+		// --------------------------------------------------------------------
 
-			/**
-			 * Validation Rules - Set according to the endorsement type
-			 */
-			$txn_type = (int)$this->input->post('txn_type');
-			$v_rules_all = $this->policy_transaction_model->validation_rules;
-			if( $txn_type == IQB_POLICY_TXN_TYPE_ET )
-			{
-				$v_rules = array_merge($v_rules_all['basic'], $v_rules_all['transaction']);
-			}
-			else
-			{
-				$v_rules = $v_rules_all['basic'];
-			}
-
-			$this->form_validation->set_rules($v_rules);
-			if($this->form_validation->run() === TRUE )
-        	{
-				$data = $this->input->post();
-				$data['policy_id'] = $policy_record->id;
-
-				/**
-				 * Prepare Data - Based on Type
-				 */
-				if( $txn_type !== IQB_POLICY_TXN_TYPE_ET )
-				{
-					// Nullify All the transactional Fields
-					$txn_fields = ['amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat'];
-					foreach($txn_fields as $key)
-					{
-						$data[$key] = NULL;
-					}
-				}
-				else
-				{
-					/**
-					 * Compute Sum Insured, Agent Commission, VAT
-					 */
-					$data = $this->_prepare_et_data($policy_record, $data);
-				}
-
-        		// Insert or Update?
-				if($action === 'add')
-				{
-					// echo '<pre>'; print_r($data);exit;
-
-					/**
-					 * RI-Approval Required?
-					 *
-					 * If Fresh/Renewal Transaction has RI-Approval Flag set, we must set this
-					 * for all the subsequent endorsements regardless of their types
-					 */
-					$data['flag_ri_approval'] = $this->policy_transaction_model->get_flag_ri_approval_by_policy( $policy_record->id );
-
-					$done = $this->policy_transaction_model->save_endorsement($data, TRUE); // No Validation on Model
-				}
-				else
-				{
-					// Now Update Data
-					$done = $this->policy_transaction_model->update($record->id, $data, TRUE);
-				}
-
-	        	if(!$done)
-				{
-					return $this->template->json(['status' => 'error', 'message' => 'Could not update.']);
-				}
-				else
-				{
-					$status = 'success';
-					$message = 'Successfully Updated.';
-
-					if($action === 'add')
-					{
-						// Refresh the list page and close bootbox
-						$return = $this->index($policy_record->id, TRUE);
-						return $this->template->json([
-							'status' 		=> $status,
-							'message' 		=> $message,
-							'reloadForm' 	=> false,
-							'hideBootbox' 	=> true,
-							'updateSection' => true,
-							'updateSectionData' => [
-								'box' 		=> '#tab-policy-transactions',
-								'method' 	=> 'html',
-								'html'		=> $return['html']
-							]
-						]);
-					}
-					else
-					{
-						// Get Updated Record
-						$record 		= $this->policy_transaction_model->get($record->id);
-						$policy_record 	= $this->policy_model->get($policy_record->id);
-						$html 			= $this->load->view('policy_transactions/_single_row', ['record' => $record, 'policy_record' => $policy_record], TRUE);
-
-						return $this->template->json([
-							'status' 		=> $status,
-							'message' 		=> $message,
-							'reloadForm' 	=> false,
-							'hideBootbox' 	=> true,
-							'updateSection' => true,
-							'updateSectionData' => [
-								'box' 		=> '#_data-row-policy_transactions-' . $record->id,
-								'method' 	=> 'replaceWith',
-								'html'		=> $html
-							]
-						]);
-					}
-				}
-        	}
-        	else
-        	{
-        		return $this->template->json(['status' => 'error', 'message' => validation_errors()]);
-        	}
-		}
-	}
 		/**
 		 * Prepare Transactional Endorsement Data
 		 *
@@ -474,7 +577,7 @@ class Policy_transactions extends MY_Controller
 		if(
 			$record->status !== IQB_POLICY_TXN_STATUS_DRAFT
 							||
-			!in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_ET, IQB_POLICY_TXN_TYPE_EG])
+			!in_array( $record->txn_type, get_policy_transaction_type_deletable() )
 							||
 			!$this->dx_auth->is_authorized('policy_transactions', 'delete.draft.transaction')
 		)

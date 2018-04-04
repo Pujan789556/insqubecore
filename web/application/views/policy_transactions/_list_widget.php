@@ -24,15 +24,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						<?php endif?>
 
 						<?php if( $this->dx_auth->is_authorized('policy_transactions', 'add.transaction') ): ?>
-							<a href="#"
-								title="Add New Transaction"
-								data-toggle="tooltip"
-								class="btn btn-success btn-round trg-dialog-edit"
-								data-box-size="large"
-								data-title='<i class="fa fa-pencil-square-o"></i> Add New Transaction'
-								data-url="<?php echo site_url($add_url);?>"
-								data-form="#_form-policy_transactions"
-							><i class="ion-plus-circled"></i> Add</a>
+							<div class="btn-group">
+								<button type="button" class="btn btn-success btn-round dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
+								<i class="ion-plus-circled margin-r-5"></i> Add <i class="fa fa-caret-down"></i></button>
+								<ul class="dropdown-menu pull-right" role="menu">
+									<?php
+									$txn_types = get_policy_transaction_type_endorsement_only_dropdown(FALSE);
+									foreach($txn_types as $key=>$label):
+										$label = "Add Endorsement - " . $label;
+									 ?>
+									 	<li>
+											<a href="#"
+												title="<?php echo $label ?>"
+												class="trg-dialog-edit"
+												data-box-size="large"
+												data-title='<i class="fa fa-pencil-square-o"></i> <?php echo $label ?>'
+												data-url="<?php echo site_url( rtrim($add_url) . '/' . $key );?>"
+												data-form="#_form-policy_transactions"
+											><i class="ion-plus-circled margin-r-5"></i> <span><?php echo $label ?></span></a>
+										</li>
+									<?php endforeach; ?>
+
+								</ul>
+							</div>
 						<?php endif?>
 
 						<a href="#"

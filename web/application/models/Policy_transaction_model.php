@@ -17,7 +17,7 @@ class Policy_transaction_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval', 'flag_current', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -59,22 +59,24 @@ class Policy_transaction_model extends MY_Model
      */
     public function validation_rules()
     {
-        $txn_type_dropdown = get_policy_txn_type_endorsement_only_dropdown(FALSE);
+        $txn_type_dropdown          = get_policy_transaction_type_endorsement_only_dropdown(FALSE);
+        $computation_basis_dropdown = get_policy_transaction_type_computation_basis_dropdown(FALSE);
+
+
+        $txn_type = (int)$this->input->post('txn_type');
+        $cb_required = '';
+        if( in_array($txn_type, [IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE, IQB_POLICY_TXN_TYPE_PREMIUM_REFUND]) )
+        {
+            $cb_required = 'required|';
+        }
+
+
         $this->validation_rules = [
 
             /**
              * Basic Information
              */
             'basic' => [
-                [
-                    'field' => 'txn_type',
-                    'label' => 'Endorsement / Transaction Type',
-                    'rules' => 'trim|required|integer|exact_length[1]|in_list['. implode(',',array_keys($txn_type_dropdown)) .']',
-                    '_type'     => 'dropdown',
-                    '_id'       => '_txn_type',
-                    '_data'     => IQB_BLANK_SELECT + $txn_type_dropdown,
-                    '_required' => true
-                ],
                 [
                     'field' => 'txn_details',
                     'label' => 'Transaction Details (सम्पुष्टि विवरण )',
@@ -85,40 +87,151 @@ class Policy_transaction_model extends MY_Model
                 ]
             ],
 
+
             /**
-             * Transactional Information
+             * Computation Basis
              */
-            'transaction' => [
+            'computation_basis' => [
                 [
-                    'field' => 'amt_total_premium',
-                    'label' => 'Premium Amount (added/reduced) (Rs.)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_type' => 'text',
+                    'field' => 'computation_basis',
+                    'label' => 'Computation Basis',
+                    'rules' => 'trim|'.$cb_required.'integer|exact_length[1]|in_list['. implode( ',', array_keys( $computation_basis_dropdown ) ) .']',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $computation_basis_dropdown,
                     '_required' => true
-                ],
-                [
-                    'field' => 'amt_pool_premium',
-                    'label' => 'Pool Premium Amount (added/reduced) (Rs.)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_type' => 'text',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'amt_commissionable',
-                    'label' => 'Commissionable Amount (added/reduced) (Rs.)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_type' => 'text',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'amt_stamp_duty',
-                    'label' => 'Stamp Duty',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_type' => 'text',
-                    '_required' => true
-                ],
+                ]
+            ],
+        ];
+    }
+
+    // ----------------------------------------------------------------
+
+    public function get_v_rules( $txn_type, $formatted = FALSE )
+    {
+        $txn_type                   = (int)$txn_type;
+        $computation_basis_dropdown = get_policy_transaction_type_computation_basis_dropdown(FALSE);
+        $v_rules                    = [];
+
+
+        $basic = [
+            [
+                'field' => 'txn_details',
+                'label' => 'Transaction Details (सम्पुष्टि विवरण )',
+                'rules' => 'trim|required|htmlspecialchars',
+                '_id'       => '_txn_details',
+                '_type'     => 'textarea',
+                '_required' => true
             ]
         ];
+
+        $computation_basis = [
+            [
+                'field' => 'computation_basis',
+                'label' => 'Computation Basis',
+                'rules' => 'trim|required|integer|exact_length[1]|in_list['. implode( ',', array_keys( $computation_basis_dropdown ) ) .']',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_BLANK_SELECT + $computation_basis_dropdown,
+                '_required' => true
+            ]
+        ];
+
+
+        switch ($txn_type)
+        {
+            case IQB_POLICY_TXN_TYPE_GENERAL:
+                $v_rules = ['basic' => $basic];
+                break;
+
+            case IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER:
+                $v_rules = [
+
+                    'basic' => $basic,
+
+                    /**
+                     * Customer Information
+                     */
+                    'customer' => [
+                        [
+                            'field' => 'transfer_customer_id',
+                            'label' => 'Customer',
+                            'rules' => 'trim|required|integer|max_length[11]|callback_cb_valid_transfer_customer',
+                            '_type'     => 'hidden',
+                            '_id'       => 'customer-id',
+                            '_required' => true
+                        ]
+                    ],
+
+                    /**
+                     * Transfer Fee
+                     */
+                    'fees' => [
+                        [
+                            'field' => 'amt_transfer_fee',
+                            'label' => 'Transfer Fee (Rs.)',
+                            'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                            '_type'     => 'text',
+                            '_required' => true
+                        ],
+                        [
+                            'field' => 'amt_transfer_ncd',
+                            'label' => 'No Claim Discount',
+                            'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                            '_type'     => 'text',
+                            '_default'  => 0.00,
+                            '_help_text' => 'This applies only in <strong class="text-red">MOTOR</strong> portfoliios.',
+                            '_required' => true
+                        ],
+                    ]
+                ];
+                break;
+
+            case IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE:
+                $v_rules = ['basic' => $basic, 'computation_basis' => $computation_basis];
+                break;
+
+            case IQB_POLICY_TXN_TYPE_PREMIUM_REFUND:
+                $v_rules = [
+                    'basic'             => $basic,
+                    'computation_basis' => $computation_basis,
+
+                    /**
+                     * Option To Terminate
+                     */
+                    'terminate' => [
+                        [
+                            'field' => 'flag_terminate',
+                            'label' => 'Terminate this policy after refund?',
+                            'rules' => 'trim|alpha|in_list['.IQB_FLAG_YES.']',
+                            '_type'             => 'checkbox',
+                            '_checkbox_value'   => IQB_FLAG_YES,
+                            '_required'         => true
+                        ],
+                    ]
+                ];
+                break;
+
+            case IQB_POLICY_TXN_TYPE_TERMINATE:
+                $v_rules = ['basic' => $basic];
+                break;
+
+            default:
+                # code...
+                break;
+        }
+
+        if( !$formatted )
+        {
+            return $v_rules;
+        }
+        else
+        {
+            $rules = [];
+            foreach($v_rules as $section=>$section_rules)
+            {
+                $rules = array_merge($rules, $section_rules);
+            }
+            return $rules;
+        }
     }
 
     // ----------------------------------------------------------------
@@ -637,9 +750,10 @@ class Policy_transaction_model extends MY_Model
      */
     public function get($id)
     {
-        return $this->db->select('PTXN.*, P.branch_id, P.portfolio_id')
+        return $this->db->select('PTXN.*, P.branch_id, P.portfolio_id, C.full_name as transfer_customer_name')
                         ->from($this->table_name . ' AS PTXN')
                         ->join('dt_policies P', 'P.id = PTXN.policy_id')
+                        ->join('dt_customers C', 'C.id = PTXN.transfer_customer_id', 'left')
                         ->where('PTXN.id', $id)
                         ->get()->row();
     }

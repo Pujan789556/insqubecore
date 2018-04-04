@@ -188,8 +188,12 @@ if ( ! function_exists('get_policy_transaction_type_dropdown'))
 		$dropdown = [
 			IQB_POLICY_TXN_TYPE_FRESH 		=> 'Fresh',
 			IQB_POLICY_TXN_TYPE_RENEWAL 	=> 'Renewal',
-			IQB_POLICY_TXN_TYPE_ET 			=> 'Endorsement - Transactional',
-			IQB_POLICY_TXN_TYPE_EG 			=> 'Endorsement - General'
+
+			IQB_POLICY_TXN_TYPE_GENERAL 			=> 'General (Nil)',
+			IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER 	=> 'Ownership Transfer',
+			IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE 	=> 'Premium Upgrade',
+			IQB_POLICY_TXN_TYPE_PREMIUM_REFUND 		=> 'Premium Refund',
+			IQB_POLICY_TXN_TYPE_TERMINATE 			=> 'Terminate'
 		];
 
 		if($flag_blank_select)
@@ -201,18 +205,61 @@ if ( ! function_exists('get_policy_transaction_type_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_txn_type_endorsement_only_dropdown'))
+if ( ! function_exists('get_policy_transaction_type_endorsement_only_dropdown'))
 {
 	/**
 	 * Get Policy Transaction Type (Endorsement Only) Dropdown
 	 *
 	 * @return	array
 	 */
-	function get_policy_txn_type_endorsement_only_dropdown( $flag_blank_select = true )
+	function get_policy_transaction_type_endorsement_only_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			IQB_POLICY_TXN_TYPE_ET 			=> 'Endorsement - Transactional',
-			IQB_POLICY_TXN_TYPE_EG 			=> 'Endorsement - General'
+			IQB_POLICY_TXN_TYPE_GENERAL 			=> 'General (Nil)',
+			IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER 	=> 'Ownership Transfer',
+			IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE 	=> 'Premium Upgrade',
+			IQB_POLICY_TXN_TYPE_PREMIUM_REFUND 		=> 'Premium Refund',
+			IQB_POLICY_TXN_TYPE_TERMINATE 			=> 'Terminate'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('get_policy_transaction_type_deletable'))
+{
+	/**
+	 * Get Policy Transaction Type - Deletable only
+	 *
+	 * Endorsement Only Transaction Types are deletable from transactions tab.
+	 *
+	 * @return	array
+	 */
+	function get_policy_transaction_type_deletable( )
+	{
+		return  array_keys( get_policy_transaction_type_endorsement_only_dropdown(FALSE) );
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('get_policy_transaction_type_computation_basis_dropdown'))
+{
+	/**
+	 * Get Policy Transaction Computation Basis Dropdown
+	 *
+	 * @return	array
+	 */
+	function get_policy_transaction_type_computation_basis_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_POLICY_TXN_CB_ANNUAL 			=> 'Annual/Complete',
+			IQB_POLICY_TXN_CB_SHORT_TERM_RATE 	=> 'Short Term Rate',
+			IQB_POLICY_TXN_CB_PRORATA 			=> 'Prorata',
 		];
 
 		if($flag_blank_select)

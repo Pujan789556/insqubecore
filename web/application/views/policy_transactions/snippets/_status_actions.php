@@ -55,7 +55,7 @@ if( is_policy_txn_editable($record->status, $record->flag_current, FALSE) ):
             class="action trg-dialog-edit"
             data-box-size="large"
             data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $policy_record->code?>'
-            data-url="<?php echo site_url('policy_transactions/edit_endorsement/' . $record->id);?>"
+            data-url="<?php echo site_url('policy_transactions/edit/' . $record->id);?>"
             data-form="#_form-policy_transactions">
             <i class="fa fa-pencil-square-o"></i> Edit</a>
     <?php endif?>

@@ -1505,6 +1505,22 @@ class Policy_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Get policy status
+     *
+     * @param int $id
+     * @return mixed
+     */
+    public function get_customer_id($id)
+    {
+         return $this->db->select( 'P.customer_id')
+                        ->from($this->table_name . ' as P')
+                        ->where('P.id', $id)
+                        ->get()->row()->customer_id;
+    }
+
+    // ----------------------------------------------------------------
+
 
     public function get_customer_object_id($id)
     {
