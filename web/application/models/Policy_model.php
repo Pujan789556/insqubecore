@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
     protected $validation_rules = [];
 
@@ -31,13 +31,13 @@ class Policy_model extends MY_Model
     public static $protect_default = FALSE;
     public static $protect_max_id = 0;
 
-	// --------------------------------------------------------------------
+    // --------------------------------------------------------------------
 
-	/**
-	 * Constructor
-	 *
-	 * @return void
-	 */
+    /**
+     * Constructor
+     *
+     * @return void
+     */
     public function __construct()
     {
         parent::__construct();
@@ -848,18 +848,6 @@ class Policy_model extends MY_Model
             $fields = $arr_record['fields'];
 
             /**
-             * TASK 2: Add Customer relation
-             * -----------------------------
-             */
-            $this->load->model('rel_customer_policy_model');
-            $relation_data = [
-                'customer_id'   => $fields['customer_id'],
-                'policy_id'     => $id
-            ];
-            $this->rel_customer_policy_model->insert($relation_data, TRUE);
-
-
-            /**
              * TASK 1: Add agent relation
              * --------------------------
              */
@@ -928,22 +916,6 @@ class Policy_model extends MY_Model
         if($id !== NULL)
         {
             $fields = $arr_record['fields'];
-
-            /**
-             * TASK 1: Update Customer relation
-             * -----------------------------
-             */
-            $this->load->model('rel_customer_policy_model');
-            $relation_data = [
-                'customer_id'    => $fields['customer_id'],
-                'policy_id'     => $id
-            ];
-            $this->rel_customer_policy_model->save_on_debit_note($relation_data);
-
-            /**
-             * TASK 2: Update Agent relation
-             * -----------------------------
-             */
             $this->load->model('rel_agent_policy_model');
             $relation_data = [
                 'policy_id' => $id
@@ -1399,9 +1371,7 @@ class Policy_model extends MY_Model
                         TIMESTAMP( P.`issued_date`, P.`issued_time` ) AS issued_datetime,
                         TIMESTAMP( P.`start_date`, P.`start_time` ) AS start_datetime,
                         TIMESTAMP( P.`end_date`, P.`end_time` ) AS end_datetime,
-                        PRT.name_en as portfolio_name,
-                        RCP.customer_id,
-                        C.full_name as customer_name";
+                        PRT.name_en as portfolio_name, C.full_name as customer_name";
             if($signle_select)
             {
                 $select .= ', RAP.agent_id';
@@ -1409,9 +1379,7 @@ class Policy_model extends MY_Model
             $this->db->select($select)
                      ->from($this->table_name . ' as P')
                      ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
-                     ->join('rel_customer__policy RCP', 'RCP.policy_id = P.id')
-                     ->join('dt_customers C', 'C.id = RCP.customer_id')
-                     ->where('RCP.flag_current', IQB_FLAG_ON);
+                     ->join('dt_customers C', 'C.id = P.customer_id');
 
             if($signle_select)
             {
@@ -1468,7 +1436,7 @@ class Policy_model extends MY_Model
                              * Customer Table (code, name, type, pan, picture, pfrofession, contact,
                              * company reg no, citizenship no, passport no, lock flag)
                              */
-                            "C.id as customer_id, C.code as customer_code, C.full_name as customer_name, C.grandfather_name as customer_grandfather_name, C.father_name as customer_father_name, C.mother_name as customer_mother_name, C.spouse_name as customer_spouse_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.identification_no, C.dob, C.flag_locked AS customer_flag_locked, " .
+                            "C.code as customer_code, C.full_name as customer_name, C.grandfather_name as customer_grandfather_name, C.father_name as customer_father_name, C.mother_name as customer_mother_name, C.spouse_name as customer_spouse_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.identification_no, C.dob, C.flag_locked AS customer_flag_locked, " .
 
 
                             /**
@@ -1504,8 +1472,7 @@ class Policy_model extends MY_Model
                      ->join('master_branches B', 'B.id = P.branch_id')
                      ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
                      ->join('dt_objects O', 'O.id = P.object_id')
-                     ->join('rel_customer__policy RCP', 'RCP.policy_id = P.id')
-                     ->join('dt_customers C', 'C.id = RCP.customer_id')
+                     ->join('dt_customers C', 'C.id = P.customer_id')
                      ->join('master_districts D', 'D.id = P.district_id')
                      ->join('master_states ST', 'ST.id = D.state_id')
                      ->join('master_regions R', 'R.id = D.region_id')
@@ -1517,7 +1484,6 @@ class Policy_model extends MY_Model
                      ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
                      ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
                      ->where('P.id', $id)
-                     ->where('RCP.flag_current', IQB_FLAG_ON)
                      ->get()->row();
     }
 
@@ -1584,7 +1550,7 @@ class Policy_model extends MY_Model
     {
         $cache_names = [
         ];
-    	// cache name without prefix
+        // cache name without prefix
         foreach($cache_names as $cache)
         {
             $this->delete_cache($cache);
