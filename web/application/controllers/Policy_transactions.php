@@ -372,7 +372,7 @@ class Policy_transactions extends MY_Controller
 
 			private function _prepare_data_ownership_transfer($post_data)
 			{
-				$fields = ['txn_details', 'amt_transfer_fee', 'amt_transfer_ncd', 'transfer_customer_id'];
+				$fields = ['txn_details', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_stamp_duty', 'transfer_customer_id'];
 				$data = [];
 				foreach($fields as $key)
 				{
@@ -383,7 +383,7 @@ class Policy_transactions extends MY_Controller
 
 			private function _prepare_data_premium_upgrade($post_data)
 			{
-				$fields = ['txn_details', 'computation_basis'];
+				$fields = ['txn_details', 'computation_basis', 'amt_stamp_duty'];
 				$data = [];
 				foreach($fields as $key)
 				{
@@ -394,7 +394,7 @@ class Policy_transactions extends MY_Controller
 
 			private function _prepare_data_premium_refund($post_data)
 			{
-				$fields = ['txn_details', 'computation_basis', 'flag_terminate'];
+				$fields = ['txn_details', 'computation_basis', 'amt_stamp_duty', 'flag_terminate'];
 				$data = [];
 				foreach($fields as $key)
 				{

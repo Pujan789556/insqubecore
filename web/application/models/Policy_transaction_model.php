@@ -132,6 +132,14 @@ class Policy_transaction_model extends MY_Model
                 '_type'     => 'dropdown',
                 '_data'     => IQB_BLANK_SELECT + $computation_basis_dropdown,
                 '_required' => true
+            ],
+            [
+                'field' => 'amt_stamp_duty',
+                'label' => 'Stamp Duty (Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                '_type'     => 'text',
+                '_default'  => 0,
+                '_required' => true
             ]
         ];
 
@@ -181,6 +189,14 @@ class Policy_transaction_model extends MY_Model
                             '_help_text' => 'This applies only in <strong class="text-red">MOTOR</strong> portfoliios.',
                             '_required' => true
                         ],
+                        [
+                            'field' => 'amt_stamp_duty',
+                            'label' => 'Stamp Duty (Rs.)',
+                            'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                            '_type'     => 'text',
+                            '_default'  => 0,
+                            '_required' => true
+                        ]
                     ]
                 ];
                 break;
