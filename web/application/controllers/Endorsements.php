@@ -185,7 +185,7 @@ class Endorsements extends MY_Controller
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
-				'title' 	=> 'Operation Not Permitted!'
+				'title' 	=> 'Operation Not Permitted!',
 				'message' 	=> 'You can not edit fresh/renewal record.'
 			], 400);
 		}
