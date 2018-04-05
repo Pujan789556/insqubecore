@@ -29,7 +29,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								<i class="ion-plus-circled margin-r-5"></i> Add <i class="fa fa-caret-down"></i></button>
 								<ul class="dropdown-menu pull-right" role="menu">
 									<?php
-									$txn_types = get_policy_transaction_type_endorsement_only_dropdown(FALSE);
+									$txn_types = _POLICY_TRANSACTION_type_eonly_dropdown(FALSE);
 									foreach($txn_types as $key=>$label):
 										$label = "Add Endorsement - " . $label;
 									 ?>

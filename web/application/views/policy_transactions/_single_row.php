@@ -12,11 +12,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<?php if($record->flag_current == IQB_FLAG_ON): ?>
 			<i class="fa fa-circle text-green" data-toggle="tooltip" title="Current Endorsement/Transaction"></i>
 		<?php endif;?>
-		<?php echo get_policy_transaction_type_text($record->txn_type);?>
+		<?php echo _POLICY_TRANSACTION_type_text($record->txn_type);?>
 
 	</td>
 	<td><?php echo active_inactive_text($record->flag_ri_approval);?></td>
-	<td><?php echo get_policy_txn_status_text($record->status);?></td>
+	<td><?php echo _POLICY_TRANSACTION_status_text($record->status);?></td>
 	<td class="ins-action">
 		<?php
 		/**

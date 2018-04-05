@@ -47,7 +47,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			/**
 			* Policy Object Card
 			*/
-			$__flag_object_editable = is_policy_editable($record->status, FALSE);
+			$__flag_object_editable = _POLICY_is_editable($record->status, FALSE);
 			$object_record = (object)[
 				'id' 				=> $record->object_id,
 	            'portfolio_id'  	=> $record->portfolio_id,

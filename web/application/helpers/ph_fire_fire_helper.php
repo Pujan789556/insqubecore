@@ -579,10 +579,10 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_validation_rules'))
 
 
 		// Basic/Common Validation Rules
-		$basic_rules = basic_premium_validation_rules( $policy_record->portfolio_id, $pfs_record );
+		$basic_rules = _POLICY_TRANSACTION_premium_basic_v_rules( $policy_record->portfolio_id, $pfs_record );
 
 		// Installment Rules
-		$installment_rules = installment_validation_rules( $policy_record->portfolio_id, $pfs_record );
+		$installment_rules = _POLICY_INSTALLMENT_validation_rules( $policy_record->portfolio_id, $pfs_record );
 
 
 		// Get validation rules based on the type (Manual Item entry or File Upload)

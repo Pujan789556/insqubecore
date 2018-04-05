@@ -186,7 +186,7 @@ class Policies extends MY_Controller
 		{
 			$this->load->model('portfolio_model');
 
-			$status_dropdown = get_policy_status_dropdown(false);
+			$status_dropdown = _POLICY_status_dropdown(false);
 
 			$filters = [
 				[
@@ -374,7 +374,7 @@ class Policies extends MY_Controller
 		/**
 		 * Check Editable?
 		 */
-		is_policy_editable($record->status);
+		_POLICY_is_editable($record->status);
 
 
 		// Validation Rule
@@ -608,7 +608,7 @@ class Policies extends MY_Controller
 		/**
 		 * Editable Permission? We should check permission of Txn not of Policy
 		 */
-		is_policy_txn_editable($txn_record->status, $txn_record->flag_current);
+		_POLICY_TRANSACTION_is_editable($txn_record->status, $txn_record->flag_current);
 
 
 		/**
@@ -1516,7 +1516,7 @@ class Policies extends MY_Controller
 			 * 		- Check if premium info is not NULL
 			 */
 
-			$status_keys = array_keys(get_policy_status_dropdown(FALSE));
+			$status_keys = array_keys(_POLICY_status_dropdown(FALSE));
 
 			// Valid Status Code?
 			if( !in_array($to_updown_status, $status_keys ) )

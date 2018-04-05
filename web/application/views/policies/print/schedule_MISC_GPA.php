@@ -68,7 +68,7 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                     </td>
                 </tr>
                 <tr>
-                    <td><?php echo policy_nr_title($record->status)?>: <strong><?php echo $record->code;?></strong></td>
+                    <td><?php echo _POLICY_schedule_title_prefix($record->status)?>: <strong><?php echo $record->code;?></strong></td>
                     <td>बीमालेखको किसिम: <strong><?php echo $record->portfolio_name; ?></strong></td>
                 </tr>
                 <tr>

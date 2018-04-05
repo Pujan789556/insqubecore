@@ -13,16 +13,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @link
  */
 
+
+// ------------------------------------------------------------------------
+// POLICY HELPER FUNCTIONS
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('get_policy_status_dropdown'))
+if ( ! function_exists('_POLICY_status_dropdown'))
 {
 	/**
 	 * Get Policy Status Dropdown
 	 *
 	 * @return	bool
 	 */
-	function get_policy_status_dropdown( $flag_blank_select = true )
+	function _POLICY_status_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 
@@ -43,16 +46,16 @@ if ( ! function_exists('get_policy_status_dropdown'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('get_policy_status_text'))
+if ( ! function_exists('_POLICY_status_text'))
 {
 	/**
 	 * Get Policy Status Text
 	 *
 	 * @return	string
 	 */
-	function get_policy_status_text( $key, $formatted = FALSE, $sentence = FALSE )
+	function _POLICY_status_text( $key, $formatted = FALSE, $sentence = FALSE )
 	{
-		$list = get_policy_status_dropdown();
+		$list = _POLICY_status_dropdown();
 
 		$text = $list[$key] ?? '';
 
@@ -87,7 +90,7 @@ if ( ! function_exists('get_policy_status_text'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('get_policy_flag_dc_dropdown'))
+if ( ! function_exists('_POLICY_flag_dc_dropdown'))
 {
 	/**
 	 * Get Policy's flag_dc dropdown
@@ -98,7 +101,7 @@ if ( ! function_exists('get_policy_flag_dc_dropdown'))
 	 *
 	 * @return	bool
 	 */
-	function get_policy_flag_dc_dropdown( $flag_blank_select = true )
+	function _POLICY_flag_dc_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 
@@ -116,239 +119,8 @@ if ( ! function_exists('get_policy_flag_dc_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_txn_status_dropdown'))
-{
-	/**
-	 * Get Policy Transaction Status Dropdown
-	 *
-	 * @return	bool
-	 */
-	function get_policy_txn_status_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = [
-			IQB_POLICY_TXN_STATUS_DRAFT			=> 'Draft',
-			IQB_POLICY_TXN_STATUS_VERIFIED		=> 'Verified',
-			IQB_POLICY_TXN_STATUS_RI_APPROVED	=> 'RI Approved',
-			IQB_POLICY_TXN_STATUS_VOUCHERED		=> 'Vouchered',
-			IQB_POLICY_TXN_STATUS_INVOICED		=> 'Invoiced',
-			IQB_POLICY_TXN_STATUS_ACTIVE		=> 'Active'
-		];
 
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_txn_status_text'))
-{
-	/**
-	 * Get Policy Transaction Status Text
-	 *
-	 * @return	string
-	 */
-	function get_policy_txn_status_text( $key, $formatted = FALSE, $sentence = FALSE )
-	{
-		$list = get_policy_txn_status_dropdown();
-
-		$text = $list[$key] ?? '';
-
-		if($formatted && $text != '')
-		{
-			if( in_array($key, [IQB_POLICY_TXN_STATUS_RI_APPROVED, IQB_POLICY_TXN_STATUS_VOUCHERED, IQB_POLICY_TXN_STATUS_INVOICED, IQB_POLICY_TXN_STATUS_ACTIVE]) )
-			{
-				// Green
-				$css_class = 'text-green';
-			}
-			else
-			{
-				// Orange
-				$css_class = 'text-orange';
-			}
-
-			$text = '<strong class="'.$css_class.'">'.$text.'</strong>';
-		}
-		return $text;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_transaction_type_dropdown'))
-{
-	/**
-	 * Get Policy Transaction Type Dropdown
-	 *
-	 * @return	array
-	 */
-	function get_policy_transaction_type_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = [
-			IQB_POLICY_TXN_TYPE_FRESH 		=> 'Fresh',
-			IQB_POLICY_TXN_TYPE_RENEWAL 	=> 'Renewal',
-
-			IQB_POLICY_TXN_TYPE_GENERAL 			=> 'General (Nil)',
-			IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER 	=> 'Ownership Transfer',
-			IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE 	=> 'Premium Upgrade',
-			IQB_POLICY_TXN_TYPE_PREMIUM_REFUND 		=> 'Premium Refund',
-			IQB_POLICY_TXN_TYPE_TERMINATE 			=> 'Terminate'
-		];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_transaction_type_endorsement_only_dropdown'))
-{
-	/**
-	 * Get Policy Transaction Type (Endorsement Only) Dropdown
-	 *
-	 * @return	array
-	 */
-	function get_policy_transaction_type_endorsement_only_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = [
-			IQB_POLICY_TXN_TYPE_GENERAL 			=> 'General (Nil)',
-			IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER 	=> 'Ownership Transfer',
-			IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE 	=> 'Premium Upgrade',
-			IQB_POLICY_TXN_TYPE_PREMIUM_REFUND 		=> 'Premium Refund',
-			IQB_POLICY_TXN_TYPE_TERMINATE 			=> 'Terminate'
-		];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_transaction_type_deletable'))
-{
-	/**
-	 * Get Policy Transaction Type - Deletable only
-	 *
-	 * Endorsement Only Transaction Types are deletable from transactions tab.
-	 *
-	 * @return	array
-	 */
-	function get_policy_transaction_type_deletable( )
-	{
-		return  array_keys( get_policy_transaction_type_endorsement_only_dropdown(FALSE) );
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_transaction_type_computation_basis_dropdown'))
-{
-	/**
-	 * Get Policy Transaction Computation Basis Dropdown
-	 *
-	 * @return	array
-	 */
-	function get_policy_transaction_type_computation_basis_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = [
-			IQB_POLICY_TXN_CB_ANNUAL 			=> 'Annual/Complete',
-			IQB_POLICY_TXN_CB_SHORT_TERM_RATE 	=> 'Short Term Rate',
-			IQB_POLICY_TXN_CB_PRORATA 			=> 'Prorata',
-		];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_transaction_type_text'))
-{
-	/**
-	 * Get Policy Status Text
-	 *
-	 * @return	string
-	 */
-	function get_policy_transaction_type_text( $key, $formatted = FALSE, $sentence = FALSE )
-	{
-		$list = get_policy_transaction_type_dropdown();
-
-		$text = $list[$key] ?? '';
-
-		return $text;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_installment_status_dropdown'))
-{
-	/**
-	 * Get Policy Transaction Status Dropdown
-	 *
-	 * @return	bool
-	 */
-	function get_policy_installment_status_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = [
-			IQB_POLICY_INSTALLMENT_STATUS_DRAFT			=> 'Due',
-			IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED		=> 'Vouchered',
-			IQB_POLICY_INSTALLMENT_STATUS_INVOICED		=> 'Invoiced',
-			IQB_POLICY_INSTALLMENT_STATUS_PAID			=> 'Paid'
-		];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('get_policy_installment_status_text'))
-{
-	/**
-	 * Get Policy Transaction Status Text
-	 *
-	 * @return	string
-	 */
-	function get_policy_installment_status_text( $key, $formatted = FALSE, $sentence = FALSE )
-	{
-		$list = get_policy_installment_status_dropdown();
-
-		$text = $list[$key] ?? '';
-
-		if($formatted && $text != '')
-		{
-			if( in_array($key, [IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED, IQB_POLICY_INSTALLMENT_STATUS_INVOICED, IQB_POLICY_INSTALLMENT_STATUS_PAID]) )
-			{
-				// Green
-				$css_class = 'text-green';
-			}
-			else
-			{
-				// Orange
-				$css_class = 'text-orange';
-			}
-
-			$text = '<strong class="'.$css_class.'">'.$text.'</strong>';
-		}
-		return $text;
-	}
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('is_policy_editable'))
+if ( ! function_exists('_POLICY_is_editable'))
 {
 	/**
 	 * Is Policy Editable?
@@ -360,7 +132,7 @@ if ( ! function_exists('is_policy_editable'))
 	 * @param bool $terminate_on_fail Terminate Right Here if not editable.
 	 * @return	bool
 	 */
-	function is_policy_editable( $status, $terminate_on_fail = TRUE )
+	function _POLICY_is_editable( $status, $terminate_on_fail = TRUE )
 	{
 		$CI =& get_instance();
 
@@ -386,66 +158,6 @@ if ( ! function_exists('is_policy_editable'))
 				||
 
 				( $status === IQB_POLICY_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('policies', 'edit.draft.policy') )
-			)
-			{
-				$__flag_authorized = TRUE;
-			}
-		}
-
-		// Terminate on Exit?
-		if( $__flag_authorized === FALSE && $terminate_on_fail == TRUE)
-		{
-			$CI->dx_auth->deny_access();
-			exit(1);
-		}
-
-		return $__flag_authorized;
-	}
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('is_policy_txn_editable'))
-{
-	/**
-	 * Is Policy Transaction Editable?
-	 *
-	 * Check if the given policy transaction is editable.
-	 *
-	 * @param char $status 	Policy Transaction Status
-	 * @param char $flag_current 	Is this Current Policy Transaction
-	 * @param bool $terminate_on_fail Terminate Right Here if not editable.
-	 * @return	bool
-	 */
-	function is_policy_txn_editable($status, $flag_current, $terminate_on_fail = TRUE )
-	{
-		$CI =& get_instance();
-
-		// Editable Permissions ?
-		$__flag_authorized 		= FALSE;
-
-
-
-		/**
-		 * Check Permissions
-		 *
-		 * Editable Status
-		 * 		draft
-		 *
-		 * Editable Permissions Are
-		 * 		edit.draft.transaction
-		 */
-
-		// Editable Permissions ?
-		if( $status === IQB_POLICY_TXN_STATUS_DRAFT )
-		{
-			if(
-				$CI->dx_auth->is_admin()
-
-				||
-
-				( $status === IQB_POLICY_TXN_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('policy_transactions', 'edit.draft.transaction') )
-
 			)
 			{
 				$__flag_authorized = TRUE;
@@ -1187,189 +899,6 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_POLICY_TRANSACTION__ri_approval_constraint'))
-{
-	/**
-	 * RI Approval Constraint on Policy Transaction
-	 *
-	 * Check if the policy transaction record requires RI Approval and is Approved
-	 * i.e.
-	 * 		if RI Approval required and not approved yet, it returns TRUE
-	 * 		FALSE otherwise.
-	 *
-	 * @param char 	$status 			Policy Transaction Status
-	 * @param int 	$flag_ri_approval 	Policy Transaction flag_ri_approval
-	 * @return	bool
-	 */
-	function _POLICY_TRANSACTION__ri_approval_constraint( $status, $flag_ri_approval )
-	{
-		$constraint = FALSE;
-
-        // First check if it requires RI Approval
-        if( (int)$flag_ri_approval === IQB_FLAG_ON )
-        {
-            // Transaction status must be "RI Approved"
-            $constraint = $status !== IQB_POLICY_TXN_STATUS_RI_APPROVED;
-        }
-
-        return $constraint;
-	}
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_POLICY_INSTALLMENT__voucher_constraint'))
-{
-	/**
-	 * Check voucher constraint for a policy installment
-	 *
-	 * Logic:
-	 *
-	 *  Case 1: First Installment
-	 *      The first installment is only eligible for voucher if policy transaction record is eligible
-	 *      i.e. either ri_approved or no ri_approval constraint with verified status
-	 *
-	 *  Case 2: Other installmemnts
-	 *      The first installment of this transaction record has to be paid.
-	 * 		And its status must be draft
-	 *
-	 * 	NOTE: You can only generate voucher for the given installment, only if voucher constraint is TRUE
-	 *
-	 *
-	 * @param object 	$record 	Policy Installment Record
-	 * @return	bool
-	 */
-	function _POLICY_INSTALLMENT__voucher_constraint( $record )
-	{
-		$passed = FALSE;
-
-		/**
-		 * Case 1: First Installment
-		 */
-		if( $record->flag_first == IQB_FLAG_ON )
-		{
-			$ri_approval_constraint = _POLICY_TRANSACTION__ri_approval_constraint($record->policy_transaction_status, $record->policy_transaction_flag_ri_approval);
-
-			$passed = 	($record->policy_transaction_status === IQB_POLICY_TXN_STATUS_RI_APPROVED)
-					        ||
-				    	(	$record->policy_transaction_status === IQB_POLICY_TXN_STATUS_VERIFIED
-				    			&&
-		    				$ri_approval_constraint == FALSE
-		    			);
-		}
-		/**
-		 * Case 2: Other Installment
-		 */
-		else
-		{
-			$CI =& get_instance();
-			$CI->load->model('policy_installment_model');
-
-			$first_installment_status = $CI->policy_installment_model->first_installment_status($record->policy_transaction_id);
-
-			$passed = 	(
-							$first_installment_status === IQB_POLICY_INSTALLMENT_STATUS_PAID
-								&&
-							$record->status === IQB_POLICY_INSTALLMENT_STATUS_DRAFT
-						);
-		}
-
-		return $passed;
-	}
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_POLICY__endorsement_pdf'))
-{
-    /**
-     * Print Policy Endorsement/Transaction PDF
-     *
-     * @param array $data
-     * @return  void
-     */
-    function _POLICY__endorsement_pdf( $data )
-    {
-    	$CI =& get_instance();
-
-		/**
-		 * Extract Policy Record and Policy Transaction Record
-		 */
-		$records 		= $data['records'];
-		$type 			= $data['type'];
-
-		if( $type == 'single' )
-		{
-			// check if this is not fresh/renewal transaction
-			$record = $records[0] ?? NULL;
-
-			if($record && in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
-			{
-				throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__endorsement_pdf()]: You can not have endrosement print of FRESH/RENEWAL Transaction/endorsement.");
-			}
-		}
-
-		$schedule_view 	= 'policy_transactions/print/endorsement';
-
-		$record = $records[0] ?? NULL;
-
-		if( $record )
-		{
-			$CI->load->library('pdf');
-	        $mpdf = $CI->pdf->load();
-	        // $mpdf->SetMargins(10, 10, 5);
-	        $mpdf->SetMargins(10, 5, 10, 5);
-	        $mpdf->margin_header = 5;
-	        $mpdf->margin_footer = 5;
-	        $mpdf->SetProtection(array('print'));
-	        $mpdf->SetTitle("Policy Endorsement - {$record->code}");
-	        $mpdf->SetAuthor($CI->settings->orgn_name_en);
-
-	        /**
-	         * Only Active Endorsement Does not have watermark!!!
-	         */
-	        if( $record->status !== IQB_POLICY_TXN_STATUS_ACTIVE )
-	        {
-	        	$mpdf->SetWatermarkText( 'ENDORSEMENT - ' . strtoupper(get_policy_txn_status_text($record->status)) );
-	        }
-
-	        $mpdf->showWatermarkText = true;
-	        $mpdf->watermark_font = 'DejaVuSansCondensed';
-	        $mpdf->watermarkTextAlpha = 0.1;
-	        $mpdf->SetDisplayMode('fullpage');
-
-	        $html = $CI->load->view( $schedule_view, $data, TRUE);
-	        $mpdf->WriteHTML($html);
-
-	        $filename = "endorsement-all-{$record->code}.pdf";
-	        // $mpdf->Output($filename,'D');      // make it to DOWNLOAD
-	        $mpdf->Output();      // make it to DOWNLOAD
-		}
-		else
-		{
-			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__endorsement_pdf()]: No endorsement found.");
-		}
-
-
-
-        // if( $action === 'save' )
-        // {
-        // 	$save_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/policies/' . $filename;
-        // 	$mpdf->Output($save_full_path,'F');
-        // }
-        // else if($action === 'download')
-        // {
-		// 		$mpdf->Output($filename,'D');      // make it to DOWNLOAD
-        // }
-        // else
-        // {
-        // 	$mpdf->Output();
-        // }
-    }
-}
-
-// ------------------------------------------------------------------------
-
 if ( ! function_exists('_POLICY__schedule_pdf'))
 {
     /**
@@ -1423,7 +952,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
 	        {
 		        if( !in_array($record->status, [IQB_POLICY_STATUS_ACTIVE, IQB_POLICY_STATUS_CANCELED, IQB_POLICY_STATUS_EXPIRED]))
 		        {
-		        	$mpdf->SetWatermarkText( 'DEBIT NOTE - ' . strtoupper(get_policy_status_text($record->status)) );
+		        	$mpdf->SetWatermarkText( 'DEBIT NOTE - ' . strtoupper(_POLICY_status_text($record->status)) );
 		        }
 		    }
 
@@ -1633,10 +1162,9 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
     }
 }
 
-
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('policy_nr_title'))
+if ( ! function_exists('_POLICY_schedule_title_prefix'))
 {
 	/**
 	 * Get policy number title based on policy status
@@ -1647,7 +1175,7 @@ if ( ! function_exists('policy_nr_title'))
 	 * @param string $lang 	Language
 	 * @return	bool
 	 */
-	function policy_nr_title( $status, $lang = 'np' )
+	function _POLICY_schedule_title_prefix( $status, $lang = 'np' )
 	{
 		if( in_array($status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_VERIFIED]) )
 		{
@@ -1668,9 +1196,371 @@ if ( ! function_exists('policy_nr_title'))
 	}
 }
 
+
+// ------------------------------------------------------------------------
+// POLICY TRANSACTION HELPER FUNCTIONS
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('basic_premium_validation_rules'))
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_status_dropdown'))
+{
+	/**
+	 * Get Policy Transaction Status Dropdown
+	 *
+	 * @return	bool
+	 */
+	function _POLICY_TRANSACTION_status_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_POLICY_TXN_STATUS_DRAFT			=> 'Draft',
+			IQB_POLICY_TXN_STATUS_VERIFIED		=> 'Verified',
+			IQB_POLICY_TXN_STATUS_RI_APPROVED	=> 'RI Approved',
+			IQB_POLICY_TXN_STATUS_VOUCHERED		=> 'Vouchered',
+			IQB_POLICY_TXN_STATUS_INVOICED		=> 'Invoiced',
+			IQB_POLICY_TXN_STATUS_ACTIVE		=> 'Active'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_status_text'))
+{
+	/**
+	 * Get Policy Transaction Status Text
+	 *
+	 * @return	string
+	 */
+	function _POLICY_TRANSACTION_status_text( $key, $formatted = FALSE, $sentence = FALSE )
+	{
+		$list = _POLICY_TRANSACTION_status_dropdown();
+
+		$text = $list[$key] ?? '';
+
+		if($formatted && $text != '')
+		{
+			if( in_array($key, [IQB_POLICY_TXN_STATUS_RI_APPROVED, IQB_POLICY_TXN_STATUS_VOUCHERED, IQB_POLICY_TXN_STATUS_INVOICED, IQB_POLICY_TXN_STATUS_ACTIVE]) )
+			{
+				// Green
+				$css_class = 'text-green';
+			}
+			else
+			{
+				// Orange
+				$css_class = 'text-orange';
+			}
+
+			$text = '<strong class="'.$css_class.'">'.$text.'</strong>';
+		}
+		return $text;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY_TRANSACTION_is_editable'))
+{
+	/**
+	 * Is Policy Transaction Editable?
+	 *
+	 * Check if the given policy transaction is editable.
+	 *
+	 * @param char $status 	Policy Transaction Status
+	 * @param char $flag_current 	Is this Current Policy Transaction
+	 * @param bool $terminate_on_fail Terminate Right Here if not editable.
+	 * @return	bool
+	 */
+	function _POLICY_TRANSACTION_is_editable($status, $flag_current, $terminate_on_fail = TRUE )
+	{
+		$CI =& get_instance();
+
+		// Editable Permissions ?
+		$__flag_authorized 		= FALSE;
+
+
+
+		/**
+		 * Check Permissions
+		 *
+		 * Editable Status
+		 * 		draft
+		 *
+		 * Editable Permissions Are
+		 * 		edit.draft.transaction
+		 */
+
+		// Editable Permissions ?
+		if( $status === IQB_POLICY_TXN_STATUS_DRAFT )
+		{
+			if(
+				$CI->dx_auth->is_admin()
+
+				||
+
+				( $status === IQB_POLICY_TXN_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('policy_transactions', 'edit.draft.transaction') )
+
+			)
+			{
+				$__flag_authorized = TRUE;
+			}
+		}
+
+		// Terminate on Exit?
+		if( $__flag_authorized === FALSE && $terminate_on_fail == TRUE)
+		{
+			$CI->dx_auth->deny_access();
+			exit(1);
+		}
+
+		return $__flag_authorized;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_type_dropdown'))
+{
+	/**
+	 * Get Policy Transaction Type Dropdown
+	 *
+	 * @return	array
+	 */
+	function _POLICY_TRANSACTION_type_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_POLICY_TXN_TYPE_FRESH 		=> 'Fresh',
+			IQB_POLICY_TXN_TYPE_RENEWAL 	=> 'Renewal',
+
+			IQB_POLICY_TXN_TYPE_GENERAL 			=> 'General (Nil)',
+			IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER 	=> 'Ownership Transfer',
+			IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE 	=> 'Premium Upgrade',
+			IQB_POLICY_TXN_TYPE_PREMIUM_REFUND 		=> 'Premium Refund',
+			IQB_POLICY_TXN_TYPE_TERMINATE 			=> 'Terminate'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_type_eonly_dropdown'))
+{
+	/**
+	 * Get Policy Transaction Type (Endorsement Only) Dropdown
+	 *
+	 * @return	array
+	 */
+	function _POLICY_TRANSACTION_type_eonly_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_POLICY_TXN_TYPE_GENERAL 			=> 'General (Nil)',
+			IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER 	=> 'Ownership Transfer',
+			IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE 	=> 'Premium Upgrade',
+			IQB_POLICY_TXN_TYPE_PREMIUM_REFUND 		=> 'Premium Refund',
+			IQB_POLICY_TXN_TYPE_TERMINATE 			=> 'Terminate'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_is_deletable_by_type'))
+{
+	/**
+	 * Get Policy Transaction Type - Deletable only
+	 *
+	 * Endorsement Only Transaction Types are deletable from transactions tab.
+	 *
+	 * @return	array
+	 */
+	function _POLICY_TRANSACTION_is_deletable_by_type( )
+	{
+		return  array_keys( _POLICY_TRANSACTION_type_eonly_dropdown(FALSE) );
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_computation_basis_dropdown'))
+{
+	/**
+	 * Get Policy Transaction Computation Basis Dropdown
+	 *
+	 * @return	array
+	 */
+	function _POLICY_TRANSACTION_computation_basis_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_POLICY_TXN_CB_ANNUAL 			=> 'Annual/Complete',
+			IQB_POLICY_TXN_CB_SHORT_TERM_RATE 	=> 'Short Term Rate',
+			IQB_POLICY_TXN_CB_PRORATA 			=> 'Prorata',
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_type_text'))
+{
+	/**
+	 * Get Policy Status Text
+	 *
+	 * @return	string
+	 */
+	function _POLICY_TRANSACTION_type_text( $key, $formatted = FALSE, $sentence = FALSE )
+	{
+		$list = _POLICY_TRANSACTION_type_dropdown();
+
+		$text = $list[$key] ?? '';
+
+		return $text;
+	}
+}
+
+
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY_TRANSACTION__ri_approval_constraint'))
+{
+	/**
+	 * RI Approval Constraint on Policy Transaction
+	 *
+	 * Check if the policy transaction record requires RI Approval and is Approved
+	 * i.e.
+	 * 		if RI Approval required and not approved yet, it returns TRUE
+	 * 		FALSE otherwise.
+	 *
+	 * @param char 	$status 			Policy Transaction Status
+	 * @param int 	$flag_ri_approval 	Policy Transaction flag_ri_approval
+	 * @return	bool
+	 */
+	function _POLICY_TRANSACTION__ri_approval_constraint( $status, $flag_ri_approval )
+	{
+		$constraint = FALSE;
+
+        // First check if it requires RI Approval
+        if( (int)$flag_ri_approval === IQB_FLAG_ON )
+        {
+            // Transaction status must be "RI Approved"
+            $constraint = $status !== IQB_POLICY_TXN_STATUS_RI_APPROVED;
+        }
+
+        return $constraint;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY_TRANSACTION_endorsement_pdf'))
+{
+    /**
+     * Print Policy Endorsement/Transaction PDF
+     *
+     * @param array $data
+     * @return  void
+     */
+    function _POLICY_TRANSACTION_endorsement_pdf( $data )
+    {
+    	$CI =& get_instance();
+
+		/**
+		 * Extract Policy Record and Policy Transaction Record
+		 */
+		$records 		= $data['records'];
+		$type 			= $data['type'];
+
+		if( $type == 'single' )
+		{
+			// check if this is not fresh/renewal transaction
+			$record = $records[0] ?? NULL;
+
+			if($record && in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+			{
+				throw new Exception("Exception [Helper: policy_helper][Method: _POLICY_TRANSACTION_endorsement_pdf()]: You can not have endrosement print of FRESH/RENEWAL Transaction/endorsement.");
+			}
+		}
+
+		$schedule_view 	= 'policy_transactions/print/endorsement';
+
+		$record = $records[0] ?? NULL;
+
+		if( $record )
+		{
+			$CI->load->library('pdf');
+	        $mpdf = $CI->pdf->load();
+	        // $mpdf->SetMargins(10, 10, 5);
+	        $mpdf->SetMargins(10, 5, 10, 5);
+	        $mpdf->margin_header = 5;
+	        $mpdf->margin_footer = 5;
+	        $mpdf->SetProtection(array('print'));
+	        $mpdf->SetTitle("Policy Endorsement - {$record->code}");
+	        $mpdf->SetAuthor($CI->settings->orgn_name_en);
+
+	        /**
+	         * Only Active Endorsement Does not have watermark!!!
+	         */
+	        if( $record->status !== IQB_POLICY_TXN_STATUS_ACTIVE )
+	        {
+	        	$mpdf->SetWatermarkText( 'ENDORSEMENT - ' . strtoupper(_POLICY_TRANSACTION_status_text($record->status)) );
+	        }
+
+	        $mpdf->showWatermarkText = true;
+	        $mpdf->watermark_font = 'DejaVuSansCondensed';
+	        $mpdf->watermarkTextAlpha = 0.1;
+	        $mpdf->SetDisplayMode('fullpage');
+
+	        $html = $CI->load->view( $schedule_view, $data, TRUE);
+	        $mpdf->WriteHTML($html);
+
+	        $filename = "endorsement-all-{$record->code}.pdf";
+	        // $mpdf->Output($filename,'D');      // make it to DOWNLOAD
+	        $mpdf->Output();      // make it to DOWNLOAD
+		}
+		else
+		{
+			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY_TRANSACTION_endorsement_pdf()]: No endorsement found.");
+		}
+
+
+
+        // if( $action === 'save' )
+        // {
+        // 	$save_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/policies/' . $filename;
+        // 	$mpdf->Output($save_full_path,'F');
+        // }
+        // else if($action === 'download')
+        // {
+		// 		$mpdf->Output($filename,'D');      // make it to DOWNLOAD
+        // }
+        // else
+        // {
+        // 	$mpdf->Output();
+        // }
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY_TRANSACTION_premium_basic_v_rules'))
 {
 	/**
 	 * Get common/basic premium validation rules for all portfolios
@@ -1679,7 +1569,7 @@ if ( ! function_exists('basic_premium_validation_rules'))
 	 * @param object $pfs_record		Portfolio Setting Record
 	 * @return	array
 	 */
-	function basic_premium_validation_rules( $portfolio_id, $pfs_record )
+	function _POLICY_TRANSACTION_premium_basic_v_rules( $portfolio_id, $pfs_record )
 	{
 		$CI =& get_instance();
 
@@ -1728,8 +1618,132 @@ if ( ! function_exists('basic_premium_validation_rules'))
 }
 
 // ------------------------------------------------------------------------
+// POLICY INSTALLMENT HELPER FUNCTIONS
+// ------------------------------------------------------------------------
 
-if ( ! function_exists('installment_validation_rules'))
+
+if ( ! function_exists('_POLICY_INSTALLMENT_status_dropdown'))
+{
+	/**
+	 * Get Policy Transaction Status Dropdown
+	 *
+	 * @return	bool
+	 */
+	function _POLICY_INSTALLMENT_status_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			IQB_POLICY_INSTALLMENT_STATUS_DRAFT			=> 'Due',
+			IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED		=> 'Vouchered',
+			IQB_POLICY_INSTALLMENT_STATUS_INVOICED		=> 'Invoiced',
+			IQB_POLICY_INSTALLMENT_STATUS_PAID			=> 'Paid'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_INSTALLMENT_status_text'))
+{
+	/**
+	 * Get Policy Transaction Status Text
+	 *
+	 * @return	string
+	 */
+	function _POLICY_INSTALLMENT_status_text( $key, $formatted = FALSE, $sentence = FALSE )
+	{
+		$list = _POLICY_INSTALLMENT_status_dropdown();
+
+		$text = $list[$key] ?? '';
+
+		if($formatted && $text != '')
+		{
+			if( in_array($key, [IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED, IQB_POLICY_INSTALLMENT_STATUS_INVOICED, IQB_POLICY_INSTALLMENT_STATUS_PAID]) )
+			{
+				// Green
+				$css_class = 'text-green';
+			}
+			else
+			{
+				// Orange
+				$css_class = 'text-orange';
+			}
+
+			$text = '<strong class="'.$css_class.'">'.$text.'</strong>';
+		}
+		return $text;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY_INSTALLMENT__voucher_constraint'))
+{
+	/**
+	 * Check voucher constraint for a policy installment
+	 *
+	 * Logic:
+	 *
+	 *  Case 1: First Installment
+	 *      The first installment is only eligible for voucher if policy transaction record is eligible
+	 *      i.e. either ri_approved or no ri_approval constraint with verified status
+	 *
+	 *  Case 2: Other installmemnts
+	 *      The first installment of this transaction record has to be paid.
+	 * 		And its status must be draft
+	 *
+	 * 	NOTE: You can only generate voucher for the given installment, only if voucher constraint is TRUE
+	 *
+	 *
+	 * @param object 	$record 	Policy Installment Record
+	 * @return	bool
+	 */
+	function _POLICY_INSTALLMENT__voucher_constraint( $record )
+	{
+		$passed = FALSE;
+
+		/**
+		 * Case 1: First Installment
+		 */
+		if( $record->flag_first == IQB_FLAG_ON )
+		{
+			$ri_approval_constraint = _POLICY_TRANSACTION__ri_approval_constraint($record->policy_transaction_status, $record->policy_transaction_flag_ri_approval);
+
+			$passed = 	($record->policy_transaction_status === IQB_POLICY_TXN_STATUS_RI_APPROVED)
+					        ||
+				    	(	$record->policy_transaction_status === IQB_POLICY_TXN_STATUS_VERIFIED
+				    			&&
+		    				$ri_approval_constraint == FALSE
+		    			);
+		}
+		/**
+		 * Case 2: Other Installment
+		 */
+		else
+		{
+			$CI =& get_instance();
+			$CI->load->model('policy_installment_model');
+
+			$first_installment_status = $CI->policy_installment_model->first_installment_status($record->policy_transaction_id);
+
+			$passed = 	(
+							$first_installment_status === IQB_POLICY_INSTALLMENT_STATUS_PAID
+								&&
+							$record->status === IQB_POLICY_INSTALLMENT_STATUS_DRAFT
+						);
+		}
+
+		return $passed;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY_INSTALLMENT_validation_rules'))
 {
 	/**
 	 * Get premium installment validation rules for all portfolios
@@ -1738,7 +1752,7 @@ if ( ! function_exists('installment_validation_rules'))
 	 * @param object $pfs_record		Portfolio Setting Record
 	 * @return	array
 	 */
-	function installment_validation_rules( $portfolio_id, $pfs_record )
+	function _POLICY_INSTALLMENT_validation_rules( $portfolio_id, $pfs_record )
 	{
 		$rules = [];
 
@@ -1758,20 +1772,20 @@ if ( ! function_exists('installment_validation_rules'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('get_installments_by_txn'))
+if ( ! function_exists('_POLICY_INSTALLMENT_list_by_transaction'))
 {
 	/**
 	 * Get the list of installments by a policy transaction
 	 *
-	 * @param integer $policy_installment_id 	Policy TXN ID
+	 * @param integer $policy_transaction_id 	Policy TXN ID
 	 * @return	array
 	 */
-	function get_installments_by_txn( $policy_installment_id )
+	function _POLICY_INSTALLMENT_list_by_transaction( $policy_transaction_id )
 	{
 		$CI =& get_instance();
 		$CI->load->model('policy_installment_model');
 
-		return $CI->policy_installment_model->get_many_by_policy_transaction($policy_installment_id);
+		return $CI->policy_installment_model->get_many_by_policy_transaction($policy_transaction_id);
 	}
 }
 

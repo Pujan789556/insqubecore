@@ -419,10 +419,10 @@ class Policy_model extends MY_Model
                     [
                         'field' => 'flag_dc',
                         'label' => 'Direct Discount or Agent Commission',
-                        'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode( ',', array_keys( get_policy_flag_dc_dropdown(false) ) ).']',
+                        'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode( ',', array_keys( _POLICY_flag_dc_dropdown(false) ) ).']',
                         '_id'       => '_flag-dc',
                         '_type'     => 'radio',
-                        '_data'     => get_policy_flag_dc_dropdown(false),
+                        '_data'     => _POLICY_flag_dc_dropdown(false),
                         '_required' => true
                     ],
                     [
@@ -975,7 +975,7 @@ class Policy_model extends MY_Model
         $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
 
         // Valid Record? Valid Status Code?
-        if( !$record || !in_array($to_status_flag, array_keys( get_policy_status_dropdown() ) ) )
+        if( !$record || !in_array($to_status_flag, array_keys( _POLICY_status_dropdown() ) ) )
         {
             throw new Exception("Exception [Model: Policy_model][Method: update_status()]: Either Policy Record not found or Invalid status flag supplied.");
         }

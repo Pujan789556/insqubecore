@@ -586,7 +586,7 @@ class Customers extends MY_Controller
 		/**
 		 * Editable Permission? We should check permission of Txn not of Policy
 		 */
-		is_policy_txn_editable($txn_record->status, $txn_record->flag_current);
+		_POLICY_TRANSACTION_is_editable($txn_record->status, $txn_record->flag_current);
 
 
 		/**

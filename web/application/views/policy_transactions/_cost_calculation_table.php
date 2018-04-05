@@ -16,7 +16,7 @@ $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($po
         <h3 class="no-margin">
             <span class="text-left">Transaction Details</span>
             <span class="pull-right">
-                <?php if( is_policy_editable($policy_record->status, FALSE) ):
+                <?php if( _POLICY_is_editable($policy_record->status, FALSE) ):
                     $txn_type = $policy_record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL:   IQB_POLICY_TXN_TYPE_FRESH;
                     $update_premium_url = 'policy_transactions/premium/' . $txn_type . '/' . $policy_record->id;
                 ?>

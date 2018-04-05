@@ -57,7 +57,7 @@ $schedule_table_title   = "Public Liability (Schedule)";
             <thead><tr><td colspan="3" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
             <tbody>
                 <tr>
-                    <td><strong><?php echo policy_nr_title($record->status, 'en')?>:</strong> <?php echo $record->code;?></td>
+                    <td><strong><?php echo _POLICY_schedule_title_prefix($record->status, 'en')?>:</strong> <?php echo $record->code;?></td>
 
                     <?php
                     /**

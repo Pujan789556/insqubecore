@@ -53,7 +53,7 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
         <table class="table" width="100%">
             <thead><tr><td colspan="2" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
             <tbody>
-                <tr><td colspan="2"><?php echo policy_nr_title($record->status)?>: <?php echo $record->code;?></td></tr>
+                <tr><td colspan="2"><?php echo _POLICY_schedule_title_prefix($record->status)?>: <?php echo $record->code;?></td></tr>
                 <tr>
                     <td width="50%" class="no-padding">
                         <table class="table" width="100%">

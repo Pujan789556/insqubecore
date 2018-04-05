@@ -178,7 +178,7 @@ class Object_model extends MY_Model
         {
             $policy_record = $this->get_latest_policy($id);
 
-            if($policy_record && is_policy_editable($policy_record->status, FALSE) === TRUE)
+            if($policy_record && _POLICY_is_editable($policy_record->status, FALSE) === TRUE)
             {
                 $this->load->model('policy_transaction_model');
                 $this->policy_transaction_model->reset($policy_record->id);

@@ -12,7 +12,7 @@ $flag__fresh_or_renewal = in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH
  * ---------------
  * Allowed Status: draft | unverified
  */
-if( is_policy_txn_editable($record->status, $record->flag_current, FALSE) ):
+if( _POLICY_TRANSACTION_is_editable($record->status, $record->flag_current, FALSE) ):
     $update_premium_url = 'policy_transactions/premium/' . $record->txn_type . '/' . $record->policy_id;
 ?>
     <?php

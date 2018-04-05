@@ -59,8 +59,8 @@ class Policy_transaction_model extends MY_Model
      */
     public function validation_rules()
     {
-        $txn_type_dropdown          = get_policy_transaction_type_endorsement_only_dropdown(FALSE);
-        $computation_basis_dropdown = get_policy_transaction_type_computation_basis_dropdown(FALSE);
+        $txn_type_dropdown          = _POLICY_TRANSACTION_type_eonly_dropdown(FALSE);
+        $computation_basis_dropdown = _POLICY_TRANSACTION_computation_basis_dropdown(FALSE);
 
 
         $txn_type = (int)$this->input->post('txn_type');
@@ -109,7 +109,7 @@ class Policy_transaction_model extends MY_Model
     public function get_v_rules( $txn_type, $formatted = FALSE )
     {
         $txn_type                   = (int)$txn_type;
-        $computation_basis_dropdown = get_policy_transaction_type_computation_basis_dropdown(FALSE);
+        $computation_basis_dropdown = _POLICY_TRANSACTION_computation_basis_dropdown(FALSE);
         $v_rules                    = [];
 
 

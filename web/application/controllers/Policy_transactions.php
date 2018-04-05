@@ -175,7 +175,7 @@ class Policy_transactions extends MY_Controller
 		/**
 		 * Check Permissions & Editability
 		 */
-		is_policy_txn_editable($record->status, $record->flag_current);
+		_POLICY_TRANSACTION_is_editable($record->status, $record->flag_current);
 
 		/**
 		 * Policy Record
@@ -228,7 +228,7 @@ class Policy_transactions extends MY_Controller
 		 * Valid Transaction Type?
 		 */
 		$txn_type = (int)$txn_type;
-		$txn_types = array_keys( get_policy_transaction_type_endorsement_only_dropdown(FALSE) );
+		$txn_types = array_keys( _POLICY_TRANSACTION_type_eonly_dropdown(FALSE) );
 		if( !in_array($txn_type, $txn_types) )
 		{
 			return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'Invalid Endorsement Type.'], 403);
@@ -577,7 +577,7 @@ class Policy_transactions extends MY_Controller
 		if(
 			$record->status !== IQB_POLICY_TXN_STATUS_DRAFT
 							||
-			!in_array( $record->txn_type, get_policy_transaction_type_deletable() )
+			!in_array( $record->txn_type, _POLICY_TRANSACTION_is_deletable_by_type() )
 							||
 			!$this->dx_auth->is_authorized('policy_transactions', 'delete.draft.transaction')
 		)
@@ -1573,7 +1573,7 @@ class Policy_transactions extends MY_Controller
 		 */
 		try {
 
-			_POLICY__endorsement_pdf($data);
+			_POLICY_TRANSACTION_endorsement_pdf($data);
 		}
 		catch (Exception $e) {
 
@@ -1752,7 +1752,7 @@ class Policy_transactions extends MY_Controller
 			 * ------------------------------
 			 *
 			 */
-			$status_keys = array_keys(get_policy_txn_status_dropdown(FALSE));
+			$status_keys = array_keys(_POLICY_TRANSACTION_status_dropdown(FALSE));
 
 			// Valid Status Code?
 			if( !in_array($to_updown_status, $status_keys ) )

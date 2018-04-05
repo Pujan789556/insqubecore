@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <h3 class="no-margin">
             <span class="pull-left">Policy Details</span>
             <span class="pull-right">
-                <?php if( is_policy_editable($record->status, FALSE) ): ?>
+                <?php if( _POLICY_is_editable($record->status, FALSE) ): ?>
                         <a href="#"
                             class="trg-dialog-edit btn btn-primary btn-sm"
                             title="Edit Policy Information"
@@ -107,7 +107,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </tr>
                         <tr>
                             <td class="text-bold">Status</td>
-                            <td><?php echo get_policy_status_text($record->status, true);?></td>
+                            <td><?php echo _POLICY_status_text($record->status, true);?></td>
                         </tr>
                     </tbody>
                 </table>

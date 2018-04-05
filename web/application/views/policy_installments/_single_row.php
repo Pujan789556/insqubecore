@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->percent;?>%</td>
 	<td><?php echo number_format( (float)$record->amt_total_premium, 2, '.', '');?></td>
 
-	<td><?php echo get_policy_installment_status_text($record->status, TRUE);?></td>
+	<td><?php echo _POLICY_INSTALLMENT_status_text($record->status, TRUE);?></td>
 	<td class="ins-action">
 		<?php
 		/**

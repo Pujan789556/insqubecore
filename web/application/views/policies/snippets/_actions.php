@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * ---------------
  * Allowed Status: draft
  */
-if( is_policy_editable($record->status, FALSE) ):
+if( _POLICY_is_editable($record->status, FALSE) ):
     $txn_type = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL:   IQB_POLICY_TXN_TYPE_FRESH;
     $update_premium_url = 'policy_transactions/premium/' . $txn_type . '/' . $record->id;
 ?>

@@ -59,7 +59,7 @@ $schedule_table_title   = 'बैंकरको क्षतिपूर्त�
             <thead><tr><td colspan="2" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
             <tbody>
                 <tr>
-                    <td><?php echo policy_nr_title($record->status)?>: <strong><?php echo $record->code;?></strong></td>
+                    <td><?php echo _POLICY_schedule_title_prefix($record->status)?>: <strong><?php echo $record->code;?></strong></td>
                     <td>बीमालेखको किसिम: <strong><?php echo $record->portfolio_name; ?></strong></td>
                 </tr>
                 <tr>
