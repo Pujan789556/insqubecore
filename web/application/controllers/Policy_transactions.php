@@ -620,27 +620,47 @@ class Policy_transactions extends MY_Controller
 	/**
 	 * Re-Build Policy Transaction Premium
 	 *
-	 * This method is used to edit the transaction table.
-	 * This method only applies for Fresh/Renewal Record.
 	 *
-	 * !!! Important: Fresh/Renewal Only
-	 *
-	 * @param char $txn_type Transaction Type
-	 * @param integer $id Policy ID
+	 * @param integer $id Policy Transaction ID
 	 * @return void
 	 */
-	public function premium( $txn_type, $policy_id )
+	public function premium( $id )
 	{
-		/**
-		 * Check Permissions
-		 */
-		if( !$this->dx_auth->is_authorized('policy_transactions', 'edit.draft.transaction') )
+
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->policy_transaction_model->get($id);
+		if(!$record)
 		{
-			$this->dx_auth->deny_access();
+			$this->template->render_404();
 		}
 
-		// Valid Transaction Type (Fresh & Renewal Only)
-		if( !in_array( $txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL] ) )
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->branch_id);
+
+
+		/**
+		 * Check Permissions & Editability
+		 */
+		_POLICY_TRANSACTION_is_editable($record->status, $record->flag_current);
+
+
+		/**
+		 * Policy Record
+		 */
+		$policy_record = $this->policy_model->get($record->policy_id);
+		if(!$policy_record)
+		{
+			$this->template->render_404();
+		}
+
+
+		/**
+		 * Valid Transaction Type for Premium Computation?
+		 */
+		if( !_POLICY_TRANSACTION_is_premium_computable_by_type($record->txn_type) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
@@ -648,49 +668,12 @@ class Policy_transactions extends MY_Controller
 			], 400);
 		}
 
-		// Policy Record
-		$policy_id = (int)$policy_id;
-		$policy_record = $this->policy_model->get($policy_id);
-		if( !$policy_record )
-		{
-			return $this->template->json([
-				'status' 	=> 'error',
-				'message' 	=> 'Invalid Policy Record!'
-			], 400);
-		}
-
-		// Current Policy Transaction Record and Has valid Type?
-		$txn_record = $this->policy_transaction_model->get_current_transaction_by_policy($policy_record->id);
-		if( !$txn_record || !in_array( $txn_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL] ) )
-		{
-			return $this->template->json([
-				'status' 	=> 'error',
-				'message' 	=> 'Invalid Current Policy Transaction Record! OR Invalid Record Type!'
-			], 400);
-		}
-
-
-		// Record Editable?
-		if( !$this->policy_transaction_model->is_editable($txn_record->status) )
-		{
-			return $this->template->json([
-				'status' 	=> 'error',
-				'message' 	=> 'You can only edit Draft Transaction!'
-			], 400);
-		}
-
-		/**
-		 * Policy Belongs to Me? i.e. My Branch? OR Terminate
-		 */
-		belongs_to_me($policy_record->branch_id);
-
-
 		// Post? Save Premium
-		$this->__save_premium($policy_record, $txn_record);
+		$this->__save_premium($policy_record, $record);
 
 
 		// Render Form
-		$this->__render_premium_form($policy_record, $txn_record);
+		$this->__render_premium_form($policy_record, $record);
 	}
 
 	// --------------------------------------------------------------------

@@ -17,8 +17,7 @@ $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($po
             <span class="text-left">Transaction Details</span>
             <span class="pull-right">
                 <?php if( _POLICY_is_editable($policy_record->status, FALSE) ):
-                    $txn_type = $policy_record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL:   IQB_POLICY_TXN_TYPE_FRESH;
-                    $update_premium_url = 'policy_transactions/premium/' . $txn_type . '/' . $policy_record->id;
+                    $update_premium_url = site_url('policy_transactions/premium/' . $txn_record->id);
                 ?>
                         <a href="#"
                             class="action trg-dialog-edit btn btn-primary btn-sm"
@@ -26,7 +25,7 @@ $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($po
                             data-toggle="tooltip"
                             data-box-size="large"
                             data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $policy_record->code?>'
-                            data-url="<?php echo site_url($update_premium_url);?>"
+                            data-url="<?php echo $update_premium_url;?>"
                             data-form="#_form-premium">
                             <i class="fa fa-pencil-square-o"></i>
                         </a>

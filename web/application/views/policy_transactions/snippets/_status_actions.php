@@ -18,7 +18,7 @@ $is_customer_editable   = _POLICY_TRANSACTION_is_customer_editable_by_type($reco
  * Allowed Status: draft | unverified
  */
 if( _POLICY_TRANSACTION_is_editable($record->status, $record->flag_current, FALSE) ):
-    $update_premium_url = 'policy_transactions/premium/' . $record->txn_type . '/' . $record->policy_id;
+    $update_premium_url = site_url('policy_transactions/premium/' . $record->id);
 ?>
     <?php
     /**
@@ -31,7 +31,7 @@ if( _POLICY_TRANSACTION_is_editable($record->status, $record->flag_current, FALS
         class="action trg-dialog-edit"
         data-box-size="large"
         data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $policy_record->code?>'
-        data-url="<?php echo site_url($update_premium_url);?>"
+        data-url="<?php echo $update_premium_url;?>"
         data-form="#_form-premium">
         <i class="fa fa-dollar"></i> Premium</a>
     <?php endif?>

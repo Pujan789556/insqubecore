@@ -337,13 +337,6 @@ class Policy_transaction_model extends MY_Model
 
     // --------------------------------------------------------------------
 
-    public function is_editable($status)
-    {
-        return $status === IQB_POLICY_TXN_STATUS_DRAFT;
-    }
-
-    // --------------------------------------------------------------------
-
     /**
      * Update Policy Transaction Status
      *
