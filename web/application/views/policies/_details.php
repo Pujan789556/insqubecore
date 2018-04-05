@@ -12,14 +12,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<a href="#tab-policy-overview" aria-controls="tab-policy-overview" role="tab" data-toggle="tab">Overview</a>
 				</li>
 				<li role="presentation">
-					<a href="#tab-policy-transactions"
-						data-url="<?php echo site_url('policy_transactions/'. $record->id)?>"
+					<a href="#tab-endorsements"
+						data-url="<?php echo site_url('endorsements/'. $record->id)?>"
 						data-load-method="get"
-						data-box="#tab-policy-transactions"
+						data-box="#tab-endorsements"
 						data-method="html"
-						aria-controls="tab-policy-transactions"
+						aria-controls="tab-endorsements"
 						role="tab"
-						data-toggle="tab">Transactions</a>
+						data-toggle="tab">Endorsements</a>
 				</li>
 				<li role="presentation">
 					<a href="#tab-policy-installments"
@@ -90,7 +90,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					?>
 				</div>
 
-				<div class="tab-pane" id="tab-policy-transactions">
+				<div class="tab-pane" id="tab-endorsements">
 
 				</div>
 

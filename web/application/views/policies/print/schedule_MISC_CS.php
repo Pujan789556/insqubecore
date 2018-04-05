@@ -145,7 +145,7 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                             <tr>
                                 <td>
                                     <?php
-                                    $this->load->view('policy_transactions/snippets/_schedule_cost_calculation_table_risks_MISC_CS', ['txn_record' => $txn_record]);
+                                    $this->load->view('endorsements/snippets/_schedule_cost_calculation_table_risks_MISC_CS', ['txn_record' => $txn_record]);
                                     ?>
                                 </td>
                             </tr>

@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Logic:
  *
  *  Case 1: First Installment
- *      The first installment is only eligible for voucher if policy transaction record is eligible
+ *      The first installment is only eligible for voucher if Endorsement record is eligible
  *      i.e. either ri_approved or no ri_approval constraint with verified status
  *
  *  Case 2: Other installmemnts

@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Allowed Status: draft
  */
 if( _POLICY_is_editable($record->status, FALSE) ):
-    $update_premium_url = site_url('policy_transactions/premium/' . $txn_record->id);
+    $update_premium_url = site_url('endorsements/premium/' . $txn_record->id);
 ?>
     <a href="#"
         title="Update Premium"
@@ -61,7 +61,7 @@ endif;
  *
  *  1. Lock flag to "ON" from Customer and Object Record
  *  2. Status to "VERIFIED" from Policy Record
- *  3. Status to "VERIFIED" from Policy Transaction Record
+ *  3. Status to "VERIFIED" from Endorsement Record
  */
 if( $record->status === IQB_POLICY_STATUS_DRAFT && $this->dx_auth->is_authorized('policies', 'status.to.verified') ): ?>
     <a href="#"
@@ -84,8 +84,8 @@ endif;
  *
  *  1. Update Txn Status to IQB_POLICY_TXN_STATUS_RI_APPROVED
  */
-$__flag_ri_approval_constraint = _POLICY_TRANSACTION__ri_approval_constraint($txn_record->status, $txn_record->flag_ri_approval);
-if( $record->status === IQB_POLICY_STATUS_VERIFIED && $__flag_ri_approval_constraint == TRUE && $this->dx_auth->is_authorized('policy_transactions', 'status.to.ri.approved') ):
+$__flag_ri_approval_constraint = _ENDORSEMENT__ri_approval_constraint($txn_record->status, $txn_record->flag_ri_approval);
+if( $record->status === IQB_POLICY_STATUS_VERIFIED && $__flag_ri_approval_constraint == TRUE && $this->dx_auth->is_authorized('endorsements', 'status.to.ri.approved') ):
  ?>
     <a href="#"
         title="RI Approve"
@@ -93,7 +93,7 @@ if( $record->status === IQB_POLICY_STATUS_VERIFIED && $__flag_ri_approval_constr
         data-confirm="true"
         class="btn btn-danger btn-round trg-dialog-action"
         data-message="Are you sure you want to APPROVE the RI-Constraints?"
-        data-url="<?php echo site_url('policy_transactions/status/' . $txn_record->id . '/' . IQB_POLICY_TXN_STATUS_RI_APPROVED . '/tab-policy-overview' );?>"
+        data-url="<?php echo site_url('endorsements/status/' . $txn_record->id . '/' . IQB_POLICY_TXN_STATUS_RI_APPROVED . '/tab-policy-overview' );?>"
     ><i class="fa fa-check-square-o"></i> RI-Approve</a>
 <?php
 endif;

@@ -579,7 +579,7 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_validation_rules'))
 
 
 		// Basic/Common Validation Rules
-		$basic_rules = _POLICY_TRANSACTION_premium_basic_v_rules( $policy_record->portfolio_id, $pfs_record );
+		$basic_rules = _ENDORSEMENT_premium_basic_v_rules( $policy_record->portfolio_id, $pfs_record );
 
 		// Installment Rules
 		$installment_rules = _POLICY_INSTALLMENT_validation_rules( $policy_record->portfolio_id, $pfs_record );
@@ -932,7 +932,7 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 if ( ! function_exists('_TXN_FIRE_FIRE_premium_goodies'))
 {
 	/**
-	 * Get Policy Policy Transaction Goodies
+	 * Get Policy Endorsement Goodies
 	 *
 	 * Get the following goodies
 	 * 		1. Validation Rules
@@ -968,12 +968,12 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_goodies'))
 if ( ! function_exists('__save_premium_FIRE_FIRE'))
 {
 	/**
-	 * Fire Portfolio : Save a Policy Transaction Record For Given Policy
+	 * Fire Portfolio : Save a Endorsement Record For Given Policy
 	 *
 	 *	!!! Important: Fresh/Renewal Only
 	 *
 	 * @param object $policy_record  	Policy Record
-	 * @param object $txn_record 	 	Policy Transaction Record
+	 * @param object $txn_record 	 	Endorsement Record
 	 * @return json
 	 */
 	function __save_premium_FIRE_FIRE($policy_record, $txn_record)
@@ -1400,7 +1400,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 					$txn_data['cost_calculation_table'] = $cost_calculation_table;
 
-					$done = $CI->policy_transaction_model->save($txn_record->id, $txn_data);
+					$done = $CI->endorsement_model->save($txn_record->id, $txn_data);
 
 					return $done;
 

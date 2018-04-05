@@ -182,8 +182,8 @@ class Object_model extends MY_Model
 
             if($policy_record && _POLICY_is_editable($policy_record->status, FALSE) === TRUE)
             {
-                $this->load->model('policy_transaction_model');
-                $this->policy_transaction_model->reset($policy_record->id);
+                $this->load->model('endorsement_model');
+                $this->endorsement_model->reset($policy_record->id);
             }
         }
         return FALSE;
@@ -381,13 +381,13 @@ class Object_model extends MY_Model
         $where = [
             'O.id'              => $id,
             'P.id'              => $policy_id,
-            'PTXN.id'           => $txn_id,
-            'PTXN.flag_current' => IQB_FLAG_ON
+            'ENDRSMNT.id'           => $txn_id,
+            'ENDRSMNT.flag_current' => IQB_FLAG_ON
         ];
         return $this->db->select("O.*, P.branch_id")
                  ->from($this->table_name . ' as O')
                  ->join('dt_policies P', 'P.object_id = O.id')
-                 ->join('dt_policy_transactions PTXN', 'P.id = PTXN.policy_id')
+                 ->join('dt_endorsements ENDRSMNT', 'P.id = ENDRSMNT.policy_id')
                  ->where($where)
                  ->get()->row();
     }

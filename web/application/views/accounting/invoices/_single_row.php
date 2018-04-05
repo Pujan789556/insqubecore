@@ -64,7 +64,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 						&&
 
-					// Must have Policy Transaction ID
+					// Must have Endorsement ID
 					isset($record->policy_installment_id) && (int)$record->policy_installment_id !== IQB_FLAG_OFF
 
 						&&

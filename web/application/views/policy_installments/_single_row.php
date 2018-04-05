@@ -8,11 +8,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<?php if( $this->dx_auth->is_admin() ): ?>
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
-	<td><?php echo $record->policy_transaction_id;?></td>
+	<td><?php echo $record->endorsement_id;?></td>
 	<td><?php echo $record->installment_date;?></td>
 	<td>
 		<?php if($record->flag_first == IQB_FLAG_ON): ?>
-			<i class="fa fa-circle text-green" data-toggle="tooltip" title="First Installment for Transaction ID - <?php echo $record->policy_transaction_id;?>"></i>
+			<i class="fa fa-circle text-green" data-toggle="tooltip" title="First Installment for Transaction ID - <?php echo $record->endorsement_id;?>"></i>
 		<?php
 		else:
 			echo '-';

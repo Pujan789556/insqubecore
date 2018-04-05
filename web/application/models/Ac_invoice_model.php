@@ -235,7 +235,7 @@ class Ac_invoice_model extends MY_Model
      *
      * @param array $master_data
      * @param array $batch_data_details
-     * @param int   $policy_id (if invoice generated for policy transaction)
+     * @param int   $policy_id (if invoice generated for Endorsement)
      * @return mixed
      */
     public function add($master_data, $batch_data_details, $policy_id=NULL)
@@ -612,12 +612,12 @@ class Ac_invoice_model extends MY_Model
             $this->_row_select();
 
             // Policy Related JOIN
-            return $this->db->select('REL.policy_installment_id, PTXN.policy_id')
+            return $this->db->select('REL.policy_installment_id, ENDRSMNT.policy_id')
                         ->join('ac_vouchers V', 'V.id = I.voucher_id')
                         ->join('rel_policy_installment_voucher REL', 'REL.voucher_id = I.voucher_id')
                         ->join('dt_policy_installments PTI', 'REL.policy_installment_id = PTI.id')
-                        ->join('dt_policy_transactions PTXN', 'PTI.policy_transaction_id = PTXN.id')
-                        ->where('PTXN.policy_id', $policy_id)
+                        ->join('dt_endorsements ENDRSMNT', 'PTI.endorsement_id = ENDRSMNT.id')
+                        ->where('ENDRSMNT.policy_id', $policy_id)
                         ->where('I.flag_complete', IQB_FLAG_ON)
                         ->where('V.flag_complete', IQB_FLAG_ON)
                         ->order_by('I.id', 'DESC')
@@ -639,8 +639,8 @@ class Ac_invoice_model extends MY_Model
                             // Branch Contact
                             'B.contacts as branch_contact, ' .
 
-                            // Policy Transaction ID, Policy ID
-                            'PTI.policy_transaction_id, PTXN.policy_id, ' .
+                            // Endorsement ID, Policy ID
+                            'PTI.endorsement_id, ENDRSMNT.policy_id, ' .
 
                             // Policy Code
                             'POLICY.code AS policy_code, ' .
@@ -651,8 +651,8 @@ class Ac_invoice_model extends MY_Model
                     ->join('ac_vouchers V', 'V.id = I.voucher_id')
                     ->join('rel_policy_installment_voucher REL', 'REL.voucher_id = I.voucher_id')
                     ->join('dt_policy_installments PTI', 'REL.policy_installment_id = PTI.id')
-                    ->join('dt_policy_transactions PTXN', 'PTI.policy_transaction_id = PTXN.id')
-                    ->join('dt_policies POLICY', 'POLICY.id = PTXN.policy_id')
+                    ->join('dt_endorsements ENDRSMNT', 'PTI.endorsement_id = ENDRSMNT.id')
+                    ->join('dt_policies POLICY', 'POLICY.id = ENDRSMNT.policy_id')
                     ->join('dt_customers CST', 'CST.id = I.customer_id');
 
         /**

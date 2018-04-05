@@ -767,13 +767,13 @@ class Objects extends MY_Controller
 		}
 
 		 // The above query validates the flag_current, so we get directly txn data here
-		$this->load->model('policy_transaction_model');
-		$txn_record = $this->policy_transaction_model->get($txn_id);
+		$this->load->model('endorsement_model');
+		$txn_record = $this->endorsement_model->get($txn_id);
 		if(!$txn_record)
 		{
 			return $this->template->json([
 				'status' => 'error',
-				'message' => 'Policy Transaction/Endorsement not found!'
+				'message' => 'Endorsement not found!'
 			],404);
 		}
 
@@ -786,17 +786,17 @@ class Objects extends MY_Controller
 		/**
 		 * Editable Permission? We should check permission of Txn not of Policy
 		 */
-		_POLICY_TRANSACTION_is_editable($txn_record->status, $txn_record->flag_current);
+		_ENDORSEMENT_is_editable($txn_record->status, $txn_record->flag_current);
 
 
 		/**
-		 * Policy Transaction Type Allows Object to Edit?
+		 * Endorsement Type Allows Object to Edit?
 		 */
-		if( !_POLICY_TRANSACTION_is_object_editable_by_type($txn_record->txn_type) )
+		if( !_ENDORSEMENT_is_object_editable_by_type($txn_record->txn_type) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
-				'title' 	=> 'Invalid Policy Transaction Type!',
+				'title' 	=> 'Invalid Endorsement Type!',
 				'message' 	=> 'You <strong>CAN NOT EDIT</strong> object information for this type of Transaction/Endorsement.'
 			],403);
 		}
@@ -905,7 +905,7 @@ class Objects extends MY_Controller
         		/**
         		 * Save Data
         		 */
-        		$done = $this->policy_transaction_model->save_endorsement_audit($txn_record->id, 'audit_object', $audit_data);
+        		$done = $this->endorsement_model->save_endorsement_audit($txn_record->id, 'audit_object', $audit_data);
 
 	        	if(!$done)
 				{

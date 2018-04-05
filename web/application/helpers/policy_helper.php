@@ -197,7 +197,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR)) )
 		{
-			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_AGR";
+			$partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_AGR";
 		}
 
 		/**
@@ -206,7 +206,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
-			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MOTOR";
+			$partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MOTOR";
 		}
 
 		/**
@@ -215,7 +215,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_FIRE_FIRE";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_FIRE_FIRE";
         }
 
         /**
@@ -224,7 +224,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_FIRE_HHP";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_FIRE_HHP";
         }
 
         /**
@@ -233,7 +233,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_FIRE_LOP";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_FIRE_LOP";
         }
 
 		/**
@@ -242,7 +242,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_BRG";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_BRG";
         }
 
 		/**
@@ -251,7 +251,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
-			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MARINE";
+			$partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MARINE";
 		}
 
 		/**
@@ -261,7 +261,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
-			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_BL";
+			$partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_ENG_BL";
         }
 
         /**
@@ -271,7 +271,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
         {
-			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_CAR";
+			$partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_ENG_CAR";
         }
 
         /**
@@ -281,7 +281,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
-			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_CPM";
+			$partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_ENG_CPM";
         }
 
         /**
@@ -291,7 +291,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
-			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_EEI";
+			$partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_ENG_EEI";
         }
 
         /**
@@ -301,7 +301,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
         {
-			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_EAR";
+			$partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_ENG_EAR";
         }
 
         /**
@@ -311,7 +311,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
-			$partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_ENG_MB";
+			$partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_ENG_MB";
         }
 
         /**
@@ -321,7 +321,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_BB";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_BB";
         }
 
         /**
@@ -331,7 +331,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_GPA";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_GPA";
         }
 
         /**
@@ -341,7 +341,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_PA";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_PA";
         }
 
         /**
@@ -350,7 +350,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_PL";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_PL";
         }
 
         /**
@@ -359,7 +359,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_CT";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_CT";
         }
 
         /**
@@ -368,7 +368,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_CS";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_CS";
         }
 
         /**
@@ -377,7 +377,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_CC";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_CC";
         }
 
         /**
@@ -386,7 +386,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_EPA";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_EPA";
         }
 
         /**
@@ -395,7 +395,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_TMI";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_TMI";
         }
 
         /**
@@ -404,7 +404,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_FG";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_FG";
         }
 
         /**
@@ -413,7 +413,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
         {
-            $partial_view = "policy_transactions/snippets/{$view_prefix}_cost_calculation_table_MISC_HI";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MISC_HI";
         }
 
         /**
@@ -433,7 +433,7 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 if ( ! function_exists('_POLICY__partial_view__premium_form'))
 {
 	/**
-	 * Get Policy Transaction Premium Form View
+	 * Get Endorsement Premium Form View
 	 *
 	 * @param id $portfolio_id Portfolio ID
 	 * @return	string
@@ -448,7 +448,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
 		if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR)) )
 		{
-			$form_view = 'policy_transactions/forms/_form_premium_AGR';
+			$form_view = 'endorsements/forms/_form_premium_AGR';
 		}
 
 		/**
@@ -458,7 +458,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 		{
-			$form_view = 'policy_transactions/forms/_form_premium_MOTOR';
+			$form_view = 'endorsements/forms/_form_premium_MOTOR';
 		}
 
 		/**
@@ -467,7 +467,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_FIRE_FIRE';
+            $form_view = 'endorsements/forms/_form_premium_FIRE_FIRE';
         }
 
         /**
@@ -476,7 +476,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_FIRE_HHP';
+            $form_view = 'endorsements/forms/_form_premium_FIRE_HHP';
         }
 
         /**
@@ -485,7 +485,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_FIRE_LOP';
+            $form_view = 'endorsements/forms/_form_premium_FIRE_LOP';
         }
 
 		/**
@@ -494,7 +494,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_BRG';
+            $form_view = 'endorsements/forms/_form_premium_MISC_BRG';
         }
 
 		/**
@@ -503,7 +503,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
 		 */
 		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 		{
-			$form_view = 'policy_transactions/forms/_form_premium_MARINE';
+			$form_view = 'endorsements/forms/_form_premium_MARINE';
 		}
 
 		/**
@@ -513,7 +513,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_ENG_BL';
+            $form_view = 'endorsements/forms/_form_premium_ENG_BL';
         }
 
         /**
@@ -523,7 +523,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_ENG_CAR';
+            $form_view = 'endorsements/forms/_form_premium_ENG_CAR';
         }
 
         /**
@@ -533,7 +533,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_ENG_CPM';
+            $form_view = 'endorsements/forms/_form_premium_ENG_CPM';
         }
 
         /**
@@ -543,7 +543,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_ENG_EEI';
+            $form_view = 'endorsements/forms/_form_premium_ENG_EEI';
         }
 
         /**
@@ -553,7 +553,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
         {
-			$form_view = 'policy_transactions/forms/_form_premium_ENG_EAR';
+			$form_view = 'endorsements/forms/_form_premium_ENG_EAR';
         }
 
         /**
@@ -562,7 +562,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_ENG_MB';
+            $form_view = 'endorsements/forms/_form_premium_ENG_MB';
         }
 
         /**
@@ -572,7 +572,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_BB';
+            $form_view = 'endorsements/forms/_form_premium_MISC_BB';
         }
 
         /**
@@ -581,7 +581,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_GPA';
+            $form_view = 'endorsements/forms/_form_premium_MISC_GPA';
         }
 
         /**
@@ -590,7 +590,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_PA';
+            $form_view = 'endorsements/forms/_form_premium_MISC_PA';
         }
 
         /**
@@ -599,7 +599,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_PL';
+            $form_view = 'endorsements/forms/_form_premium_MISC_PL';
         }
 
         /**
@@ -608,7 +608,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_CT';
+            $form_view = 'endorsements/forms/_form_premium_MISC_CT';
         }
 
         /**
@@ -617,7 +617,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_CS';
+            $form_view = 'endorsements/forms/_form_premium_MISC_CS';
         }
 
         /**
@@ -626,7 +626,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_CC';
+            $form_view = 'endorsements/forms/_form_premium_MISC_CC';
         }
 
         /**
@@ -635,7 +635,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_EPA';
+            $form_view = 'endorsements/forms/_form_premium_MISC_EPA';
         }
 
         /**
@@ -644,7 +644,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_TMI';
+            $form_view = 'endorsements/forms/_form_premium_MISC_TMI';
         }
 
         /**
@@ -653,7 +653,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_FG';
+            $form_view = 'endorsements/forms/_form_premium_MISC_FG';
         }
 
         /**
@@ -662,7 +662,7 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
         {
-            $form_view = 'policy_transactions/forms/_form_premium_MISC_HI';
+            $form_view = 'endorsements/forms/_form_premium_MISC_HI';
         }
 
 
@@ -928,7 +928,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
     	$CI =& get_instance();
 
 		/**
-		 * Extract Policy Record and Policy Transaction Record
+		 * Extract Policy Record and Endorsement Record
 		 */
 		$record 		= $data['record'];
 		$txn_record 	= $data['txn_record'];
@@ -1203,14 +1203,14 @@ if ( ! function_exists('_POLICY_schedule_title_prefix'))
 
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_status_dropdown'))
+if ( ! function_exists('_ENDORSEMENT_status_dropdown'))
 {
 	/**
-	 * Get Policy Transaction Status Dropdown
+	 * Get Endorsement Status Dropdown
 	 *
 	 * @return	bool
 	 */
-	function _POLICY_TRANSACTION_status_dropdown( $flag_blank_select = true )
+	function _ENDORSEMENT_status_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 			IQB_POLICY_TXN_STATUS_DRAFT			=> 'Draft',
@@ -1230,16 +1230,16 @@ if ( ! function_exists('_POLICY_TRANSACTION_status_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_status_text'))
+if ( ! function_exists('_ENDORSEMENT_status_text'))
 {
 	/**
-	 * Get Policy Transaction Status Text
+	 * Get Endorsement Status Text
 	 *
 	 * @return	string
 	 */
-	function _POLICY_TRANSACTION_status_text( $key, $formatted = FALSE, $sentence = FALSE )
+	function _ENDORSEMENT_status_text( $key, $formatted = FALSE, $sentence = FALSE )
 	{
-		$list = _POLICY_TRANSACTION_status_dropdown();
+		$list = _ENDORSEMENT_status_dropdown();
 
 		$text = $list[$key] ?? '';
 
@@ -1264,19 +1264,19 @@ if ( ! function_exists('_POLICY_TRANSACTION_status_text'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_POLICY_TRANSACTION_is_editable'))
+if ( ! function_exists('_ENDORSEMENT_is_editable'))
 {
 	/**
-	 * Is Policy Transaction Editable?
+	 * Is Endorsement Editable?
 	 *
-	 * Check if the given policy transaction is editable.
+	 * Check if the given Endorsement is editable.
 	 *
-	 * @param char $status 	Policy Transaction Status
-	 * @param char $flag_current 	Is this Current Policy Transaction
+	 * @param char $status 	Endorsement Status
+	 * @param char $flag_current 	Is this Current Endorsement
 	 * @param bool $terminate_on_fail Terminate Right Here if not editable.
 	 * @return	bool
 	 */
-	function _POLICY_TRANSACTION_is_editable($status, $flag_current, $terminate_on_fail = TRUE )
+	function _ENDORSEMENT_is_editable($status, $flag_current, $terminate_on_fail = TRUE )
 	{
 		$CI =& get_instance();
 
@@ -1298,7 +1298,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_editable'))
 		 * 		draft
 		 *
 		 * Editable Permissions Are
-		 * 		edit.draft.transaction
+		 * 		edit.draft.endorsement
 		 */
 
 		// Editable Permissions ?
@@ -1309,7 +1309,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_editable'))
 
 				||
 
-				( $status === IQB_POLICY_TXN_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('policy_transactions', 'edit.draft.transaction') )
+				( $status === IQB_POLICY_TXN_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('endorsements', 'edit.draft.endorsement') )
 
 			)
 			{
@@ -1329,14 +1329,14 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_editable'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_type_dropdown'))
+if ( ! function_exists('_ENDORSEMENT_type_dropdown'))
 {
 	/**
-	 * Get Policy Transaction Type Dropdown
+	 * Get Endorsement Type Dropdown
 	 *
 	 * @return	array
 	 */
-	function _POLICY_TRANSACTION_type_dropdown( $flag_blank_select = true )
+	function _ENDORSEMENT_type_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 			IQB_POLICY_TXN_TYPE_FRESH 		=> 'Fresh',
@@ -1358,14 +1358,14 @@ if ( ! function_exists('_POLICY_TRANSACTION_type_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_type_eonly_dropdown'))
+if ( ! function_exists('_ENDORSEMENT_type_eonly_dropdown'))
 {
 	/**
-	 * Get Policy Transaction Type (Endorsement Only) Dropdown
+	 * Get Endorsement Type (Endorsement Only) Dropdown
 	 *
 	 * @return	array
 	 */
-	function _POLICY_TRANSACTION_type_eonly_dropdown( $flag_blank_select = true )
+	function _ENDORSEMENT_type_eonly_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 			IQB_POLICY_TXN_TYPE_GENERAL 			=> 'General (Nil)',
@@ -1384,16 +1384,16 @@ if ( ! function_exists('_POLICY_TRANSACTION_type_eonly_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_is_first'))
+if ( ! function_exists('_ENDORSEMENT_is_first'))
 {
 	/**
-	 * Check if given policy transaction is first (Fresh/Renewal).
+	 * Check if given Endorsement is first (Fresh/Renewal).
 	 *
 	 *
 	 * @param 	int 	Transaction Type
 	 * @return	array
 	 */
-	function _POLICY_TRANSACTION_is_first( $txn_type )
+	function _ENDORSEMENT_is_first( $txn_type )
 	{
 		$txn_type 		= (int)$txn_type;
 		$allowed_types 	= [
@@ -1406,30 +1406,30 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_first'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_is_deletable_by_type'))
+if ( ! function_exists('_ENDORSEMENT_is_deletable_by_type'))
 {
 	/**
-	 * Get Policy Transaction Type - Deletable only
+	 * Get Endorsement Type - Deletable only
 	 *
 	 * Endorsement Only Transaction Types are deletable from transactions tab.
 	 *
 	 * @param 	int 	Transaction Type
 	 * @return	array
 	 */
-	function _POLICY_TRANSACTION_is_deletable_by_type( $txn_type )
+	function _ENDORSEMENT_is_deletable_by_type( $txn_type )
 	{
 		$txn_type 		= (int)$txn_type;
-		$allowed_types =  array_keys( _POLICY_TRANSACTION_type_eonly_dropdown(FALSE) );
+		$allowed_types =  array_keys( _ENDORSEMENT_type_eonly_dropdown(FALSE) );
 
 		return in_array($txn_type, $allowed_types);
 	}
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_is_premium_computable_by_type'))
+if ( ! function_exists('_ENDORSEMENT_is_premium_computable_by_type'))
 {
 	/**
-	 * Check if given policy transaction type is Premium Computable.
+	 * Check if given Endorsement type is Premium Computable.
 	 *
 	 * Allowed Transaction Types
 	 * 	- Fresh
@@ -1440,7 +1440,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_premium_computable_by_type'))
 	 * @param 	int 	Transaction Type
 	 * @return	array
 	 */
-	function _POLICY_TRANSACTION_is_premium_computable_by_type( $txn_type )
+	function _ENDORSEMENT_is_premium_computable_by_type( $txn_type )
 	{
 		$txn_type 		= (int)$txn_type;
 		$allowed_types 	= [
@@ -1455,10 +1455,10 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_premium_computable_by_type'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_is_policy_editable_by_type'))
+if ( ! function_exists('_ENDORSEMENT_is_policy_editable_by_type'))
 {
 	/**
-	 * Check if given policy transaction type allows policy to edit.
+	 * Check if given Endorsement type allows policy to edit.
 	 *
 	 * Allowed Transaction Types
 	 * 	- General
@@ -1468,7 +1468,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_policy_editable_by_type'))
 	 * @param 	int 	Transaction Type
 	 * @return	array
 	 */
-	function _POLICY_TRANSACTION_is_policy_editable_by_type( $txn_type )
+	function _ENDORSEMENT_is_policy_editable_by_type( $txn_type )
 	{
 		$txn_type 		= (int)$txn_type;
 		$allowed_types 	= [
@@ -1482,10 +1482,10 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_policy_editable_by_type'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_is_object_editable_by_type'))
+if ( ! function_exists('_ENDORSEMENT_is_object_editable_by_type'))
 {
 	/**
-	 * Check if given policy transaction type allows policy object to edit.
+	 * Check if given Endorsement type allows policy object to edit.
 	 *
 	 * Allowed Transaction Types
 	 * 	- General
@@ -1495,7 +1495,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_object_editable_by_type'))
 	 * @param 	int 	Transaction Type
 	 * @return	array
 	 */
-	function _POLICY_TRANSACTION_is_object_editable_by_type( $txn_type )
+	function _ENDORSEMENT_is_object_editable_by_type( $txn_type )
 	{
 		$txn_type 		= (int)$txn_type;
 		$allowed_types 	= [
@@ -1509,10 +1509,10 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_object_editable_by_type'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_is_customer_editable_by_type'))
+if ( ! function_exists('_ENDORSEMENT_is_customer_editable_by_type'))
 {
 	/**
-	 * Check if given policy transaction type allows policy customer to edit.
+	 * Check if given Endorsement type allows policy customer to edit.
 	 *
 	 * Allowed Transaction Types
 	 * 	- General
@@ -1522,7 +1522,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_customer_editable_by_type'))
 	 * @param 	int 	Transaction Type
 	 * @return	array
 	 */
-	function _POLICY_TRANSACTION_is_customer_editable_by_type( $txn_type )
+	function _ENDORSEMENT_is_customer_editable_by_type( $txn_type )
 	{
 		$txn_type 		= (int)$txn_type;
 		$allowed_types 	= [
@@ -1536,14 +1536,14 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_customer_editable_by_type'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_computation_basis_dropdown'))
+if ( ! function_exists('_ENDORSEMENT_computation_basis_dropdown'))
 {
 	/**
-	 * Get Policy Transaction Computation Basis Dropdown
+	 * Get Endorsement Computation Basis Dropdown
 	 *
 	 * @return	array
 	 */
-	function _POLICY_TRANSACTION_computation_basis_dropdown( $flag_blank_select = true )
+	function _ENDORSEMENT_computation_basis_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 			IQB_POLICY_TXN_CB_ANNUAL 			=> 'Annual/Complete',
@@ -1560,16 +1560,16 @@ if ( ! function_exists('_POLICY_TRANSACTION_computation_basis_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_POLICY_TRANSACTION_type_text'))
+if ( ! function_exists('_ENDORSEMENT_type_text'))
 {
 	/**
 	 * Get Policy Status Text
 	 *
 	 * @return	string
 	 */
-	function _POLICY_TRANSACTION_type_text( $key, $formatted = FALSE, $sentence = FALSE )
+	function _ENDORSEMENT_type_text( $key, $formatted = FALSE, $sentence = FALSE )
 	{
-		$list = _POLICY_TRANSACTION_type_dropdown();
+		$list = _ENDORSEMENT_type_dropdown();
 
 		$text = $list[$key] ?? '';
 
@@ -1581,21 +1581,21 @@ if ( ! function_exists('_POLICY_TRANSACTION_type_text'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_POLICY_TRANSACTION__ri_approval_constraint'))
+if ( ! function_exists('_ENDORSEMENT__ri_approval_constraint'))
 {
 	/**
-	 * RI Approval Constraint on Policy Transaction
+	 * RI Approval Constraint on Endorsement
 	 *
-	 * Check if the policy transaction record requires RI Approval and is Approved
+	 * Check if the Endorsement record requires RI Approval and is Approved
 	 * i.e.
 	 * 		if RI Approval required and not approved yet, it returns TRUE
 	 * 		FALSE otherwise.
 	 *
-	 * @param char 	$status 			Policy Transaction Status
-	 * @param int 	$flag_ri_approval 	Policy Transaction flag_ri_approval
+	 * @param char 	$status 			Endorsement Status
+	 * @param int 	$flag_ri_approval 	Endorsement flag_ri_approval
 	 * @return	bool
 	 */
-	function _POLICY_TRANSACTION__ri_approval_constraint( $status, $flag_ri_approval )
+	function _ENDORSEMENT__ri_approval_constraint( $status, $flag_ri_approval )
 	{
 		$constraint = FALSE;
 
@@ -1612,20 +1612,20 @@ if ( ! function_exists('_POLICY_TRANSACTION__ri_approval_constraint'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_POLICY_TRANSACTION_endorsement_pdf'))
+if ( ! function_exists('_ENDORSEMENT_endorsement_pdf'))
 {
     /**
-     * Print Policy Endorsement/Transaction PDF
+     * Print Policy Endorsement PDF
      *
      * @param array $data
      * @return  void
      */
-    function _POLICY_TRANSACTION_endorsement_pdf( $data )
+    function _ENDORSEMENT_endorsement_pdf( $data )
     {
     	$CI =& get_instance();
 
 		/**
-		 * Extract Policy Record and Policy Transaction Record
+		 * Extract Policy Record and Endorsement Record
 		 */
 		$records 		= $data['records'];
 		$type 			= $data['type'];
@@ -1637,11 +1637,11 @@ if ( ! function_exists('_POLICY_TRANSACTION_endorsement_pdf'))
 
 			if($record && in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
 			{
-				throw new Exception("Exception [Helper: policy_helper][Method: _POLICY_TRANSACTION_endorsement_pdf()]: You can not have endrosement print of FRESH/RENEWAL Transaction/endorsement.");
+				throw new Exception("Exception [Helper: policy_helper][Method: _ENDORSEMENT_endorsement_pdf()]: You can not have endrosement print of FRESH/RENEWAL Transaction/endorsement.");
 			}
 		}
 
-		$schedule_view 	= 'policy_transactions/print/endorsement';
+		$schedule_view 	= 'endorsements/print/endorsement';
 
 		$record = $records[0] ?? NULL;
 
@@ -1662,7 +1662,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_endorsement_pdf'))
 	         */
 	        if( $record->status !== IQB_POLICY_TXN_STATUS_ACTIVE )
 	        {
-	        	$mpdf->SetWatermarkText( 'ENDORSEMENT - ' . strtoupper(_POLICY_TRANSACTION_status_text($record->status)) );
+	        	$mpdf->SetWatermarkText( 'ENDORSEMENT - ' . strtoupper(_ENDORSEMENT_status_text($record->status)) );
 	        }
 
 	        $mpdf->showWatermarkText = true;
@@ -1679,7 +1679,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_endorsement_pdf'))
 		}
 		else
 		{
-			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY_TRANSACTION_endorsement_pdf()]: No endorsement found.");
+			throw new Exception("Exception [Helper: policy_helper][Method: _ENDORSEMENT_endorsement_pdf()]: No endorsement found.");
 		}
 
 
@@ -1702,7 +1702,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_endorsement_pdf'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_POLICY_TRANSACTION_premium_basic_v_rules'))
+if ( ! function_exists('_ENDORSEMENT_premium_basic_v_rules'))
 {
 	/**
 	 * Get common/basic premium validation rules for all portfolios
@@ -1711,7 +1711,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_premium_basic_v_rules'))
 	 * @param object $pfs_record		Portfolio Setting Record
 	 * @return	array
 	 */
-	function _POLICY_TRANSACTION_premium_basic_v_rules( $portfolio_id, $pfs_record )
+	function _ENDORSEMENT_premium_basic_v_rules( $portfolio_id, $pfs_record )
 	{
 		$CI =& get_instance();
 
@@ -1767,7 +1767,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_premium_basic_v_rules'))
 if ( ! function_exists('_POLICY_INSTALLMENT_status_dropdown'))
 {
 	/**
-	 * Get Policy Transaction Status Dropdown
+	 * Get Endorsement Status Dropdown
 	 *
 	 * @return	bool
 	 */
@@ -1792,7 +1792,7 @@ if ( ! function_exists('_POLICY_INSTALLMENT_status_dropdown'))
 if ( ! function_exists('_POLICY_INSTALLMENT_status_text'))
 {
 	/**
-	 * Get Policy Transaction Status Text
+	 * Get Endorsement Status Text
 	 *
 	 * @return	string
 	 */
@@ -1831,7 +1831,7 @@ if ( ! function_exists('_POLICY_INSTALLMENT__voucher_constraint'))
 	 * Logic:
 	 *
 	 *  Case 1: First Installment
-	 *      The first installment is only eligible for voucher if policy transaction record is eligible
+	 *      The first installment is only eligible for voucher if Endorsement record is eligible
 	 *      i.e. either ri_approved or no ri_approval constraint with verified status
 	 *
 	 *  Case 2: Other installmemnts
@@ -1853,11 +1853,11 @@ if ( ! function_exists('_POLICY_INSTALLMENT__voucher_constraint'))
 		 */
 		if( $record->flag_first == IQB_FLAG_ON )
 		{
-			$ri_approval_constraint = _POLICY_TRANSACTION__ri_approval_constraint($record->policy_transaction_status, $record->policy_transaction_flag_ri_approval);
+			$ri_approval_constraint = _ENDORSEMENT__ri_approval_constraint($record->endorsement_status, $record->endorsement_flag_ri_approval);
 
-			$passed = 	($record->policy_transaction_status === IQB_POLICY_TXN_STATUS_RI_APPROVED)
+			$passed = 	($record->endorsement_status === IQB_POLICY_TXN_STATUS_RI_APPROVED)
 					        ||
-				    	(	$record->policy_transaction_status === IQB_POLICY_TXN_STATUS_VERIFIED
+				    	(	$record->endorsement_status === IQB_POLICY_TXN_STATUS_VERIFIED
 				    			&&
 		    				$ri_approval_constraint == FALSE
 		    			);
@@ -1870,7 +1870,7 @@ if ( ! function_exists('_POLICY_INSTALLMENT__voucher_constraint'))
 			$CI =& get_instance();
 			$CI->load->model('policy_installment_model');
 
-			$first_installment_status = $CI->policy_installment_model->first_installment_status($record->policy_transaction_id);
+			$first_installment_status = $CI->policy_installment_model->first_installment_status($record->endorsement_id);
 
 			$passed = 	(
 							$first_installment_status === IQB_POLICY_INSTALLMENT_STATUS_PAID
@@ -1917,17 +1917,17 @@ if ( ! function_exists('_POLICY_INSTALLMENT_validation_rules'))
 if ( ! function_exists('_POLICY_INSTALLMENT_list_by_transaction'))
 {
 	/**
-	 * Get the list of installments by a policy transaction
+	 * Get the list of installments by a Endorsement
 	 *
-	 * @param integer $policy_transaction_id 	Policy TXN ID
+	 * @param integer $endorsement_id 	Policy TXN ID
 	 * @return	array
 	 */
-	function _POLICY_INSTALLMENT_list_by_transaction( $policy_transaction_id )
+	function _POLICY_INSTALLMENT_list_by_transaction( $endorsement_id )
 	{
 		$CI =& get_instance();
 		$CI->load->model('policy_installment_model');
 
-		return $CI->policy_installment_model->get_many_by_policy_transaction($policy_transaction_id);
+		return $CI->policy_installment_model->get_many_by_endorsement($endorsement_id);
 	}
 }
 

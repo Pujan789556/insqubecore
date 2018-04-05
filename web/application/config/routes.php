@@ -60,9 +60,9 @@ $route['profile'] = 'users/profile';
 
 
 /**
- * Policy Transactions Routes
+ * Endorsements Routes
  */
-$route['policy_transactions/(:num)'] = 'policy_transactions/index/$1';
+$route['endorsements/(:num)'] = 'endorsements/index/$1';
 
 /**
  * Policy Installment Routes

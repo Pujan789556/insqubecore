@@ -346,7 +346,7 @@ if ( ! function_exists('RI__distribute'))
 			 */
 			$relation_data = [
 				'policy_id' 			=> $policy_installment_record->policy_id,
-				'policy_transaction_id' => $policy_installment_record->policy_transaction_id,
+				'endorsement_id' => $policy_installment_record->endorsement_id,
 				'policy_installment_id' => $policy_installment_record->id,
 				'treaty_id' 			=> $treaty_record->id,
 				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
@@ -443,9 +443,9 @@ if ( ! function_exists('RI__distribute_endorsement'))
 		 */
 		if( !in_array( $policy_installment_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL] ) )
 		{
-			if( $policy_installment_record->policy_transaction_amt_sum_insured )
+			if( $policy_installment_record->endorsement_amt_sum_insured )
 			{
-				$policy_installment_record->policy_transaction_amt_sum_insured += $si_gross;
+				$policy_installment_record->endorsement_amt_sum_insured += $si_gross;
 
 				/**
 				 * Charge the premium from policy issue date to today.
@@ -474,7 +474,7 @@ if ( ! function_exists('RI__distribute_endorsement'))
 		else
 		{
 			// Fresh/Renewal's Installment - the lastes SI GROSS from RI distribution
-			$policy_installment_record->policy_transaction_amt_sum_insured = $si_gross;
+			$policy_installment_record->endorsement_amt_sum_insured = $si_gross;
 		}
 
 		/**
@@ -534,7 +534,7 @@ if ( ! function_exists('RI__distribute_endorsement'))
 			 */
 			$relation_data = [
 				'policy_id' 			=> $policy_installment_record->policy_id,
-				'policy_transaction_id' => $policy_installment_record->policy_transaction_id,
+				'endorsement_id' => $policy_installment_record->endorsement_id,
 				'policy_installment_id' => $policy_installment_record->id,
 				'treaty_id' 			=> $treaty_record->id,
 				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
@@ -671,7 +671,7 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 		/**
 		 * SI & Premium Variables
 		 */
-		$si_gross 				= floatval($policy_installment_record->policy_transaction_amt_sum_insured);
+		$si_gross 				= floatval($policy_installment_record->endorsement_amt_sum_insured);
 		$si_comp_cession 		= NULL;
 		$si_treaty_total 		= NULL;
 		$si_treaty_retaintion 	= NULL;
@@ -878,7 +878,7 @@ if ( ! function_exists('RI__distribute__QT'))
 		/**
 		 * SI & Premium Variables
 		 */
-		$si_gross 				= floatval($policy_installment_record->policy_transaction_amt_sum_insured);
+		$si_gross 				= floatval($policy_installment_record->endorsement_amt_sum_insured);
 		$si_comp_cession 		= NULL;
 		$si_treaty_total 		= NULL;
 		$si_treaty_retaintion 	= NULL;
@@ -977,7 +977,7 @@ if ( ! function_exists('RI__distribute__EOL'))
 		/**
 		 * SI & Premium Variables
 		 */
-		$si_gross 				= floatval($policy_installment_record->policy_transaction_amt_sum_insured);
+		$si_gross 				= floatval($policy_installment_record->endorsement_amt_sum_insured);
 		$si_comp_cession 		= NULL;
 		$si_treaty_retaintion 	= NULL;
 
@@ -1116,7 +1116,7 @@ if ( ! function_exists('RI__pool_distribute'))
 			$relation_data = [
 				'parent_id' 			=> $parent_id,
 				'policy_id' 			=> $policy_installment_record->policy_id,
-				'policy_transaction_id' => $policy_installment_record->policy_transaction_id,
+				'endorsement_id' => $policy_installment_record->endorsement_id,
 				'policy_installment_id' => $policy_installment_record->id,
 				'treaty_id' 			=> $treaty_record->id,
 				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
@@ -1225,7 +1225,7 @@ if ( ! function_exists('RI__pool_distribute_endorsement'))
 			$relation_data = [
 				'parent_id' 			=> $parent_id,
 				'policy_id' 			=> $policy_installment_record->policy_id,
-				'policy_transaction_id' => $policy_installment_record->policy_transaction_id,
+				'endorsement_id' => $policy_installment_record->endorsement_id,
 				'policy_installment_id' => $policy_installment_record->id,
 				'treaty_id' 			=> $treaty_record->id,
 				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
@@ -1323,7 +1323,7 @@ if ( ! function_exists('RI__pool_distribute__QS_SP'))
 		/**
 		 * SI & Premium Variables
 		 */
-		$si_gross 				= floatval($policy_installment_record->policy_transaction_amt_sum_insured);
+		$si_gross 				= floatval($policy_installment_record->endorsement_amt_sum_insured);
 		$si_treaty_total 		= NULL;
 		$si_treaty_retaintion 	= NULL;
 		$si_treaty_quota 		= NULL;
@@ -1509,7 +1509,7 @@ if ( ! function_exists('RI__pool_distribute__QT'))
 		/**
 		 * SI & Premium Variables
 		 */
-		$si_gross 				= floatval($policy_installment_record->policy_transaction_amt_sum_insured);
+		$si_gross 				= floatval($policy_installment_record->endorsement_amt_sum_insured);
 		$si_comp_cession 		= NULL;
 		$si_treaty_total 		= NULL;
 		$si_treaty_retaintion 	= NULL;

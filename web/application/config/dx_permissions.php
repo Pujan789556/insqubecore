@@ -208,17 +208,17 @@ $config['DX_permissions'] = [
 		],
 
 		/**
-		 * Policy Transaction/Endorsement
+		 * Endorsement
 		 */
-		'policy_transactions' => [
+		'endorsements' => [
 
 			/**
 			 * CRUD Operation Permissions
 			 */
-			'explore.transaction',
-			'add.transaction',
-			'edit.draft.transaction',
-			'delete.draft.transaction',
+			'explore.endorsement',
+			'add.endorsement',
+			'edit.draft.endorsement',
+			'delete.draft.endorsement',
 
 			/**
 			 * Verify/Approval Permission
@@ -325,8 +325,8 @@ $config['DX_permissions'] = [
 		 * RI Transactions
 		 */
 		'ri_transactions'  => [
-			'explore.transaction',
-			'add.transaction',
+			'explore.endorsement',
+			'add.endorsement',
 			'edit.transaction',
 			'delete.transaction',
 

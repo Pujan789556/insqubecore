@@ -17,7 +17,7 @@ class Policy_installment_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_transaction_id', 'installment_date', 'percent', 'amt_total_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'endorsement_id', 'installment_date', 'percent', 'amt_total_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -88,13 +88,13 @@ class Policy_installment_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Build Installments for a Policy Transaction
+     * Build Installments for a Endorsement
      *
-     * @param object $policy_transaction_record
+     * @param object $endorsement_record
      * @param array $installment_data
      * @return bool
      */
-    public function build($policy_transaction_record, $installment_data)
+    public function build($endorsement_record, $installment_data)
     {
         /**
          * ==================== TRANSACTIONS BEGIN =========================
@@ -110,7 +110,7 @@ class Policy_installment_model extends MY_Model
                 /**
                  * Task 1: Delete Old installments
                  */
-                parent::delete_by(['policy_transaction_id' => $policy_transaction_record->id]);
+                parent::delete_by(['endorsement_id' => $endorsement_record->id]);
 
                 /**
                  * Task 2: Build Batch Insert For Installments
@@ -124,15 +124,15 @@ class Policy_installment_model extends MY_Model
                     $installment_date       = $dates[$i];
                     $percent                = $percents[$i];
 
-                    $amt_total_premium      = ( $policy_transaction_record->amt_total_premium * $percent ) / 100.00;
+                    $amt_total_premium      = ( $endorsement_record->amt_total_premium * $percent ) / 100.00;
 
-                    $amt_pool_premium       = $policy_transaction_record->amt_pool_premium
-                                                ? ( $policy_transaction_record->amt_pool_premium * $percent ) / 100.00 : NULL;
+                    $amt_pool_premium       = $endorsement_record->amt_pool_premium
+                                                ? ( $endorsement_record->amt_pool_premium * $percent ) / 100.00 : NULL;
 
-                    $amt_agent_commission   = $policy_transaction_record->amt_agent_commission
-                                                ? ( $policy_transaction_record->amt_agent_commission * $percent ) / 100.00 : NULL;
+                    $amt_agent_commission   = $endorsement_record->amt_agent_commission
+                                                ? ( $endorsement_record->amt_agent_commission * $percent ) / 100.00 : NULL;
 
-                    $amt_stamp_duty         = $i === 0 ? $policy_transaction_record->amt_stamp_duty : NULL;
+                    $amt_stamp_duty         = $i === 0 ? $endorsement_record->amt_stamp_duty : NULL;
 
                     // Compute VAT
                     $taxable_amount = $amt_total_premium + floatval($amt_stamp_duty);
@@ -140,7 +140,7 @@ class Policy_installment_model extends MY_Model
                     $amt_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
                     $batch_data[] = [
-                        'policy_transaction_id' => $policy_transaction_record->id,
+                        'endorsement_id' => $endorsement_record->id,
                         'installment_date'      => $installment_date,
                         'percent'               => $percent,
                         'amt_total_premium'     => $amt_total_premium,
@@ -157,9 +157,9 @@ class Policy_installment_model extends MY_Model
                  * Task 3: Delete Cache
                  */
                 $cache_keys = [
-                    'ptxi_bytxn_' . $policy_transaction_record->id,
-                    'ptxi_fst_stts_bytxn_' . $policy_transaction_record->id,
-                    'ptxi_bypolicy_' . $policy_transaction_record->policy_id
+                    'ptxi_bytxn_' . $endorsement_record->id,
+                    'ptxi_fst_stts_bytxn_' . $endorsement_record->id,
+                    'ptxi_bypolicy_' . $endorsement_record->policy_id
                 ];
                 $this->clear_cache($cache_keys);
 
@@ -187,7 +187,7 @@ class Policy_installment_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Update Policy Transaction Status
+     * Update Endorsement Status
      *
      * !!! NOTE: We can only change status of current Transaction Record
      *
@@ -253,7 +253,7 @@ class Policy_installment_model extends MY_Model
              */
             $cache_keys = [
                 'ptxi_bytxn_' . $record->id,
-                'ptxi_fst_stts_bytxn_' . $record->policy_transaction_id,
+                'ptxi_fst_stts_bytxn_' . $record->endorsement_id,
                 'ptxi_bypolicy_' . $record->policy_id
             ];
             $this->clear_cache($cache_keys);
@@ -303,23 +303,23 @@ class Policy_installment_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Get the status of first installment belonging to this policy transaction
+     * Get the status of first installment belonging to this Endorsement
      *
-     * @param int $policy_transaction_id
+     * @param int $endorsement_id
      * @return char
      */
-    public function first_installment_status($policy_transaction_id)
+    public function first_installment_status($endorsement_id)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_var  = 'ptxi_fst_stts_bytxn_' . $policy_transaction_id;
+        $cache_var  = 'ptxi_fst_stts_bytxn_' . $endorsement_id;
         $status       = $this->get_cache($cache_var);
         if(!$status)
         {
             $status = $this->db->select('PTI.status')
                         ->from($this->table_name . ' AS PTI')
-                        ->where('PTI.policy_transaction_id', $policy_transaction_id)
+                        ->where('PTI.endorsement_id', $endorsement_id)
                         ->where('PTI.flag_first', IQB_FLAG_ON)
                         ->get()->row()->status;
             if($status)
@@ -350,16 +350,16 @@ class Policy_installment_model extends MY_Model
                                 // Policy Table Data
                                 'P.id AS policy_id, P.branch_id, P.code AS policy_code, P.portfolio_id, P.start_date as policy_start_date, P.end_date as policy_end_date, '.
 
-                                // Policy Transaction Table Data
-                                'PTXN.txn_type,
-                                    PTXN.amt_sum_insured as policy_transaction_amt_sum_insured,
-                                    PTXN.flag_current as policy_transaction_flag_current,
-                                    PTXN.status AS policy_transaction_status,
-                                    PTXN.flag_ri_approval AS policy_transaction_flag_ri_approval'
+                                // Endorsement Table Data
+                                'ENDRSMNT.txn_type,
+                                    ENDRSMNT.amt_sum_insured as endorsement_amt_sum_insured,
+                                    ENDRSMNT.flag_current as endorsement_flag_current,
+                                    ENDRSMNT.status AS endorsement_status,
+                                    ENDRSMNT.flag_ri_approval AS endorsement_flag_ri_approval'
                             )
                         ->from($this->table_name . ' AS PTI')
-                        ->join('dt_policy_transactions PTXN', 'PTXN.id = PTI.policy_transaction_id')
-                        ->join('dt_policies P', 'P.id = PTXN.policy_id')
+                        ->join('dt_endorsements ENDRSMNT', 'ENDRSMNT.id = PTI.endorsement_id')
+                        ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
                         ->where('PTI.id', $id)
                         ->get()->row();
     }
@@ -367,22 +367,22 @@ class Policy_installment_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Get all records belonging to single Policy Transaction
+     * Get all records belonging to single Endorsement
      *
      *
      * @param int $id
      * @return array
      */
-    public function get_many_by_policy_transaction($policy_transaction_id)
+    public function get_many_by_endorsement($endorsement_id)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_var  = 'ptxi_bytxn_'.$policy_transaction_id;
+        $cache_var  = 'ptxi_bytxn_'.$endorsement_id;
         $rows       = $this->get_cache($cache_var);
         if(!$rows)
         {
-            $rows = $this->_rows(['PTI.policy_transaction_id' => $policy_transaction_id]);
+            $rows = $this->_rows(['PTI.endorsement_id' => $endorsement_id]);
 
             if($rows)
             {
@@ -397,7 +397,7 @@ class Policy_installment_model extends MY_Model
 
 
     /**
-     * Get All Transactions Rows for Supplied Policy
+     * Get All Endorsements Rows for Supplied Policy
      *
      * @param int $policy_id
      * @return type
@@ -431,10 +431,10 @@ class Policy_installment_model extends MY_Model
          */
         private function _rows($where)
         {
-            $this->db->select('PTI.*, P.branch_id, P.code AS policy_code, PTXN.flag_current as policy_transaction_flag_current, PTXN.status AS policy_transaction_status, PTXN.flag_ri_approval AS policy_transaction_flag_ri_approval')
+            $this->db->select('PTI.*, P.branch_id, P.code AS policy_code, ENDRSMNT.flag_current as endorsement_flag_current, ENDRSMNT.status AS endorsement_status, ENDRSMNT.flag_ri_approval AS endorsement_flag_ri_approval')
                     ->from($this->table_name . ' AS PTI')
-                    ->join('dt_policy_transactions PTXN', 'PTXN.id = PTI.policy_transaction_id')
-                    ->join('dt_policies P', 'P.id = PTXN.policy_id')
+                    ->join('dt_endorsements ENDRSMNT', 'ENDRSMNT.id = PTI.endorsement_id')
+                    ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
                     ->where($where);
 
             /**
@@ -444,7 +444,7 @@ class Policy_installment_model extends MY_Model
 
             // Get the damn result (Latest Transaction with first installment date order)
             return $this->db->order_by('PTI.installment_date', 'ASC')
-                            ->order_by('PTI.policy_transaction_id', 'DESC')
+                            ->order_by('PTI.endorsement_id', 'DESC')
                             ->get()->result();
         }
 

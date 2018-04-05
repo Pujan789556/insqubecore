@@ -270,11 +270,11 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
-	 * Activities related to Policy Transaction
+	 * Activities related to Endorsement
 	 */
-	'policy_transactions' => [
-		'_uri' => 'policy_transactions/',
-		'_table' => 'dt_policy_transactions',
+	'endorsements' => [
+		'_uri' => 'endorsements/',
+		'_table' => 'dt_endorsements',
 		'_actions' => [
 			'C' => 'added',
 			'E' => 'edited',

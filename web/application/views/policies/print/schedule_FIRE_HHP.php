@@ -148,7 +148,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                             <tr>
                                 <td>
                                     <?php
-                                    $this->load->view('policy_transactions/snippets/_schedule_cost_calculation_table_risks_FIRE_HHP', ['txn_record' => $txn_record]);
+                                    $this->load->view('endorsements/snippets/_schedule_cost_calculation_table_risks_FIRE_HHP', ['txn_record' => $txn_record]);
                                     ?>
                                 </td>
                             </tr>

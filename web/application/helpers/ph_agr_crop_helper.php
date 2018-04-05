@@ -415,7 +415,7 @@ if ( ! function_exists('_TXN_AGR_CROP_premium_validation_rules'))
 			 * ----------------------------
 			 * Sampusti Bibaran and Remarks are common to all type of policy package.
 			 */
-			'basic' => _POLICY_TRANSACTION_premium_basic_v_rules( $policy_record->portfolio_id, $pfs_record ),
+			'basic' => _ENDORSEMENT_premium_basic_v_rules( $policy_record->portfolio_id, $pfs_record ),
 
 			/**
 			 * Installment Validation Rules (Common to all portfolios)
@@ -445,7 +445,7 @@ if ( ! function_exists('_TXN_AGR_CROP_premium_validation_rules'))
 if ( ! function_exists('_TXN_AGR_CROP_premium_goodies'))
 {
 	/**
-	 * Get Policy Policy Transaction Goodies
+	 * Get Policy Endorsement Goodies
 	 *
 	 * Get the following goodies
 	 * 		1. Validation Rules
@@ -552,7 +552,7 @@ if ( ! function_exists('__save_premium_AGR_CROP'))
 	 *	!!! Important: Fresh/Renewal Only
 	 *
 	 * @param object $policy_record  	Policy Record
-	 * @param object $txn_record 	 	Policy Transaction Record
+	 * @param object $txn_record 	 	Endorsement Record
 	 * @return json
 	 */
 	function __save_premium_AGR_CROP($policy_record, $txn_record)
@@ -727,7 +727,7 @@ if ( ! function_exists('__save_premium_AGR_CROP'))
 					 * Cost Calculation Table
 					 */
 					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
-					return $CI->policy_transaction_model->save($txn_record->id, $txn_data);
+					return $CI->endorsement_model->save($txn_record->id, $txn_data);
 
 
 					/**

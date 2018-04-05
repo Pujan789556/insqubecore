@@ -83,7 +83,7 @@ class Policy_installments extends MY_Controller
 
 		$records 	= $this->policy_installment_model->get_many_by_policy($policy_id);
 
-		// $txn_record = $this->policy_transaction_model->get($txn_record->id);
+		// $txn_record = $this->endorsement_model->get($txn_record->id);
 
 
 		// echo $this->db->last_query();exit;
@@ -199,7 +199,7 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Get the transaction record
 		 */
-		$transaction_record = $this->policy_transaction_model->get( $installment_record->policy_transaction_id );
+		$transaction_record = $this->endorsement_model->get( $installment_record->endorsement_id );
 		if(!$transaction_record)
 		{
 			$this->template->render_404();
@@ -613,7 +613,7 @@ class Policy_installments extends MY_Controller
 						 */
 						if($installment_record->flag_first == IQB_FLAG_ON)
 						{
-							$this->policy_transaction_model->update_status($transaction_record, IQB_POLICY_TXN_STATUS_VOUCHERED);
+							$this->endorsement_model->update_status($transaction_record, IQB_POLICY_TXN_STATUS_VOUCHERED);
 						}
 
 						// Update installment status
@@ -708,7 +708,7 @@ class Policy_installments extends MY_Controller
 		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
 		 */
 		$installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED;
-		$installment_record->policy_transaction_status 	= IQB_POLICY_TXN_STATUS_VOUCHERED;
+		$installment_record->endorsement_status 	= IQB_POLICY_TXN_STATUS_VOUCHERED;
 		$transaction_record->status 					= IQB_POLICY_TXN_STATUS_VOUCHERED;
 
 		$html_tab_ovrview = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'txn_record' => $transaction_record], TRUE);
@@ -768,7 +768,7 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Get the transaction record
 		 */
-		$transaction_record = $this->policy_transaction_model->get( $installment_record->policy_transaction_id );
+		$transaction_record = $this->endorsement_model->get( $installment_record->endorsement_id );
 		if(!$transaction_record)
 		{
 			$this->template->render_404();
@@ -940,7 +940,7 @@ class Policy_installments extends MY_Controller
 					 */
 					if($installment_record->flag_first == IQB_FLAG_ON)
 					{
-						$this->policy_transaction_model->update_status($transaction_record, IQB_POLICY_TXN_STATUS_INVOICED);
+						$this->endorsement_model->update_status($transaction_record, IQB_POLICY_TXN_STATUS_INVOICED);
 					}
 					$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_INVOICED);
 
@@ -1036,7 +1036,7 @@ class Policy_installments extends MY_Controller
 		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
 		 */
 		$installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_INVOICED;
-		$installment_record->policy_transaction_status 	= IQB_POLICY_TXN_STATUS_INVOICED;
+		$installment_record->endorsement_status 	= IQB_POLICY_TXN_STATUS_INVOICED;
 		$transaction_record->status 					= IQB_POLICY_TXN_STATUS_INVOICED;
 
 		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'txn_record' => $transaction_record], TRUE);
@@ -1095,7 +1095,7 @@ class Policy_installments extends MY_Controller
         /**
 		 * Get the transaction record
 		 */
-		$transaction_record = $this->policy_transaction_model->get( $installment_record->policy_transaction_id );
+		$transaction_record = $this->endorsement_model->get( $installment_record->endorsement_id );
 		if(!$transaction_record)
 		{
 			$this->template->render_404();
@@ -1409,7 +1409,7 @@ class Policy_installments extends MY_Controller
 						 */
 						if($installment_record->flag_first == IQB_FLAG_ON)
 						{
-							$this->policy_transaction_model->update_status($transaction_record, IQB_POLICY_TXN_STATUS_ACTIVE);
+							$this->endorsement_model->update_status($transaction_record, IQB_POLICY_TXN_STATUS_ACTIVE);
 						}
                         $this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_PAID);
 
@@ -1525,7 +1525,7 @@ class Policy_installments extends MY_Controller
          * Reload the Policy Overview Tab, Update Installment Row (Replace)
          */
         $installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_PAID;
-		$installment_record->policy_transaction_status 	= IQB_POLICY_TXN_STATUS_ACTIVE;
+		$installment_record->endorsement_status 	= IQB_POLICY_TXN_STATUS_ACTIVE;
         $transaction_record->status 					= IQB_POLICY_TXN_STATUS_ACTIVE;
         $policy_record->status      					= IQB_POLICY_STATUS_ACTIVE;
         $invoice_record->flag_paid  					= IQB_FLAG_ON;

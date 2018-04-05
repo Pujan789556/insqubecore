@@ -477,11 +477,11 @@ class Ac_receipt_model extends MY_Model
             // $this->_row_select();
 
             // // Policy Related JOIN
-            // return $this->db->select('PTXN.id AS policy_installment_id, PTXN.policy_id')
+            // return $this->db->select('ENDRSMNT.id AS policy_installment_id, ENDRSMNT.policy_id')
             //             ->join('ac_vouchers V', 'V.id = I.voucher_id')
-            //             ->join('rel_policy_installment_voucher RELPTXNVHR', 'RELPTXNVHR.voucher_id = I.voucher_id')
-            //             ->join('dt_policy_transactions PTXN', 'RELPTXNVHR.policy_installment_id = PTXN.id')
-            //             ->where('PTXN.policy_id', $policy_id)
+            //             ->join('rel_policy_installment_voucher RELENDRSMNTVHR', 'RELENDRSMNTVHR.voucher_id = I.voucher_id')
+            //             ->join('dt_endorsements ENDRSMNT', 'RELENDRSMNTVHR.policy_installment_id = ENDRSMNT.id')
+            //             ->where('ENDRSMNT.policy_id', $policy_id)
             //             ->where('I.flag_complete', IQB_FLAG_ON)
             //             ->where('V.flag_complete', IQB_FLAG_ON)
             //             ->order_by('I.id', 'DESC')
@@ -503,8 +503,8 @@ class Ac_receipt_model extends MY_Model
         //                     // Branch Contact
         //                     'B.contacts as branch_contact, ' .
 
-        //                     // Policy Transaction ID, Policy ID
-        //                     'PTXN.id AS policy_installment_id, PTXN.policy_id, ' .
+        //                     // Endorsement ID, Policy ID
+        //                     'ENDRSMNT.id AS policy_installment_id, ENDRSMNT.policy_id, ' .
 
         //                     // Policy Code
         //                     'POLICY.code AS policy_code, ' .
@@ -513,9 +513,9 @@ class Ac_receipt_model extends MY_Model
         //                     'CST.full_name AS customer_full_name, CST.contact as customer_contact'
         //                 )
         //             ->join('ac_vouchers V', 'V.id = I.voucher_id')
-        //             ->join('rel_policy_installment_voucher RELPTXNVHR', 'RELPTXNVHR.voucher_id = I.voucher_id')
-        //             ->join('dt_policy_transactions PTXN', 'RELPTXNVHR.policy_installment_id = PTXN.id')
-        //             ->join('dt_policies POLICY', 'POLICY.id = PTXN.policy_id')
+        //             ->join('rel_policy_installment_voucher RELENDRSMNTVHR', 'RELENDRSMNTVHR.voucher_id = I.voucher_id')
+        //             ->join('dt_endorsements ENDRSMNT', 'RELENDRSMNTVHR.policy_installment_id = ENDRSMNT.id')
+        //             ->join('dt_policies POLICY', 'POLICY.id = ENDRSMNT.policy_id')
         //             ->join('dt_customers CST', 'CST.id = I.customer_id');
 
         // /**

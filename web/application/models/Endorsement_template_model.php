@@ -53,7 +53,7 @@ class Endorsement_template_model extends MY_Model
 
     public function validation_rules()
     {
-        $e_type_dropdown = _POLICY_TRANSACTION_type_dropdown(false);
+        $e_type_dropdown = _ENDORSEMENT_type_dropdown(false);
         $this->validation_rules = [
             [
                 'field' => 'portfolio_id',
@@ -173,7 +173,7 @@ class Endorsement_template_model extends MY_Model
             $list = [];
             foreach($records as $record)
             {
-                $list["{$record->id}"] = _POLICY_TRANSACTION_type_text($record->endorsement_type) . ' - ' . $record->title  ;
+                $list["{$record->id}"] = _ENDORSEMENT_type_text($record->endorsement_type) . ' - ' . $record->title  ;
             }
             $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
         }

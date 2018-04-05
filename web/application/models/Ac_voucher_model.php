@@ -309,7 +309,7 @@ class Ac_voucher_model extends MY_Model
      *      b. Insert Voucher Details - Debit, Credit
      *
      * @param array $data
-     * @param int   $policy_id (if voucher generated for policy transaction)
+     * @param int   $policy_id (if voucher generated for Endorsement)
      * @return mixed
      */
     public function add($data, $policy_id=NULL)
@@ -755,11 +755,11 @@ class Ac_voucher_model extends MY_Model
             $this->_row_select();
 
             // Policy Related JOIN
-            return $this->db->select('RPV.flag_invoiced, RPV.policy_installment_id, PTXN.policy_id')
+            return $this->db->select('RPV.flag_invoiced, RPV.policy_installment_id, ENDRSMNT.policy_id')
                         ->join('rel_policy_installment_voucher RPV', 'RPV.voucher_id = V.id')
                         ->join('dt_policy_installments PTI', 'RPV.policy_installment_id = PTI.id')
-                        ->join('dt_policy_transactions PTXN', 'PTI.policy_transaction_id = PTXN.id')
-                        ->where('PTXN.policy_id', $policy_id)
+                        ->join('dt_endorsements ENDRSMNT', 'PTI.endorsement_id = ENDRSMNT.id')
+                        ->where('ENDRSMNT.policy_id', $policy_id)
                         ->where('V.flag_complete', IQB_FLAG_ON)
                         ->order_by('V.id', 'DESC')
                         ->get()

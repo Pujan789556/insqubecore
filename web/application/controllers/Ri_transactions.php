@@ -64,7 +64,7 @@ class Ri_transactions extends MY_Controller
 		/**
 		 * Check Permissions? OR Deny on Fail!
 		 */
-		$this->dx_auth->is_authorized('ri_transactions', 'explore.transaction', TRUE);
+		$this->dx_auth->is_authorized('ri_transactions', 'explore.endorsement', TRUE);
 
 		// dom data
 		$dom_data = [
@@ -262,7 +262,7 @@ class Ri_transactions extends MY_Controller
 		/**
 		 * Check Permissions? OR Deny on Fail!
 		 */
-		$this->dx_auth->is_authorized('ri_transactions', 'explore.transaction', TRUE);
+		$this->dx_auth->is_authorized('ri_transactions', 'explore.endorsement', TRUE);
 
 		$policy_id 	= (int)$policy_id;
 		$records = $this->ri_transaction_model->rows_by_policy($policy_id);
@@ -297,7 +297,7 @@ class Ri_transactions extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		$this->dx_auth->is_authorized('ri_transactions', 'explore.transaction', TRUE);
+		$this->dx_auth->is_authorized('ri_transactions', 'explore.endorsement', TRUE);
 
 		$policy_id = $policy_id ? (int)$policy_id : NULL;
 		$cache_var = $policy_id ? 'ri_txn_list_by_policy_' . $policy_id : NULL;
@@ -337,7 +337,7 @@ class Ri_transactions extends MY_Controller
 		/**
 		 * Check Permissions? OR Deny on Fail
 		 */
-		$this->dx_auth->is_authorized('ri_transactions', 'add.transaction', TRUE);
+		$this->dx_auth->is_authorized('ri_transactions', 'add.endorsement', TRUE);
 
 		$record = NULL;
 
@@ -506,7 +506,7 @@ class Ri_transactions extends MY_Controller
     	/**
 		 * Check Permissions
 		 */
-		$this->dx_auth->is_authorized('ri_transactions', 'explore.transaction', TRUE);
+		$this->dx_auth->is_authorized('ri_transactions', 'explore.endorsement', TRUE);
 
 		/**
 		 * Main Record
@@ -726,7 +726,7 @@ class Ri_transactions extends MY_Controller
     	/**
 		 * Check Permissions
 		 */
-		$this->dx_auth->is_authorized('ri_transactions', 'explore.transaction', TRUE);
+		$this->dx_auth->is_authorized('ri_transactions', 'explore.endorsement', TRUE);
 
 		/**
 		 * Main Record & Has FAC?

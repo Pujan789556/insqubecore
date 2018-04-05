@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						title="View agent details.">
 						<?php echo $record->portfolio_name_en;?></a>
 	</td>
-	<td><?php echo _POLICY_TRANSACTION_type_text($record->endorsement_type);?></td>
+	<td><?php echo _ENDORSEMENT_type_text($record->endorsement_type);?></td>
 	<td><?php echo $record->title; ?></td>
 	<td class="ins-action">
 		<div class="btn-group">
