@@ -47,15 +47,17 @@ if( _ENDORSEMENT_is_editable($record->status, $record->flag_current, FALSE) ):
             <span>Delete</span></a>
     <?php endif; ?>
 
-    <a href="#"
-        title="Edit Transaction/Endorsement"
-        data-toggle="tooltip"
-        class="action trg-dialog-edit"
-        data-box-size="large"
-        data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $policy_record->code?>'
-        data-url="<?php echo site_url('endorsements/edit/' . $record->id);?>"
-        data-form="#_form-endorsements">
-        <i class="fa fa-pencil-square-o"></i> Edit</a>
+    <?php if( !$is_first ): ?>
+        <a href="#"
+            title="Edit Transaction/Endorsement"
+            data-toggle="tooltip"
+            class="action trg-dialog-edit"
+            data-box-size="large"
+            data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $policy_record->code?>'
+            data-url="<?php echo site_url('endorsements/edit/' . $record->id);?>"
+            data-form="#_form-endorsements">
+            <i class="fa fa-pencil-square-o"></i> Edit</a>
+    <?php endif; ?>
 
     <?php if($is_policy_editable): ?>
         <a href="#"

@@ -177,6 +177,20 @@ class Endorsements extends MY_Controller
 		 */
 		_ENDORSEMENT_is_editable($record->status, $record->flag_current);
 
+
+		/**
+		 * Only Endorsement are editable
+		 */
+		if( _ENDORSEMENT_is_first($record->txn_type) )
+		{
+			return $this->template->json([
+				'status' 	=> 'error',
+				'title' 	=> 'Operation Not Permitted!'
+				'message' 	=> 'You can not edit fresh/renewal record.'
+			], 400);
+		}
+
+
 		/**
 		 * Policy Record
 		 */
