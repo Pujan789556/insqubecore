@@ -22,6 +22,8 @@ class Policy_model extends MY_Model
 
     protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
+    protected $endorsement_fields = ['proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time'];
+
     protected $validation_rules = [];
 
 

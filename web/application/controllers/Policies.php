@@ -590,7 +590,7 @@ class Policies extends MY_Controller
 			],404);
 		}
 
-		$txn_record = $this->policy_transaction_model->get_current_txn_by_policy($record->id);
+		$txn_record = $this->policy_transaction_model->get_current_transaction_by_policy($record->id);
 		if(!$txn_record)
 		{
 			return $this->template->json([
@@ -609,6 +609,19 @@ class Policies extends MY_Controller
 		 * Editable Permission? We should check permission of Txn not of Policy
 		 */
 		_POLICY_TRANSACTION_is_editable($txn_record->status, $txn_record->flag_current);
+
+
+		/**
+		 * Policy Transaction Type Allows Policy to Edit?
+		 */
+		if( !_POLICY_TRANSACTION_is_policy_editable_by_type($txn_record->txn_type) )
+		{
+			return $this->template->json([
+				'status' 	=> 'error',
+				'title' 	=> 'Invalid Policy Transaction Type!',
+				'message' 	=> 'You <strong>CAN NOT EDIT</strong> policy information for this type of Transaction/Endorsement.'
+			],403);
+		}
 
 
 		/**
@@ -717,12 +730,11 @@ class Policies extends MY_Controller
 
 		private function _get_endorsement_audit_data($old_record, $post_data)
 		{
-			$fields 	= ['proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time'];
 			$old_data 	= [];
 			$new_data 	= [];
 			$old_record = (array)$old_record;
 			$post_data 	= $this->__refactor_datetime_fields($post_data);
-			foreach($fields as $key)
+			foreach($this->policy_model->endorsement_fields as $key)
 			{
 				$old_data[$key] = $old_record[$key];
 				$new_data[$key] = $post_data[$key];

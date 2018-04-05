@@ -496,7 +496,7 @@ class Policy_transactions extends MY_Controller
 		 */
 		private function _can_add_endorsement($policy_id)
 		{
-			$current_txn = $this->policy_transaction_model->get_current_txn_by_policy($policy_id);
+			$current_txn = $this->policy_transaction_model->get_current_transaction_by_policy($policy_id);
 
 			return $current_txn->status === IQB_POLICY_TXN_STATUS_ACTIVE;
 		}
@@ -577,7 +577,7 @@ class Policy_transactions extends MY_Controller
 		if(
 			$record->status !== IQB_POLICY_TXN_STATUS_DRAFT
 							||
-			!in_array( $record->txn_type, _POLICY_TRANSACTION_is_deletable_by_type() )
+			! _POLICY_TRANSACTION_is_deletable_by_type($record->txn_type)
 							||
 			!$this->dx_auth->is_authorized('policy_transactions', 'delete.draft.transaction')
 		)
@@ -660,7 +660,7 @@ class Policy_transactions extends MY_Controller
 		}
 
 		// Current Policy Transaction Record and Has valid Type?
-		$txn_record = $this->policy_transaction_model->get_current_txn_by_policy($policy_record->id);
+		$txn_record = $this->policy_transaction_model->get_current_transaction_by_policy($policy_record->id);
 		if( !$txn_record || !in_array( $txn_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL] ) )
 		{
 			return $this->template->json([

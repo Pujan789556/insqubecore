@@ -4,7 +4,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Policy Transaction : Row Actions
  */
 
-$flag__fresh_or_renewal = in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]);
+$is_first               = _POLICY_TRANSACTION_is_first($record->txn_type);
+$is_premium_computable  = _POLICY_TRANSACTION_is_premium_computable_by_type($record->txn_type);
+$is_deletable           = _POLICY_TRANSACTION_is_deletable_by_type($record->txn_type);
+$is_policy_editable     = _POLICY_TRANSACTION_is_policy_editable_by_type($record->txn_type);
+$is_object_editable     = _POLICY_TRANSACTION_is_object_editable_by_type($record->txn_type);
+$is_customer_editable   = _POLICY_TRANSACTION_is_customer_editable_by_type($record->txn_type);
 ?>
 <?php
 /**
@@ -19,7 +24,7 @@ if( _POLICY_TRANSACTION_is_editable($record->status, $record->flag_current, FALS
     /**
      * Updating Premium is only on Fresh/Renewal Transaction
      */
-    if( $flag__fresh_or_renewal ):?>
+    if( $is_premium_computable ):?>
     <a href="#"
         title="Update Premium"
         data-toggle="tooltip"
@@ -31,64 +36,64 @@ if( _POLICY_TRANSACTION_is_editable($record->status, $record->flag_current, FALS
         <i class="fa fa-dollar"></i> Premium</a>
     <?php endif?>
 
-    <?php
-    /**
-     * General or Transactional Endorsements
-     *      - Can Edit Policy/Customer/Object Information
-     */
-    if( !$flag__fresh_or_renewal ):?>
-
-        <?php if($record->status == IQB_POLICY_TXN_STATUS_DRAFT): ?>
-        <a href="#"
-            title="Delete Transaction/Endorsement"
-            data-toggle="tooltip"
-            class="action trg-row-action"
-            data-confirm="true"
-            data-url="<?php echo site_url('policy_transactions/delete/' . $record->id);?>">
-                <i class="fa fa-trash-o"></i>
-                <span>Delete</span></a>
-        <?php endif; ?>
-
-        <a href="#"
-            title="Edit Transaction/Endorsement"
-            data-toggle="tooltip"
-            class="action trg-dialog-edit"
-            data-box-size="large"
-            data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $policy_record->code?>'
-            data-url="<?php echo site_url('policy_transactions/edit/' . $record->id);?>"
-            data-form="#_form-policy_transactions">
-            <i class="fa fa-pencil-square-o"></i> Edit</a>
-    <?php endif?>
-
+    <?php if($is_deletable): ?>
     <a href="#"
-        class="action trg-dialog-edit"
-        title="Edit Policy Information"
+        title="Delete Transaction/Endorsement"
         data-toggle="tooltip"
+        class="action trg-row-action"
+        data-confirm="true"
+        data-url="<?php echo site_url('policy_transactions/delete/' . $record->id);?>">
+            <i class="fa fa-trash-o"></i>
+            <span>Delete</span></a>
+    <?php endif; ?>
+
+    <a href="#"
+        title="Edit Transaction/Endorsement"
+        data-toggle="tooltip"
+        class="action trg-dialog-edit"
         data-box-size="large"
-        data-title='<i class="fa fa-pencil-square-o"></i> Edit Policy Info for Endorsement- <?php echo $policy_record->code?>'
-        data-url="<?php echo site_url('policies/edit_endorsement/' . $record->policy_id );?>"
-        data-form="#_form-policy">
-        <i class="fa fa-pencil-square-o"></i> Policy</a>
+        data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $policy_record->code?>'
+        data-url="<?php echo site_url('policy_transactions/edit/' . $record->id);?>"
+        data-form="#_form-policy_transactions">
+        <i class="fa fa-pencil-square-o"></i> Edit</a>
 
-    <a href="#"
-            title="Edit Object Information"
-            data-toggle="tooltip"
+    <?php if($is_policy_editable): ?>
+        <a href="#"
             class="action trg-dialog-edit"
+            title="Edit Policy Information"
+            data-toggle="tooltip"
             data-box-size="large"
-            data-title='<i class="fa fa-pencil-square-o"></i> Edit Object Info for Endorsement - <?php echo $policy_record->code?>'
-            data-url="<?php echo site_url('objects/edit_endorsement/' . $policy_record->id . '/' . $record->id . '/' . $policy_record->object_id);?>"
-            data-form="#_form-object">
-            <i class="fa fa-pencil-square-o"></i> Object</a>
+            data-title='<i class="fa fa-pencil-square-o"></i> Edit Policy Info for Endorsement- <?php echo $policy_record->code?>'
+            data-url="<?php echo site_url('policies/edit_endorsement/' . $record->policy_id );?>"
+            data-form="#_form-policy">
+            <i class="fa fa-pencil-square-o"></i> Policy</a>
+    <?php endif; ?>
 
-    <a href="#"
-            title="Edit Customer Information"
-            data-toggle="tooltip"
-            class="action trg-dialog-edit"
-            data-box-size="large"
-            data-title='<i class="fa fa-pencil-square-o"></i> Edit Customer Info for Endorsement - <?php echo $policy_record->code?>'
-            data-url="<?php echo site_url('customers/edit_endorsement/' . $policy_record->id . '/' . $record->id . '/' . $policy_record->customer_id);?>"
-            data-form="#_form-customer">
-            <i class="fa fa-pencil-square-o"></i> Customer</a>
+    <?php if($is_object_editable): ?>
+        <a href="#"
+                title="Edit Object Information"
+                data-toggle="tooltip"
+                class="action trg-dialog-edit"
+                data-box-size="large"
+                data-title='<i class="fa fa-pencil-square-o"></i> Edit Object Info for Endorsement - <?php echo $policy_record->code?>'
+                data-url="<?php echo site_url('objects/edit_endorsement/' . $policy_record->id . '/' . $record->id . '/' . $policy_record->object_id);?>"
+                data-form="#_form-object">
+                <i class="fa fa-pencil-square-o"></i> Object</a>
+    <?php endif; ?>
+
+    <?php if($is_customer_editable): ?>
+        <a href="#"
+                title="Edit Customer Information"
+                data-toggle="tooltip"
+                class="action trg-dialog-edit"
+                data-box-size="large"
+                data-title='<i class="fa fa-pencil-square-o"></i> Edit Customer Info for Endorsement - <?php echo $policy_record->code?>'
+                data-url="<?php echo site_url('customers/edit_endorsement/' . $policy_record->id . '/' . $record->id . '/' . $policy_record->customer_id);?>"
+                data-form="#_form-customer">
+                <i class="fa fa-pencil-square-o"></i> Customer</a>
+
+    <?php endif; ?>
+
 <?php
 endif;
 
@@ -97,7 +102,7 @@ endif;
 /**
  * Print Endorsement/Transaction
  */
-if( $this->dx_auth->is_authorized('policy_transactions', 'print.endorsement') && !$flag__fresh_or_renewal ):?>
+if( $this->dx_auth->is_authorized('policy_transactions', 'print.endorsement') && !$is_first ):?>
 
     <a href="<?php echo site_url('policy_transactions/print/single/' . $record->id );?>"
             target="_blank"
@@ -113,7 +118,7 @@ endif;
 /**
  * Status "Back to Draft"
  */
-if( !$flag__fresh_or_renewal && $record->status === IQB_POLICY_TXN_STATUS_VERIFIED && $this->dx_auth->is_authorized('policy_transactions', 'status.to.draft') ): ?>
+if( !$is_first && $record->status === IQB_POLICY_TXN_STATUS_VERIFIED && $this->dx_auth->is_authorized('policy_transactions', 'status.to.draft') ): ?>
     <a href="#"
         title="Back to Draft"
         data-toggle="tooltip"
@@ -130,7 +135,7 @@ endif;
 /**
  * Status "to Verified"
  */
-if( !$flag__fresh_or_renewal && $record->status === IQB_POLICY_TXN_STATUS_DRAFT && $this->dx_auth->is_authorized('policy_transactions', 'status.to.verified') ): ?>
+if( !$is_first && $record->status === IQB_POLICY_TXN_STATUS_DRAFT && $this->dx_auth->is_authorized('policy_transactions', 'status.to.verified') ): ?>
     <a href="#"
         title="Verify Debit Note"
         data-toggle="tooltip"

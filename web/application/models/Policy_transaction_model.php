@@ -306,7 +306,7 @@ class Policy_transaction_model extends MY_Model
 
         private function _reset($policy_id)
         {
-            $record = $this->get_current_txn_by_policy($policy_id);
+            $record = $this->get_current_transaction_by_policy($policy_id);
 
             if(!$record)
             {
@@ -356,7 +356,7 @@ class Policy_transaction_model extends MY_Model
     public function update_status($policy_id_or_txn_record, $to_status_flag)
     {
         // Get the Policy Record
-        $record = is_numeric($policy_id_or_txn_record) ? $this->get_current_txn_by_policy( (int)$policy_id_or_txn_record ) : $policy_id_or_txn_record;
+        $record = is_numeric($policy_id_or_txn_record) ? $this->get_current_transaction_by_policy( (int)$policy_id_or_txn_record ) : $policy_id_or_txn_record;
 
         if(!$record)
         {
@@ -743,7 +743,7 @@ class Policy_transaction_model extends MY_Model
      * @param int $policy_id
      * @return object
      */
-    public function get_current_txn_by_policy($policy_id)
+    public function get_current_transaction_by_policy($policy_id)
     {
         $where = [
             'PTXN.policy_id'    => $policy_id,

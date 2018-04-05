@@ -590,6 +590,18 @@ class Customers extends MY_Controller
 
 
 		/**
+		 * Policy Transaction Type Allows Customer to Edit?
+		 */
+		if( !_POLICY_TRANSACTION_is_customer_editable_by_type($txn_record->txn_type) )
+		{
+			return $this->template->json([
+				'status' 	=> 'error',
+				'title' 	=> 'Invalid Policy Transaction Type!',
+				'message' 	=> 'You <strong>CAN NOT EDIT</strong> customer information for this type of Transaction/Endorsement.'
+			],403);
+		}
+
+		/**
          * Do we have audit data available? If yes, pass it instead of policy's original data
          *
          * !!!NOTE: We need to pass the original record for getting old data. That's why clone.
@@ -704,17 +716,16 @@ class Customers extends MY_Controller
 
 		private function _get_endorsement_audit_data($old_record, $post_data)
 		{
-			$fields 	= ['type', 'pan', 'full_name', 'picture', 'profession', 'contact', 'company_reg_no', 'citizenship_no', 'passport_no'];
 			$old_data 	= [];
 			$new_data 	= [];
 			$old_record = (array)$old_record;
 
 			// Prepare Contact Data
 			$post_data 	= $this->customer_model->prepare_contact_data($post_data);
-			foreach($fields as $key)
+			foreach($this->customer_model->endorsement_fields as $key)
 			{
-				$old_data[$key] = $old_record[$key];
-				$new_data[$key] = $post_data[$key];
+				$old_data[$key] = $old_record[$key] ?? NULL;
+				$new_data[$key] = $post_data[$key] ?? NULL;
 			}
 
 			return json_encode([

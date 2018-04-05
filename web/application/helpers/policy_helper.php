@@ -1281,9 +1281,15 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_editable'))
 		$CI =& get_instance();
 
 		// Editable Permissions ?
-		$__flag_authorized 		= FALSE;
+		$__flag_authorized 	= FALSE;
 
-
+		/**
+		 * Is it current Transaction?
+		 */
+		if( $flag_current == IQB_FLAG_ON )
+		{
+			$__flag_authorized 	= TRUE;
+		}
 
 		/**
 		 * Check Permissions
@@ -1296,7 +1302,7 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_editable'))
 		 */
 
 		// Editable Permissions ?
-		if( $status === IQB_POLICY_TXN_STATUS_DRAFT )
+		if( $__flag_authorized && $status === IQB_POLICY_TXN_STATUS_DRAFT )
 		{
 			if(
 				$CI->dx_auth->is_admin()
@@ -1378,6 +1384,28 @@ if ( ! function_exists('_POLICY_TRANSACTION_type_eonly_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_is_first'))
+{
+	/**
+	 * Check if given policy transaction is first (Fresh/Renewal).
+	 *
+	 *
+	 * @param 	int 	Transaction Type
+	 * @return	array
+	 */
+	function _POLICY_TRANSACTION_is_first( $txn_type )
+	{
+		$txn_type 		= (int)$txn_type;
+		$allowed_types 	= [
+			IQB_POLICY_TXN_TYPE_FRESH,
+			IQB_POLICY_TXN_TYPE_RENEWAL
+		];
+
+		return in_array($txn_type, $allowed_types);
+	}
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('_POLICY_TRANSACTION_is_deletable_by_type'))
 {
 	/**
@@ -1385,11 +1413,125 @@ if ( ! function_exists('_POLICY_TRANSACTION_is_deletable_by_type'))
 	 *
 	 * Endorsement Only Transaction Types are deletable from transactions tab.
 	 *
+	 * @param 	int 	Transaction Type
 	 * @return	array
 	 */
-	function _POLICY_TRANSACTION_is_deletable_by_type( )
+	function _POLICY_TRANSACTION_is_deletable_by_type( $txn_type )
 	{
-		return  array_keys( _POLICY_TRANSACTION_type_eonly_dropdown(FALSE) );
+		$txn_type 		= (int)$txn_type;
+		$allowed_types =  array_keys( _POLICY_TRANSACTION_type_eonly_dropdown(FALSE) );
+
+		return in_array($txn_type, $allowed_types);
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_is_premium_computable_by_type'))
+{
+	/**
+	 * Check if given policy transaction type is Premium Computable.
+	 *
+	 * Allowed Transaction Types
+	 * 	- Fresh
+	 * 	- Renewal
+	 * 	- Premium Upgrade
+	 * 	- Premium Refund
+	 *
+	 * @param 	int 	Transaction Type
+	 * @return	array
+	 */
+	function _POLICY_TRANSACTION_is_premium_computable_by_type( $txn_type )
+	{
+		$txn_type 		= (int)$txn_type;
+		$allowed_types 	= [
+			IQB_POLICY_TXN_TYPE_FRESH,
+			IQB_POLICY_TXN_TYPE_RENEWAL,
+			IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE,
+			IQB_POLICY_TXN_TYPE_PREMIUM_REFUND,
+		];
+
+		return in_array($txn_type, $allowed_types);
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_is_policy_editable_by_type'))
+{
+	/**
+	 * Check if given policy transaction type allows policy to edit.
+	 *
+	 * Allowed Transaction Types
+	 * 	- General
+	 * 	- Premium Upgrade
+	 * 	- Premium Refund
+	 *
+	 * @param 	int 	Transaction Type
+	 * @return	array
+	 */
+	function _POLICY_TRANSACTION_is_policy_editable_by_type( $txn_type )
+	{
+		$txn_type 		= (int)$txn_type;
+		$allowed_types 	= [
+			IQB_POLICY_TXN_TYPE_GENERAL,
+			IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE,
+			IQB_POLICY_TXN_TYPE_PREMIUM_REFUND,
+		];
+
+		return in_array($txn_type, $allowed_types);
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_is_object_editable_by_type'))
+{
+	/**
+	 * Check if given policy transaction type allows policy object to edit.
+	 *
+	 * Allowed Transaction Types
+	 * 	- General
+	 * 	- Premium Upgrade
+	 * 	- Premium Refund
+	 *
+	 * @param 	int 	Transaction Type
+	 * @return	array
+	 */
+	function _POLICY_TRANSACTION_is_object_editable_by_type( $txn_type )
+	{
+		$txn_type 		= (int)$txn_type;
+		$allowed_types 	= [
+			IQB_POLICY_TXN_TYPE_GENERAL,
+			IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE,
+			IQB_POLICY_TXN_TYPE_PREMIUM_REFUND,
+		];
+
+		return in_array($txn_type, $allowed_types);
+	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_TRANSACTION_is_customer_editable_by_type'))
+{
+	/**
+	 * Check if given policy transaction type allows policy customer to edit.
+	 *
+	 * Allowed Transaction Types
+	 * 	- General
+	 * 	- Premium Upgrade
+	 * 	- Premium Refund
+	 *
+	 * @param 	int 	Transaction Type
+	 * @return	array
+	 */
+	function _POLICY_TRANSACTION_is_customer_editable_by_type( $txn_type )
+	{
+		$txn_type 		= (int)$txn_type;
+		$allowed_types 	= [
+			IQB_POLICY_TXN_TYPE_GENERAL,
+			IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE,
+			IQB_POLICY_TXN_TYPE_PREMIUM_REFUND,
+		];
+
+		return in_array($txn_type, $allowed_types);
 	}
 }
 

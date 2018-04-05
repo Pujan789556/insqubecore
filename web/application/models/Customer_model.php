@@ -21,6 +21,8 @@ class Customer_model extends MY_Model
 
     protected $fields = ['id', 'branch_id', 'code', 'type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'contact', 'fts', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
+    protected $endorsement_fields = ['type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'contact'];
+
     protected $validation_rules = [];
 
 
