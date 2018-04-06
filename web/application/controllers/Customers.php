@@ -668,14 +668,27 @@ class Customers extends MY_Controller
 
 				if( $status === 'success' || $status === 'no_file_selected')
 	            {
-	            	$data = $this->input->post();
-        			$data['picture'] = $picture;
-        			$audit_data 	= $this->_get_endorsement_audit_data($record, $data);
+	            	$post_data = $this->input->post();
+        			$post_data['picture'] = $picture;
 
-        			/**
-	        		 * Save Data
+        			$audit_data = [
+	        			'endorsement_id' 	=> $endorsement_record->id,
+	        			'customer_id'  		=> $record->id,
+	        			'audit_customer' 		=> $this->_get_endorsement_audit_data($record, $post_data)
+	        		];
+
+	        		/**
+	        		 * Save Data (Insert if new, Update else)
 	        		 */
-	        		$done = $this->endorsement_model->save_endorsement_audit($endorsement_record->id, 'audit_customer', $audit_data);
+	        		$this->load->model('audit_endorsement_model');
+	        		if($endorsement_record->audit_endorsement_id)
+	        		{
+	        			$done = $this->audit_endorsement_model->update($endorsement_record->audit_endorsement_id, $audit_data, TRUE);
+	        		}
+	        		else
+	        		{
+	        			$done = $this->audit_endorsement_model->insert($audit_data, TRUE);
+	        		}
 
 	        		if(!$done)
 					{

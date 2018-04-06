@@ -600,26 +600,6 @@ class Endorsement_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Save Endorsement Audit Data
-     * @param int $id   Transaction ID
-     * @param string $audit_field Audit Field Name
-     * @param string $audit_data JSON Encoded Data
-     * @return bool
-     */
-    public function save_endorsement_audit($id, $audit_field, $audit_data)
-    {
-        if( !in_array($audit_field, ['audit_policy', 'audit_object', 'audit_customer']))
-        {
-            return FALSE;
-        }
-        return $this->db->set($audit_field, $audit_data)
-                        ->where('id', $id)
-                        ->update($this->table_name);
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
      * Commit Endorsement Audit Information
      *
      * On final activation of the status on endorsement of any kind, we need
@@ -742,10 +722,10 @@ class Endorsement_model extends MY_Model
             'ENDRSMNT.policy_id'    => $policy_id,
             'ENDRSMNT.flag_current' => IQB_FLAG_ON
         ];
-        return $this->db->select('ENDRSMNT.*, P.branch_id, P.portfolio_id')
-                        ->from($this->table_name . ' AS ENDRSMNT')
-                        ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
-                        ->where($where)
+
+        $this->_single_select();
+
+        return $this->db->where($where)
                         ->get()->row();
     }
 
@@ -759,12 +739,32 @@ class Endorsement_model extends MY_Model
      */
     public function get($id)
     {
-        return $this->db->select('ENDRSMNT.*, P.branch_id, P.portfolio_id, C.full_name as transfer_customer_name')
-                        ->from($this->table_name . ' AS ENDRSMNT')
-                        ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
-                        ->join('dt_customers C', 'C.id = ENDRSMNT.transfer_customer_id', 'left')
-                        ->where('ENDRSMNT.id', $id)
+        $this->_single_select();
+
+        return $this->db->where('ENDRSMNT.id', $id)
                         ->get()->row();
+    }
+
+    // --------------------------------------------------------------------
+
+    private function _single_select()
+    {
+        $select =   "ENDRSMNT.*, " .
+
+                    // Branch and Portfolio
+                    "P.branch_id, P.portfolio_id, " .
+
+                    // Transfer Customer Name
+                    "C.full_name as transfer_customer_name, " .
+
+                    // Endorsement Audit
+                    "AE.id AS audit_endorsement_id, AE.object_id, AE.customer_id, AE.audit_policy, AE.audit_object, AE.audit_customer";
+
+        $this->db->select($select)
+                ->from($this->table_name . ' AS ENDRSMNT')
+                ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
+                ->join('audit_endorsements AE', 'AE.endorsement_id = ENDRSMNT.id', 'left')
+                ->join('dt_customers C', 'C.id = ENDRSMNT.transfer_customer_id', 'left');
     }
 
     // --------------------------------------------------------------------

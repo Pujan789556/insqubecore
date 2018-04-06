@@ -7,9 +7,9 @@ class Audit_endorsement_model extends MY_Model
 
     protected $skip_validation = TRUE;
 
-    protected $set_created  = false;
-    protected $set_modified = false;
-    protected $log_user     = false;
+    protected $set_created  = TRUE;
+    protected $set_modified = TRUE;
+    protected $log_user     = TRUE;
 
     protected $protected_attributes = [];
 
@@ -17,7 +17,7 @@ class Audit_endorsement_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'endorsement_id', 'policy_id', 'object_id', 'customer_id', 'data_policy', 'data_object', 'data_customer', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'endorsement_id', 'policy_id', 'object_id', 'customer_id', 'audit_policy', 'audit_object', 'audit_customer', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -38,46 +38,6 @@ class Audit_endorsement_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Save Endorsement Audit Data
-     *
-     * @param int $endorsement_id
-     * @param array $data
-     * @return mixed
-     */
-    public function save($endorsement_id, $data)
-    {
-        /**
-         * Since We are adding audit data separately frome each modules
-         * i.e. Policy, Object, Customer
-         * So, we need to check if already exists for this endorsement.
-         */
-        $id = $this->get_id_by_endorsement($endorsement_id);
-
-        if( $id )
-        {
-            return parent::update($id, $data, TRUE);
-        }
-        else
-        {
-            return parent::insert($data, TRUE);
-        }
-    }
-
-    // ----------------------------------------------------------------
-
-    public function get_id_by_endorsement($endorsement_id)
-    {
-        $row = $this->db->select('id')
-                        ->from($this->table_name)
-                        ->where('endorsement_id', $endorsement_id)
-                        ->get()->row();
-
-        return $row->id ?? NULL;
     }
 
 	// --------------------------------------------------------------------

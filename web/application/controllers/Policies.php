@@ -679,18 +679,28 @@ class Policies extends MY_Controller
 		{
 			$done = FALSE;
 
-			// echo '<pre>'; print_r($v_rules);exit;
-
 			$this->form_validation->set_rules($v_rules);
 			if($this->form_validation->run() === TRUE )
         	{
-        		$data = $this->input->post();
-        		$audit_data 	= $this->_get_endorsement_audit_data($record, $data);
+        		$post_data = $this->input->post();
+        		$audit_data = [
+        			'endorsement_id' 	=> $endorsement_record->id,
+        			'policy_id'  		=> $record->id,
+        			'audit_policy' 		=> $this->_get_endorsement_audit_data($record, $post_data)
+        		];
 
         		/**
-        		 * Save Data
+        		 * Save Data (Insert if new, Update else)
         		 */
-        		$done = $this->endorsement_model->save_endorsement_audit($endorsement_record->id, 'audit_policy', $audit_data);
+        		$this->load->model('audit_endorsement_model');
+        		if($endorsement_record->audit_endorsement_id)
+        		{
+        			$done = $this->audit_endorsement_model->update($endorsement_record->audit_endorsement_id, $audit_data, TRUE);
+        		}
+        		else
+        		{
+        			$done = $this->audit_endorsement_model->insert($audit_data, TRUE);
+        		}
 
 	        	if(!$done)
 				{
