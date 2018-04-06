@@ -17,7 +17,7 @@ class Endorsement_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'gross_amt_sum_insured', 'gross_amt_total_premium', 'gross_amt_pool_premium', 'gross_amt_commissionable', 'gross_amt_agent_commission', 'net_amt_sum_insured', 'net_amt_total_premium', 'net_amt_pool_premium', 'net_amt_commissionable', 'net_amt_agent_commission', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -342,14 +342,14 @@ class Endorsement_model extends MY_Model
      *
      * !!! NOTE: We can only change status of current Transaction Record
      *
-     * @param integer $policy_id_or_txn_record Policy ID or Transaction Record
+     * @param integer $policy_id_or_endorsement_record Policy ID or Transaction Record
      * @param alpha $to_status_flag Status Code
      * @return bool
      */
-    public function update_status($policy_id_or_txn_record, $to_status_flag)
+    public function update_status($policy_id_or_endorsement_record, $to_status_flag)
     {
         // Get the Policy Record
-        $record = is_numeric($policy_id_or_txn_record) ? $this->get_current_endorsement_by_policy( (int)$policy_id_or_txn_record ) : $policy_id_or_txn_record;
+        $record = is_numeric($policy_id_or_endorsement_record) ? $this->get_current_endorsement_by_policy( (int)$policy_id_or_endorsement_record ) : $policy_id_or_endorsement_record;
 
         if(!$record)
         {

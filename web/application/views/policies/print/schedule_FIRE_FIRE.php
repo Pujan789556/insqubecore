@@ -148,7 +148,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                             <tr>
                                 <td>
                                     <?php
-                                    $this->load->view('endorsements/snippets/_schedule_cost_calculation_table_risks_FIRE', ['txn_record' => $txn_record]);
+                                    $this->load->view('endorsements/snippets/_schedule_cost_calculation_table_risks_FIRE', ['endorsement_record' => $endorsement_record]);
                                     ?>
                                 </td>
                             </tr>
@@ -193,7 +193,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                 </tr>
 
                 <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)); ?></td>
+                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>
             </tbody>
         </table>

@@ -179,7 +179,7 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                             <tr>
                                 <td>
                                     <strong class="border-b">बीमाशुल्क</strong><br><br>
-                                    <?php $cost_calculation_table = json_decode($txn_record->cost_calculation_table ?? NULL);
+                                    <?php $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);
                                     if($cost_calculation_table->schedule_cost_table):?>
                                         <table class="table">
                                             <thead>
@@ -200,19 +200,19 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                                     <table class="table no-margin table-bordered table-condensed">
                                         <tr>
                                             <td width="80%" class="text-right"><strong>बीमा शुल्क</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format((float)$endorsement_record->amt_total_premium, 2, '.', '')?></strong></td>
                                         </tr>
                                         <tr>
                                             <td class="text-right"><strong>टिकट दस्तुर</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format( (float)$txn_record->amt_stamp_duty, 2, '.', '')?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2, '.', '')?></strong></td>
                                         </tr>
                                         <tr>
                                             <td class="text-right"><strong>मु. अ. क. (VAT)</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format( (float)$txn_record->amt_vat, 2, '.', '');?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2, '.', '');?></strong></td>
                                         </tr>
                                         <tr>
                                             <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format( (float)( $txn_record->amt_stamp_duty + $txn_record->amt_total_premium + $txn_record->amt_vat ) , 2, '.', '');?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( (float)( $endorsement_record->amt_stamp_duty + $endorsement_record->amt_total_premium + $endorsement_record->amt_vat ) , 2, '.', '');?></strong></td>
                                         </tr>
                                     </table>
                                 </td>
@@ -221,7 +221,7 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)) ?></td>
+                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
                 </tr>
 
                 <tr>

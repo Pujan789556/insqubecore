@@ -113,7 +113,7 @@ $schedule_table_title   = "Contractor's All Risks (Schedule)";
                         To: <strong><?php echo $record->end_date ?></strong> <em>plus <strong><?php echo $object_attributes->maintenance_period ?></strong> months maintenance period.</em>
                     </td>
                     <td>
-                        <?php $cost_calculation_table = json_decode($txn_record->cost_calculation_table ?? NULL);
+                        <?php $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);
                         if($cost_calculation_table):?>
                             <table class="table">
                                 <thead>
@@ -135,20 +135,20 @@ $schedule_table_title   = "Contractor's All Risks (Schedule)";
                         <table class="table table-condensed no-border">
                             <tr>
                                 <td><strong>Premium</strong></td>
-                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_total_premium, 2, '.', '')?></td>
                             </tr>
                             <tr>
                                 <td>Stamp Duty</td>
-                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_stamp_duty, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2, '.', '')?></td>
                             </tr>
                             <tr>
                                 <td>13% VAT</td>
-                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_vat, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2, '.', '')?></td>
                             </tr>
                             <tr><td colspan="2"><hr/></td></tr>
                             <tr>
                                 <td class="border-t"><strong>TOTAL (NRs.)</strong></td>
-                                <td class="text-right border-t"><strong><?php echo number_format( (float)( $txn_record->amt_stamp_duty + $txn_record->amt_total_premium + $txn_record->amt_vat ) , 2, '.', '');?></strong></td>
+                                <td class="text-right border-t"><strong><?php echo number_format( (float)( $endorsement_record->amt_stamp_duty + $endorsement_record->amt_total_premium + $endorsement_record->amt_vat ) , 2, '.', '');?></strong></td>
                             </tr>
                         </table>
                     </td>
@@ -285,7 +285,7 @@ $schedule_table_title   = "Contractor's All Risks (Schedule)";
                     <td colspan="2"><?php echo htmlspecialchars($object_attributes->others->limit_per_event); ?></td>
                 </tr>
                 <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)); ?></td>
+                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>
                 <tr>
                     <td colspan="2">

@@ -158,7 +158,7 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                                      * Policy Premium Card
                                      */
                                     $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($record->portfolio_id);
-                                    $this->load->view($cost_calculation_table_view, ['txn_record' => $txn_record, 'policy_record' => $record, 'title' => $cost_table_title]);
+                                    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record, 'title' => $cost_table_title]);
                                     ?>
                                 </td>
                             </tr>
@@ -167,7 +167,7 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                 </tr>
 
                 <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)) ?></td>
+                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
                 </tr>
             </tbody>
         </table>

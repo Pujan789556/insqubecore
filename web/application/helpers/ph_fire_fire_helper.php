@@ -973,10 +973,10 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 	 *	!!! Important: Fresh/Renewal Only
 	 *
 	 * @param object $policy_record  	Policy Record
-	 * @param object $txn_record 	 	Endorsement Record
+	 * @param object $endorsement_record 	 	Endorsement Record
 	 * @return json
 	 */
-	function __save_premium_FIRE_FIRE($policy_record, $txn_record)
+	function __save_premium_FIRE_FIRE($policy_record, $endorsement_record)
 	{
 		$CI =& get_instance();
 
@@ -1400,7 +1400,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 					$txn_data['cost_calculation_table'] = $cost_calculation_table;
 
-					$done = $CI->endorsement_model->save($txn_record->id, $txn_data);
+					$done = $CI->endorsement_model->save($endorsement_record->id, $txn_data);
 
 					return $done;
 

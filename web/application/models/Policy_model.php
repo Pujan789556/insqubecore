@@ -1108,14 +1108,14 @@ class Policy_model extends MY_Model
                          * Updated Records - Policy and Endorsement
                          */
                         $record     = $this->get($record->id);
-                        $txn_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+                        $endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 
                         /**
                          * Save a Fresh PDF copy
                          */
                         _POLICY__schedule_pdf([
                                 'record'        => $record,
-                                'txn_record'    => $txn_record
+                                'endorsement_record'    => $endorsement_record
                             ], 'save');
                     }
                     break;

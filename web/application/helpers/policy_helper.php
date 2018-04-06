@@ -914,7 +914,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
      *
      * Filename: <policycode>.pdf
      *
-     * @param array $data 		['record' => xxx, 'txn_record' => yyy]
+     * @param array $data 		['record' => xxx, 'endorsement_record' => yyy]
      * @param string $action 	[save|print]
      * @return  void
      */
@@ -931,7 +931,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
 		 * Extract Policy Record and Endorsement Record
 		 */
 		$record 		= $data['record'];
-		$txn_record 	= $data['txn_record'];
+		$endorsement_record 	= $data['endorsement_record'];
 		$schedule_view 	= _POLICY__get_schedule_view($record->portfolio_id);
 		if( $schedule_view )
 		{

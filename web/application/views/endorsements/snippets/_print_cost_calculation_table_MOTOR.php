@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Policy: Details - Policy Premium Overview Card
 */
-$cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn_record->cost_calculation_table) : NULL;
+$cost_calculation_table = $endorsement_record->cost_calculation_table ? json_decode($endorsement_record->cost_calculation_table) : NULL;
 ?>
 
 <table class="table">
@@ -54,19 +54,19 @@ $cost_calculation_table = $txn_record->cost_calculation_table ? json_decode($txn
                     <table class="table" cellpadding="0" cellspacing="0">
                         <tr>
                             <td width="80%" align="right"><strong>जम्मा</strong></td>
-                            <td width="100px" align="right"><strong><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></strong></td>
+                            <td width="100px" align="right"><strong><?php echo number_format((float)$endorsement_record->amt_total_premium, 2, '.', '')?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>टिकट दस्तुर</strong></td>
-                            <td align="right"><strong><?php echo $txn_record->amt_stamp_duty;?></strong></td>
+                            <td align="right"><strong><?php echo $endorsement_record->amt_stamp_duty;?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>मु. अ. क. (VAT)</strong></td>
-                            <td align="right"><strong><?php echo number_format( (float)$txn_record->amt_vat, 2, '.', '');?></strong></td>
+                            <td align="right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2, '.', '');?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                            <td align="right"><strong><?php echo number_format( (float)( $txn_record->amt_stamp_duty + $txn_record->amt_total_premium + $txn_record->amt_vat ) , 2, '.', '');?></strong></td>
+                            <td align="right"><strong><?php echo number_format( (float)( $endorsement_record->amt_stamp_duty + $endorsement_record->amt_total_premium + $endorsement_record->amt_vat ) , 2, '.', '');?></strong></td>
                         </tr>
                     </table>
                 </td>

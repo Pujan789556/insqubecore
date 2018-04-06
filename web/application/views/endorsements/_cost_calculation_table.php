@@ -17,7 +17,7 @@ $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($po
             <span class="text-left">Transaction Details</span>
             <span class="pull-right">
                 <?php if( _POLICY_is_editable($policy_record->status, FALSE) ):
-                    $update_premium_url = site_url('endorsements/premium/' . $txn_record->id);
+                    $update_premium_url = site_url('endorsements/premium/' . $endorsement_record->id);
                 ?>
                         <a href="#"
                             class="action trg-dialog-edit btn btn-primary btn-sm"
@@ -39,7 +39,7 @@ $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($po
     /**
      * Load Partial Overview Card
      */
-    $this->load->view($cost_calculation_table_view, ['txn_record' => $txn_record, 'policy_record' => $policy_record]);
+    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $policy_record]);
     ?>
 
     <div class="box-footer">
@@ -47,7 +47,7 @@ $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($po
         <table class="table table-responsive table-bordered">
             <tbody>
                 <tr>
-                    <td><?php echo htmlspecialchars(nl2br($txn_record->txn_details)); ?></td>
+                    <td><?php echo htmlspecialchars(nl2br($endorsement_record->txn_details)); ?></td>
                 </tr>
             </tbody>
         </table>

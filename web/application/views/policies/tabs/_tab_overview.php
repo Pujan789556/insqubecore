@@ -37,7 +37,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			/**
 			 * Render Cost Calculation Table
 			 */
-			$this->load->view('endorsements/_cost_calculation_table', ['txn_record' => $txn_record, 'policy_record' => $record]);
+			$this->load->view('endorsements/_cost_calculation_table', ['endorsement_record' => $endorsement_record, 'policy_record' => $record]);
 			?>
 			<h3 class="text-red">@TODO: Current RI Distribution Table</h3>
 		</div>

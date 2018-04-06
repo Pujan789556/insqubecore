@@ -524,7 +524,7 @@ class Policies extends MY_Controller
 						 */
 						try {
 
-							$txn_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+							$endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 
 						} catch (Exception $e) {
 
@@ -534,7 +534,7 @@ class Policies extends MY_Controller
 							], 404);
 						}
 
-						$view_data['txn_record'] = $txn_record;
+						$view_data['endorsement_record'] = $endorsement_record;
 					}
 
 					$html = $this->load->view($view, $view_data, TRUE);
@@ -590,8 +590,8 @@ class Policies extends MY_Controller
 			],404);
 		}
 
-		$txn_record = $this->endorsement_model->get_current_endorsement_by_policy($record->id);
-		if(!$txn_record)
+		$endorsement_record = $this->endorsement_model->get_current_endorsement_by_policy($record->id);
+		if(!$endorsement_record)
 		{
 			return $this->template->json([
 				'status' => 'error',
@@ -608,13 +608,13 @@ class Policies extends MY_Controller
 		/**
 		 * Editable Permission? We should check permission of Txn not of Policy
 		 */
-		_ENDORSEMENT_is_editable($txn_record->status, $txn_record->flag_current);
+		_ENDORSEMENT_is_editable($endorsement_record->status, $endorsement_record->flag_current);
 
 
 		/**
 		 * Endorsement Type Allows Policy to Edit?
 		 */
-		if( !_ENDORSEMENT_is_policy_editable_by_type($txn_record->txn_type) )
+		if( !_ENDORSEMENT_is_policy_editable_by_type($endorsement_record->txn_type) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
@@ -630,7 +630,7 @@ class Policies extends MY_Controller
          * !!!NOTE: We need to pass the original record for getting old data. That's why clone.
          */
 		$edit_record = clone $record; // We need to pass the original record for getting old data.
-        $audit_record = $txn_record->audit_policy ? json_decode($txn_record->audit_policy) : NULL;
+        $audit_record = $endorsement_record->audit_policy ? json_decode($endorsement_record->audit_policy) : NULL;
         if($audit_record)
         {
             // Get the New data
@@ -661,7 +661,7 @@ class Policies extends MY_Controller
 		];
 
 		// Form Submitted? Save the data
-		$this->_save_endorsement($form_data, $v_rules, $record, $txn_record);
+		$this->_save_endorsement($form_data, $v_rules, $record, $endorsement_record);
 	}
 
 	// --------------------------------------------------------------------
@@ -670,7 +670,7 @@ class Policies extends MY_Controller
 	 * Save a Record from Endorsement
 	 *
 	 */
-	private function _save_endorsement($form_data, $v_rules, $record, $txn_record)
+	private function _save_endorsement($form_data, $v_rules, $record, $endorsement_record)
 	{
 		/**
 		 * Form Submitted?
@@ -690,7 +690,7 @@ class Policies extends MY_Controller
         		/**
         		 * Save Data
         		 */
-        		$done = $this->endorsement_model->save_endorsement_audit($txn_record->id, 'audit_policy', $audit_data);
+        		$done = $this->endorsement_model->save_endorsement_audit($endorsement_record->id, 'audit_policy', $audit_data);
 
 	        	if(!$done)
 				{
@@ -1285,7 +1285,7 @@ class Policies extends MY_Controller
 		 */
 		try {
 
-			$txn_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+			$endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 
 		} catch (Exception $e) {
 
@@ -1307,7 +1307,7 @@ class Policies extends MY_Controller
 
 		$data = [
 			'record' 		=> $record,
-			'txn_record' 	=> $txn_record
+			'endorsement_record' 	=> $endorsement_record
 		];
 
 		$page_header = 'Policy Details - <span id="page-title-policy-code">' . $record->code . '</span>';
@@ -1358,7 +1358,7 @@ class Policies extends MY_Controller
 		 */
 		try {
 
-			$txn_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+			$endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 
 		} catch (Exception $e) {
 
@@ -1370,7 +1370,7 @@ class Policies extends MY_Controller
 
 		$data = [
 			'record' 		=> $record,
-			'txn_record' 	=> $txn_record
+			'endorsement_record' 	=> $endorsement_record
 		];
 
 		/**
@@ -1462,13 +1462,13 @@ class Policies extends MY_Controller
 				 */
 				try {
 
-					$txn_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+					$endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
 				} catch (Exception $e) {
 
 					return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage() ], 404);
 				}
 
-				$html = $this->load->view($view, ['record' => $record, 'txn_record' => $txn_record], TRUE);
+				$html = $this->load->view($view, ['record' => $record, 'endorsement_record' => $endorsement_record], TRUE);
 				$ajax_data = [
 					'message' 	=> 'Successfully Updated!',
 					'status'  	=> 'success',
@@ -1613,7 +1613,7 @@ class Policies extends MY_Controller
 			/**
 			 * Get the Current Txn Record
 			 */
-			$txn_record = $__flag_passed === TRUE ? $this->endorsement_model->get_fresh_renewal_by_policy($record->id, IQB_POLICY_TXN_TYPE_FRESH) : NULL;
+			$endorsement_record = $__flag_passed === TRUE ? $this->endorsement_model->get_fresh_renewal_by_policy($record->id, IQB_POLICY_TXN_TYPE_FRESH) : NULL;
 
 			/**
 			 * Premium Must be Updated Before Verifying
@@ -1624,7 +1624,7 @@ class Policies extends MY_Controller
 				( $record->status === IQB_POLICY_STATUS_DRAFT && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
 			)
 			{
-				if( !$txn_record->amt_total_premium )
+				if( !$endorsement_record->amt_total_premium )
 				{
 					$__flag_passed 		= FALSE;
 					$failed_message 	= 'Please Update Policy Premium First!';
@@ -1640,7 +1640,7 @@ class Policies extends MY_Controller
 					&&
 				( $record->status === IQB_POLICY_STATUS_VERIFIED  && $to_updown_status === IQB_POLICY_STATUS_DRAFT )
 					&&
-				in_array($txn_record->status, [IQB_POLICY_TXN_STATUS_RI_APPROVED, IQB_POLICY_TXN_STATUS_VOUCHERED] )
+				in_array($endorsement_record->status, [IQB_POLICY_TXN_STATUS_RI_APPROVED, IQB_POLICY_TXN_STATUS_VOUCHERED] )
 			)
 			{
 				$__flag_passed 		= FALSE;

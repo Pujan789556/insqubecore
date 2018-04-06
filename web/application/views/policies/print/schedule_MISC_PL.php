@@ -111,20 +111,20 @@ $schedule_table_title   = "Public Liability (Schedule)";
                         <table class="table table-condensed no-border">
                             <tr>
                                 <td><strong>Premium</strong></td>
-                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_total_premium, 2, '.', '')?></td>
                             </tr>
                             <tr>
                                 <td>Stamp Duty</td>
-                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_stamp_duty, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2, '.', '')?></td>
                             </tr>
                             <tr>
                                 <td>13% VAT</td>
-                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_vat, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2, '.', '')?></td>
                             </tr>
                             <tr><td colspan="2"><hr/></td></tr>
                             <tr>
                                 <td class="border-t"><strong>TOTAL (NRs.)</strong></td>
-                                <td class="text-right border-t"><strong><?php echo number_format( (float)( $txn_record->amt_stamp_duty + $txn_record->amt_total_premium + $txn_record->amt_vat ) , 2, '.', '');?></strong></td>
+                                <td class="text-right border-t"><strong><?php echo number_format( (float)( $endorsement_record->amt_stamp_duty + $endorsement_record->amt_total_premium + $endorsement_record->amt_vat ) , 2, '.', '');?></strong></td>
                             </tr>
                         </table>
                     </td>
@@ -188,7 +188,7 @@ $schedule_table_title   = "Public Liability (Schedule)";
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)); ?></td>
+                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>
             </tbody>
         </table>

@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     </div>
     <div class="box-body">
         <?php
-        $installments = _POLICY_INSTALLMENT_list_by_transaction($txn_record->id);
+        $installments = _POLICY_INSTALLMENT_list_by_transaction($endorsement_record->id);
         $item_count          = count( $installments ?? [] );
         ?>
         <table class="table table-bordered table-condensed no-margin table-installment">

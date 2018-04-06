@@ -14,13 +14,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         /**
          * Default Stamp Duty if NULL
          */
-        if($txn_record->amt_stamp_duty === NULL )
+        if($endorsement_record->amt_stamp_duty === NULL )
         {
             foreach($form_elements as $elem)
             {
                 if($elem['field'] === 'amt_stamp_duty')
                 {
-                    $txn_record->amt_stamp_duty = $elem['_default'];
+                    $endorsement_record->amt_stamp_duty = $elem['_default'];
                 }
             }
         }
@@ -31,7 +31,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         $this->load->view('templates/_common/_form_components_horz', [
             'form_elements'     => $form_elements,
-            'form_record'       => $txn_record,
+            'form_record'       => $endorsement_record,
             'grid_label'        => 'col-sm-4',
             'grid_form_control' => 'col-sm-8'
         ]);

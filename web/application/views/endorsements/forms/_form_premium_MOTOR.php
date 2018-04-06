@@ -102,7 +102,7 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
              */
             if( $policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE )
             {
-                $premium_computation_table = $txn_record->premium_computation_table ? json_decode($txn_record->premium_computation_table) : NULL;
+                $premium_computation_table = $endorsement_record->premium_computation_table ? json_decode($endorsement_record->premium_computation_table) : NULL;
 
                 /**
                  * Load Form Components
@@ -121,7 +121,7 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
      * Load TXN Common Elements
      */
     $this->load->view('endorsements/forms/_form_txn_common', [
-        'txn_record'        => $txn_record,
+        'endorsement_record'        => $endorsement_record,
         'form_elements'     => $form_elements['basic']
     ]);
 

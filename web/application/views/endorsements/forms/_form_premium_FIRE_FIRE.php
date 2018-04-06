@@ -4,8 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Premium Form : FIRE - FIRE
  */
 $object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-$premium_computation_table      = json_decode($txn_record->premium_computation_table ?? NULL);
-$premium_computation_table_arr  = json_decode($txn_record->premium_computation_table ?? NULL, TRUE);
+$premium_computation_table      = json_decode($endorsement_record->premium_computation_table ?? NULL);
+$premium_computation_table_arr  = json_decode($endorsement_record->premium_computation_table ?? NULL, TRUE);
 ?>
 <?php echo form_open( $this->uri->uri_string(),
         [
@@ -302,7 +302,7 @@ $premium_computation_table_arr  = json_decode($txn_record->premium_computation_t
      * Load TXN Common Elements
      */
     $this->load->view('endorsements/forms/_form_txn_common', [
-        'txn_record'        => $txn_record,
+        'endorsement_record'        => $endorsement_record,
         'form_elements'     => $form_elements['basic']
     ]);
 

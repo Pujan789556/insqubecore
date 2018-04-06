@@ -440,10 +440,10 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 	 *	!!! Important: Fresh/Renewal Only
 	 *
 	 * @param object $policy_record  	Policy Record
-	 * @param object $txn_record 	 	Endorsement Record
+	 * @param object $endorsement_record 	 	Endorsement Record
 	 * @return json
 	 */
-	function __save_premium_MISC_TMI($policy_record, $txn_record)
+	function __save_premium_MISC_TMI($policy_record, $endorsement_record)
 	{
 		$CI =& get_instance();
 
@@ -570,7 +570,7 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 					 * !!! No cost calculation table
 					 */
 					$txn_data['cost_calculation_table'] = NULL;
-					return $CI->endorsement_model->save($txn_record->id, $txn_data);
+					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
 
 
 					/**

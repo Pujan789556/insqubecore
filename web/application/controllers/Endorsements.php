@@ -698,10 +698,10 @@ class Endorsements extends MY_Controller
 		 * !!! Important: Fresh/Renewal Only
 		 *
 		 * @param object $policy_record 	Policy Record
-		 * @param object $txn_record 		Endorsement Record
+		 * @param object $endorsement_record 		Endorsement Record
 		 * @return mixed
 		 */
-		private function __save_premium($policy_record, $txn_record)
+		private function __save_premium($policy_record, $endorsement_record)
 		{
 			if( $this->input->post() )
 			{
@@ -716,7 +716,7 @@ class Endorsements extends MY_Controller
 		         */
 		        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
 		        {
-		            $done = __save_premium_AGR_CROP($policy_record, $txn_record);
+		            $done = __save_premium_AGR_CROP($policy_record, $endorsement_record);
 		        }
 
 		        /**
@@ -725,7 +725,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
 		        {
-		            $done = __save_premium_AGR_CATTLE($policy_record, $txn_record);
+		            $done = __save_premium_AGR_CATTLE($policy_record, $endorsement_record);
 		        }
 
 		        /**
@@ -734,7 +734,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
 		        {
-		            $done = __save_premium_AGR_POULTRY($policy_record, $txn_record);
+		            $done = __save_premium_AGR_POULTRY($policy_record, $endorsement_record);
 		        }
 
 		        /**
@@ -743,7 +743,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
 		        {
-		            $done = __save_premium_AGR_FISH($policy_record, $txn_record);
+		            $done = __save_premium_AGR_FISH($policy_record, $endorsement_record);
 		        }
 
 		        /**
@@ -752,7 +752,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
 		        {
-		            $done = __save_premium_AGR_BEE($policy_record, $txn_record);
+		            $done = __save_premium_AGR_BEE($policy_record, $endorsement_record);
 		        }
 
 				/**
@@ -761,7 +761,7 @@ class Endorsements extends MY_Controller
 				 */
 				else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 				{
-					$done = __save_premium_MOTOR( $policy_record, $txn_record );
+					$done = __save_premium_MOTOR( $policy_record, $endorsement_record );
 				}
 
 				/**
@@ -770,7 +770,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
 		        {
-		            $done = __save_premium_FIRE_FIRE( $policy_record, $txn_record );
+		            $done = __save_premium_FIRE_FIRE( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -779,7 +779,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
 		        {
-		            $done = __save_premium_FIRE_HHP( $policy_record, $txn_record );
+		            $done = __save_premium_FIRE_HHP( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -788,7 +788,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
 		        {
-		            $done = __save_premium_FIRE_LOP( $policy_record, $txn_record );
+		            $done = __save_premium_FIRE_LOP( $policy_record, $endorsement_record );
 		        }
 
 				/**
@@ -797,7 +797,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
 		        {
-		            $done = __save_premium_MISC_BRG( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_BRG( $policy_record, $endorsement_record );
 		        }
 
 				/**
@@ -806,7 +806,7 @@ class Endorsements extends MY_Controller
 				 */
 				else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 				{
-					$done = __save_premium_MARINE( $policy_record, $txn_record );
+					$done = __save_premium_MARINE( $policy_record, $endorsement_record );
 				}
 
 				/**
@@ -815,7 +815,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
 		        {
-		            $done = __save_premium_ENG_BL( $policy_record, $txn_record );
+		            $done = __save_premium_ENG_BL( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -824,7 +824,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
 		        {
-		            $done = __save_premium_ENG_CAR( $policy_record, $txn_record );
+		            $done = __save_premium_ENG_CAR( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -833,7 +833,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
 		        {
-		            $done = __save_premium_ENG_CPM( $policy_record, $txn_record );
+		            $done = __save_premium_ENG_CPM( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -842,7 +842,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
 		        {
-		            $done = __save_premium_ENG_EEI( $policy_record, $txn_record );
+		            $done = __save_premium_ENG_EEI( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -851,7 +851,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
 		        {
-					$done = __save_premium_ENG_EAR( $policy_record, $txn_record );
+					$done = __save_premium_ENG_EAR( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -860,7 +860,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
 		        {
-		            $done = __save_premium_ENG_MB( $policy_record, $txn_record );
+		            $done = __save_premium_ENG_MB( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -869,7 +869,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
 		        {
-		            $done = __save_premium_MISC_BB( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_BB( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -878,7 +878,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
 		        {
-		            $done = __save_premium_MISC_GPA( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_GPA( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -887,7 +887,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
 		        {
-		            $done = __save_premium_MISC_PA( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_PA( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -896,7 +896,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
 		        {
-		            $done = __save_premium_MISC_PL( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_PL( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -905,7 +905,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
 		        {
-		            $done = __save_premium_MISC_CT( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_CT( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -914,7 +914,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
 		        {
-		            $done = __save_premium_MISC_CS( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_CS( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -923,7 +923,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
 		        {
-		            $done = __save_premium_MISC_CC( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_CC( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -932,7 +932,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
 		        {
-		            $done = __save_premium_MISC_EPA( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_EPA( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -941,7 +941,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
 		        {
-		            $done = __save_premium_MISC_TMI( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_TMI( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -950,7 +950,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
 		        {
-		            $done = __save_premium_MISC_FG( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_FG( $policy_record, $endorsement_record );
 		        }
 
 		        /**
@@ -959,7 +959,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
 		        {
-		            $done = __save_premium_MISC_HI( $policy_record, $txn_record );
+		            $done = __save_premium_MISC_HI( $policy_record, $endorsement_record );
 		        }
 
 				else
@@ -978,10 +978,10 @@ class Endorsements extends MY_Controller
 					 * Build and Update Installments
 					 */
 					// Get Updated TXN Record
-					$txn_record 		= $this->endorsement_model->get($txn_record->id);
+					$endorsement_record 		= $this->endorsement_model->get($endorsement_record->id);
 					try {
 
-						$this->_save_installments($policy_record, $txn_record);
+						$this->_save_installments($policy_record, $endorsement_record);
 
 					} catch (Exception $e) {
 						return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
@@ -998,7 +998,7 @@ class Endorsements extends MY_Controller
 							 */
 							'box' 		=> '#_premium-card',
 							'method' 	=> 'replaceWith',
-							'html'		=> $this->load->view('endorsements/_cost_calculation_table', ['txn_record' => $txn_record, 'policy_record' => $policy_record], TRUE)
+							'html'		=> $this->load->view('endorsements/_cost_calculation_table', ['endorsement_record' => $endorsement_record, 'policy_record' => $policy_record], TRUE)
 						]
 					];
 
@@ -1021,10 +1021,10 @@ class Endorsements extends MY_Controller
 		 * 	Master Setup >> Portfolio >> Portfolio Settings
 		 *
 		 * @param object $policy_record
-		 * @param object $txn_record
+		 * @param object $endorsement_record
 		 * @return mixed
 		 */
-		private function _save_installments($policy_record, $txn_record)
+		private function _save_installments($policy_record, $endorsement_record)
 		{
 			$this->load->model('policy_installment_model');
 
@@ -1057,7 +1057,7 @@ class Endorsements extends MY_Controller
 				];
 			}
 
-			return $this->policy_installment_model->build($txn_record, $installment_data);
+			return $this->policy_installment_model->build($endorsement_record, $installment_data);
 		}
 
 		// --------------------------------------------------------------------
@@ -1134,11 +1134,11 @@ class Endorsements extends MY_Controller
 	 * 	2. Transactional Endorsement
 	 *
 	 * @param object 	$policy_record 	Policy Record
-	 * @param object 	$txn_record Endorsement Record
+	 * @param object 	$endorsement_record Endorsement Record
 	 * @param array 	$json_extra 	Extra Data to Pass as JSON
 	 * @return type
 	 */
-	private function __render_premium_form($policy_record, $txn_record, $json_extra=[])
+	private function __render_premium_form($policy_record, $endorsement_record, $json_extra=[])
 	{
 		/**
 		 *  Let's Load The Endorsement Form For this Record
@@ -1182,7 +1182,7 @@ class Endorsements extends MY_Controller
         if($pfs_record->flag_installment === IQB_FLAG_YES )
 		{
 	        $common_components = $this->load->view('endorsements/forms/_form_txn_installments', [
-	            'txn_record'        => $txn_record,
+	            'endorsement_record'        => $endorsement_record,
 	            'form_elements'     => $premium_goodies['validation_rules']['installments']
 	        ], TRUE);
 	    }
@@ -1192,7 +1192,7 @@ class Endorsements extends MY_Controller
 								                'form_elements'         => $premium_goodies['validation_rules'],
 								                'portfolio_risks' 		=> $portfolio_risks,
 								                'policy_record'         => $policy_record,
-								                'txn_record'        	=> $txn_record,
+								                'endorsement_record'        	=> $endorsement_record,
 								                'policy_object' 		=> $policy_object,
 								                'tariff_record' 		=> $premium_goodies['tariff_record'],
 								                'common_components' 	=> $common_components
@@ -1603,14 +1603,14 @@ class Endorsements extends MY_Controller
 	public function status($id, $to_status_code, $ref='tab-endorsements')
 	{
 		$id = (int)$id;
-		$txn_record = $this->endorsement_model->get($id);
-		if(!$txn_record)
+		$endorsement_record = $this->endorsement_model->get($id);
+		if(!$endorsement_record)
 		{
 			$this->template->render_404();
 		}
 
 		// is This Current Transaction?
-		if( $txn_record->flag_current != IQB_FLAG_ON  )
+		if( $endorsement_record->flag_current != IQB_FLAG_ON  )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
@@ -1623,13 +1623,13 @@ class Endorsements extends MY_Controller
 		 * -----------------
 		 * You need to have permission to modify the given status.
 		 */
-		$this->__check_status_permission($to_status_code, $txn_record);
+		$this->__check_status_permission($to_status_code, $endorsement_record);
 
 
 		/**
 		 * Meet the Status Pre-Requisite ?
 		 */
-		$this->__status_qualifies($to_status_code, $txn_record);
+		$this->__status_qualifies($to_status_code, $endorsement_record);
 
 
 		/**
@@ -1637,13 +1637,13 @@ class Endorsements extends MY_Controller
 		 */
 		try {
 
-			if( $this->endorsement_model->update_status($txn_record, $to_status_code) )
+			if( $this->endorsement_model->update_status($endorsement_record, $to_status_code) )
 			{
 				/**
 				 * Updated Transaction & Policy Record
 				 */
-				$txn_record = $this->endorsement_model->get($txn_record->id);
-				$policy_record = $this->policy_model->get($txn_record->policy_id);
+				$endorsement_record = $this->endorsement_model->get($endorsement_record->id);
+				$policy_record = $this->policy_model->get($endorsement_record->policy_id);
 
 
 				/**
@@ -1656,9 +1656,9 @@ class Endorsements extends MY_Controller
 				 * 	- customer (from audit_customer field if any data)
 				 * 	- SEND SMS on General Transaction Activation
 				 */
-				if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_EG && $to_status_code ==IQB_POLICY_TXN_STATUS_ACTIVE )
+				if( $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_EG && $to_status_code ==IQB_POLICY_TXN_STATUS_ACTIVE )
 				{
-					$this->_sms_activation($txn_record, $policy_record);
+					$this->_sms_activation($endorsement_record, $policy_record);
 				}
 
 
@@ -1680,7 +1680,7 @@ class Endorsements extends MY_Controller
 					 * Update View
 					 */
 					$view = 'policies/tabs/_tab_overview';
-					$html = $this->load->view($view, ['record' => $policy_record, 'txn_record' => $txn_record], TRUE);
+					$html = $this->load->view($view, ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
 
 					$ajax_data = [
 						'message' 	=> 'Successfully Updated!',
@@ -1703,13 +1703,13 @@ class Endorsements extends MY_Controller
 				else
 				{
 					// Replace the Row
-					$html = $this->load->view('endorsements/_single_row', ['record' => $txn_record, 'policy_record' => $policy_record], TRUE);
+					$html = $this->load->view('endorsements/_single_row', ['record' => $endorsement_record, 'policy_record' => $policy_record], TRUE);
 					return $this->template->json([
 						'message' 	=> 'Successfully Updated!',
 						'status'  	=> 'success',
 						'multipleUpdate' => [
 							[
-								'box' 		=> '#_data-row-endorsements-' . $txn_record->id,
+								'box' 		=> '#_data-row-endorsements-' . $endorsement_record->id,
 								'method' 	=> 'replaceWith',
 								'html' 		=> $html
 							]
@@ -1824,13 +1824,13 @@ class Endorsements extends MY_Controller
 		 * follow the logic accordingly.
 		 *
 		 * @param alpha $to_updown_status Status Code to UP/DOWN
-		 * @param object $txn_record Endorsement Record
+		 * @param object $endorsement_record Endorsement Record
 		 * @param bool $terminate_on_fail Terminate right here on fails
 		 * @return mixed
 		 */
-		private function __status_qualifies($to_updown_status, $txn_record, $terminate_on_fail = TRUE)
+		private function __status_qualifies($to_updown_status, $endorsement_record, $terminate_on_fail = TRUE)
 		{
-			$__flag_passed = $this->endorsement_model->status_qualifies($txn_record->status, $to_updown_status);
+			$__flag_passed = $this->endorsement_model->status_qualifies($endorsement_record->status, $to_updown_status);
 
 			if( $__flag_passed )
 			{
@@ -1839,7 +1839,7 @@ class Endorsements extends MY_Controller
 				 * 	Draft/Verified are automatically triggered from
 				 * 	Policy Status Update Method
 				 */
-				if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_FRESH  || $txn_record->txn_type == IQB_POLICY_TXN_TYPE_RENEWAL )
+				if( $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_FRESH  || $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_RENEWAL )
 				{
 					$__flag_passed = !in_array($to_updown_status, [
 						IQB_POLICY_TXN_STATUS_DRAFT,
@@ -1866,15 +1866,15 @@ class Endorsements extends MY_Controller
 			 *
 			 * !!! If RI-Approval Constraint Required, It should Come from That Status else from Verified
 			 */
-			if( $__flag_passed && $to_updown_status === IQB_POLICY_TXN_STATUS_ACTIVE && $txn_record->txn_type == IQB_POLICY_TXN_TYPE_EG )
+			if( $__flag_passed && $to_updown_status === IQB_POLICY_TXN_STATUS_ACTIVE && $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_EG )
 			{
-				if( (int)$txn_record->flag_ri_approval === IQB_FLAG_ON )
+				if( (int)$endorsement_record->flag_ri_approval === IQB_FLAG_ON )
 				{
-					$__flag_passed = $txn_record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED;
+					$__flag_passed = $endorsement_record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED;
 				}
 				else
 				{
-					$__flag_passed = $txn_record->status === IQB_POLICY_TXN_STATUS_VERIFIED;
+					$__flag_passed = $endorsement_record->status === IQB_POLICY_TXN_STATUS_VERIFIED;
 				}
 			}
 
@@ -1905,11 +1905,11 @@ class Endorsements extends MY_Controller
          * Case 1: Fresh/Renewal/Transactional - After making payment, it gets activated automatically
          * Case 2: General Endorsement - After activating
          *
-         * @param object $txn_record
+         * @param object $endorsement_record
          * @param object $policy_record
          * @return bool
          */
-    	private function _sms_activation($txn_record, $policy_record, $invoice_record = NULL)
+    	private function _sms_activation($endorsement_record, $policy_record, $invoice_record = NULL)
     	{
     		$customer_name 		= $policy_record->customer_name;
     		$customer_contact 	= $policy_record->customer_contact ? json_decode($policy_record->customer_contact) : NULL;
@@ -1922,14 +1922,14 @@ class Endorsements extends MY_Controller
 
     		$message = "Dear {$customer_name}," . PHP_EOL;
 
-    		if( in_array($txn_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+    		if( in_array($endorsement_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
         	{
         		$message .= "Your Policy has been issued." . PHP_EOL .
         					"Policy No: " . $policy_record->code . PHP_EOL .
         					"Premium Paid(Rs): " . $invoice_record->amount . PHP_EOL .
         					"Expires on : " . $policy_record->end_date . PHP_EOL;
         	}
-        	else if( $txn_record->txn_type == IQB_POLICY_TXN_TYPE_ET )
+        	else if( $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_ET )
         	{
         		$message .= "Your Policy Endorsement has been issued." . PHP_EOL .
         					"Policy No: " . $policy_record->code . PHP_EOL .

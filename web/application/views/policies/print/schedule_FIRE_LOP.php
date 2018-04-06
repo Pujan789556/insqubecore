@@ -116,7 +116,7 @@ $schedule_table_title   = 'LOSS OF PROFIT(FIRE) SCHEDULE';
                     </td>
                     <td>
 
-                        <?php $cost_calculation_table = json_decode($txn_record->cost_calculation_table ?? NULL); ?>
+                        <?php $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL); ?>
                         <table class="table">
                             <thead>
                                 <tr>
@@ -137,26 +137,26 @@ $schedule_table_title   = 'LOSS OF PROFIT(FIRE) SCHEDULE';
                         <table class="table table-condensed no-border">
                             <tr>
                                 <td align="right"><strong>Premium</strong></td>
-                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_total_premium, 2, '.', '')?></td>
                             </tr>
                             <tr>
                                 <td align="right"><strong>Stamp Duty</strong></td>
-                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_stamp_duty, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2, '.', '')?></td>
                             </tr>
                             <tr>
                                 <td align="right"><strong>VAT</strong></td>
-                                <td class="text-right"><?php echo number_format((float)$txn_record->amt_vat, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2, '.', '')?></td>
                             </tr>
                             <tr><td colspan="2"><hr/></td></tr>
                             <tr>
                                 <td class="border-t" align="right"><strong>TOTAL (NRs.)</strong></td>
-                                <td class="text-right border-t"><strong><?php echo number_format( (float)( $txn_record->amt_stamp_duty + $txn_record->amt_total_premium + $txn_record->amt_vat ) , 2, '.', '');?></strong></td>
+                                <td class="text-right border-t"><strong><?php echo number_format( (float)( $endorsement_record->amt_stamp_duty + $endorsement_record->amt_total_premium + $endorsement_record->amt_vat ) , 2, '.', '');?></strong></td>
                             </tr>
                         </table>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)); ?></td>
+                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>
             </tbody>
         </table>

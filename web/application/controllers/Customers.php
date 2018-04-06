@@ -568,8 +568,8 @@ class Customers extends MY_Controller
 
 		 // The above query validates the flag_current, so we get directly txn data here
 		$this->load->model('endorsement_model');
-		$txn_record = $this->endorsement_model->get($txn_id);
-		if(!$txn_record)
+		$endorsement_record = $this->endorsement_model->get($txn_id);
+		if(!$endorsement_record)
 		{
 			return $this->template->json([
 				'status' => 'error',
@@ -586,13 +586,13 @@ class Customers extends MY_Controller
 		/**
 		 * Editable Permission? We should check permission of Txn not of Policy
 		 */
-		_ENDORSEMENT_is_editable($txn_record->status, $txn_record->flag_current);
+		_ENDORSEMENT_is_editable($endorsement_record->status, $endorsement_record->flag_current);
 
 
 		/**
 		 * Endorsement Type Allows Customer to Edit?
 		 */
-		if( !_ENDORSEMENT_is_customer_editable_by_type($txn_record->txn_type) )
+		if( !_ENDORSEMENT_is_customer_editable_by_type($endorsement_record->txn_type) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
@@ -607,7 +607,7 @@ class Customers extends MY_Controller
          * !!!NOTE: We need to pass the original record for getting old data. That's why clone.
          */
 		$edit_record = clone $record;
-        $audit_record = $txn_record->audit_customer ? json_decode($txn_record->audit_customer) : NULL;
+        $audit_record = $endorsement_record->audit_customer ? json_decode($endorsement_record->audit_customer) : NULL;
         if($audit_record)
         {
             // Get the New data
@@ -630,7 +630,7 @@ class Customers extends MY_Controller
 		];
 
 		// Form Submitted? Save the data
-		$this->_save_endorsement($form_data, $v_rules, $record, $txn_record);
+		$this->_save_endorsement($form_data, $v_rules, $record, $endorsement_record);
 	}
 
 	// --------------------------------------------------------------------
@@ -639,7 +639,7 @@ class Customers extends MY_Controller
 	 * Save a Record from Endorsement
 	 *
 	 */
-	private function _save_endorsement($form_data, $v_rules, $record, $txn_record)
+	private function _save_endorsement($form_data, $v_rules, $record, $endorsement_record)
 	{
 		/**
 		 * Form Submitted?
@@ -675,7 +675,7 @@ class Customers extends MY_Controller
         			/**
 	        		 * Save Data
 	        		 */
-	        		$done = $this->endorsement_model->save_endorsement_audit($txn_record->id, 'audit_customer', $audit_data);
+	        		$done = $this->endorsement_model->save_endorsement_audit($endorsement_record->id, 'audit_customer', $audit_data);
 
 	        		if(!$done)
 					{

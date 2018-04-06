@@ -145,7 +145,7 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                             <tr>
                                 <td>
                                     <?php
-                                    $this->load->view('endorsements/snippets/_schedule_cost_calculation_table_risks_MISC_CC', ['txn_record' => $txn_record]);
+                                    $this->load->view('endorsements/snippets/_schedule_cost_calculation_table_risks_MISC_CC', ['endorsement_record' => $endorsement_record]);
                                     ?>
                                 </td>
                             </tr>
@@ -154,7 +154,7 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                 </tr>
 
                 <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($txn_record->txn_details)) ?></td>
+                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
                 </tr>
             </tbody>
         </table>

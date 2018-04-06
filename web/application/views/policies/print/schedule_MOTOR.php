@@ -190,20 +190,20 @@ switch ($record->portfolio_id)
                                     <table class="table table-condensed no-border">
                                         <tr>
                                             <td><strong>बीमाशुल्क</strong></td>
-                                            <td class="text-right"><?php echo number_format((float)$txn_record->amt_total_premium, 2, '.', '')?></td>
+                                            <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_total_premium, 2, '.', '')?></td>
                                         </tr>
                                         <tr>
                                             <td>टिकट</td>
-                                            <td class="text-right"><?php echo number_format((float)$txn_record->amt_stamp_duty, 2, '.', '')?></td>
+                                            <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2, '.', '')?></td>
                                         </tr>
                                         <tr>
                                             <td>मु. अ. क. (VAT)</td>
-                                            <td class="text-right"><?php echo number_format((float)$txn_record->amt_vat, 2, '.', '')?></td>
+                                            <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2, '.', '')?></td>
                                         </tr>
                                         <tr><td colspan="2" style="height:2px;"><hr style="margin:0" /></td></tr>
                                         <tr>
                                             <td class="border-t"><strong>मु. अ. क.(VAT) सहित जम्मा शुल्क (रु)</strong></td>
-                                            <td class="text-right border-t"><strong><?php echo number_format( (float)( $txn_record->amt_stamp_duty + $txn_record->amt_total_premium + $txn_record->amt_vat ) , 2, '.', '');?></strong></td>
+                                            <td class="text-right border-t"><strong><?php echo number_format( (float)( $endorsement_record->amt_stamp_duty + $endorsement_record->amt_total_premium + $endorsement_record->amt_vat ) , 2, '.', '');?></strong></td>
                                         </tr>
                                     </table>
                                 </td>
@@ -309,7 +309,7 @@ switch ($record->portfolio_id)
          * Policy Premium Card
          */
         $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($record->portfolio_id, 'print');
-        $this->load->view($cost_calculation_table_view, ['txn_record' => $txn_record, 'policy_record' => $record, 'title' => $cost_table_title]);
+        $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record, 'title' => $cost_table_title]);
         ?>
     </body>
 </html>

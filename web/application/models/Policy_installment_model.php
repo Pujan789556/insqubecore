@@ -191,7 +191,7 @@ class Policy_installment_model extends MY_Model
      *
      * !!! NOTE: We can only change status of current Transaction Record
      *
-     * @param integer $policy_id_or_txn_record Policy ID or Transaction Record
+     * @param integer $policy_id_or_endorsement_record Policy ID or Transaction Record
      * @param alpha $to_status_flag Status Code
      * @return bool
      */
