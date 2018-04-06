@@ -21,7 +21,7 @@ class Object_model extends MY_Model
 
     protected $fields = ['id', 'portfolio_id', 'attributes', 'amt_sum_insured', 'si_breakdown', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
-    protected $endorsement_fields = ['attributes', 'amt_sum_insured'];
+    protected $endorsement_fields = ['attributes', 'amt_sum_insured', 'si_breakdown',];
 
     protected $validation_rules = [];
 

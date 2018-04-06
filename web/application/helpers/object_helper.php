@@ -1395,19 +1395,19 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 	 * @return float
 	 */
 	function _OBJ_compute_sum_insured_amount( $portfolio_id, $data )
-	{
-		$amt_sum_insured =  0.00;
+    {
+        $si_data =  ['amt_sum_insured' => 0.00];
 
-		// Load Portfolio Helper
-		load_portfolio_helper($portfolio_id);
+        // Load Portfolio Helper
+        load_portfolio_helper($portfolio_id);
 
-		/**
+        /**
          * AGRICULTURE - CROP SUB-PORTFOLIOS
          * ---------------------------------
          */
         if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
         {
-            $amt_sum_insured = _OBJ_AGR_CROP_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_AGR_CROP_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1416,7 +1416,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
         {
-            $amt_sum_insured = _OBJ_AGR_CATTLE_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_AGR_CATTLE_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1425,7 +1425,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
         {
-            $amt_sum_insured = _OBJ_AGR_POULTRY_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_AGR_POULTRY_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1434,7 +1434,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
         {
-            $amt_sum_insured = _OBJ_AGR_FISH_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_AGR_FISH_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1443,18 +1443,18 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
         {
-            $amt_sum_insured = _OBJ_AGR_BEE_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_AGR_BEE_compute_sum_insured_amount($portfolio_id, $data);
         }
 
 
-		/**
-		 * MOTOR
-		 * -----
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
-		{
-			$amt_sum_insured = _OBJ_MOTOR_compute_sum_insured_amount($portfolio_id, $data);
-		}
+        /**
+         * MOTOR
+         * -----
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+        {
+            $si_data = _OBJ_MOTOR_compute_sum_insured_amount($portfolio_id, $data);
+        }
 
         /**
          * FIRE - FIRE
@@ -1462,7 +1462,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
         {
-            $amt_sum_insured = _OBJ_FIRE_FIRE_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_FIRE_FIRE_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1471,7 +1471,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
         {
-            $amt_sum_insured = _OBJ_FIRE_HHP_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_FIRE_HHP_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1480,7 +1480,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
         {
-            $amt_sum_insured = _OBJ_FIRE_LOP_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_FIRE_LOP_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1489,26 +1489,26 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
         {
-            $amt_sum_insured = _OBJ_MISC_BRG_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_BRG_compute_sum_insured_amount($portfolio_id, $data);
         }
 
-		/**
-		 * MARINE
-		 * -----
-		 */
-		else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
-		{
-			$amt_sum_insured = _OBJ_MARINE_compute_sum_insured_amount($portfolio_id, $data);
-		}
+        /**
+         * MARINE
+         * -----
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+        {
+            $si_data = _OBJ_MARINE_compute_sum_insured_amount($portfolio_id, $data);
+        }
 
-		/**
+        /**
          * ENGINEERING - BOILER EXPLOSION
          * ------------------------------
          * Sub-portfolio wise computation
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
         {
-            $amt_sum_insured = _OBJ_ENG_BL_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_ENG_BL_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1517,7 +1517,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
         {
-            $amt_sum_insured = _OBJ_ENG_CAR_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_ENG_CAR_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1527,7 +1527,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
         {
-            $amt_sum_insured = _OBJ_ENG_CPM_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_ENG_CPM_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1537,7 +1537,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
         {
-            $amt_sum_insured = _OBJ_ENG_EEI_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_ENG_EEI_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1546,7 +1546,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
         {
-            $amt_sum_insured = _OBJ_ENG_EAR_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_ENG_EAR_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1555,7 +1555,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
         {
-            $amt_sum_insured = _OBJ_ENG_MB_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_ENG_MB_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1564,7 +1564,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
         {
-            $amt_sum_insured = _OBJ_MISC_BB_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_BB_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1573,7 +1573,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
         {
-            $amt_sum_insured = _OBJ_MISC_GPA_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_GPA_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1582,7 +1582,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
         {
-            $amt_sum_insured = _OBJ_MISC_PA_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_PA_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1591,7 +1591,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
         {
-            $amt_sum_insured = _OBJ_MISC_PL_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_PL_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1600,7 +1600,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
         {
-            $amt_sum_insured = _OBJ_MISC_CT_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_CT_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1609,7 +1609,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
         {
-            $amt_sum_insured = _OBJ_MISC_CS_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_CS_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1618,7 +1618,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
         {
-            $amt_sum_insured = _OBJ_MISC_CC_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_CC_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1627,7 +1627,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
         {
-            $amt_sum_insured = _OBJ_MISC_EPA_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_EPA_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1636,7 +1636,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
         {
-            $amt_sum_insured = _OBJ_MISC_TMI_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_TMI_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1645,7 +1645,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
         {
-            $amt_sum_insured = _OBJ_MISC_FG_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_FG_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
@@ -1654,19 +1654,19 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
         {
-            $amt_sum_insured = _OBJ_MISC_HI_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_MISC_HI_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**
          * Throw Exception
          */
-		else
-		{
-			throw new Exception("Exception [Helper: object_helper][Method: _OBJ_compute_sum_insured_amount()]: No sum insured amount computing method defined for supplied portfolio.");
-		}
+        else
+        {
+            throw new Exception("Exception [Helper: object_helper][Method: _OBJ_compute_sum_insured_amount()]: No sum insured amount computing method defined for supplied portfolio.");
+        }
 
-		return $amt_sum_insured;
-	}
+        return $si_data;
+    }
 }
 
 // ------------------------------------------------------------------------
