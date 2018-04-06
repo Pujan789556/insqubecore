@@ -19,7 +19,7 @@ class Object_model extends MY_Model
     protected $after_update  = ['after_update__defaults', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'portfolio_id', 'attributes', 'amt_sum_insured', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'portfolio_id', 'attributes', 'amt_sum_insured', 'si_breakdown', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $endorsement_fields = ['attributes', 'amt_sum_insured'];
 

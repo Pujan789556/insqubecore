@@ -552,7 +552,8 @@ if ( ! function_exists('_OBJ_MARINE_compute_sum_insured_amount'))
 			$SI = forex_conversion($date, $currency, $SI);
 		}
 
-		return $SI;
+		// NO SI Breakdown for this Portfolio
+		return ['amt_sum_insured' => $SI];
 	}
 }
 

@@ -157,7 +157,10 @@ if ( ! function_exists('_OBJ_MISC_CT_compute_sum_insured_amount'))
 		/**
 		 * There is a direct field to supply Sum Insured amount
 		 */
-		return floatval($data['annual_limit']);
+		$amt_sum_insured = floatval($data['annual_limit']);
+
+		// NO SI Breakdown for this Portfolio
+		return ['amt_sum_insured' => $amt_sum_insured];
 	}
 }
 

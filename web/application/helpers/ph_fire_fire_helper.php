@@ -526,6 +526,8 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_compute_sum_insured_amount'))
 	{
 		$CI =& get_instance();
 
+		$amt_sum_insured = 0.00;
+
 		/**
 		 * If "item_attached" is Set, we have one placeholder to compute sum_insured value,
 		 * else we compute from all items
@@ -534,20 +536,22 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_compute_sum_insured_amount'))
 		if ( $CI->input->post('object[item_attached]') == 'Y' )
 		{
 			$amt_sum_insured = floatval($data['sum_insured']);
-			return $amt_sum_insured;
 		}
-
-
-		/**
-		 * A single Fire Policy may hold multiple Items
-		 */
-		$sum_inusred_arr = $data['items']['sum_insured'];
-		$amt_sum_insured = 0;
-		foreach($sum_inusred_arr as $si)
+		else
 		{
-			$amt_sum_insured += $si;
+			/**
+			 * A single Fire Policy may hold multiple Items
+			 */
+			$sum_inusred_arr = $data['items']['sum_insured'];
+			$amt_sum_insured = 0;
+			foreach($sum_inusred_arr as $si)
+			{
+				$amt_sum_insured += $si;
+			}
 		}
-		return $amt_sum_insured;
+
+		// NO SI Breakdown for this Portfolio
+		return ['amt_sum_insured' => $amt_sum_insured];
 	}
 }
 

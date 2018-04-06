@@ -188,7 +188,8 @@ if ( ! function_exists('_OBJ_MISC_BB_compute_sum_insured_amount'))
 		$si_components 		= $data['sum_insured'];
 		$amt_sum_insured 	= floatval($si_components['basic'] ?? 0.00) + floatval($si_components['cip'] ?? 0.00) + floatval($si_components['cit'] ?? 0.00);
 
-		return $amt_sum_insured;
+		// NO SI Breakdown for this Portfolio
+		return ['amt_sum_insured' => $amt_sum_insured];
 	}
 }
 

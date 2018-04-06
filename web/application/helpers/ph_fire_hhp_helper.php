@@ -459,7 +459,9 @@ if ( ! function_exists('_OBJ_FIRE_HHP_compute_sum_insured_amount'))
 		{
 			$amt_sum_insured += $si;
 		}
-		return $amt_sum_insured;
+
+		// NO SI Breakdown for this Portfolio
+		return ['amt_sum_insured' => $amt_sum_insured];
 	}
 }
 

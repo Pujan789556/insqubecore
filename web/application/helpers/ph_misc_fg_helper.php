@@ -344,7 +344,9 @@ if ( ! function_exists('_OBJ_MISC_FG_compute_sum_insured_amount'))
 			$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 			$amt_sum_insured +=  $si_per_item;
 		}
-		return $amt_sum_insured;
+
+		// NO SI Breakdown for this Portfolio
+		return ['amt_sum_insured' => $amt_sum_insured];
 	}
 }
 

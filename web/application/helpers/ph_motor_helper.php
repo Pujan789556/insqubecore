@@ -2387,20 +2387,30 @@ if ( ! function_exists('_OBJ_MOTOR_compute_sum_insured_amount'))
 	 */
 	function _OBJ_MOTOR_compute_sum_insured_amount( $portfolio_id, $data )
 	{
-		$price_vehicle 		= $data['price_vehicle'] 		? floatval($data['price_vehicle']) : 0.00;
-		$price_accessories 	= $data['price_accessories'] 	? floatval($data['price_accessories']) : 0.00;
-		$trailer_price 		= isset($data['trailer_price']) ? floatval($data['trailer_price']) : 0.00;
+		$si_vehicle 		= $data['price_vehicle'] 		? floatval($data['price_vehicle']) : 0.00;
+		$si_accessories 	= $data['price_accessories'] 	? floatval($data['price_accessories']) : 0.00;
+		$si_trailer 		= isset($data['trailer_price']) ? floatval($data['trailer_price']) : 0.00;
 
 		// Common Price for all three sub-portfolios
-		$amt_sum_insured = $price_vehicle + $price_accessories;
+		$amt_sum_insured = $si_vehicle + $si_accessories;
+		$si_breakdown = [
+			'si_vehicle' 		=> $si_vehicle,
+			'si_accessories'  	=> $si_accessories
+		];
 
 		// Add trailer price on Private Vehicle or Commercial Vehicle
 		if($portfolio_id != IQB_SUB_PORTFOLIO_MOTORCYCLE_ID )
 		{
-			$amt_sum_insured += $trailer_price;
+			$amt_sum_insured += $si_trailer;
+
+			$si_breakdown['si_trailer'] = $si_trailer;
 		}
 
-		return $amt_sum_insured;
+		$si_breakdown = json_encode($si_breakdown);
+
+		// With SI Breakdown
+		return ['amt_sum_insured' => $amt_sum_insured, 'si_breakdown' => $si_breakdown];
+
 	}
 }
 

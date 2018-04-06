@@ -616,11 +616,12 @@ class Objects extends MY_Controller
         		$object_data['attributes'] = json_encode($data['object']);
 
         		/**
-				 * Compute Sum Insured Amount
+				 * Compute Sum Insured Amount & SI Breakdown
 				 */
         		try {
 
-					$object_data['amt_sum_insured'] = _OBJ_compute_sum_insured_amount($portfolio_id, $data['object']);
+					$si_data 	 = _OBJ_compute_sum_insured_amount($portfolio_id, $data['object']);
+					$object_data = array_merge($object_data, $si_data);
 
 				} catch (Exception $e) {
 
@@ -893,7 +894,8 @@ class Objects extends MY_Controller
 				 */
         		try {
 
-					$post_data['amt_sum_insured'] 	= _OBJ_compute_sum_insured_amount($record->portfolio_id, $data['object']);
+					$si_data 	 = _OBJ_compute_sum_insured_amount($record->portfolio_id, $data['object']);
+					$post_data   = array_merge($post_data, $si_data);
 
 				} catch (Exception $e) {
 

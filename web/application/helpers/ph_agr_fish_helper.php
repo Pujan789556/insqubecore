@@ -437,16 +437,26 @@ if ( ! function_exists('_OBJ_AGR_FISH_compute_sum_insured_amount'))
 		/**
 		 * Items' Total Sum Insured Amount
 		 */
+		$amt_sum_insured = 0.00;
+
 		$items = (object)$data['items'];
-		$amt_sum_insured = _OBJ_AGR_FISH_items_only_sum_insured_amount($items);
+		$si_items = _OBJ_AGR_FISH_items_only_sum_insured_amount($items);
 
 		/**
 		 * Do you want to insure fish pond too?
 		 */
 		$object_attributes 	= (object)$data;
-		$amt_sum_insured 	+= _OBJ_AGR_FISH_pond_sum_insured_amount($object_attributes);
+		$si_pond 	= _OBJ_AGR_FISH_pond_sum_insured_amount($object_attributes);
 
-		return $amt_sum_insured;
+		$amt_sum_insured = $si_items + $si_pond;
+
+		$si_breakdown = json_encode([
+			'si_items' => $si_items,
+			'si_pond'  => $si_pond
+		]);
+
+		// With SI Breakdown
+		return ['amt_sum_insured' => $amt_sum_insured, 'si_breakdown' => $si_breakdown];
 	}
 }
 

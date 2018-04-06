@@ -1386,7 +1386,7 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
 if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
 {
 	/**
-	 * Get Sum Insured Amount of Policy Object
+	 * Get Sum Insured Amount & SI Breakdown of Policy Object
 	 *
 	 * Compute sum insured amount based on object's portfolio and return.
 	 *

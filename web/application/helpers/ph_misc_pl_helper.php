@@ -237,7 +237,9 @@ if ( ! function_exists('_OBJ_MISC_PL_compute_sum_insured_amount'))
 		{
 			$amt_sum_insured +=  floatval($si_per_item);
 		}
-		return $amt_sum_insured;
+
+		// NO SI Breakdown for this Portfolio
+		return ['amt_sum_insured' => $amt_sum_insured];
 	}
 }
 
