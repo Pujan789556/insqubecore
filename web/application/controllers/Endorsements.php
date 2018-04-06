@@ -44,7 +44,6 @@ class Endorsements extends MY_Controller
 		$this->load->model('policy_model');
 		$this->load->model('endorsement_model');
 		$this->load->model('portfolio_setting_model');
-		// $this->load->model('premium_model');
 		$this->load->model('object_model');
 
 		// Policy Configuration/Helper

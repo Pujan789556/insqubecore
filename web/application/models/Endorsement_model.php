@@ -758,7 +758,7 @@ class Endorsement_model extends MY_Model
                     "C.full_name as transfer_customer_name, " .
 
                     // Endorsement Audit
-                    "AE.id AS audit_endorsement_id, AE.object_id, AE.customer_id, AE.audit_policy, AE.audit_object, AE.audit_customer";
+                    "AE.id AS audit_endorsement_id, AE.object_id AS audit_object_id, AE.customer_id AS audit_customer_id, AE.audit_policy, AE.audit_object, AE.audit_customer";
 
         $this->db->select($select)
                 ->from($this->table_name . ' AS ENDRSMNT')
