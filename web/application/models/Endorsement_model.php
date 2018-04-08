@@ -17,7 +17,7 @@ class Endorsement_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'gross_amt_sum_insured', 'gross_amt_total_premium', 'gross_amt_pool_premium', 'gross_amt_commissionable', 'gross_amt_agent_commission', 'net_amt_sum_insured', 'net_amt_total_premium', 'net_amt_pool_premium', 'net_amt_commissionable', 'net_amt_agent_commission', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -266,58 +266,32 @@ class Endorsement_model extends MY_Model
      * @param integer $policy_id
      * @return bool
      */
-    public function reset($policy_id)
+    public function reset_by_policy($policy_id)
     {
-        /**
-         * ==================== TRANSACTIONS BEGIN =========================
-         */
-        $transaction_status = TRUE;
+        $record = $this->get_current_endorsement_by_policy($policy_id);
 
-        /**
-         * Disable DB Debugging
-         */
-        $this->db->db_debug = FALSE;
-        $this->db->trans_start();
-
-                $this->_reset($policy_id);
-
-        /**
-         * Complete transactions or Rollback
-         */
-        $this->db->trans_complete();
-        if ($this->db->trans_status() === FALSE)
+        if(!$record)
         {
-            $transaction_status = FALSE;
+            throw new Exception("Exception [Model: Endorsement_model][Method: _reset()]: Current TXN record could not be found.");
         }
 
-        /**
-         * Restore DB Debug Configuration
-         */
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+        return $this->_reset($record);
+    }
 
-        /**
-         * ==================== TRANSACTIONS END =========================
-         */
-
-        return $transaction_status;
+    public function reset($id)
+    {
+        $record = $this->get($id);
+        return $this->_reset($record);
     }
 
         // --------------------------------------------------------------------
 
-        private function _reset($policy_id)
+        private function _reset($record)
         {
-            $record = $this->get_current_endorsement_by_policy($policy_id);
-
-            if(!$record)
-            {
-                throw new Exception("Exception [Model: Endorsement_model][Method: _reset()]: Current TXN record could not be found.");
-            }
-
             /**
              * Task 1: Reset Endorsement Record
              */
-            // !!!NOTE: 'amt_sum_insured' can not be emptied as it is updated when policy is updated
-            $nullable_fields = ['txn_date', 'amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'flag_ri_approval'];
+            $nullable_fields = ['gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_total_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_vat', 'premium_computation_table', 'cost_calculation_table', 'flag_ri_approval'];
 
             $reset_data = [];
 
@@ -325,14 +299,45 @@ class Endorsement_model extends MY_Model
             {
                  $reset_data[$field] = NULL;
             }
-            $this->db->where('id', $record->id)
-                     ->update($this->table_name, $reset_data);
 
             /**
-             * Task 2: Clear Cache (Speciic to this Policy ID)
+             * ==================== TRANSACTIONS BEGIN =========================
              */
-            $cache_var = 'endrsmnt_' . $policy_id;
-            $this->clear_cache($cache_var);
+            $transaction_status = TRUE;
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_start();
+
+                $this->db->where('id', $record->id)
+                         ->update($this->table_name, $reset_data);
+
+                /**
+                 * Task 2: Clear Cache (Speciic to this Policy ID)
+                 */
+                $cache_var = 'endrsmnt_' . $record->policy_id;
+                $this->clear_cache($cache_var);
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $transaction_status = FALSE;
+            }
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+            /**
+             * ==================== TRANSACTIONS END =========================
+             */
+
+            return $transaction_status;
         }
 
     // --------------------------------------------------------------------
@@ -706,6 +711,52 @@ class Endorsement_model extends MY_Model
          */
 
         return $transaction_status;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Update GROSS & NET SI of a given endorsement
+     *
+     * @param int $id
+     * @param float $gross_amt_sum_insured
+     * @return bool
+     */
+    public function update_sum_insured($id, $gross_amt_sum_insured)
+    {
+
+        /**
+         * Task 1: Get Previous SI(gross)
+         */
+        $txn_types = [
+            IQB_POLICY_TXN_TYPE_FRESH,
+            IQB_POLICY_TXN_TYPE_RENEWAL,
+            IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE,
+            IQB_POLICY_TXN_TYPE_PREMIUM_REFUND
+        ];
+
+        $record =  parent::find($id);
+        $net_amt_sum_insured = $gross_amt_sum_insured;
+        $previous_record = $this->db->select('ENDRSMNT.gross_amt_sum_insured')
+                                    ->from($this->table_name . ' ENDRSMNT')
+                                    ->where('ENDRSMNT.policy_id', $record->policy_id)
+                                    ->where_in('ENDRSMNT.txn_type', $txn_types)
+                                    ->order_by('ENDRSMNT.id', 'desc')
+                                    ->get()->row();
+
+        /**
+         * Compute the SI Difference
+         */
+        if( $previous_record )
+        {
+            $net_amt_sum_insured = $previous_record->gross_amt_sum_insured - $gross_amt_sum_insured;
+        }
+
+        $data = [
+            'gross_amt_sum_insured' => $gross_amt_sum_insured,
+            'net_amt_sum_insured'   => $net_amt_sum_insured
+        ];
+        parent::update($id, $txn_data, TRUE);
     }
 
     // --------------------------------------------------------------------

@@ -319,7 +319,11 @@ class Endorsements extends MY_Controller
 	        		else
 	        		{
 	        			// Now Update Data
+	        			$data['txn_date'] = date('Y-m-d');
 						$done = $this->endorsement_model->update($record->id, $data, TRUE);
+
+						// Reset Premium
+						$this->endorsement_model->reset($record->id);
 	        		}
 
 	        		return $this->_return_on_save($action, $done, $policy_record->id, $record->id ?? NULL);
@@ -338,6 +342,7 @@ class Endorsements extends MY_Controller
 			return [
 				'policy_id' 		=> $policy_id,
     			'txn_type'  		=> $txn_type,
+    			'txn_date' 			=> date('Y-m-d'),
     			'flag_ri_approval' 	=> $this->endorsement_model->get_flag_ri_approval_by_policy( $policy_id )
 			];
 		}
@@ -512,40 +517,6 @@ class Endorsements extends MY_Controller
 			$current_txn = $this->endorsement_model->get_current_endorsement_by_policy($policy_id);
 
 			return $current_txn->status === IQB_POLICY_TXN_STATUS_ACTIVE;
-		}
-
-
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Prepare Transactional Endorsement Data
-		 *
-		 * Compute Sum Insured, Agent Commission, VAT
-		 *
-		 * @param object $policy_record
-		 * @param array $data
-		 * @return array
-		 */
-		private function _prepare_et_data($policy_record, $data)
-		{
-			/**
-			 * Agent Commission
-			 */
-			$data['amt_agent_commission'] = NULL;
-			if( !empty($policy_record->agent_id) && $policy_record->flag_dc ==  IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
-			{
-				$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-				$data['amt_agent_commission'] 	= ( $data['amt_commissionable'] * $pfs_record->agent_commission)/100.00;
-			}
-
-			/**
-			 * Compute VAT
-			 */
-			$this->load->helper('account');
-			$data['amt_vat'] = ac_compute_tax(IQB_AC_DNT_ID_VAT, $data['amt_total_premium']+ $data['amt_stamp_duty']);
-
-			return $data;
 		}
 
 	// --------------------------------------------------------------------
@@ -1655,7 +1626,7 @@ class Endorsements extends MY_Controller
 				 * 	- customer (from audit_customer field if any data)
 				 * 	- SEND SMS on General Transaction Activation
 				 */
-				if( $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_EG && $to_status_code ==IQB_POLICY_TXN_STATUS_ACTIVE )
+				if( $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_GENERAL && $to_status_code ==IQB_POLICY_TXN_STATUS_ACTIVE )
 				{
 					$this->_sms_activation($endorsement_record, $policy_record);
 				}
@@ -1838,7 +1809,7 @@ class Endorsements extends MY_Controller
 				 * 	Draft/Verified are automatically triggered from
 				 * 	Policy Status Update Method
 				 */
-				if( $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_FRESH  || $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_RENEWAL )
+				if( _ENDORSEMENT_is_first($endorsement_record->txn_type) )
 				{
 					$__flag_passed = !in_array($to_updown_status, [
 						IQB_POLICY_TXN_STATUS_DRAFT,
@@ -1847,6 +1818,24 @@ class Endorsements extends MY_Controller
 					]);
 				}
 			}
+
+
+			/**
+			 * Premium Must be Updated Before Verifying
+			 */
+			if(
+				$__flag_passed && _ENDORSEMENT_is_premium_computable_by_type($endorsement_record->txn_type)
+				&&
+				$to_updown_status === IQB_POLICY_TXN_STATUS_VERIFIED
+				&&
+				!$endorsement_record->amt_total_premium
+			)
+			{
+				$__flag_passed 		= FALSE;
+				$failed_message 	= 'Please Update Policy Premium First!';
+			}
+
+
 
 			/**
 			 * Can not Update Transactional Status Directly using status function
@@ -1865,7 +1854,7 @@ class Endorsements extends MY_Controller
 			 *
 			 * !!! If RI-Approval Constraint Required, It should Come from That Status else from Verified
 			 */
-			if( $__flag_passed && $to_updown_status === IQB_POLICY_TXN_STATUS_ACTIVE && $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_EG )
+			if( $__flag_passed && $to_updown_status === IQB_POLICY_TXN_STATUS_ACTIVE && $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_GENERAL )
 			{
 				if( (int)$endorsement_record->flag_ri_approval === IQB_FLAG_ON )
 				{
@@ -1883,7 +1872,7 @@ class Endorsements extends MY_Controller
 				return $this->template->json([
 					'status' 	=> 'error',
 					'title' 	=> 'Invalid Status Transaction',
-					'message' 	=> 'You can not swith to the state from this state of transaction.'
+					'message' 	=> $failed_message ?? 'You can not switch to the state from this state of transaction.'
 				], 400);
 			}
 

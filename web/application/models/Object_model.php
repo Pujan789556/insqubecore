@@ -183,7 +183,7 @@ class Object_model extends MY_Model
             if($policy_record && _POLICY_is_editable($policy_record->status, FALSE) === TRUE)
             {
                 $this->load->model('endorsement_model');
-                $this->endorsement_model->reset($policy_record->id);
+                $this->endorsement_model->reset_by_policy($policy_record->id);
             }
         }
         return FALSE;

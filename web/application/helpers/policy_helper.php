@@ -688,45 +688,47 @@ if ( ! function_exists('_POLICY__compute_short_term_premium'))
 	 * @return	array
 	 */
 	function _POLICY__compute_short_term_premium( $policy_record, $pfs_record, $cost_table )
-	{
-		/**
-		 * SHORT TERM POLICY?
-		 * ---------------------
-		 *
-		 * If the policy is short term policy, we have to calculate the short term values
-		 *
-		 */
-		$CI =& get_instance();
-		$fy_record = $CI->fiscal_year_model->get_fiscal_year( $policy_record->issued_date );
-		$short_term_info = _POLICY__get_short_term_info( $policy_record->portfolio_id, $fy_record, $policy_record->start_date, $policy_record->end_date );
+    {
+        /**
+         * SHORT TERM POLICY?
+         * ---------------------
+         *
+         * If the policy is short term policy, we have to calculate the short term values
+         *
+         */
+        $CI =& get_instance();
+        $fy_record = $CI->fiscal_year_model->get_fiscal_year( $policy_record->issued_date );
+        $short_term_info = _POLICY__get_short_term_info( $policy_record->portfolio_id, $fy_record, $policy_record->start_date, $policy_record->end_date );
 
-		if(
-			$pfs_record->flag_short_term === IQB_FLAG_YES
-			&&
-			$short_term_info['flag'] === IQB_FLAG_YES
-			&&
-			$policy_record->flag_short_term === IQB_FLAG_YES )
-		{
-			$short_term_record = $short_term_info['record'];
+        if(
+            $pfs_record->flag_short_term === IQB_FLAG_YES
+            &&
+            $short_term_info['flag'] === IQB_FLAG_YES
+            &&
+            $policy_record->flag_short_term === IQB_FLAG_YES )
+        {
+            $short_term_record = $short_term_info['record'];
 
-			$short_term_rate = $short_term_record->rate ?? 100.00;
-			$short_term_rate = (float)$short_term_rate;
+            $short_term_rate = $short_term_record->rate ?? 100.00;
+            $short_term_rate = (float)$short_term_rate;
 
-			// Compute Total Amount
-			$cost_table['amt_total_premium'] = ($cost_table['amt_total_premium'] * $short_term_rate)/100.00;
+            // Compute Total Amount (Pool do not apply short term rate)
+            $amt_basic_premium               = $cost_table['amt_total_premium'] - $cost_table['amt_pool_premium'];
+            $amt_pool_premium                = $cost_table['amt_pool_premium'];
+            $amt_basic_premium               = ($amt_basic_premium * $short_term_rate)/100.00;
+            $cost_table['amt_total_premium'] = $amt_basic_premium + $cost_table['amt_pool_premium'];
 
+            // Update Commissionable Amount and Commission
+            $amt_commissionable = $cost_table['amt_commissionable'] ?? NULL;
+            if($amt_commissionable)
+            {
+                $cost_table['amt_commissionable']   = ($cost_table['amt_commissionable'] * $short_term_rate)/100.00;
+                $cost_table['amt_agent_commission'] = ($cost_table['amt_commissionable'] * $pfs_record->agent_commission)/100.00;
+            }
+        }
 
-			// Update Commissionable Amount and Commission
-			$amt_commissionable = $cost_table['amt_commissionable'] ?? NULL;
-			if($amt_commissionable)
-			{
-				$cost_table['amt_commissionable'] 	= ($cost_table['amt_commissionable'] * $short_term_rate)/100.00;
-				$cost_table['amt_agent_commission'] = ($cost_table['amt_commissionable'] * $pfs_record->agent_commission)/100.00;
-			}
-		}
-
-		return $cost_table;
-	}
+        return $cost_table;
+    }
 }
 
 // ------------------------------------------------------------------------
@@ -829,7 +831,7 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
 
 
         $short_term_policy_rate = $pfs_record->short_term_policy_rate ? json_decode($pfs_record->short_term_policy_rate) : [];
-
+        echo '<pre>'; print_r($short_term_policy_rate);exit;
         // Build The Duration List
         $duration_list = [$default_duration];
         foreach($short_term_policy_rate as $spr)
@@ -887,7 +889,6 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
                 $spr_record = $spr;
             }
         }
-
         return [
             'flag'      		=> IQB_FLAG_YES,
             'record'    		=> $spr_record,
@@ -1315,7 +1316,12 @@ if ( ! function_exists('_ENDORSEMENT_is_editable'))
 			{
 				$__flag_authorized = TRUE;
 			}
+
 		}
+        else
+        {
+            $__flag_authorized  = FALSE;
+        }
 
 		// Terminate on Exit?
 		if( $__flag_authorized === FALSE && $terminate_on_fail == TRUE)
@@ -1560,6 +1566,186 @@ if ( ! function_exists('_ENDORSEMENT_computation_basis_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('_ENDORSEMENT_apply_computation_basis'))
+{
+    /**
+     * Apply computation Basis for given endorsement data
+     *
+     * @param record $policy_record Policy Record
+     * @param record $endorsement_record Endorsement Record
+     * @param record $pfs_record    Portfoli Setting Record
+     * @param array $premium_data       Endorsement Data
+     * @return type
+     */
+    function _ENDORSEMENT_apply_computation_basis( $policy_record, $endorsement_record, $pfs_record, $premium_data )
+    {
+        $computed_data = [];
+        $computation_basis = (int)$endorsement_record->computation_basis;
+        switch ($computation_basis)
+        {
+            /**
+             * No computation needed. The whole amount is used.
+             */
+            case IQB_POLICY_TXN_CB_ANNUAL:
+                $computed_data = $premium_data;
+                break;
+
+            case IQB_POLICY_TXN_CB_SHORT_TERM_RATE:
+                $computed_data = _ENDORSEMENT__compute_short_term_premium( $pfs_record, $premium_data, $endorsement_record->txn_date, $policy_record->end_date );
+                break;
+
+            case IQB_POLICY_TXN_CB_PRORATA:
+                $computed_data = _ENDORSEMENT__compute_prorata_premium( $premium_data, $endorsement_record->txn_date, $policy_record->end_date );
+                break;
+
+            default:
+                # code...
+                break;
+        }
+        return $computed_data;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_ENDORSEMENT__compute_prorata_premium'))
+{
+    /**
+     * Compute Prorata Premium of a Policy
+     *
+     * @param array $premium_data
+     * @param date $start_date
+     * @param date $end_date
+     * @return array
+     */
+    function _ENDORSEMENT__compute_prorata_premium( $premium_data, $start_date, $end_date )
+    {
+        $today = date('Y-m-d');
+        $policy_duration  = date_difference($start_date, $end_date, 'd');
+        $prorata_duration = date_difference($today, $end_date, 'd');
+
+
+        $rate = $prorata_duration / $policy_duration;
+
+        // Compute Total Amount (Pool do not apply prorata)
+        $amt_basic_premium                  = $premium_data['amt_total_premium'] - $premium_data['amt_pool_premium'];
+        $amt_pool_premium                   = $premium_data['amt_pool_premium'];
+        $amt_basic_premium                  = $amt_basic_premium * $rate;
+        $premium_data['amt_total_premium']  = $amt_basic_premium + $amt_pool_premium ;
+
+        // Update Commissionable Amount and Commission
+        $amt_commissionable = $cost_table['amt_commissionable'] ?? NULL;
+        if($amt_commissionable)
+        {
+            $premium_data['amt_commissionable']     = (float)$premium_data['amt_total_premium'] * $rate ;
+            $premium_data['amt_agent_commission']   = (float)$premium_data['amt_agent_commission'] * $rate ;
+        }
+
+        return $premium_data;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_ENDORSEMENT__compute_short_term_premium'))
+{
+    /**
+     * Compute Short Term Policy Premium
+     *
+     * @param object $pfs_record Portfolio Settings Record
+     * @param array $premium_data Cost Table computed by Specific cost table function
+     * @param date $start_date Endorsement/Policy Start Date
+     * @param date $end_date Policy End Date
+     * @return  array
+     */
+    function _ENDORSEMENT__compute_short_term_premium( $pfs_record, $premium_data, $start_date, $end_date )
+    {
+        $rate = _ENDORSEMENT__get_short_term_rate( $pfs_record, $start_date, $end_date  );
+
+        // Compute Total Amount (Pool do not apply short term rate)
+        $amt_basic_premium                  = $premium_data['amt_total_premium'] - $premium_data['amt_pool_premium'];
+        $amt_pool_premium                   = $premium_data['amt_pool_premium'];
+        $amt_basic_premium                  = ($amt_basic_premium * $rate)/100.00;
+        $premium_data['amt_total_premium']  = $amt_basic_premium + $premium_data['amt_pool_premium'];
+
+        // Update Commissionable Amount and Commission
+        $amt_commissionable = $premium_data['amt_commissionable'] ?? NULL;
+        if($amt_commissionable)
+        {
+            $premium_data['amt_commissionable']   = ($premium_data['amt_commissionable'] * $rate)/100.00;
+            $premium_data['amt_agent_commission'] = ($premium_data['amt_commissionable'] * $pfs_record->agent_commission)/100.00;
+        }
+
+        return $premium_data;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_ENDORSEMENT__get_short_term_rate'))
+{
+    /**
+     * Get Short Term Policy Rate
+     *
+     * @param object $pfs_record Portfolio Settings Record
+     * @param date  $start_date Endorsement Start Date
+     * @param date $end_date    Policy End Date
+     * @return  float
+     */
+    function _ENDORSEMENT__get_short_term_rate( $pfs_record, $start_date, $end_date )
+    {
+        $default_rate = 100.00;
+
+        /**
+         * Let's find if the policy duration falls under Short Term Duration List
+         *
+         * Calculate the Number of Days between given two dates
+         */
+        $start_timestamp    = strtotime($start_date);
+        $end_timestamp      = strtotime($end_date);
+        $difference         = $end_timestamp - $start_timestamp;
+        $days               = floor($difference / (60 * 60 * 24));
+        $default_duration   = (int)$pfs_record->default_duration;
+
+
+        /**
+         * Supplied Duration === Default Duration? it's 100%
+         */
+        if($days == $default_duration)
+        {
+            return $default_rate;
+        }
+
+        $short_term_policy_rates = $pfs_record->short_term_policy_rate ? json_decode($pfs_record->short_term_policy_rate) : NULL;
+
+        if( !$short_term_policy_rates )
+        {
+            throw new Exception("Exception [Helper: policy_helper][Method: _ENDORSEMENT__get_short_term_rate()]: No Short Term Policy Rates found for the supplied portfolio.");
+
+        }
+
+        $rate_list = [];
+        foreach($short_term_policy_rates as $r)
+        {
+            $rate_list[$r->duration] = $r->rate;
+        }
+        ksort($rate_list);
+
+        foreach($rate_list as $duration=>$rate)
+        {
+            if( $days <= $duration )
+            {
+                $default_rate = $rate;
+                break;
+            }
+        }
+
+        return $default_rate;
+    }
+}
+
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('_ENDORSEMENT_type_text'))
 {
 	/**
@@ -1576,7 +1762,6 @@ if ( ! function_exists('_ENDORSEMENT_type_text'))
 		return $text;
 	}
 }
-
 
 
 // ------------------------------------------------------------------------

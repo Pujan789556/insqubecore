@@ -968,7 +968,7 @@ class Policies extends MY_Controller
 			if( $__flag_reset === TRUE )
 			{
 
-				return $this->endorsement_model->reset($before_update->id);
+				return $this->endorsement_model->reset_by_policy($before_update->id);
 			}
 			return TRUE;
 		}
@@ -1623,7 +1623,9 @@ class Policies extends MY_Controller
 			/**
 			 * Get the Current Txn Record
 			 */
-			$endorsement_record = $__flag_passed === TRUE ? $this->endorsement_model->get_fresh_renewal_by_policy($record->id, IQB_POLICY_TXN_TYPE_FRESH) : NULL;
+			$endorsement_record = $__flag_passed === TRUE
+									? $this->endorsement_model->get_fresh_renewal_by_policy($record->id,
+											$record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH) : NULL;
 
 			/**
 			 * Premium Must be Updated Before Verifying

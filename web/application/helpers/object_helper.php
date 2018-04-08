@@ -28,7 +28,7 @@ if ( ! function_exists('get_object_from_policy_record'))
     function get_object_from_policy_record( $policy_record )
     {
         // Policy Record contains the following columns by prefixing "object_"
-        $object_columns = ['id', 'portfolio_id', 'attributes', 'amt_sum_insured', 'flag_locked'];
+        $object_columns = ['id', 'portfolio_id', 'attributes', 'amt_sum_insured', 'si_breakdown', 'flag_locked'];
         $object = new StdClass();
         foreach($object_columns as $column )
         {
@@ -40,11 +40,79 @@ if ( ! function_exists('get_object_from_policy_record'))
     }
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('get_object_from_object_audit'))
+{
+    /**
+     * Get Policy Object from Object Audit
+     *
+     * This function is required to get the object info for premium computation on
+     * endorsements.
+     *
+     * @param object $policy_record Policy Record
+     * @param json|NULL $audit_object Object Audit
+     * @return object   Policy Object
+     */
+    function get_object_from_object_audit( $policy_record, $audit_object )
+    {
+        $object         = NULL;
+        $audit_record   = $audit_object ? json_decode($audit_object) : NULL;
+        if($audit_record)
+        {
+            // Get the New data as  Policy Object
+            $object = $audit_record->new;
+
+            // Add other meta columns
+            // Policy Record contains the following columns by prefixing "object_"
+            $object_columns = ['id', 'portfolio_id', 'flag_locked'];
+            foreach($object_columns as $column )
+            {
+                $object->{$column} = $policy_record->{'object_' . $column};
+            }
+            // Customer ID
+            $object->customer_id = $policy_record->customer_id;
+        }
+        else
+        {
+            throw new Exception("Exception [Helper: object_helper][Method: get_object_from_object_audit()]: No modified policy object found!");
+        }
+
+        return $object;
+    }
+}
 
 
 // ------------------------------------------------------------------------
 // GENERAL OBJECT HELPERS
 // ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_si_net'))
+{
+    /**
+     * Get NET SI of an object
+     *
+     * Compute the NET Sum Insured in reference to its previous object information.
+     * If, there is no prevous audit object, the gross is net.
+     *
+     * @param object $old_object Policy Object - OLD Version (Current Version for Fresh/Renewal)
+     * @param object $new_object Policy Object - NEW Version (Audit Object for Endorsements)
+     * @return  html
+     */
+    function _OBJ_si_net( $old_object, $new_object = NULL )
+    {
+        if($new_object)
+        {
+            $net_si = (float)$new_object->amt_sum_insured - (float)$old_object->amt_sum_insured;
+        }
+        else
+        {
+            $net_si = (float)$old_object->amt_sum_insured;
+        }
+
+        return $net_si;
+    }
+}
 
 if ( ! function_exists('_OBJ_row_snippet'))
 {

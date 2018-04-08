@@ -352,7 +352,7 @@ class Policy_installment_model extends MY_Model
 
                                 // Endorsement Table Data
                                 'ENDRSMNT.txn_type,
-                                    ENDRSMNT.amt_sum_insured as endorsement_amt_sum_insured,
+                                    ENDRSMNT.net_amt_sum_insured as endorsement_amt_sum_insured,
                                     ENDRSMNT.flag_current as endorsement_flag_current,
                                     ENDRSMNT.status AS endorsement_status,
                                     ENDRSMNT.flag_ri_approval AS endorsement_flag_ri_approval'

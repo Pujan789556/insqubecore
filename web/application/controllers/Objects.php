@@ -965,7 +965,7 @@ class Objects extends MY_Controller
 			foreach($this->object_model->endorsement_fields as $key)
 			{
 				$old_data[$key] = $old_record[$key];
-				$new_data[$key] = $post_data[$key];
+				$new_data[$key] = $post_data[$key] ?? NULL;
 			}
 
 			return json_encode([
