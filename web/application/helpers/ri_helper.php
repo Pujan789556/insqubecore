@@ -441,7 +441,7 @@ if ( ! function_exists('RI__distribute_endorsement'))
 		 *
 		 * !!!IMPORTANT: It applies only on installments of non-fresh/non-renewal transactions
 		 */
-		if( !in_array( $policy_installment_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL] ) )
+		if( !in_array( $policy_installment_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL] ) )
 		{
 			if( $policy_installment_record->endorsement_amt_sum_insured )
 			{

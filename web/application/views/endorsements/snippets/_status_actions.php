@@ -120,14 +120,14 @@ endif;
 /**
  * Status "Back to Draft"
  */
-if( !$is_first && $record->status === IQB_POLICY_TXN_STATUS_VERIFIED && $this->dx_auth->is_authorized('endorsements', 'status.to.draft') ): ?>
+if( !$is_first && $record->status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED && $this->dx_auth->is_authorized('endorsements', 'status.to.draft') ): ?>
     <a href="#"
         title="Back to Draft"
         data-toggle="tooltip"
         data-confirm="true"
         class="btn btn-sm bg-maroon btn-round trg-dialog-action"
         data-message="Are you sure you want to do this?<br/>Staff having lower level permission will be able to <strong>edit/delete</strong> this transaction."
-        data-url="<?php echo site_url('endorsements/status/' . $record->id . '/' . IQB_POLICY_TXN_STATUS_DRAFT );?>"
+        data-url="<?php echo site_url('endorsements/status/' . $record->id . '/' . IQB_POLICY_ENDORSEMENT_STATUS_DRAFT );?>"
     ><i class="fa fa-level-down"></i> To Draft</a>
 <?php
 endif;
@@ -137,14 +137,14 @@ endif;
 /**
  * Status "to Verified"
  */
-if( !$is_first && $record->status === IQB_POLICY_TXN_STATUS_DRAFT && $this->dx_auth->is_authorized('endorsements', 'status.to.verified') ): ?>
+if( !$is_first && $record->status === IQB_POLICY_ENDORSEMENT_STATUS_DRAFT && $this->dx_auth->is_authorized('endorsements', 'status.to.verified') ): ?>
     <a href="#"
         title="Verify Debit Note"
         data-toggle="tooltip"
         data-confirm="true"
         class="btn btn-sm bg-orange btn-round trg-dialog-action"
         data-message="Are you sure you want to do this?<br/>You can not modify this transaction anymore."
-        data-url="<?php echo site_url('endorsements/status/' . $record->id . '/' . IQB_POLICY_TXN_STATUS_VERIFIED );?>"
+        data-url="<?php echo site_url('endorsements/status/' . $record->id . '/' . IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED );?>"
     ><i class="fa fa-check-square-o"></i> Verify</a>
 <?php
 endif;
@@ -157,7 +157,7 @@ endif;
 $__flag_ri_approval_constraint = _ENDORSEMENT__ri_approval_constraint($record->status, $record->flag_ri_approval);
 
 if(
-    $record->status === IQB_POLICY_TXN_STATUS_VERIFIED
+    $record->status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED
         &&
     $__flag_ri_approval_constraint == TRUE
         &&
@@ -169,7 +169,7 @@ if(
         data-confirm="true"
         class="btn btn-sm btn-danger btn-round trg-dialog-action"
         data-message="Are you sure you want to APPROVE the RI-Constraints?"
-        data-url="<?php echo site_url('endorsements/status/' . $record->id . '/' . IQB_POLICY_TXN_STATUS_RI_APPROVED . '/policy_tab_overview' );?>"
+        data-url="<?php echo site_url('endorsements/status/' . $record->id . '/' . IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED . '/policy_tab_overview' );?>"
     ><i class="fa fa-check-square-o"></i> RI-Approve</a>
 <?php
 endif;
@@ -180,21 +180,21 @@ endif;
  * RI-APPROVED OR VERIFIED(NO RI APPROVAL CONSTRAINT)
  */
 if(
-    $record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED
+    $record->status === IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED
         ||
-    ($record->status === IQB_POLICY_TXN_STATUS_VERIFIED && $__flag_ri_approval_constraint == FALSE )
+    ($record->status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED && $__flag_ri_approval_constraint == FALSE )
 ):
 
     /**
      * Let's activate the general endorsement
      */
-    if( (int)$record->txn_type === IQB_POLICY_TXN_TYPE_GENERAL && $this->dx_auth->is_authorized('endorsements', 'status.to.active')): ?>
+    if( (int)$record->txn_type === IQB_POLICY_ENDORSEMENT_TYPE_GENERAL && $this->dx_auth->is_authorized('endorsements', 'status.to.active')): ?>
         <a href="#"
             title="Activate Transaction/Endorsement"
             data-toggle="tooltip"
             data-confirm="false"
             class="btn btn-sm btn-success btn-round trg-dialog-action"
-            data-url="<?php echo site_url('endorsements/status/' . $record->id  . '/' . IQB_POLICY_TXN_STATUS_ACTIVE );?>"
+            data-url="<?php echo site_url('endorsements/status/' . $record->id  . '/' . IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE );?>"
         ><i class="fa fa-check-square-o"></i> Activate</a>
     <?php endif?>
 <?php endif?>

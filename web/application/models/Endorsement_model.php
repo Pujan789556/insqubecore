@@ -65,7 +65,7 @@ class Endorsement_model extends MY_Model
 
         $txn_type = (int)$this->input->post('txn_type');
         $cb_required = '';
-        if( in_array($txn_type, [IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE, IQB_POLICY_TXN_TYPE_PREMIUM_REFUND]) )
+        if( in_array($txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND]) )
         {
             $cb_required = 'required|';
         }
@@ -146,11 +146,11 @@ class Endorsement_model extends MY_Model
 
         switch ($txn_type)
         {
-            case IQB_POLICY_TXN_TYPE_GENERAL:
+            case IQB_POLICY_ENDORSEMENT_TYPE_GENERAL:
                 $v_rules = ['basic' => $basic];
                 break;
 
-            case IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER:
+            case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
                 $v_rules = [
 
                     'basic' => $basic,
@@ -201,11 +201,11 @@ class Endorsement_model extends MY_Model
                 ];
                 break;
 
-            case IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE:
+            case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
                 $v_rules = ['basic' => $basic, 'computation_basis' => $computation_basis];
                 break;
 
-            case IQB_POLICY_TXN_TYPE_PREMIUM_REFUND:
+            case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
                 $v_rules = [
                     'basic'             => $basic,
                     'computation_basis' => $computation_basis,
@@ -226,7 +226,7 @@ class Endorsement_model extends MY_Model
                 ];
                 break;
 
-            case IQB_POLICY_TXN_TYPE_TERMINATE:
+            case IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE:
                 $v_rules = ['basic' => $basic];
                 break;
 
@@ -378,7 +378,7 @@ class Endorsement_model extends MY_Model
             /**
              * Reset Verified date/user to NULL
              */
-            case IQB_POLICY_TXN_STATUS_DRAFT:
+            case IQB_POLICY_ENDORSEMENT_STATUS_DRAFT:
                 $data['verified_at'] = NULL;
                 $data['verified_by'] = NULL;
                 break;
@@ -386,7 +386,7 @@ class Endorsement_model extends MY_Model
             /**
              * Update Verified date/user and Reset ri_approved date/user to null
              */
-            case IQB_POLICY_TXN_STATUS_VERIFIED:
+            case IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED:
                 $data['verified_at'] = $this->set_date();
                 $data['verified_by'] = $this->dx_auth->get_user_id();
                 $data['ri_approved_at'] = NULL;
@@ -396,7 +396,7 @@ class Endorsement_model extends MY_Model
             /**
              * Update RI Approved date/user
              */
-            case IQB_POLICY_TXN_STATUS_RI_APPROVED:
+            case IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED:
                 $data['ri_approved_at'] = $this->set_date();
                 $data['ri_approved_by'] = $this->dx_auth->get_user_id();
             break;
@@ -422,7 +422,7 @@ class Endorsement_model extends MY_Model
              *      - Fresh/Renewal - Activate Policy Record
              *
              */
-            if( $to_status_flag === IQB_POLICY_TXN_STATUS_ACTIVE )
+            if( $to_status_flag === IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE )
             {
                 if( !_ENDORSEMENT_is_first($record->txn_type) )
                 {
@@ -437,12 +437,12 @@ class Endorsement_model extends MY_Model
              * If FRESH/RENEWAL transaction and status is verified,
              * Update the Sum Insured Value from Policy Object
              */
-            else if($to_status_flag === IQB_POLICY_TXN_STATUS_VERIFIED)
+            else if($to_status_flag === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED)
             {
                 /**
                  * Task 1: FRESH/RENEWAL - RI Approval Constraint
                  */
-                if( in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+                if( in_array($record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]) )
                 {
                     /**
                      * RI Approval Constraint
@@ -484,29 +484,29 @@ class Endorsement_model extends MY_Model
 
         switch ($to_status)
         {
-            case IQB_POLICY_TXN_STATUS_DRAFT:
-                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_VERIFIED;
+            case IQB_POLICY_ENDORSEMENT_STATUS_DRAFT:
+                $flag_qualifies = $current_status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED;
                 break;
 
-            case IQB_POLICY_TXN_STATUS_VERIFIED:
-                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_DRAFT;
+            case IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED:
+                $flag_qualifies = $current_status === IQB_POLICY_ENDORSEMENT_STATUS_DRAFT;
                 break;
 
-            case IQB_POLICY_TXN_STATUS_RI_APPROVED:
-                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_VERIFIED;
+            case IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED:
+                $flag_qualifies = $current_status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED;
                 break;
 
-            case IQB_POLICY_TXN_STATUS_VOUCHERED:
-                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED]);
+            case IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED:
+                $flag_qualifies = in_array($current_status, [IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED, IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED]);
                 break;
 
-            case IQB_POLICY_TXN_STATUS_INVOICED:
-                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_VOUCHERED;
+            case IQB_POLICY_ENDORSEMENT_STATUS_INVOICED:
+                $flag_qualifies = $current_status === IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED;
                 break;
 
             // For non-txnal endorsement, its from approved
-            case IQB_POLICY_TXN_STATUS_ACTIVE:
-                $flag_qualifies = in_array($current_status, [IQB_POLICY_TXN_STATUS_VERIFIED, IQB_POLICY_TXN_STATUS_RI_APPROVED, IQB_POLICY_TXN_STATUS_INVOICED]);
+            case IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE:
+                $flag_qualifies = in_array($current_status, [IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED, IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED, IQB_POLICY_ENDORSEMENT_STATUS_INVOICED]);
                 break;
 
             default:
@@ -725,10 +725,10 @@ class Endorsement_model extends MY_Model
          * Task 1: Get Previous SI(gross)
          */
         $txn_types = [
-            IQB_POLICY_TXN_TYPE_FRESH,
-            IQB_POLICY_TXN_TYPE_RENEWAL,
-            IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE,
-            IQB_POLICY_TXN_TYPE_PREMIUM_REFUND
+            IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
+            IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
+            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
+            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND
         ];
 
         $record =  parent::find($id);
@@ -910,7 +910,7 @@ class Endorsement_model extends MY_Model
      */
     public function get_fresh_renewal_by_policy($policy_id, $txn_type)
     {
-        if( !in_array($txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+        if( !in_array($txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]) )
         {
             throw new Exception("Exception [Model:Endorsement_model][Method: get_fresh_renewal_by_policy()]: Invalid Transaction Type.");
         }

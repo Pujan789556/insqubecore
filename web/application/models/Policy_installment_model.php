@@ -17,7 +17,7 @@ class Policy_installment_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'endorsement_id', 'installment_date', 'percent', 'amt_total_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'endorsement_id', 'installment_date', 'type', 'percent', 'amt_total_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -227,7 +227,7 @@ class Policy_installment_model extends MY_Model
                  * RI__distribute_endorsement - All other transaction or installments
                  */
                 if(
-                    in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL])
+                    in_array($record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL])
                         &&
                     $record->flag_first == IQB_FLAG_ON
                 )
@@ -268,13 +268,13 @@ class Policy_installment_model extends MY_Model
                 $flag_qualifies = $current_status === IQB_POLICY_INSTALLMENT_STATUS_DRAFT;
                 break;
 
-            case IQB_POLICY_TXN_STATUS_INVOICED:
+            case IQB_POLICY_ENDORSEMENT_STATUS_INVOICED:
                 $flag_qualifies = $current_status === IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED;
                 break;
 
             // For non-txnal endorsement, its from approved
             case IQB_POLICY_INSTALLMENT_STATUS_PAID:
-                $flag_qualifies = $current_status === IQB_POLICY_TXN_STATUS_INVOICED;
+                $flag_qualifies = $current_status === IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
                 break;
 
             default:

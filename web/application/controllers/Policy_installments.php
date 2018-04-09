@@ -613,7 +613,7 @@ class Policy_installments extends MY_Controller
 						 */
 						if($installment_record->flag_first == IQB_FLAG_ON)
 						{
-							$this->endorsement_model->update_status($transaction_record, IQB_POLICY_TXN_STATUS_VOUCHERED);
+							$this->endorsement_model->update_status($transaction_record, IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED);
 						}
 
 						// Update installment status
@@ -638,7 +638,7 @@ class Policy_installments extends MY_Controller
 							&&
 						$installment_record->flag_first == IQB_FLAG_ON
 							&&
-						in_array($transaction_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL])
+						in_array($transaction_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL])
 					)
 				{
 					try{
@@ -708,8 +708,8 @@ class Policy_installments extends MY_Controller
 		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
 		 */
 		$installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED;
-		$installment_record->endorsement_status 	= IQB_POLICY_TXN_STATUS_VOUCHERED;
-		$transaction_record->status 					= IQB_POLICY_TXN_STATUS_VOUCHERED;
+		$installment_record->endorsement_status 	= IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED;
+		$transaction_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED;
 
 		$html_tab_ovrview = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $transaction_record], TRUE);
 		$html_txn_row 	  = $this->load->view('policy_installments/_single_row', ['policy_record' => $policy_record, 'record' => $installment_record], TRUE);
@@ -940,7 +940,7 @@ class Policy_installments extends MY_Controller
 					 */
 					if($installment_record->flag_first == IQB_FLAG_ON)
 					{
-						$this->endorsement_model->update_status($transaction_record, IQB_POLICY_TXN_STATUS_INVOICED);
+						$this->endorsement_model->update_status($transaction_record, IQB_POLICY_ENDORSEMENT_STATUS_INVOICED);
 					}
 					$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_INVOICED);
 
@@ -1036,8 +1036,8 @@ class Policy_installments extends MY_Controller
 		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
 		 */
 		$installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_INVOICED;
-		$installment_record->endorsement_status 	= IQB_POLICY_TXN_STATUS_INVOICED;
-		$transaction_record->status 					= IQB_POLICY_TXN_STATUS_INVOICED;
+		$installment_record->endorsement_status 	= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
+		$transaction_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
 
 		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $transaction_record], TRUE);
 
@@ -1409,7 +1409,7 @@ class Policy_installments extends MY_Controller
 						 */
 						if($installment_record->flag_first == IQB_FLAG_ON)
 						{
-							$this->endorsement_model->update_status($transaction_record, IQB_POLICY_TXN_STATUS_ACTIVE);
+							$this->endorsement_model->update_status($transaction_record, IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE);
 						}
                         $this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_PAID);
 
@@ -1525,8 +1525,8 @@ class Policy_installments extends MY_Controller
          * Reload the Policy Overview Tab, Update Installment Row (Replace)
          */
         $installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_PAID;
-		$installment_record->endorsement_status 	= IQB_POLICY_TXN_STATUS_ACTIVE;
-        $transaction_record->status 					= IQB_POLICY_TXN_STATUS_ACTIVE;
+		$installment_record->endorsement_status 	= IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
+        $transaction_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
         $policy_record->status      					= IQB_POLICY_STATUS_ACTIVE;
         $invoice_record->flag_paid  					= IQB_FLAG_ON;
 
@@ -1577,7 +1577,7 @@ class Policy_installments extends MY_Controller
 
     		$message = "Dear {$customer_name}," . PHP_EOL;
 
-    		if( in_array($transaction_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+    		if( in_array($transaction_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]) )
         	{
 
         		// First Installment

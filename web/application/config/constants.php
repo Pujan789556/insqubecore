@@ -364,28 +364,6 @@ defined('IQB_POLICY_STATUS_ACTIVE')         OR define('IQB_POLICY_STATUS_ACTIVE'
 defined('IQB_POLICY_STATUS_CANCELED')       OR define('IQB_POLICY_STATUS_CANCELED',     'C');
 defined('IQB_POLICY_STATUS_EXPIRED')        OR define('IQB_POLICY_STATUS_EXPIRED',      'E');
 
-/*
-|--------------------------------------------------------------------------
-| POLICY TRANSACTION STATUS CONSTANTS
-|--------------------------------------------------------------------------
-*/
-defined('IQB_POLICY_TXN_STATUS_DRAFT')          OR define('IQB_POLICY_TXN_STATUS_DRAFT',        'D');
-defined('IQB_POLICY_TXN_STATUS_VERIFIED')       OR define('IQB_POLICY_TXN_STATUS_VERIFIED',     'V');
-defined('IQB_POLICY_TXN_STATUS_RI_APPROVED')    OR define('IQB_POLICY_TXN_STATUS_RI_APPROVED',  'R');
-defined('IQB_POLICY_TXN_STATUS_VOUCHERED')    	OR define('IQB_POLICY_TXN_STATUS_VOUCHERED',  	'H');
-defined('IQB_POLICY_TXN_STATUS_INVOICED')    	OR define('IQB_POLICY_TXN_STATUS_INVOICED',  	'I');
-defined('IQB_POLICY_TXN_STATUS_ACTIVE')         OR define('IQB_POLICY_TXN_STATUS_ACTIVE',       'A');
-
-/*
-|--------------------------------------------------------------------------
-| POLICY INSTALLMENT STATUS CONSTANTS
-|--------------------------------------------------------------------------
-*/
-defined('IQB_POLICY_INSTALLMENT_STATUS_DRAFT')          OR define('IQB_POLICY_INSTALLMENT_STATUS_DRAFT',        'D');
-defined('IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED')    	OR define('IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED',  	'V');
-defined('IQB_POLICY_INSTALLMENT_STATUS_INVOICED')    	OR define('IQB_POLICY_INSTALLMENT_STATUS_INVOICED',  	'I');
-defined('IQB_POLICY_INSTALLMENT_STATUS_PAID')         	OR define('IQB_POLICY_INSTALLMENT_STATUS_PAID',       	'P');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -399,33 +377,66 @@ defined('IQB_POLICY_FLAG_DC_NONE')    			OR define('IQB_POLICY_FLAG_DC_NONE',   
 
 /*
 |--------------------------------------------------------------------------
-| POLICY TRANSACTION TYPES CONSTANTS
+| POLICY ENDORSEMENT STATUS CONSTANTS
 |--------------------------------------------------------------------------
 */
-defined('IQB_POLICY_TXN_TYPE_FRESH')    OR define('IQB_POLICY_TXN_TYPE_FRESH',      1);
-defined('IQB_POLICY_TXN_TYPE_RENEWAL')  OR define('IQB_POLICY_TXN_TYPE_RENEWAL',    2);
+defined('IQB_POLICY_ENDORSEMENT_STATUS_DRAFT')          OR define('IQB_POLICY_ENDORSEMENT_STATUS_DRAFT',        'D');
+defined('IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED')       OR define('IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED',     'V');
+defined('IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED')    OR define('IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED',  'R');
+defined('IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED')    	OR define('IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED',  	'H');
+defined('IQB_POLICY_ENDORSEMENT_STATUS_INVOICED')    	OR define('IQB_POLICY_ENDORSEMENT_STATUS_INVOICED',  	'I');
+defined('IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE')         OR define('IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE',       'A');
+
+
+/*
+|--------------------------------------------------------------------------
+| POLICY ENDORSEMENT TYPES CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_POLICY_ENDORSEMENT_TYPE_FRESH')    OR define('IQB_POLICY_ENDORSEMENT_TYPE_FRESH',      1);
+defined('IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL')  OR define('IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL',    2);
 
 // OTHER ENDORSEMENTS
-defined('IQB_POLICY_TXN_TYPE_GENERAL')  			OR define('IQB_POLICY_TXN_TYPE_GENERAL',    		3);
-defined('IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER')	OR define('IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER', 4);
-defined('IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE')  	OR define('IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE',    5);
-defined('IQB_POLICY_TXN_TYPE_PREMIUM_REFUND')  		OR define('IQB_POLICY_TXN_TYPE_PREMIUM_REFUND',    	6);
-defined('IQB_POLICY_TXN_TYPE_TERMINATE')  			OR define('IQB_POLICY_TXN_TYPE_TERMINATE',    		7);
+defined('IQB_POLICY_ENDORSEMENT_TYPE_GENERAL')  			OR define('IQB_POLICY_ENDORSEMENT_TYPE_GENERAL',    		3);
+defined('IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER')	OR define('IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER', 4);
+defined('IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE')  	OR define('IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE',    5);
+defined('IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND')  		OR define('IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND',    	6);
+defined('IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE')  			OR define('IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE',    		7);
 
 
-
+// @TODO : TO DEL
 defined('IQB_POLICY_TXN_TYPE_ET')       OR define('IQB_POLICY_TXN_TYPE_ET',     	3); // ENDORSEMENT TRANSACTIONAL
 defined('IQB_POLICY_TXN_TYPE_EG')       OR define('IQB_POLICY_TXN_TYPE_EG',     	4); // ENDORSEMENT GENERAL
 defined('IQB_POLICY_TXN_TYPE_EC')       OR define('IQB_POLICY_TXN_TYPE_EC',     	5); // ENDORSEMENT CANCEL/REFUND
 
 /*
 |--------------------------------------------------------------------------
-| POLICY TRANSACTION COMPUTATION BASIS CONSTANTS
+| POLICY ENDORSEMENT COMPUTATION BASIS CONSTANTS
 |--------------------------------------------------------------------------
 */
-defined('IQB_POLICY_TXN_CB_ANNUAL')       		OR define('IQB_POLICY_TXN_CB_ANNUAL',     		3);
-defined('IQB_POLICY_TXN_CB_SHORT_TERM_RATE')    OR define('IQB_POLICY_TXN_CB_SHORT_TERM_RATE',  4);
-defined('IQB_POLICY_TXN_CB_PRORATA')       		OR define('IQB_POLICY_TXN_CB_PRORATA',     		5);
+defined('IQB_POLICY_ENDORSEMENT_CB_ANNUAL')     OR define('IQB_POLICY_ENDORSEMENT_CB_ANNUAL',   1);
+defined('IQB_POLICY_ENDORSEMENT_CB_STR')    	OR define('IQB_POLICY_ENDORSEMENT_CB_STR',  	2); // STR = SHORT TERM RATE
+defined('IQB_POLICY_ENDORSEMENT_CB_PRORATA')    OR define('IQB_POLICY_ENDORSEMENT_CB_PRORATA', 	3);
+
+
+/*
+|--------------------------------------------------------------------------
+| POLICY INSTALLMENT STATUS CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_POLICY_INSTALLMENT_STATUS_DRAFT')          OR define('IQB_POLICY_INSTALLMENT_STATUS_DRAFT',        'D');
+defined('IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED')    	OR define('IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED',  	'V');
+defined('IQB_POLICY_INSTALLMENT_STATUS_INVOICED')    	OR define('IQB_POLICY_INSTALLMENT_STATUS_INVOICED',  	'I');
+defined('IQB_POLICY_INSTALLMENT_STATUS_PAID')         	OR define('IQB_POLICY_INSTALLMENT_STATUS_PAID',       	'P');
+
+/*
+|--------------------------------------------------------------------------
+| POLICY INSTALLMENT TYPE CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_POLICY_INSTALLMENT_TYPE_INVOICE_TO_CUSTOMER') OR define('IQB_POLICY_INSTALLMENT_TYPE_INVOICE_TO_CUSTOMER', 'I');
+defined('IQB_POLICY_INSTALLMENT_TYPE_REFUND_TO_CUSTOMER') OR define('IQB_POLICY_INSTALLMENT_TYPE_REFUND_TO_CUSTOMER',  	'R');
+
 
 
 /*

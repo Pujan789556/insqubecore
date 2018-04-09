@@ -1067,7 +1067,7 @@ class Policy_model extends MY_Model
 
 
                     // Txn Status to draft, Editable Object & Customer
-                    $this->endorsement_model->update_status($record->id, IQB_POLICY_TXN_STATUS_DRAFT);
+                    $this->endorsement_model->update_status($record->id, IQB_POLICY_ENDORSEMENT_STATUS_DRAFT);
                     $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
                     $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
                     break;
@@ -1084,7 +1084,7 @@ class Policy_model extends MY_Model
                     /**
                      * Update Transaction Status, Lock Object, Customer
                      */
-                    $this->endorsement_model->update_status($record->id, IQB_POLICY_TXN_STATUS_VERIFIED);
+                    $this->endorsement_model->update_status($record->id, IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED);
                     $this->object_model->update_lock($record->object_id, IQB_FLAG_LOCKED);
                     $this->customer_model->update_lock($record->customer_id, IQB_FLAG_LOCKED);
                     break;
@@ -1108,7 +1108,7 @@ class Policy_model extends MY_Model
                          * Updated Records - Policy and Endorsement
                          */
                         $record     = $this->get($record->id);
-                        $endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH );
+                        $endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
 
                         /**
                          * Save a Fresh PDF copy
@@ -1258,7 +1258,7 @@ class Policy_model extends MY_Model
          *
          * !!! NOTE: Both the tasks are done by calling the stored function.
          */
-        $policy_type    = $record->ancestor_id ? IQB_POLICY_TXN_TYPE_RENEWAL : IQB_POLICY_TXN_TYPE_FRESH;
+        $policy_type    = $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH;
         $params         = [$policy_type, $record->id, $this->dx_auth->get_user_id()];
         $sql            = "SELECT `f_generate_policy_number`(?, ?, ?) AS policy_code";
         $result         = mysqli_store_procedure('select', $sql, $params);

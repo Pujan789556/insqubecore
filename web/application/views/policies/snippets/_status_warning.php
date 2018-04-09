@@ -9,15 +9,15 @@ if( $record->status === IQB_POLICY_STATUS_VERIFIED )
     $css_class  = 'text-green';
 
     // Transaction Status
-    if($endorsement_record->status === IQB_POLICY_TXN_STATUS_VERIFIED || $endorsement_record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED )
+    if($endorsement_record->status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED || $endorsement_record->status === IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED )
     {
         $status_sentence .= "<br/>Please <strong>Generate Policy Voucher</strong> from <strong>Transactions</strong> Tab.";
     }
-    else if( $endorsement_record->status == IQB_POLICY_TXN_STATUS_VOUCHERED )
+    else if( $endorsement_record->status == IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED )
     {
         $status_sentence .= "<br/>Please <strong>Generate Policy Invoice</strong> from <strong>Vouchers</strong> Tab.";
     }
-    else if( $endorsement_record->status === IQB_POLICY_TXN_STATUS_INVOICED )
+    else if( $endorsement_record->status === IQB_POLICY_ENDORSEMENT_STATUS_INVOICED )
     {
         $status_sentence .= "<br/>Please <strong>Make Payment</strong> for this policy from <strong>Invoices</strong> Tab.";
     }

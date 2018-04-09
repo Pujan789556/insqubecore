@@ -354,23 +354,23 @@ class Endorsements extends MY_Controller
 			$data = [];
 			switch ($txn_type)
 			{
-				case IQB_POLICY_TXN_TYPE_GENERAL:
+				case IQB_POLICY_ENDORSEMENT_TYPE_GENERAL:
 					$data = $this->_prepare_data_general($post_data);
 					break;
 
-				case IQB_POLICY_TXN_TYPE_OWNERSHIP_TRANSFER:
+				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
 					$data = $this->_prepare_data_ownership_transfer($post_data);
 					break;
 
-				case IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE:
+				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 					$data = $this->_prepare_data_premium_upgrade($post_data);
 					break;
 
-				case IQB_POLICY_TXN_TYPE_PREMIUM_REFUND:
+				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
 					$data = $this->_prepare_data_premium_refund($post_data);
 					break;
 
-				case IQB_POLICY_TXN_TYPE_TERMINATE:
+				case IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE:
 					$data = $this->_prepare_data_terminate($post_data);
 					break;
 
@@ -516,7 +516,7 @@ class Endorsements extends MY_Controller
 		{
 			$current_txn = $this->endorsement_model->get_current_endorsement_by_policy($policy_id);
 
-			return $current_txn->status === IQB_POLICY_TXN_STATUS_ACTIVE;
+			return $current_txn->status === IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
 		}
 
 	// --------------------------------------------------------------------
@@ -559,7 +559,7 @@ class Endorsements extends MY_Controller
 
 		// Deletable Status?
 		if(
-			$record->status !== IQB_POLICY_TXN_STATUS_DRAFT
+			$record->status !== IQB_POLICY_ENDORSEMENT_STATUS_DRAFT
 							||
 			! _ENDORSEMENT_is_deletable_by_type($record->txn_type)
 							||
@@ -947,8 +947,7 @@ class Endorsements extends MY_Controller
 					/**
 					 * Build and Update Installments
 					 */
-					// Get Updated TXN Record
-					$endorsement_record 		= $this->endorsement_model->get($endorsement_record->id);
+					$endorsement_record = $this->endorsement_model->get($endorsement_record->id);
 					try {
 
 						$this->_save_installments($policy_record, $endorsement_record);
@@ -1517,7 +1516,7 @@ class Endorsements extends MY_Controller
 		{
 			$where = [
 				'P.id' 			=> $key,
-				'ENDRSMNT.status' 	=> IQB_POLICY_TXN_STATUS_ACTIVE
+				'ENDRSMNT.status' 	=> IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
 			];
 		}
 		else
@@ -1626,7 +1625,7 @@ class Endorsements extends MY_Controller
 				 * 	- customer (from audit_customer field if any data)
 				 * 	- SEND SMS on General Transaction Activation
 				 */
-				if( $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_GENERAL && $to_status_code ==IQB_POLICY_TXN_STATUS_ACTIVE )
+				if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_GENERAL && $to_status_code ==IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE )
 				{
 					$this->_sms_activation($endorsement_record, $policy_record);
 				}
@@ -1744,27 +1743,27 @@ class Endorsements extends MY_Controller
 			$permission_name 	= '';
 			switch ($to_updown_status)
 			{
-				case IQB_POLICY_TXN_STATUS_DRAFT:
+				case IQB_POLICY_ENDORSEMENT_STATUS_DRAFT:
 					$permission_name = 'status.to.draft';
 					break;
 
-				case IQB_POLICY_TXN_STATUS_VERIFIED:
+				case IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED:
 					$permission_name = 'status.to.verified';
 					break;
 
-				case IQB_POLICY_TXN_STATUS_RI_APPROVED:
+				case IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED:
 					$permission_name = 'status.to.ri.approved';
 					break;
 
-				case IQB_POLICY_TXN_STATUS_VOUCHERED:
+				case IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED:
 					$permission_name = 'status.to.vouchered';
 					break;
 
-				case IQB_POLICY_TXN_STATUS_INVOICED:
+				case IQB_POLICY_ENDORSEMENT_STATUS_INVOICED:
 					$permission_name = 'status.to.invoiced';
 					break;
 
-				case IQB_POLICY_TXN_STATUS_ACTIVE:
+				case IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE:
 					$permission_name = 'status.to.active';
 					break;
 
@@ -1812,9 +1811,9 @@ class Endorsements extends MY_Controller
 				if( _ENDORSEMENT_is_first($endorsement_record->txn_type) )
 				{
 					$__flag_passed = !in_array($to_updown_status, [
-						IQB_POLICY_TXN_STATUS_DRAFT,
-						IQB_POLICY_TXN_STATUS_VERIFIED,
-						IQB_POLICY_TXN_STATUS_ACTIVE
+						IQB_POLICY_ENDORSEMENT_STATUS_DRAFT,
+						IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED,
+						IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
 					]);
 				}
 			}
@@ -1826,7 +1825,7 @@ class Endorsements extends MY_Controller
 			if(
 				$__flag_passed && _ENDORSEMENT_is_premium_computable_by_type($endorsement_record->txn_type)
 				&&
-				$to_updown_status === IQB_POLICY_TXN_STATUS_VERIFIED
+				$to_updown_status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED
 				&&
 				!$endorsement_record->amt_total_premium
 			)
@@ -1843,8 +1842,8 @@ class Endorsements extends MY_Controller
 			if( $__flag_passed )
 			{
 				$__flag_passed = !in_array($to_updown_status, [
-					IQB_POLICY_TXN_STATUS_VOUCHERED,
-					IQB_POLICY_TXN_STATUS_INVOICED
+					IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED,
+					IQB_POLICY_ENDORSEMENT_STATUS_INVOICED
 				]);
 			}
 
@@ -1854,15 +1853,15 @@ class Endorsements extends MY_Controller
 			 *
 			 * !!! If RI-Approval Constraint Required, It should Come from That Status else from Verified
 			 */
-			if( $__flag_passed && $to_updown_status === IQB_POLICY_TXN_STATUS_ACTIVE && $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_GENERAL )
+			if( $__flag_passed && $to_updown_status === IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE && $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_GENERAL )
 			{
 				if( (int)$endorsement_record->flag_ri_approval === IQB_FLAG_ON )
 				{
-					$__flag_passed = $endorsement_record->status === IQB_POLICY_TXN_STATUS_RI_APPROVED;
+					$__flag_passed = $endorsement_record->status === IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED;
 				}
 				else
 				{
-					$__flag_passed = $endorsement_record->status === IQB_POLICY_TXN_STATUS_VERIFIED;
+					$__flag_passed = $endorsement_record->status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED;
 				}
 			}
 
@@ -1910,7 +1909,7 @@ class Endorsements extends MY_Controller
 
     		$message = "Dear {$customer_name}," . PHP_EOL;
 
-    		if( in_array($endorsement_record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
+    		if( in_array($endorsement_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]) )
         	{
         		$message .= "Your Policy has been issued." . PHP_EOL .
         					"Policy No: " . $policy_record->code . PHP_EOL .
