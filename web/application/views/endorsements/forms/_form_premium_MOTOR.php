@@ -13,83 +13,12 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
         ],
         // Hidden Fields
         isset($policy_record) ? ['id' => $policy_record->id] : []);
+
+    /**
+     * Premium Summary Table
+     */
+    $this->load->view('endorsements/snippets/_premium_summary');
 ?>
-
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-            <h4 class="box-title">Policy Summary</h4>
-        </div>
-        <table class="table table-responsive table-condensed">
-            <tbody>
-                <tr>
-                    <th>Portfolio</th>
-                    <td><?php echo $policy_record->portfolio_name;?></td>
-                </tr>
-
-                <?php if($policy_record->portfolio_id === IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID):?>
-                    <tr>
-                        <th>CVC Type</th>
-                        <td>
-                            <?php echo $object_attributes->cvc_type ? _OBJ_MOTOR_CVC_type_dropdown(FALSE)[$object_attributes->cvc_type] : '-'?>
-                        </td>
-                    </tr>
-                <?php endif?>
-
-                <tr>
-                    <th>Ownership</th>
-                    <td><?php echo _OBJ_MOTOR_ownership_dropdown(FALSE)[$object_attributes->ownership]?></td>
-                </tr>
-
-                <tr>
-                    <th>Engine Capacity</th>
-                    <td><?php echo $object_attributes->engine_capacity . ' ' . $object_attributes->ec_unit?></td>
-                </tr>
-
-                <tr>
-                    <th>Policy Package</th>
-                    <td><?php echo _OBJ_policy_package_dropdown($policy_record->portfolio_id)[$policy_record->policy_package]?></td>
-                </tr>
-
-                <?php
-                // Find the Thirdparty Discount
-                $tariff = json_decode($tariff_record->tariff, true);
-                $third_party_premium = 0.00;
-                foreach ($tariff as $t)
-                {
-                    if( $object_attributes->engine_capacity >= $t['ec_min'] && $object_attributes->engine_capacity <= $t['ec_max'])
-                    {
-                        $third_party_premium = $t['third_party'];
-                        break;
-                    }
-                }
-                ?>
-                <tr>
-                    <th>Third Party Premium</th>
-                    <td>Rs. <?php echo $third_party_premium?></td>
-                </tr>
-
-                <tr>
-                    <th>Sum Insured Value (Rs.)</th>
-                    <td>
-                        <p class="form-control-static">Rs. <?php echo $policy_object->amt_sum_insured;?></p>
-                        <p class="help-box">
-                            When Sum Insured Value is below or equal to Rs. <strong>1 Lakh (100000.00)</strong> then the Stamp Duty = should be <strong>Rs. 10</strong>.
-                            If its greater it should be <strong>Rs. 20</strong>.<br/><br/>
-                            <code>
-                                IF Sum Insured <= 100000 Then  <strong>Stamp Duty = Rs. 10</strong> <br/>
-                                Else <strong>Stamp Duty = Rs. 10</strong>
-                            </code>
-                        </p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Direct Discount</th>
-                    <td><?php echo $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT ? 'Yes' : 'No';?></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
 
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">

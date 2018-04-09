@@ -15,29 +15,12 @@ $premium_computation_table = $endorsement_record->premium_computation_table ? js
         ],
         // Hidden Fields
         isset($policy_record) ? ['id' => $policy_record->id] : []);
-?>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-            <h4 class="box-title">Policy Summary</h4>
-        </div>
-        <table class="table table-responsive table-condensed">
-            <tbody>
-                <tr>
-                    <th>Portfolio</th>
-                    <td><?php echo $policy_record->portfolio_name;?></td>
-                </tr>
-                <tr>
-                    <th>Sum Insured (Rs.)</th>
-                    <td><?php echo $policy_object->amt_sum_insured;?></td>
-                </tr>
-                <tr>
-                    <th>Direct Discount</th>
-                    <td><?php echo $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT ? 'Yes' : 'No';?></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    /**
+     * Premium Summary Table
+     */
+    $this->load->view('endorsements/snippets/_premium_summary');
+?>
 
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">
