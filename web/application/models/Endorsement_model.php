@@ -424,8 +424,7 @@ class Endorsement_model extends MY_Model
              */
             if( $to_status_flag === IQB_POLICY_TXN_STATUS_ACTIVE )
             {
-
-                if( in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_ET, IQB_POLICY_TXN_TYPE_EG]) )
+                if( !_ENDORSEMENT_is_first($record->txn_type) )
                 {
                     $this->_commit_endorsement_audit($record);
                 }
