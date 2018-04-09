@@ -1552,9 +1552,9 @@ if ( ! function_exists('_ENDORSEMENT_computation_basis_dropdown'))
 	function _ENDORSEMENT_computation_basis_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			IQB_POLICY_ENDORSEMENT_CB_ANNUAL 			=> 'Annual/Complete',
-			IQB_POLICY_ENDORSEMENT_CB_STR 	=> 'Short Term Rate',
-			IQB_POLICY_ENDORSEMENT_CB_PRORATA 			=> 'Prorata',
+			IQB_POLICY_ENDORSEMENT_CB_ANNUAL     => 'Annual/Complete',
+			IQB_POLICY_ENDORSEMENT_CB_STR        => 'Short Term Rate',
+			IQB_POLICY_ENDORSEMENT_CB_PRORATA 	  => 'Prorata',
 		];
 
 		if($flag_blank_select)
