@@ -1534,18 +1534,6 @@ class Policy_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-
-    public function get_sum_insured_by_policy_object($id)
-    {
-        return $this->db->select( 'O.amt_sum_insured')
-                        ->from($this->table_name . ' as P')
-                        ->join('dt_objects O', 'P.object_id = O.id')
-                        ->where('P.id', $id)
-                        ->get()->row()->amt_sum_insured;
-    }
-
-    // ----------------------------------------------------------------
-
     /**
      * Check if Policy exists by Supplied ID
      *

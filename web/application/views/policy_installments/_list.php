@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<?php if( $this->dx_auth->is_admin() ): ?>
 				<th>ID</th>
 			<?php endif?>
-			<th>Transaction / Endorsement ID</th>
+			<th>Endorsement ID</th>
 			<th>Installment Date</th>
 			<th>First Installment?</th>
 			<th>Percent</th>

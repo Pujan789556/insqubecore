@@ -123,21 +123,13 @@ class Policy_installment_model extends MY_Model
                 {
                     $installment_date       = $dates[$i];
                     $percent                = $percents[$i];
-
                     $amt_total_premium      = ( $endorsement_record->amt_total_premium * $percent ) / 100.00;
-
                     $amt_pool_premium       = $endorsement_record->amt_pool_premium
                                                 ? ( $endorsement_record->amt_pool_premium * $percent ) / 100.00 : NULL;
-
                     $amt_agent_commission   = $endorsement_record->amt_agent_commission
                                                 ? ( $endorsement_record->amt_agent_commission * $percent ) / 100.00 : NULL;
-
+                    $amt_vat                = ( $endorsement_record->amt_vat * $percent ) / 100.00;
                     $amt_stamp_duty         = $i === 0 ? $endorsement_record->amt_stamp_duty : NULL;
-
-                    // Compute VAT
-                    $taxable_amount = $amt_total_premium + floatval($amt_stamp_duty);
-                    $this->load->helper('account');
-                    $amt_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
                     $batch_data[] = [
                         'endorsement_id' => $endorsement_record->id,

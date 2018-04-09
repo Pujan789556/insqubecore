@@ -441,10 +441,8 @@ class Endorsement_model extends MY_Model
             else if($to_status_flag === IQB_POLICY_TXN_STATUS_VERIFIED)
             {
                 /**
-                 * Task 1: FRESH/RENEWAL - Update sum insured amount
-                 * Task 2: FRESH/RENEWAL - RI Approval Constraint
+                 * Task 1: FRESH/RENEWAL - RI Approval Constraint
                  */
-                $amt_sum_insured = $this->policy_model->get_sum_insured_by_policy_object($record->policy_id);
                 if( in_array($record->txn_type, [IQB_POLICY_TXN_TYPE_FRESH, IQB_POLICY_TXN_TYPE_RENEWAL]) )
                 {
                     /**
@@ -453,7 +451,6 @@ class Endorsement_model extends MY_Model
                     $this->load->helper('ri');
                     $flag_ri_approval = RI__compute_flag_ri_approval($record->portfolio_id, $amt_sum_insured);
                     $update_data = [
-                        'amt_sum_insured' => $amt_sum_insured,
                         'flag_ri_approval' => $flag_ri_approval
                     ];
                     parent::update($record->id, $update_data, TRUE);

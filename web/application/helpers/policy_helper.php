@@ -1602,6 +1602,32 @@ if ( ! function_exists('_ENDORSEMENT_apply_computation_basis'))
                 # code...
                 break;
         }
+
+        /**
+         * Computation Right?
+         * i.e.
+         *  If endorsement is premium upgrade -> total premium and/or pool premium MUST be positive
+         *  If endorsement is premium refund -> total premium and/or pool premium MUST be negative
+         */
+        $allowed_types  = [
+            IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE,
+            IQB_POLICY_TXN_TYPE_PREMIUM_REFUND,
+        ];
+        if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+        {
+            $txn_type           = (int)$endorsement_record->txn_type;
+            $amt_total_premium  = $computed_data['amt_total_premium'];
+
+            if( $txn_type == IQB_POLICY_TXN_TYPE_PREMIUM_UPGRADE && $amt_total_premium < 0 )
+            {
+                throw new Exception("Exception [Helper: policy_helper][Method: _ENDORSEMENT_apply_computation_basis()]: Negative Premium. Please change the endorsement type to 'Premium Refund' and update premium again!");
+            }
+            else if ($txn_type == IQB_POLICY_TXN_TYPE_PREMIUM_REFUND && $amt_total_premium > 0 )
+            {
+                throw new Exception("Exception [Helper: policy_helper][Method: _ENDORSEMENT_apply_computation_basis()]: Positive Premium. Please change the endorsement type to 'Premium Upgrade' and update premium again!");
+            }
+        }
+
         return $computed_data;
     }
 }
