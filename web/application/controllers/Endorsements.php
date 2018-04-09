@@ -1026,6 +1026,11 @@ class Endorsements extends MY_Controller
 				];
 			}
 
+			/**
+			 * Set Installment Type
+			 */
+			$installment_data['installment_type'] = _POLICY_INSTALLMENT_type_by_endorsement_type( $endorsement_record->txn_type );
+
 			return $this->policy_installment_model->build($endorsement_record, $installment_data);
 		}
 

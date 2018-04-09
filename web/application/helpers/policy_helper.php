@@ -2056,6 +2056,50 @@ if ( ! function_exists('_POLICY_INSTALLMENT_type_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_INSTALLMENT_type_by_endorsement_type'))
+{
+    /**
+     * Get policy installment type by endorsement type
+     *
+     * Allowed Transaction Types
+     *  - Fresh
+     *  - Renewal
+     *  - Premium Upgrade
+     *  - Premium Refund
+     *
+     * @param   int     Transaction Type
+     * @return  array
+     */
+    function _POLICY_INSTALLMENT_type_by_endorsement_type( $txn_type )
+    {
+        $txn_type = (int)$txn_type;
+        if( !_ENDORSEMENT_is_premium_computable_by_type($txn_type) )
+        {
+            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY_INSTALLMENT_type_by_endorsement_type()]: Invalid Endorsement Type.");
+        }
+
+        $installment_type = NULL;
+        switch($txn_type)
+        {
+            case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
+            case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
+            case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+                $installment_type = IQB_POLICY_INSTALLMENT_TYPE_INVOICE_TO_CUSTOMER;
+                break;
+
+            case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+                $installment_type = IQB_POLICY_INSTALLMENT_TYPE_REFUND_TO_CUSTOMER;
+                break;
+
+            default:
+                break;
+        }
+
+        return $installment_type;
+    }
+}
+
+// ------------------------------------------------------------------------
 
 if ( ! function_exists('_POLICY_INSTALLMENT__voucher_constraint'))
 {

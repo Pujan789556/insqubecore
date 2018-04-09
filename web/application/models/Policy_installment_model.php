@@ -115,8 +115,10 @@ class Policy_installment_model extends MY_Model
                 /**
                  * Task 2: Build Batch Insert For Installments
                  */
-                $dates      = $installment_data['dates'];
-                $percents   = $installment_data['percents'];
+                $dates              = $installment_data['dates'];
+                $percents           = $installment_data['percents'];
+                $installment_type   = $installment_data['installment_type'];
+
 
                 $batch_data = [];
                 for($i = 0; $i < count($dates); $i++ )
@@ -134,6 +136,7 @@ class Policy_installment_model extends MY_Model
                     $batch_data[] = [
                         'endorsement_id' => $endorsement_record->id,
                         'installment_date'      => $installment_date,
+                        'type'                  => $installment_type,
                         'percent'               => $percent,
                         'amt_total_premium'     => $amt_total_premium,
                         'amt_pool_premium'      => $amt_pool_premium,
