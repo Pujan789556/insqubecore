@@ -290,13 +290,7 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Let's Build Policy Voucher
 		 */
-		$narration = 'POLICY VOUCHER - POLICY CODE : ';
-
-		// policy code if not second installment
-		if($installment_record->flag_first == IQB_FLAG_OFF)
-		{
-			$narration .= $policy_record->code;
-		}
+		$narration = 'POLICY VOUCHER - POLICY CODE : ' . $policy_record->code;
 
 		$voucher_data = [
             'voucher_date'      => date('Y-m-d'),
@@ -311,7 +305,7 @@ class Policy_installments extends MY_Controller
         /**
          * Voucher Amount Computation
          */
-        $gross_premium_amount 		= $installment_record->amt_total_premium;
+        $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
         $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
         $vat_payable_amount 		= $installment_record->amt_vat;
 
@@ -835,7 +829,7 @@ class Policy_installments extends MY_Controller
 		/**
          * Voucher Amount Computation
          */
-        $gross_premium_amount 		= $installment_record->amt_total_premium;
+        $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
         $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
         $vat_payable_amount 		= $installment_record->amt_vat;
 

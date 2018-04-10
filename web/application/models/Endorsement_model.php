@@ -474,7 +474,7 @@ class Endorsement_model extends MY_Model
                      * RI Approval Constraint
                      */
                     $this->load->helper('ri');
-                    $flag_ri_approval = RI__compute_flag_ri_approval($record->portfolio_id, $amt_sum_insured);
+                    $flag_ri_approval = RI__compute_flag_ri_approval($record->portfolio_id, $record->net_amt_sum_insured);
                     $update_data = [
                         'flag_ri_approval' => $flag_ri_approval
                     ];

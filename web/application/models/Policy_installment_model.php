@@ -230,7 +230,7 @@ class Policy_installment_model extends MY_Model
                  * RI__distribute_endorsement - All other transaction or installments
                  */
                 if(
-                    in_array($record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL])
+                    _ENDORSEMENT_is_first($record->txn_type)
                         &&
                     $record->flag_first == IQB_FLAG_ON
                 )

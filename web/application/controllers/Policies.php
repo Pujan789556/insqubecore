@@ -1636,7 +1636,7 @@ class Policies extends MY_Controller
 				( $record->status === IQB_POLICY_STATUS_DRAFT && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
 			)
 			{
-				if( !$endorsement_record->amt_total_premium )
+				if( !$endorsement_record->amt_basic_premium )
 				{
 					$__flag_passed 		= FALSE;
 					$failed_message 	= 'Please Update Policy Premium First!';

@@ -15,7 +15,7 @@ if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
     } catch (Exception $e) {
     }
 }
-$grand_total = $endorsement_record->amt_total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
+$grand_total = $endorsement_record->amt_basic_premium + $endorsement_record->amt_pool_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
 
 
 ?>
@@ -62,7 +62,7 @@ $grand_total = $endorsement_record->amt_total_premium + $endorsement_record->amt
 
                     <tr>
                         <td>Basic Premium (Rs.)</td>
-                        <td class="text-right"><?php echo number_format($endorsement_record->amt_total_premium - $endorsement_record->amt_pool_premium, 2, '.', '');?></td>
+                        <td class="text-right"><?php echo number_format($endorsement_record->amt_basic_premium, 2, '.', '');?></td>
                     </tr>
                     <tr>
                         <td>Pool Premium (Rs.)</td>

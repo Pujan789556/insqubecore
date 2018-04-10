@@ -422,7 +422,6 @@ if ( ! function_exists('RI__distribute_endorsement'))
 		}
 
 
-
 		/**
 		 * Task 1 : Reflected RI Transaction (Current RI Transaction State)
 		 *
@@ -441,7 +440,7 @@ if ( ! function_exists('RI__distribute_endorsement'))
 		 *
 		 * !!!IMPORTANT: It applies only on installments of non-fresh/non-renewal transactions
 		 */
-		if( !in_array( $policy_installment_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL] ) )
+		if( !_ENDORSEMENT_is_first($policy_installment_record->txn_type) )
 		{
 			if( $policy_installment_record->endorsement_amt_sum_insured )
 			{
@@ -480,9 +479,9 @@ if ( ! function_exists('RI__distribute_endorsement'))
 		/**
 		 * Task 3: Update Premium ( If changed )
 		 */
-		if( $policy_installment_record->amt_total_premium )
+		if( $policy_installment_record->amt_basic_premium )
 		{
-			$policy_installment_record->amt_total_premium 	+= $premium_gross;
+			$policy_installment_record->amt_basic_premium 	+= $premium_gross;
 			$policy_installment_record->amt_pool_premium 	+= $premium_pool;
 		}
 
@@ -534,7 +533,7 @@ if ( ! function_exists('RI__distribute_endorsement'))
 			 */
 			$relation_data = [
 				'policy_id' 			=> $policy_installment_record->policy_id,
-				'endorsement_id' => $policy_installment_record->endorsement_id,
+				'endorsement_id' 		=> $policy_installment_record->endorsement_id,
 				'policy_installment_id' => $policy_installment_record->id,
 				'treaty_id' 			=> $treaty_record->id,
 				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
@@ -681,7 +680,7 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 		$si_treaty_3rd_surplus 	= NULL;
 		$si_treaty_fac 			= NULL;
 
-		$premium_gross 				= $policy_installment_record->amt_total_premium;
+		$premium_gross 				= $policy_installment_record->amt_basic_premium + (float)$policy_installment_record->amt_pool_premium;
 		$premium_pool 				= floatval($policy_installment_record->amt_pool_premium);
 		$premium_net 				= $premium_gross - $premium_pool;
 		$premium_comp_cession 		= NULL;
@@ -885,7 +884,7 @@ if ( ! function_exists('RI__distribute__QT'))
 		$si_treaty_quota 		= NULL;
 
 
-		$premium_gross 				= $policy_installment_record->amt_total_premium;
+		$premium_gross 				= $policy_installment_record->amt_basic_premium + (float)$policy_installment_record->amt_pool_premium;
 		$premium_pool 				= floatval($policy_installment_record->amt_pool_premium);
 		$premium_net 				= $premium_gross - $premium_pool;
 		$premium_comp_cession 		= NULL;
@@ -982,7 +981,7 @@ if ( ! function_exists('RI__distribute__EOL'))
 		$si_treaty_retaintion 	= NULL;
 
 
-		$premium_gross 				= $policy_installment_record->amt_total_premium;
+		$premium_gross 				= $policy_installment_record->amt_basic_premium + (float)$policy_installment_record->amt_pool_premium;
 		$premium_pool 				= floatval($policy_installment_record->amt_pool_premium);
 		$premium_net 				= $premium_gross - $premium_pool;
 		$premium_comp_cession 		= NULL;
@@ -1332,7 +1331,7 @@ if ( ! function_exists('RI__pool_distribute__QS_SP'))
 		$si_treaty_3rd_surplus 	= NULL;
 		$si_treaty_fac 			= NULL;
 
-		$premium_gross 				= $policy_installment_record->amt_total_premium;
+		$premium_gross 				= $policy_installment_record->amt_basic_premium + (float)$policy_installment_record->amt_pool_premium;
 		$premium_pool 				= floatval($policy_installment_record->amt_pool_premium);
 		$premium_net 				= $premium_pool;
 		$premium_treaty_total 		= NULL;
@@ -1516,7 +1515,7 @@ if ( ! function_exists('RI__pool_distribute__QT'))
 		$si_treaty_quota 		= NULL;
 
 
-		$premium_gross 				= $policy_installment_record->amt_total_premium;
+		$premium_gross 				= $policy_installment_record->amt_basic_premium + (float)$policy_installment_record->amt_pool_premium;
 		$premium_pool 				= floatval($policy_installment_record->amt_pool_premium);
 		$premium_net 				= $premium_pool;
 		$premium_comp_cession 		= NULL;

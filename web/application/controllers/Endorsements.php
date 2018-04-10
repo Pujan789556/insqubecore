@@ -1841,7 +1841,7 @@ class Endorsements extends MY_Controller
 				&&
 				$to_updown_status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED
 				&&
-				!$endorsement_record->amt_total_premium
+				!$endorsement_record->amt_basic_premium
 			)
 			{
 				$__flag_passed 		= FALSE;

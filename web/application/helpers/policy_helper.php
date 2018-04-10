@@ -834,11 +834,13 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
         }
         ksort($rate_list);
 
+        // If no spr found, we use this as a default spr
+        $spr_record = (object)['rate' => 100.00, 'duration' => $default_duration, 'title' => 'Default Rate'];
         foreach($rate_list as $duration=>$spr)
         {
             if( $days <= $duration )
             {
-                $default_rate = $spr;
+                $spr_record = $spr;
                 break;
             }
         }
@@ -1570,13 +1572,13 @@ if ( ! function_exists('_ENDORSEMENT_apply_computation_basis'))
         if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
         {
             $txn_type           = (int)$endorsement_record->txn_type;
-            $amt_total_premium  = $computed_data['amt_total_premium'];
+            $amt_basic_premium  = $computed_data['amt_basic_premium'];
 
-            if( $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE && $amt_total_premium < 0 )
+            if( $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE && $amt_basic_premium < 0 )
             {
                 throw new Exception("Exception [Helper: policy_helper][Method: _ENDORSEMENT_apply_computation_basis()]: Negative Premium. Please change the endorsement type to 'Premium Refund' and update premium again!");
             }
-            else if ($txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND && $amt_total_premium > 0 )
+            else if ($txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND && $amt_basic_premium > 0 )
             {
                 throw new Exception("Exception [Helper: policy_helper][Method: _ENDORSEMENT_apply_computation_basis()]: Positive Premium. Please change the endorsement type to 'Premium Upgrade' and update premium again!");
             }
@@ -1614,7 +1616,7 @@ if ( ! function_exists('_ENDORSEMENT__compute_prorata_premium'))
         $amt_commissionable = $cost_table['amt_commissionable'] ?? NULL;
         if($amt_commissionable)
         {
-            $premium_data['amt_commissionable']     = (float)$premium_data['amt_total_premium'] * $rate ;
+            $premium_data['amt_commissionable']     = (float)$premium_data['amt_basic_premium'] * $rate ;
             $premium_data['amt_agent_commission']   = (float)$premium_data['amt_agent_commission'] * $rate ;
         }
 
