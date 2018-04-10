@@ -17,7 +17,7 @@ class Policy_installment_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'endorsement_id', 'installment_date', 'type', 'percent', 'amt_total_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'endorsement_id', 'installment_date', 'type', 'percent', 'amt_basic_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -125,7 +125,7 @@ class Policy_installment_model extends MY_Model
                 {
                     $installment_date       = $dates[$i];
                     $percent                = $percents[$i];
-                    $amt_total_premium      = ( $endorsement_record->amt_total_premium * $percent ) / 100.00;
+                    $amt_basic_premium      = ( $endorsement_record->amt_basic_premium * $percent ) / 100.00;
                     $amt_pool_premium       = $endorsement_record->amt_pool_premium
                                                 ? ( $endorsement_record->amt_pool_premium * $percent ) / 100.00 : NULL;
                     $amt_agent_commission   = $endorsement_record->amt_agent_commission
@@ -138,7 +138,7 @@ class Policy_installment_model extends MY_Model
                         'installment_date'      => $installment_date,
                         'type'                  => $installment_type,
                         'percent'               => $percent,
-                        'amt_total_premium'     => $amt_total_premium,
+                        'amt_basic_premium'     => $amt_basic_premium,
                         'amt_pool_premium'      => $amt_pool_premium,
                         'amt_agent_commission'  => $amt_agent_commission,
                         'amt_stamp_duty'        => $amt_stamp_duty,

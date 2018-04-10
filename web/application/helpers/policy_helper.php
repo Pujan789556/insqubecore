@@ -713,10 +713,7 @@ if ( ! function_exists('_POLICY__compute_short_term_premium'))
             $short_term_rate = (float)$short_term_rate;
 
             // Compute Total Amount (Pool do not apply short term rate)
-            $amt_basic_premium               = $cost_table['amt_total_premium'] - $cost_table['amt_pool_premium'];
-            $amt_pool_premium                = $cost_table['amt_pool_premium'];
-            $amt_basic_premium               = ($amt_basic_premium * $short_term_rate)/100.00;
-            $cost_table['amt_total_premium'] = $amt_basic_premium + $cost_table['amt_pool_premium'];
+            $cost_table['amt_basic_premium'] = ($cost_table['amt_basic_premium'] * $short_term_rate)/100.00;
 
             // Update Commissionable Amount and Commission
             $amt_commissionable = $cost_table['amt_commissionable'] ?? NULL;
@@ -798,7 +795,7 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
         $pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($fy_record->id, $portfolio_id);
         if(!$pfs_record)
         {
-        	throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__get_short_term_info()]: No Portfolio Setting Record found for specified fiscal year {$fy_record->code_np}({$fy_record->code_en})");
+            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__get_short_term_info()]: No Portfolio Setting Record found for specified fiscal year {$fy_record->code_np}({$fy_record->code_en})");
         }
 
         // update false return with default duration
@@ -819,80 +816,37 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
         $end_timestamp      = strtotime($end_date);
         $difference         = $end_timestamp - $start_timestamp;
         $days               = floor($difference / (60 * 60 * 24));
-        $default_duration 	= (int)$pfs_record->default_duration;
+        $default_duration   = (int)$pfs_record->default_duration;
 
-        /**
-         * Supplied Duration === Default Duration?
-         */
-        if($days == $default_duration)
+
+
+        $short_term_policy_rates = $pfs_record->short_term_policy_rate ? json_decode($pfs_record->short_term_policy_rate) : NULL;
+
+        if( !$short_term_policy_rates )
         {
-        	return $false_return;
+            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__get_short_term_info()]: No Short Term Policy Rates found for the supplied portfolio.");
         }
 
-
-        $short_term_policy_rate = $pfs_record->short_term_policy_rate ? json_decode($pfs_record->short_term_policy_rate) : [];
-        echo '<pre>'; print_r($short_term_policy_rate);exit;
-        // Build The Duration List
-        $duration_list = [$default_duration];
-        foreach($short_term_policy_rate as $spr)
+        $rate_list = [];
+        foreach($short_term_policy_rates as $r)
         {
-            $duration_list[] = (int)$spr->duration;
+            $rate_list[$r->duration] = $r;
         }
-        sort($duration_list);
-        $duration_list = array_values(array_unique($duration_list));
+        ksort($rate_list);
 
-        // Index
-        $index_days       = array_search($days, $duration_list);
-        $index_default    = array_search($default_duration, $duration_list);
-
-        $element_count = count($duration_list);
-
-        // If days is exactly found in duration list, bang...
-        $flag_short_term = FALSE;
-        $found          = FALSE;
-        $found_index    = 0;
-        if($index_days !== FALSE)
+        foreach($rate_list as $duration=>$spr)
         {
-            // We found the key
-            // Last key? then its not short term policy
-            $flag_short_term    = $index_days !== $index_default;
-            $found_index        = $index_days;
-        }
-        else
-        {
-            // Let's loop through to find where it falls
-            foreach ($duration_list as $key => $value)
+            if( $days <= $duration )
             {
-                if( !$found && $days < $value )
-                {
-                    $found = TRUE;
-                    $found_index = $key;
-                }
-            }
-            // Let's check if we have found
-            $flag_short_term = $found_index !== $index_default;
-        }
-
-        // is Short TERM?
-        if( !$flag_short_term )
-        {
-            return $false_return;
-        }
-
-        // Now Let's Get the Short Term Duration Record
-        $spr_record = NULL;
-        foreach($short_term_policy_rate as $spr)
-        {
-            $spr_duration = (int)$spr->duration;
-            if($spr_duration === $duration_list[$found_index] )
-            {
-                $spr_record = $spr;
+                $default_rate = $spr;
+                break;
             }
         }
+
         return [
-            'flag'      		=> IQB_FLAG_YES,
-            'record'    		=> $spr_record,
-            'default_duration' 	=> $default_duration
+            'flag'              => IQB_FLAG_YES,
+            'record'            => $spr_record,
+            'default_duration'  => $default_duration
         ];
     }
 }
@@ -1654,10 +1608,7 @@ if ( ! function_exists('_ENDORSEMENT__compute_prorata_premium'))
         $rate = $prorata_duration / $policy_duration;
 
         // Compute Total Amount (Pool do not apply prorata)
-        $amt_basic_premium                  = $premium_data['amt_total_premium'] - $premium_data['amt_pool_premium'];
-        $amt_pool_premium                   = $premium_data['amt_pool_premium'];
-        $amt_basic_premium                  = $amt_basic_premium * $rate;
-        $premium_data['amt_total_premium']  = $amt_basic_premium + $amt_pool_premium ;
+        $premium_data['amt_basic_premium']  = $premium_data['amt_basic_premium'] * $rate ;
 
         // Update Commissionable Amount and Commission
         $amt_commissionable = $cost_table['amt_commissionable'] ?? NULL;
@@ -1688,11 +1639,8 @@ if ( ! function_exists('_ENDORSEMENT__compute_short_term_premium'))
     {
         $rate = _ENDORSEMENT__get_short_term_rate( $pfs_record, $start_date, $end_date  );
 
-        // Compute Total Amount (Pool do not apply short term rate)
-        $amt_basic_premium                  = $premium_data['amt_total_premium'] - $premium_data['amt_pool_premium'];
-        $amt_pool_premium                   = $premium_data['amt_pool_premium'];
-        $amt_basic_premium                  = ($amt_basic_premium * $rate)/100.00;
-        $premium_data['amt_total_premium']  = $amt_basic_premium + $premium_data['amt_pool_premium'];
+        // Compute on basic premium
+        $premium_data['amt_basic_premium']  = ($premium_data['amt_basic_premium'] * $rate)/100.00;;
 
         // Update Commissionable Amount and Commission
         $amt_commissionable = $premium_data['amt_commissionable'] ?? NULL;

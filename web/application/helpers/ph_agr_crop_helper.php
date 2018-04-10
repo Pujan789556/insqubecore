@@ -707,10 +707,10 @@ if ( ! function_exists('__save_premium_AGR_CROP'))
 					];
 
 					// NET PREMIUM = C - D
-					$NET_PREMIUM = $C - $D;
+					$BASIC_PREMIUM = $C - $D;
 					$cost_calculation_table[] = [
 						'label' => "ङ. जम्मा (ग - घ)",
-						'value' => $NET_PREMIUM
+						'value' => $BASIC_PREMIUM
 					];
 
 
@@ -718,7 +718,7 @@ if ( ! function_exists('__save_premium_AGR_CROP'))
 					 * Prepare Premium Data
 					 */
 					$premium_data = [
-						'amt_total_premium' 	=> $NET_PREMIUM,
+						'amt_basic_premium' 	=> $BASIC_PREMIUM,
 						'amt_commissionable'	=> $commissionable_premium,
 						'amt_agent_commission'  => $agent_commission,
 						'amt_pool_premium' 		=> 0.00,
@@ -737,13 +737,22 @@ if ( ! function_exists('__save_premium_AGR_CROP'))
 
 					/**
 					 * Compute VAT
+					 *
+					 * NOTE: On premium refund, we should also be refunding VAT
 					 */
 					$taxable_amount = $post_data['amt_stamp_duty']; // Vat applies only for Ticket
 					$CI->load->helper('account');
 					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
+					if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
+					{
+						// We do not do anything here, because, VAT was applied only on Stamp Duty
+						// For other portfolio, it must be set as -ve value
+					}
+
+
 					/**
-					 * Compute VAT & Prepare Other Data
+					 * Prepare Other Data
 					 */
 					$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
 					$net_amt_sum_insured 	= $SI;
@@ -752,9 +761,7 @@ if ( ! function_exists('__save_premium_AGR_CROP'))
 						'net_amt_sum_insured' 	=> $net_amt_sum_insured,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
-						'txn_date' 				=> date('Y-m-d'),
-						'txn_details' 			=> $post_data['txn_details'],
-						'remarks' 				=> $post_data['remarks'],
+						'txn_date' 				=> date('Y-m-d')
 					]);
 
 					/**
