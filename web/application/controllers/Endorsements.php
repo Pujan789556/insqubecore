@@ -203,7 +203,7 @@ class Endorsements extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('endorsements/forms/_form_endorsement',
 			[
-				'form_elements' => $this->endorsement_model->get_v_rules($txn_type),
+				'form_elements' => $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id),
 				'record' 		=> $record,
 				'policy_record' => $policy_record
 			], TRUE);
@@ -269,7 +269,7 @@ class Endorsements extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('endorsements/forms/_form_endorsement',
 			[
-				'form_elements' => $this->endorsement_model->get_v_rules($txn_type),
+				'form_elements' => $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id),
 				'record' 		=> $record,
 				'policy_record' => $policy_record
 			], TRUE);
@@ -304,7 +304,7 @@ class Endorsements extends MY_Controller
 					return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'Invalid policy information.'], 403);
 				}
 
-				$rules = $this->endorsement_model->get_v_rules($txn_type, TRUE);
+				$rules = $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id, TRUE);
 				$this->form_validation->set_rules($rules);
 				if($this->form_validation->run() === TRUE )
 	        	{
@@ -384,13 +384,14 @@ class Endorsements extends MY_Controller
 			private function _prepare_data_general($post_data)
 			{
 				return [
-					'txn_details' => $post_data['txn_details']
+					'txn_details' => $post_data['txn_details'],
+					'remarks' 	  => $post_data['remarks'],
 				];
 			}
 
 			private function _prepare_data_ownership_transfer($post_data)
 			{
-				$fields = ['txn_details', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_stamp_duty', 'transfer_customer_id'];
+				$fields = ['txn_details', 'remarks', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_stamp_duty', 'transfer_customer_id'];
 				$data = [];
 				foreach($fields as $key)
 				{
@@ -401,7 +402,7 @@ class Endorsements extends MY_Controller
 
 			private function _prepare_data_premium_upgrade($post_data)
 			{
-				$fields = ['txn_details', 'computation_basis', 'amt_stamp_duty'];
+				$fields = ['txn_details', 'remarks', 'computation_basis', 'amt_stamp_duty'];
 				$data = [];
 				foreach($fields as $key)
 				{
@@ -412,7 +413,7 @@ class Endorsements extends MY_Controller
 
 			private function _prepare_data_premium_refund($post_data)
 			{
-				$fields = ['txn_details', 'computation_basis', 'amt_stamp_duty', 'flag_terminate'];
+				$fields = ['txn_details', 'remarks', 'computation_basis', 'amt_stamp_duty', 'flag_terminate'];
 				$data = [];
 				foreach($fields as $key)
 				{
@@ -424,7 +425,8 @@ class Endorsements extends MY_Controller
 			private function _prepare_data_terminate($post_data)
 			{
 				return [
-					'txn_details' => $post_data['txn_details']
+					'txn_details' => $post_data['txn_details'],
+					'remarks' 	  => $post_data['remarks'],
 				];
 			}
 	// --------------------------------------------------------------------

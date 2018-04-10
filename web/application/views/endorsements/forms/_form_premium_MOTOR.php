@@ -63,22 +63,3 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
 
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
-<script type="text/javascript">
-// Load Txn Details from Endorsement Template
-$('#template-reference').on('change', function(){
-    var v = parseInt(this.value);
-    if(v){
-        // Load template body from the reference supplied
-        $.getJSON('<?php echo base_url()?>endorsement_templates/body/'+v, function(r){
-            // Update dropdown
-            if(r.status == 'success'){
-                $('#txn-details').val(r.body);
-            }
-            else{
-                toastr[r.status](r.message);
-            }
-        });
-    }
-})
-</script>
-

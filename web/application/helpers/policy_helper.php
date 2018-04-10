@@ -1926,10 +1926,6 @@ if ( ! function_exists('_ENDORSEMENT_premium_basic_v_rules'))
 	{
 		$CI =& get_instance();
 
-		// Let's have the Endorsement Templates
-		$CI->load->model('endorsement_template_model');
-		$template_dropdown = $CI->endorsement_template_model->dropdown( $portfolio_id );
-
 		$basic_rules = [
 			[
                 'field' => 'amt_stamp_duty',
@@ -1938,31 +1934,6 @@ if ( ! function_exists('_ENDORSEMENT_premium_basic_v_rules'))
                 '_type'     => 'text',
                 '_default' 	=> $pfs_record->stamp_duty,
                 '_required' => true
-            ],
-			[
-                'field' => 'txn_details',
-                'label' => 'Details/सम्पुष्टि विवरण',
-                'rules' => 'trim|required|htmlspecialchars',
-                '_type'     => 'textarea',
-                '_id'		=> 'txn-details',
-                '_required' => true
-            ],
-            [
-                'field' => 'template_reference',
-                'label' => 'Load from endorsement templates',
-                'rules' => 'trim|integer|max_length[8]',
-                '_key' 		=> 'template_reference',
-                '_id'		=> 'template-reference',
-                '_type'     => 'dropdown',
-                '_data' 	=> IQB_BLANK_SELECT + $template_dropdown,
-                '_required' => false
-            ],
-            [
-                'field' => 'remarks',
-                'label' => 'Remarks/कैफियत',
-                'rules' => 'trim|htmlspecialchars',
-                '_type'     => 'textarea',
-                '_required' => false
             ]
 		];
 

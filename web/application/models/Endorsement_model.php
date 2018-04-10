@@ -106,21 +106,40 @@ class Endorsement_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function get_v_rules( $txn_type, $formatted = FALSE )
+    public function get_v_rules( $txn_type, $portfolio_id, $formatted = FALSE )
     {
         $txn_type                   = (int)$txn_type;
         $computation_basis_dropdown = _ENDORSEMENT_computation_basis_dropdown(FALSE);
         $v_rules                    = [];
 
+        $this->load->model('endorsement_template_model');
+        $template_dropdown = $this->endorsement_template_model->dropdown( $portfolio_id, $txn_type );
 
         $basic = [
+            [
+                'field' => 'template_reference',
+                'label' => 'Endorsement Template',
+                'rules' => 'trim|integer|max_length[8]',
+                '_key'      => 'template_reference',
+                '_id'       => 'template-reference',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_BLANK_SELECT + $template_dropdown,
+                '_required' => false
+            ],
             [
                 'field' => 'txn_details',
                 'label' => 'Transaction Details (सम्पुष्टि विवरण )',
                 'rules' => 'trim|required|htmlspecialchars',
-                '_id'       => '_txn_details',
+                '_id'       => 'txn-details',
                 '_type'     => 'textarea',
                 '_required' => true
+            ],
+            [
+                'field' => 'remarks',
+                'label' => 'Remarks/कैफियत',
+                'rules' => 'trim|htmlspecialchars',
+                '_type'     => 'textarea',
+                '_required' => false
             ]
         ];
 

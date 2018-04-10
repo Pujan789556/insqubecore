@@ -156,9 +156,9 @@ class Endorsement_template_model extends MY_Model
     /**
      * Get Dropdown List
      */
-    public function dropdown($portfolio_id)
+    public function dropdown($portfolio_id, $txn_type)
     {
-        $cache_name = 'etmpl_' . $portfolio_id;
+        $cache_name = 'etmpl_' . $portfolio_id . '_' . $txn_type;
         /**
          * Get Cached Result, If no, cache the query result
          */
@@ -169,6 +169,7 @@ class Endorsement_template_model extends MY_Model
                                  ->from($this->table_name . ' as ET')
                                  ->join('master_portfolio AS PRT', 'PRT.id = ET.portfolio_id')
                                  ->where('ET.portfolio_id', $portfolio_id)
+                                 ->where('ET.endorsement_type', $txn_type)
                                  ->get()->result();
             $list = [];
             foreach($records as $record)
