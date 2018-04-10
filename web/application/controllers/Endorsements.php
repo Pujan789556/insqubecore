@@ -413,12 +413,19 @@ class Endorsements extends MY_Controller
 
 			private function _prepare_data_premium_refund($post_data)
 			{
-				$fields = ['txn_details', 'remarks', 'computation_basis', 'amt_stamp_duty', 'flag_terminate'];
+				$fields = ['txn_details', 'remarks', 'computation_basis', 'amt_stamp_duty', 'flag_terminate_on_refund', 'amt_cancellation_fee'];
 				$data = [];
 				foreach($fields as $key)
 				{
 					$data[$key] = $post_data[$key] ?? NULL;
 				}
+
+				// Reset cancellation fee if no terminate set
+				if( !$data['flag_terminate_on_refund'])
+				{
+					$data['amt_cancellation_fee'] = NULL;
+				}
+
 				return $data;
 			}
 
