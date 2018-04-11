@@ -176,7 +176,7 @@ class Policy_installments extends MY_Controller
 	 * @param integer $id Policy TXN ID
 	 * @return mixed
 	 */
-	public function voucher($id)
+	public function voucher_OLD($id)
 	{
 		/**
 		 * Check Permissions
@@ -726,6 +726,891 @@ class Policy_installments extends MY_Controller
 		];
 		return $this->template->json($ajax_data);
 	}
+
+	// --------------------------------------------------------------------
+
+	public function voucher($id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('policy_installments', 'generate.policy.voucher') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Get the Policy Fresh/Renewal Txn Record
+		 */
+		$id 				= (int)$id;
+		$installment_record = $this->policy_installment_model->get( $id );
+		if(!$installment_record)
+		{
+			$this->template->render_404();
+		}
+
+
+		/**
+		 * Get the transaction record
+		 */
+		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
+		if(!$endorsement_record)
+		{
+			$this->template->render_404();
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Policy Record
+		 */
+		$policy_record = $this->policy_model->get($installment_record->policy_id);
+		if(!$policy_record)
+		{
+			$this->template->render_404();
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Record Status Authorized to Generate Voucher?
+		 */
+
+		$authorized_status = _POLICY_INSTALLMENT__voucher_constraint($installment_record);
+		// if( !$authorized_status )
+		// {
+		// 	return $this->template->json([
+		// 		'title' 	=> 'Unauthorized Installment Status!',
+		// 		'status' 	=> 'error',
+		// 		'message' 	=> 'This installment does not have authorized status to perform this action.'
+		// 	], 404);
+		// }
+
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Load voucher models
+		 */
+		$this->load->model('ac_voucher_model');
+		$this->load->model('rel_policy_installment_voucher_model');
+
+		/**
+		 * Check if Voucher already generated for this Installment
+		 */
+		// if( $this->rel_policy_installment_voucher_model->voucher_exists($installment_record->id))
+		// {
+		// 	return $this->template->json([
+		// 		'title' 	=> 'OOPS!',
+		// 		'status' 	=> 'error',
+		// 		'message' 	=> 'Voucher already exists for this Installment/Endorsement.'
+		// 	], 404);
+		// }
+
+
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Fiscal Year Record
+		 */
+		$fy_record = $this->fiscal_year_model->get($policy_record->fiscal_yr_id);
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Portfoliio Record
+		 */
+		$this->load->model('portfolio_model');
+		$this->load->model('portfolio_setting_model');
+		$portfolio_record = $this->portfolio_model->find($policy_record->portfolio_id);
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Portfolio Setting Record
+		 */
+		$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+		if( !$pfs_record )
+		{
+			return $this->template->json([
+				'title' 	=> 'Portfolio Setting Missing!',
+				'status' 	=> 'error',
+				'message' 	=> "Please add portfolio settings for fiscal year({$fy_record->code_np}) for portfolio ({$portfolio_record->name_en})"
+			], 404);
+		}
+
+		// --------------------------------------------------------------------
+
+
+		/**
+		 * Let's Build Policy Voucher
+		 * Voucher Master Data
+		 */
+		try{
+			$voucher_data = $this->_data_voucher_master($policy_record->code, $endorsement_record->txn_type);
+		}
+		catch (Exception $e) {
+			return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
+		}
+
+		// --------------------------------------------------------------------
+
+        /**
+         * Build Voucher Details Data
+         */
+        try{
+			$voucher_rows = $this->_data_voucher_details($installment_record, $pfs_record, $portfolio_record, $policy_record);
+		}
+		catch (Exception $e) {
+			return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
+		}
+
+		// echo '<pre>'; print_r($voucher_data); print_r($voucher_rows);exit;
+
+		$dr_rows = $voucher_rows['dr_rows'];
+		$cr_rows = $voucher_rows['cr_rows'];
+
+		// --------------------------------------------------------------------
+
+
+        /**
+         * Format Data
+         */
+        $voucher_data['account_id']['dr'] 	= $dr_rows['accounts'];
+        $voucher_data['party_type']['dr'] 	= $dr_rows['party_types'];
+        $voucher_data['party_id']['dr'] 	= $dr_rows['parties'];
+        $voucher_data['amount']['dr'] 		= $dr_rows['amounts'];
+
+        $voucher_data['account_id']['cr'] 	= $cr_rows['accounts'];
+        $voucher_data['party_type']['cr'] 	= $cr_rows['party_types'];
+        $voucher_data['party_id']['cr'] 	= $cr_rows['parties'];
+        $voucher_data['amount']['cr'] 		= $cr_rows['amounts'];
+
+
+		// --------------------------------------------------------------------
+
+        /**
+		 * Save Voucher and Its Relation with Policy
+		 */
+
+		try {
+
+			/**
+			 * Task 1: Save Voucher and Generate Voucher Code
+			 */
+			$voucher_id = $this->ac_voucher_model->add($voucher_data, $policy_record->id);
+
+		} catch (Exception $e) {
+
+			return $this->template->json([
+				'title' 	=> 'Exception Occured!',
+				'status' 	=> 'error',
+				'message' 	=> $e->getMessage()
+			]);
+		}
+
+		$flag_exception = FALSE;
+		$message = '';
+
+
+		/**
+		 * --------------------------------------------------------------------
+		 * Post Voucher Add Tasks
+		 *
+		 * NOTE
+		 * 		We perform post voucher add tasks which are mainly to insert
+		 * 		voucher internal relation with policy txn record and  update
+		 * 		policy status.
+		 *
+		 * 		Please note that, if any of installment fails or exception
+		 * 		happens, we rollback and disable voucher. (We can not delete
+		 * 		voucher as we need to maintain sequential order for audit trail)
+		 * --------------------------------------------------------------------
+		 */
+
+
+		/**
+         * ==================== MANUAL TRANSACTIONS BEGIN =========================
+         */
+
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_begin();
+
+
+                // --------------------------------------------------------------------
+
+            	/**
+				 * Task 2: Add Voucher-Policy Installment Relation
+				 */
+
+				try {
+
+					$relation_data = [
+						'policy_installment_id' => $installment_record->id,
+						'voucher_id' 			=> $voucher_id
+					];
+					$this->rel_policy_installment_voucher_model->add($relation_data);
+
+				} catch (Exception $e) {
+
+					$flag_exception = TRUE;
+					$message = $e->getMessage();
+				}
+
+                // --------------------------------------------------------------------
+
+				/**
+				 * Task 4: Update Installment Status to "Vouchered", Clean Cache
+				 */
+				if( !$flag_exception )
+				{
+					try{
+
+						/**
+						 * If first installment of this transaction
+						 */
+						if($installment_record->flag_first == IQB_FLAG_ON)
+						{
+							$this->endorsement_model->update_status($endorsement_record, IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED);
+						}
+
+						// Update installment status
+						$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED);
+
+					} catch (Exception $e) {
+
+						$flag_exception = TRUE;
+						$message = $e->getMessage();
+					}
+				}
+
+                // --------------------------------------------------------------------
+
+				/**
+				 * Task 5: Generate Policy Number
+				 *
+				 * NOTE: Policy TXN must be fresh or Renewal & First Installment
+				 */
+				if(
+						$flag_exception == FALSE
+							&&
+						$installment_record->flag_first == IQB_FLAG_ON
+							&&
+						in_array($endorsement_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL])
+					)
+				{
+					try{
+						$policy_code = $this->policy_model->generate_policy_number( $policy_record );
+						if($policy_code)
+						{
+							$policy_record->code = $policy_code;
+
+							// Update Voucher Narration
+							$narration = 'POLICY VOUCHER - POLICY CODE : ' . $policy_record->code;
+							$this->ac_voucher_model->update($voucher_id, ['narration' => $narration], TRUE);
+						}
+					} catch (Exception $e) {
+						$flag_exception = TRUE;
+						$message = $e->getMessage();
+					}
+				}
+
+                // --------------------------------------------------------------------
+
+			/**
+             * Complete transactions or Rollback
+             */
+			if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
+			{
+		        $this->db->trans_rollback();
+
+		        /**
+            	 * Set Voucher Flag Complete to OFF
+            	 */
+            	$this->ac_voucher_model->disable_voucher($voucher_id);
+
+            	return $this->template->json([
+					'title' 	=> 'Something went wrong!',
+					'status' 	=> 'error',
+					'message' 	=> $message ? $message : 'Could not perform save voucher relation or update policy status'
+				]);
+			}
+			else
+			{
+			        $this->db->trans_commit();
+			}
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== MANUAL TRANSACTIONS END =========================
+         */
+
+
+		// --------------------------------------------------------------------
+
+        /**
+		 * Load Portfolio Specific Helper File
+		 */
+        try { load_portfolio_helper($policy_record->portfolio_id);} catch (Exception $e) {
+			return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
+		}
+
+		/**
+		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
+		 */
+		$installment_record->status 				= IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED;
+		$installment_record->endorsement_status 	= IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED;
+		$endorsement_record->status 				= IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED;
+
+		$html_tab_ovrview = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
+		$html_txn_row 	  = $this->load->view('policy_installments/_single_row', ['policy_record' => $policy_record, 'record' => $installment_record], TRUE);
+
+		$ajax_data = [
+			'message' 	=> 'Successfully Updated!',
+			'status'  	=> 'success',
+			'multipleUpdate' => [
+				[
+					'box' 		=> '#tab-policy-overview-inner',
+					'method' 	=> 'replaceWith',
+					'html' 		=> $html_tab_ovrview
+				],
+				[
+					'box' 		=> '#_data-row-policy_installments-' . $installment_record->id,
+					'method' 	=> 'replaceWith',
+					'html' 		=> $html_txn_row
+				]
+			]
+		];
+		return $this->template->json($ajax_data);
+	}
+
+	// --------------------------------------------------------------------
+	// VOUCHER helper function
+	// --------------------------------------------------------------------
+
+		private function _data_voucher_master($policy_code, $txn_type)
+		{
+			/**
+			 * Let's Build Policy Voucher
+			 */
+			$narration = 'POLICY VOUCHER - POLICY CODE : ' . $policy_code;
+
+			$voucher_data = [
+	            'voucher_date'      => date('Y-m-d'),
+	            'voucher_type_id'   => $this->_voucher_type_by_txn_type($txn_type),
+	            'narration'         => $narration,
+	            'flag_internal'     => IQB_FLAG_ON
+	        ];
+
+	        return $voucher_data;
+		}
+
+		private function _data_voucher_details($installment_record, $pfs_record, $portfolio_record, $policy_record)
+		{
+			$txn_type 	= (int)$installment_record->txn_type;
+			$data 		= NULL;
+
+			switch ($txn_type)
+			{
+				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
+				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
+				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+					$data = $this->_data_voucher_details_for_premium_voucher($installment_record, $pfs_record, $portfolio_record, $policy_record);
+					break;
+
+				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+					$data = $this->_data_voucher_details_for_credit_voucher($installment_record, $pfs_record, $portfolio_record, $policy_record);
+					break;
+
+				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+					break;
+
+
+				default:
+					# code...
+					break;
+			}
+
+			if( !$data )
+			{
+				throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details()]: No voucher details found for supplied 'Endorsement Type'.");
+			}
+
+			return $data;
+		}
+
+		private function _data_voucher_details_for_premium_voucher($installment_record, $pfs_record, $portfolio_record, $policy_record)
+		{
+			// --------------------------------------------------------------------
+
+	        /**
+	         * Voucher Amount Computation
+	         */
+	        $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
+	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
+	        $vat_payable_amount 		= $installment_record->amt_vat;
+
+	        $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
+	        $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
+	        $agent_commission_amount 					= $installment_record->amt_agent_commission ?? NULL;
+
+			// --------------------------------------------------------------------
+
+	        /**
+	         * Debit Rows
+	         */
+	        $dr_rows = [
+
+	        	/**
+	        	 * Accounts
+	        	 */
+	        	 'accounts' => 	[
+		        	// Insured Party
+		        	IQB_AC_ACCOUNT_ID_INSURED_PARTY,
+
+		        	// Expense - Beema Samiti Service Charge
+		        	IQB_AC_ACCOUNT_ID_EXPENSE_BS_SERVICE_CHARGE
+		        ],
+
+		        /**
+		         * Party Types
+		         */
+		        'party_types' => [
+		        	// Insured Party -- Customer
+		        	IQB_AC_PARTY_TYPE_CUSTOMER,
+
+		        	// Beema Samiti Service Charge -- Company
+		        	IQB_AC_PARTY_TYPE_COMPANY,
+		        ],
+
+		        /**
+		         * Party IDs
+		         */
+		        'parties' => [
+
+		        	// Insured Party -- Customr ID
+		        	$policy_record->customer_id,
+
+		        	// Beema Samiti Service Charge -- Beema Samiti ID
+		        	IQB_COMPANY_ID_BEEMA_SAMITI
+		        ],
+
+		        /**
+		         * Amounts
+		         */
+		        'amounts' => [
+
+		        	// Insured Party -- Amount Received From Insured Party
+		        	$total_to_receive_from_insured_party_amount,
+
+		        	// Beema Samiti Service Charge -- Beema Samiti Service Charge
+		        	$beema_samiti_service_charge_amount
+		        ]
+
+	        ];
+
+			// --------------------------------------------------------------------
+
+	        /**
+	         * Check if portfolio has "Direct Premium Income Account ID"
+	         */
+	        if( !$portfolio_record->account_id_dpi )
+	        {
+	        	throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details_for_premium_voucher()]: No 'Direct Premium Income Account' for this Portfolio (({$portfolio_record->name_en})).<br/>Please add portfolio 'Direct Premium Income Account' for portfolio ({$portfolio_record->name_en}) from Master Setup > Portfolio.");
+	        }
+
+	        /**
+	         * Credit Rows
+	         */
+	        $cr_rows = [
+
+	        	/**
+	        	 * Accounts
+	        	 */
+	        	 'accounts' => 	[
+		        	// Vat Payable
+		        	IQB_AC_ACCOUNT_ID_VAT_PAYABLE,
+
+		        	// Stamp Income
+		        	IQB_AC_ACCOUNT_ID_STAMP_INCOME,
+
+		        	// Direct Premium Income Portfolio Wise
+		        	$portfolio_record->account_id_dpi,
+
+		        	// Liability - Service fee Beema Samiti
+		        	IQB_AC_ACCOUNT_ID_LIABILITY_BS_SERVICE_CHARGE
+		        ],
+
+		        /**
+		         * Party Types
+		         */
+		        'party_types' => [
+		        	// Vat Payable -- NULL
+		        	NULL,
+
+		        	// Stamp Income -- NULL
+		        	NULL,
+
+		        	// Direct Premium Income -- NULL
+		        	NULL,
+
+		        	// Beema Samiti Service Charge -- Company
+		        	IQB_AC_PARTY_TYPE_COMPANY
+		        ],
+
+		        /**
+		         * Party IDs
+		         */
+		        'parties' => [
+
+		        	// Vat Payable -- NULL
+		        	NULL,
+
+		        	// Stamp Income -- NULL
+		        	NULL,
+
+		        	// Direct Premium Income -- NULL
+		        	NULL,
+
+		        	// Beema Samiti Service Charge -- Beema Samiti ID
+		        	IQB_COMPANY_ID_BEEMA_SAMITI
+		        ],
+
+		        /**
+		         * Amounts
+		         */
+		        'amounts' => [
+
+		        	// Vat Payable -- Vat Amount
+		        	$vat_payable_amount,
+
+		        	// Stamp Income -- Stamp Income Amount
+		        	$stamp_income_amount,
+
+		        	// Direct Premium Income -- Gross Premium Amount
+		        	$gross_premium_amount,
+
+		        	// Beema Samiti Service Charge -- Beema Samiti Service Charge
+		        	$beema_samiti_service_charge_amount
+		        ]
+
+	        ];
+
+	        // --------------------------------------------------------------------
+
+	        /**
+	         * Additional Debit/Credit Rows if Agent Commission Apply?
+	         *
+	         * NOTE: You must have $agent_commission_amount (NOT NULL or Non Zero Value)
+	         */
+	        if( $agent_commission_amount &&  $policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $policy_record->agent_id )
+	        {
+	        	// Agency Commission
+	        	$dr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION;
+
+	        	// Agency Commission -- Agent
+	        	$dr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
+
+	        	// Agency Commission -- Agent ID
+	        	$dr_rows['parties'][] = $policy_record->agent_id;
+
+	        	// Agency Commission -- Agent Commission Amount
+	        	$dr_rows['amounts'][] = $agent_commission_amount;
+
+
+
+	        	// Agent TDS, Agent Commission Payable
+	        	$cr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_TDS_AGENCY_COMMISSION;
+	        	$cr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION_PAYABLE;
+
+	        	// Agent TDS -- Agent, Agent Commission Payable -- Agent
+	        	$cr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
+	        	$cr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
+
+	        	// Agent TDS -- Agent ID, Agent Commission Payable -- Agent ID
+	        	$cr_rows['parties'][] = $policy_record->agent_id;
+	        	$cr_rows['parties'][] = $policy_record->agent_id;
+
+	        	// Agent TDS -- TDS Amount, Agent Commission Payable -- Agent Payable Amount
+	        	$this->load->model('ac_duties_and_tax_model');
+	        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount);
+	        	$agent_commission_payable_amount = $agent_commission_amount - $agent_tds_amount;
+	        	$cr_rows['amounts'][] = $agent_tds_amount;
+	        	$cr_rows['amounts'][] = $agent_commission_payable_amount;
+	        }
+
+	        // --------------------------------------------------------------------
+
+
+	        return [
+	        	'dr_rows' => $dr_rows,
+	        	'cr_rows' => $cr_rows
+	        ];
+		}
+
+		private function _data_voucher_details_for_credit_voucher($installment_record, $pfs_record, $portfolio_record, $policy_record)
+		{
+			// --------------------------------------------------------------------
+
+	        /**
+	         * Voucher Amount Computation
+	         */
+	        $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
+	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
+	        $vat_payable_amount 		= $installment_record->amt_vat;
+
+	        $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
+	        $total_refund_to_insured_party_amount 		= $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
+	        $agent_commission_amount 					= $installment_record->amt_agent_commission ?? NULL;
+
+			// --------------------------------------------------------------------
+
+	        /**
+	         * Credit Rows
+	         */
+	        $cr_rows = [
+
+	        	/**
+	        	 * Accounts
+	        	 */
+	        	 'accounts' => 	[
+		        	// Insured Party
+		        	IQB_AC_ACCOUNT_ID_INSURED_PARTY,
+
+		        	// Expense - Beema Samiti Service Charge
+		        	IQB_AC_ACCOUNT_ID_EXPENSE_BS_SERVICE_CHARGE
+		        ],
+
+		        /**
+		         * Party Types
+		         */
+		        'party_types' => [
+		        	// Insured Party -- Customer
+		        	IQB_AC_PARTY_TYPE_CUSTOMER,
+
+		        	// Beema Samiti Service Charge -- Company
+		        	IQB_AC_PARTY_TYPE_COMPANY,
+		        ],
+
+		        /**
+		         * Party IDs
+		         */
+		        'parties' => [
+
+		        	// Insured Party -- Customr ID
+		        	$policy_record->customer_id,
+
+		        	// Beema Samiti Service Charge -- Beema Samiti ID
+		        	IQB_COMPANY_ID_BEEMA_SAMITI
+		        ],
+
+		        /**
+		         * Amounts
+		         */
+		        'amounts' => [
+
+		        	// Insured Party -- Amount Refund to Insured Party
+		        	abs($total_refund_to_insured_party_amount),
+
+		        	// Beema Samiti Service Charge -- Beema Samiti Service Charge
+		        	abs($beema_samiti_service_charge_amount)
+		        ]
+
+	        ];
+
+	        /**
+	         * !!! STAMP INCOME !!!
+	         *
+	         * Stamp Income is Credit if any
+	         */
+	        if( $stamp_income_amount )
+	        {
+	        	$cr_rows['accounts'][] 		= IQB_AC_ACCOUNT_ID_STAMP_INCOME;
+	        	$cr_rows['party_types'][] 	= NULL;
+	        	$cr_rows['parties'][] 		= NULL;
+	        	$cr_rows['amounts'][] 		= $stamp_income_amount;
+	        }
+
+
+
+			// --------------------------------------------------------------------
+
+	        /**
+	         * Check if portfolio has "Direct Premium Income Account ID"
+	         */
+	        if( !$portfolio_record->account_id_dpi )
+	        {
+	        	throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details_for_premium_voucher()]: No 'Direct Premium Income Account' for this Portfolio (({$portfolio_record->name_en})).<br/>Please add portfolio 'Direct Premium Income Account' for portfolio ({$portfolio_record->name_en}) from Master Setup > Portfolio.");
+	        }
+
+	        /**
+	         * Credit Rows
+	         */
+	        $dr_rows = [
+
+	        	/**
+	        	 * Accounts
+	        	 */
+	        	 'accounts' => 	[
+		        	// Direct Premium Income Portfolio Wise
+		        	$portfolio_record->account_id_dpi,
+
+		        	// Liability - Service fee Beema Samiti
+		        	IQB_AC_ACCOUNT_ID_LIABILITY_BS_SERVICE_CHARGE
+		        ],
+
+		        /**
+		         * Party Types
+		         */
+		        'party_types' => [
+		        	// Direct Premium Income -- NULL
+		        	NULL,
+
+		        	// Beema Samiti Service Charge -- Company
+		        	IQB_AC_PARTY_TYPE_COMPANY
+		        ],
+
+		        /**
+		         * Party IDs
+		         */
+		        'parties' => [
+
+		        	// Direct Premium Income -- NULL
+		        	NULL,
+
+		        	// Beema Samiti Service Charge -- Beema Samiti ID
+		        	IQB_COMPANY_ID_BEEMA_SAMITI
+		        ],
+
+		        /**
+		         * Amounts
+		         */
+		        'amounts' => [
+
+		        	// Direct Premium Income -- Gross Premium Amount
+		        	abs($gross_premium_amount),
+
+		        	// Beema Samiti Service Charge -- Beema Samiti Service Charge
+		        	abs($beema_samiti_service_charge_amount)
+		        ]
+
+	        ];
+
+	        // --------------------------------------------------------------------
+
+
+	        /**
+	         * !!! VAT !!!
+
+	         * 		case a. Positive VAT - Goes Credit
+	         * 		case b. Negative VAT - Goes Debit
+	         */
+	        if( $vat_payable_amount > 0 )
+	        {
+	        	$cr_rows['accounts'][] 		= IQB_AC_ACCOUNT_ID_VAT_PAYABLE;
+	        	$cr_rows['party_types'][] 	= NULL;
+	        	$cr_rows['parties'][] 		= NULL;
+	        	$cr_rows['amounts'][] 		= $vat_payable_amount;
+	        }
+	        else
+	        {
+	        	$dr_rows['accounts'][] 		= IQB_AC_ACCOUNT_ID_VAT_PAYABLE;
+	        	$dr_rows['party_types'][] 	= NULL;
+	        	$dr_rows['parties'][] 		= NULL;
+	        	$dr_rows['amounts'][] 		= abs($vat_payable_amount);
+	        }
+
+	        // --------------------------------------------------------------------
+
+	        /**
+	         * Additional Debit/Credit Rows if Agent Commission Apply?
+	         *
+	         * NOTE: You must have $agent_commission_amount (NOT NULL or Non Zero Value)
+	         */
+	        if( $agent_commission_amount &&  $policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $policy_record->agent_id )
+	        {
+	        	// Agency Commission
+	        	$cr_rows['accounts'][] 		= IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION;
+	        	$cr_rows['party_types'][] 	= IQB_AC_PARTY_TYPE_AGENT;
+	        	$cr_rows['parties'][] 		= $policy_record->agent_id;
+	        	$cr_rows['amounts'][] 		= abs($agent_commission_amount);
+
+
+
+
+
+	        	// Agent TDS, Agent Commission Payable
+	        	$dr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_TDS_AGENCY_COMMISSION;
+	        	$dr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION_PAYABLE;
+
+	        	// Agent TDS -- Agent, Agent Commission Payable -- Agent
+	        	$dr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
+	        	$dr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
+
+	        	// Agent TDS -- Agent ID, Agent Commission Payable -- Agent ID
+	        	$dr_rows['parties'][] = $policy_record->agent_id;
+	        	$dr_rows['parties'][] = $policy_record->agent_id;
+
+	        	// Agent TDS -- TDS Amount, Agent Commission Payable -- Agent Payable Amount
+	        	$this->load->model('ac_duties_and_tax_model');
+	        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount);
+	        	$agent_commission_payable_amount = $agent_commission_amount - $agent_tds_amount;
+	        	$dr_rows['amounts'][] = abs($agent_tds_amount);
+	        	$dr_rows['amounts'][] = abs($agent_commission_payable_amount);
+	        }
+
+	        // --------------------------------------------------------------------
+
+
+	        return [
+	        	'dr_rows' => $dr_rows,
+	        	'cr_rows' => $cr_rows
+	        ];
+		}
+
+		private function _voucher_type_by_txn_type($txn_type)
+		{
+			$txn_type = (int)$txn_type;
+			$voucher_type_id = NULL;
+
+
+			switch ($txn_type)
+			{
+				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
+				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
+				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+					$voucher_type_id = IQB_AC_VOUCHER_TYPE_PRI; // Premium Voucher
+					break;
+
+				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+					$voucher_type_id = IQB_AC_VOUCHER_TYPE_CRDN; // Credit Voucher
+					break;
+
+				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+					break;
+
+
+				default:
+					# code...
+					break;
+			}
+
+			if( !$voucher_type_id )
+			{
+				throw new Exception("Exception [Controller:Policy_installments][Method: _voucher_type_by_txn_type()]: No voucher type found for supplied 'Endorsement Type'.");
+			}
+
+			return $voucher_type_id;
+		}
 
 	// --------------------------------------------------------------------
 

@@ -748,6 +748,24 @@ if ( ! function_exists('__save_premium_AGR_CROP'))
 					{
 						// We do not do anything here, because, VAT was applied only on Stamp Duty
 						// For other portfolio, it must be set as -ve value
+
+						/**
+						 * !!! NO POOL PREMIUM !!!
+						 *
+						 * Pool premium is not refunded to customer.
+						 * NULLify Pool Premium
+						 */
+						$premium_data['amt_pool_premium'] = 0.00;
+
+						/**
+						 * !!! VAT RETURN !!!
+						 *
+						 * We must also refund the VAT for as we refund the premium.
+						 *
+						 * NOTE:
+						 * In this portfolio, we have to pay vat for stamp duty if any.
+						 * So there is no vat return in this case.
+						 */
 					}
 
 
