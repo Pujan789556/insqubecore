@@ -119,6 +119,8 @@ class Policy_installment_model extends MY_Model
                 $percents           = $installment_data['percents'];
                 $installment_type   = $installment_data['installment_type'];
 
+                // First Installment Only Fields
+                $first_instlmnt_only_fields = ['amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee'];
 
                 $batch_data = [];
                 for($i = 0; $i < count($dates); $i++ )
@@ -131,20 +133,42 @@ class Policy_installment_model extends MY_Model
                     $amt_agent_commission   = $endorsement_record->amt_agent_commission
                                                 ? ( $endorsement_record->amt_agent_commission * $percent ) / 100.00 : NULL;
                     $amt_vat                = ( $endorsement_record->amt_vat * $percent ) / 100.00;
-                    $amt_stamp_duty         = $i === 0 ? $endorsement_record->amt_stamp_duty : NULL;
 
-                    $batch_data[] = [
-                        'endorsement_id' => $endorsement_record->id,
+                    /**
+                     * Items for 1st Installment Only
+                     *
+                     *  - Stamp Duty
+                     *  - Cancellation Fee
+                     *  - Transfer Fee
+                     *  - No calaim Discount
+                     */
+                    $fst_inst_only_data = [];
+                    if($i === 0 )
+                    {
+                        foreach($first_instlmnt_only_fields as $field)
+                        {
+                            $fst_inst_only_data[$field] = $endorsement_record->{$field} ?? NULL;
+                        }
+                    }
+                    else
+                    {
+                        foreach($first_instlmnt_only_fields as $field)
+                        {
+                            $fst_inst_only_data[$field] =  NULL;
+                        }
+                    }
+
+                    $batch_data[] = array_merge( $fst_inst_only_data, [
+                        'endorsement_id'        => $endorsement_record->id,
                         'installment_date'      => $installment_date,
                         'type'                  => $installment_type,
                         'percent'               => $percent,
                         'amt_basic_premium'     => $amt_basic_premium,
                         'amt_pool_premium'      => $amt_pool_premium,
                         'amt_agent_commission'  => $amt_agent_commission,
-                        'amt_stamp_duty'        => $amt_stamp_duty,
                         'amt_vat'               => $amt_vat,
                         'flag_first'            => $i === 0 ? IQB_FLAG_ON : IQB_FLAG_OFF
-                    ];
+                    ]);
                 }
                 parent::insert_batch($batch_data, TRUE);
 

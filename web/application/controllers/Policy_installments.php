@@ -1367,10 +1367,11 @@ class Policy_installments extends MY_Controller
 	        $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
 	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
 	        $vat_payable_amount 		= $installment_record->amt_vat;
+	        $amt_cancellation_fee 		= floatval($installment_record->amt_cancellation_fee);
 
-	        $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
-	        $total_refund_to_insured_party_amount 		= $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
-	        $agent_commission_amount 					= $installment_record->amt_agent_commission ?? NULL;
+	        $beema_samiti_service_charge_amount 	= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
+	        $total_refund_to_insured_party_amount 	= $gross_premium_amount + $stamp_income_amount + $vat_payable_amount + $amt_cancellation_fee;
+	        $agent_commission_amount 				= $installment_record->amt_agent_commission ?? NULL;
 
 			// --------------------------------------------------------------------
 
@@ -1440,6 +1441,18 @@ class Policy_installments extends MY_Controller
 	        	$cr_rows['amounts'][] 		= $stamp_income_amount;
 	        }
 
+	        /**
+	         *  !!! CANCELLATION FEE !!!
+	         *
+	         * Cancellation Fee is Credit if any
+	         */
+	        if( $amt_cancellation_fee )
+	        {
+	        	$cr_rows['accounts'][] 		= IQB_AC_ACCOUNT_ID_SERVICE_CHARGE_RECOVERY;
+	        	$cr_rows['party_types'][] 	= NULL;
+	        	$cr_rows['parties'][] 		= NULL;
+	        	$cr_rows['amounts'][] 		= $amt_cancellation_fee;
+	        }
 
 
 			// --------------------------------------------------------------------

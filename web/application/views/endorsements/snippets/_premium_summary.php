@@ -15,7 +15,7 @@ if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
     } catch (Exception $e) {
     }
 }
-$grand_total = $endorsement_record->amt_basic_premium + $endorsement_record->amt_pool_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
+$grand_total = $endorsement_record->amt_basic_premium + $endorsement_record->amt_pool_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat + $endorsement_record->amt_cancellation_fee;
 
 /**
  * If active, use endorsement record else from object information
@@ -83,6 +83,10 @@ else
                     <tr>
                         <td>Stamp Duty (Rs.)</td>
                         <td class="text-right"><?php echo number_format($endorsement_record->amt_stamp_duty, 2, '.', '');?></td>
+                    </tr>
+                    <tr>
+                        <td>Cancellation Fee (Rs.)</td>
+                        <td class="text-right"><?php echo number_format($endorsement_record->amt_cancellation_fee, 2, '.', '');?></td>
                     </tr>
                     <tr>
                         <td>VAT (Rs.)</td>
