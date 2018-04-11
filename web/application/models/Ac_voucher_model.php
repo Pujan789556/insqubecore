@@ -335,6 +335,18 @@ class Ac_voucher_model extends MY_Model
         // ----------------------------------------------------------------
 
         /**
+         * Internal Voucher
+         * Check DEBIT === CREDIT ???
+         */
+        if( $data['flag_internal'] == IQB_FLAG_ON && !$this->_valid_voucher_amount($batch_data_details) )
+        {
+            throw new Exception("Exception [Model: Ac_voucher_model][Method: add()]: Computation Error: Debit Total is Not Equal to Credit Total.");
+        }
+        // ----------------------------------------------------------------
+
+
+
+        /**
          * !!! IMPORTANT
          *
          * We do not use transaction here as we may lost the voucher id autoincrement.
@@ -487,6 +499,39 @@ class Ac_voucher_model extends MY_Model
         return $batch_data;
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Check if Debit Equals Credit
+     *
+     * @param array $voucher_rows
+     * @return boolean
+     */
+    function _valid_voucher_amount($voucher_rows)
+    {
+        $debit_total    = 0.00;
+        $credit_total   = 0.00;
+
+        // Compute Debit Total
+        foreach($voucher_rows as $row)
+        {
+            if($row['flag_type'] == IQB_AC_FLAG_DEBIT )
+            {
+                $debit_total += $row['amount'];
+            }
+            else
+            {
+                $credit_total += $row['amount'];
+            }
+        }
+
+        $epsilon = 0.00001;
+        if( abs($debit_total - $credit_total) < $epsilon )
+        {
+            return TRUE;
+        }
+        return FALSE;
+    }
     // --------------------------------------------------------------------
 
     /**
