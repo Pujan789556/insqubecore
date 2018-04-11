@@ -742,6 +742,21 @@ class Ac_invoices extends MY_Controller
 			 */
 			belongs_to_me( $record->branch_id );
 
+
+			/**
+			 * Download the physical copy if already exist
+			 */
+			$filename =  "invoice-{$record->invoice_code}.pdf";
+			$file = rtrim(INSQUBE_MEDIA_PATH, '/') . '/invoices/' . $filename;
+			if( file_exists($file) )
+			{
+				$this->load->helper('download');
+				force_download($file, NULL);
+				exit(0);
+			}
+
+
+
 			/**
 			 * Invoice Detail Rows
 			 */
@@ -779,11 +794,28 @@ class Ac_invoices extends MY_Controller
 			belongs_to_me( $invoice_record->branch_id );
 
 			/**
-			 * Invoice Detail Rows
+			 * Get Receipt Record
 			 */
 			$this->load->model('ac_receipt_model');
+			$record = $this->ac_receipt_model->find_by(['invoice_id' => $invoice_record->id]);
+
+			/**
+			 * Download the physical copy if already exist
+			 */
+			$filename =  "receipt-{$record->receipt_code}.pdf";
+			$file = rtrim(INSQUBE_MEDIA_PATH, '/') . '/receipts/' . $filename;
+			if( file_exists($file) )
+			{
+				$this->load->helper('download');
+				force_download($file, NULL);
+				exit(0);
+			}
+
+			/**
+			 * Invoice Detail Rows
+			 */
 			$data = [
-				'record' 			=> $this->ac_receipt_model->find_by(['invoice_id' => $invoice_record->id]),
+				'record' 			=> $record,
 				'invoice_record' 	=> $invoice_record
 			];
 
