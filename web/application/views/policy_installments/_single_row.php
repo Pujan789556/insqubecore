@@ -11,6 +11,7 @@ $total_premium = (float)$record->amt_basic_premium + (float)$record->amt_pool_pr
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
 	<td><?php echo $record->endorsement_id;?></td>
+	<td><?php echo _POLICY_INSTALLMENT_type_dropdown(FALSE)[$record->type]; ?></td>
 	<td><?php echo $record->installment_date;?></td>
 	<td>
 		<?php if($record->flag_first == IQB_FLAG_ON): ?>

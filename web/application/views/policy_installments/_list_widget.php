@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<div class="box-header with-border gray bg-gray">
 				<div class="row page-header">
 					<div class="col-sm-6">
-						<h3 class="no-margin-t no-margin-b">Manage Installments</h3>
+						<h3 class="no-margin-t no-margin-b">Manage Installments / Refunds</h3>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
 						<a href="#"

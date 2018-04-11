@@ -17,7 +17,19 @@ if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 }
 $grand_total = $endorsement_record->amt_basic_premium + $endorsement_record->amt_pool_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
 
-
+/**
+ * If active, use endorsement record else from object information
+ */
+if($endorsement_record->status == IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE )
+{
+    $gross_si   = $endorsement_record->gross_amt_sum_insured;
+    $net_si     = $endorsement_record->net_amt_sum_insured;
+}
+else
+{
+    $gross_si   = $old_object->amt_sum_insured;
+    $net_si     = _OBJ_si_net($old_object, $new_object);
+}
 ?>
 
 <div class="row">
@@ -34,11 +46,11 @@ $grand_total = $endorsement_record->amt_basic_premium + $endorsement_record->amt
                     </tr>
                     <tr>
                         <th>Gross Sum Insured (Rs.)</th>
-                        <td class="text-right"><?php echo number_format($old_object->amt_sum_insured, 2, '.', '');?></td>
+                        <td class="text-right"><?php echo number_format($gross_si, 2, '.', '');?></td>
                     </tr>
                     <tr>
                         <th>Net Sum Insured (Rs.)</th>
-                        <td class="text-right"><?php echo number_format(_OBJ_si_net($old_object, $new_object), 2, '.', '');?></td>
+                        <td class="text-right"><?php echo number_format($net_si, 2, '.', '');?></td>
                     </tr>
                     <tr>
                         <th>Direct Discount</th>

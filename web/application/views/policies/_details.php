@@ -29,7 +29,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						data-method="html"
 						aria-controls="tab-policy-installments"
 						role="tab"
-						data-toggle="tab">Installments</a>
+						data-toggle="tab">Installments/Refunds</a>
 				</li>
 				<li role="presentation">
 					<a href="#tab-policy-vouchers"

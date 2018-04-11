@@ -198,3 +198,22 @@ if(
         ><i class="fa fa-check-square-o"></i> Activate</a>
     <?php endif?>
 <?php endif?>
+
+<?php
+/**
+ * Premium/Refind or Ownership Transfer Summary
+ */
+if( _ENDORSEMENT_is_transactional_by_type($record->txn_type) )
+{
+    echo anchor(
+        '#',
+        '<i class="fa fa-search"></i> Summary',
+        [
+            'class'         => 'trg-dialog-popup action',
+            'data-toggle'   => 'tooltip',
+            'title'         => 'View Premium/Refund/Transfer Information',
+            'data-url'      => site_url('endorsements/premium_summary/'.$record->id),
+            'data-box-size' => 'large',
+        ]);
+}
+?>

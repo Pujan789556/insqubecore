@@ -530,6 +530,48 @@ class Endorsements extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	public function premium_summary($id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('endorsements', 'explore.endorsement') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->endorsement_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->branch_id);
+
+		/**
+		 * Policy Record
+		 */
+		$policy_record = $this->policy_model->get($record->policy_id);
+
+
+		$data = [
+			'endorsement_record' 	=> $record,
+			'policy_record' 		=> $policy_record
+		];
+
+		$this->template->json([
+			'html' 	=> $this->load->view('endorsements/snippets/_premium_summary', $data, TRUE),
+			'title' => 'Endorsement Premium Distribution'
+		]);
+	}
+
+	// --------------------------------------------------------------------
+
 	/**
 	 * Delete a Endorsement Draft (Non Fresh/Renewal)
 	 *

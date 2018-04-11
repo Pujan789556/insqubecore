@@ -1346,6 +1346,37 @@ if ( ! function_exists('_ENDORSEMENT_type_eonly_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('_ENDORSEMENT_is_transactional_by_type'))
+{
+    /**
+     * Check if given Endorsement type is Transactional.
+     *
+     * Allowed Transaction Types
+     *  - Fresh
+     *  - Renewal
+     *  - Ownership Transfer
+     *  - Premium Upgrade
+     *  - Premium Refund
+     *
+     * @param   int     Transaction Type
+     * @return  array
+     */
+    function _ENDORSEMENT_is_transactional_by_type( $txn_type )
+    {
+        $txn_type       = (int)$txn_type;
+        $allowed_types  = [
+            IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
+            IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
+            IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER,
+            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
+            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
+        ];
+
+        return in_array($txn_type, $allowed_types);
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('_ENDORSEMENT_is_first'))
 {
 	/**
@@ -1964,8 +1995,8 @@ if ( ! function_exists('_POLICY_INSTALLMENT_type_dropdown'))
     function _POLICY_INSTALLMENT_type_dropdown( $flag_blank_select = true )
     {
         $dropdown = [
-            IQB_POLICY_INSTALLMENT_TYPE_INVOICE_TO_CUSTOMER     => 'Invoice to Customer',
-            IQB_POLICY_INSTALLMENT_TYPE_REFUND_TO_CUSTOMER      => 'Refund to Customer'
+            IQB_POLICY_INSTALLMENT_TYPE_INVOICE_TO_CUSTOMER     => 'Premium', // Invoice to Customer (Income)
+            IQB_POLICY_INSTALLMENT_TYPE_REFUND_TO_CUSTOMER      => 'Refund'   // Refund to Customer (Expense)
         ];
 
         if($flag_blank_select)

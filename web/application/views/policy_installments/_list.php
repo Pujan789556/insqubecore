@@ -10,11 +10,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<?php if( $this->dx_auth->is_admin() ): ?>
 				<th>ID</th>
 			<?php endif?>
-			<th>Endorsement ID</th>
-			<th>Installment Date</th>
-			<th>First Installment?</th>
+			<th width="5%">E ID <span class="text-muted" data-toggle="tooltip" title="Endorsement ID"><i class="fa fa-info-circle"></i></span></th>
+			<th>Type</th>
+			<th>Date</th>
+			<th>Is First?</th>
 			<th>Percent</th>
-			<th>Premium (Rs.)</th>
+			<th>Amount (Rs.)</th>
 			<th>Status</th>
 			<th>Actions</th>
 		</tr>
