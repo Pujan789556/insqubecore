@@ -777,14 +777,14 @@ class Policy_installments extends MY_Controller
 		 */
 
 		$authorized_status = _POLICY_INSTALLMENT__voucher_constraint($installment_record);
-		// if( !$authorized_status )
-		// {
-		// 	return $this->template->json([
-		// 		'title' 	=> 'Unauthorized Installment Status!',
-		// 		'status' 	=> 'error',
-		// 		'message' 	=> 'This installment does not have authorized status to perform this action.'
-		// 	], 404);
-		// }
+		if( !$authorized_status )
+		{
+			return $this->template->json([
+				'title' 	=> 'Unauthorized Installment Status!',
+				'status' 	=> 'error',
+				'message' 	=> 'This installment does not have authorized status to perform this action.'
+			], 404);
+		}
 
 
 		// --------------------------------------------------------------------
@@ -798,14 +798,14 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Check if Voucher already generated for this Installment
 		 */
-		// if( $this->rel_policy_installment_voucher_model->voucher_exists($installment_record->id))
-		// {
-		// 	return $this->template->json([
-		// 		'title' 	=> 'OOPS!',
-		// 		'status' 	=> 'error',
-		// 		'message' 	=> 'Voucher already exists for this Installment/Endorsement.'
-		// 	], 404);
-		// }
+		if( $this->rel_policy_installment_voucher_model->voucher_exists($installment_record->id))
+		{
+			return $this->template->json([
+				'title' 	=> 'OOPS!',
+				'status' 	=> 'error',
+				'message' 	=> 'Voucher already exists for this Installment/Endorsement.'
+			], 404);
+		}
 
 
 
