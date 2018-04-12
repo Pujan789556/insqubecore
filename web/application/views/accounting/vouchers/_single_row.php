@@ -54,46 +54,32 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		<?php
 		/**
-		 * Internal Voucher - Policy Voucher to Generate Invoice
+		 * Internal Voucher - Generate Invoice
 		 */
-		if(
-			// Must be Internal
-			$record->flag_internal == IQB_FLAG_ON
-
-				&&
-
-			// Must be Complete
-			$record->flag_complete == IQB_FLAG_ON
-
-				&&
-
-			// Premium Income Voucher
-			$record->voucher_type_id == IQB_AC_VOUCHER_TYPE_PRI
-
-				&&
-
-			// Must not Be Invoiced Yet
-			isset($record->flag_invoiced) && (int)$record->flag_invoiced === IQB_FLAG_OFF
-
-				&&
-
-			// Must have Policy Installment ID
-			isset($record->policy_installment_id) && (int)$record->policy_installment_id !== IQB_FLAG_OFF
-
-				&&
-
-			// Has Permission
-			$this->dx_auth->is_authorized('policy_installments', 'generate.policy.invoice')
-
-		):?>
+		if( is_invoicable_policy_voucher($record, FALSE) ):?>
 			<a href="#"
 	            title="Generate Invoice"
 	            data-toggle="tooltip"
 	            data-confirm="true"
 	            class="btn btn-sm btn-success btn-round trg-dialog-action"
-	            data-message="Are you sure you want to Genrate Invoice for this policy?<br/>This will automatically generate INVOICE for this Policy."
+	            data-message="Are you sure you want to Genrate Invoice for this policy?<br/>This will automatically generate INVOICE for this Transaction."
 	            data-url="<?php echo site_url('policy_installments/invoice/' . $record->policy_installment_id  . '/' . $record->id );?>"
 	        ><i class="fa fa-list-alt"></i> Invoice</a>
+		<?php endif;?>
+
+		<?php
+		/**
+		 * Internal Voucher - Generate Credit Note
+		 */
+		if( is_creditable_policy_voucher($record, FALSE) ):?>
+			<a href="#"
+	            title="Generate Credit Note"
+	            data-toggle="tooltip"
+	            data-confirm="true"
+	            class="btn btn-sm btn-success btn-round trg-dialog-action"
+	            data-message="Are you sure you want to Genrate Credit Note for this policy?<br/>This will automatically generate Credit Note for this Transaction."
+	            data-url="<?php echo site_url('policy_installments/credit_note/' . $record->policy_installment_id  . '/' . $record->id );?>"
+	        ><i class="fa fa-list-alt"></i> Credit Note</a>
 		<?php endif;?>
 
 

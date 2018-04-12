@@ -230,16 +230,6 @@ $config['DX_permissions'] = [
 			'status.to.active', // Issue Endorsement
 
 			/**
-			 * Accounting Permissions
-			 * 	1. Generate Policy Voucher
-			 * 	1. Generate Policy Invoice
-			 * 	2. Make payment and generate Policy Receipt
-			 */
-			'generate.policy.voucher',
-			'generate.policy.invoice',
-			'make.policy.payment',
-
-			/**
 			 * Endorsement Print
 			 */
 			'print.endorsement'
@@ -298,7 +288,23 @@ $config['DX_permissions'] = [
 		],
 
 		/**
-		 * Vouchers
+		 * Credit Notes
+		 */
+		'ac_credit_notes'  => [
+			'explore.credit_note',
+			'add.credit_note',
+			'print.credit_note',
+			'update.credit_note.print.flag',
+
+			/**
+			 * Reporting Permissions
+			 * ---------------------
+			 * @TODO -
+			 */
+		],
+
+		/**
+		 * Invoices
 		 */
 		'ac_invoices'  => [
 			'explore.invoice',

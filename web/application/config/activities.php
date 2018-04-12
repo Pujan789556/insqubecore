@@ -86,6 +86,17 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to Account Invoice
+	 */
+	'ac_credit_note' => [
+		'_uri' => 'ac_credit_notes/',
+		'_table' => 'ac_credit_notes',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited'
+	]],
+
+	/**
 	 * Activities related to Account Receipts
 	 */
 	'ac_receipt' => [

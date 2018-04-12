@@ -94,6 +94,197 @@ if ( ! function_exists('is_voucher_editable'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('is_invoicable_policy_voucher'))
+{
+	/**
+	 * Is this Policy Voucher Invoicable?
+	 *
+	 *
+	 * @param object $record 	Voucher Record
+	 * @param bool $terminate_on_fail Terminate Right Here if not editable.
+	 * @return	bool
+	 */
+	function is_invoicable_policy_voucher( $record, $terminate_on_fail = TRUE )
+	{
+		$CI =& get_instance();
+
+		$allowed = FALSE;
+
+		if(
+			// Must be Internal
+			$record->flag_internal == IQB_FLAG_ON
+
+				&&
+
+			// Must be Complete
+			$record->flag_complete == IQB_FLAG_ON
+
+				&&
+
+			// Premium Income Voucher
+			$record->voucher_type_id == IQB_AC_VOUCHER_TYPE_PRI
+
+				&&
+
+			// Must not Be Invoiced Yet
+			isset($record->flag_invoiced) && (int)$record->flag_invoiced === IQB_FLAG_OFF
+
+				&&
+
+			// Must have Policy Installment ID
+			isset($record->policy_installment_id) && (int)$record->policy_installment_id !== IQB_FLAG_OFF
+
+				&&
+
+			// Has Permission
+			$CI->dx_auth->is_authorized('policy_installments', 'generate.policy.invoice')
+
+		)
+		{
+			$allowed = TRUE;
+		}
+
+
+		// Terminate on Exit?
+		if( $allowed === FALSE && $terminate_on_fail == TRUE)
+		{
+			$CI->dx_auth->deny_access();
+			exit(1);
+		}
+
+		return $allowed;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('is_creditable_policy_voucher'))
+{
+	/**
+	 * Is this Policy Voucher allowed to generate Credit Note?
+	 *
+	 *
+	 * @param object $record 	Voucher Record
+	 * @param bool $terminate_on_fail Terminate Right Here if not editable.
+	 * @return	bool
+	 */
+	function is_creditable_policy_voucher( $record, $terminate_on_fail = TRUE )
+	{
+		$CI =& get_instance();
+
+		$allowed = FALSE;
+
+		if(
+			// Must be Internal
+			$record->flag_internal == IQB_FLAG_ON
+
+				&&
+
+			// Must be Complete
+			$record->flag_complete == IQB_FLAG_ON
+
+				&&
+
+			// Credit Note Voucher
+			$record->voucher_type_id == IQB_AC_VOUCHER_TYPE_CRDN
+
+				&&
+
+			// Must not Be Invoiced Yet
+			isset($record->flag_invoiced) && (int)$record->flag_invoiced === IQB_FLAG_OFF
+
+				&&
+
+			// Must have Policy Installment ID
+			isset($record->policy_installment_id) && (int)$record->policy_installment_id !== IQB_FLAG_OFF
+
+				&&
+
+			// Has Permission
+			$CI->dx_auth->is_authorized('policy_installments', 'generate.policy.invoice')
+
+		)
+		{
+			$allowed = TRUE;
+		}
+
+
+		// Terminate on Exit?
+		if( $allowed === FALSE && $terminate_on_fail == TRUE)
+		{
+			$CI->dx_auth->deny_access();
+			exit(1);
+		}
+
+		return $allowed;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('credit_note_complete_flag_text'))
+{
+	/**
+	 * Credit Note Complete Flag Text
+	 *
+	 * @param integer $flag 	Credit Note Complete Flag
+	 * @param bool $plain_text Return as HTML formatted or plain text
+	 * @return	bool
+	 */
+	function credit_note_complete_flag_text( $flag, $plain_text = FALSE )
+	{
+		$title = $flag == IQB_FLAG_ON ? 'Complete' : 'Incomplete';
+		if($plain_text)
+		{
+			return $title;
+		}
+
+		if( $flag == IQB_FLAG_ON )
+		{
+			$css = 'fa-check text-green';
+		}
+		else
+		{
+			$css = 'fa-exclamation-triangle text-muted';
+		}
+		return '<i class="fa '.$css.'" data-toggle="tooltip" title="'.$title.'"></i>';
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('credit_note_flag_on_off_text'))
+{
+	/**
+	 * Credit Note Flag ON/OFF Text
+	 *
+	 * @param integer $flag 	Credit Note Flag
+	 * @param bool $plain_text Return as HTML formatted or plain text
+	 * @return	bool
+	 */
+	function credit_note_flag_on_off_text( $flag, $plain_text = FALSE )
+	{
+		$title = $flag == IQB_FLAG_ON ? 'Yes' : 'No';
+		if($plain_text)
+		{
+			return $title;
+		}
+
+		if( $flag == IQB_FLAG_ON )
+		{
+			$css = 'fa-check text-green';
+		}
+		else
+		{
+			$css = 'fa-minus text-muted';
+		}
+		return '<i class="fa '.$css.'" data-toggle="tooltip" title="'.$title.'"></i>';
+	}
+}
+
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('voucher_complete_flag_text'))
 {
 	/**
