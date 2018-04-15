@@ -36,10 +36,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				if($policy_id):?>
 					<li>
 		                <a href="<?php echo site_url('policies/schedule/' . $policy_id  );?>"
-		                    title="Print Schedule"
+		                    title="Print Policy Schedule"
 		                    target="_blank"
 		                    data-toggle="tooltip">
-		                    <i class="fa fa-print"></i> Print Schedule
+		                    <i class="fa fa-print"></i> Print Policy Schedule
 		                </a>
 	                </li><li class="divider"></li>
 				<?php
@@ -85,7 +85,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 				<?php if( $this->dx_auth->is_authorized('ac_credit_notes', 'print.credit_note') ): ?>
 					<li>
-		                <a href="<?php echo site_url('ac_credit_notes/print/credit_note/' . $record->id)?>"
+		                <a href="<?php echo site_url('ac_credit_notes/print/' . $record->id)?>"
 		                    title="Print Credit Note"
 		                    target="_blank"
 		                    data-toggle="tooltip">
@@ -102,7 +102,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								data-confirm="true"
 								data-message="Are you sure you want to do this? <br/>Once you do this, printing credit_note gives a copy."
 								data-url="<?php echo site_url('ac_credit_notes/printed/credit_note/' . $record->id);?>">
-									<i class="fa fa-check-square-o"></i> Mark as Credit Note Printed</a>
+									<i class="fa fa-check-square-o"></i> Mark as Printed</a>
 						</li>
 					<?php endif;?><li class="divider"></li>
 				<?php endif?>

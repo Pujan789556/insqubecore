@@ -625,75 +625,57 @@ class Ac_credit_notes extends MY_Controller
 	 * @param integer $id  Credit Note ID
 	 * @return void
 	 */
-    public function print($type, $id)
+    public function print($id)
     {
 		/**
-		 * Valid Type?
+		 * Check Permissions
 		 */
-    	if( !in_array($type, ['credit_note', 'receipt']) )
+		$this->dx_auth->is_authorized('ac_credit_notes', 'print.credit_note', TRUE);
+
+
+		/**
+		 * Main Record (Complete Credit Note)
+		 */
+    	$id = (int)$id;
+		$record = $this->ac_credit_note_model->get($id, IQB_FLAG_ON);
+		if(!$record)
 		{
 			$this->template->render_404();
 		}
 
-    	/**
-		 * Check Permissions
+		/**
+		 * Check if Belongs to me?
 		 */
-    	$permission = "print.{$type}";
-		$this->dx_auth->is_authorized('ac_credit_notes', $permission, TRUE);
+		belongs_to_me( $record->branch_id );
 
 
 		/**
-		 * Call Individual Print Method
+		 * Download the physical copy if already exist
 		 */
-		$method =  "_print_{$type}";
-		return $this->$method($id);
+		$filename =  "credit_note-{$record->id}.pdf";
+		$file = rtrim(INSQUBE_MEDIA_PATH, '/') . '/credit_notes/' . $filename;
+		if( file_exists($file) )
+		{
+			$this->load->helper('download');
+			force_download($file, NULL);
+			exit(0);
+		}
+
+
+
+		/**
+		 * Credit Note Detail Rows
+		 */
+		$data = [
+			'record' 	=> $record,
+			'rows' 		=> $this->ac_credit_note_detail_model->rows_by_credit_note($record->id)
+		];
+
+		_CREDIT_NOTE__pdf($data, 'print');
 
     }
+
 	// --------------------------------------------------------------------
-
-
-	    private function _print_credit_note($id)
-	    {
-	    	/**
-			 * Main Record (Complete Credit Note)
-			 */
-	    	$id = (int)$id;
-			$record = $this->ac_credit_note_model->get($id, IQB_FLAG_ON);
-			if(!$record)
-			{
-				$this->template->render_404();
-			}
-
-			/**
-			 * Check if Belongs to me?
-			 */
-			belongs_to_me( $record->branch_id );
-
-
-			/**
-			 * Download the physical copy if already exist
-			 */
-			$filename =  "credit_note-{$record->id}.pdf";
-			$file = rtrim(INSQUBE_MEDIA_PATH, '/') . '/credit_notes/' . $filename;
-			if( file_exists($file) )
-			{
-				$this->load->helper('download');
-				force_download($file, NULL);
-				exit(0);
-			}
-
-
-
-			/**
-			 * Credit Note Detail Rows
-			 */
-			$data = [
-				'record' 	=> $record,
-				'rows' 		=> $this->ac_credit_note_detail_model->rows_by_credit_note($record->id)
-			];
-
-			_CREDIT_NOTE__pdf($data, 'print');
-	    }
 
 
 
