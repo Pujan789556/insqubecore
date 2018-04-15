@@ -253,11 +253,14 @@ class Endorsements extends MY_Controller
 		$policy_id = (int)$policy_id;
 		if( !$this->_can_add_endorsement($policy_id) )
 		{
-			return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'You can not add new endorsement as you have unfinished current endorsement.'], 403);
+			return $this->template->json([
+				'status' => 'error',
+				'title' => 'Action Not Permitted.',
+				'message' => 'Either Policy or the last Endorsement is not complete (issued or active).'], 403);
 		}
 
 		/**
-		 * Policy Record
+		 * Policy Record? Active?
 		 */
 		$policy_record = $this->policy_model->get($policy_id);
 
@@ -525,7 +528,7 @@ class Endorsements extends MY_Controller
 		{
 			$current_txn = $this->endorsement_model->get_current_endorsement_by_policy($policy_id);
 
-			return $current_txn->status === IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
+			return $current_txn->status === IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE && $current_txn->policy_status === IQB_POLICY_STATUS_ACTIVE;
 		}
 
 	// --------------------------------------------------------------------
