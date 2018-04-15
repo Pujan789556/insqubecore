@@ -375,9 +375,10 @@ class Endorsement_model extends MY_Model
      *
      * @param integer $policy_id_or_endorsement_record Policy ID or Transaction Record
      * @param alpha $to_status_flag Status Code
+     * @param bool $terminate_policy Terminate policy on Endorsement Activation
      * @return bool
      */
-    public function update_status($policy_id_or_endorsement_record, $to_status_flag)
+    public function update_status($policy_id_or_endorsement_record, $to_status_flag, $terminate_policy=FALSE)
     {
         // Get the Policy Record
         $record = is_numeric($policy_id_or_endorsement_record) ? $this->get_current_endorsement_by_policy( (int)$policy_id_or_endorsement_record ) : $policy_id_or_endorsement_record;
@@ -453,7 +454,21 @@ class Endorsement_model extends MY_Model
                 if( !_ENDORSEMENT_is_first($record->txn_type) )
                 {
                     $this->_commit_endorsement_audit($record);
+
+                    /**
+                     * Policy Termination the following Endorsement
+                     *  - Refund and Terminate
+                     *  - Simply Terminate
+                     */
+                    if($terminate_policy)
+                    {
+                        $this->policy_model->update_status($record->policy_id, IQB_POLICY_STATUS_CANCELED);
+                    }
                 }
+
+                /**
+                 * Activate Policy on Fresh/Renewal Endorsement Activation
+                 */
                 else
                 {
                     $this->policy_model->update_status($record->policy_id, IQB_POLICY_STATUS_ACTIVE);

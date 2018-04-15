@@ -1126,6 +1126,12 @@ class Policy_model extends MY_Model
                 case IQB_POLICY_STATUS_CANCELED:
                 case IQB_POLICY_STATUS_EXPIRED:
                     $this->_to_status($record->id, $base_data);
+
+                    /**
+                     * Unlock Policy Object and Customer
+                     */
+                    $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
+                    $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
                     break;
             }
 

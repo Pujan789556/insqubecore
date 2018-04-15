@@ -2067,8 +2067,9 @@ class Policy_installments extends MY_Controller
          */
         $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
         $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
-        $vat_payable_amount 		= $installment_record->amt_vat;
-        $total_refund_amount 		= $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
+        $amt_cancellation_fee 		= floatval($installment_record->amt_cancellation_fee);
+        $vat_payable_amount 		= floatval($installment_record->amt_vat);
+        $total_refund_amount 		= $gross_premium_amount + $stamp_income_amount + $vat_payable_amount + $amt_cancellation_fee;
 
 		$credit_note_data = [
 			'customer_id' 		=> $policy_record->customer_id,
@@ -2097,10 +2098,23 @@ class Policy_installments extends MY_Controller
 	        ];
         }
 
-        $credit_note_details_data[] = [
-        	'description' 	=> "VAT",
-        	'amount'		=> $vat_payable_amount
-        ];
+        if($vat_payable_amount)
+        {
+        	$credit_note_details_data[] = [
+	        	'description' 	=> "VAT",
+	        	'amount'		=> $vat_payable_amount
+	        ];
+        }
+
+        if($amt_cancellation_fee)
+        {
+        	$credit_note_details_data[] = [
+	        	'description' 	=> "Cancellation Charge",
+	        	'amount'		=> $amt_cancellation_fee
+	        ];
+        }
+
+
 
 
 		// --------------------------------------------------------------------
@@ -2718,11 +2732,15 @@ class Policy_installments extends MY_Controller
                      * Post Commit Tasks
                      * -----------------
                      *
-                     * 1. Clear Cache
+                     * 1. Clear Cache (Invoice, RI Distribution)
                      * 2. Send SMS
                      */
                     $cache_var = 'ac_invoice_list_by_policy_'.$policy_record->id;
                     $this->ac_invoice_model->clear_cache($cache_var);
+
+                    $this->load->model('ri_transaction_model');
+                    $cache_var = 'ri_txn_list_by_policy_'.$policy_record->id;
+                    $this->ri_transaction_model->clear_cache($cache_var);
 
                     // Send SMS
                     $this->_sms_activation($transaction_record, $policy_record, $invoice_record, $installment_record);
@@ -3069,7 +3087,7 @@ class Policy_installments extends MY_Controller
                 /**
                  * Task 2:
                  * 		Update Credit Note Paid Flat to "ON"
-                 *      Update Policy Status to "Active" (if Fresh or Renewal )
+                 *      Update Policy Status to "Active" (if Fresh or Renewal ) or "Cancel" if to Terminate
                  *      Update Installment Status to "Paid", Clean Cache, (Commit endorsement)
                  */
                 if( !$flag_exception )
@@ -3081,12 +3099,25 @@ class Policy_installments extends MY_Controller
                     	/**
 						 * If first installment of this endorsement, activate the endorsement
 						 */
+                    	$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_PAID);
 						if($installment_record->flag_first == IQB_FLAG_ON)
 						{
-							$this->endorsement_model->update_status($endorsement_record, IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE);
-						}
-                        $this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_PAID);
 
+							/**
+							 * TERMINATE POLICY?
+							 *
+							 * If this endorsement is "Refund & Terminate" or "Terminate"
+							 * we have to terminate the policy.
+							 */
+							$terminate_policy = FALSE;
+							if($endorsement_record->flag_terminate_on_refund == IQB_FLAG_YES )
+							{
+								$terminate_policy = TRUE;
+							}
+
+							// Activate endorsement and cancel policy if needed.
+							$this->endorsement_model->update_status($endorsement_record, IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE, $terminate_policy);
+						}
                     } catch (Exception $e) {
 
                         $flag_exception = TRUE;
@@ -3122,7 +3153,7 @@ class Policy_installments extends MY_Controller
                      * Post Commit Tasks
                      * -----------------
                      *
-                     * 1. Clear Cache (Credit Notes and Vouchers)
+                     * 1. Clear Cache (Credit Notes and Vouchers, RI Distribution)
                      * 2. Send SMS
                      */
                     $cache_var = 'ac_credit_note_list_by_policy_'.$policy_record->id;
@@ -3130,6 +3161,10 @@ class Policy_installments extends MY_Controller
 
                     $cache_var = 'ac_voucher_list_by_policy_'.$policy_record->id;
                 	$this->ac_voucher_model->clear_cache($cache_var);
+
+                	$this->load->model('ri_transaction_model');
+                    $cache_var = 'ri_txn_list_by_policy_'.$policy_record->id;
+                    $this->ri_transaction_model->clear_cache($cache_var);
 
                     // Send SMS
                     $this->_sms_activation($endorsement_record, $policy_record, $credit_note_record, $installment_record);
@@ -3231,83 +3266,92 @@ class Policy_installments extends MY_Controller
      * @return bool
      */
 	private function _sms_activation( $endorsement_record, $policy_record, $invoice_record = NULL, $installment_record = NULL)
+	{
+		$customer_name 		= $policy_record->customer_name;
+		$customer_contact 	= $policy_record->customer_contact ? json_decode($policy_record->customer_contact) : NULL;
+		$mobile 			= $customer_contact->mobile ? $customer_contact->mobile : NULL;
+
+		if( !$mobile )
 		{
-			$customer_name 		= $policy_record->customer_name;
-			$customer_contact 	= $policy_record->customer_contact ? json_decode($policy_record->customer_contact) : NULL;
-			$mobile 			= $customer_contact->mobile ? $customer_contact->mobile : NULL;
+			return FALSE;
+		}
 
-			if( !$mobile )
+		$message 	= "Dear {$customer_name}," . PHP_EOL;
+		$txn_type 	= (int)$endorsement_record->txn_type;
+
+		$amount = abs($invoice_record->amount ?? 0);
+
+		/**
+		 * Compose Message By Types
+		 */
+		if( _ENDORSEMENT_is_first($txn_type) )
+		{
+			// First Installment
+    		if($installment_record->flag_first == IQB_FLAG_ON)
 			{
-				return FALSE;
+				$message .= "Your Policy has been issued." . PHP_EOL .
+        					"Policy No: " . $policy_record->code . PHP_EOL .
+        					"Premium Paid(Rs): " . $amount . PHP_EOL .
+        					"Expires on : " . $policy_record->end_date . PHP_EOL;
 			}
 
-			$message 	= "Dear {$customer_name}," . PHP_EOL;
-			$txn_type 	= (int)$endorsement_record->txn_type;
-
-			$amount = abs($invoice_record->amount ?? 0);
-
-			/**
-			 * Compose Message By Types
-			 */
-			if( _ENDORSEMENT_is_first($txn_type) )
-			{
-				// First Installment
-	    		if($installment_record->flag_first == IQB_FLAG_ON)
-				{
-					$message .= "Your Policy has been issued." . PHP_EOL .
-	        					"Policy No: " . $policy_record->code . PHP_EOL .
-	        					"Premium Paid(Rs): " . $amount . PHP_EOL .
-	        					"Expires on : " . $policy_record->end_date . PHP_EOL;
-				}
-
-				// Other Installment
-				else
-				{
-					$message .= "Your Policy installment has been issued." . PHP_EOL .
-	        					"Policy No: " . $policy_record->code . PHP_EOL .
-	        					"Premium Paid(Rs): " . $amount . PHP_EOL;
-				}
-			}
-
-			/**
-			 * Premium Upgrade or Ownership Transfer ( Customer pays the Premium)
-			 */
-			else if( in_array($txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER]) )
-			{
-				$message .= "Your Policy endorsement has been issued." . PHP_EOL .
-	        					"Policy No: " . $policy_record->code . PHP_EOL .
-	        					"Premium Paid(Rs): " . $amount . PHP_EOL;
-			}
-
-			/**
-			 * Premium Refund ( Customer gets the refund amount)
-			 */
-			else if( $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
-			{
-				$message .= "Your Policy endorsement has been issued." . PHP_EOL .
-	        					"Policy No: " . $policy_record->code . PHP_EOL .
-	        					"Premium Refunded(Rs): " . $amount . PHP_EOL;
-			}
-
-			/**
-			 * General Endorsement
-			 */
+			// Other Installment
 			else
 			{
-				$message .= "Your Policy Endorsement has been issued." . PHP_EOL .
-	    					"Policy No: " . $policy_record->code . PHP_EOL;
+				$message .= "Your Policy installment has been issued." . PHP_EOL .
+        					"Policy No: " . $policy_record->code . PHP_EOL .
+        					"Premium Paid(Rs): " . $amount . PHP_EOL;
+			}
+		}
+
+		/**
+		 * Premium Upgrade or Ownership Transfer ( Customer pays the Premium)
+		 */
+		else if( in_array($txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER]) )
+		{
+			$message .= "Your Policy endorsement has been issued." . PHP_EOL .
+        					"Policy No: " . $policy_record->code . PHP_EOL .
+        					"Premium Paid(Rs): " . $amount . PHP_EOL;
+		}
+
+		/**
+		 * Premium Refund ( Customer gets the refund amount)
+		 */
+		else if( $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
+		{
+
+			if($endorsement_record->flag_terminate_on_refund == IQB_FLAG_YES )
+			{
+				$message .= "Your Policy endorsement has been issued and policy has been terminated." . PHP_EOL;
+			}
+			else
+			{
+				$message .= "Your Policy endorsement has been issued." . PHP_EOL ;
 			}
 
-	    	/**
-	    	 * Add Signature
-	    	 */
-	    	$message .= PHP_EOL . SMS_SIGNATURE;
-
-	    	/**
-	    	 * Let's Fire the SMS
-	    	 */
-	    	$this->load->helper('sms');
-	    	$result = send_sms($mobile, $message);
+			$message .= "Policy No: " . $policy_record->code . PHP_EOL .
+        				"Premium Refunded(Rs): " . $amount . PHP_EOL;
 		}
+
+		/**
+		 * General Endorsement
+		 */
+		else
+		{
+			$message .= "Your Policy Endorsement has been issued." . PHP_EOL .
+    					"Policy No: " . $policy_record->code . PHP_EOL;
+		}
+
+    	/**
+    	 * Add Signature
+    	 */
+    	$message .= PHP_EOL . SMS_SIGNATURE;
+
+    	/**
+    	 * Let's Fire the SMS
+    	 */
+    	$this->load->helper('sms');
+    	$result = send_sms($mobile, $message);
+	}
 
 }

@@ -82,7 +82,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				            data-box-size="large"
 				            data-title='<i class="fa fa-pencil-square-o"></i> Make a Payment'
 				            data-url="<?php echo site_url('policy_installments/payment/' . $record->policy_installment_id  . '/' . $record->id );?>"
-				        ><i class="fa fa-list-alt"></i> Payment</a>
+				        ><i class="fa fa-list-alt"></i> Make Payment</a>
 			        </li><li class="divider"></li>
 				<?php endif;?>
 
