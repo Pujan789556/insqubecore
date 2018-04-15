@@ -301,70 +301,95 @@ class Endorsement_model extends MY_Model
             throw new Exception("Exception [Model: Endorsement_model][Method: _reset()]: Current TXN record could not be found.");
         }
 
-        return $this->_reset($record);
+        return $this->_reset($record->id, $record->policy_id);
     }
 
-    public function reset($id)
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Reset Premium & SI Fields of a record to NULL
+     */
+    private function _reset($id, $policy_id)
     {
-        $record = $this->get($id);
-        return $this->_reset($record);
+        /**
+         * Task 1: Reset Endorsement Record
+         */
+        $nullable_fields = ['gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_vat', 'premium_computation_table', 'cost_calculation_table', 'flag_ri_approval'];
+
+        $reset_data = [];
+
+        foreach ($nullable_fields as $field)
+        {
+             $reset_data[$field] = NULL;
+        }
+
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+        $transaction_status = TRUE;
+        /**
+         * Disable DB Debugging
+         */
+        $this->db->db_debug = FALSE;
+        $this->db->trans_start();
+
+            $this->db->where('id', $id)
+                     ->update($this->table_name, $reset_data);
+
+            /**
+             * Task 2: Clear Cache (Speciic to this Policy ID)
+             */
+            $cache_var = 'endrsmnt_' . $policy_id;
+            $this->clear_cache($cache_var);
+
+        /**
+         * Complete transactions or Rollback
+         */
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            $transaction_status = FALSE;
+        }
+
+        /**
+         * Restore DB Debug Configuration
+         */
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        return $transaction_status;
     }
 
-        // --------------------------------------------------------------------
+    // --------------------------------------------------------------------
 
-        private function _reset($record)
+    /**
+     * Reset Data on Edit
+     *
+     * We should nullify the fields on premium computable endorsement i.e.
+     *  - Fresh/Renewal
+     *  - Premium Upgrade
+     *  - Premium Refund
+     */
+    public function _reset_on_edit($txn_type, $data)
+    {
+
+        $nullable_fields = [];
+        if( _ENDORSEMENT_is_premium_computable_by_type($txn_type) )
         {
-            /**
-             * Task 1: Reset Endorsement Record
-             */
             $nullable_fields = ['gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_vat', 'premium_computation_table', 'cost_calculation_table', 'flag_ri_approval'];
-
-            $reset_data = [];
-
-            foreach ($nullable_fields as $field)
-            {
-                 $reset_data[$field] = NULL;
-            }
-
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
-            $transaction_status = TRUE;
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
-            $this->db->trans_start();
-
-                $this->db->where('id', $record->id)
-                         ->update($this->table_name, $reset_data);
-
-                /**
-                 * Task 2: Clear Cache (Speciic to this Policy ID)
-                 */
-                $cache_var = 'endrsmnt_' . $record->policy_id;
-                $this->clear_cache($cache_var);
-
-            /**
-             * Complete transactions or Rollback
-             */
-            $this->db->trans_complete();
-            if ($this->db->trans_status() === FALSE)
-            {
-                $transaction_status = FALSE;
-            }
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-            /**
-             * ==================== TRANSACTIONS END =========================
-             */
-
-            return $transaction_status;
         }
+
+        foreach ($nullable_fields as $field)
+        {
+             $data[$field] = NULL;
+        }
+
+        return $data;
+    }
 
     // --------------------------------------------------------------------
 
@@ -568,13 +593,13 @@ class Endorsement_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Save Endorsement
+     * Add Endorsement
      *
      * @param int $id
      * @param array $data
      * @return bool
      */
-    public function save_endorsement($data)
+    public function add($data)
     {
         /**
          * ==================== TRANSACTIONS BEGIN =========================
@@ -607,6 +632,74 @@ class Endorsement_model extends MY_Model
                  * Task 4: Clear Cache
                  */
                 $cache_var = 'endrsmnt_'.$data['policy_id'];
+                $this->clear_cache($cache_var);
+
+        /**
+         * Complete transactions or Rollback
+         */
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            $transaction_status = FALSE;
+        }
+
+        /**
+         * Restore DB Debug Configuration
+         */
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        return $transaction_status;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Edit Endorsement
+     *
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
+    public function edit($id, $data)
+    {
+        $record = parent::find($id);
+
+        /**
+         * Reset Data by Type
+         */
+        $data = $this->_reset_on_edit($record->txn_type, $data);
+
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+        $transaction_status = TRUE;
+
+        /**
+         * Disable DB Debugging
+         */
+        $this->db->db_debug = FALSE;
+        $this->db->trans_start();
+
+
+                /**
+                 * Task 1: Update Data
+                 */
+                parent::update($id, $data, TRUE);
+
+
+                /**
+                 * Task 3: Log activity
+                 */
+                $this->log_activity($id, 'E');
+
+                /**
+                 * Task 4: Clear Cache
+                 */
+                $cache_var = 'endrsmnt_' . $record->policy_id;
                 $this->clear_cache($cache_var);
 
         /**
@@ -701,7 +794,7 @@ class Endorsement_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Save Cost Reference Data and Transactional Data
+     * Save Premium Data
      *
      * @param int $id
      * @param array $data
@@ -749,52 +842,6 @@ class Endorsement_model extends MY_Model
          */
 
         return $transaction_status;
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Update GROSS & NET SI of a given endorsement
-     *
-     * @param int $id
-     * @param float $gross_amt_sum_insured
-     * @return bool
-     */
-    public function update_sum_insured($id, $gross_amt_sum_insured)
-    {
-
-        /**
-         * Task 1: Get Previous SI(gross)
-         */
-        $txn_types = [
-            IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-            IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
-            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
-            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND
-        ];
-
-        $record =  parent::find($id);
-        $net_amt_sum_insured = $gross_amt_sum_insured;
-        $previous_record = $this->db->select('ENDRSMNT.gross_amt_sum_insured')
-                                    ->from($this->table_name . ' ENDRSMNT')
-                                    ->where('ENDRSMNT.policy_id', $record->policy_id)
-                                    ->where_in('ENDRSMNT.txn_type', $txn_types)
-                                    ->order_by('ENDRSMNT.id', 'desc')
-                                    ->get()->row();
-
-        /**
-         * Compute the SI Difference
-         */
-        if( $previous_record )
-        {
-            $net_amt_sum_insured = $previous_record->gross_amt_sum_insured - $gross_amt_sum_insured;
-        }
-
-        $data = [
-            'gross_amt_sum_insured' => $gross_amt_sum_insured,
-            'net_amt_sum_insured'   => $net_amt_sum_insured
-        ];
-        parent::update($id, $txn_data, TRUE);
     }
 
     // --------------------------------------------------------------------

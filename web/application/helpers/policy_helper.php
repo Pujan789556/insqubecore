@@ -2052,18 +2052,14 @@ if ( ! function_exists('_POLICY_INSTALLMENT_type_by_endorsement_type'))
      */
     function _POLICY_INSTALLMENT_type_by_endorsement_type( $txn_type )
     {
-        $txn_type = (int)$txn_type;
-        if( !_ENDORSEMENT_is_premium_computable_by_type($txn_type) )
-        {
-            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY_INSTALLMENT_type_by_endorsement_type()]: Invalid Endorsement Type.");
-        }
-
-        $installment_type = NULL;
+        $txn_type           = (int)$txn_type;
+        $installment_type   = NULL;
         switch($txn_type)
         {
             case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
             case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
             case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+            case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
                 $installment_type = IQB_POLICY_INSTALLMENT_TYPE_INVOICE_TO_CUSTOMER;
                 break;
 
@@ -2073,6 +2069,11 @@ if ( ! function_exists('_POLICY_INSTALLMENT_type_by_endorsement_type'))
 
             default:
                 break;
+        }
+
+        if( !$installment_type )
+        {
+            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY_INSTALLMENT_type_by_endorsement_type()]: Invalid Endorsement Type.");
         }
 
         return $installment_type;
@@ -2187,6 +2188,28 @@ if ( ! function_exists('_POLICY_INSTALLMENT_list_by_transaction'))
 
 		return $CI->policy_installment_model->get_many_by_endorsement($endorsement_id);
 	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY_INSTALLMENT_compute_total_amount'))
+{
+    /**
+     * Compute the Total Amount for this Installment
+     *
+     * @param integer $record   Policy Installment Record
+     * @return  float
+     */
+    function _POLICY_INSTALLMENT_compute_total_amount( $record )
+    {
+        return  floatval($record->amt_basic_premium) +
+                floatval($record->amt_pool_premium) +
+                floatval($record->amt_stamp_duty) +
+                floatval($record->amt_transfer_fee) +
+                floatval($record->amt_transfer_ncd) +
+                floatval($record->amt_cancellation_fee) +
+                floatval($record->amt_vat);
+    }
 }
 
 // ------------------------------------------------------------------------

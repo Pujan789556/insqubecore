@@ -317,16 +317,13 @@ class Endorsements extends MY_Controller
 	        		{
 	        			$common_data 	= $this->_prepare_common_on_add($policy_record->id, $txn_type);
 	        			$data 		 	= array_merge($common_data, $data);
-	        			$done 			= $this->endorsement_model->save_endorsement($data, TRUE);
+	        			$done 			= $this->endorsement_model->add($data, TRUE);
 	        		}
 	        		else
 	        		{
 	        			// Now Update Data
 	        			$data['txn_date'] = date('Y-m-d');
-						$done = $this->endorsement_model->update($record->id, $data, TRUE);
-
-						// Reset Premium
-						$this->endorsement_model->reset($record->id);
+						$done = $this->endorsement_model->edit($record->id, $data);
 	        		}
 
 	        		return $this->_return_on_save($action, $done, $policy_record->id, $record->id ?? NULL);
@@ -400,6 +397,18 @@ class Endorsements extends MY_Controller
 				{
 					$data[$key] = $post_data[$key] ?? NULL;
 				}
+
+				/**
+				 * We have to compute VAT manually
+				 */
+				$this->load->helper('account');
+				$taxable_amount = 	floatval($data['amt_transfer_fee']) +
+									floatval($data['amt_transfer_ncd']) +
+									floatval($data['amt_stamp_duty']);
+
+				$amt_vat 		 = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+				$data['amt_vat'] = $amt_vat;
+
 				return $data;
 			}
 
@@ -1075,7 +1084,7 @@ class Endorsements extends MY_Controller
 			{
 				// Single Installment
 				$installment_data = [
-					'dates' 	=> [$policy_record->issued_date],
+					'dates' 	=> [date('Y-m-d')], // Today
 					'percents' 	=> [100],
 				];
 			}
@@ -1673,6 +1682,19 @@ class Endorsements extends MY_Controller
 				$endorsement_record = $this->endorsement_model->get($endorsement_record->id);
 				$policy_record 		= $this->policy_model->get($endorsement_record->policy_id);
 
+
+
+				/**
+				 * Post Status Update Task
+				 *
+				 * 1. Save Installment Record on Ownership transfer
+				 * 		Since this type does not have premium update function. So we have to do this while we verify it
+				 */
+				$txn_type = (int)$endorsement_record->txn_type;
+				if( $to_status_code == IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED && $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER )
+				{
+					$this->_save_installments($policy_record, $endorsement_record);
+				}
 
 				/**
 				 * Load Portfolio Specific Helper File

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $old_object = get_object_from_policy_record($policy_record);
 $new_object = NULL;
 $computation_basis_text = '';
-if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) && $endorsement_record->computation_basis )
 {
     $computation_basis_text = _ENDORSEMENT_computation_basis_dropdown(FALSE)[$endorsement_record->computation_basis];
     try {

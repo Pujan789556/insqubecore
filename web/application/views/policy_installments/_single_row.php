@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy Installment:  Single Row
 */
 
-$total_premium = (float)$record->amt_basic_premium + (float)$record->amt_pool_premium;
+$total_amount = _POLICY_INSTALLMENT_compute_total_amount($record);
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-policy_installments-<?php echo $record->id;?>">
 	<?php if( $this->dx_auth->is_admin() ): ?>
@@ -22,7 +22,7 @@ $total_premium = (float)$record->amt_basic_premium + (float)$record->amt_pool_pr
 		endif;?>
 	</td>
 	<td><?php echo $record->percent;?>%</td>
-	<td><?php echo number_format( $total_premium, 2, '.', '');?></td>
+	<td><?php echo number_format( $total_amount, 2, '.', '');?></td>
 
 	<td><?php echo _POLICY_INSTALLMENT_status_text($record->status, TRUE);?></td>
 	<td class="ins-action">
