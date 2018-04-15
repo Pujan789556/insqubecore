@@ -1468,6 +1468,7 @@ if ( ! function_exists('_ENDORSEMENT_is_invoicable_by_type'))
             IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
             IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
             IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
+            IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER,
         ];
 
         return in_array($txn_type, $allowed_types);

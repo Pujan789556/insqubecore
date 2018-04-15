@@ -76,7 +76,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				            class="trg-dialog-edit"
 				            data-form="#_form-refund"
 				            data-box-size="large"
-				            data-title='<i class="fa fa-pencil-square-o"></i> Refund'
+				            data-title='<i class="fa fa-pencil-square-o"></i> Complete Refund'
 				            data-url="<?php echo site_url('policy_installments/refund/' . $record->policy_installment_id  . '/' . $record->id );?>"
 				        ><i class="fa fa-list-alt"></i> Refund</a>
 			        </li><li class="divider"></li>

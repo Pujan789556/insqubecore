@@ -1988,7 +1988,7 @@ class Policy_installments extends MY_Controller
 		}
 
 		/**
-		 * Get the transaction record, Valid Type?
+		 * Get the endorsement record, Valid Type?
 		 */
 		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
 		if(!$endorsement_record || $endorsement_record->txn_type != IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
@@ -2323,7 +2323,7 @@ class Policy_installments extends MY_Controller
 		 * Get the transaction record
 		 */
 		$transaction_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if(!$transaction_record)
+		if(!$transaction_record || !_ENDORSEMENT_is_invoicable_by_type($transaction_record->txn_type))
 		{
 			$this->template->render_404();
 		}
@@ -2779,76 +2779,7 @@ class Policy_installments extends MY_Controller
         return $this->template->json($ajax_data);
     }
 
-    	/**
-         * Send Activation SMS
-         * ---------------------
-         * Case 1: Fresh/Renewal/Transactional - After making payment, it gets activated automatically
-         * Case 2: General Endorsement - After activating
-         *
-         * @param object $transaction_record
-         * @param object $policy_record
-         * @param object $invoice_record
-         * @param object $installment_record
-         * @return bool
-         */
-    	private function _sms_activation( $transaction_record, $policy_record, $invoice_record = NULL, $installment_record = NULL)
-    	{
-    		$customer_name 		= $policy_record->customer_name;
-    		$customer_contact 	= $policy_record->customer_contact ? json_decode($policy_record->customer_contact) : NULL;
-    		$mobile 			= $customer_contact->mobile ? $customer_contact->mobile : NULL;
 
-    		if( !$mobile )
-    		{
-    			return FALSE;
-    		}
-
-    		$message = "Dear {$customer_name}," . PHP_EOL;
-
-    		if( in_array($transaction_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]) )
-        	{
-
-        		// First Installment
-        		if($installment_record->flag_first == IQB_FLAG_ON)
-				{
-					$message .= "Your Policy has been issued." . PHP_EOL .
-	        					"Policy No: " . $policy_record->code . PHP_EOL .
-	        					"Premium Paid(Rs): " . $invoice_record->amount . PHP_EOL .
-	        					"Expires on : " . $policy_record->end_date . PHP_EOL;
-				}
-
-				// Other Installment
-				else
-				{
-					$message .= "Your Policy installment has been issued." . PHP_EOL .
-	        					"Policy No: " . $policy_record->code . PHP_EOL .
-	        					"Premium Paid(Rs): " . $invoice_record->amount . PHP_EOL;
-				}
-
-
-        	}
-        	else if( $transaction_record->txn_type == IQB_POLICY_TXN_TYPE_ET )
-        	{
-        		$message .= "Your Policy Endorsement has been issued." . PHP_EOL .
-        					"Policy No: " . $policy_record->code . PHP_EOL .
-        					"Premium Paid(Rs): " . $invoice_record->amount . PHP_EOL;
-        	}
-        	else
-        	{
-        		$message .= "Your Policy Endorsement has been issued." . PHP_EOL .
-        					"Policy No: " . $policy_record->code . PHP_EOL;
-        	}
-
-        	/**
-        	 * Add Signature
-        	 */
-        	$message .= PHP_EOL . SMS_SIGNATURE;
-
-        	/**
-        	 * Let's Fire the SMS
-        	 */
-        	$this->load->helper('sms');
-        	$result = send_sms($mobile, $message);
-    	}
 
 	    private function _payment_form( $invoice_data )
 	    {
@@ -2910,4 +2841,473 @@ class Policy_installments extends MY_Controller
 
 	            ];
 	        }
+
+    // --------------------------------------------------------------------
+
+	/**
+	 * Make Installment Refund Complete
+	 *
+	 * !!! NOTE !!!
+	 * Please note that, the refund (payment) voucher must be made manually from
+	 * accounting section and only after that, you can perform this action.
+	 *
+	 * @param int $id Installment ID
+	 * @param int $credit_note_id Credit Note ID
+	 * @return mixed
+	 */
+	public function refund($id, $credit_note_id)
+    {
+        /**
+         * Check Permissions
+         */
+        if( !$this->dx_auth->is_authorized('policy_installments', 'make.policy.refund') )
+        {
+            $this->dx_auth->deny_access();
+        }
+
+		// --------------------------------------------------------------------
+
+        /**
+         * Get the Policy Installment Record
+         */
+        $id         		= (int)$id;
+        $credit_note_id 	= (int)$credit_note_id;
+        $installment_record = $this->policy_installment_model->get( $id );
+		if(!$installment_record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($installment_record->branch_id);
+
+
+        /**
+         * Record Status Authorized to Make Refund?
+         */
+        if($installment_record->status !== IQB_POLICY_INSTALLMENT_STATUS_INVOICED)
+        {
+            return $this->template->json([
+                'title'     => 'OOPS!',
+                'status'    => 'error',
+                'message'   => 'You can not perform this action.'
+            ], 404);
+        }
+
+		// --------------------------------------------------------------------
+
+        /**
+		 * Get the endorsement record, Valid Type?
+		 */
+		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
+		if(!$endorsement_record || $endorsement_record->txn_type != IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND)
+		{
+			return $this->template->json([
+				'title' 	=> 'Invalid Action!',
+				'status' 	=> 'error',
+				'message' 	=> 'Invalid Endorsement Record and/or Type.'
+			], 400);
+		}
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Policy Record
+         */
+        $policy_record = $this->policy_model->get($endorsement_record->policy_id);
+        if(!$policy_record)
+        {
+            return $this->template->json([
+				'title' 	=> 'Invalid Action!',
+				'status' 	=> 'error',
+				'message' 	=> 'Policy record not found!'
+			], 400);
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Credit Note Record? Already Paid?
+         */
+        $this->load->model('ac_credit_note_model');
+        $this->load->model('ac_credit_note_detail_model');
+        $credit_note_record = $this->ac_credit_note_model->get($credit_note_id);
+        if(!$credit_note_record || $credit_note_record->flag_paid == IQB_FLAG_ON)
+        {
+            return $this->template->json([
+                'title'     => 'OOPS!',
+                'status'    => 'error',
+                'message'   => 'You have already made payment for this Credit Note.'
+            ], 404);
+        }
+
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Load voucher models
+         */
+        $this->load->model('ac_voucher_model');
+        $this->load->model('rel_policy_installment_voucher_model');
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Render Refund Form
+         */
+        if( !$this->input->post() )
+		{
+			$credit_note_data = [
+				'record' 	=> $credit_note_record,
+				'rows' 		=> $this->ac_credit_note_detail_model->rows_by_credit_note($credit_note_record->id)
+			];
+			return $this->_refund_form($credit_note_data);
+		}
+		else
+		{
+			$v_rules = $this->_refund_rules();
+			$this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$refund_data = $this->input->post();
+        	}
+        	else
+        	{
+        		return $this->template->json([
+	                'title'     => 'Validation Failed!',
+	                'status'    => 'error',
+	                'message'   => validation_errors()
+	            ], 404);
+        	}
+		}
+
+        // --------------------------------------------------------------------
+
+
+		/**
+		 * Let's Get the Payment Voucher Record
+		 */
+		$voucher_id 	= (int)$this->input->post('voucher_id');
+		$voucher_record = $this->ac_voucher_model->get($voucher_id);
+		if(
+			// Voucher Record Exists?
+			!$voucher_record
+				||
+			// Voucher Complete
+			$voucher_record->flag_complete != IQB_FLAG_ON
+				||
+			// Valid Voucher Type
+			$voucher_record->voucher_type_id != IQB_AC_VOUCHER_TYPE_PMNT )
+        {
+            return $this->template->json([
+                'title'     => 'OOPS!',
+                'status'    => 'error',
+                'message'   => 'Invalid Voucher Record.'
+            ], 404);
+        }
+
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($voucher_record->branch_id, TRUE, 'Voucher does not belong to your branch.');
+
+
+        $flag_exception = FALSE;
+        $message = '';
+
+
+        /**
+         * --------------------------------------------------------------------
+         * Post Voucher Validation Tasks
+         *
+         * NOTE
+         *      We perform post voucher add tasks which are mainly to insert
+         *      voucher internal relation with policy txn record and  update
+         *      policy status
+         * --------------------------------------------------------------------
+         */
+
+
+        /**
+         * ==================== MANUAL TRANSACTIONS BEGIN =========================
+         */
+
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            $this->db->trans_begin();
+
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 1: Add Voucher-Policy Installment Relation
+                 */
+
+                try {
+
+                    $relation_data = [
+                        'policy_installment_id' => $installment_record->id,
+                        'voucher_id'    		=> $voucher_id,
+                        'flag_invoiced' 		=> IQB_FLAG_NOT_REQUIRED
+                    ];
+                    $this->rel_policy_installment_voucher_model->add($relation_data);
+
+                } catch (Exception $e) {
+
+                    $flag_exception = TRUE;
+                    $message = $e->getMessage();
+                }
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 2:
+                 * 		Update Credit Note Paid Flat to "ON"
+                 *      Update Policy Status to "Active" (if Fresh or Renewal )
+                 *      Update Installment Status to "Paid", Clean Cache, (Commit endorsement)
+                 */
+                if( !$flag_exception )
+                {
+                    try{
+
+                    	$this->ac_credit_note_model->update_flag($credit_note_record->id, 'flag_paid', IQB_FLAG_ON);
+
+                    	/**
+						 * If first installment of this endorsement, activate the endorsement
+						 */
+						if($installment_record->flag_first == IQB_FLAG_ON)
+						{
+							$this->endorsement_model->update_status($endorsement_record, IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE);
+						}
+                        $this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_PAID);
+
+                    } catch (Exception $e) {
+
+                        $flag_exception = TRUE;
+                        $message = $e->getMessage();
+                    }
+                }
+                // --------------------------------------------------------------------
+
+            /**
+             * Complete transactions or Rollback
+             */
+            if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
+            {
+                $this->db->trans_rollback();
+
+                /**
+                 * Set Voucher Flag Complete to OFF
+                 */
+                $this->ac_voucher_model->disable_voucher($voucher_id);
+
+                return $this->template->json([
+                    'title'     => 'Something went wrong!',
+                    'status'    => 'error',
+                    'message'   => $message ? $message : 'Could not perform refund operations.'
+                ]);
+            }
+            else
+            {
+                    $this->db->trans_commit();
+
+
+                    /**
+                     * Post Commit Tasks
+                     * -----------------
+                     *
+                     * 1. Clear Cache (Credit Notes and Vouchers)
+                     * 2. Send SMS
+                     */
+                    $cache_var = 'ac_credit_note_list_by_policy_'.$policy_record->id;
+                    $this->ac_credit_note_model->clear_cache($cache_var);
+
+                    $cache_var = 'ac_voucher_list_by_policy_'.$policy_record->id;
+                	$this->ac_voucher_model->clear_cache($cache_var);
+
+                    // Send SMS
+                    $this->_sms_activation($endorsement_record, $policy_record, $credit_note_record, $installment_record);
+            }
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== MANUAL TRANSACTIONS END =========================
+         */
+
+
+        // --------------------------------------------------------------------
+
+        /**
+		 * Load Portfolio Specific Helper File
+		 */
+        try { load_portfolio_helper($policy_record->portfolio_id);} catch (Exception $e) {
+			return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
+		}
+
+
+        /**
+         * Reload the Policy Overview Tab, Update Installment Row (Replace)
+         */
+        $installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_PAID;
+		$installment_record->endorsement_status 		= IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
+        $endorsement_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
+        $policy_record->status      					= IQB_POLICY_STATUS_ACTIVE;
+        $credit_note_record->flag_paid  				= IQB_FLAG_ON;
+
+        $html_tab_ovrview   = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
+        $html_credit_note_row 	= $this->load->view('accounting/credit_notes/_single_row', ['record' => $credit_note_record], TRUE);
+        $ajax_data = [
+            'message'   => 'Successfully Updated!',
+            'status'    => 'success',
+            'hideBootbox' => true,
+            'multipleUpdate' => [
+                [
+                    'box'       => '#tab-policy-overview-inner',
+                    'method'    => 'replaceWith',
+                    'html'      => $html_tab_ovrview
+                ],
+                [
+                    'box'       => '#_data-row-credit_note-' . $credit_note_record->id,
+                    'method'    => 'replaceWith',
+                    'html'      => $html_credit_note_row
+                ]
+            ]
+        ];
+        return $this->template->json($ajax_data);
+    }
+
+    	private function _refund_form( $credit_note_data )
+	    {
+	        $form_data = [
+	            'form_elements' => $this->_refund_rules(),
+	            'record' 		=> NULL,
+	            'credit_note_data' 	=> $credit_note_data
+	        ];
+
+	        /**
+	         * Render The Form
+	         */
+	        $json_data = [
+	            'form' => $this->load->view('accounting/credit_notes/_form_refund', $form_data, TRUE)
+	        ];
+	        $this->template->json($json_data);
+	    }
+
+	        private function _refund_rules()
+	        {
+	            return [
+	                [
+	                    'field' => 'voucher_id',
+	                    'label' => 'Voucher ID',
+	                    'rules' => 'trim|required|integer|max_length[20]',
+	                    '_type' => 'text',
+	                ]
+
+	            ];
+	        }
+
+	// --------------------------------------------------------------------
+
+    /**
+     * Send Activation SMS
+     * ---------------------
+     * Case 1: Fresh/Renewal/Transactional - After making payment, it gets activated automatically
+     * Case 2: General Endorsement - After activating
+     *
+     * @param object $transaction_record
+     * @param object $policy_record
+     * @param object $invoice_record / $credit_note_record
+     * @param object $installment_record
+     * @return bool
+     */
+	private function _sms_activation( $endorsement_record, $policy_record, $invoice_record = NULL, $installment_record = NULL)
+		{
+			$customer_name 		= $policy_record->customer_name;
+			$customer_contact 	= $policy_record->customer_contact ? json_decode($policy_record->customer_contact) : NULL;
+			$mobile 			= $customer_contact->mobile ? $customer_contact->mobile : NULL;
+
+			if( !$mobile )
+			{
+				return FALSE;
+			}
+
+			$message 	= "Dear {$customer_name}," . PHP_EOL;
+			$txn_type 	= (int)$endorsement_record->txn_type;
+
+			$amount = abs($invoice_record->amount ?? 0);
+
+			/**
+			 * Compose Message By Types
+			 */
+			if( _ENDORSEMENT_is_first($txn_type) )
+			{
+				// First Installment
+	    		if($installment_record->flag_first == IQB_FLAG_ON)
+				{
+					$message .= "Your Policy has been issued." . PHP_EOL .
+	        					"Policy No: " . $policy_record->code . PHP_EOL .
+	        					"Premium Paid(Rs): " . $amount . PHP_EOL .
+	        					"Expires on : " . $policy_record->end_date . PHP_EOL;
+				}
+
+				// Other Installment
+				else
+				{
+					$message .= "Your Policy installment has been issued." . PHP_EOL .
+	        					"Policy No: " . $policy_record->code . PHP_EOL .
+	        					"Premium Paid(Rs): " . $amount . PHP_EOL;
+				}
+			}
+
+			/**
+			 * Premium Upgrade or Ownership Transfer ( Customer pays the Premium)
+			 */
+			else if( in_array($txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER]) )
+			{
+				$message .= "Your Policy endorsement has been issued." . PHP_EOL .
+	        					"Policy No: " . $policy_record->code . PHP_EOL .
+	        					"Premium Paid(Rs): " . $amount . PHP_EOL;
+			}
+
+			/**
+			 * Premium Refund ( Customer gets the refund amount)
+			 */
+			else if( $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
+			{
+				$message .= "Your Policy endorsement has been issued." . PHP_EOL .
+	        					"Policy No: " . $policy_record->code . PHP_EOL .
+	        					"Premium Refunded(Rs): " . $amount . PHP_EOL;
+			}
+
+			/**
+			 * General Endorsement
+			 */
+			else
+			{
+				$message .= "Your Policy Endorsement has been issued." . PHP_EOL .
+	    					"Policy No: " . $policy_record->code . PHP_EOL;
+			}
+
+	    	/**
+	    	 * Add Signature
+	    	 */
+	    	$message .= PHP_EOL . SMS_SIGNATURE;
+
+	    	/**
+	    	 * Let's Fire the SMS
+	    	 */
+	    	$this->load->helper('sms');
+	    	$result = send_sms($mobile, $message);
+		}
+
 }

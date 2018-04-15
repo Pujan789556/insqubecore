@@ -1668,23 +1668,7 @@ class Endorsements extends MY_Controller
 				 * Updated Transaction & Policy Record
 				 */
 				$endorsement_record = $this->endorsement_model->get($endorsement_record->id);
-				$policy_record = $this->policy_model->get($endorsement_record->policy_id);
-
-
-				/**
-				 * Post Tasks on Transaction Activation
-				 * -------------------------------------
-				 *
-				 * If this is not a General Endorsement Transaction, we also have to update the
-				 * 	- policy (from audit_policy field if any data)
-				 * 	- object (from audit_object field if any data)
-				 * 	- customer (from audit_customer field if any data)
-				 * 	- SEND SMS on General Transaction Activation
-				 */
-				if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_GENERAL && $to_status_code ==IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE )
-				{
-					$this->_sms_activation($endorsement_record, $policy_record);
-				}
+				$policy_record 		= $this->policy_model->get($endorsement_record->policy_id);
 
 
 				/**
@@ -1936,63 +1920,4 @@ class Endorsements extends MY_Controller
 		}
 
 	// --------------------- END: STATUS UPGRADE/DOWNGRADE --------------------
-
-
-	// --------------------------------------------------------------------
-	//  POLICY Voucher & Invoice
-	// --------------------------------------------------------------------
-
-    	/**
-         * Send Activation SMS
-         * ---------------------
-         * Case 1: Fresh/Renewal/Transactional - After making payment, it gets activated automatically
-         * Case 2: General Endorsement - After activating
-         *
-         * @param object $endorsement_record
-         * @param object $policy_record
-         * @return bool
-         */
-    	private function _sms_activation($endorsement_record, $policy_record, $invoice_record = NULL)
-    	{
-    		$customer_name 		= $policy_record->customer_name;
-    		$customer_contact 	= $policy_record->customer_contact ? json_decode($policy_record->customer_contact) : NULL;
-    		$mobile 			= $customer_contact->mobile ? $customer_contact->mobile : NULL;
-
-    		if( !$mobile )
-    		{
-    			return FALSE;
-    		}
-
-    		$message = "Dear {$customer_name}," . PHP_EOL;
-
-    		if( in_array($endorsement_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]) )
-        	{
-        		$message .= "Your Policy has been issued." . PHP_EOL .
-        					"Policy No: " . $policy_record->code . PHP_EOL .
-        					"Premium Paid(Rs): " . $invoice_record->amount . PHP_EOL .
-        					"Expires on : " . $policy_record->end_date . PHP_EOL;
-        	}
-        	else if( $endorsement_record->txn_type == IQB_POLICY_TXN_TYPE_ET )
-        	{
-        		$message .= "Your Policy Endorsement has been issued." . PHP_EOL .
-        					"Policy No: " . $policy_record->code . PHP_EOL .
-        					"Amount Paid(Rs): " . $invoice_record->amount . PHP_EOL;
-        	}
-        	else
-        	{
-        		$message .= "Your Policy Endorsement has been issued." . PHP_EOL .
-        					"Policy No: " . $policy_record->code . PHP_EOL;
-        	}
-
-        	/**
-        	 * Add Signature
-        	 */
-        	$message .= PHP_EOL . SMS_SIGNATURE;
-
-        	/**
-        	 * Let's Fire the SMS
-        	 */
-        	$this->load->helper('sms');
-        	$result = send_sms($mobile, $message);
-    	}
 }

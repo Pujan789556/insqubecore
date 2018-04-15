@@ -452,7 +452,7 @@ if ( ! function_exists('belongs_to_me'))
      * @param integer $branch_id branch ID
      * @return mixed
      */
-    function belongs_to_me( $branch_id, $terminate_on_fail = TRUE  )
+    function belongs_to_me( $branch_id, $terminate_on_fail = TRUE, $message=''  )
     {
         $CI =& get_instance();
 
@@ -465,7 +465,7 @@ if ( ! function_exists('belongs_to_me'))
         // Terminate on Exit?
         if( $__flag_authorized === FALSE && $terminate_on_fail === TRUE)
         {
-            $CI->dx_auth->deny_access();
+            $CI->dx_auth->deny_access('deny', $message);
             exit(1);
         }
 
