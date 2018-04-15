@@ -186,9 +186,9 @@ if(
 ):
 
     /**
-     * Let's activate the general endorsement
+     * Let's activate the Non-transactional Endorsements
      */
-    if( (int)$record->txn_type === IQB_POLICY_ENDORSEMENT_TYPE_GENERAL && $this->dx_auth->is_authorized('endorsements', 'status.to.active')): ?>
+    if( !_ENDORSEMENT_is_transactional_by_type((int)$record->txn_type) && $this->dx_auth->is_authorized('endorsements', 'status.to.active')): ?>
         <a href="#"
             title="Activate Transaction/Endorsement"
             data-toggle="tooltip"

@@ -460,6 +460,7 @@ class Endorsement_model extends MY_Model
                      *  - Refund and Terminate
                      *  - Simply Terminate
                      */
+                    $terminate_policy = $terminate_policy || $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE;
                     if($terminate_policy)
                     {
                         $this->policy_model->update_status($record->policy_id, IQB_POLICY_STATUS_CANCELED);
