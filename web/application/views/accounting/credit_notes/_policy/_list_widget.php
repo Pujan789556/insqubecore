@@ -1,22 +1,22 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Policy Invoices: List View
+* Policy Credit Notes: List View
 */
 ?>
-<div class="row" id="list-widget-policy-invoices">
+<div class="row" id="list-widget-policy-credit_notes">
 	<div class="col-xs-12">
 		<div class="box no-border">
 			<div class="box-header gray bg-gray">
 				<div class="row page-header">
 					<div class="col-sm-6">
-						<h3 class="no-margin-t no-margin-b">Manage Invoices</h3>
+						<h3 class="no-margin-t no-margin-b">Manage Credit Notes</h3>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
 						<a href="#"
 							title="Flush Cache"
 							data-confirm="false"
-							data-url="<?php echo site_url( 'ac_invoices/flush_by_policy/' . $policy_id );?>"
+							data-url="<?php echo site_url( 'ac_credit_notes/flush_by_policy/' . $policy_id );?>"
 							class="btn btn-warning btn-round trg-dialog-action"
 							data-toggle="tooltip"
 						><i class="fa fa-trash-o"></i> Flush Cache</a>
@@ -28,7 +28,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						/**
 						 * Load Live Search UI
 						 */
-						$this->load->view('templates/_common/_live_search',['options' => json_encode(['rows'=>'#search-result-invoice tr.searchable'])]);
+						$this->load->view('templates/_common/_live_search',['options' => json_encode(['rows'=>'#search-result-credit_note tr.searchable'])]);
 						?>
 					</div>
 				</div>
@@ -39,7 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('accounting/invoices/_list');
+				$this->load->view('accounting/credit_notes/_list');
 				?>
 			</div>
 		</div>

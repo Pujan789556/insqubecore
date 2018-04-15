@@ -26,7 +26,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo credit_note_complete_flag_text($record->flag_complete);?></td>
 	<td><?php echo credit_note_flag_on_off_text($record->flag_paid);?></td>
 	<td><?php echo credit_note_flag_on_off_text($record->flag_printed);?></td>
-	<td><?php echo credit_note_flag_on_off_text($record->receipt_flag_printed);?></td>
 	<td class="ins-action">
 		<div class="btn-group">
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
@@ -79,7 +78,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				            data-box-size="large"
 				            data-title='<i class="fa fa-pencil-square-o"></i> Refund'
 				            data-url="<?php echo site_url('policy_installments/refund/' . $record->policy_installment_id  . '/' . $record->id );?>"
-				        ><i class="fa fa-list-alt"></i> Refundb</a>
+				        ><i class="fa fa-list-alt"></i> Refund</a>
 			        </li><li class="divider"></li>
 				<?php endif;?>
 

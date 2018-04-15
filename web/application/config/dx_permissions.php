@@ -204,6 +204,7 @@ $config['DX_permissions'] = [
 			 */
 			'generate.policy.voucher',
 			'generate.policy.invoice',
+			'generate.policy.credit_note',
 			'make.policy.payment',
 		],
 

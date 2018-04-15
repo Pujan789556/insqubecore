@@ -73,12 +73,12 @@ class Ac_credit_note_detail_model extends MY_Model
      * @param integer $credit_note_id
      * @return array
      */
-    public function rows_by_invoice($credit_note_id)
+    public function rows_by_credit_note($credit_note_id)
     {
 
-        return $this->db->select('IDTL.*')
-                        ->from($this->table_name . ' AS IDTL')
-                        ->where('IDTL.credit_note_id', $credit_note_id)
+        return $this->db->select('CNDTL.*')
+                        ->from($this->table_name . ' AS CNDTL')
+                        ->where('CNDTL.credit_note_id', $credit_note_id)
                         ->get()
                         ->result();
     }

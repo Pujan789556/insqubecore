@@ -53,6 +53,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</li>
 
 				<li role="presentation">
+					<a href="#tab-policy-credit_notes"
+						data-url="<?php echo site_url('ac_credit_notes/by_policy/'. $record->id)?>"
+						data-load-method="get"
+						data-box="#tab-policy-credit_notes"
+						data-method="html"
+						aria-controls="tab-policy-credit_notes"
+						role="tab"
+						data-toggle="tab">Credit Notes</a>
+				</li>
+
+				<li role="presentation">
 					<a href="#tab-policy-ri_transactions"
 						data-url="<?php echo site_url('ri_transactions/by_policy/'. $record->id)?>"
 						data-load-method="get"
@@ -90,37 +101,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					?>
 				</div>
 
-				<div class="tab-pane" id="tab-endorsements">
+				<div class="tab-pane" id="tab-endorsements"></div>
 
-				</div>
+				<div class="tab-pane" id="tab-policy-installments"></div>
 
-				<div class="tab-pane" id="tab-policy-installments">
+				<div class="tab-pane" id="tab-policy-vouchers"></div>
 
-				</div>
+				<div class="tab-pane" id="tab-policy-invoices"></div>
 
-				<div class="tab-pane" id="tab-policy-vouchers">
+				<div class="tab-pane" id="tab-policy-credit_notes"></div>
 
-				</div>
+				<div class="tab-pane" id="tab-policy-ri_transactions"></div>
 
-				<div class="tab-pane" id="tab-policy-invoices">
+				<div class="tab-pane" id="tab-policy-claims"></div>
 
-				</div>
+				<div class="tab-pane" id="tab-policy-docs"></div>
 
-				<div class="tab-pane" id="tab-policy-ri_transactions">
-
-				</div>
-
-				<div class="tab-pane" id="tab-policy-claims">
-
-				</div>
-
-				<div class="tab-pane" id="tab-policy-docs">
-
-				</div>
-
-				<div class="tab-pane" id="tab-policy-logs">
-
-				</div>
+				<div class="tab-pane" id="tab-policy-logs"></div>
 			</div>
 		</div>
 	</div>

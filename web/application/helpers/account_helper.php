@@ -624,7 +624,13 @@ if ( ! function_exists('_INVOICE__pdf'))
         $filename =  "invoice-{$record->invoice_code}.pdf";
         if( $action === 'save' )
         {
-            $save_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/invoices/' . $filename;
+
+        	$filepath = rtrim(INSQUBE_MEDIA_PATH, '/') . '/invoices/';
+        	if( !file_exists($filepath) )
+        	{
+        		throw new Exception("Exception [Helper: account_helper][Method: _INVOICE__pdf()]: File path ({$filepath}) not found.");
+        	}
+            $save_full_path = rtrim($filepath, '/') . '/' . $filename;
             $mpdf->Output($save_full_path,'F');
         }
         else if($action === 'download')
@@ -656,7 +662,7 @@ if ( ! function_exists('_RECEIPT__pdf'))
     {
         if( !in_array($action, ['save', 'print', 'download']) )
         {
-            throw new Exception("Exception [Helper: account_helper][Method: _INVOICE__pdf()]: Invalid Action.");
+            throw new Exception("Exception [Helper: account_helper][Method: _RECEIPT__pdf()]: Invalid Action.");
         }
 
         $CI =& get_instance();
@@ -690,7 +696,13 @@ if ( ! function_exists('_RECEIPT__pdf'))
         $filename =  "receipt-{$record->receipt_code}.pdf";
         if( $action === 'save' )
         {
-            $save_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/receipts/' . $filename;
+
+        	$filepath = rtrim(INSQUBE_MEDIA_PATH, '/') . '/receipts/';
+        	if( !file_exists($filepath) )
+        	{
+        		throw new Exception("Exception [Helper: account_helper][Method: _RECEIPT__pdf()]: File path ({$filepath}) not found.");
+        	}
+            $save_full_path = rtrim($filepath, '/') . '/' . $filename;
             $mpdf->Output($save_full_path,'F');
         }
         else if($action === 'download')
@@ -704,4 +716,76 @@ if ( ! function_exists('_RECEIPT__pdf'))
     }
 }
 
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_CREDIT_NOTE__pdf'))
+{
+    /**
+     * Save, Print or Download Credit Note.
+     *
+     *
+     * Filename: credit_note-<credit_note_id>.pdf
+     *
+     * @param array $data       ['record' => xxx, 'rows' => []]
+     * @param string $action    [save|print|download]
+     * @return  void
+     */
+    function _CREDIT_NOTE__pdf( $data, $action )
+    {
+        if( !in_array($action, ['save', 'print', 'download']) )
+        {
+            throw new Exception("Exception [Helper: account_helper][Method: _CREDIT_NOTE__pdf()]: Invalid Action.");
+        }
+
+        $CI =& get_instance();
+
+        /**
+         * Extract Invoice Record and Invoice Rows
+         */
+        $record    = $data['record'];
+        $rows      = $data['rows'];
+
+        $CI->load->library('pdf');
+        $mpdf = $CI->pdf->load();
+        $mpdf->SetMargins(10, 5, 10, 5);
+        $mpdf->margin_header = 5;
+        $mpdf->margin_footer = 5;
+        $mpdf->SetProtection(array('print'));
+        $mpdf->SetTitle("Policy Credit Note - {$record->id}");
+        $mpdf->SetAuthor($CI->settings->orgn_name_en);
+
+        if( $record->flag_printed == IQB_FLAG_ON )
+        {
+            $mpdf->SetWatermarkText( 'CREDIT NOTE COPY - ' . $CI->settings->orgn_name_en );
+        }
+
+        $mpdf->showWatermarkText = true;
+        $mpdf->watermark_font = 'DejaVuSansCondensed';
+        $mpdf->watermarkTextAlpha = 0.1;
+        $mpdf->SetDisplayMode('fullpage');
+
+        $html = $CI->load->view( 'accounting/credit_notes/print/credit_note', $data, TRUE);
+        $mpdf->WriteHTML($html);
+        $filename =  "credit_note-{$record->id}.pdf";
+        if( $action === 'save' )
+        {
+        	$filepath = rtrim(INSQUBE_MEDIA_PATH, '/') . '/credit_notes/';
+        	if( !file_exists($filepath) )
+        	{
+        		throw new Exception("Exception [Helper: account_helper][Method: _CREDIT_NOTE__pdf()]: File path ({$filepath}) not found.");
+        	}
+            $save_full_path = rtrim($filepath, '/') . '/' . $filename;
+            $mpdf->Output($save_full_path,'F');
+        }
+        else if($action === 'download')
+        {
+            $mpdf->Output($filename,'D');      // make it to DOWNLOAD
+        }
+        else
+        {
+            $mpdf->Output();
+        }
+    }
+}
 

@@ -560,12 +560,12 @@ class Ac_credit_notes extends MY_Controller
 
 		// echo '<pre>'; print_r($data);exit;
 
-		$this->data['site_title'] = 'Credit Note Details | ' . $record->credit_note_code;
+		$this->data['site_title'] = 'Credit Note Details | ' . $record->id;
 		$this->template->partial(
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Credit Note -' . $record->credit_note_code,
+								'content_header' => 'Credit Note -' . $record->id,
 								'breadcrumbs' => ['Credit Notes' => $this->router->class, 'Details' => NULL]
 						])
 						->partial('content', 'accounting/credit_notes/_details', $data)

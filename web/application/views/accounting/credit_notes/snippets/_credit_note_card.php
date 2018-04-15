@@ -38,7 +38,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </div>
                 <!-- /.col -->
                 <div class="col-sm-4 invoice-col">
-                    <b>Credit Note #<?php echo $record->invoice_code?></b><br/>
+                    <b>Credit Note #<?php echo $record->id?></b><br/>
                     Policy # <strong><?php echo $record->policy_code?></strong><br/>
                     Branch: <strong><?php echo $record->branch_name?></strong>
                 </div>
@@ -73,7 +73,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                         Amount in Words:
                                         <strong>
                                             <?php
-                                            echo ucfirst( number_to_words( number_format($record->amount, 2, '.', '') ) );
+                                            echo ucfirst( number_to_words( number_format( abs($record->amount), 2, '.', '') ) );
                                             ?>
                                         </strong>
                                     </td>

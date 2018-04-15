@@ -1448,6 +1448,33 @@ if ( ! function_exists('_ENDORSEMENT_is_premium_computable_by_type'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('_ENDORSEMENT_is_invoicable_by_type'))
+{
+    /**
+     * Check if given Endorsement type is Invoicable.
+     *
+     * Allowed Transaction Types
+     *  - Fresh
+     *  - Renewal
+     *  - Premium Upgrade
+     *
+     * @param   int     Transaction Type
+     * @return  array
+     */
+    function _ENDORSEMENT_is_invoicable_by_type( $txn_type )
+    {
+        $txn_type       = (int)$txn_type;
+        $allowed_types  = [
+            IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
+            IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
+            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
+        ];
+
+        return in_array($txn_type, $allowed_types);
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('_ENDORSEMENT_is_policy_editable_by_type'))
 {
 	/**

@@ -335,9 +335,6 @@ class Ac_credit_note_model extends MY_Model
                         // Credit Note Table
                         'CN.*, ' .
 
-                        // // Receipt Data
-                        // 'RCPT.id as receipt_id, RCPT.adjustment_amount, RCPT.received_in, RCPT.received_in_date, RCPT.flag_printed as receipt_flag_printed, ' .
-
                         // Branch Table
                         'B.name AS branch_name, ' .
 
@@ -345,7 +342,6 @@ class Ac_credit_note_model extends MY_Model
                         'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
                     )
                 ->from($this->table_name . ' AS CN')
-                // ->join('ac_receipts RCPT', 'CN.id = RCPT.credit_note_id', 'left')
                 ->join('master_branches B', 'B.id = CN.branch_id')
                 ->join('master_fiscal_yrs FY', 'FY.id = CN.fiscal_yr_id');
 
@@ -391,8 +387,8 @@ class Ac_credit_note_model extends MY_Model
             return $this->db->select('REL.policy_installment_id, ENDRSMNT.policy_id')
                         ->join('ac_vouchers V', 'V.id = CN.voucher_id')
                         ->join('rel_policy_installment_voucher REL', 'REL.voucher_id = CN.voucher_id')
-                        ->join('dt_policy_installments PTI', 'REL.policy_installment_id = PTCN.id')
-                        ->join('dt_endorsements ENDRSMNT', 'PTCN.endorsement_id = ENDRSMNT.id')
+                        ->join('dt_policy_installments PTI', 'REL.policy_installment_id = PTI.id')
+                        ->join('dt_endorsements ENDRSMNT', 'PTI.endorsement_id = ENDRSMNT.id')
                         ->where('ENDRSMNT.policy_id', $policy_id)
                         ->where('CN.flag_complete', IQB_FLAG_ON)
                         ->where('V.flag_complete', IQB_FLAG_ON)
@@ -416,7 +412,7 @@ class Ac_credit_note_model extends MY_Model
                             'B.contacts as branch_contact, ' .
 
                             // Endorsement ID, Policy ID
-                            'PTCN.endorsement_id, ENDRSMNT.policy_id, ' .
+                            'PTI.endorsement_id, ENDRSMNT.policy_id, ' .
 
                             // Policy Code
                             'POLICY.code AS policy_code, ' .
@@ -426,8 +422,8 @@ class Ac_credit_note_model extends MY_Model
                         )
                     ->join('ac_vouchers V', 'V.id = CN.voucher_id')
                     ->join('rel_policy_installment_voucher REL', 'REL.voucher_id = CN.voucher_id')
-                    ->join('dt_policy_installments PTI', 'REL.policy_installment_id = PTCN.id')
-                    ->join('dt_endorsements ENDRSMNT', 'PTCN.endorsement_id = ENDRSMNT.id')
+                    ->join('dt_policy_installments PTI', 'REL.policy_installment_id = PTI.id')
+                    ->join('dt_endorsements ENDRSMNT', 'PTI.endorsement_id = ENDRSMNT.id')
                     ->join('dt_policies POLICY', 'POLICY.id = ENDRSMNT.policy_id')
                     ->join('dt_customers CST', 'CST.id = CN.customer_id');
 

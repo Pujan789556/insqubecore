@@ -1658,10 +1658,10 @@ class Policy_installments extends MY_Controller
 		}
 
 		/**
-		 * Get the transaction record
+		 * Get the transaction record. Valid? Type must be invoicable
 		 */
 		$transaction_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if(!$transaction_record)
+		if( !$transaction_record || !_ENDORSEMENT_is_invoicable_by_type($transaction_record->txn_type) )
 		{
 			$this->template->render_404();
 		}
@@ -1932,6 +1932,341 @@ class Policy_installments extends MY_Controller
 		$transaction_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
 
 		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $transaction_record], TRUE);
+
+		$voucher_record->flag_invoiced = IQB_FLAG_ON;
+		$html_voucher_row 	= $this->load->view('accounting/vouchers/_single_row', ['record' => $voucher_record], TRUE);
+
+		$ajax_data = [
+			'message' 	=> 'Successfully Updated!',
+			'status'  	=> 'success',
+			'multipleUpdate' => [
+				[
+					'box' 		=> '#tab-policy-overview-inner',
+					'method' 	=> 'replaceWith',
+					'html' 		=> $html_tab_ovrview
+				],
+				[
+					'box' 		=> '#_data-row-voucher-' . $voucher_id,
+					'method' 	=> 'replaceWith',
+					'html' 		=> $html_voucher_row
+				]
+			]
+		];
+		return $this->template->json($ajax_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Generate Credit Note
+	 *
+	 * @param integer $id Policy Installment ID
+	 * @param integer $voucher_id Voucher ID
+	 * @return mixed
+	 */
+	public function credit_note($id, $voucher_id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('policy_installments', 'generate.policy.credit_note') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Get the Policy Fresh/Renewal Txn Record
+		 */
+		$id 		= (int)$id;
+		$voucher_id = (int)$voucher_id;
+		$installment_record = $this->policy_installment_model->get( $id );
+		if(!$installment_record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Get the transaction record, Valid Type?
+		 */
+		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
+		if(!$endorsement_record || $endorsement_record->txn_type != IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
+		{
+			return $this->template->json([
+				'title' 	=> 'Invalid Action!',
+				'status' 	=> 'error',
+				'message' 	=> 'Invalid Endorsement Record and/or Type.'
+			], 400);
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Get Voucher Record By Policy Installment Relation
+		 */
+		$this->load->model('ac_voucher_model');
+		$voucher_record = $this->ac_voucher_model->get_voucher_by_policy_installment($installment_record->id, $voucher_id);
+		if(!$voucher_record)
+		{
+			$this->template->render_404();
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Check if Credit Note already generated for this Voucher
+		 */
+		$this->load->model('ac_credit_note_model');
+		if( $this->ac_credit_note_model->credit_note_exists($voucher_id))
+		{
+			return $this->template->json([
+				'title' 	=> 'Invalid Action!',
+				'status' 	=> 'error',
+				'message' 	=> 'Credit Note already exists for this Voucher.'
+			], 400);
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Policy Record
+		 */
+		$policy_record = $this->policy_model->get($installment_record->policy_id);
+		if(!$policy_record)
+		{
+			return $this->template->json([
+				'title' 	=> 'Invalid Action!',
+				'status' 	=> 'error',
+				'message' 	=> 'Policy record not found!'
+			], 400);
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Record Status Authorized to Generate Voucher?
+		 */
+		if($installment_record->status !== IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED || $voucher_record->flag_invoiced != IQB_FLAG_OFF )
+		{
+			return $this->template->json([
+			'title' 	=> 'Unauthorized Action!',
+				'status' 	=> 'error',
+				'message' 	=> 'You can not perform this action.'
+			], 404);
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Let's Build Policy Credit Note
+		 */
+
+		/**
+         * Voucher Amount Computation
+         */
+        $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
+        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
+        $vat_payable_amount 		= $installment_record->amt_vat;
+        $total_refund_amount 		= $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
+
+		$credit_note_data = [
+			'customer_id' 		=> $policy_record->customer_id,
+            'credit_note_date'  => date('Y-m-d'),
+            'voucher_id'   		=> $voucher_id,
+            'amount' 			=> $total_refund_amount
+        ];
+
+		// --------------------------------------------------------------------
+
+        /**
+         * Credit Note Details
+         */
+        $credit_note_details_data = [
+        	[
+	        	'description' 	=> "Policy Endorsement - Premium Refund (Policy Code - {$policy_record->code})",
+	        	'amount'		=> $gross_premium_amount
+	        ]
+        ];
+
+        if($stamp_income_amount)
+        {
+        	$credit_note_details_data[] = [
+	        	'description' 	=> "Stamp Duty",
+	        	'amount'		=> $stamp_income_amount
+	        ];
+        }
+
+        $credit_note_details_data[] = [
+        	'description' 	=> "VAT",
+        	'amount'		=> $vat_payable_amount
+        ];
+
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Save Credit Note
+		 */
+		try {
+
+			/**
+			 * Task 1: Save Credit Note and Generate Credit Note Code
+			 */
+			$credit_note_id = $this->ac_credit_note_model->add($credit_note_data, $credit_note_details_data, $policy_record->id);
+
+		} catch (Exception $e) {
+
+			return $this->template->json([
+				'title' 	=> 'Exception Occured!',
+				'status' 	=> 'error',
+				'message' 	=> $e->getMessage()
+			]);
+		}
+		$flag_exception = FALSE;
+		$message = '';
+
+
+		/**
+		 * --------------------------------------------------------------------
+		 * Post Credit Note Add Tasks
+		 *
+		 * NOTE
+		 * 		We perform post voucher add tasks which are mainly to update
+		 * 		voucher internal relation with policy txn record and  update
+		 * 		policy installment status.
+		 *
+		 * 		Please note that, if any of installment fails or exception
+		 * 		happens, we rollback and disable voucher. (We can not delete
+		 * 		voucher as we need to maintain sequential order for audit trail)
+		 * --------------------------------------------------------------------
+		 */
+
+
+		/**
+         * ==================== MANUAL TRANSACTIONS BEGIN =========================
+         */
+
+
+            /**
+             * Disable DB Debugging
+             */
+            $this->db->db_debug = FALSE;
+            // $this->db->trans_start();
+            $this->db->trans_begin();
+
+
+                // --------------------------------------------------------------------
+
+				/**
+				 * Task 2: Update Installment Status to "Credit Noted", Clean Cache
+				 */
+				try{
+
+					/**
+					 * If first installment of this transaction
+					 */
+					if($installment_record->flag_first == IQB_FLAG_ON)
+					{
+						$this->endorsement_model->update_status($endorsement_record, IQB_POLICY_ENDORSEMENT_STATUS_INVOICED);
+					}
+					$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_INVOICED);
+
+				} catch (Exception $e) {
+
+					$flag_exception = TRUE;
+					$message = $e->getMessage();
+				}
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 3: Update Relation Table Flag - "flag_invoiced"
+                 */
+                if( !$flag_exception )
+				{
+					$this->load->model('rel_policy_installment_voucher_model');
+					$rel_base_where = [
+						'policy_installment_id' => $installment_record->id,
+						'voucher_id' 			=> $voucher_id
+					];
+	                $this->rel_policy_installment_voucher_model->flag_invoiced($rel_base_where, IQB_FLAG_ON);
+
+	            	// Clear Voucher Cache for This Policy
+	            	$cache_var = 'ac_voucher_list_by_policy_' . $policy_record->id;
+					$this->ac_voucher_model->clear_cache($cache_var);
+            	}
+
+                // --------------------------------------------------------------------
+
+
+				/**
+				 * Task 4: Save Credit Note PDF (Original)
+				 */
+				try{
+					$credit_note_data = [
+						'record' 	=> $this->ac_credit_note_model->get($credit_note_id),
+						'rows' 		=> $this->ac_credit_note_detail_model->rows_by_credit_note($credit_note_id)
+					];
+					_CREDIT_NOTE__pdf($credit_note_data, 'save');
+
+				} catch (Exception $e) {
+
+					$flag_exception = TRUE;
+					$message = $e->getMessage();
+				}
+
+			/**
+             * Complete transactions or Rollback
+             */
+			if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
+			{
+		        $this->db->trans_rollback();
+
+		        /**
+            	 * Set Credit Note Flag Complete to OFF
+            	 */
+            	$this->ac_credit_note_model->disable_invoice($credit_note_id);
+
+            	return $this->template->json([
+					'title' 	=> 'Something went wrong!',
+					'status' 	=> 'error',
+					'message' 	=> $message ? $message : 'Could not update policy installment status or voucher relation flag'
+				]);
+			}
+			else
+			{
+			        $this->db->trans_commit();
+			}
+
+            /**
+             * Restore DB Debug Configuration
+             */
+            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== MANUAL TRANSACTIONS END =========================
+         */
+
+
+		// --------------------------------------------------------------------
+
+        /**
+		 * Load Portfolio Specific Helper File
+		 */
+        try { load_portfolio_helper($policy_record->portfolio_id);} catch (Exception $e) {
+			return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
+		}
+
+
+		/**
+		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
+		 */
+		$installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_INVOICED;
+		$installment_record->endorsement_status 		= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
+		$endorsement_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
+
+		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
 
 		$voucher_record->flag_invoiced = IQB_FLAG_ON;
 		$html_voucher_row 	= $this->load->view('accounting/vouchers/_single_row', ['record' => $voucher_record], TRUE);
