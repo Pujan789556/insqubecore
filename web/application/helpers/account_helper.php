@@ -121,8 +121,8 @@ if ( ! function_exists('is_invoicable_policy_voucher'))
 
 				&&
 
-			// Premium Income Voucher
-			$record->voucher_type_id == IQB_AC_VOUCHER_TYPE_PRI
+			// Premium Income Voucher or Gneral Invoice Voucher
+			in_array($record->voucher_type_id, [IQB_AC_VOUCHER_TYPE_PRI, IQB_AC_VOUCHER_TYPE_GINV])
 
 				&&
 

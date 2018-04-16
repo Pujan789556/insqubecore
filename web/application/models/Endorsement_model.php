@@ -478,6 +478,10 @@ class Endorsement_model extends MY_Model
             {
                 if( !_ENDORSEMENT_is_first($record->txn_type) )
                 {
+
+                    /**
+                     * Update Endorsement Changes to Object, Policy, Customer - If any
+                     */
                     $this->_commit_endorsement_audit($record);
 
                     /**
@@ -489,6 +493,15 @@ class Endorsement_model extends MY_Model
                     if($terminate_policy)
                     {
                         $this->policy_model->update_status($record->policy_id, IQB_POLICY_STATUS_CANCELED);
+                    }
+
+
+                    /**
+                     * Policy Ownership Transfer
+                     */
+                    if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER )
+                    {
+                        $this->transfer_ownership($record);
                     }
                 }
 
@@ -589,6 +602,34 @@ class Endorsement_model extends MY_Model
             return $this->db->where('id', $id)
                         ->update($this->table_name, $data);
         }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Transfer Ownership of Policy
+     *
+     * @param object $record Endorsement Record
+     * @return mixed
+     */
+    public function transfer_ownership($record)
+    {
+        /**
+         * TASKS:
+         *
+         *  1. Assign New Customer to this policy
+         *  2. Unlock Old Customer
+         *  3. Assign New Customer to this Policy Object
+         */
+
+        $this->load->model('policy_model');
+        $this->policy_model->transfer_ownership($record->policy_id, $record->transfer_customer_id);
+
+        $this->load->model('customer_model');
+        $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
+
+        $this->load->model('object_model');
+        $this->object_model->transfer_ownership($record->object_id, $record->customer_id, $record->transfer_customer_id);
+    }
 
     // --------------------------------------------------------------------
 
@@ -888,7 +929,7 @@ class Endorsement_model extends MY_Model
         $select =   "ENDRSMNT.*, " .
 
                     // Branch and Portfolio
-                    "P.branch_id, P.portfolio_id, P.status AS policy_status, " .
+                    "P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, " .
 
                     // Transfer Customer Name
                     "C.full_name as transfer_customer_name, " .

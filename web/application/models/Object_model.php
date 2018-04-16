@@ -118,10 +118,7 @@ class Object_model extends MY_Model
         if($id !== NULL)
         {
             $this->load->model('rel_customer_object_model');
-            $this->rel_customer_object_model->insert([
-                'customer_id' => $customer_id,
-                'object_id' => $id
-            ]);
+            $this->rel_customer_object_model->add_new_object_owner($id, $customer_id);
         }
         return FALSE;
     }
@@ -187,6 +184,33 @@ class Object_model extends MY_Model
             }
         }
         return FALSE;
+    }
+
+    // ----------------------------------------------------------------
+
+
+    /**
+     * Transfer Ownership of this Object to New Customer
+     *
+     * @param int $id
+     * @param int $old_customer_id
+     * @param int $new_customer_id
+     * @return bool
+     */
+    public function transfer_ownership($id, $old_customer_id, $new_customer_id)
+    {
+        $this->load->model('rel_customer_object_model');
+
+        /**
+         * Task 1: Reset current flag - Old Customer
+         */
+        $this->rel_customer_object_model->reset_current_owner($id, $old_customer_id);
+
+        /**
+         * Task 2: Add new Customer as Current Owner
+         */
+        $this->rel_customer_object_model->add_new_object_owner($id, $new_customer_id);
+
     }
 
     // ----------------------------------------------------------------

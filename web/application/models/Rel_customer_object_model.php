@@ -42,6 +42,29 @@ class Rel_customer_object_model extends MY_Model
 
     // --------------------------------------------------------------------
 
+    public function reset_current_owner( $object_id, $customer_id )
+    {
+        $where = [
+            'object_id'     => $object_id,
+            'customer_id'   => $customer_id
+        ];
+        $data = ['flag_current' => IQB_FLAG_OFF];
+        return $this->db->where($where)
+                        ->update($this->table_name, $data);
+    }
+
+    // --------------------------------------------------------------------
+
+    public function add_new_object_owner( $object_id, $customer_id )
+    {
+        return parent::insert([
+            'object_id'     => $object_id,
+            'customer_id'   => $customer_id
+        ]);
+    }
+
+    // --------------------------------------------------------------------
+
     /**
      * Save (Insert or Update) customer relation on debit note add/edit
      *

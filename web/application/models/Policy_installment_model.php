@@ -261,7 +261,14 @@ class Policy_installment_model extends MY_Model
                 {
                     RI__distribute( $record->id );
                 }
-                else
+
+                /**
+                 * Only Premium Computable Endorsement has RI Distribution
+                 * i.e.
+                 *  - Premium Upgrade
+                 *  - Premium Refund
+                 */
+                else if( _ENDORSEMENT_is_premium_computable_by_type($record->txn_type) )
                 {
                     RI__distribute_endorsement($record->id);
                 }
@@ -462,7 +469,7 @@ class Policy_installment_model extends MY_Model
             $this->dx_auth->apply_user_scope('P');
 
             // Get the damn result (Latest Transaction with first installment date order)
-            return $this->db->order_by('PTI.installment_date', 'ASC')
+            return $this->db->order_by('PTI.installment_date', 'DESC')
                             ->order_by('PTI.endorsement_id', 'DESC')
                             ->get()->result();
         }

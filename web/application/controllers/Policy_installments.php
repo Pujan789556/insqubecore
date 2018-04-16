@@ -176,559 +176,6 @@ class Policy_installments extends MY_Controller
 	 * @param integer $id Policy TXN ID
 	 * @return mixed
 	 */
-	public function voucher_OLD($id)
-	{
-		/**
-		 * Check Permissions
-		 */
-		if( !$this->dx_auth->is_authorized('policy_installments', 'generate.policy.voucher') )
-		{
-			$this->dx_auth->deny_access();
-		}
-
-		/**
-		 * Get the Policy Fresh/Renewal Txn Record
-		 */
-		$id 				= (int)$id;
-		$installment_record = $this->policy_installment_model->get( $id );
-		if(!$installment_record)
-		{
-			$this->template->render_404();
-		}
-
-		/**
-		 * Get the transaction record
-		 */
-		$transaction_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if(!$transaction_record)
-		{
-			$this->template->render_404();
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Policy Record
-		 */
-		$policy_record = $this->policy_model->get($installment_record->policy_id);
-		if(!$policy_record)
-		{
-			$this->template->render_404();
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Record Status Authorized to Generate Voucher?
-		 */
-
-		$authorized_status = _POLICY_INSTALLMENT__voucher_constraint($installment_record);
-		if( !$authorized_status )
-		{
-			return $this->template->json([
-				'title' 	=> 'Unauthorized Installment Status!',
-				'status' 	=> 'error',
-				'message' 	=> 'This installment does not have authorized status to perform this action.'
-			], 404);
-		}
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Load voucher models
-		 */
-		$this->load->model('ac_voucher_model');
-		$this->load->model('rel_policy_installment_voucher_model');
-
-		/**
-		 * Check if Voucher already generated for this Installment
-		 */
-		if( $this->rel_policy_installment_voucher_model->voucher_exists($installment_record->id))
-		{
-			return $this->template->json([
-				'title' 	=> 'OOPS!',
-				'status' 	=> 'error',
-				'message' 	=> 'Voucher already exists for this Installment/Endorsement.'
-			], 404);
-		}
-
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Fiscal Year Record
-		 */
-		$fy_record = $this->fiscal_year_model->get($policy_record->fiscal_yr_id);
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Portfoliio Record
-		 */
-		$this->load->model('portfolio_model');
-		$this->load->model('portfolio_setting_model');
-		$portfolio_record = $this->portfolio_model->find($policy_record->portfolio_id);
-
-		// --------------------------------------------------------------------
-
-		/**
-		 * Portfolio Setting Record
-		 */
-		$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-		if( !$pfs_record )
-		{
-			return $this->template->json([
-				'title' 	=> 'Portfolio Setting Missing!',
-				'status' 	=> 'error',
-				'message' 	=> "Please add portfolio settings for fiscal year({$fy_record->code_np}) for portfolio ({$portfolio_record->name_en})"
-			], 404);
-		}
-
-		// --------------------------------------------------------------------
-
-
-		/**
-		 * Let's Build Policy Voucher
-		 */
-		$narration = 'POLICY VOUCHER - POLICY CODE : ' . $policy_record->code;
-
-		$voucher_data = [
-            'voucher_date'      => date('Y-m-d'),
-            'voucher_type_id'   => IQB_AC_VOUCHER_TYPE_PRI,
-            'narration'         => $narration,
-            'flag_internal'     => IQB_FLAG_ON
-        ];
-
-		// --------------------------------------------------------------------
-
-
-        /**
-         * Voucher Amount Computation
-         */
-        $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
-        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
-        $vat_payable_amount 		= $installment_record->amt_vat;
-
-        $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
-        $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
-        $agent_commission_amount 					= $installment_record->amt_agent_commission ?? NULL;
-
-		// --------------------------------------------------------------------
-
-        /**
-         * Debit Rows
-         */
-        $dr_rows = [
-
-        	/**
-        	 * Accounts
-        	 */
-        	 'accounts' => 	[
-	        	// Insured Party
-	        	IQB_AC_ACCOUNT_ID_INSURED_PARTY,
-
-	        	// Expense - Beema Samiti Service Charge
-	        	IQB_AC_ACCOUNT_ID_EXPENSE_BS_SERVICE_CHARGE
-	        ],
-
-	        /**
-	         * Party Types
-	         */
-	        'party_types' => [
-	        	// Insured Party -- Customer
-	        	IQB_AC_PARTY_TYPE_CUSTOMER,
-
-	        	// Beema Samiti Service Charge -- Company
-	        	IQB_AC_PARTY_TYPE_COMPANY,
-	        ],
-
-	        /**
-	         * Party IDs
-	         */
-	        'parties' => [
-
-	        	// Insured Party -- Customr ID
-	        	$policy_record->customer_id,
-
-	        	// Beema Samiti Service Charge -- Beema Samiti ID
-	        	IQB_COMPANY_ID_BEEMA_SAMITI
-	        ],
-
-	        /**
-	         * Amounts
-	         */
-	        'amounts' => [
-
-	        	// Insured Party -- Amount Received From Insured Party
-	        	$total_to_receive_from_insured_party_amount,
-
-	        	// Beema Samiti Service Charge -- Beema Samiti Service Charge
-	        	$beema_samiti_service_charge_amount
-	        ]
-
-        ];
-
-		// --------------------------------------------------------------------
-
-        /**
-         * Check if portfolio has "Direct Premium Income Account ID"
-         */
-        if( !$portfolio_record->account_id_dpi )
-        {
-			return $this->template->json([
-				'title' 	=> 'Direct Premium Income Account Missing!',
-				'status' 	=> 'error',
-				'message' 	=> "Please add portfolio 'Direct Premium Income Account' for portfolio ({$portfolio_record->name_en}) from Master Setup > Portfolio"
-			], 404);
-        }
-
-        /**
-         * Credit Rows
-         */
-        $cr_rows = [
-
-        	/**
-        	 * Accounts
-        	 */
-        	 'accounts' => 	[
-	        	// Vat Payable
-	        	IQB_AC_ACCOUNT_ID_VAT_PAYABLE,
-
-	        	// Stamp Income
-	        	IQB_AC_ACCOUNT_ID_STAMP_INCOME,
-
-	        	// Direct Premium Income Portfolio Wise
-	        	$portfolio_record->account_id_dpi,
-
-	        	// Liability - Service fee Beema Samiti
-	        	IQB_AC_ACCOUNT_ID_LIABILITY_BS_SERVICE_CHARGE
-	        ],
-
-	        /**
-	         * Party Types
-	         */
-	        'party_types' => [
-	        	// Vat Payable -- NULL
-	        	NULL,
-
-	        	// Stamp Income -- NULL
-	        	NULL,
-
-	        	// Direct Premium Income -- NULL
-	        	NULL,
-
-	        	// Beema Samiti Service Charge -- Company
-	        	IQB_AC_PARTY_TYPE_COMPANY
-	        ],
-
-	        /**
-	         * Party IDs
-	         */
-	        'parties' => [
-
-	        	// Vat Payable -- NULL
-	        	NULL,
-
-	        	// Stamp Income -- NULL
-	        	NULL,
-
-	        	// Direct Premium Income -- NULL
-	        	NULL,
-
-	        	// Beema Samiti Service Charge -- Beema Samiti ID
-	        	IQB_COMPANY_ID_BEEMA_SAMITI
-	        ],
-
-	        /**
-	         * Amounts
-	         */
-	        'amounts' => [
-
-	        	// Vat Payable -- Vat Amount
-	        	$vat_payable_amount,
-
-	        	// Stamp Income -- Stamp Income Amount
-	        	$stamp_income_amount,
-
-	        	// Direct Premium Income -- Gross Premium Amount
-	        	$gross_premium_amount,
-
-	        	// Beema Samiti Service Charge -- Beema Samiti Service Charge
-	        	$beema_samiti_service_charge_amount
-	        ]
-
-        ];
-
-		// --------------------------------------------------------------------
-
-        /**
-         * Additional Debit/Credit Rows if Agent Commission Apply?
-         *
-         * NOTE: You must have $agent_commission_amount (NOT NULL or Non Zero Value)
-         */
-        if( $agent_commission_amount &&  $policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $policy_record->agent_id )
-        {
-        	// Agency Commission
-        	$dr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION;
-
-        	// Agency Commission -- Agent
-        	$dr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
-
-        	// Agency Commission -- Agent ID
-        	$dr_rows['parties'][] = $policy_record->agent_id;
-
-        	// Agency Commission -- Agent Commission Amount
-        	$dr_rows['amounts'][] = $agent_commission_amount;
-
-
-
-        	// Agent TDS, Agent Commission Payable
-        	$cr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_TDS_AGENCY_COMMISSION;
-        	$cr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION_PAYABLE;
-
-        	// Agent TDS -- Agent, Agent Commission Payable -- Agent
-        	$cr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
-        	$cr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
-
-        	// Agent TDS -- Agent ID, Agent Commission Payable -- Agent ID
-        	$cr_rows['parties'][] = $policy_record->agent_id;
-        	$cr_rows['parties'][] = $policy_record->agent_id;
-
-        	// Agent TDS -- TDS Amount, Agent Commission Payable -- Agent Payable Amount
-        	$this->load->model('ac_duties_and_tax_model');
-        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount);
-        	$agent_commission_payable_amount = $agent_commission_amount - $agent_tds_amount;
-        	$cr_rows['amounts'][] = $agent_tds_amount;
-        	$cr_rows['amounts'][] = $agent_commission_payable_amount;
-        }
-
-		// --------------------------------------------------------------------
-
-        /**
-         * Format Data
-         */
-        $voucher_data['account_id']['dr'] 	= $dr_rows['accounts'];
-        $voucher_data['party_type']['dr'] 	= $dr_rows['party_types'];
-        $voucher_data['party_id']['dr'] 	= $dr_rows['parties'];
-        $voucher_data['amount']['dr'] 		= $dr_rows['amounts'];
-
-        $voucher_data['account_id']['cr'] 	= $cr_rows['accounts'];
-        $voucher_data['party_type']['cr'] 	= $cr_rows['party_types'];
-        $voucher_data['party_id']['cr'] 	= $cr_rows['parties'];
-        $voucher_data['amount']['cr'] 		= $cr_rows['amounts'];
-
-
-		// --------------------------------------------------------------------
-
-        /**
-		 * Save Voucher and Its Relation with Policy
-		 */
-
-		try {
-
-			/**
-			 * Task 1: Save Voucher and Generate Voucher Code
-			 */
-			$voucher_id = $this->ac_voucher_model->add($voucher_data, $policy_record->id);
-
-		} catch (Exception $e) {
-
-			return $this->template->json([
-				'title' 	=> 'Exception Occured!',
-				'status' 	=> 'error',
-				'message' 	=> $e->getMessage()
-			]);
-		}
-
-		$flag_exception = FALSE;
-		$message = '';
-
-
-		/**
-		 * --------------------------------------------------------------------
-		 * Post Voucher Add Tasks
-		 *
-		 * NOTE
-		 * 		We perform post voucher add tasks which are mainly to insert
-		 * 		voucher internal relation with policy txn record and  update
-		 * 		policy status.
-		 *
-		 * 		Please note that, if any of installment fails or exception
-		 * 		happens, we rollback and disable voucher. (We can not delete
-		 * 		voucher as we need to maintain sequential order for audit trail)
-		 * --------------------------------------------------------------------
-		 */
-
-
-		/**
-         * ==================== MANUAL TRANSACTIONS BEGIN =========================
-         */
-
-
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
-            // $this->db->trans_start();
-            $this->db->trans_begin();
-
-
-                // --------------------------------------------------------------------
-
-            	/**
-				 * Task 2: Add Voucher-Policy Installment Relation
-				 */
-
-				try {
-
-					$relation_data = [
-						'policy_installment_id' => $installment_record->id,
-						'voucher_id' 			=> $voucher_id
-					];
-					$this->rel_policy_installment_voucher_model->add($relation_data);
-
-				} catch (Exception $e) {
-
-					$flag_exception = TRUE;
-					$message = $e->getMessage();
-				}
-
-                // --------------------------------------------------------------------
-
-				/**
-				 * Task 4: Update Installment Status to "Vouchered", Clean Cache
-				 */
-				if( !$flag_exception )
-				{
-					try{
-
-						/**
-						 * If first installment of this transaction
-						 */
-						if($installment_record->flag_first == IQB_FLAG_ON)
-						{
-							$this->endorsement_model->update_status($transaction_record, IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED);
-						}
-
-						// Update installment status
-						$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED);
-
-					} catch (Exception $e) {
-
-						$flag_exception = TRUE;
-						$message = $e->getMessage();
-					}
-				}
-
-                // --------------------------------------------------------------------
-
-				/**
-				 * Task 5: Generate Policy Number
-				 *
-				 * NOTE: Policy TXN must be fresh or Renewal & First Installment
-				 */
-				if(
-						$flag_exception == FALSE
-							&&
-						$installment_record->flag_first == IQB_FLAG_ON
-							&&
-						in_array($transaction_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL])
-					)
-				{
-					try{
-
-						$policy_code = $this->policy_model->generate_policy_number( $policy_record );
-						if($policy_code)
-						{
-							$policy_record->code = $policy_code;
-
-							// Update Voucher Narration
-							$narration .= $policy_code;
-							$this->ac_voucher_model->update($voucher_id, ['narration' => $narration], TRUE);
-						}
-
-					} catch (Exception $e) {
-
-						$flag_exception = TRUE;
-						$message = $e->getMessage();
-					}
-				}
-
-                // --------------------------------------------------------------------
-
-			/**
-             * Complete transactions or Rollback
-             */
-			if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
-			{
-		        $this->db->trans_rollback();
-
-		        /**
-            	 * Set Voucher Flag Complete to OFF
-            	 */
-            	$this->ac_voucher_model->disable_voucher($voucher_id);
-
-            	return $this->template->json([
-					'title' 	=> 'Something went wrong!',
-					'status' 	=> 'error',
-					'message' 	=> $message ? $message : 'Could not perform save voucher relation or update policy status'
-				]);
-			}
-			else
-			{
-			        $this->db->trans_commit();
-			}
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-        /**
-         * ==================== MANUAL TRANSACTIONS END =========================
-         */
-
-
-		// --------------------------------------------------------------------
-
-        /**
-		 * Load Portfolio Specific Helper File
-		 */
-        try { load_portfolio_helper($policy_record->portfolio_id);} catch (Exception $e) {
-			return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
-		}
-
-		/**
-		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
-		 */
-		$installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED;
-		$installment_record->endorsement_status 	= IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED;
-		$transaction_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED;
-
-		$html_tab_ovrview = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $transaction_record], TRUE);
-		$html_txn_row 	  = $this->load->view('policy_installments/_single_row', ['policy_record' => $policy_record, 'record' => $installment_record], TRUE);
-
-		$ajax_data = [
-			'message' 	=> 'Successfully Updated!',
-			'status'  	=> 'success',
-			'multipleUpdate' => [
-				[
-					'box' 		=> '#tab-policy-overview-inner',
-					'method' 	=> 'replaceWith',
-					'html' 		=> $html_tab_ovrview
-				],
-				[
-					'box' 		=> '#_data-row-policy_installments-' . $installment_record->id,
-					'method' 	=> 'replaceWith',
-					'html' 		=> $html_txn_row
-				]
-			]
-		];
-		return $this->template->json($ajax_data);
-	}
-
-	// --------------------------------------------------------------------
-
 	public function voucher($id)
 	{
 		/**
@@ -860,7 +307,7 @@ class Policy_installments extends MY_Controller
          * Build Voucher Details Data
          */
         try{
-			$voucher_rows = $this->_data_voucher_details($installment_record, $pfs_record, $portfolio_record, $policy_record);
+			$voucher_rows = $this->_data_voucher_details( $installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record );
 		}
 		catch (Exception $e) {
 			return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
@@ -1114,7 +561,7 @@ class Policy_installments extends MY_Controller
 	        return $voucher_data;
 		}
 
-		private function _data_voucher_details($installment_record, $pfs_record, $portfolio_record, $policy_record)
+		private function _data_voucher_details($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record)
 		{
 			$txn_type 	= (int)$installment_record->txn_type;
 			$data 		= NULL;
@@ -1124,14 +571,15 @@ class Policy_installments extends MY_Controller
 				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
 				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
 				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
-					$data = $this->_data_voucher_details_for_premium_voucher($installment_record, $pfs_record, $portfolio_record, $policy_record);
+					$data = $this->_data_voucher_details_for_premium_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
 					break;
 
 				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-					$data = $this->_data_voucher_details_for_credit_voucher($installment_record, $pfs_record, $portfolio_record, $policy_record);
+					$data = $this->_data_voucher_details_for_credit_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
 					break;
 
 				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+					$data = $this->_data_voucher_details_for_transfer_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
 					break;
 
 
@@ -1148,7 +596,7 @@ class Policy_installments extends MY_Controller
 			return $data;
 		}
 
-		private function _data_voucher_details_for_premium_voucher($installment_record, $pfs_record, $portfolio_record, $policy_record)
+		private function _data_voucher_details_for_premium_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record)
 		{
 			// --------------------------------------------------------------------
 
@@ -1357,7 +805,7 @@ class Policy_installments extends MY_Controller
 	        ];
 		}
 
-		private function _data_voucher_details_for_credit_voucher($installment_record, $pfs_record, $portfolio_record, $policy_record)
+		private function _data_voucher_details_for_credit_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record)
 		{
 			// --------------------------------------------------------------------
 
@@ -1590,6 +1038,142 @@ class Policy_installments extends MY_Controller
 	        ];
 		}
 
+		private function _data_voucher_details_for_transfer_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record)
+		{
+			// --------------------------------------------------------------------
+
+	        /**
+	         * Voucher Amount Computation
+	         */
+	        $vat_payable_amount 		= floatval($installment_record->amt_vat);
+	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
+	        $ownership_transfer_charge 	= floatval($installment_record->amt_transfer_fee) +
+				        			  	  floatval($installment_record->amt_transfer_ncd);
+
+	        $total_amount = $ownership_transfer_charge +
+							$stamp_income_amount +
+							$vat_payable_amount;
+
+			// --------------------------------------------------------------------
+
+	        /**
+	         * Debit Rows
+	         */
+	        $dr_rows = [
+
+	        	/**
+	        	 * Accounts
+	        	 */
+	        	 'accounts' => 	[
+		        	// Insured Party
+		        	IQB_AC_ACCOUNT_ID_INSURED_PARTY
+		        ],
+
+		        /**
+		         * Party Types
+		         */
+		        'party_types' => [
+		        	// Insured Party -- Customer
+		        	IQB_AC_PARTY_TYPE_CUSTOMER
+		        ],
+
+		        /**
+		         * Party IDs
+		         */
+		        'parties' => [
+
+		        	// Insured Party -- New Owner (Customr ID)
+		        	$endorsement_record->transfer_customer_id
+		        ],
+
+		        /**
+		         * Amounts
+		         */
+		        'amounts' => [
+
+		        	// Insured Party -- Amount Received From Insured Party
+		        	$total_amount
+		        ]
+
+	        ];
+
+			// --------------------------------------------------------------------
+
+
+	        /**
+	         * Credit Rows
+	         */
+	        $cr_rows = [
+
+	        	/**
+	        	 * Accounts
+	        	 */
+	        	 'accounts' => 	[
+		        	// Vat Payable
+		        	IQB_AC_ACCOUNT_ID_VAT_PAYABLE,
+
+		        	// Stamp Income
+		        	IQB_AC_ACCOUNT_ID_STAMP_INCOME,
+
+		        	// Ownership Transfer Charge
+		        	IQB_AC_ACCOUNT_ID_OWNERSHIP_TRANSFER_CHARGE
+		        ],
+
+		        /**
+		         * Party Types
+		         */
+		        'party_types' => [
+		        	// Vat Payable -- NULL
+		        	NULL,
+
+		        	// Stamp Income -- NULL
+		        	NULL,
+
+		        	// Ownership Transfer Charge -- NULL
+		        	NULL
+		        ],
+
+		        /**
+		         * Party IDs
+		         */
+		        'parties' => [
+
+		        	// Vat Payable -- NULL
+		        	NULL,
+
+		        	// Stamp Income -- NULL
+		        	NULL,
+
+		        	// Ownership Transfer Charge -- NULL
+		        	NULL
+		        ],
+
+		        /**
+		         * Amounts
+		         */
+		        'amounts' => [
+
+		        	// Vat Payable -- Vat Amount
+		        	$vat_payable_amount,
+
+		        	// Stamp Income -- Stamp Income Amount
+		        	$stamp_income_amount,
+
+		        	// Ownership Transfer Charge
+		        	$ownership_transfer_charge
+		        ]
+
+	        ];
+
+	        // --------------------------------------------------------------------
+
+
+	        return [
+	        	'dr_rows' => $dr_rows,
+	        	'cr_rows' => $cr_rows
+	        ];
+		}
+
 		private function _voucher_type_by_txn_type($txn_type)
 		{
 			$txn_type = (int)$txn_type;
@@ -1609,6 +1193,7 @@ class Policy_installments extends MY_Controller
 					break;
 
 				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+					$voucher_type_id = IQB_AC_VOUCHER_TYPE_GINV; // General Invoice
 					break;
 
 
@@ -1660,10 +1245,14 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Get the transaction record. Valid? Type must be invoicable
 		 */
-		$transaction_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if( !$transaction_record || !_ENDORSEMENT_is_invoicable_by_type($transaction_record->txn_type) )
+		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
+		if( !$endorsement_record || !_ENDORSEMENT_is_invoicable_by_type($endorsement_record->txn_type) )
 		{
-			$this->template->render_404();
+			return $this->template->json([
+				'title' 	=> 'Invalid Action!',
+				'status' 	=> 'error',
+				'message' 	=> 'Invalid Endorsement Record and/or Type.'
+			], 400);
 		}
 
 		// --------------------------------------------------------------------
@@ -1675,7 +1264,11 @@ class Policy_installments extends MY_Controller
 		$voucher_record = $this->ac_voucher_model->get_voucher_by_policy_installment($installment_record->id, $voucher_id);
 		if(!$voucher_record)
 		{
-			$this->template->render_404();
+			return $this->template->json([
+				'title' 	=> 'NOT FOUND!',
+				'status' 	=> 'error',
+				'message' 	=> 'Voucher not found for given installment/endorsement record.'
+			], 400);
 		}
 
 		// --------------------------------------------------------------------
@@ -1701,7 +1294,11 @@ class Policy_installments extends MY_Controller
 		$policy_record = $this->policy_model->get($installment_record->policy_id);
 		if(!$policy_record)
 		{
-			$this->template->render_404();
+			return $this->template->json([
+				'title' 	=> 'NOT FOUND!',
+				'status' 	=> 'error',
+				'message' 	=> 'Policy record not found.'
+			], 404);
 		}
 
 		// --------------------------------------------------------------------
@@ -1724,46 +1321,24 @@ class Policy_installments extends MY_Controller
 		 * Let's Build Policy Invoice
 		 */
 
-		/**
-         * Voucher Amount Computation
-         */
-        $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
-        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
-        $vat_payable_amount 		= $installment_record->amt_vat;
-
-        $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
-
-		$invoice_data = [
-			'customer_id' 		=> $policy_record->customer_id,
-            'invoice_date'      => date('Y-m-d'),
-            'voucher_id'   		=> $voucher_id,
-            'amount' 			=> $total_to_receive_from_insured_party_amount
-        ];
+		try{
+			$invoice_data = $this->_data_invoice_master($installment_record, $endorsement_record->txn_type, $endorsement_record->transfer_customer_id, $voucher_id);
+		}
+		catch (Exception $e) {
+			return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
+		}
 
 		// --------------------------------------------------------------------
 
         /**
-         * Invoice Details
+         * Build Invoice Details Data
          */
-        $invoice_details_data = [
-        	[
-	        	'description' 	=> "Policy Premium Amount (Policy Code - {$policy_record->code})",
-	        	'amount'		=> $gross_premium_amount
-	        ]
-        ];
-
-        if($stamp_income_amount)
-        {
-        	$invoice_details_data[] = [
-	        	'description' 	=> "Stamp Duty",
-	        	'amount'		=> $stamp_income_amount
-	        ];
-        }
-
-        $invoice_details_data[] = [
-        	'description' 	=> "VAT",
-        	'amount'		=> $vat_payable_amount
-        ];
+        try{
+			$invoice_details_data = $this->_data_invoice_details( $installment_record, $endorsement_record->txn_type );
+		}
+		catch (Exception $e) {
+			return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
+		}
 
 
 		// --------------------------------------------------------------------
@@ -1796,12 +1371,12 @@ class Policy_installments extends MY_Controller
 		 * Post Invoice Add Tasks
 		 *
 		 * NOTE
-		 * 		We perform post voucher add tasks which are mainly to update
-		 * 		voucher internal relation with policy txn record and  update
+		 * 		We perform post invoice add tasks which are mainly to update
+		 * 		voucher internal relation's invoiced flag and  update
 		 * 		policy installment status.
 		 *
 		 * 		Please note that, if any of installment fails or exception
-		 * 		happens, we rollback and disable voucher. (We can not delete
+		 * 		happens, we rollback and disable invoice. (We can not delete
 		 * 		voucher as we need to maintain sequential order for audit trail)
 		 * --------------------------------------------------------------------
 		 */
@@ -1832,7 +1407,7 @@ class Policy_installments extends MY_Controller
 					 */
 					if($installment_record->flag_first == IQB_FLAG_ON)
 					{
-						$this->endorsement_model->update_status($transaction_record, IQB_POLICY_ENDORSEMENT_STATUS_INVOICED);
+						$this->endorsement_model->update_status($endorsement_record, IQB_POLICY_ENDORSEMENT_STATUS_INVOICED);
 					}
 					$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_INVOICED);
 
@@ -1927,11 +1502,11 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
 		 */
-		$installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_INVOICED;
-		$installment_record->endorsement_status 	= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
-		$transaction_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
+		$installment_record->status 			= IQB_POLICY_INSTALLMENT_STATUS_INVOICED;
+		$installment_record->endorsement_status = IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
+		$endorsement_record->status 			= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
 
-		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $transaction_record], TRUE);
+		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
 
 		$voucher_record->flag_invoiced = IQB_FLAG_ON;
 		$html_voucher_row 	= $this->load->view('accounting/vouchers/_single_row', ['record' => $voucher_record], TRUE);
@@ -1954,6 +1529,124 @@ class Policy_installments extends MY_Controller
 		];
 		return $this->template->json($ajax_data);
 	}
+
+		private function _data_invoice_master($installment_record, $txn_type, $customer_id, $voucher_id)
+		{
+			$invoice_data = [
+				'customer_id' 		=> $customer_id,
+	            'invoice_date'      => date('Y-m-d'),
+	            'voucher_id'   		=> $voucher_id
+	        ];
+
+			/**
+	         * Amount Computation
+	         */
+			$amount 	= 0.00;
+	        $txn_type 	= (int)$txn_type;
+			switch ($txn_type)
+			{
+				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
+				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
+				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+					$amount = floatval($installment_record->amt_basic_premium) +
+								floatval($installment_record->amt_pool_premium) +
+								floatval($installment_record->amt_stamp_duty) +
+								floatval($installment_record->amt_vat);
+					break;
+
+
+				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+					$amount = floatval($installment_record->amt_transfer_fee) +
+								floatval($installment_record->amt_transfer_ncd) +
+								floatval($installment_record->amt_stamp_duty) +
+								floatval($installment_record->amt_vat);
+					break;
+
+
+				default:
+					# code...
+					break;
+			}
+
+			if( !$amount )
+			{
+				throw new Exception("Exception [Controller:Policy_installments][Method: _data_invoice_master()]: Could not compute invoice data for given 'Endorsement Type'.");
+			}
+
+			// Update invoice data
+			$invoice_data['amount'] = $amount;
+
+			return $invoice_data;
+		}
+
+		private function _data_invoice_details($installment_record, $txn_type)
+		{
+			/**
+	         * Amount Computation
+	         */
+			$amount 	= NULL;
+			$description = '';
+	        $txn_type 	= (int)$installment_record->txn_type;
+			switch ($txn_type)
+			{
+				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
+				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
+				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+					$amount = floatval($installment_record->amt_basic_premium) +
+								floatval($installment_record->amt_pool_premium) ;
+					$description = "Policy Premium Amount (Policy Code - {$installment_record->policy_code})";
+					break;
+
+
+				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+					$amount 	= floatval($installment_record->amt_transfer_fee) +
+								floatval($installment_record->amt_transfer_ncd);
+					$description = "Policy Ownership Transfer Amount (Policy Code - {$installment_record->policy_code})";
+					break;
+
+
+				default:
+					# code...
+					break;
+			}
+
+			if( !$amount || !$description )
+			{
+				throw new Exception("Exception [Controller:Policy_installments][Method: _data_invoice_details()]: Could not compute invoice details data for given 'Endorsement Type'.");
+			}
+
+			/**
+			 * Add Primary Amount
+			 */
+			$invoice_details_data = [
+				[
+					'description' 	=> $description,
+					'amount' 		=> $amount
+				]
+			];
+
+			/**
+			 * Add Stamp Duty Amount
+			 */
+			if($installment_record->amt_stamp_duty)
+	        {
+	        	$invoice_details_data[] = [
+		        	'description' 	=> "Stamp Duty",
+		        	'amount'		=> $installment_record->amt_stamp_duty
+		        ];
+	        }
+
+	        /**
+			 * Add VAT Amount
+			 */
+	        $invoice_details_data[] = [
+	        	'description' 	=> "VAT",
+	        	'amount'		=> $installment_record->amt_vat
+	        ];
+
+
+			return $invoice_details_data;
+		}
 
 	// --------------------------------------------------------------------
 
@@ -2009,7 +1702,11 @@ class Policy_installments extends MY_Controller
 		$voucher_record = $this->ac_voucher_model->get_voucher_by_policy_installment($installment_record->id, $voucher_id);
 		if(!$voucher_record)
 		{
-			$this->template->render_404();
+			return $this->template->json([
+				'title' 	=> 'NOT FOUND!',
+				'status' 	=> 'error',
+				'message' 	=> 'Voucher not found for given refund record.'
+			], 400);
 		}
 
 		// --------------------------------------------------------------------
@@ -2331,15 +2028,23 @@ class Policy_installments extends MY_Controller
         $installment_record = $this->policy_installment_model->get( $id );
 		if(!$installment_record)
 		{
-			$this->template->render_404();
+			return $this->template->json([
+				'title' 	=> 'NOT FOUND!',
+				'status' 	=> 'error',
+				'message' 	=> 'No installment record found.'
+			], 400);
 		}
         /**
 		 * Get the transaction record
 		 */
-		$transaction_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if(!$transaction_record || !_ENDORSEMENT_is_invoicable_by_type($transaction_record->txn_type))
+		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
+		if(!$endorsement_record || !_ENDORSEMENT_is_invoicable_by_type($endorsement_record->txn_type))
 		{
-			$this->template->render_404();
+			return $this->template->json([
+				'title' 	=> 'Invalid Action!',
+				'status' 	=> 'error',
+				'message' 	=> 'Invalid Endorsement Record and/or Type.'
+			], 400);
 		}
 
         // --------------------------------------------------------------------
@@ -2347,10 +2052,14 @@ class Policy_installments extends MY_Controller
         /**
          * Policy Record
          */
-        $policy_record = $this->policy_model->get($transaction_record->policy_id);
+        $policy_record = $this->policy_model->get($endorsement_record->policy_id);
         if(!$policy_record)
         {
-            $this->template->render_404();
+            return $this->template->json([
+				'title' 	=> 'NOT FOUND!',
+				'status' 	=> 'error',
+				'message' 	=> 'No policy record found.'
+			], 400);
         }
 
         // --------------------------------------------------------------------
@@ -2424,24 +2133,6 @@ class Policy_installments extends MY_Controller
         	}
 		}
 
-
-
-
-        // --------------------------------------------------------------------
-
-        /**
-         * Fiscal Year Record
-         */
-        $fy_record = $this->fiscal_year_model->get($policy_record->fiscal_yr_id);
-
-        // --------------------------------------------------------------------
-
-        /**
-         * Portfoliio Record
-         */
-        $this->load->model('portfolio_model');
-        $this->load->model('portfolio_setting_model');
-        $portfolio_record = $this->portfolio_model->find($policy_record->portfolio_id);
 
         // --------------------------------------------------------------------
 
@@ -2528,7 +2219,7 @@ class Policy_installments extends MY_Controller
             'parties' => [
 
                 // Insured Party -- Customr ID
-                $policy_record->customer_id
+                $invoice_record->customer_id
             ],
 
             /**
@@ -2650,7 +2341,7 @@ class Policy_installments extends MY_Controller
 						 */
 						if($installment_record->flag_first == IQB_FLAG_ON)
 						{
-							$this->endorsement_model->update_status($transaction_record, IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE);
+							$this->endorsement_model->update_status($endorsement_record, IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE);
 						}
                         $this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_PAID);
 
@@ -2743,7 +2434,7 @@ class Policy_installments extends MY_Controller
                     $this->ri_transaction_model->clear_cache($cache_var);
 
                     // Send SMS
-                    $this->_sms_activation($transaction_record, $policy_record, $invoice_record, $installment_record);
+                    $this->_sms_activation($endorsement_record, $policy_record, $invoice_record, $installment_record);
             }
 
             /**
@@ -2771,11 +2462,11 @@ class Policy_installments extends MY_Controller
          */
         $installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_PAID;
 		$installment_record->endorsement_status 	= IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
-        $transaction_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
+        $endorsement_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
         $policy_record->status      					= IQB_POLICY_STATUS_ACTIVE;
         $invoice_record->flag_paid  					= IQB_FLAG_ON;
 
-        $html_tab_ovrview   = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $transaction_record], TRUE);
+        $html_tab_ovrview   = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
         $html_invoice_row 	= $this->load->view('accounting/invoices/_single_row', ['record' => $invoice_record], TRUE);
         $ajax_data = [
             'message'   => 'Successfully Updated!',

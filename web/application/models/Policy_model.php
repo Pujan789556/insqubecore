@@ -955,6 +955,22 @@ class Policy_model extends MY_Model
     }
 
     // ----------------------------------------------------------------
+
+    /**
+     * Update Customer on Policy on Ownership Transfer
+     *
+     * @param int $id
+     * @param int $customer_id
+     * @return bool
+     */
+    public function transfer_ownership($id, $customer_id)
+    {
+        $data = ['customer_id' => $customer_id];
+        return $this->db->where('id', $id)
+                        ->update($this->table_name, $data);
+    }
+
+    // ----------------------------------------------------------------
     //  POLICY STATUS UPDATE METHODS
     // ----------------------------------------------------------------
 
