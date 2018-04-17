@@ -134,7 +134,7 @@ if ( ! function_exists('_PO_MOTOR_premium_compute_method'))
 				break;
 
 			case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID:
-				$method = '_PO_MOTOR_PVC_compute_crf';
+				$method = '_PO_MOTOR_PVC_premium';
 				break;
 
 			case IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID:
@@ -695,7 +695,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
+if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 {
 	/**
 	 * Private Vehicle Policy Cost Table
@@ -709,12 +709,37 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 	 *
 	 * @return	array
 	 */
-	function _PO_MOTOR_PVC_compute_crf( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
+	function _PO_MOTOR_PVC_premium( $policy_record, $endorsement_record, $tariff_record, $pfs_record, $post_data  )
 	{
-		$attributes = json_decode($policy_object->attributes);
+		$CI =& get_instance();
+
+		/**
+		 * Policy Object Record
+		 *
+		 * In case of endorsements, we will be needing both current policy object and edited object information
+		 * to compute premium.
+		 */
+		$old_object = get_object_from_policy_record($policy_record);
+		$new_object = NULL;
+		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+		{
+			try {
+				$new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
+			} catch (Exception $e) {
+
+				return $CI->template->json([
+                    'status'        => 'error',
+                    'title' 		=> 'Exception Occured',
+                    'message' 	=> $e->getMessage()
+                ], 404);
+			}
+		}
+
+		// Newest object attributes should be used.
+		$object_attributes  = json_decode($new_object->attributes ?? $old_object->attributes);
 
 		// Form Posted Data - Extra Fields Required to Perform Cost Calculation
-		$premium_computation_table = $data['premium'] ?? NULL;
+		$premium_computation_table = $post_data['premium'] ?? NULL;
 
 
 		// Tariff Extracts
@@ -723,16 +748,24 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 		// Trolly Tariff
 		$trolly_tariff = $tariff_record->trolly_tariff ? json_decode($tariff_record->trolly_tariff) : NULL;
 
-		// Vehicle Price
-		$vehicle_price 				= (float)$attributes->price_vehicle;
-		$vehicle_price_accessories 	= (float)$attributes->price_accessories;
-		$vehicle_total_price  		= $vehicle_price + $vehicle_price_accessories;
+		/**
+		 * NET Sum Insured & Its Breakdown
+		 *
+		 *  A. Net SI
+		 * 	B. Vehicle Price
+		 * 	C. Accessories Price
+		 * 	D. Trailer Price
+		 */
+		$SI 			= _OBJ_si_net($old_object, $new_object);
+		$SI_BREAKDOWN 	= _OBJ_si_breakdown_net($old_object, $new_object);
+		$si_vehicle 	= $SI_BREAKDOWN['si_vehicle'];
+		$si_accessories = $SI_BREAKDOWN['si_accessories'];
+		$si_trailer 	= $SI_BREAKDOWN['si_trailer'];
+		$vehicle_total_si = $si_vehicle + $si_accessories;
 
-		// Trolly/Trailer Price
-		$trailer_price 				= $attributes->trailer_price ? (float)$attributes->trailer_price : 0.00;
 
 		// Vehicle Age (If registration date is there use it otherwise mfd year)
-		$ref_date = $attributes->reg_date ? $attributes->reg_date : $attributes->year_mfd . '-01-01';
+		$ref_date = $object_attributes->reg_date ? $object_attributes->reg_date : $object_attributes->year_mfd . '-01-01';
 		$vehicle_reference_date 	= new DateTime($ref_date);
 		$today 						= new DateTime(date('Y-m-d'));
 		$interval 					= $vehicle_reference_date->diff($today);
@@ -752,10 +785,13 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 		$premiumm_third_party 			= 0.00;
 		$vehicle_over_age_rate 			= 0.00;
 
+        $commissionable_premium = NULL;
+        $agent_commission = NULL;
+
         foreach ($default_tariff as $t)
         {
         	// Should also match Engine Capacity Type
-            if( $attributes->engine_capacity >= $t->ec_min && $attributes->engine_capacity <= $t->ec_max && $attributes->ec_unit === $t->ec_type )
+            if( $object_attributes->engine_capacity >= $t->ec_min && $object_attributes->engine_capacity <= $t->ec_max && $object_attributes->ec_unit === $t->ec_type )
             {
             	$minus_amount_according_to_cc 			= (float)$t->minus_amount;
                 $default_si_amount 						= (float)$t->default_si_amount;
@@ -790,7 +826,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
         $premium_AA_total = 0.00;
         $premium_I_total = 0.00;
         $premium_EE_total = 0.00;
-        $premium_U_total = 0.00;
+        $POOL_PREMIUM = 0.00;
         if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			/**
@@ -806,14 +842,14 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 			// Base Premium
 			$__premium_A_row_1 = 0.00;
 			$__premium_A_row_2 = 0.00;
-			if($vehicle_total_price > $default_si_amount ) // if Vehicle Price > 20 Lakhs
+			if($vehicle_total_si > $default_si_amount ) // if Vehicle Price > 20 Lakhs
 			{
 				$__premium_A_row_1 = $default_si_amount * ($default_si_rate / 100.00);
-				$__premium_A_row_2 = ( $vehicle_total_price -  $default_si_amount ) * ($remaining_si_rate/100.00);
+				$__premium_A_row_2 = ( $vehicle_total_si -  $default_si_amount ) * ($remaining_si_rate/100.00);
 			}
 			else
 			{
-				$__premium_A_row_1 = $vehicle_total_price * ($default_si_rate / 100.00);
+				$__premium_A_row_1 = $vehicle_total_si * ($default_si_rate / 100.00);
 			}
 			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "सि.सि.अनुसार घोषित मूल्य मध्ये पहिलो बीस लाखसम्मको बीमाशुल्क (घोषित मूल्यको {$default_si_rate}%)",
@@ -827,9 +863,9 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 
 			// Trailer/Trolly Premium
 			$__premium_A_row_3 = 0.00;
-			if( $trailer_price )
+			if( $si_trailer )
 			{
-				$__premium_A_row_3 = ( $trailer_price * ($trolly_tariff->rate/100.00) ) - $trolly_tariff->minus_amount;
+				$__premium_A_row_3 = ( $si_trailer * ($trolly_tariff->rate/100.00) ) - $trolly_tariff->minus_amount;
 			}
 			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "ट्रेलर (मालसामान ओसार्ने) वापतको बीमाशुल्क ( घोषित मूल्यको{$trolly_tariff->rate}% - रु. {$trolly_tariff->minus_amount})का दरले",
@@ -936,7 +972,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 
 
 			// ङ Sub Total
-			$__agent_comissionable_amount = $__premium_A_row_NGA = $__premium_A_row_13 = $__premium_A_row_GHA - $__premium_A_row_12;
+			$commissionable_premium = $__premium_A_row_NGA = $__premium_A_row_13 = $__premium_A_row_GHA - $__premium_A_row_12;
 			$__CRF_cc_table__A['sections'][] = [
 				'title' 	=> "",
 				'amount' 	=> $__premium_A_row_NGA,
@@ -948,7 +984,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 			// Agent Commission/Direct Discount? -> Applies only Non-GOVT
 			//
 			$__premium_A_row_14 = 0.00;
-			if( $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
+			if( $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT && $object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
 			{
 				// X% of ङ
 				$__premium_A_row_14 = $__premium_A_row_NGA * ($pfs_record->direct_discount/100.00);
@@ -995,7 +1031,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 
 				// Premium Total and Commissionable Amount to Default.
 				$premium_A_total 				= $tariff_record->default_premium;
-				$__agent_comissionable_amount 	= $premium_A_total;
+				$commissionable_premium 	= $premium_A_total;
 
 				// Remove all the sections
 				$__CRF_cc_table__A = [
@@ -1062,7 +1098,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 				'title_en' 	=> 'Insured Party & Passenger Accident Insurance'
 			];
 
-			$premium_EE_total =  ($attributes->carrying_capacity - 1) * $accident_premium->pramt_accident_per_passenger;
+			$premium_EE_total =  ($object_attributes->carrying_capacity - 1) * $accident_premium->pramt_accident_per_passenger;
 			$__CRF_cc_table__EE['sections'][] = [
 				'title' => "प्रति व्यक्ति बीमांक रु. {$insured_value_tariff->passenger} को लागी बीमाशुल्क प्रति सिट रु. {$accident_premium->pramt_accident_per_passenger} का दरले",
 				'amount' => $premium_EE_total
@@ -1098,10 +1134,10 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 			if($flag_risk_pool)
 			{
 				// Mob/Strike
-				$__premium_U_row_1 = (float)($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
+				$__premium_U_row_1 = (float)($vehicle_total_si + $si_trailer) * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
 
 				// Terrorism
-				$__premium_U_row_2 = (float)($vehicle_total_price + $trailer_price) * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
+				$__premium_U_row_2 = (float)($vehicle_total_si + $si_trailer) * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
 
 				// Premium for "Per Thousand Insured Amount" on Terorrism rate_additionl_per_thousand_on_extra_rate
 
@@ -1114,7 +1150,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 
 				$insured_value_tariff = json_decode($tariff_record->insured_value_tariff);
 
-				$no_of_seat = $attributes->carrying_capacity;
+				$no_of_seat = $object_attributes->carrying_capacity;
 				$passenger_count = $no_of_seat - 1;
 
 				// Driver Premium
@@ -1131,7 +1167,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 
 
 			// उ TOTAL
-			$premium_U_total = $__premium_U_row_1 + $__premium_U_row_2 + $__premium_U_row_3 + $__premium_U_row_4;
+			$POOL_PREMIUM = $__premium_U_row_1 + $__premium_U_row_2 + $__premium_U_row_3 + $__premium_U_row_4;
 
 			$__CRF_cc_table__U['sections'][] = [
 				'title' => "(ख) आतंककारी तथा विध्वंसात्मक कार्य (घोषित मूल्यको {$tariff_rsik_group->rate_pool_risk_terorrism}%का दरले)",
@@ -1148,12 +1184,12 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 
 			$__CRF_cc_table__U['sections'][] = [
 				'title' 	=> 'जम्मा', // Subtotal
-				'amount' 	=> $premium_U_total,
+				'amount' 	=> $POOL_PREMIUM,
 				'section_total' => true
 			];
 
 			// Section Sub Total
-			$__CRF_cc_table__U['sub_total'] = $premium_U_total;
+			$__CRF_cc_table__U['sub_total'] = $POOL_PREMIUM;
 		}
 
 
@@ -1205,27 +1241,18 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 		//
 		// Grand Total
 		//
-		$amt_total_premium = $premium_A_total + $premium_AA_total  + $premium_I_total + $premium_EE_total + $premium_U_total;
+		$BASIC_PREMIUM = $premium_A_total + $premium_AA_total  + $premium_I_total + $premium_EE_total;
 
 
 		//
 		// Stamp Duty
 		//
-		$amt_stamp_duty 	= $data['amt_stamp_duty'];
+		$amt_stamp_duty 	= $post_data['amt_stamp_duty'];
 
-
-
-		$CRF_PREMIUM_DATA = [
-			'amt_sum_insured' 		=> $policy_object->amt_sum_insured,
-			'amt_total_premium'  	=> $amt_total_premium,
-			'amt_stamp_duty' 		=> $amt_stamp_duty,
-			'premium_computation_table' 	=> $premium_computation_table ? json_encode($premium_computation_table) : NULL,
-			'amt_pool_premium' 		=> $premium_U_total
-		];
 
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
 		{
-			$CRF_PREMIUM_DATA['cost_calculation_table'] = json_encode( [$__CRF_cc_table__AA, $__CRF_cc_table__I, $__CRF_cc_table__EE ] );
+			$cost_calculation_table = [$__CRF_cc_table__AA, $__CRF_cc_table__I, $__CRF_cc_table__EE ];
 		}
 		else
 		{
@@ -1248,7 +1275,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 				$__CRF_cc_table__U
 			]);
 
-			$CRF_PREMIUM_DATA['cost_calculation_table'] = json_encode($__CRF_cc_table__comprehensive);
+			$cost_calculation_table = $__CRF_cc_table__comprehensive;
 
 
 			/**
@@ -1260,29 +1287,82 @@ if ( ! function_exists('_PO_MOTOR_PVC_compute_crf'))
 			if(
 				$policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION
 					&&
-				$attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT
+				$object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT
 			){
-				$CRF_PREMIUM_DATA['amt_commissionable'] 	= $__agent_comissionable_amount;
-				$CRF_PREMIUM_DATA['amt_agent_commission'] 	= ($__agent_comissionable_amount * $pfs_record->agent_commission)/100.00;
+				$agent_commission 	= ($commissionable_premium * $pfs_record->agent_commission)/100.00;
 			}
 		}
 
-		// Common TXN Data
-		$CRF_PREMIUM_DATA['txn_details'] 	= $data['txn_details'];
-        $CRF_PREMIUM_DATA['remarks'] 		= $data['remarks'];
-		$CRF_PREMIUM_DATA['remarks'] 		= $__remarks;
+		/**
+		 * Prepare Premium Data
+		 */
+		$premium_data = [
+			'amt_basic_premium' 	=> $BASIC_PREMIUM,
+			'amt_commissionable'	=> $commissionable_premium,
+			'amt_agent_commission'  => $agent_commission,
+			'amt_pool_premium' 		=> $POOL_PREMIUM,
+		];
 
 
 		/**
-		 * SHORT TERM POLICY?
-		 * ---------------------
-		 *
-		 * If the policy is short term policy, we have to calculate the short term values
-		 *
+		 * Perform Computation Basis for Endorsement
 		 */
-		$CRF_PREMIUM_DATA = _POLICY__compute_short_term_premium( $policy_record, $pfs_record, $CRF_PREMIUM_DATA );
+		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+		{
+			// Transaction Date must be set as today
+			$endorsement_record->txn_date = date('Y-m-d');
+			$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
+		}
 
-		return $CRF_PREMIUM_DATA;
+		/**
+		 * Compute VAT
+		 *
+		 * NOTE:
+		 * On premium refund, we should also be refunding VAT
+		 */
+		if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
+		{
+			// We do not do anything here, because, VAT was applied only on Stamp Duty
+			// For other portfolio, it must be set as -ve value
+
+			/**
+			 * !!! NO POOL PREMIUM !!!
+			 *
+			 * Pool premium is not refunded to customer.
+			 * NULLify Pool Premium so that it reflects on VAT Computation
+			 */
+			$premium_data['amt_pool_premium'] = 0.00;
+		}
+		$CI->load->helper('account');
+		$taxable_amount = $post_data['amt_stamp_duty'] + $premium_data['amt_basic_premium'] + $premium_data['amt_pool_premium'];
+		$amount_vat 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+		/**
+		 * Prepare Other Data
+		 */
+		$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
+		$net_amt_sum_insured 	= $SI;
+		$txn_data = array_merge($premium_data, [
+			'gross_amt_sum_insured' => $gross_amt_sum_insured,
+			'net_amt_sum_insured' 	=> $net_amt_sum_insured,
+			'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+			'amt_vat' 				=> $amount_vat,
+			'txn_date' 				=> date('Y-m-d')
+		]);
+
+		/**
+		 * Premium Computation Table
+		 * -------------------------
+		 */
+		$txn_data['premium_computation_table'] = $premium_computation_table ? json_encode($premium_computation_table) : NULL;
+
+
+		/**
+		 * Cost Calculation Table
+		 */
+		$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+		return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
 	}
 }
 
