@@ -1320,9 +1320,8 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Let's Build Policy Invoice
 		 */
-
 		try{
-			$invoice_data = $this->_data_invoice_master($installment_record, $endorsement_record->txn_type, $endorsement_record->transfer_customer_id, $voucher_id);
+			$invoice_data = $this->_data_invoice_master($installment_record, $endorsement_record, $voucher_id);
 		}
 		catch (Exception $e) {
 			return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
@@ -1530,10 +1529,9 @@ class Policy_installments extends MY_Controller
 		return $this->template->json($ajax_data);
 	}
 
-		private function _data_invoice_master($installment_record, $txn_type, $customer_id, $voucher_id)
+		private function _data_invoice_master($installment_record, $endorsement_record, $voucher_id)
 		{
 			$invoice_data = [
-				'customer_id' 		=> $customer_id,
 	            'invoice_date'      => date('Y-m-d'),
 	            'voucher_id'   		=> $voucher_id
 	        ];
@@ -1541,8 +1539,9 @@ class Policy_installments extends MY_Controller
 			/**
 	         * Amount Computation
 	         */
-			$amount 	= 0.00;
-	        $txn_type 	= (int)$txn_type;
+			$amount 		= 0.00;
+			$customer_id 	= NULL;
+	        $txn_type 		= (int)$endorsement_record->txn_type;
 			switch ($txn_type)
 			{
 				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
@@ -1552,6 +1551,9 @@ class Policy_installments extends MY_Controller
 								floatval($installment_record->amt_pool_premium) +
 								floatval($installment_record->amt_stamp_duty) +
 								floatval($installment_record->amt_vat);
+
+					// Regular Policy Customer ID
+					$customer_id  = $endorsement_record->customer_id;
 					break;
 
 
@@ -1560,6 +1562,9 @@ class Policy_installments extends MY_Controller
 								floatval($installment_record->amt_transfer_ncd) +
 								floatval($installment_record->amt_stamp_duty) +
 								floatval($installment_record->amt_vat);
+
+					// Customer ID to be Transferred
+					$customer_id  = $endorsement_record->transfer_customer_id;
 					break;
 
 
@@ -1568,13 +1573,14 @@ class Policy_installments extends MY_Controller
 					break;
 			}
 
-			if( !$amount )
+			if( !$amount || !$customer_id )
 			{
 				throw new Exception("Exception [Controller:Policy_installments][Method: _data_invoice_master()]: Could not compute invoice data for given 'Endorsement Type'.");
 			}
 
 			// Update invoice data
-			$invoice_data['amount'] = $amount;
+			$invoice_data['amount'] 		= $amount;
+			$invoice_data['customer_id'] 	= $customer_id;
 
 			return $invoice_data;
 		}
