@@ -622,9 +622,29 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 		{
 			/**
 			 * Policy Object Record
+			 *
+			 * In case of endorsements, we will be needing both current policy object and edited object information
+			 * to compute premium.
 			 */
-			$policy_object 		= get_object_from_policy_record($policy_record);
-			$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+			$old_object = get_object_from_policy_record($policy_record);
+			$new_object = NULL;
+			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+			{
+				try {
+					$new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
+				} catch (Exception $e) {
+
+					return $CI->template->json([
+	                    'status'        => 'error',
+	                    'title' 		=> 'Exception Occured',
+	                    'message' 	=> $e->getMessage()
+	                ], 404);
+				}
+			}
+
+			// Newest object attributes should be used.
+			$object_attributes  = json_decode($new_object->attributes ?? $old_object->attributes);
+
 
 			/**
 			 * Portfolio Setting Record
@@ -652,7 +672,7 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 			/**
 			 * Validation Rules for Form Processing
 			 */
-			$validation_rules = _TXN_AGR_POULTRY_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
+			$validation_rules = _TXN_AGR_POULTRY_premium_validation_rules($policy_record, $pfs_record, $old_object, TRUE );
             $CI->form_validation->set_rules($validation_rules);
 
             // echo '<pre>';print_r($validation_rules);exit;
@@ -677,10 +697,9 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 
 
 					/**
-					 * Extract Information from Object
-					 * 	A. Sum Insured Amount
+					 * Get the NET Sum Insured Amount
 					 */
-					$SI = floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
+					$SI = _OBJ_si_net($old_object, $new_object);
 
 					/**
 					 * Get Tariff Rate
@@ -738,34 +757,79 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 					];
 
 					// NET PREMIUM = C - D
-					$NET_PREMIUM = $C - $D;
+					$BASIC_PREMIUM = $C - $D;
 					$cost_calculation_table[] = [
 						'label' => "ङ. जम्मा (ग - घ)",
-						'value' => $NET_PREMIUM
+						'value' => $BASIC_PREMIUM
 					];
 
 
 					/**
+					 * Prepare Premium Data
+					 */
+					$premium_data = [
+						'amt_basic_premium' 	=> $BASIC_PREMIUM,
+						'amt_commissionable'	=> $commissionable_premium,
+						'amt_agent_commission'  => $agent_commission,
+						'amt_pool_premium' 		=> 0.00,
+					];
+
+					/**
+					 * Perform Computation Basis for Endorsement
+					 */
+					if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+					{
+						// Transaction Date must be set as today
+						$endorsement_record->txn_date = date('Y-m-d');
+						$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
+					}
+
+					/**
 					 * Compute VAT
+					 *
+					 * NOTE: On premium refund, we should also be refunding VAT
 					 */
 					$taxable_amount = $post_data['amt_stamp_duty']; // Vat applies only for Ticket
 					$CI->load->helper('account');
 					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
+					if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
+					{
+						// We do not do anything here, because, VAT was applied only on Stamp Duty
+						// For other portfolio, it must be set as -ve value
+
+						/**
+						 * !!! NO POOL PREMIUM !!!
+						 *
+						 * Pool premium is not refunded to customer.
+						 * NULLify Pool Premium
+						 */
+						$premium_data['amt_pool_premium'] = 0.00;
+
+						/**
+						 * !!! VAT RETURN !!!
+						 *
+						 * We must also refund the VAT for as we refund the premium.
+						 *
+						 * NOTE:
+						 * In this portfolio, we have to pay vat for stamp duty if any.
+						 * So there is no vat return in this case.
+						 */
+					}
 
 					/**
-					 * Prepare Transactional Data
+					 * Prepare Other Data
 					 */
-					$txn_data = [
-						'amt_total_premium' 	=> $NET_PREMIUM,
-						'amt_pool_premium' 		=> 0.00,
-						'amt_commissionable'	=> $commissionable_premium,
-						'amt_agent_commission'  => $agent_commission,
+					$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
+					$net_amt_sum_insured 	= $SI;
+					$txn_data = array_merge($premium_data, [
+						'gross_amt_sum_insured' => $gross_amt_sum_insured,
+						'net_amt_sum_insured' 	=> $net_amt_sum_insured,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
-						'txn_details' 			=> $post_data['txn_details'],
-						'remarks' 				=> $post_data['remarks'],
-					];
+						'txn_date' 				=> date('Y-m-d')
+					]);
+
 
 
 					/**
@@ -782,14 +846,6 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 					 */
 					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
 					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
-
-
-					/**
-					 * @TODO
-					 *
-					 * 1. Build RI Distribution Data For This Policy
-					 * 2. RI Approval Constraint for this Policy
-					 */
 
 				} catch (Exception $e){
 

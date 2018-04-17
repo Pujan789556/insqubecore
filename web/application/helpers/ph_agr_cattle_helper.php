@@ -734,11 +734,6 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 					 */
 					$SI = _OBJ_si_net($old_object, $new_object);
 
-					/**
-					 * Extract Information from Object
-					 * 	A. Sum Insured Amount
-					 */
-					// $SI = floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
 
 					/**
 					 * Get Tariff Rate
@@ -868,31 +863,6 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 						'amt_vat' 				=> $amount_vat,
 						'txn_date' 				=> date('Y-m-d')
 					]);
-
-
-
-
-					// /**
-					//  * Compute VAT
-					//  */
-					// $taxable_amount = $post_data['amt_stamp_duty']; // Vat applies only for Ticket
-					// $CI->load->helper('account');
-					// $amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
-
-					// /**
-					//  * Prepare Transactional Data
-					//  */
-					// $txn_data = [
-					// 	'amt_total_premium' 	=> $BASIC_PREMIUM,
-					// 	'amt_pool_premium' 		=> 0.00,
-					// 	'amt_commissionable'	=> $commissionable_premium,
-					// 	'amt_agent_commission'  => $agent_commission,
-					// 	'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-					// 	'amt_vat' 				=> $amount_vat,
-					// 	'txn_details' 			=> $post_data['txn_details'],
-					// 	'remarks' 				=> $post_data['remarks'],
-					// ];
 
 
 					/**
