@@ -591,8 +591,10 @@ class Object_model extends MY_Model
         else
         {
             // Clear cache for this customer
-            $this->clear_cache($data);
+            $cache_var = 'object_customer_' . $record->customer_id;
+            $this->delete_cache($cache_var);
 
+            // Update activity log
             $this->log_activity($id, 'D');
         }
 

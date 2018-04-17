@@ -416,7 +416,7 @@ class Policy_model extends MY_Model
                         '_extra_attributes' => 'style="width:100%; display:block"',
                         '_type'     => 'dropdown',
                         '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown($branch_id),
-                        '_required' => true
+                        '_required' => false
                     ],
                     [
                         'field' => 'flag_dc',

@@ -76,7 +76,7 @@ if( _ENDORSEMENT_is_editable($record->status, $record->flag_current, FALSE) ):
                 title="Edit Object Information"
                 data-toggle="tooltip"
                 class="action trg-dialog-edit"
-                data-box-size="large"
+                data-box-size="full-width"
                 data-title='<i class="fa fa-pencil-square-o"></i> Edit Object Info for Endorsement - <?php echo $policy_record->code?>'
                 data-url="<?php echo site_url('objects/edit_endorsement/' . $policy_record->id . '/' . $record->id . '/' . $policy_record->object_id);?>"
                 data-form="#_form-object">
