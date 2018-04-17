@@ -16,7 +16,19 @@
 .no-shadow{box-shadow: none;}
 .hr-medium{margin-top:10px; margin-bottom: 10px;}
 .scroll-x{overflow-x: scroll;}
-
+#iqb-processing{
+  opacity: 0.7;
+}
+.iqb-abs-center{
+  position: fixed; /* or absolute */
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  z-index: 1050;
+  color: #eee;
+}
 
 /* ------------------------------ */
 /* -- Nav Bar User Image Style -- */

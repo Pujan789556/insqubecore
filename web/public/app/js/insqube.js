@@ -46,6 +46,9 @@ $( document ).ajaxError(function( event, request, settings ) {
     if( typeof InsQube.options.__btn_loading !== 'undefined' && typeof InsQube.options.__btn_loading === 'object'){
         InsQube.options.__btn_loading.button('reset');
     }
+
+    // Hide if any processing window is open
+    InsQube.doing(false);
 });
 
 /* global define */
@@ -58,6 +61,7 @@ $( document ).ajaxError(function( event, request, settings ) {
                 imagePopup: imagePopup,
                 liveSearch: liveSearch,
                 load: load,
+                doing:doing,
                 options: {},
                 postData: postData,
                 postForm: postForm,
@@ -287,8 +291,7 @@ $( document ).ajaxError(function( event, request, settings ) {
             /**
              * Popup Image into Bootbox alert (as a gallery preview)
              */
-             function imagePopup(img, title)
-             {
+             function imagePopup(img, title){
                 var $img = $(img),
                 src = $img.data('src') ? $img.data('src') :  $img.attr('src');
                 html = '<div class="text-center"><img src="'+ src +'" class="img-responsive" style="display:inline-block"></div>';
@@ -309,6 +312,23 @@ $( document ).ajaxError(function( event, request, settings ) {
                     // buttons: false // No close buttons
                 });
              }
+
+             /**
+              * Show/Hide Processing Window
+              */
+            function doing(f, m){
+                if(f){
+                    var m = m ? m : 'Processing, please wait...',
+                        $backdrop = $('<div class="modal-backdrop fade in" id="iqb-processing"><div class="iqb-abs-center">'+m+'</div></div>');
+                    $backdrop.appendTo($(document.body));
+                }
+                else
+                {
+                    $('#iqb-processing').fadeOut(100, function(){
+                        $(this).remove();
+                    })
+                }
+            }
 
 
 
@@ -581,7 +601,13 @@ $(document).on('click', '.trg-dialog-popup', function(e){
     // Do Action
     function do_action()
     {
+        // Show Processing Window
+        InsQube.doing(true);
         $.getJSON(url, function(r){
+
+            // Hide Processing Window
+            InsQube.doing(false);
+
             // Clear Toastr
             toastr.clear();
 
