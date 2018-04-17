@@ -114,7 +114,7 @@ if ( ! function_exists('_PO_MOTOR_no_claim_discount_rate'))
 // ------------------------------------------------------------------------
 
 
-if ( ! function_exists('_PO_MOTOR_crf_compute_method'))
+if ( ! function_exists('_PO_MOTOR_premium_compute_method'))
 {
     /**
      * Get MOTOR Cost Reference Computation Method
@@ -122,7 +122,7 @@ if ( ! function_exists('_PO_MOTOR_crf_compute_method'))
      * @param int $portfolio_id
      * @return string
      */
-    function _PO_MOTOR_crf_compute_method($portfolio_id)
+    function _PO_MOTOR_premium_compute_method($portfolio_id)
     {
     	// Method to compute CRF data
 		$method = '';
@@ -130,7 +130,7 @@ if ( ! function_exists('_PO_MOTOR_crf_compute_method'))
 		switch ($portfolio_id)
 		{
 			case IQB_SUB_PORTFOLIO_MOTORCYCLE_ID:
-				$method = '_PO_MOTOR_MCY_compute_crf';
+				$method = '_PO_MOTOR_MCY_premium';
 				break;
 
 			case IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID:
@@ -151,7 +151,7 @@ if ( ! function_exists('_PO_MOTOR_crf_compute_method'))
 
 // -----------------------------------------------------------------------
 
-if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
+if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 {
 	/**
 	 * Motorcycle Policy Cost Table
@@ -165,23 +165,58 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 	 *
 	 * @return	array
 	 */
-	function _PO_MOTOR_MCY_compute_crf( $policy_record, $policy_object, $tariff_record, $pfs_record, $data  )
+	function _PO_MOTOR_MCY_premium( $policy_record, $endorsement_record, $tariff_record, $pfs_record, $post_data  )
 	{
-		$attributes = json_decode($policy_object->attributes);
+		$CI =& get_instance();
+
+		/**
+		 * Policy Object Record
+		 *
+		 * In case of endorsements, we will be needing both current policy object and edited object information
+		 * to compute premium.
+		 */
+		$old_object = get_object_from_policy_record($policy_record);
+		$new_object = NULL;
+		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+		{
+			try {
+				$new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
+			} catch (Exception $e) {
+
+				return $CI->template->json([
+                    'status'        => 'error',
+                    'title' 		=> 'Exception Occured',
+                    'message' 	=> $e->getMessage()
+                ], 404);
+			}
+		}
+
+		// Newest object attributes should be used.
+		$object_attributes  = json_decode($new_object->attributes ?? $old_object->attributes);
+
 
 		// Form Posted Data - Extra Fields Required to Perform Cost Calculation
-		$premium_computation_table = $data['premium'] ?? NULL;
+		$premium_computation_table = $post_data['premium'] ?? NULL;
 
 		// Tariff Extracts
 		$default_tariff = json_decode($tariff_record->tariff);
 
-		// Vehicle Price
-		$vehicle_price 				= $attributes->price_vehicle;
-		$vehicle_price_accessories 	= $attributes->price_accessories;
-		$vehicle_total_price  		= $vehicle_price + $vehicle_price_accessories;
+		/**
+		 * NET Sum Insured & Its Breakdown
+		 *
+		 *  A. Net SI
+		 * 	B. Vehicle Price
+		 * 	C. Accessories Price
+		 */
+		$SI 			= _OBJ_si_net($old_object, $new_object);
+		$SI_BREAKDOWN 	= _OBJ_si_breakdown_net($old_object, $new_object);
+		$si_vehicle 	= $SI_BREAKDOWN['si_vehicle'];
+		$si_accessories = $SI_BREAKDOWN['si_accessories'];
+		$vehicle_total_si = $si_vehicle + $si_accessories;
+
 
 		// Vehicle Age (If registration date is there use it otherwise mfd year)
-		$ref_date = $attributes->reg_date ? $attributes->reg_date : $attributes->year_mfd . '-01-01';
+		$ref_date = $object_attributes->reg_date ? $object_attributes->reg_date : $object_attributes->year_mfd . '-01-01';
 		$vehicle_reference_date 	= new DateTime($ref_date);
 		$today 						= new DateTime(date('Y-m-d'));
 		$interval 					= $vehicle_reference_date->diff($today);
@@ -197,7 +232,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 		$vehicle_over_age_rate 	= 0.00;
         foreach ($default_tariff as $t)
         {
-            if( $attributes->engine_capacity >= $t->ec_min && $attributes->engine_capacity <= $t->ec_max )
+            if( $object_attributes->engine_capacity >= $t->ec_min && $object_attributes->engine_capacity <= $t->ec_max )
             {
                 $premiumm_third_party = $t->third_party;
                 $default_rate = $t->default_rate;
@@ -228,7 +263,10 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
          */
         $premium_A_total 	= 0.00;
         $premium_AA_total 	= 0.00;
-        $premium_I_total 	= 0.00;
+        $POOL_PREMIUM 	= 0.00;
+        $commissionable_premium = NULL;
+        $agent_commission = NULL;
+
         if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			/**
@@ -241,7 +279,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 			];
 
 			// Default Premium =  X% of Vehicle Price
-			$__premium_A_row_1 =  $vehicle_total_price * ($default_rate/100.00);
+			$__premium_A_row_1 =  $vehicle_total_si * ($default_rate/100.00);
 			$__CRF_cc_table__A['sections'][] = [
 				'label' 	=> 'क',
 				'title' 	=> "सि.सि.तथा घोषित मूल्य (सरसामान सहित) अनुसार बीमा शुल्क (घोषित मूल्यको {$default_rate}%)",
@@ -306,7 +344,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 
 
 			// Sub Total : घ
-			$__agent_comissionable_amount = $__premium_A_row_7 = $__premium_A_row_5 - $__premium_A_row_6;
+			$commissionable_premium = $__premium_A_row_7 = $__premium_A_row_5 - $__premium_A_row_6;
 			$__CRF_cc_table__A['sections'][] = [
 				'label' 	=> 'घ',
 				'title' 	=> "",
@@ -317,7 +355,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 			// Agent Commission/Direct Discount? -> Applies only Non-GOVT
 			//
 			$__premium_A_row_8 = 0.00;
-			if( $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT && $attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
+			if( $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT && $object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
 			{
 				// X% of GHA
 				$__premium_A_row_8 = $__premium_A_row_7 * ($pfs_record->direct_discount/100.00);
@@ -343,7 +381,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 
 				// Premium Total and Commissionable Amount to Default.
 				$premium_A_total 				= $tariff_record->default_premium;
-				$__agent_comissionable_amount 	= $premium_A_total;
+				$commissionable_premium 	= $premium_A_total;
 
 				// Remove all the sections
 				$__CRF_cc_table__A = [
@@ -388,8 +426,8 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 			$premium_for_insured_covered_on_terorrism = 0.00;
 			if($flag_risk_pool)
 			{
-				$premium_risk_mob 		= $vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
-				$premium_risk_terorrism = $vehicle_total_price * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
+				$premium_risk_mob 		= $vehicle_total_si * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
+				$premium_risk_terorrism = $vehicle_total_si * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
 
 				// Premium for "Per Thousand Insured Amount" on Terorrism rate_additionl_per_thousand_on_extra_rate
 
@@ -401,7 +439,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 
 				$insured_value_tariff = json_decode($tariff_record->insured_value_tariff);
 
-				$no_of_seat = $attributes->carrying_capacity;
+				$no_of_seat = $object_attributes->carrying_capacity;
 				$passenger_count = $no_of_seat - 1;
 
 				// Driver Premium
@@ -427,15 +465,15 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 			];
 
 			// इ TOTAL
-			$premium_I_total = $premium_risk_mob + $premium_risk_terorrism + $premium_for_insured_covered_on_terorrism;
+			$POOL_PREMIUM = $premium_risk_mob + $premium_risk_terorrism + $premium_for_insured_covered_on_terorrism;
 
 			$__CRF_cc_table__I['sections'][] = [
 				'title' 	=> 'जम्मा', // Subtotal
-				'amount' 	=> $premium_I_total,
+				'amount' 	=> $POOL_PREMIUM,
 				'section_total' => true
 			];
 
-			$__CRF_cc_table__I['sub_total'] = $premium_I_total;
+			$__CRF_cc_table__I['sub_total'] = $POOL_PREMIUM;
 		}
 
 
@@ -458,7 +496,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 		//
 		// Disabled Friendly Discount
 		//
-		$vehile_flag_mcy_df = $attributes->flag_mcy_df ?? FALSE;
+		$vehile_flag_mcy_df = $object_attributes->flag_mcy_df ?? FALSE;
 		$discount_MCY_DF = 0.00;
 		if($vehile_flag_mcy_df)
 		{
@@ -473,13 +511,13 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 		//
 		// Grand Total
 		//
-		$amt_total_premium = $premium_total_A_AA  + $premium_I_total;
+		$BASIC_PREMIUM = $premium_total_A_AA;
 
 
 		//
 		// Stamp Duty
 		//
-		$amt_stamp_duty = $data['amt_stamp_duty'];
+		$amt_stamp_duty = $post_data['amt_stamp_duty'];
 
 
 		/**
@@ -545,17 +583,9 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 			];
 		}
 
-		$CRF_PREMIUM_DATA = [
-			'amt_sum_insured' 		=> $policy_object->amt_sum_insured,
-			'amt_total_premium'  	=> $amt_total_premium,
-			'amt_stamp_duty' 		=> $amt_stamp_duty,
-			'premium_computation_table' 	=> $premium_computation_table ? json_encode($premium_computation_table) : NULL,
-			'amt_pool_premium' 		=> $premium_I_total
-		];
-
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
 		{
-			$CRF_PREMIUM_DATA['cost_calculation_table'] = json_encode(array_filter([$__CRF_cc_table__AA, $__CRF_cc_table__flag_mcy_df]));
+			$cost_calculation_table = array_filter([$__CRF_cc_table__AA, $__CRF_cc_table__flag_mcy_df]);
 		}
 		else
 		{
@@ -573,7 +603,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 				$__CRF_cc_table__I
 			]);
 
-			$CRF_PREMIUM_DATA['cost_calculation_table'] = json_encode($__CRF_cc_table__comprehensive);
+			$cost_calculation_table = $__CRF_cc_table__comprehensive;
 
 			/**
 			 * Agent Commission?
@@ -584,28 +614,82 @@ if ( ! function_exists('_PO_MOTOR_MCY_compute_crf'))
 			if(
 				$policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION
 				&&
-				$attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT
+				$object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT
 			){
-				$CRF_PREMIUM_DATA['amt_commissionable'] 	= $__agent_comissionable_amount;
-				$CRF_PREMIUM_DATA['amt_agent_commission'] 	= ($__agent_comissionable_amount * $pfs_record->agent_commission)/100.00;
+				$agent_commission 	= ($commissionable_premium * $pfs_record->agent_commission)/100.00;
 			}
 		}
 
-		// Common TXN Data
-		$CRF_PREMIUM_DATA['txn_details'] 	= $data['txn_details'];
-        $CRF_PREMIUM_DATA['remarks'] 		= $data['remarks'];
-		$CRF_PREMIUM_DATA['remarks'] 		= $__remarks;
 
 		/**
-		 * SHORT TERM POLICY?
-		 * ---------------------
-		 *
-		 * If the policy is short term policy, we have to calculate the short term values
-		 *
+		 * Prepare Premium Data
 		 */
-		$CRF_PREMIUM_DATA = _POLICY__compute_short_term_premium( $policy_record, $pfs_record, $CRF_PREMIUM_DATA );
+		$premium_data = [
+			'amt_basic_premium' 	=> $BASIC_PREMIUM,
+			'amt_commissionable'	=> $commissionable_premium,
+			'amt_agent_commission'  => $agent_commission,
+			'amt_pool_premium' 		=> $POOL_PREMIUM,
+		];
 
-		return $CRF_PREMIUM_DATA;
+		/**
+		 * Perform Computation Basis for Endorsement
+		 */
+		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+		{
+			// Transaction Date must be set as today
+			$endorsement_record->txn_date = date('Y-m-d');
+			$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
+		}
+
+		/**
+		 * Compute VAT
+		 *
+		 * NOTE:
+		 * On premium refund, we should also be refunding VAT
+		 */
+		if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
+		{
+			// We do not do anything here, because, VAT was applied only on Stamp Duty
+			// For other portfolio, it must be set as -ve value
+
+			/**
+			 * !!! NO POOL PREMIUM !!!
+			 *
+			 * Pool premium is not refunded to customer.
+			 * NULLify Pool Premium so that it reflects on VAT Computation
+			 */
+			$premium_data['amt_pool_premium'] = 0.00;
+		}
+		$CI->load->helper('account');
+		$taxable_amount = $post_data['amt_stamp_duty'] + $premium_data['amt_basic_premium'] + $premium_data['amt_pool_premium'];
+		$amount_vat 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+		/**
+		 * Prepare Other Data
+		 */
+		$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
+		$net_amt_sum_insured 	= $SI;
+		$txn_data = array_merge($premium_data, [
+			'gross_amt_sum_insured' => $gross_amt_sum_insured,
+			'net_amt_sum_insured' 	=> $net_amt_sum_insured,
+			'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+			'amt_vat' 				=> $amount_vat,
+			'txn_date' 				=> date('Y-m-d')
+		]);
+
+		/**
+		 * Premium Computation Table
+		 * -------------------------
+		 */
+		$txn_data['premium_computation_table'] = $premium_computation_table ? json_encode($premium_computation_table) : NULL;
+
+
+		/**
+		 * Cost Calculation Table
+		 */
+		$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+		return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
 	}
 }
 
@@ -2921,7 +3005,7 @@ if ( ! function_exists('__save_premium_MOTOR'))
 				$post_data = $CI->input->post();
 
 				// Method to compute premium data
-				$method = _PO_MOTOR_crf_compute_method($policy_record->portfolio_id);
+				$method = _PO_MOTOR_premium_compute_method($policy_record->portfolio_id);
 
 				/**
 				 * Do we have a valid method?
@@ -2933,26 +3017,19 @@ if ( ! function_exists('__save_premium_MOTOR'))
 						/**
 						 * Get the Cost Reference Data
 						 */
-						$txn_data = call_user_func($method, $policy_record, $policy_object, $tariff_record, $pfs_record, $post_data);
+						return call_user_func($method, $policy_record, $endorsement_record, $tariff_record, $pfs_record, $post_data);
 
 
-						/**
-						 * Compute VAT ON Taxable Amount
-						 */
-			        	$CI->load->helper('account');
-				        $taxable_amount 		= $txn_data['amt_total_premium'] + $txn_data['amt_stamp_duty'];
-				        $txn_data['amt_vat'] 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+						// /**
+						//  * Compute VAT ON Taxable Amount
+						//  */
+			   //      	$CI->load->helper('account');
+				  //       $taxable_amount 		= $txn_data['amt_total_premium'] + $txn_data['amt_stamp_duty'];
+				  //       $txn_data['amt_vat'] 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
-						$done 	  = $CI->endorsement_model->save($endorsement_record->id, $txn_data);
+						// $done 	  = $CI->endorsement_model->save($endorsement_record->id, $txn_data);
 
-						return $done;
-
-						/**
-						 * @TODO
-						 *
-						 * 1. Build RI Distribution Data For This Policy
-						 * 2. RI Approval Constraint for this Policy
-						 */
+						// return $done;
 
 					} catch (Exception $e){
 

@@ -1048,9 +1048,8 @@ class Endorsement_model extends MY_Model
             'ENDRSMNT.policy_id'    => $policy_id,
             'ENDRSMNT.txn_type'     => $txn_type
         ];
-        return $this->db->select('ENDRSMNT.*')
-                        ->from($this->table_name . ' AS ENDRSMNT')
-                        ->where($where)
+        $this->_single_select();
+        return $this->db->where($where)
                         ->get()->row();
     }
 
