@@ -754,8 +754,19 @@ class DX_Auth
 		$branch_list 	= [$this->get_branch_id()];
         $scope_list 	= $this->get_scope_list();
         $branch_list 	= $scope_list ? array_unique( array_merge($branch_list, $scope_list) ) : $branch_list;
+        $scope_name 	= $this->get_scope_name();
 
-		return $this->is_admin() OR in_array($branch_id, $branch_list);
+        /**
+         * How an items belongs to me?
+         *
+         * 1. Admin - Access Everything
+         * 2. If user scope is global for this action with authorized permission.
+         * 		for example,
+         * 			Permission: explore.claim
+         * 			User Scope: Global
+         * 		The user with above configuration can explore any claim from any branch.
+         */
+		return $this->is_admin() OR in_array($branch_id, $branch_list) OR $scope_name === IQB_USER_SCOPE_GLOBAL;
 	}
 
     // --------------------------------------------------------------------
