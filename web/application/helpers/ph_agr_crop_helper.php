@@ -797,14 +797,6 @@ if ( ! function_exists('__save_premium_AGR_CROP'))
 					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
 					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
 
-
-					/**
-					 * @TODO
-					 *
-					 * 1. Build RI Distribution Data For This Policy
-					 * 2. RI Approval Constraint for this Policy
-					 */
-
 				} catch (Exception $e){
 
 					return $CI->template->json([
