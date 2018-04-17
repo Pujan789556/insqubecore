@@ -114,6 +114,47 @@ if ( ! function_exists('_OBJ_si_net'))
     }
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_si_breakdown_net'))
+{
+    /**
+     * Get NET SI breakdown of an object
+     *
+     * Compute the NET Sum Insured of each breakdown title in reference to its previous object information.
+     * If, there is no prevous audit object, the gross is net.
+     *
+     * @param object $old_object Policy Object - OLD Version (Current Version for Fresh/Renewal)
+     * @param object $new_object Policy Object - NEW Version (Audit Object for Endorsements)
+     * @return  html
+     */
+    function _OBJ_si_breakdown_net( $old_object, $new_object = NULL )
+    {
+        $new_si_breakdown = json_decode($new_object->si_breakdown ?? NULL, TRUE); // Array
+        $old_si_breakdown = json_decode($old_object->si_breakdown ?? NULL, TRUE); // Array
+
+        $net_si_breakdown = [];
+
+        /**
+         * Let's Compute the Net SI on each title
+         */
+        if( $new_si_breakdown )
+        {
+            foreach($new_si_breakdown as $key=>$si )
+            {
+                $net_si_breakdown[$key] = floatval($si) - floatval($old_si_breakdown[$key]);
+            }
+        }
+        else
+        {
+            $net_si_breakdown = $old_si_breakdown;
+        }
+        return $net_si_breakdown;
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_OBJ_row_snippet'))
 {
 	/**
