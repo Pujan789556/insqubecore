@@ -697,9 +697,12 @@ class Policy_model extends MY_Model
         /**
          * Short Term Flag???
          * ------------------
+         *
+         * !!! DISABLED NOW !!!
+         *
          * Find if this start-end date gives a default duration or short term duration
          */
-        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
+        // $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
 
         /**
          * No marketing staff select?
@@ -730,13 +733,23 @@ class Policy_model extends MY_Model
         // Refactor Date & time
         $data = $this->__refactor_datetime_fields($data);
 
+        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
+
         /**
          * Short Term Flag???
          * ------------------
          * Find if this start-end date gives a default duration or short term duration
          */
-        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
-        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
+
+        /**
+         * Short Term Flag???
+         * ------------------
+         *
+         * !!! DISABLED NOW !!!
+         *
+         * Find if this start-end date gives a default duration or short term duration
+         */
+        // $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
 
         // Business Referer NULL if not supplied
         $data['ref_company_id'] = $data['ref_company_id'] ? $data['ref_company_id'] : NULL;
