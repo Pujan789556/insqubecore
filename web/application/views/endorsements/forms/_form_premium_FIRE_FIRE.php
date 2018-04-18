@@ -181,7 +181,7 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
             <div class="box-header with-border">
                 <h4 class="box-title">Discount/Additional Charges (Rates)</h4>
             </div>
-            <div class="box-body">
+            <div class="box-body form-horizontal">
                 <?php
                 /**
                  * Additional Charge/Discount Rates
