@@ -1271,22 +1271,6 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 
 					/**
-					 * Prepare Transactional Data
-					 */
-					// $txn_data = [
-					// 	'amt_sum_insured' 		=> $policy_object->amt_sum_insured,
-					// 	'amt_total_premium' 	=> $BASIC_PREMIUM,
-					// 	'amt_pool_premium' 		=> $NET_POOL_PREMIUM,
-					// 	'amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
-					// 	'amt_agent_commission'  => $AGENT_COMMISSION,
-					// 	'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-					// 	'amt_vat' 				=> $AMOUNT_VAT,
-					// 	'txn_details' 			=> $post_data['txn_details'],
-					// 	'remarks' 				=> $post_data['remarks'],
-					// ];
-
-
-					/**
 					 * Premium Computation Table
 					 * -------------------------
 					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
@@ -1409,11 +1393,6 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 						'property_table' 	=> $property_table,
 						'risk_table'		=> $risk_table
 					]);
-
-
-					// $done = $CI->endorsement_model->save($endorsement_record->id, $txn_data);
-
-					// return $done;
 
 
 					/**
