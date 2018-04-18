@@ -761,7 +761,9 @@ if ( ! function_exists('__save_premium_ENG_BL'))
 					];
 
 
-
+					/**
+					 * Premium Computation and Cost Calculation Table
+					 */
 					$premium_computation_table 	= json_encode($post_premium);
 					$cost_calculation_table 	= json_encode($cost_calculation_table);
 

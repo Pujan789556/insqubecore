@@ -489,7 +489,6 @@ if ( ! function_exists('__save_premium_FIRE_LOP'))
 
 						'premium_computation_table' => $premium_computation_table,	// JSON encoded
 						'cost_calculation_table' 	=> $cost_calculation_table		// JSON encoded
-
 					]);
 
 					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);

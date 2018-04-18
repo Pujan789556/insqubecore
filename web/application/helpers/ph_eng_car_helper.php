@@ -597,6 +597,23 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 		$CI =& get_instance();
 
 		/**
+		 * !!! NOTE @TODO !!!
+		 *
+		 * Manual Endorsement should be done on
+		 * 	- Premium Upgrade
+		 * 	- Premium Refund
+		 */
+		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+		{
+			return $CI->template->json([
+				'title' 	=> 'UNDER CONSTRUCTION!',
+				'status' 	=> 'error',
+				'message' 	=> 'We need to do it manually.'
+			], 400);
+		}
+
+
+		/**
 		 * Form Submitted?
 		 */
 		$return_data = [];
@@ -736,17 +753,17 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 						'value' => $POOL_PREMIUM
 					];
 
-					$NET_PREMIUM = $E + $POOL_PREMIUM;
+					$NET_BASIC_PREMIUM = $E;
 					$cost_calculation_table[] = [
-						'label' => "Net Premium",
-						'value' => $NET_PREMIUM
+						'label' => "Total Premium",
+						'value' => $NET_BASIC_PREMIUM
 					];
 
 
 					/**
 					 * Compute VAT
 					 */
-					$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
+					$taxable_amount = $NET_BASIC_PREMIUM + $POOL_PREMIUM + $post_data['amt_stamp_duty'];
 					$CI->load->helper('account');
 					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
@@ -754,17 +771,17 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 					/**
 					 * Prepare Transactional Data
 					 *
-					 * @TODO: What is Pool Premium Amount?
 					 */
 					$txn_data = [
-						'amt_total_premium' 	=> $NET_PREMIUM,
+						'gross_amt_sum_insured' => $policy_object->amt_sum_insured,
+						'net_amt_sum_insured' 	=> $policy_object->amt_sum_insured,
+						'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
 						'amt_pool_premium' 		=> $POOL_PREMIUM,
 						'amt_commissionable'	=> $commissionable_premium,
 						'amt_agent_commission'  => $agent_commission,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
-						'txn_details' 			=> $post_data['txn_details'],
-						'remarks' 				=> $post_data['remarks'],
+						'txn_date' 				=> date('Y-m-d'),
 					];
 
 
@@ -782,14 +799,6 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 					 */
 					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
 					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
-
-
-					/**
-					 * @TODO
-					 *
-					 * 1. Build RI Distribution Data For This Policy
-					 * 2. RI Approval Constraint for this Policy
-					 */
 
 				} catch (Exception $e){
 
