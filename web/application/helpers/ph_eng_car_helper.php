@@ -756,7 +756,7 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 					$NET_BASIC_PREMIUM = $E;
 					$cost_calculation_table[] = [
 						'label' => "Total Premium",
-						'value' => $NET_BASIC_PREMIUM
+						'value' => $NET_BASIC_PREMIUM + $POOL_PREMIUM
 					];
 
 
