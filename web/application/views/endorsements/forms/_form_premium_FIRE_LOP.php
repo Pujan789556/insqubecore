@@ -25,7 +25,7 @@ $premium_computation_table  = json_decode( $endorsement_record->premium_computat
         <div class="box-header with-border">
             <h4 class="box-title">Premium Information</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
             <?php
             /**
              * Portfolio Specific Premium Fields

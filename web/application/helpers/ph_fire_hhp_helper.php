@@ -749,7 +749,7 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 					/**
 					 * Let's Compute the Total Basic Premium
 					 */
-					$BASIC_PREMIUM 	= $GROSS_PREMIUM - $DIRECT_DISCOUNT ;
+					$NET_BASIC_PREMIUM 	= $GROSS_PREMIUM - $DIRECT_DISCOUNT ;
 
 
 					/**
@@ -845,7 +845,7 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 					 * Prepare Premium Data
 					 */
 					$premium_data = [
-						'amt_basic_premium' 	=> $BASIC_PREMIUM,
+						'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
 						'amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
 						'amt_agent_commission'  => $AGENT_COMMISSION,
 						'amt_pool_premium' 		=> $POOL_PREMIUM,
