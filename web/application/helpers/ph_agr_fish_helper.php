@@ -766,9 +766,7 @@ if ( ! function_exists('__save_premium_AGR_FISH'))
 					/**
 					 * Premium Rates
 					 */
-					// $FISH_SI 		= _OBJ_AGR_FISH_items_only_sum_insured_amount($object_attributes->items);
 					$default_rate 	= floatval($tariff->rate);
-					// $POND_SI 		= _OBJ_AGR_FISH_pond_sum_insured_amount($object_attributes);
 					$pond_rate 		= 1; // 1%
 
 

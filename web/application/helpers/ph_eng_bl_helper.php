@@ -418,8 +418,19 @@ if ( ! function_exists('_OBJ_ENG_BL_compute_sum_insured_amount'))
 			$amt_sum_insured +=  $si_per_item;
 		}
 
+		/**
+		 * SI Breakdown
+		 * 	- Item Sum Insured
+		 * 	- TPL Liability
+		 */
+		$si_tpl = _OBJ_ENG_BL_compute_tpl_amount($data['third_party']['limit']);
+		$si_breakdown = json_encode([
+			'si_items' 	=> $amt_sum_insured,
+			'si_tpl'  	=> $si_tpl
+		]);
+
 		// NO SI Breakdown for this Portfolio
-		return ['amt_sum_insured' => $amt_sum_insured];
+		return ['amt_sum_insured' => $amt_sum_insured, 'si_breakdown' => $si_breakdown];
 	}
 }
 
@@ -595,8 +606,28 @@ if ( ! function_exists('__save_premium_ENG_BL'))
 
 			/**
 			 * Policy Object Record
+			 *
+			 * In case of endorsements, we will be needing both current policy object and edited object information
+			 * to compute premium.
 			 */
-			$policy_object 		= get_object_from_policy_record($policy_record);
+			$old_object = get_object_from_policy_record($policy_record);
+			$new_object = NULL;
+			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+			{
+				try {
+					$new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
+				} catch (Exception $e) {
+
+					return $CI->template->json([
+	                    'status'        => 'error',
+	                    'title' 		=> 'Exception Occured',
+	                    'message' 	=> $e->getMessage()
+	                ], 404);
+				}
+			}
+
+			// Newest object attributes should be used.
+			$object_attributes  = json_decode($new_object->attributes ?? $old_object->attributes);
 
 			/**
 			 * Portfolio Setting Record
@@ -607,7 +638,7 @@ if ( ! function_exists('__save_premium_ENG_BL'))
 			/**
 			 * Validation Rules for Form Processing
 			 */
-			$validation_rules = _TXN_ENG_BL_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
+			$validation_rules = _TXN_ENG_BL_premium_validation_rules($policy_record, $pfs_record, $old_object, TRUE );
             $CI->form_validation->set_rules($validation_rules);
 
             // echo '<pre>';print_r($validation_rules);exit;
@@ -631,15 +662,18 @@ if ( ! function_exists('__save_premium_ENG_BL'))
 					$premium_computation_table 	= [];
 
 
+
 					/**
-					 * Extract Information from Object
-					 * 	A. Object Atrributes
-					 * 	B. Sum Insured Amount
-					 * 	C. Third party liability Amount
+					 * NET Sum Insured & Its Breakdown
+					 *
+					 *  A. Net SI
+					 * 	A. Items' SI
+					 * 	B. TPL SI
 					 */
-					$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-					$SI 				= floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
-					$TPL_AMOUNT 		= _OBJ_ENG_BL_compute_tpl_amount($object_attributes->third_party->limit ?? []);
+					$SI 			= _OBJ_si_net($old_object, $new_object);
+					$SI_BREAKDOWN 	= _OBJ_si_breakdown_net($old_object, $new_object);
+					$ITEM_SI 	= $SI_BREAKDOWN['si_items'];
+					$TPL_SI 	= $SI_BREAKDOWN['si_tpl'];
 
 
 					/**
@@ -656,14 +690,14 @@ if ( ! function_exists('__save_premium_ENG_BL'))
 
 
 					// A = SI X Default Rate %
-					$A = ( $SI * $default_rate ) / 100.00;
+					$A = ( $ITEM_SI * $default_rate ) / 100.00;
 					$cost_calculation_table[] = [
 						'label' => "Gross Premium",
 						'value' => $A
 					];
 
 					// B = TP X TP Rate %
-					$B = ( $TPL_AMOUNT * $tp_rate ) / 100.00;
+					$B = ( $TPL_SI * $tp_rate ) / 100.00;
 					$cost_calculation_table[] = [
 						'label' => "Third Party Liability",
 						'value' => $B
@@ -713,69 +747,95 @@ if ( ! function_exists('__save_premium_ENG_BL'))
 					{
 						// Pool Premium = x% of Default Premium (A)
 						$pool_rate = floatval($pfs_record->pool_premium);
-						$POOL_PREMIUM = ( $SI * $pool_rate ) / 100.00;
+						$POOL_PREMIUM = ( $ITEM_SI * $pool_rate ) / 100.00;
 					}
 					$cost_calculation_table[] = [
 						'label' => "Pool Premium",
 						'value' => $POOL_PREMIUM
 					];
 
-					$NET_PREMIUM = $E + $POOL_PREMIUM;
+					$NET_BASIC_PREMIUM = $E;
 					$cost_calculation_table[] = [
-						'label' => "Net Premium",
-						'value' => $NET_PREMIUM
+						'label' => "Total Premium",
+						'value' => $NET_BASIC_PREMIUM + $POOL_PREMIUM
 					];
 
 
 
+					$premium_computation_table 	= json_encode($post_premium);
+					$cost_calculation_table 	= json_encode($cost_calculation_table);
+
+					/**
+					 * Prepare Premium Data
+					 */
+					$premium_data = [
+						'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
+						'amt_commissionable'	=> $commissionable_premium,
+						'amt_agent_commission'  => $agent_commission,
+						'amt_pool_premium' 		=> $POOL_PREMIUM,
+					];
+
+					/**
+					 * Perform Computation Basis for Endorsement
+					 */
+					if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+					{
+						// Transaction Date must be set as today
+						$endorsement_record->txn_date = date('Y-m-d');
+						$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
+					}
+
+
+					if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
+					{
+						// We do not do anything here, because, VAT was applied only on Stamp Duty
+						// For other portfolio, it must be set as -ve value
+
+						/**
+						 * !!! NO POOL PREMIUM !!!
+						 *
+						 * Pool premium is not refunded to customer.
+						 * NULLify Pool Premium
+						 */
+						$premium_data['amt_pool_premium'] = 0.00;
+
+						/**
+						 * !!! VAT RETURN !!!
+						 *
+						 * We must also refund the VAT for as we refund the premium.
+						 *
+						 */
+					}
 
 					/**
 					 * Compute VAT
+					 *
+					 * NOTE: On premium refund, we should also be refunding VAT
 					 */
-					$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
+					$taxable_amount = $premium_data['amt_basic_premium'] + $premium_data['amt_pool_premium'] + $post_data['amt_stamp_duty'];
 					$CI->load->helper('account');
 					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
 
 					/**
-					 * Prepare Transactional Data
-					 *
-					 * @TODO: What is Pool Premium Amount?
+					 * Prepare Other Data
 					 */
-					$txn_data = [
-						'amt_total_premium' 	=> $NET_PREMIUM,
-						'amt_pool_premium' 		=> $POOL_PREMIUM,
-						'amt_commissionable'	=> $commissionable_premium,
-						'amt_agent_commission'  => $agent_commission,
+					$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
+					$net_amt_sum_insured 	= $SI;
+					$txn_data = array_merge($premium_data, [
+						'gross_amt_sum_insured' => $gross_amt_sum_insured,
+						'net_amt_sum_insured' 	=> $net_amt_sum_insured,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
-						'txn_details' 			=> $post_data['txn_details'],
-						'remarks' 				=> $post_data['remarks'],
-					];
+						'txn_date' 				=> date('Y-m-d'),
+
+						'premium_computation_table' => $premium_computation_table,	// JSON encoded
+						'cost_calculation_table' 	=> $cost_calculation_table		// JSON encoded
+					]);
 
 
-					/**
-					 * Premium Computation Table
-					 * -------------------------
-					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
-					 */
-					$premium_computation_table = json_encode($post_premium);
-					$txn_data['premium_computation_table'] = $premium_computation_table;
-
-
-					/**
-					 * Cost Calculation Table
-					 */
-					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
 					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
 
-
-					/**
-					 * @TODO
-					 *
-					 * 1. Build RI Distribution Data For This Policy
-					 * 2. RI Approval Constraint for this Policy
-					 */
 
 				} catch (Exception $e){
 
