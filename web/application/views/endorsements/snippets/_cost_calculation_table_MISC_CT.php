@@ -4,6 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy: Details - Policy Premium Overview Card - MISCELLANEOUS - CASH IN TRANSIT
 */
 $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_decode($endorsement_record->cost_calculation_table) : NULL;
+$total_premium 	= (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
+$grand_total 	= $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
 ?>
 <div class="box-body">
 	<table class="table no-margin table-bordered">
@@ -21,7 +23,7 @@ $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_dec
 				        <table class="table no-margin table-bordered table-condensed">
 				            <tr>
 				                <td width="80%" class="text-right"><strong>बीमा शुल्क</strong></td>
-				                <td class="text-right"><strong><?php echo number_format((float)$endorsement_record->amt_total_premium, 2, '.', '')?></strong></td>
+				                <td class="text-right"><strong><?php echo number_format($total_premium, 2, '.', '')?></strong></td>
 				            </tr>
 				            <tr>
 				                <td class="text-right"><strong>टिकट दस्तुर</strong></td>
@@ -33,7 +35,7 @@ $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_dec
 				            </tr>
 				            <tr>
 				                <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-				                <td class="text-right"><strong><?php echo number_format( (float)( $endorsement_record->amt_stamp_duty + $endorsement_record->amt_total_premium + $endorsement_record->amt_vat ) , 2, '.', '');?></strong></td>
+				                <td class="text-right"><strong><?php echo number_format( $grand_total , 2, '.', '');?></strong></td>
 				            </tr>
 				        </table>
 				    </td>

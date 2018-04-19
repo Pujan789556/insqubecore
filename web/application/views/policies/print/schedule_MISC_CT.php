@@ -4,7 +4,8 @@
  */
 $object_attributes      = json_decode($record->object_attributes);
 $schedule_table_title   = $record->portfolio_name . ' बीमालेखको अनुसुची (सेड्युल)';
-// echo '<pre>'; print_r($record);echo '</pre>';exit;
+$total_premium  = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
+$grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
 ?>
 
 <!DOCTYPE html>
