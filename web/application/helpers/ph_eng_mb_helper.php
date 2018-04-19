@@ -646,56 +646,6 @@ if ( ! function_exists('__save_premium_ENG_MB'))
 
 					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
 
-
-
-					// /**
-					//  * Compute VAT
-					//  */
-					// $taxable_amount = $NET_BASIC_PREMIUM + $post_data['amt_stamp_duty'];
-					// $CI->load->helper('account');
-					// $amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
-
-					// /**
-					//  * Prepare Transactional Data
-					//  *
-					//  * @TODO: What is Pool Premium Amount?
-					//  */
-					// $txn_data = [
-					// 	'amt_total_premium' 	=> $NET_BASIC_PREMIUM,
-					// 	'amt_pool_premium' 		=> $POOL_PREMIUM,
-					// 	'amt_commissionable'	=> $commissionable_premium,
-					// 	'amt_agent_commission'  => $agent_commission,
-					// 	'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-					// 	'amt_vat' 				=> $amount_vat,
-					// 	'txn_details' 			=> $post_data['txn_details'],
-					// 	'remarks' 				=> $post_data['remarks'],
-					// ];
-
-
-					// /**
-					//  * Premium Computation Table
-					//  * -------------------------
-					//  * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
-					//  */
-					// $premium_computation_table = json_encode($post_premium);
-					// $txn_data['premium_computation_table'] = $premium_computation_table;
-
-
-					// /**
-					//  * Cost Calculation Table
-					//  */
-					// $txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
-					// return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
-
-
-					/**
-					 * @TODO
-					 *
-					 * 1. Build RI Distribution Data For This Policy
-					 * 2. RI Approval Constraint for this Policy
-					 */
-
 				} catch (Exception $e){
 
 					return $CI->template->json([

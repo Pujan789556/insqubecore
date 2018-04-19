@@ -186,10 +186,25 @@ if ( ! function_exists('_OBJ_MISC_BB_compute_sum_insured_amount'))
 	function _OBJ_MISC_BB_compute_sum_insured_amount( $portfolio_id, $data )
 	{
 		$si_components 		= $data['sum_insured'];
-		$amt_sum_insured 	= floatval($si_components['basic'] ?? 0.00) + floatval($si_components['cip'] ?? 0.00) + floatval($si_components['cit'] ?? 0.00);
+		$si_basic 			= floatval($si_components['basic'] ?? 0.00);
+		$si_cip 			= floatval($si_components['cip'] ?? 0.00);
+		$si_cit 			= floatval($si_components['cit'] ?? 0.00);
+		$amt_sum_insured 	= $si_basic + $si_cip + $si_cit;
+
+		/**
+		 * SI Breakdown
+		 * 	- SI Basic
+		 * 	- SI CIP
+		 * 	- SI CIT
+		 */
+		$si_breakdown = json_encode([
+			'si_basic' 	=> $si_basic,
+			'si_cip' 	=> $si_cip,
+			'si_cit' 	=> $si_cit,
+		]);
 
 		// NO SI Breakdown for this Portfolio
-		return ['amt_sum_insured' => $amt_sum_insured];
+		return ['amt_sum_insured' => $amt_sum_insured, 'si_breakdown' => $si_breakdown];
 	}
 }
 
@@ -399,8 +414,28 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 
 			/**
 			 * Policy Object Record
+			 *
+			 * In case of endorsements, we will be needing both current policy object and edited object information
+			 * to compute premium.
 			 */
-			$policy_object 		= get_object_from_policy_record($policy_record);
+			$old_object = get_object_from_policy_record($policy_record);
+			$new_object = NULL;
+			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+			{
+				try {
+					$new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
+				} catch (Exception $e) {
+
+					return $CI->template->json([
+	                    'status'        => 'error',
+	                    'title' 		=> 'Exception Occured',
+	                    'message' 	=> $e->getMessage()
+	                ], 404);
+				}
+			}
+
+			// Newest object attributes should be used.
+			$object_attributes  = json_decode($new_object->attributes ?? $old_object->attributes);
 
 			/**
 			 * Portfolio Setting Record
@@ -415,7 +450,7 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 			/**
 			 * Validation Rules for Form Processing
 			 */
-			$validation_rules = _TXN_MISC_BB_premium_validation_rules($policy_record, $pfs_record, $policy_object, $portfolio_risks, TRUE );
+			$validation_rules = _TXN_MISC_BB_premium_validation_rules($policy_record, $pfs_record, $old_object, $portfolio_risks, TRUE );
             $CI->form_validation->set_rules($validation_rules);
 
             // echo '<pre>';print_r($validation_rules);exit;
@@ -435,18 +470,28 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 
 
 					/**
-					 * Sum Insured Amount
-					 */
-					$object_attributes  	= $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-					$object_amt_sum_insured = $policy_object->amt_sum_insured;
-
-
-					/**
 					 * Tariff Data
 					 */
 					$CI->load->model('tariff_misc_bb_model');
 					$tariff_record = $CI->tariff_misc_bb_model->get_by_fy_portfolio( $policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 					$tariff   	= json_decode($tariff_record->tariff ?? NULL);
+
+
+
+					/**
+					 * NET Sum Insured & Its Breakdown
+					 *
+					 *  A. Basic SI
+					 * 	A. CIP SI (Cash in Primeses)
+					 * 	B. CIT SI (Cash in Transit)
+					 */
+					$SI 			= _OBJ_si_net($old_object, $new_object);
+					$SI_BREAKDOWN 	= _OBJ_si_breakdown_net($old_object, $new_object);
+					$si_basic 	= $SI_BREAKDOWN['si_basic'];
+					$si_cip 	= $SI_BREAKDOWN['si_cip'];
+					$si_cit 	= $SI_BREAKDOWN['si_cit'];
+
+
 
 					/**
 					 * Compute Premium From Post Data
@@ -456,11 +501,6 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 					 * 	b. Other Risk Premium
 					 *  c. Pool Premium
 					 */
-
-					// Basic, Cash in Primeses, Cash in Transit - SI
-					$si_basic 	= floatval($object_attributes->sum_insured->basic ?? 0.00);
-					$si_cip 	= floatval($object_attributes->sum_insured->cip ?? 0.00);
-					$si_cit 	= floatval($object_attributes->sum_insured->cit ?? 0.00);
 
 					// Tariff Rate for those SI
 					$rate_basic = floatval($tariff->basic ?? 0.00);
@@ -518,7 +558,7 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 						// Compute only if rate is supplied
 						if($rate)
 						{
-							$per_risk_premium = ( $rate * $object_amt_sum_insured ) / 100.00;
+							$per_risk_premium = ( $rate * $SI ) / 100.00;
 							$additional_risk_premium += $per_risk_premium;
 
 							if($per_risk_premium)
@@ -565,8 +605,6 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 						$agent_commission 		= ( $G * $pfs_record->agent_commission ) / 100.00;
 					}
 
-
-
 					/**
 					 * Pool Premium
 					 */
@@ -574,56 +612,138 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 					{
 						// Pool Premium = x% of Default Premium (A-B)
 						$pool_rate = floatval($pfs_record->pool_premium);
-						$POOL_PREMIUM = ( $object_amt_sum_insured * $pool_rate ) / 100.00;
+						$POOL_PREMIUM = ( $SI * $pool_rate ) / 100.00;
 					}
 					$cost_calculation_table[] = [
 						'label' => "Pool Premium",
 						'value' => $POOL_PREMIUM
 					];
 
-					$NET_PREMIUM = $G + $POOL_PREMIUM;
+					$NET_BASIC_PREMIUM = $G;
 					$cost_calculation_table[] = [
-						'label' => "Net Premium",
-						'value' => $NET_PREMIUM
+						'label' => "Total Premium",
+						'value' => $NET_BASIC_PREMIUM + $POOL_PREMIUM
+					];
+
+
+					/**
+					 * Premium Computation and Cost Calculation Table
+					 */
+					$premium_computation_table 	= json_encode($post_premium);
+					$cost_calculation_table 	= json_encode($cost_calculation_table);
+
+					/**
+					 * Prepare Premium Data
+					 */
+					$premium_data = [
+						'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
+						'amt_commissionable'	=> $commissionable_premium,
+						'amt_agent_commission'  => $agent_commission,
+						'amt_pool_premium' 		=> $POOL_PREMIUM,
 					];
 
 					/**
-					 * Compute VAT
+					 * Perform Computation Basis for Endorsement
 					 */
-					$taxable_amount = $NET_PREMIUM + $post_data['amt_stamp_duty'];
+					if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+					{
+						// Transaction Date must be set as today
+						$endorsement_record->txn_date = date('Y-m-d');
+						$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
+					}
+
+
+					if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
+					{
+						// We do not do anything here, because, VAT was applied only on Stamp Duty
+						// For other portfolio, it must be set as -ve value
+
+						/**
+						 * !!! NO POOL PREMIUM !!!
+						 *
+						 * Pool premium is not refunded to customer.
+						 * NULLify Pool Premium
+						 */
+						$premium_data['amt_pool_premium'] = 0.00;
+
+						/**
+						 * !!! VAT RETURN !!!
+						 *
+						 * We must also refund the VAT for as we refund the premium.
+						 *
+						 */
+					}
+
+					/**
+					 * Compute VAT
+					 *
+					 * NOTE: On premium refund, we should also be refunding VAT
+					 */
+					$taxable_amount = $premium_data['amt_basic_premium'] + $premium_data['amt_pool_premium'] + $post_data['amt_stamp_duty'];
 					$CI->load->helper('account');
 					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
 
 					/**
-					 * Prepare Transactional Data
+					 * Prepare Other Data
 					 */
-					$txn_data = [
-						'amt_total_premium' 	=> $NET_PREMIUM,
-						'amt_pool_premium' 		=> $POOL_PREMIUM,
-						'amt_commissionable'	=> $commissionable_premium,
-						'amt_agent_commission'  => $agent_commission,
+					$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
+					$net_amt_sum_insured 	= $SI;
+					$txn_data = array_merge($premium_data, [
+						'gross_amt_sum_insured' => $gross_amt_sum_insured,
+						'net_amt_sum_insured' 	=> $net_amt_sum_insured,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
-						'txn_details' 			=> $post_data['txn_details'],
-						'remarks' 				=> $post_data['remarks'],
-					];
+						'txn_date' 				=> date('Y-m-d'),
+
+						'premium_computation_table' => $premium_computation_table,	// JSON encoded
+						'cost_calculation_table' 	=> $cost_calculation_table		// JSON encoded
+					]);
 
 
-					/**
-					 * Premium Computation Table
-					 * -------------------------
-					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
-					 */
-					$premium_computation_table = json_encode($post_premium);
-					$txn_data['premium_computation_table'] = $premium_computation_table;
-
-
-					/**
-					 * Cost Calculation Table
-					 */
-					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
 					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
+
+
+
+
+
+					// /**
+					//  * Compute VAT
+					//  */
+					// $taxable_amount = $NET_BASIC_PREMIUM + $post_data['amt_stamp_duty'];
+					// $CI->load->helper('account');
+					// $amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+					// /**
+					//  * Prepare Transactional Data
+					//  */
+					// $txn_data = [
+					// 	'amt_total_premium' 	=> $NET_BASIC_PREMIUM,
+					// 	'amt_pool_premium' 		=> $POOL_PREMIUM,
+					// 	'amt_commissionable'	=> $commissionable_premium,
+					// 	'amt_agent_commission'  => $agent_commission,
+					// 	'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
+					// 	'amt_vat' 				=> $amount_vat,
+					// 	'txn_details' 			=> $post_data['txn_details'],
+					// 	'remarks' 				=> $post_data['remarks'],
+					// ];
+
+
+					// /**
+					//  * Premium Computation Table
+					//  * -------------------------
+					//  * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+					//  */
+					// $premium_computation_table = json_encode($post_premium);
+					// $txn_data['premium_computation_table'] = $premium_computation_table;
+
+
+					// /**
+					//  * Cost Calculation Table
+					//  */
+					// $txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+					// return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
 
 
 					/**
