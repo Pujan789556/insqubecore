@@ -509,7 +509,7 @@ if ( ! function_exists('__save_premium_ENG_EEI'))
 					$POOL_PREMIUM = 0.00;
 					if($flag_pool_risk)
 					{
-						// Pool Premium = x% of Default Premium (A-B)
+						// Pool Premium = x% of SI (A-B)
 						$pool_rate = floatval($pfs_record->pool_premium);
 						$POOL_PREMIUM = ( $SI * $pool_rate ) / 100.00;
 					}
