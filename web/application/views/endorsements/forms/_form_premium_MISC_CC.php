@@ -90,7 +90,7 @@ $premium_computation_table = $endorsement_record->premium_computation_table ? js
         <div class="box-header with-border">
             <h4 class="box-title">Pool Premium</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
             <?php
             /**
              * Load Form Components - Pool Premium
