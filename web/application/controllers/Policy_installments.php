@@ -1447,7 +1447,7 @@ class Policy_installments extends MY_Controller
 						'record' 	=> $this->ac_invoice_model->get($invoice_id),
 						'rows' 		=> $this->ac_invoice_detail_model->rows_by_invoice($invoice_id)
 					];
-					_INVOICE__pdf($invoice_data, 'save');
+					// _INVOICE__pdf($invoice_data, 'save');
 
 				} catch (Exception $e) {
 
@@ -1925,7 +1925,7 @@ class Policy_installments extends MY_Controller
 						'record' 	=> $this->ac_credit_note_model->get($credit_note_id),
 						'rows' 		=> $this->ac_credit_note_detail_model->rows_by_credit_note($credit_note_id)
 					];
-					_CREDIT_NOTE__pdf($credit_note_data, 'save');
+					// _CREDIT_NOTE__pdf($credit_note_data, 'save');
 
 				} catch (Exception $e) {
 
@@ -2388,7 +2388,7 @@ class Policy_installments extends MY_Controller
 								'invoice_record' 	=> $invoice_record
 							];
 
-							_RECEIPT__pdf($receipt_data, 'save');
+							// _RECEIPT__pdf($receipt_data, 'save');
                         }
 
                     } catch (Exception $e) {
@@ -2440,7 +2440,7 @@ class Policy_installments extends MY_Controller
                     $this->ri_transaction_model->clear_cache($cache_var);
 
                     // Send SMS
-                    $this->_sms_activation($endorsement_record, $policy_record, $invoice_record, $installment_record);
+                    // $this->_sms_activation($endorsement_record, $policy_record, $invoice_record, $installment_record);
             }
 
             /**
