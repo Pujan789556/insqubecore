@@ -603,7 +603,6 @@ if ( ! function_exists('__save_premium_ENG_BL'))
 
 		if( $CI->input->post() )
 		{
-
 			/**
 			 * Policy Object Record
 			 *

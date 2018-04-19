@@ -88,7 +88,7 @@ $premium_computation_table  = $endorsement_record->premium_computation_table ? j
         <div class="box-header with-border">
             <h4 class="box-title">Premium Computation - Third Party and Pool Risk</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
             <?php
             /**
              * Portfolio Specific Premium Fields
