@@ -885,6 +885,18 @@ class Objects extends MY_Controller
         		$data = $this->input->post();
 
         		/**
+				 * Perform Object Pre Save Tasks
+				 */
+				try {
+
+					$data = _OBJ_pre_save_tasks($record->portfolio_id, $data, $record);
+
+				} catch (Exception $e) {
+
+					return $this->template->json(['status' => 'error', 'title' => 'Exception Occured!', 'message' => $e->getMessage()], 404);
+				}
+
+        		/**
         		 * Prepare Post Data
         		 */
         		$post_data['attributes'] 		= json_encode($data['object']);

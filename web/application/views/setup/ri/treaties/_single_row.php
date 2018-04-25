@@ -34,7 +34,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 						title="Edit Treaty"
 						class="trg-dialog-edit"
 						data-box-size="large"
-						data-title='<i class="fa fa-pencil-square-o"></i> Edit Treaty'
+						data-title='<i class="fa fa-pencil-square-o"></i> Edit Treaty - <?php echo $record->name ?>'
 						data-url="<?php echo site_url('ri_setup_treaties/edit/' . $record->id);?>"
 						data-form=".form-iqb-general">
 						<i class="fa fa-pencil-square-o"></i>
