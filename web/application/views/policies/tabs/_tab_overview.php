@@ -39,7 +39,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			 */
 			$this->load->view('endorsements/_cost_calculation_table', ['endorsement_record' => $endorsement_record, 'policy_record' => $record]);
 			?>
-			<h3 class="text-red">@TODO: Current RI Distribution Table</h3>
 		</div>
 		<div class="col-sm-6 col-md-5 no-padding-l-col-sm no-padding-l-col-md">
 			<?php
