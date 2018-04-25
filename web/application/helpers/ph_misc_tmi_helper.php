@@ -449,6 +449,22 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 		$CI =& get_instance();
 
 		/**
+		 * !!! NOTE @TODO !!!
+		 *
+		 * Manual Endorsement should be done on
+		 * 	- Premium Upgrade
+		 * 	- Premium Refund
+		 */
+		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+		{
+			return $CI->template->json([
+				'title' 	=> 'UNDER CONSTRUCTION!',
+				'status' 	=> 'error',
+				'message' 	=> 'We need to do it manually.'
+			], 400);
+		}
+
+		/**
 		 * Form Submitted?
 		 */
 		$return_data = [];
@@ -510,7 +526,6 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 					$RATE 	= _OBJ_MISC_TMI_tariff_rate( $tariff_record, $object_attributes->plan_type, $policy_duration, $age );
 
 
-
 					/**
 					 * Direct Discount or Agent Commission?, Pool Premium
 					 * --------------------------------------------------
@@ -534,27 +549,28 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 					}
 
 
-
 					/**
 					 * Compute VAT
 					 */
-					$taxable_amount = $PREMIUM_TOTAL + $post_data['amt_stamp_duty'];
+					$taxable_amount = $PREMIUM_TOTAL + $POOL_PREMIUM + $post_data['amt_stamp_duty'];
 					$CI->load->helper('account');
 					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
 
 					/**
 					 * Prepare Transactional Data
+					 *
 					 */
 					$txn_data = [
-						'amt_total_premium' 	=> $PREMIUM_TOTAL,
+						'gross_amt_sum_insured' => $policy_object->amt_sum_insured,
+						'net_amt_sum_insured' 	=> $policy_object->amt_sum_insured,
+						'amt_basic_premium' 	=> $PREMIUM_TOTAL,
 						'amt_pool_premium' 		=> $POOL_PREMIUM,
 						'amt_commissionable'	=> $commissionable_premium,
 						'amt_agent_commission'  => $agent_commission,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
-						'txn_details' 			=> $post_data['txn_details'],
-						'remarks' 				=> $post_data['remarks']
+						'txn_date' 				=> date('Y-m-d'),
 					];
 
 
@@ -572,14 +588,6 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 					 */
 					$txn_data['cost_calculation_table'] = NULL;
 					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
-
-
-					/**
-					 * @TODO
-					 *
-					 * 1. Build RI Distribution Data For This Policy
-					 * 2. RI Approval Constraint for this Policy
-					 */
 
 				} catch (Exception $e){
 

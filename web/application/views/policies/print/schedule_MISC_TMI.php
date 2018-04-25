@@ -6,7 +6,6 @@ $this->load->helper('ph_misc_tmi');
 
 $object_attributes      = json_decode($record->object_attributes);
 $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
-
 ?>
 
 <!DOCTYPE html>
