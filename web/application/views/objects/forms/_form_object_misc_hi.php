@@ -21,7 +21,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     'form_record'   => $record
                 ]);
                 ?>
-                <p class="help-block">Please note that the excel file must have the following format:</p>
+                <hr>
+                <h4 class="text-red">Please note that the excel file must have the following format:</h4>
                 <table class="table table-condensed table-bordered text-danger">
                     <thead>
                         <?php
@@ -41,7 +42,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </tr>
                     </tbody>
                 </table>
-                <p class="text-info"><strong>NOTE:</strong> If you have uploaded item list, please do not fill the <strong>Item Details. It will be overwritten by the excel data.</strong> section below.</p>
                 <div class="alert alert-danger">
                     <p>The excel file must have three sheets namely:</p>
                     <ul>
@@ -57,6 +57,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </ul>
                     <p>Please note that each excel sheet have the <strong>EXACTLY SAME SHEET NAME</strong> and <strong>SAME FORMAT</strong></p>
                 </div>
+            </div>
+            <div class="box-footer">
+                <h5><a href="<?php echo site_url('public/samples/tmi-sample.xlsx') ?>" target="_blank"> <i class="fa fa-download"></i> Download Sample File</a></h5>
             </div>
         </div>
     </div>
