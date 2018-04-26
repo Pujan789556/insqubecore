@@ -438,12 +438,12 @@ class Ac_invoice_model extends MY_Model
             $this->_row_select();
 
             // Policy Related JOIN
-             $this->db->where('REL.policy_id', $policy_id)
-                        ->where('I.flag_complete', IQB_FLAG_ON)
-                        ->where('V.flag_complete', IQB_FLAG_ON)
-                        ->order_by('I.id', 'DESC')
-                        ->get()
-                        ->result();
+            return $this->db->where('REL.policy_id', $policy_id)
+                            ->where('I.flag_complete', IQB_FLAG_ON)
+                            ->where('V.flag_complete', IQB_FLAG_ON)
+                            ->order_by('I.id', 'DESC')
+                            ->get()
+                            ->result();
         }
 
 

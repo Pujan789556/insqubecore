@@ -390,12 +390,12 @@ class Ac_credit_note_model extends MY_Model
 
             // Policy Related JOIN
             return $this->db->select('REL.policy_id, REL.ref, REL.ref_id')
-                        ->where('REL.policy_id', $policy_id)
-                        ->where('CN.flag_complete', IQB_FLAG_ON)
-                        ->where('V.flag_complete', IQB_FLAG_ON)
-                        ->order_by('CN.id', 'DESC')
-                        ->get()
-                        ->result();
+                            ->where('REL.policy_id', $policy_id)
+                            ->where('CN.flag_complete', IQB_FLAG_ON)
+                            ->where('V.flag_complete', IQB_FLAG_ON)
+                            ->order_by('CN.id', 'DESC')
+                            ->get()
+                            ->result();
         }
 
 
