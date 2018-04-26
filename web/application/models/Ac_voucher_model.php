@@ -800,11 +800,9 @@ class Ac_voucher_model extends MY_Model
             $this->_row_select();
 
             // Policy Related JOIN
-            return $this->db->select('RPV.flag_invoiced, RPV.policy_installment_id, ENDRSMNT.policy_id')
-                        ->join('rel_policy_installment_voucher RPV', 'RPV.voucher_id = V.id')
-                        ->join('dt_policy_installments PTI', 'RPV.policy_installment_id = PTI.id')
-                        ->join('dt_endorsements ENDRSMNT', 'PTI.endorsement_id = ENDRSMNT.id')
-                        ->where('ENDRSMNT.policy_id', $policy_id)
+            return $this->db->select('REL.policy_id, REL.ref, REL.ref_id, REL.flag_invoiced')
+                        ->join('rel_policy__voucher REL', 'REL.voucher_id = V.id')
+                        ->where('REL.policy_id', $policy_id)
                         ->where('V.flag_complete', IQB_FLAG_ON)
                         ->order_by('V.id', 'DESC')
                         ->get()
@@ -813,61 +811,46 @@ class Ac_voucher_model extends MY_Model
 
     // --------------------------------------------------------------------
 
-    public function get($id)
+    public function get($id, $policy_relation = FALSE)
     {
-        return $this->db->select(
-                        // Voucher Table
-                        'V.*, ' .
+        $select =   // Voucher Table
+                    'V.*, ' .
 
-                        // Voucher Type Table
-                        'VT.name AS voucher_type_name, ' .
+                    // Voucher Type Table
+                    'VT.name AS voucher_type_name, ' .
 
-                        // Branch Table
-                        'B.name AS branch_name, ' .
+                    // Branch Table
+                    'B.name AS branch_name, ' .
 
-                        // Fiscal Year Table
-                        'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
-                    )
+                    // Fiscal Year Table
+                    'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np';
+
+        /**
+         * Add Policy Relation as well?
+         */
+        if( $policy_relation )
+        {
+            $select .= ', REL.policy_id, REL.ref, REL.ref_id, REL.flag_invoiced';
+        }
+
+        $this->db->select($select)
                 ->from($this->table_name . ' AS V')
                 ->join('ac_voucher_types VT', 'VT.id = V.voucher_type_id')
                 ->join('master_branches B', 'B.id = V.branch_id')
-                ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id')
-                ->where('V.id', $id)
-                ->get()->row();
-    }
+                ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id');
 
-    // --------------------------------------------------------------------
 
-    public function get_voucher_by_policy_installment($policy_installment_id, $voucher_id)
-    {
-        return $this->db->select(
+        /**
+         * Add Policy Relation as well?
+         */
+        if( $policy_relation )
+        {
+            $this->db->join('rel_policy__voucher REL', 'V.id = REL.voucher_id');
+        }
 
-                // Relation Table
-                'REL.*, ' .
 
-                // Voucher Table
-                'V.id, V.voucher_type_id, V.branch_id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.flag_complete, V.voucher_date, ' .
-
-                // Voucher Type Table
-                'VT.name AS voucher_type_name, ' .
-
-                // Branch Table
-                'B.name AS branch_name, ' .
-
-                // Fiscal Year Table
-                'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
-            )
-            ->from($this->table_name . ' AS V')
-            ->join('rel_policy_installment_voucher REL', 'V.id = REL.voucher_id')
-            ->join('ac_voucher_types VT', 'VT.id = V.voucher_type_id')
-            ->join('master_branches B', 'B.id = V.branch_id')
-            ->join('master_fiscal_yrs FY', 'FY.id = V.fiscal_yr_id')
-            ->where([
-                'REL.policy_installment_id' => $policy_installment_id,
-                'REL.voucher_id'    => $voucher_id,
-                'V.id'              => $voucher_id,
-                'V.flag_complete'   => IQB_FLAG_ON
-            ])->get()->row();
+        return $this->db->where('V.id', $id)
+                        ->get()->row();
     }
 
 	// --------------------------------------------------------------------

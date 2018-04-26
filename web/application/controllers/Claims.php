@@ -1095,7 +1095,7 @@ class Claims extends MY_Controller
 		 * Let's Settle the Claim
 		 */
 		$this->load->model('ac_voucher_model');
-		$this->load->model('rel_claim_voucher_model');
+		$this->load->model('rel_policy_voucher_model');
 		$done 		= FALSE;
 		$voucher_id = NULL;
 
@@ -1159,10 +1159,13 @@ class Claims extends MY_Controller
 		             * Task 2: Update Claim-Voucher Relation Data
 		             */
 					$relation_data = [
-						'claim_id' 		=> $record->id,
-						'voucher_id' 	=> $voucher_id
+						'policy_id' 	=> $record->policy_id,
+						'voucher_id' 	=> $voucher_id,
+						'ref' 			=> IQB_REL_POLICY_VOUCHER_REF_CLM,
+						'ref_id' 		=> $record->id,
+						'flag_invoiced' => IQB_FLAG_INVOICED__NOT_REQUIRED
 					];
-					$this->rel_claim_voucher_model->add($relation_data);
+					$this->rel_policy_voucher_model->add($relation_data);
 
 					/**
 					 * Task 3: Update Claim-RI Data and Status
@@ -1298,7 +1301,7 @@ class Claims extends MY_Controller
 		 * Let's Settle the Claim
 		 */
 		$this->load->model('ac_voucher_model');
-		$this->load->model('rel_claim_voucher_model');
+		$this->load->model('rel_policy_voucher_model');
 		$done 		= FALSE;
 		$voucher_id = NULL;
 
@@ -1362,10 +1365,13 @@ class Claims extends MY_Controller
 		             * Task 2: Update Claim-Voucher Relation Data
 		             */
 					$relation_data = [
-						'claim_id' 		=> $record->id,
-						'voucher_id' 	=> $voucher_id
+						'policy_id' 	=> $record->policy_id,
+						'voucher_id' 	=> $voucher_id,
+						'ref' 			=> IQB_REL_POLICY_VOUCHER_REF_CLM,
+						'ref_id' 		=> $record->id,
+						'flag_invoiced' => IQB_FLAG_INVOICED__NOT_REQUIRED
 					];
-					$this->rel_claim_voucher_model->add($relation_data);
+					$this->rel_policy_voucher_model->add($relation_data);
 
 					/**
 					 * Task 3: Update the Surveyor Voucher Flag

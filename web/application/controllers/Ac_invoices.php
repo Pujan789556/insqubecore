@@ -94,7 +94,6 @@ class Ac_invoices extends MY_Controller
 		$records 	= $records ? $records : [];
 		$total 		= count($records);
 
-
 		/**
 		 * Grab Next ID or Reset It
 		 */

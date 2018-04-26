@@ -135,7 +135,6 @@ define('IQB_FLAG_NO',     	'N');
 
 define('IQB_FLAG_OFF',				0);
 define('IQB_FLAG_ON',    			1);
-define('IQB_FLAG_NOT_REQUIRED',		2);
 
 define('IQB_FLAG_LOCKED',	1);
 define('IQB_FLAG_UNLOCKED',	0);
@@ -546,6 +545,29 @@ defined('IQB_AC_VOUCHER_TYPE_CRDN')    			OR define('IQB_AC_VOUCHER_TYPE_CRDN',	
 defined('IQB_AC_VOUCHER_TYPE_GINV')    			OR define('IQB_AC_VOUCHER_TYPE_GINV',	7);
 defined('IQB_AC_VOUCHER_TYPE_PUR')    			OR define('IQB_AC_VOUCHER_TYPE_PUR',	8);
 defined('IQB_AC_VOUCHER_TYPE_PURRTN')    		OR define('IQB_AC_VOUCHER_TYPE_PURRTN',	9);
+
+
+/*
+|--------------------------------------------------------------------------
+| POLICY-VOUCHER-RELATION REFERENCE CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_REL_POLICY_VOUCHER_REF_PI') OR define('IQB_REL_POLICY_VOUCHER_REF_PI',	'PI'); // Policy Installment
+defined('IQB_REL_POLICY_VOUCHER_REF_CLM') OR define('IQB_REL_POLICY_VOUCHER_REF_CLM',	'CLM'); // Claim
+defined('IQB_REL_POLICY_VOUCHER_REFERENCES')  OR define('IQB_REL_POLICY_VOUCHER_REFERENCES', 	[
+	IQB_REL_POLICY_VOUCHER_REF_PI 	=> 'Policy Installment',
+	IQB_REL_POLICY_VOUCHER_REF_CLM 	=> 'Claim'
+]);
+
+/*
+|--------------------------------------------------------------------------
+| POLICY-VOUCHER-RELATION INVOICE FLAG CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_FLAG_INVOICED__NO') 			OR define('IQB_FLAG_INVOICED__NO',	0); // Not Invoiced yet
+defined('IQB_FLAG_INVOICED__YES') 			OR define('IQB_FLAG_INVOICED__YES',	1); // Invoiced
+defined('IQB_FLAG_INVOICED__NOT_REQUIRED') 	OR define('IQB_FLAG_INVOICED__NOT_REQUIRED',	2); // NOT Required
+
 
 
 

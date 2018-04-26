@@ -11,17 +11,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo anchor('ac_invoices/details/'.$record->id, $record->invoice_code, ['target' => '_blank']);?></td>
 	<td>
 		<?php
-		$reference = [];
-		if(isset($record->policy_installment_id))
-		{
-			$reference[] = "Installment ID: " . $record->policy_installment_id;
-		}
-		if(isset($record->voucher_id))
-		{
-			$reference[] = "Voucher ID: " . $record->voucher_id;
-		}
-
-		echo implode('<br/>', $reference);
+		echo IQB_REL_POLICY_VOUCHER_REFERENCES[$record->ref] , ' ID: ' , $record->ref_id,
+			 '<br/>',
+			 "Voucher ID: " , $record->voucher_id;
 		?>
 	</td>
 	<td><?php echo $record->branch_name;?></td>
@@ -65,7 +57,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						&&
 
 					// Must have Endorsement ID
-					isset($record->policy_installment_id) && (int)$record->policy_installment_id !== IQB_FLAG_OFF
+					// isset($record->policy_installment_id) && (int)$record->policy_installment_id !== IQB_FLAG_OFF
+
+					// Must have Policy Installment ID
+					isset($record->ref) && $record->ref === IQB_REL_POLICY_VOUCHER_REF_PI && (int)$record->ref_id !== IQB_FLAG_OFF
 
 						&&
 
@@ -81,7 +76,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				            data-form="#_form-payment"
 				            data-box-size="large"
 				            data-title='<i class="fa fa-pencil-square-o"></i> Make a Payment'
-				            data-url="<?php echo site_url('policy_installments/payment/' . $record->policy_installment_id  . '/' . $record->id );?>"
+				            data-url="<?php echo site_url('policy_installments/payment/' . $record->ref_id  . '/' . $record->id );?>"
 				        ><i class="fa fa-list-alt"></i> Make Payment</a>
 			        </li><li class="divider"></li>
 				<?php endif;?>

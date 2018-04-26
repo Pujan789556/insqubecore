@@ -127,12 +127,12 @@ if ( ! function_exists('is_invoicable_policy_voucher'))
 				&&
 
 			// Must not Be Invoiced Yet
-			isset($record->flag_invoiced) && (int)$record->flag_invoiced === IQB_FLAG_OFF
+			isset($record->flag_invoiced) && (int)$record->flag_invoiced === IQB_FLAG_INVOICED__NO
 
 				&&
 
 			// Must have Policy Installment ID
-			isset($record->policy_installment_id) && (int)$record->policy_installment_id !== IQB_FLAG_OFF
+			isset($record->ref) && $record->ref === IQB_REL_POLICY_VOUCHER_REF_PI && (int)$record->ref_id !== IQB_FLAG_OFF
 
 				&&
 
@@ -191,13 +191,12 @@ if ( ! function_exists('is_creditable_policy_voucher'))
 				&&
 
 			// Must not Be Invoiced Yet
-			isset($record->flag_invoiced) && (int)$record->flag_invoiced === IQB_FLAG_OFF
+			isset($record->flag_invoiced) && (int)$record->flag_invoiced === IQB_FLAG_INVOICED__NO
 
 				&&
 
 			// Must have Policy Installment ID
-			isset($record->policy_installment_id) && (int)$record->policy_installment_id !== IQB_FLAG_OFF
-
+			isset($record->ref) && $record->ref === IQB_REL_POLICY_VOUCHER_REF_PI && (int)$record->ref_id !== IQB_FLAG_OFF
 				&&
 
 			// Has Permission

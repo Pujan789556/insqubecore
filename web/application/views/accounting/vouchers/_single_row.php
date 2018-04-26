@@ -11,9 +11,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo anchor('ac_vouchers/details/'.$record->id, $record->voucher_code, ['target' => '_blank']);?></td>
 	<td>
 		<?php
-		if(isset($record->policy_installment_id))
+		if(isset($record->ref))
 		{
-			echo "Installment ID: ", $record->policy_installment_id;
+			echo IQB_REL_POLICY_VOUCHER_REFERENCES[$record->ref], ' (ID: ', $record->ref_id, ')';
 		}
 		?>
 	</td>
@@ -63,7 +63,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	            data-confirm="true"
 	            class="btn btn-sm btn-success btn-round trg-dialog-action"
 	            data-message="Are you sure you want to Genrate Invoice for this policy?<br/>This will automatically generate INVOICE for this Transaction."
-	            data-url="<?php echo site_url('policy_installments/invoice/' . $record->policy_installment_id  . '/' . $record->id );?>"
+	            data-url="<?php echo site_url('policy_installments/invoice/' . $record->ref_id  . '/' . $record->id );?>"
 	        ><i class="fa fa-list-alt"></i> Invoice</a>
 		<?php endif;?>
 
@@ -78,7 +78,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	            data-confirm="true"
 	            class="btn btn-sm btn-success btn-round trg-dialog-action"
 	            data-message="Are you sure you want to Genrate Credit Note for this policy?<br/>This will automatically generate Credit Note for this Transaction."
-	            data-url="<?php echo site_url('policy_installments/credit_note/' . $record->policy_installment_id  . '/' . $record->id );?>"
+	            data-url="<?php echo site_url('policy_installments/credit_note/' . $record->ref_id  . '/' . $record->id );?>"
 	        ><i class="fa fa-list-alt"></i> Credit Note</a>
 		<?php endif;?>
 

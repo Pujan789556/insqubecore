@@ -1,13 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Rel_policy_installment_voucher_model extends MY_Model
+class Rel_policy_voucher_model extends MY_Model
 {
-    protected $table_name   = 'rel_policy_installment_voucher';
+    protected $table_name   = 'rel_policy__voucher';
     protected $set_created  = FALSE;
     protected $set_modified = FALSE;
     protected $log_user     = FALSE;
-    protected $skip_validation = TRUE;
+    protected $skip_validation      = TRUE;
     protected $protected_attributes = [];
 
     protected $before_insert = [];
@@ -15,8 +15,7 @@ class Rel_policy_installment_voucher_model extends MY_Model
     protected $after_update  = [];
     protected $after_delete  = [];
 
-    protected $fields = ['policy_installment_id', 'voucher_id', 'flag_invoiced'];
-
+    protected $fields = ['policy_id', 'voucher_id', 'ref', 'ref_id', 'flag_invoiced'];
     protected $validation_rules = [];
 
 
@@ -57,7 +56,7 @@ class Rel_policy_installment_voucher_model extends MY_Model
         $done = $this->db->insert($this->table_name, $data);
         if( !$done )
         {
-            throw new Exception("Exception [Model: Rel_policy_installment_voucher_model][Method: add()]: Could not insert record.");
+            throw new Exception("Exception [Model: Rel_policy_voucher_model][Method: add()]: Could not insert record.");
         }
 
         // return result/status
@@ -84,15 +83,19 @@ class Rel_policy_installment_voucher_model extends MY_Model
     /**
      * Check if Voucher Exists for Given Transaction ID
      *
-     * @param integer $policy_installment_id
+     * @param array $where  [
+     *                          'REL.policy_id' => $policy_id,
+     *                          'REL.ref'       => IQB_REL_POLICY_VOUCHER_REF_PI | IQB_REL_POLICY_VOUCHER_REF_CLM,
+     *                          'REL.ref_id'    => $ref_id
+     *                      ]
      * @return integer
      */
-    public function voucher_exists($policy_installment_id)
+    public function voucher_exists($where)
     {
         return $this->db
                         ->from($this->table_name . ' AS REL')
                         ->join('ac_vouchers V', 'V.id = REL.voucher_id')
-                        ->where('REL.policy_installment_id', $policy_installment_id)
+                        ->where($where)
                         ->where('V.flag_complete', IQB_FLAG_ON)
                         ->count_all_results();
     }

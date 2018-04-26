@@ -387,12 +387,17 @@ class Ac_invoice_model extends MY_Model
                         'B.name AS branch_name, ' .
 
                         // Fiscal Year Table
-                        'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
+                        'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, ' .
+
+                        // Policy Voucher Relation Data
+                        'REL.policy_id, REL.ref, REL.ref_id'
                     )
                 ->from($this->table_name . ' AS I')
                 ->join('ac_receipts RCPT', 'I.id = RCPT.invoice_id', 'left')
                 ->join('master_branches B', 'B.id = I.branch_id')
-                ->join('master_fiscal_yrs FY', 'FY.id = I.fiscal_yr_id');
+                ->join('master_fiscal_yrs FY', 'FY.id = I.fiscal_yr_id')
+                ->join('ac_vouchers V', 'V.id = I.voucher_id')
+                ->join('rel_policy__voucher REL', 'REL.voucher_id = I.voucher_id');
 
         /**
          * Apply User Scope
@@ -433,12 +438,7 @@ class Ac_invoice_model extends MY_Model
             $this->_row_select();
 
             // Policy Related JOIN
-            return $this->db->select('REL.policy_installment_id, ENDRSMNT.policy_id')
-                        ->join('ac_vouchers V', 'V.id = I.voucher_id')
-                        ->join('rel_policy_installment_voucher REL', 'REL.voucher_id = I.voucher_id')
-                        ->join('dt_policy_installments PTI', 'REL.policy_installment_id = PTI.id')
-                        ->join('dt_endorsements ENDRSMNT', 'PTI.endorsement_id = ENDRSMNT.id')
-                        ->where('ENDRSMNT.policy_id', $policy_id)
+            return $this->where('REL.policy_id', $policy_id)
                         ->where('I.flag_complete', IQB_FLAG_ON)
                         ->where('V.flag_complete', IQB_FLAG_ON)
                         ->order_by('I.id', 'DESC')
@@ -460,8 +460,8 @@ class Ac_invoice_model extends MY_Model
                             // Branch Contact
                             'B.contacts as branch_contact, ' .
 
-                            // Endorsement ID, Policy ID
-                            'PTI.endorsement_id, ENDRSMNT.policy_id, ' .
+                            // Policy Installment ID, Endorsement ID
+                            'PTI.id as policy_installment_id, PTI.endorsement_id, ' .
 
                             // Policy Code
                             'POLICY.code AS policy_code, ' .
@@ -469,11 +469,8 @@ class Ac_invoice_model extends MY_Model
                             // Customer Details
                             'CST.full_name AS customer_full_name, CST.contact as customer_contact'
                         )
-                    ->join('ac_vouchers V', 'V.id = I.voucher_id')
-                    ->join('rel_policy_installment_voucher REL', 'REL.voucher_id = I.voucher_id')
-                    ->join('dt_policy_installments PTI', 'REL.policy_installment_id = PTI.id')
-                    ->join('dt_endorsements ENDRSMNT', 'PTI.endorsement_id = ENDRSMNT.id')
-                    ->join('dt_policies POLICY', 'POLICY.id = ENDRSMNT.policy_id')
+                    ->join('dt_policies POLICY', 'POLICY.id = REL.policy_id')
+                    ->join('dt_policy_installments PTI', "REL.ref = '" . IQB_REL_POLICY_VOUCHER_REF_PI . "' AND REL.ref_id = PTI.id")
                     ->join('dt_customers CST', 'CST.id = I.customer_id');
 
         /**

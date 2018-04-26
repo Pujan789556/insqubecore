@@ -240,12 +240,17 @@ class Policy_installments extends MY_Controller
 		 * Load voucher models
 		 */
 		$this->load->model('ac_voucher_model');
-		$this->load->model('rel_policy_installment_voucher_model');
+		$this->load->model('rel_policy_voucher_model');
 
 		/**
 		 * Check if Voucher already generated for this Installment
 		 */
-		if( $this->rel_policy_installment_voucher_model->voucher_exists($installment_record->id))
+		$where = [
+			'REL.policy_id' => $installment_record->policy_id,
+			'REL.ref' 		=> IQB_REL_POLICY_VOUCHER_REF_PI,
+			'REL.ref_id' 	=> $installment_record->id
+		];
+		if( $this->rel_policy_voucher_model->voucher_exists($where))
 		{
 			return $this->template->json([
 				'title' 	=> 'OOPS!',
@@ -398,10 +403,13 @@ class Policy_installments extends MY_Controller
 				try {
 
 					$relation_data = [
-						'policy_installment_id' => $installment_record->id,
-						'voucher_id' 			=> $voucher_id
+						'policy_id' 	=> $installment_record->policy_id,
+						'voucher_id' 	=> $voucher_id,
+						'ref' 			=> IQB_REL_POLICY_VOUCHER_REF_PI,
+						'ref_id' 		=> $installment_record->id,
+						'flag_invoiced' => IQB_FLAG_INVOICED__NO
 					];
-					$this->rel_policy_installment_voucher_model->add($relation_data);
+					$this->rel_policy_voucher_model->add($relation_data);
 
 				} catch (Exception $e) {
 
@@ -1261,9 +1269,14 @@ class Policy_installments extends MY_Controller
 		 * Get Voucher Record By Policy Installment Relation
 		 */
 		$this->load->model('ac_voucher_model');
-		$voucher_record = $this->ac_voucher_model->get_voucher_by_policy_installment($installment_record->id, $voucher_id);
-		if(!$voucher_record)
-		{
+		$voucher_record = $this->ac_voucher_model->get($voucher_id, TRUE);
+		if(
+			!$voucher_record
+				||
+			$voucher_record->ref !== IQB_REL_POLICY_VOUCHER_REF_PI
+				||
+			$voucher_record->ref_id != $installment_record->id
+		){
 			return $this->template->json([
 				'title' 	=> 'NOT FOUND!',
 				'status' 	=> 'error',
@@ -1306,7 +1319,7 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Record Status Authorized to Generate Voucher?
 		 */
-		if($installment_record->status !== IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED || $voucher_record->flag_invoiced != IQB_FLAG_OFF )
+		if($installment_record->status !== IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED || $voucher_record->flag_invoiced != IQB_FLAG_INVOICED__NO )
 		{
 			return $this->template->json([
 				'title' 	=> 'OOPS!',
@@ -1423,12 +1436,11 @@ class Policy_installments extends MY_Controller
                  */
                 if( !$flag_exception )
 				{
-					$this->load->model('rel_policy_installment_voucher_model');
+					$this->load->model('rel_policy_voucher_model');
 					$rel_base_where = [
-						'policy_installment_id' => $installment_record->id,
-						'voucher_id' 			=> $voucher_id
+						'voucher_id' 	=> $voucher_id,
 					];
-	                $this->rel_policy_installment_voucher_model->flag_invoiced($rel_base_where, IQB_FLAG_ON);
+	                $this->rel_policy_voucher_model->flag_invoiced($rel_base_where, IQB_FLAG_INVOICED__YES);
 
 	            	// Clear Voucher Cache for This Policy
 	            	$cache_var = 'ac_voucher_list_by_policy_' . $policy_record->id;
@@ -1507,7 +1519,7 @@ class Policy_installments extends MY_Controller
 
 		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
 
-		$voucher_record->flag_invoiced = IQB_FLAG_ON;
+		$voucher_record->flag_invoiced = IQB_FLAG_INVOICED__YES;
 		$html_voucher_row 	= $this->load->view('accounting/vouchers/_single_row', ['record' => $voucher_record], TRUE);
 
 		$ajax_data = [
@@ -1683,7 +1695,11 @@ class Policy_installments extends MY_Controller
 		$installment_record = $this->policy_installment_model->get( $id );
 		if(!$installment_record)
 		{
-			$this->template->render_404();
+			return $this->template->json([
+				'title' 	=> 'OOPS!',
+				'status' 	=> 'error',
+				'message' 	=> 'No Installment/Refund Record Found.'
+			], 404);
 		}
 
 		/**
@@ -1705,9 +1721,15 @@ class Policy_installments extends MY_Controller
 		 * Get Voucher Record By Policy Installment Relation
 		 */
 		$this->load->model('ac_voucher_model');
-		$voucher_record = $this->ac_voucher_model->get_voucher_by_policy_installment($installment_record->id, $voucher_id);
-		if(!$voucher_record)
-		{
+		$voucher_record = $this->ac_voucher_model->get($voucher_id, TRUE);
+		if(
+			!$voucher_record
+				||
+			$voucher_record->ref !== IQB_REL_POLICY_VOUCHER_REF_PI
+				||
+			$voucher_record->ref_id != $installment_record->id
+		){
+
 			return $this->template->json([
 				'title' 	=> 'NOT FOUND!',
 				'status' 	=> 'error',
@@ -1750,7 +1772,7 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Record Status Authorized to Generate Voucher?
 		 */
-		if($installment_record->status !== IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED || $voucher_record->flag_invoiced != IQB_FLAG_OFF )
+		if($installment_record->status !== IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED || $voucher_record->flag_invoiced != IQB_FLAG_INVOICED__NO )
 		{
 			return $this->template->json([
 			'title' 	=> 'Unauthorized Action!',
@@ -1902,12 +1924,11 @@ class Policy_installments extends MY_Controller
                  */
                 if( !$flag_exception )
 				{
-					$this->load->model('rel_policy_installment_voucher_model');
+					$this->load->model('rel_policy_voucher_model');
 					$rel_base_where = [
-						'policy_installment_id' => $installment_record->id,
-						'voucher_id' 			=> $voucher_id
+						'voucher_id' 	=> $voucher_id,
 					];
-	                $this->rel_policy_installment_voucher_model->flag_invoiced($rel_base_where, IQB_FLAG_ON);
+	                $this->rel_policy_voucher_model->flag_invoiced($rel_base_where, IQB_FLAG_INVOICED__YES);
 
 	            	// Clear Voucher Cache for This Policy
 	            	$cache_var = 'ac_voucher_list_by_policy_' . $policy_record->id;
@@ -1985,7 +2006,7 @@ class Policy_installments extends MY_Controller
 
 		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
 
-		$voucher_record->flag_invoiced = IQB_FLAG_ON;
+		$voucher_record->flag_invoiced = IQB_FLAG_INVOICED__YES;
 		$html_voucher_row 	= $this->load->view('accounting/vouchers/_single_row', ['record' => $voucher_record], TRUE);
 
 		$ajax_data = [
@@ -2106,7 +2127,7 @@ class Policy_installments extends MY_Controller
          * Load voucher models
          */
         $this->load->model('ac_voucher_model');
-        $this->load->model('rel_policy_installment_voucher_model');
+        $this->load->model('rel_policy_voucher_model');
 
         // --------------------------------------------------------------------
 
@@ -2316,11 +2337,13 @@ class Policy_installments extends MY_Controller
                 try {
 
                     $relation_data = [
-                        'policy_installment_id' => $installment_record->id,
-                        'voucher_id'    		=> $voucher_id,
-                        'flag_invoiced' 		=> IQB_FLAG_NOT_REQUIRED
-                    ];
-                    $this->rel_policy_installment_voucher_model->add($relation_data);
+						'policy_id' 	=> $installment_record->policy_id,
+						'voucher_id' 	=> $voucher_id,
+						'ref' 			=> IQB_REL_POLICY_VOUCHER_REF_PI,
+						'ref_id' 		=> $installment_record->id,
+						'flag_invoiced' => IQB_FLAG_INVOICED__NOT_REQUIRED
+					];
+                    $this->rel_policy_voucher_model->add($relation_data);
 
                 } catch (Exception $e) {
 
@@ -2665,7 +2688,7 @@ class Policy_installments extends MY_Controller
          * Load voucher models
          */
         $this->load->model('ac_voucher_model');
-        $this->load->model('rel_policy_installment_voucher_model');
+        $this->load->model('rel_policy_voucher_model');
 
         // --------------------------------------------------------------------
 
@@ -2767,11 +2790,13 @@ class Policy_installments extends MY_Controller
                 try {
 
                     $relation_data = [
-                        'policy_installment_id' => $installment_record->id,
-                        'voucher_id'    		=> $voucher_id,
-                        'flag_invoiced' 		=> IQB_FLAG_NOT_REQUIRED
-                    ];
-                    $this->rel_policy_installment_voucher_model->add($relation_data);
+						'policy_id' 	=> $installment_record->policy_id,
+						'voucher_id' 	=> $voucher_id,
+						'ref' 			=> IQB_REL_POLICY_VOUCHER_REF_PI,
+						'ref_id' 		=> $installment_record->id,
+						'flag_invoiced' => IQB_FLAG_INVOICED__NOT_REQUIRED
+					];
+                    $this->rel_policy_voucher_model->add($relation_data);
 
                 } catch (Exception $e) {
 
