@@ -47,60 +47,63 @@ class Endorsement_model extends MY_Model
 
 
         // Set validation rules
-        $this->validation_rules();
+        // $this->validation_rules();
     }
 
     // ----------------------------------------------------------------
 
-    /**
-     * Set Validation Rules
-     *
-     * @return void
-     */
-    public function validation_rules()
+    public function manual_premium_v_rules($txn_type)
     {
-        $txn_type_dropdown          = _ENDORSEMENT_type_eonly_dropdown(FALSE);
-        $computation_basis_dropdown = _ENDORSEMENT_computation_basis_dropdown(FALSE);
 
-
-        $txn_type = (int)$this->input->post('txn_type');
-        $cb_required = '';
-        if( in_array($txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND]) )
-        {
-            $cb_required = 'required|';
-        }
-
-
-        $this->validation_rules = [
-
-            /**
-             * Basic Information
-             */
-            'basic' => [
-                [
-                    'field' => 'txn_details',
-                    'label' => 'Transaction Details (सम्पुष्टि विवरण )',
-                    'rules' => 'trim|required|htmlspecialchars',
-                    '_id'       => '_txn_details',
-                    '_type'     => 'textarea',
-                    '_required' => true
-                ]
+        $rules = [
+            [
+                'field' => 'gross_amt_sum_insured',
+                'label' => 'Gross Sum Insured (Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                '_type'     => 'text',
+                '_default'  => 0,
+                '_required' => true
             ],
-
-
-            /**
-             * Computation Basis
-             */
-            'computation_basis' => [
-                [
-                    'field' => 'computation_basis',
-                    'label' => 'Computation Basis',
-                    'rules' => 'trim|'.$cb_required.'integer|exact_length[1]|in_list['. implode( ',', array_keys( $computation_basis_dropdown ) ) .']',
-                    '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + $computation_basis_dropdown,
-                    '_required' => true
-                ]
+            [
+                'field' => 'net_amt_sum_insured',
+                'label' => 'Net Sum Insured (Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                '_type'     => 'text',
+                '_default'  => 0,
+                '_required' => true
             ],
+            [
+                'field' => 'amt_basic_premium',
+                'label' => 'Basic Premium (Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                '_type'     => 'text',
+                '_default'  => 0,
+                '_required' => true
+            ],
+            [
+                'field' => 'amt_pool_premium',
+                'label' => 'Pool Premium (Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                '_type'     => 'text',
+                '_default'  => 0,
+                '_required' => true
+            ],
+            [
+                'field' => 'amt_agent_commission',
+                'label' => 'Agent Commission (Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                '_type'     => 'text',
+                '_default'  => 0,
+                '_required' => true
+            ],
+            [
+                'field' => 'amt_stamp_duty',
+                'label' => 'Stamp Duty (Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                '_type'     => 'text',
+                '_default'  => 0,
+                '_required' => true
+            ]
         ];
     }
 
