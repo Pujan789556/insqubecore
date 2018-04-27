@@ -34,6 +34,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </p>
             </div>
         </div>
+        <div class="form-group">
+            <label for="logo" class="col-sm-2 control-label">Surveyor's Resume / Profile / Bio-Data</label>
+            <div class="col-sm-10 col-md-6">
+                <input type="file" id="resume" name="resume">
+                <p class="help-block">Only PDF, DOC or DOCX files supported.</p>
+                <?php if(isset($record->resume)  && !empty($record->resume) ):?>
+                      <p><a href="<?php echo INSQUBE_MEDIA_URL . 'surveyors/' . $record->resume?>" target="_blank"><i class="fa fa-download"></i> Download Existing Document</a></p>
+                  <?php endif?>
+
+            </div>
+        </div>
         <?php
         /**
          * Load Form Components

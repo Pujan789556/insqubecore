@@ -145,9 +145,9 @@ class Surveyors extends MY_Controller
 				[
 	                'field' => 'filter_type',
 	                'label' => 'Surveyor Type',
-	                'rules' => 'trim|integer|exact_length[1]|in_list[1,2]',
+	                'rules' => 'trim|integer|exact_length[1]|in_list['. implode(',', array_keys(IQB_SURVEYOR_TYPES) ) .']',
 	                '_type'     => 'dropdown',
-	                '_data'     => [ '' => 'Select...', '1' => 'Individual', '2' => 'Company'],
+	                '_data'     => IQB_BLANK_SELECT + IQB_SURVEYOR_TYPES,
 	                '_required' => false
 	            ],
 	            [
@@ -360,8 +360,9 @@ class Surveyors extends MY_Controller
 		{
 			$done = FALSE;
 
-			// Extract Old Profile Picture if any
-			$picture = $record->picture ?? NULL;
+			// Old Documents (Picture | Resume)
+			$picture 	= $record->picture ?? NULL;
+			$resume 	= $record->resume ?? NULL;
 
 
 			/**
@@ -382,19 +383,39 @@ class Surveyors extends MY_Controller
 			if( $this->form_validation->run() === TRUE )
 			{
 				/**
-				 * Upload Image If any?
+				 * Upload Surveyor Image (If any)
 				 */
 				$upload_result 	= $this->_upload_profile_picture($picture);
 				$status 		= $upload_result['status'];
 				$message 		= $upload_result['message'];
 				$files 			= $upload_result['files'];
-				$picture = $status === 'success' ? $files[0] : $picture;
+				$picture 		= $status === 'success' ? $files[0] : $picture;
 
+
+				/**
+				 * Upload Surveyor Resume (If any)
+				 */
+				if( $status === 'success' || $status === 'no_file_selected')
+	            {
+					$upload_result 	= $this->_upload_resume($resume);
+					$status 		= $upload_result['status'];
+					$message 		= $upload_result['message'];
+					$files 			= $upload_result['files'];
+					$resume 		= $status === 'success' ? $files[0] : $resume;
+				}
+
+
+				/**
+				 * Save Data if Both Upload Success
+				 */
 	        	if( $status === 'success' || $status === 'no_file_selected')
 	            {
 
 	            	$data = $this->input->post();
-	            	$data['picture'] = $picture;
+
+
+	            	$data['picture'] 	= $picture;
+	            	$data['resume'] 	= $resume;
 
 	            	// Nullify checkbox if not set
 	            	$data['flag_vat_registered'] = $data['flag_vat_registered'] ?? NULL;
@@ -495,6 +516,35 @@ class Surveyors extends MY_Controller
 
 				// Delete Old file
 				'old_files' => $old_picture ? [$old_picture] : [],
+				'delete_old' => TRUE
+			];
+			return upload_insqube_media($options);
+		}
+
+	// --------------------------------------------------------------------
+
+
+		/**
+		 * Sub-function: Upload Surveyor's Resume
+		 *
+		 * @param string|null $old_resume
+		 * @return array
+		 */
+		private function _upload_resume( $old_resume = NULL )
+		{
+			$options = [
+				'config' => [
+					'encrypt_name' => TRUE,
+	                'upload_path' => self::$upload_path,
+	                'allowed_types' => 'doc|docx|pdf',
+	                'max_size' => '4098'
+				],
+				'form_field' => 'resume',
+
+				'create_thumb' => FALSE,
+
+				// Delete Old file
+				'old_files' => $old_resume ? [$old_resume] : [],
 				'delete_old' => TRUE
 			];
 			return upload_insqube_media($options);

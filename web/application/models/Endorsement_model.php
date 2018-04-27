@@ -52,9 +52,24 @@ class Endorsement_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Get Validation Rules of Manual Premium Computation for Endorsement
+     *
+     * Endorsement Types
+     *  - Premium Upgrade
+     *  - Premium Refund
+     *
+     * Portfolios
+     *  - FIRE - FIRE
+     *  - ENG - CAR
+     *  - ENG - EAR
+     *  - ENG - TMI
+     *
+     * @param int $txn_type
+     * @return array
+     */
     public function manual_premium_v_rules($txn_type)
     {
-
         $rules = [
             [
                 'field' => 'gross_amt_sum_insured',
@@ -105,6 +120,8 @@ class Endorsement_model extends MY_Model
                 '_required' => true
             ]
         ];
+
+        return $rules;
     }
 
     // ----------------------------------------------------------------

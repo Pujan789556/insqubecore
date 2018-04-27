@@ -11,6 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<th>ID</th>
 			<?php endif?>
 			<th>Name</th>
+			<th>Profile</th>
 			<th>Type</th>
 			<th>VAT Registered?</th>
 			<th>Active</th>

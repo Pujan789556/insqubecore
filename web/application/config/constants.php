@@ -183,6 +183,22 @@ define('IQB_COMPANY_ID_BEEMA_SAMITI',  1);
 
 /*
 |--------------------------------------------------------------------------
+| SURVEYOR TYPE CONSTANTS
+|--------------------------------------------------------------------------
+|
+*/
+define('IQB_SURVEYOR_TYPE_INDIVIDUAL',  1);
+define('IQB_SURVEYOR_TYPE_COMPANY',    	2);
+
+// SUB PORTFOLIO LIST
+define('IQB_SURVEYOR_TYPES',  [
+	IQB_SURVEYOR_TYPE_INDIVIDUAL 	=> 'Individual',
+	IQB_SURVEYOR_TYPE_COMPANY 		=> 'Company'
+]);
+
+
+/*
+|--------------------------------------------------------------------------
 | PARENT PORTFOLIO CONSTANTS
 |--------------------------------------------------------------------------
 |

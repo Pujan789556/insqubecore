@@ -19,48 +19,9 @@ class Surveyor_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'name', 'picture', 'type', 'flag_vat_registered', 'vat_no', 'active', 'contact', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'name', 'picture', 'resume', 'type', 'flag_vat_registered', 'vat_no', 'active', 'contact', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
-    protected $validation_rules = [
-        [
-            'field' => 'name',
-            'label' => 'Surveyor Name',
-            'rules' => 'trim|required|max_length[80]',
-            '_type'     => 'text',
-            '_required' => true
-        ],
-        [
-            'field' => 'type',
-            'label' => 'Surveyor Type',
-            'rules' => 'trim|required|integer|exact_length[1]|in_list[1,2]',
-            '_type'     => 'dropdown',
-            '_data'     => [ '' => 'Select...', '1' => 'Individual', '2' => 'Company'],
-            '_required' => true
-        ],
-        [
-            'field' => 'flag_vat_registered',
-            'label' => 'Vat Registered',
-            'rules' => 'trim|integer|exact_length[1]|in_list[1]',
-            '_type'           => 'checkbox',
-            '_checkbox_value' => '1',
-            '_required' => true
-        ],
-        [
-            'field' => 'vat_no',
-            'label' => 'VAT Number',
-            'rules' => 'trim|max_length[40]',
-            '_type'     => 'text',
-            '_required' => false
-        ],
-        [
-            'field' => 'active',
-            'label' => 'Is Active?',
-            'rules' => 'trim|required|integer|exact_length[1]',
-            '_type'     => 'dropdown',
-            '_data'     => [ '' => 'Select...', '1' => 'Active', '0' => 'Not Active'],
-            '_required' => true
-        ]
-    ];
+    protected $validation_rules = [];
 
 
     /**
@@ -79,8 +40,57 @@ class Surveyor_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+
+        // Load Validation Rules
+        $this->_v_rules();
     }
 
+
+    // ----------------------------------------------------------------
+
+    private function _v_rules()
+    {
+        $this->validation_rules = [
+            [
+                'field' => 'name',
+                'label' => 'Surveyor Name',
+                'rules' => 'trim|required|max_length[80]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            [
+                'field' => 'type',
+                'label' => 'Surveyor Type',
+                'rules' => 'trim|required|integer|exact_length[1]|in_list['. implode(',', array_keys(IQB_SURVEYOR_TYPES) ) .']',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_BLANK_SELECT + IQB_SURVEYOR_TYPES,
+                '_required' => true
+            ],
+            [
+                'field' => 'flag_vat_registered',
+                'label' => 'Vat Registered',
+                'rules' => 'trim|integer|exact_length[1]|in_list[1]',
+                '_type'           => 'checkbox',
+                '_checkbox_value' => '1',
+                '_required' => true
+            ],
+            [
+                'field' => 'vat_no',
+                'label' => 'VAT Number',
+                'rules' => 'trim|max_length[40]',
+                '_type'     => 'text',
+                '_required' => false
+            ],
+            [
+                'field' => 'active',
+                'label' => 'Is Active?',
+                'rules' => 'trim|required|integer|exact_length[1]',
+                '_type'     => 'dropdown',
+                '_data'     => [ '' => 'Select...', '1' => 'Active', '0' => 'Not Active'],
+                '_required' => true
+            ]
+        ];
+    }
 
     // ----------------------------------------------------------------
 
@@ -118,7 +128,7 @@ class Surveyor_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('S.id, S.name, S.type, S.flag_vat_registered, S.active')
+        $this->db->select('S.id, S.name, S.picture, S.resume, S.type, S.flag_vat_registered, S.active')
                  ->from($this->table_name . ' as S');
 
         if(!empty($params))

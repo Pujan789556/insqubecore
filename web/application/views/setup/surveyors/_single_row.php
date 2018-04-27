@@ -13,6 +13,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						title="View agent details.">
 						<?php echo $record->name;?></a>
 	</td>
+	<td>
+		<?php if(isset($record->resume)  && !empty($record->resume) ):?>
+          <a data-toggle="tooltip" title="Download Sureveyor's Resume/Bio-data/Profile" href="<?php echo INSQUBE_MEDIA_URL . 'surveyors/' . $record->resume?>" target="_blank"><i class="fa fa-file-pdf-o"></i></a>
+      	<?php else: ?>
+      		<i class="fa fa-minus text-muted" title="Not Available" data-toggle="tooltip"></i>
+      	<?php endif?>
+	</td>
 	<td><?php echo $record->type == '1' ? 'Individual' : 'Company';?></td>
 	<td>
 		<?php
@@ -22,7 +29,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		}
 		else
 		{
-			$flag_str = '<i class="fa fa-minus" title="No" data-toggle="tooltip"></i>';
+			$flag_str = '<i class="fa fa-minus text-muted" title="No" data-toggle="tooltip"></i>';
 		}
 		echo $flag_str;
 		?>
