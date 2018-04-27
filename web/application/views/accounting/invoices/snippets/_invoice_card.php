@@ -62,7 +62,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             foreach($rows as $row):?>
                                 <tr>
                                     <td><?php echo $row->description?></td>
-                                    <td class="text-right"><?php echo number_format($row->amount, 2, '.', '')?></td>
+                                    <td class="text-right"><?php echo number_format($row->amount, 2)?></td>
                                 </tr>
                             <?php
                                 $taxable_total_amount += $row->amount;
@@ -70,15 +70,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                                 <tr>
                                     <th class="text-right">Taxable Total Amount</th>
-                                    <th class="text-right"><?php echo number_format($taxable_total_amount, 2, '.', '')?></th>
+                                    <th class="text-right"><?php echo number_format($taxable_total_amount, 2)?></th>
                                 </tr>
                                 <tr>
                                     <th class="text-right"><?php echo $vat_row->description?></th>
-                                    <th class="text-right" class="text-right"><?php echo number_format($vat_row->amount, 2, '.', '')?></th>
+                                    <th class="text-right" class="text-right"><?php echo number_format($vat_row->amount, 2)?></th>
                                 </tr>
                                 <tr>
                                     <th class="text-right">Grand Total</th>
-                                    <th class="text-right"><?php echo number_format($record->amount, 2, '.', '')?></th>
+                                    <th class="text-right"><?php echo number_format($record->amount, 2)?></th>
                                 </tr>
                                 <tr>
                                     <td colspan="2">

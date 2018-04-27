@@ -86,7 +86,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <tfoot>
                 <tr>
                     <th class="text-right">Total(%)</th>
-                    <td id="__total_box" class="<?php echo $total_percentage == 100 ? 'text-green' : 'text-red';?>"><?php echo number_format($total_percentage, 2, '.', '');?></td>
+                    <td id="__total_box" class="<?php echo $total_percentage == 100 ? 'text-green' : 'text-red';?>"><?php echo number_format($total_percentage, 2);?></td>
                     <td>&nbsp;</td>
                 </tr>
             </tfoot>

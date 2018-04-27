@@ -15,7 +15,7 @@ $grand_total 	= $total_premium + $endorsement_record->amt_stamp_duty + $endorsem
 				<?php foreach($cost_calculation_table as $row):?>
 					<tr>
 						<th class="text-left"><?php echo $row->label ?></th>
-						<td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+						<td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
 					</tr>
 				<?php endforeach ?>
 				<tr>
@@ -23,19 +23,19 @@ $grand_total 	= $total_premium + $endorsement_record->amt_stamp_duty + $endorsem
 				        <table class="table no-margin table-bordered table-condensed">
 				            <tr>
 				                <td width="80%" class="text-right"><strong>बीमा शुल्क</strong></td>
-				                <td class="text-right"><strong><?php echo number_format($total_premium, 2, '.', '')?></strong></td>
+				                <td class="text-right"><strong><?php echo number_format($total_premium, 2)?></strong></td>
 				            </tr>
 				            <tr>
 				                <td class="text-right"><strong>टिकट दस्तुर</strong></td>
-				                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2, '.', '')?></strong></td>
+				                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2)?></strong></td>
 				            </tr>
 				            <tr>
 				                <td class="text-right"><strong>मु. अ. क. (VAT)</strong></td>
-				                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2, '.', '');?></strong></td>
+				                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2);?></strong></td>
 				            </tr>
 				            <tr>
 				                <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-				                <td class="text-right"><strong><?php echo number_format( $grand_total , 2, '.', '');?></strong></td>
+				                <td class="text-right"><strong><?php echo number_format( $grand_total , 2);?></strong></td>
 				            </tr>
 				        </table>
 				    </td>

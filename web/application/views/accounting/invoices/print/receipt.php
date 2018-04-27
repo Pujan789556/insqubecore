@@ -72,7 +72,7 @@
                 <p class="receipt-description">
                     Received with thanks from <strong class="border-b"><?php echo $invoice_record->customer_full_name?></strong>,
 
-                    a sum of rupees <strong class="border-b"><?php echo ucfirst( number_to_words( number_format($invoice_record->amount, 2, '.', '') ) );?> (<?php echo number_format($invoice_record->amount, 2, '.', '')?>)</strong>
+                    a sum of Nepalese Rupees <strong class="border-b"><?php echo number_format($invoice_record->amount, 2)?> (<?php echo ucfirst( number_to_words( number_format($invoice_record->amount, 2, '.', '') ) );?>)</strong>
 
                     in <strong class="border-b"> <?php echo IQB_AC_PAYMENT_RECEIPT_MODES[$record->received_in]?></strong>
                     <?php if($record->received_in_ref):?>
@@ -86,7 +86,7 @@
             </div>
             <div class="col-xs-12 table-responsive receipt-box margin-t-10">
                 <p class="receipt-description text-right">
-                    Adjustment Amount (Rs.): <strong><?php echo $record->adjustment_amount ? number_format($record->adjustment_amount, 2,'.', '') : 0.00;?></strong>
+                    Adjustment Amount (Rs.): <strong><?php echo $record->adjustment_amount ? number_format($record->adjustment_amount, 2) : 0.00;?></strong>
                 </p>
             </div>
             <!-- /.col -->

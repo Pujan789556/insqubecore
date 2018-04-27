@@ -72,7 +72,7 @@ else
                 <?php endforeach ?>
                 <tr>
                     <td class="text-bold">Total Sum Insured Amount(Rs.)</td>
-                    <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2, '.', '') ?></td>
+                    <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2) ?></td>
                 </tr>
             </table>
         </div>

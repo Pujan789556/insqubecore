@@ -12,6 +12,9 @@ if($cost_calculation_table)
     $property_table = $cost_calculation_table->property_table;
     $risk_table     = $cost_calculation_table->risk_table;
 }
+
+$total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
+$grand_total            = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
 ?>
 <table class="table no-margin table-bordered">
     <tbody>
@@ -30,12 +33,12 @@ if($cost_calculation_table)
                                <?php foreach($property_table as $dt): ?>
                                     <tr>
                                         <td><?php echo $dt[0] ?></td>
-                                        <td class="text-right"><?php echo number_format((float)$dt[2], 2, '.', '');?></td>
+                                        <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
                                     </tr>
                                 <?php endforeach ?>
                                 <tr>
                                   <td class="text-right"><strong>कुल</strong></td>
-                                  <td class="text-right"><strong><?php echo number_format((float)$endorsement_record->amt_total_premium, 2, '.', '')?></strong></td>
+                                  <td class="text-right"><strong><?php echo number_format((float)$total_premium, 2)?></strong></td>
                                 </tr>
                            </tbody>
                        </table>

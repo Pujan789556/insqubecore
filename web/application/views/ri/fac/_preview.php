@@ -12,11 +12,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <tbody>
             <tr>
                 <th>FAC SI (Rs.)</th>
-                <td class="text-right"><?php echo number_format($record->si_treaty_fac, 2, '.', '');?></td>
+                <td class="text-right"><?php echo number_format($record->si_treaty_fac, 2);?></td>
             </tr>
             <tr>
                 <th>FAC Premium (Rs.)</th>
-                <td class="text-right"><?php echo number_format($record->premium_treaty_fac, 2, '.', '');?></td>
+                <td class="text-right"><?php echo number_format($record->premium_treaty_fac, 2);?></td>
             </tr>
         </tbody>
     </table>
@@ -65,14 +65,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						</a>
 					</td>
 					<td class="text-right"><?php echo $distrib->fac_percent?></td>
-					<td class="text-right"><?php echo number_format($distrib->fac_si_amount, 2, '.', '');?></td>
-					<td class="text-right"><?php echo number_format($distrib->fac_premium_amount, 2, '.', '');?></td>
+					<td class="text-right"><?php echo number_format($distrib->fac_si_amount, 2);?></td>
+					<td class="text-right"><?php echo number_format($distrib->fac_premium_amount, 2);?></td>
 					<td class="text-right"><?php echo $distrib->fac_commission_percent?></td>
-					<td class="text-right"><?php echo number_format($distrib->fac_commission_amount, 3, '.', '');?></td>
+					<td class="text-right"><?php echo number_format($distrib->fac_commission_amount, 3);?></td>
 					<td class="text-right"><?php echo $distrib->fac_ri_tax_percent?></td>
-					<td class="text-right"><?php echo number_format($distrib->fac_ri_tax_amount, 3, '.', '');?></td>
+					<td class="text-right"><?php echo number_format($distrib->fac_ri_tax_amount, 3);?></td>
 					<td class="text-right"><?php echo $distrib->fac_ib_tax_percent?></td>
-					<td class="text-right"><?php echo number_format($distrib->fac_ib_tax_amount, 3, '.', '');?></td>
+					<td class="text-right"><?php echo number_format($distrib->fac_ib_tax_amount, 3);?></td>
 				</tr>
 			<?php endforeach?>
 
@@ -80,15 +80,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<tfoot>
 			<tr>
 				<th colspan="2" class="text-bold text-right">Total(%):</th>
-				<th class="text-right"><?php echo number_format($fac_percent_total, 2, '.', '');?></th>
-				<th class="text-right"><?php echo number_format($fac_si_amount_total, 2, '.', '');?></th>
-				<th class="text-right"><?php echo number_format($fac_premium_amount_total, 2, '.', '');?></th>
+				<th class="text-right"><?php echo number_format($fac_percent_total, 2);?></th>
+				<th class="text-right"><?php echo number_format($fac_si_amount_total, 2);?></th>
+				<th class="text-right"><?php echo number_format($fac_premium_amount_total, 2);?></th>
 				<th>&nbsp;</th>
-				<th class="text-right"><?php echo number_format($fac_commission_amount_total, 3, '.', '');?></th>
+				<th class="text-right"><?php echo number_format($fac_commission_amount_total, 3);?></th>
 				<th>&nbsp;</th>
-				<th class="text-right"><?php echo number_format($fac_ri_tax_amount_total, 3, '.', '');?></th>
+				<th class="text-right"><?php echo number_format($fac_ri_tax_amount_total, 3);?></th>
 				<th>&nbsp;</th>
-				<th class="text-right"><?php echo number_format($fac_ib_tax_amount_total, 3, '.', '');?></th>
+				<th class="text-right"><?php echo number_format($fac_ib_tax_amount_total, 3);?></th>
 			</tr>
 		</tfoot>
 	</table>

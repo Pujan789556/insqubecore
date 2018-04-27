@@ -88,7 +88,7 @@ else
         		<?php endforeach ?>
                 <tr>
                     <th>Sum Insured Amount (NRS)</th>
-                    <td class="text-right"><strong><?php echo number_format($record->amt_sum_insured, 2, '.', '') ?></strong></td>
+                    <td class="text-right"><strong><?php echo number_format($record->amt_sum_insured, 2) ?></strong></td>
                 </tr>
             </table>
         </div>

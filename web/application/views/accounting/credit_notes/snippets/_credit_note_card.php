@@ -60,20 +60,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             foreach($rows as $row):?>
                                 <tr>
                                     <td><?php echo $row->description?></td>
-                                    <td class="text-right"><?php echo number_format($row->amount, 2, '.', '')?></td>
+                                    <td class="text-right"><?php echo number_format($row->amount, 2)?></td>
                                 </tr>
                             <?php
                             endforeach;?>
                                 <tr>
                                     <th class="text-right">Grand Total</th>
-                                    <th class="text-right"><?php echo number_format($record->amount, 2, '.', '')?></th>
+                                    <th class="text-right"><?php echo number_format($record->amount, 2)?></th>
                                 </tr>
                                 <tr>
                                     <td colspan="2">
                                         Amount in Words:
                                         <strong>
                                             <?php
-                                            echo ucfirst( number_to_words( number_format( abs($record->amount), 2, '.', '') ) );
+                                            echo ucfirst( number_to_words( number_format( abs($record->amount), 2) ) );
                                             ?>
                                         </strong>
                                     </td>

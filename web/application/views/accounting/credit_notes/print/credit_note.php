@@ -86,20 +86,20 @@
                         foreach($rows as $row):?>
                             <tr>
                                 <td><?php echo $row->description?></td>
-                                <td align="right"><?php echo number_format($row->amount, 2, '.', '')?></td>
+                                <td align="right"><?php echo number_format($row->amount, 2)?></td>
                             </tr>
                         <?php
                         endforeach;?>
                             <tr>
                                 <td align="right" class="bold">Grand Total</td>
-                                <td align="right" class="bold"><?php echo number_format($record->amount, 2, '.', '')?></td>
+                                <td align="right" class="bold"><?php echo number_format($record->amount, 2)?></td>
                             </tr>
                             <tr>
                                 <td colspan="2">
                                     Amount in Words (Rs.):
                                     <strong>
                                         <?php
-                                        echo ucfirst( number_to_words( number_format(abs($record->amount), 2, '.', '') ) );
+                                        echo ucfirst( number_to_words( number_format(abs($record->amount), 2) ) );
                                         ?>
                                     </strong>
                                 </td>

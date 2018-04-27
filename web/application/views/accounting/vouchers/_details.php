@@ -69,7 +69,7 @@ $credit_total = 0;
                 					echo $row->party_name ? ' (' . ac_party_types_dropdown(false)[$row->party_type] . ')' : '';
                 					?>
                 				</td>
-                				<td class="text-right"><?php echo number_format($row->amount, 2, '.', '')?></td>
+                				<td class="text-right"><?php echo number_format($row->amount, 2)?></td>
                 				<td>&nbsp;</td>
                 			</tr>
             			<?php endforeach;?>
@@ -90,7 +90,7 @@ $credit_total = 0;
                 					?>
                 				</td>
                 				<td>&nbsp;</td>
-                				<td class="text-right"><?php echo number_format($row->amount, 2, '.', '')?></td>
+                				<td class="text-right"><?php echo number_format($row->amount, 2)?></td>
                 			</tr>
             			<?php endforeach;?>
                 	</tbody>
@@ -109,8 +109,8 @@ $credit_total = 0;
                 		<?php endif;?>
                 		<tr>
                 			<td colspan="3">&nbsp;</td>
-                			<td class="text-right"><?php echo number_format($debit_total, 2, '.', '');?></td>
-                			<td class="text-right"><?php echo number_format($credit_total, 2, '.', '');?></td>
+                			<td class="text-right"><?php echo number_format($debit_total, 2);?></td>
+                			<td class="text-right"><?php echo number_format($credit_total, 2);?></td>
                 		</tr>
                 	</tfoot>
                 </table>

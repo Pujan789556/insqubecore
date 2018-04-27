@@ -77,19 +77,19 @@ else
                                     $value  = (float) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 
                                     // format this to echo
-                                    $value = number_format($value, 2, '.', '');
+                                    $value = number_format($value, 2);
                                 }
                             ?>
 
                                 <td <?php echo $key == 'limit' ? 'class="text-right"' : '' ?>>
-                                    <?php echo $value?>
+                                    <?php echo $key == 'limit' ? number_format($value, 2) : $value;?>
                                 </td>
                             <?php endforeach ?>
                         </tr>
                     <?php endfor ?>
                     <tr>
                         <td class="text-bold">Total Sum Insured Amount(Rs.)</td>
-                        <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2, '.', '') ?></td>
+                        <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2) ?></td>
                         <td>&nbsp;</td>
                     </tr>
                 </tbody>

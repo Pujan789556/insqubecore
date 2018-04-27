@@ -115,7 +115,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
 
                             <tr>
                                 <td>
-                                    बीमांक रकम (रु): <?php echo number_format($total_premium, 2, '.', '')?>
+                                    बीमांक रकम (रु): <?php echo number_format($total_premium, 2)?>
                                 </td>
                             </tr>
                             <tr>

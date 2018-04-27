@@ -33,7 +33,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		endforeach?>
 		<tr>
 			<td colspan="2" class="text-bold text-right">Total(%):</td>
-			<td class="text-right"><?php echo number_format($total_percentage, 2, '.', '');?></td>
+			<td class="text-right"><?php echo number_format($total_percentage, 2);?></td>
 			<td>&nbsp;</td>
 		</tr>
 	</tbody>

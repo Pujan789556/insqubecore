@@ -89,7 +89,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                             </tr>
                             <tr>
                                 <td>
-                                    बिमांक रकम (रु): <strong><?php echo number_format( (float)$endorsement_record->net_amt_sum_insured, 2, '.', '');?></strong>
+                                    बिमांक रकम (रु): <strong><?php echo number_format( (float)$endorsement_record->net_amt_sum_insured, 2);?></strong>
                                 </td>
                             </tr>
                             <tr>

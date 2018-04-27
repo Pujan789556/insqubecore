@@ -41,7 +41,7 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                                         <?php echo  $sub_section->label ?? '&nbsp;';?>
                                     </td>
                                     <td align="right" width="120px" class="<?php echo $flag_section_total ? 'bold' : ''?>">
-                                        <?php echo number_format((float)$sub_section->amount, 2, '.', '') ?>
+                                        <?php echo number_format((float)$sub_section->amount, 2) ?>
                                     </td>
                                 </tr>
                             <?php endforeach?>
@@ -56,19 +56,19 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                     <table class="table" cellpadding="0" cellspacing="0">
                         <tr>
                             <td width="80%" align="right"><strong>जम्मा</strong></td>
-                            <td width="100px" align="right"><strong><?php echo number_format((float)$total_premium, 2, '.', '')?></strong></td>
+                            <td width="100px" align="right"><strong><?php echo number_format((float)$total_premium, 2)?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>टिकट दस्तुर</strong></td>
-                            <td align="right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2, '.', '');?></strong></td>
+                            <td align="right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2);?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>मु. अ. क. (VAT)</strong></td>
-                            <td align="right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2, '.', '');?></strong></td>
+                            <td align="right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2);?></strong></td>
                         </tr>
                         <tr>
                             <td align="right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                            <td align="right"><strong><?php echo number_format( (float)$grand_total , 2, '.', '');?></strong></td>
+                            <td align="right"><strong><?php echo number_format( (float)$grand_total , 2);?></strong></td>
                         </tr>
                     </table>
                 </td>

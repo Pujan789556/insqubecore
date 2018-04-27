@@ -343,24 +343,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <td><?php echo htmlspecialchars($single->title) ?></td>
                             <td><?php echo CLAIM__settlement_category_dropdown(FALSE)[$single->category] ?></td>
                             <td><?php echo CLAIM__settlement_subcategory_dropdown(FALSE)[$single->sub_category] ?></td>
-                            <td class="text-right"><?php echo number_format($single->claimed_amount, 2, '.', '') ?></td>
-                            <td class="text-right"><?php echo number_format($single->assessed_amount, 2, '.', '') ?></td>
-                            <td class="text-right"><?php echo number_format($single->recommended_amount, 2, '.', '') ?></td>
+                            <td class="text-right"><?php echo number_format($single->claimed_amount, 2) ?></td>
+                            <td class="text-right"><?php echo number_format($single->assessed_amount, 2) ?></td>
+                            <td class="text-right"><?php echo number_format($single->recommended_amount, 2) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
                 <tfoot>
                     <tr>
                         <th colspan="6">Claim Settlement Amount (Rs.)</th>
-                        <th class="text-right"><?php echo number_format($record->settlement_claim_amount, 2, '.', '') ?></th>
+                        <th class="text-right"><?php echo number_format($record->settlement_claim_amount, 2) ?></th>
                     </tr>
                     <tr>
                         <th colspan="6">Surveyor Fee (Rs.)</th>
-                        <th class="text-right"><?php echo number_format($record->total_surveyor_fee_amount, 2, '.', '') ?></th>
+                        <th class="text-right"><?php echo number_format($record->total_surveyor_fee_amount, 2) ?></th>
                     </tr>
                     <tr>
                         <th colspan="6">Total Settlement Amount (Rs.)</th>
-                        <th class="text-right"><?php echo number_format($record->total_surveyor_fee_amount + $record->settlement_claim_amount, 2, '.', '') ?></th>
+                        <th class="text-right"><?php echo number_format($record->total_surveyor_fee_amount + $record->settlement_claim_amount, 2) ?></th>
                     </tr>
                 </tfoot>
             </table>

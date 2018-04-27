@@ -15,7 +15,7 @@ $grand_total 	= $total_premium + $endorsement_record->amt_stamp_duty + $endorsem
 				<?php foreach($cost_calculation_table as $row):?>
 					<tr>
 						<th><?php echo $row->label ?></th>
-						<td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+						<td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
 					</tr>
 				<?php endforeach ?>
 				<tr>
@@ -23,19 +23,19 @@ $grand_total 	= $total_premium + $endorsement_record->amt_stamp_duty + $endorsem
 				        <table class="table no-margin table-bordered table-condensed">
 				            <tr>
 				                <td width="80%" class="text-right"><strong>Gross Premium</strong></td>
-				                <td class="text-right"><strong><?php echo number_format((float)$total_premium, 2, '.', '')?></strong></td>
+				                <td class="text-right"><strong><?php echo number_format((float)$total_premium, 2)?></strong></td>
 				            </tr>
 				            <tr>
 				                <td class="text-right"><strong>Stamp Duty</strong></td>
-				                <td class="text-right"><strong><?php echo number_format($endorsement_record->amt_stamp_duty, 2, '.', '');?></strong></td>
+				                <td class="text-right"><strong><?php echo number_format($endorsement_record->amt_stamp_duty, 2);?></strong></td>
 				            </tr>
 				            <tr>
 				                <td class="text-right"><strong>VAT</strong></td>
-				                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2, '.', '');?></strong></td>
+				                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2);?></strong></td>
 				            </tr>
 				            <tr>
 				                <td class="text-right"><strong>Total Premium</strong></td>
-				                <td class="text-right"><strong><?php echo number_format( (float)$grand_total , 2, '.', '');?></strong></td>
+				                <td class="text-right"><strong><?php echo number_format( (float)$grand_total , 2);?></strong></td>
 				            </tr>
 				        </table>
 				    </td>

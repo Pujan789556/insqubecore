@@ -73,7 +73,7 @@ else
                                         $value = $items->{$key}[$i];
                                     ?>
                                         <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                            <?php echo $value?>
+                                            <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
                                         </td>
                                     <?php endforeach ?>
                             </tr>
@@ -83,12 +83,12 @@ else
                     endforeach; ?>
                     <tr>
                         <td class="text-bold">Total Sum Insured Amount(Rs.)</td>
-                        <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2, '.', '') ?></td>
+                        <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2) ?></td>
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
                         <td>AOG - Earthquake, volcanism, tsunami, storm, cyclone, flood, inundation, landslide</td>
-                        <td class="text-right"><?php echo number_format($record->amt_sum_insured, 2, '.', '') ?></td>
+                        <td class="text-right"><?php echo number_format($record->amt_sum_insured, 2) ?></td>
                         <td><?php echo $attributes->risk->deductibles; ?></td>
                     </tr>
                 </tbody>
@@ -138,7 +138,7 @@ else
                                     $value  = (float) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 
                                     // format this to echo
-                                    $value = number_format($value, 2, '.', '');
+                                    $value = number_format($value, 2);
                                 }
                             ?>
 
@@ -150,7 +150,7 @@ else
                     <?php endfor ?>
                     <tr>
                         <td class="text-bold">Total Third Party Liability(Rs.)</td>
-                        <td class="text-bold text-right"><?php echo number_format($total_tp_liability, 2, '.', '') ?></td>
+                        <td class="text-bold text-right"><?php echo number_format($total_tp_liability, 2) ?></td>
                         <td>&nbsp;</td>
                     </tr>
                 </tbody>

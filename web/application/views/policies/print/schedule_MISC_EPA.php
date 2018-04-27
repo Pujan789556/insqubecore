@@ -111,7 +111,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                             </tr>
                             <tr>
                                 <td>
-                                    <strong>बीमांक रकम (रु):</strong> <?php echo number_format((float)$record->object_amt_sum_insured, 2, '.', '')?><br>
+                                    <strong>बीमांक रकम (रु):</strong> <?php echo number_format((float)$record->object_amt_sum_insured, 2)?><br>
                                     (संलग्न बीमितको विवरण सूचि बमोजिम ।)
                                 </td>
                             </tr>
@@ -123,8 +123,8 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                         $amt_rescue_npr = forex_conversion($record->issued_date, 'USD', floatval($object_attributes->amt_rescue));
                                          ?>
                                         <strong>खोज तथा उद्धार रकम (रु):</strong>
-                                        <?php echo number_format((float)$amt_rescue_npr, 2, '.', '')?>
-                                        (USD <?php echo number_format((float)$object_attributes->amt_rescue, 2, '.', '')?>)
+                                        <?php echo number_format((float)$amt_rescue_npr, 2)?>
+                                        (USD <?php echo number_format((float)$object_attributes->amt_rescue, 2)?>)
                                     </td>
                                 </tr>
                             <?php endif ?>
@@ -192,7 +192,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                                 <?php foreach($cost_calculation_table->schedule_cost_table as $row):?>
                                                     <tr>
                                                         <td><?php echo $row->label ?></td>
-                                                        <td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+                                                        <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
                                                     </tr>
                                                 <?php endforeach ?>
                                             </tbody>
@@ -201,19 +201,19 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                     <table class="table no-margin table-bordered table-condensed">
                                         <tr>
                                             <td width="80%" class="text-right"><strong>बीमा शुल्क</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format( $total_premium, 2, '.', '')?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( $total_premium, 2)?></strong></td>
                                         </tr>
                                         <tr>
                                             <td class="text-right"><strong>टिकट दस्तुर</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2, '.', '')?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2)?></strong></td>
                                         </tr>
                                         <tr>
                                             <td class="text-right"><strong>मु. अ. क. (VAT)</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2, '.', '');?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2);?></strong></td>
                                         </tr>
                                         <tr>
                                             <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format( $grand_total, 2, '.', '');?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( $grand_total, 2);?></strong></td>
                                         </tr>
                                     </table>
                                 </td>

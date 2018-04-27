@@ -9,6 +9,8 @@ $this->load->helper('ph_marine');
 $object_attributes      = json_decode($record->object_attributes);
 $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
 
+$total_premium  = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
+$grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
 ?>
 
 <!DOCTYPE html>
@@ -131,7 +133,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                                 <td>
                                     <?php
                                     $forex = get_forex_rate_by_base_currency($record->start_date, $si_components->currency);
-                                    echo number_format((float)$record->object_amt_sum_insured, 2, '.', ''),
+                                    echo number_format((float)$record->object_amt_sum_insured, 2),
                                          " ({$forex->BaseCurrency} {$forex->BaseValue} = {$forex->TargetCurrency} {$forex->TargetSell})";
 
                                     ?>
@@ -143,20 +145,20 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                         <table class="table table-condensed no-border">
                             <tr>
                                 <td><strong>Premium</strong></td>
-                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_total_premium, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format($total_premium, 2)?></td>
                             </tr>
                             <tr>
                                 <td>Stamp Duty</td>
-                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2)?></td>
                             </tr>
                             <tr>
                                 <td>13% VAT</td>
-                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2)?></td>
                             </tr>
                             <tr><td colspan="2"><hr/></td></tr>
                             <tr>
                                 <td class="border-t"><strong>TOTAL (NRs.)</strong></td>
-                                <td class="text-right border-t"><strong><?php echo number_format( (float)( $endorsement_record->amt_stamp_duty + $endorsement_record->amt_total_premium + $endorsement_record->amt_vat ) , 2, '.', '');?></strong></td>
+                                <td class="text-right border-t"><strong><?php echo number_format($grand_total , 2);?></strong></td>
                             </tr>
                         </table>
                     </td>
@@ -306,7 +308,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                     <?php foreach($cost_calculation_table as $row):?>
                         <tr>
                             <td><?php echo $row->label ?></td>
-                            <td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+                            <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
                         </tr>
                     <?php endforeach ?>
                 </tbody>

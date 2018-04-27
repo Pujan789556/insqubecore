@@ -59,11 +59,11 @@ else
                     </tr>
                     <tr>
                         <th>Gross Sum Insured (Rs.)</th>
-                        <td class="text-right"><?php echo number_format($gross_si, 2, '.', '');?></td>
+                        <td class="text-right"><?php echo number_format($gross_si, 2);?></td>
                     </tr>
                     <tr>
                         <th>Net Sum Insured (Rs.)</th>
-                        <td class="text-right"><?php echo number_format($net_si, 2, '.', '');?></td>
+                        <td class="text-right"><?php echo number_format($net_si, 2);?></td>
                     </tr>
                     <tr>
                         <th>Direct Discount</th>
@@ -87,40 +87,40 @@ else
                     <?php if( _ENDORSEMENT_is_premium_computable_by_type($endorsement_record->txn_type) ): ?>
                         <tr>
                             <td>Basic Premium (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_basic_premium, 2, '.', '');?></td>
+                            <td class="text-right"><?php echo number_format($endorsement_record->amt_basic_premium, 2);?></td>
                         </tr>
                         <tr>
                             <td>Pool Premium (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_pool_premium, 2, '.', '');?></td>
+                            <td class="text-right"><?php echo number_format($endorsement_record->amt_pool_premium, 2);?></td>
                         </tr>
                         <tr>
                             <td>Stamp Duty (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_stamp_duty, 2, '.', '');?></td>
+                            <td class="text-right"><?php echo number_format($endorsement_record->amt_stamp_duty, 2);?></td>
                         </tr>
                         <tr>
                             <td>Cancellation Fee (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_cancellation_fee, 2, '.', '');?></td>
+                            <td class="text-right"><?php echo number_format($endorsement_record->amt_cancellation_fee, 2);?></td>
                         </tr>
                     <?php else: ?>
                         <tr>
                             <td>Ownership Transfer Fee (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_transfer_fee, 2, '.', '');?></td>
+                            <td class="text-right"><?php echo number_format($endorsement_record->amt_transfer_fee, 2);?></td>
                         </tr>
                         <tr>
                             <td>No Claim Discount Fee (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_transfer_ncd, 2, '.', '');?></td>
+                            <td class="text-right"><?php echo number_format($endorsement_record->amt_transfer_ncd, 2);?></td>
                         </tr>
                     <?php endif ?>
 
                     <tr>
                         <td>VAT (Rs.)</td>
-                        <td class="text-right"><?php echo number_format($endorsement_record->amt_vat, 2, '.', '');?></td>
+                        <td class="text-right"><?php echo number_format($endorsement_record->amt_vat, 2);?></td>
                     </tr>
                 </tbody>
                 <tfoot>
                     <tr>
                         <th>Grand Total (Rs.)</th>
-                        <th class="text-right"><?php echo number_format($grand_total, 2, '.', '');?></th>
+                        <th class="text-right"><?php echo number_format($grand_total, 2);?></th>
                     </tr>
                 </tfoot>
             </table>

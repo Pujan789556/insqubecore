@@ -108,19 +108,19 @@ $schedule_table_title   = 'बैंकरको क्षतिपूर्त�
                                     <table class="table no-border">
                                         <tr>
                                             <td>१. आधारभूत बीमांक (रक्षावरणको बुंदा नं (क) देखि (ङ) सम्म)</td>
-                                            <td class="text-right"><?php echo number_format((float)$si_components->basic, 2, '.', '')?></td>
+                                            <td class="text-right"><?php echo number_format((float)$si_components->basic, 2)?></td>
                                         </tr>
                                         <tr>
                                             <td>२. थप बीमांक (रक्षावरणको बुंदा नं (क) को लागि)</td>
-                                            <td class="text-right"><?php echo number_format((float)$si_components->cip, 2, '.', '')?></td>
+                                            <td class="text-right"><?php echo number_format((float)$si_components->cip, 2)?></td>
                                         </tr>
                                         <tr>
                                             <td>३. थप बीमांक (रक्षावरणको बुंदा नं (ख) को लागि)</td>
-                                            <td class="text-right"><?php echo number_format((float)$si_components->cit, 2, '.', '')?></td>
+                                            <td class="text-right"><?php echo number_format((float)$si_components->cit, 2)?></td>
                                         </tr>
                                         <tr>
                                             <td>४. एटिएममा राखिएको अधिकतम रकम</td>
-                                            <td class="text-right"><?php echo number_format((float)$object_attributes->cash_in_atm, 2, '.', '')?></td>
+                                            <td class="text-right"><?php echo number_format((float)$object_attributes->cash_in_atm, 2)?></td>
                                         </tr>
                                     </table>
                                 </td>
@@ -187,7 +187,7 @@ $schedule_table_title   = 'बैंकरको क्षतिपूर्त�
                                                     <?php foreach($cost_calculation_table as $row):?>
                                                         <tr>
                                                             <td><?php echo $row->label ?></td>
-                                                            <td class="text-right"><?php echo number_format( (float)$row->value, 2, '.', '');?></td>
+                                                            <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
                                                         </tr>
                                                     <?php endforeach ?>
                                                 </tbody>
@@ -196,19 +196,19 @@ $schedule_table_title   = 'बैंकरको क्षतिपूर्त�
                                     <table class="table no-margin table-bordered table-condensed">
                                         <tr>
                                             <td width="80%" class="text-right"><strong>कुल बीमा शुल्क</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format($total_premium, 2, '.', '')?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format($total_premium, 2)?></strong></td>
                                         </tr>
                                         <tr>
                                             <td class="text-right"><strong>टिकट दस्तुर</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2, '.', '')?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2)?></strong></td>
                                         </tr>
                                         <tr>
                                             <td class="text-right"><strong>टिकटको मु. अ. क. (VAT)</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2, '.', '');?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2);?></strong></td>
                                         </tr>
                                         <tr>
                                             <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format($grand_total , 2, '.', '');?></strong></td>
+                                            <td class="text-right"><strong><?php echo number_format($grand_total , 2);?></strong></td>
                                         </tr>
                                     </table>
                                 </td>

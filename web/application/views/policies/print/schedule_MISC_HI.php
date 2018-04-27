@@ -95,7 +95,7 @@ $schedule_table_title   = 'स्वास्थ्य उपचार बीम
                             <tr>
                                 <td>
                                     <strong></strong><br/>
-                                    बीमांक रकम (रु): <?php echo number_format((float)$record->object_amt_sum_insured, 2, '.', '')?><br>
+                                    बीमांक रकम (रु): <?php echo number_format((float)$record->object_amt_sum_insured, 2)?><br>
                                     (संलग्न बीमितको विवरण सूचि बमोजिम ।)
                                 </td>
                             </tr>

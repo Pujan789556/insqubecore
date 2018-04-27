@@ -88,7 +88,7 @@
                         foreach($rows as $row):?>
                             <tr>
                                 <td><?php echo $row->description?></td>
-                                <td align="right"><?php echo number_format($row->amount, 2, '.', '')?></td>
+                                <td align="right"><?php echo number_format($row->amount, 2)?></td>
                             </tr>
                         <?php
                             $taxable_total_amount += $row->amount;
@@ -96,15 +96,15 @@
 
                             <tr>
                                 <td align="right" class="bold">Taxable Total Amount</td>
-                                <td align="right" class="bold"><?php echo number_format($taxable_total_amount, 2, '.', '')?></td>
+                                <td align="right" class="bold"><?php echo number_format($taxable_total_amount, 2)?></td>
                             </tr>
                             <tr>
                                 <td align="right" class="bold"><?php echo $vat_row->description?></td>
-                                <td align="right" class="bold"><?php echo number_format($vat_row->amount, 2, '.', '')?></td>
+                                <td align="right" class="bold"><?php echo number_format($vat_row->amount, 2)?></td>
                             </tr>
                             <tr>
                                 <td align="right" class="bold">Grand Total</td>
-                                <td align="right" class="bold"><?php echo number_format($record->amount, 2, '.', '')?></td>
+                                <td align="right" class="bold"><?php echo number_format($record->amount, 2)?></td>
                             </tr>
                             <tr>
                                 <td colspan="2">

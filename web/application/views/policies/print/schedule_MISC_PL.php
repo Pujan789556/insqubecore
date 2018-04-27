@@ -112,20 +112,20 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         <table class="table table-condensed no-border">
                             <tr>
                                 <td><strong>Premium</strong></td>
-                                <td class="text-right"><?php echo number_format($total_premium, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format($total_premium, 2)?></td>
                             </tr>
                             <tr>
                                 <td>Stamp Duty</td>
-                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2)?></td>
                             </tr>
                             <tr>
                                 <td>13% VAT</td>
-                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2, '.', '')?></td>
+                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2)?></td>
                             </tr>
                             <tr><td colspan="2"><hr/></td></tr>
                             <tr>
                                 <td class="border-t"><strong>TOTAL (NRs.)</strong></td>
-                                <td class="text-right border-t"><strong><?php echo number_format( $grand_total , 2, '.', '');?></strong></td>
+                                <td class="text-right border-t"><strong><?php echo number_format( $grand_total , 2);?></strong></td>
                             </tr>
                         </table>
                     </td>
@@ -169,7 +169,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                             if( $key == 'limit' )
                                             {
                                                 // format this to echo
-                                                $value = number_format(floatval($value), 2, '.', '');
+                                                $value = number_format(floatval($value), 2);
                                             }
                                         ?>
 
@@ -181,7 +181,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                 <?php endfor ?>
                                 <tr>
                                     <td class="text-bold">Total Public Liability(Rs.)</td>
-                                    <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2, '.', '') ?></td>
+                                    <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2) ?></td>
                                     <td>&nbsp;</td>
                                 </tr>
                             </tbody>

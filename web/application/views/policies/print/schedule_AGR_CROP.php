@@ -205,14 +205,14 @@ $schedule_table_title   = 'बाली/फलफुलको बीमाले
                         ?>
 
                             <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                <?php echo $value?>
+                                <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
                             </td>
                         <?php endforeach ?>
                     </tr>
                 <?php endfor ?>
                 <tr>
                     <td colspan="4" class="text-bold">जम्मा बीमांक रकम(रु)</td>
-                    <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2, '.', '') ?></td>
+                    <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2) ?></td>
                 </tr>
             </tbody>
         </table><br/>

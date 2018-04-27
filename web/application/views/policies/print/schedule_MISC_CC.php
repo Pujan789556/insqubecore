@@ -87,7 +87,7 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                             </tr>
                             <tr>
                                 <td>
-                                    बिमांक रकम (रु): <strong><?php echo number_format( (float)$record->net_amt_sum_insured, 2, '.', '');?></strong>
+                                    बिमांक रकम (रु): <strong><?php echo number_format( (float)$record->net_amt_sum_insured, 2);?></strong>
                                 </td>
                             </tr>
                             <tr>

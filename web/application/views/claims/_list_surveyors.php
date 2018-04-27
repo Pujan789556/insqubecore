@@ -19,10 +19,10 @@ foreach($records as $record):
 		<td><?php echo CLAIM__surveyor_type_dropdown(FALSE)[$record->survey_type] ?></td>
 		<td><?php echo $record->assigned_date ?></td>
 		<td><?php echo $record->status ?></td>
-		<td class="text-right"><?php echo number_format($record->surveyor_fee, 2, '.', '') ?></td>
+		<td class="text-right"><?php echo number_format($record->surveyor_fee, 2) ?></td>
 	</tr>
 <?php endforeach; ?>
 <tr>
 	<th colspan="5">Total Surveyor Fee</th>
-	<th class="text-right"><?php echo number_format($total_surveyor_fee, 2, '.', '') ?></th>
+	<th class="text-right"><?php echo number_format($total_surveyor_fee, 2) ?></th>
 </tr>

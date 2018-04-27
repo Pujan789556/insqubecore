@@ -22,7 +22,7 @@ $total_amount = _POLICY_INSTALLMENT_compute_total_amount($record);
 		endif;?>
 	</td>
 	<td><?php echo $record->percent;?>%</td>
-	<td><?php echo number_format( $total_amount, 2, '.', '');?></td>
+	<td><?php echo number_format( $total_amount, 2);?></td>
 
 	<td><?php echo _POLICY_INSTALLMENT_status_text($record->status, TRUE);?></td>
 	<td class="ins-action">

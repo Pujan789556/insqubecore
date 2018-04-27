@@ -67,14 +67,14 @@ else
                             ?>
 
                                 <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                    <?php echo $value?>
+                                    <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
                                 </td>
                             <?php endforeach ?>
                         </tr>
                     <?php endfor ?>
                     <tr>
                         <td colspan="4" class="text-bold">Total Sum Insured Amount(Rs.)</td>
-                        <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2, '.', '') ?></td>
+                        <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2) ?></td>
                     </tr>
                 </tbody>
             </table>
