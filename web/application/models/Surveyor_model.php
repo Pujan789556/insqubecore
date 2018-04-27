@@ -3,7 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Surveyor_model extends MY_Model
 {
-    protected $table_name = 'master_surveyors';
+    protected $table_name       = 'master_surveyors';
+    protected $rel_table_name   = 'rel_surveyor__surveyor_expertise';
 
     protected $set_created = true;
 
@@ -15,8 +16,8 @@ class Surveyor_model extends MY_Model
 
     protected $before_insert = ['prepare_contact_data'];
     protected $before_update = ['prepare_contact_data'];
-    protected $after_insert  = ['clear_cache'];
-    protected $after_update  = ['clear_cache'];
+    protected $after_insert  = ['update_surveyor_expertise', 'clear_cache'];
+    protected $after_update  = ['update_surveyor_expertise', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
     protected $fields = ['id', 'name', 'picture', 'resume', 'type', 'flag_vat_registered', 'vat_no', 'active', 'contact', 'created_at', 'created_by', 'updated_at', 'updated_by'];
@@ -41,6 +42,9 @@ class Surveyor_model extends MY_Model
     {
         parent::__construct();
 
+        // Surveyor Expertise Model
+        $this->load->model('surveyor_expertise_model');
+
         // Load Validation Rules
         $this->_v_rules();
     }
@@ -50,6 +54,8 @@ class Surveyor_model extends MY_Model
 
     private function _v_rules()
     {
+        $surveyor_expertise_dd = $this->surveyor_expertise_model->dropdown();
+
         $this->validation_rules = [
             [
                 'field' => 'name',
@@ -82,6 +88,17 @@ class Surveyor_model extends MY_Model
                 '_required' => false
             ],
             [
+                'field' => 'surveyor_expertise[]',
+                'label' => 'Surveyor Expertise',
+                'rules' => 'trim|required|integer|max_length[8]|in_list['. implode(',', array_keys($surveyor_expertise_dd)) .']',
+                '_key'      => 'surveyor_expertise',
+                '_type'     => 'dropdown',
+                '_data'     => $surveyor_expertise_dd,
+                '_id'       => 'surveyor-expertise',
+                '_class'     => 'form-control select-multiple',
+                '_extra_attributes' => 'multiple="multiple" style="width:100%" data-placeholder="Select Expertise..."',
+            ],
+            [
                 'field' => 'active',
                 'label' => 'Is Active?',
                 'rules' => 'trim|required|integer|exact_length[1]',
@@ -98,6 +115,96 @@ class Surveyor_model extends MY_Model
     {
         $data['contact'] = get_contact_data_from_form();
         return $data;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * After Insert/Update Trigger
+     *
+     * Update Surveyor Expertise Relations on add/edit
+     *
+     * @param array $data
+     * @return bool
+     */
+    public function update_surveyor_expertise($data)
+    {
+        $id = $data['id'] ?? NULL;
+
+        if($id !== NULL)
+        {
+            /**
+             * Get the Surveyor Expertise List
+             */
+            $fields = $data['fields'];
+            $expertise_list = array_unique($fields['surveyor_expertise']);
+
+            /**
+             * Task 1: Delete Old Relation If any
+             */
+            $this->_delete_expertise($id);
+
+            /**
+             * Task 2: Batch Insert Expertise Relation
+             */
+            $batch_data = [];
+            foreach( $expertise_list as $key )
+            {
+                $batch_data[] = [
+                    'surveyor_id' => $id,
+                    'surveyor_expertise_id' => $key
+                ];
+            }
+            if($batch_data)
+            {
+                $this->_batch_insert_expertise($batch_data);
+            }
+
+            return TRUE;
+        }
+
+        return FALSE;
+    }
+
+        private function _delete_expertise($id)
+        {
+            return $this->db->where('surveyor_id', $id)
+                            ->delete($this->rel_table_name);
+        }
+
+        private function _batch_insert_expertise($data)
+        {
+            return $this->db->insert_batch($this->rel_table_name, $data);
+        }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get List of Expertise of a Surveyor
+     *
+     * @param inte $id
+     * @return array
+     */
+    public function expertise_list($id, $dropdown = FALSE)
+    {
+        $result = $this->db->select('SE.id, SE.name')
+                            ->from('master_surveyor_expertise AS SE')
+                            ->join($this->rel_table_name . ' REL', 'REL.surveyor_expertise_id = SE.id')
+                            ->join($this->table_name . ' S', 'REL.surveyor_id = S.id')
+                            ->where('S.id', $id)
+                            ->get()->result();
+
+        if($dropdown)
+        {
+            $data = [];
+            foreach($result as $record)
+            {
+                $data["{$record->id}"] = $record->name;
+            }
+            return $data;
+        }
+
+        return $result;
     }
 
     // ----------------------------------------------------------------

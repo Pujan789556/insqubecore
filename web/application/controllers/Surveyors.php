@@ -281,6 +281,11 @@ class Surveyors extends MY_Controller
 			$this->template->render_404();
 		}
 
+		/**
+		 * Get Expertise List
+		 */
+		$record->surveyor_expertise = array_keys( $this->surveyor_model->expertise_list($record->id, TRUE) );
+
 		// Form Submitted? Save the data
 		$json_data = $this->_save('edit', $record, $from_widget, $widget_reference);
 
@@ -632,6 +637,11 @@ class Surveyors extends MY_Controller
 		{
 			$this->template->render_404();
 		}
+
+		/**
+		 * Get Expertise List
+		 */
+		$record->surveyor_expertise = array_values( $this->surveyor_model->expertise_list($record->id, TRUE) );
 
 
 		$this->data['site_title'] = 'Surveyor Details | ' . $record->name;

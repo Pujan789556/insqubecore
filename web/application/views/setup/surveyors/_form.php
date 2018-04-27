@@ -4,6 +4,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Surveyor
  */
 ?>
+<style>
+.select2-dropdown .select2-search__field:focus, .select2-search--inline .select2-search__field:focus{
+    border:none;
+}
+</style>
 <?php echo form_open( $this->uri->uri_string(),
                         [
                             'class' => 'form-horizontal form-iqb-general',
@@ -65,3 +70,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     ?>
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
+
+<!-- Select2 -->
+<script>
+    $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
+        //Initialize Select2 Elements
+        $(".select-multiple").select2();
+    });
+</script>

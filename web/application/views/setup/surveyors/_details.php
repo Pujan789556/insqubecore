@@ -29,7 +29,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 				<ul class="list-group list-group-unbordered">
 					<li class="list-group-item">
-						<b>Type</b> <span class="pull-right"><?php echo $record->type == '1' ? 'Individual' : 'Compamy';?></span>
+						<b>Type</b> <span class="pull-right"><?php echo IQB_SURVEYOR_TYPES[$record->type];?></span>
 					</li>
 					<li class="list-group-item">
 						<b>Active?</b>
@@ -51,8 +51,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			</div>
 		</div>
 
+		<div class="box box-solid box-bordered">
+			<div class="box-header with-border">
+				<h3 class="box-title"><i class="fa fa-certificate margin-r-5"></i>Surveyor Expertise</h3>
+			</div>
+			<div class="box-body">
+				<p><?php echo implode(', ', $record->surveyor_expertise ?? ['<small class="text-muted">Not Available!</small>']);?></p>
+			</div>
+		</div>
+
 		<!-- About Me Box -->
-		<div class="box box-primary">
+		<div class="box box-solid box-bordered">
 			<?php
 			/**
 			 * Contact Widget

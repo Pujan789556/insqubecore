@@ -13,8 +13,8 @@ class Surveyor_expertise_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['capitalize_code'];
-    protected $before_update = ['capitalize_code'];
+    protected $before_insert = [];
+    protected $before_update = [];
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
@@ -64,22 +64,6 @@ class Surveyor_expertise_model extends MY_Model
             $this->write_cache($list, 'srv_expertise_all', CACHE_DURATION_DAY);
         }
         return $list;
-    }
-
-
-    // ----------------------------------------------------------------
-
-    public function capitalize_code($data)
-    {
-        $code_cols = array('code');
-        foreach($code_cols as $col)
-        {
-            if( isset($data[$col]) && !empty($data[$col]) )
-            {
-                $data[$col] = strtoupper($data[$col]);
-            }
-        }
-        return $data;
     }
 
     // ----------------------------------------------------------------
