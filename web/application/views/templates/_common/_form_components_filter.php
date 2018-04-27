@@ -21,7 +21,7 @@ foreach($filters as $element):?>
          */
         $element_config = array(
             'name'          => $element['field'],
-            'class'         => 'form-control'
+            'class'         => $element['_class'] ?? 'form-control'
         );
 
         /**

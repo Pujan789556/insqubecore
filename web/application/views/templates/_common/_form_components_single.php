@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 $element_config = array(
     'name'          => $element['field'],
-    'class'         => 'form-control',
+    'class'         => $element['_class'] ?? 'form-control',
     'placeholder'   => $element['_placeholder'] ?? $element['label']
 );
 
