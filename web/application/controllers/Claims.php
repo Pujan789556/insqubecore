@@ -442,7 +442,7 @@ class Claims extends MY_Controller
 	private function _save($action, $policy_id, $record = NULL, $ref = 'l')
 	{
 		// Valid action?
-		if( !in_array($action, array('add_draft', 'edit_draft', 'close_claim', 'withdraw_claim', 'assign_surveyors', 'update_assessment', 'update_settlement', 'update_scheme')))
+		if( !in_array($action, array('add_draft', 'edit_draft', 'close_claim', 'withdraw_claim', 'assign_surveyors', 'update_assessment', 'update_settlement', 'update_scheme', 'update_progress')))
 		{
 			$this->template->json([
 				'status' => 'error',
@@ -526,6 +526,13 @@ class Claims extends MY_Controller
 					case 'update_scheme':
 						$update_data = [
 							'claim_scheme_id' 	=> $data['claim_scheme_id']
+    					];
+    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
+						break;
+
+					case 'update_progress':
+						$update_data = [
+							'progress_remarks' 	=> $data['progress_remarks']
     					];
     					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
 						break;
@@ -649,6 +656,10 @@ class Claims extends MY_Controller
 
 				case 'update_scheme':
 					$rules = $this->claim_model->scheme_v_rules($formatted);
+					break;
+
+				case 'update_progress':
+					$rules = $this->claim_model->progress_v_rules();
 					break;
 
 				default:
@@ -1943,6 +1954,62 @@ class Claims extends MY_Controller
 		$json_data['form'] = $this->load->view('claims/forms/_form_scheme',
 			[
 				'form_elements' => $this->_v_rules('update_scheme'),
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Update Claim Progress
+	 *
+	 * @param int $id
+	 * @return json
+	 */
+	public function progress($id, $ref)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('claims', 'update.claim.progress') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+		/**
+		 * Status Qualifies
+		 *
+		 * Allowed Status: Verified | Approved
+		 */
+		if( !in_array( $record->status,  [IQB_CLAIM_STATUS_VERIFIED, IQB_CLAIM_STATUS_APPROVED]) )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('update_progress', $record->policy_id, $record, $ref);
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('claims/forms/_form_progress',
+			[
+				'form_elements' => $this->_v_rules('update_progress'),
 				'record' 		=> $record
 			], TRUE);
 

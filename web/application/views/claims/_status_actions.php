@@ -215,6 +215,32 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <?php endif;?>
 
         <?php endif;?>
+
+        <?php
+
+        // ------------------------------------------------------------------------------
+
+        /**
+         * Update Claim Progress
+         *
+         * Allowed Status: Verified & Approved
+         */
+        if( in_array( $record->status,  [IQB_CLAIM_STATUS_VERIFIED, IQB_CLAIM_STATUS_APPROVED]) && $this->dx_auth->is_authorized('claims', 'update.claim.progress') ): ?>
+            <li class="divider"></li>
+            <li>
+                <a href="#"
+                        title="Update Claim Progress"
+                        data-toggle="tooltip"
+                        class="text-yellow trg-dialog-edit"
+                        data-title='<i class="fa fa-pencil-square-o"></i> Update Claim Progress - <?php echo $record->claim_code?>'
+                        data-url="<?php echo site_url('claims/progress/' . $record->id . '/' . $ref);?>"
+                        data-box-size="large"
+                        data-form="#_form-claims">
+                        <i class="fa fa-pencil-square-o"></i> Update Claim Progress</a>
+            </li>
+        <?php endif; ?>
+
+
         <?php if($record->status === IQB_CLAIM_STATUS_APPROVED && $this->dx_auth->is_authorized('claims', 'status.to.settled')): ?>
             <li>
                     <a href="#"
@@ -227,6 +253,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <i class="fa fa-dollar"></i> Settle</a>
                 </li>
         <?php endif;?>
+
 
         <?php
         /**

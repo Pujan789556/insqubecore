@@ -4,8 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div id="claim-details">
     <div class="box box-bordered box-default">
         <div class="box-header with-border">
-            <h4 class="no-margin">
-                Basic Information
+            <h3 class="no-margin">
+                Claim Information
                 <span class="pull-right">
                     <?php
                     /**
@@ -15,92 +15,112 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     $this->load->view('claims/_status_actions', ['record' => $record, 'ref' => 'd']);
                     ?>
                 </span>
-            </h4>
+            </h3>
         </div>
-        <table class="table table-responsive table-condensed">
-            <tbody>
-                <tr>
-                    <th width="30%">Policy Code</th>
-                    <td><?php echo anchor('policies/details/' . $record->policy_id, $record->policy_code, ['target' => '_blank']);?></td>
-                </tr>
-                <tr>
-                    <th>Claim Code</th>
-                    <td><?php echo $record->claim_code;?></td>
-                </tr>
-                <tr>
-                    <th>Fiscal Year</th>
-                    <td><?php echo $record->fy_code_np, ' (', $record->fy_code_en, ')';?></td>
-                </tr>
-                <tr>
-                    <th>Status</th>
-                    <td class="text-bold"><?php echo CLAIM__status_dropdown(FALSE)[$record->status];?></td>
-                </tr>
-                <tr>
-                    <th>Status Remarks</th>
-                    <td><?php echo nl2br(htmlspecialchars($record->status_remarks));?></td>
-                </tr>
-                <tr>
-                    <th>Nature of Loss</th>
-                    <td><?php echo $record->loss_nature;?></td>
-                </tr>
+        <div class="box-body">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="alert alert-warning">
+                        <h4><i class="icon fa fa-warning"></i> Progress Remarks</h4>
+                        <?php echo nl2br(htmlspecialchars($record->progress_remarks));?>
+                    </div>
 
-                <tr>
-                    <th>Claim Scheme</th>
-                    <td><?php echo $record->claim_scheme_name;?></td>
-                </tr>
-            </tbody>
-        </table>
+                    <div class="box box-bordered box-default">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">Basic Information</h4>
+                        </div>
+                        <table class="table table-bordered table-responsive table-condensed">
+                            <tbody>
+                                <tr>
+                                    <th width="30%">Policy Code</th>
+                                    <td><?php echo anchor('policies/details/' . $record->policy_id, $record->policy_code, ['target' => '_blank']);?></td>
+                                </tr>
+                                <tr>
+                                    <th>Claim Code</th>
+                                    <td><?php echo $record->claim_code;?></td>
+                                </tr>
+                                <tr>
+                                    <th>Fiscal Year</th>
+                                    <td><?php echo $record->fy_code_np, ' (', $record->fy_code_en, ')';?></td>
+                                </tr>
+                                <tr>
+                                    <th>Status</th>
+                                    <td class="text-bold"><?php echo CLAIM__status_dropdown(FALSE)[$record->status];?></td>
+                                </tr>
+                                <tr>
+                                    <th>Status Remarks</th>
+                                    <td><?php echo nl2br(htmlspecialchars($record->status_remarks));?></td>
+                                </tr>
+                                <tr>
+                                    <th>Nature of Loss</th>
+                                    <td><?php echo $record->loss_nature;?></td>
+                                </tr>
+
+                                <tr>
+                                    <th>Claim Scheme</th>
+                                    <td><?php echo $record->claim_scheme_name;?></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="box box-bordered box-default">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">Accident Details</h4>
+                        </div>
+                        <table class="table table-responsive table-condensed">
+                            <tbody>
+                                <tr>
+                                    <th width="30%">Accident Date & Time</th>
+                                    <td><?php echo $record->accident_date, ' ', $record->accident_time;?></td>
+                                </tr>
+                                <tr>
+                                    <th>Location</th>
+                                    <td><?php echo nl2br(htmlspecialchars($record->accident_location));?></td>
+                                </tr>
+                                <tr>
+                                    <th>Details</th>
+                                    <td><?php echo nl2br(htmlspecialchars($record->accident_details));?></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box box-bordered box-default">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">Intimation Details</h4>
+                        </div>
+                        <table class="table table-responsive table-condensed">
+                            <tbody>
+                                <tr>
+                                    <th width="30%">Name</th>
+                                    <td><?php echo $record->intimation_name;?></td>
+                                </tr>
+                                <tr>
+                                    <th>Address</th>
+                                    <td><?php echo nl2br(htmlspecialchars($record->initimation_address));?></td>
+                                </tr>
+                                <tr>
+                                    <th>Contact No.</th>
+                                    <td><?php echo $record->initimation_contact;?></td>
+                                </tr>
+                                <tr>
+                                    <th>Intimation Date</th>
+                                    <td><?php echo $record->intimation_date;?></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
     </div>
 
     <div class="row">
-        <div class="col-sm-6">
-            <div class="box box-bordered box-default">
-                <div class="box-header with-border">
-                    <h4 class="box-title">Accident Details</h4>
-                </div>
-                <table class="table table-responsive table-condensed">
-                    <tbody>
-                        <tr>
-                            <th width="30%">Accident Date & Time</th>
-                            <td><?php echo $record->accident_date, ' ', $record->accident_time;?></td>
-                        </tr>
-                        <tr>
-                            <th>Location</th>
-                            <td><?php echo nl2br(htmlspecialchars($record->accident_location));?></td>
-                        </tr>
-                        <tr>
-                            <th>Details</th>
-                            <td><?php echo nl2br(htmlspecialchars($record->accident_details));?></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="box box-bordered box-default">
-                <div class="box-header with-border">
-                    <h4 class="box-title">Intimation Details</h4>
-                </div>
-                <table class="table table-responsive table-condensed">
-                    <tbody>
-                        <tr>
-                            <th width="30%">Name</th>
-                            <td><?php echo $record->intimation_name;?></td>
-                        </tr>
-                        <tr>
-                            <th>Address</th>
-                            <td><?php echo nl2br(htmlspecialchars($record->initimation_address));?></td>
-                        </tr>
-                        <tr>
-                            <th>Contact No.</th>
-                            <td><?php echo $record->initimation_contact;?></td>
-                        </tr>
-                        <tr>
-                            <th>Intimation Date</th>
-                            <td><?php echo $record->intimation_date;?></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+
         <div class="col-sm-6">
             <div class="box box-bordered box-default">
                 <div class="box-header with-border">
@@ -133,6 +153,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </tbody>
                 </table>
             </div>
+        </div>
+        <div class="col-sm-6">
             <div class="box box-bordered box-default">
                 <div class="box-header with-border">
                     <h4 class="box-title">Claim Estimation</h4>
