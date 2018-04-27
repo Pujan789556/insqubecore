@@ -225,6 +225,7 @@ $config['insqb_activity_types'] = [
 			'D' => 'deleted'
 	]],
 
+
 	/**
 	 * Activities related to District
 	 */
@@ -407,6 +408,18 @@ $config['insqb_activity_types'] = [
 	'surveyor' => [
 		'_uri' => 'surveyors/',
 		'_table' => 'master_surveyors',
+		'_actions' => [
+			'C' => 'added',
+			'E' => 'edited',
+			'D' => 'deleted'
+	]],
+
+	/**
+	 * Activities related to Surveyor Expertise
+	 */
+	'surveyor_expertise' => [
+		'_uri' => 'surveyor_expertise/',
+		'_table' => 'master_surveyor_expertise',
 		'_actions' => [
 			'C' => 'added',
 			'E' => 'edited',
