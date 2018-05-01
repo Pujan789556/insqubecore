@@ -704,16 +704,18 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 					 * Agent Commission or Direct Discount
 					 * applies on NET Premium
 					 */
-					$D 						= 0.00;
 					$commissionable_premium = NULL;
 					$agent_commission 		= NULL;
+					$direct_discount 		= NULL;
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 					{
 						// Direct Discount
-						$D = ( $C * $pfs_record->direct_discount ) / 100.00 ;
+						$direct_discount = ( $C * $pfs_record->direct_discount ) / 100.00 ;
+
+						$dd_formatted = number_format($pfs_record->direct_discount, 2);
 						$cost_calculation_table[] = [
-							'label' => "Direct Discount",
-							'value' => $D
+							'label' => "Direct discount ({$dd_formatted}%)",
+							'value' => $direct_discount
 						];
 					}
 					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
@@ -722,8 +724,8 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 						$agent_commission 		= ( $C * $pfs_record->agent_commission ) / 100.00;
 					}
 
-					// E = C - D
-					$E = $C - $D;
+					// E = C - Direct Discount
+					$E = $C - $direct_discount;
 
 
 					/**
@@ -775,6 +777,7 @@ if ( ! function_exists('__save_premium_ENG_CAR'))
 						'amt_pool_premium' 		=> $POOL_PREMIUM,
 						'amt_commissionable'	=> $commissionable_premium,
 						'amt_agent_commission'  => $agent_commission,
+						'amt_direct_discount' 	=> $direct_discount,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
 						'txn_date' 				=> date('Y-m-d'),

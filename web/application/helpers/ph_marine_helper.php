@@ -944,14 +944,17 @@ if ( ! function_exists('__save_premium_MARINE'))
 					 * applies on NET Premium
 					 */
 					$J = 0.00;
+					$direct_discount = NULL;
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 					{
 						// Direct Business Discount/Direct Discount
 						$J = ( $I * $pfs_record->direct_discount ) / 100.00 ;
 
+						$direct_discount = $J;
+						$dd_formatted = number_format($pfs_record->direct_discount, 2);
 						$cost_calculation_table[] = [
-							'label' => "J. Direct business discount ({$pfs_record->direct_discount}% of I)",
-							'value' => $J
+							'label' => "J. Direct business discount ({$dd_formatted}% of I)",
+							'value' => $direct_discount
 						];
 					}
 
@@ -1010,6 +1013,7 @@ if ( ! function_exists('__save_premium_MARINE'))
 						'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
 						'amt_commissionable'	=> $commissionable_premium,
 						'amt_agent_commission'  => $agent_commission,
+						'amt_direct_discount' 	=> $direct_discount,
 						'amt_pool_premium' 		=> 0.00,
 					];
 

@@ -587,14 +587,15 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 					$commissionable_premium = NULL;
 					$agent_commission 		= NULL;
 					$POOL_PREMIUM 			= 0.00;
-					$direct_discount 		= 0.00;
+					$direct_discount 		= NULL;
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 					{
 						$direct_discount = ( $G * $pfs_record->direct_discount ) / 100.00 ;
 						$G -= $direct_discount;
 
+						$dd_formatted = number_format($pfs_record->direct_discount, 2);
 						$cost_calculation_table[] = [
-							'label' => "Direct discount ({$pfs_record->direct_discount}%)",
+							'label' => "Direct discount ({$dd_formatted}%)",
 							'value' => $direct_discount
 						];
 					}
@@ -638,6 +639,7 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 						'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
 						'amt_commissionable'	=> $commissionable_premium,
 						'amt_agent_commission'  => $agent_commission,
+						'amt_direct_discount' 	=> $direct_discount,
 						'amt_pool_premium' 		=> $POOL_PREMIUM,
 					];
 

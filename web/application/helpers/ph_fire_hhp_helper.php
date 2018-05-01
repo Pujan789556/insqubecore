@@ -727,7 +727,7 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 					$premium_computation_table 	= [];
 					$COMMISSIONABLE_PREMIUM 	= NULL;
 					$AGENT_COMMISSION 			= NULL;
-					$DIRECT_DISCOUNT 			= 0.00;
+					$DIRECT_DISCOUNT 			= NULL;
 
 					/**
 					 * Direct Discount or Agent Commission?
@@ -778,8 +778,9 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 
 					if($DIRECT_DISCOUNT)
 					{
+						$dd_formatted = number_format($pfs_record->direct_discount, 2);
 						$summary_table[] = [
-							'label' => "DIRECT DISCOUNT ({$pfs_record->direct_discount}%)",
+							'label' => "DIRECT DISCOUNT ({$dd_formatted}%)",
 							'value' => $DIRECT_DISCOUNT
 						];
 					}
@@ -848,6 +849,7 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 						'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
 						'amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
 						'amt_agent_commission'  => $AGENT_COMMISSION,
+						'amt_direct_discount' 	=> $DIRECT_DISCOUNT,
 						'amt_pool_premium' 		=> $POOL_PREMIUM,
 					];
 

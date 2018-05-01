@@ -1409,6 +1409,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 						'amt_pool_premium' 		=> $NET_POOL_PREMIUM,
 						'amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
 						'amt_agent_commission'  => $AGENT_COMMISSION,
+						'amt_direct_discount' 	=> $DIRECT_DISCOUNT,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
 						'txn_date' 				=> date('Y-m-d'),
@@ -1801,8 +1802,9 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 					if($DIRECT_DISCOUNT)
 					{
+						$dd_formatted = number_format($pfs_record->direct_discount, 2);
 						$summary_table[] = [
-							'label' => "DIRECT DISCOUNT ({$pfs_record->direct_discount}%)",
+							'label' => "DIRECT DISCOUNT ({$dd_formatted}%)",
 							'value' => $DIRECT_DISCOUNT
 						];
 					}

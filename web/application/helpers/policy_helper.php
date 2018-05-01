@@ -1679,6 +1679,12 @@ if ( ! function_exists('_ENDORSEMENT__compute_prorata_premium'))
             $premium_data['amt_agent_commission']   = (float)$premium_data['amt_agent_commission'] * $rate ;
         }
 
+        // Direct Discount
+        if( $premium_data['amt_direct_discount'] )
+        {
+            $premium_data['amt_direct_discount'] = ($premium_data['amt_direct_discount'] * $rate)/100.00;
+        }
+
         return $premium_data;
     }
 }
@@ -1701,7 +1707,7 @@ if ( ! function_exists('_ENDORSEMENT__compute_short_term_premium'))
         $rate = _ENDORSEMENT__get_short_term_rate( $pfs_record, $start_date, $end_date  );
 
         // Compute on basic premium
-        $premium_data['amt_basic_premium']  = ($premium_data['amt_basic_premium'] * $rate)/100.00;;
+        $premium_data['amt_basic_premium']  = ($premium_data['amt_basic_premium'] * $rate)/100.00;
 
         // Update Commissionable Amount and Commission
         $amt_commissionable = $premium_data['amt_commissionable'] ?? NULL;
@@ -1709,6 +1715,12 @@ if ( ! function_exists('_ENDORSEMENT__compute_short_term_premium'))
         {
             $premium_data['amt_commissionable']   = ($premium_data['amt_commissionable'] * $rate)/100.00;
             $premium_data['amt_agent_commission'] = ($premium_data['amt_commissionable'] * $pfs_record->agent_commission)/100.00;
+        }
+
+        // Direct Discount
+        if( $premium_data['amt_direct_discount'] )
+        {
+            $premium_data['amt_direct_discount'] = ($premium_data['amt_direct_discount'] * $rate)/100.00;
         }
 
         return $premium_data;

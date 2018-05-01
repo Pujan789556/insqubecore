@@ -722,13 +722,19 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 					 * Agent Commission or Direct Discount
 					 * applies on NET Premium
 					 */
-					$B 						= 0.00;
 					$commissionable_premium = NULL;
 					$agent_commission 		= NULL;
+					$direct_discount 		= NULL;
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 					{
 						// Direct Discount
-						$B = ( $A * $pfs_record->direct_discount ) / 100.00 ;
+						$direct_discount = ( $A * $pfs_record->direct_discount ) / 100.00 ;
+
+						$dd_formatted = number_format($pfs_record->direct_discount, 2);
+						$cost_calculation_table[] = [
+							'label' => "ख. प्रत्यक्ष छूट ({$dd_formatted}%)",
+							'value' => $direct_discount
+						];
 					}
 					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
@@ -736,13 +742,10 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 						$agent_commission 		= ( $A * $pfs_record->agent_commission ) / 100.00;
 					}
 
-					$cost_calculation_table[] = [
-						'label' => "ख. प्रत्यक्ष छूट ({$pfs_record->direct_discount}%)",
-						'value' => $B
-					];
 
-					// C = A - B
-					$C = $A - $B;
+
+					// C = A - Direct Discount
+					$C = $A - $direct_discount;
 					$cost_calculation_table[] = [
 						'label' => "ग. (क - ख)",
 						'value' => $C
@@ -771,6 +774,7 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 						'amt_basic_premium' 	=> $BASIC_PREMIUM,
 						'amt_commissionable'	=> $commissionable_premium,
 						'amt_agent_commission'  => $agent_commission,
+						'amt_direct_discount' 	=> $direct_discount,
 						'amt_pool_premium' 		=> 0.00,
 					];
 

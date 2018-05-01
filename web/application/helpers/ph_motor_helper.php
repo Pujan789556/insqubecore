@@ -265,8 +265,8 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
         $premium_AA_total 	= 0.00;
         $POOL_PREMIUM 	= 0.00;
         $commissionable_premium = NULL;
-        $agent_commission = NULL;
-
+        $agent_commission 		= NULL;
+        $direct_discount 		= NULL;
         if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			/**
@@ -359,11 +359,15 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 			{
 				// X% of GHA
 				$__premium_A_row_8 = $__premium_A_row_7 * ($pfs_record->direct_discount/100.00);
+
+				$direct_discount 	= $__premium_A_row_8;
+				$dd_formatted 		= number_format($pfs_record->direct_discount, 2);
+				$__CRF_cc_table__A['sections'][] = [
+					'title' 	=> "प्रत्यक्ष बीमा वापत छूटः “घ” को {$dd_formatted} %",
+					'amount' 	=> $direct_discount
+				];
 			}
-			$__CRF_cc_table__A['sections'][] = [
-				'title' 	=> "प्रत्यक्ष बीमा वापत छूटः “घ” को {$pfs_record->direct_discount} %",
-				'amount' 	=> $__premium_A_row_8
-			];
+
 
 			// अ Total
 			$premium_A_total = $__premium_A_row_7  - $__premium_A_row_8;
@@ -628,6 +632,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 			'amt_basic_premium' 	=> $BASIC_PREMIUM,
 			'amt_commissionable'	=> $commissionable_premium,
 			'amt_agent_commission'  => $agent_commission,
+			'amt_direct_discount' 	=> $direct_discount,
 			'amt_pool_premium' 		=> $POOL_PREMIUM,
 		];
 
@@ -786,7 +791,8 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		$vehicle_over_age_rate 			= 0.00;
 
         $commissionable_premium = NULL;
-        $agent_commission = NULL;
+        $agent_commission 	= NULL;
+        $direct_discount 	= NULL;
 
         foreach ($default_tariff as $t)
         {
@@ -988,11 +994,15 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 			{
 				// X% of ङ
 				$__premium_A_row_14 = $__premium_A_row_NGA * ($pfs_record->direct_discount/100.00);
+
+				$direct_discount 	= $__premium_A_row_14;
+				$dd_formatted 		= number_format($pfs_record->direct_discount, 2);
+				$__CRF_cc_table__A['sections'][] = [
+					'title' => "प्रत्यक्ष बीमा वापत छुटः “ङ” को {$dd_formatted} %",
+					'amount' => $__premium_A_row_14
+				];
 			}
-			$__CRF_cc_table__A['sections'][] = [
-				'title' => "प्रत्यक्ष बीमा वापत छुटः “ङ” को {$pfs_record->direct_discount} %",
-				'amount' => $__premium_A_row_14
-			];
+
 
 			// च Sub Total
 			$__premium_A_row_CHA = $__premium_A_row_15 = $__premium_A_row_NGA - $__premium_A_row_14;
@@ -1300,6 +1310,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 			'amt_basic_premium' 	=> $BASIC_PREMIUM,
 			'amt_commissionable'	=> $commissionable_premium,
 			'amt_agent_commission'  => $agent_commission,
+			'amt_direct_discount' 	=> $direct_discount,
 			'amt_pool_premium' 		=> $POOL_PREMIUM,
 		];
 
@@ -1471,7 +1482,8 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
         $premium_U_total = 0.00;
         $POOL_PREMIUM = 0.00;
         $commissionable_premium = NULL;
-        $agent_commission = NULL;
+        $agent_commission 		= NULL;
+        $direct_discount 		= NULL;
         if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
         {
             /**
@@ -1736,15 +1748,14 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 
 
             // Agent Commission/Direct Discount? -> Applies only Non-GOVT
-            $__discount_A_row__direct_discount = 0.00;
             if( $policy_record->flag_dc === IQB_POLICY_FLAG_DC_DIRECT && $object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
             {
                 // X% of ङ
-                $__discount_A_row__direct_discount = $__premium_A_row_NGA * ($pfs_record->direct_discount/100.00);
-
+                $direct_discount = $__premium_A_row_NGA * ($pfs_record->direct_discount/100.00);
+                $dd_formatted 	 = number_format($pfs_record->direct_discount, 2);
                 $__CRF_cc_table__A['sections'][] = [
-                    'title' => "प्रत्यक्ष बीमा वापत छुटः “ङ” को {$pfs_record->direct_discount} %",
-                    'amount' => $__discount_A_row__direct_discount
+                    'title' => "प्रत्यक्ष बीमा वापत छुटः “ङ” को {$dd_formatted} %",
+                    'amount' => $direct_discount
                 ];
             }
 
@@ -1766,7 +1777,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
             //
             // अ Sub Total
             //
-            $premium_A_total =  $__premium_A_row_NGA - $__discount_A_row__direct_discount + $__premium_A_row_towing;
+            $premium_A_total =  $__premium_A_row_NGA - $direct_discount + $__premium_A_row_towing;
 
             /**
 			 * Default Premium Check
@@ -2079,6 +2090,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 			'amt_basic_premium' 	=> $BASIC_PREMIUM,
 			'amt_commissionable'	=> $commissionable_premium,
 			'amt_agent_commission'  => $agent_commission,
+			'amt_direct_discount' 	=> $direct_discount,
 			'amt_pool_premium' 		=> $POOL_PREMIUM,
 		];
 
