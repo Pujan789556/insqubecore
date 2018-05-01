@@ -1067,8 +1067,8 @@ class Endorsements extends MY_Controller
 			if($pfs_record->flag_installment === IQB_FLAG_YES )
 			{
 				// Get Multiple Installments
-				$dates = $this->input->post('installment_date') ?? NULL;
-				$percents = $this->input->post('percent') ?? NULL;
+				$dates 		= $this->input->post('installment_date') ?? NULL;
+				$percents 	= $this->input->post('percent') ?? NULL;
 
 				if(empty($dates) OR empty($percents))
 				{
@@ -1177,6 +1177,7 @@ class Endorsements extends MY_Controller
 	 */
 	private function __render_premium_form($policy_record, $endorsement_record, $json_extra=[])
 	{
+
 		/**
 		 *  Let's Load The Endorsement Form For this Record
 		 */
@@ -1195,10 +1196,46 @@ class Endorsements extends MY_Controller
 			return $this->template->json($premium_goodies, 400);
 		}
 
+
 		/**
 		 * Portfolio Settings Record
 		 */
 		$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+
+		/**
+         * Common Views:
+         *
+         * 	1. Premium Installment Section
+         */
+		$common_components = '';
+        if($pfs_record->flag_installment === IQB_FLAG_YES )
+		{
+	        $common_components = $this->load->view('endorsements/forms/_form_txn_installments', [
+	            'endorsement_record'    => $endorsement_record,
+	            'form_elements'     	=> $premium_goodies['validation_rules']['installments']
+	        ], TRUE);
+	    }
+
+
+		/**
+		 * Do we have to compute premium manually?
+		 *
+		 * If so, let's render manual premium form
+		 */
+		if( _ENDORSEMENT__is_portfolio_premium_manual($endorsement_record->portfolio_id, $endorsement_record->txn_type) )
+		{
+			$json_data['form'] = $this->load->view('endorsements/forms/_form_premium_manual', [
+								                'form_elements'         => $this->endorsement_model->manual_premium_v_rules(),
+								                'policy_record'         => $policy_record,
+								                'endorsement_record'    => $endorsement_record,
+								                'common_components' 	=> $common_components
+								            ], TRUE);
+			$json_data = array_merge($json_data, $json_extra);
+			$this->template->json($json_data);
+			exit(0);
+		}
+
 
 
 		// Endorsement Form
@@ -1210,26 +1247,13 @@ class Endorsements extends MY_Controller
 			return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
 		}
 
-		/**
-         * Common Views:
-         *
-         * 	1. Premium Installment Section
-         */
-		$common_components = '';
-        if($pfs_record->flag_installment === IQB_FLAG_YES )
-		{
-	        $common_components = $this->load->view('endorsements/forms/_form_txn_installments', [
-	            'endorsement_record'        => $endorsement_record,
-	            'form_elements'     => $premium_goodies['validation_rules']['installments']
-	        ], TRUE);
-	    }
 
 		// Let's render the form
         $json_data['form'] = $this->load->view($form_view, [
 								                'form_elements'         => $premium_goodies['validation_rules'],
 								                'portfolio_risks' 		=> $portfolio_risks,
 								                'policy_record'         => $policy_record,
-								                'endorsement_record'        	=> $endorsement_record,
+								                'endorsement_record'    => $endorsement_record,
 								                'policy_object' 		=> $policy_object,
 								                'tariff_record' 		=> $premium_goodies['tariff_record'],
 								                'common_components' 	=> $common_components

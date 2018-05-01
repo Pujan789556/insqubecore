@@ -1951,6 +1951,125 @@ if ( ! function_exists('_ENDORSEMENT_premium_basic_v_rules'))
 }
 
 // ------------------------------------------------------------------------
+
+if ( ! function_exists('_ENDORSEMENT__save_premium_manual'))
+{
+    /**
+     * Save Endorsement Premium Manually
+     *
+     * This function is used to save manual endorsement for the following types
+     *  - Premium Upgrade
+     *  - Premium Refund
+     *
+     * Currently Identified Portfolios are:
+     *  - ENG - CAR
+     *  - ENG - EAR
+     *  - FIRE - FIRE
+     *  - MISC - TMI
+     *
+     * @param int   $id             Endorsement ID
+     * @param float $agent_commission_rate  Portfolio Agent Commission Rate
+     * @return  bool
+     */
+    function _ENDORSEMENT__save_premium_manual( $id, $agent_commission_rate )
+    {
+        $CI =& get_instance();
+
+        if( $CI->input->post() )
+        {
+            /**
+             * Manual Validatio Rules
+             */
+            $v_rules = $CI->endorsement_model->manual_premium_v_rules();
+            $CI->form_validation->set_rules($v_rules);
+
+            if($CI->form_validation->run() === TRUE )
+            {
+                $data = [
+                    'gross_amt_sum_insured' => $CI->input->post('gross_amt_sum_insured'),
+                    'net_amt_sum_insured'   => $CI->input->post('net_amt_sum_insured'),
+                    'amt_basic_premium'     => $CI->input->post('amt_basic_premium'),
+                    'amt_pool_premium'      => $CI->input->post('amt_pool_premium'),
+                    'amt_agent_commission'  => $CI->input->post('amt_agent_commission'),
+                    'amt_stamp_duty'        => $CI->input->post('amt_stamp_duty'),
+                    'txn_date'              => date('Y-m-d'),
+
+                    // No Premium Computation and Cost Computation
+                    'premium_computation_table' => NULL,
+                    'cost_calculation_table'    => NULL
+                ];
+
+                /**
+                 * Let's Compute VAT
+                 */
+                $taxable_amount = $data['amt_basic_premium'] + $data['amt_pool_premium'] + $data['amt_stamp_duty'];
+                $CI->load->helper('account');
+                $data['amt_vat'] = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
+
+                /**
+                 * Commissionable Amount
+                 */
+                $amt_commissionable = NULL;
+                if( $data['amt_agent_commission'] != 0 && $agent_commission_rate > 0 )
+                {
+                    $data['amt_commissionable'] = ( $data['amt_agent_commission'] * 100 ) / $agent_commission_rate;
+                }
+
+                return $CI->endorsement_model->save($id, $data);
+
+            }
+            else
+            {
+                return $CI->template->json([
+                    'status'    => 'error',
+                    'title'     => 'Validation Error!',
+                    'message'   => validation_errors()
+                ]);
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_ENDORSEMENT__is_portfolio_premium_manual'))
+{
+    /**
+     * Check if given portfolio's Endorsement's Premium is to compute manually.
+     *
+     * This function is used to save manual endorsement for the following types
+     *  - Premium Upgrade
+     *  - Premium Refund
+     *
+     * Currently Identified Portfolios are:
+     *  - ENG - CAR
+     *  - ENG - EAR
+     *  - FIRE - FIRE
+     *  - MISC - TMI
+     *
+     * @param int   $portfolio_id   Portfolio ID
+     * @param int   $txn_type  Endorsement TXN Type
+     * @return  bool
+     */
+    function _ENDORSEMENT__is_portfolio_premium_manual( $portfolio_id, $txn_type )
+    {
+        $portfolio_id = (int)$portfolio_id;
+        $txn_type = (int)$txn_type;
+
+        // Allowed Portfolios
+        $manual_portolios   = [IQB_SUB_PORTFOLIO_ENG_CAR_ID, IQB_SUB_PORTFOLIO_ENG_EAR_ID, IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID, IQB_SUB_PORTFOLIO_MISC_TMI_ID];
+
+        // Allowed Txn Types
+        $txn_types          = [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND];
+
+
+        return in_array($portfolio_id, $manual_portolios) && in_array($txn_type, $txn_types);
+
+    }
+}
+
+// ------------------------------------------------------------------------
 // POLICY INSTALLMENT HELPER FUNCTIONS
 // ------------------------------------------------------------------------
 

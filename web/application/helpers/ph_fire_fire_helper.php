@@ -980,22 +980,6 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 		$CI =& get_instance();
 
 		/**
-		 * !!! NOTE @TODO !!!
-		 *
-		 * Manual Endorsement should be done on
-		 * 	- Premium Upgrade
-		 * 	- Premium Refund
-		 */
-		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-		{
-			return $CI->template->json([
-				'title' 	=> 'UNDER CONSTRUCTION!',
-				'status' 	=> 'error',
-				'message' 	=> 'We need to do it manually.'
-			], 400);
-		}
-
-		/**
 		 * Form Submitted?
 		 */
 		$return_data = [];
@@ -1012,6 +996,19 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 			 * Portfolio Setting Record
 			 */
 			$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
+
+
+			/**
+			 * !!! MANUAL PREMIUM COMPUTATION ENDORSEMENT !!!
+			 *
+			 * Manual Endorsement should be done on
+			 * 	- Premium Upgrade
+			 * 	- Premium Refund
+			 */
+			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+			{
+				return _ENDORSEMENT__save_premium_manual($endorsement_record->id, $pfs_record->agent_commission);
+			}
 
 			/**
 			 * Portfolio Risks

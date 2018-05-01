@@ -65,10 +65,9 @@ class Endorsement_model extends MY_Model
      *  - ENG - EAR
      *  - ENG - TMI
      *
-     * @param int $txn_type
      * @return array
      */
-    public function manual_premium_v_rules($txn_type)
+    public function manual_premium_v_rules()
     {
         $rules = [
             [
