@@ -335,7 +335,7 @@ class Endorsement_model extends MY_Model
         /**
          * Task 1: Reset Endorsement Record
          */
-        $nullable_fields = ['gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_vat', 'premium_computation_table', 'cost_calculation_table', 'flag_ri_approval'];
+        $nullable_fields = ['gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_vat', 'cost_calculation_table', 'flag_ri_approval'];
 
         $reset_data = [];
 
