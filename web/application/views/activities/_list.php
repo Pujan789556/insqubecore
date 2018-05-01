@@ -8,13 +8,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<tr>
 		<th>ID</th>
 		<th>Activity</th>
+		<th>Module</th>
+		<th>Module ID</th>
 		<th>Date</th>
 		<th>User ID</th>
-	</tr>					
+	</tr>
 	<?php
 	/**
 	 * Load Rows & Next Link (if any)
-	 */ 
-	$this->load->view('activities/_rows');	
-	?>	
+	 */
+	$this->load->view('activities/_rows');
+	?>
 </table>

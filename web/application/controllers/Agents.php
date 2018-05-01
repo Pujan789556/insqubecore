@@ -396,14 +396,11 @@ class Agents extends MY_Controller
 					if($action === 'add')
 					{
 						$done = $this->agent_model->insert($data, TRUE); // No Validation on Model
-
-						// Activity Log
-						$done ? $this->agent_model->log_activity($done, 'C'): '';
 					}
 					else
 					{
 						// Now Update Data
-						$done = $this->agent_model->update($record->id, $data, TRUE) && $this->agent_model->log_activity($record->id, 'E');
+						$done = $this->agent_model->update($record->id, $data, TRUE);
 					}
 
 		        	if(!$done)

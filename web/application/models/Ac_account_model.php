@@ -258,10 +258,6 @@ class Ac_account_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-        else
-        {
-            $this->log_activity($id, 'D');
-        }
 
         // Enable db_debug if on development environment
         $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;

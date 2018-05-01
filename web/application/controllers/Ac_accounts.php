@@ -378,14 +378,11 @@ class Ac_accounts extends MY_Controller
 				if($action === 'add')
 				{
 					$done = $this->ac_account_model->insert($data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$done ? $this->ac_account_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->ac_account_model->update($record->id, $data, TRUE) && $this->ac_account_model->log_activity($record->id, 'E');
+					$done = $this->ac_account_model->update($record->id, $data, TRUE);
 				}
 
 	        	if(!$done)

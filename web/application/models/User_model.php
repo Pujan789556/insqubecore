@@ -418,7 +418,7 @@ class User_model extends MY_Model
 			'banned' 			=> 0,
 			'ban_reason' 	=> NULL
 		);
-		return $this->update($id, $data, TRUE) && $this->log_activity($id, 'U');
+		return $this->update($id, $data, TRUE) && $this->log_activity($id, 'Y');
 		// return $this->set_user($user_id, $data);
 	}
 

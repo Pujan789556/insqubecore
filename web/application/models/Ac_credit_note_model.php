@@ -104,14 +104,7 @@ class Ac_credit_note_model extends MY_Model
                     // --------------------------------------------------------------------
 
                     /**
-                     * Task 3: Log Activity
-                     */
-                    $this->log_activity($id, 'C');
-
-                    // --------------------------------------------------------------------
-
-                    /**
-                     * Task 4: Clear Cache (For this Policy)
+                     * Task 3: Clear Cache (For this Policy)
                      */
                     if($policy_id)
                     {
@@ -474,29 +467,5 @@ class Ac_credit_note_model extends MY_Model
     public function delete($id = NULL)
     {
         return FALSE;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module'    => 'ac_credit_note',
-            'module_id' => $id,
-            'action'    => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 }

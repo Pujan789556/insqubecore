@@ -201,24 +201,41 @@ class Activity {
 	private function _statement_common( $fullstop = TRUE )
 	{
 		$action_base_uri = $this->_module_config['_uri'];
-		$anchor = '';
+		// $anchor = '';
 		$action = $this->_module_config['_actions'][$this->_activity->action];
 
-		// If this is a recordwise action
-		if($this->_activity->module_id)
-		{
-			// eg. <a href="roles/...">role</a>
-			$anchor = anchor(
-						site_url( $action_base_uri . $this->_activity->module_id),
-						"{$this->_activity->module}");
-		}
-		else
-		{
-			// Else, linke to module on the whole statement
-			$action = anchor(site_url( $action_base_uri ), $action);
-		}
+		// $what = $this->_module_config['single'];
 
-		$statement = "$action $anchor";
+		// echo '<pre>';
+		// print_r($this->_module_config);
+		// print_r($this->_activity);exit;
+
+
+		/**
+		 * Statement Format:
+		 *
+		 * 		Username <action> <a href="link_to_module">module_item</a>
+		 */
+		$what = anchor( site_url( $this->_module_config['_uri']), $this->_module_config['single'] );
+
+
+
+		// echo $action;exit;
+		// // If this is a recordwise action
+		// if($this->_activity->module_id)
+		// {
+		// 	// eg. <a href="roles/...">role</a>
+		// 	$anchor = anchor(
+		// 				site_url( $action_base_uri . $this->_activity->module_id),
+		// 				"{$this->_activity->module}");
+		// }
+		// else
+		// {
+		// 	// Else, linke to module on the whole statement
+		// 	$action = anchor(site_url( $action_base_uri ), $action);
+		// }
+
+		$statement = $this->_activity->username . ' ' . $action . ' ' . $what;
 
 		$statement = $fullstop ? $statement . '.' : $statement;
 
@@ -328,6 +345,10 @@ class Activity {
 		else if( !empty($this->_activity) && array_key_exists($this->_activity->module, $configs) )
 		{
 			$this->_module_config = $configs[$this->_activity->module];
+		}
+		else
+		{
+			$this->_module_config = [];
 		}
 		return $this;
 	}

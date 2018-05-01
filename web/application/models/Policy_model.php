@@ -541,12 +541,12 @@ class Policy_model extends MY_Model
             // Task a: Insert Master Record, No Validation Required as it is performed on Controller
             $id = parent::insert($data, TRUE);
 
-            // Task b. Insert Broker Relations
-            if($id)
-            {
-                // Log Activity
-                $this->log_activity($id, 'C');
-            }
+            // // Task b. Insert Broker Relations
+            // if($id)
+            // {
+            //     // Log Activity
+            //     $this->log_activity($id, 'C');
+            // }
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
@@ -579,12 +579,12 @@ class Policy_model extends MY_Model
             // Task a: Update Master Record, No Validation Required as it is performed on Controller
             $status = parent::update($id, $data, TRUE);
 
-            // Task b. Update Broker Relations
-            if($status)
-            {
-                // Log Activity
-                $this->log_activity($id, 'E');
-            }
+            // // Task b. Update Broker Relations
+            // if($status)
+            // {
+            //     // Log Activity
+            //     $this->log_activity($id, 'E');
+            // }
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();

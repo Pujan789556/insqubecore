@@ -19,26 +19,38 @@
 $config['insqb_activity_types'] = [
 
 	/**
-	 * Activities related to Account
+	 * Activities related to Account Heading Group
 	 */
-	'ac_account' => [
-		'_uri' => 'ac_accounts/',
-		'_table' => 'ac_accounts',
+	'ac_account_groups' => [
+		'_uri' => 'ac_account_groups/',
+		'single' => 'account group',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
-	 * Activities related to Account Heading Group
+	 * Activities related to Account
 	 */
-	'ac_account_group' => [
-		'_uri' => 'ac_account_groups/',
-		'_table' => 'ac_account_groups',
+	'ac_accounts' => [
+		'_uri' => 'ac_accounts/',
+		'single' => 'account',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited'
+			'U' => 'edited',
+			'D' => 'deleted'
+	]],
+
+	/**
+	 * Activities related to Account Invoice
+	 */
+	'ac_credit_notes' => [
+		'_uri' => 'ac_credit_notes/',
+		'single' => 'credit note',
+		'_actions' => [
+			'C' => 'added',
+			'U' => 'edited'
 	]],
 
 	/**
@@ -46,114 +58,113 @@ $config['insqb_activity_types'] = [
 	 */
 	'ac_duties_and_tax' => [
 		'_uri' => 'ac_duties_and_tax/',
-		'_table' => 'ac_duties_and_tax',
+		'single' => 'account duty and tax',
 		'_actions' => [
-			'E' => 'edited'
+			'U' => 'edited'
+	]],
+
+	/**
+	 * Activities related to Account Invoice
+	 */
+	'ac_invoices' => [
+		'_uri' => 'ac_invoices/',
+		'single' => 'invoice',
+		'_actions' => [
+			'C' => 'added',
+			'U' => 'edited'
 	]],
 
 	/**
 	 * Activities related to Account Parties
 	 */
-	'ac_party' => [
+	'ac_parties' => [
 		'_uri' => 'ac_parties/',
-		'_table' => 'ac_parties',
+		'single' => 'account party',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
+	]],
+
+	/**
+	 * Activities related to Account Invoice
+	 */
+	'ac_receipts' => [
+		'_uri' => 'ac_receipts/',
+		'single' => 'receipt',
+		'_actions' => [
+			'C' => 'added',
+			'U' => 'edited'
 	]],
 
 	/**
 	 * Activities related to Account Voucher
 	 */
-	'ac_voucher' => [
+	'ac_vouchers' => [
 		'_uri' => 'ac_vouchers/',
-		'_table' => 'ac_vouchers',
+		'single' => 'voucher',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited'
+			'U' => 'edited'
 	]],
 
 	/**
-	 * Activities related to Account Invoice
+	 * Activities related to Account Voucher Type
 	 */
-	'ac_invoice' => [
-		'_uri' => 'ac_invoices/',
-		'_table' => 'ac_invoices',
+	'ac_voucher_types' => [
+		'_uri' => 'ac_voucher_types/',
+		'single' => 'voucher type',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited'
+			'U' => 'edited'
 	]],
-
-	/**
-	 * Activities related to Account Invoice
-	 */
-	'ac_credit_note' => [
-		'_uri' => 'ac_credit_notes/',
-		'_table' => 'ac_credit_notes',
-		'_actions' => [
-			'C' => 'added',
-			'E' => 'edited'
-	]],
-
-	/**
-	 * Activities related to Account Receipts
-	 */
-	'ac_receipt' => [
-		'_uri' => 'ac_receipts/',
-		'_table' => 'ac_receipts',
-		'_actions' => [
-			'C' => 'added'
-	]],
-
-
 
 
 	/**
 	 * Activities related to Agent
 	 */
-	'agent' => [
+	'agents' => [
 		'_uri' => 'agents/',
-		'_table' => 'master_agents',
+		'single' => 'agent',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
 	 * Activities related to Branches
 	 */
-	'branch' => [
+	'branches' => [
 		'_uri' => 'branches/',
-		'_table' => 'master_branches',
+		'single' => 'branch',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
 	 * Activities related to Branches
 	 */
-	'branch_target' => [
+	'branch_targets' => [
 		'_uri' => 'branches/targets/',
-		'_table' => 'master_branch_targets',
+		'single' => 'branch target',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
 	 * Activities related to Departments
 	 */
-	'claim_scheme' => [
+	'claim_schemes' => [
 		'_uri' => 'claim_schemes/',
-		'_table' => 'master_claim_schemes',
+		'single' => 'claim scheme',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -162,66 +173,66 @@ $config['insqb_activity_types'] = [
 	 */
 	'claims' => [
 		'_uri' => 'claims/',
-		'_table' => 'dt_claims',
+		'single' => 'claim',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
 	 * Activities related to Company
 	 */
-	'company' => [
+	'companies' => [
 		'_uri' => 'companies/',
-		'_table' => 'master_companies',
+		'single' => 'company',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	// Company Branches
-	'company_branch' => [
+	'company_branches' => [
 		'_uri' => 'companies/branch/',
-		'_table' => 'master_company_branches',
+		'single' => 'company branch',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
 	 * Activities related to Country
 	 */
-	'country' => [
+	'countries' => [
 		'_uri' => 'countries/',
-		'_table' => 'master_countries',
+		'single' => 'country',
 		'_actions' => [
-			'E' => 'edited'
+			'U' => 'edited'
 	]],
 
 	/**
 	 * Customers related to Agent
 	 */
-	'customer' => [
+	'customers' => [
 		'_uri' => 'customers/',
-		'_table' => 'dt_customers',
+		'single' => 'customer',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
 	 * Activities related to Departments
 	 */
-	'department' => [
+	'departments' => [
 		'_uri' => 'departments/',
-		'_table' => 'master_departments',
+		'single' => 'department',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -229,55 +240,55 @@ $config['insqb_activity_types'] = [
 	/**
 	 * Activities related to District
 	 */
-	'district' => [
+	'districts' => [
 		'_uri' => 'districts/',
-		'_table' => 'master_districts',
+		'single' => 'district',
 		'_actions' => [
-			'E' => 'edited'
+			'U' => 'edited'
 	]],
 
 	/**
 	 * Activities related to District
 	 */
-	'exchange_rate' => [
-		'_uri' => 'exchange_rates/',
-		'_table' => 'master_exchange_rates',
+	'forex' => [
+		'_uri' => 'forex/',
+		'single' => 'forex',
 		'_actions' => [
-			'E' => 'edited'
+			'U' => 'edited'
 	]],
 
 	/**
 	 * Activities related to Departments
 	 */
-	'fy_quarter' => [
+	'fy_quarters' => [
 		'_uri' => 'fy_quarters/',
-		'_table' => 'master_fy_quarters',
+		'single' => 'fiscal year quarter',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited'
+			'U' => 'edited'
 	]],
 
 	/**
 	 * Activities related to Object
 	 */
-	'object' => [
+	'objects' => [
 		'_uri' => 'objects/',
-		'_table' => 'dt_objects',
+		'single' => 'policy object',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
 	 * Activities related to Policy
 	 */
-	'policy' => [
+	'policies' => [
 		'_uri' => 'policies/',
-		'_table' => 'dt_policies',
+		'single' => 'policy',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -286,10 +297,10 @@ $config['insqb_activity_types'] = [
 	 */
 	'endorsements' => [
 		'_uri' => 'endorsements/',
-		'_table' => 'dt_endorsements',
+		'single' => 'policy endorsement',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -298,33 +309,33 @@ $config['insqb_activity_types'] = [
 	 */
 	'portfolio' => [
 		'_uri' => 'portfolio/',
-		'_table' => 'master_portfolio',
+		'single' => 'portfolio',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
 	 * Activities related to Region
 	 */
-	'region' => [
+	'regions' => [
 		'_uri' => 'regions/',
-		'_table' => 'master_regions',
+		'single' => 'region',
 		'_actions' => [
-			'E' => 'edited'
+			'U' => 'edited'
 	]],
 
 
 	/**
 	 * RI Setup - Pools
 	 */
-	'ri_setup_pool' => [
+	'ri_setup_pools' => [
 		'_uri' => 'ri_setup_pools/',
-		'_table' => 'ri_setup_pools',
+		'single' => 'RI pool setup',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -332,24 +343,24 @@ $config['insqb_activity_types'] = [
 	/**
 	 * RI Setup - Treaties
 	 */
-	'ri_setup_treaty' => [
+	'ri_setup_treaties' => [
 		'_uri' => 'ri_setup_treaties/',
-		'_table' => 'ri_setup_treaties',
+		'single' => 'RI treaty setup',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
 	 * Activities related to Risks
 	 */
-	'risk' => [
+	'risks' => [
 		'_uri' => 'risks/',
-		'_table' => 'master_risks',
+		'single' => 'risk',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -357,14 +368,14 @@ $config['insqb_activity_types'] = [
 	/**
 	 * Activities related to Roles
 	 */
-	'role' => [
+	'roles' => [
 		'_uri' => 'roles/',
-		'_table' => 'auth_roles',
+		'single' => 'role',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted',
-			'A' => 'assigned',  // assigned <role> to <user>
+			'A' => 'assigned role to',  // assigned <role> to <user>
 			'P' => 'updated permissions to ',  // assigned permission to <role>
 			'R' => 'revoked all permissions from all roles.'
 	]],
@@ -373,44 +384,44 @@ $config['insqb_activity_types'] = [
 	/**
 	 * Activities related to Portfolio Settings
 	 */
-	'portfolio_setting' => [
+	'portfolio_settings' => [
 		'_uri' => 'portfolio/settings/',
-		'_table' => 'master_portfolio_settings',
+		'single' => 'portfolio setting',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
 	 * Activities related to Setting
 	 */
-	'setting' => [
+	'settings' => [
 		'_uri' => 'settings/',
-		'_table' => 'master_settings',
+		'single' => 'application settings',
 		'_actions' => [
-			'E' => 'edited'
+			'U' => 'edited'
 	]],
 
 	/**
 	 * Activities related to State
 	 */
-	'state' => [
+	'states' => [
 		'_uri' => 'states/',
-		'_table' => 'master_states',
+		'single' => 'state',
 		'_actions' => [
-			'E' => 'edited'
+			'U' => 'edited'
 	]],
 
 	/**
 	 * Activities related to Surveyor
 	 */
-	'surveyor' => [
+	'surveyors' => [
 		'_uri' => 'surveyors/',
-		'_table' => 'master_surveyors',
+		'single' => 'surveyor',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
@@ -419,42 +430,42 @@ $config['insqb_activity_types'] = [
 	 */
 	'surveyor_expertise' => [
 		'_uri' => 'surveyor_expertise/',
-		'_table' => 'master_surveyor_expertise',
+		'single' => 'surveyor expertise',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted'
 	]],
 
 	/**
 	 * Activities related to TMI Plans
 	 */
-	'tmi_plan' => [
+	'tmi_plans' => [
 		'_uri' => 'tmi_plans/',
-		'_table' => 'master_tmi_plans',
+		'single' => 'TMI Plan',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 	]],
 
 	/**
 	 * Activities related to User
 	 */
-	'user' => [
+	'users' => [
 		'_uri' => 'users/',
-		'_table' => 'auth_users',
+		'single' => 'user',
 		'_actions' => [
 			'C' => 'added',
-			'E' => 'edited',
+			'U' => 'edited',
 			'D' => 'deleted',
-			'A' => 'assigned',  // assigned <role> to <user>
-			'B' => 'updated basdic information', // of <user>
-			'H' => 'changed password', // of <user>
-			'T' => 'updated contact',  // updated contact of <user>
-			'P' => 'updated profile',  // updated profile of <user>
-			'O' => 'uploaded document(s)',  // uploaded documents of <user>
+			'A' => 'assigned role to',  // assigned <role> to <user>
+			'B' => 'updated basdic information of', // of <user>
+			'H' => 'changed password of', // of <user>
+			'T' => 'updated contact of',  // updated contact of <user>
+			'P' => 'updated profile of',  // updated profile of <user>
+			'O' => 'uploaded document(s) of',  // uploaded documents of <user>
 			'X' => 'banned', // banned <user>
-			'U' => 'unbanned' // unbanned <user>
+			'Y' => 'unbanned' // unbanned <user>
 	]],
 
 ];

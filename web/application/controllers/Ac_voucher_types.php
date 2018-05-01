@@ -146,14 +146,11 @@ class Ac_voucher_types extends MY_Controller
 				{
 					// // @NOTE: Activity Log will be automatically inserted
 					// $done = $this->ac_voucher_type_model->insert($data, TRUE); // No Validation on Model
-
-					// // Activity Log
-					// $done ? $this->ac_voucher_type_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->ac_voucher_type_model->update($record->id, $data, TRUE) && $this->ac_voucher_type_model->log_activity($record->id, 'E');
+					$done = $this->ac_voucher_type_model->update($record->id, $data, TRUE);
 				}
 
 				if(!$done)

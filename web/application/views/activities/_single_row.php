@@ -7,7 +7,9 @@ $activity = $this->activity->initialize($record);
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
-	<td><?php echo $record->username . ' ' . $activity->statement();?></td>
+	<td><?php echo $activity->statement();?></td>
+	<td><?php echo $record->module; ?></td>
+	<td><?php echo $record->module_id; ?></td>
 	<td><?php echo $record->created_at;?></td>
 	<td><?php echo $record->created_by;?></td>
 

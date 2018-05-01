@@ -268,13 +268,11 @@ class Ac_account_groups extends MY_Controller
 					// @NOTE: Activity Log will be automatically inserted
 					$done = $this->ac_account_group_model->add($data); // No Validation on Model
 
-					// Activity Log
-					$done ? $this->ac_account_group_model->log_activity($done, 'C'): '';
 				}
 				else if($action === 'edit' )
 				{
 					// Now Update Data
-					$done = $this->ac_account_group_model->update($record->id, $data, TRUE) && $this->ac_account_group_model->log_activity($record->id, 'E');
+					$done = $this->ac_account_group_model->update($record->id, $data, TRUE);
 				}
 				else if($action === 'move' ){
 					// Now Update Data

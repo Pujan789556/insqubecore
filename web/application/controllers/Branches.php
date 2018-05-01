@@ -183,14 +183,11 @@ class Branches extends MY_Controller
 				{
 					// @NOTE: Activity Log will be automatically inserted
 					$done = $this->branch_model->insert($data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$done ? $this->branch_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->branch_model->update($record->id, $data, TRUE) && $this->branch_model->log_activity($record->id, 'E');
+					$done = $this->branch_model->update($record->id, $data, TRUE);
 				}
 
 				if(!$done)
@@ -533,8 +530,6 @@ class Branches extends MY_Controller
 
 						$done = $this->branch_target_model->insert($data, TRUE); // No Validation on Model
 
-						// Activity Log
-						$done ? $this->branch_target_model->log_activity($done, 'C'): '';
 						$i++;
 					}
 				}
@@ -550,7 +545,7 @@ class Branches extends MY_Controller
 						];
 						$target_id = $target_ids[$i];
 
-						$done = $this->branch_target_model->update($target_id, $data, TRUE) && $this->branch_target_model->log_activity($target_id, 'E');
+						$done = $this->branch_target_model->update($target_id, $data, TRUE);
 
 						$i++;
 					}
@@ -833,7 +828,7 @@ class Branches extends MY_Controller
 					'target_details' 	=> $this->_get_target_details_formatted(TRUE)
 				];
 
-				$done = $this->branch_target_model->update($target_id, $post_data, TRUE) && $this->branch_target_model->log_activity($target_id, 'E');
+				$done = $this->branch_target_model->update($target_id, $post_data, TRUE);
 
 
 				if(!$done)

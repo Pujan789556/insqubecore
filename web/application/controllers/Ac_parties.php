@@ -463,14 +463,11 @@ class Ac_parties extends MY_Controller
 				if($action === 'add')
 				{
 					$done = $this->ac_party_model->insert($data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$done ? $this->ac_party_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->ac_party_model->update($record->id, $data, TRUE) && $this->ac_party_model->log_activity($record->id, 'E');
+					$done = $this->ac_party_model->update($record->id, $data, TRUE);
 				}
 
 	        	if(!$done)
@@ -577,7 +574,7 @@ class Ac_parties extends MY_Controller
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
 				'removeRow' => true,
-				'rowId'		=> '#_data-row-'.$record->id
+				'rowId'		=> '#_data-row-ac_party-'.$record->id
 			];
 		}
 		else

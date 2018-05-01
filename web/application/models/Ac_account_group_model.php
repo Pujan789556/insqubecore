@@ -149,9 +149,6 @@ class Ac_account_group_model extends MY_Model
 
             if($id)
             {
-                // Log Activity
-                $this->log_activity($id, 'C');
-
                 // Clear Cache
                 $this->clear_cache();
             }
@@ -205,8 +202,6 @@ class Ac_account_group_model extends MY_Model
 
             if($result)
             {
-                // Log Activity
-                $this->log_activity($id, 'E');
 
                 // Clear Cache
                 $this->clear_cache();
@@ -261,9 +256,6 @@ class Ac_account_group_model extends MY_Model
 
             if($result)
             {
-                // Log Activity
-                $this->log_activity($id, 'E');
-
                 // Clear Cache
                 $this->clear_cache();
             }
@@ -482,8 +474,6 @@ class Ac_account_group_model extends MY_Model
             // Let's delete the record(s)
             $result = mysqli_store_procedure('delete', $sql, $bind_params);
 
-            // Log Activity
-            $this->log_activity($id, 'D');
 
             // Clear Cache
             $this->clear_cache();
@@ -503,29 +493,5 @@ class Ac_account_group_model extends MY_Model
 
         // return result/status
         return $status;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module' => 'ac_account_group',
-            'module_id' => $id,
-            'action' => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 }
