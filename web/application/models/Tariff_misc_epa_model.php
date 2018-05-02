@@ -316,39 +316,11 @@ class Tariff_misc_epa_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-        else
-        {
-            $this->log_activity($id, 'D');
-        }
 
         // Enable db_debug if on development environment
         $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module' => 'portfolio_tarrif_misc_epa',
-            'module_id' => $id,
-            'action' => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 }

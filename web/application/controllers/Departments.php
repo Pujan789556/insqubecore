@@ -176,14 +176,11 @@ class Departments extends MY_Controller
 				{
 					// @NOTE: Activity Log will be automatically inserted
 					$done = $this->department_model->insert($data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$done ? $this->department_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->department_model->update($record->id, $data, TRUE) && $this->department_model->log_activity($record->id, 'E');
+					$done = $this->department_model->update($record->id, $data, TRUE);
 				}
 
 				if(!$done)

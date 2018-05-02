@@ -97,9 +97,6 @@ class Districts extends MY_Controller
         	$data = $this->input->post();
         	if( $this->district_model->update($id, $data) )
         	{
-        		// Update Record
-        		$this->district_model->log_activity($record->id, 'E');
-
         		$status = 'success';
 				$message = 'Successfully Updated.';
 				$record = $this->district_model->get($id);

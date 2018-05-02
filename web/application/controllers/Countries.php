@@ -102,7 +102,7 @@ class Countries extends MY_Controller
 				$data = $this->input->post();
 
 				// Now Update Data & Log Activity
-	        	$done = $this->country_model->update($id, $data, TRUE) && $this->country_model->log_activity($record->id, 'E');
+	        	$done = $this->country_model->update($id, $data, TRUE);
 
 	        	if(!$done)
 				{

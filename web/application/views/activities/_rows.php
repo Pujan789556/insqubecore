@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Load Rows from View
- */ 
+ */
 foreach($records as $record)
 {
 	$this->load->view('activities/_single_row', compact('record'));
@@ -18,9 +18,9 @@ foreach($records as $record)
 if($next_id):
 	$next_url = site_url('activities/page/'.$next_id);
 	$loader_box_id = '__next-loader-'.$next_id;
-?>	
+?>
 	<tr id="<?php echo $loader_box_id;?>">
-		<td colspan="4" class="text-center pointer"
+		<td colspan="6" class="text-center pointer"
 			data-loading-text="Loading ..."
 			data-url="<?php echo $next_url;?>"
 			data-method="append"
@@ -32,4 +32,4 @@ if($next_id):
 			<span class="text-blue">Load More Result<br/> <i class="fa fa-angle-down"></i></span>
 		</td>
 	</tr>
-<?php endif;?>	
+<?php endif;?>

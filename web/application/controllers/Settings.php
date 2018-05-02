@@ -83,15 +83,14 @@ class Settings extends MY_Controller
 	            	// Get New Logo
 	            	$new_logo = $status === 'success' ? $files[0] : $this->settings->logo;
 
-	            	// Now Update Data
-		        	// $done = $this->setting_model->from_form(NULL, ['logo' => $new_logo])->update(NULL, 1) && $this->setting_model->log_activity(1, 'E');
+
 	            	$data = $this->input->post();
 	            	$data['logo'] = $new_logo;
 
 	            	// Offline checkbox
 	            	$data['flag_offline'] = $data['flag_offline'] ?? 0;
 
-		        	$done = $this->setting_model->update(1, $data, TRUE) && $this->setting_model->log_activity(1, 'E');
+		        	$done = $this->setting_model->update(1, $data, TRUE);
 
 
 					// Validation Error?
@@ -225,7 +224,7 @@ class Settings extends MY_Controller
                     $section_data[$element['field']] = $field_value;
                 }
 
-                $done = $this->setting_model->update(1, $section_data, TRUE) && $this->setting_model->log_activity(1, 'E');
+                $done = $this->setting_model->update(1, $section_data, TRUE);
                 // Validation Error?
                 if( !$done )
                 {

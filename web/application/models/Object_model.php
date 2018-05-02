@@ -593,9 +593,6 @@ class Object_model extends MY_Model
             // Clear cache for this customer
             $cache_var = 'object_customer_' . $record->customer_id;
             $this->delete_cache($cache_var);
-
-            // Update activity log
-            $this->log_activity($id, 'D');
         }
 
         // Enable db_debug if on development environment
@@ -603,29 +600,5 @@ class Object_model extends MY_Model
 
         // return result/status
         return $status;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module' => 'object',
-            'module_id' => $id,
-            'action' => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 }

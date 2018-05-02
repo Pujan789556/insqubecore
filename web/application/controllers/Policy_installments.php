@@ -43,7 +43,6 @@ class Policy_installments extends MY_Controller
 		// Load Models
 		$this->load->model('policy_model');
 		$this->load->model('policy_installment_model');
-		$this->load->model('policy_installment_model');
 		$this->load->model('portfolio_setting_model');
 		$this->load->model('object_model');
 

@@ -684,12 +684,7 @@ class Endorsement_model extends MY_Model
                 $this->_update_flag_current($id, $data['policy_id']);
 
                 /**
-                 * Task 3: Log activity
-                 */
-                $this->log_activity($id, 'C');
-
-                /**
-                 * Task 4: Clear Cache
+                 * Task 3: Clear Cache
                  */
                 $cache_var = 'endrsmnt_'.$data['policy_id'];
                 $this->clear_cache($cache_var);
@@ -752,12 +747,7 @@ class Endorsement_model extends MY_Model
 
 
                 /**
-                 * Task 3: Log activity
-                 */
-                $this->log_activity($id, 'E');
-
-                /**
-                 * Task 4: Clear Cache
+                 * Task 2: Clear Cache
                  */
                 $cache_var = 'endrsmnt_' . $record->policy_id;
                 $this->clear_cache($cache_var);
@@ -878,10 +868,6 @@ class Endorsement_model extends MY_Model
                  */
                 parent::update($id, $txn_data, TRUE);
 
-                /**
-                 * Task 2: Log activity
-                 */
-                $this->log_activity($id, 'E');
 
         /**
          * Complete transactions or Rollback
@@ -1154,21 +1140,21 @@ class Endorsement_model extends MY_Model
              */
             parent::delete($record->id);
 
-            /**
-             * Task 2: Update Activity Log
-             */
-            $this->log_activity($record->id, 'D');
 
             /**
-             * Task 3: Update Current Flag to Heighest ID of txn for this policy
+             * Task 2: Update Current Flag to Heighest ID of txn for this policy
              */
             $this->_set_flag_current($record->policy_id);
 
             /**
-             * Task 4: Clear Cache for this Policy (List of txn for this policy)
+             * Task 3: Clear Cache for this Policy (List of txn for this policy)
              */
             $cache_var = 'endrsmnt_'.$record->policy_id;
             $this->clear_cache($cache_var);
+
+            // Installment Cache by Policy
+            $cache_var = 'ptxi_bypolicy_' . $record->policy_id;
+            $this->delete_cache($cache);
 
         /**
          * Complete Transaction
@@ -1204,29 +1190,4 @@ class Endorsement_model extends MY_Model
 
             return $this->db->query($sql, array(IQB_FLAG_ON, $policy_id));
         }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-
-        // Save Activity Log
-        $activity_log = [
-            'module' => 'endorsements',
-            'module_id' => $id,
-            'action' => $action
-        ];
-        return $this->activity->save($activity_log);
-    }
 }

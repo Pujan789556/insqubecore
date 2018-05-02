@@ -31,7 +31,7 @@ class Activity_model extends MY_Model
     {
         $this->db->select('A.id, A.module, A.module_id, A.action, A.extra, A.created_by, A.created_at, U.username')
                 ->from($this->table_name . ' A')
-                ->join('auth_users U', 'U.id = A.created_by');
+                ->join('auth_users U', 'U.id = A.created_by', 'left');
 
         if(!empty($params))
         {

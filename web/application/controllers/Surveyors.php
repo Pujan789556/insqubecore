@@ -429,14 +429,11 @@ class Surveyors extends MY_Controller
 					if($action === 'add')
 					{
 						$done = $this->surveyor_model->insert($data, TRUE); // No Validation on Model
-
-						// Activity Log
-						$done ? $this->surveyor_model->log_activity($done, 'C'): '';
 					}
 					else
 					{
 						// Now Update Data
-						$done = $this->surveyor_model->update($record->id, $data, TRUE) && $this->surveyor_model->log_activity($record->id, 'E');
+						$done = $this->surveyor_model->update($record->id, $data, TRUE);
 					}
 
 		        	if(!$done)

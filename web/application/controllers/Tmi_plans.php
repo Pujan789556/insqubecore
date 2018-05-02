@@ -245,16 +245,12 @@ class Tmi_plans extends MY_Controller
 				// Insert or Update?
 				if($action === 'add')
 				{
-					// @NOTE: Activity Log will be automatically inserted
 					$done = $this->tmi_plan_model->insert($data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$done ? $this->tmi_plan_model->log_activity($done, 'C'): '';
 				}
 				else if($action === 'edit')
 				{
 					// Basic Information Edit Mode
-					$done = $this->tmi_plan_model->update($record->id, $data, TRUE) && $this->tmi_plan_model->log_activity($record->id, 'E');
+					$done = $this->tmi_plan_model->update($record->id, $data, TRUE);
 				}
 
 				/**
@@ -270,7 +266,7 @@ class Tmi_plans extends MY_Controller
 					$tariff_data[ $tariff_type == 'm' ? 'tariff_medical' : 'tariff_package' ] = json_encode($structured_tariff);
 
 					// Basic Information Edit Mode
-					$done = $this->tmi_plan_model->update_tariff_benefits($record->id, $tariff_data) && $this->tmi_plan_model->log_activity($record->id, 'E');
+					$done = $this->tmi_plan_model->update_tariff_benefits($record->id, $tariff_data);
 				}
 
 				/**
@@ -286,7 +282,7 @@ class Tmi_plans extends MY_Controller
 						'benefits' => json_encode($structured_benefits)
 					];
 					// Basic Information Edit Mode
-					$done = $this->tmi_plan_model->update_tariff_benefits($record->id, $benefit_data) && $this->tmi_plan_model->log_activity($record->id, 'E');
+					$done = $this->tmi_plan_model->update_tariff_benefits($record->id, $benefit_data);
 				}
 
 				if(!$done)

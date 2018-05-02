@@ -703,8 +703,6 @@ class Ri_setup_treaty_model extends MY_Model
                 // Insert Batch Portfolio Data
                 $this->batch_insert_treaty_portfolios($id, $portfolio_ids);
 
-                // Log Activity
-                $this->log_activity($id, 'C');
             }
 
         // Commit all transactions on success, rollback else
@@ -780,9 +778,6 @@ class Ri_setup_treaty_model extends MY_Model
 
                 // Insert Batch Portfolio Data
                 $this->batch_insert_treaty_portfolios($id, $to_insert_portfolios);
-
-                // Log Activity
-                $this->log_activity($id, 'E');
             }
 
         // Commit all transactions on success, rollback else
@@ -1445,39 +1440,12 @@ class Ri_setup_treaty_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-        else
-        {
-            $this->log_activity($id, 'D');
-        }
+
 
         // Enable db_debug if on development environment
         $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module'    => 'ri_setup_treaty',
-            'module_id' => $id,
-            'action'    => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 }

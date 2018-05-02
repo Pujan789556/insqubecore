@@ -12,5 +12,4 @@ $activity = $this->activity->initialize($record);
 	<td><?php echo $record->module_id; ?></td>
 	<td><?php echo $record->created_at;?></td>
 	<td><?php echo $record->created_by;?></td>
-
 </tr>

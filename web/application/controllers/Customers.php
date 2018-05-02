@@ -317,6 +317,18 @@ class Customers extends MY_Controller
 			$this->template->render_404();
 		}
 
+		/**
+		 * You Can not Edit Locked Customer Information
+		 */
+		if($record->flag_locked == IQB_FLAG_ON )
+		{
+			return $this->template->json([
+				'status' 	=> 'error',
+				'title' 	=> 'Unauthorized Action!',
+				'message' 	=> 'You can not edit locked Customer.'
+			], 403);
+		}
+
 		// Form Submitted? Save the data
 		$json_data = $this->_save('edit', $record, $from_widget, $widget_reference);
 
@@ -380,22 +392,14 @@ class Customers extends MY_Controller
 	{
 
 		// Valid action?
-		if( !in_array($action, array('add', 'edit')))
+		if( !in_array($action, array('add', 'edit')) || !in_array($from_widget, array('y', 'n')))
 		{
-			return [
+			return $this->template->json([
 				'status' => 'error',
 				'message' => 'Invalid action!'
-			];
+			]);
 		}
 
-		// Valid "from" ?
-		if( !in_array($from_widget, array('y', 'n')))
-		{
-			return [
-				'status' => 'error',
-				'message' => 'Invalid action!'
-			];
-		}
 
 		/**
 		 * Form Submitted?
@@ -432,14 +436,11 @@ class Customers extends MY_Controller
 					if($action === 'add')
 					{
 						$done = $this->customer_model->insert($data, TRUE); // No Validation on Model
-
-						// Activity Log
-						$done ? $this->customer_model->log_activity($done, 'C'): '';
 					}
 					else
 					{
 						// Now Update Data
-						$done = $this->customer_model->update($record->id, $data, TRUE) && $this->customer_model->log_activity($record->id, 'E');
+						$done = $this->customer_model->update($record->id, $data, TRUE);
 					}
 
 		        	if(!$done)

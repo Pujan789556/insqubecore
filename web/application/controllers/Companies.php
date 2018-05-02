@@ -398,14 +398,11 @@ class Companies extends MY_Controller
 					if($action === 'add')
 					{
 						$done = $this->company_model->insert($data, TRUE); // No Validation on Model
-
-						// Activity Log
-						$done ? $this->company_model->log_activity($done, 'C'): '';
 					}
 					else
 					{
 						// Now Update Data
-						$done = $this->company_model->update($record->id, $data, TRUE) && $this->company_model->log_activity($record->id, 'E');
+						$done = $this->company_model->update($record->id, $data, TRUE);
 					}
 
 		        	if(!$done)
@@ -672,14 +669,11 @@ class Companies extends MY_Controller
 				{
 					$data['company_id'] = $company_id;
 					$done = $this->company_branch_model->insert($data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$done ? $this->company_branch_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->company_branch_model->update($record->id, $data, TRUE) && $this->company_branch_model->log_activity($record->id, 'E');
+					$done = $this->company_branch_model->update($record->id, $data, TRUE);
 				}
 
 	        	if(!$done)

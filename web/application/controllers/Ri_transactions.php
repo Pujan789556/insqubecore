@@ -474,9 +474,9 @@ class Ri_transactions extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Delete a Invoice
+	 * Delete a record
 	 *
-	 * You can not delete any Invoice.
+	 * You can not delete any record.
 	 *
 	 * @param integer $id
 	 * @return void

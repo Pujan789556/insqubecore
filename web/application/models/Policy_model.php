@@ -541,12 +541,6 @@ class Policy_model extends MY_Model
             // Task a: Insert Master Record, No Validation Required as it is performed on Controller
             $id = parent::insert($data, TRUE);
 
-            // // Task b. Insert Broker Relations
-            // if($id)
-            // {
-            //     // Log Activity
-            //     $this->log_activity($id, 'C');
-            // }
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
@@ -579,12 +573,6 @@ class Policy_model extends MY_Model
             // Task a: Update Master Record, No Validation Required as it is performed on Controller
             $status = parent::update($id, $data, TRUE);
 
-            // // Task b. Update Broker Relations
-            // if($status)
-            // {
-            //     // Log Activity
-            //     $this->log_activity($id, 'E');
-            // }
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
@@ -1627,7 +1615,7 @@ class Policy_model extends MY_Model
         $this->db->trans_start();
 
             parent::delete($id);
-            $this->log_activity($id, 'D');
+
 
         $this->db->trans_complete();
 
@@ -1642,29 +1630,5 @@ class Policy_model extends MY_Model
 
         // return result/status
         return $status;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module'    => 'policy',
-            'module_id' => $id,
-            'action'    => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 }

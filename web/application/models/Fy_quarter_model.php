@@ -210,18 +210,4 @@ class Fy_quarter_model extends MY_Model
         }
         return TRUE;
     }
-
-    // ----------------------------------------------------------------
-
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module' => 'fy_quarter',
-            'module_id' => $id,
-            'action' => $action
-        ];
-        return $this->activity->save($activity_log);
-    }
 }

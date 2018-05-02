@@ -93,9 +93,10 @@ class District_model extends MY_Model
 
     public function get($id)
     {
-        return $this->db->select('D.*, S.name_en as state_name_en')
+        return $this->db->select('D.*, S.name_en as state_name_en, R.name_en as region_name_en')
                             ->from($this->table_name . ' D')
                             ->join('master_states S', 'S.id = D.state_id')
+                            ->join('master_regions R', 'R.id = D.region_id')
                             ->where('D.id', $id)
                             ->get()->row();
     }
@@ -122,29 +123,5 @@ class District_model extends MY_Model
     {
         // cache name without prefix
         return $this->delete_cache('districts_all');
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Edit
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'E')
-    {
-        $action = is_string($action) ? $action : 'E';
-        // Save Activity Log
-        $activity_log = [
-            'module' => 'district',
-            'module_id' => $id,
-            'action' => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 }

@@ -95,9 +95,6 @@ class Regions extends MY_Controller
         	$data = $this->input->post();
         	if( $this->region_model->update($id, $data) )
         	{
-        		// Update Record
-        		$this->region_model->log_activity($record->id, 'E');
-
         		$status = 'success';
 				$message = 'Successfully Updated.';
 				$record = $this->region_model->find($id);

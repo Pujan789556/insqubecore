@@ -96,20 +96,4 @@ class Ri_setup_treaty_type_model extends MY_Model
         }
         return TRUE;
     }
-
-    // ----------------------------------------------------------------
-
-    public function log_activity($id, $action = 'C')
-    {
-        return TRUE;
-
-      //    $action = is_string($action) ? $action : 'C';
-      //    // Save Activity Log
-            // $activity_log = [
-            //  'module' => 'fiscal_year',
-            //  'module_id' => $id,
-            //  'action' => $action
-            // ];
-            // return $this->activity->save($activity_log);
-    }
 }

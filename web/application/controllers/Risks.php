@@ -171,14 +171,11 @@ class Risks extends MY_Controller
 				{
 					// @NOTE: Activity Log will be automatically inserted
 					$done = $this->risk_model->insert($data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$done ? $this->risk_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->risk_model->update($record->id, $data, TRUE) && $this->risk_model->log_activity($record->id, 'E');
+					$done = $this->risk_model->update($record->id, $data, TRUE);
 				}
 
 				if(!$done)

@@ -634,14 +634,11 @@ class Objects extends MY_Controller
 				if($action === 'add')
 				{
 					$done = $this->object_model->insert($object_data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$this->object_model->log_activity($done, 'C');
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->object_model->update($record->id, $object_data, TRUE) && $this->object_model->log_activity($record->id, 'E');
+					$done = $this->object_model->update($record->id, $object_data, TRUE);
 				}
 
 	        	if(!$done)

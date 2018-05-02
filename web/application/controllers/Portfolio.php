@@ -279,9 +279,6 @@ class Portfolio extends MY_Controller
 				{
 					// @NOTE: Activity Log will be automatically inserted
 					$done = $this->portfolio_model->insert($data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$done ? $this->portfolio_model->log_activity($done, 'C'): '';
 				}
 				else if ($action === 'accounts')
 				{
@@ -292,7 +289,7 @@ class Portfolio extends MY_Controller
 					}
 
 					// Now Update Data
-					$done = $this->portfolio_model->save_accounts($record->id, $data) && $this->portfolio_model->log_activity($record->id, 'E');
+					$done = $this->portfolio_model->save_accounts($record->id, $data);
 				}
 				else if ($action === 'risks')
 				{
@@ -302,12 +299,12 @@ class Portfolio extends MY_Controller
 					];
 
 					// Now Update Data
-					$done = $this->portfolio_model->save_accounts($record->id, $risk_data) && $this->portfolio_model->log_activity($record->id, 'E');
+					$done = $this->portfolio_model->save_accounts($record->id, $risk_data);
 				}
 				else
 				{
 					// Basic Information Edit Mode
-					$done = $this->portfolio_model->update($record->id, $data, TRUE) && $this->portfolio_model->log_activity($record->id, 'E');
+					$done = $this->portfolio_model->update($record->id, $data, TRUE);
 				}
 
 				if(!$done)
@@ -800,7 +797,7 @@ class Portfolio extends MY_Controller
 						];
 
 						$setting_id = $setting_ids[$i];
-						$done = $this->portfolio_setting_model->update($setting_id, $single_data, TRUE) && $this->portfolio_setting_model->log_activity($setting_id, 'E');
+						$done = $this->portfolio_setting_model->update($setting_id, $single_data, TRUE);
 
 						$i++;
 					}

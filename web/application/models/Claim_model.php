@@ -512,9 +512,6 @@ class Claim_model extends MY_Model
             // Task b. Insert Broker Relations
             if($id)
             {
-                // Log Activity
-                $this->log_activity($id, 'C');
-
                 // Clean Cache by this Policy
                 $this->clear_cache( 'claim_list_by_policy_' . $data['policy_id'] );
             }
@@ -613,9 +610,6 @@ class Claim_model extends MY_Model
             // Task b. Insert Broker Relations
             if($done)
             {
-                // Log Activity
-                $this->log_activity($id, 'U');
-
                 // Clean Cache by this Policy
                 $this->clear_cache( 'claim_list_by_policy_' . $data['policy_id'] );
             }
@@ -769,9 +763,6 @@ class Claim_model extends MY_Model
             // Task b. Insert Broker Relations
             if($done)
             {
-                // Log Activity
-                $this->log_activity($id, 'U');
-
                 // Clean Cache by policy belonging to this policy
                 if( !$policy_id )
                 {
@@ -835,9 +826,6 @@ class Claim_model extends MY_Model
             // Task b. Insert Broker Relations
             if($done)
             {
-                // Log Activity
-                $this->log_activity($record->id, 'U');
-
                 // Clean Cache by policy belonging to this policy
                 $this->clear_cache( 'claim_list_by_policy_' . $record->policy_id );
             }
@@ -895,9 +883,6 @@ class Claim_model extends MY_Model
             // Task b. activity, cache
             if($done)
             {
-                // Log Activity
-                $this->log_activity($record->id, 'U');
-
                 // Clean Cache by policy belonging to this policy
                 $this->clear_cache( 'claim_list_by_policy_' . $record->policy_id );
             }
@@ -951,9 +936,6 @@ class Claim_model extends MY_Model
         // Task b. activity, cache
         if($done)
         {
-            // Log Activity
-            $this->log_activity($record->id, 'U');
-
             // Clean Cache by policy belonging to this policy
             $this->clear_cache( 'claim_list_by_policy_' . $record->policy_id );
         }
@@ -1393,8 +1375,6 @@ class Claim_model extends MY_Model
         }
         else
         {
-            $this->log_activity($id, 'D');
-
             // Clear Cache
             $this->clear_cache( 'claim_list_by_policy_' . $record->policy_id );
         }
@@ -1404,29 +1384,5 @@ class Claim_model extends MY_Model
 
         // return result/status
         return $status;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module'    => 'claims',
-            'module_id' => $id,
-            'action'    => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 }

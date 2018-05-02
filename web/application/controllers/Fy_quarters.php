@@ -153,10 +153,10 @@ class Fy_quarters extends MY_Controller
 		// Valid action?
 		if( !in_array($action, array('add', 'edit')))
 		{
-			return [
+			$this->template->json([
 				'status' => 'error',
 				'message' => 'Invalid action!'
-			];
+			]);
 		}
 
 		/**
@@ -179,14 +179,11 @@ class Fy_quarters extends MY_Controller
 				{
 					// @NOTE: Activity Log will be automatically inserted
 					$done = $this->fy_quarter_model->insert($data, TRUE); // No Validation on Model
-
-					// Activity Log
-					$done ? $this->fy_quarter_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->fy_quarter_model->update($record->id, $data, TRUE) && $this->fy_quarter_model->log_activity($record->id, 'E');
+					$done = $this->fy_quarter_model->update($record->id, $data, TRUE);
 				}
 
 				if(!$done)
