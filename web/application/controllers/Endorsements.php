@@ -1013,7 +1013,7 @@ class Endorsements extends MY_Controller
 					$endorsement_record = $this->endorsement_model->get($endorsement_record->id);
 					try {
 
-						$this->_save_installments($policy_record, $endorsement_record);
+						$this->_save_installments_PREMIUM($policy_record, $endorsement_record);
 
 					} catch (Exception $e) {
 						return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
@@ -1042,7 +1042,7 @@ class Endorsements extends MY_Controller
 		// --------------------------------------------------------------------
 
 		/**
-		 * Save Premium Installments
+		 * Save Installments - Premium Upgrade/Downgrade
 		 *
 		 * Every portfolio is installment based.
 		 * Default number of installment is 1.
@@ -1056,7 +1056,7 @@ class Endorsements extends MY_Controller
 		 * @param object $endorsement_record
 		 * @return mixed
 		 */
-		private function _save_installments($policy_record, $endorsement_record)
+		private function _save_installments_PREMIUM($policy_record, $endorsement_record)
 		{
 			$this->load->model('policy_installment_model');
 
@@ -1072,7 +1072,7 @@ class Endorsements extends MY_Controller
 
 				if(empty($dates) OR empty($percents))
 				{
-					throw new Exception("Exception [Controller:Endorsements][Method: _save_installments()]: No installment data found. <br/>You integrate and supply installment information on premium for of this PORTFOLIO.");
+					throw new Exception("Exception [Controller:Endorsements][Method: _save_installments_PREMIUM()]: No installment data found. <br/>You integrate and supply installment information on premium for of this PORTFOLIO.");
 				}
 
 				$installment_data = [
@@ -1093,6 +1093,37 @@ class Endorsements extends MY_Controller
 			 * Set Installment Type
 			 */
 			$installment_data['installment_type'] = _POLICY_INSTALLMENT_type_by_endorsement_type( $endorsement_record->txn_type );
+
+			return $this->policy_installment_model->build($endorsement_record, $installment_data);
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Save Installments - Ownership Transfer
+		 *
+		 * Every portfolio is installment based.
+		 * Default number of installment is 1.
+		 *
+		 * If you want to have multiple installments allowed for particular portoflio,
+		 * you can do so by allowing multiple installments via settings:
+		 *
+		 * 	Master Setup >> Portfolio >> Portfolio Settings
+		 *
+		 * @param object $policy_record
+		 * @param object $endorsement_record
+		 * @return mixed
+		 */
+		private function _save_installment_OT($policy_record, $endorsement_record)
+		{
+			$this->load->model('policy_installment_model');
+
+			// Single Installment
+			$installment_data = [
+				'dates' 			=> [date('Y-m-d')], // Today
+				'percents' 			=> [100],
+				'installment_type' 	=> _POLICY_INSTALLMENT_type_by_endorsement_type( $endorsement_record->txn_type )
+			];
 
 			return $this->policy_installment_model->build($endorsement_record, $installment_data);
 		}
@@ -1717,7 +1748,7 @@ class Endorsements extends MY_Controller
 				$txn_type = (int)$endorsement_record->txn_type;
 				if( $to_status_code == IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED && $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER )
 				{
-					$this->_save_installments($policy_record, $endorsement_record);
+					$this->_save_installment_OT($policy_record, $endorsement_record);
 				}
 
 				/**
