@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			 "Voucher ID: " , $record->voucher_id;
 		?>
 	</td>
-	<td><?php echo $record->branch_name;?></td>
+	<td><?php echo $record->branch_name_en;?></td>
 	<td><?php echo $record->credit_note_date;?></td>
 	<td><?php echo credit_note_complete_flag_text($record->flag_complete);?></td>
 	<td><?php echo credit_note_flag_on_off_text($record->flag_paid);?></td>

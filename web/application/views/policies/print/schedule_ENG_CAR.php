@@ -29,7 +29,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         ? ( $record->verified_by_profile_name ?? $record->verified_by_username ) . ' - ' . $record->verified_by_code
                         : '';
 
-    $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $record->branch_name;
+    $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $record->branch_name_en;
 
     $header_footer = '<htmlpagefooter name="myfooter">
                         <table class="table table-footer no-border">
@@ -290,7 +290,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                 </tr>
                 <tr>
                     <td colspan="2">
-                        In witness whereof the undersigned acting on behalf and under the Authority of the Company that hereunder set his hand at <span style="text-decoration: underline; font-weight: bold"><?php echo $record->branch_name; ?></span> on this <span style="text-decoration: underline; font-weight: bold"><?php echo date('jS', strtotime($record->issued_date) ); ?></span> day of <span style="text-decoration: underline; font-weight: bold"><?php echo date('F, Y', strtotime($record->issued_date) ); ?></span>.
+                        In witness whereof the undersigned acting on behalf and under the Authority of the Company that hereunder set his hand at <span style="text-decoration: underline; font-weight: bold"><?php echo $record->branch_name_en; ?></span> on this <span style="text-decoration: underline; font-weight: bold"><?php echo date('jS', strtotime($record->issued_date) ); ?></span> day of <span style="text-decoration: underline; font-weight: bold"><?php echo date('F, Y', strtotime($record->issued_date) ); ?></span>.
                     </td>
                 </tr>
             </tbody>

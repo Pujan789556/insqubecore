@@ -7,17 +7,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <table class="table table-hover" id="live-searchable">
 	<tr>
 		<th>ID</th>
-		<th>Name</th>
+		<th>Name (NP)</th>
+		<th>Name (EN)</th>
 		<th>Code</th>
 		<th>Actions</th>
-	</tr>					
+	</tr>
 	<?php
 	/**
 	 * Load Rows from View
-	 */ 
+	 */
 	foreach($records as $record)
 	{
 		$this->load->view('setup/branches/_single_row', compact('record'));
 	}
-	?>				
+	?>
 </table>

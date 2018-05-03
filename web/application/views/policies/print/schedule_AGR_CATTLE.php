@@ -30,7 +30,7 @@ $schedule_table_title   = 'पशुधनको बीमालेख';
                         ? ( $record->verified_by_profile_name ?? $record->verified_by_username ) . ' - ' . $record->verified_by_code
                         : '';
 
-    $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $record->branch_name;
+    $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $record->branch_name_en;
 
     $header_footer = '<htmlpagefooter name="myfooter">
                         <table class="table table-footer no-border">

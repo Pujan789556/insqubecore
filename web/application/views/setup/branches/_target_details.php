@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="col-sm-6" id="target-<?php echo $target->id?>">
 		<div class="box box-default box-solid collapsed-box">
 			<div class="box-header with-border">
-				<h3 class="box-title"><?php echo $target->branch_name;?></h3>
+				<h3 class="box-title"><?php echo $target->branch_name_en, ' (', $target->branch_name_np, ')';?></h3>
 				<div class="box-tools pull-right">
 					<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
 					</button>

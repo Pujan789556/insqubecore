@@ -168,11 +168,11 @@ class Branches extends MY_Controller
 			$done = FALSE;
 
 			$rules = array_merge($this->branch_model->validation_rules, get_contact_form_validation_rules());
-			if($action === 'edit')
-			{
-				// Update Validation Rule on Update
-				$rules[1]['rules'] = 'trim|required|max_length[5]|callback_check_duplicate';
-			}
+			// if($action === 'edit')
+			// {
+			// 	// Update Validation Rule on Update
+			// 	$rules[1]['rules'] = 'trim|required|max_length[4]|callback_check_duplicate';
+			// }
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
@@ -516,19 +516,18 @@ class Branches extends MY_Controller
 				$target_total = $this->input->post('target_total');
 				$branches = $this->branch_model->dropdown();
 
+
 				// Insert or Update?
 				if($action === 'add')
 				{
 					$i = 0;
 					foreach($branches as $branch_id => $branch_name)
 					{
-						$data = [
+						$done = $this->branch_target_model->insert([
 							'fiscal_yr_id' 	=> $fiscal_yr_id,
 							'branch_id'    	=> $branch_id,
 							'target_total' 	=> $target_total[$i]
-						];
-
-						$done = $this->branch_target_model->insert($data, TRUE); // No Validation on Model
+						], TRUE); // No Validation on Model
 
 						$i++;
 					}
@@ -545,7 +544,23 @@ class Branches extends MY_Controller
 						];
 						$target_id = $target_ids[$i];
 
-						$done = $this->branch_target_model->update($target_id, $data, TRUE);
+						/**
+						 * If a branch is added after setting targets, it will not be added on target automatically.
+						 * So we have to insert manually here
+						 */
+						if( $target_id )
+						{
+							$done = $this->branch_target_model->update($target_id, $data, TRUE);
+						}
+						else
+						{
+							// Insert target for new branch
+							$done = $this->branch_target_model->insert([
+								'fiscal_yr_id' 	=> $fiscal_yr_id,
+								'branch_id'    	=> $branch_id,
+								'target_total' 	=> $target_total[$i]
+							], TRUE); // No Validation on Model
+						}
 
 						$i++;
 					}

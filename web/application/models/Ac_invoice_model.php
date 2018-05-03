@@ -378,7 +378,7 @@ class Ac_invoice_model extends MY_Model
                         'RCPT.id as receipt_id, RCPT.adjustment_amount, RCPT.received_in, RCPT.received_in_date, RCPT.flag_printed as receipt_flag_printed, ' .
 
                         // Branch Table
-                        'B.name AS branch_name, ' .
+                        'B.name_en AS branch_name_en, B.name_np AS branch_name_np, ' .
 
                         // Fiscal Year Table
                         'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, ' .

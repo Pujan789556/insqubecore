@@ -1438,7 +1438,7 @@ class Policy_model extends MY_Model
                             /**
                              * Branch Table
                              */
-                            "B.name as branch_name, B.code as branch_code, B.contacts as branch_contact, " .
+                            "B.name_en AS branch_name_en, B.name_np AS branch_name_np, B.code as branch_code, B.contacts as branch_contact, " .
 
 
                             /**

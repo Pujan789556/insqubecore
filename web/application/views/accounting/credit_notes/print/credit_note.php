@@ -16,7 +16,7 @@
     /**
      * Header & Footer
      */
-    $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $record->branch_name;
+    $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $record->branch_name_en;
     $header_footer = '<htmlpagefooter name="myfooter">
                         <table class="table table-footer no-border">
                             <tr>
@@ -66,7 +66,7 @@
                     <td align="right">
                         Date: <strong><?php echo $record->credit_note_date?></strong><br/>
                         Policy # <strong><?php echo $record->policy_code?></strong><br/>
-                        Branch: <strong><?php echo $record->branch_name?></strong>
+                        Branch: <strong><?php echo $record->branch_name_en?></strong>
                     </td>
                 </tr>
             </tbody>

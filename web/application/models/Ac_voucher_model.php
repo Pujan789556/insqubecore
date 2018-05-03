@@ -741,7 +741,7 @@ class Ac_voucher_model extends MY_Model
                         'VT.name AS voucher_type_name, ' .
 
                         // Branch Table
-                        'B.name AS branch_name, ' .
+                        'B.name_en AS branch_name_en, B.name_np AS branch_name_np, ' .
 
                         // Fiscal Year Table
                         'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np'
@@ -813,7 +813,7 @@ class Ac_voucher_model extends MY_Model
                     'VT.name AS voucher_type_name, ' .
 
                     // Branch Table
-                    'B.name AS branch_name, ' .
+                    'B.name_en AS branch_name_en, B.name_np AS branch_name_np, ' .
 
                     // Fiscal Year Table
                     'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np';

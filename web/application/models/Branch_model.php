@@ -20,20 +20,27 @@ class Branch_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "name", "code", "estd", "contacts", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ['id', 'name_en', 'name_np', 'code', 'estd', 'contacts', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [
         [
-            'field' => 'name',
-            'label' => 'Branch Name',
-            'rules' => 'trim|required|max_length[30]',
+            'field' => 'name_en',
+            'label' => 'Branch Name (EN)',
+            'rules' => 'trim|required|max_length[80]',
+            '_type'     => 'text',
+            '_required' => true
+        ],
+        [
+            'field' => 'name_np',
+            'label' => 'Branch Name (NP)',
+            'rules' => 'trim|required|max_length[100]',
             '_type'     => 'text',
             '_required' => true
         ],
         [
             'field' => 'code',
             'label' => 'Branch Code',
-            'rules' => 'trim|required|alpha|max_length[3]|is_unique[master_branches.code]|strtoupper',
+            'rules' => 'trim|required|alpha|max_length[4]|strtoupper|callback_check_duplicate',
             '_type'     => 'text',
             '_required' => true
         ],
@@ -131,7 +138,7 @@ class Branch_model extends MY_Model
         $list = [];
         foreach($records as $record)
         {
-            $list["{$record->id}"] = $record->name;
+            $list["{$record->id}"] = $record->name_en . ' (' . $record->name_np . ')';
         }
         return $list;
     }

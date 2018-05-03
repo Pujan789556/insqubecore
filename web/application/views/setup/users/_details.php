@@ -34,7 +34,7 @@ $profile = $record->profile ? json_decode($record->profile) : new class($record)
 
 				<h3 class="profile-username text-center"><?php echo $profile ? $profile->name : $record->username;?></h3>
 				<h5 class="text-center"><strong><?php echo $profile->designation; ?></strong></h5>
-				<p class="text-center text-muted"><?php echo $record->branch_name;?></p>
+				<p class="text-center text-muted"><?php echo $record->branch_name_en, ' (', $record->branch_name_np, ')';?></p>
 
 				<!-- <ul class="list-group list-group-unbordered">
 					<li class="list-group-item">

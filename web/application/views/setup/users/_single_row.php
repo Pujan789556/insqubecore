@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</td>
 	<td><?php echo $record->role_name;?></td>
 	<td><?php echo $record->department_name;?></td>
-	<td><?php echo $record->branch_name;?></td>
+	<td><?php echo $record->branch_name_en;?></td>
 	<td>
 		<?php
 		$profile = $record->profile ? json_decode($record->profile) : NULL;

@@ -114,7 +114,7 @@ class Branch_target_model extends MY_Model
 
     public function get_list_by_fiscal_year($fiscal_yr_id)
     {
-        return $this->db->select('BT.id, BT.fiscal_yr_id, BT.branch_id, BT.target_total, BT.target_details, B.name as branch_name')
+        return $this->db->select('BT.id, BT.fiscal_yr_id, BT.branch_id, BT.target_total, BT.target_details, B.name_en AS branch_name_en, B.name_np AS branch_name_np')
                         ->from($this->table_name . ' BT')
                         ->join('master_branches B', 'B.id = BT.branch_id')
                         ->where('BT.fiscal_yr_id', $fiscal_yr_id)

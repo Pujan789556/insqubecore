@@ -40,7 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <div class="col-sm-4 invoice-col">
                     <b>Invoice #<?php echo $record->invoice_code?></b><br/>
                     Policy # <strong><?php echo $record->policy_code?></strong><br/>
-                    Branch: <strong><?php echo $record->branch_name?></strong>
+                    Branch: <strong><?php echo $record->branch_name_en?></strong>
                 </div>
                 <!-- /.col -->
             </div>

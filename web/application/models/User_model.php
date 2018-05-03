@@ -75,7 +75,7 @@ class User_model extends MY_Model
 	 */
 	public function rows($params = array())
     {
-    	$this->db->select('U.id, U.code, U.username, U.banned, U.profile, U._profile_name, R.name as role_name, B.name as branch_name, D.name as department_name')
+    	$this->db->select('U.id, U.code, U.username, U.banned, U.profile, U._profile_name, R.name as role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, D.name as department_name')
     			 ->from($this->table_name . ' as U')
     			 ->join('auth_roles R', 'U.role_id = R.id')
     			 ->join('master_branches B', 'U.branch_id = B.id')
@@ -142,7 +142,7 @@ class User_model extends MY_Model
     	$dropdown = $this->get_cache($cache_name);
         if(!$dropdown)
         {
-            $this->db->select('U.id, U.code, U.username, U.email, U.profile, R.name as role_name, B.name as branch_name, D.name as department_name')
+            $this->db->select('U.id, U.code, U.username, U.email, U.profile, R.name as role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, D.name as department_name')
 	    			 ->from($this->table_name . ' as U')
 	    			 ->join('auth_roles R', 'U.role_id = R.id')
 	    			 ->join('master_branches B', 'U.branch_id = B.id')
@@ -164,7 +164,7 @@ class User_model extends MY_Model
 	        foreach($list as $r)
 	        {
 	        	$profile = $r->profile ? json_decode($r->profile) : NULL;
-	        	$initial = $r->branch_name . ' - ';
+	        	$initial = $r->branch_name_en . ' - ';
 	        	$initial .= isset($profile->name) ? $profile->name . " ({$r->code})" : $r->username . " ({$r->code})";
 	        	$dropdown["{$r->id}"] = $initial;
 	        }
@@ -201,7 +201,7 @@ class User_model extends MY_Model
      */
 	public function row($id)
     {
-    	$this->db->select('U.id, U.code, U.username, U.banned, U.profile, R.name as role_name, B.name as branch_name, D.name as department_name')
+    	$this->db->select('U.id, U.code, U.username, U.banned, U.profile, R.name as role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, D.name as department_name')
     			 ->from($this->table_name . ' as U')
     			 ->join('auth_roles R', 'U.role_id = R.id')
     			 ->join('master_branches B', 'U.branch_id = B.id')
@@ -229,7 +229,7 @@ class User_model extends MY_Model
     	$record = $this->get_cache($cache_name);
         if(!$record)
         {
-            $record = $this->db->select('U.id, U.code, U.username, U.email, U.banned, U.profile, U.contact, R.name AS role_name, B.name AS branch_name, B.contacts AS branch_contact, D.name AS department_name')
+            $record = $this->db->select('U.id, U.code, U.username, U.email, U.banned, U.profile, U.contact, R.name AS role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, B.contacts AS branch_contact, D.name AS department_name')
 						->from($this->table_name . ' AS U')
 						->join('auth_roles R', 'U.role_id = R.id')
 						->join('master_branches B', 'U.branch_id = B.id')
@@ -251,7 +251,7 @@ class User_model extends MY_Model
      */
 	public function details($id)
     {
-    	$this->db->select('U.id, U.code, U.username, U.banned, U.profile, U.contact, R.name as role_name, B.name as branch_name, D.name as department_name')
+    	$this->db->select('U.id, U.code, U.username, U.banned, U.profile, U.contact, R.name as role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, D.name as department_name')
     			 ->from($this->table_name . ' as U')
     			 ->join('auth_roles R', 'U.role_id = R.id')
     			 ->join('master_branches B', 'U.branch_id = B.id')

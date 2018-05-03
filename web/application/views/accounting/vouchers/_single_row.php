@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		}
 		?>
 	</td>
-	<td><?php echo $record->branch_name;?></td>
+	<td><?php echo $record->branch_name_en;?></td>
 	<td><?php echo $record->voucher_type_name;?></td>
 	<td><?php echo $record->voucher_date;?></td>
 	<td><?php echo voucher_complete_flag_text($record->flag_complete);?></td>

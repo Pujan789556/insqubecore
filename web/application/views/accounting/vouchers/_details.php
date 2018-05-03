@@ -41,7 +41,7 @@ $credit_total = 0;
                 		</tr>
                 		<tr>
                 			<td>Voucher Type: <?php echo $record->voucher_type_name;?></td>
-                			<td>Branch : <?php echo $record->branch_name;?></td>
+                			<td>Branch : <?php echo $record->branch_name_en;?></td>
                 		</tr>
                 	</tbody>
                 </table>
