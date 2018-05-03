@@ -24,6 +24,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							data-url="<?php echo site_url('branches/add/');?>"
 							data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
+
+						<a href="<?php echo site_url( $this->router->class . '/flush/' );?>" title="Flush Cache"
+							class="btn btn-warning btn-round"
+							data-toggle="tooltip"
+						><i class="fa fa-trash-o"></i> Flush Cache</a>
 					</div>
 				</div>
 			</div>

@@ -75,6 +75,19 @@ class Branches extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        $this->branch_model->clear_cache();
+        redirect($this->router->class);
+    }
+
+	// --------------------------------------------------------------------
     // CRUD OPERATIONS
     // --------------------------------------------------------------------
 
