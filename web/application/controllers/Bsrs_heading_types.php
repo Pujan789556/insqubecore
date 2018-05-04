@@ -293,28 +293,6 @@ class Bsrs_heading_types extends MY_Controller
 		return $this->template->json($data);
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-     * Check Duplicate Callback
-     *
-     * @param string $code
-     * @param integer|null $id
-     * @return bool
-     */
-    public function check_duplicate($code, $id=NULL){
-
-    	$code = strtoupper( $code ? $code : $this->input->post('code') );
-    	$id   = $id ? (int)$id : (int)$this->input->post('id');
-
-        if( $this->bsrs_heading_type_model->check_duplicate(['code' => $code], $id))
-        {
-            $this->form_validation->set_message('check_duplicate', 'The %s already exists.');
-            return FALSE;
-        }
-        return TRUE;
-    }
-
     // --------------------------------------------------------------------
 
 
