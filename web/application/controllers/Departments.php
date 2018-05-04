@@ -321,4 +321,16 @@ class Departments extends MY_Controller
 
     // --------------------------------------------------------------------
 
+
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        $this->department_model->clear_cache();
+        redirect($this->router->class);
+    }
+
 }
