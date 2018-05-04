@@ -520,7 +520,7 @@ class User_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'user',
+            'module' => 'users',
             'module_id' => $id,
             'action' => $action
         ];

@@ -178,7 +178,7 @@ class Role_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'role',
+            'module' => 'roles',
             'module_id' => $id,
             'action' => $action
         ];

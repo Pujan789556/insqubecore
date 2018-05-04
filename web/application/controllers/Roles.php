@@ -186,7 +186,7 @@ class Roles extends MY_Controller
 				else
 				{
 					// Now Update Data
-					$done = $this->role_model->update($record->id, $data, TRUE) && $this->role_model->log_activity($record->id, 'E');
+					$done = $this->role_model->update($record->id, $data, TRUE) && $this->role_model->log_activity($record->id, 'U');
 				}
 
 	        	if(!$done)
