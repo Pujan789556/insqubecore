@@ -179,6 +179,18 @@ $config['insqb_activity_types'] = [
 	]],
 
 	/**
+	 * Activities related to Agent
+	 */
+	'bsrs_heading_types' => [
+		'_uri' => 'bsrs_heading_types/',
+		'single' => 'Beema Samiti report setup - heading type',
+		'_actions' => [
+			'C' => 'added',
+			'U' => 'updated',
+			'D' => 'deleted'
+	]],
+
+	/**
 	 * Activities related to Departments
 	 */
 	'claim_schemes' => [

@@ -103,6 +103,19 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                     </ul>
                               </li>
 
+                              <li class="<?php echo set_menu_active($nav_level_1, 'beema_samiti');?>">
+                                    <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Beema Samiti
+                                          <span class="pull-right-container">
+                                                <i class="fa fa-angle-left pull-right"></i>
+                                          </span>
+                                    </a>
+                                    <ul class="treeview-menu">
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'bsrs_heading_types');?>">
+                                                <a href="<?php echo site_url('bsrs_heading_types');?>"><i class="fa fa-circle-o"></i> Report Heading Types</a>
+                                          </li>
+                                    </ul>
+                              </li>
+
                               <li class="<?php echo set_menu_active($nav_level_1, 'account');?>">
                                     <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Account
                                           <span class="pull-right-container">
