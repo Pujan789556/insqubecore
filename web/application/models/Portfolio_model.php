@@ -393,8 +393,8 @@ class Portfolio_model extends MY_Model
     public function save($id, $data)
     {
         $result = $this->db->where('id', $id)
-                        ->set($data)
-                        ->update($this->table_name);
+                            ->set($data)
+                            ->update($this->table_name);
 
         if( $result)
         {
@@ -410,7 +410,7 @@ class Portfolio_model extends MY_Model
      * Trigger - Before Insert/Update
      *
      * The following tasks are carried out before inserting/updating the record:
-     *  1. Capitalize Code
+     *  1. Capitalize Code (if any)
      *  2. Nullify Parent ID if empty supplied
      *
      * @param array $data
@@ -427,10 +427,7 @@ class Portfolio_model extends MY_Model
             }
         }
 
-        if( !$data['parent_id'])
-        {
-            $data['parent_id'] = NULL;
-        }
+        $data['parent_id'] = isset($data['parent_id']) && !empty($data['parent_id']) ? $data['parent_id'] : NULL;
         return $data;
     }
 

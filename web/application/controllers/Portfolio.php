@@ -326,7 +326,7 @@ class Portfolio extends MY_Controller
 					}
 
 					// Now Update Data
-					$done = $this->portfolio_model->save($record->id, $data);
+					$done = $this->portfolio_model->update($record->id, $data, TRUE);
 				}
 				else if ($action === 'risks')
 				{
@@ -336,7 +336,7 @@ class Portfolio extends MY_Controller
 					];
 
 					// Now Update Data
-					$done = $this->portfolio_model->save($record->id, $risk_data);
+					$done = $this->portfolio_model->update($record->id, $data, TRUE);
 				}
 				else if ($action === 'bsrs_headings')
 				{
@@ -346,7 +346,7 @@ class Portfolio extends MY_Controller
 					];
 
 					// Now Update Data
-					$done = $this->portfolio_model->save($record->id, $risk_data);
+					$done = $this->portfolio_model->update($record->id, $data, TRUE);
 				}
 				else
 				{
