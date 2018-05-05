@@ -320,13 +320,14 @@ class Portfolio extends MY_Controller
 				else if ($action === 'accounts')
 				{
 					// Nullify Account ID if nothing supplied
+					$account_data = [];
 					foreach($rules as $r)
 					{
-						$data[$r['field']] = $data[$r['field']] ? $data[$r['field']] : NULL;
+						$account_data[$r['field']] = $data[$r['field']] ? $data[$r['field']] : NULL;
 					}
 
 					// Now Update Data
-					$done = $this->portfolio_model->update($record->id, $data, TRUE);
+					$done = $this->portfolio_model->update($record->id, $account_data, TRUE);
 				}
 				else if ($action === 'risks')
 				{
@@ -336,17 +337,17 @@ class Portfolio extends MY_Controller
 					];
 
 					// Now Update Data
-					$done = $this->portfolio_model->update($record->id, $data, TRUE);
+					$done = $this->portfolio_model->update($record->id, $risk_data, TRUE);
 				}
 				else if ($action === 'bsrs_headings')
 				{
 					// Nullify Account ID if nothing supplied
-					$risk_data = [
+					$bsrs_heading_data = [
 						'bsrs_heading_type_ids' => $data['bsrs_headings'] ? implode(',', $data['bsrs_headings']) : NULL
 					];
 
 					// Now Update Data
-					$done = $this->portfolio_model->update($record->id, $data, TRUE);
+					$done = $this->portfolio_model->update($record->id, $bsrs_heading_data, TRUE);
 				}
 				else
 				{

@@ -384,29 +384,6 @@ class Portfolio_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Save Portfolio Data
-     *
-     * @param integer $id
-     * @param array $data
-     * @return bool
-     */
-    public function save($id, $data)
-    {
-        $result = $this->db->where('id', $id)
-                            ->set($data)
-                            ->update($this->table_name);
-
-        if( $result)
-        {
-            $this->clear_cache();
-        }
-
-        return $result;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
      * Trigger - Before Insert/Update
      *
      * The following tasks are carried out before inserting/updating the record:
@@ -418,16 +395,20 @@ class Portfolio_model extends MY_Model
      */
     public function before_insert_update__defaults($data)
     {
-        $code_cols = array('code');
-        foreach($code_cols as $col)
+        if( isset($data['code']) && !empty($data['code']) )
         {
-            if( isset($data[$col]) && !empty($data[$col]) )
-            {
-                $data[$col] = strtoupper($data[$col]);
-            }
+            $data['code'] = strtoupper($data['code']);
         }
 
-        $data['parent_id'] = isset($data['parent_id']) && !empty($data['parent_id']) ? $data['parent_id'] : NULL;
+        if( isset($data['parent_id']) && !empty($data['parent_id']) )
+        {
+            $data['parent_id'] = strtoupper($data['parent_id']);
+        }
+        else if( isset($data['parent_id']) && empty($data['parent_id']) )
+        {
+            // If empty value sent, make it NULL
+            $data['parent_id'] = NULL;
+        }
         return $data;
     }
 
