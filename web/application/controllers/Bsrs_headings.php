@@ -60,7 +60,7 @@ class Bsrs_headings extends MY_Controller
 		 * Normal Form Render
 		 */
 
-		$portfolios = $this->portfolio_model->get_all_children();
+		$portfolios = $this->portfolio_model->get_children();
 		$sectioned_portfolio = [];
 		foreach($portfolios as $single)
 		{

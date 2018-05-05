@@ -337,27 +337,6 @@ class Portfolio_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function get_all_children()
-    {
-        /**
-         * Get Cached Result, If no, cache the query result
-         */
-        $list = $this->get_cache('pf_all_children');
-        if(!$list)
-        {
-            $list = $this->db->select('N.*, P.name_en AS parent_name_en')
-                             ->from($this->table_name . ' AS N')
-                             ->join($this->table_name . ' AS P', 'P.id = N.parent_id', 'left')
-                             ->where('N.parent_id !=', NULL)
-                             ->get()->result();
-
-            $this->write_cache($list, 'pf_all_children', CACHE_DURATION_DAY);
-        }
-        return $list;
-    }
-
-    // ----------------------------------------------------------------
-
     public function find($id)
     {
         /**
@@ -460,10 +439,10 @@ class Portfolio_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('pf_all_children');
+        $list = $this->get_cache('pf_children_all');
         if(!$list)
         {
-            $records = $this->get_all_children();
+            $records = $this->get_children();
 
             $list = [];
             foreach($records as $record)
@@ -551,10 +530,6 @@ class Portfolio_model extends MY_Model
             $this->db->select('L1.*, L2.code as parent_code, L2.name_en as parent_name_en, L2.name_np as parent_name_np')
                              ->from($this->table_name . ' L1')
                              ->join($this->table_name . ' L2', 'L1.parent_id = L2.id', 'left');
-
-
-            // $this->db->select('id, parent_id, code, name_en, name_np')
-            //                 ->from($this->table_name);
 
             if($parent_id)
             {
