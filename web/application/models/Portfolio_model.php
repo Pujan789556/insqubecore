@@ -19,7 +19,7 @@ class Portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'risk_ids', 'bs_ri_code', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'risk_ids', 'bs_ri_code', 'bsrs_heading_type_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -74,8 +74,12 @@ class Portfolio_model extends MY_Model
         $this->load->model('risk_model');
         $risk_dropdown = $this->risk_model->dropdown();
 
+        $this->load->model('bsrs_heading_type_model');
+        $bsrs_heading_types_dropdown = $this->bsrs_heading_type_model->dropdown();
+
 
         $this->validation_rules = [
+
             'basic' => [
                 [
                     'field' => 'parent_id',
@@ -125,6 +129,22 @@ class Portfolio_model extends MY_Model
                     'rules' => 'trim|required|integer|max_length[11]',
                     '_type'     => 'checkbox-group',
                     '_data'     => $risk_dropdown,
+                    '_list_inline' => false,
+                    '_checkbox_value' => [],
+                    '_required' => true
+                ]
+            ],
+
+            /**
+             * Beema Samiti Report Setup - Heading Type Rules
+             */
+            'bsrs_headings' => [
+                [
+                    'field' => 'bsrs_headings[]',
+                    'label' => 'BS Report Headings',
+                    'rules' => 'trim|required|integer|max_length[4]',
+                    '_type'     => 'checkbox-group',
+                    '_data'     => $bsrs_heading_types_dropdown,
                     '_list_inline' => false,
                     '_checkbox_value' => [],
                     '_required' => true
@@ -317,6 +337,27 @@ class Portfolio_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function get_all_children()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('pf_all_children');
+        if(!$list)
+        {
+            $list = $this->db->select('N.*, P.name_en AS parent_name_en')
+                             ->from($this->table_name . ' AS N')
+                             ->join($this->table_name . ' AS P', 'P.id = N.parent_id', 'left')
+                             ->where('N.parent_id !=', NULL)
+                             ->get()->result();
+
+            $this->write_cache($list, 'pf_all_children', CACHE_DURATION_DAY);
+        }
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
+
     public function find($id)
     {
         /**
@@ -343,13 +384,13 @@ class Portfolio_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Save Portfolio Specific Accounts
+     * Save Portfolio Data
      *
      * @param integer $id
      * @param array $data
      * @return bool
      */
-    public function save_accounts($id, $data)
+    public function save($id, $data)
     {
         $result = $this->db->where('id', $id)
                         ->set($data)
@@ -441,14 +482,10 @@ class Portfolio_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('pf_dropdown_children_tree');
+        $list = $this->get_cache('pf_all_children');
         if(!$list)
         {
-            $records = $this->db->select('N.id, N.parent_id, N.code, N.name_en, P.name_en AS parent_name_en')
-                             ->from($this->table_name . ' AS N')
-                             ->join($this->table_name . ' AS P', 'P.id = N.parent_id', 'left')
-                             ->where('N.parent_id !=', NULL)
-                             ->get()->result();
+            $records = $this->get_all_children();
 
             $list = [];
             foreach($records as $record)

@@ -49,13 +49,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					{
 						echo "<tr><th>&nbsp;</th><th colspan=\"2\">{$parent}</th></tr>";
 
-						foreach($children as $key=>$value)
+						foreach($children as $single)
 						{
-							$portfolio = (object)[
-								'id' => $key,
-								'name' => $value
-							];
-							$this->load->view('setup/bsrs_headings/_single_row', ['portfolio' => $portfolio, 'heading_types' => $heading_types]);
+							$this->load->view('setup/bsrs_headings/_single_row', ['portfolio' => $single, 'heading_types' => $heading_types]);
 						}
 					}
 					?>

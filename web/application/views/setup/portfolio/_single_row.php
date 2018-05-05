@@ -57,6 +57,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<i class="fa fa-flag"></i>
 				<span class="hidden-xs">Risks</span>
 			</a>
+
+			<a href="#"
+				title="Edit Portfolio Specific Beema Samiti Report Heading Type"
+				data-toggle="tooltip"
+				data-box-size="large"
+				class="trg-dialog-edit action"
+				data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio Specific Beema Samiti Report Heading Type - <?php echo $record->name_en?>'
+				data-url="<?php echo site_url('portfolio/bsrs_headings/' . $record->id);?>"
+				data-form=".form-iqb-general">
+				<i class="fa fa-th-large"></i>
+				<span class="hidden-xs">BS Headings</span>
+			</a>
 		<?php endif?>
 
 		<?php if(safe_to_delete( 'Portfolio_model', $record->id )):?>

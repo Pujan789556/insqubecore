@@ -60,8 +60,15 @@ class Bsrs_headings extends MY_Controller
 		 * Normal Form Render
 		 */
 
+		$portfolios = $this->portfolio_model->get_all_children();
+		$sectioned_portfolio = [];
+		foreach($portfolios as $single)
+		{
+			$sectioned_portfolio[$single->parent_name_en][] = $single;
+		}
+
 		$data = [
-			'portfolios' 	=> $this->portfolio_model->dropdown_children_tree(),
+			'portfolios' 	=> $sectioned_portfolio,
 			'heading_types' => $this->bsrs_heading_type_model->dropdown()
 		];
 

@@ -178,7 +178,7 @@ class Portfolio extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Edit a Portfolio Specific Accounts
+	 * Edit a Portfolio Specific Risks
 	 *
 	 *
 	 * @param integer $id
@@ -215,6 +215,43 @@ class Portfolio extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
+	 * Edit a Portfolio Specific Beema Samiti Report Setup - Heading Types
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function bsrs_headings($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->portfolio_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('bsrs_headings', $record);
+
+		// Add already checked values
+		$rules = $this->portfolio_model->validation_rules['bsrs_headings'];
+		$rules[0]['_checkbox_value'] = $record->bsrs_heading_type_ids ? explode(',', $record->bsrs_heading_type_ids) : [];
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('setup/portfolio/_form',
+			[
+				'form_elements' => $rules,
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Save a Record
 	 *
 	 * @param string $action [add|edit]
@@ -224,7 +261,7 @@ class Portfolio extends MY_Controller
 	private function _save($action, $record = NULL)
 	{
 		// Valid action?
-		if( !in_array($action, array('add', 'edit', 'accounts', 'risks')))
+		if( !in_array($action, array('add', 'edit', 'accounts', 'risks', 'bsrs_headings')))
 		{
 			return $this->template->json([
 				'status' => 'error',
@@ -289,7 +326,7 @@ class Portfolio extends MY_Controller
 					}
 
 					// Now Update Data
-					$done = $this->portfolio_model->save_accounts($record->id, $data);
+					$done = $this->portfolio_model->save($record->id, $data);
 				}
 				else if ($action === 'risks')
 				{
@@ -299,7 +336,17 @@ class Portfolio extends MY_Controller
 					];
 
 					// Now Update Data
-					$done = $this->portfolio_model->save_accounts($record->id, $risk_data);
+					$done = $this->portfolio_model->save($record->id, $risk_data);
+				}
+				else if ($action === 'bsrs_headings')
+				{
+					// Nullify Account ID if nothing supplied
+					$risk_data = [
+						'bsrs_heading_type_ids' => $data['bsrs_headings'] ? implode(',', $data['bsrs_headings']) : NULL
+					];
+
+					// Now Update Data
+					$done = $this->portfolio_model->save($record->id, $risk_data);
 				}
 				else
 				{
@@ -386,6 +433,7 @@ class Portfolio extends MY_Controller
 
 				case 'accounts':
 				case 'risks':
+				case 'bsrs_headings':
 					$rules = $this->portfolio_model->validation_rules[$action];
 					break;
 
