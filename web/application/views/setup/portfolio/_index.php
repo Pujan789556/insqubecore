@@ -18,9 +18,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						?>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
-						<a href="#" title="Add new portfolio"
-							class="btn btn-success btn-round trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New Portfolio' data-url="<?php echo site_url('portfolio/add/');?>" data-form=".form-iqb-general"
-						><i class="ion-plus-circled"></i> Add</a>
 						<a href="<?php echo site_url( $this->router->class . '/flush/' );?>" title="Flush Cache"
 							class="btn btn-warning btn-round"
 							data-toggle="tooltip"

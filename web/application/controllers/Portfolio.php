@@ -118,32 +118,6 @@ class Portfolio extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Add a new Role
-	 *
-	 * @return void
-	 */
-	public function add()
-	{
-		$record = NULL;
-
-		// Form Submitted? Save the data
-		$json_data = $this->_save('add');
-
-
-		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/portfolio/_form',
-			[
-				'form_elements' => $this->portfolio_model->validation_rules['basic'],
-				'record' 		=> $record
-			], TRUE);
-
-		// Return HTML
-		$this->template->json($json_data);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Edit a Portfolio Specific Accounts
 	 *
 	 *
@@ -261,7 +235,7 @@ class Portfolio extends MY_Controller
 	private function _save($action, $record = NULL)
 	{
 		// Valid action?
-		if( !in_array($action, array('add', 'edit', 'accounts', 'risks', 'bsrs_headings')))
+		if( !in_array($action, array('edit', 'accounts', 'risks', 'bsrs_headings')))
 		{
 			return $this->template->json([
 				'status' => 'error',
@@ -285,10 +259,10 @@ class Portfolio extends MY_Controller
 				$data = $this->input->post();
 
 				/**
-				 * File upload in add/edit mode
+				 * File upload in edit mode
 				 */
 				$file_toc = $record->file_toc ?? NULL;
-				if( in_array($action, ['add', 'edit']) )
+				if( $action === 'edit' )
 				{
 					/**
 					 * Upload toc file if any?
@@ -311,13 +285,7 @@ class Portfolio extends MY_Controller
 					$data['file_toc'] = $file_toc;
 				}
 
-				// Insert or Update?
-				if($action === 'add')
-				{
-					// @NOTE: Activity Log will be automatically inserted
-					$done = $this->portfolio_model->insert($data, TRUE); // No Validation on Model
-				}
-				else if ($action === 'accounts')
+				if ($action === 'accounts')
 				{
 					// Nullify Account ID if nothing supplied
 					$account_data = [];

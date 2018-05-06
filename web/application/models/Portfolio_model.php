@@ -81,14 +81,14 @@ class Portfolio_model extends MY_Model
         $this->validation_rules = [
 
             'basic' => [
-                [
-                    'field' => 'parent_id',
-                    'label' => 'Parent Portfolio',
-                    'rules' => 'trim|integer|max_length[8]|in_list[' . implode(',', array_keys($parent_dropdown)) . ']',
-                    '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + $parent_dropdown,
-                    '_required' => true
-                ],
+                // [
+                //     'field' => 'parent_id',
+                //     'label' => 'Parent Portfolio',
+                //     'rules' => 'trim|integer|max_length[8]|in_list[' . implode(',', array_keys($parent_dropdown)) . ']',
+                //     '_type'     => 'dropdown',
+                //     '_data'     => IQB_BLANK_SELECT + $parent_dropdown,
+                //     '_required' => true
+                // ],
                 [
                     'field' => 'name_en',
                     'label' => 'Portfolio Name(EN)',
