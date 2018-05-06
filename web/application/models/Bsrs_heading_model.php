@@ -93,19 +93,44 @@ class Bsrs_heading_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function by_portfolio($portfolio_id)
+    /**
+     * List all headings for portfolio
+     *
+     * @param int $portfolio_id
+     * @param string $for
+     * @return type
+     */
+    public function by_portfolio($portfolio_id, $for='all')
     {
+
+
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_var = 'bsrs_hd_p_' . $portfolio_id;
+        $cache_var = 'bsrs_hd_p_' . $portfolio_id . $for;
         $list = $this->get_cache($cache_var);
         if(!$list)
         {
+
+            /**
+             * List for policy or claim or all
+             *
+             * Heading Type ID for Claim Details = 3
+             */
+            $where = ['H.portfolio_id' => $portfolio_id];
+            if($for === 'policy')
+            {
+                $where['HT.id !='] = IQB_BSRS_HEADING_TYPE_ID_CLAIM;
+            }
+            else if($for === 'claim')
+            {
+                $where['HT.id'] = IQB_BSRS_HEADING_TYPE_ID_CLAIM;
+            }
+
             $list = $this->db->select('H.*, HT.name_en AS heading_type_name_en, HT.name_np AS heading_type_name_np')
                              ->from($this->table_name . ' AS H')
                              ->join('bsrs_heading_types HT', 'HT.id = H.heading_type_id')
-                             ->where('H.portfolio_id', $portfolio_id)
+                             ->where($where)
                              ->order_by('HT.id')
                              ->order_by('H.code')
                              ->get()->result();
@@ -114,23 +139,6 @@ class Bsrs_heading_model extends MY_Model
         }
         return $list;
     }
-
-    // ----------------------------------------------------------------
-
-    public function get_all()
-    {
-        // /**
-        //  * Get Cached Result, If no, cache the query result
-        //  */
-        // $list = $this->get_cache('bsrs_hd_all');
-        // if(!$list)
-        // {
-        //     $list = parent::find_all();
-        //     $this->write_cache($list, 'bsrs_hd_all', CACHE_DURATION_DAY);
-        // }
-        // return $list;
-    }
-
 
     // ----------------------------------------------------------------
 
@@ -143,25 +151,6 @@ class Bsrs_heading_model extends MY_Model
         // $where is array ['key' => $value]
         return $this->db->where($where)
                         ->count_all_results($this->table_name);
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Get Dropdown List
-     */
-    public function dropdown()
-    {
-        /**
-         * Get Cached Result, If no, cache the query result
-         */
-        // $records = $this->get_all();
-        // $list = [];
-        // foreach($records as $record)
-        // {
-        //     $list["{$record->id}"] = $record->name_en . ' (' . $record->name_np . ')';
-        // }
-        // return $list;
     }
 
 	// --------------------------------------------------------------------

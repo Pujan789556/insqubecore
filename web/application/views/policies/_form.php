@@ -334,7 +334,7 @@ $('#_find-object').on('click', function(e){
     InsQube.options.__btn_loading = $this;
 
     var c = $('#customer-id').val(),
-        p = $('#_portfolio-id').val()
+        p = $('#_portfolio-id').val();
 
     if( p == '' || c == '')
     {

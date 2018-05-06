@@ -124,6 +124,4 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         $this->load->view('policies/snippets/_policy_user_card', ['record' => $record]);
         ?>
     </div>
-
-
 </div>

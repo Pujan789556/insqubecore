@@ -535,6 +535,12 @@ class Policies extends MY_Controller
 						}
 
 						$view_data['endorsement_record'] = $endorsement_record;
+
+						/**
+						 * Beema Samiti Report Headings
+						 */
+						$this->load->model('rel_policy_bsrs_heading_model');
+						$view_data['bsrs_headings_policy'] = $this->rel_policy_bsrs_heading_model->by_policy($record->id);
 					}
 
 					$html = $this->load->view($view, $view_data, TRUE);
@@ -562,6 +568,137 @@ class Policies extends MY_Controller
 		 */
 		$json_data = [
 			'form' => $this->load->view('policies/_form_box', $form_data, TRUE)
+		];
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Edit a Beema Samiti Report Tags
+	 *
+	 * These are the tags required to compute Beema Samiti Reports
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function bs_tags($id)
+	{
+		// Capture the ID
+		$id = (int)$id;
+
+		// If Submit, must match (post ID = method ID)
+		if($this->input->post())
+		{
+			$post_id = (int)$this->input->post('id');
+
+			if($post_id !== $id)
+			{
+				return $this->template->json([
+					'status' => 'error',
+					'message' => 'Data mismatch (post vs method param)'
+				],404);
+			}
+		}
+
+		// Valid Record ?
+		$record = $this->policy_model->row($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Policy not found!'
+			],404);
+		}
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($record->branch_id);
+
+
+		/**
+		 * Check Editable?
+		 */
+		_POLICY_is_editable($record->status);
+
+
+		// Validation Rule
+		$v_rules = $this->policy_model->get_bs_report_heading_rules();
+
+
+		/**
+		 * Heading Type-wise - Beema Samiti Report Headings(tags)
+		 */
+		$this->load->model('bsrs_heading_model');
+		$this->load->model('rel_policy_bsrs_heading_model');
+		$bsrs_headings_portfolio 	= $this->bsrs_heading_model->by_portfolio($record->portfolio_id, 'policy');
+		$bsrs_headings_policy 		= $this->rel_policy_bsrs_heading_model->by_policy($record->id);
+
+		if( $this->input->post() )
+		{
+			$done = FALSE;
+
+			// These Rules are Sectioned, We need to merge Together
+            $this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$bsrs_heading_ids = array_unique( $this->input->post('bsrs_heading_id') );
+        		if($bsrs_heading_ids)
+        		{
+        			$done = $this->rel_policy_bsrs_heading_model->save($record->id, $bsrs_heading_ids);
+        		}
+
+        		$return_data = [
+        			'status' => $done ? 'success' : 'error',
+        			'message' => $done ? 'Successfully updated.' : 'Could not update.',
+        		];
+
+        		if($done)
+        		{
+        			$return_data = array_merge($return_data, [
+        				'updateSection' => true,
+						'hideBootbox' => true
+					]);
+
+        			// Updated List
+        			$bsrs_headings_policy 	= $this->rel_policy_bsrs_heading_model->by_policy($record->id);
+        			$view_data 	= [ 'record' => $record, 'bsrs_headings_policy' => $bsrs_headings_policy];
+        			$html 		= $this->load->view('policies/snippets/_policy_bsrs_headings', $view_data, TRUE);
+
+        			$return_data['updateSectionData']  = [
+						'box' 		=> '#policy-bsrs-headings',
+						'method' 	=> 'replaceWith',
+						'html'		=> $html
+					];
+        		}
+        		return $this->template->json($return_data);
+
+        	}
+        	else
+        	{
+        		return $this->template->json([
+					'status' => 'error',
+					'title'  => 'Validation Error!',
+					'message' => validation_errors()
+				],422);
+        	}
+        }
+
+
+		$form_data = [
+			'form_elements' => $v_rules,
+			'record' 		=> $record,
+			'bsrs_headings_portfolio' 	=> $bsrs_headings_portfolio,
+			'bsrs_headings_policy' 		=> $bsrs_headings_policy
+		];
+
+
+		/**
+		 * Render The Form
+		 */
+		$json_data = [
+			'form' => $this->load->view('policies/_form_bs_tags', $form_data, TRUE)
 		];
 		$this->template->json($json_data);
 	}
@@ -1312,12 +1449,13 @@ class Policies extends MY_Controller
 			return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
 		}
 
-
-
+		$this->load->model('rel_policy_bsrs_heading_model');
+		$bsrs_headings_policy 		= $this->rel_policy_bsrs_heading_model->by_policy($record->id);
 
 		$data = [
-			'record' 		=> $record,
-			'endorsement_record' 	=> $endorsement_record
+			'record' 				=> $record,
+			'endorsement_record' 	=> $endorsement_record,
+			'bsrs_headings_policy' 	=> $bsrs_headings_policy
 		];
 
 		$page_header = 'Policy Details - <span id="page-title-policy-code">' . $record->code . '</span>';
@@ -1478,7 +1616,16 @@ class Policies extends MY_Controller
 					return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage() ], 404);
 				}
 
-				$html = $this->load->view($view, ['record' => $record, 'endorsement_record' => $endorsement_record], TRUE);
+				/**
+				 * Beema Samiti Report Headings
+				 */
+				$this->load->model('rel_policy_bsrs_heading_model');
+				$view_data = [
+					'record' => $record,
+					'endorsement_record' => $endorsement_record,
+					'bsrs_headings_policy' => $this->rel_policy_bsrs_heading_model->by_policy($record->id)
+				];
+				$html = $this->load->view($view, $view_data, TRUE);
 				$ajax_data = [
 					'message' 	=> 'Successfully Updated!',
 					'status'  	=> 'success',
@@ -1613,6 +1760,7 @@ class Policies extends MY_Controller
 				&&
 				!in_array($to_updown_status, [
 					IQB_POLICY_STATUS_ACTIVE,
+					IQB_POLICY_STATUS_CANCELED,
 					IQB_POLICY_STATUS_EXPIRED
 				])
 			)
@@ -1636,10 +1784,28 @@ class Policies extends MY_Controller
 				( $record->status === IQB_POLICY_STATUS_DRAFT && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
 			)
 			{
+				/**
+				 * Case 1: Premium Must be Updated
+				 */
 				if( !$endorsement_record->amt_basic_premium )
 				{
 					$__flag_passed 		= FALSE;
-					$failed_message 	= 'Please Update Policy Premium First!';
+					$failed_message 	= 'Please Update "Policy Premium" First!';
+				}
+
+				/**
+				 * Case 2: Beema Samiti Reporting Information Must be Updated
+				 */
+				else
+				{
+					$this->load->model('rel_policy_bsrs_heading_model');
+					$rel_exists = $this->rel_policy_bsrs_heading_model->rel_exists($record->id);
+
+					if(!$rel_exists)
+					{
+						$__flag_passed 	= FALSE;
+						$failed_message = 'Please Update "Beema Samiti Reporting Information" First!';
+					}
 				}
 			}
 

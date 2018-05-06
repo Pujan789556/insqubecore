@@ -524,6 +524,29 @@ class Policy_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get Beema Samiti Report Information Validation Rules
+     *
+     * @return array
+     */
+    public function get_bs_report_heading_rules( )
+    {
+        return  [
+                    [
+                        'field' => 'bsrs_heading_id[]',
+                        'label' => 'BS Reporting Heading',
+                        'rules' => 'trim|required|integer|max_length[8]',
+                        '_key'      => 'bsrs_heading_id',
+                        '_type'     => 'dropdown',
+                        '_data'     => [],
+                        '_class'     => 'form-control select-multiple',
+                        '_extra_attributes' => 'multiple="multiple" style="width:100%" data-placeholder="Select Expertise..."',
+                    ],
+                ];
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Add a Fresh/Renewal Policy Debit Note(Draft)
      *
      * @param array $data

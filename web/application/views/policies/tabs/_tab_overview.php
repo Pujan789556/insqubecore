@@ -35,6 +35,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 
 			/**
+			 * Beema Samit Report Information
+			 */
+			$this->load->view('policies/snippets/_policy_bsrs_headings');
+
+			/**
 			 * Render Cost Calculation Table
 			 */
 			$this->load->view('endorsements/_cost_calculation_table', ['endorsement_record' => $endorsement_record, 'policy_record' => $record]);
