@@ -789,13 +789,9 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 					}
 
 					/**
-					 * Compute VAT
-					 *
-					 * NOTE: On premium refund, we should also be refunding VAT
+					 * !!! NO VAT  on AGRICULTURE PORTFOLIOS !!!
 					 */
-					$taxable_amount = $post_data['amt_stamp_duty']; // Vat applies only for Ticket
-					$CI->load->helper('account');
-					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+					$amount_vat = 0.00;
 
 					if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
 					{
