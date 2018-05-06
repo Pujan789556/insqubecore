@@ -189,10 +189,6 @@ class Policy_installment_model extends MY_Model
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
         {
-            $transaction_status = FALSE;
-        }
-        else
-        {
             throw new Exception("Exception [Model: Policy_installment_model][Method: build()]: Instellment(s) could not be saved.");
         }
 
