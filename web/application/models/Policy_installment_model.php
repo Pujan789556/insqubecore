@@ -17,7 +17,7 @@ class Policy_installment_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'endorsement_id', 'installment_date', 'type', 'percent', 'amt_basic_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'endorsement_id', 'fiscal_yr_id', 'fy_quarter', 'installment_date', 'type', 'percent', 'amt_basic_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -170,6 +170,7 @@ class Policy_installment_model extends MY_Model
                         'flag_first'            => $i === 0 ? IQB_FLAG_ON : IQB_FLAG_OFF
                     ]);
                 }
+
                 parent::insert_batch($batch_data, TRUE);
 
                 /**
@@ -190,6 +191,10 @@ class Policy_installment_model extends MY_Model
         {
             $transaction_status = FALSE;
         }
+        else
+        {
+            throw new Exception("Exception [Model: Policy_installment_model][Method: build()]: Instellment(s) could not be saved.");
+        }
 
         /**
          * Restore DB Debug Configuration
@@ -203,75 +208,97 @@ class Policy_installment_model extends MY_Model
         return $transaction_status;
     }
 
+
     // --------------------------------------------------------------------
 
     /**
-     * Update Endorsement Status
+     * Perform Policy Installment Post Paid Tasks
      *
-     * !!! NOTE: We can only change status of current Transaction Record
+     * Tasks:
      *
-     * @param integer $policy_id_or_endorsement_record Policy ID or Transaction Record
-     * @param alpha $to_status_flag Status Code
-     * @return bool
+     * 1. Update Fiscal Year, FY Quarter and Installment Date
+     * 2. Update Status to Paid
+     * 3. RI Distribute
+     *
+     *
+     *
+     * @param int|object $id_or_record
+     * @return mixed
      */
-    public function update_status($id_or_record, $to_status_flag)
+    public function post_paid_tasks($id_or_record)
     {
         // Get the Policy Record
         $record = is_numeric($id_or_record) ? $this->get( (int)$id_or_record ) : $id_or_record;
 
         if(!$record)
         {
-            throw new Exception("Exception [Model: Policy_installment_model][Method: update_status()]: Installment record could not be found.");
+            throw new Exception("Exception [Model: Policy_installment_model][Method: post_paid_tasks()]: Installment record could not be found.");
+        }
+
+        $installment_date = date('Y-m-d');
+
+        $fy_record  = $this->fiscal_year_model->get_fiscal_year($installment_date);
+        if(!$fy_record)
+        {
+            throw new Exception("Exception [Model: Policy_installment_model][Method: post_paid_tasks()]: Fiscal Year not found for supplied installment date ({$installment_date}).");
+        }
+
+        $fy_quarter = $this->fy_quarter_model->get_quarter_by_date($installment_date);
+        if(!$fy_quarter)
+        {
+            throw new Exception("Exception [Model: Policy_installment_model][Method: post_paid_tasks()]: Fiscal Year Quarter not found for supplied installment date ({$installment_date}).");
         }
 
         // Status Qualified?
-        if( !$this->status_qualifies($record->status, $to_status_flag) )
+        if( !$this->status_qualifies($record->status, IQB_POLICY_INSTALLMENT_STATUS_PAID) )
         {
-            throw new Exception("Exception [Model:Policy_installment_model][Method: update_status()]: Current Status does not qualify to upgrade/downgrade.");
+            throw new Exception("Exception [Model:Policy_installment_model][Method: post_paid_tasks()]: Current Status does not qualify to upgrade/downgrade.");
         }
 
+        /**
+         * Prepare Data
+         */
         $data = [
-            'status'        => $to_status_flag,
-            'updated_by'    => $this->dx_auth->get_user_id(),
-            'updated_at'    => $this->set_date()
+            'installment_date'  => $installment_date,
+            'fiscal_yr_id'      => $fy_record->id,
+            'fy_quarter'        => $fy_quarter->quarter,
+            'status'            => IQB_POLICY_INSTALLMENT_STATUS_PAID
         ];
+
 
         /**
          * Update Status and Clear Cache Specific to this Policy ID
          */
-        if( $this->_to_status($record->id, $data) )
+        if( $this->_update($record->id, $data) )
         {
 
             /**
              * DO RI Distribution on Paid
              */
-            if( $to_status_flag == IQB_POLICY_INSTALLMENT_STATUS_PAID )
+            $this->load->helper('ri');
+
+            /**
+             * RI__distribute - Fresh/Renewal Transaction's First Installment
+             * RI__distribute_endorsement - All other transaction or installments
+             */
+            if(
+                _ENDORSEMENT_is_first($record->txn_type)
+                    &&
+                $record->flag_first == IQB_FLAG_ON
+            )
             {
-                $this->load->helper('ri');
+                RI__distribute( $record->id );
+            }
 
-                /**
-                 * RI__distribute - Fresh/Renewal Transaction's First Installment
-                 * RI__distribute_endorsement - All other transaction or installments
-                 */
-                if(
-                    _ENDORSEMENT_is_first($record->txn_type)
-                        &&
-                    $record->flag_first == IQB_FLAG_ON
-                )
-                {
-                    RI__distribute( $record->id );
-                }
-
-                /**
-                 * Only Premium Computable Endorsement has RI Distribution
-                 * i.e.
-                 *  - Premium Upgrade
-                 *  - Premium Refund
-                 */
-                else if( _ENDORSEMENT_is_premium_computable_by_type($record->txn_type) )
-                {
-                    RI__distribute_endorsement($record->id);
-                }
+            /**
+             * Only Premium Computable Endorsement has RI Distribution
+             * i.e.
+             *  - Premium Upgrade
+             *  - Premium Refund
+             */
+            else if( _ENDORSEMENT_is_premium_computable_by_type($record->txn_type) )
+            {
+                RI__distribute_endorsement($record->id);
             }
 
             /**
@@ -286,9 +313,98 @@ class Policy_installment_model extends MY_Model
 
             return TRUE;
         }
+        else
+        {
+            throw new Exception("Exception [Model: Policy_installment_model][Method: post_paid_tasks()]: Could not update 'Post-Paid Tasks'.");
+        }
 
         return FALSE;
     }
+
+    // ----------------------------------------------------------------
+
+    public function to_vouchered($id_or_record)
+    {
+        $record = is_numeric($id_or_record) ? $this->get( (int)$id_or_record ) : $id_or_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Policy_installment_model][Method: to_vouchered()]: Installment record could not be found.");
+        }
+
+        // Status Qualified?
+        if( !$this->status_qualifies($record->status, IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED) )
+        {
+            throw new Exception("Exception [Model:Policy_installment_model][Method: to_vouchered()]: Current Status does not qualify to upgrade/downgrade.");
+        }
+
+
+        /**
+         * Update Status and Clear Cache Specific to this Policy ID
+         */
+        if( $this->_update($record->id, ['status' => IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED]) )
+        {
+
+            /**
+             * Delete Caches
+             */
+            $cache_keys = [
+                'ptxi_bytxn_' . $record->id,
+                'ptxi_fst_stts_bytxn_' . $record->endorsement_id,
+                'ptxi_bypolicy_' . $record->policy_id
+            ];
+            $this->clear_cache($cache_keys);
+
+            return TRUE;
+        }
+        else
+        {
+            throw new Exception("Exception [Model: Policy_installment_model][Method: to_vouchered()]: Could not update 'Installment Status'.");
+        }
+    }
+
+    // ----------------------------------------------------------------
+
+    public function to_invoiced($id_or_record)
+    {
+        $record = is_numeric($id_or_record) ? $this->get( (int)$id_or_record ) : $id_or_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Policy_installment_model][Method: to_invoiced()]: Installment record could not be found.");
+        }
+
+        // Status Qualified?
+        if( !$this->status_qualifies($record->status, IQB_POLICY_ENDORSEMENT_STATUS_INVOICED) )
+        {
+            throw new Exception("Exception [Model:Policy_installment_model][Method: to_invoiced()]: Current Status does not qualify to upgrade/downgrade.");
+        }
+
+
+        /**
+         * Update Status and Clear Cache Specific to this Policy ID
+         */
+        if( $this->_update($record->id, ['status' => IQB_POLICY_ENDORSEMENT_STATUS_INVOICED]) )
+        {
+
+            /**
+             * Delete Caches
+             */
+            $cache_keys = [
+                'ptxi_bytxn_' . $record->id,
+                'ptxi_fst_stts_bytxn_' . $record->endorsement_id,
+                'ptxi_bypolicy_' . $record->policy_id
+            ];
+            $this->clear_cache($cache_keys);
+
+            return TRUE;
+        }
+        else
+        {
+            throw new Exception("Exception [Model: Policy_installment_model][Method: to_invoiced()]: Could not update 'Installment Status'.");
+        }
+    }
+
 
     // ----------------------------------------------------------------
 
@@ -319,10 +435,9 @@ class Policy_installment_model extends MY_Model
 
         // ----------------------------------------------------------------
 
-        private function _to_status($id, $data)
+        private function _update($id, $data)
         {
-            return $this->db->where('id', $id)
-                        ->update($this->table_name, $data);
+            return parent::update($id, $data, TRUE);
         }
 
 

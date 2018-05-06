@@ -434,7 +434,7 @@ class Policy_installments extends MY_Controller
 						}
 
 						// Update installment status
-						$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED);
+						$this->policy_installment_model->to_vouchered($installment_record);
 
 					} catch (Exception $e) {
 
@@ -1420,7 +1420,7 @@ class Policy_installments extends MY_Controller
 					{
 						$this->endorsement_model->update_status($endorsement_record, IQB_POLICY_ENDORSEMENT_STATUS_INVOICED);
 					}
-					$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_INVOICED);
+					$this->policy_installment_model->to_invoiced($installment_record);
 
 				} catch (Exception $e) {
 
@@ -1908,7 +1908,7 @@ class Policy_installments extends MY_Controller
 					{
 						$this->endorsement_model->update_status($endorsement_record, IQB_POLICY_ENDORSEMENT_STATUS_INVOICED);
 					}
-					$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_INVOICED);
+					$this->policy_installment_model->to_invoiced($installment_record);
 
 				} catch (Exception $e) {
 
@@ -2356,12 +2356,13 @@ class Policy_installments extends MY_Controller
                  * Task 4:
                  * 		Update Invoice Paid Flat to "ON"
                  *      Update Policy Status to "Active" (if Fresh or Renewal )
-                 *      Update Installment Status to "Paid", Clean Cache, (Commit endorsement if ET or EG)
+                 *      Post Installment Paid Tasks
                  */
                 if( !$flag_exception )
                 {
                     try{
 
+                    	// Update Invoice
                     	$this->ac_invoice_model->update_flag($invoice_record->id, 'flag_paid', IQB_FLAG_ON);
 
                     	/**
@@ -2371,7 +2372,9 @@ class Policy_installments extends MY_Controller
 						{
 							$this->endorsement_model->update_status($endorsement_record, IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE);
 						}
-                        $this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_PAID);
+
+						// Post Paid Tasks
+                        $this->policy_installment_model->post_paid_tasks($installment_record);
 
                     } catch (Exception $e) {
 
@@ -2809,7 +2812,7 @@ class Policy_installments extends MY_Controller
                  * Task 2:
                  * 		Update Credit Note Paid Flat to "ON"
                  *      Update Policy Status to "Active" (if Fresh or Renewal ) or "Cancel" if to Terminate
-                 *      Update Installment Status to "Paid", Clean Cache, (Commit endorsement)
+                 *      Post Installment Tasks
                  */
                 if( !$flag_exception )
                 {
@@ -2820,7 +2823,9 @@ class Policy_installments extends MY_Controller
                     	/**
 						 * If first installment of this endorsement, activate the endorsement
 						 */
-                    	$this->policy_installment_model->update_status($installment_record, IQB_POLICY_INSTALLMENT_STATUS_PAID);
+                    	// Post Paid Tasks
+                        $this->policy_installment_model->post_paid_tasks($installment_record);
+
 						if($installment_record->flag_first == IQB_FLAG_ON)
 						{
 

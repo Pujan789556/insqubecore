@@ -1748,7 +1748,9 @@ class Endorsements extends MY_Controller
 				$txn_type = (int)$endorsement_record->txn_type;
 				if( $to_status_code == IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED && $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER )
 				{
-					$this->_save_installment_OT($policy_record, $endorsement_record);
+					try { $this->_save_installment_OT($policy_record, $endorsement_record); } catch (Exception $e) {
+						return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
+					}
 				}
 
 				/**

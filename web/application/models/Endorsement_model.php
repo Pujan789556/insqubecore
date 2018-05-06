@@ -1154,7 +1154,7 @@ class Endorsement_model extends MY_Model
 
             // Installment Cache by Policy
             $cache_var = 'ptxi_bypolicy_' . $record->policy_id;
-            $this->delete_cache($cache);
+            $this->delete_cache($cache_var);
 
         /**
          * Complete Transaction
