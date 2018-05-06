@@ -439,21 +439,11 @@ class Portfolio_model extends MY_Model
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('pf_children_all');
-        if(!$list)
+        $records    = $this->get_children();
+        $list       = [];
+        foreach($records as $record)
         {
-            $records = $this->get_children();
-
-            $list = [];
-            foreach($records as $record)
-            {
-                $parent_name = $record->parent_name_en;
-                $list["{$parent_name}"]["{$record->id}"] = $record->name_en;
-            }
-            if(!empty($list))
-            {
-                $this->write_cache($list, 'pf_dropdown_children_tree', CACHE_DURATION_DAY);
-            }
+            $list["{$record->parent_name_en}"][] = $record->name_en;
         }
         return $list;
     }
