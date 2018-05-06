@@ -202,6 +202,8 @@ if ( ! function_exists('CLAIM__approval_constraint'))
 	 */
 	function CLAIM__approval_constraint($record, $terminate_on_fail = TRUE )
 	{
+		$CI =& get_instance();
+
 		// Authorized Flag ?
 		$__flag_authorized 		= TRUE;
 
@@ -218,14 +220,33 @@ if ( ! function_exists('CLAIM__approval_constraint'))
 		)
 		{
 			$__flag_authorized = FALSE;
+
+			$message = 'You must first set "Claim Settlement Amount", "Claim Scheme",  "Settlement Brief" & "Beema Samiti Report Headings" in order to approve a claim.';
 		}
+
+		/**
+		 * Beema Samiti Reports
+		 */
+		if( $__flag_authorized  )
+		{
+			$CI->load->model('rel_claim_bsrs_heading_model');
+			$rel_exists = $CI->rel_claim_bsrs_heading_model->rel_exists($record->id);
+
+			if(!$rel_exists)
+			{
+				$__flag_authorized 	= FALSE;
+				$message = 'You must first set "Beema Samiti Report Headings" in order to approve a claim.';
+			}
+		}
+
+
+
 
 		// Terminate on Exit?
 		if( $__flag_authorized === FALSE && $terminate_on_fail == TRUE)
 		{
 			$CI =& get_instance();
 
-			$message = 'You must first set "Claim Settlement Amount", "Claim Scheme" & "Settlement Brief" in order to approve a claim.';
 			$CI->dx_auth->deny_access('deny', $message);
 			exit(1);
 		}

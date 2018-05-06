@@ -258,7 +258,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     </div>
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-7">
             <div class="box box-bordered box-default">
                 <div class="box-header with-border">
                     <h3 class="no-margin">
@@ -298,6 +298,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     ?>
                 </div>
             </div>
+        </div>
+        <div class="col-md-5">
+            <?php
+                /**
+                 * Beema Samit Report Information
+                 */
+                $this->load->view('claims/_claim_bsrs_headings');
+             ?>
         </div>
     </div>
 

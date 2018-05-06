@@ -36,6 +36,7 @@ class Claims extends MY_Controller
 		$this->load->model('claim_surveyor_model');
 		$this->load->model('claim_settlement_model');
 		$this->load->model('policy_model');
+		$this->load->model('rel_claim_bsrs_heading_model');
 
 		// Helper
 		$this->load->helper('claim');
@@ -431,6 +432,89 @@ class Claims extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
+	 * Edit a Beema Samiti Report Tags
+	 *
+	 * These are the tags required to compute Beema Samiti Reports
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function bs_tags($id, $ref)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('claims', 'assign.beema.samiti.report.heading') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Get Record
+		 */
+		$id 	= (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Claim not found!'
+			],404);
+		}
+
+		/**
+		 * Status Qualifies
+		 */
+		if($record->status !== IQB_CLAIM_STATUS_VERIFIED)
+		{
+			$this->dx_auth->deny_access();
+		}
+
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('bs_tags', $record->policy_id, $record, $ref);
+
+
+
+		// // No form Submitted?
+		// $json_data['form'] = $this->load->view('claims/forms/_form_surveyors',
+		// 	[
+		// 		'form_elements' => $this->claim_surveyor_model->validation_rules,
+		// 		'record' 		=> $record,
+		// 		'surveyors' 	=> $this->claim_surveyor_model->get_many_by_claim($record->id)
+		// 	], TRUE);
+
+		// // Return HTML
+		// $this->template->json($json_data);
+
+
+		/**
+		 * Heading Type-wise - Beema Samiti Report Headings(tags)
+		 */
+		$this->load->model('bsrs_heading_model');
+		$bsrs_headings_portfolio 	= $this->bsrs_heading_model->by_portfolio($record->portfolio_id, 'claim');
+		$bsrs_headings_claim 		= $this->rel_claim_bsrs_heading_model->by_claim($record->id);
+
+		$form_data = [
+			'form_elements' 			=> $this->_v_rules('bs_tags'),
+			'record' 					=> $record,
+			'bsrs_headings_portfolio' 	=> $bsrs_headings_portfolio,
+			'bsrs_headings_claim' 		=> $bsrs_headings_claim
+		];
+
+
+		/**
+		 * Render The Form
+		 */
+		$json_data = [
+			'form' => $this->load->view('claims/forms/_form_bs_tags', $form_data, TRUE)
+		];
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Save a Record
 	 *
 	 * @param string $action [add|edit]
@@ -442,7 +526,7 @@ class Claims extends MY_Controller
 	private function _save($action, $policy_id, $record = NULL, $ref = 'l')
 	{
 		// Valid action?
-		if( !in_array($action, array('add_draft', 'edit_draft', 'close_claim', 'withdraw_claim', 'assign_surveyors', 'update_assessment', 'update_settlement', 'update_scheme', 'update_progress')))
+		if( !in_array($action, array('add_draft', 'edit_draft', 'close_claim', 'withdraw_claim', 'assign_surveyors', 'update_assessment', 'update_settlement', 'update_scheme', 'update_progress', 'bs_tags')))
 		{
 			$this->template->json([
 				'status' => 'error',
@@ -537,6 +621,14 @@ class Claims extends MY_Controller
     					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
 						break;
 
+					case 'bs_tags':
+						$bsrs_heading_ids = array_unique( $this->input->post('bsrs_heading_id') );
+		        		if($bsrs_heading_ids)
+		        		{
+		        			$done = $this->rel_claim_bsrs_heading_model->save($record->id, $bsrs_heading_ids);
+		        		}
+						break;
+
         			default:
         				# code...
         				break;
@@ -582,7 +674,8 @@ class Claims extends MY_Controller
 									[
 										'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
 										'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
-										'draft_elements' 	=> $this->claim_model->draft_v_rules()
+										'draft_elements' 	=> $this->claim_model->draft_v_rules(),
+										'bsrs_headings_claim' => $this->rel_claim_bsrs_heading_model->by_claim($record->id)
 									]);
 				}
 
@@ -661,6 +754,11 @@ class Claims extends MY_Controller
 				case 'update_progress':
 					$rules = $this->claim_model->progress_v_rules();
 					break;
+
+				case 'bs_tags':
+					$rules = $this->claim_model->bs_tags_v_rules($formatted);
+					break;
+
 
 				default:
 					break;
@@ -822,7 +920,8 @@ class Claims extends MY_Controller
 								[
 									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
 									'settlements' 	=> $this->claim_settlement_model->get_many_by_claim($record->id),
-									'draft_elements' 	=> $this->claim_model->draft_v_rules()
+									'draft_elements' 	=> $this->claim_model->draft_v_rules(),
+									'bsrs_headings_claim' => $this->rel_claim_bsrs_heading_model->by_claim($record->id)
 								]);
 			}
 
@@ -920,7 +1019,8 @@ class Claims extends MY_Controller
 								[
 									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
 									'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
-									'draft_elements' 	=> $this->claim_model->draft_v_rules()
+									'draft_elements' 	=> $this->claim_model->draft_v_rules(),
+									'bsrs_headings_claim' => $this->rel_claim_bsrs_heading_model->by_claim($record->id)
 								]);
 			}
 
@@ -1023,7 +1123,8 @@ class Claims extends MY_Controller
 								[
 									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
 									'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
-									'draft_elements' 	=> $this->claim_model->draft_v_rules()
+									'draft_elements' 	=> $this->claim_model->draft_v_rules(),
+									'bsrs_headings_claim' => $this->rel_claim_bsrs_heading_model->by_claim($record->id)
 								]);
 			}
 
@@ -1238,7 +1339,8 @@ class Claims extends MY_Controller
 								[
 									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
 									'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
-									'draft_elements' 	=> $this->claim_model->draft_v_rules()
+									'draft_elements' 	=> $this->claim_model->draft_v_rules(),
+									'bsrs_headings_claim' => $this->rel_claim_bsrs_heading_model->by_claim($record->id)
 								]);
 			}
 
@@ -1445,7 +1547,8 @@ class Claims extends MY_Controller
 								[
 									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
 									'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
-									'draft_elements' 	=> $this->claim_model->draft_v_rules()
+									'draft_elements' 	=> $this->claim_model->draft_v_rules(),
+									'bsrs_headings_claim' => $this->rel_claim_bsrs_heading_model->by_claim($record->id)
 								]);
 			}
 
@@ -2031,6 +2134,8 @@ class Claims extends MY_Controller
      */
     public function details($id)
     {
+    	// $this->rel_claim_bsrs_heading_model->clear_cache();
+
     	/**
 		 * Check Permissions
 		 */
@@ -2051,6 +2156,8 @@ class Claims extends MY_Controller
 		 */
 		belongs_to_me( $record->branch_id );
 
+		$this->load->model('rel_claim_bsrs_heading_model');
+		$bsrs_headings_claim = $this->rel_claim_bsrs_heading_model->by_claim($record->id);
 
 		/**
 		 * RI Transaction Detail Rows
@@ -2059,7 +2166,8 @@ class Claims extends MY_Controller
 			'record' 		=> $record,
 			'surveyors' 	=> $this->claim_surveyor_model->get_many_by_claim($record->id),
 			'settlements' 	=> $this->claim_settlement_model->get_many_by_claim($record->id),
-			'draft_elements' => $this->claim_model->draft_v_rules(),
+			'draft_elements' 		=> $this->claim_model->draft_v_rules(),
+			'bsrs_headings_claim' 	=> $bsrs_headings_claim
 		];
 
 		$page_header = 'Claim Details - <span id="page-title-claim-code">' . $record->claim_code . '</span>';

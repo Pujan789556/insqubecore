@@ -362,6 +362,7 @@ $config['DX_permissions'] = [
 			'update.claim.settlement',
 			'update.claim.assessment',
 			'update.claim.scheme',
+			'assign.beema.samiti.report.heading',
 			'update.claim.progress', // Claim progress description
 
 			// Status Permission

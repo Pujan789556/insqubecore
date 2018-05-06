@@ -350,6 +350,32 @@ class Claim_model extends MY_Model
         ];
     }
 
+
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Claim Beema Samiti Report Heading Validation Rules
+     *
+     * @param bool $formatted
+     * @return array
+     */
+    public function bs_tags_v_rules( )
+    {
+        return  [
+            [
+                'field' => 'bsrs_heading_id[]',
+                'label' => 'BS Reporting Heading',
+                'rules' => 'trim|integer|max_length[8]',
+                '_key'      => 'bsrs_heading_id',
+                '_type'     => 'dropdown',
+                '_data'     => [],
+                '_class'     => 'form-control select-multiple',
+                '_extra_attributes' => 'multiple="multiple" style="width:100%" data-placeholder="Select Expertise..."',
+            ],
+        ];
+    }
+
     // ----------------------------------------------------------------
 
     /**
