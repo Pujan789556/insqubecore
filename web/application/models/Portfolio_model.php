@@ -443,7 +443,7 @@ class Portfolio_model extends MY_Model
         $list       = [];
         foreach($records as $record)
         {
-            $list["{$record->parent_name_en}"][] = $record->name_en;
+            $list["{$record->parent_name_en}"]["{$record->id}"] = $record->name_en;
         }
         return $list;
     }
