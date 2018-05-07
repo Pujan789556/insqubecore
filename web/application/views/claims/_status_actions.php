@@ -141,10 +141,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     data-toggle="tooltip"
                     class="text-green trg-dialog-edit"
                     data-title='<i class="fa fa-pencil-square-o"></i> Update Claim Assessment - <?php echo $record->claim_code?>'
-                    data-url="<?php echo site_url('claims/assessment/' . $record->id . '/d');?>"
+                    data-url="<?php echo site_url('claims/assessment/' . $record->id . '/' . $ref);?>"
                     data-box-size="large"
                     data-form="#_form-claims">
                     <i class="fa fa-pencil-square-o"></i> Update Claim Assessment</a>
+                </li>
+
+            <?php
+            endif;
+
+            /**
+             * Update Claim Assessment
+             */
+            if($this->dx_auth->is_authorized('claims', 'assign.beema.samiti.report.heading')): ?>
+                <li class="divider"></li><li><a href="#"
+                    title="Update Beema Samiti Report Information"
+                    data-toggle="tooltip"
+                    class="text-green trg-dialog-edit"
+                    data-title='<i class="fa fa-pencil-square-o"></i> Update Beema Samiti Report Information - <?php echo $record->claim_code?>'
+                    data-url="<?php echo site_url('claims/bs_tags/' . $record->id . '/' . $ref);?>"
+                    data-box-size="large"
+                    data-form="#_form-claims">
+                    <i class="fa fa-pencil-square-o"></i> BS Report Info</a>
                 </li>
 
             <?php

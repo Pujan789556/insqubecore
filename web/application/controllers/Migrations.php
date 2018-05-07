@@ -54,4 +54,20 @@ class Migrations extends CI_Controller
 		$this->m20180404_model->migrate();
 	}
 
+	// -------------------------------------------------------------------------------------
+
+	/**
+	 * Object - Customer Relation Migration
+	 *
+	 * Usage
+	 * 		$ php index.php migrations m20180507
+	 * 		$ CI_ENV=production php index.php migrations m20180507
+	 * @return void
+	 */
+	public function m20180507( )
+	{
+		$this->load->model('migrations/m20180507_model');
+		$this->m20180507_model->migrate();
+	}
+
 }

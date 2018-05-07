@@ -16,7 +16,7 @@ foreach( $bsrs_headings_claim as $single )
         <h3 class="no-margin">
             <span class="pull-left">Beema Samiti Report Information</span>
             <span class="pull-right">
-                <?php if($record->status === IQB_CLAIM_STATUS_VERIFIED && $this->dx_auth->is_authorized('claims', 'assign.claim.surveyors')): ?>
+                <?php if($record->status === IQB_CLAIM_STATUS_VERIFIED && $this->dx_auth->is_authorized('claims', 'assign.beema.samiti.report.heading')): ?>
                         <a href="#"
                             class="trg-dialog-edit btn btn-primary btn-sm"
                             title="Beema Samiti Report Information"

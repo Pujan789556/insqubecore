@@ -60,6 +60,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     <th>Claim Scheme</th>
                                     <td><?php echo $record->claim_scheme_name;?></td>
                                 </tr>
+                                <tr>
+                                    <th>Settlement Date</th>
+                                    <td><strong class="text-green"><?php echo $record->settlement_date;?></strong></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
