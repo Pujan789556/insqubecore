@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		<div class="box box-primary">
 			<div class="box-body box-profile">
-				<h3 class="profile-username text-center"><?php echo $record->name;?></h3>
+				<h3 class="profile-username text-center"><?php echo $record->name_en, ' (', $record->name_np, ')';?></h3>
 				<h5 class="text-muted text-center"><?php echo $record->code;?></h5>
 				<p class="text-center">Established on <?php echo $record->estd?></p>
 				<ul class="list-group list-group-unbordered">

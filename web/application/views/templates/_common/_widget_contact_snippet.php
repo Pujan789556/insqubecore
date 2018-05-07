@@ -36,7 +36,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $ct_state_zip = array_filter([$city, $state, $zip]);
 
             echo $ct_state_zip ? implode(', ', $ct_state_zip) . '<br/>' : '';
-            echo get_country_name($contact->country);
+            echo get_country_name($contact->country ?? '');
         echo "</p>";
 
         // phones, fax, mobile, web, email

@@ -363,12 +363,12 @@ class Branches extends MY_Controller
 		{
 			$this->template->render_404();
 		}
-		$this->data['site_title'] = 'Branch Details | ' . $record->name;
+		$this->data['site_title'] = 'Branch Details | ' . $record->name_en;
 		$this->template->partial(
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Branch Details <small>' . $record->name . '</small>',
+								'content_header' => 'Branch Details <small>' . $record->name_en . '</small>',
 								'breadcrumbs' => ['Branches' => 'branches', 'Details' => NULL]
 						])
 						->partial('content', 'setup/branches/_details', compact('record'))
