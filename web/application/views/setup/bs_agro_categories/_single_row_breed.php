@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<a href="#"
 						title="Manage Breeds"
 						class="trg-dialog-edit"
-						data-title='<i class="fa fa-pencil-square-o"></i> Manage Breeds - <?php echo $record->name_en ?>'
+						data-title='<i class="fa fa-pencil-square-o"></i> Manage Breeds - <?php echo $record->name_en, '(', $record->code, ')'; ?>'
 						data-url="<?php echo site_url('bs_agro_categories/edit_breed/' . $record->id);?>"
 						data-form=".form-iqb-general">
 						<i class="fa fa-pencil-square-o"></i>

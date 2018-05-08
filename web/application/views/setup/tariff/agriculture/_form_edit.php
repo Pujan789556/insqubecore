@@ -3,14 +3,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Form : Tariff - Agriculture
  */
-$anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">' .
-                         '<a href="#" onclick=\'$(this).closest(".box-body").remove()\'>Remove</a>' .
-                     '</div></div>' .
-                 '</div>';
 ?>
 <style type="text/css">
 .remove-row{margin-top: 10px; margin-bottom: 10px; border-top:1px solid #ccc;}
 .box-body.with-bordered{border: 1px solid #eee;}
+table .form-group{margin-bottom:0;}
 </style>
 <?php echo form_open( $this->uri->uri_string(),
                         [
@@ -48,7 +45,14 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
         </div>
         <?php
         $section_elements   = $form_elements['tariff'];
-        $tariff = $record->tariff ? json_decode($record->tariff) : NULL;
+        $tariff = $record->tariff ? json_decode($record->tariff) : [];
+
+        $tariff_formatted = [];
+        foreach($tariff as $single)
+        {
+            $tariff_formatted[$single->bs_agro_category_id] = $single;
+        }
+
         ?>
         <table class="table table-bordered table-condensed no-margin">
             <thead>
@@ -56,76 +60,36 @@ $anchor_remove = '<div class="row remove-row"><div class="col-xs-12 text-right">
                     <?php foreach($section_elements as $elem): ?>
                         <th><?php echo $elem['label'] ?></th>
                     <?php endforeach ?>
-                    <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
-                <?php
-                if($tariff):
-                    $i = 0;
-                    foreach($tariff as $single_tarrif):?>
-                        <tr <?php echo $i == 0 ? 'id="__agriculture_tariff_row"' : '' ?>>
-                            <?php
-                            /**
-                             * Single Row
-                             */
-                            $this->load->view('templates/_common/_form_components_table', [
-                                'form_elements' => $section_elements,
-                                'form_record'   => $single_tarrif
-                            ]);
 
-                            if($i == 0):?>
-                                <td>&nbsp;</td>
-                            <?php else:?>
-                                <td width="10%"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'><i class="fa fa-trash"></i></a></td>
-                            <?php endif;?>
-                        </tr>
-                    <?php
-                    $i++;
-                    endforeach;
-                else:?>
-                    <tr id="__agriculture_tariff_row">
+            <tbody>
+                <?php foreach($bs_agro_categories as $bs_agro_category_id => $category_name ): ?>
+                    <tr>
                         <?php
                         /**
-                         * Single Row (Default)
+                         * Single Row
                          */
+
+                        $form_record = $tariff_formatted[$bs_agro_category_id] ?? NULL;
+
+                        // Add ID in hidden field if no form record (Category ID)
+                        if( !$form_record )
+                        {
+                            $section_elements[0]['_default'] = $bs_agro_category_id;
+                        }
+
+
+                        $section_elements[0]['_extra_html_below'] = $category_name;
                         $this->load->view('templates/_common/_form_components_table', [
                             'form_elements' => $section_elements,
-                            'form_record'   => NULL
+                            'form_record'   => $form_record
                         ]);
                         ?>
-                        <td>&nbsp;</td>
                     </tr>
-                <?php endif; ?>
+                <?php endforeach ?>
             </tbody>
         </table>
-        <div class="box-footer bg-info">
-            <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__agriculture_tariff_row', this)">Add More</a>
-        </div>
     </div>
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
-
-<script type="text/javascript">
-    /**
-     * Duplicate Treaty Distribution Row
-     */
-    function __duplicate_tr(src, a)
-    {
-        var $src = $(src),
-            $box = $src.closest('tbody'),
-            html = $src.html(),
-            $row  = $('<tr></tr>');
-
-        $row.html(html);
-
-        // remove last blank td
-        $row.find('td:last').remove();
-
-        // Add Remover Column
-        $row.append('<td width="10%"><a href="#" class="btn btn-danger btn-sm" onclick=\'$(this).closest("tr").remove();\'><i class="fa fa-trash"></i></a></td>');
-
-        // Append to table body
-        $box.append($row);
-    }
-</script>

@@ -423,6 +423,18 @@ class Tariff extends MY_Controller
         }
 
 
+        $this->load->model('bs_agro_category_model');
+        $bs_agro_categories = $this->bs_agro_category_model->dropdwon_by_portfolio($record->portfolio_id);
+        if( !$bs_agro_categories )
+        {
+            $this->template->json([
+                'status' => 'error',
+                'title'     => 'Data has not been setup yet.',
+                'message'   =>  'Please add the "Beema Samiti Agriculture Category" for this portfolio first.<br><br>' .
+                                'Master Setup >> Beema Samiti >> Agriculture Categories'
+            ], 422);
+        }
+
         $rules = $this->tariff_agriculture_model->validation_rules;
 
         if( $this->input->post() )
@@ -446,31 +458,18 @@ class Tariff extends MY_Controller
                 $data   = $this->input->post();
                 $tariff = $data['tariff'];
 
-                /**
-                 * Check if we have duplicate code?
-                 */
-                if( count($tariff['code']) != count(array_unique($tariff['code'])) )
-                {
-                    return $this->template->json([
-                        'status'        => 'error',
-                        'message'       => 'Code must be unique.'
-                    ]);
-                }
-
-
                 $post_data = [];
 
                 /**
                  * Prepare Tariff
                  */
-                $tariff_count   = count($tariff['name']);
+                $tariff_count   = count($tariff['bs_agro_category_id']);
                 $tariff_data    = [];
                 for($i = 0; $i < $tariff_count; $i++)
                 {
                     $single_tarrif = [
-                        'code'      => strtoupper($tariff['code'][$i]),
-                        'name'      => $tariff['name'][$i],
-                        'rate'      => $tariff['rate'][$i],
+                        'bs_agro_category_id'   => $tariff['bs_agro_category_id'][$i],
+                        'rate'                  => $tariff['rate'][$i],
                     ];
 
                     $tariff_data[] = $single_tarrif;
@@ -544,7 +543,8 @@ class Tariff extends MY_Controller
         $json_data['form'] = $this->load->view('setup/tariff/agriculture/_form_edit',
             [
                 'form_elements'         => $rules,
-                'record'                => $record
+                'record'                => $record,
+                'bs_agro_categories'    => $bs_agro_categories
             ], TRUE);
 
         // Return HTML

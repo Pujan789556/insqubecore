@@ -109,6 +109,27 @@ class Bs_agro_category_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Dropdown by portfolio.
+     *
+     * @param inte $portfolio_id
+     * @return array
+     */
+    public function dropdwon_by_portfolio($portfolio_id)
+    {
+        $records = $this->by_portfolio($portfolio_id);
+
+        $list = [];
+        foreach($records as $record)
+        {
+            $list["{$record->id}"] = $record->name_np . ' (' . $record->name_np . ')';
+        }
+        return $list;
+    }
+
+
+    // ----------------------------------------------------------------
+
     public function check_duplicate($where, $id=NULL)
     {
         if( $id )
