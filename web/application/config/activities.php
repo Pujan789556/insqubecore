@@ -181,6 +181,19 @@ $config['insqb_activity_types'] = [
 	/**
 	 * Activities related to Beema Samiti report setup - heading type
 	 */
+	'bs_agro_categories' => [
+		'_uri' => 'bs_agro_categories/',
+		'single' => 'Beema Samiti agriculture category',
+		'_actions' => [
+			'C' => 'added',
+			'U' => 'updated',
+			'D' => 'deleted'
+	]],
+
+
+	/**
+	 * Activities related to Beema Samiti report setup - heading type
+	 */
 	'bsrs_heading_types' => [
 		'_uri' => 'bsrs_heading_types/',
 		'single' => 'Beema Samiti report setup - heading type',
