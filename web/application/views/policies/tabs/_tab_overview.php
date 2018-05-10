@@ -26,7 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-sm-6 col-md-7">
+		<div class="col-md-6">
 			<?php
 			/**
 			 * Policy Overvivew Card
@@ -36,8 +36,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 			/**
 			 * Beema Samit Report Information
+			 *
+			 * !!! NOTE !!!
+			 *
+			 * Agriculture Portfolios - NOT Required
 			 */
-			$this->load->view('policies/snippets/_policy_bsrs_headings');
+			if( !in_array( $record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR) ) )
+			{
+				$this->load->view('policies/snippets/_policy_bsrs_headings');
+			}
 
 			/**
 			 * Render Cost Calculation Table
@@ -45,7 +52,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			$this->load->view('endorsements/_cost_calculation_table', ['endorsement_record' => $endorsement_record, 'policy_record' => $record]);
 			?>
 		</div>
-		<div class="col-sm-6 col-md-5 no-padding-l-col-sm no-padding-l-col-md">
+		<div class="col-md-6 no-padding-l-col-md">
 			<?php
 
 			/**

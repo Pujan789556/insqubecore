@@ -50,6 +50,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <h4 class="box-title">माछाको विवरण</h4>
             </div>
             <?php
+            $js_breeds = [];
             $section_elements   = $form_elements['items'];
             $items               = $record->items ?? NULL;
             $item_count          = count( $items->sum_insured ?? [] );
@@ -66,30 +67,36 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <tbody>
                     <?php
                         if($item_count):
-                            for ($i=0; $i < $item_count; $i++):?>
-                            <tr <?php echo $i == 0 ? 'id="__cattle_items_row"' : '' ?>>
-                                <?php foreach($section_elements as $single_element):?>
-                                    <td>
-                                        <?php
-                                        /**
-                                         * Load Single Element
-                                         */
-                                        $single_element['_default']    = $items->{$single_element['_key']}[$i] ?? '';
-                                        $single_element['_value']      = $single_element['_default'];
-                                        $this->load->view('templates/_common/_form_components_inline', [
-                                            'form_elements' => [$single_element],
-                                            'form_record'   => NULL
-                                        ]);
-                                        ?>
-                                    </td>
-                                <?php
-                                endforeach;
-                                if($i == 0):?>
-                                    <td>&nbsp;</td>
-                                <?php else:?>
-                                    <td width="10%"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'><i class="fa fa-trash"></i></a></td>
-                                <?php endif;?>
-                            </tr>
+                            for ($i=0; $i < $item_count; $i++):
+                                /**
+                                 * Extract Breed Info For Javascript Rendering of Breed Dropdown
+                                 * on EDIT mode
+                                 */
+                                $js_breeds[] = is_numeric($items->breed[$i]) ? $items->breed[$i] : '';
+                                ?>
+                                <tr <?php echo $i == 0 ? 'id="__cattle_items_row"' : '' ?>>
+                                    <?php foreach($section_elements as $single_element):?>
+                                        <td>
+                                            <?php
+                                            /**
+                                             * Load Single Element
+                                             */
+                                            $single_element['_default']    = $items->{$single_element['_key']}[$i] ?? '';
+                                            $single_element['_value']      = $single_element['_default'];
+                                            $this->load->view('templates/_common/_form_components_inline', [
+                                                'form_elements' => [$single_element],
+                                                'form_record'   => NULL
+                                            ]);
+                                            ?>
+                                        </td>
+                                    <?php
+                                    endforeach;
+                                    if($i == 0):?>
+                                        <td>&nbsp;</td>
+                                    <?php else:?>
+                                        <td width="10%"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'><i class="fa fa-trash"></i></a></td>
+                                    <?php endif;?>
+                                </tr>
                         <?php
                             endfor;
                         else:?>
@@ -194,6 +201,55 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </div>
 
 <script type="text/javascript">
+    // Breeds update on Edit MODE
+    var breeds = [<?php echo implode(',', $js_breeds) ?>];
+    setTimeout(function(){
+        var category = $('#bs_agro_category_id option:selected').val();
+        console.log(category);
+        if(category) __update_breed(category, breeds);
+    }, 300);
+
+    function __update_breed(category, breeds)
+    {
+        var $target = $('select.breed-dropdown');
+            $target.empty();
+
+        $.getJSON('<?php echo base_url()?>objects/dd_agro_breed/'+category, function(r){
+            // Update dropdown
+            if(r.status == 'success' && typeof r.options !== 'undefined'){
+                $target.append($('<option>', {
+                    value: '',
+                    text : 'Select...'
+                }));
+                $.each(r.options, function(key, value) {
+                    $target.append($('<option>', {
+                        value: key,
+                        text : value
+                    }));
+                });
+                $target.prop('selectedIndex',0).trigger('change');
+
+                if(breeds) {
+                    for(var i=0; i < breeds.length; i++){
+                        $( $target[i] ).val(breeds[i]);
+                    }
+                    $target.trigger('change');
+                }
+            }
+        });
+    }
+
+    // Edit mode: Get category id and fetch list of options and update on all breed dropdown.
+    $('#bs_agro_category_id').on('change', function(e){
+        e.preventDefault();
+
+        // Fetch the breed list
+        var v = $(this).val();
+        if(v) __update_breed(v);
+
+    });
+
+
     // Field Togggler
     $('input[name="object[flag_ownership]"]').on('ifChecked', function(event){
         __toggle_field(this, 'J', 'textarea[name="object[partner_details]"]');

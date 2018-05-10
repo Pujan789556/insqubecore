@@ -55,11 +55,13 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_select_text'))
 	 */
 	function _OBJ_AGR_POULTRY_select_text( $record )
 	{
-		$attributes = $record->attributes ? json_decode($record->attributes) : NULL;
-		$poultry_type 	= $attributes->poultry_type;
+		$category_dropdown   = _OBJ_AGR_category_dropdown($record->portfolio_id);
+		$attributes 		 = $record->attributes ? json_decode($record->attributes) : NULL;
+		$bs_agro_category_id = $attributes->bs_agro_category_id ?? NULL;
+		$category 		 = $category_dropdown[$bs_agro_category_id] ?? '';
 
 		$snippet = [
-			'<strong>' . $poultry_type . '</strong>',
+			'<strong>' . $category . '</strong>',
 			'Sum Insured(NRS): ' . '<strong>' . $record->amt_sum_insured . '</strong>'
 		];
 
@@ -90,8 +92,8 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 		$post 	= $CI->input->post();
 		$object = $post['object'] ?? NULL;
 
+		$category_dropdown  = _OBJ_AGR_category_dropdown($portfolio_id);
 		$keep_type_dropdown = _OBJ_AGR_POULTRY_keep_type_dropdown(FALSE);
-		$type_dropdown 		= _OBJ_AGR_POULTRY_type_dropdown(FALSE);
 		$ownership_dropdown = _OBJ_AGR_POULTRY_ownership_dropdown(false);
 		$yesno_dropdown 	= _FLAG_yes_no_dropdwon(false);
 
@@ -105,8 +107,10 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[items][breed][]',
 			        '_key' => 'breed',
 			        'label' => 'जात',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
-			        '_type' => 'text',
+			        'rules' => 'trim|required|integer|max_length[8]',
+			        '_type' => 'dropdown',
+			        '_class' => 'form-control breed-dropdown',
+			        '_data' => IQB_BLANK_SELECT,
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ],
@@ -163,12 +167,14 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			 */
 			'basic' =>[
 				[
-                    'field' => 'object[poultry_type]',
-                    '_key' => 'poultry_type',
+                    'field' => 'object[bs_agro_category_id]',
+                    '_key' => 'bs_agro_category_id',
                     'label' => 'पन्छीको किसिम',
-                    'rules' => 'trim|required|alpha|in_list['.implode(',', array_keys($type_dropdown)).']',
+                    'rules' => 'trim|required|integer|in_list['.implode(',', array_keys($category_dropdown)).']',
                     '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + $type_dropdown,
+                    '_id' 		=> 'bs_agro_category_id',
+                    '_data'     => IQB_BLANK_SELECT + $category_dropdown,
+                    '_show_label' 	=> true,
                     '_required' => true
                 ],
                 [
@@ -296,7 +302,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'rules' => 'trim|htmlspecialchars|max_length[40]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
-			        '_required' 	=> true
+			        '_required' 	=> false
 			    ],
 			    [
 			        'field' => 'object[damages][reason][]',
@@ -305,7 +311,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'rules' => 'trim|htmlspecialchars|max_length[300]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
-			        '_required' 	=> true
+			        '_required' 	=> false
 			    ],
 			    [
 			        'field' => 'object[damages][quantity][]',
@@ -314,7 +320,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'rules' => 'trim|htmlspecialchars|max_length[300]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
-			        '_required' 	=> true
+			        '_required' 	=> false
 			    ]
 		    ]
 		];
@@ -335,33 +341,6 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 	}
 }
 
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_OBJ_AGR_POULTRY_type_dropdown'))
-{
-	/**
-	 * Get Poultry Type Dropdown
-	 *
-	 *
-	 * @param bool $flag_blank_select 	Whether to append blank select
-	 * @return	bool
-	 */
-	function _OBJ_AGR_POULTRY_type_dropdown( $flag_blank_select = true )
-	{
-		$CI =& get_instance();
-
-		$CI->load->model('tariff_agriculture_model');
-
-		$dropdown = $CI->tariff_agriculture_model->type_dropdown($CI->current_fiscal_year->id, IQB_SUB_PORTFOLIO_AGR_POULTRY_ID);
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
 
 // ------------------------------------------------------------------------
 
@@ -566,10 +545,10 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_tariff_by_type'))
 	/**
 	 * Get Tariff for supplied poultry type
 	 *
-	 * @param alpha $poultry_code 	Poultry Type Code
+	 * @param int $bs_agro_category_id 	Crop Category ID
 	 * @return	Object
 	 */
-	function _OBJ_AGR_POULTRY_tariff_by_type( $poultry_code )
+	function _OBJ_AGR_POULTRY_tariff_by_type( $bs_agro_category_id )
 	{
 		$CI =& get_instance();
 
@@ -580,7 +559,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_tariff_by_type'))
 
 		foreach($tariff as $single_tariff)
 		{
-			if(strtoupper($single_tariff->code) == strtoupper($poultry_code))
+			if($single_tariff->bs_agro_category_id == $bs_agro_category_id)
 			{
 				$valid_tariff = $single_tariff;
 				break;
@@ -589,7 +568,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_tariff_by_type'))
 
 		if( !$valid_tariff)
 		{
-			throw new Exception("Exception [Helper: ph_agr_poultry_helper][Method: _OBJ_AGR_POULTRY_tariff_by_type()]: No Tariff found for supplied poultry ({$poultry_code})");
+			throw new Exception("Exception [Helper: ph_agr_poultry_helper][Method: _OBJ_AGR_POULTRY_tariff_by_type()]: No Tariff found for supplied Category ({$bs_agro_category_id})");
 		}
 
 		return $valid_tariff;
@@ -657,7 +636,7 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 			 */
 			try {
 
-				$tariff = _OBJ_AGR_POULTRY_tariff_by_type($object_attributes->poultry_type);
+				$tariff = _OBJ_AGR_POULTRY_tariff_by_type($object_attributes->bs_agro_category_id);
 
 			} catch (Exception $e) {
 

@@ -122,7 +122,7 @@ class Bs_agro_category_model extends MY_Model
         $list = [];
         foreach($records as $record)
         {
-            $list["{$record->id}"] = $record->name_np . ' (' . $record->name_np . ')';
+            $list["{$record->id}"] = $record->name_np . ' (' . $record->name_en . ')';
         }
         return $list;
     }

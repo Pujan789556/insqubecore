@@ -773,6 +773,7 @@ if ( ! function_exists('load_portfolio_helper'))
          */
         if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
         {
+            $CI->load->helper('ph_agr');
             $CI->load->helper('ph_agr_crop');
         }
 
@@ -782,6 +783,7 @@ if ( ! function_exists('load_portfolio_helper'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
         {
+            $CI->load->helper('ph_agr');
             $CI->load->helper('ph_agr_cattle');
         }
 
@@ -791,6 +793,7 @@ if ( ! function_exists('load_portfolio_helper'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
         {
+            $CI->load->helper('ph_agr');
             $CI->load->helper('ph_agr_poultry');
         }
 
@@ -800,6 +803,7 @@ if ( ! function_exists('load_portfolio_helper'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
         {
+            $CI->load->helper('ph_agr');
             $CI->load->helper('ph_agr_fish');
         }
 
@@ -809,6 +813,7 @@ if ( ! function_exists('load_portfolio_helper'))
          */
         else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
         {
+            $CI->load->helper('ph_agr');
             $CI->load->helper('ph_agr_bee');
         }
 

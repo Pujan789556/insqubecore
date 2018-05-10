@@ -984,48 +984,7 @@ class Objects extends MY_Controller
 		}
 
 
-	// --------------------------------------------------------------------
-	// CALLBACK VALIDATIONS: MOTOR OBJECTS
-	// --------------------------------------------------------------------
 
-		public function _cb_motor_duplicate_engine_no($engine_no, $id=NULL)
-		{
-			$engine_no = $engine_no ??  $this->input->post('object[engine_no]');
-	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
-
-	        if( $this->object_model->_cb_motor_duplicate(['_motor_engine_no' => $engine_no], $id))
-	        {
-	            $this->form_validation->set_message('_cb_motor_duplicate_engine_no', 'The %s already exists.');
-	            return FALSE;
-	        }
-	        return TRUE;
-		}
-
-		public function _cb_motor_duplicate_chasis_no($chasis_no, $id=NULL)
-		{
-			$chasis_no = $chasis_no ??  $this->input->post('object[chasis_no]');
-	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
-
-	        if( $this->object_model->_cb_motor_duplicate(['_motor_chasis_no' => $chasis_no], $id))
-	        {
-	            $this->form_validation->set_message('_cb_motor_duplicate_chasis_no', 'The %s already exists.');
-	            return FALSE;
-	        }
-	        return TRUE;
-		}
-
-		public function _cb_motor_duplicate_reg_no($reg_no, $id=NULL)
-		{
-			$reg_no = $reg_no ??  $this->input->post('object[reg_no]');
-	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
-
-	        if( $this->object_model->_cb_motor_duplicate(['_motor_reg_no' => $reg_no], $id))
-	        {
-	            $this->form_validation->set_message('_cb_motor_duplicate_reg_no', 'The %s already exists.');
-	            return FALSE;
-	        }
-	        return TRUE;
-		}
 
 	// --------------------------------------------------------------------
 
@@ -1222,4 +1181,81 @@ class Objects extends MY_Controller
         	$this->template->render_404('', "Sorry! File Not Found.");
         }
 	}
+
+	// --------------------------------------------------------------------
+	// PORTFOLIO - MOTOR - CRUD HELPER FUNCTIONS
+	// --------------------------------------------------------------------
+
+		public function _cb_motor_duplicate_engine_no($engine_no, $id=NULL)
+		{
+			$engine_no = $engine_no ??  $this->input->post('object[engine_no]');
+	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
+
+	        if( $this->object_model->_cb_motor_duplicate(['_motor_engine_no' => $engine_no], $id))
+	        {
+	            $this->form_validation->set_message('_cb_motor_duplicate_engine_no', 'The %s already exists.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
+
+		public function _cb_motor_duplicate_chasis_no($chasis_no, $id=NULL)
+		{
+			$chasis_no = $chasis_no ??  $this->input->post('object[chasis_no]');
+	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
+
+	        if( $this->object_model->_cb_motor_duplicate(['_motor_chasis_no' => $chasis_no], $id))
+	        {
+	            $this->form_validation->set_message('_cb_motor_duplicate_chasis_no', 'The %s already exists.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
+
+		public function _cb_motor_duplicate_reg_no($reg_no, $id=NULL)
+		{
+			$reg_no = $reg_no ??  $this->input->post('object[reg_no]');
+	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
+
+	        if( $this->object_model->_cb_motor_duplicate(['_motor_reg_no' => $reg_no], $id))
+	        {
+	            $this->form_validation->set_message('_cb_motor_duplicate_reg_no', 'The %s already exists.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
+
+
+
+	// --------------------------------------------------------------------
+	//  PORTFOLIO - AGRICULTURE - CRUD HELPER FUNCTIONS
+	// --------------------------------------------------------------------
+
+		/**
+		 * Get Beema Samiti - Agriculture Breed Data by Category
+		 * @param type $bs_agro_category_id
+		 * @return type
+		 */
+		public function dd_agro_breed($bs_agro_category_id)
+		{
+			// Valid Record ?
+			$bs_agro_category_id = (int)$bs_agro_category_id;
+			$this->load->helper('ph_agr');
+
+			$options = _OBJ_AGR_breed_dropdown($bs_agro_category_id);
+			if( !empty($options))
+			{
+				$this->template->json([
+					'status' => 'success',
+					'options' => $options
+				]);
+			}
+			else
+			{
+				$this->template->json([
+					'status' => 'error',
+					'message' => 'No breed found for supplied agriculture item category. Please ask your IT Support to add "Beema Samiti >> Agriculture Categories >> Breed" of selected "Agriculture Category" and try again.'
+				], 404);
+			}
+		}
 }

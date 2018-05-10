@@ -196,27 +196,6 @@ class tariff_agriculture_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Get Type Dropdown for Given Fiscal Year/Portfolio
-     *
-     * @param int $fiscal_yr_id
-     * @param int $portfolio_id
-     * @return array
-     */
-    public function type_dropdown($fiscal_yr_id, $portfolio_id)
-    {
-        $dropdown   = [];
-        $row        = $this->get_by_fy_portfolio($fiscal_yr_id, $portfolio_id);
-        $tariff     = json_decode($row->tariff ?? '[]');
-        foreach($tariff as $st)
-        {
-            $dropdown[$st->code] = $st->name;
-        }
-        return $dropdown;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
      * Get Record for Given Fiscal Year/Portfolio
      *
      * @param int $fiscal_yr_id

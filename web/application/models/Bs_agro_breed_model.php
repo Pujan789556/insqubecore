@@ -109,6 +109,20 @@ class Bs_agro_breed_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function dropdown_by_category($category_id)
+    {
+        $this->clear_cache();
+        $records = $this->by_category($category_id);
+        $list = [];
+        foreach($records as $record)
+        {
+            $list["{$record->id}"] = $record->name_en . ' (' . $record->name_np . ')';
+        }
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
+
     public function check_duplicate($where, $id=NULL)
     {
         if( $id )

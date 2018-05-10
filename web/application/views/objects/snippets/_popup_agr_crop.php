@@ -3,9 +3,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Object Snippet: CROP SUB-PORTFOLIOS (AGRICULTURE)
 */
-$this->load->helper('ph_agr_crop');
 $attributes 	= $record->attributes ? json_decode($record->attributes) : NULL;
 $form_elements 	= _OBJ_AGR_CROP_validation_rules($record->portfolio_id);
+
+$breed_dropdown = _OBJ_AGR_breed_dropdown($attributes->bs_agro_category_id);
+$form_elements['items'][0]['_data'] = $breed_dropdown;
 
 $ref = $ref ?? '';
 if($ref === 'policy_overview_tab')
@@ -46,6 +48,11 @@ else
                             <?php foreach($section_elements as $elem):
                                 $key =  $elem['_key'];
                                 $value = $items->{$key}[$i];
+
+                                $elem_data  = $elem['_data'] ?? NULL;
+                                if($elem_data){
+                                    $value = $elem_data[$value];
+                                }
                             ?>
 
                                 <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
@@ -55,7 +62,7 @@ else
                         </tr>
                     <?php endfor ?>
                     <tr>
-                        <td colspan="4" class="text-bold">जम्मा बीमांक रकम(रु)</td>
+                        <td colspan="5" class="text-bold">जम्मा बीमांक रकम(रु)</td>
                         <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2) ?></td>
                     </tr>
                 </tbody>

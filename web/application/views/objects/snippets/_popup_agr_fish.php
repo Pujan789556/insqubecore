@@ -3,9 +3,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Object Snippet: FISH SUB-PORTFOLIO (AGRICULTURE)
 */
-$this->load->helper('ph_agr_fish');
 $attributes 	= $record->attributes ? json_decode($record->attributes) : NULL;
 $form_elements 	= _OBJ_AGR_FISH_validation_rules($record->portfolio_id);
+
+$breed_dropdown = _OBJ_AGR_breed_dropdown($attributes->bs_agro_category_id);
+$form_elements['items'][0]['_data'] = $breed_dropdown;
 
 $ref = $ref ?? '';
 if($ref === 'policy_overview_tab')

@@ -1798,13 +1798,22 @@ class Policies extends MY_Controller
 				 */
 				else
 				{
-					$this->load->model('rel_policy_bsrs_heading_model');
-					$rel_exists = $this->rel_policy_bsrs_heading_model->rel_exists($record->id);
 
-					if(!$rel_exists)
+					/**
+					 * !!! NOTE !!!
+					 *
+					 * Agriculture Portfolios - NOT Required
+					 */
+					if( !in_array( $record->portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR) ) )
 					{
-						$__flag_passed 	= FALSE;
-						$failed_message = 'Please Update "Beema Samiti Reporting Information" First!';
+						$this->load->model('rel_policy_bsrs_heading_model');
+						$rel_exists = $this->rel_policy_bsrs_heading_model->rel_exists($record->id);
+
+						if(!$rel_exists)
+						{
+							$__flag_passed 	= FALSE;
+							$failed_message = 'Please Update "Beema Samiti Reporting Information" First!';
+						}
 					}
 				}
 			}
