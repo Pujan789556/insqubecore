@@ -59,7 +59,7 @@ if ( ! function_exists('upload_insqube_media'))
      */
     function upload_insqube_media( $options = [])
     {
-    	$ci =& get_instance();
+    	$CI =& get_instance();
 
         /**
          * Extract options into useful goodies
@@ -104,11 +104,19 @@ if ( ! function_exists('upload_insqube_media'))
 
         if( isset($_FILES[$form_field]['name']) && !empty($_FILES[$form_field]['name']) )
         {
-            $ci->load->library('upload', $config);
+            /**
+             * Load Upload Library
+             */
+            $CI->load->library('upload');
 
-            if( $ci->upload->do_upload($form_field))
+            /**
+             * Re-Initialize the library
+             */
+            $CI->upload->initialize($config);
+
+            if( $CI->upload->do_upload($form_field))
             {
-                $uploaded = $ci->upload->data();
+                $uploaded = $CI->upload->data();
 
                 /**
                  * Single Upload Response:
@@ -136,7 +144,7 @@ if ( ! function_exists('upload_insqube_media'))
                  */
                 if($create_thumb)
                 {
-                    $ci->load->library('image_lib');
+                    $CI->load->library('image_lib');
                 }
                 foreach($uploaded as $single)
                 {
@@ -165,7 +173,7 @@ if ( ! function_exists('upload_insqube_media'))
             }
             else
             {
-                $message = $ci->upload->display_errors();
+                $message = $CI->upload->display_errors();
             }
         }
         else
@@ -198,12 +206,12 @@ if ( ! function_exists('create_thumbnail'))
 	 */
 	function create_thumbnail( $image_source, $thumb_xy = ['x' => 100, 'y' => 100], $thumb_marker = '_thumb' )
 	{
-		$ci = & get_instance();
+		$CI = & get_instance();
 
 		if( !file_exists($image_source) )
 		{
 			// Set error message
-			$ci->image_lib->set_error('imglib_invalid_path');
+			$CI->image_lib->set_error('imglib_invalid_path');
 			return FALSE;
 		}
 
@@ -229,9 +237,9 @@ if ( ! function_exists('create_thumbnail'))
             'height'            => $y
         );
         // Clear Image Library & Old Config
-        $ci->image_lib->clear();
-        $ci->image_lib->initialize($config);
-        return $ci->image_lib->resize();
+        $CI->image_lib->clear();
+        $CI->image_lib->initialize($config);
+        return $CI->image_lib->resize();
 	}
 }
 
