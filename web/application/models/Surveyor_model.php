@@ -97,6 +97,7 @@ class Surveyor_model extends MY_Model
                 '_id'       => 'surveyor-expertise',
                 '_class'     => 'form-control select-multiple',
                 '_extra_attributes' => 'multiple="multiple" style="width:100%" data-placeholder="Select Expertise..."',
+                '_required' => true
             ],
             [
                 'field' => 'active',

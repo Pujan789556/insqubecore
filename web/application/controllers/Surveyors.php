@@ -395,60 +395,65 @@ class Surveyors extends MY_Controller
 				$message 		= $upload_result['message'];
 				$files 			= $upload_result['files'];
 				$picture 		= $status === 'success' ? $files[0] : $picture;
+				if($status == 'error')
+				{
+					return $this->template->json([
+						'status' => 'error',
+						'title' => 'Error Uploading Profile Picture!',
+						'message' => $message
+					], 422);
+				}
 
 
 				/**
 				 * Upload Surveyor Resume (If any)
 				 */
-				if( $status === 'success' || $status === 'no_file_selected')
-	            {
-					$upload_result 	= $this->_upload_resume($resume);
-					$status 		= $upload_result['status'];
-					$message 		= $upload_result['message'];
-					$files 			= $upload_result['files'];
-					$resume 		= $status === 'success' ? $files[0] : $resume;
-				}
+				$upload_result 	= $this->_upload_resume($resume);
+				$status 		= $upload_result['status'];
+				$message 		= $upload_result['message'];
+				$files 			= $upload_result['files'];
+				$resume 		= $status === 'success' ? $files[0] : $resume;
 
+				if($status == 'error')
+				{
+					return $this->template->json([
+						'status' => 'error',
+						'title' => 'Error Uploading Resume!',
+						'message' => $message
+					], 422);
+				}
 
 				/**
 				 * Save Data if Both Upload Success
 				 */
-	        	if( $status === 'success' || $status === 'no_file_selected')
-	            {
+	        	$data = $this->input->post();
+            	$data['picture'] 	= $picture;
+            	$data['resume'] 	= $resume;
 
-	            	$data = $this->input->post();
+            	// Nullify checkbox if not set
+            	$data['flag_vat_registered'] = $data['flag_vat_registered'] ?? NULL;
 
+            	// Insert or Update?
+				if($action === 'add')
+				{
+					$done = $this->surveyor_model->insert($data, TRUE); // No Validation on Model
+				}
+				else
+				{
+					// Now Update Data
+					$done = $this->surveyor_model->update($record->id, $data, TRUE);
+				}
 
-	            	$data['picture'] 	= $picture;
-	            	$data['resume'] 	= $resume;
-
-	            	// Nullify checkbox if not set
-	            	$data['flag_vat_registered'] = $data['flag_vat_registered'] ?? NULL;
-
-	            	// Insert or Update?
-					if($action === 'add')
-					{
-						$done = $this->surveyor_model->insert($data, TRUE); // No Validation on Model
-					}
-					else
-					{
-						// Now Update Data
-						$done = $this->surveyor_model->update($record->id, $data, TRUE);
-					}
-
-		        	if(!$done)
-					{
-						$status = 'error';
-						$message = 'Could not update.';
-					}
-					else
-					{
-						$status = 'success';
-						$message = 'Successfully Updated.';
-					}
-
-
-	            }
+	        	if(!$done)
+				{
+					$status = 'error';
+					$message = 'Could not update.';
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+				}
 			}
 			else
 			{
@@ -509,7 +514,7 @@ class Surveyors extends MY_Controller
 				'config' => [
 					'encrypt_name' => TRUE,
 	                'upload_path' => self::$upload_path,
-	                'allowed_types' => 'gif|jpg|png',
+	                'allowed_types' => 'gif|jpg|jpeg|png',
 	                'max_size' => '2048'
 				],
 				'form_field' => 'picture',
@@ -536,10 +541,10 @@ class Surveyors extends MY_Controller
 		{
 			$options = [
 				'config' => [
-					'encrypt_name' => TRUE,
-	                'upload_path' => self::$upload_path,
+					'encrypt_name' 	=> TRUE,
+	                'upload_path' 	=> self::$upload_path,
 	                'allowed_types' => 'doc|docx|pdf',
-	                'max_size' => '4098'
+	                'max_size' 		=> '4098'
 				],
 				'form_field' => 'resume',
 
