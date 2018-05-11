@@ -3,8 +3,6 @@
  * Schedule Print : Agriculture - Poultry
  */
 
-$this->load->helper('ph_agr_poultry');
-
 $object_attributes  = json_decode($record->object_attributes);
 $premium_attributes = json_decode($record->premium_attributes);
 

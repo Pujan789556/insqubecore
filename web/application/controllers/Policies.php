@@ -1516,6 +1516,12 @@ class Policies extends MY_Controller
 			], 404);
 		}
 
+		/**
+		 * Load Portfolio Helper
+		 */
+		load_portfolio_helper($record->portfolio_id);
+
+
 		$data = [
 			'record' 		=> $record,
 			'endorsement_record' 	=> $endorsement_record
