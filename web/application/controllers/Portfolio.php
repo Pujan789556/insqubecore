@@ -299,9 +299,9 @@ class Portfolio extends MY_Controller
 				}
 				else if ($action === 'risks')
 				{
-					// Nullify Account ID if nothing supplied
+					$risk_ids = $data['risks'] ?? NULL;
 					$risk_data = [
-						'risk_ids' => $data['risks'] ? implode(',', $data['risks']) : NULL
+						'risk_ids' => $risk_ids ? implode(',', $risk_ids) : NULL
 					];
 
 					// Now Update Data
@@ -310,8 +310,9 @@ class Portfolio extends MY_Controller
 				else if ($action === 'bsrs_headings')
 				{
 					// Nullify Account ID if nothing supplied
+					$bsrs_headings = $data['bsrs_headings'] ?? NULL;
 					$bsrs_heading_data = [
-						'bsrs_heading_type_ids' => $data['bsrs_headings'] ? implode(',', $data['bsrs_headings']) : NULL
+						'bsrs_heading_type_ids' => $bsrs_headings ? implode(',', $bsrs_headings) : NULL
 					];
 
 					// Now Update Data

@@ -126,7 +126,7 @@ class Portfolio_model extends MY_Model
                 [
                     'field' => 'risks[]',
                     'label' => 'Portfolio Risks',
-                    'rules' => 'trim|required|integer|max_length[11]',
+                    'rules' => 'trim|integer|max_length[11]',
                     '_type'     => 'checkbox-group',
                     '_data'     => $risk_dropdown,
                     '_list_inline' => false,
@@ -142,7 +142,7 @@ class Portfolio_model extends MY_Model
                 [
                     'field' => 'bsrs_headings[]',
                     'label' => 'BS Report Headings',
-                    'rules' => 'trim|required|integer|max_length[4]',
+                    'rules' => 'trim|integer|max_length[4]',
                     '_type'     => 'checkbox-group',
                     '_data'     => $bsrs_heading_types_dropdown,
                     '_list_inline' => false,
