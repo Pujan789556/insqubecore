@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					</div>
 					<div class="col-sm-6 master-actions text-right">
 						<a href="<?php echo site_url( $this->router->class . '/flush/');?>" title="Flush Cache"
-							class="btn btn-success btn-round"
+							class="btn btn-warning btn-round"
 							data-toggle="tooltip"
 						><i class="fa fa-trash-o"></i> Flush Cache</a>
 					</div>
