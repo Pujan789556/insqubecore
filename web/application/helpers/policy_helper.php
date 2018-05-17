@@ -894,6 +894,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
 		{
 			$CI->load->library('pdf');
 	        $mpdf = $CI->pdf->load();
+
 	        // $mpdf->SetMargins(10, 10, 5);
 	        $mpdf->SetMargins(10, 5, 10, 5);
 	        $mpdf->margin_header = 5;
@@ -919,6 +920,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
 	        $mpdf->SetDisplayMode('fullpage');
 
 	        $html = $CI->load->view( $schedule_view, $data, TRUE);
+            // echo $html;exit;
 	        $mpdf->WriteHTML($html);
 	        // $filename = $upload_path . "policy-{$record->code}.pdf";
 	        $filename = "policy-{$record->code}.pdf";
@@ -933,6 +935,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
 	        }
 	        else
 	        {
+                // $mpdf->Output($filename,'D');
 	        	$mpdf->Output();
 	        }
 		}

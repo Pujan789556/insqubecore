@@ -42,18 +42,26 @@ class Pdf {
     public function __construct()
     {
         $CI = & get_instance();
-        log_message('Debug', 'mPDF class is loaded.');
+        log_message('Debug', 'Mpdf class is loaded.');
     }
 
-
-    function load($param=NULL)
+    function load($config=NULL)
     {
-        include_once APPPATH.'/third_party/mpdf-6.1.3/mpdf.php';
-        if ($param == NULL)
+        if ($config == NULL)
         {
-            $param = '"en-GB-x","A4","","",10,10,10,10,6,3';
+            $config = [
+                'format' => 'A4',
+                'margin_left' => 10,
+                'margin_right' => 10,
+                'margin_top' => 15,
+                'margin_bottom' => 15,
+                'margin_header' => 9,
+                'margin_footer' => 9,
+                'orientation' => 'P'
+            ];
         }
-        return new mPDF($param);
+        // return new mPDF($param);
+        return new \Mpdf\Mpdf($config);
     }
 
 }
