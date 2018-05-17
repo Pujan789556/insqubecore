@@ -6,10 +6,8 @@
 $this->load->helper('ph_agr_crop');
 
 $object_attributes  = json_decode($record->object_attributes);
-$premium_attributes = json_decode($record->premium_attributes);
 
 $schedule_table_title   = 'बाली/फलफुलको बीमालेख';
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -168,7 +166,7 @@ $schedule_table_title   = 'बाली/फलफुलको बीमाले
                                      * Policy Premium Card
                                      */
                                     $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($record->portfolio_id);
-                                    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record, 'title' => $cost_table_title]);
+                                    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record, 'title' => "बिमा शुल्क तालिका"]);
                                     ?>
                                 </td>
                             </tr>
@@ -186,7 +184,7 @@ $schedule_table_title   = 'बाली/फलफुलको बीमाले
             ?>
             <thead>
                 <tr>
-                    <td colspan="5" class="text-bold">बीमीत बाली/फलफुलको विवरण</td>
+                    <td colspan="6" class="text-bold">बीमीत बाली/फलफुलको विवरण</td>
                 </tr>
                 <tr>
                         <td class="text-bold">क्र. सं.</td>
@@ -211,7 +209,7 @@ $schedule_table_title   = 'बाली/फलफुलको बीमाले
                     </tr>
                 <?php endfor ?>
                 <tr>
-                    <td colspan="4" class="text-bold">जम्मा बीमांक रकम(रु)</td>
+                    <td colspan="5" class="text-bold">जम्मा बीमांक रकम(रु)</td>
                     <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2) ?></td>
                 </tr>
             </tbody>
