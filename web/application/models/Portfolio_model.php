@@ -554,6 +554,20 @@ class Portfolio_model extends MY_Model
         return $list;
     }
 
+    // ----------------------------------------------------------------
+
+    public function dropdown_children_code($parent_id=NULL)
+    {
+        $records = $this->get_children($parent_id);
+
+        $list = [];
+        foreach($records as $record)
+        {
+            $list[$record->id] = $record->code;
+        }
+        return $list;
+    }
+
 	// --------------------------------------------------------------------
 
     /**

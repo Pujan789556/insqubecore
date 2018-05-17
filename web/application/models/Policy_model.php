@@ -1153,8 +1153,9 @@ class Policy_model extends MY_Model
                         /**
                          * Save a Fresh PDF copy
                          */
+                        load_portfolio_helper($record->portfolio_id);
                         _POLICY__schedule_pdf([
-                                'record'        => $record,
+                                'record'                => $record,
                                 'endorsement_record'    => $endorsement_record
                             ], 'save');
                     }
