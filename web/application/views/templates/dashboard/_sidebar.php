@@ -75,7 +75,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'surveyor_expertise');?>"><a href="<?php echo site_url('surveyor_expertise');?>"><i class="fa fa-circle-o"></i> Surveyor Expertise</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'surveyors');?>"><a href="<?php echo site_url('surveyors');?>"><i class="fa fa-circle-o"></i> Surveyors</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'months');?>"><a href="<?php echo site_url('fiscal_years');?>"><i class="fa fa-circle-o"></i> Nepali Months</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'months');?>"><a href="<?php echo site_url('months');?>"><i class="fa fa-circle-o"></i> Nepali Months</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'fiscal_years');?>"><a href="<?php echo site_url('fiscal_years');?>"><i class="fa fa-circle-o"></i> Fiscal Years</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'fy_quarters');?>"><a href="<?php echo site_url('fy_quarters');?>"><i class="fa fa-circle-o"></i> Fiscal Years Quarters</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'forex');?>"><a href="<?php echo site_url('forex');?>"><i class="fa fa-circle-o"></i> Forex</a></li>
