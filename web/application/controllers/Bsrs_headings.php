@@ -64,7 +64,15 @@ class Bsrs_headings extends MY_Controller
 		$sectioned_portfolio = [];
 		foreach($portfolios as $single)
 		{
-			$sectioned_portfolio[$single->parent_name_en][] = $single;
+			/**
+			 * NOTE: Escape Agriculture Portfolios
+			 *
+			 * This is because Agriculture has different reporting format
+			 */
+			if( $single->parent_id != IQB_MASTER_PORTFOLIO_AGR_ID )
+			{
+				$sectioned_portfolio[$single->parent_name_en][] = $single;
+			}
 		}
 
 		$data = [
@@ -107,6 +115,17 @@ class Bsrs_headings extends MY_Controller
 				'status' => 'error',
 				'message' => 'Portfolio and/or Heading Type Not Found!'
 			], 404);
+		}
+
+		/**
+		 * NOTE: Agriculture Portfolio? Do nothing
+		 */
+		if($portfolio->parent_id == IQB_MASTER_PORTFOLIO_AGR_ID)
+		{
+			$this->template->json([
+				'status' => 'error',
+				'message' => 'Agriculture Portfolios do not required this setup!'
+			], 403);
 		}
 
 
