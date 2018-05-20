@@ -1,15 +1,15 @@
 #!/bin/bash
 #
-# CLI Cron JOBs
+# InsQube Cron JOBs
 #
 # @author 	IP Bastola < ip.bastola@gmail.com>
 #
-# Example Usage (cront tab record) - Every 07:30 AM
+# Example Usage (cront tab record) - Every 06:00 AM
 #
-# 				30 7 * * * sh /home/insqube/repo/insqube-core/scripts/cli.sh
+# 				* 6 * * * sh /home/insqube/repo/insqube-core/scripts/cron.sh
 #
 
-WEB_ROOT=/var/www/html/neco.insqube.local/web
+WEB_ROOT=/var/www/html/neco.insqube.local
 
 #
 # Go to web root folder
@@ -20,7 +20,7 @@ cd $WEB_ROOT
 # Import Forex Data from NRB
 #
 echo $(date)" - Importing forex from NRB ..."
-php index.php cli import_forex_rates
+php index.php cli forex
 
 
 

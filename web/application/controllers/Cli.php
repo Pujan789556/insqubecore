@@ -47,16 +47,16 @@ class Cli extends CI_Controller
 	 * If No date is supplied, it bring's today's Exchange rate
 	 *
 	 * Usage(dev/production):
-	 * 		$ php index.php cli import_forex_rates
-	 * 		$ php index.php cli import_forex_rates '2016-02-09'
+	 * 		$ php index.php cli forex
+	 * 		$ php index.php cli forex '2016-02-09'
 	 *
-	 * 		$ CI_ENV=production php index.php cli import_forex_rates
-	 * 		$ CI_ENV=production php index.php cli import_forex_rates '2016-02-09'
+	 * 		$ CI_ENV=production php index.php cli forex
+	 * 		$ CI_ENV=production php index.php cli forex '2016-02-09'
 	 *
 	 * @param date $date=NULL
 	 * @return void
 	 */
-	public function import_forex_rates( $date=NULL )
+	public function forex( $date=NULL )
 	{
 		$api 	= 'https://nrb.org.np/exportForexJSON.php';
 		$date 	= $date ?? date('Y-m-d');
