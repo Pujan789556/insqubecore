@@ -123,6 +123,32 @@ class Bs_agro_breed_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Dropdown all
+     *
+     * @return array
+     */
+    public function dropdown()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('bsag_breed_all');
+        if(!$list)
+        {
+            $records = parent::find_all();
+            $list = [];
+            foreach($records as $single)
+            {
+                $list[$single->id] = $single->name_en;
+            }
+            $this->write_cache($list, 'bsag_breed_all', CACHE_DURATION_MONTH);
+        }
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
+
     public function check_duplicate($where, $id=NULL)
     {
         if( $id )
@@ -142,7 +168,8 @@ class Bs_agro_breed_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'bsag_breed_cat_*'
+            'bsag_breed_cat_*',
+            'bsag_breed_all'
         ];
         // cache name without prefix
         foreach($cache_names as $cache)

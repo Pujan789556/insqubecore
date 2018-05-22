@@ -142,6 +142,33 @@ class Fy_month_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get a Fiscal year Record
+     *
+     * @param integer $id
+     * @return object
+     */
+    public function get($id)
+    {
+        /**
+         * CACHE first
+         */
+        $cache_key = 'fy_month_id_' . $id;
+        $record = $this->get_cache($cache_key);
+        if(!$record)
+        {
+            $record = $this->db->select('FM.*, M.name_en, M.name_np')
+                                ->from($this->table_name . ' AS FM')
+                                ->join('master_months M', 'M.id = FM.month_id')
+                                ->where('FM.id', $id)
+                                ->get()->row();
+            $this->write_cache($record, $cache_key, CACHE_DURATION_WEEK);
+        }
+        return $record;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * List all headings for portfolio
      *
      * @param int $fiscal_yr_id
@@ -207,7 +234,8 @@ class Fy_month_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'fy_month_fy_*'
+            'fy_month_fy_*',
+            'fy_month_id_*'
         ];
         // cache name without prefix
         foreach($cache_names as $cache)

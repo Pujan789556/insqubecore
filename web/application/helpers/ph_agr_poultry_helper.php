@@ -124,8 +124,8 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        '_required' 	=> true
 			    ],
 			    [
-			        'field' => 'object[items][batch][]',
-			        '_key' => 'batch',
+			        'field' => 'object[items][tag_no][]',
+			        '_key' => 'tag_no',
 			        'label' => 'समूह (व्याच)',
 			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
 			        '_type' => 'text',

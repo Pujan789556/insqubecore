@@ -520,6 +520,26 @@ if ( ! function_exists('is_valid_fy_quarter'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('is_valid_fy_month'))
+{
+    /**
+     * Is valid fiscal Year Month?
+     *
+     *
+     * @param int $month_id   Month ID
+     * @return  bool
+     */
+    function is_valid_fy_month( $month_id )
+    {
+        $CI =& get_instance();
+        $CI->load->model('month_model');
+        $months = array_keys($CI->month_model->dropdown());
+
+        return in_array($month_id, $months);
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('risk_type_dropdown'))
 {
     /**

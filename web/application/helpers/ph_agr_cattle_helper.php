@@ -161,8 +161,8 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
                     '_required' => true
                 ],
                 [
-			        'field' => 'object[items][sign][]',
-			        '_key' => 'sign',
+			        'field' => 'object[items][tag_no][]',
+			        '_key' => 'tag_no',
 			        'label' => 'संकेत पट्टा',
 			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
 			        '_type' => 'text',

@@ -127,6 +127,32 @@ class Bs_agro_category_model extends MY_Model
         return $list;
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Dropdown all codes
+     *
+     * @return array
+     */
+    public function dropdown_codes()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('bsag_cat_all');
+        if(!$list)
+        {
+            $records = parent::find_all();
+            $list = [];
+            foreach($records as $single)
+            {
+                $list[$single->id] = $single->code;
+            }
+            $this->write_cache($list, 'bsag_cat_all', CACHE_DURATION_MONTH);
+        }
+        return $list;
+    }
+
 
     // ----------------------------------------------------------------
 
@@ -149,7 +175,8 @@ class Bs_agro_category_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'bsag_cat_p_*'
+            'bsag_cat_p_*',
+            'bsag_cat_all'
         ];
         // cache name without prefix
         foreach($cache_names as $cache)
