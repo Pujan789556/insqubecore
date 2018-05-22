@@ -502,6 +502,24 @@ if ( ! function_exists('fiscal_year_quarters_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('is_valid_fy_quarter'))
+{
+    /**
+     * Is valid fiscal Year Quarter?
+     *
+     *
+     * @param int $key   Quarter Value
+     * @return  bool
+     */
+    function is_valid_fy_quarter( $key )
+    {
+        $quarters = array_keys(fiscal_year_quarters_dropdown(FALSE));
+
+        return in_array($key, $quarters);
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('risk_type_dropdown'))
 {
     /**

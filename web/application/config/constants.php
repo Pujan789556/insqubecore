@@ -698,6 +698,16 @@ defined('IQB_AC_ACCOUNT_ID_OWNERSHIP_TRANSFER_CHARGE') 		OR define('IQB_AC_ACCOU
 
 
 
-
-
+/*
+|--------------------------------------------------------------------------
+| BEEMA SAMITI REPORT TYPES CONSTANTS
+|--------------------------------------------------------------------------
+|
+*/
+define('IQB_BS_REPORT_TYPE_QUARTELRY',  'Q');
+define('IQB_BS_REPORT_TYPE_MONTHLY',  	'M');
+defined('IQB_BS_REPORT_TYPES')    	OR define('IQB_BS_REPORT_TYPES', 	[
+	IQB_BS_REPORT_TYPE_MONTHLY		=> 'Monthly',
+	IQB_BS_REPORT_TYPE_QUARTELRY	=> 'Quarterly',
+]);
 

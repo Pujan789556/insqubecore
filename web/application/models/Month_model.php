@@ -103,7 +103,7 @@ class Month_model extends MY_Model
     /**
      * Get Dropdown List
      */
-    public function dropdown()
+    public function dropdwon()
     {
         /**
          * Get Cached Result, If no, cache the query result
@@ -115,6 +115,32 @@ class Month_model extends MY_Model
             $list["{$record->id}"] = $record->name_np . "({$record->name_en}) ";
         }
         return $list;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Dropdown List - Fiscal Year Month Order
+     */
+    public function dropdwon_fy()
+    {
+        $dropdown = $this->dropdwon();
+        $dd_first_year = [];
+        $dd_second_year = [];
+        foreach($dropdown as $key=>$value)
+        {
+            if($key <= 3)
+            {
+                $dd_second_year[$key] = $value;
+            }
+            else
+            {
+                $dd_first_year[$key] = $value;
+            }
+        }
+
+        $dd = $dd_first_year + $dd_second_year;
+        return $dd;
     }
 
 	// --------------------------------------------------------------------
