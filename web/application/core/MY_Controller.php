@@ -50,6 +50,13 @@ class MY_Controller extends CI_Controller
 	 */
 	public $current_fy_quarter;
 
+	/**
+	 * Application's Current Month of Current Fiscal Year from DB
+	 *
+	 * @var object
+	 */
+	public $current_fy_month;
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -191,6 +198,11 @@ class MY_Controller extends CI_Controller
          * Current Quarter
          */
         $this->current_fy_quarter = $this->fy_quarter_model->get_quarter_by_date($today);
+
+        /**
+         * Current Month
+         */
+        $this->current_fy_month = $this->fy_month_model->get_month_by_date($today);
 	}
 
 	// --------------------------------------------------------------------

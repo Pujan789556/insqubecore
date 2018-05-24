@@ -29,6 +29,18 @@ class Cli_bs_report extends CI_Controller
      */
     public $current_fy_quarter;
 
+    /**
+     * Application's Current Month of Current Fiscal Year from DB
+     *
+     * @var object
+     */
+    public $current_fy_month;
+
+    /**
+     * Files Upload Path
+     */
+    public static $upload_path = INSQUBE_MEDIA_PATH . 'reports/bs/';
+
     // --------------------------------------------------------------------
 
 
@@ -45,7 +57,6 @@ class Cli_bs_report extends CI_Controller
         /**
          * App Settings
          */
-        $this->load->model('setting_model');
         $this->_app_settings();
         $this->_app_fiscal_year();
 
@@ -55,7 +66,6 @@ class Cli_bs_report extends CI_Controller
         date_default_timezone_set('Asia/Katmandu');
 
         // Load models
-        $this->load->model('fiscal_year_model');
         $this->load->model('bs_report_model');
     }
 
@@ -93,6 +103,12 @@ class Cli_bs_report extends CI_Controller
          * Current Quarter
          */
         $this->current_fy_quarter = $this->fy_quarter_model->get_quarter_by_date($today);
+
+
+        /**
+         * Current Month
+         */
+        $this->current_fy_month = $this->fy_month_model->get_month_by_date($today);
     }
 
 	// -------------------------------------------------------------------------------------
@@ -112,30 +128,78 @@ class Cli_bs_report extends CI_Controller
 	}
 
 
+    // -------------------------------------------------------------------------------------
+
+    /**
+     * Generate all beema samiti queued reports
+     *
+     *
+     * Usage(dev/production):
+     *      $ php index.php cli_bs_report generate
+     *      $ php index.php cli_bs_report generate
+     *
+     *      $ CI_ENV=production php index.php cli_bs_report generate
+     *      $ CI_ENV=production php index.php cli_bs_report generate
+     *
+     * @param inte $fiscal_yr_id
+     * @param int $fy_quarter
+     * @return void
+     */
+    public function generate()
+    {
+        $records = $this->bs_report_model->pending_list();
+
+        /**
+         * Generate Report Per Type
+         */
+        foreach($records as $record)
+        {
+            /**
+             * Underwriting Reports
+             */
+            if( $record->category === IQB_BS_REPORT_CATEGORY_UW )
+            {
+                switch ($record->type)
+                {
+                    case IQB_BS_REPORT_TYPE_QUARTELRY:
+                        $this->uw_quarterly( $record->id );
+                        break;
+
+                    case IQB_BS_REPORT_TYPE_MONTHLY:
+                        $this->uw_monthly( $record->id );
+                        break;
+
+                    default:
+                        # code...
+                        break;
+                }
+            }
+        }
+    }
+
 	// -------------------------------------------------------------------------------------
 
 	/**
 	 * Generate Quarterly Report for Underwriting
 	 *
-	 * NOTE: All portfolios except Agriculture (Which is Monthly, having different structure)
-	 *
-	 * Usage(dev/production):
-	 * 		$ php index.php cli_bs_report uw_quarterly '19' '1'
-	 * 		$ php index.php cli_bs_report uw_quarterly '19' '1'
-	 *
-	 * 		$ CI_ENV=production php index.php cli_bs_report uw_quarterly '19' '1'
-	 * 		$ CI_ENV=production php index.php cli_bs_report uw_quarterly '19' '1'
-	 *
-	 * @param inte $fiscal_yr_id
-	 * @param int $fy_quarter
+	 * @param inte $id
 	 * @return void
 	 */
-	public function uw_quarterly( $fiscal_yr_id, $fy_quarter )
+	public function uw_quarterly( $id )
 	{
+        // Valid Record ?
+        $id = (int)$id;
+        $record = $this->bs_report_model->find($id);
+        if(!$record )
+        {
+            echo "ERROR: Fiscal Year not found!" . PHP_EOL;
+            exit(1);
+        }
+
 		/**
 		 * Valid Fiscal Year?
 		 */
-		$fy_record = $this->fiscal_year_model->get($fiscal_yr_id);
+		$fy_record = $this->fiscal_year_model->get($record->fiscal_yr_id);
 		if(!$fy_record)
 		{
 			echo "ERROR: Fiscal Year not found!" . PHP_EOL;
@@ -143,14 +207,11 @@ class Cli_bs_report extends CI_Controller
 		}
 
 		/**
-		 * Valid Quarter?
+		 * Fiscal Year, Quarter
 		 */
+        $fiscal_yr_id = $record->fiscal_yr_id;
+        $fy_quarter = $record->fy_quarter_month;
 
-		if(!is_valid_fy_quarter($fy_quarter))
-		{
-			echo "ERROR: Invalid fiscal year quarter. It must be between 1 and 4!" . PHP_EOL;
-			exit(1);
-		}
 
 		$fy_code_np     = $fy_record->code_np;
 		$this->load->model('portfolio_model');
@@ -244,30 +305,30 @@ class Cli_bs_report extends CI_Controller
                             PINST.fy_quarter = {$fy_quarter}
                         GROUP BY P0.policy_id, {$sql_group_headings};";
         }
-        $this->_csv_export($fy_record, $fy_quarter, $SQLS, IQB_BS_REPORT_TYPE_QUARTELRY);
+        $this->_csv_export($record, $fy_record, $fy_quarter, $SQLS, IQB_BS_REPORT_TYPE_QUARTELRY);
 	}
 
     // -------------------------------------------------------------------------------------
 
     /**
-     * Generate Quarterly Report for Underwriting
+     * Generate Monthly for Underwriting
      *
      * NOTE: Only Agriculture Portfolios
      *
-     * Usage(dev/production):
-     *      $ php index.php cli_bs_report uw_monthly '18' '11'
-     *      $ php index.php cli_bs_report uw_monthly '18' '11'
-     *
-     *      $ CI_ENV=production php index.php cli_bs_report uw_monthly '18' '11'
-     *      $ CI_ENV=production php index.php cli_bs_report uw_monthly '18' '11'
-     *
-     * @param int $fiscal_yr_id
-     * @param int $fy_month_id
+     * @param int $id
      * @return void
      */
-    public function uw_monthly( $fiscal_yr_id, $fy_month_id )
+    public function uw_monthly( $id )
     {
-        $this->load->model('fy_month_model');
+        // Valid Record ?
+        $id = (int)$id;
+        $record = $this->bs_report_model->find($id);
+        if(!$record )
+        {
+            echo "ERROR: Fiscal Year not found!" . PHP_EOL;
+            exit(1);
+        }
+
         $this->load->model('bs_agro_category_model');
         $this->load->model('bs_agro_breed_model');
         $this->load->model('portfolio_setting_model');
@@ -275,15 +336,16 @@ class Cli_bs_report extends CI_Controller
         /**
          * Valid Fiscal Year?
          */
-        $fy_record = $this->fiscal_year_model->get($fiscal_yr_id);
+        $fy_record = $this->fiscal_year_model->get($record->fiscal_yr_id);
         if(!$fy_record)
         {
             echo "ERROR: Fiscal Year not found!" . PHP_EOL;
             exit(1);
         }
+        $fiscal_yr_id = $record->fiscal_yr_id;
 
 
-        $fy_month_record = $this->fy_month_model->get($fy_month_id);
+        $fy_month_record = $this->fy_month_model->get_by_fy_month($record->fiscal_yr_id, $record->fy_quarter_month);
         if(!$fy_month_record)
         {
             echo "ERROR: Fiscal Year Month not found!" . PHP_EOL;
@@ -319,11 +381,6 @@ class Cli_bs_report extends CI_Controller
                         PF.parent_id = 1 AND
                         PINST.installment_date >= '{$month_start}' AND
                         PINST.installment_date <= '{$month_end}';";
-
-
-
-
-
 
 
         $bs_category_codes  = $this->bs_agro_category_model->dropdown_codes();
@@ -423,7 +480,7 @@ class Cli_bs_report extends CI_Controller
         /**
          * Let's Save in CSV file
          */
-        $csv_file_path   = INSQUBE_MEDIA_PATH . '/reports/bs/' . $filename;
+        $csv_file_path   = self::$upload_path . $filename;
 
 
         $fp = fopen($csv_file_path, 'w') or die("ERROR: Permission Denied. Unable to create file!" . PHP_EOL);
@@ -448,11 +505,18 @@ class Cli_bs_report extends CI_Controller
 
 
         // Output Zip File
-        $zip_file   = "bs-monthly-{$fy_code_np}-{$fy_month_record->name_en}-AGR.zip";
-        $csv_zip_file   = INSQUBE_MEDIA_PATH . '/reports/bs/' . $zip_file;
+        $zip_file       = uniqid("bs-monthly-{$fy_code_np}-{$fy_month_record->name_en}-AGR", true). ".zip";
+        $csv_zip_file   = self::$upload_path . $zip_file;
 
         // Remove any Zip file already
         @unlink($csv_zip_file);
+
+        // Remove old record file
+        if($record->filename)
+        {
+            @unlink(self::$upload_path . $record->filename);
+        }
+
 
         echo "Generating CSVs Zip ($zip_file)... " ;
 
@@ -465,12 +529,10 @@ class Cli_bs_report extends CI_Controller
              * Save the Report for Downloads
              */
             $report_data = array(
-                'type'              => IQB_BS_REPORT_TYPE_MONTHLY,
-                'fiscal_yr_id'      => $fy_record->id,
-                'fy_quarter_month'  => $fy_month_record->month_id,
-                'filename'          => $zip_file,
+                'filename'  => $zip_file,
+                'status'    => IQB_FLAG_ON
             );
-            $this->bs_report_model->save($report_data);
+            $this->bs_report_model->update($record->id, $report_data, TRUE);
 
             echo "OK" . PHP_EOL;
         }else{
@@ -492,7 +554,7 @@ class Cli_bs_report extends CI_Controller
 	 * @param array $sqls
 	 * @return void
 	 */
-	private function _csv_export($fy_record, $fy_quarter, $sqls, $type)
+	private function _csv_export($record, $fy_record, $fy_quarter, $sqls, $type)
     {
         $this->load->dbutil();
         $this->load->helper('file');
@@ -527,7 +589,7 @@ class Cli_bs_report extends CI_Controller
 
 
             // File to write content to
-            $csv_files[] = $csv_file = INSQUBE_MEDIA_PATH . '/reports/bs/' . $filename;
+            $csv_files[] = $csv_file = self::$upload_path . $filename;
 
             // Write into individual csv files
             // We need these individual files for range query to merge them together
@@ -545,11 +607,17 @@ class Cli_bs_report extends CI_Controller
 
 
         // Output Zip File
-        $zip_file   = "bs-quarterly-{$fy_code_np}-{$fy_quarter}.zip";
-        $csv_zip_file   = INSQUBE_MEDIA_PATH . '/reports/bs/' . $zip_file;
+        $zip_file       = uniqid("bs-quarterly-{$fy_code_np}-{$fy_quarter}", true). ".zip";
+        $csv_zip_file   = self::$upload_path . $zip_file;
 
         // Remove any Zip file already
         @unlink($csv_zip_file);
+
+        // Remove old record file
+        if($record->filename)
+        {
+            @unlink(self::$upload_path . $record->filename);
+        }
 
         echo "Generating CSVs Zip ($zip_file)... " ;
 
@@ -565,12 +633,10 @@ class Cli_bs_report extends CI_Controller
              * Save the Report for Downloads
              */
             $report_data = array(
-                'type' 				=> $type,
-                'fiscal_yr_id'  	=> $fy_record->id,
-                'fy_quarter_month'  => $fy_quarter,
-                'filename'  		=> $zip_file,
+                'filename'  => $zip_file,
+                'status' => IQB_FLAG_ON
             );
-            $this->bs_report_model->save($report_data);
+            $this->bs_report_model->update($record->id, $report_data, TRUE);
 
             echo "OK" . PHP_EOL;
         }else{

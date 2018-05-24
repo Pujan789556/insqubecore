@@ -481,7 +481,7 @@ if ( ! function_exists('fiscal_year_quarters_dropdown'))
      *
      *
      * @param bool $flag_blank_select   Whether to append blank select
-     * @return  bool
+     * @return  array
      */
     function fiscal_year_quarters_dropdown( $flag_blank_select = true)
     {
@@ -493,6 +493,30 @@ if ( ! function_exists('fiscal_year_quarters_dropdown'))
             4   => 'Fourth'
         ];
 
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('nepali_month_dropdown'))
+{
+    /**
+     * Get nepali month dropdown
+     *
+     * @param bool $flag_blank_select   Whether to append blank select
+     * @return  array
+     */
+    function nepali_month_dropdown( $flag_blank_select = true )
+    {
+
+        $CI =& get_instance();
+        $CI->load->model('month_model');
+
+        $dropdown = $CI->month_model->dropdown();
         if($flag_blank_select)
         {
             $dropdown = IQB_BLANK_SELECT + $dropdown;

@@ -70,7 +70,7 @@ class Month_model extends MY_Model
         $record = $this->get_cache($cache_name);
         if(!$record)
         {
-            $record = $this->db->select('`id`, `name_en`, `name_np`')
+            $record = $this->db->select('id, name_en, name_np')
                         ->from($this->table_name)
                         ->where('id', $id)
                         ->get()->row();
@@ -83,13 +83,14 @@ class Month_model extends MY_Model
 
     public function get_all()
     {
+        $this->clear_cache();
         /**
          * Get Cached Result, If no, cache the query result
          */
         $list = $this->get_cache('mnth_all');
         if(!$list)
         {
-            $list = $this->db->select('`id`, `name_en`, `name_np`')
+            $list = $this->db->select('id, name_en, name_np')
                         ->from($this->table_name)
                         ->get()->result();
             $this->write_cache($list, 'mnth_all', CACHE_DURATION_MONTH);
@@ -103,7 +104,7 @@ class Month_model extends MY_Model
     /**
      * Get Dropdown List
      */
-    public function dropdwon()
+    public function dropdown()
     {
         /**
          * Get Cached Result, If no, cache the query result
@@ -122,7 +123,7 @@ class Month_model extends MY_Model
     /**
      * Get Dropdown List - Fiscal Year Month Order
      */
-    public function dropdwon_fy()
+    public function dropdown_fy()
     {
         $dropdown = $this->dropdwon();
         $dd_first_year = [];

@@ -50,7 +50,7 @@ class Fy_month_model extends MY_Model
 
     public function validation_rules()
     {
-        $month_dropdown = $this->month_model->dropdwon();
+        $month_dropdown = $this->month_model->dropdown();
         $month_ids = array_keys($month_dropdown);
 
         $this->validation_rules = [
@@ -169,6 +169,64 @@ class Fy_month_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get a Record by Fiscal Year's Particular Month
+     *
+     * @param integer $id
+     * @return object
+     */
+    public function get_by_fy_month($fiscal_year_id, $month_id)
+    {
+        /**
+         * CACHE first
+         */
+        $cache_key = 'fy_month_fy_mnth_' . $fiscal_year_id . '_' . $month_id;
+        $record = $this->get_cache($cache_key);
+        if(!$record)
+        {
+            $record = $this->db->select('FM.*, M.name_en, M.name_np')
+                                ->from($this->table_name . ' AS FM')
+                                ->join('master_months M', 'M.id = FM.month_id')
+                                ->where('FM.fiscal_yr_id', $fiscal_year_id)
+                                ->where('FM.month_id', $month_id)
+                                ->get()->row();
+            $this->write_cache($record, $cache_key, CACHE_DURATION_WEEK);
+        }
+        return $record;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Quarter for Given Fiscal year's Date
+     *
+     * @param type $date
+     * @return type
+     */
+    public function get_month_by_date($date)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'fy_month_dt_' . date('Ymd', strtotime($date));
+        $record = $this->get_cache($cache_name);
+        if(!$record)
+        {
+            $where = [
+                'FM.starts_at <=' => $date,
+                'FM.ends_at >=' => $date
+            ];
+            $record = $this->db->select('FM.id, FM.fiscal_yr_id, FM.month_id, FM.starts_at, FM.ends_at')
+                            ->from($this->table_name . ' as FM')
+                            ->where($where)
+                            ->get()->row();
+            $this->write_cache($record, $cache_name, CACHE_DURATION_DAY);
+        }
+        return $record;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * List all headings for portfolio
      *
      * @param int $fiscal_yr_id
@@ -235,7 +293,9 @@ class Fy_month_model extends MY_Model
     {
         $cache_names = [
             'fy_month_fy_*',
-            'fy_month_id_*'
+            'fy_month_id_*',
+            'fy_month_dt_*',
+            'fy_month_fy_mnth_*',
         ];
         // cache name without prefix
         foreach($cache_names as $cache)

@@ -700,6 +700,21 @@ defined('IQB_AC_ACCOUNT_ID_OWNERSHIP_TRANSFER_CHARGE') 		OR define('IQB_AC_ACCOU
 
 /*
 |--------------------------------------------------------------------------
+| BEEMA SAMITI REPORT CATEGORIES CONSTANTS
+|--------------------------------------------------------------------------
+|
+*/
+define('IQB_BS_REPORT_CATEGORY_UW',  'UW'); // UNDERWRITING
+define('IQB_BS_REPORT_CATEGORY_CL',  	'CL'); // CLAIM
+define('IQB_BS_REPORT_CATEGORY_RI',  	'RI'); // RI
+defined('IQB_BS_REPORT_CATEGORIES')    	OR define('IQB_BS_REPORT_CATEGORIES', 	[
+	IQB_BS_REPORT_CATEGORY_UW	=> 'Underwriting',
+	IQB_BS_REPORT_CATEGORY_CL	=> 'Claim',
+	IQB_BS_REPORT_CATEGORY_RI	=> 'Re-Insurance',
+]);
+
+/*
+|--------------------------------------------------------------------------
 | BEEMA SAMITI REPORT TYPES CONSTANTS
 |--------------------------------------------------------------------------
 |

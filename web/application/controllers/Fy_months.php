@@ -238,7 +238,7 @@ class Fy_months extends MY_Controller
             return FALSE;
     	}
 
-    	$months = array_keys($this->month_model->dropdwon());
+    	$months = array_keys($this->month_model->dropdown());
     	foreach($month_ids as $month_id)
     	{
     		if(!in_array($month_id, $months))
@@ -278,7 +278,7 @@ class Fy_months extends MY_Controller
 		 * Existing Categories for this Portfolio and heading type
 		 */
 		$records 	= $this->fy_month_model->by_fiscal_year($fiscal_yr_id);
-		$months 	= $this->month_model->dropdwon_fy();
+		$months 	= $this->month_model->dropdown_fy();
 
 
 		/**

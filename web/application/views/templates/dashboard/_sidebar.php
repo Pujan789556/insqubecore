@@ -343,30 +343,11 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                         </span>
                   </a>
                   <ul class="treeview-menu">
-                        <li class="<?php echo set_menu_active($nav_level_1, 'reports');?>">
-
-                              <a href="#">
-                                    <i class="fa fa-arrow-circle-o-down"></i> <span>Beema Samiti</span>
-                                    <span class="pull-right-container">
-                                          <i class="fa fa-angle-left pull-right"></i>
-                                    </span>
-                              </a>
-                              <ul class="treeview-menu">
-                                    <li class="<?php echo set_menu_active($nav_level_1, 'reports/bs/policy');?>">
-                                          <a href="<?php echo site_url('reports/bs/policy');?>"><i class="fa fa-file-text-o"></i> Underwriting</a>
-                                    </li>
-                                    <li class="<?php echo set_menu_active($nav_level_1, 'reports/bs/claim');?>">
-                                          <a href="<?php echo site_url('reports/bs/claim');?>"><i class="fa fa-file-text-o"></i> Claim</a>
-                                    </li>
-                                    <li class="<?php echo set_menu_active($nav_level_1, 'reports/bs/ri');?>">
-                                          <a href="<?php echo site_url('reports/bs/ri');?>"><i class="fa fa-file-text-o"></i> RI</a>
-                                    </li>
-                              </ul>
+                        <li class="<?php echo set_menu_active($nav_level_1, 'bs_reports');?>">
+                              <a href="<?php echo site_url('bs_reports');?>"><i class="fa fa-file-text-o"></i> Beema Samiti</a>
                         </li>
                   </ul>
             </li>
-
-
       </ul>
 </section>
 <!-- /.sidebar -->
