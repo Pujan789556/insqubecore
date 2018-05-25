@@ -772,7 +772,7 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 					$summary_table = [
 						[
 							'label' => "BASIC PREMIUM",
-							'value' => $BASIC_PREMIUM
+							'value' => $GROSS_PREMIUM
 						]
 					];
 
