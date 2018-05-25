@@ -810,5 +810,19 @@ class Companies extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        $this->company_model->clear_cache();
+        $this->company_branch_model->clear_cache();
+        redirect($this->router->class);
+    }
+
+	// --------------------------------------------------------------------
+
 
 }
