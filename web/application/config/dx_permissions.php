@@ -377,6 +377,22 @@ $config['DX_permissions'] = [
 			'generate.claim.voucher'
 		],
 	],
+
+	/**
+	 * Group: Reports
+	 */
+	'Report Permissions' => [
+		/**
+		 * Beema Samiti Report Module
+		 */
+		'bs_reports'  => [
+			'explore.bs.reports',
+			'download.bs.reports',
+			'edit.bs.report',
+			'add.bs.report',
+			'delete.bs.report'
+		],
+	],
 ];
 
 

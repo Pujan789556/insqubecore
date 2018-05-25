@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<h1 style="margin:0; font-size:24px;"><?php echo $content_header; ?></h1>
 			</div>
 			<div class="col-sm-4 master-actions text-right">
-				<?php if($this->dx_auth->is_authorized('reports', 'add.bs.report')): ?>
+				<?php if($this->dx_auth->is_authorized('bs_reports', 'add.bs.report')): ?>
 					<a href="#"
 						title="Add New Report"
 						data-toggle="tooltip"

@@ -70,7 +70,7 @@ class Bs_reports extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('reports', 'explore.bs.reports') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('bs_reports', 'explore.bs.reports') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -246,7 +246,7 @@ class Bs_reports extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('reports', 'download.bs.reports') )
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('bs_reports', 'download.bs.reports') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -315,7 +315,7 @@ class Bs_reports extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('reports', 'edit.bs.report') )
+		if( !$this->dx_auth->is_authorized('bs_reports', 'edit.bs.report') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -372,7 +372,7 @@ class Bs_reports extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('reports', 'add.bs.report') )
+		if( !$this->dx_auth->is_authorized('bs_reports', 'add.bs.report') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -561,7 +561,7 @@ class Bs_reports extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('reports', 'delete.bs.report') )
+		if( !$this->dx_auth->is_authorized('bs_reports', 'delete.bs.report') )
 		{
 			$this->dx_auth->deny_access();
 		}

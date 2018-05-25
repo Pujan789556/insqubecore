@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td class="ins-action">
 		<?php if(!$record->status): ?>
 
-			<?php if($this->dx_auth->is_authorized('reports', 'edit.bs.report')): ?>
+			<?php if($this->dx_auth->is_authorized('bs_reports', 'edit.bs.report')): ?>
 				<a href="#"
 					data-toggle="tooltip"
 					title="Edit report"
@@ -37,7 +37,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</a>
 			<?php endif ?>
 
-			<?php if(safe_to_delete( 'Bs_report_model', $record->id ) && $this->dx_auth->is_authorized('reports', 'delete.bs.report') ):?>
+			<?php if(safe_to_delete( 'Bs_report_model', $record->id ) && $this->dx_auth->is_authorized('bs_reports', 'delete.bs.report') ):?>
 				<a href="#"
 					title="Delete"
 					data-toggle="tooltip"
