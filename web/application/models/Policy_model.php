@@ -117,10 +117,6 @@ class Policy_model extends MY_Model
              */
             $district_dropdown = $this->district_model->dropdown();
 
-            /**
-             * List all marketing staffs of this branch
-             */
-            $branch_id = $this->dx_auth->is_admin() ? NULL : $this->dx_auth->get_branch_id();
 
             /**
              * If posted and Direct Discount Checked, We don't need agent
@@ -410,12 +406,12 @@ class Policy_model extends MY_Model
                 'sales' => [
                     [
                         'field' => 'sold_by',
-                        'label' => 'Marketing Staff',
+                        'label' => 'Staff',
                         'rules' => 'trim|integer|max_length[11]',
                         '_id'       => '_marketing-staff',
                         '_extra_attributes' => 'style="width:100%; display:block"',
                         '_type'     => 'dropdown',
-                        '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown($branch_id),
+                        '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown(),
                         '_required' => false
                     ],
                     [
