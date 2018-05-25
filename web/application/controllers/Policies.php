@@ -213,15 +213,15 @@ class Policies extends MY_Controller
 		            '_required' => false
 		        ],
 		        [
-		            'field' => 'filter_start_date',
-		            'label' => 'Policy Start Date',
+		            'field' => 'filter_issued_from',
+		            'label' => 'Issued Date (From)',
 		            'rules' => 'trim|valid_date',
 		            '_type'     => 'date',
 		            '_required' => false
 		        ],
 		        [
-		            'field' => 'filter_end_date',
-		            'label' => 'Policy End Date',
+		            'field' => 'filter_issued_to',
+		            'label' => 'Issued Date (To)',
 		            'rules' => 'trim|valid_date',
 		            '_type'     => 'date',
 		            '_required' => false
@@ -251,8 +251,8 @@ class Policies extends MY_Controller
 						'code' 				=> $this->input->post('filter_code') ?? NULL,
 						'status' 			=> $this->input->post('filter_status') ?? NULL,
 						'portfolio_id' 		=> $this->input->post('filter_portfolio_id') ?? NULL,
-						'start_date' 		=> $this->input->post('filter_start_date') ?? NULL,
-						'end_date' 			=> $this->input->post('filter_end_date') ?? NULL,
+						'issued_from' 		=> $this->input->post('filter_issued_from') ?? NULL,
+						'issued_to' 		=> $this->input->post('filter_issued_to') ?? NULL,
 						'keywords' 			=> $this->input->post('filter_keywords') ?? ''
 					];
 					$data['status'] = 'success';

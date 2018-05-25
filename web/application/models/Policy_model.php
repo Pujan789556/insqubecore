@@ -1364,16 +1364,16 @@ class Policy_model extends MY_Model
                 $this->db->where(['P.portfolio_id' =>  $portfolio_id]);
             }
 
-            $start_date = $params['start_date'] ?? NULL;
-            if( $start_date )
+            $issued_from = $params['issued_from'] ?? NULL;
+            if( $issued_from )
             {
-                $this->db->where(['P.start_date >=' =>  $start_date]);
+                $this->db->where(['P.issued_date >=' =>  $issued_from]);
             }
 
-            $end_date = $params['end_date'] ?? NULL;
-            if( $end_date )
+            $issued_to = $params['issued_to'] ?? NULL;
+            if( $issued_to )
             {
-                $this->db->where(['P.end_date <=' =>  $end_date]);
+                $this->db->where(['P.issued_date <=' =>  $issued_to]);
             }
 
             // $keywords = $params['keywords'] ?? '';
