@@ -252,6 +252,9 @@ class Tmi_plan_model extends MY_Model
 
     public function update_tariff_benefits($id, $data)
     {
+        // add modified details
+        $data = $this->modified_on(['fields' => $data]);
+
         $result = $this->db->set($data)
                         ->where('id', $id)
                         ->update($this->table_name);
