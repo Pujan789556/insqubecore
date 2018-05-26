@@ -42,5 +42,12 @@ else
     $status_sentence   = '<i class="fa fa-warning margin-r-5"></i>This Policy is <strong>DRAFT</strong>.';
     $css_class  = 'text-red';
 }
+
+
+$__flag_ri_approval_constraint = _ENDORSEMENT__ri_approval_constraint($endorsement_record->status, $endorsement_record->flag_ri_approval);
+if($__flag_ri_approval_constraint)
+{
+    echo '<div class="alert alert-danger"><h4><i class="fa fa-warning margin-r-5"> Pending RI-Approval.</h4></div>';
+}
 ?>
 <p class="<?php echo $css_class?>"><?php echo $status_sentence?></p>
