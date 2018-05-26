@@ -121,7 +121,7 @@ class Portfolio_setting_model extends MY_Model
                 [
                     'field' => 'default_duration[]',
                     'label' => 'Default Duration (Days)',
-                    'rules' => 'trim|required|integer|max_length[3]',
+                    'rules' => 'trim|required|integer|max_length[5]',
                     '_default'  => 365,
                     '_type'     => 'text',
                     '_key'      => 'default_duration',
