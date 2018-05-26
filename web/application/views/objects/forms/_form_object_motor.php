@@ -118,15 +118,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $reg_box.hide(500);
             $reg_date_box.hide(500);
         }else if(typeof et === 'undefined' || et === 'ifUnchecked'){
-            $reg_field.val('');
-            $reg_date_field.val('');
             $reg_box.show(500);
             $reg_date_box.show(500);
         }
     }
 
     (function($){
-
         // To Be Intimated Toggle
         _po_to_be_intimated('#_motor-vehicle-to-be-intimated');
         $('#_motor-vehicle-to-be-intimated').on('ifChecked ifUnchecked', function(event){

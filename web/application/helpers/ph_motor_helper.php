@@ -2316,12 +2316,10 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 		if($flag_to_be_intimated)
 		{
 			$reg_no_rules  = 'trim|max_length[30]|strtoupper|in_list[TO BE INTIMATED]';
-			$reg_date_rule = 'trim|valid_date';
 		}
 		else
 		{
 			$reg_no_rules  = 'trim|max_length[30]|strtoupper|callback__cb_motor_duplicate_reg_no';
-			$reg_date_rule = 'trim|required|valid_date';
 		}
 
 		/**
@@ -2360,7 +2358,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'field' => 'object[engine_no]',
 			        '_key' => 'engine_no',
 			        'label' => 'Engine Number',
-			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[30]|strtoupper|callback__cb_motor_duplicate_engine_no',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[30]|strtoupper|callback__cb_motor_duplicate_engine_no',
 			        '_id' 		=> '_motor-engine-no',
 			        '_type'     => 'text',
 			        '_required' => true
@@ -2369,7 +2367,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'field' => 'object[chasis_no]',
 			        '_key' => 'chasis_no',
 			        'label' => 'Chasis Number',
-			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[30]|strtoupper|callback__cb_motor_duplicate_chasis_no',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[30]|strtoupper|callback__cb_motor_duplicate_chasis_no',
 			        '_id' 		=> '_motor-chasis-no',
 			        '_type'     => 'text',
 			        '_required' => true
@@ -2423,25 +2421,25 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'rules' => $reg_no_rules,
 			        '_id' 		=> '_motor-registration-no',
 			        '_type'     => 'text',
-			        '_required' => false
+			        '_required' => true
 			    ],
 			    [
 			        'field' => 'object[reg_date]',
 			        '_key' => 'reg_date',
 			        'label' => 'Registration Date',
-			        'rules' => $reg_date_rule,
+			        'rules' => 'trim|valid_date',
 			        '_id' 		=> '_motor-registration-date',
 			        '_type'     => 'date',
-			        '_required' => true
+			        '_required' => false
 			    ],
 			    [
 			        'field' => 'object[puchase_date]',
 			        '_key' => 'puchase_date',
 			        'label' => 'Purchase Date',
-			        'rules' => 'trim|required|valid_date',
+			        'rules' => 'trim|valid_date',
 			        '_id' 		=> '_motor-purchase-date',
 			        '_type'     => 'date',
-			        '_required' => true
+			        '_required' => false
 			    ],
 			    [
 			    	'field' => 'object[vechile_status]',
@@ -2457,7 +2455,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'field' => 'object[manufacturer]',
 			        '_key' => 'manufacturer',
 			        'label' => 'Manufacturer',
-			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[80]',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[80]',
 			        '_id' 		=> '_motor-manufacturer',
 			        '_type'     => 'text',
 			        '_required' => true
@@ -2466,7 +2464,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'field' => 'object[make]',
 			        '_key' => 'make',
 			        'label' => 'Make',
-			        'rules' => 'trim|required|max_length[60]',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[60]',
 			        '_id' 		=> '_motor-make',
 			        '_type'     => 'text',
 			        '_required' => true
@@ -2475,7 +2473,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'field' => 'object[model]',
 			        '_key' => 'model',
 			        'label' => 'Model',
-			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[60]',
+			        'rules' => 'trim|required|htmlspecialchars|max_length[60]',
 			        '_id' 		=> '_motor-model',
 			        '_type'     => 'text',
 			        '_required' => true
