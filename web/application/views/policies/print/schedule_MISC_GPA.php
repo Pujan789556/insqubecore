@@ -4,7 +4,6 @@
  */
 
 $object_attributes  = json_decode($record->object_attributes);
-$premium_attributes = json_decode($record->premium_attributes);
 $schedule_table_title   = 'सामुहिक दुर्घटना बीमालेख';
 $total_premium  = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
 $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
@@ -175,7 +174,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                      * Policy Premium Card
                                      */
                                     $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($record->portfolio_id);
-                                    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record, 'title' => $cost_table_title]);
+                                    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record]);
                                     ?>
                                 </td>
                             </tr>
