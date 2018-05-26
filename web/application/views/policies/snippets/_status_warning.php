@@ -45,7 +45,7 @@ else
 
 
 $__flag_ri_approval_constraint = _ENDORSEMENT__ri_approval_constraint($endorsement_record->status, $endorsement_record->flag_ri_approval);
-if($__flag_ri_approval_constraint)
+if($record->status === IQB_POLICY_STATUS_VERIFIED && $__flag_ri_approval_constraint == TRUE )
 {
     echo '<div class="alert alert-danger"><h4><i class="fa fa-warning margin-r-5"> Pending RI-Approval.</h4></div>';
 }
