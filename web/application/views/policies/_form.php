@@ -66,6 +66,18 @@ echo form_open( $this->uri->uri_string(),
                 ]);
                 ?>
             </div>
+
+
+            <?php
+            /**
+             * Load Form Components : Care of
+             */
+            $care_of_elements = $form_elements['care_of'];
+            $this->load->view('templates/_common/_form_components_horz', [
+                'form_elements' => $care_of_elements,
+                'form_record'   => $record
+            ]);
+            ?>
         </div>
     </div>
 
@@ -231,7 +243,6 @@ function __toggle_creditor_info(){
     if(typeof flag === 'undefined' || flag === 'N'){
         $box.fadeOut();
         $('#_creditor-id').prop('selectedIndex',0).trigger('change');
-        $('#_care-of-text').val('');
         $('#_other-creditors').val('');
     }else{
         $box.fadeIn();

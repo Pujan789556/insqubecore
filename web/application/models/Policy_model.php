@@ -256,6 +256,20 @@ class Policy_model extends MY_Model
                 ],
 
                 /**
+                 * Customer Information
+                 */
+                'care_of' => [
+                    [
+                        'field' => 'care_of',
+                        'label' => 'Care of',
+                        'rules' => 'trim|max_length[100]',
+                        '_id'       => '_care-of-text',
+                        '_type'     => 'text',
+                        '_required' => false
+                    ]
+                ],
+
+                /**
                  * Risk District Information
                  */
                 'district' => [
@@ -324,14 +338,6 @@ class Policy_model extends MY_Model
                         '_type'     => 'textarea',
                         'rows'      => 4,
                         '_help_text' => '<i class="fa fa-info-circle"></i> If you have more than one financers, please mention here with branch information.',
-                        '_required' => false
-                    ],
-                    [
-                        'field' => 'care_of',
-                        'label' => 'Care of (or Referer)',
-                        'rules' => 'trim|max_length[100]',
-                        '_id'       => '_care-of-text',
-                        '_type'     => 'text',
                         '_required' => false
                     ]
                 ],
