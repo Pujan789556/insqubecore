@@ -56,6 +56,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <td><?php echo $record->proposed_date?></td>
                         </tr>
                         <tr>
+                            <td class="text-bold">Insured Party(Customer)</td>
+                            <td>
+                                <?php
+                                echo '<span class="margin-r-5">', $this->security->xss_clean($record->customer_name), '</span>';
+                                echo anchor(
+                                            site_url('customers/details/' . $record->customer_id),
+                                            '<i class="fa fa-external-link small"></i>',
+                                            ['target' => '_blank', 'title' => 'View Customer Details']);?>
+
+
+                            </td>
+                        </tr>
+                        <tr>
                             <td class="text-bold">Object on Loan/Financed?</td>
                             <td><?php echo $record->flag_on_credit === 'Y' ? 'Yes' : 'No';?></td>
                         </tr>
@@ -70,20 +83,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <td class="text-bold">Other Financer(s)</td>
                                 <td><?php echo nl2br($this->security->xss_clean($record->other_creditors));?></td>
                             </tr>
-                            <tr>
-                                <td class="text-bold">Insured Party</td>
-                                <td><?php echo $this->security->xss_clean($record->customer_name);?></td>
-                            </tr>
-                             <tr>
-                                <td class="text-bold">Care Of</td>
-                                <td><?php echo nl2br($this->security->xss_clean($record->care_of));?></td>
-                            </tr>
-                        <?php else:?>
-                            <tr>
-                                <td class="text-bold">Insured Party</td>
-                                <td><?php echo $this->security->xss_clean($record->customer_name);?></td>
-                            </tr>
                         <?php endif?>
+                        <tr>
+                                <td class="text-bold">Care of</td>
+                                <td><?php echo $this->security->xss_clean($record->care_of);?></td>
+                            </tr>
                         <tr>
                             <td class="text-bold">Policy Issued Date</td>
                             <td><?php echo $record->issued_date?></td>
