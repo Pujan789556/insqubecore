@@ -320,7 +320,8 @@ class Policies extends MY_Controller
 
 		$form_data = [
 			'form_elements' => $this->policy_model->validation_rules('add_edit_draft'),
-			'record' 		=> NULL
+			'record' 				=> NULL,
+			'endorsement_record' 	=> NULL
 		];
 
 		// Form Submitted? Save the data
@@ -384,8 +385,9 @@ class Policies extends MY_Controller
 		$object_record = $this->object_model->row($record->object_id);
 		$record->object_name = _OBJ_select_text($object_record);
 		$form_data = [
-			'form_elements' => $v_rules,
-			'record' 		=> $record
+			'form_elements' 		=> $v_rules,
+			'record' 				=> $record,
+			'endorsement_record' 	=> $this->endorsement_model->get_current_endorsement_by_policy($record->id)
 		];
 
 		// Form Submitted? Save the data

@@ -2002,4 +2002,25 @@ class Endorsements extends MY_Controller
 		}
 
 	// --------------------- END: STATUS UPGRADE/DOWNGRADE --------------------
+
+
+	// --------------------------------------------------------------------
+	//  OTHER GENERAL FUNCTIONS
+	// --------------------------------------------------------------------
+
+	public function template_reference($portfolio_id, $txn_type)
+	{
+		$portfolio_id 	= (int)$portfolio_id;
+		$txn_type 		= (int)$txn_type;
+		$this->load->model('endorsement_template_model');
+        $template_dropdown = $this->endorsement_template_model->dropdown( $portfolio_id, $txn_type );
+
+        $this->template->json([
+			'status' 	=> 'success',
+			'data' 		=> $template_dropdown
+		]);
+	}
+
+	// --------------------- END: OTHER GENERAL FUNCTIONS --------------------
+
 }

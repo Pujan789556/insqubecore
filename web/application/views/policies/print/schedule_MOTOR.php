@@ -239,7 +239,7 @@ switch ($record->portfolio_id)
                         <?php
                         /**
                          * Sub Portfolio-wise  Statements
-                         */
+
                         $usage_limitation = '';
                         $driver_limitation = '';
                         $reaffirm_numbers = '';
@@ -268,20 +268,9 @@ switch ($record->portfolio_id)
                                 # code...
                                 break;
                         }
+                        */
                         ?>
-                        <h4 class="underline">प्रयोगको सीमा</h4>
-
-                        <p><?php echo $usage_limitation?></p><br/>
-
-                        <h4 class="underline">चालक</h4>
-                        <p><?php echo $driver_limitation?></p><br/>
-
-                        <h4 class="underline">बीमाशुल्कको हिसाब</h4>
-                        <p>संलग्न तालिका बमोजिम</p><br/>
-
-                        <h4 class="underline">अनिवार्य अधिक:  स्वेच्छीक अधिक:</h4><br/>
-
-                        <h4>संलग्न सम्पुष्टी नम्बरहरु: <?php echo $reaffirm_numbers?></h4>
+                        <p><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details));?></p>
                     </td>
                 </tr>
             </tbody>

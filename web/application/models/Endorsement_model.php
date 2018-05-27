@@ -131,36 +131,9 @@ class Endorsement_model extends MY_Model
         $computation_basis_dropdown = _ENDORSEMENT_computation_basis_dropdown(FALSE);
         $v_rules                    = [];
 
-        $this->load->model('endorsement_template_model');
-        $template_dropdown = $this->endorsement_template_model->dropdown( $portfolio_id, $txn_type );
+        // Basic Rules (Txn Details, Remarks with Template Reference)
+        $basic = $this->get_v_rules_basic( $txn_type, $portfolio_id, TRUE );
 
-        $basic = [
-            [
-                'field' => 'template_reference',
-                'label' => 'Endorsement Template',
-                'rules' => 'trim|integer|max_length[8]',
-                '_key'      => 'template_reference',
-                '_id'       => 'template-reference',
-                '_type'     => 'dropdown',
-                '_data'     => IQB_BLANK_SELECT + $template_dropdown,
-                '_required' => false
-            ],
-            [
-                'field' => 'txn_details',
-                'label' => 'Transaction Details (सम्पुष्टि विवरण )',
-                'rules' => 'trim|required|htmlspecialchars',
-                '_id'       => 'txn-details',
-                '_type'     => 'textarea',
-                '_required' => true
-            ],
-            [
-                'field' => 'remarks',
-                'label' => 'Remarks/कैफियत',
-                'rules' => 'trim|htmlspecialchars',
-                '_type'     => 'textarea',
-                '_required' => false
-            ]
-        ];
 
         $computation_basis = [
             [
@@ -292,6 +265,64 @@ class Endorsement_model extends MY_Model
                 $rules = array_merge($rules, $section_rules);
             }
             return $rules;
+        }
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Basic Validation Rules
+     * i.e. Txn Details and Remarks with Endorsement Template Reference
+     * @param type $txn_type
+     * @param type $portfolio_id
+     * @param type|bool $formatted
+     * @return type
+     */
+    public function get_v_rules_basic( $txn_type, $portfolio_id, $formatted = FALSE )
+    {
+        $txn_type                   = (int)$txn_type;
+        $v_rules                    = [];
+
+        $this->load->model('endorsement_template_model');
+        $template_dropdown = $this->endorsement_template_model->dropdown( $portfolio_id, $txn_type );
+
+        $basic = [
+            [
+                'field' => 'template_reference',
+                'label' => 'Template Reference',
+                'rules' => 'trim|integer|max_length[8]',
+                '_key'      => 'template_reference',
+                '_id'       => 'template-reference',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_BLANK_SELECT + $template_dropdown,
+                '_required' => false
+            ],
+            [
+                'field' => 'txn_details',
+                'label' => 'Transaction Details (सम्पुष्टि विवरण)',
+                'rules' => 'trim|required|htmlspecialchars',
+                '_id'       => 'txn-details',
+                '_type'     => 'textarea',
+                '_required' => true
+            ],
+            [
+                'field' => 'remarks',
+                'label' => 'Remarks/कैफियत',
+                'rules' => 'trim|htmlspecialchars',
+                '_type'     => 'textarea',
+                '_required' => false
+            ]
+        ];
+
+        $v_rules = ['basic' => $basic];
+
+        if( !$formatted )
+        {
+            return $v_rules;
+        }
+        else
+        {
+            return $basic;
         }
     }
 

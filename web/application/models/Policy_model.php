@@ -450,7 +450,14 @@ class Policy_model extends MY_Model
                         '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Business Referer" if not available in this list and try again.',
                         '_required' => false
                     ],
-                ]
+                ],
+
+                /**
+                 * Policy Endorsement - Txn Details (सम्पुष्टि विवरण), Remarks and Template Reference
+                 */
+                'endorsement_basic' => $this->endorsement_model->get_v_rules_basic( IQB_POLICY_ENDORSEMENT_TYPE_FRESH, $portfolio_id, TRUE)
+
+
 
             ];
         }
@@ -748,6 +755,10 @@ class Policy_model extends MY_Model
 
         $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
 
+
+        // Status
+        $data['status'] = IQB_POLICY_STATUS_DRAFT;
+
         /**
          * Short Term Flag???
          * ------------------
@@ -890,6 +901,13 @@ class Policy_model extends MY_Model
                 $this->load->model('rel_agent_policy_model');
                 $this->rel_agent_policy_model->insert($relation_data, TRUE);
             }
+
+            /**
+             * Task 2: Fresh/Renewal Endorsement Data
+             * --------------------------------------
+             */
+            $this->_save_endorsement_basic($id, $fields);
+
             return TRUE;
 
         }
@@ -944,6 +962,11 @@ class Policy_model extends MY_Model
         if($id !== NULL)
         {
             $fields = $arr_record['fields'];
+
+            /**
+             * TASK 1: Update Agent Relation
+             * ------------------------------
+             */
             $this->load->model('rel_agent_policy_model');
             $relation_data = [
                 'policy_id' => $id
@@ -954,15 +977,43 @@ class Policy_model extends MY_Model
                 // Add or Update the Relation
                 // Get the agent id
                 $relation_data['agent_id'] = $fields['agent_id'];
-                return $this->rel_agent_policy_model->insert_or_update($relation_data);
+                $this->rel_agent_policy_model->insert_or_update($relation_data);
             }
             else
             {
                 // Delete if we have any existing record having this policy
-                return $this->rel_agent_policy_model->delete_by($relation_data);
+                $this->rel_agent_policy_model->delete_by($relation_data);
             }
+
+            /**
+             * Task 2: Fresh/Renewal Endorsement Data
+             * --------------------------------------
+             */
+            $this->_save_endorsement_basic($id, $fields);
+
         }
-        return FALSE;
+        return TRUE;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Save Endorsement basic data on add/edit Policy Draft
+     *
+     * Endorsement Txn Details and Remarks on Policy Debit NOte add/edit
+     *
+     * @param array $data
+     * @return mixed
+     */
+    public function _save_endorsement_basic($id, $data)
+    {
+        $endorsement_record = $this->endorsement_model->get_current_endorsement_by_policy($id);
+        $endorsement_data = [
+            'txn_details'   => $data['txn_details'],
+            'remarks'       => $data['remarks']
+        ];
+
+        return $this->endorsement_model->save($endorsement_record->id, $endorsement_data);
     }
 
     // ----------------------------------------------------------------

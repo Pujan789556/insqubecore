@@ -3,7 +3,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Form : Policy
  */
-
 echo form_open( $this->uri->uri_string(),
     [
         'class' => 'form-horizontal form-iqb-general',
@@ -206,6 +205,26 @@ echo form_open( $this->uri->uri_string(),
             ?>
         </div>
     </div>
+
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
+          <h4 class="box-title">Disclaimer Information (सम्पुष्टि विवरण)</h4>
+        </div>
+        <div class="box-body">
+
+            <?php
+            /**
+             * Load Form Components
+             */
+            $endorsement_basic_elements = $form_elements['endorsement_basic'];
+            $this->load->view('templates/_common/_form_components_horz', [
+                'form_elements' => $endorsement_basic_elements,
+                'form_record'   => $endorsement_record
+            ]);
+            ?>
+        </div>
+    </div>
+
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
 
@@ -301,6 +320,22 @@ $('#_portfolio-id').on('change', function(e){
                 $.each(r.ppo, function(key, value) {
 
                     $('#_policy-package-id').append($('<option>', {
+                        value: key,
+                        text : value
+                    }));
+                });
+            }
+        });
+
+        // Load template body from the reference supplied
+        $.getJSON('<?php echo base_url()?>endorsements/template_reference/'+v + '/1', function(r){
+            if(r.status == 'success' && typeof r.data !== 'undefined'){
+
+                var $tmpl = $('#template-reference');
+                $tmpl.empty();
+                $tmpl.append($('<option>', {value: '',text : 'Select...'}));
+                $.each(r.data, function(key, value) {
+                    $tmpl.append($('<option>', {
                         value: key,
                         text : value
                     }));
@@ -411,5 +446,23 @@ $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", func
     $("#_ref-company-id").select2();
 
     $('.bootbox.modal').removeAttr('tabindex'); // modal workaround
+});
+
+
+// Load Txn Details from Endorsement Template
+$('#template-reference').on('change', function(){
+    var v = parseInt(this.value);
+    if(v){
+        // Load template body from the reference supplied
+        $.getJSON('<?php echo base_url()?>endorsement_templates/body/'+v, function(r){
+            // Update dropdown
+            if(r.status == 'success'){
+                $('#txn-details').val(r.body);
+            }
+            else{
+                toastr[r.status](r.message);
+            }
+        });
+    }
 });
 </script>
