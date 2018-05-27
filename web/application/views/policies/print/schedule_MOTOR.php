@@ -3,10 +3,20 @@
  * Schedule Print : Motor - Motorcycle
  */
 
-$object_attributes = json_decode($record->object_attributes);
-
+$object_attributes      = json_decode($record->object_attributes);
 $total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
 $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
+
+
+/**
+ * Let's get the Required Records
+ */
+$policy_object      = get_object_from_policy_record($record);
+$premium_goodies    = _TXN_MOTOR_premium_goodies($record, $policy_object);
+$tariff_record      = $premium_goodies['tariff_record'];
+
+$premium_computation_table = json_decode($endorsement_record->premium_computation_table);
+
 
 /**
  * Sub Portfolio-wise  Statements
@@ -217,12 +227,21 @@ switch ($record->portfolio_id)
                 </tr>
                 <tr>
                     <td>
+                        <?php
+                        $dd_voluntary_excess = _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '');
+                        $compulsory_excess = _PO_MOTOR_get_compulsory_excess( $tariff_record, $object_attributes->year_mfd);
+                        ?>
+
                         इन्जिन नं.: <?php echo $object_attributes->engine_no;?> <br/>
                         च्यासिस नं.: <?php echo $object_attributes->chasis_no;?> <br/>
                         दर्ता नं.: <?php echo $object_attributes->reg_no;?> <br/>
                         बनाउने कम्पनी: <?php echo $object_attributes->manufacturer;?> <br/>
                         बनौट: <?php echo $object_attributes->make;?> <br/>
-                        मोडेल: <?php echo $object_attributes->model;?>
+                        मोडेल: <?php echo $object_attributes->model;?><br>
+                        स्वेच्छीक अधिक: रु.<?php echo $dd_voluntary_excess[$premium_computation_table->dr_voluntary_excess];?><br>
+                        अनिवार्य अधिक: रु.<?php  echo $compulsory_excess->amount ?? ''?>
+
+
                     </td>
                     <td>
                         बनेको वर्ष : <?php echo $object_attributes->year_mfd;?> <br/>

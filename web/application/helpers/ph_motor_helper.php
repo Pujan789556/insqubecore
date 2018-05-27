@@ -3074,6 +3074,8 @@ if ( ! function_exists('_TXN_MOTOR_premium_goodies'))
 
 		// Tariff Configuration for this Portfolio
 		$CI->load->model('tariff_motor_model');
+		$CI->load->model('portfolio_setting_model'); // required as called from schedule
+
 		$tariff_record = $CI->tariff_motor_model->get_single(
 														$policy_record->fiscal_yr_id,
 														$attributes->ownership,
@@ -3258,5 +3260,44 @@ if ( ! function_exists('_OBJ_MOTOR_vehicle_certificate_goodies'))
 				'si_driver_other' => 500000,
 			]
 		];
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_PO_MOTOR_get_compulsory_excess'))
+{
+	/**
+	 * Get "Compulsory Excess" For Given Vehicle
+	 *
+	 * @param object $tariff_record  for given motor
+	 * @param int $year_mfd  Year Manufactured of the Vehicle
+	 * @return	object Compulsory Excess Record
+	 */
+	function _PO_MOTOR_get_compulsory_excess( $tariff_record, $year_mfd)
+	{
+		$record = NULL;
+		if($tariff_record->pramt_compulsory_excess)
+		{
+			$pramt_compulsory_excess = json_decode($tariff_record->pramt_compulsory_excess);
+
+			$year_now = date('Y');
+			$diff = $year_now - $year_mfd;
+
+			foreach($pramt_compulsory_excess as $single)
+			{
+				if($single->min_age <= $diff && $single->max_age >= $diff)
+				{
+					$record = $single;
+					break;
+				}
+			}
+		}
+		else
+		{
+			throw new Exception("Exception [Helper: ph_motor_helper][Method: _PO_MOTOR_get_compulsory_excess()]: No Compulsory Excess found on Tariff for this PORTFOLIO!");
+		}
+
+		return $record;
 	}
 }
