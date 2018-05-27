@@ -449,32 +449,6 @@ class Endorsement_templates extends MY_Controller
 		return $this->template->json($data);
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Get template Body
-	 *
-	 * @param integer $id
-	 * @return json
-	 */
-	public function body($id)
-	{
-		$record = $this->endorsement_template_model->row($id);
-		if( !$record )
-		{
-			$status = 'warning';
-			$message = "Endorsement Template Not Found!";
-			$body = '';
-
-		}
-		else{
-			$status = 'success';
-			$message = "Found!";
-			$body = $record->body;
-		}
-		return $this->template->json(['status' => $status, 'message' => $message, 'body' => $body]);
-	}
-
 
 	// --------------------------------------------------------------------
 

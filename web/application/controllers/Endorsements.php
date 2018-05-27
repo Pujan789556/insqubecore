@@ -2021,6 +2021,33 @@ class Endorsements extends MY_Controller
 		]);
 	}
 
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get Endorsement template Body
+	 *
+	 * @param integer $endorsement_template_id
+	 * @return json
+	 */
+	public function template_body($endorsement_template_id)
+	{
+		$this->load->model('endorsement_template_model');
+		$record = $this->endorsement_template_model->row($endorsement_template_id);
+		if( !$record )
+		{
+			$status = 'warning';
+			$message = "Endorsement Template Not Found!";
+			$body = '';
+
+		}
+		else{
+			$status = 'success';
+			$message = "Found!";
+			$body = $record->body;
+		}
+		return $this->template->json(['status' => $status, 'message' => $message, 'body' => $body]);
+	}
+
 	// --------------------- END: OTHER GENERAL FUNCTIONS --------------------
 
 }

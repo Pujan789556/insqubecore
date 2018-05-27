@@ -193,7 +193,7 @@ $('#template-reference').on('change', function(){
     var v = parseInt(this.value);
     if(v){
         // Load template body from the reference supplied
-        $.getJSON('<?php echo base_url()?>endorsement_templates/body/'+v, function(r){
+        $.getJSON('<?php echo base_url()?>endorsements/template_body/'+v, function(r){
             // Update dropdown
             if(r.status == 'success'){
                 $('#txn-details').val(r.body);
