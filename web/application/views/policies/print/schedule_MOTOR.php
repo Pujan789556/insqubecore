@@ -341,8 +341,7 @@ switch ($record->portfolio_id)
                 <td width="50%"><strong>प्रमाणपत्र जारी गर्ने बीमकको नाम र ठेगाना:</strong></td>
                 <td>
                     <?php
-                    $branch_contact_prefix = $this->settings->orgn_name_np . ', ' . $record->branch_name_np;
-                    echo get_contact_widget_two_lines($record->branch_contact, $branch_contact_prefix);
+                    echo $this->settings->orgn_name_np . ', ' . $record->branch_name_np;
                     ?>
                 </td>
             </tr>
