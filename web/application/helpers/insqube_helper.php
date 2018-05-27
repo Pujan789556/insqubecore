@@ -50,6 +50,22 @@ if ( ! function_exists('safe_to_delete'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('logo_url'))
+{
+    /**
+     *  Get Logo URL
+     *
+     * @return string
+     */
+    function logo_url( )
+    {
+        $CI =& get_instance();
+        return INSQUBE_MEDIA_PATH . 'settings/' . $CI->settings->logo;
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('set_menu_active'))
 {
 	/**

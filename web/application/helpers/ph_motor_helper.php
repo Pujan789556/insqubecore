@@ -3227,3 +3227,36 @@ if ( ! function_exists('__save_premium_MOTOR'))
 	}
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MOTOR_vehicle_certificate_goodies'))
+{
+	/**
+	 * Get list of goodies required for vehicle certificate
+	 *
+	 * @return	array
+	 */
+	function _OBJ_MOTOR_vehicle_certificate_goodies(  )
+	{
+		return [
+			IQB_SUB_PORTFOLIO_MOTORCYCLE_ID => [
+				'tp_human_damage' => 2500000,
+				'tp_property_damage' => 2500000,
+				'si_per_passenger' => 500000,
+				'si_driver_other' => 500000,
+			],
+			IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID => [
+				'tp_human_damage' => 8000000,
+				'tp_property_damage' => 8000000,
+				'si_per_passenger' => 500000,
+				'si_driver_other' => 500000,
+			],
+			IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID => [
+				'tp_human_damage' => 5000000,
+				'tp_property_damage' => 5000000,
+				'si_per_passenger' => 500000,
+				'si_driver_other' => 500000,
+			]
+		];
+	}
+}
