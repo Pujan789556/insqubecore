@@ -1394,6 +1394,47 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
 		switch ($portfolio_id)
 		{
             /**
+             * AGRO - CROP
+             * -------------
+             */
+            case IQB_SUB_PORTFOLIO_AGR_CROP_ID:
+                $method = '_OBJ_AGR_CROP_pre_save_tasks';
+                break;
+
+            /**
+             * AGRO - CATTLE
+             * -------------
+             */
+            case IQB_SUB_PORTFOLIO_AGR_CATTLE_ID:
+                $method = '_OBJ_AGR_CATTLE_pre_save_tasks';
+                break;
+
+            /**
+             * AGRO - POULTRY
+             * -------------
+             */
+            case IQB_SUB_PORTFOLIO_AGR_POULTRY_ID:
+                $method = '_OBJ_AGR_POULTRY_pre_save_tasks';
+                break;
+
+            /**
+             * AGRO - FISH
+             * -------------
+             */
+            case IQB_SUB_PORTFOLIO_AGR_FISH_ID:
+                $method = '_OBJ_AGR_FISH_pre_save_tasks';
+                break;
+
+            /**
+             * AGRO - BEE
+             * -------------
+             */
+            case IQB_SUB_PORTFOLIO_AGR_BEE_ID:
+                $method = '_OBJ_AGR_BEE_pre_save_tasks';
+                break;
+
+
+            /**
              * FIRE - FIRE
              * -------------
              */

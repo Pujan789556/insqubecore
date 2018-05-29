@@ -314,6 +314,46 @@ if ( ! function_exists('_OBJ_AGR_BEE_validation_rules'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('_OBJ_AGR_BEE_pre_save_tasks'))
+{
+	/**
+	 * Object Pre Save Tasks
+	 *
+	 * Format Items
+	 *
+	 * @param array $data 		Post Data
+	 * @param object $record 	Object Record (for edit mode)
+	 * @return array
+	 */
+	function _OBJ_AGR_BEE_pre_save_tasks( array $data, $record )
+	{
+		$items = $data['object']['items'];
+
+		$v_rules = _OBJ_AGR_BEE_validation_rules(IQB_SUB_PORTFOLIO_AGR_BEE_ID);
+		$item_rules = $v_rules['items'];
+
+		$items_formatted = [];
+		$count = count($items['breed']);
+
+		for($i=0; $i < $count; $i++)
+		{
+			$single = [];
+			foreach($item_rules as $rule)
+			{
+				$key = $rule['_key'];
+				$single[$key] = $items[$key][$i];
+			}
+			$items_formatted[] = $single;
+		}
+
+		$data['object']['items'] = $items_formatted;
+
+		return $data;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_OBJ_AGR_BEE_ownership_dropdown'))
 {
 	/**

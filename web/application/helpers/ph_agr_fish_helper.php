@@ -209,7 +209,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'label' => 'माछा भुराको स्रोत',
 			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
 			        '_type'     => 'text',
-			        '_required' => false
+			        '_required' => true
 			    ],
 			    [
 			        'field' => 'object[fish_disease]',
@@ -372,6 +372,46 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 		}
 
 		return $v_rules;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_AGR_FISH_pre_save_tasks'))
+{
+	/**
+	 * Object Pre Save Tasks
+	 *
+	 * Format Items
+	 *
+	 * @param array $data 		Post Data
+	 * @param object $record 	Object Record (for edit mode)
+	 * @return array
+	 */
+	function _OBJ_AGR_FISH_pre_save_tasks( array $data, $record )
+	{
+		$items = $data['object']['items'];
+
+		$v_rules = _OBJ_AGR_FISH_validation_rules(IQB_SUB_PORTFOLIO_AGR_FISH_ID);
+		$item_rules = $v_rules['items'];
+
+		$items_formatted = [];
+		$count = count($items['breed']);
+
+		for($i=0; $i < $count; $i++)
+		{
+			$single = [];
+			foreach($item_rules as $rule)
+			{
+				$key = $rule['_key'];
+				$single[$key] = $items[$key][$i];
+			}
+			$items_formatted[] = $single;
+		}
+
+		$data['object']['items'] = $items_formatted;
+
+		return $data;
 	}
 }
 

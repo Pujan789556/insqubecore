@@ -292,143 +292,147 @@ switch ($record->portfolio_id)
         $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record, 'title' => $cost_table_title]);
         ?>
 
-        <pagebreak>
+
 
         <?php
         /**
          * Let's Build Vehicle Certificate
          */
         $certificate_goodies = _OBJ_MOTOR_vehicle_certificate_goodies()[$record->portfolio_id];
-        ?>
-        <table class="table no-border">
-            <tr>
-                <td align="center" colspan="2">
-                    <img src="<?php echo logo_url();?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
-                </td>
-            </tr>
-            <tr>
-                <td align="center" colspan="2"><br/><h2>सवारी साधन बीमाको प्रमाणपत्र</h2><br/><br/></td>
-            </tr>
-            <tr>
-                <td width="40%"><strong>प्रमाणपत्र जारी गर्ने बीमकको नाम र ठेगाना:</strong></td>
-                <td>
-                    <?php
-                    echo $this->settings->orgn_name_np . ', ' . $record->branch_name_np;
-                    ?>
-                </td>
-            </tr>
-            <tr>
-                <td><strong>प्रमाणपत्र नं.:</strong></td>
-                <td><?php echo $record->code; ?></td>
-            </tr>
-            <tr>
-                <td><strong>प्रमाणपत्र जारी मिति:</strong></td>
-                <td><?php echo $record->issued_date ?></td>
-            </tr>
-            <tr>
-                <td><strong>१. बीमितको नाम:</strong></td>
-                <td><?php echo $record->customer_name; ?></td>
-            </tr>
-            <tr>
-                <td><strong>२. ठेगाना:</strong></td>
-                <td><?php echo get_contact_widget_two_lines($record->customer_contact); ?></td>
-            </tr>
-            <tr>
-                <td><strong>३. टेलिफोन नं.:</strong></td>
-                <td>&nbsp;</td>
-            </tr>
-            <tr>
-                <td><strong>४. बीमालेख नं.:</strong></td>
-                <td><?php echo $record->code; ?></td>
-            </tr>
-            <tr>
-                <td colspan="2"><strong>५. तेश्रो पक्ष प्रतिको दायित्व बीमाको सीमा</strong></td>
-            </tr>
-            <tr>
-                <td><strong>&nbsp;&nbsp;&nbsp;&nbsp;(क) मानिसको शारीरिक क्षति वापत:</strong></td>
-                <td><?php echo $certificate_goodies['tp_human_damage'] ?></td>
-            </tr>
-            <tr>
-                <td><strong>&nbsp;&nbsp;&nbsp;&nbsp;(ख) सम्पत्तिको क्षति वापत:</strong></td>
-                <td><?php echo $certificate_goodies['tp_property_damage'] ?></td>
-            </tr>
-            <tr>
-                <td>
-                    <?php
-                    $label = '६. प्रति यात्री बीमाङ्क';
-                    if($record->portfolio_id == IQB_SUB_PORTFOLIO_MOTORCYCLE_ID )
-                    {
-                        $label = '६. चालक तथा पछाडि बस्ने एक यात्रुको प्रतिव्यक्ति बीमाङ्क';
-                    }
-                     ?>
-                    <strong><?php echo $label; ?></strong>
-                </td>
-                <td><?php echo $certificate_goodies['si_per_passenger'] ?></td>
-            </tr>
-            <?php if($record->portfolio_id != IQB_SUB_PORTFOLIO_MOTORCYCLE_ID ): ?>
-                <tr>
-                    <td><strong>७. चालक तथा अन्य बीमित कर्मचारीहरुको प्रति व्यक्ति बीमाङ्क</strong></td>
-                    <td><?php echo $certificate_goodies['si_driver_other'] ?></td>
-                </tr>
-            <?php endif ?>
-        </table>
-        <br>
-        <table class="table">
-            <thead>
-                <tr>
-                    <td colspan="6"><strong>सवारी साधनको विवरण</strong></td>
-                </tr>
-                <tr>
-                    <td><strong>किसिम</strong></td>
-                    <td><strong>बनौट</strong></td>
-                    <td><strong>दर्ता नं./मिति</strong></td>
-                    <td><strong>चेसीस नं.</strong></td>
-                    <td><strong>इन्जीन नं.</strong></td>
-                    <td><strong>भारबहनक्षमता/सिट संख्या</strong></td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><?php echo $object_attributes->make ?></td>
-                    <td><?php echo $object_attributes->model ?></td>
-                    <td><?php echo implode(' / ', array_filter([$object_attributes->reg_no, $object_attributes->reg_date]) ) ?></td>
-                    <td><?php echo $object_attributes->chasis_no ?></td>
-                    <td><?php echo $object_attributes->engine_no ?></td>
-                    <td><?php echo $object_attributes->engine_capacity, $object_attributes->ec_unit, ' / ', $object_attributes->carrying_capacity ?></td>
-                </tr>
-            </tbody>
-        </table>
-        <br>
-        <table class="table">
-            <thead>
-                <tr>
-                    <td colspan="6"><strong>बीमालेख वहाल रहने अवधि</strong></td>
-                </tr>
-                <tr>
-                    <td><strong>देखि</strong></td>
-                    <td><strong>सम्म</strong></td>
-                    <td><strong>प्रमाणित गर्ने अधिकारीको हस्ताक्षर र मिति</strong></td>
-                    <td width="30%"><strong>छाप</strong></td>
-                    <td width="20%"><strong>कैफियत</strong></td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><?php echo $record->start_date ?></td>
-                    <td><?php echo $record->end_date ?></td>
-                    <td><br><br><br><br><br><br></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </tbody>
-        </table>
-        <br>
 
-        <p><strong>द्रष्टब्य:</strong></p>
-        <p>१.यस प्रमाणपत्रमा उल्लेख भएको बीमा सम्बन्धी व्यवस्थाहरु सम्बन्धित बीमालेखमा उल्लेख भए बमोजिम
-        हुनेछ ।</p>
-        <p>२. यो प्रमाणपत्र हराएमा तत्काल नजिकको प्रहरी कार्यालयमा लिखित सूचना दिनु पर्नेछ ।</p>
-        <p>३. यो प्रमाणपत्र हराएमा वा नासिएमा यथाशिध्र बीमकबाट प्रतिलिपि दिनु पर्नेछ ।</p>
-        <p>४. यो प्रमाणपत्र अनिवार्य रुपमा सवारी साधनमा राख्नु पर्नेछ ।</p>
+        if($record->status == IQB_POLICY_STATUS_ACTIVE ):
+        ?>
+            <pagebreak>
+            <table class="table no-border">
+                <tr>
+                    <td align="center" colspan="2">
+                        <img src="<?php echo logo_url();?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="2"><br/><h2>सवारी साधन बीमाको प्रमाणपत्र</h2><br/><br/></td>
+                </tr>
+                <tr>
+                    <td width="40%"><strong>प्रमाणपत्र जारी गर्ने बीमकको नाम र ठेगाना:</strong></td>
+                    <td>
+                        <?php
+                        echo $this->settings->orgn_name_np . ', ' . $record->branch_name_np;
+                        ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>प्रमाणपत्र नं.:</strong></td>
+                    <td><?php echo $record->code; ?></td>
+                </tr>
+                <tr>
+                    <td><strong>प्रमाणपत्र जारी मिति:</strong></td>
+                    <td><?php echo $record->issued_date ?></td>
+                </tr>
+                <tr>
+                    <td><strong>१. बीमितको नाम:</strong></td>
+                    <td><?php echo $record->customer_name; ?></td>
+                </tr>
+                <tr>
+                    <td><strong>२. ठेगाना:</strong></td>
+                    <td><?php echo get_contact_widget_two_lines($record->customer_contact); ?></td>
+                </tr>
+                <tr>
+                    <td><strong>३. टेलिफोन नं.:</strong></td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td><strong>४. बीमालेख नं.:</strong></td>
+                    <td><?php echo $record->code; ?></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><strong>५. तेश्रो पक्ष प्रतिको दायित्व बीमाको सीमा</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>&nbsp;&nbsp;&nbsp;&nbsp;(क) मानिसको शारीरिक क्षति वापत:</strong></td>
+                    <td><?php echo $certificate_goodies['tp_human_damage'] ?></td>
+                </tr>
+                <tr>
+                    <td><strong>&nbsp;&nbsp;&nbsp;&nbsp;(ख) सम्पत्तिको क्षति वापत:</strong></td>
+                    <td><?php echo $certificate_goodies['tp_property_damage'] ?></td>
+                </tr>
+                <tr>
+                    <td>
+                        <?php
+                        $label = '६. प्रति यात्री बीमाङ्क';
+                        if($record->portfolio_id == IQB_SUB_PORTFOLIO_MOTORCYCLE_ID )
+                        {
+                            $label = '६. चालक तथा पछाडि बस्ने एक यात्रुको प्रतिव्यक्ति बीमाङ्क';
+                        }
+                         ?>
+                        <strong><?php echo $label; ?></strong>
+                    </td>
+                    <td><?php echo $certificate_goodies['si_per_passenger'] ?></td>
+                </tr>
+                <?php if($record->portfolio_id != IQB_SUB_PORTFOLIO_MOTORCYCLE_ID ): ?>
+                    <tr>
+                        <td><strong>७. चालक तथा अन्य बीमित कर्मचारीहरुको प्रति व्यक्ति बीमाङ्क</strong></td>
+                        <td><?php echo $certificate_goodies['si_driver_other'] ?></td>
+                    </tr>
+                <?php endif ?>
+            </table>
+            <br>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <td colspan="6"><strong>सवारी साधनको विवरण</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>किसिम</strong></td>
+                        <td><strong>बनौट</strong></td>
+                        <td><strong>दर्ता नं./मिति</strong></td>
+                        <td><strong>चेसीस नं.</strong></td>
+                        <td><strong>इन्जीन नं.</strong></td>
+                        <td><strong>भारबहनक्षमता/सिट संख्या</strong></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><?php echo $object_attributes->make ?></td>
+                        <td><?php echo $object_attributes->model ?></td>
+                        <td><?php echo implode(' / ', array_filter([$object_attributes->reg_no, $object_attributes->reg_date]) ) ?></td>
+                        <td><?php echo $object_attributes->chasis_no ?></td>
+                        <td><?php echo $object_attributes->engine_no ?></td>
+                        <td><?php echo $object_attributes->engine_capacity, $object_attributes->ec_unit, ' / ', $object_attributes->carrying_capacity ?></td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <td colspan="6"><strong>बीमालेख वहाल रहने अवधि</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>देखि</strong></td>
+                        <td><strong>सम्म</strong></td>
+                        <td><strong>प्रमाणित गर्ने अधिकारीको हस्ताक्षर र मिति</strong></td>
+                        <td width="30%"><strong>छाप</strong></td>
+                        <td width="20%"><strong>कैफियत</strong></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><?php echo $record->start_date ?></td>
+                        <td><?php echo $record->end_date ?></td>
+                        <td><br><br><br><br><br><br></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+
+            <p><strong>द्रष्टब्य:</strong></p>
+            <p>१.यस प्रमाणपत्रमा उल्लेख भएको बीमा सम्बन्धी व्यवस्थाहरु सम्बन्धित बीमालेखमा उल्लेख भए बमोजिम
+            हुनेछ ।</p>
+            <p>२. यो प्रमाणपत्र हराएमा तत्काल नजिकको प्रहरी कार्यालयमा लिखित सूचना दिनु पर्नेछ ।</p>
+            <p>३. यो प्रमाणपत्र हराएमा वा नासिएमा यथाशिध्र बीमकबाट प्रतिलिपि दिनु पर्नेछ ।</p>
+            <p>४. यो प्रमाणपत्र अनिवार्य रुपमा सवारी साधनमा राख्नु पर्नेछ ।</p>
+        <?php endif; ?>
     </body>
 </html>
