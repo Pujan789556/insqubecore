@@ -35,10 +35,11 @@
         border: 0.1mm solid #000000;
         font-variant: small-caps;
     }
-    .border-b, td.border-b{border-bottom: 0.1mm solid #000000;}
-    .border-t, td.border-t{border-top: 0.1mm solid #000000;}
-    .underline{text-decoration: underline;}
     .no-border, td.no-border, table.no-border td, table.no-border th{border:none !important;}
+    .border-b, td.border-b{border-bottom: 0.1mm solid #000000 !important;}
+    .border-t, td.border-t{border-top: 0.1mm solid #000000 !important;}
+    .underline{text-decoration: underline;}
+
     .table td.cost {
         text-align: "." center;
     }

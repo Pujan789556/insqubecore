@@ -16,35 +16,16 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
      * Load Styles (inline)
      */
     $this->load->view('print/style/schedule');
-
-    /**
-     * Header & Footer
-     */
-    $creator_text = ( $record->created_by_profile_name ?? $record->created_by_username ) . ' - ' . $record->created_by_code;
-
-    $verifier_text = $record->verified_by_code
-                        ? ( $record->verified_by_profile_name ?? $record->verified_by_username ) . ' - ' . $record->verified_by_code
-                        : '';
-
-    $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $record->branch_name_en;
-
-    $header_footer = '<htmlpagefooter name="myfooter">
-                        <table class="table table-footer no-border">
-                            <tr>
-                                <td align="left"> Created By: ' . $creator_text . ' </td>
-                                <td align="right"> Verified By: ' . $verifier_text . ' </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" class="border-t">'. get_contact_widget_two_lines($record->branch_contact, $branch_contact_prefix) .'</td>
-                            </tr>
-                        </table>
-                    </htmlpagefooter>
-                    <sethtmlpagefooter name="myfooter" value="on" />';
     ?>
     </head>
     <body>
+        <?php
+        /**
+         * Header & Footer
+         */
+        ?>
         <!--mpdf
-            <?php echo $header_footer?>
+            <?php echo _POLICY_schedule_header_footer($record);?>
         mpdf-->
         <?php
         /**

@@ -1156,6 +1156,61 @@ if ( ! function_exists('_POLICY_schedule_title_prefix'))
 	}
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY_schedule_header_footer'))
+{
+    /**
+     * Get Policy Schedule Header/Footer HTML
+     *
+     * @param object $record   Policy Record
+     * @return  string
+     */
+    function _POLICY_schedule_header_footer( $record )
+    {
+        $CI =& get_instance();
+
+        $creator_text = $record->created_by_username . ' - ' . $record->created_by_code;
+        if($record->created_by_profile)
+        {
+            $_u_profile = json_decode($record->created_by_profile);
+            $creator_text = $_u_profile->name . ' - ' . $record->created_by_code;
+        }
+
+        $verifier_text = $record->verified_by_username . ' - ' . $record->verified_by_code;
+        if($record->verified_by_profile)
+        {
+            $_u_profile = json_decode($record->verified_by_profile);
+            $verifier_text = $_u_profile->name . ' - ' . $record->verified_by_code;
+        }
+
+        $seller_text = $record->sold_by_username . ' - ' . $record->sold_by_code;
+        if($record->sold_by_profile)
+        {
+            $_u_profile = json_decode($record->sold_by_profile);
+            $seller_text = $_u_profile->name . ' - ' . $record->sold_by_code;
+        }
+
+        $branch_contact_prefix = $CI->settings->orgn_name_en . ', ' . $record->branch_name_en;
+
+        $header_footer = '<htmlpagefooter name="myfooter">
+                            <table class="table table-footer no-border">
+                                <tr>
+                                    <td align="left" class="border-b"> Created By: ' . $creator_text . ' </td>
+                                    <td align="left" class="border-b"> Business By: ' . $seller_text . ' </td>
+                                    <td align="right" class="border-b"> Verified By: ' . $verifier_text . ' </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="border-t">'. get_contact_widget_two_lines($record->branch_contact, $branch_contact_prefix) .'</td>
+                                </tr>
+                            </table>
+                        </htmlpagefooter>
+                        <sethtmlpagefooter name="myfooter" value="on" />';
+
+        return $header_footer;
+    }
+}
+
 
 // ------------------------------------------------------------------------
 // POLICY TRANSACTION HELPER FUNCTIONS
