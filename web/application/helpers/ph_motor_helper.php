@@ -1087,10 +1087,15 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 			/**
 			 * Driver Accident Insurance (इ)
 			 */
+			$column_head = 'इ';
+            if( strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY )
+			{
+				$column_head = 'आ';
+			}
 			$accident_premium = $tariff_record->accident_premium ? json_decode($tariff_record->accident_premium) : NULL;
 			$insured_value_tariff = $tariff_record->insured_value_tariff ? json_decode($tariff_record->insured_value_tariff) : NULL;
 			$__CRF_cc_table__I = [
-				'column_head' => 'इ',
+				'column_head' => $column_head,
 				'title_np' 	=> 'चालकको दुर्घटना बीमा वापत',
 				'title_en' 	=> 'Driver Accident Insurance'
 			];
@@ -1110,8 +1115,13 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 			/**
 			 * Insured Party/Passenger Accident Insurance (ई)
 			 */
+			$column_head = 'ई';
+            if( strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY )
+			{
+				$column_head = 'इ';
+			}
 			$__CRF_cc_table__EE = [
-				'column_head' => 'ई',
+				'column_head' => $column_head,
 				'title_np' 	=> 'बीमित तथा यात्रीको दुर्घटना बीमा वापत',
 				'title_en' 	=> 'Insured Party & Passenger Accident Insurance'
 			];
@@ -1849,8 +1859,15 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 
             $accident_premium = $tariff_record->accident_premium ? json_decode($tariff_record->accident_premium) : NULL;
             $insured_value_tariff = $tariff_record->insured_value_tariff ? json_decode($tariff_record->insured_value_tariff) : NULL;
+
+            $column_head = 'इ';
+            if( strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY )
+			{
+				$column_head = 'आ';
+			}
+
             $__CRF_cc_table__I = [
-                'column_head' => 'इ',
+                'column_head' => $column_head,
                 'title_np'  => 'चालकको दुर्घटना बीमा वापत',
                 'title_en'  => 'Driver Accident Insurance'
             ];
@@ -1869,8 +1886,13 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
             //  ई) Staff Accident
             // ---------------------------------------------------------------------------------------
 
+			$column_head = 'ई';
+            if( strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY )
+			{
+				$column_head = 'इ';
+			}
             $__CRF_cc_table__EE = [
-                'column_head' => 'ई',
+                'column_head' => $column_head,
                 'title_np'  => 'परिचालक तथा अन्य कर्मचारी (चालक बाहेक) को दुर्घटना बीमा वापत',
                 'title_en'  => 'Staff Accident Insurance'
             ];
@@ -1890,8 +1912,13 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
             //  उ) Passenger Accident
             // ---------------------------------------------------------------------------------------
 
+			$column_head = 'उ';
+            if( strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY )
+			{
+				$column_head = 'ई';
+			}
             $__CRF_cc_table__U = [
-                'column_head' => 'उ',
+                'column_head' => $column_head,
                 'title_np'  => 'यात्रीको दुर्घटना बीमा वापत',
                 'title_en'  => 'Passenger Accident Insurance'
             ];
