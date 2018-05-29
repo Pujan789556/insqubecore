@@ -12,19 +12,8 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
         <?php if($cost_calculation_table):?>
             <?php foreach($cost_calculation_table as $section_object):?>
                 <tr>
-                    <td>
-                        <?php echo $section_object->title_np?>
-                    </td>
-                    <?php foreach($section_object->sections as $sub_section)
-                    {
-                        $flag_section_total = $sub_section->section_total ?? FALSE;
-                        if($flag_section_total)
-                        {
-                            echo '<td class="text-right">' . number_format($sub_section->amount, 2) . '</td>';
-                            break;
-                        }
-                    }
-                    ?>
+                    <td><?php echo $section_object->title_np?></td>
+                    <td class="text-right"><?php echo number_format($section_object->sub_total, 2); ?></td>
                 </tr>
             <?php endforeach?>
             <tr>
