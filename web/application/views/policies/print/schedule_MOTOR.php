@@ -186,7 +186,7 @@ switch ($record->portfolio_id)
                                 /**
                                  * Agent Details
                                  */
-                                $agent_text = implode(', ', array_filter([$record->agent_bs_code, $record->agent_ud_code]));
+                                $agent_text = implode(' ', array_filter([$record->agent_bs_code, $record->agent_ud_code]));
                                 ?>
                                 <td>बीमा अभिकर्ताको नाम र इजाजत पत्र नम्बर: <?php echo $agent_text;?></td>
                             </tr>

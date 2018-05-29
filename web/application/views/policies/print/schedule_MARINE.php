@@ -72,7 +72,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     /**
                      * Agent Details
                      */
-                    $agent_text = implode(', ', array_filter([$record->agent_name, $record->agent_ud_code]));
+                    $agent_text = implode(' ', array_filter([$record->agent_bs_code, $record->agent_ud_code]));
                     ?>
                     <td><strong>Agent:</strong> <?php echo $agent_text;?> </td>
                 </tr>
