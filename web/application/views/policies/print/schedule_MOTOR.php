@@ -239,7 +239,7 @@ switch ($record->portfolio_id)
                         बनौट: <?php echo $object_attributes->make;?> <br/>
                         मोडेल: <?php echo $object_attributes->model;?><br>
                         स्वेच्छीक अधिक: रु.<?php echo $voluntary_excess_key ? ( $dd_voluntary_excess[$voluntary_excess_key] ?? '') : '';?>
-                        <?php if( strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY ):
+                        <?php if( strtoupper($record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY ):
                             $compulsory_excess = _PO_MOTOR_get_compulsory_excess( $tariff_record, $object_attributes->year_mfd);
                             ?>
                             <br>
