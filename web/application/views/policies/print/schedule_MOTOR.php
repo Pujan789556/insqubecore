@@ -186,7 +186,7 @@ switch ($record->portfolio_id)
                                 /**
                                  * Agent Details
                                  */
-                                $agent_text = implode(', ', array_filter([$record->agent_name, $record->agent_ud_code]));
+                                $agent_text = implode(', ', array_filter([$record->agent_bs_code, $record->agent_ud_code]));
                                 ?>
                                 <td>बीमा अभिकर्ताको नाम र इजाजत पत्र नम्बर: <?php echo $agent_text;?></td>
                             </tr>
@@ -197,25 +197,14 @@ switch ($record->portfolio_id)
 
                             <tr>
                                 <td>
-                                    <table class="table table-condensed no-border">
-                                        <tr>
-                                            <td><strong>बीमाशुल्क</strong></td>
-                                            <td class="text-right"><?php echo number_format((float)$total_premium, 2)?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>टिकट</td>
-                                            <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2)?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>मु. अ. क. (VAT)</td>
-                                            <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2)?></td>
-                                        </tr>
-                                        <tr><td colspan="2" style="height:2px;"><hr style="margin:0" /></td></tr>
-                                        <tr>
-                                            <td class="border-t"><strong>मु. अ. क.(VAT) सहित जम्मा शुल्क (रु)</strong></td>
-                                            <td class="text-right border-t"><strong><?php echo number_format( (float)$grand_total , 2);?></strong></td>
-                                        </tr>
-                                    </table>
+                                    <h4>बीमाशुल्क</h4>
+                                    <?php
+                                    /**
+                                     * Policy Premium Card
+                                     */
+                                    $cost_summary_view = 'endorsements/snippets/_cost_calculation_table_summary_MOTOR';
+                                    $this->load->view($cost_summary_view, ['endorsement_record' => $endorsement_record]);
+                                    ?>
                                 </td>
                             </tr>
                         </table>
