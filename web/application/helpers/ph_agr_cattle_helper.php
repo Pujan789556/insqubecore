@@ -484,11 +484,11 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_compute_sum_insured_amount'))
 		 * Sum up all the item's sum insured amount to get the total Sum Insured
 		 * Amount
 		 */
-		$items_sum_insured 	= $data['items']['sum_insured'] ?? [];
 		$amt_sum_insured 	= 0.00;
-
-		foreach($items_sum_insured as $si_per_item)
+		$items = $data['items'];
+		foreach($items as $single)
 		{
+			$si_per_item = $single['sum_insured'];
 			// Clean all formatting ( as data can come from excel sheet with comma on thousands eg. 10,00,000.00 )
 			$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 			$amt_sum_insured +=  $si_per_item;

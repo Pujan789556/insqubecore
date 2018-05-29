@@ -3,11 +3,8 @@
  * Schedule Print : Agriculture - Poultry
  */
 
-$object_attributes  = json_decode($record->object_attributes);
-$premium_attributes = json_decode($record->premium_attributes);
-
+$object_attributes      = json_decode($record->object_attributes);
 $schedule_table_title   = 'पन्छीको बीमालेख';
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -147,7 +144,7 @@ $schedule_table_title   = 'पन्छीको बीमालेख';
                                      * Policy Premium Card
                                      */
                                     $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($record->portfolio_id);
-                                    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record, 'title' => $cost_table_title]);
+                                    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record]);
                                     ?>
                                 </td>
                             </tr>
@@ -161,7 +158,7 @@ $schedule_table_title   = 'पन्छीको बीमालेख';
             <?php
             $section_elements  = _OBJ_AGR_POULTRY_validation_rules($record->portfolio_id)['items'];
             $items              = $object_attributes->items ?? NULL;
-            $item_count         = count( $items->sum_insured ?? [] );
+            $item_count         = count( $items ?? [] );
             ?>
             <thead>
                 <tr>
@@ -175,16 +172,18 @@ $schedule_table_title   = 'पन्छीको बीमालेख';
                     </tr>
             </thead>
             <tbody>
-                <?php for ($i=0; $i < $item_count; $i++): ?>
+                <?php
+                $i = 1;
+                foreach($items as $item_record): ?>
                     <tr>
-                        <td><?php echo $i+1; ?></td>
+                        <td><?php echo $i++; ?></td>
                         <?php foreach($section_elements as $elem):
                             $key =  $elem['_key'];
-                            $value = $items->{$key}[$i];
+                            $value = $item_record->{$key};
 
                             $elem_data  = $elem['_data'] ?? NULL;
                             if($elem_data){
-                                $value = $elem_data[$value];
+                                $value = $elem_data[$value] ?? $value;
                             }
                         ?>
 
@@ -193,7 +192,7 @@ $schedule_table_title   = 'पन्छीको बीमालेख';
                             </td>
                         <?php endforeach ?>
                     </tr>
-                <?php endfor ?>
+                <?php endforeach; ?>
                 <tr>
                     <td colspan="6" class="text-bold">जम्मा बीमांक रकम(रु)</td>
                     <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2) ?></td>

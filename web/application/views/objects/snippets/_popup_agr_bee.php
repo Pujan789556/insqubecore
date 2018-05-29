@@ -30,7 +30,7 @@ else
                 <?php
                 $section_elements   = $form_elements['items'];
                 $items              = $attributes->items ?? NULL;
-                $item_count         = count( $items->sum_insured ?? [] );
+                $item_count         = count( $items ?? [] );
                 ?>
                 <thead>
                     <tr>
@@ -42,25 +42,27 @@ else
                 </thead>
 
                 <tbody>
-                    <?php for ($i=0; $i < $item_count; $i++): ?>
+                    <?php
+                    $i = 1;
+                    foreach($items as $item_record): ?>
                         <tr>
-                            <td><?php echo $i+1; ?></td>
+                            <td><?php echo $i++; ?></td>
                             <?php foreach($section_elements as $elem):
                                 $key =  $elem['_key'];
-                                $value = $items->{$key}[$i];
+                                $value = $item_record->{$key};
 
                                 $elem_data  = $elem['_data'] ?? NULL;
                                 if($elem_data){
                                     $value = $elem_data[$value];
                                 }
-                                ?>
+                            ?>
 
                                 <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
                                     <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
                                 </td>
                             <?php endforeach ?>
                         </tr>
-                    <?php endfor ?>
+                    <?php endforeach;?>
                     <tr>
                         <td colspan="3" class="text-bold">जम्मा बीमांक रकम(रु)</td>
                         <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2) ?></td>

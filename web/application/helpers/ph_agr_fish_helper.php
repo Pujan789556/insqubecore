@@ -459,7 +459,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_compute_sum_insured_amount'))
 		 */
 		$amt_sum_insured = 0.00;
 
-		$items = (object)$data['items'];
+		$items = $data['items'];
 		$si_items = _OBJ_AGR_FISH_items_only_sum_insured_amount($items);
 
 		/**
@@ -492,16 +492,15 @@ if ( ! function_exists('_OBJ_AGR_FISH_items_only_sum_insured_amount'))
 	 */
 	function _OBJ_AGR_FISH_items_only_sum_insured_amount( $items )
 	{
-		$items_sum_insured 	= $items->sum_insured ?? [];
 		$amt_sum_insured 	= 0.00;
 
-		foreach($items_sum_insured as $si_per_item)
+		foreach($items as $single)
 		{
+			$si_per_item = $single['sum_insured'];
 			// Clean all formatting ( as data can come from excel sheet with comma on thousands eg. 10,00,000.00 )
 			$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 			$amt_sum_insured +=  $si_per_item;
 		}
-
 
 		return $amt_sum_insured;
 	}
