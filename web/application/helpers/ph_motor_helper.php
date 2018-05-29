@@ -527,8 +527,16 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 		/**
 		 * Cost Table: Third Party Only
 		 */
+		$tp_column_head = 'आ';
+		$tp_label 		= 'ङ';
+		if( strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY )
+		{
+			$tp_column_head = 'अ';
+			$tp_label 		= 'क';
+		}
+
 		$__CRF_cc_table__AA = [
-			'column_head' => 'आ',
+			'column_head' => $tp_column_head,
 			'title_np' 	=> 'तेश्रो पक्ष प्रतिको दायित्व बीमा वापत',
 			'title_en' 	=> 'Third party liability insurance amounted to',
 			'sections' 	=> [
@@ -536,7 +544,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 				[
 					'title' 	=> "सि. सि. अनुसारको बीमाशुल्क",
 					'amount' 	=> $premiumm_third_party,
-					'label' 	=> 'ङ'
+					'label' 	=> $tp_label
 				]
 			]
 		];
@@ -545,7 +553,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			$__CRF_cc_table__AA['sections'][] = [
-				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ङ” को $no_claim_discount_rate %",
+				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः \"{$tp_label}\" को $no_claim_discount_rate %",
 				'amount' => $amount_noClaimDiscount_on_thirdParty
 			];
 		}
@@ -1208,8 +1216,15 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		/**
 		 * Third Party (आ)
 		 */
+		$tp_column_head = 'आ';
+		$tp_label 		= 'छ';
+		if( strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY )
+		{
+			$tp_column_head = 'अ';
+			$tp_label 		= 'क';
+		}
 		$__CRF_cc_table__AA = [
-			'column_head' => 'आ',
+			'column_head' => $tp_column_head,
 			'title_np' 	=> 'तेश्रो पक्ष प्रतिको दायित्व बीमा वापत',
 			'title_en' 	=> 'Third party liability insurance amounted to'
 		];
@@ -1221,14 +1236,15 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		}
 		$__CRF_cc_table__AA['sections'][] = [
 			'title' => "सि. सि. अनुसारको बीमाशुल्क",
-			'amount' => $__premium_AA_row_1
+			'amount' => $__premium_AA_row_1,
+			'label' => $tp_label
 		];
 
 		// No claim Dicount Only if Comprehensive
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			$__CRF_cc_table__AA['sections'][] = [
-				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “छ” को $no_claim_discount_rate %",
+				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः \"{$tp_label}\" को $no_claim_discount_rate %",
 				'amount' => $__premium_AA_row_2
 			];
 		}
@@ -1984,8 +2000,16 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
         /**
          * Third Party (आ)
          */
+        $tp_column_head = 'आ';
+		$tp_label 		= 'छ';
+		if( strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY )
+		{
+			$tp_column_head = 'अ';
+			$tp_label 		= 'क';
+		}
+
         $__CRF_cc_table__AA = [
-            'column_head' => 'आ',
+            'column_head' => $tp_column_head,
             'title_np'  => 'तेश्रो पक्ष प्रतिको दायित्व बीमा वापत',
             'title_en'  => 'Third party liability insurance amounted to'
         ];
@@ -1997,14 +2021,15 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
         }
         $__CRF_cc_table__AA['sections'][] = [
             'title' => "सि. सि. अनुसारको बीमाशुल्क",
-            'amount' => $__premium_AA_row_1
+            'amount' => $__premium_AA_row_1,
+            'label' => $tp_label
         ];
 
         // No claim Dicount Only if Comprehensive
         if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
         {
             $__CRF_cc_table__AA['sections'][] = [
-                'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “छ” को $no_claim_discount_rate %",
+                'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः \"{$tp_label}\" को $no_claim_discount_rate %",
                 'amount' => $__premium_AA_row_2
             ];
         }

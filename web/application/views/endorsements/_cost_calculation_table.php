@@ -47,7 +47,7 @@ $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($po
         <table class="table table-responsive table-bordered">
             <tbody>
                 <tr>
-                    <td><?php echo htmlspecialchars(nl2br($endorsement_record->txn_details)); ?></td>
+                    <td><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>
             </tbody>
         </table>

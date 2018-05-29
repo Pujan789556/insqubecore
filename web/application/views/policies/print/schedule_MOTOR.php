@@ -421,8 +421,8 @@ switch ($record->portfolio_id)
                     <td><strong>देखि</strong></td>
                     <td><strong>सम्म</strong></td>
                     <td><strong>प्रमाणित गर्ने अधिकारीको हस्ताक्षर र मिति</strong></td>
-                    <td><strong>छाप</strong></td>
-                    <td><strong>कैफियत</strong></td>
+                    <td width="30%"><strong>छाप</strong></td>
+                    <td width="20%"><strong>कैफियत</strong></td>
                 </tr>
             </thead>
             <tbody>
