@@ -229,8 +229,6 @@ switch ($record->portfolio_id)
                     <td>
                         <?php
                         $dd_voluntary_excess = _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '');
-                        $compulsory_excess = _PO_MOTOR_get_compulsory_excess( $tariff_record, $object_attributes->year_mfd);
-
                         $voluntary_excess_key = $premium_computation_table->dr_voluntary_excess  ?? NULL;
                         ?>
 
@@ -240,8 +238,13 @@ switch ($record->portfolio_id)
                         बनाउने कम्पनी: <?php echo $object_attributes->manufacturer;?> <br/>
                         बनौट: <?php echo $object_attributes->make;?> <br/>
                         मोडेल: <?php echo $object_attributes->model;?><br>
-                        स्वेच्छीक अधिक: रु.<?php echo $voluntary_excess_key ? ( $dd_voluntary_excess[$voluntary_excess_key] ?? '') : '';?><br>
-                        अनिवार्य अधिक: रु.<?php  echo $compulsory_excess->amount ?? ''?>
+                        स्वेच्छीक अधिक: रु.<?php echo $voluntary_excess_key ? ( $dd_voluntary_excess[$voluntary_excess_key] ?? '') : '';?>
+                        <?php if( strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY ):
+                            $compulsory_excess = _PO_MOTOR_get_compulsory_excess( $tariff_record, $object_attributes->year_mfd);
+                            ?>
+                            <br>
+                            अनिवार्य अधिक: रु.<?php  echo $compulsory_excess->amount ?? ''?>
+                        <?php endif; ?>
                     </td>
                     <td>
                         बनेको वर्ष : <?php echo $object_attributes->year_mfd;?> <br/>
