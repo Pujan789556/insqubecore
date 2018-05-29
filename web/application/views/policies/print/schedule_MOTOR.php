@@ -341,7 +341,7 @@ switch ($record->portfolio_id)
                 <td align="center" colspan="2"><br/><h2>सवारी साधन बीमाको प्रमाणपत्र</h2><br/><br/></td>
             </tr>
             <tr>
-                <td width="50%"><strong>प्रमाणपत्र जारी गर्ने बीमकको नाम र ठेगाना:</strong></td>
+                <td width="40%"><strong>प्रमाणपत्र जारी गर्ने बीमकको नाम र ठेगाना:</strong></td>
                 <td>
                     <?php
                     echo $this->settings->orgn_name_np . ', ' . $record->branch_name_np;
@@ -361,32 +361,47 @@ switch ($record->portfolio_id)
                 <td><?php echo $record->customer_name; ?></td>
             </tr>
             <tr>
-                <td><strong>२. ठेगाना, टेलिफोन नं.:</strong></td>
+                <td><strong>२. ठेगाना:</strong></td>
                 <td><?php echo get_contact_widget_two_lines($record->customer_contact); ?></td>
             </tr>
             <tr>
-                <td><strong>३. बीमालेख नं.:</strong></td>
+                <td><strong>३. टेलिफोन नं.:</strong></td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td><strong>४. बीमालेख नं.:</strong></td>
                 <td><?php echo $record->code; ?></td>
             </tr>
             <tr>
-                <td colspan="2"><strong>४. तेश्रो पक्ष प्रतिको दायित्व बीमाको सीमा</strong></td>
+                <td colspan="2"><strong>५. तेश्रो पक्ष प्रतिको दायित्व बीमाको सीमा</strong></td>
             </tr>
             <tr>
                 <td><strong>&nbsp;&nbsp;&nbsp;&nbsp;(क) मानिसको शारीरिक क्षति वापत:</strong></td>
-                <td>रु <?php echo number_format($certificate_goodies['tp_human_damage'], 2) ?></td>
+                <td><?php echo $certificate_goodies['tp_human_damage'] ?></td>
             </tr>
             <tr>
                 <td><strong>&nbsp;&nbsp;&nbsp;&nbsp;(ख) सम्पत्तिको क्षति वापत:</strong></td>
-                <td>रु <?php echo number_format($certificate_goodies['tp_property_damage'], 2) ?></td>
+                <td><?php echo $certificate_goodies['tp_property_damage'] ?></td>
             </tr>
             <tr>
-                <td><strong>५. प्रति यात्री बीमाङ्क</strong></td>
-                <td>रु <?php echo number_format($certificate_goodies['si_per_passenger'], 2) ?></td>
+                <td>
+                    <?php
+                    $label = '६. प्रति यात्री बीमाङ्क';
+                    if($record->portfolio_id == IQB_SUB_PORTFOLIO_MOTORCYCLE_ID )
+                    {
+                        $label = '६. चालक तथा पछाडि बस्ने एक यात्रुको प्रतिव्यक्ति बीमाङ्क';
+                    }
+                     ?>
+                    <strong><?php echo $label; ?></strong>
+                </td>
+                <td><?php echo $certificate_goodies['si_per_passenger'] ?></td>
             </tr>
-            <tr>
-                <td><strong>६. चालक तथा अन्य बीमित कर्मचारीहरुको प्रति व्यक्ति बीमाङ्क</strong></td>
-                <td>रु <?php echo number_format($certificate_goodies['si_driver_other'], 2) ?></td>
-            </tr>
+            <?php if($record->portfolio_id != IQB_SUB_PORTFOLIO_MOTORCYCLE_ID ): ?>
+                <tr>
+                    <td><strong>७. चालक तथा अन्य बीमित कर्मचारीहरुको प्रति व्यक्ति बीमाङ्क</strong></td>
+                    <td><?php echo $certificate_goodies['si_driver_other'] ?></td>
+                </tr>
+            <?php endif ?>
         </table>
         <br>
         <table class="table">
