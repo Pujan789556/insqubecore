@@ -264,7 +264,8 @@ class Policy_model extends MY_Model
                         'label' => 'Care of',
                         'rules' => 'trim|max_length[100]',
                         '_id'       => '_care-of-text',
-                        '_type'     => 'text',
+                        '_type'     => 'textarea',
+                        'rows'      => 5,
                         '_required' => false
                     ]
                 ],

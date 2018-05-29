@@ -86,7 +86,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <?php endif?>
                         <tr>
                                 <td class="text-bold">Care of</td>
-                                <td><?php echo $this->security->xss_clean($record->care_of);?></td>
+                                <td><?php echo nl2br($this->security->xss_clean($record->care_of));?></td>
                             </tr>
                         <tr>
                             <td class="text-bold">Policy Issued Date</td>
