@@ -174,6 +174,23 @@ class Cli_bs_report extends CI_Controller
                         break;
                 }
             }
+            else if( $record->category === IQB_BS_REPORT_CATEGORY_CL )
+            {
+                switch ($record->type)
+                {
+                    case IQB_BS_REPORT_TYPE_QUARTELRY:
+                        $this->claim_quarterly( $record->id );
+                        break;
+
+                    case IQB_BS_REPORT_TYPE_MONTHLY:
+                        // @TODO
+                        break;
+
+                    default:
+                        # code...
+                        break;
+                }
+            }
         }
     }
 
@@ -307,6 +324,173 @@ class Cli_bs_report extends CI_Controller
         }
         $this->_csv_export($record, $fy_record, $fy_quarter, $SQLS, IQB_BS_REPORT_TYPE_QUARTELRY);
 	}
+
+    // -------------------------------------------------------------------------------------
+
+    /**
+     * Generate Quarterly Report for Claim
+     *
+     * @param int $id
+     * @return void
+     */
+    public function claim_quarterly( $id )
+    {
+        $this->load->model('bs_report_model');
+
+        // Valid Record ?
+        $id = (int)$id;
+        $record = $this->bs_report_model->find($id);
+        if(!$record )
+        {
+            echo "ERROR: Fiscal Year not found!" . PHP_EOL;
+            exit(1);
+        }
+
+        /**
+         * Valid Fiscal Year?
+         */
+        $fy_record = $this->fiscal_year_model->get($record->fiscal_yr_id);
+        if(!$fy_record)
+        {
+            echo "ERROR: Fiscal Year not found!" . PHP_EOL;
+            exit(1);
+        }
+
+        /**
+         * Fiscal Year, Quarter
+         */
+        $fiscal_yr_id = $record->fiscal_yr_id;
+        $fy_quarter = $record->fy_quarter_month;
+
+
+        $fy_code_np     = $fy_record->code_np;
+        $this->load->model('portfolio_model');
+        $this->load->model('bsrs_heading_model');
+
+        $portfolios             = $this->portfolio_model->dropdown_children();
+        $bs_heading_formatted   = [];
+        foreach($portfolios as $portfolio_id => $portfolio_name)
+        {
+            $bs_headings = $this->bsrs_heading_model->by_portfolio($portfolio_id, 'policy');
+
+            // Let's Group Heading with Heading Type ID
+            $heading_type_ids = [];
+            foreach($bs_headings as $single)
+            {
+                $heading_type_ids[] = $single->heading_type_id;
+            }
+
+            $heading_type_ids = array_values(array_unique($heading_type_ids));
+            if($heading_type_ids)
+            {
+                $bs_heading_formatted["{$portfolio_id}"] = $heading_type_ids;
+            }
+        }
+
+       $portfolio_codes = $this->portfolio_model->dropdown_children_code();
+
+        /**
+         * Let's build the query
+         *
+         */
+        $SQLS       = [];
+        $SQL_TEST   = [];
+        foreach($bs_heading_formatted as $portfolio_id => $hd_type_ids)
+        {
+            $sql_group_headings = [];
+            $select_sql         = [];
+            $from_join_sql           = [];
+
+            for($i = 0; $i < count($hd_type_ids); $i++ )
+            {
+                $heading_type_id = $hd_type_ids[$i];
+                $inline_sql =   "(
+                                    SELECT
+                                        P.id as policy_id, P.district_id, H.id as bsrs_heading_id, H.code AS bsrs_code, H.name as bsrs_name
+                                    FROM dt_policies AS P
+                                    JOIN rel_policy__bsrs_heading REL ON REL.policy_id = P.id
+                                    JOIN bsrs_headings H ON H.id = REL.bsrs_heading_id
+                                    WHERE P.portfolio_id = {$portfolio_id} AND H.heading_type_id = {$heading_type_id}
+                                ) P{$i}";
+
+                if($i == 0 )
+                {
+                    $select_sql[] = "SELECT P0.bsrs_code AS bsrs_code0, P0.bsrs_name AS bsrs_name0";
+                    $from_join_sql[] = "FROM {$inline_sql}";
+                }
+                else
+                {
+                    $select_sql[] = "P{$i}.bsrs_code AS bsrs_code{$i}, P{$i}.bsrs_name AS bsrs_name{$i}";
+                    $from_join_sql[] = "LEFT JOIN {$inline_sql} ON P0.policy_id = P{$i}.policy_id";
+                }
+
+                $sql_group_headings[] = "P{$i}.bsrs_heading_id";
+            }
+
+
+            /**
+             * CLAIM JOIN
+             */
+            $claim_status = IQB_CLAIM_STATUS_SETTLED;
+            $heading_type_id = IQB_BSRS_HEADING_TYPE_ID_CLAIM;
+            $claim_index        = count($hd_type_ids);
+            $claim_inline_sql = "(
+                                    SELECT
+                                        CLM.id AS claim_id, CLM.policy_id, CLM.fiscal_yr_id, CLM.fy_quarter,
+                                        CLM.settlement_claim_amount + CLM.total_surveyor_fee_amount AS total_claim_amount,
+                                        CLM.settlement_claim_amount + CLM.total_surveyor_fee_amount - CLM.cl_treaty_retaintion AS total_ri_amount,
+                                        CLM.total_surveyor_fee_amount AS total_surveyor_amount,
+                                        P.district_id, H.id as bsrs_heading_id, H.code AS bsrs_code, H.name as bsrs_name
+                                    FROM dt_claims AS CLM
+                                    JOIN dt_policies P ON CLM.policy_id = P.id
+                                    JOIN rel_claim__bsrs_heading REL ON REL.claim_id = CLM.id
+                                    JOIN bsrs_headings H ON H.id = REL.bsrs_heading_id
+                                    WHERE
+                                        CLM.status = '{$claim_status}' AND
+                                        P.portfolio_id = {$portfolio_id} AND
+                                        H.heading_type_id = {$heading_type_id}
+                                ) C0";
+
+            $claim_join_on = [];
+            for($i = 0; $i < count($hd_type_ids); $i++ )
+            {
+                $claim_join_on[] = "C0.policy_id = P{$i}.policy_id";
+            }
+            $select_sql[]           = "C0.bsrs_code AS bsrs_code{$claim_index}, C0.bsrs_name AS bsrs_name{$claim_index},
+                                    C0.total_claim_amount, C0.total_ri_amount, C0.total_surveyor_amount";
+            $from_join_sql[]        = "JOIN {$claim_inline_sql} ON " . implode(" AND ", $claim_join_on);
+            $sql_group_headings[]   = "C0.bsrs_heading_id";
+
+
+
+            $select_sql         = implode(', ', $select_sql);
+            $from_join_sql      = implode(PHP_EOL, $from_join_sql);
+            $sql_group_headings = implode(', ', $sql_group_headings);
+
+            $SQL_TEST[]     = $select_sql . PHP_EOL . $from_join_sql;
+
+
+            /**
+             * CSV Name:
+             *  BS-CLAIM-QUARTERLY-<fy_code_np>-<fy_quarter>-<portfolio_code>.csv
+             */
+            $filename = 'BS-CLAIM-QUARTERLY-' . $fy_code_np . '-' . $fy_quarter . '-' . $portfolio_codes[$portfolio_id] . '.csv';
+            $SQLS[$filename] = "{$select_sql},
+                            R.id AS region_id,
+                            COUNT(C0.claim_id) AS claim_count
+                        {$from_join_sql}
+                        JOIN master_districts D ON P0.district_id = D.id
+                        JOIN master_regions R ON D.region_id = R.id
+                        WHERE
+                            C0.fiscal_yr_id = {$fiscal_yr_id} AND
+                            C0.fy_quarter = {$fy_quarter}
+                        GROUP BY C0.claim_id, {$sql_group_headings};";
+        }
+
+        // echo '<pre>'; print_r($SQLS);exit;
+
+        $this->_csv_export($record, $fy_record, $fy_quarter, $SQLS, IQB_BS_REPORT_TYPE_QUARTELRY);
+    }
 
     // -------------------------------------------------------------------------------------
 

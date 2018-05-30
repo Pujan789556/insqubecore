@@ -600,6 +600,9 @@ class Claim_model extends MY_Model
         // Fiscal Year ID
         $draft_data['fiscal_yr_id'] = $this->current_fiscal_year->id;
 
+        // Fiscal Year Quarter
+        $draft_data['fy_quarter'] = $this->current_fy_quarter->quarter;
+
         // Branch ID
         $draft_data['branch_id']      = $this->dx_auth->get_branch_id();
 
