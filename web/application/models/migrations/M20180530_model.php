@@ -75,7 +75,11 @@ class M20180530_model extends MY_Model
                         $attributes['items'] = $items_formatted;
 
                         $done = $this->db->where('id', $record->id)
-                                     ->set(['attributes' => json_encode($attributes)])
+                                     ->set([
+                                            'attributes' => json_encode($attributes),
+                                            'updated_at' => date('Y-m-d H:i:s'),
+                                            'updated_by' => 1
+                                        ])
                                      ->update('dt_objects');
 
                         $done ? $total_success++ : '';
