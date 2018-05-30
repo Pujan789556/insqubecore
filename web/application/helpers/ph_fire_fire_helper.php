@@ -581,17 +581,6 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_compute_sum_insured_amount'))
 		}
 		else
 		{
-			/**
-			 * A single Fire Policy may hold multiple Items
-			 */
-			// $sum_inusred_arr = $data['items']['sum_insured'];
-			// $amt_sum_insured = 0;
-			// foreach($sum_inusred_arr as $si)
-			// {
-			// 	$amt_sum_insured += $si;
-			// }
-
-			$amt_sum_insured 	= 0.00;
 			$items = $data['items'];
 			foreach($items as $single)
 			{

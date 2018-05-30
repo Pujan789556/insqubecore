@@ -52,12 +52,12 @@ $old_document           = $record->document ?? NULL;
                 </thead>
                 <?php
                 $items                  = $record->items ?? NULL;
-                $item_count             = count( $items->category ?? [] );
+                $item_count             = count( $items ?? [] );
                 ?>
                 <tbody class="form-inline">
                     <?php
                         if($item_count):
-                            for ($i=0; $i < $item_count; $i++):?>
+                            foreach($items as $item_record):?>
                             <tr <?php echo $i == 0 ? 'id="__fire_items_row"' : '' ?>>
                                 <?php foreach($item_form_elements as $single_element):?>
                                     <td>
@@ -65,7 +65,7 @@ $old_document           = $record->document ?? NULL;
                                         /**
                                          * Load Single Element
                                          */
-                                        $single_element['_default']    = $items->{$single_element['_key']}[$i] ?? '';
+                                        $single_element['_default']    = $item_record->{$single_element['_key']} ?? '';
                                         $single_element['_value']      = $single_element['_default'];
                                         $this->load->view('templates/_common/_form_components_inline', [
                                             'form_elements' => [$single_element],
@@ -82,7 +82,7 @@ $old_document           = $record->document ?? NULL;
                                 <?php endif;?>
                             </tr>
                         <?php
-                            endfor;
+                            endforeach;
                         else:?>
                             <tr id="__fire_items_row">
                                 <?php foreach($item_form_elements as $single_element):?>

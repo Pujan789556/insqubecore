@@ -20,27 +20,31 @@ $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 	<table class="table table-bordered table-condensed no-margin">
 	    <thead>
 	        <tr>
+	        	<th>S.N.</th>
 	            <th>Item Category</th>
 	            <th>Ownership</th>
+	            <th>Description</th>
 	            <th>Sum Insured(Rs.)</th>
 	        </tr>
 	    </thead>
 	    <?php
-	    $items     	= $attributes->items ?? NULL;
-	    $item_count	= count( $items->category ?? [] );
+	    $items     	= $attributes->items ?? [];
+	    $item_count	= count( $items );
 	    ?>
 	    <tbody class="form-inline">
 	        <?php
-	        if($item_count):
-	            for ($i=0; $i < $item_count; $i++):?>
+		        $i = 1;
+                foreach($items as $item_record):?>
 	            	<tr>
-	            		<td><?php echo _OBJ_FIRE_HHP_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
-	            		<td><?php echo _OBJ_FIRE_HHP_item_ownership_dropdown(FALSE)[ $items->ownership[$i] ]; ?></td>
-	            		<td>Rs. <?php echo $items->sum_insured[$i]; ?></td>
+	            		<td><?php echo $i++; ?></td>
+	            		<td><?php echo _OBJ_FIRE_HHP_item_category_dropdown(FALSE)[ $item_record->category ]?></td>
+	            		<td><?php echo _OBJ_FIRE_HHP_item_ownership_dropdown(FALSE)[ $item_record->ownership ]; ?></td>
+	            		<td><?php echo nl2br(htmlspecialchars($item_record->description)); ?></td>
+	            		<td class="text-right"><?php echo number_format($item_record->sum_insured, 2); ?></td>
 	            	</tr>
 	            <?php
-	            endfor;
-	        endif;?>
+	            endforeach;
+	            ?>
 	    </tbody>
 	</table>
 </div>

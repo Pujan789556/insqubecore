@@ -431,6 +431,46 @@ if ( ! function_exists('_OBJ_FIRE_HHP_pre_save_tasks'))
         	throw new Exception("Exception [Helper: ph_fire_hhp_helper][Method: _OBJ_FIRE_HHP_pre_save_tasks()]: " . $message );
         }
 
+        /**
+		 * Format Items
+		 */
+		$data = _OBJ_FIRE_HHP_format_items($data);
+
+		return $data;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_FIRE_HHP_format_items'))
+{
+	/**
+	 * Format Fire Object Items
+	 *
+	 * @param array $data 		Post Data
+	 * @return array
+	 */
+	function _OBJ_FIRE_HHP_format_items( array $data )
+	{
+		$items 		= $data['object']['items'];
+		$item_rules = _OBJ_FIRE_HHP_validation_rules(IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID)['items'];
+
+		$items_formatted = [];
+		$count = count($items['category']);
+
+		for($i=0; $i < $count; $i++)
+		{
+			$single = [];
+			foreach($item_rules as $rule)
+			{
+				$key = $rule['_key'];
+				$single[$key] = $items[$key][$i];
+			}
+			$items_formatted[] = $single;
+		}
+
+		$data['object']['items'] = $items_formatted;
+
 		return $data;
 	}
 }
@@ -453,11 +493,14 @@ if ( ! function_exists('_OBJ_FIRE_HHP_compute_sum_insured_amount'))
 		/**
 		 * Compute Sum of all items' sum_insured
 		 */
-		$sum_inusred_arr = $data['items']['sum_insured'];
 		$amt_sum_insured = 0;
-		foreach($sum_inusred_arr as $si)
+		$items = $data['items'];
+		foreach($items as $single)
 		{
-			$amt_sum_insured += $si;
+			$si_per_item = $single['sum_insured'];
+			// Clean all formatting ( as data can come from excel sheet with comma on thousands eg. 10,00,000.00 )
+			$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+			$amt_sum_insured +=  $si_per_item;
 		}
 
 		// NO SI Breakdown for this Portfolio

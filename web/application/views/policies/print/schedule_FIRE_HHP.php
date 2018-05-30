@@ -143,6 +143,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                         <table>
                             <thead>
                                 <tr>
+                                    <td>क्र. स.</td>
                                     <td>सम्पत्ति</td>
                                     <td>विवरण</td>
                                     <td align="right">बीमांक (रु)</td>
@@ -151,19 +152,18 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                             <tbody>
                                 <?php
                                 $items      = $object_attributes->items ?? NULL;
-                                $item_count = count( $items->category ?? [] );
-                                if($item_count):
-                                    for ($i=0; $i < $item_count; $i++):?>
-                                        <tr>
-                                            <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
-                                            <td><?php echo nl2br($items->description[$i]) ?></td>
-                                            <td align="right"><?php echo number_format((float)$items->sum_insured[$i], 2); ?></td>
-                                        </tr>
-                                    <?php
-                                    endfor;
-                                endif;?>
+                                $item_count = count( $items );
+                                $i = 1;
+                                foreach($items as $item_record):?>
+                                    <tr>
+                                        <td><?php echo $i++; ?>.</td>
+                                        <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item_record->category ]?></td>
+                                        <td><?php echo nl2br($item_record->description) ?></td>
+                                        <td align="right"><?php echo number_format((float)$item_record->sum_insured, 2); ?></td>
+                                    </tr>
+                                <?php endforeach?>
                                 <tr>
-                                    <td colspan="2" align="right">जम्मा बीमांक (रु)</td>
+                                    <td colspan="3" align="right">जम्मा बीमांक (रु)</td>
                                     <td align="right"><?php echo number_format((float)$record->object_amt_sum_insured, 2);?></td>
                                 </tr>
                             </tbody>
