@@ -57,8 +57,9 @@ $old_document           = $record->document ?? NULL;
                 <tbody class="form-inline">
                     <?php
                         if($item_count):
+                            $i = 0;
                             foreach($items as $item_record):?>
-                            <tr <?php echo $i == 0 ? 'id="__fire_items_row"' : '' ?>>
+                            <tr <?php echo $i++ == 0 ? 'id="__fire_items_row"' : '' ?>>
                                 <?php foreach($item_form_elements as $single_element):?>
                                     <td>
                                         <?php
