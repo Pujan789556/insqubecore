@@ -8,6 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<?php if( $this->dx_auth->is_admin() ): ?>
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
+	<td><?php echo IQB_BS_REPORT_CATEGORIES[$record->category];?></td>
 	<td><?php echo IQB_BS_REPORT_TYPES[$record->type];?></td>
 	<td><?php echo $record->fy_code_np, ' (', $record->fy_code_en, ')';?></td>
 	<td><?php echo $record->type === IQB_BS_REPORT_TYPE_MONTHLY
