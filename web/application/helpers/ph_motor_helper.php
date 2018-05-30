@@ -1726,6 +1726,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
              */
             $__premium_A_row_NGA = 0.00;
             $__discount_A_row_on_personal_use = 0.00;
+            $statement = "निजी प्रयोजनमा प्रयोग गरे वापत छुट: \"घ\" को {$tariff_record->dr_cvc_on_personal_use} %";
             if( $object_attributes->ownership === IQB_POLICY_OBJECT_MOTOR_OWNERSHIP_NON_GOVT )
             {
                 switch ( $object_attributes->cvc_type )
@@ -1738,7 +1739,6 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
                     case IQB_MOTOR_CVC_TYPE_TEMPO:
                     case IQB_MOTOR_CVC_TYPE_PASSENGER_CARRIER:
                         $flag_private_use = $premium_computation_table['flag_private_use'] ?? FALSE;
-                        $statement = "निजी प्रयोजनमा प्रयोग गरे वापत छुट: “घ” को {$tariff_record->dr_cvc_on_personal_use} प्रतिशत";
                         if( $flag_private_use )
                         {
                             $__discount_A_row_on_personal_use = $__premium_A_row_GHA * ($tariff_record->dr_cvc_on_personal_use/100.00);
