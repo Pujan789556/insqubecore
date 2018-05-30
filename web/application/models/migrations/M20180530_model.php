@@ -38,7 +38,7 @@ class M20180530_model extends MY_Model
 
     public function eng_bl()
     {
-        $this->load->helper('ph_fire_hhp');
+        $this->load->helper('ph_eng_bl');
 
         $list = $this->db->select('id, portfolio_id, attributes, amt_sum_insured, si_breakdown')
                         ->from('dt_objects')
