@@ -504,6 +504,48 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_pre_save_tasks'))
 	        	throw new Exception("Exception [Helper: ph_FIRE_FIRE_helper][Method: _OBJ_FIRE_FIRE_pre_save_tasks()]: " . $message );
 	        }
 		}
+		else
+		{
+			/**
+			 * Format Items
+			 */
+			$data = _OBJ_FIRE_FIRE_format_items($data);
+		}
+
+		return $data;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_FIRE_FIRE_format_items'))
+{
+	/**
+	 * Format Fire Object Items
+	 *
+	 * @param array $data 		Post Data
+	 * @return array
+	 */
+	function _OBJ_FIRE_FIRE_format_items( array $data )
+	{
+		$items 		= $data['object']['items'];
+		$item_rules = _OBJ_FIRE_FIRE_manual_item_v_rules();
+
+		$items_formatted = [];
+		$count = count($items['category']);
+
+		for($i=0; $i < $count; $i++)
+		{
+			$single = [];
+			foreach($item_rules as $rule)
+			{
+				$key = $rule['_key'];
+				$single[$key] = $items[$key][$i];
+			}
+			$items_formatted[] = $single;
+		}
+
+		$data['object']['items'] = $items_formatted;
 
 		return $data;
 	}
@@ -542,12 +584,24 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_compute_sum_insured_amount'))
 			/**
 			 * A single Fire Policy may hold multiple Items
 			 */
-			$sum_inusred_arr = $data['items']['sum_insured'];
-			$amt_sum_insured = 0;
-			foreach($sum_inusred_arr as $si)
+			// $sum_inusred_arr = $data['items']['sum_insured'];
+			// $amt_sum_insured = 0;
+			// foreach($sum_inusred_arr as $si)
+			// {
+			// 	$amt_sum_insured += $si;
+			// }
+
+			$amt_sum_insured 	= 0.00;
+			$items = $data['items'];
+			foreach($items as $single)
 			{
-				$amt_sum_insured += $si;
+				$si_per_item = $single['sum_insured'];
+				// Clean all formatting ( as data can come from excel sheet with comma on thousands eg. 10,00,000.00 )
+				$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+				$amt_sum_insured +=  $si_per_item;
 			}
+
+
 		}
 
 		// NO SI Breakdown for this Portfolio
@@ -812,7 +866,7 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 			'premium_manual_additional_rates' => [
                 [
 	                'field' => 'premium[manual][nwl_rate]',
-	                'label' => 'NWL (Night Working Load)',
+	                'label' => 'NWL (Night Working Load %)',
 	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
 	                '_type'     => 'text',
 	                '_key' 		=> 'nwl_rate',
@@ -821,7 +875,7 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 	            ],
 	            [
 	                'field' => 'premium[manual][ffa_rate]',
-	                'label' => 'FFA (Fire Fighting Appliance)',
+	                'label' => 'FFA (Fire Fighting Appliance %)',
 	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
 	                '_type'     => 'text',
 	                '_key' 		=> 'ffa_rate',
@@ -830,7 +884,7 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 	            ],
 	            [
 	                'field' => 'premium[manual][sdd_rate]',
-	                'label' => 'SDD (Stock Declaration Discount)',
+	                'label' => 'SDD (Stock Declaration Discount %)',
 	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
 	                '_type'     => 'text',
 	                '_key' 		=> 'sdd_rate',
@@ -905,10 +959,11 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 			$premium_manual_risks_elements 	= $v_rules['premium_manual_risks'];
 			$object_attributes 	= $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
 			$items 				= $object_attributes->items;
-			$item_count 		= count($items->category);
+			$item_count 		= count($items);
 
 			// Per Item We have validation rules
-			for($i=0; $i < $item_count; $i++ )
+			$i = 0;
+			foreach($items as $item_record)
 			{
 				// Loop through each portfolio risks
 				foreach($portfolio_risks as $risk_id=>$risk_name)
@@ -919,6 +974,7 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
                     	$rules[] = $elem;
                     }
 				}
+				$i++;
 			}
 			return $rules;
 		}
@@ -1127,14 +1183,14 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 						// Get Fire Items
 						$items              = $object_attributes->items;
-						$item_count         = count($items->category);
+						$item_count         = count($items);
 
 						// Risk table tmp
 						$risk_table_tmp = [];
-
-						for($i=0; $i < $item_count; $i++ )
+						$i = 0;
+						foreach($items as $item_record)
 						{
-							$item_sum_insured 	= $items->sum_insured[$i];
+							$item_sum_insured 	= $item_record->sum_insured;
 
 							foreach($portfolio_risks as $pr)
 							{
@@ -1215,6 +1271,8 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 									}
 								}
 							}
+
+							$i++;
 						}
 
 						// Update Risk Table
@@ -1343,11 +1401,12 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					// Property table for manual item entry
 					if( $object_attributes->item_attached === 'N' )
 					{
-						for($i=0; $i < $item_count; $i++ )
+						$i = 0;
+						foreach($items as $item_record)
 						{
-							$item_sum_insured 		= $items->sum_insured[$i];
-							$property_category 		= _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ];
-							$single_property_row 	= [ $property_category, $items->sum_insured[$i] ];
+							$item_sum_insured 		= $item_record->sum_insured;
+							$property_category 		= _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item_record->category ];
+							$single_property_row 	= [ $property_category, $item_record->sum_insured ];
 
 							$per_property_premium 		= 0.00;
 							$per_property_base_premium 	= 0.00;
@@ -1379,6 +1438,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 							$single_property_row[] 	= $per_property_premium;
 							$property_table[] 		= $single_property_row;
 						}
+						$i++;
 					}
 
 					$cost_calculation_table = json_encode([
@@ -1419,541 +1479,6 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 					];
 
-					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
-
-				} catch (Exception $e){
-
-					return $CI->template->json([
-						'status' 	=> 'error',
-						'message' 	=> $e->getMessage()
-					], 404);
-				}
-        	}
-        	else
-        	{
-        		return $CI->template->json([
-					'status' 	=> 'error',
-					'title' 	=> 'Validation Error!',
-					'message' 	=> validation_errors()
-				]);
-        	}
-		}
-	}
-
-	function __save_premium_FIRE_FIRE_OLD($policy_record, $endorsement_record)
-	{
-		$CI =& get_instance();
-
-		/**
-		 * !!! NOTE @TODO !!!
-		 *
-		 * Manual Endorsement should be done on
-		 * 	- Premium Upgrade
-		 * 	- Premium Refund
-		 */
-		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-		{
-			return $CI->template->json([
-				'title' 	=> 'UNDER CONSTRUCTION!',
-				'status' 	=> 'error',
-				'message' 	=> 'We need to do it manually.'
-			], 400);
-		}
-
-		/**
-		 * Form Submitted?
-		 */
-		$return_data = [];
-
-		if( $CI->input->post() )
-		{
-
-			/**
-			 * Policy Object Record
-			 *
-			 * In case of endorsements, we will be needing both current policy object and edited object information
-			 * to compute premium.
-			 */
-			$old_object = get_object_from_policy_record($policy_record);
-			$new_object = NULL;
-			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-			{
-				try {
-					$new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
-				} catch (Exception $e) {
-
-					return $CI->template->json([
-	                    'status'        => 'error',
-	                    'title' 		=> 'Exception Occured',
-	                    'message' 	=> $e->getMessage()
-	                ], 404);
-				}
-			}
-
-			// Newest object attributes should be used.
-			$object_attributes  = json_decode($new_object->attributes ?? $old_object->attributes);
-
-			/**
-			 * Portfolio Setting Record
-			 */
-			$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-
-			/**
-			 * Portfolio Risks
-			 */
-			$portfolio_risks = $CI->portfolio_model->dropdown_risks($policy_record->portfolio_id);
-
-			/**
-			 * Validation Rules for Form Processing
-			 */
-			$validation_rules = _TXN_FIRE_FIRE_premium_validation_rules($policy_record, $pfs_record, $old_object, $portfolio_risks, TRUE );
-            $CI->form_validation->set_rules($validation_rules);
-
-            // echo '<pre>';print_r($validation_rules);exit;
-
-			if($CI->form_validation->run() === TRUE )
-        	{
-
-				// Premium Data
-				$post_data 		= $CI->input->post();
-				$premium_data 	= $post_data['premium'];
-
-				/**
-				 * Do we have a valid method?
-				 */
-				try{
-
-					/**
-					 * Compute Premium From Post Data
-					 * ------------------------------
-					 * 	From the Portfolio Risks - We compute two type of premiums
-					 * 	a. Pool Premium
-					 *  b. Base Premium
-					 */
-
-
-					/**
-					 * Portfolio Risks Rows
-					 */
-					$portfolio_risks = $CI->portfolio_model->portfolio_risks($policy_record->portfolio_id);
-
-					/**
-					 * Initialization of Computational Variables
-					 */
-					$GROSS_REGULAR_PREMIUM 	= 0.00; // Gross Premium (Without Pool Premium)
-					$GROSS_POOL_PREMIUM  	= 0.00; // Pool Premium
-
-					$NET_REGULAR_PREMIUM 	= 0.00; // Net Premium (Without Pool Premium)
-					$NET_POOL_PREMIUM  		= 0.00; // Net Pool Premium
-
-					// Additional discount/charge rates & amounts
-					$NWL_RATE 		= 0.00;
-					$FFA_RATE 		= 0.00;
-					$SDD_RATE 		= 0.00;
-					$NWL_AMOUNT 	= 0.00;
-					$FFA_AMOUNT 	= 0.00;
-					$SDD_AMOUNT_REGULAR 	= 0.00;
-					$SDD_AMOUNT_POOL 		= 0.00;
-
-					// Risk Distribution Table
-					$risk_table = [];
-
-
-					/**
-					 * -------------------------------------------------------------------------------------
-					 * CASE A : FIRE ITEMS AS FILE UPLOAD
-					 * -------------------------------------------------------------------------------------
-					 */
-					if( $object_attributes->item_attached === 'Y' )
-					{
-						// Get additional discount/charge rate & amount
-						$NWL_RATE 		= floatval($premium_data['file']['nwl_rate']);
-						$FFA_RATE 		= floatval($premium_data['file']['ffa_rate']);
-						$SDD_RATE 		= floatval($premium_data['file']['sdd_rate']);
-						$NWL_AMOUNT 	= floatval($premium_data['file']['nwl_amount']);
-						$FFA_AMOUNT 	= floatval($premium_data['file']['ffa_amount']);
-						$SDD_AMOUNT_REGULAR 	= floatval($premium_data['file']['sdd_amount_regular']);
-						$SDD_AMOUNT_POOL 		= floatval($premium_data['file']['sdd_amount_pool']);
-
-						// GROSS - Regular & Pool
-						foreach($portfolio_risks as $pr)
-						{
-							$premium_per_risk = floatval($premium_data['file']['premium'][$pr->id]);
-
-
-							if( $pr->type == IQB_RISK_TYPE_BASIC )
-							{
-								$GROSS_REGULAR_PREMIUM += $premium_per_risk;
-							}
-							else
-							{
-								$GROSS_POOL_PREMIUM += $premium_per_risk;
-							}
-
-
-							// Update Risk Table
-							$risk_table[] 		= [$pr->name, $premium_per_risk];
-						}
-
-						// NET - Regular & Pool
-						$NET_REGULAR_PREMIUM 	= $GROSS_REGULAR_PREMIUM + $NWL_AMOUNT - $FFA_AMOUNT - $SDD_AMOUNT_REGULAR;
-						$NET_POOL_PREMIUM 		= $GROSS_POOL_PREMIUM  - $SDD_AMOUNT_POOL;
-					}
-
-					/**
-					 * -------------------------------------------------------------------------------------
-					 * CASE B : FIRE ITEMS AS MANUAL ENTRY
-					 * -------------------------------------------------------------------------------------
-					 */
-					else
-					{
-						// Get additional discount/charge rate & amount
-						$NWL_RATE 		= $premium_data['manual']['nwl_rate'];
-						$FFA_RATE 		= $premium_data['manual']['ffa_rate'];
-						$SDD_RATE 		= $premium_data['manual']['sdd_rate'];
-
-
-						// Get Fire Items
-						$items              = $object_attributes->items;
-						$item_count         = count($items->category);
-
-						// Risk table tmp
-						$risk_table_tmp = [];
-
-						for($i=0; $i < $item_count; $i++ )
-						{
-							$item_sum_insured 	= $items->sum_insured[$i];
-
-							foreach($portfolio_risks as $pr)
-							{
-								// Rate is Per Thousand of Sum Insured
-								$rate = floatval($premium_data['manual']['rate'][$pr->id][$i]);
-
-								// Compute only if rate is supplied
-								if($rate)
-								{
-									$premium_per_risk = $item_sum_insured * $rate / 1000.00;
-
-
-									// Risk table tmp
-									$risk_table_tmp[$pr->name] = $risk_table_tmp[$pr->name] ?? 0.00;
-									$risk_table_tmp[$pr->name] += $premium_per_risk;
-
-									// GROSS - Regular & Pool
-									if( $pr->type == IQB_RISK_TYPE_BASIC )
-									{
-										$GROSS_REGULAR_PREMIUM += $premium_per_risk;
-									}
-									else
-									{
-										$GROSS_POOL_PREMIUM += $premium_per_risk;
-									}
-
-									// Additional Charges/Discount (Per Risk Per Item)
-									$nwl_apply = $premium_data['manual']['nwl_apply'][$pr->id][$i] ?? NULL;
-									$ffa_apply = $premium_data['manual']['ffa_apply'][$pr->id][$i] ?? NULL;
-									$sdd_apply = $premium_data['manual']['sdd_apply'][$pr->id][$i] ?? NULL;
-
-									/**
-									 * NWL Compute
-									 */
-									if($nwl_apply)
-									{
-										$nwl_per_risk 		= $premium_per_risk * $NWL_RATE / 100.00;
-										$premium_per_risk 	+= $nwl_per_risk;
-										$NWL_AMOUNT 		+= $nwl_per_risk;
-									}
-
-									/**
-									 * FFA Compute
-									 */
-									if($ffa_apply)
-									{
-										$ffa_per_risk 		= $premium_per_risk * $FFA_RATE / 100.00;
-										$premium_per_risk 	-= $ffa_per_risk;
-										$FFA_AMOUNT 		+= $ffa_per_risk;
-									}
-
-									/**
-									 * SDD Compute
-									 */
-									if($sdd_apply)
-									{
-										$sdd_per_risk 		= $premium_per_risk * $SDD_RATE / 100.00;
-										$premium_per_risk 	-= $sdd_per_risk;
-
-										if( $pr->type == IQB_RISK_TYPE_BASIC )
-										{
-											$SDD_AMOUNT_REGULAR += $sdd_per_risk;
-										}
-										else
-										{
-											$SDD_AMOUNT_POOL += $sdd_per_risk;
-										}
-									}
-
-									// NET - Regular & Pool
-									if( $pr->type == IQB_RISK_TYPE_BASIC )
-									{
-										$NET_REGULAR_PREMIUM += $premium_per_risk;
-									}
-									else
-									{
-										$NET_POOL_PREMIUM += $premium_per_risk;
-									}
-								}
-							}
-						}
-
-						// Update Risk Table
-						foreach($risk_table_tmp as $key=>$value)
-						{
-							$risk_table[] 		= [$key, $value];
-						}
-					}
-
-
-					/**
-					 * Other computational data
-					 */
-					$premium_computation_table 	= [];
-					$COMMISSIONABLE_PREMIUM 	= NULL;
-					$AGENT_COMMISSION 			= NULL;
-					$DIRECT_DISCOUNT 			= 0.00;
-
-					/**
-					 * Direct Discount or Agent Commission?
-					 * ------------------------------------
-					 *
-					 * Note: Direct Discount applies only on Base Premium
-					 */
-					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
-					{
-						$DIRECT_DISCOUNT = ( $NET_REGULAR_PREMIUM * $pfs_record->direct_discount ) / 100.00;
-					}
-					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
-					{
-						$COMMISSIONABLE_PREMIUM = $NET_REGULAR_PREMIUM;
-						$AGENT_COMMISSION = ( $COMMISSIONABLE_PREMIUM * $pfs_record->agent_commission ) / 100.00;
-					}
-
-
-					/**
-					 * Let's Compute the Total Premium
-					 */
-					$BASIC_PREMIUM 	= $NET_REGULAR_PREMIUM - $DIRECT_DISCOUNT;
-					$taxable_amount = $BASIC_PREMIUM + $post_data['amt_stamp_duty'];
-
-					/**
-					 * Compute VAT
-					 */
-					$CI->load->helper('account');
-					$AMOUNT_VAT = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
-
-					/**
-					 * Premium Computation Table
-					 * -------------------------
-					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
-					 */
-					$premium_computation_table = json_encode($post_data['premium']);
-
-
-					/**
-					 * Cost calculation Table
-					 *
-					 * It holds three section:
-					 * 	a. Summary Table
-					 * 	b. Risk wise summary Table
-					 * 	c. Property wise summary Table
-					 */
-
-					$summary_table = [
-						[
-							'label' => "PREMIUM",
-							'value' => $GROSS_REGULAR_PREMIUM
-						]
-					];
-
-
-
-					$summary_table = array_merge($summary_table, [
-						[
-							'label' => "NWL - Fire Only ({$NWL_RATE}%)",
-							'value' => $NWL_AMOUNT
-						],
-						[
-							'label' => "FFA - Fire Only ({$FFA_RATE}%)",
-							'value' => $FFA_AMOUNT
-						],
-						[
-							'label' => "SDD - Regular ({$SDD_RATE}%)",
-							'value' => $SDD_AMOUNT_REGULAR
-						],
-						[
-							'label' => "SDD - Pool ({$SDD_RATE}%)",
-							'value' => $SDD_AMOUNT_POOL
-						],
-						[
-							'label' => "POOL PREMIUM",
-							'value' => $NET_POOL_PREMIUM
-						]
-					]);
-
-					if($DIRECT_DISCOUNT)
-					{
-						$dd_formatted = number_format($pfs_record->direct_discount, 2);
-						$summary_table[] = [
-							'label' => "DIRECT DISCOUNT ({$dd_formatted}%)",
-							'value' => $DIRECT_DISCOUNT
-						];
-					}
-
-
-					/**
-					 * Cost Calculation Table - Schedule Data
-					 *
-					 * 	Property Details
-					 * 	------------------------------------
-					 * 	| Property | Sum Insured | Premium |
-					 * 	------------------------------------
-					 *  |		   | 			 |		   |
-					 * 	------------------------------------
-					 *
-					 * 	Risk Details - Computed Above
-					 * 	------------------
-					 * 	| Risk | Premium |
-					 * 	------------------
-					 * 	|	   |		 |
-					 * 	------------------
-					 */
-					$property_table = [];
-
-					// Property table for manual item entry
-					if( $object_attributes->item_attached === 'N' )
-					{
-						for($i=0; $i < $item_count; $i++ )
-						{
-							$item_sum_insured 		= $items->sum_insured[$i];
-							$property_category 		= _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ];
-							$single_property_row 	= [ $property_category, $items->sum_insured[$i] ];
-
-							$per_property_premium 		= 0.00;
-							$per_property_base_premium 	= 0.00;
-							$per_property_pool_premium 	= 0.00;
-
-							foreach($portfolio_risks as $pr)
-							{
-								$rate = floatval($premium_data['manual']['rate'][$pr->id][$i]);
-
-								// Compute only if rate is supplied
-								if($rate)
-								{
-									// Rate is Per Thousand
-									$premium = $item_sum_insured * $rate / 1000.00;
-
-									// Assign to Pool or Base based on Risk Type
-									if( $pr->type == IQB_RISK_TYPE_BASIC )
-									{
-										$per_property_base_premium += $premium;
-									}
-									else
-									{
-										$per_property_pool_premium += $premium;
-									}
-								}
-							}
-
-							$per_property_premium 	= $per_property_base_premium  + $per_property_pool_premium;
-							$single_property_row[] 	= $per_property_premium;
-							$property_table[] 		= $single_property_row;
-						}
-					}
-
-					$cost_calculation_table = json_encode([
-						'summary_table' 	=> $summary_table,
-						'property_table' 	=> $property_table,
-						'risk_table'		=> $risk_table
-					]);
-
-
-					/**
-					 * Prepare Premium Data
-					 */
-					$premium_data = [
-						'amt_basic_premium' 	=> $BASIC_PREMIUM,
-						'amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
-						'amt_agent_commission'  => $AGENT_COMMISSION,
-						'amt_pool_premium' 		=> $NET_POOL_PREMIUM,
-					];
-
-
-					/**
-					 * Perform Computation Basis for Endorsement
-					 */
-					if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-					{
-						// Transaction Date must be set as today
-						$endorsement_record->txn_date = date('Y-m-d');
-						$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
-					}
-
-					/**
-					 * NO Pool premium on Premium Refund
-					 */
-					if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
-					{
-						// We do not do anything here, because, VAT was applied only on Stamp Duty
-						// For other portfolio, it must be set as -ve value
-
-						/**
-						 * !!! NO POOL PREMIUM !!!
-						 *
-						 * Pool premium is not refunded to customer.
-						 * NULLify Pool Premium
-						 */
-						$premium_data['amt_pool_premium'] = 0.00;
-
-						/**
-						 * !!! VAT RETURN !!!
-						 *
-						 * We must also refund the VAT for as we refund the premium.
-						 *
-						 */
-					}
-
-					/**
-					 * Compute VAT
-					 *
-					 * NOTE: On premium refund, we should also be refunding VAT
-					 */
-					$taxable_amount = $BASIC_PREMIUM + $premium_data['amt_pool_premium'] + $post_data['amt_stamp_duty'];
-					$CI->load->helper('account');
-					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
-
-					/**
-					 * Prepare Other Data
-					 */
-					/**
-					 * Get the NET Sum Insured Amount
-					 */
-					$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
-					$net_amt_sum_insured 	= _OBJ_si_net($old_object, $new_object);
-					$txn_data = array_merge($premium_data, [
-						'gross_amt_sum_insured' => $gross_amt_sum_insured,
-						'net_amt_sum_insured' 	=> $net_amt_sum_insured,
-						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-						'amt_vat' 				=> $amount_vat,
-						'txn_date' 				=> date('Y-m-d'),
-
-						'premium_computation_table' => $premium_computation_table, 	// already json encoded
-						'cost_calculation_table' 	=> $cost_calculation_table 		// already json encoded
-					]);
-
-					/**
-					 * Save Premium
-					 */
 					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
 
 				} catch (Exception $e){

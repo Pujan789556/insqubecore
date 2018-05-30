@@ -144,6 +144,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                             <table>
                                 <thead>
                                     <tr>
+                                        <td>क्र. स.</td>
                                         <td>सम्पत्ति</td>
                                         <td>विवरण</td>
                                         <td align="right">बीमांक (रु)</td>
@@ -152,20 +153,22 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                                 <tbody>
                                     <?php
                                     $items      = $object_attributes->items ?? NULL;
-                                    $item_count = count( $items->category ?? [] );
+                                    $item_count = count( $items ?? [] );
+                                    $i = 0;
                                     if($item_count):
-                                        for ($i=0; $i < $item_count; $i++):?>
+                                        foreach($items as $item_record):?>
                                             <tr>
-                                                <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
-                                                <td><?php echo nl2br(htmlspecialchars($items->description[$i])); ?></td>
-                                                <td align="right"><?php echo $items->sum_insured[$i]; ?></td>
+                                                <td><?php echo $i++; ?></td>
+                                                <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item_record->category ]?></td>
+                                                <td><?php echo nl2br(htmlspecialchars($item_record->description)); ?></td>
+                                                <td align="right"><?php echo number_format($item_record->sum_insured, 2); ?></td>
                                             </tr>
                                         <?php
-                                        endfor;
+                                        endforeach;
                                     endif;?>
                                     <tr>
                                         <td colspan="2" align="right">जम्मा बीमांक (रु)</td>
-                                        <td align="right"><?php echo  $record->object_amt_sum_insured;?></td>
+                                        <td align="right"><?php echo  number_format($record->object_amt_sum_insured, 2);?></td>
                                     </tr>
                                 </tbody>
                             </table>

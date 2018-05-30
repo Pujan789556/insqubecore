@@ -25,48 +25,51 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
     <div class="row">
         <div class="col-sm-6">
             <div class="box box-solid box-bordered">
-                    <div class="box-header with-border">
-                        <h4 class="box-title">Fire Items Summary</h4>
-                    </div>
-                    <?php if($object_attributes->item_attached === 'N'):
-                        $items              = $object_attributes->items;
-                        $item_count         = count($items->category);
-                        ?>
-                        <table class="table table-responsive table-condensed">
-                            <thead>
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Ownership</th>
-                                    <th>Sum Insured</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php for($i=0; $i < $item_count; $i++ ): ?>
-                                    <tr>
-                                        <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?></td>
-                                        <td><?php echo _OBJ_FIRE_FIRE_item_ownership_dropdown(FALSE)[ $items->ownership[$i] ]; ?></td>
-                                        <td>Rs. <?php echo $items->sum_insured[$i]; ?></td>
-                                    </tr>
-                                <?php endfor; ?>
-                            </tbody>
-                        </table>
-                    <?php else: ?>
-                        <table class="table table-bordered table-condensed no-margin">
-                            <tr>
-                                <th>Sum Insured (Rs)</th>
-                                <td>
-                                    <?php echo $object_attributes->sum_insured; ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Download Item List</th>
-                                <td>
-                                    <?php echo anchor('objects/download/' . $object_attributes->document, 'Download', 'target="_blank"') ?>
-                                </td>
-                            </tr>
-                        </table>
-                    <?php endif; ?>
+                <div class="box-header with-border">
+                    <h4 class="box-title">Fire Items Summary</h4>
                 </div>
+                <?php if($object_attributes->item_attached === 'N'):
+                    $items              = $object_attributes->items;
+                    $item_count         = count($items);
+                    $i = 1;
+                    ?>
+                    <table class="table table-responsive table-condensed">
+                        <thead>
+                            <tr>
+                                <th>S.N.</th>
+                                <th>Item</th>
+                                <th>Ownership</th>
+                                <th>Sum Insured (Rs.)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach($items as $item_record): ?>
+                                <tr>
+                                    <td><?php echo $i++; ?></td>
+                                    <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item_record->category ]?></td>
+                                    <td><?php echo _OBJ_FIRE_FIRE_item_ownership_dropdown(FALSE)[ $item_record->ownership ]; ?></td>
+                                    <td class="text-right"><?php echo number_format($item_record->sum_insured, 2); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <table class="table table-bordered table-condensed no-margin">
+                        <tr>
+                            <th>Sum Insured (Rs)</th>
+                            <td>
+                                <?php echo $object_attributes->sum_insured; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Download Item List</th>
+                            <td>
+                                <?php echo anchor('objects/download/' . $object_attributes->document, 'Download', 'target="_blank"') ?>
+                            </td>
+                        </tr>
+                    </table>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
@@ -197,10 +200,12 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
                 ?>
             </div>
         </div>
-        <?php for($i=0; $i < $item_count; $i++ ): ?>
+        <?php
+        $i = 0;
+        foreach($items as $item_record ): ?>
             <div class="box box-solid box-bordered">
                 <div class="box-header with-border">
-                    <h4 class="box-title"><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $items->category[$i] ]?> <em>( Sum Insured Rs. <?php echo $items->sum_insured[$i]; ?>)</em> - Premium Table</h4>
+                    <h4 class="box-title"><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item_record->category ]?> <em>( Sum Insured Rs. <?php echo $item_record->sum_insured; ?>)</em> - Premium Table</h4>
                 </div>
                 <div class="box-body form-inline" style="overflow-x: scroll;">
                     <table class="table table-responsive table-condensed table-bordered">
@@ -269,12 +274,15 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
                                     ]);
                                     ?>
                                 </tr>
-                            <?php endforeach; ?>
+                            <?php
+                            endforeach; ?>
                         </tbody>
                     </table>
                 </div>
             </div>
-        <?php endfor; ?>
+        <?php
+            $i++;
+        endforeach; ?>
     <?php endif; ?>
 
 
