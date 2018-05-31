@@ -27,10 +27,65 @@ class M20180530_model extends MY_Model
         /**
          * Migrate Portfolio Object Attributes
          */
-        $this->eng_bl();
+        $this->motor_mcy();
 
 
 
+    }
+
+    // ----------------------------------------------------------------
+
+
+    public function motor_mcy()
+    {
+        $this->load->helper('ph_motor_helper');
+
+        $list = $this->db->select('id, portfolio_id, attributes, amt_sum_insured, si_breakdown')
+                        ->from('dt_objects')
+                        ->where('portfolio_id', IQB_SUB_PORTFOLIO_MOTORCYCLE_ID)
+                        ->get()->result();
+        $total_success = 0;
+
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+
+            foreach($list as $record)
+            {
+                $items_formatted    = [];
+                $attributes         = json_decode($record->attributes, TRUE);
+
+                // Update Seating Capacity
+                $attributes['seating_capacity'] = (int)$attributes['carrying_capacity'];
+                unset($attributes['carrying_capacity']);
+                unset($attributes['carrying_unit']);
+
+                $done = $this->db->where('id', $record->id)
+                                     ->set([
+                                            'attributes' => json_encode($attributes),
+                                            'updated_at' => date('Y-m-d H:i:s'),
+                                            'updated_by' => 1
+                                        ])
+                                     ->update('dt_objects');
+
+                $done ? $total_success++ : '';
+
+            }
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // incomplete message
+            die('Could not migrate.' . PHP_EOL );
+        }
+        else
+        {
+            die("Successfully migrated {$total_success}" . PHP_EOL );
+        }
     }
 
     // ----------------------------------------------------------------
