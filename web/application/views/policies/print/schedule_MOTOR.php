@@ -200,28 +200,79 @@ switch ($record->portfolio_id)
                         $dd_voluntary_excess = _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '');
                         $voluntary_excess_key = $premium_computation_table->dr_voluntary_excess  ?? NULL;
                         ?>
-
-                        इन्जिन नं.: <?php echo $object_attributes->engine_no;?> <br/>
-                        च्यासिस नं.: <?php echo $object_attributes->chasis_no;?> <br/>
-                        दर्ता नं.: <?php echo $object_attributes->reg_no;?> <br/>
-                        बनाउने कम्पनी: <?php echo $object_attributes->manufacturer;?> <br/>
-                        बनौट: <?php echo $object_attributes->make;?> <br/>
-                        मोडेल: <?php echo $object_attributes->model;?><br>
-                        स्वेच्छीक अधिक: रु.<?php echo $voluntary_excess_key ? ( $dd_voluntary_excess[$voluntary_excess_key] ?? '') : '';?>
-                        <?php if( strtoupper($record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE ):
-                            $compulsory_excess = _PO_MOTOR_get_compulsory_excess( $tariff_record, $object_attributes->year_mfd);
-                            ?>
-                            <br>
-                            अनिवार्य अधिक: रु.<?php  echo $compulsory_excess->amount ?? ''?>
-                        <?php endif; ?>
+                        <table class="table no-border">
+                            <tr>
+                                <td>इन्जिन नं.:</td>
+                                <td><?php echo $object_attributes->engine_no;?></td>
+                            </tr>
+                            <tr>
+                                <td>च्यासिस नं.:</td>
+                                <td><?php echo $object_attributes->chasis_no;?></td>
+                            </tr>
+                            <tr>
+                                <td>दर्ता नं.:</td>
+                                <td><?php echo $object_attributes->reg_no;?></td>
+                            </tr>
+                            <tr>
+                                <td>बनाउने कम्पनी:</td>
+                                <td><?php echo $object_attributes->manufacturer;?></td>
+                            </tr>
+                            <tr>
+                                <td>बनौट:</td>
+                                <td><?php echo $object_attributes->make;?></td>
+                            </tr>
+                            <tr>
+                                <td>मोडेल:</td>
+                                <td><?php echo $object_attributes->model;?></td>
+                            </tr>
+                            <tr>
+                                <td>स्वेच्छीक अधिक:</td>
+                                <td>रु.<?php if($voluntary_excess_key && isset($dd_voluntary_excess[$voluntary_excess_key]))
+                                    {
+                                        echo number_format($dd_voluntary_excess[$voluntary_excess_key], 2);
+                                    }?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>अनिवार्य अधिक:</td>
+                                <td>
+                                    <?php
+                                    if( strtoupper($record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE )
+                                    {
+                                        $compulsory_excess = _PO_MOTOR_get_compulsory_excess( $tariff_record, $object_attributes->year_mfd);
+                                        echo $compulsory_excess->amount ? 'रु. ' . number_format($compulsory_excess->amount, 2) : '';
+                                    }?>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                     <td>
-                        बनेको वर्ष : <?php echo $object_attributes->year_mfd;?> <br/>
-                        घन क्षमता (क्यूविक क्यापासिटी) : <?php echo $object_attributes->engine_capacity;?> <br/>
-                        दर्ता मिति : <?php echo $object_attributes->reg_date;?> <br/>
-                        सरसामान बाहेक सवारी साधनको घोषित मूल्य : रु. <?php echo $object_attributes->price_vehicle;?> <br/>
-                        सरसामानको घोषित मूल्य : रु. <?php echo $object_attributes->price_accessories;?> <br/>
-                        जम्मा घोषित मूल्य: रु. <?php echo number_format( (float)$object_attributes->price_vehicle + $object_attributes->price_accessories, 2 );?>
+                        <table class="table no-border">
+                            <tr>
+                                <td>बनेको वर्ष:</td>
+                                <td><?php echo $object_attributes->year_mfd;?></td>
+                            </tr>
+                            <tr>
+                                <td>घन क्षमता (क्यूविक क्यापासिटी):</td>
+                                <td><?php echo $object_attributes->engine_capacity;?></td>
+                            </tr>
+                            <tr>
+                                <td>दर्ता मिति: </td>
+                                <td><?php echo $object_attributes->reg_date;?></td>
+                            </tr>
+                            <tr>
+                                <td>सरसामान बाहेक सवारी साधनको घोषित मूल्य:</td>
+                                <td align="right">रु. <?php echo number_format($object_attributes->price_vehicle, 2);?></td>
+                            </tr>
+                            <tr>
+                                <td>सरसामानको घोषित मूल्य:</td>
+                                <td align="right">रु. <?php echo number_format($object_attributes->price_accessories, 2);?></td>
+                            </tr>
+                            <tr>
+                                <td><strong>जम्मा घोषित मूल्य:</strong></td>
+                                <td align="right"><strong>रु. <?php echo number_format( (float)$object_attributes->price_vehicle + $object_attributes->price_accessories, 2 );?></strong></td>
+                            </tr>
+                        </table>
                     </td>
                 </tr>
 

@@ -25,22 +25,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </div>
     </div>
     <div class="col-md-6">
+
         <?php
         /**
-         * Vehicle Specific Information - CVC Type
+         * CVC Types - CVC
          */
-        $vehicle_cvc_elements = $form_elements['vehicle-cvc'] ?? NULL;
-        if($vehicle_cvc_elements):
+        $section_elements = $form_elements['vehicle-cvc'] ?? NULL;
+        if($section_elements):
         ?>
             <div class="box box-solid box-bordered">
                 <div class="box-header with-border">
-                    <h4 class="box-title">Vehicle Specific Information - Types</h4>
+                    <h4 class="box-title">Commercial Vehicle Types</h4>
                 </div>
                 <div class="box-body form-horizontal">
                     <?php
                     $this->load->view('templates/_common/_form_components_horz', [
-                        'form_elements' => $vehicle_cvc_elements,
-                        'form_record'   => $record
+                        'form_elements' => $section_elements,
+                        'form_record'   => $record,
+                        'grid_label'        => 'col-sm-4',
+                        'grid_form_control' => 'col-sm-8'
                     ]);
                     ?>
                 </div>
@@ -49,7 +52,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         <?php
         /**
-         * Vehicle Specific Information - Staff Count
+         * Seating Capacity - PVC, CVC
+         */
+        $section_elements = $form_elements['seating-capcity'] ?? NULL;
+        if($section_elements):
+        ?>
+            <div class="box box-solid box-bordered">
+                <div class="box-header with-border">
+                    <h4 class="box-title">Seating Capacity</h4>
+                </div>
+                <div class="box-body form-horizontal">
+                    <?php
+                    $this->load->view('templates/_common/_form_components_horz', [
+                        'form_elements' => $section_elements,
+                        'form_record'   => $record,
+                        'grid_label' => 'col-sm-4',
+                        'grid_form_control' => 'col-sm-8'
+                    ]);
+                    ?>
+                </div>
+            </div>
+        <?php endif ?>
+
+        <?php
+        /**
+         * Vehicle Specific Information - Staff Count (PVC, CVC)
          */
         $staff_elements = $form_elements['staff'] ?? NULL;
         if($staff_elements):
@@ -66,7 +93,34 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                      */
                     $this->load->view('templates/_common/_form_components_horz', [
                         'form_elements' => $staff_elements,
-                        'form_record'   => $record
+                        'form_record'   => $record,
+                        'grid_label'        => 'col-sm-4',
+                        'grid_form_control' => 'col-sm-8'
+                    ]);
+                    ?>
+                </div>
+            </div>
+        <?php endif ?>
+
+
+        <?php
+        /**
+         * Carrying Capacity
+         */
+        $section_elements = $form_elements['carrying-capcity'] ?? NULL;
+        if($section_elements):
+        ?>
+            <div class="box box-solid box-bordered">
+                <div class="box-header with-border">
+                    <h4 class="box-title">Carrying Capacity</h4>
+                </div>
+                <div class="box-body form-horizontal">
+                    <?php
+                    $this->load->view('templates/_common/_form_components_horz', [
+                        'form_elements' => $section_elements,
+                        'form_record'   => $record,
+                        'grid_label'        => 'col-sm-4',
+                        'grid_form_control' => 'col-sm-8'
                     ]);
                     ?>
                 </div>

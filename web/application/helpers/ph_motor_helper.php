@@ -1126,7 +1126,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 				'title_en' 	=> 'Insured Party & Passenger Accident Insurance'
 			];
 
-			$premium_EE_total =  ($object_attributes->carrying_capacity - 1) * $accident_premium->pramt_accident_per_passenger;
+			$premium_EE_total =  ($object_attributes->seating_capacity - 1) * $accident_premium->pramt_accident_per_passenger;
 			$__CRF_cc_table__EE['sections'][] = [
 				'title' => "प्रति व्यक्ति बीमांक रु. {$insured_value_tariff->passenger} को लागी बीमाशुल्क प्रति सिट रु. {$accident_premium->pramt_accident_per_passenger} का दरले",
 				'amount' => $premium_EE_total
@@ -1178,7 +1178,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 
 				$insured_value_tariff = json_decode($tariff_record->insured_value_tariff);
 
-				$no_of_seat = $object_attributes->carrying_capacity;
+				$no_of_seat = $object_attributes->seating_capacity;
 				$passenger_count = $no_of_seat - 1;
 
 				// Driver Premium
@@ -1474,6 +1474,13 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 		$si_trailer 	= $SI_BREAKDOWN['si_trailer'];
 		$vehicle_total_si = $si_vehicle + $si_accessories;
 
+
+		/**
+		 * Seating Breakdown
+		 */
+		$seating_capacity   = $object_attributes->seating_capacity ?? 0;
+		$staff_count 		= $object_attributes->staff_count ?? 0;
+		$passenger_count    = $seating_capacity - $staff_count - 1; // 1 for driver
 
         // Vehicle Age (If registration date is there use it otherwise mfd year)
 		$ref_date = $object_attributes->reg_date ? $object_attributes->reg_date : $object_attributes->year_mfd . '-01-01';
@@ -1897,7 +1904,6 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
                 'title_en'  => 'Staff Accident Insurance'
             ];
 
-            $staff_count = $object_attributes->staff_count ?? 0;
             $premium_EE_total =  $accident_premium->pramt_accident_per_staff * $staff_count;
             $__CRF_cc_table__EE['sections'][] = [
                 'title' => "प्रति ब्यक्ति (बीमांक रु. {$insured_value_tariff->staff}  को लागि प्रति ब्यक्ति रु. {$accident_premium->pramt_accident_per_staff} का दरले)",
@@ -1923,7 +1929,6 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
                 'title_en'  => 'Passenger Accident Insurance'
             ];
 
-            $passenger_count    = $object_attributes->carrying_unit === 'S' ?  $object_attributes->carrying_capacity : 0;
             $premium_U_total   =  $accident_premium->pramt_accident_per_passenger * $passenger_count;
             $__CRF_cc_table__U['sections'][] = [
                 'title' => "प्रति ब्यक्ति (बीमांक रु. {$insured_value_tariff->staff}  को लागि प्रति ब्यक्ति रु. {$accident_premium->pramt_accident_per_passenger} का दरले)",
@@ -1975,7 +1980,6 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
                 // Driver Count  = 1
                 // Passenger Count = Seat Capacity
                 // Tariff Rate: rate_additionl_per_thousand_on_extra_rate
-                $passenger_count = $object_attributes->carrying_unit == 'S' ?   $object_attributes->carrying_capacity : 0;
 
                 // Driver Premium
                 $__premium_OO_row_3 = ($insured_value_tariff->driver/1000.00) * $tariff_rsik_group->rate_additionl_per_thousand_on_extra_rate;
@@ -2047,7 +2051,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
             $__premium_AA_row_2 = $__premium_AA_row_1 * ($no_claim_discount_rate/100.00);
         }
         $__CRF_cc_table__AA['sections'][] = [
-            'title' => "सि. सि. अनुसारको बीमाशुल्क",
+            'title' => "क्षमता अनुसारको बीमाशुल्क",
             'amount' => $__premium_AA_row_1,
             'label' => $tp_label
         ];
@@ -2548,27 +2552,47 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        '_type'     => 'text',
 			        '_default' 	=> 0.00,
 			        '_required' => true
-			    ],
+			    ]
+		    ],
+
+		    // Seating Capacity - PVC and CVC
+		    'seating-capcity' => [
 			    [
-			        'field' => 'object[carrying_unit]',
-			        '_key' => 'carrying_unit',
-			        'label' => 'Carrying Capacity Unit',
-			        'rules' => 'trim|required|alpha|in_list[S,T]',
-			        '_id' 		=> '_motor-vehicle-carrying-unit',
-			        '_type'     => 'dropdown',
-			        '_data' 	=> _OBJ_MOTOR_carrying_unit_dropdown(),
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[carrying_capacity]',
-			        '_key' => 'carrying_capacity',
-			        'label' => 'Carrying Capacity',
+			        'field' => 'object[seating_capacity]',
+			        '_key' => 'seating_capacity',
+			        'label' => 'Total Seats (incl Driver Seat)',
 			        'rules' => 'trim|required|integer|max_length[5]',
-			        '_id' 		=> '_motor-carrying-capacity',
+			        '_id' 		=> '_motor-seating-capacity',
 			        '_type'     => 'text',
 			        '_required' => true
 			    ]
 		    ],
+
+		    // Carrying Capicity - CVC
+		    'carrying-capcity' => [
+		    	[
+		            'field' => 'object[carrying_unit]',
+			        '_key' => 'carrying_unit',
+			        'label' => 'Unit',
+			        'rules' => 'trim|required|alpha|in_list[T]',
+			        '_id' 		=> '_motor-vehicle-carrying-unit',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> _OBJ_MOTOR_carrying_unit_dropdown(FALSE),
+			        '_required' => true
+
+			    ],
+			    [
+			        'field' => 'object[carrying_capacity]',
+			        '_key' => 'carrying_capacity',
+			        'label' => 'Carrying Capacity (भारबहन क्षमता )',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+			        '_id' 		=> '_motor-carrying-capacity',
+			        '_type'     => 'text',
+			        '_help_text' => '<i class="fa fa-info-circle"></i> Type zero(0) if NOT APPLICABLE.',
+			        '_required' => true
+			    ]
+		    ],
+
 
 		    // Commercial Vehicle Extra Fields
 		    'vehicle-cvc' => [
@@ -2619,11 +2643,11 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 		}
 		else if($portfolio_id == IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID)
 		{
-			$sections = ['vehicle-common', 'trailer'];
+			$sections = ['vehicle-common', 'seating-capcity', 'trailer'];
 		}
 		else
 		{
-			$sections = ['vehicle-cvc', 'vehicle-common', 'staff', 'trailer'];
+			$sections = ['vehicle-cvc', 'vehicle-common', 'seating-capcity', 'carrying-capcity',  'staff', 'trailer'];
 		}
 
 
@@ -2888,7 +2912,7 @@ if ( ! function_exists('_OBJ_MOTOR_carrying_unit_dropdown'))
 	 */
 	function _OBJ_MOTOR_carrying_unit_dropdown( $flag_blank_select = true )
 	{
-		$dropdown = ['S' => 'Seat', 'T' => 'Metric Ton'];
+		$dropdown = ['T' => 'Ton'];
 
 		if($flag_blank_select)
 		{
