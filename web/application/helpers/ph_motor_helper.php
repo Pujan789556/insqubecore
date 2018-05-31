@@ -443,7 +443,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 
 				$insured_value_tariff = json_decode($tariff_record->insured_value_tariff);
 
-				$no_of_seat = $object_attributes->carrying_capacity;
+				$no_of_seat = $object_attributes->seating_capacity;
 				$passenger_count = $no_of_seat - 1;
 
 				// Driver Premium
@@ -2639,7 +2639,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 
 		if($portfolio_id == IQB_SUB_PORTFOLIO_MOTORCYCLE_ID)
 		{
-			$sections = ['vehicle-common'];
+			$sections = ['vehicle-common', 'seating-capcity'];
 		}
 		else if($portfolio_id == IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID)
 		{
