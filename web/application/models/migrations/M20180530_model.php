@@ -57,7 +57,7 @@ class M20180530_model extends MY_Model
                 $attributes         = json_decode($record->attributes, TRUE);
 
                 // Update Seating Capacity
-                $attributes['seating_capacity'] = (int)$attributes['carrying_capacity'];
+                $attributes['seating_capacity'] = intval($attributes['carrying_capacity'] ?? 2);
                 unset($attributes['carrying_capacity']);
                 unset($attributes['carrying_unit']);
 
