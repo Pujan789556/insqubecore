@@ -45,7 +45,7 @@ else
                 <?php
                 $section_elements   = $form_elements['items'];
                 $items              = $attributes->items ?? NULL;
-                $item_count         = count( $items->sum_insured ?? [] );
+                $item_count         = count( $items ?? [] );
                 $insured_items_dropdown = _OBJ_ENG_CAR_insured_items_dropdown(true, false);
                 $insured_items_dropdown_g = _OBJ_ENG_CAR_insured_items_dropdown(false, true);
                 ?>
@@ -70,7 +70,7 @@ else
                                 <td><?php echo $label ?></td>
                                 <?php foreach($section_elements as $elem):
                                         $key =  $elem['_key'];
-                                        $value = $items->{$key}[$i];
+                                        $value = $items[$i]->{$key};
                                     ?>
                                         <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
                                             <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>

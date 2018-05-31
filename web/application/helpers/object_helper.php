@@ -1458,6 +1458,14 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
 				$method = '_OBJ_ENG_BL_pre_save_tasks';
 				break;
 
+            /**
+             * ENGINEERING - CONTRACTOR ALL RISK (CAR)
+             * ---------------------------------------
+             */
+            case IQB_SUB_PORTFOLIO_ENG_CAR_ID:
+                $method = '_OBJ_ENG_CAR_pre_save_tasks';
+                break;
+
 			/**
 	         * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
 	         * ---------------------------------------------

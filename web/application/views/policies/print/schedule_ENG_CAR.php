@@ -172,7 +172,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                             <td><?php echo $label ?></td>
                                             <?php foreach($section_elements as $elem):
                                                     $key =  $elem['_key'];
-                                                    $value = $items->{$key}[$i];
+                                                    $value = $items[$i]->{$key};
                                                 ?>
                                                     <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : 'text-left' ?>>
                                                         <?php echo $value?>

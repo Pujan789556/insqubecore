@@ -104,8 +104,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             </div>
             <?php
             $section_elements           = $form_elements['items'];
-            $insured_items_dropdown   = $section_elements[0]['_data'];
-            $item_objects                = $record->items ?? NULL;
+            $insured_items_dropdown     = $section_elements[0]['_data'];
+            $items                      = $record->items ?? NULL;
             ?>
             <table class="table table-bordered table-condensed table-hover no-margin">
                 <thead>
@@ -130,12 +130,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                  * Create a Record for Third Single Row object, (edit mode)
                                  */
                                 $item_row_record = NULL;
-                                if($item_objects)
+                                if($items)
                                 {
                                     $item_row_record = (object)[];
                                     foreach ($section_elements as $elem)
                                     {
-                                        $item_row_record->{$elem['_key']} = $item_objects->{$elem['_key']}[$i];
+                                        $item_row_record->{$elem['_key']} = $items[$i]->{$elem['_key']};
                                     }
                                 }
                                 else
