@@ -411,11 +411,11 @@ if ( ! function_exists('_OBJ_ENG_EAR_compute_sum_insured_amount'))
 		 * Sum up all the item's sum insured amount to get the total Sum Insured
 		 * Amount
 		 */
-		$items_sum_insured 	= $data['items']['sum_insured'] ?? [];
 		$amt_sum_insured 	= 0.00;
-
-		foreach($items_sum_insured as $si_per_item)
+		$items = $data['items'] ?? [];
+		foreach($items as $single)
 		{
+			$si_per_item = $single['sum_insured'];
 			// Clean all formatting ( as data can come from excel sheet with comma on thousands eg. 10,00,000.00 )
 			$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 			$amt_sum_insured +=  $si_per_item;
@@ -423,6 +423,7 @@ if ( ! function_exists('_OBJ_ENG_EAR_compute_sum_insured_amount'))
 
 		// NO SI Breakdown for this Portfolio
 		return ['amt_sum_insured' => $amt_sum_insured];
+
 	}
 }
 
@@ -453,6 +454,45 @@ if ( ! function_exists('_OBJ_ENG_EAR_compute_tpl_amount'))
 		}
 
 		return $total_tpl_amount;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_ENG_EAR_pre_save_tasks'))
+{
+	/**
+	 * Object Pre Save Tasks
+	 *
+	 * FORMAT Object ITEMS
+	 *
+	 * @param array $data 		Post Data
+	 * @param object $record 	Object Record (for edit mode)
+	 * @return array
+	 */
+	function _OBJ_ENG_EAR_pre_save_tasks( array $data, $record = NULL )
+	{
+
+		$items 		= $data['object']['items'];
+		$item_rules = _OBJ_ENG_EAR_validation_rules(IQB_SUB_PORTFOLIO_ENG_EAR_ID)['items'];
+
+		$items_formatted = [];
+		$count = count($items['sum_insured']);
+
+		for($i=0; $i < $count; $i++)
+		{
+			$single = [];
+			foreach($item_rules as $rule)
+			{
+				$key = $rule['_key'];
+				$single[$key] = $items[$key][$i];
+			}
+			$items_formatted[] = $single;
+		}
+
+		$data['object']['items'] = $items_formatted;
+
+		return $data;
 	}
 }
 
@@ -605,16 +645,14 @@ if ( ! function_exists('_OBJ_ENG_EAR_compute_premium_total_by_items'))
 	function _OBJ_ENG_EAR_compute_premium_total_by_items( $data, $items )
 	{
 
-		$sum_insured_list 	= $items->sum_insured;
 		$rates 				= $data['rate'];
-
 		$total_premium_by_item 	= 0.00;
 
-		$count = count($sum_insured_list);
+		$count = count($items);
 		for($i = 0; $i < $count; $i++ )
 		{
 			$per_item_rate 	= floatval($rates[$i] ?? 0);
-			$per_item_si 	= floatval($sum_insured_list[$i] ?? 0);
+			$per_item_si 	= floatval($items[$i]->sum_insured ?? 0);
 
 			$total_premium_by_item += ( $per_item_si * $per_item_rate ) / 100.00;
 		}
@@ -783,8 +821,8 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 						$pool_rate = floatval($pfs_record->pool_premium);
 
 						// Debris Premium
-						$debris_key 	= array_search('I2', $object_attributes->items->sn); // $key = 2;
-						$si_debris 		= floatval($object_attributes->items->sum_insured[$debris_key]);
+						$debris_record = _OBJ_ENG_EAR_get_debris_record($object_attributes->items); // SN = I2
+						$si_debris 		= floatval($debris_record->sum_insured);
 
 						$POOL_PREMIUM = ( ($SI - $si_debris) * $pool_rate ) / 100.00;
 					}
@@ -906,6 +944,32 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 				]);
         	}
 		}
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_ENG_EAR_get_debris_record'))
+{
+	/**
+	 * Get Debris Record from ITEM set
+	 *
+	 * @param array 	$items 	Array of items objects
+	 * @return float
+	 */
+	function _OBJ_ENG_EAR_get_debris_record( $items )
+	{
+		$record = NULL;
+		foreach($items as $item_record)
+		{
+			if($item_record->sn == 'I2')
+			{
+				$record = $item_record;
+				break;
+			}
+		}
+
+		return $record;
 	}
 }
 

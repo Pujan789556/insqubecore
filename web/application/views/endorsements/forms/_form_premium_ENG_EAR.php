@@ -73,7 +73,7 @@ $premium_computation_table  = $endorsement_record->premium_computation_table ? j
                             ]);
 
                             // Item's Sum Insured Amount
-                            echo '<td class="text-right">' . $object_attributes->items->sum_insured[$i] . '</td>';
+                            echo '<td class="text-right">' . $object_attributes->items[$i]->sum_insured . '</td>';
 
                             $i++; // Go to next item;
                             ?>

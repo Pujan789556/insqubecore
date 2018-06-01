@@ -143,7 +143,6 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                  */
                 $section_elements   = $form_elements['items'];
                 $items              = $object_attributes->items ?? NULL;
-                $item_count         = count( $items->sum_insured ?? [] );
 
                 $insured_items_dropdown = _OBJ_ENG_CAR_insured_items_dropdown(true, false);
                 $insured_items_dropdown_g = _OBJ_ENG_CAR_insured_items_dropdown(false, true);
@@ -172,7 +171,8 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                             <td><?php echo $label ?></td>
                                             <?php foreach($section_elements as $elem):
                                                     $key =  $elem['_key'];
-                                                    $value = $items[$i]->{$key};
+                                                    $value = $items[$i]->{$key} ?? '';
+                                                    $value = $key == 'sum_insured' ? number_format($value, 2) : $value;
                                                 ?>
                                                     <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : 'text-left' ?>>
                                                         <?php echo $value?>

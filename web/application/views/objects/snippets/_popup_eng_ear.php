@@ -70,7 +70,7 @@ else
                                 <td><?php echo $label ?></td>
                                 <?php foreach($section_elements as $elem):
                                         $key =  $elem['_key'];
-                                        $value = $items->{$key}[$i] ?? '';
+                                        $value = $items[$i]->{$key} ?? '';
                                     ?>
                                         <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
                                             <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
