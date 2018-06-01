@@ -131,7 +131,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                  */
                 $section_elements   = $form_elements['items'];
                 $items              = $object_attributes->items ?? NULL;
-                $item_count         = count( $items->sum_insured ?? [] );
+                $item_count         = count( $items ?? [] );
                 ?>
                 <tr>
                     <td colspan="2">
@@ -139,6 +139,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         <table class="table table-condensed">
                             <thead>
                                 <tr>
+                                    <td>SN</td>
                                     <?php foreach($section_elements as $elem): ?>
                                         <td><?php echo $elem['label'] ?></td>
                                     <?php endforeach; ?>
@@ -146,19 +147,22 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                             </thead>
 
                             <tbody>
-                                <?php for ($i=0; $i < $item_count; $i++): ?>
+                                <?php
+                                $i = 1;
+                                foreach($items as $item_record): ?>
                                     <tr>
+                                        <td><?php echo $i++; ?></td>
                                         <?php foreach($section_elements as $elem):
                                             $key =  $elem['_key'];
-                                            $value = $items->{$key}[$i];
+                                            $value = $item_record->{$key};
                                         ?>
 
                                             <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                                <?php echo $value?>
+                                                <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
                                             </td>
                                         <?php endforeach ?>
                                     </tr>
-                                <?php endfor ?>
+                                <?php endforeach ?>
                                 <tr>
                                     <td colspan="2" class="text-bold">Total Sum Insured Amount(Rs.)</td>
                                     <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2) ?></td>

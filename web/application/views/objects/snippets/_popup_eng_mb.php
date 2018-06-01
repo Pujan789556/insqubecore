@@ -48,10 +48,11 @@ else
                 <?php
                 $section_elements   = $form_elements['items'];
                 $items              = $attributes->items ?? NULL;
-                $item_count         = count( $items->sum_insured ?? [] );
+                $item_count         = count( $items ?? [] );
                 ?>
                 <thead>
                     <tr>
+                        <th>SN</th>
                         <?php foreach($section_elements as $elem): ?>
                             <th><?php echo $elem['label'] ?></th>
                         <?php endforeach; ?>
@@ -59,11 +60,14 @@ else
                 </thead>
 
                 <tbody>
-                    <?php for ($i=0; $i < $item_count; $i++): ?>
+                    <?php
+                    $i = 1;
+                    foreach($items as $item_record): ?>
                         <tr>
+                            <td><?php echo $i++; ?></td>
                             <?php foreach($section_elements as $elem):
                                 $key =  $elem['_key'];
-                                $value = $items->{$key}[$i];
+                                $value = $item_record->{$key};
                             ?>
 
                                 <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
@@ -71,9 +75,9 @@ else
                                 </td>
                             <?php endforeach ?>
                         </tr>
-                    <?php endfor ?>
+                    <?php endforeach ?>
                     <tr>
-                        <td colspan="4" class="text-bold">Total Sum Insured Amount(Rs.)</td>
+                        <td colspan="2" class="text-bold">Total Sum Insured Amount(Rs.)</td>
                         <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2) ?></td>
                     </tr>
                 </tbody>

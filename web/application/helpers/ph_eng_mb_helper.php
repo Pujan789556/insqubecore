@@ -118,15 +118,6 @@ if ( ! function_exists('_OBJ_ENG_MB_validation_rules'))
 		     */
 		    'items' => [
 		    	[
-			        'field' => 'object[items][sn][]',
-			        '_key' => 'sn',
-			        'label' => 'S.N.',
-			        'rules' => 'trim|required|integer|max_length[5]',
-			        '_type' => 'text',
-			        '_show_label' 	=> false,
-			        '_required' 	=> true
-			    ],
-			    [
 			        'field' => 'object[items][description][]',
 			        '_key' => 'description',
 			        'label' => 'Description',
@@ -218,9 +209,8 @@ if ( ! function_exists('_OBJ_ENG_MB_pre_save_tasks'))
 				 *
 				[1] => Array
 		        (
-		            [A] => S.N
-		            [B] => Description
-		            [C] => Sum Insured
+		            [A] => Description
+		            [B] => Sum Insured
 		        )
 		        */
 
@@ -230,21 +220,21 @@ if ( ! function_exists('_OBJ_ENG_MB_pre_save_tasks'))
 		        /**
 		         * Format data to save into JSON Object Items
 		         */
-		        $excel_columns = [ 'A'=>'sn', 'B' => 'description', 'C' => 'sum_insured' ];
+		        $excel_columns = [ 'A' => 'description', 'B' => 'sum_insured' ];
 		        $items = [];
 		        foreach($excel_data as $row)
 		        {
 		        	/**
 		        	 * At least you need to have description and sum_insured amount filled
 		        	 */
-		        	if( !empty($row['B']) && !empty($row['C']) )
+		        	if( !empty($row['A']) && !empty($row['B']) )
 		        	{
 		        		foreach($excel_columns as $col_index => $item_key)
 			        	{
 			        		$col_value = $row[$col_index] ?? NULL;
 
 			        		// If Sum Insured Column, Get Clean DECIMAL Value.
-			        		if($col_index === 'C')
+			        		if($col_index === 'B')
 			        		{
 			        			// Remove all formatting except fractional part
 								$col_value 	= (float) filter_var($col_value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
@@ -265,6 +255,48 @@ if ( ! function_exists('_OBJ_ENG_MB_pre_save_tasks'))
 		        $data['object']['items'] = $items;
 			}
 		}
+
+		/**
+		 * Format Items
+		 */
+		$data = _OBJ_ENG_MB_format_items($data);
+
+
+		return $data;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_ENG_MB_format_items'))
+{
+	/**
+	 * Format Fire Object Items
+	 *
+	 * @param array $data 		Post Data
+	 * @return array
+	 */
+	function _OBJ_ENG_MB_format_items( array $data )
+	{
+		$items 		= $data['object']['items'];
+		$item_rules = _OBJ_ENG_MB_validation_rules(IQB_SUB_PORTFOLIO_ENG_MB_ID)['items'];
+
+		$items_formatted = [];
+		$count = count($items['description']);
+
+		for($i=0; $i < $count; $i++)
+		{
+			$single = [];
+			foreach($item_rules as $rule)
+			{
+				$key = $rule['_key'];
+				$single[$key] = $items[$key][$i];
+			}
+			$items_formatted[] = $single;
+		}
+
+		$data['object']['items'] = $items_formatted;
+
 		return $data;
 	}
 }
@@ -288,15 +320,16 @@ if ( ! function_exists('_OBJ_ENG_MB_compute_sum_insured_amount'))
 		 * Sum up all the item's sum insured amount to get the total Sum Insured
 		 * Amount
 		 */
-		$items_sum_insured 	= $data['items']['sum_insured'] ?? [];
 		$amt_sum_insured 	= 0.00;
-
-		foreach($items_sum_insured as $si_per_item)
+		$items = $data['items'] ?? [];
+		foreach($items as $single)
 		{
+			$si_per_item = $single['sum_insured'];
 			// Clean all formatting ( as data can come from excel sheet with comma on thousands eg. 10,00,000.00 )
 			$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 			$amt_sum_insured +=  $si_per_item;
 		}
+
 
 		// NO SI Breakdown for this Portfolio
 		return ['amt_sum_insured' => $amt_sum_insured];

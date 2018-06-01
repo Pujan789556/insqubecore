@@ -417,9 +417,6 @@ if ( ! function_exists('_OBJ_ENG_BL_format_items'))
 }
 
 
-
-
-
 // ------------------------------------------------------------------------
 
 if ( ! function_exists('_OBJ_ENG_BL_compute_sum_insured_amount'))
