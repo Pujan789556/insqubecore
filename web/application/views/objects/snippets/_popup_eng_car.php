@@ -71,6 +71,7 @@ else
                                 <?php foreach($section_elements as $elem):
                                         $key =  $elem['_key'];
                                         $value = $items[$i]->{$key} ?? '';
+                                        $value = $elem['_data'][$value] ?? $value;
                                     ?>
                                         <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
                                             <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
