@@ -90,6 +90,7 @@ if ( ! function_exists('_OBJ_ENG_CAR_validation_rules'))
 
 		$tbl_liabilities_dropdown 	= _OBJ_ENG_CAR_thirdparty_liability_dropdown(FALSE);
 		$insured_items_dropdown 	= _OBJ_ENG_CAR_insured_items_dropdown(FALSE);
+		$car_category_dropdown 		= _OBJ_ENG_CAR_category_dropdown(FALSE);
 
 		$v_rules = [
 			/**
@@ -112,6 +113,15 @@ if ( ! function_exists('_OBJ_ENG_CAR_validation_rules'))
 			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[category]',
+			        '_key' => 'category',
+			        'label' => 'Category',
+			        'rules' => 'trim|required|alpha_numeric|max_length[10]',
+			        '_type'     => 'dropdown',
+			        '_data' 		=> IQB_BLANK_SELECT + $car_category_dropdown,
 			        '_required' => true
 			    ],
 			    [
@@ -265,6 +275,36 @@ if ( ! function_exists('_OBJ_ENG_CAR_validation_rules'))
 		}
 
 		return $v_rules;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_ENG_CAR_category_dropdown'))
+{
+	/**
+	 * Get category dropdown
+	 *
+	 * @param bool $flag_blank_select
+	 * @return	array
+	 */
+	function _OBJ_ENG_CAR_category_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			'C100' => 'Bridge Project',
+			'C200' => 'Building (Civil) Project',
+			'C300' => 'Canal & Related Structure',
+			'C400' => 'Hydropower Project',
+			'C500' => 'River Training Project',
+			'C600' => 'Road Project',
+			'C700' => 'Water Supply and Sewerage Project',
+		];
+
+		if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
 	}
 }
 
