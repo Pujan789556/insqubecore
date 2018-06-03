@@ -448,7 +448,11 @@ switch ($record->portfolio_id)
                         <td><?php echo implode(' / ', array_filter([$object_attributes->reg_no, $object_attributes->reg_date]) ) ?></td>
                         <td><?php echo $object_attributes->chasis_no ?></td>
                         <td><?php echo $object_attributes->engine_no ?></td>
-                        <td><?php echo $object_attributes->engine_capacity, $object_attributes->ec_unit, ' / ', $object_attributes->carrying_capacity ?></td>
+                        <td>
+                            <?php
+                            echo $object_attributes->engine_capacity, $object_attributes->ec_unit;
+                            echo isset($object_attributes->carrying_capacity) ? ' / ' . $object_attributes->carrying_capacity : '' ?>
+                            </td>
                     </tr>
                 </tbody>
             </table>
