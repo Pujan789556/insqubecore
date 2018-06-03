@@ -29,7 +29,13 @@ else
                 foreach($basic_elements as $elem): ?>
             		<tr>
             			<th width="30%"><?php echo $elem['label']; ?></th>
-            			<td><?php echo $attributes->{$elem['_key']}; ?></td>
+            			<td>
+                            <?php
+                            $value = $attributes->{$elem['_key']} ?? '';
+                            $value = $elem['_data'][$value] ?? $value;
+                            echo $value; ?>
+
+                        </td>
             		</tr>
         		<?php endforeach ?>
             </table>
