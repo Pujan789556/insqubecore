@@ -154,21 +154,11 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
             </tbody>
         </table>
         <p style="text-align: center;">यस तालिकामा उल्लेख भएको प्रयोगको सीमा उल्लघंन भएमा बीमकले बीमितलाई क्षतिपूर्ति दिनेछैन ।</p>
-        <table class="table">
-            <tr>
-                <td width="50%">
-                    कर बिजक नं: <br/>
-                    मिति:<br/>
-                    रु.:
-                </td>
-                <td align="left">
-                    <h4 class="underline"><?php echo htmlspecialchars($this->settings->orgn_name_np)?> तर्फबाट अधिकार प्राप्त अधिकारीको</h4>
-                    <p style="line-height: 30px">दस्तखत:</p>
-                    <p>नाम थर:</p>
-                    <p>छाप:</p>
-                    <p>दर्जा:</p>
-                </td>
-            </tr>
-        </table>
+        <?php
+        /**
+         * Load Footer
+         */
+        $this->load->view('policies/print/_schedule_footer_np');
+        ?>
     </body>
 </html>

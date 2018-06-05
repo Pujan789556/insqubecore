@@ -187,19 +187,12 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     </td>
                 </tr>
             </tbody>
-        </table>
-        <table class="table no-border" width="100%">
-            <tr>
-                <td width="50%">Office Seal:</td>
-                <td>
-                    Signed for and on behalf of the <br><strong><?php echo htmlspecialchars($this->settings->orgn_name_en)?></strong>
-                    <br><br><br>
-                    Authorized Signature
-                    <br>
-                    Name:<br>
-                    Designation:
-                </td>
-            </tr>
-        </table>
+        </table><br/>
+        <?php
+        /**
+         * Load Footer
+         */
+        $this->load->view('policies/print/_schedule_footer_en');
+        ?>
     </body>
 </html>

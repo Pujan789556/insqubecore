@@ -169,19 +169,12 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
                     <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
                 </tr>
             </tbody>
-        </table>
-        <table class="table no-border" width="100%">
-            <tr>
-                <td width="50%">Office Seal:</td>
-                <td>
-                    Signed for and on behalf of the <br><strong><?php echo htmlspecialchars($this->settings->orgn_name_en)?></strong>
-                    <br><br><br>
-                    Authorized Signature
-                    <br>
-                    Name:<br>
-                    Designation:
-                </td>
-            </tr>
-        </table>
+        </table><br>
+        <?php
+        /**
+         * Load Footer
+         */
+        $this->load->view('policies/print/_schedule_footer_np');
+        ?>
     </body>
 </html>
