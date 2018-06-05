@@ -118,7 +118,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[items][age][]',
 			        '_key' => 'age',
 			        'label' => 'उमेर',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
+			        'rules' => 'trim|required|max_length[100]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -127,7 +127,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[items][tag_no][]',
 			        '_key' => 'tag_no',
 			        'label' => 'समूह (व्याच)',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
+			        'rules' => 'trim|required|max_length[100]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -146,7 +146,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[items][health_stat][]',
 			        '_key' => 'health_stat',
 			        'label' => 'हालको स्वास्थ्य स्थिति',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
+			        'rules' => 'trim|required|max_length[100]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -181,7 +181,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[risk_locaiton]',
 			        '_key' => 'risk_locaiton',
 			        'label' => 'पन्छी पालिएको खोरको वास्तविक ठेगाना',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        'rules' => 'trim|required|max_length[250]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
@@ -190,7 +190,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[farmhouse_structure]',
 			        '_key' => 'farmhouse_structure',
 			        'label' => 'पन्छी राखिने खोरको बनवटको विवरण',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        'rules' => 'trim|required|max_length[250]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
@@ -199,7 +199,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[poultry_disease]',
 			        '_key' => 'poultry_disease',
 			        'label' => 'पन्छीमा लागेको रोगको विवरण',
-			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|max_length[500]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => false
@@ -218,7 +218,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[partner_details]',
 			        '_key' => 'partner_details',
 			        'label' => 'साझेदारको विवरण (नाम र ठेगाना)',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
@@ -237,7 +237,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[invester_details]',
 			        '_key' => 'invester_details',
 			        'label' => 'लगानीकर्ताको विवरण (नाम र ठेगाना)',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => false
@@ -260,7 +260,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[fclt_govt]',
 			        '_key' => 'fclt_govt',
 			        'label' => 'सरकारी कृषि सेवा केन्द्र',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        '_type'     => 'text',
 			        '_required' => false
 			    ],
@@ -268,7 +268,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[fclt_private]',
 			        '_key' => 'fclt_private',
 			        'label' => 'निजी कृषि सेवा केन्द्र',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        '_type'     => 'text',
 			        '_required' => false
 			    ],
@@ -276,7 +276,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[fclt_distance]',
 			        '_key' => 'fclt_distance',
 			        'label' => 'कृषि सेवा केन्द्रबाट पन्छी राखिने खोरसम्मको अन्दाजी दूरी',
-			        'rules' => 'trim|htmlspecialchars|max_length[100]',
+			        'rules' => 'trim|max_length[100]',
 			        '_type'     => 'text',
 			        '_required' => false
 			    ],
@@ -284,7 +284,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[fclt_inspection_report]',
 			        '_key' => 'fclt_inspection_report',
 			        'label' => 'सरकारी वा निजी कृषि प्राविधकद्वारा बीमित पन्छीहरूलाई गरिने चेकजाँचको विवरण',
-			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|max_length[500]',
 			        '_type'     => 'textarea',
 			        'rows' 		=> 4,
 			        '_required' => false
@@ -299,7 +299,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[damages][year][]',
 			        '_key' => 'year',
 			        'label' => 'वर्ष',
-			        'rules' => 'trim|htmlspecialchars|max_length[40]',
+			        'rules' => 'trim|max_length[40]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> false
@@ -308,7 +308,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[damages][reason][]',
 			        '_key' => 'reason',
 			        'label' => 'मृत्यु कारण',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> false
@@ -317,7 +317,7 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        'field' => 'object[damages][quantity][]',
 			        '_key' => 'quantity',
 			        'label' => 'मृत्यु भएको परिमाण',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> false

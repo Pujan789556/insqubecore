@@ -23,7 +23,7 @@ $form_elements 	= _OBJ_FIRE_LOP_validation_rules($record->portfolio_id);
                     if($elem_data){
                         $value = $elem_data[$value];
                     }
-                    echo $value;
+                    echo htmlspecialchars($value);
                     ?>
                 </td>
             </tr>

@@ -30,7 +30,7 @@ else
             	foreach($basic_elements as $elem): ?>
             		<tr>
             			<th><?php echo $elem['label']; ?></th>
-            			<td><?php echo $attributes->{$elem['_key']}; ?></td>
+            			<td><?php echo htmlspecialchars($attributes->{$elem['_key']}); ?></td>
             		</tr>
         		<?php endforeach ?>
             </table>
@@ -62,7 +62,7 @@ else
                         ?>
 
                             <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
+                                <?php echo $key == 'sum_insured' ? number_format($value, 2) : htmlspecialchars($value);?>
                             </td>
                         <?php endforeach ?>
                     </tr>
@@ -98,7 +98,7 @@ else
                     <?php foreach($excel_data as $row): ?>
                         <tr>
                             <?php foreach($row as $col=>$value): ?>
-                                <td><?php echo $value ?></td>
+                                <td><?php echo htmlspecialchars($value) ?></td>
                             <?php endforeach; ?>
                         </tr>
                     <?php endforeach ?>

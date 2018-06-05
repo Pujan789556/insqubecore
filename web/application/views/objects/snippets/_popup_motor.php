@@ -19,7 +19,7 @@ if($attributes)
 		$value = $attributes[$key] ?? '-';
 		if($field['_type'] == 'dropdown')
 		{
-			$value = $value ? ( $field['_data'][$value] ?? $value ) : '-';
+			$value = $value ? ( $field['_data'][$value] ?? htmlspecialchars($value) ) : '-';
 		}
 		$formatted_attriutes[$label] = $value;
 	}

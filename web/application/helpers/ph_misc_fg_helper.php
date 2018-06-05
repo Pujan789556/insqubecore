@@ -109,7 +109,7 @@ if ( ! function_exists('_OBJ_MISC_FG_validation_rules'))
 			        'field' => 'object[items][name][]',
 			        '_key' => 'name',
 			        'label' => 'बीमित कर्मचारीको नाम थर',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[150]',
+			        'rules' => 'trim|required|max_length[150]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -118,7 +118,7 @@ if ( ! function_exists('_OBJ_MISC_FG_validation_rules'))
 			        'field' => 'object[items][position][]',
 			        '_key' => 'position',
 			        'label' => 'पद',
-			        'rules' => 'trim|htmlspecialchars|max_length[200]',
+			        'rules' => 'trim|max_length[200]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -127,7 +127,7 @@ if ( ! function_exists('_OBJ_MISC_FG_validation_rules'))
 			        'field' => 'object[items][document_id][]',
 			        '_key' => 'document_id',
 			        'label' => 'नागरिकता नं',
-			        'rules' => 'trim|htmlspecialchars|max_length[200]',
+			        'rules' => 'trim|max_length[200]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true

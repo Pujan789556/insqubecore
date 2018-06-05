@@ -50,18 +50,18 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
                                      */
                                     if($record->flag_on_credit === 'Y')
                                     {
-                                        echo '<strong>INS.: ' . $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name) . '</strong><br/>';
+                                        echo '<strong>INS.: ' . htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name) . '</strong><br/>';
                                         echo '<br/>' . get_contact_widget($record->creditor_branch_contact, true, true) . '<br/>';
 
                                         // Care of
-                                        echo '<strong>A/C.: ' . $this->security->xss_clean($record->customer_name) . '<br/></strong>';
+                                        echo '<strong>A/C.: ' . htmlspecialchars($record->customer_name) . '<br/></strong>';
                                         echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
 
-                                        echo  $record->care_of ? '<br/>C/O.: ' . $this->security->xss_clean($record->care_of) : '';
+                                        echo  $record->care_of ? '<br/>C/O.: ' . htmlspecialchars($record->care_of) : '';
                                     }
                                     else
                                     {
-                                        echo $this->security->xss_clean($record->customer_name) . '<br/>';
+                                        echo htmlspecialchars($record->customer_name) . '<br/>';
                                         echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                                     }
                                     ?>
@@ -81,11 +81,11 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
                     <td width="50%" class="no-padding">
                         <table class="table">
                             <tr>
-                                <td><strong>Portfolio</strong>: <?php echo $record->portfolio_name; ?></td>
+                                <td><strong>Portfolio</strong>: <?php echo htmlspecialchars($record->portfolio_name); ?></td>
                             </tr>
 
                             <tr>
-                                <td><strong>Proposed By</strong>: <?php echo nl2br($this->security->xss_clean($record->proposer));?></td>
+                                <td><strong>Proposed By</strong>: <?php echo nl2br(htmlspecialchars($record->proposer));?></td>
                             </tr>
 
                             <tr>
@@ -156,7 +156,7 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
                                         <td><?php echo $single->section ?></td>
                                         <td><?php echo nl2br( htmlspecialchars($single->benefit)) ?></td>
                                         <td><?php echo $single->max_sum_insured ?></td>
-                                        <td><?php echo $single->excess ?></td>
+                                        <td><?php echo htmlspecialchars($single->excess) ?></td>
                                     </tr>
                                 <?php endforeach ?>
                             </tbody>
@@ -174,7 +174,7 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
             <tr>
                 <td width="50%">Office Seal:</td>
                 <td>
-                    Signed for and on behalf of the <br><strong><?php echo $this->settings->orgn_name_en?></strong>
+                    Signed for and on behalf of the <br><strong><?php echo htmlspecialchars($this->settings->orgn_name_en)?></strong>
                     <br><br><br>
                     Authorized Signature
                     <br>

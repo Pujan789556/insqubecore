@@ -117,7 +117,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[items][rearing_technology][]',
 			        '_key' => 'rearing_technology',
 			        'label' => 'पालन प्रविधि',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[150]',
+			        'rules' => 'trim|required|max_length[150]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -126,7 +126,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[items][area][]',
 			        '_key' => 'area',
 			        'label' => 'जलासयको क्षेत्रफल',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
+			        'rules' => 'trim|required|max_length[100]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -135,7 +135,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[items][stock_no][]',
 			        '_key' => 'stock_no',
 			        'label' => 'स्टक गरेको माछाको संख्या',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
+			        'rules' => 'trim|required|max_length[100]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -197,7 +197,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[risk_locaiton]',
 			        '_key' => 'risk_locaiton',
 			        'label' => 'माछा पालिएको स्थानको वास्तविक ठेगाना',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        'rules' => 'trim|required|max_length[250]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
@@ -207,7 +207,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[fingerling_source]',
 			        '_key' => 'fingerling_source',
 			        'label' => 'माछा भुराको स्रोत',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        'rules' => 'trim|required|max_length[250]',
 			        '_type'     => 'text',
 			        '_required' => true
 			    ],
@@ -215,7 +215,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[fish_disease]',
 			        '_key' => 'fish_disease',
 			        'label' => 'माछामा लागेको रोगको विवरण',
-			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|max_length[500]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => false
@@ -252,7 +252,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[partner_details]',
 			        '_key' => 'partner_details',
 			        'label' => 'साझेदारको विवरण (नाम र ठेगाना)',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
@@ -271,7 +271,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[invester_details]',
 			        '_key' => 'invester_details',
 			        'label' => 'लगानीकर्ताको विवरण (नाम र ठेगाना)',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => false
@@ -294,7 +294,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[fclt_govt]',
 			        '_key' => 'fclt_govt',
 			        'label' => 'सरकारी कृषि सेवा केन्द्र',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        '_type'     => 'text',
 			        '_required' => false
 			    ],
@@ -302,7 +302,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[fclt_private]',
 			        '_key' => 'fclt_private',
 			        'label' => 'निजी कृषि सेवा केन्द्र',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        '_type'     => 'text',
 			        '_required' => false
 			    ],
@@ -310,7 +310,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[fclt_distance]',
 			        '_key' => 'fclt_distance',
 			        'label' => 'कृषि सेवा केन्द्रबाट माछा पालिएको स्थानसम्मको अन्दाजी दूरी',
-			        'rules' => 'trim|htmlspecialchars|max_length[100]',
+			        'rules' => 'trim|max_length[100]',
 			        '_type'     => 'text',
 			        '_required' => false
 			    ],
@@ -318,7 +318,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[fclt_inspection_report]',
 			        '_key' => 'fclt_inspection_report',
 			        'label' => 'सरकारी वा निजी कृषि प्राविधकद्वारा बीमित माछाहरूलाई गरिने चेकजाँचको विवरण',
-			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|max_length[500]',
 			        '_type'     => 'textarea',
 			        'rows' 		=> 4,
 			        '_required' => false
@@ -333,7 +333,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[damages][year][]',
 			        '_key' => 'year',
 			        'label' => 'वर्ष',
-			        'rules' => 'trim|htmlspecialchars|max_length[40]',
+			        'rules' => 'trim|max_length[40]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> false
@@ -342,7 +342,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[damages][reason][]',
 			        '_key' => 'reason',
 			        'label' => 'मृत्युको कारण',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> false
@@ -351,7 +351,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 			        'field' => 'object[damages][quantity][]',
 			        '_key' => 'quantity',
 			        'label' => 'नोक्सान भएको माछाको अनुमानित संख्या र तौल',
-			        'rules' => 'trim|htmlspecialchars|max_length[300]',
+			        'rules' => 'trim|max_length[300]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> false

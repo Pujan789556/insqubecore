@@ -313,7 +313,7 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_manual_item_v_rules'))
 		        'field' => 'object[items][description][]',
 		        '_key' => 'description',
 		        'label' => 'Item Description',
-		        'rules' => 'trim|htmlspecialchars|max_length[500]',
+		        'rules' => 'trim|max_length[500]',
 		        '_type'     => 'textarea',
 		        'rows' 		=> 4,
 		        '_show_label' 	=> false,

@@ -97,18 +97,18 @@ switch ($record->portfolio_id)
                                      */
                                     if($record->flag_on_credit === 'Y')
                                     {
-                                        echo '<strong>INS.: ' . $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name) . '</strong><br/>';
+                                        echo '<strong>INS.: ' . htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name) . '</strong><br/>';
                                         echo '<br/>' . get_contact_widget($record->creditor_branch_contact, true, true) . '<br/>';
 
                                         // Care of
-                                        echo '<strong>A/C.: ' . $this->security->xss_clean($record->customer_name) . '<br/></strong>';
+                                        echo '<strong>A/C.: ' . htmlspecialchars($record->customer_name) . '<br/></strong>';
                                         echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
 
-                                        echo  $record->care_of ? '<br/>C/O.: ' . $this->security->xss_clean($record->care_of) : '';
+                                        echo  $record->care_of ? '<br/>C/O.: ' . htmlspecialchars($record->care_of) : '';
                                     }
                                     else
                                     {
-                                        echo $this->security->xss_clean($record->customer_name) . '<br/>';
+                                        echo htmlspecialchars($record->customer_name) . '<br/>';
                                         echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                                     }
                                     ?>
@@ -135,11 +135,11 @@ switch ($record->portfolio_id)
                     <td width="50%" class="no-padding no-border">
                         <table class="table">
                             <tr>
-                                <td>बीमालेखको किसिम: <?php echo $record->portfolio_name; ?></td>
+                                <td>बीमालेखको किसिम: <?php echo htmlspecialchars($record->portfolio_name); ?></td>
                             </tr>
 
                             <tr>
-                                <td>प्रस्तावकको नाम: <?php echo nl2br($this->security->xss_clean($record->proposer));?></td>
+                                <td>प्रस्तावकको नाम: <?php echo nl2br(htmlspecialchars($record->proposer));?></td>
                             </tr>
 
                             <tr>
@@ -203,23 +203,23 @@ switch ($record->portfolio_id)
                         <table class="table no-border">
                             <tr>
                                 <td>इन्जिन नं.:</td>
-                                <td><?php echo $object_attributes->engine_no;?></td>
+                                <td><?php echo htmlspecialchars($object_attributes->engine_no);?></td>
                             </tr>
                             <tr>
                                 <td>च्यासिस नं.:</td>
-                                <td><?php echo $object_attributes->chasis_no;?></td>
+                                <td><?php echo htmlspecialchars($object_attributes->chasis_no);?></td>
                             </tr>
                             <tr>
                                 <td>दर्ता नं.:</td>
-                                <td><?php echo $object_attributes->reg_no;?></td>
+                                <td><?php echo htmlspecialchars($object_attributes->reg_no);?></td>
                             </tr>
                             <tr>
                                 <td>बनाउने कम्पनी:</td>
-                                <td><?php echo $object_attributes->manufacturer;?></td>
+                                <td><?php echo htmlspecialchars($object_attributes->manufacturer);?></td>
                             </tr>
                             <tr>
                                 <td>बनौट:</td>
-                                <td><?php echo $object_attributes->make;?></td>
+                                <td><?php echo htmlspecialchars($object_attributes->make);?></td>
                             </tr>
                             <tr>
                                 <td>मोडेल:</td>
@@ -250,11 +250,11 @@ switch ($record->portfolio_id)
                         <table class="table no-border">
                             <tr>
                                 <td>बनेको वर्ष:</td>
-                                <td><?php echo $object_attributes->year_mfd;?></td>
+                                <td><?php echo htmlspecialchars($object_attributes->year_mfd);?></td>
                             </tr>
                             <tr>
                                 <td>घन क्षमता (क्यूविक क्यापासिटी):</td>
-                                <td><?php echo $object_attributes->engine_capacity;?></td>
+                                <td><?php echo htmlspecialchars($object_attributes->engine_capacity);?></td>
                             </tr>
                             <tr>
                                 <td>दर्ता मिति: </td>
@@ -367,7 +367,7 @@ switch ($record->portfolio_id)
                     <td width="40%"><strong>प्रमाणपत्र जारी गर्ने बीमकको नाम र ठेगाना:</strong></td>
                     <td>
                         <?php
-                        echo $this->settings->orgn_name_np . ', ' . $record->branch_name_np;
+                        echo htmlspecialchars($this->settings->orgn_name_np . ', ' . $record->branch_name_np);
                         ?>
                     </td>
                 </tr>
@@ -443,11 +443,11 @@ switch ($record->portfolio_id)
                 </thead>
                 <tbody>
                     <tr>
-                        <td><?php echo $object_attributes->make ?></td>
-                        <td><?php echo $object_attributes->model ?></td>
-                        <td><?php echo implode(' / ', array_filter([$object_attributes->reg_no, $object_attributes->reg_date]) ) ?></td>
-                        <td><?php echo $object_attributes->chasis_no ?></td>
-                        <td><?php echo $object_attributes->engine_no ?></td>
+                        <td><?php echo htmlspecialchars($object_attributes->make) ?></td>
+                        <td><?php echo htmlspecialchars($object_attributes->model) ?></td>
+                        <td><?php echo htmlspecialchars( implode(' / ', array_filter([$object_attributes->reg_no, $object_attributes->reg_date]) ) ) ?></td>
+                        <td><?php echo htmlspecialchars( $object_attributes->chasis_no ) ?></td>
+                        <td><?php echo htmlspecialchars( $object_attributes->engine_no ) ?></td>
                         <td>
                             <?php
                             echo $object_attributes->engine_capacity, $object_attributes->ec_unit;

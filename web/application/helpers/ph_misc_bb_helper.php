@@ -113,7 +113,7 @@ if ( ! function_exists('_OBJ_MISC_BB_validation_rules'))
 			        'field' => 'object[excess_deductibles]',
 			        '_key' => 'excess_deductibles',
 			        'label' => 'Excess/Deductibles',
-			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|max_length[500]',
 			        '_type' => 'textarea',
 			        'rows' 	=> 4,
 			        '_required' 	=> false

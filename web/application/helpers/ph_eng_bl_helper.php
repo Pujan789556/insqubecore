@@ -98,7 +98,7 @@ if ( ! function_exists('_OBJ_ENG_BL_validation_rules'))
 			        'field' => 'object[risk_locaiton]',
 			        '_key' => 'risk_locaiton',
 			        'label' => 'Location of Risk',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        'rules' => 'trim|required|max_length[250]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
@@ -122,7 +122,7 @@ if ( ! function_exists('_OBJ_ENG_BL_validation_rules'))
 			        'field' => 'object[items][description][]',
 			        '_key' => 'description',
 			        'label' => 'Description',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|required|max_length[500]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -131,7 +131,7 @@ if ( ! function_exists('_OBJ_ENG_BL_validation_rules'))
 			        'field' => 'object[items][regd_no][]',
 			        '_key' => 'regd_no',
 			        'label' => 'Registration No.',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
+			        'rules' => 'trim|required|max_length[100]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -158,7 +158,7 @@ if ( ! function_exists('_OBJ_ENG_BL_validation_rules'))
 			        'field' => 'object[items][excess][]',
 			        '_key' => 'excess',
 			        'label' => 'Excess',
-			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|max_length[500]',
 			        '_type' => 'textarea',
 			        'rows' 	=> 4,
 			        '_show_label' 	=> false,
@@ -193,7 +193,7 @@ if ( ! function_exists('_OBJ_ENG_BL_validation_rules'))
 			        'field' => 'object[third_party][deductibles][]',
 			        '_key' => 'deductibles',
 			        'label' => 'Deductibles',
-			        'rules' => 'trim|htmlspecialchars|max_length[150]',
+			        'rules' => 'trim|max_length[150]',
 			        '_type'     => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -208,7 +208,7 @@ if ( ! function_exists('_OBJ_ENG_BL_validation_rules'))
 			        'field' => 'object[others][limit_per_event]',
 			        '_key' => 'limit_per_event',
 			        'label' => 'Limit per event',
-			        'rules' => 'trim|htmlspecialchars|max_length[200]',
+			        'rules' => 'trim|max_length[200]',
 			        '_type'     => 'text',
 			        '_default' 	=> 'Per event limit is restricted upto Rs. ___ only.',
 			        '_required' => false

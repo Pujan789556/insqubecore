@@ -95,7 +95,7 @@ if ( ! function_exists('_OBJ_MISC_BRG_validation_rules'))
 			        'field' => 'object[items]',
 			        '_key' => 'items',
 			        'label' => 'माल समान',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|required|max_length[500]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
@@ -112,7 +112,7 @@ if ( ! function_exists('_OBJ_MISC_BRG_validation_rules'))
 			        'field' => 'object[excess]',
 			        '_key' => 'excess',
 			        'label' => 'अधिक',
-			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|max_length[500]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => false

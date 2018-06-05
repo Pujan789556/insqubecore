@@ -35,7 +35,7 @@ else
                             <?php
                             $value = $attributes->{$elem['_key']};
                             $value = $elem['_type'] == 'dropdown' ? $elem['_data'][$value] : $value;
-                            echo $value;
+                            echo htmlspecialchars($value);
                             ?>
                         </td>
                     </tr>
@@ -76,7 +76,7 @@ else
                             ?>
 
                                 <td <?php echo $key == 'sum_insured' || $key == 'medical' ? 'class="text-right"' : '' ?>>
-                                    <?php echo $key == 'sum_insured' || $key == 'medical' ? number_format($value, 2) : $value;?>
+                                    <?php echo $key == 'sum_insured' || $key == 'medical' ? number_format($value, 2) : htmlspecialchars($value);?>
                                 </td>
                             <?php endforeach ?>
                         </tr>

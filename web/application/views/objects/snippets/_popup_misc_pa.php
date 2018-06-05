@@ -37,7 +37,7 @@ else
                             if($elem_data){
                                 $value = $elem_data[$value];
                             }
-                            echo $value;
+                            echo htmlspecialchars($value);
                             ?>
                         </td>
                     </tr>
@@ -65,7 +65,7 @@ else
                             if($elem_data){
                                 $value = $elem_data[$value];
                             }
-                            echo $value;
+                            echo htmlspecialchars($value);
                             ?>
                         </td>
                     </tr>

@@ -60,7 +60,7 @@ else
                             ?>
 
                                 <td <?php echo $key == 'sum_insured' || $key == 'premium' ? 'class="text-right"' : '' ?>>
-                                    <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
+                                    <?php echo $key == 'sum_insured' ? number_format($value, 2) : htmlspecialchars($value);?>
                                 </td>
                             <?php endforeach ?>
                         </tr>

@@ -90,7 +90,7 @@ if ( ! function_exists('_OBJ_MISC_CT_validation_rules'))
 			        'field' => 'object[risk_locaiton]',
 			        '_key' => 'risk_locaiton',
 			        'label' => 'प्रयोग हुने स्थान',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        'rules' => 'trim|required|max_length[250]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
@@ -115,7 +115,7 @@ if ( ! function_exists('_OBJ_MISC_CT_validation_rules'))
 			        'field' => 'object[excess]',
 			        '_key' => 'excess',
 			        'label' => 'अधिक',
-			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|max_length[500]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => false

@@ -33,7 +33,7 @@ else
                             <?php
                             $value = $attributes->{$elem['_key']} ?? '';
                             $value = $elem['_data'][$value] ?? $value;
-                            echo $value; ?>
+                            echo htmlspecialchars($value); ?>
 
                         </td>
             		</tr>
@@ -80,7 +80,7 @@ else
                                         $value = $elem['_data'][$value] ?? $value;
                                     ?>
                                         <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                            <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
+                                            <?php echo $key == 'sum_insured' ? number_format($value, 2) : htmlspecialchars($value);?>
                                         </td>
                                     <?php endforeach ?>
                             </tr>
@@ -150,7 +150,7 @@ else
                             ?>
 
                                 <td <?php echo $key == 'limit' ? 'class="text-right"' : '' ?>>
-                                    <?php echo $value?>
+                                    <?php echo htmlspecialchars($value)?>
                                 </td>
                             <?php endforeach ?>
                         </tr>
@@ -183,7 +183,7 @@ else
                             }
                             else
                             {
-                                echo $section_object->{$elem['_key']} ?? '';
+                                echo htmlspecialchars($section_object->{$elem['_key']} ?? '');
                             }
                         ?></td>
                     </tr>

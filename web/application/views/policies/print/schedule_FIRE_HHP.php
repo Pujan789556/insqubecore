@@ -43,7 +43,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                                 <td>
                                     <strong>बीमीतको विवरण (नाम थर, ठेगाना):</strong><br/>
                                     <?php
-                                    echo $this->security->xss_clean($record->customer_name) . '<br/>';
+                                    echo htmlspecialchars($record->customer_name) . '<br/>';
                                     echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                                     ?>
                                 </td>
@@ -57,7 +57,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                                 <td>
                                     <strong>बीमा योग्य हित रहेको बैंक/वित्तीय संस्थाको विवरण</strong> <br/>
                                     <strong>नाम:</strong>
-                                    <?php echo implode(',', array_filter([$this->security->xss_clean($record->creditor_name), $this->security->xss_clean($record->creditor_branch_name)])); ?><br/>
+                                    <?php echo implode(',', array_filter([htmlspecialchars($record->creditor_name), htmlspecialchars($record->creditor_branch_name)])); ?><br/>
                                     <strong>ठेगाना:</strong> <?php echo get_contact_widget($record->creditor_branch_contact, true, true); ?>
                                 </td>
                             </tr>
@@ -86,11 +86,11 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                     <td width="50%" class="no-padding">
                         <table class="table">
                             <tr>
-                                <td>बीमालेखको किसिम: <?php echo $record->portfolio_name; ?></td>
+                                <td>बीमालेखको किसिम: <?php echo htmlspecialchars($record->portfolio_name); ?></td>
                             </tr>
 
                             <tr>
-                                <td>प्रस्तावकको नाम: <?php echo $record->proposer ? $this->security->xss_clean($record->proposer) : $this->security->xss_clean($record->customer_name);?></td>
+                                <td>प्रस्तावकको नाम: <?php echo $record->proposer ? htmlspecialchars($record->proposer) : htmlspecialchars($record->customer_name);?></td>
                             </tr>
 
                             <tr>
@@ -158,7 +158,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                                     <tr>
                                         <td><?php echo $i++; ?>.</td>
                                         <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item_record->category ]?></td>
-                                        <td><?php echo nl2br($item_record->description) ?></td>
+                                        <td><?php echo nl2br(htmlspecialchars($item_record->description)) ?></td>
                                         <td align="right"><?php echo number_format((float)$item_record->sum_insured, 2); ?></td>
                                     </tr>
                                 <?php endforeach?>
@@ -181,7 +181,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
             <tr>
                 <td width="50%">&nbsp;</td>
                 <td align="left">
-                    <h4 class="underline"><?php echo $this->settings->orgn_name_np?> तर्फबाट अधिकार प्राप्त अधिकारीको</h4>
+                    <h4 class="underline"><?php echo htmlspecialchars($this->settings->orgn_name_np)?> तर्फबाट अधिकार प्राप्त अधिकारीको</h4>
                     <p style="line-height: 30px">दस्तखत:</p>
                     <p>नाम थर:</p>
                     <p>छाप:</p>

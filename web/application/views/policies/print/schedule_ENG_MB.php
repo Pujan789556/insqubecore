@@ -53,7 +53,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     <td>
                         <strong>Name and address of Insured</strong><br/>
                         <?php
-                        echo $this->security->xss_clean($record->customer_name) ,
+                        echo htmlspecialchars($record->customer_name) ,
                                 '<br/>' , get_contact_widget($record->customer_contact, true, true), '<br/>';
 
                         /**
@@ -65,7 +65,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                             $financer_info = [
                                 '<strong>Name and address of Financer(s)</strong>',
 
-                                $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name),
+                                htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name),
 
                                 get_contact_widget($record->creditor_branch_contact, true, true)
 
@@ -75,13 +75,13 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                             {
                                 $financer_info = array_merge($financer_info, [
                                     '<strong>Other Financer(s)</strong>',
-                                    nl2br($this->security->xss_clean($record->other_creditors))
+                                    nl2br(htmlspecialchars($record->other_creditors))
                                 ]);
                             }
 
                             echo implode('<br/>', $financer_info), '<br/>';
                         }
-                        echo  $record->care_of ? '<br/><strong>Care of</strong><br>' . nl2br($this->security->xss_clean($record->care_of)) : '';
+                        echo  $record->care_of ? '<br/><strong>Care of</strong><br>' . nl2br(htmlspecialchars($record->care_of)) : '';
                         ?>
                     </td>
                     <td>
@@ -171,7 +171,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                         ?>
 
                                             <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                                <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
+                                                <?php echo $key == 'sum_insured' ? number_format($value, 2) : htmlspecialchars($value);?>
                                             </td>
                                         <?php endforeach ?>
                                     </tr>
@@ -189,7 +189,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                 </tr>
                 <tr>
                     <td colspan="2">
-                        In witness whereof the undersigned acting on behalf and under the Authority of the Company that hereunder set his hand at <span style="text-decoration: underline; font-weight: bold"><?php echo $record->branch_name_en; ?></span> on this <span style="text-decoration: underline; font-weight: bold"><?php echo date('jS', strtotime($record->issued_date) ); ?></span> day of <span style="text-decoration: underline; font-weight: bold"><?php echo date('F, Y', strtotime($record->issued_date) ); ?></span>.
+                        In witness whereof the undersigned acting on behalf and under the Authority of the Company that hereunder set his hand at <span style="text-decoration: underline; font-weight: bold"><?php echo htmlspecialchars($record->branch_name_en); ?></span> on this <span style="text-decoration: underline; font-weight: bold"><?php echo date('jS', strtotime($record->issued_date) ); ?></span> day of <span style="text-decoration: underline; font-weight: bold"><?php echo date('F, Y', strtotime($record->issued_date) ); ?></span>.
                     </td>
                 </tr>
             </tbody>
@@ -198,7 +198,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
             <tr>
                 <td width="50%">Office Seal:</td>
                 <td>
-                    Signed for and on behalf of the <br><strong><?php echo $this->settings->orgn_name_en?></strong>
+                    Signed for and on behalf of the <br><strong><?php echo htmlspecialchars($this->settings->orgn_name_en)?></strong>
                     <br><br><br>
                     Authorized Signature
                     <br>

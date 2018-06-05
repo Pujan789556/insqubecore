@@ -58,7 +58,7 @@ else
                             ?>
 
                                 <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                    <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
+                                    <?php echo $key == 'sum_insured' ? number_format($value, 2) : htmlspecialchars($value);?>
                                 </td>
                             <?php endforeach ?>
                         </tr>
@@ -95,7 +95,7 @@ else
                             if($elem_data){
                                 $value = $elem_data[$value];
                             }
-                            echo $value;
+                            echo htmlspecialchars($value);
                             ?>
                         </td>
             		</tr>
@@ -116,7 +116,7 @@ else
                 foreach($basic_elements as $elem): ?>
                     <tr>
                         <th><?php echo $elem['label']; ?></th>
-                        <td><?php echo $attributes->{$elem['_key']}; ?></td>
+                        <td><?php echo htmlspecialchars($attributes->{$elem['_key']}); ?></td>
                     </tr>
                 <?php endforeach ?>
             </table>
@@ -151,7 +151,7 @@ else
                             ?>
 
                                 <td>
-                                    <?php echo $value?>
+                                    <?php echo htmlspecialchars($value)?>
                                 </td>
                             <?php endforeach ?>
                         </tr>

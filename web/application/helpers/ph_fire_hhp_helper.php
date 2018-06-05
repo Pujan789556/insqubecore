@@ -118,7 +118,7 @@ if ( ! function_exists('_OBJ_FIRE_HHP_validation_rules'))
 			        'field' => 'object[items][description][]',
 			        '_key' => 'description',
 			        'label' => 'Item Description',
-			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|max_length[500]',
 			        '_type'     => 'textarea',
 			        'rows' 		=> 4,
 			        '_show_label' 	=> false,

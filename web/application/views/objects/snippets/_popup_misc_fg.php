@@ -47,7 +47,7 @@ else
                                 $value = $items->{$key}[$i];
                             ?>
                                 <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                    <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
+                                    <?php echo $key == 'sum_insured' ? number_format($value, 2) : htmlspecialchars($value);?>
                                 </td>
                             <?php endforeach ?>
                         </tr>

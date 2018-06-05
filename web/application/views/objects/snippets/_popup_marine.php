@@ -30,7 +30,7 @@ else
             	foreach($basic_elements as $elem): ?>
             		<tr>
             			<th><?php echo $elem['label']; ?></th>
-            			<td><?php echo $attributes->{$elem['_key']}; ?></td>
+            			<td><?php echo htmlspecialchars($attributes->{$elem['_key']}); ?></td>
             		</tr>
         		<?php endforeach ?>
             </table>
@@ -53,7 +53,7 @@ else
             				}
             				else
             				{
-            					echo $section_object->{$elem['_key']};
+            					echo htmlspecialchars($section_object->{$elem['_key']});
             				}
             			?></td>
             		</tr>
@@ -81,7 +81,7 @@ else
             				}
             				else
             				{
-            					echo $section_object->{$elem['_key']};
+            					echo htmlspecialchars($section_object->{$elem['_key']});
             				}
             			?></td>
             		</tr>
@@ -116,7 +116,7 @@ else
             				}
             				else
             				{
-            					echo $section_object->{$elem['_key']};
+            					echo htmlspecialchars($section_object->{$elem['_key']});
             				}
             			?></td>
             		</tr>
@@ -157,7 +157,7 @@ else
             				}
             				else
             				{
-            					echo $section_object->{$elem['_key']};
+            					echo htmlspecialchars($section_object->{$elem['_key']});
             				}
             			?></td>
             		</tr>

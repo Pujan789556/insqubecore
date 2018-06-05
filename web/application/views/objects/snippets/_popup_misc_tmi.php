@@ -47,7 +47,7 @@ else
                                 $age    = date_difference($value, date('Y-m-d'), 'y');
                                 $value  = "{$value} ({$age} years)";
                             }
-                            echo $value;
+                            echo htmlspecialchars($value);
                             ?>
                         </td>
                     </tr>

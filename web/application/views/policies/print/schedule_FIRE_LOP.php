@@ -60,18 +60,18 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                          */
                         if($record->flag_on_credit === 'Y')
                         {
-                            echo '<strong>INS.: ' . $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name) . '</strong><br/>';
+                            echo '<strong>INS.: ' . htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name) . '</strong><br/>';
                             echo '<br/>' . get_contact_widget($record->creditor_branch_contact, true, true) . '<br/>';
 
                             // Care of
-                            echo '<strong>A/C.: ' . $this->security->xss_clean($record->customer_name) . '<br/></strong>';
+                            echo '<strong>A/C.: ' . htmlspecialchars($record->customer_name) . '<br/></strong>';
                             echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
 
-                            echo  $record->care_of ? '<br/>C/O.: ' . $this->security->xss_clean($record->care_of) : '';
+                            echo  $record->care_of ? '<br/>C/O.: ' . htmlspecialchars($record->care_of) : '';
                         }
                         else
                         {
-                            echo $this->security->xss_clean($record->customer_name) . '<br/>';
+                            echo htmlspecialchars($record->customer_name) . '<br/>';
                             echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                         }
                         ?>
@@ -147,7 +147,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
             <tr>
                 <td width="50%">Office Seal:</td>
                 <td>
-                    Signed for and on behalf of the <br><strong><?php echo $this->settings->orgn_name_en?></strong>
+                    Signed for and on behalf of the <br><strong><?php echo htmlspecialchars($this->settings->orgn_name_en)?></strong>
                     <br><br><br>
                     Authorized Signature
                     <br>

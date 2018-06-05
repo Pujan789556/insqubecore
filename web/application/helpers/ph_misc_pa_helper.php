@@ -113,7 +113,7 @@ if ( ! function_exists('_OBJ_MISC_PA_validation_rules'))
 			        'field' => 'object[nominee]',
 			        '_key' => 'nominee',
 			        'label' => 'इच्छाएको ब्यक्तिको नाम थर',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[150]',
+			        'rules' => 'trim|required|max_length[150]',
 			        '_type' => 'text',
 			        '_required' 	=> true
 			    ],
@@ -121,7 +121,7 @@ if ( ! function_exists('_OBJ_MISC_PA_validation_rules'))
 			        'field' => 'object[nominee_father]',
 			        '_key' => 'nominee_father',
 			        'label' => 'पिताको नाम थर',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[150]',
+			        'rules' => 'trim|required|max_length[150]',
 			        '_type' => 'text',
 			        '_required' 	=> true
 			    ],
@@ -129,7 +129,7 @@ if ( ! function_exists('_OBJ_MISC_PA_validation_rules'))
 			        'field' => 'object[nominee_mother]',
 			        '_key' => 'nominee_mother',
 			        'label' => 'आमाको नाम थर',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[150]',
+			        'rules' => 'trim|required|max_length[150]',
 			        '_type' => 'text',
 			        '_required' 	=> true
 			    ],
@@ -137,7 +137,7 @@ if ( ! function_exists('_OBJ_MISC_PA_validation_rules'))
 			        'field' => 'object[nominee_relation]',
 			        '_key' => 'nominee_relation',
 			        'label' => 'बीमित र इच्छाएको ब्यक्ति बीचको नाता',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[150]',
+			        'rules' => 'trim|required|max_length[150]',
 			        '_type' => 'text',
 			        '_required' 	=> true
 			    ],

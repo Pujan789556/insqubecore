@@ -39,7 +39,7 @@ $schedule_table_title   = 'निष्ठा जमानी बीमाले
             <tbody>
                 <tr>
                     <td><?php echo _POLICY_schedule_title_prefix($record->status)?>: <strong><?php echo $record->code;?></strong></td>
-                    <td>बीमालेखको किसिम: <strong><?php echo $record->portfolio_name; ?></strong></td>
+                    <td>बीमालेखको किसिम: <strong><?php echo htmlspecialchars($record->portfolio_name); ?></strong></td>
                 </tr>
                 <tr>
                     <td width="50%" class="no-padding">
@@ -55,18 +55,18 @@ $schedule_table_title   = 'निष्ठा जमानी बीमाले
                                      */
                                     if($record->flag_on_credit === 'Y')
                                     {
-                                        echo '<strong>INS.: ' . $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name) . '</strong><br/>';
+                                        echo '<strong>INS.: ' . htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name) . '</strong><br/>';
                                         echo '<br/>' . get_contact_widget($record->creditor_branch_contact, true, true) . '<br/>';
 
                                         // Care of
-                                        echo '<strong>A/C.: ' . $this->security->xss_clean($record->customer_name) . '<br/></strong>';
+                                        echo '<strong>A/C.: ' . htmlspecialchars($record->customer_name) . '<br/></strong>';
                                         echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
 
-                                        echo  $record->care_of ? '<br/>C/O.: ' . $this->security->xss_clean($record->care_of) : '';
+                                        echo  $record->care_of ? '<br/>C/O.: ' . htmlspecialchars($record->care_of) : '';
                                     }
                                     else
                                     {
-                                        echo $this->security->xss_clean($record->customer_name) . '<br/>';
+                                        echo htmlspecialchars($record->customer_name) . '<br/>';
                                         echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                                     }
                                     ?>
@@ -95,9 +95,9 @@ $schedule_table_title   = 'निष्ठा जमानी बीमाले
                             <tr>
                                 <td>
                                     <strong>बीमालेख धारकको तर्फबाट बीमा प्रस्ताव गर्ने प्रस्तावकको</strong><br/>
-                                    नाम: <?php echo nl2br($this->security->xss_clean($record->proposer));?><br/>
-                                    ठेगाना: <?php echo nl2br($this->security->xss_clean($record->proposer_address));?><br>
-                                    पेशा: <?php echo nl2br($this->security->xss_clean($record->proposer_profession));?>
+                                    नाम: <?php echo nl2br(htmlspecialchars($record->proposer));?><br/>
+                                    ठेगाना: <?php echo nl2br(htmlspecialchars($record->proposer_address));?><br>
+                                    पेशा: <?php echo nl2br(htmlspecialchars($record->proposer_profession));?>
                                 </td>
                             </tr>
 
@@ -181,7 +181,7 @@ $schedule_table_title   = 'निष्ठा जमानी बीमाले
                                         ?>
 
                                             <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                                <?php echo $value?>
+                                                <?php echo htmlspecialchars($value)?>
                                             </td>
                                         <?php endforeach ?>
                                     </tr>
@@ -205,7 +205,7 @@ $schedule_table_title   = 'निष्ठा जमानी बीमाले
                     रु.:
                 </td>
                 <td align="left">
-                    <h4 class="underline"><?php echo $this->settings->orgn_name_np?> तर्फबाट अधिकार प्राप्त अधिकारीको</h4>
+                    <h4 class="underline"><?php echo htmlspecialchars($this->settings->orgn_name_np)?> तर्फबाट अधिकार प्राप्त अधिकारीको</h4>
                     <p style="line-height: 30px">दस्तखत:</p>
                     <p>नाम थर:</p>
                     <p>छाप:</p>

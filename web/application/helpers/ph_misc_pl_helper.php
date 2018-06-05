@@ -99,7 +99,7 @@ if ( ! function_exists('_OBJ_MISC_PL_validation_rules'))
 			        'field' => 'object[risk_locaiton]',
 			        '_key' => 'risk_locaiton',
 			        'label' => 'Location of Risk',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        'rules' => 'trim|required|max_length[250]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
@@ -133,7 +133,7 @@ if ( ! function_exists('_OBJ_MISC_PL_validation_rules'))
 			        'field' => 'object[public_liability][deductibles][]',
 			        '_key' => 'deductibles',
 			        'label' => 'Deductibles',
-			        'rules' => 'trim|htmlspecialchars|max_length[150]',
+			        'rules' => 'trim|max_length[150]',
 			        '_type'     => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true

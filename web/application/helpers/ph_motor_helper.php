@@ -2414,7 +2414,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'field' => 'object[engine_no]',
 			        '_key' => 'engine_no',
 			        'label' => 'Engine Number',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[30]|strtoupper|callback__cb_motor_duplicate_engine_no',
+			        'rules' => 'trim|required|max_length[30]|strtoupper|callback__cb_motor_duplicate_engine_no',
 			        '_id' 		=> '_motor-engine-no',
 			        '_type'     => 'text',
 			        '_required' => true
@@ -2423,7 +2423,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'field' => 'object[chasis_no]',
 			        '_key' => 'chasis_no',
 			        'label' => 'Chasis Number',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[30]|strtoupper|callback__cb_motor_duplicate_chasis_no',
+			        'rules' => 'trim|required|max_length[30]|strtoupper|callback__cb_motor_duplicate_chasis_no',
 			        '_id' 		=> '_motor-chasis-no',
 			        '_type'     => 'text',
 			        '_required' => true
@@ -2511,7 +2511,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'field' => 'object[manufacturer]',
 			        '_key' => 'manufacturer',
 			        'label' => 'Manufacturer',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[80]',
+			        'rules' => 'trim|required|max_length[80]',
 			        '_id' 		=> '_motor-manufacturer',
 			        '_type'     => 'text',
 			        '_required' => true
@@ -2520,7 +2520,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'field' => 'object[make]',
 			        '_key' => 'make',
 			        'label' => 'Make',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[60]',
+			        'rules' => 'trim|required|max_length[60]',
 			        '_id' 		=> '_motor-make',
 			        '_type'     => 'text',
 			        '_required' => true
@@ -2529,7 +2529,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        'field' => 'object[model]',
 			        '_key' => 'model',
 			        'label' => 'Model',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[60]',
+			        'rules' => 'trim|required|max_length[60]',
 			        '_id' 		=> '_motor-model',
 			        '_type'     => 'text',
 			        '_required' => true

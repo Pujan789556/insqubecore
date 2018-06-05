@@ -29,7 +29,7 @@ else
                 foreach($basic_elements as $elem): ?>
             		<tr>
             			<th width="30%"><?php echo $elem['label']; ?></th>
-            			<td><?php echo $attributes->{$elem['_key']}; ?></td>
+            			<td><?php echo htmlspecialchars($attributes->{$elem['_key']}); ?></td>
             		</tr>
         		<?php endforeach ?>
             </table>
@@ -73,7 +73,7 @@ else
                                         $value = $items[$i]->{$key} ?? '';
                                     ?>
                                         <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                            <?php echo $key == 'sum_insured' ? number_format($value, 2) : $value;?>
+                                            <?php echo $key == 'sum_insured' ? number_format($value, 2) : htmlspecialchars($value);?>
                                         </td>
                                     <?php endforeach ?>
                                     <td>&nbsp;</td>
@@ -144,7 +144,7 @@ else
                             ?>
 
                                 <td <?php echo $key == 'limit' ? 'class="text-right"' : '' ?>>
-                                    <?php echo $value?>
+                                    <?php echo htmlspecialchars($value)?>
                                 </td>
                             <?php endforeach ?>
                         </tr>
@@ -178,7 +178,7 @@ else
                             }
                             else
                             {
-                                echo $section_object->{$elem['_key']} ?? '';
+                                echo htmlspecialchars($section_object->{$elem['_key']} ?? '');
                             }
                         ?></td>
                     </tr>

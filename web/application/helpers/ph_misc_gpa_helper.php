@@ -113,7 +113,7 @@ if ( ! function_exists('_OBJ_MISC_GPA_validation_rules'))
 			        'field' => 'object[items][name][]',
 			        '_key' => 'name',
 			        'label' => 'बीमितको नाम थर',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[150]',
+			        'rules' => 'trim|required|max_length[150]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -122,7 +122,7 @@ if ( ! function_exists('_OBJ_MISC_GPA_validation_rules'))
 			        'field' => 'object[items][position][]',
 			        '_key' => 'position',
 			        'label' => 'पद/बीमालेख धारकसंगको सम्बन्ध',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[200]',
+			        'rules' => 'trim|required|max_length[200]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -131,7 +131,7 @@ if ( ! function_exists('_OBJ_MISC_GPA_validation_rules'))
 			        'field' => 'object[items][job_nature][]',
 			        '_key' => 'job_nature',
 			        'label' => 'पेशाको खास प्रकृति',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[200]',
+			        'rules' => 'trim|required|max_length[200]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -176,7 +176,7 @@ if ( ! function_exists('_OBJ_MISC_GPA_validation_rules'))
 			        'field' => 'object[items][nominee][]',
 			        '_key' => 'nominee',
 			        'label' => 'इच्छाएको ब्यक्तिको नाम थर',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[150]',
+			        'rules' => 'trim|required|max_length[150]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -185,7 +185,7 @@ if ( ! function_exists('_OBJ_MISC_GPA_validation_rules'))
 			        'field' => 'object[items][nominee_relation][]',
 			        '_key' => 'nominee_relation',
 			        'label' => 'बीमित र इच्छाएको ब्यक्ति बीचको नाता',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[150]',
+			        'rules' => 'trim|required|max_length[150]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -194,7 +194,7 @@ if ( ! function_exists('_OBJ_MISC_GPA_validation_rules'))
 			        'field' => 'object[items][remarks][]',
 			        '_key' => 'remarks',
 			        'label' => 'कैफियत',
-			        'rules' => 'trim|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|max_length[500]',
 			        '_type' => 'textarea',
 			        'rows' 	=> 2,
 			        '_show_label' 	=> false,

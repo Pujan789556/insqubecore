@@ -100,7 +100,7 @@ if ( ! function_exists('_OBJ_FIRE_LOP_validation_rules'))
 			        'field' => 'object[risk_locaiton]',
 			        '_key' => 'risk_locaiton',
 			        'label' => 'Location of Risk',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        'rules' => 'trim|required|max_length[250]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
@@ -109,7 +109,7 @@ if ( ! function_exists('_OBJ_FIRE_LOP_validation_rules'))
 			        'field' => 'object[max_indemnity_period]',
 			        '_key' => 'max_indemnity_period',
 			        'label' => 'Max Indemnity Period',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[100]',
+			        'rules' => 'trim|required|max_length[100]',
 			        '_type' => 'text',
 			        '_required' 	=> true
 			    ],

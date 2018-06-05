@@ -67,18 +67,18 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                          */
                         if($record->flag_on_credit === 'Y')
                         {
-                            echo '<strong>INS.: ' . $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name) . '</strong><br/>';
+                            echo '<strong>INS.: ' . htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name) . '</strong><br/>';
                             echo '<br/>' . get_contact_widget($record->creditor_branch_contact, true, true) . '<br/>';
 
                             // Care of
-                            echo '<strong>A/C.: ' . $this->security->xss_clean($record->customer_name) . '<br/></strong>';
+                            echo '<strong>A/C.: ' . htmlspecialchars($record->customer_name) . '<br/></strong>';
                             echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
 
-                            echo  $record->care_of ? '<br/>C/O.: ' . $this->security->xss_clean($record->care_of) : '';
+                            echo  $record->care_of ? '<br/>C/O.: ' . htmlspecialchars($record->care_of) : '';
                         }
                         else
                         {
-                            echo $this->security->xss_clean($record->customer_name) . '<br/>';
+                            echo htmlspecialchars($record->customer_name) . '<br/>';
                             echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
                         }
                         ?>
@@ -86,7 +86,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     <td>
                         <strong>Bill No.:</strong> <br/>
                         <strong>Receipt No.:</strong><br>
-                        <strong>Issued at:</strong> <?php echo $record->branch_name_en ?>
+                        <strong>Issued at:</strong> <?php echo htmlspecialchars($record->branch_name_en) ?>
                     </td>
                 </tr>
 
@@ -148,14 +148,14 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                 <tr>
                     <td colspan="2">
                         <strong>Subject matter insured/Interest</strong><br/>
-                        <?php echo nl2br($object_attributes->description); ?>
-                        <?php echo nl2br($object_attributes->packing); ?>
+                        <?php echo nl2br( htmlspecialchars($object_attributes->description) ); ?>
+                        <?php echo nl2br( htmlspecialchars($object_attributes->packing) ); ?>
                     </td>
                 </tr>
 
                 <tr>
                     <td><strong>Marks &amp; Numbers</strong></td>
-                    <td> <?php echo $object_attributes->marks_numbers ?></td>
+                    <td> <?php echo htmlspecialchars($object_attributes->marks_numbers) ?></td>
                 </tr>
 
                 <tr>
@@ -163,7 +163,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         <strong>Voyage From</strong>
                     </td>
                     <td>
-                        <?php echo $object_attributes->transit->from ?><br/>
+                        <?php echo htmlspecialchars($object_attributes->transit->from) ?><br/>
                     </td>
                 </tr>
                 <tr>
@@ -171,28 +171,28 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         <strong>Voyage To</strong>
                     </td>
                     <td>
-                        <?php echo $object_attributes->transit->to ?>
+                        <?php echo htmlspecialchars($object_attributes->transit->to) ?>
                     </td>
                 </tr>
 
                 <tr>
                     <td><strong>Invoice No. &amp; Date</strong></td>
                     <td>
-                        <?php echo $object_attributes->transit->invoice_no, ', ', $object_attributes->transit->invoice_date ?>
+                        <?php echo htmlspecialchars($object_attributes->transit->invoice_no), ', ', $object_attributes->transit->invoice_date ?>
                     </td>
                 </tr>
 
                 <tr>
                     <td><strong>LC No. &amp; Date</strong></td>
                     <td>
-                        <?php echo $object_attributes->transit->lc_no, ', ', $object_attributes->transit->lc_date ?>
+                        <?php echo htmlspecialchars($object_attributes->transit->lc_no), ', ', $object_attributes->transit->lc_date ?>
                     </td>
                 </tr>
 
                 <tr>
                     <td><strong>B/L No./C/N No./AW/B No./R/R No. &amp; Date</strong></td>
                     <td>
-                        <?php echo $object_attributes->transit->bl_no, ', ', $object_attributes->transit->bl_date ?>
+                        <?php echo htmlspecialchars($object_attributes->transit->bl_no), ', ', $object_attributes->transit->bl_date ?>
                     </td>
                 </tr>
                 <tr>
@@ -232,7 +232,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         </table>
                         <br/>
                         <strong>Warranties:</strong><br/>
-                        <?php echo $object_attributes->risk->warranties; ?>
+                        <?php echo htmlspecialchars($object_attributes->risk->warranties); ?>
                     </td>
                 </tr>
                 <tr>
@@ -249,16 +249,18 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     </td>
                     <td>
                         <?php
-                        echo $object_attributes->surveyor->name, '<br>',
-                             $object_attributes->surveyor->contact_person, '<br>',
-                             $object_attributes->surveyor->address;
+                        echo htmlspecialchars(
+                            $object_attributes->surveyor->name . '<br>' .
+                            $object_attributes->surveyor->contact_person . '<br>' .
+                            $object_attributes->surveyor->address
+                         );
                         ?>
                     </td>
                 </tr>
                 <tr>
                     <td><strong>Claims payable at</strong></td>
                     <td>
-                        <?php echo $object_attributes->claim_payable_at ?>
+                        <?php echo htmlspecialchars( $object_attributes->claim_payable_at ) ?>
                     </td>
                 </tr>
             </tbody>
@@ -267,7 +269,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
             <tr>
                 <td width="50%">Office Seal:</td>
                 <td>
-                    Signed for and on behalf of the <br><strong><?php echo $this->settings->orgn_name_en?></strong>
+                    Signed for and on behalf of the <br><strong><?php echo htmlspecialchars($this->settings->orgn_name_en)?></strong>
                     <br><br><br>
                     Authorized Signature
                     <br>

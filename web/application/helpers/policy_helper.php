@@ -1174,24 +1174,24 @@ if ( ! function_exists('_POLICY_schedule_header_footer'))
         if($record->created_by_profile)
         {
             $_u_profile = json_decode($record->created_by_profile);
-            $creator_text = $_u_profile->name . ' - ' . $record->created_by_code;
+            $creator_text = htmlspecialchars( $_u_profile->name ) . ' - ' . $record->created_by_code;
         }
 
         $verifier_text = $record->verified_by_username . ' - ' . $record->verified_by_code;
         if($record->verified_by_profile)
         {
             $_u_profile = json_decode($record->verified_by_profile);
-            $verifier_text = $_u_profile->name . ' - ' . $record->verified_by_code;
+            $verifier_text = htmlspecialchars($_u_profile->name) . ' - ' . $record->verified_by_code;
         }
 
         $seller_text = $record->sold_by_username . ' - ' . $record->sold_by_code;
         if($record->sold_by_profile)
         {
             $_u_profile = json_decode($record->sold_by_profile);
-            $seller_text = $_u_profile->name . ' - ' . $record->sold_by_code;
+            $seller_text = htmlspecialchars($_u_profile->name) . ' - ' . $record->sold_by_code;
         }
 
-        $branch_contact_prefix = $CI->settings->orgn_name_en . ', ' . $record->branch_name_en;
+        $branch_contact_prefix = htmlspecialchars( $CI->settings->orgn_name_en . ', ' . $record->branch_name_en);
 
         $header_footer = '<htmlpagefooter name="myfooter">
                             <table class="table table-footer no-border">

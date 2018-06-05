@@ -97,7 +97,7 @@ if ( ! function_exists('_OBJ_ENG_MB_validation_rules'))
 			        'field' => 'object[risk_locaiton]',
 			        '_key' => 'risk_locaiton',
 			        'label' => 'Location of Risk',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+			        'rules' => 'trim|required|max_length[250]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true
@@ -121,7 +121,7 @@ if ( ! function_exists('_OBJ_ENG_MB_validation_rules'))
 			        'field' => 'object[items][description][]',
 			        '_key' => 'description',
 			        'label' => 'Description',
-			        'rules' => 'trim|required|htmlspecialchars|max_length[500]',
+			        'rules' => 'trim|required|max_length[500]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
