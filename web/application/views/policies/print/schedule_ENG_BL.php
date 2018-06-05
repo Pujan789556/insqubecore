@@ -53,37 +53,11 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
 
                 <tr>
                     <td>
-                        <strong>Name and address of Insured</strong><br/>
                         <?php
-                        echo htmlspecialchars($record->customer_name) ,
-                                '<br/>' , get_contact_widget($record->customer_contact, true, true), '<br/>';
-
                         /**
-                         * If Policy Object is Financed or on Loan, The financial Institute will be "Insured Party"
-                         * and the customer will be "Account Party"
+                         * Insured Party, Financer, Other Financer, Careof
                          */
-                        if($record->flag_on_credit === 'Y')
-                        {
-                            $financer_info = [
-                                '<strong>Name and address of Financer(s)</strong>',
-
-                                htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name),
-
-                                get_contact_widget($record->creditor_branch_contact, true, true)
-
-                            ];
-
-                            if( $record->other_creditors )
-                            {
-                                $financer_info = array_merge($financer_info, [
-                                    '<strong>Other Financer(s)</strong>',
-                                    nl2br(htmlspecialchars($record->other_creditors))
-                                ]);
-                            }
-
-                            echo implode('<br/>', $financer_info), '<br/>';
-                        }
-                        echo  $record->care_of ? '<br/><strong>Care of</strong><br>' . nl2br(htmlspecialchars($record->care_of)) : '';
+                        $this->load->view('policies/print/_schedule_insured_party', ['lang' => 'en']);
                         ?>
                     </td>
                     <td>
@@ -270,7 +244,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
         /**
          * Load Footer
          */
-        $this->load->view('policies/print/_schedule_footer_en');
+        $this->load->view('policies/print/_schedule_footer', ['lang' => 'en']);
         ?>
     </body>
 </html>

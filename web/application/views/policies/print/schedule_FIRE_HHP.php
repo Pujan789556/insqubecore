@@ -41,24 +41,17 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                         <table class="table" width="100%">
                             <tr>
                                 <td>
-                                    <strong>बीमीतको विवरण (नाम थर, ठेगाना):</strong><br/>
                                     <?php
-                                    echo htmlspecialchars($record->customer_name) . '<br/>';
-                                    echo '<br/>' . get_contact_widget($record->customer_contact, true, true);
+                                    /**
+                                     * Insured Party, Financer, Other Financer, Careof
+                                     */
+                                    $this->load->view('policies/print/_schedule_insured_party', ['lang' => 'np']);
                                     ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     पेशा: <?php echo $record->customer_profession;?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <strong>बीमा योग्य हित रहेको बैंक/वित्तीय संस्थाको विवरण</strong> <br/>
-                                    <strong>नाम:</strong>
-                                    <?php echo implode(',', array_filter([htmlspecialchars($record->creditor_name), htmlspecialchars($record->creditor_branch_name)])); ?><br/>
-                                    <strong>ठेगाना:</strong> <?php echo get_contact_widget($record->creditor_branch_contact, true, true); ?>
                                 </td>
                             </tr>
                             <tr>
@@ -181,7 +174,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
         /**
          * Load Footer
          */
-        $this->load->view('policies/print/_schedule_footer_np');
+        $this->load->view('policies/print/_schedule_footer', ['lang' => 'np']);
         ?>
     </body>
 </html>

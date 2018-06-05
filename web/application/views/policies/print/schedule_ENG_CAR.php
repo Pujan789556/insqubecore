@@ -51,42 +51,14 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                 </tr>
                 <tr>
                     <td>
-                        <strong>Name and address of Contractor (Insured)</strong><br/>
                         <?php
-                        echo htmlspecialchars($record->customer_name) ,
-                                '<br/>' , get_contact_widget($record->customer_contact, true, true), '<br/>';
-
                         /**
-                         * On Loan?
+                         * Insured Party, Financer, Other Financer, Careof
                          */
-                        if($record->flag_on_credit === 'Y')
-                        {
-                            $financer_info = [
-                                '<strong>Name and address of Financer(s)</strong>',
-
-                                htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name),
-
-                                get_contact_widget($record->creditor_branch_contact, true, true)
-
-                            ];
-
-                            if( $record->other_creditors )
-                            {
-                                $financer_info = array_merge($financer_info, [
-                                    '<strong>Other Financer(s)</strong>',
-                                    nl2br(htmlspecialchars($record->other_creditors))
-                                ]);
-                            }
-
-                            echo implode('<br/>', $financer_info), '<br/>';
-                        }
+                        $this->load->view('policies/print/_schedule_insured_party', ['lang' => 'en']);
                         ?>
-
                         <strong>Name and address of Principal</strong><br/>
                         <?php echo nl2br(htmlspecialchars($object_attributes->principal)) ?>
-
-                        <?php echo  $record->care_of ? '<br/><strong>Care of</strong><br>' . nl2br(htmlspecialchars($record->care_of)) : ''; ?>
-
                     </td>
                     <td>
                         <strong>Contract Title:</strong><br>
@@ -292,7 +264,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
         /**
          * Load Footer
          */
-        $this->load->view('policies/print/_schedule_footer_en');
+        $this->load->view('policies/print/_schedule_footer', ['lang' => 'en']);
         ?>
     </body>
 </html>
