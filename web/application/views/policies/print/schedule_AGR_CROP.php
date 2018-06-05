@@ -66,7 +66,6 @@ $schedule_table_title   = 'बाली/फलफुलको बीमाले
                                     ?>
                                 </td>
                             </tr>
-
                             <tr>
                                 <td>
                                     <strong>बाली/फलफुल लगाएको स्थान</strong><br/>
@@ -173,6 +172,7 @@ $schedule_table_title   = 'बाली/फलफुलको बीमाले
             <tbody>
                 <?php
                 $i = 1;
+                $breed_dropdown = _OBJ_AGR_breed_dropdown( $object_attributes->bs_agro_category_id );
                 foreach($items as $item_record): ?>
                     <tr>
                         <td><?php echo $i++; ?></td>
@@ -181,7 +181,13 @@ $schedule_table_title   = 'बाली/फलफुलको बीमाले
                             $value = $item_record->{$key};
 
                             $elem_data  = $elem['_data'] ?? NULL;
-                            if($elem_data){
+
+                            // Update Breed dropdown
+                            if($elem['_key'] == 'breed')
+                            {
+                                $value = $breed_dropdown[$value];
+                            }
+                            else if($elem_data){
                                 $value = $elem_data[$value];
                             }
                         ?>

@@ -174,6 +174,7 @@ $schedule_table_title   = 'पन्छीको बीमालेख';
             <tbody>
                 <?php
                 $i = 1;
+                $breed_dropdown = _OBJ_AGR_breed_dropdown( $object_attributes->bs_agro_category_id );
                 foreach($items as $item_record): ?>
                     <tr>
                         <td><?php echo $i++; ?></td>
@@ -182,8 +183,14 @@ $schedule_table_title   = 'पन्छीको बीमालेख';
                             $value = $item_record->{$key};
 
                             $elem_data  = $elem['_data'] ?? NULL;
-                            if($elem_data){
-                                $value = $elem_data[$value] ?? $value;
+
+                            // Update Breed dropdown
+                            if($elem['_key'] == 'breed')
+                            {
+                                $value = $breed_dropdown[$value];
+                            }
+                            else if($elem_data){
+                                $value = $elem_data[$value];
                             }
                         ?>
 
