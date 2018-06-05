@@ -51,30 +51,42 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                 </tr>
                 <tr>
                     <td>
+                        <strong>Name and address of Contractor (Insured)</strong><br/>
                         <?php
+                        echo $this->security->xss_clean($record->customer_name) ,
+                                '<br/>' , get_contact_widget($record->customer_contact, true, true), '<br/>';
+
                         /**
-                         * If Policy Object is Financed or on Loan, The financial Institute will be "Insured Party"
-                         * and the customer will be "Account Party"
+                         * On Loan?
                          */
                         if($record->flag_on_credit === 'Y')
                         {
-                            echo '<strong>Name and address of Financer(s)</strong><br/>',
-                                $this->security->xss_clean($record->creditor_name) , ', ' , $this->security->xss_clean($record->creditor_branch_name), '<br/>',
-                                get_contact_widget($record->creditor_branch_contact, true, true) , '<br/>' ,
-                                nl2br($this->security->xss_clean($record->other_creditors));
+                            $financer_info = [
+                                '<strong>Name and address of Financer(s)</strong>',
 
-                            echo  $record->care_of ? '<br/>C/O.: ' . $this->security->xss_clean($record->care_of) : '';
+                                $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name),
+
+                                get_contact_widget($record->creditor_branch_contact, true, true)
+
+                            ];
+
+                            if( $record->other_creditors )
+                            {
+                                $financer_info = array_merge($financer_info, [
+                                    '<strong>Other Financer(s)</strong>',
+                                    nl2br($this->security->xss_clean($record->other_creditors))
+                                ]);
+                            }
+
+                            echo implode('<br/>', $financer_info), '<br/>';
                         }
                         ?>
 
                         <strong>Name and address of Principal</strong><br/>
                         <?php echo nl2br(htmlspecialchars($object_attributes->principal)) ?>
 
-                        <br/><br/><strong>Name and address of Contractor</strong><br/>
-                        <?php
-                        echo $this->security->xss_clean($record->customer_name),
-                            '<br/>' . get_contact_widget($record->customer_contact, true, true);
-                        ?>
+                        <?php echo  $record->care_of ? '<br/><strong>Care of</strong><br>' . nl2br($this->security->xss_clean($record->care_of)) : ''; ?>
+
                     </td>
                     <td>
                         <strong>Contract Title:</strong><br>

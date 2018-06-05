@@ -40,21 +40,23 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
             <tbody>
                 <tr>
                     <td><strong><?php echo _POLICY_schedule_title_prefix($record->status, 'en')?>:</strong> <?php echo $record->code;?></td>
-
-                    <?php
-                    /**
-                     * Agent Details
-                     */
-                    $agent_text = implode(' ', array_filter([$record->agent_bs_code, $record->agent_ud_code]));
-                    ?>
-                    <td><strong>Agent:</strong> <?php echo $agent_text;?> </td>
+                    <td>
+                        <?php
+                        /**
+                         * Agent Details
+                         */
+                        $agent_text = implode(' ', array_filter([$record->agent_bs_code, $record->agent_ud_code]));
+                        ?>
+                        <strong>Agent:</strong> <?php echo $agent_text;?>
+                    </td>
                 </tr>
+
                 <tr>
                     <td>
                         <strong>Name and address of Insured</strong><br/>
                         <?php
                         echo $this->security->xss_clean($record->customer_name) ,
-                                '<br/>' , get_contact_widget($record->customer_contact, true, true);
+                                '<br/>' , get_contact_widget($record->customer_contact, true, true), '<br/>';
 
                         /**
                          * If Policy Object is Financed or on Loan, The financial Institute will be "Insured Party"
@@ -62,63 +64,83 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                          */
                         if($record->flag_on_credit === 'Y')
                         {
-                            echo '<br/><strong>Name and address of Financer(s)</strong><br/>',
-                                $this->security->xss_clean($record->creditor_name) , ', ' , $this->security->xss_clean($record->creditor_branch_name), '<br/>',
-                                get_contact_widget($record->creditor_branch_contact, true, true) , '<br/>' ,
-                                nl2br($this->security->xss_clean($record->other_creditors));
+                            $financer_info = [
+                                '<strong>Name and address of Financer(s)</strong>',
 
-                            echo  $record->care_of ? '<br/>C/O.: ' . $this->security->xss_clean($record->care_of) : '';
+                                $this->security->xss_clean($record->creditor_name) . ', ' . $this->security->xss_clean($record->creditor_branch_name),
+
+                                get_contact_widget($record->creditor_branch_contact, true, true)
+
+                            ];
+
+                            if( $record->other_creditors )
+                            {
+                                $financer_info = array_merge($financer_info, [
+                                    '<strong>Other Financer(s)</strong>',
+                                    nl2br($this->security->xss_clean($record->other_creditors))
+                                ]);
+                            }
+
+                            echo implode('<br/>', $financer_info), '<br/>';
                         }
+                        echo  $record->care_of ? '<br/><strong>Care of</strong><br>' . nl2br($this->security->xss_clean($record->care_of)) : '';
                         ?>
                     </td>
                     <td>
-                        <strong>Location of Risk:</strong><br>
-                        <?php echo nl2br(htmlspecialchars($object_attributes->risk_locaiton)) ?>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <strong>Period of Insurance:</strong><br>
-                        From: : <?php echo $record->start_date ?><br>
-                        To: : <?php echo $record->end_date ?>
-                    </td>
-                    <td>
-                        <?php $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);
-                        if($cost_calculation_table):?>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <td colspan="2"><strong>COST CALCULATION TABLE</strong></td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach($cost_calculation_table as $row):?>
+                        <table>
+                            <tr>
+                                <td class="no-border">
+                                    <strong>Location of Risk:</strong><br>
+                                    <?php echo nl2br(htmlspecialchars($object_attributes->risk_locaiton)) ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="no-border">
+                                    <strong>Period of Insurance:</strong><br>
+                                    From: <?php echo $record->start_date ?><br>
+                                    To: <?php echo $record->end_date ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="no-border">
+                                    <?php $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);
+                                    if($cost_calculation_table):?>
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <td colspan="2"><strong>COST CALCULATION TABLE</strong></td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach($cost_calculation_table as $row):?>
+                                                    <tr>
+                                                        <td><?php echo $row->label ?></td>
+                                                        <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
+                                                    </tr>
+                                                <?php endforeach ?>
+                                            </tbody>
+                                        </table><br>
+                                    <?php endif ?>
+                                    <table class="table table-condensed no-border">
                                         <tr>
-                                            <td><?php echo $row->label ?></td>
-                                            <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
+                                            <td><strong>Premium</strong></td>
+                                            <td class="text-right"><?php echo number_format((float)$total_premium, 2)?></td>
                                         </tr>
-                                    <?php endforeach ?>
-                                </tbody>
-                            </table><br>
-                        <?php endif ?>
-                        <table class="table table-condensed no-border">
-                            <tr>
-                                <td><strong>Premium</strong></td>
-                                <td class="text-right"><?php echo number_format((float)$total_premium, 2)?></td>
-                            </tr>
-                            <tr>
-                                <td>Stamp Duty</td>
-                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2)?></td>
-                            </tr>
-                            <tr>
-                                <td>13% VAT</td>
-                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2)?></td>
-                            </tr>
-                            <tr><td colspan="2"><hr/></td></tr>
-                            <tr>
-                                <td class="border-t"><strong>TOTAL (NRs.)</strong></td>
-                                <td class="text-right border-t"><strong><?php echo number_format( (float)$grand_total , 2);?></strong></td>
+                                        <tr>
+                                            <td>Stamp Duty</td>
+                                            <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2)?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>13% VAT</td>
+                                            <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2)?></td>
+                                        </tr>
+                                        <tr><td colspan="2"><hr/></td></tr>
+                                        <tr>
+                                            <td class="border-t"><strong>TOTAL (NRs.)</strong></td>
+                                            <td class="text-right border-t"><strong><?php echo number_format( (float)$grand_total , 2);?></strong></td>
+                                        </tr>
+                                    </table>
+                                </td>
                             </tr>
                         </table>
                     </td>
