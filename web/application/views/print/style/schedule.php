@@ -16,6 +16,10 @@
         border-collapse: collapse;
         width: 100%;
     }
+
+    .small{font-size:9pt;}
+    .smaller{font-size:8pt;}
+
     .margin-t-10{margin-top:10px;}
     .text-right{text-align: right}
     .text-left{text-align: left}

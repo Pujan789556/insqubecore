@@ -240,13 +240,19 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                 </tr>
                             </tbody>
                         </table>
+                        <?php
+                        $show_limit_per_event = $object_attributes->others->show_limit_per_event ?? NULL;
+                        if($show_limit_per_event):
+                        ?>
+                            <p>
+                                <strong>Limit per event:</strong>
+                                <?php echo htmlspecialchars($object_attributes->others->limit_per_event); ?>
+                            </p>
+                        <?php endif ?>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2"><?php echo htmlspecialchars($object_attributes->others->limit_per_event); ?></td>
-                </tr>
-                <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
+                    <td colspan="2" class="small"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>
                 <tr>
                     <td colspan="2">

@@ -258,18 +258,25 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                 </tr>
                             </tbody>
                         </table>
-                        <p><sup>(2)</sup> <i style="font-size: 8pt">Limit of indemnity in respect of any one accident or series of accidents arising out of one event.</i></p>
+                        <?php
+                        $show_limit_per_event = $object_attributes->others->show_limit_per_event ?? NULL;
+                        if($show_limit_per_event):
+                        ?>
+                            <p>
+                                <strong>Limit per event:</strong>
+                                <?php echo htmlspecialchars($object_attributes->others->limit_per_event); ?>
+                            </p>
+                        <?php endif ?>
+                        <p><sup>(2)</sup> <i class="smaller">Limit of indemnity in respect of any one accident or series of accidents arising out of one event.</i></p>
                     </td>
                 </tr>
-                <tr>
-                    <td colspan="2"><?php echo htmlspecialchars($object_attributes->others->limit_per_event); ?></td>
-                </tr>
+
 
                 <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
+                    <td colspan="2" class="small"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>
                 <tr>
-                    <td colspan="2">
+                    <td colspan="2" class="small">
                         In witness whereof the undersigned acting on behalf and under the Authority of the Company that hereunder set his hand at <span style="text-decoration: underline; font-weight: bold"><?php echo htmlspecialchars($record->branch_name_en); ?></span> on this <span style="text-decoration: underline; font-weight: bold"><?php echo date('jS', strtotime($record->issued_date) ); ?></span> day of <span style="text-decoration: underline; font-weight: bold"><?php echo date('F, Y', strtotime($record->issued_date) ); ?></span>.
                     </td>
                 </tr>
