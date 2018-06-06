@@ -100,7 +100,7 @@ if ( ! function_exists('_OBJ_ENG_CAR_validation_rules'))
 			    [
 			        'field' => 'object[principal]',
 			        '_key' => 'principal',
-			        'label' => 'Name & Address of Pricipal',
+			        'label' => 'Name & Address of Principal',
 			        'rules' => 'trim|required|max_length[250]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',

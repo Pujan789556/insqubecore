@@ -57,7 +57,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                          */
                         $this->load->view('policies/print/_schedule_insured_party', ['lang' => 'en']);
                         ?>
-                        <strong>Name and address of Principal</strong><br/>
+                        <br/><strong>Name and address of Principal</strong><br/>
                         <?php echo nl2br(htmlspecialchars($object_attributes->principal)) ?>
                     </td>
                     <td>
