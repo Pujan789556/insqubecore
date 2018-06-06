@@ -285,6 +285,10 @@ if ( ! function_exists('_OBJ_ENG_EAR_insured_items_dropdown'))
 		$dropdown = [
 			'1. Plant & Equipments to be erected' => [
 				'I1.a.i' => '1.a.i Landed Cost of Imported machinery as at Factory site - Invoice Cost',
+
+				/**
+				 * Not Needed - Suggested by Rama
+				 *
 				'I1.a.ii' => '1.a.ii Landed Cost of Imported machinery as at Factory site - Freight insurance, handling, Clearing & forwarding charges upto factory site',
 				'I1.a.iii' => '1.a.iii Landed Cost of Imported machinery as at Factory site - Customs duty',
 
@@ -295,6 +299,7 @@ if ( ! function_exists('_OBJ_ENG_EAR_insured_items_dropdown'))
 
 				'I1.d.i' => '1.d.i On Building in which the above Plant and Machinery is to be erected - Permanent Civil Engineering Works',
 				'I1.d.ii' => '1.d.ii On Building in which the above Plant and Machinery is to be erected - Temporary Works'
+				*/
 			],
 
 			'2. Clearance & Removal of Debris' => [
