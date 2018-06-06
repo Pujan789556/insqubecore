@@ -132,7 +132,13 @@ class Policy_installment_model extends MY_Model
                                                 ? ( $endorsement_record->amt_pool_premium * $percent ) / 100.00 : NULL;
                     $amt_agent_commission   = $endorsement_record->amt_agent_commission
                                                 ? ( $endorsement_record->amt_agent_commission * $percent ) / 100.00 : NULL;
-                    $amt_vat                = ( $endorsement_record->amt_vat * $percent ) / 100.00;
+
+
+                    /**
+                     * Compute Taxable Amount
+                     */
+                    $taxable_amount = $amt_basic_premium +  $amt_pool_premium;
+
 
                     /**
                      * Items for 1st Installment Only
@@ -147,7 +153,14 @@ class Policy_installment_model extends MY_Model
                     {
                         foreach($first_instlmnt_only_fields as $field)
                         {
-                            $fst_inst_only_data[$field] = $endorsement_record->{$field} ?? NULL;
+                            $value = $endorsement_record->{$field} ?? NULL;
+                            $fst_inst_only_data[$field] = $value;
+
+                            // Update Taxable Amount
+                            if($value)
+                            {
+                                $taxable_amount += $value;
+                            }
                         }
                     }
                     else
@@ -157,6 +170,13 @@ class Policy_installment_model extends MY_Model
                             $fst_inst_only_data[$field] =  NULL;
                         }
                     }
+
+                    /**
+                     * Let's Compute VAT
+                     */
+                    $this->load->helper('account');
+                    $amt_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+
 
                     $batch_data[] = array_merge( $fst_inst_only_data, [
                         'endorsement_id'        => $endorsement_record->id,
