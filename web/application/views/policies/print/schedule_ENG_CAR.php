@@ -245,9 +245,14 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         <p><sup>(2)</sup> <i style="font-size: 8pt">Limit of indemnity in respect of any one accident or series of accidents arising out of one event.</i></p>
                     </td>
                 </tr>
-                <tr>
-                    <td colspan="2"><?php echo htmlspecialchars($object_attributes->others->limit_per_event); ?></td>
-                </tr>
+                <?php
+                $show_limit_per_event = $object_attributes->others->show_limit_per_event ?? NULL;
+                if($show_limit_per_event):
+                ?>
+                    <tr>
+                        <td colspan="2"><strong>Limit per event:</strong> <?php echo htmlspecialchars($object_attributes->others->limit_per_event); ?></td>
+                    </tr>
+                <?php endif ?>
                 <tr>
                     <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>
