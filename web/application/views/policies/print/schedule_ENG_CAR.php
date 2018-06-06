@@ -117,6 +117,20 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         </table>
                     </td>
                 </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <?php
+                        /**
+                         * Policy Installments
+                         */
+                        $this->load->view('policies/print/_schedule_installments');
+                        ?>
+                    </td>
+                </tr>
+
+
+
                 <?php
                 $form_elements = _OBJ_ENG_CAR_validation_rules($record->portfolio_id);
 
