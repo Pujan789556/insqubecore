@@ -519,7 +519,11 @@ class Policy_installment_model extends MY_Model
         $rows       = $this->get_cache($cache_var);
         if(!$rows)
         {
-            $rows = $this->_rows(['PTI.endorsement_id' => $endorsement_id]);
+            $this->_rows_select(['PTI.endorsement_id' => $endorsement_id]);
+
+            // First Installment Date on top
+            $rows = $this->db->order_by('PTI.installment_date', 'ASC')
+                            ->get()->result();
 
             if($rows)
             {
@@ -566,7 +570,7 @@ class Policy_installment_model extends MY_Model
          * @param array $where
          * @return mixed
          */
-        private function _rows($where)
+        private function _rows_select($where)
         {
             $this->db->select('PTI.*, P.branch_id, P.code AS policy_code, ENDRSMNT.flag_current as endorsement_flag_current, ENDRSMNT.status AS endorsement_status, ENDRSMNT.flag_ri_approval AS endorsement_flag_ri_approval')
                     ->from($this->table_name . ' AS PTI')
@@ -578,6 +582,19 @@ class Policy_installment_model extends MY_Model
              * Apply User Scope
              */
             $this->dx_auth->apply_user_scope('P');
+        }
+
+    // --------------------------------------------------------------------
+
+        /**
+         * Get Rows from Database
+         *
+         * @param array $where
+         * @return mixed
+         */
+        private function _rows($where)
+        {
+            $this->_rows_select($where);
 
             // Get the damn result (Latest Transaction with first installment date order)
             return $this->db->order_by('PTI.installment_date', 'DESC')
