@@ -76,36 +76,38 @@ else
         </div>
     </div>
 
-    <div class="col-sm-12">
-        <div class="box box-solid box-bordered" style="overflow-x: scroll;">
-            <div class="box-header with-border">
-                <h4 class="box-title">Item Details (From Excel Data)</h4>
-            </div>
-            <table class="table table-bordered table-condensed no-margin">
-                <?php
-                $excel_data = excel_to_array(INSQUBE_MEDIA_PATH . 'objects/' . $attributes->document);
-                $header_row = array_shift($excel_data);
-                $row_count = count($excel_data);
-                ?>
-                <thead>
-                    <tr>
-                        <?php foreach($header_row as $col=>$value): ?>
-                            <th><?php echo $value ?></th>
-                        <?php endforeach; ?>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach($excel_data as $row): ?>
+    <?php if($attributes->document): ?>
+        <div class="col-sm-12">
+            <div class="box box-solid box-bordered" style="overflow-x: scroll;">
+                <div class="box-header with-border">
+                    <h4 class="box-title">Item Details (From Excel Data)</h4>
+                </div>
+                <table class="table table-bordered table-condensed no-margin">
+                    <?php
+                    $excel_data = excel_to_array(INSQUBE_MEDIA_PATH . 'objects/' . $attributes->document);
+                    $header_row = array_shift($excel_data);
+                    $row_count = count($excel_data);
+                    ?>
+                    <thead>
                         <tr>
-                            <?php foreach($row as $col=>$value): ?>
-                                <td><?php echo htmlspecialchars($value) ?></td>
+                            <?php foreach($header_row as $col=>$value): ?>
+                                <th><?php echo $value ?></th>
                             <?php endforeach; ?>
                         </tr>
-                    <?php endforeach ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php foreach($excel_data as $row): ?>
+                            <tr>
+                                <?php foreach($row as $col=>$value): ?>
+                                    <td><?php echo htmlspecialchars($value) ?></td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    <?php endif; ?>
 
 
 </div>
