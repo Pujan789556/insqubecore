@@ -387,6 +387,20 @@ class Ri_setup_treaty_model extends MY_Model
                 ],
 
                 /**
+                 * Apply flat retention ?
+                 */
+                [
+                    'field' => 'flag_qs_def_ret_apply[]',
+                    'label' => 'Apply defined retention?',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdwon(false)) ) . ']',
+                    '_field'        => 'flag_qs_def_ret_apply',
+                    '_type'         => 'dropdown',
+                    '_show_label'   => false,
+                    '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
+                    '_required'     => true
+                ],
+
+                /**
                  * Quota Share  Part
                  */
                 [
@@ -408,19 +422,7 @@ class Ri_setup_treaty_model extends MY_Model
                     '_required'         => true
                 ],
 
-                /**
-                 * Apply flat retention ?
-                 */
-                [
-                    'field' => 'flag_qs_def_ret_apply[]',
-                    'label' => 'Apply defined retention?',
-                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdwon(false)) ) . ']',
-                    '_field'        => 'flag_qs_def_ret_apply',
-                    '_type'         => 'dropdown',
-                    '_show_label'   => false,
-                    '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
-                    '_required'     => true
-                ],
+
 
                 /**
                  * Surplus Part
@@ -456,6 +458,37 @@ class Ri_setup_treaty_model extends MY_Model
 
             // Treaty Portfolios: "Excell of Loss" only Fields
             'portfolios_eol' => [
+                [
+                    'field' => 'qs_max_ret_amt[]',
+                    'label' => 'Maximum Retention Amount',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_field'            => 'qs_max_ret_amt',
+                    '_type'             => 'text',
+                    '_show_label'   => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'qs_def_ret_amt[]',
+                    'label' => 'Defined Retention Amount',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]|less_than[qs_max_ret_amt[]]',
+                    '_field'            => 'qs_def_ret_amt',
+                    '_type'             => 'text',
+                    '_show_label'       => false,
+                    '_required'         => true
+                ],
+                /**
+                 * Apply flat retention ?
+                 */
+                [
+                    'field' => 'flag_qs_def_ret_apply[]',
+                    'label' => 'Apply defined retention?',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdwon(false)) ) . ']',
+                    '_field'        => 'flag_qs_def_ret_apply',
+                    '_type'         => 'dropdown',
+                    '_show_label'   => false,
+                    '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
+                    '_required'     => true
+                ],
                 [
                     'field' => 'eol_layer_amount_1[]',
                     'label' => 'EOL Amount Layer 1',
