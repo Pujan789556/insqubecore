@@ -111,16 +111,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     </td>
                 </tr>
 
-                <tr>
-                    <td colspan="2">
-                        <?php
-                        /**
-                         * Policy Installments
-                         */
-                        $this->load->view('policies/print/_schedule_installments');
-                        ?>
-                    </td>
-                </tr>
+
 
 
                 <?php
@@ -129,15 +120,17 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                 /**
                  * Item List
                  */
-                $section_elements   = $form_elements['item'];
-                $item              = $object_attributes->item ?? NULL;
+                $section_elements   = $form_elements['items'];
+                $items              = $object_attributes->items ?? NULL;
+                $item_count         = count( $items ?? [] );
                 ?>
                 <tr>
                     <td colspan="2">
-                        <strong>SPECIFICATION OF INSURED ITEMS</strong><br>
+                        <strong>SECTION 1 - MATERIAL DAMAGE</strong><br>
                         <table class="table table-condensed">
                             <thead>
                                 <tr>
+                                    <td width="5%">S.N.</td>
                                     <?php foreach($section_elements as $elem): ?>
                                         <td><?php echo $elem['label'] ?></td>
                                     <?php endforeach; ?>
@@ -145,29 +138,144 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                             </thead>
 
                             <tbody>
-                                <tr>
-                                    <?php foreach($section_elements as $elem):
-                                        $key =  $elem['_key'];
-                                        $value = $item->{$key};
-                                    ?>
+                                <?php
+                                $i = 1;
+                                foreach($items as $item_record): ?>
+                                    <tr>
+                                        <td><?php echo $i++; ?></td>
+                                        <?php foreach($section_elements as $elem):
+                                            $key =  $elem['_key'];
+                                            $value = $item_record->{$key};
+                                        ?>
 
-                                        <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                            <?php echo htmlspecialchars($value)?>
-                                        </td>
-                                    <?php endforeach ?>
-                                </tr>
+                                            <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
+                                                <?php echo $key == 'sum_insured' ? number_format($value, 2) : htmlspecialchars($value);?>
+                                            </td>
+                                        <?php endforeach ?>
+                                    </tr>
+                                <?php endforeach ?>
                                 <tr>
-                                    <td class="text-bold">Total Sum Insured Amount(Rs.)</td>
+                                    <td colspan="5" class="text-bold">Total Sum Insured Amount(Rs.)</td>
                                     <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2) ?></td>
-                                    <td>&nbsp;</td>
                                 </tr>
                             </tbody>
                         </table>
                     </td>
                 </tr>
                 <tr>
+                    <td colspan="2" class="small"><strong>Excess/Deductible:</strong> <?php echo nl2br(htmlspecialchars($object_attributes->deductible)); ?></td>
+                </tr>
+                <tr>
                     <td colspan="2" class="small"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <strong>SECTION 2 - EXTERNAL DATA MEDIA</strong><br>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <td><strong>Insured Item</strong></td>
+                                    <td><strong>Sum Insured (Rs.)</strong></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Data media (type and quantity)</td>
+                                    <td>NIL</td>
+                                </tr>
+                                <tr>
+                                    <td>Expenses for reconstruction and re-recording of information</td>
+                                    <td>NIL</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right"><strong>Total Sum Insured</strong></td>
+                                    <td><strong>NIL</strong></td>
+                                </tr>
+                            </tbody>
+                        </table><br>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <td><strong>Deductible (% of loss amount)</strong></td>
+                                    <td><strong>Minimum deductible</strong></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <strong>SECTION 3 - INCREASED COST OF WORKING</strong><br>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <td rowspan="2"><strong>Insured Item</strong></td>
+                                    <td colspan="2"><strong>Limit of indemnity</strong></td>
+                                    <td rowspan="2"><strong>Sum Insured (Rs.)</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>per day</strong></td>
+                                    <td><strong>per month</strong></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Rental of substitute electronic data processing equipment</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>NIL</td>
+                                </tr>
+                                <tr>
+                                    <td>Personal expense</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>NIL</td>
+                                </tr>
+                                <tr>
+                                    <td>Expense of transport of materials</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>NIL</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right" colspan="3"><strong>Total Sum Insured</strong></td>
+                                    <td><strong>NIL</strong></td>
+                                </tr>
+                            </tbody>
+                        </table><br>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <td><strong>Indemnity period (months)</strong></td>
+                                    <td><strong>Time excess (days) </strong></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+
                 <tr>
                     <td colspan="2" class="small">
                         In witness whereof the undersigned acting on behalf and under the Authority of the Company that hereunder set his hand at <span style="text-decoration: underline; font-weight: bold"><?php echo htmlspecialchars($record->branch_name_en); ?></span> on this <span style="text-decoration: underline; font-weight: bold"><?php echo date('jS', strtotime($record->issued_date) ); ?></span> day of <span style="text-decoration: underline; font-weight: bold"><?php echo date('F, Y', strtotime($record->issued_date) ); ?></span>.

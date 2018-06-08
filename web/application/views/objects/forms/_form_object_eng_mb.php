@@ -20,19 +20,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     'form_elements' => $section_elements,
                     'form_record'   => $record
                 ]);
+
+                // Items Cols
+                $items_cols = $form_elements['items'];
                 ?>
                 <p class="help-block">Please note that the excel file must have the following format:</p>
                 <table class="table table-condensed table-bordered text-danger">
                     <thead>
                         <tr>
-                            <th>Description</th>
-                            <th>Sum Insured(Rs)</th>
+                            <?php foreach($items_cols as $single): ?>
+                                <th><?php echo $single['label'] ?></th>
+                            <?php endforeach ?>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>...</td>
-                            <td>...</td>
+                            <?php foreach($items_cols as $single): ?>
+                                <th>...</th>
+                            <?php endforeach ?>
                         </tr>
                     </tbody>
                 </table>

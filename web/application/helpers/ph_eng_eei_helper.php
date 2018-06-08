@@ -99,6 +99,15 @@ if ( ! function_exists('_OBJ_ENG_EEI_validation_rules'))
 			        '_required' => true
 			    ],
 			    [
+			        'field' => 'object[deductible]',
+			        '_key' => 'deductible',
+			        'label' => 'Deductible / Excess',
+			        'rules' => 'trim|required|max_length[1000]',
+			        'rows' 		=> 5,
+			        '_type'     => 'textarea',
+			        '_required' => true
+			    ],
+			    [
 			        'field' => 'document',
 			        '_key' => 'document',
 			        'label' => 'Upload Item List File (.xls or .xlsx)',
@@ -108,42 +117,56 @@ if ( ! function_exists('_OBJ_ENG_EEI_validation_rules'))
 			    ],
 		    ],
 
-
 		    /**
 		     * Item Details
 		     */
-		    'item' => [
-			    [
-			        'field' => 'object[item][description]',
-			        '_key' => 'description',
-			        'label' => 'Item Summary',
-			        'rules' => 'trim|required|max_length[500]',
-			        '_type' => 'textarea',
-			        'rows' 	=> 4,
+		    'items' => [
+		    	[
+			        'field' => 'object[items][qty][]',
+			        '_key' => 'qty',
+			        'label' => 'Quantity',
+			        'rules' => 'trim|required|integer|max_length[10]',
+			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
 			    ],
 			    [
-			        'field' => 'object[item][sum_insured]',
+			        'field' => 'object[items][code][]',
+			        '_key' => 'code',
+			        'label' => 'Code',
+			        'rules' => 'trim|max_length[100]',
+			        '_type' => 'text',
+			        '_show_label' 	=> false,
+			        '_required' 	=> false
+			    ],
+			    [
+			        'field' => 'object[items][description][]',
+			        '_key' => 'description',
+			        'label' => 'Description',
+			        'rules' => 'trim|required|max_length[500]',
+			        '_type' => 'text',
+			        '_show_label' 	=> false,
+			        '_required' 	=> true
+			    ],
+			    [
+			        'field' => 'object[items][year_mfd][]',
+			        '_key' => 'year_mfd',
+			        'label' => 'Year of Mfd.',
+			        'rules' => 'trim|integer|max_length[4]',
+			        '_type' => 'text',
+			        '_show_label' 	=> false,
+			        '_required' 	=> false
+			    ],
+			    [
+			        'field' => 'object[items][sum_insured][]',
 			        '_key' => 'sum_insured',
 			        'label' => 'Sum Insured(Rs)',
 			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
-			    ],
-			    [
-			        'field' => 'object[item][excess]',
-			        '_key' => 'excess',
-			        'label' => 'Excess',
-			        'rules' => 'trim|max_length[300]',
-			        '_type' => 'textarea',
-			        'rows' 	=> 4,
-			        '_show_label' 	=> false,
-			        '_required' 	=> true
 			    ]
-		    ],
-
+		    ]
 		];
 
 
@@ -179,52 +202,126 @@ if ( ! function_exists('_OBJ_ENG_EEI_pre_save_tasks'))
 	function _OBJ_ENG_EEI_pre_save_tasks( array $data, $record )
 	{
 		/**
-		 * Task : Upload Excel File of Item List, and save
-		 * 		  the name back to Object attributes to access it later
+		 * Task : Read Excel File from Upload and Render into data list
 		 *
+		 * !!! NOTE - We are not going to save this document as it is
+		 * 			  only used to extract the item list
 		 */
-		$attributes 	= json_decode($record->attributes ?? NULL);
-		$old_document 	= $attributes->document ?? NULL;
+
+		$CI =& get_instance();
 
 
-		$options = [
-			'config' => [
-				'encrypt_name' 	=> TRUE,
-                'upload_path' 	=> Objects::$upload_path,
-                'allowed_types' => 'xls|xlsx',
-                'max_size' 		=> '2048'
-			],
-			'form_field' => 'document',
+		$filename = $_FILES['document']['name'];
+		if( $filename  )
+		{
+			if( !is_valid_file_extension($filename, ['xls', 'xlsx']) )
+			{
+				throw new Exception("Exception [Helper: ph_eng_bl_helper][Method: _OBJ_ENG_EEI_pre_save_tasks()]: Invalid file uploaded. Please upload only excel file(.xls or .xlsx).");
+			}
+			else
+			{
+				$tmp_file = $_FILES['document']['tmp_name'];
 
-			'create_thumb' => FALSE,
+				/**
+				 * Get excel data into array
+				 */
+				$excel_data = excel_to_array($tmp_file);
 
-			// Delete Old file
-			'old_files' => $old_document ? [$old_document] : [],
-			'delete_old' => TRUE
-		];
-		$upload_result = upload_insqube_media($options);
+				/**
+				 * Excel Data Structure Must follow this structure
+				 *
+				[1] => Array
+		        (
+		            [A] => Quantity
+		            [B] => Code
+		            [C] => Description
+		            [D] => Year of MFD
+		            [E] => Sum Insured
+		        )
+		        */
 
-		$status 		= $upload_result['status'];
-		$message 		= $upload_result['message'];
-		$files 			= $upload_result['files'];
+		        // Remove Header Row
+		        array_shift($excel_data);
 
-		if( $status === 'success' )
-        {
-        	$document = $files[0];
-        	$data['object']['document'] = $document;
-        }
+		        /**
+		         * Format data to save into JSON Object Items
+		         */
+		        $excel_columns = [ 'A' => 'qty', 'B' => 'code', 'C' => 'description', 'D' => 'year_mfd', 'E' => 'sum_insured' ];
+		        $items = [];
+		        foreach($excel_data as $row)
+		        {
+		        	/**
+		        	 * At least you need to have description and sum_insured amount filled
+		        	 */
+		        	if( !empty($row['C']) && !empty($row['E']) )
+		        	{
+		        		foreach($excel_columns as $col_index => $item_key)
+			        	{
+			        		$col_value = $row[$col_index] ?? NULL;
 
-        /**
-         * No File Selected in Edit Mode, Use the old one
-         */
-        else if( $status === 'no_file_selected' )
-        {
-			// Old Document as it is
-			$data['object']['document'] = $old_document;
-        }
-        else{
-        	throw new Exception("Exception [Helper: ph_eng_eei_helper][Method: _OBJ_ENG_EEI_pre_save_tasks()]: " . $message );
-        }
+			        		// If Sum Insured Column, Get Clean DECIMAL Value.
+			        		if($col_index === 'E')
+			        		{
+			        			// Remove all formatting except fractional part
+								$col_value 	= (float) filter_var($col_value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+			        		}
+			        		$items[$item_key][] = $col_value;
+			        	}
+		        	}
+		        }
+
+		        if( !$items )
+		        {
+		        	throw new Exception("Exception [Helper: ph_eng_eei_helper][Method: _OBJ_ENG_EEI_pre_save_tasks()]: Excel file does not contain valid data.");
+		        }
+
+		        /**
+		         * Add Items into the data
+		         */
+		        $data['object']['items'] = $items;
+			}
+		}
+
+		/**
+		 * Format Items
+		 */
+		$data = _OBJ_ENG_EEI_format_items($data);
+
+
+		return $data;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_ENG_EEI_format_items'))
+{
+	/**
+	 * Format Fire Object Items
+	 *
+	 * @param array $data 		Post Data
+	 * @return array
+	 */
+	function _OBJ_ENG_EEI_format_items( array $data )
+	{
+		$items 		= $data['object']['items'];
+		$item_rules = _OBJ_ENG_EEI_validation_rules(IQB_SUB_PORTFOLIO_ENG_EEI_ID)['items'];
+
+		$items_formatted = [];
+		$count = count($items['description']);
+
+		for($i=0; $i < $count; $i++)
+		{
+			$single = [];
+			foreach($item_rules as $rule)
+			{
+				$key = $rule['_key'];
+				$single[$key] = $items[$key][$i];
+			}
+			$items_formatted[] = $single;
+		}
+
+		$data['object']['items'] = $items_formatted;
 
 		return $data;
 	}
@@ -247,9 +344,19 @@ if ( ! function_exists('_OBJ_ENG_EEI_compute_sum_insured_amount'))
 	function _OBJ_ENG_EEI_compute_sum_insured_amount( $portfolio_id, $data )
 	{
 		/**
-		 * We have single item, so it's SI is the object's total SI
+		 * Sum up all the item's sum insured amount to get the total Sum Insured
+		 * Amount
 		 */
-		$amt_sum_insured = $data['item']['sum_insured'] ?? 0.00;
+		$amt_sum_insured 	= 0.00;
+		$items = $data['items'] ?? [];
+		foreach($items as $single)
+		{
+			$si_per_item = $single['sum_insured'];
+			// Clean all formatting ( as data can come from excel sheet with comma on thousands eg. 10,00,000.00 )
+			$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+			$amt_sum_insured +=  $si_per_item;
+		}
+
 
 		// NO SI Breakdown for this Portfolio
 		return ['amt_sum_insured' => $amt_sum_insured];
