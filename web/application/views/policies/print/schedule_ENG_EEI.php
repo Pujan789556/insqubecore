@@ -168,121 +168,113 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                 <tr>
                     <td colspan="2" class="small"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>
+            </tbody>
+        </table>
 
+        <pagebreak>
+        <h3>SECTION 2 - EXTERNAL DATA MEDIA</h3>
+        <table>
+            <thead>
                 <tr>
-                    <td colspan="2">
-                        <strong>SECTION 2 - EXTERNAL DATA MEDIA</strong><br>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <td><strong>Insured Item</strong></td>
-                                    <td><strong>Sum Insured (Rs.)</strong></td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Data media (type and quantity)</td>
-                                    <td>NIL</td>
-                                </tr>
-                                <tr>
-                                    <td>Expenses for reconstruction and re-recording of information</td>
-                                    <td>NIL</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right"><strong>Total Sum Insured</strong></td>
-                                    <td><strong>NIL</strong></td>
-                                </tr>
-                            </tbody>
-                        </table><br>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <td><strong>Deductible (% of loss amount)</strong></td>
-                                    <td><strong>Minimum deductible</strong></td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
+                    <td><strong>Insured Item</strong></td>
+                    <td><strong>Sum Insured (Rs.)</strong></td>
                 </tr>
-
+            </thead>
+            <tbody>
                 <tr>
-                    <td colspan="2">
-                        <strong>SECTION 3 - INCREASED COST OF WORKING</strong><br>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <td rowspan="2"><strong>Insured Item</strong></td>
-                                    <td colspan="2"><strong>Limit of indemnity</strong></td>
-                                    <td rowspan="2"><strong>Sum Insured (Rs.)</strong></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>per day</strong></td>
-                                    <td><strong>per month</strong></td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Rental of substitute electronic data processing equipment</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>NIL</td>
-                                </tr>
-                                <tr>
-                                    <td>Personal expense</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>NIL</td>
-                                </tr>
-                                <tr>
-                                    <td>Expense of transport of materials</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>NIL</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right" colspan="3"><strong>Total Sum Insured</strong></td>
-                                    <td><strong>NIL</strong></td>
-                                </tr>
-                            </tbody>
-                        </table><br>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <td><strong>Indemnity period (months)</strong></td>
-                                    <td><strong>Time excess (days) </strong></td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
+                    <td>Data media (type and quantity)</td>
+                    <td>NIL</td>
                 </tr>
-
                 <tr>
-                    <td colspan="2" class="small">
-                        In witness whereof the undersigned acting on behalf and under the Authority of the Company that hereunder set his hand at <span style="text-decoration: underline; font-weight: bold"><?php echo htmlspecialchars($record->branch_name_en); ?></span> on this <span style="text-decoration: underline; font-weight: bold"><?php echo date('jS', strtotime($record->issued_date) ); ?></span> day of <span style="text-decoration: underline; font-weight: bold"><?php echo date('F, Y', strtotime($record->issued_date) ); ?></span>.
-                    </td>
+                    <td>Expenses for reconstruction and re-recording of information</td>
+                    <td>NIL</td>
+                </tr>
+                <tr>
+                    <td class="text-right"><strong>Total Sum Insured</strong></td>
+                    <td><strong>NIL</strong></td>
                 </tr>
             </tbody>
-        </table><br/>
+        </table><br>
+        <table>
+            <thead>
+                <tr>
+                    <td><strong>Deductible (% of loss amount)</strong></td>
+                    <td><strong>Minimum deductible</strong></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>SECTION 3 - INCREASED COST OF WORKING</h3>
+        <table>
+            <thead>
+                <tr>
+                    <td rowspan="2"><strong>Insured Item</strong></td>
+                    <td colspan="2"><strong>Limit of indemnity</strong></td>
+                    <td rowspan="2"><strong>Sum Insured (Rs.)</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>per day</strong></td>
+                    <td><strong>per month</strong></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Rental of substitute electronic data processing equipment</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>NIL</td>
+                </tr>
+                <tr>
+                    <td>Personal expense</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>NIL</td>
+                </tr>
+                <tr>
+                    <td>Expense of transport of materials</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>NIL</td>
+                </tr>
+                <tr>
+                    <td class="text-right" colspan="3"><strong>Total Sum Insured</strong></td>
+                    <td><strong>NIL</strong></td>
+                </tr>
+            </tbody>
+        </table><br>
+        <table>
+            <thead>
+                <tr>
+                    <td><strong>Indemnity period (months)</strong></td>
+                    <td><strong>Time excess (days) </strong></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p class="small">
+            In witness whereof the undersigned acting on behalf and under the Authority of the Company that hereunder set his hand at <span style="text-decoration: underline; font-weight: bold"><?php echo htmlspecialchars($record->branch_name_en); ?></span> on this <span style="text-decoration: underline; font-weight: bold"><?php echo date('jS', strtotime($record->issued_date) ); ?></span> day of <span style="text-decoration: underline; font-weight: bold"><?php echo date('F, Y', strtotime($record->issued_date) ); ?></span>.
+        </p><br>
+
         <?php
         /**
          * Load Footer
