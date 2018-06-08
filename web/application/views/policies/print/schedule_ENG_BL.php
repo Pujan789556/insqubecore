@@ -184,13 +184,17 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     </td>
                 </tr>
                 <tr>
+                    <td><strong>2. SURROUNDING PROPERTY OF THE INSURED INCLUDING PROPERTY HELD IN TRUST OR COMMISSION</strong></td>
+                    <td><br><br></td>
+                </tr>
+                <tr>
                     <td colspan="2">
                         <?php
                         $section_elements   = $form_elements['third_party'];
                         $items              = $object_attributes->third_party ?? NULL;
                         $item_count         = count( $items->limit ?? [] );
                         ?>
-                        <strong>2. THIRD PARTY LIABILITY</strong><br>
+                        <strong>3. THIRD PARTY LIABILITY</strong><br>
                         <table class="table table-condensed">
                             <thead>
                                 <tr>
