@@ -145,6 +145,16 @@ class Ri_setup_treaty_model extends MY_Model
             // RI Distribution
             'reinsurers' => [
                 [
+                    'field' => 'broker_ids[]',
+                    'label' => 'Broker',
+                    'rules' => 'trim|integer|max_length[8]|in_list[' . implode( ',', array_keys($broker_dropdown) ) . ']',
+                    '_field'        => 'broker_id',
+                    '_type'         => 'dropdown',
+                    '_show_label'   => false,
+                    '_data'         => IQB_BLANK_SELECT + $broker_dropdown,
+                    '_required'     => true
+                ],
+                [
                     'field' => 'reinsurer_ids[]',
                     'label' => 'Reinsurer',
                     'rules' => 'trim|required|integer|max_length[8]|in_list[' . implode( ',', array_keys($reinsurer_dropdown) ) . ']',
@@ -989,6 +999,7 @@ class Ri_setup_treaty_model extends MY_Model
     public function batch_insert_treaty_distribution($id, $data)
     {
         // Extract All Data
+        $broker_ids             = $data['broker_ids'];
         $reinsurer_ids          = $data['reinsurer_ids'];
         $distribution_percent   = $data['distribution_percent'];
 
@@ -1000,6 +1011,7 @@ class Ri_setup_treaty_model extends MY_Model
             {
                 $batch_distribution_data[] = [
                     'treaty_id'             => $id,
+                    'broker_id'             => $broker_ids[$i] ? $broker_ids[$i] : NULL,
                     'company_id'            => $reinsurer_ids[$i],
                     'distribution_percent'  => $distribution_percent[$i],
                     'flag_leader'           => IQB_FLAG_OFF
@@ -1416,9 +1428,14 @@ class Ri_setup_treaty_model extends MY_Model
 
     public function get_treaty_distribution_by_treaty($id)
     {
-        return $this->db->select('TD.treaty_id, TD.company_id, TD.distribution_percent, TD.flag_leader, C.name, C.picture, C.pan_no, C.active, C.type, C.contact')
+        return $this->db->select(
+                        'TD.treaty_id, TD.broker_id, TD.company_id, TD.distribution_percent, TD.flag_leader, '.
+                        'C.name as reinsurer_name, ' .
+                        'B.name as broker_name'
+                    )
                         ->from(self::$table_treaty_distribution . ' TD')
                         ->join('master_companies C', 'C.id = TD.company_id')
+                        ->join('master_companies B', 'B.id = TD.broker_id', 'left')
                         ->where('TD.treaty_id', $id)
                         ->order_by('TD.flag_leader', 'DESC')
                         ->get()->result();

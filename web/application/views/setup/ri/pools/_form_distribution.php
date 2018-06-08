@@ -17,10 +17,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <div class="box-header with-border">
             <h4 class="box-title">RI(POOL) Distribution Table</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body" style="overflow-x: scroll;">
             <table class="table table-bordered table-condensed">
                 <thead>
                     <tr>
+                        <th>Broker Company</th>
                         <th>Re-Insurance Company<?php echo field_compulsary_text( TRUE )?></th>
                         <th>% Share<?php echo field_compulsary_text( TRUE )?></th>
                         <th>Action</th>
@@ -85,7 +86,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th class="text-right">Total(%)</th>
+                        <th class="text-right" colspan="2">Total(%)</th>
                         <td id="__total_box" class="<?php echo $total_percentage == 100 ? 'text-green' : 'text-red';?>"><?php echo number_format($total_percentage, 2);?></td>
                         <td>&nbsp;</td>
                     </tr>

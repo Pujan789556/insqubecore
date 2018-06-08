@@ -8,6 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<thead>
 		<tr>
 			<th>SN</th>
+			<th>Broker</th>
 			<th>Reinsurer Company</th>
 			<th class="text-right">Distribution(%)</th>
 			<th>&nbsp;</th>
@@ -21,10 +22,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<tr>
 				<td><?php echo $sn++;?>.</td>
 				<td>
+					<?php if($distrib->broker_id): ?>
+						<a href="<?php echo site_url('companies/details/' . $distrib->broker_id)?>" target="_blank">
+							<?php echo $distrib->broker_name?>
+						</a>
+					<?php else: ?>
+						Direct
+					<?php endif ?>
+				</td>
+				<td>
 					<a href="<?php echo site_url('companies/details/' . $distrib->company_id)?>" target="_blank">
-						<?php echo $distrib->name?>
+						<?php echo $distrib->reinsurer_name?>
 					</a>
 				</td>
+
 				<td class="text-right"><?php echo $distrib->distribution_percent?></td>
 				<td><?php echo $distrib->flag_leader ? '<span class="text-success"><i class="fa fa-check"></i> Leader</span>' : '';?></td>
 			</tr>
