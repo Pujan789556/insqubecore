@@ -51,7 +51,7 @@ $premium_computation_table = $endorsement_record->premium_computation_table ? js
                 <thead>
                     <tr>
                         <th>Risk</th>
-                        <th>Rate</th>
+                        <th>Rate (Rs. Per Thousand)</th>
                     </tr>
                 </thead>
                 <tbody>

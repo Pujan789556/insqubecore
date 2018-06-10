@@ -181,7 +181,7 @@ if ( ! function_exists('_OBJ_MISC_EPA_validation_rules'))
 			        'field' => 'object[items][position][]',
 			        '_key' => 'position',
 			        'label' => 'पद',
-			        'rules' => 'trim|required|max_length[200]',
+			        'rules' => 'trim|max_length[200]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -190,7 +190,7 @@ if ( ! function_exists('_OBJ_MISC_EPA_validation_rules'))
 			        'field' => 'object[items][document_id][]',
 			        '_key' => 'document_id',
 			        'label' => 'नागरिकता/गाइड लाइसेन्स',
-			        'rules' => 'trim|required|max_length[200]',
+			        'rules' => 'trim|max_length[200]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true
@@ -199,7 +199,7 @@ if ( ! function_exists('_OBJ_MISC_EPA_validation_rules'))
 			        'field' => 'object[items][address][]',
 			        '_key' => 'address',
 			        'label' => 'ठेगाना',
-			        'rules' => 'trim|required|max_length[200]',
+			        'rules' => 'trim|max_length[200]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
 			        '_required' 	=> true

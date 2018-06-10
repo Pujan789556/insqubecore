@@ -517,19 +517,19 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 
 					// Basic Premium
 					$cost_calculation_table[] = [
-						'label' => "Basic Premium ({$rate_basic}%)",
+						'label' => "Basic Premium",
 						'value' => $premium_basic
 					];
 
 					// Additional Premium - Cash in Premises
 					$cost_calculation_table[] = [
-						'label' => "Additional Premium - Cash in Premises ({$rate_cip}%)",
+						'label' => "Additional Premium - Cash in Premises",
 						'value' => $premium_cip
 					];
 
 					// Additional Premium - Cash in Transit
 					$cost_calculation_table[] = [
-						'label' => "Additional Premium - Cash in Transit ({$rate_cit}%)",
+						'label' => "Additional Premium - Cash in Transit",
 						'value' => $premium_cit
 					];
 
@@ -542,7 +542,7 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 					// E = Forgery Rate X Total Staff
 					$E =  intval($object_attributes->staff_count) * $forgery_dishonesty_rate;
 					$cost_calculation_table[] = [
-						'label' => "Forgery & Dishonesty (Rs. {$forgery_dishonesty_rate} per Staff)",
+						'label' => "Forgery & Dishonesty",
 						'value' => $E
 					];
 
@@ -555,15 +555,16 @@ if ( ! function_exists('__save_premium_MISC_BB'))
 						$rate = $post_data['premium']['others']['rate'][$risk_id];
 
 						// Compute only if rate is supplied
+						// NOTE: Rate is Per Thousand
 						if($rate)
 						{
-							$per_risk_premium = ( $rate * $SI ) / 100.00;
+							$per_risk_premium = ( $rate * $SI ) / 1000.00;
 							$additional_risk_premium += $per_risk_premium;
 
 							if($per_risk_premium)
 							{
 								$cost_calculation_table[] = [
-									'label' => "$risk_name ({$rate}%)",
+									'label' => "$risk_name",
 									'value' => $per_risk_premium
 								];
 							}
