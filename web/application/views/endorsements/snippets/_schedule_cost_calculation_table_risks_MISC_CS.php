@@ -4,11 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy: Details - Policy Premium Overview Card - MISCELLANEOUS - CASH IN SAFE
 */
 $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_decode($endorsement_record->cost_calculation_table) : NULL;
-$property_table = NULL;
 $risk_table     = NULL;
 if($cost_calculation_table)
 {
-    $property_table = $cost_calculation_table->property_table;
     $risk_table     = $cost_calculation_table->risk_table;
 }
 $total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
