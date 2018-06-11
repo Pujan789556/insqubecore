@@ -240,6 +240,24 @@ if ( ! function_exists('_TXN_MISC_TMI_premium_validation_rules'))
 	function _TXN_MISC_TMI_premium_validation_rules($policy_record, $pfs_record, $policy_object, $for_form_processing = FALSE )
 	{
 		$validation_rules = [
+
+			/**
+			 * Forex Exchange Date
+			 */
+			'forex' => [
+				[
+	                'field' => 'premium[forex_date]',
+	                'label' => 'Forex Date',
+	                'rules' => 'trim|required|valid_date',
+	                '_type'     => 'date',
+	                '_key' 		=> 'forex_date',
+	                '_default'  => date('Y-m-d'),
+	                '_extra_attributes' => 'data-provide="datepicker-inline"',
+	                '_required' => true
+	            ]
+			],
+
+
 			/**
 			 * Common to All Package Type
 			 * ----------------------------
@@ -347,10 +365,11 @@ if ( ! function_exists('_OBJ_MISC_TMI_tariff_rate'))
 	 * @param object $tariff_record
 	 * @param integer $tmi_days
 	 * @param integer $age
+	 * @param date $forex_date
 	 * @param bool $convert_forex
 	 * @return float
 	 */
-	function _OBJ_MISC_TMI_tariff_rate( $tariff_record, $plan_type, $tmi_days, $age, $convert_forex = true )
+	function _OBJ_MISC_TMI_tariff_rate( $tariff_record, $plan_type, $tmi_days, $age, $forex_date, $convert_forex = true )
 	{
 		$CI =& get_instance();
 
@@ -392,7 +411,7 @@ if ( ! function_exists('_OBJ_MISC_TMI_tariff_rate'))
 		if( $convert_forex )
 		{
 			$CI->load->helper('forex');
-			$rate = forex_conversion(date('Y-m-d'), 'USD', $rate);
+			$rate = forex_conversion($forex_date, 'USD', $rate);
 		}
 
 		return $rate;
@@ -520,8 +539,9 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 					 */
 					$policy_duration = date_difference($policy_record->start_date, $policy_record->end_date, 'd');
 
-					$age 	= date_difference($object_attributes->dob, date('Y-m-d'), 'y');
-					$RATE 	= _OBJ_MISC_TMI_tariff_rate( $tariff_record, $object_attributes->plan_type, $policy_duration, $age );
+					$age 		= date_difference($object_attributes->dob, date('Y-m-d'), 'y');
+					$forex_date = $post_data['premium']['forex_date'];
+					$RATE 		= _OBJ_MISC_TMI_tariff_rate( $tariff_record, $object_attributes->plan_type, $policy_duration, $age, $forex_date );
 
 
 					/**
@@ -584,7 +604,7 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 					 * -------------------------
 					 * 	!!! No additional premium computation information.
 					 */
-					$txn_data['premium_computation_table'] = NULL;
+					$txn_data['premium_computation_table'] = json_encode($post_data['premium']);
 
 
 					/**
