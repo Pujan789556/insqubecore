@@ -96,7 +96,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                 <td>Total (NPR):</td>
                                 <td>
                                     <?php
-                                    $forex = get_forex_rate_by_base_currency($record->start_date, $si_components->currency);
+                                    $forex = get_forex_rate_by_base_currency($si_components->forex_date, $si_components->currency);
                                     echo number_format((float)$record->object_amt_sum_insured, 2),
                                          " ({$forex->BaseCurrency} {$forex->BaseValue} = {$forex->TargetCurrency} {$forex->TargetSell})";
 

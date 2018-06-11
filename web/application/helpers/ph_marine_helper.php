@@ -269,6 +269,16 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        '_required' => true
 			    ],
 			    [
+	                'field' => 'object[sum_insured][forex_date]',
+	                'label' => 'Forex Date',
+	                'rules' => 'trim|required|valid_date',
+	                '_type'     => 'date',
+	                '_key' 		=> 'forex_date',
+	                '_default'  => date('Y-m-d'),
+	                '_extra_attributes' => 'data-provide="datepicker-inline"',
+	                '_required' => true
+	            ],
+			    [
 			        'field' => 'object[sum_insured][tolerance_limit]',
 			        '_key' => 'tolerance_limit',
 			        'label' => 'Tolerance Limit (%)',
@@ -503,6 +513,8 @@ if ( ! function_exists('_OBJ_MARINE_compute_sum_insured_amount'))
 
 		$sum_insured_src 	= $data['sum_insured'];
 		$currency 			= $sum_insured_src['currency'];
+		$forex_date 		= $sum_insured_src['forex_date'];
+
 
 		$A 	= $sum_insured_src['invoice_value'];
 		$B 	= ( $A * floatval($sum_insured_src['tolerance_limit']) ) / 100.00;
@@ -548,8 +560,7 @@ if ( ! function_exists('_OBJ_MARINE_compute_sum_insured_amount'))
 			/**
 			 * Let's Convert it into NRS
 			 */
-			$date = date('Y-m-d');
-			$SI = forex_conversion($date, $currency, $SI);
+			$SI = forex_conversion($forex_date, $currency, $SI);
 		}
 
 		// NO SI Breakdown for this Portfolio
