@@ -76,9 +76,9 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
     <?php if($object_attributes->item_attached === 'Y'):?>
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
-                <h4 class="box-title">Discount/Additional Charges (Rate &nbsp; Amount)</h4>
+                <h4 class="box-title">Discount/Additional Charges (Rate & Amount)</h4>
             </div>
-            <div class="box-body">
+            <div class="box-body form-horizontal">
                 <div class="row">
                     <div class="col-sm-6">
                         <?php
@@ -157,7 +157,7 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
                             if($premium_computation_table_arr)
                             {
                                 // Premium
-                                $premium = $premium_computation_table_arr['file']['premium'][$risk_id];
+                                $premium = $premium_computation_table_arr['file']['premium'][$risk_id] ?? '';
                                 $formatted_premium_elements[1]['_default'] = $premium;
                             }
                             ?>
