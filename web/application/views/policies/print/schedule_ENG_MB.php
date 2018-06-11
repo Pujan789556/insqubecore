@@ -111,18 +111,6 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     </td>
                 </tr>
 
-                <tr>
-                    <td colspan="2">
-                        <?php
-                        /**
-                         * Policy Installments
-                         */
-                        $this->load->view('policies/print/_schedule_installments');
-                        ?>
-                    </td>
-                </tr>
-
-
                 <?php
                 $form_elements = _OBJ_ENG_MB_validation_rules($record->portfolio_id);
 
@@ -139,7 +127,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         <table class="table table-condensed">
                             <thead>
                                 <tr>
-                                    <td>SN</td>
+                                    <td width="5%">SN</td>
                                     <?php foreach($section_elements as $elem): ?>
                                         <td><?php echo $elem['label'] ?></td>
                                     <?php endforeach; ?>
@@ -151,7 +139,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                 $i = 1;
                                 foreach($items as $item_record): ?>
                                     <tr>
-                                        <td><?php echo $i++; ?></td>
+                                        <td align="center"><?php echo $i++; ?></td>
                                         <?php foreach($section_elements as $elem):
                                             $key =  $elem['_key'];
                                             $value = $item_record->{$key};
