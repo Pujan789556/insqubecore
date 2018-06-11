@@ -62,7 +62,7 @@ else
                         ?>
 
                             <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                <?php echo $key == 'sum_insured' ? number_format($value, 2) : htmlspecialchars($value);?>
+                                <?php echo $key == 'sum_insured' ? number_format($value, 2) : nl2br(htmlspecialchars($value));?>
                             </td>
                         <?php endforeach ?>
                     </tr>

@@ -152,7 +152,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                     ?>
 
                                         <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
-                                            <?php echo htmlspecialchars($value)?>
+                                            <?php echo nl2br(htmlspecialchars($value))?>
                                         </td>
                                     <?php endforeach ?>
                                 </tr>
