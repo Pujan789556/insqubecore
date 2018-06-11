@@ -467,17 +467,9 @@ class Endorsement_templates extends MY_Controller
 			$this->template->render_404();
 		}
 
-		$this->data['site_title'] = 'Endorsement Templates Details | ' . $record->portfolio_name_en;
-		$header_title = 'Endorsement Templates Details <small>' . $record->portfolio_name_en . '</small> - <small>' . _ENDORSEMENT_type_text($record->endorsement_type) . '</small>';
-		$this->template->partial(
-							'content_header',
-							'templates/_common/_content_header',
-							[
-								'content_header' => $header_title,
-								'breadcrumbs' => ['Endorsement Templates' => 'endorsement_templates', 'Details' => NULL]
-						])
-						->partial('content', 'setup/endorsement_templates/_details', compact('record'))
-						->render($this->data);
-
+		$this->template->json([
+			'html' 	=> $this->load->view('setup/endorsement_templates/_details', ['record' => $record], TRUE),
+			'title' => 'Endorsement Templates Details - ' .  $record->portfolio_name_en . '</small> - <small>' . _ENDORSEMENT_type_text($record->endorsement_type) . '</small>'
+		]);
     }
 }
