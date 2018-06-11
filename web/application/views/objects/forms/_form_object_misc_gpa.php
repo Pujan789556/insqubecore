@@ -54,13 +54,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <?php
             $section_elements   = $form_elements['items'];
             $items               = $record->items ?? NULL;
-            $item_count          = count( $items->sum_insured ?? [] );
+            $item_count          = count( $items ?? [] );
             ?>
             <table class="table table-bordered table-condensed no-margin">
                 <thead>
                     <tr>
                         <?php foreach($section_elements as $elem): ?>
-                            <th><?php echo $elem['label'] ?></th>
+                            <th><?php echo $elem['label'], field_compulsary_text($elem['_required']) ?></th>
                         <?php endforeach ?>
                         <th>Action</th>
                     </tr>
@@ -68,33 +68,33 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <tbody>
                     <?php
                         if($item_count && $item_count <= 300):
-                            for ($i=0; $i < $item_count; $i++):?>
-                            <tr <?php echo $i == 0 ? 'id="__gpa_items_row"' : '' ?>>
-                                    <td><?php echo ($i+1); ?></td>
-                                <?php foreach($section_elements as $single_element):?>
-                                    <td>
-                                        <?php
-                                        /**
-                                         * Load Single Element
-                                         */
-                                        $single_element['_default']    = $items->{$single_element['_key']}[$i] ?? '';
-                                        $single_element['_value']      = $single_element['_default'];
-                                        $this->load->view('templates/_common/_form_components_inline', [
-                                            'form_elements' => [$single_element],
-                                            'form_record'   => NULL
-                                        ]);
-                                        ?>
-                                    </td>
-                                <?php
-                                endforeach;
-                                if($i == 0):?>
-                                    <td>&nbsp;</td>
-                                <?php else:?>
-                                    <td width="10%"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'><i class="fa fa-trash"></i></a></td>
-                                <?php endif;?>
-                            </tr>
-                        <?php
-                            endfor;
+                            $i = 0;
+                            foreach($items as $item_record):?>
+                                <tr <?php echo $i++ == 0 ? 'id="__gpa_items_row"' : '' ?>>
+                                    <?php foreach($section_elements as $single_element):?>
+                                        <td>
+                                            <?php
+                                            /**
+                                             * Load Single Element
+                                             */
+                                            $single_element['_default']    = $item_record->{$single_element['_key']} ?? '';
+                                            $single_element['_value']      = $single_element['_default'];
+                                            $this->load->view('templates/_common/_form_components_inline', [
+                                                'form_elements' => [$single_element],
+                                                'form_record'   => NULL
+                                            ]);
+                                            ?>
+                                        </td>
+                                    <?php
+                                    endforeach;
+                                    if($i == 0):?>
+                                        <td>&nbsp;</td>
+                                    <?php else:?>
+                                        <td width="10%"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'><i class="fa fa-trash"></i></a></td>
+                                    <?php endif;?>
+                                </tr>
+                            <?php
+                            endforeach;
                         elseif($item_count > 300):?>
                             <tr>
                                 <td colspan="11"><p class="help-block">You have list of more than 300 personnels. Please make necessary change on excel file and upload.</p></td>

@@ -86,6 +86,13 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                     रसिदको मिति:  समय:
                                 </td>
                             </tr>
+
+                            <tr>
+                                <td>
+                                    <strong>बीमा लाभ</strong><br>
+                                    <?php echo nl2br(htmlspecialchars($object_attributes->benefit)) ?>
+                                </td>
+                            </tr>
                         </table>
                     </td>
 
@@ -170,5 +177,41 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
          */
         $this->load->view('policies/print/_schedule_footer', ['lang' => 'np']);
         ?>
+
+        <pagebreak>
+
+        <?php
+        $item_headings  = _OBJ_MISC_GPA_item_headings_dropdown();
+        $items              = $object_attributes->items ?? NULL;
+        $item_count         = count( $items ?? [] );
+         ?>
+        <h3>बीमालेखले रक्षावरण गर्ने बीमितहरु</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <td><strong>क्र. स.</strong></td>
+                    <?php foreach($item_headings as $key=>$label): ?>
+                        <td><strong><?php echo $label ?></strong></td>
+                    <?php endforeach ?>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $i = 1;
+                foreach($items as $item_record): ?>
+                    <tr>
+                        <td><?php echo $i++; ?></td>
+                        <?php foreach($item_headings as $key=>$label):
+                            $value = $item_record->{$key};
+                        ?>
+
+                            <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
+                                <?php echo $key == 'sum_insured' ? number_format($value, 2) : htmlspecialchars($value);?>
+                            </td>
+                        <?php endforeach ?>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </body>
 </html>

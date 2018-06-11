@@ -95,6 +95,15 @@ if ( ! function_exists('_OBJ_MISC_GPA_validation_rules'))
 			 */
 			'basic' =>[
 				[
+			        'field' => 'object[benefit]',
+			        '_key' => 'benefit',
+			        'label' => 'बीमा लाभ',
+			        'rules' => 'trim|required|max_length[2000]',
+			        '_type' => 'textarea',
+			        'rows'  => 5,
+			        '_required' 	=> true
+			    ],
+				[
 			        'field' => 'document',
 			        '_key' => 'document',
 			        'label' => 'Upload Item List File (.xls or .xlsx)',
@@ -131,19 +140,19 @@ if ( ! function_exists('_OBJ_MISC_GPA_validation_rules'))
 			        'field' => 'object[items][job_nature][]',
 			        '_key' => 'job_nature',
 			        'label' => 'पेशाको खास प्रकृति',
-			        'rules' => 'trim|required|max_length[200]',
+			        'rules' => 'trim|max_length[200]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
-			        '_required' 	=> true
+			        '_required' 	=> false
 			    ],
 			    [
 			        'field' => 'object[items][dob][]',
 			        '_key' => 'dob',
 			        'label' => 'जन्म मिति',
-			        'rules' => 'trim|required|max_length[40]',
+			        'rules' => 'trim|max_length[40]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
-			        '_required' 	=> true
+			        '_required' 	=> false
 			    ],
 			    [
 			        'field' => 'object[items][sum_insured][]',
@@ -155,40 +164,31 @@ if ( ! function_exists('_OBJ_MISC_GPA_validation_rules'))
 			        '_required' 	=> true
 			    ],
 			    [
-			        'field' => 'object[items][benefit][]',
-			        '_key' => 'benefit',
-			        'label' => 'लाभको समूह',
-			        'rules' => 'trim|required|max_length[40]',
-			        '_type' => 'text',
-			        '_show_label' 	=> false,
-			        '_required' 	=> true
-			    ],
-			    [
 			        'field' => 'object[items][weekly_income][]',
 			        '_key' => 'weekly_income',
 			        'label' => 'बीमितको साप्ताहिक आय',
-			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
-			        '_required' 	=> true
+			        '_required' 	=> false
 			    ],
 			    [
 			        'field' => 'object[items][nominee][]',
 			        '_key' => 'nominee',
 			        'label' => 'इच्छाएको ब्यक्तिको नाम थर',
-			        'rules' => 'trim|required|max_length[150]',
+			        'rules' => 'trim|max_length[150]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
-			        '_required' 	=> true
+			        '_required' 	=> false
 			    ],
 			    [
 			        'field' => 'object[items][nominee_relation][]',
 			        '_key' => 'nominee_relation',
 			        'label' => 'बीमित र इच्छाएको ब्यक्ति बीचको नाता',
-			        'rules' => 'trim|required|max_length[150]',
+			        'rules' => 'trim|max_length[150]',
 			        '_type' => 'text',
 			        '_show_label' 	=> false,
-			        '_required' 	=> true
+			        '_required' 	=> false
 			    ],
 			    [
 			        'field' => 'object[items][remarks][]',
@@ -198,7 +198,7 @@ if ( ! function_exists('_OBJ_MISC_GPA_validation_rules'))
 			        '_type' => 'textarea',
 			        'rows' 	=> 2,
 			        '_show_label' 	=> false,
-			        '_required' 	=> true
+			        '_required' 	=> false
 			    ],
 		    ]
 		];
@@ -388,6 +388,46 @@ if ( ! function_exists('_OBJ_MISC_GPA_pre_save_tasks'))
 		        $data['object']['items'] = $items;
 			}
 		}
+
+		/**
+		 * Format Items
+		 */
+		$data = _OBJ_MISC_GPA_format_items($data);
+		return $data;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MISC_GPA_format_items'))
+{
+	/**
+	 * Format Fire Object Items
+	 *
+	 * @param array $data 		Post Data
+	 * @return array
+	 */
+	function _OBJ_MISC_GPA_format_items( array $data )
+	{
+		$items 		= $data['object']['items'];
+		$item_rules = _OBJ_MISC_GPA_validation_rules(IQB_SUB_PORTFOLIO_MISC_GPA_ID)['items'];
+
+		$items_formatted = [];
+		$count = count($items['sum_insured']);
+
+		for($i=0; $i < $count; $i++)
+		{
+			$single = [];
+			foreach($item_rules as $rule)
+			{
+				$key = $rule['_key'];
+				$single[$key] = $items[$key][$i];
+			}
+			$items_formatted[] = $single;
+		}
+
+		$data['object']['items'] = $items_formatted;
+
 		return $data;
 	}
 }
@@ -413,11 +453,11 @@ if ( ! function_exists('_OBJ_MISC_GPA_compute_sum_insured_amount'))
 		 * Sum up all the item's sum insured amount to get the total Sum Insured
 		 * Amount
 		 */
-		$items_sum_insured 	= $data['items']['sum_insured'] ?? [];
 		$amt_sum_insured 	= 0.00;
-
-		foreach($items_sum_insured as $si_per_item)
+		$items = $data['items'] ?? [];
+		foreach($items as $single)
 		{
+			$si_per_item = $single['sum_insured'];
 			// Clean all formatting ( as data can come from excel sheet with comma on thousands eg. 10,00,000.00 )
 			$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 			$amt_sum_insured +=  $si_per_item;
