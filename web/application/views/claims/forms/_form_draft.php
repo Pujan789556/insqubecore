@@ -172,6 +172,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         showClear: true
     });
 
+    // Compute Claim Estimation
+    $('#loss_amount_ip').on('keyup', function(){
+        __compute_claim_estimation();
+    } )
+    $('#loss_amount_tpp').on('keyup', function(){
+        __compute_claim_estimation();
+    } )
+
+    function __compute_claim_estimation()
+    {
+        var $dst    = $('#estimated_claim_amount'),
+            $ip     = $('#loss_amount_ip'),
+            $tpp    = $('#loss_amount_tpp'),
+            v1      = parseFloat($ip.val()),
+            v2      = parseFloat($tpp.val()),
+            total   = 0;
+            if(v1) total += v1;
+            if(v2) total += v2;
+
+        $dst.val( total );
+    }
+
     /**
      * Duplicate Treaty Distribution Row
      */

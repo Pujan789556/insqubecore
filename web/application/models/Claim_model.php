@@ -109,6 +109,7 @@ class Claim_model extends MY_Model
                     'label' => 'Estimated Amount(Insured Property) (Rs.)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                     '_type' => 'text',
+                    '_id'   => 'loss_amount_ip',
                     '_required'     => true
                 ],
                 [
@@ -124,6 +125,7 @@ class Claim_model extends MY_Model
                     'label' => 'Estimated Amount(Third Party Property) (Rs.)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                     '_type' => 'text',
+                    '_id'   => 'loss_amount_tpp',
                     '_required'     => true
                 ],
             ],
@@ -227,6 +229,7 @@ class Claim_model extends MY_Model
                     'label' => 'Estimated Claim Amount (Rs.)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                     '_type' => 'text',
+                    '_id'   => 'estimated_claim_amount',
                     '_default'  => 0.00,
                     '_required' => true
                 ]
