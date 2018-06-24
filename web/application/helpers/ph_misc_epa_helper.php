@@ -638,6 +638,11 @@ if ( ! function_exists('_TXN_MISC_EPA_premium_validation_rules'))
 			/**
 			 * Premium Validation Rules - Template
 			 */
+
+			/**
+			 * !!! NOTE !!!
+			 * NO POOL RISK FOR THIS PORTFOLIO
+			 *
 			'premium' => [
                 [
                     'field' => 'premium[flag_pool_risk]',
@@ -649,6 +654,7 @@ if ( ! function_exists('_TXN_MISC_EPA_premium_validation_rules'))
                     '_required' => false,
                 ]
 			],
+			*/
 
 			/**
 			 * Common to All Package Type
