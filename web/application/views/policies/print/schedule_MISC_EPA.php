@@ -184,10 +184,13 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         </table>
                     </td>
                 </tr>
-                <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
-                </tr>
 
+                <tr>
+                    <td colspan="2">
+                        यस बीमलेख अन्तर्गत हुलदंगा, आतंकवाद तथा  द्धेशपुर्ण  जोखिम वहन हुने छ | <br>
+                        यस बीमालेख अन्तर्गत १६ वर्ष भन्दा मुनि तथा ६० वर्ष उमेर भन्दा माथिको कर्मचारीहरुको बीमा जोखिम बहन हुने छैन |
+                    </td>
+                </tr>
                 <tr>
                     <td colspan="2">
                         <strong class="border-b">भुक्तानी पाउने व्यक्तिः</strong><br><br>
@@ -336,8 +339,13 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     <?php endforeach ?>
                 </tbody>
             <?php endif ?>
-
-
         </table>
+
+        <table class="no-border">
+            <tr>
+                <td><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
+            </tr>
+        </table>
+
     </body>
 </html>
