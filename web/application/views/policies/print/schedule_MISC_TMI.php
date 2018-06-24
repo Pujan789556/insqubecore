@@ -58,6 +58,25 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
                                     <strong>Passport No.:</strong> <?php echo $object_attributes->passport_no; ?>
                                 </td>
                             </tr>
+                            <tr>
+                                <td>
+                                    <?php
+                                    if($object_attributes->plan_type == 'M')
+                                    {
+                                        $cover = '"A" to "C"';
+                                    }
+                                    else
+                                    {
+                                        $cover = '"A" to "N"';
+                                    }
+                                    $benefit_text = 'Benefits covered from ' . $cover .' of schedule of cover as mentioned below.'
+                                     ?>
+                                    <strong>Plan Required (Benefits Covered):</strong><br>
+                                    <?php echo $benefit_text; ?>
+
+                                    <strong>Area:</strong> <?php echo _OBJ_MISC_TMI_plan_dropdown(FALSE)[$object_attributes->plan_id]; ?>
+                                </td>
+                            </tr>
                         </table>
                     </td>
 
