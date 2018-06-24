@@ -168,14 +168,20 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                 <tr>
                     <td><strong>LC No. &amp; Date</strong></td>
                     <td>
-                        <?php echo htmlspecialchars($object_attributes->transit->lc_no), ', ', $object_attributes->transit->lc_date ?>
+                        <?php 
+                        $text = [htmlspecialchars($object_attributes->transit->lc_no), $object_attributes->transit->lc_date];
+                        echo implode(', ', array_filter($text));
+                        ?>
                     </td>
                 </tr>
 
                 <tr>
                     <td><strong>B/L No./C/N No./AW/B No./R/R No. &amp; Date</strong></td>
                     <td>
-                        <?php echo htmlspecialchars($object_attributes->transit->bl_no), ', ', $object_attributes->transit->bl_date ?>
+                    	<?php 
+                        $text = [htmlspecialchars($object_attributes->transit->bl_no), $object_attributes->transit->bl_date];
+                        echo implode(', ', array_filter($text));
+                        ?>
                     </td>
                 </tr>
                 <tr>
