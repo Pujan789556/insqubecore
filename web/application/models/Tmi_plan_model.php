@@ -165,7 +165,7 @@ class Tmi_plan_model extends MY_Model
                     'field' => 'benefits[section][]',
                     '_key'  => 'section',
                     'label' => 'Section of Cover',
-                    'rules' => 'trim|required|htmlspecialchars|max_length[10]',
+                    'rules' => 'trim|required|max_length[10]',
                     '_type'     => 'text',
                     '_show_label' => false,
                     '_required' => true
@@ -174,7 +174,7 @@ class Tmi_plan_model extends MY_Model
                     'field' => 'benefits[benefit][]',
                     '_key'  => 'benefit',
                     'label' => 'Benefit',
-                    'rules' => 'trim|required|htmlspecialchars|max_length[500]',
+                    'rules' => 'trim|required|max_length[500]',
                     '_type'     => 'textarea',
                     'rows'      => 4,
                     '_show_label' => false,
@@ -184,7 +184,7 @@ class Tmi_plan_model extends MY_Model
                     'field' => 'benefits[max_sum_insured][]',
                     '_key'  => 'max_sum_insured',
                     'label' => 'Max. Sum Insured (USD)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    'rules' => 'trim|required|max_length[200]',
                     '_type'     => 'text',
                     '_show_label' => false,
                     '_required' => true
@@ -193,7 +193,7 @@ class Tmi_plan_model extends MY_Model
                     'field' => 'benefits[excess][]',
                     '_key'  => 'excess',
                     'label' => 'Excess',
-                    'rules' => 'trim|required|htmlspecialchars|max_length[200]',
+                    'rules' => 'trim|required|max_length[200]',
                     '_type'     => 'text',
                     '_show_label' => false,
                     '_required' => true
