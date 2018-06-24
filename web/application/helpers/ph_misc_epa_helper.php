@@ -964,9 +964,14 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 
 
 					/**
-					 * Pool Premium
+					 * !!! NOTE !!!
+					 * NO POOL PREMIUM FOR THIS PORTFOLIO
 					 */
 					$POOL_PREMIUM = 0.00;
+
+					/**
+					 *
+					 *
 					if($flag_pool_risk)
 					{
 						// Pool Premium = x% of Default Premium (A-B)
@@ -977,6 +982,7 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 						'label' => "Pool Premium",
 						'value' => $POOL_PREMIUM
 					];
+					*/
 
 
 					// NET PREMIUM
@@ -1003,10 +1009,10 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 							'label' => "Direct discount",
 							'value' => $direct_discount
 						],
-						[
-							'label' => "Pool Premium",
-							'value' => $POOL_PREMIUM
-						],
+						// [
+						// 	'label' => "Pool Premium",
+						// 	'value' => $POOL_PREMIUM
+						// ],
 						[
 							'label' => "Total Premium",
 							'value' => $PREMIUM_TOTAL + $POOL_PREMIUM
