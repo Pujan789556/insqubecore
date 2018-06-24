@@ -21,25 +21,6 @@ $premium_computation_table  = $endorsement_record->premium_computation_table ? j
     $this->load->view('endorsements/snippets/_premium_summary');
 ?>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-            <h4 class="box-title">Premium Information</h4>
-        </div>
-        <div class="box-body">
-            <?php
-            /**
-             * Portfolio Specific Premium Fields
-             */
-            $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements'     => $form_elements['premium'],
-                'form_record'       => $premium_computation_table,
-                'grid_label'        => 'col-md-4',
-                'grid_form_control' => 'col-md-8'
-            ]);
-            ?>
-        </div>
-    </div>
-
     <?php
     /**
      * Load TXN Common Elements
