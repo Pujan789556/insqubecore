@@ -74,7 +74,7 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
                                     <strong>Plan Required (Benefits Covered):</strong><br>
                                     <?php echo $benefit_text; ?>
 
-                                    <strong>Area:</strong> <?php echo _OBJ_MISC_TMI_plan_dropdown(FALSE)[$object_attributes->plan_id]; ?>
+                                    <br><br><strong>Area/Plan:</strong> <br><?php echo _OBJ_MISC_TMI_plan_dropdown(FALSE)[$object_attributes->plan_id]; ?>
                                 </td>
                             </tr>
                         </table>
