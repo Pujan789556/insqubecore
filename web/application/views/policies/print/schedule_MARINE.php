@@ -225,21 +225,22 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                        <strong>Surveyor Name</strong> <br>
-                        <strong>Contact Person</strong> <br>
-                        <strong>Address</strong>
-                    </td>
-                    <td>
-                        <?php
-                        	$text = [
-                        		htmlspecialchars($object_attributes->surveyor->name),
-                        		htmlspecialchars($object_attributes->surveyor->contact_person),
-                        		htmlspecialchars($object_attributes->surveyor->address),
-                        	];
-                        echo implode('<br/>',$text);
-                        ?>
-                    </td>
+                    <td colspan="2">
+	                    <table class="no-border">
+	                    	<tr>	
+	                    		<td><strong>Surveyor Name</strong></td>
+	                    		<td><?php echo  htmlspecialchars($object_attributes->surveyor->name)?></td>
+	                    	</tr>
+	                    	<tr>	
+	                    		<td><strong>Contact Person</strong></td>
+	                    		<td><?php echo  htmlspecialchars($object_attributes->surveyor->contact_person)?></td>
+	                    	</tr>
+	                    	<tr>	
+	                    		<td><strong>Address</strong></td>
+	                    		<td><?php echo  htmlspecialchars($object_attributes->surveyor->address)?></td>
+	                    	</tr>
+	                    </table>
+	                </td>
                 </tr>
                 <tr>
                     <td><strong>Claims payable at</strong></td>
