@@ -232,11 +232,12 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     </td>
                     <td>
                         <?php
-                        echo htmlspecialchars(
-                            $object_attributes->surveyor->name . '<br>' .
-                            $object_attributes->surveyor->contact_person . '<br>' .
-                            $object_attributes->surveyor->address
-                         );
+                        	$text = [
+                        		htmlspecialchars($object_attributes->surveyor->name),
+                        		htmlspecialchars($object_attributes->surveyor->contact_person),
+                        		htmlspecialchars($object_attributes->surveyor->address),
+                        	];
+                        echo implode('<br/>',$text);
                         ?>
                     </td>
                 </tr>
