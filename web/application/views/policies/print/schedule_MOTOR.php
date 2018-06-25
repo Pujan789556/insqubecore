@@ -236,7 +236,20 @@ switch ($record->portfolio_id)
                             </tr>
                             <tr>
                                 <td>घन क्षमता (क्यूविक क्यापासिटी):</td>
-                                <td><?php echo htmlspecialchars($object_attributes->engine_capacity);?></td>
+                                <td><?php echo htmlspecialchars($object_attributes->engine_capacity) . ' ' . _OBJ_MOTOR_ec_unit_dropdown()[$object_attributes->ec_unit];?></td>
+                            </tr>
+                            <tr>
+                                <td>चालक सहित यात्रु । भारबहन क्षमाता</td>
+                                <td>
+                                    <?php echo $object_attributes->seating_capacity . 'seats';
+
+                                    $carrying_capacity = $object_attributes->carrying_capacity ?? NULL;
+                                    if($carrying_capacity)
+                                    {
+                                        echo ' | ' . $object_attributes->seating_capacity . ' ' . _OBJ_MOTOR_carrying_unit_dropdown(FALSE)[$object_attributes->carrying_unit];
+                                    }
+                                    ?>
+                                </td>
                             </tr>
                             <tr>
                                 <td>दर्ता मिति: </td>
