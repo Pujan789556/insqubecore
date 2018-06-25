@@ -55,11 +55,8 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         /**
                          * Insured Party, Financer, Other Financer, Careof
                          */
-                        $this->load->view('policies/print/_schedule_insured_party', ['lang' => 'en']);
+                        $this->load->view('policies/print/_schedule_insured_party_car', ['object_attributes' => $object_attributes, 'record' => $record]);
                         ?>
-
-                        <strong>Name and address of Principal</strong><br/>
-                        <?php echo nl2br(htmlspecialchars($object_attributes->principal)) ?>
                     </td>
                     <td>
                         <strong>Contract Title:</strong><br>
@@ -77,7 +74,15 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     <td>
                         <strong>Period of Insurance:</strong><br>
                         From: <strong><?php echo $record->start_date ?></strong><br>
-                        To: <strong><?php echo $record->end_date ?></strong> <em>plus <strong><?php echo $object_attributes->maintenance_period ?></strong> months maintenance period.</em>
+                        To: <strong><?php echo $record->end_date ?></strong>
+                        <br><em>
+                            <?php
+                            $testing_period = $object_attributes->testing_period ?? NULL;
+                             if($testing_period): ?>
+                                including <strong><?php echo $testing_period ?></strong> month(s) testing period
+                             <?php endif ?>
+                            plus <strong><?php echo $object_attributes->maintenance_period ?></strong> month(s) maintenance period.
+                        </em>
                     </td>
                     <td>
                         <?php $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);

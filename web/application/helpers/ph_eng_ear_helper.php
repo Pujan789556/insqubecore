@@ -133,6 +133,14 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 			        '_required' 	=> true
 			    ],
 			    [
+			        'field' => 'object[testing_period]',
+			        '_key' => 'testing_period',
+			        'label' => 'Testing Period (Months)',
+			        'rules' => 'trim|integer|max_length[11]',
+			        '_type' => 'text',
+			        '_required' 	=> false
+			    ],
+			    [
 			        'field' => 'object[maintenance_period]',
 			        '_key' => 'maintenance_period',
 			        'label' => 'Maintenance Period (Months)',

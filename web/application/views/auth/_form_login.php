@@ -20,7 +20,7 @@ $remember = array(
 	'name'	=> 'remember',
 	'id'	=> 'remember',
 	'value'	=> 1,
-	'checked'	=> set_value('remember') ? set_value('remember') : 1	
+	'checked'	=> set_value('remember') ? set_value('remember') : 1
 );
 
 $confirmation_code = array(
@@ -30,7 +30,7 @@ $confirmation_code = array(
 );
 ?>
 
-<?php 
+<?php
 /**
  * Load Auth Error If any
  */
@@ -51,13 +51,13 @@ $this->load->view('auth/_auth_error');
     </div>
     <?php if ($show_captcha): ?>
     	<div class="form-group <?php echo form_error('recaptcha_response_field') ? 'has-error' : '';?>">
-    		<?php 
+    		<?php
 				// Show recaptcha imgage
-				echo $this->dx_auth->get_recaptcha_image(); 
+				echo $this->dx_auth->get_recaptcha_image();
 				// Show reload captcha link
-				echo $this->dx_auth->get_recaptcha_reload_link(); 
+				echo $this->dx_auth->get_recaptcha_reload_link();
 				// Show switch to image captcha or audio link
-				echo $this->dx_auth->get_recaptcha_switch_image_audio_link(); 
+				echo $this->dx_auth->get_recaptcha_switch_image_audio_link();
 			?>
 			<label for="recaptcha_response_field"><?php echo $this->dx_auth->get_recaptcha_label(); ?></label>
 			<?php echo $this->dx_auth->get_recaptcha_input(); ?>
@@ -65,8 +65,8 @@ $this->load->view('auth/_auth_error');
 			<?php if( form_error('recaptcha_response_field') ):?>
 				<span class="help-block"><?php echo form_error('recaptcha_response_field'); ?></span>
 			<?php endif?>
-				
-			<?php 
+
+			<?php
 			// Get recaptcha javascript and non javasript html
 			echo $this->dx_auth->get_recaptcha_html();
 			?>
@@ -90,10 +90,16 @@ $this->load->view('auth/_auth_error');
         	<p>
 	        	<?php echo anchor($this->dx_auth->forgot_password_uri, 'Forgot password');?>
 	        	<?php if ($this->dx_auth->allow_registration):?>
-	        		&nbsp;|&nbsp;<?php echo anchor($this->dx_auth->register_uri, 'Register');?>        		
+	        		&nbsp;|&nbsp;<?php echo anchor($this->dx_auth->register_uri, 'Register');?>
 	    		<?php endif?>
     		</p>
         </div>
         <!-- /.col -->
+
+        <div class="col-xs-12">
+        	<p class="small text-right no-margin">Logging from <strong><?php echo $this->input->ip_address(); ?></strong></p>
+        </div>
+    	<!-- /.col -->
+
     </div>
 <?php echo form_close()?>

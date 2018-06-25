@@ -23,7 +23,7 @@
         <link rel="stylesheet" href="<?php echo THEME_URL; ?>bootstrap/css/bootstrap.min.css">
         <!-- Font Awesome -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-        
+
         <!-- Theme style -->
         <link rel="stylesheet" href="<?php echo THEME_URL; ?>dist/css/AdminLTE.min.css">
         <!-- iCheck -->
@@ -43,7 +43,7 @@
             <!-- /.login-logo -->
             <div class="login-box-body">
                 <h3 class="login-box-msg"><?php echo $page_title ?></h3>
-                <?php 
+                <?php
                 /**
                  * Templete Section
                  */
