@@ -74,14 +74,14 @@ class Endorsement_template_model extends MY_Model
             [
                 'field' => 'title',
                 'label' => 'Title',
-                'rules' => 'trim|required|htmlspecialchars|max_length[250]',
+                'rules' => 'trim|required|max_length[250]',
                 '_type'     => 'text',
                 '_required' => true
             ],
             [
                 'field' => 'body',
                 'label' => 'Template Text',
-                'rules' => 'trim|required|htmlspecialchars',
+                'rules' => 'trim|required|max_length[10000]',
                 '_type'     => 'textarea',
                 '_required' => true
             ]

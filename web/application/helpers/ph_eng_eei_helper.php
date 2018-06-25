@@ -103,6 +103,7 @@ if ( ! function_exists('_OBJ_ENG_EEI_validation_rules'))
 			        '_key' => 'deductible',
 			        'label' => 'Deductible / Excess',
 			        'rules' => 'trim|required|max_length[1000]',
+			        '_default' => '__% of claim amount subject to minimum of Rs. ______ on each and every item.',
 			        'rows' 		=> 5,
 			        '_type'     => 'textarea',
 			        '_required' => true
