@@ -103,6 +103,14 @@ if ( ! function_exists('_OBJ_ENG_MB_validation_rules'))
 			        '_required' => true
 			    ],
 			    [
+			        'field' => 'object[excess]',
+			        '_key' => 'excess',
+			        'label' => 'Excess / Deductible',
+			        'rules' => 'trim|required|max_length[500]',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
 			        'field' => 'document',
 			        '_key' => 'document',
 			        'label' => 'Upload Item List File (.xls or .xlsx)',

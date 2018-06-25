@@ -155,6 +155,9 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                     <td colspan="2" class="text-bold">Total Sum Insured Amount(Rs.)</td>
                                     <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2) ?></td>
                                 </tr>
+                                <tr>
+                                    <td colspan="3"><strong>Excess:</strong> <?php echo htmlspecialchars($object_attributes->excess ?? '')?></td>
+                                </tr>
                             </tbody>
                         </table>
                     </td>
