@@ -244,7 +244,7 @@ switch ($record->portfolio_id)
                                     <?php echo $object_attributes->seating_capacity . ' seats';
 
                                     $carrying_capacity = $object_attributes->carrying_capacity ?? NULL;
-                                    if($carrying_capacity)
+                                    if( $carrying_capacity > 0)
                                     {
                                         echo ' | ' . $object_attributes->carrying_capacity . ' ' . _OBJ_MOTOR_carrying_unit_dropdown(FALSE)[$object_attributes->carrying_unit];
                                     }
