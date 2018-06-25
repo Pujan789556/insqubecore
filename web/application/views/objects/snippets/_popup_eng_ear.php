@@ -29,7 +29,7 @@ else
                 foreach($basic_elements as $elem): ?>
             		<tr>
             			<th width="30%"><?php echo $elem['label']; ?></th>
-            			<td><?php echo htmlspecialchars($attributes->{$elem['_key'] ?? ''}); ?></td>
+            			<td><?php echo htmlspecialchars($attributes->{$elem['_key']} ?? ''); ?></td>
             		</tr>
         		<?php endforeach ?>
             </table>
