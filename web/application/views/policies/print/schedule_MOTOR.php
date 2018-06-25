@@ -241,12 +241,12 @@ switch ($record->portfolio_id)
                             <tr>
                                 <td>चालक सहित यात्रु । भारबहन क्षमाता</td>
                                 <td>
-                                    <?php echo $object_attributes->seating_capacity . 'seats';
+                                    <?php echo $object_attributes->seating_capacity . ' seats';
 
                                     $carrying_capacity = $object_attributes->carrying_capacity ?? NULL;
                                     if($carrying_capacity)
                                     {
-                                        echo ' | ' . $object_attributes->seating_capacity . ' ' . _OBJ_MOTOR_carrying_unit_dropdown(FALSE)[$object_attributes->carrying_unit];
+                                        echo ' | ' . $object_attributes->carrying_capacity . ' ' . _OBJ_MOTOR_carrying_unit_dropdown(FALSE)[$object_attributes->carrying_unit];
                                     }
                                     ?>
                                 </td>
