@@ -108,6 +108,7 @@ if ( ! function_exists('_OBJ_ENG_MB_validation_rules'))
 			        'label' => 'Excess / Deductible',
 			        'rules' => 'trim|required|max_length[500]',
 			        '_type'     => 'text',
+			        '_default' => '__% of claim amount subject to minimum of Rs. ______ on each and every item.',
 			        '_required' => true
 			    ],
 			    [
