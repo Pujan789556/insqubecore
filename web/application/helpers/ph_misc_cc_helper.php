@@ -105,10 +105,11 @@ if ( ! function_exists('_OBJ_MISC_CC_validation_rules'))
 			        'field' => 'object[excess]',
 			        '_key' => 'excess',
 			        'label' => 'अधिक',
-			        'rules' => 'trim|max_length[500]',
+			        'rules' => 'trim|required|max_length[500]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
-			        '_required' => false
+			        '_default' 	=> '10 % of claim amount subject to minimum of Rs. 50000 for RSMDST Claims 10% of claim amount subject to minimum of Rs. 25000 for Normal claims',
+			        '_required' => true
 			    ],
 		    ]
 		];
