@@ -118,6 +118,7 @@ if ( ! function_exists('_OBJ_MISC_CT_validation_rules'))
 			        'rules' => 'trim|required|max_length[500]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
+			        '_default' 	=> '10 % of claim amount subject to minimum of Rs. 50000 for RSMDST Claims 10% of claim amount subject to minimum of Rs. 25000 for Normal claims',
 			        '_required' => true
 			    ],
 		    ]
@@ -398,7 +399,7 @@ if ( ! function_exists('__save_premium_MISC_CT'))
 					// Pool Premium
 					$POOL_PREMIUM = ( $SI * $pool_rate ) / 1000.00;
 					$cost_calculation_table[] = [
-						'label' => "हुल्दङा/आतंकवाद/द्वेष्पूर्ण   बिमा शुल्क",
+						'label' => "हुल्दङा/आतंकवाद/द्वेष्पूर्ण बिमा शुल्क",
 						'value' => $POOL_PREMIUM
 					];
 

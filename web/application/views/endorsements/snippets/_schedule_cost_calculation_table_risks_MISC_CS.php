@@ -8,6 +8,7 @@ $risk_table     = NULL;
 if($cost_calculation_table)
 {
     $risk_table     = $cost_calculation_table->risk_table;
+    $cost_table     = $cost_calculation_table->cost_table;
 }
 $total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
 $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
@@ -34,6 +35,15 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                                         <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
                                     </tr>
                                 <?php endforeach ?>
+
+                                <?php if($cost_table): ?>
+                                  <?php foreach($cost_table as $row):?>
+                                    <tr>
+                                      <th class="text-left" colspan="2"><?php echo $row->label ?></th>
+                                      <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
+                                    </tr>
+                                  <?php endforeach ?>
+                              <?php endif ?>
                            </tbody>
                        </table>
                    </td>

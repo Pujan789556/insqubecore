@@ -4,12 +4,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy: Details - Policy Premium Overview Card - MISCELLANEOUS - CASH IN COUNTER
 */
 $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_decode($endorsement_record->cost_calculation_table) : NULL;
-$property_table = NULL;
-$risk_table     = NULL;
+$cost_table     = [];
+$risk_table     = [];
 if($cost_calculation_table)
 {
-    $property_table = $cost_calculation_table->property_table;
-    $risk_table     = $cost_calculation_table->risk_table;
+    $cost_table     = $cost_calculation_table->cost_table ?? [];
+    $risk_table     = $cost_calculation_table->risk_table ?? [];
 }
 $total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
 $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
@@ -34,6 +34,13 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                                         <td><?php echo $dt[0] ?></td>
                                         <td class="text-right"><?php echo number_format((float)$dt[1], 2);?></td>
                                         <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
+                                    </tr>
+                                <?php endforeach ?>
+
+                                <?php foreach($cost_table as $row):?>
+                                    <tr>
+                                        <th colspan="2" class="text-left"><?php echo $row->label ?></th>
+                                        <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
                                     </tr>
                                 <?php endforeach ?>
                            </tbody>

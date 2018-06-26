@@ -436,7 +436,7 @@ if ( ! function_exists('__save_premium_MISC_CC'))
 					// Pool Premium
 					$POOL_PREMIUM = ( $SI * $pool_rate ) / 1000.00;
 					$cost_table[] = [
-						'label' => "हुल्दङा/आतंकवाद/द्वेष्पूर्ण   बिमा शुल्क (रु {$pool_rate} प्रति हजार)",
+						'label' => "हुल्दङा/आतंकवाद/द्वेष्पूर्ण बिमा शुल्क",
 						'value' => $POOL_PREMIUM
 					];
 
