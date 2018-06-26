@@ -2,7 +2,6 @@
 /**
  * Schedule Print : MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
  */
-
 $object_attributes  = json_decode($record->object_attributes);
 $schedule_table_title   = 'सामुहिक दुर्घटना बीमालेख';
 $total_premium  = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
@@ -33,7 +32,6 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
          * Policy Schedule
          */
         ?>
-
         <table class="table" width="100%">
             <thead><tr><td colspan="2" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
             <tbody>
@@ -90,7 +88,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                             <tr>
                                 <td>
                                     <strong>बीमा लाभ</strong><br>
-                                    <?php echo nl2br(htmlspecialchars($object_attributes->benefit)) ?>
+                                    <?php echo nl2br(htmlspecialchars($object_attributes->benefit ?? '')) ?>
                                 </td>
                             </tr>
                         </table>
@@ -210,7 +208,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                             </td>
                         <?php endforeach ?>
                     </tr>
-                <?php endforeach; ?>
+                <?php endforeach;?>
             </tbody>
         </table>
     </body>
