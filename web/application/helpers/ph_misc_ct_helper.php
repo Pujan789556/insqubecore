@@ -115,10 +115,10 @@ if ( ! function_exists('_OBJ_MISC_CT_validation_rules'))
 			        'field' => 'object[excess]',
 			        '_key' => 'excess',
 			        'label' => 'अधिक',
-			        'rules' => 'trim|max_length[500]',
+			        'rules' => 'trim|required|max_length[500]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
-			        '_required' => false
+			        '_required' => true
 			    ],
 		    ]
 		];
@@ -364,7 +364,7 @@ if ( ! function_exists('__save_premium_MISC_CT'))
 					// A =  SI X Default Rate
 					$A = ( $SI * $default_rate ) / 1000.00;
 					$cost_calculation_table[] = [
-						'label' => "बिमा शुल्क (रु {$default_rate} प्रति हजार)",
+						'label' => "बिमा शुल्क",
 						'value' => $A
 					];
 
@@ -398,7 +398,7 @@ if ( ! function_exists('__save_premium_MISC_CT'))
 					// Pool Premium
 					$POOL_PREMIUM = ( $SI * $pool_rate ) / 1000.00;
 					$cost_calculation_table[] = [
-						'label' => "हुल्दङा/आतंकवाद/द्वेष्पूर्ण   बिमा शुल्क (रु {$pool_rate} प्रति हजार)",
+						'label' => "हुल्दङा/आतंकवाद/द्वेष्पूर्ण   बिमा शुल्क",
 						'value' => $POOL_PREMIUM
 					];
 

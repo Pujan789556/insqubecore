@@ -63,6 +63,15 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                 </td>
                             </tr>
                             <tr>
+                                <td><strong>एक पटकको मार्गस्थ रकम (रु):</strong> <?php echo number_format($object_attributes->single_carrying_limit, 2); ?></td>
+                            </tr>
+                            <tr>
+                                <td><strong>अनुमानित वार्षिक मार्गस्थ रकम (रु):</strong> <?php echo number_format($object_attributes->annual_limit, 2); ?></td>
+                            </tr>
+                            <tr>
+                                <td><strong>अधिक:</strong> <?php echo nl2br(htmlspecialchars($object_attributes->excess ?? '')) ?></td>
+                            </tr>
+                            <tr>
                                 <td>
                                     रसिद नं.: <br/>
                                     रसिदको मिति:  समय:
@@ -129,6 +138,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         </table>
                     </td>
                 </tr>
+
 
                 <tr>
                     <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
