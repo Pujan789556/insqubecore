@@ -1206,7 +1206,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 				'amount' => $__premium_U_row_3
 			];
 			$__CRF_cc_table__U['sections'][] = [
-				'title' => "(घ) बीमित तथा यात्री ({$passenger_count}) जना",
+				'title' => "(घ) बीमित तथा यात्री ({$passenger_count} जना)",
 				'amount' => $__premium_U_row_4
 			];
 
