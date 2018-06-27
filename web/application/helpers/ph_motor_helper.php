@@ -1206,7 +1206,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 				'amount' => $__premium_U_row_3
 			];
 			$__CRF_cc_table__U['sections'][] = [
-				'title' => "(घ) बीमित तथा यात्री",
+				'title' => "(घ) बीमित तथा यात्री ({$passenger_count}) जना",
 				'amount' => $__premium_U_row_4
 			];
 
@@ -2008,11 +2008,11 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
                 'amount' => $__premium_OO_row_3
             ];
             $__CRF_cc_table__OO['sections'][] = [
-                'title' => "(घ) परिचालक तथा अन्य कर्मचारी",
+                'title' => "(घ) परिचालक तथा अन्य कर्मचारी ({$staff_count} जना)",
                 'amount' => $__premium_OO_row_4
             ];
             $__CRF_cc_table__OO['sections'][] = [
-                'title' => "(ङ) यात्री",
+                'title' => "(ङ) यात्री ({$passenger_count} जना)",
                 'amount' => $__premium_OO_row_5
             ];
 
