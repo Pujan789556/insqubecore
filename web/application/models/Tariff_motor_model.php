@@ -457,7 +457,7 @@ class Tariff_motor_model extends MY_Model
                 [
                     'field' => 'tariff[ec_type][]',
                     'label' => 'Engine Capacity Type',
-                    'rules' => 'trim|required|alpha|max_length[2]',
+                    'rules' => 'trim|required|alpha|max_length[3]',
                     '_type'     => 'dropdown',
                     '_show_label' => false,
                     '_key'      => 'ec_type',

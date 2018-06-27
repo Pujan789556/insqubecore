@@ -2378,6 +2378,8 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			$reg_no_rules  = 'trim|max_length[30]|strtoupper|callback__cb_motor_duplicate_reg_no';
 		}
 
+		$ec_dropdown = _OBJ_MOTOR_carrying_unit_dropdown(FALSE);
+
 		/**
 		 * Object Sections
 		 * -----------------
@@ -2574,10 +2576,10 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 		            'field' => 'object[carrying_unit]',
 			        '_key' => 'carrying_unit',
 			        'label' => 'Unit',
-			        'rules' => 'trim|required|alpha|in_list[T]',
+			        'rules' => 'trim|required|alpha|in_list['.implode(',', array_keys($ec_dropdown)).']',
 			        '_id' 		=> '_motor-vehicle-carrying-unit',
 			        '_type'     => 'dropdown',
-			        '_data' 	=> _OBJ_MOTOR_carrying_unit_dropdown(FALSE),
+			        '_data' 	=> IQB_BLANK_SELECT + $ec_dropdown,
 			        '_required' => true
 
 			    ],
@@ -2912,7 +2914,7 @@ if ( ! function_exists('_OBJ_MOTOR_carrying_unit_dropdown'))
 	 */
 	function _OBJ_MOTOR_carrying_unit_dropdown( $flag_blank_select = true )
 	{
-		$dropdown = ['T' => 'Ton'];
+		$dropdown = ['T' => 'Ton', 'NA' => 'Capacity Unknown'];
 
 		if($flag_blank_select)
 		{
