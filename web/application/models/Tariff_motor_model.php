@@ -466,7 +466,7 @@ class Tariff_motor_model extends MY_Model
                 ],
                 [
                     'field' => 'tariff[ec_min][]',
-                    'label' => 'Capacity Min (CC|KW|TON|HP)',
+                    'label' => 'Capacity Min (CC|KW|TON|HP|Seat)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_show_label' => false,
