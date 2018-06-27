@@ -2914,7 +2914,7 @@ if ( ! function_exists('_OBJ_MOTOR_carrying_unit_dropdown'))
 	 */
 	function _OBJ_MOTOR_carrying_unit_dropdown( $flag_blank_select = true )
 	{
-		$dropdown = ['T' => 'Ton', 'NA' => 'Capacity Unknown'];
+		$dropdown = ['T' => 'Ton', 'S' => 'Seat', 'NA' => 'Capacity Unknown'];
 
 		if($flag_blank_select)
 		{
