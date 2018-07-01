@@ -1491,10 +1491,22 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 
 		/**
 		 * Seating Breakdown
+		 *
+		 * NOTE: For Passenger Carrier and Tractor - Staff does not occupy seat
 		 */
 		$seating_capacity   = $object_attributes->seating_capacity ?? 0;
 		$staff_count 		= $object_attributes->staff_count ?? 0;
-		$passenger_count    = $seating_capacity - $staff_count - 1; // 1 for driver
+		if( in_array($object_attributes->cvc_type, [IQB_MOTOR_CVC_TYPE_PASSENGER_CARRIER, IQB_MOTOR_CVC_TYPE_TRACTOR_POWER_TRILLER]) )
+		{
+			$passenger_count = $seating_capacity - 1;
+		}
+		else
+		{
+			// Rest of vehicle type, staff also consumes seats
+			$passenger_count    = $seating_capacity - $staff_count - 1; // 1 for driver
+		}
+
+
 
         // Vehicle Age (If registration date is there use it otherwise mfd year)
 		$ref_date = $object_attributes->reg_date ? $object_attributes->reg_date : $object_attributes->year_mfd . '-01-01';
@@ -2591,7 +2603,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			    [
 			        'field' => 'object[seating_capacity]',
 			        '_key' => 'seating_capacity',
-			        'label' => 'Total Seats (incl Driver Seat)',
+			        'label' => 'Total Seats (Including Driver Seat)',
 			        'rules' => 'trim|required|integer|max_length[5]',
 			        '_id' 		=> '_motor-seating-capacity',
 			        '_type'     => 'text',
@@ -2644,7 +2656,7 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 		    	[
 			        'field' => 'object[staff_count]',
 			        '_key' => 'staff_count',
-			        'label' => 'Staff Count',
+			        'label' => 'Staff Count (Excluding Driver)',
 			        'rules' => 'trim|required|integer|max_length[4]',
 			        '_id' 		=> '_motor-staff-count',
 			        '_type'     => 'text',
