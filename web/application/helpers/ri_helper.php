@@ -997,7 +997,15 @@ if ( ! function_exists('RI__distribute__EOL'))
 			$si_comp_cession 	= $percent_amount < $default_max_amount ? $percent_amount : $default_max_amount;
 
 			// Premium
-			$premium_comp_cession = ( $si_comp_cession / $si_gross ) * $premium_net;
+			// NOTE: Thirdparty Motor - No SI Info is supplied.
+			// 			So let's use comp cession percent to divide premium
+			// $premium_comp_cession = ( $si_comp_cession / $si_gross ) * $premium_net;
+
+
+			/**
+			 * Let's Compute Compulsory Cession Only at this moment.
+			 */
+			$premium_comp_cession =  $premium_net * $treaty_record->comp_cession_percent / 100.00;
 
 		}
 
