@@ -994,7 +994,16 @@ if ( ! function_exists('RI__distribute__EOL'))
 			// SI = Percent or default max
 			$percent_amount 	= ( $si_gross * $treaty_record->comp_cession_percent ) / 100.00;
 			$default_max_amount = $treaty_record->comp_cession_max_amt;
-			$si_comp_cession 	= $percent_amount < $default_max_amount ? $percent_amount : $default_max_amount;
+
+			// New Comp Cession Percent
+			if( $percent_amount >= $default_max_amount && $si_gross > 0 )
+			{
+				$si_comp_cession = $default_max_amount;
+
+				// What is the comp_cession percent
+				$treaty_record->comp_cession_percent = ( $default_max_amount / $si_gross ) * 100.00;
+			}
+
 
 			// Premium
 			// NOTE: Thirdparty Motor - No SI Info is supplied.
