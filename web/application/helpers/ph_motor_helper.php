@@ -1238,17 +1238,31 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 			'title_np' 	=> 'तेश्रो पक्ष प्रतिको दायित्व बीमा वापत',
 			'title_en' 	=> 'Third party liability insurance amounted to'
 		];
-		$__premium_AA_row_1 = $premiumm_third_party;
-		$__premium_AA_row_2 = 0.00;		// Compute No claim discount on Third Party if Comprehensive Package
-		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE && $no_claim_discount_rate != 0)
-		{
-			$__premium_AA_row_2 = $__premium_AA_row_1 * ($no_claim_discount_rate/100.00);
-		}
+
+		$__premium_AA_row_1 		 = $premiumm_third_party;
 		$__CRF_cc_table__AA['sections'][] = [
 			'title' => "सि. सि. अनुसारको बीमाशुल्क",
 			'amount' => $__premium_AA_row_1,
 			'label' => $tp_label
 		];
+		$trailer_third_party_premium = 0;
+		if( $si_trailer )
+		{
+			$trailer_third_party_premium = $trolly_tariff->third_party;
+
+			$__CRF_cc_table__AA['sections'][] = [
+				'title' => "ट्रेलरको लागि",
+				'amount' => $trailer_third_party_premium,
+				'label' => ''
+			];
+		}
+
+		$__premium_AA_row_2 = 0.00;		// Compute No claim discount on Third Party if Comprehensive Package
+		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE && $no_claim_discount_rate != 0)
+		{
+			$__premium_AA_row_2 = ($__premium_AA_row_1 + $trailer_third_party_premium) * ($no_claim_discount_rate/100.00);
+		}
+
 
 		// No claim Dicount Only if Comprehensive
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
@@ -1260,7 +1274,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		}
 
 		// Third Party : Sub Total (छ Total)
-		$premium_AA_total = $__premium_AA_row_1 - $__premium_AA_row_2;
+		$premium_AA_total = ($__premium_AA_row_1 + $trailer_third_party_premium) - $__premium_AA_row_2;
 		$__CRF_cc_table__AA['sections'][] = [
 			'title' 	=> 'जम्मा', // Subtotal
 			'amount' 	=> $premium_AA_total,
@@ -2044,17 +2058,32 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
             'title_np'  => 'तेश्रो पक्ष प्रतिको दायित्व बीमा वापत',
             'title_en'  => 'Third party liability insurance amounted to'
         ];
+
         $__premium_AA_row_1 = $primary_tariff_vehicle['third_party'];
-        $__premium_AA_row_2 = 0.00;     // Compute No claim discount on Third Party if Comprehensive Package
-        if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE && $no_claim_discount_rate != 0)
-        {
-            $__premium_AA_row_2 = $__premium_AA_row_1 * ($no_claim_discount_rate/100.00);
-        }
         $__CRF_cc_table__AA['sections'][] = [
             'title' => "क्षमता अनुसारको बीमाशुल्क",
             'amount' => $__premium_AA_row_1,
             'label' => $tp_label
         ];
+
+        $trailer_third_party_premium = 0;
+		if( $si_trailer )
+		{
+			$trailer_third_party_premium = $trolly_tariff->third_party;
+
+			$__CRF_cc_table__AA['sections'][] = [
+				'title' => "ट्रेलरको लागि",
+				'amount' => $trailer_third_party_premium,
+				'label' => ''
+			];
+		}
+
+        $__premium_AA_row_2 = 0.00;     // Compute No claim discount on Third Party if Comprehensive Package
+        if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE && $no_claim_discount_rate != 0)
+        {
+            $__premium_AA_row_2 = ($__premium_AA_row_1 + $trailer_third_party_premium) * ($no_claim_discount_rate/100.00);
+        }
+
 
         // No claim Dicount Only if Comprehensive
         if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
@@ -2066,7 +2095,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
         }
 
         // Third Party : Sub Total
-        $premium_AA_total = $__premium_AA_row_1 - $__premium_AA_row_2;
+        $premium_AA_total = ( $__premium_AA_row_1 + $trailer_third_party_premium ) - $__premium_AA_row_2;
         $__CRF_cc_table__AA['sections'][] = [
             'title'     => 'जम्मा', // Subtotal
             'amount'    => $premium_AA_total,
