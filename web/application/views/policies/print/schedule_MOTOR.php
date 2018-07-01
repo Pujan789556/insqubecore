@@ -236,7 +236,7 @@ switch ($record->portfolio_id)
                             </tr>
                             <tr>
                                 <td>घन क्षमता (क्यूविक क्यापासिटी):</td>
-                                <td><?php echo htmlspecialchars($object_attributes->engine_capacity) . ' ' . _OBJ_MOTOR_ec_unit_dropdown()[$object_attributes->ec_unit];?></td>
+                                <td><?php echo htmlspecialchars($object_attributes->engine_capacity) . ' ' . $object_attributes->ec_unit;?></td>
                             </tr>
                             <tr>
                                 <td>चालक सहित यात्रु । भारबहन क्षमाता</td>
@@ -263,9 +263,19 @@ switch ($record->portfolio_id)
                                 <td>सरसामानको घोषित मूल्य:</td>
                                 <td align="right">रु. <?php echo number_format($object_attributes->price_accessories, 2);?></td>
                             </tr>
+
+                            <?php
+                            $trailer_price = $object_attributes->trailer_price ?? 0;
+                            if($trailer_price): ?>
+                                <tr>
+                                    <td>ट्रेलरको घोषित मूल्य:</td>
+                                    <td align="right">रु. <?php echo number_format($trailer_price, 2);?></td>
+                                </tr>
+                            <?php endif ?>
+
                             <tr>
                                 <td><strong>जम्मा घोषित मूल्य:</strong></td>
-                                <td align="right"><strong>रु. <?php echo number_format( (float)$object_attributes->price_vehicle + $object_attributes->price_accessories, 2 );?></strong></td>
+                                <td align="right"><strong>रु. <?php echo number_format( (float)$object_attributes->price_vehicle + $object_attributes->price_accessories + $trailer_price, 2 );?></strong></td>
                             </tr>
                         </table>
                     </td>
