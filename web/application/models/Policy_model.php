@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'ref_company_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
     protected $endorsement_fields = ['proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time'];
 
@@ -52,6 +52,7 @@ class Policy_model extends MY_Model
         $this->load->model('object_model');
         $this->load->model('customer_model');
         $this->load->model('endorsement_model');
+        $this->load->model('tag_model');
     }
 
 
@@ -441,14 +442,16 @@ class Policy_model extends MY_Model
                         '_required' => true
                     ],
                     [
-                        'field' => 'ref_company_id',
-                        'label' => 'Business Referer',
+                        'field' => 'tags[]',
+                        '_key'  => 'tags',
+                        'label' => 'Policy Tags',
                         'rules' => 'trim|integer|max_length[11]',
-                        '_id'       => '_ref-company-id',
-                        '_extra_attributes' => 'style="width:100%; display:block"',
+                        '_id'       => '_policy-tags',
+                        '_extra_attributes' => 'style="width:100%; display:block" multiple="multiple" data-placeholder="Select..."',
                         '_type'     => 'dropdown',
-                        '_data'     => IQB_BLANK_SELECT + $this->company_model->dropdown_general(true),
-                        '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Business Referer" if not available in this list and try again.',
+                        '_data'     => $this->tag_model->dropdown(),
+                        '_class'     => 'form-control select-multiple',
+                        '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Tags" if not available in this list and try again.',
                         '_required' => false
                     ],
                 ],
@@ -698,10 +701,6 @@ class Policy_model extends MY_Model
         $data['fiscal_yr_id'] = $fy_record->id;
 
 
-        // Business Referer NULL if not supplied
-        $data['ref_company_id'] = $data['ref_company_id'] ? $data['ref_company_id'] : NULL;
-
-
         // Reset Creditor Info if "No" Selected
         if($data['flag_on_credit'] === 'N')
         {
@@ -775,9 +774,6 @@ class Policy_model extends MY_Model
          * Find if this start-end date gives a default duration or short term duration
          */
         // $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
-
-        // Business Referer NULL if not supplied
-        $data['ref_company_id'] = $data['ref_company_id'] ? $data['ref_company_id'] : NULL;
 
 
         // Reset Creditor Info if "No" Selected
@@ -909,6 +905,14 @@ class Policy_model extends MY_Model
              */
             $this->_save_endorsement_basic($id, $fields);
 
+            /**
+             * Task 3: Policy Tags
+             * ---------------------
+             */
+            $this->load->model('rel_policy_tag_model');
+            $tags = $fields['tags'];
+            $this->rel_policy_tag_model->save($id, $tags);
+
             return TRUE;
 
         }
@@ -992,7 +996,16 @@ class Policy_model extends MY_Model
              */
             $this->_save_endorsement_basic($id, $fields);
 
+
+            /**
+             * Task 3: Policy Tags
+             * ---------------------
+             */
+            $this->load->model('rel_policy_tag_model');
+            $tags = $fields['tags'];
+            $this->rel_policy_tag_model->save($id, $tags);
         }
+
         return TRUE;
     }
 
@@ -1502,7 +1515,7 @@ class Policy_model extends MY_Model
      */
     public function get($id)
     {
-        return $this->db->select(
+        $record = $this->db->select(
 
                             /**
                              * Policy Table (all fields, formatted datetime fields)
@@ -1588,6 +1601,17 @@ class Policy_model extends MY_Model
                      ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
                      ->where('P.id', $id)
                      ->get()->row();
+
+         /**
+          * Add Tags
+          */
+         if($record)
+         {
+            $this->load->model('rel_policy_tag_model');
+            $record->tags = $this->rel_policy_tag_model->by_policy($record->id, TRUE);
+         }
+
+         return $record;
     }
 
     // ----------------------------------------------------------------

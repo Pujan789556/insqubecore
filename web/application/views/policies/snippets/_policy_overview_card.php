@@ -107,7 +107,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                         <tr>
                             <td class="text-bold">Agent</td>
-                            <td><?php echo $record->agent_id ? anchor('agents/details/'. $record->agent_id, $record->agent_name . ' <i class="fa fa fa-external-link"></i>', ['target' => '_blank']) : '-';?></td>
+                            <td><?php echo $record->agent_id ? anchor('agents/details/'. $record->agent_id, $record->agent_name . ' <i class="fa fa fa-external-link"></i>', ['target' => '_blank']) : '';?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Tags</td>
+                            <td><?php echo _POLICY_tags_text($record->tags ?? []); ?></td>
                         </tr>
                         <tr>
                             <td class="text-bold">Status</td>

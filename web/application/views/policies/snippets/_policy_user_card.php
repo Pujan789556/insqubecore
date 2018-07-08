@@ -69,11 +69,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             $user_info[] = 'Date: ' . $record->verified_at;
                             echo implode('<br/>', $user_info);
                         }
-                        else
-                        {
-                            echo '-';
-                        }
-
                         ?>
                     </td>
                 </tr>

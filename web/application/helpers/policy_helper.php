@@ -90,6 +90,32 @@ if ( ! function_exists('_POLICY_status_text'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('_POLICY_tags_text'))
+{
+    /**
+     * Get Policy Tag Texts
+     *
+     * @param   array
+     * @return  string
+     */
+    function _POLICY_tags_text( $tag_ids )
+    {
+        $CI =& get_instance();
+
+        $CI->load->model('tag_model');
+        $dd = $CI->tag_model->dropdown();
+        $text = [];
+        foreach($tag_ids as $tag_id)
+        {
+            $text[] = $dd[$tag_id];
+        }
+
+        return implode(', ', $text);
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_POLICY_flag_dc_dropdown'))
 {
 	/**

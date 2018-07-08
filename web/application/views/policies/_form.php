@@ -3,6 +3,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Form : Policy
  */
+?>
+<style>
+.select2-dropdown .select2-search__field:focus, .select2-search--inline .select2-search__field:focus{
+    border:none;
+}
+</style>
+<?php
 echo form_open( $this->uri->uri_string(),
     [
         'class' => 'form-horizontal form-iqb-general',
@@ -197,9 +204,9 @@ echo form_open( $this->uri->uri_string(),
             /**
              * Load Form Components
              */
-            $staff_elements = $form_elements['sales'];
+            $sales_elements = $form_elements['sales'];
             $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements' => $staff_elements,
+                'form_elements' => $sales_elements,
                 'form_record'   => $record
             ]);
             ?>
@@ -443,8 +450,7 @@ $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", func
     $("#_creditor-id").select2();
     $("#_district-id").select2();
     $("#_creditor-branch-id").select2();
-    $("#_ref-company-id").select2();
-
+    $("#_policy-tags").select2();
     $('.bootbox.modal').removeAttr('tabindex'); // modal workaround
 });
 

@@ -378,6 +378,12 @@ class Policies extends MY_Controller
 		_POLICY_is_editable($record->status);
 
 
+		/**
+		 * Load Tags as record attribute
+		 */
+		$this->load->model('rel_policy_tag_model');
+		$record->tags = $this->rel_policy_tag_model->by_policy($record->id, TRUE);
+
 		// Validation Rule
 		$v_rules = $this->policy_model->validation_rules('add_edit_draft', FALSE, $record);
 
