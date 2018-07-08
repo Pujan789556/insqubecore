@@ -578,7 +578,8 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 				'column_head' => '*',
 				'title_np' 	=> 'अपाङ्ग मैत्री छुट',
 				'title_en' 	=> 'Disabled-friendly discount',
-				'sections' => [
+				'sub_total' => $discount_MCY_DF,
+				'sections'  => [
 					// Cost according to CC
 					[
 						'title' => "(अ) र (आ) को जम्मा रकममा {$tariff_record->dr_mcy_disabled_friendly} % छुट",
