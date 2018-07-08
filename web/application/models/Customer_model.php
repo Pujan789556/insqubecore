@@ -134,7 +134,7 @@ class Customer_model extends MY_Model
             ],
             [
                 'field' => 'identification_no',
-                'label' => 'Citizenship/Passport Number',
+                'label' => 'Citizenship / Passport / License Number',
                 'rules' => 'trim|max_length[40]',
                 '_type'     => 'text',
                 '_extra_attributes' => 'data-ref="I"',
