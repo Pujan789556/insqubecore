@@ -120,7 +120,7 @@ class MY_Form_validation extends CI_Form_validation {
 	 */
 	public function valid_mobile($str)
 	{
-		return preg_match('/^(98|97)[0-9]{8}$/', $str) ? TRUE : FALSE;
+		return preg_match('/^(98|97|96)[0-9]{8}$/', $str) ? TRUE : FALSE;
 	}
 
 	// --------------------------------------------------------------------
