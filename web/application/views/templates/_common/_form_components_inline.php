@@ -65,7 +65,19 @@ foreach($form_elements as $element):?>
 
         if($this->input->post())
         {
-            $value = set_value($element['field'], '', FALSE);
+            /**
+             * If array Values, we extract here
+             * NOTE: set_value() does not return array. This is specially for multiselect and checkbox group
+             */
+            $post_value = $this->input->post($element['field']);
+            if(is_array($post_value))
+            {
+                $value = $post_value;
+            }
+            else
+            {
+                $value = set_value($element['field'], '', FALSE);
+            }
         }
         else if( isset($form_record) )
         {
