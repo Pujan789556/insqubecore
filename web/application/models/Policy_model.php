@@ -910,7 +910,7 @@ class Policy_model extends MY_Model
              * ---------------------
              */
             $this->load->model('rel_policy_tag_model');
-            $tags = $fields['tags'];
+            $tags = $fields['tags'] ?? [];
             $this->rel_policy_tag_model->save($id, $tags);
 
             return TRUE;
@@ -1002,7 +1002,7 @@ class Policy_model extends MY_Model
              * ---------------------
              */
             $this->load->model('rel_policy_tag_model');
-            $tags = $fields['tags'];
+            $tags = $fields['tags'] ?? [];
             $this->rel_policy_tag_model->save($id, $tags);
         }
 
