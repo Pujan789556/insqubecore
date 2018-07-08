@@ -143,7 +143,7 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
                         $benefits = json_decode($benefits_json);
                         if($benefits):
                          ?>
-                         <table class="table">
+                         <table class="table" class="smaller">
                             <thead>
                                 <tr>
                                     <td><strong>Section</strong></td>
@@ -166,9 +166,8 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
                         <?php endif; ?>
                     </td>
                 </tr>
-
                 <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
+                    <td colspan="2" class="smaller"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
                 </tr>
             </tbody>
         </table><br>
@@ -176,7 +175,7 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
         /**
          * Load Footer
          */
-        $this->load->view('policies/print/_schedule_footer', ['lang' => 'np']);
+        $this->load->view('policies/print/_schedule_footer', ['lang' => 'en']);
         ?>
     </body>
 </html>
