@@ -71,20 +71,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                     </a>
                                     <ul class="treeview-menu">
                                           <li class="<?php echo set_menu_active($nav_level_2, 'agents');?>"><a href="<?php echo site_url('agents');?>"><i class="fa fa-circle-o"></i> Agents</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'companies');?>"><a href="<?php echo site_url('companies');?>"><i class="fa fa-circle-o"></i> Companies</a></li>
 
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'surveyor_expertise');?>"><a href="<?php echo site_url('surveyor_expertise');?>"><i class="fa fa-circle-o"></i> Surveyor Expertise</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'surveyors');?>"><a href="<?php echo site_url('surveyors');?>"><i class="fa fa-circle-o"></i> Surveyors</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'months');?>"><a href="<?php echo site_url('months');?>"><i class="fa fa-circle-o"></i> Nepali Months</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'fiscal_years');?>"><a href="<?php echo site_url('fiscal_years');?>"><i class="fa fa-circle-o"></i> Fiscal Years</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'fy_months');?>"><a href="<?php echo site_url('fy_months');?>"><i class="fa fa-circle-o"></i> Fiscal Year Months</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'fy_quarters');?>"><a href="<?php echo site_url('fy_quarters');?>"><i class="fa fa-circle-o"></i> Fiscal Year Quarters</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'forex');?>"><a href="<?php echo site_url('forex');?>"><i class="fa fa-circle-o"></i> Forex</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'departments');?>"><a href="<?php echo site_url('departments');?>"><i class="fa fa-circle-o"></i> Departments</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'countries');?>"><a href="<?php echo site_url('countries');?>"><i class="fa fa-globe"></i> Countries</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'states');?>"><a href="<?php echo site_url('states');?>"><i class="fa fa-circle-o"></i> States</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'regions');?>"><a href="<?php echo site_url('regions');?>"><i class="fa fa-circle-o"></i> Regions</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'districts');?>"><a href="<?php echo site_url('districts');?>"><i class="fa fa-circle-o"></i> Districts</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'branches');?>">
                                                 <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Branches
                                                       <span class="pull-right-container">
@@ -101,6 +88,31 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                                       </li>
                                                 </ul>
                                           </li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'companies');?>"><a href="<?php echo site_url('companies');?>"><i class="fa fa-circle-o"></i> Companies</a></li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'countries');?>"><a href="<?php echo site_url('countries');?>"><i class="fa fa-globe"></i> Countries</a></li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'departments');?>"><a href="<?php echo site_url('departments');?>"><i class="fa fa-circle-o"></i> Departments</a></li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'districts');?>"><a href="<?php echo site_url('districts');?>"><i class="fa fa-circle-o"></i> Districts</a></li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'fiscal_years');?>"><a href="<?php echo site_url('fiscal_years');?>"><i class="fa fa-circle-o"></i> Fiscal Years</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'fy_months');?>"><a href="<?php echo site_url('fy_months');?>"><i class="fa fa-circle-o"></i> Fiscal Year Months</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'fy_quarters');?>"><a href="<?php echo site_url('fy_quarters');?>"><i class="fa fa-circle-o"></i> Fiscal Year Quarters</a></li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'forex');?>"><a href="<?php echo site_url('forex');?>"><i class="fa fa-circle-o"></i> Forex</a></li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'months');?>"><a href="<?php echo site_url('months');?>"><i class="fa fa-circle-o"></i> Nepali Months</a></li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'regions');?>"><a href="<?php echo site_url('regions');?>"><i class="fa fa-circle-o"></i> Regions</a></li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'states');?>"><a href="<?php echo site_url('states');?>"><i class="fa fa-circle-o"></i> States</a></li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'surveyor_expertise');?>"><a href="<?php echo site_url('surveyor_expertise');?>"><i class="fa fa-circle-o"></i> Surveyor Expertise</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'surveyors');?>"><a href="<?php echo site_url('surveyors');?>"><i class="fa fa-circle-o"></i> Surveyors</a></li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'tags');?>"><a href="<?php echo site_url('tags');?>"><i class="fa fa-circle-o"></i> Tags</a></li>
                                     </ul>
                               </li>
 
