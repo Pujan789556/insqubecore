@@ -54,20 +54,6 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                                     पेशा: <?php echo $record->customer_profession;?>
                                 </td>
                             </tr>
-
-                            <tr>
-                                <td>
-                                    <strong>बीमाको विषयवस्तु रहेको स्थान, भवन वा सम्पत्तिको विवरण</strong><br/>
-                                    <?php
-
-                                    $object = (object)[
-                                        'attributes' => $record->object_attributes
-                                    ];
-
-                                    $this->load->view('objects/snippets/_schedule_snippet_brg', ['record' => $object ]);
-                                     ?>
-                                </td>
-                            </tr>
                             <tr>
                                 <td>
                                     रसिद नं.: <br/>
@@ -135,7 +121,17 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                         </table>
                     </td>
                 </tr>
-
+                <tr>
+                    <td colspan="2">
+                        <strong>बीमाको विषयवस्तु रहेको स्थान, भवन वा सम्पत्तिको विवरण</strong><br/>
+                        <?php
+                        $object = (object)[
+                            'attributes' => $record->object_attributes
+                        ];
+                        $this->load->view('objects/snippets/_schedule_snippet_brg', ['record' => $object ]);
+                         ?>
+                    </td>
+                </tr>
                 <tr>
                     <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
                 </tr>

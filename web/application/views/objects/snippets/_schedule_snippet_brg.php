@@ -30,16 +30,16 @@ $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
         if($item_count):
             for ($i=0; $i < $item_count; $i++):?>
         		<tr>
-        			<td><?php echo $land_building->owner_name[$i]?></td>
-        			<td><?php echo $land_building->owner_address[$i]?></td>
-        			<td><?php echo $land_building->owner_contacts[$i]?></td>
-        			<td><?php echo $land_building->plot_no[$i]?></td>
-        			<td><?php echo $land_building->house_no[$i]?></td>
-        			<td><?php echo $land_building->tole[$i]?></td>
-        			<td><?php echo $land_building->district[$i] ? $districts[ $land_building->district[$i] ] : ''?></td>
-        			<td><?php echo $land_building->vdc[$i]?></td>
-        			<td><?php echo $land_building->ward_no[$i]?></td>
-        			<td><?php echo $land_building->storey_no[$i]?></td>
+        			<td><?php echo $land_building->owner_name[$i] ?? ''?></td>
+        			<td><?php echo $land_building->owner_address[$i] ?? ''?></td>
+        			<td><?php echo $land_building->owner_contacts[$i] ?? ''?></td>
+        			<td><?php echo $land_building->plot_no[$i] ?? ''?></td>
+        			<td><?php echo $land_building->house_no[$i] ?? ''?></td>
+        			<td><?php echo $land_building->tole[$i] ?? ''?></td>
+        			<td><?php echo $land_building->district[$i] ? $districts[$land_building->district[$i]] : ''?></td>
+        			<td><?php echo $land_building->vdc[$i] ?? ''?></td>
+        			<td><?php echo $land_building->ward_no[$i] ?? ''?></td>
+        			<td><?php echo $land_building->storey_no[$i] ?? ''?></td>
         		</tr>
         <?php
         	endfor;
