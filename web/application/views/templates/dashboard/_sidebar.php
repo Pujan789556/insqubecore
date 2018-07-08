@@ -264,6 +264,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                     <ul class="treeview-menu">
                                           <li class="<?php echo set_menu_active($nav_level_2, 'roles');?>"><a href="<?php echo site_url('roles');?>"><i class="fa fa-lock"></i> Roles &amp; Permissions</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'users');?>"><a href="<?php echo site_url('users');?>"><i class="fa fa-users"></i> Users</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'login_attempts');?>"><a href="<?php echo site_url('login_attempts');?>"><i class="fa fa-lock"></i> Login Attempts</a></li>
                                     </ul>
                               </li>
                         </ul>
