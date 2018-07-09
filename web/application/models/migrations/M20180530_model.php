@@ -24,7 +24,7 @@ class M20180530_model extends MY_Model
         /**
          * Migrate Portfolio Object Attributes
          */
-        $this->misc_gpa();
+        $this->agr_cattle();
     }
 
     // ----------------------------------------------------------------
