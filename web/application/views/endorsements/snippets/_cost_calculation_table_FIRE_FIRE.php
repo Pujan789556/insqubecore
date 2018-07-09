@@ -69,6 +69,7 @@ $grand_total = $total_premium + $endorsement_record->amt_stamp_duty + $endorseme
                                         <tr>
                                             <td><?php echo $dt[0] ?></td>
                                             <td class="text-right"><?php echo $dt[1] ?></td>
+                                            <td class="text-right"><?php echo number_format($dt[2], 2) ?></td>
                                         </tr>
                                     <?php endforeach ?>
                                </tbody>
