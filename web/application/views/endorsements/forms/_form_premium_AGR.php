@@ -16,12 +16,37 @@ $premium_computation_table  = $endorsement_record->premium_computation_table ? j
         isset($policy_record) ? ['id' => $policy_record->id] : []);
 ?>
 
+
+
     <?php
     /**
      * Premium Summary Table
      */
     $this->load->view('endorsements/snippets/_premium_summary');
 
+    $premium_elements = $form_elements['premium'] ?? NULL;
+    if($premium_elements):
+    ?>
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">Premium Information</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <?php
+                /**
+                 * Portfolio Specific Premium Fields
+                 */
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements'     => $premium_elements,
+                    'form_record'       => $premium_computation_table,
+                    'grid_label'        => 'col-md-4',
+                    'grid_form_control' => 'col-md-8'
+                ]);
+                ?>
+            </div>
+        </div>
+    <?php
+    endif;
 
     /**
      * Load TXN Common Elements

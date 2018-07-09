@@ -14,32 +14,10 @@ $grand_total = $total_premium + $endorsement_record->amt_stamp_duty + $endorseme
 
 				<?php foreach($cost_calculation_table as $row):?>
 					<tr>
-						<th class="text-left"><?php echo $row->label ?></th>
+						<td class="text-left"><?php echo $row->label ?></td>
 						<td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
 					</tr>
 				<?php endforeach ?>
-				<tr>
-				    <td class="no-padding" colspan="2">
-				        <table class="table no-margin table-bordered table-condensed">
-				            <tr>
-				                <td width="80%" class="text-right"><strong>बीमा शुल्क</strong></td>
-				                <td class="text-right"><strong><?php echo number_format($total_premium, 2)?></strong></td>
-				            </tr>
-				            <tr>
-				                <td class="text-right"><strong>टिकट दस्तुर</strong></td>
-				                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2)?></strong></td>
-				            </tr>
-				            <tr>
-				                <td class="text-right"><strong>टिकटको मु. अ. क. (VAT)</strong></td>
-				                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2);?></strong></td>
-				            </tr>
-				            <tr>
-				                <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-				                <td class="text-right"><strong><?php echo number_format( $grand_total , 2);?></strong></td>
-				            </tr>
-				        </table>
-				    </td>
-				</tr>
 			<?php else: ?>
 				<tr><td class="text-muted text-center">No Premium Information Found!</td></tr>
 			<?php endif ?>

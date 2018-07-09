@@ -327,6 +327,52 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
 		    ],
 
 		    /**
+		     * Nominee
+		     */
+		    'nominee' => [
+		    	[
+			        'field' => 'object[nominee_name]',
+			        '_key' => 'nominee_name',
+			        'label' => 'नाम थर',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[nominee_relation]',
+			        '_key' => 'nominee_relation',
+			        'label' => 'बिमितसँगको नाता',
+			        'rules' => 'trim|max_length[50]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[nominee_father]',
+			        '_key' => 'nominee_father',
+			        'label' => 'पिताको नाम',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[nominee_mother]',
+			        '_key' => 'nominee_mother',
+			        'label' => 'माताको नाम',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[nominee_contact]',
+			        '_key' => 'nominee_contact',
+			        'label' => 'संपर्क नं (मोबाईल / आवास)',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ]
+		    ],
+
+		    /**
 		     * Damage or Loss Details
 		     */
 		    'damages' => [
@@ -518,6 +564,21 @@ if ( ! function_exists('_TXN_AGR_CATTLE_premium_validation_rules'))
 	function _TXN_AGR_CATTLE_premium_validation_rules($policy_record, $pfs_record, $policy_object, $for_form_processing = FALSE )
 	{
 		$validation_rules = [
+
+			/**
+			 * Premium Validation Rules
+			 */
+			'premium' => [
+                [
+	                'field' => 'premium[personal_accident]',
+	                'label' => 'Personal Accident Premium Charge of Insured Party (Rs.)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'personal_accident',
+	                '_required' => true
+	            ]
+			],
+
 			/**
 			 * Common to All Package Type
 			 * ----------------------------
@@ -735,7 +796,9 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
         	{
 
 				// Premium Data
-				$post_data = $CI->input->post();
+				$post_data 		= $CI->input->post();
+				$post_premium 	= $post_data['premium'];
+				$personal_accident = $post_premium['personal_accident'];
 
 				/**
 				 * Do we have a valid method?
@@ -765,7 +828,7 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 					// A = SI X Default Rate %
 					$A = ( $SI * $default_rate ) / 100.00;
 					$cost_calculation_table[] = [
-						'label' => "क. बीमा शुल्क ({$default_rate}%)",
+						'label' => "क. कुल बीमा शुल्क ({$default_rate}%)",
 						'value' => $A
 					];
 
@@ -779,17 +842,15 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 					 */
 					$commissionable_premium = NULL;
 					$agent_commission 		= NULL;
-					$direct_discount 		= NULL;
+					$direct_discount 		= 0.00;
+					$dd_formatted 			= 0.00;
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 					{
 						// Direct Discount
 						$direct_discount = ( $A * $pfs_record->direct_discount ) / 100.00 ;
 
 						$dd_formatted = number_format($pfs_record->direct_discount, 2);
-						$cost_calculation_table[] = [
-							'label' => "ख. प्रत्यक्ष छूट ({$dd_formatted}%)",
-							'value' => $direct_discount
-						];
+
 					}
 					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
@@ -797,11 +858,16 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 						$agent_commission 		= ( $A * $pfs_record->agent_commission ) / 100.00;
 					}
 
+					$cost_calculation_table[] = [
+						'label' => "ख. प्रत्यक्ष छूट ({$dd_formatted}%)",
+						'value' => $direct_discount
+					];
+
 
 					// C = A - Direct Discount
 					$C = $A - $direct_discount;
 					$cost_calculation_table[] = [
-						'label' => "ग. (क - ख)",
+						'label' => "ग. छुट पछिको शुल्क (क - ख)",
 						'value' => $C
 					];
 
@@ -809,17 +875,46 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 					// D = 75% of C
 					$D = ($C * 75) / 100.00;
 					$cost_calculation_table[] = [
-						'label' => "घ. ग को ७५% ले हुन आउने छुट",
+						'label' => "घ. ग को ७५% ले हुन आउने रकम",
 						'value' => $D
 					];
 
-					// NET PREMIUM = C - D
-					$BASIC_PREMIUM = $C - $D;
+					// E = C - D
+					$E = $C - $D;
 					$cost_calculation_table[] = [
 						'label' => "ङ. जम्मा (ग - घ)",
-						'value' => $BASIC_PREMIUM
+						'value' => $E
 					];
 
+					// Stamp Duty
+					$F = $post_data['amt_stamp_duty'];
+					$cost_calculation_table[] = [
+						'label' => "च. थप टिकट दस्तुर",
+						'value' => $F
+					];
+
+					// G = E + F
+					$G = $E + $F;
+					$cost_calculation_table[] = [
+						'label' => "छ. बिमितले तिर्नुपर्ने जम्मा बीमा शुल्क (ङ + च)",
+						'value' => $G
+					];
+
+					// Personal Accident
+					$H = floatval($personal_accident);
+					$cost_calculation_table[] = [
+						'label' => "ज. बिमितले दुर्घटना बीमा वपत तिर्नुपर्ने बीमा शुल्क",
+						'value' => $H
+					];
+
+					// Basic Premium
+					$I = $G + $H; // Stamp Duty is Saved Saperately
+					$cost_calculation_table[] = [
+						'label' => "झ. बिमितले तिर्नुपर्ने जम्मा बीमा शुल्क (छ + ज)",
+						'value' => $I
+					];
+
+					$BASIC_PREMIUM = $E + $H;
 
 					/**
 					 * Prepare Premium Data
@@ -890,7 +985,7 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 					 * -------------------------
 					 * NOT Applicable!!!
 					 */
-					$premium_computation_table = NULL;
+					$premium_computation_table 			   = json_encode($post_premium);
 					$txn_data['premium_computation_table'] = $premium_computation_table;
 
 
