@@ -147,9 +147,9 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'field' => 'object[date_dept]',
 			        '_key' => 'date_dept',
 			        'label' => 'Estimated Date of Departure',
-			        'rules' => 'trim|required|valid_date',
-			        '_extra_attributes' => 'data-provide="datepicker-inline"',
-			        '_type'             => 'date',
+			        'rules' => 'trim|required|max_length[100]',
+			        '_type'     => 'text',
+			        '_default' 	=> 'TO BE INTIMATED',
 			        '_required' => true
 			    ],
 			    [
