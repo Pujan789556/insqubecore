@@ -357,11 +357,11 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_item_building_category_dropdown'))
 	function _OBJ_FIRE_FIRE_item_building_category_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			'1' => 'First',
-			'2' => 'Second',
-			'3'	=> 'Third',
-			'4' => 'Fourth',
-			'5' => 'Open Space'
+			'1' => 'पहिलो श्रेणी',
+			'2' => 'दोस्रो श्रेणी',
+			'3'	=> 'तेस्रो श्रेणी',
+			'4' => 'चौथो श्रेणी',
+			'5' => 'खुल्ला'
 		];
 
 		if($flag_blank_select)
@@ -385,11 +385,11 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_item_category_dropdown'))
 	function _OBJ_FIRE_FIRE_item_category_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			'BWALL' => 'Boundary Wall',
-			'BLDNG' => 'Building',
-			'GOODS'	=> 'Goods/Stock',
-			'MCNRY' => 'Machinary',
-			'OTH' 	=> 'Others'
+			'BWALL' => 'सिमाना पर्खाल',
+			'BLDNG' => 'भवन',
+			'GOODS'	=> 'मालसामान',
+			'MCNRY' => 'मशीनरी',
+			'OTH' 	=> 'अन्य'
 		];
 
 		if($flag_blank_select)
@@ -413,8 +413,8 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_item_ownership_dropdown'))
 	function _OBJ_FIRE_FIRE_item_ownership_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			'O' => 'Owned',
-			'R' => 'Rented'
+			'O' => 'निजी स्वामित्व',
+			'R' => 'भाडामा'
 		];
 
 		if($flag_blank_select)
@@ -1193,8 +1193,9 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 
 									// Risk table tmp
-									$risk_table_tmp[$pr->name] = $risk_table_tmp[$pr->name] ?? 0.00;
-									$risk_table_tmp[$pr->name] += $premium_per_risk;
+									$risk_table_tmp[$pr->name]['premium'] = $risk_table_tmp[$pr->name] ?? 0.00;
+									$risk_table_tmp[$pr->name]['premium'] += $premium_per_risk;
+									$risk_table_tmp[$pr->name]['rate'] = $rate;
 
 									// GROSS - Regular & Pool
 									if( $pr->type == IQB_RISK_TYPE_BASIC )
@@ -1265,9 +1266,9 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 						}
 
 						// Update Risk Table
-						foreach($risk_table_tmp as $key=>$value)
+						foreach($risk_table_tmp as $risk_name=>$goodies)
 						{
-							$risk_table[] 		= [$key, $value];
+							$risk_table[] 		= [$risk_name, $goodies['rate'], $goodies['premium']];
 						}
 					}
 

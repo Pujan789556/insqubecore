@@ -151,7 +151,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                                     if($item_count):
                                         foreach($items as $item_record):?>
                                             <tr>
-                                                <td><?php echo $i++; ?></td>
+                                                <td><?php echo ++$i; ?></td>
                                                 <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item_record->category ]?></td>
                                                 <td><?php echo nl2br(htmlspecialchars($item_record->description)); ?></td>
                                                 <td align="right"><?php echo number_format($item_record->sum_insured, 2); ?></td>
@@ -160,7 +160,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                                         endforeach;
                                     endif;?>
                                     <tr>
-                                        <td colspan="2" align="right">जम्मा बीमांक (रु)</td>
+                                        <td colspan="3" align="right">जम्मा बीमांक (रु)</td>
                                         <td align="right"><?php echo  number_format($record->object_amt_sum_insured, 2);?></td>
                                     </tr>
                                 </tbody>

@@ -22,8 +22,6 @@ $grand_total = $total_premium + $endorsement_record->amt_stamp_duty + $endorseme
     <table class="table no-margin table-bordered">
         <tbody id="_premium-details">
             <?php if($cost_calculation_table):?>
-
-
                 <?php if($property_table): ?>
                     <tr>
                        <td class="no-padding">
@@ -62,6 +60,7 @@ $grand_total = $total_premium + $endorsement_record->amt_stamp_duty + $endorseme
                                     </tr>
                                     <tr>
                                        <th>Risk</th>
+                                       <th>Rate(Rs. Per Thousand)</th>
                                        <th class="text-right">Premium (Rs.)</th>
                                    </tr>
                                 </thead>

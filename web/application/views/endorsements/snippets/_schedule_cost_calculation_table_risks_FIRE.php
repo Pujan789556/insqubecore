@@ -12,6 +12,8 @@ if($cost_calculation_table)
 }
 $total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
 $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
+
+// echo '<pre>'; print_r($risk_table);exit;
 ?>
 <table class="table no-margin table-bordered">
     <tbody>
@@ -23,6 +25,7 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                            <thead>
                                <tr>
                                    <td>रक्षावरण गरिएका जोेखिमहरु</td>
+                                   <td class="text-right">दर (रु प्रति हजार)</td>
                                    <td class="text-right">बीमाशुल्क (रु.)</td>
                                </tr>
                            </thead>
@@ -31,6 +34,7 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                                     <tr>
                                         <td><?php echo $dt[0] ?></td>
                                         <td class="text-right"><?php echo number_format((float)$dt[1], 2);?></td>
+                                        <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
                                     </tr>
                                 <?php endforeach ?>
                            </tbody>
