@@ -29,9 +29,8 @@ class Ac_accounts extends MY_Controller
 
         // Setup Navigation
 		$this->active_nav_primary([
-			'level_0' => 'master_setup',
-			'level_1' => 'account',
-			'level_2' => $this->router->class
+			'level_0' => 'accounting',
+			'level_1' => $this->router->class
 		]);
 
 		// Load Model

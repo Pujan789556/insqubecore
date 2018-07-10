@@ -147,17 +147,12 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ac_account_groups');?>">
                                                 <a href="<?php echo site_url('ac_account_groups');?>"><i class="fa fa-circle-o"></i> Account Groups</a>
                                           </li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'ac_accounts');?>">
-                                                <a href="<?php echo site_url('ac_accounts');?>"><i class="fa fa-circle-o"></i> Accounts</a>
-                                          </li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ac_voucher_types');?>">
                                                 <a href="<?php echo site_url('ac_voucher_types');?>"><i class="fa fa-circle-o"></i> Voucher Types</a>
                                           </li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ac_duties_and_tax');?>">
                                                 <a href="<?php echo site_url('ac_duties_and_tax');?>"><i class="fa fa-circle-o"></i> Duties &amp; Tax</a>
                                           </li>
-
-
                                     </ul>
                               </li>
 
@@ -333,6 +328,9 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                         </span>
                   </a>
                   <ul class="treeview-menu">
+                        <li class="<?php echo set_menu_active($nav_level_1, 'ac_accounts');?>">
+                              <a href="<?php echo site_url('ac_accounts');?>"><i class="fa fa-circle-o"></i> Accounts</a>
+                        </li>
                         <li class="<?php echo set_menu_active($nav_level_1, 'ac_parties');?>">
                               <a href="<?php echo site_url('ac_parties');?>"><i class="fa fa-circle-o"></i> Parties</a>
                         </li>
