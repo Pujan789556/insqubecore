@@ -96,41 +96,34 @@ if ( ! function_exists('_OBJ_AGR_tariff_by_type'))
      * Get Tariff for supplied sub portfolio and agro category
      *
      * @param int $portfolio_id  Portfolio ID
-     * @param int $bs_agro_category_id  Crop Category ID
+     * @param int $bs_agro_breed_id  Crop Category ID
      * @return  Object
      */
-    function _OBJ_AGR_tariff_by_type( $portfolio_id, $bs_agro_category_id )
+    function _OBJ_AGR_tariff_by_type( $portfolio_id, $bs_agro_breed_id )
     {
+        $CI =& get_instance();
+
         $portfolio_id = (int)$portfolio_id;
-        load_portfolio_helper($portfolio_id);
 
-        switch($portfolio_id)
+        $CI->load->model('tariff_agriculture_model');
+        $tariff_record = $CI->tariff_agriculture_model->get_by_fy_portfolio($CI->current_fiscal_year->id, $portfolio_id);
+        $tariff         = json_decode($tariff_record->tariff ?? '[]');
+        $valid_tariff   = NULL;
+
+        foreach($tariff as $single_tariff)
         {
-            case IQB_SUB_PORTFOLIO_AGR_CROP_ID:
-                $tariff = _OBJ_AGR_CROP_tariff_by_type( $bs_agro_category_id );
+            if($single_tariff->bs_agro_breed_id == $bs_agro_breed_id)
+            {
+                $valid_tariff = $single_tariff;
                 break;
-
-            case IQB_SUB_PORTFOLIO_AGR_CATTLE_ID:
-                $tariff = _OBJ_AGR_CATTLE_tariff_by_type( $bs_agro_category_id );
-                break;
-
-            case IQB_SUB_PORTFOLIO_AGR_POULTRY_ID:
-                $tariff = _OBJ_AGR_POULTRY_tariff_by_type( $bs_agro_category_id );
-                break;
-
-            case IQB_SUB_PORTFOLIO_AGR_FISH_ID:
-                $tariff = _OBJ_AGR_FISH_tariff_by_type( $bs_agro_category_id );
-                break;
-
-            case IQB_SUB_PORTFOLIO_AGR_BEE_ID:
-                $tariff = _OBJ_AGR_BEE_tariff_by_type( $bs_agro_category_id );
-                break;
-
-            default:
-                throw new Exception("Exception [Helper: ph_agr_helper][Method: _OBJ_AGR_tariff_by_type()]: No portfolio found!");
-                break;
+            }
         }
 
-        return $tariff;
+        if( !$valid_tariff)
+        {
+            throw new Exception("Exception [Helper: ph_agr_helper][Method: _OBJ_AGR_tariff_by_type()]: No Tariff found for supplied Breed ({$bs_agro_breed_id}) for supplied portfolio ({$bs_agro_breed_id})");
+        }
+
+        return $valid_tariff;
     }
 }
