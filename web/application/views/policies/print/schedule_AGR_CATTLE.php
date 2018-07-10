@@ -147,6 +147,10 @@ $schedule_table_title   = 'पशुधनको बीमालेख';
                             </tr>
 
                             <tr>
+                                <td>कुल बीमांक रकम(रु): <?php echo  number_format($endorsement_record->net_amt_sum_insured, 2);?></td>
+                            </tr>
+
+                            <tr>
                                 <td>
                                     <?php
                                     /**
@@ -159,6 +163,9 @@ $schedule_table_title   = 'पशुधनको बीमालेख';
                             </tr>
                         </table>
                     </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="small no-border"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
                 </tr>
             </tbody>
         </table><br/>

@@ -857,15 +857,15 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 					 * Premium Computation Table
 					 * -------------------------
 					 */
-					$premium_computation_table = json_encode($post_premium);
-					$txn_data['premium_computation_table'] = $premium_computation_table;
+					$premium_computation_table 					= json_encode($post_premium);
+					$premium_data['premium_computation_table'] 	= $premium_computation_table;
 
 
 					/**
 					 * Cost Calculation Table
 					 */
-					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
-					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
+					$premium_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+					return $CI->endorsement_model->save($endorsement_record->id, $premium_data);
 
 				} catch (Exception $e){
 

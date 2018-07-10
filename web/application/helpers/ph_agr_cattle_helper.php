@@ -676,43 +676,6 @@ if ( ! function_exists('_TXN_AGR_CATTLE_premium_goodies'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_AGR_CATTLE_tariff_by_type'))
-{
-	/**
-	 * Get Tariff for supplied cattle type
-	 *
-	 * @param integer $bs_agro_category_id 	Category ID
-	 * @return	Object
-	 */
-	function _OBJ_AGR_CATTLE_tariff_by_type( $bs_agro_category_id )
-	{
-		$CI =& get_instance();
-
-		$CI->load->model('tariff_agriculture_model');
-		$tariff_record = $CI->tariff_agriculture_model->get_by_fy_portfolio($CI->current_fiscal_year->id, IQB_SUB_PORTFOLIO_AGR_CATTLE_ID);
-		$tariff     	= json_decode($tariff_record->tariff ?? '[]');
-		$valid_tariff 	= NULL;
-
-		foreach($tariff as $single_tariff)
-		{
-			if($single_tariff->bs_agro_category_id == $bs_agro_category_id)
-			{
-				$valid_tariff = $single_tariff;
-				break;
-			}
-		}
-
-		if( !$valid_tariff)
-		{
-			throw new Exception("Exception [Helper: ph_agr_cattle_helper][Method: _OBJ_AGR_CATTLE_tariff_by_type()]: No Tariff found for supplied Category ({$bs_agro_category_id})");
-		}
-
-		return $valid_tariff;
-	}
-}
-
-// ------------------------------------------------------------------------
-
 if ( ! function_exists('__save_premium_AGR_CATTLE'))
 {
 	/**
@@ -737,29 +700,8 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 		{
 			/**
 			 * Policy Object Record
-			 *
-			 * In case of endorsements, we will be needing both current policy object and edited object information
-			 * to compute premium.
 			 */
-			$old_object = get_object_from_policy_record($policy_record);
-			$new_object = NULL;
-			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-			{
-				try {
-					$new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
-				} catch (Exception $e) {
-
-					return $CI->template->json([
-	                    'status'        => 'error',
-	                    'title' 		=> 'Exception Occured',
-	                    'message' 	=> $e->getMessage()
-	                ], 404);
-				}
-			}
-
-			// Newest object attributes should be used.
-			$object_attributes  = json_decode($new_object->attributes ?? $old_object->attributes);
-
+			$policy_object 		= get_object_from_policy_record($policy_record);
 
 			/**
 			 * Portfolio Setting Record
@@ -768,26 +710,22 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 
 
 			/**
-			 * Tariff Record
+			 * !!! MANUAL PREMIUM COMPUTATION ENDORSEMENT !!!
+			 *
+			 * Manual Endorsement should be done on
+			 * 	- Premium Upgrade
+			 * 	- Premium Refund
 			 */
-			try {
-
-				$tariff = _OBJ_AGR_CATTLE_tariff_by_type($object_attributes->bs_agro_category_id);
-
-			} catch (Exception $e) {
-
-				return $CI->template->json([
-                    'status'        => 'error',
-                    'title' 		=> 'Exception Occured',
-                    'message' 	=> $e->getMessage()
-                ], 404);
+			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+			{
+				return _ENDORSEMENT__save_premium_manual($endorsement_record->id, $pfs_record->agent_commission);
 			}
 
 
 			/**
 			 * Validation Rules for Form Processing
 			 */
-			$validation_rules = _TXN_AGR_CATTLE_premium_validation_rules($policy_record, $pfs_record, $old_object, TRUE );
+			$validation_rules = _TXN_AGR_CATTLE_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
             $CI->form_validation->set_rules($validation_rules);
 
             // echo '<pre>';print_r($validation_rules);exit;
@@ -796,9 +734,9 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
         	{
 
 				// Premium Data
-				$post_data 		= $CI->input->post();
-				$post_premium 	= $post_data['premium'];
-				$personal_accident = $post_premium['personal_accident'];
+				$post_data 			= $CI->input->post();
+				$post_premium 		= $post_data['premium'];
+				$personal_accident 	= $post_premium['personal_accident'];
 
 				/**
 				 * Do we have a valid method?
@@ -814,21 +752,24 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 
 
 					/**
-					 * Get the NET Sum Insured Amount
+					 * Get Sum Insured & Object Attributes
 					 */
-					$SI = _OBJ_si_net($old_object, $new_object);
+					$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+					$SI 				= floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
 
 
 					/**
-					 * Get Tariff Rate
+					 * Compute Premium for Per Breed
 					 */
-					$default_rate 	= floatval($tariff->rate);
+					$A = 0.00;
+					foreach($object_attributes->items as $single)
+					{
 
-
-					// A = SI X Default Rate %
-					$A = ( $SI * $default_rate ) / 100.00;
+						$tariff = _OBJ_AGR_tariff_by_type(IQB_SUB_PORTFOLIO_AGR_CATTLE_ID, $single->breed);
+						$A += ( floatval($tariff->rate) * floatval($single->sum_insured) ) / 100.00;
+					}
 					$cost_calculation_table[] = [
-						'label' => "क. कुल बीमा शुल्क ({$default_rate}%)",
+						'label' => "क. बीमा शुल्क",
 						'value' => $A
 					];
 
@@ -914,7 +855,13 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 						'value' => $I
 					];
 
+					// Basic Premium
 					$BASIC_PREMIUM = $E + $H;
+
+					/**
+					 * !!! NO VAT  on AGRICULTURE PORTFOLIOS !!!
+					 */
+					$amount_vat = 0.00;
 
 					/**
 					 * Prepare Premium Data
@@ -925,75 +872,28 @@ if ( ! function_exists('__save_premium_AGR_CATTLE'))
 						'amt_agent_commission'  => $agent_commission,
 						'amt_direct_discount' 	=> $direct_discount,
 						'amt_pool_premium' 		=> 0.00,
-					];
-
-					/**
-					 * Perform Computation Basis for Endorsement
-					 */
-					if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-					{
-						// Transaction Date must be set as today
-						$endorsement_record->txn_date = date('Y-m-d');
-						$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
-					}
-
-					/**
-					 * !!! NO VAT  on AGRICULTURE PORTFOLIOS !!!
-					 */
-					$amount_vat = 0.00;
-
-					if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
-					{
-						// We do not do anything here, because, VAT was applied only on Stamp Duty
-						// For other portfolio, it must be set as -ve value
-
-						/**
-						 * !!! NO POOL PREMIUM !!!
-						 *
-						 * Pool premium is not refunded to customer.
-						 * NULLify Pool Premium
-						 */
-						$premium_data['amt_pool_premium'] = 0.00;
-
-						/**
-						 * !!! VAT RETURN !!!
-						 *
-						 * We must also refund the VAT for as we refund the premium.
-						 *
-						 * NOTE:
-						 * In this portfolio, we have to pay vat for stamp duty if any.
-						 * So there is no vat return in this case.
-						 */
-					}
-
-					/**
-					 * Prepare Other Data
-					 */
-					$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
-					$net_amt_sum_insured 	= $SI;
-					$txn_data = array_merge($premium_data, [
-						'gross_amt_sum_insured' => $gross_amt_sum_insured,
-						'net_amt_sum_insured' 	=> $net_amt_sum_insured,
+						'gross_amt_sum_insured' => $policy_object->amt_sum_insured,
+						'net_amt_sum_insured' 	=> $policy_object->amt_sum_insured,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
 						'txn_date' 				=> date('Y-m-d')
-					]);
+					];
+
 
 
 					/**
 					 * Premium Computation Table
 					 * -------------------------
-					 * NOT Applicable!!!
 					 */
-					$premium_computation_table 			   = json_encode($post_premium);
-					$txn_data['premium_computation_table'] = $premium_computation_table;
+					$premium_computation_table 					= json_encode($post_premium);
+					$premium_data['premium_computation_table'] 	= $premium_computation_table;
 
 
 					/**
 					 * Cost Calculation Table
 					 */
-					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
-					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
+					$premium_data['cost_calculation_table'] = json_encode($cost_calculation_table);
+					return $CI->endorsement_model->save($endorsement_record->id, $premium_data);
 
 				} catch (Exception $e){
 

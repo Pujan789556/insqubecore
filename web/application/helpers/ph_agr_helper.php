@@ -96,7 +96,7 @@ if ( ! function_exists('_OBJ_AGR_tariff_by_type'))
      * Get Tariff for supplied sub portfolio and agro category
      *
      * @param int $portfolio_id  Portfolio ID
-     * @param int $bs_agro_breed_id  Crop Category ID
+     * @param int $bs_agro_breed_id  Crop Breed ID
      * @return  Object
      */
     function _OBJ_AGR_tariff_by_type( $portfolio_id, $bs_agro_breed_id )
@@ -121,7 +121,7 @@ if ( ! function_exists('_OBJ_AGR_tariff_by_type'))
 
         if( !$valid_tariff)
         {
-            throw new Exception("Exception [Helper: ph_agr_helper][Method: _OBJ_AGR_tariff_by_type()]: No Tariff found for supplied Breed ({$bs_agro_breed_id}) for supplied portfolio ({$bs_agro_breed_id})");
+            throw new Exception("Exception [Helper: ph_agr_helper][Method: _OBJ_AGR_tariff_by_type()]: No Tariff found for supplied Breed ({$bs_agro_breed_id}) for supplied portfolio ({$portfolio_id})");
         }
 
         return $valid_tariff;
