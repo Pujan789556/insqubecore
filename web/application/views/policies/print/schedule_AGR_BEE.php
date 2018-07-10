@@ -72,6 +72,34 @@ $schedule_table_title   = 'मौरीको बीमालेख';
 
                             <tr>
                                 <td>
+                                    <strong>इच्छाइएको व्यक्तिको विवरण</strong><br/>
+                                    <table class="no-border">
+                                        <tr>
+                                            <td width="40%">नाम थर</td>
+                                            <td><?php  echo nl2br(htmlspecialchars($object_attributes->nominee_name ?? ''))?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>बिमितसँगको नाता</td>
+                                            <td><?php  echo nl2br(htmlspecialchars($object_attributes->nominee_relation ?? ''))?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>पिताको नाम</td>
+                                            <td><?php  echo nl2br(htmlspecialchars($object_attributes->nominee_father ?? ''))?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>माताको नाम</td>
+                                            <td><?php  echo nl2br(htmlspecialchars($object_attributes->nominee_mother ?? ''))?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>संपर्क नं (मोबाईल / आवास)</td>
+                                            <td><?php  echo nl2br(htmlspecialchars($object_attributes->nominee_contact ?? ''))?></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
                                     रसिद नं.: <br/>
                                     रसिदको मिति:  समय:
                                 </td>
@@ -119,6 +147,10 @@ $schedule_table_title   = 'मौरीको बीमालेख';
                             </tr>
 
                             <tr>
+                                <td>कुल बीमांक रकम(रु): <?php echo  number_format($endorsement_record->net_amt_sum_insured, 2);?></td>
+                            </tr>
+
+                            <tr>
                                 <td>
                                     <?php
                                     /**
@@ -131,6 +163,9 @@ $schedule_table_title   = 'मौरीको बीमालेख';
                             </tr>
                         </table>
                     </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="small no-border"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
                 </tr>
             </tbody>
         </table><br/>
