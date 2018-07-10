@@ -50,7 +50,7 @@ table .form-group{margin-bottom:0;}
         $tariff_formatted = [];
         foreach($tariff as $single)
         {
-            $tariff_formatted[$single->bs_agro_category_id] = $single;
+            $tariff_formatted[$single->bs_agro_breed_id] = $single;
         }
 
         ?>
@@ -64,19 +64,19 @@ table .form-group{margin-bottom:0;}
             </thead>
 
             <tbody>
-                <?php foreach($bs_agro_categories as $bs_agro_category_id => $category_name ): ?>
+                <?php foreach($bs_agro_breeds as $bs_agro_breed_id => $category_name ): ?>
                     <tr>
                         <?php
                         /**
                          * Single Row
                          */
 
-                        $form_record = $tariff_formatted[$bs_agro_category_id] ?? NULL;
+                        $form_record = $tariff_formatted[$bs_agro_breed_id] ?? NULL;
 
                         // Add ID in hidden field if no form record (Category ID)
                         if( !$form_record )
                         {
-                            $section_elements[0]['_default'] = $bs_agro_category_id;
+                            $section_elements[0]['_default'] = $bs_agro_breed_id;
                         }
 
 

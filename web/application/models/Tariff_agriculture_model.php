@@ -84,9 +84,9 @@ class tariff_agriculture_model extends MY_Model
              */
             'tariff' => [
                 [
-                    'field' => 'tariff[bs_agro_category_id][]',
-                    '_key'  => 'bs_agro_category_id',
-                    'label' => 'Category',
+                    'field' => 'tariff[bs_agro_breed_id][]',
+                    '_key'  => 'bs_agro_breed_id',
+                    'label' => 'Breed',
                     'rules' => 'trim|required|integer|max_length[8]',
                     '_type'     => 'hidden',
                     '_required' => true

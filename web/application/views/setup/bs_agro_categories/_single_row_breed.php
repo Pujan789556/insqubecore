@@ -7,8 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <tr data-name="<?php echo $record->name_en;?>" class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
 	<td><?php echo $record->code;?></td>
-	<td><a href="<?php echo site_url('bs_agro_categories/breeds/' . $record->id);?>"
-						title="View Breed Details."><?php echo $record->name_en;?></a></td>
+	<td><?php echo $record->name_en;?></td>
 
 	<td class="ins-action">
 		<div class="btn-group">
@@ -32,7 +31,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						data-toggle="tooltip"
 						data-box-size="large"
 						data-url="<?php echo site_url('bs_agro_categories/breeds/' . $record->id); ?>"
-						title="View FAC Distribution"><i class="fa fa-search"></i> <span>View Breed Details</span></a>
+						title="View Breed Details"><i class="fa fa-search"></i> <span>View Breed Details</span></a>
 				</li>
 			</ul>
 		</div>

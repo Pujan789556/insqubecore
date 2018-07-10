@@ -120,6 +120,55 @@ class Bs_agro_breed_model extends MY_Model
         }
         return $list;
     }
+    // ----------------------------------------------------------------
+
+    /**
+     * List all breeds for portfolio
+     *
+     * @param int $portfolio_id
+     * @param string $for
+     * @return type
+     */
+    public function by_portfolio($portfolio_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var = 'bsag_breed_cat_p_' . $portfolio_id;
+        $list = $this->get_cache($cache_var);
+        if(!$list)
+        {
+            $list = $this->db->select('B.id, B.name_en AS breed_name_en, B.name_np AS breed_name_np, CAT.name_en AS category_name_en, CAT.name_np AS category_name_np')
+                            ->from($this->table_name . ' B')
+                            ->join('bs_agro_categories CAT', 'CAT.id = B.category_id')
+                            ->where('CAT.portfolio_id', $portfolio_id)
+                            ->get()
+                            ->result();
+
+            $this->write_cache($list, $cache_var, CACHE_DURATION_6HRS);
+        }
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Dropdown by portfolio.
+     *
+     * @param inte $portfolio_id
+     * @return array
+     */
+    public function dropdwon_by_portfolio($portfolio_id, $lang = 'en')
+    {
+        $records = $this->by_portfolio($portfolio_id);
+
+        $list = [];
+        foreach($records as $record)
+        {
+            $list["{$record->id}"] = $record->category_name_en . ' - ' . $record->breed_name_en;
+        }
+        return $list;
+    }
 
     // ----------------------------------------------------------------
 
@@ -169,6 +218,7 @@ class Bs_agro_breed_model extends MY_Model
     {
         $cache_names = [
             'bsag_breed_cat_*',
+            'bsag_breed_cat_p_*',
             'bsag_breed_all'
         ];
         // cache name without prefix
