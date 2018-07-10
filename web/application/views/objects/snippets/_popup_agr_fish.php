@@ -123,6 +123,25 @@ else
         </div>
     </div>
 
+    <div class="<?php echo $col ?>">
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">इच्छाइएको व्यक्तिको विवरण</h4>
+            </div>
+            <table class="table table-bordered table-condensed no-margin">
+                <?php
+                $basic_elements = $form_elements['nominee'];
+
+                foreach($basic_elements as $elem): ?>
+                    <tr>
+                        <th><?php echo $elem['label']; ?></th>
+                        <td><?php echo htmlspecialchars($attributes->{$elem['_key']} ?? ''); ?></td>
+                    </tr>
+                <?php endforeach ?>
+            </table>
+        </div>
+    </div>
+
     <div class="col-sm-12">
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">

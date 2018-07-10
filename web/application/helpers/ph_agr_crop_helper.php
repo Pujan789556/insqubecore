@@ -673,10 +673,9 @@ if ( ! function_exists('__save_premium_AGR_CROP'))
 
 
 					/**
-					 * Get Sum Insured & Object Attributes
+					 * Get Object Attributes
 					 */
 					$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-					$SI 				= floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
 
 					/**
 					 * Compute Premium for Per Breed
