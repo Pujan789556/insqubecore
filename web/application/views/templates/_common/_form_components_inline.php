@@ -67,10 +67,10 @@ foreach($form_elements as $element):?>
         {
             /**
              * If array Values, we extract here
-             * NOTE: set_value() does not return array. This is specially for multiselect and checkbox group
+             * NOTE: set_value() does not return array. This is specially for multiselect
              */
             $post_value = $this->input->post($element['field']);
-            if(is_array($post_value))
+            if(is_array($post_value) && $element['field'] == 'dropdown')
             {
                 $value = $post_value;
             }
