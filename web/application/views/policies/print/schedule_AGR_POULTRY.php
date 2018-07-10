@@ -72,6 +72,34 @@ $schedule_table_title   = 'पन्छीको बीमालेख';
 
                             <tr>
                                 <td>
+                                    <strong>इच्छाइएको व्यक्तिको विवरण</strong><br/>
+                                    <table class="no-border">
+                                        <tr>
+                                            <td width="40%">नाम थर</td>
+                                            <td><?php  echo nl2br(htmlspecialchars($object_attributes->nominee_name ?? ''))?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>बिमितसँगको नाता</td>
+                                            <td><?php  echo nl2br(htmlspecialchars($object_attributes->nominee_relation ?? ''))?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>पिताको नाम</td>
+                                            <td><?php  echo nl2br(htmlspecialchars($object_attributes->nominee_father ?? ''))?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>माताको नाम</td>
+                                            <td><?php  echo nl2br(htmlspecialchars($object_attributes->nominee_mother ?? ''))?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>संपर्क नं (मोबाईल / आवास)</td>
+                                            <td><?php  echo nl2br(htmlspecialchars($object_attributes->nominee_contact ?? ''))?></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
                                     रसिद नं.: <br/>
                                     रसिदको मिति:  समय:
                                 </td>
@@ -156,10 +184,13 @@ $schedule_table_title   = 'पन्छीको बीमालेख';
                 <?php
                 $i = 1;
                 $breed_dropdown = _OBJ_AGR_breed_dropdown( $object_attributes->bs_agro_category_id );
+                $total_batch_count = 0;
                 foreach($items as $item_record): ?>
                     <tr>
                         <td><?php echo $i++; ?></td>
-                        <?php foreach($section_elements as $elem):
+                        <?php
+                        $total_batch_count += $item_record->batch_count ?? 0;
+                        foreach($section_elements as $elem):
                             $key =  $elem['_key'];
                             $value = $item_record->{$key};
 
@@ -182,7 +213,9 @@ $schedule_table_title   = 'पन्छीको बीमालेख';
                     </tr>
                 <?php endforeach; ?>
                 <tr>
-                    <td colspan="6" class="text-bold">जम्मा बीमांक रकम(रु)</td>
+                    <td colspan="4" class="text-bold text-right">जम्मा संख्या</td>
+                    <td class="text-bold"><?php echo $total_batch_count ?></td>
+                    <td colspan="2" class="text-bold text-right">जम्मा बीमांक रकम(रु)</td>
                     <td class="text-bold text-right"><?php echo number_format($record->object_amt_sum_insured, 2) ?></td>
                 </tr>
             </tbody>

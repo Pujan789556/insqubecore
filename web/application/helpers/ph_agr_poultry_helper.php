@@ -133,6 +133,15 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        '_required' 	=> true
 			    ],
 			    [
+			        'field' => 'object[items][batch_count][]',
+			        '_key' => 'batch_count',
+			        'label' => 'संख्या',
+			        'rules' => 'trim|required|integer|max_length[10]',
+			        '_type' => 'text',
+			        '_show_label' 	=> false,
+			        '_required' 	=> true
+			    ],
+			    [
                     'field' => 'object[items][keep_type][]',
                     '_key' => 'keep_type',
                     'label' => 'पालिएको तरिका',
@@ -247,6 +256,52 @@ if ( ! function_exists('_OBJ_AGR_POULTRY_validation_rules'))
 			        '_key' => 'investment_amount',
 			        'label' => 'लिएको ऋणको रकम(रू.)',
 			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ]
+		    ],
+
+		    /**
+		     * Nominee
+		     */
+		    'nominee' => [
+		    	[
+			        'field' => 'object[nominee_name]',
+			        '_key' => 'nominee_name',
+			        'label' => 'नाम थर',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[nominee_relation]',
+			        '_key' => 'nominee_relation',
+			        'label' => 'बिमितसँगको नाता',
+			        'rules' => 'trim|max_length[50]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[nominee_father]',
+			        '_key' => 'nominee_father',
+			        'label' => 'पिताको नाम',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[nominee_mother]',
+			        '_key' => 'nominee_mother',
+			        'label' => 'माताको नाम',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[nominee_contact]',
+			        '_key' => 'nominee_contact',
+			        'label' => 'संपर्क नं (मोबाईल / आवास)',
+			        'rules' => 'trim|max_length[100]',
 			        '_type'     => 'text',
 			        '_required' => false
 			    ]
@@ -484,6 +539,20 @@ if ( ! function_exists('_TXN_AGR_POULTRY_premium_validation_rules'))
 	{
 		$validation_rules = [
 			/**
+			 * Premium Validation Rules
+			 */
+			'premium' => [
+                [
+	                'field' => 'premium[personal_accident]',
+	                'label' => 'Personal Accident Premium Charge of Insured Party (Rs.)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'personal_accident',
+	                '_required' => true
+	            ]
+			],
+
+			/**
 			 * Common to All Package Type
 			 * ----------------------------
 			 * Sampusti Bibaran and Remarks are common to all type of policy package.
@@ -580,43 +649,6 @@ if ( ! function_exists('_TXN_AGR_POULTRY_premium_goodies'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_OBJ_AGR_POULTRY_tariff_by_type'))
-{
-	/**
-	 * Get Tariff for supplied poultry type
-	 *
-	 * @param int $bs_agro_category_id 	Crop Category ID
-	 * @return	Object
-	 */
-	function _OBJ_AGR_POULTRY_tariff_by_type( $bs_agro_category_id )
-	{
-		$CI =& get_instance();
-
-		$CI->load->model('tariff_agriculture_model');
-		$tariff_record = $CI->tariff_agriculture_model->get_by_fy_portfolio($CI->current_fiscal_year->id, IQB_SUB_PORTFOLIO_AGR_POULTRY_ID);
-		$tariff     	= json_decode($tariff_record->tariff ?? '[]');
-		$valid_tariff 	= NULL;
-
-		foreach($tariff as $single_tariff)
-		{
-			if($single_tariff->bs_agro_category_id == $bs_agro_category_id)
-			{
-				$valid_tariff = $single_tariff;
-				break;
-			}
-		}
-
-		if( !$valid_tariff)
-		{
-			throw new Exception("Exception [Helper: ph_agr_poultry_helper][Method: _OBJ_AGR_POULTRY_tariff_by_type()]: No Tariff found for supplied Category ({$bs_agro_category_id})");
-		}
-
-		return $valid_tariff;
-	}
-}
-
-// ------------------------------------------------------------------------
-
 if ( ! function_exists('__save_premium_AGR_POULTRY'))
 {
 	/**
@@ -641,29 +673,8 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 		{
 			/**
 			 * Policy Object Record
-			 *
-			 * In case of endorsements, we will be needing both current policy object and edited object information
-			 * to compute premium.
 			 */
-			$old_object = get_object_from_policy_record($policy_record);
-			$new_object = NULL;
-			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-			{
-				try {
-					$new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
-				} catch (Exception $e) {
-
-					return $CI->template->json([
-	                    'status'        => 'error',
-	                    'title' 		=> 'Exception Occured',
-	                    'message' 	=> $e->getMessage()
-	                ], 404);
-				}
-			}
-
-			// Newest object attributes should be used.
-			$object_attributes  = json_decode($new_object->attributes ?? $old_object->attributes);
-
+			$policy_object 		= get_object_from_policy_record($policy_record);
 
 			/**
 			 * Portfolio Setting Record
@@ -672,26 +683,22 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 
 
 			/**
-			 * Tariff Record
+			 * !!! MANUAL PREMIUM COMPUTATION ENDORSEMENT !!!
+			 *
+			 * Manual Endorsement should be done on
+			 * 	- Premium Upgrade
+			 * 	- Premium Refund
 			 */
-			try {
-
-				$tariff = _OBJ_AGR_POULTRY_tariff_by_type($object_attributes->bs_agro_category_id);
-
-			} catch (Exception $e) {
-
-				return $CI->template->json([
-                    'status'        => 'error',
-                    'title' 		=> 'Exception Occured',
-                    'message' 	=> $e->getMessage()
-                ], 404);
+			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+			{
+				return _ENDORSEMENT__save_premium_manual($endorsement_record->id, $pfs_record->agent_commission);
 			}
 
 
 			/**
 			 * Validation Rules for Form Processing
 			 */
-			$validation_rules = _TXN_AGR_POULTRY_premium_validation_rules($policy_record, $pfs_record, $old_object, TRUE );
+			$validation_rules = _TXN_AGR_POULTRY_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );
             $CI->form_validation->set_rules($validation_rules);
 
             // echo '<pre>';print_r($validation_rules);exit;
@@ -700,7 +707,9 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
         	{
 
 				// Premium Data
-				$post_data = $CI->input->post();
+				$post_data 			= $CI->input->post();
+				$post_premium 		= $post_data['premium'];
+				$personal_accident 	= $post_premium['personal_accident'];
 
 				/**
 				 * Do we have a valid method?
@@ -716,20 +725,23 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 
 
 					/**
-					 * Get the NET Sum Insured Amount
+					 * Get Sum Insured & Object Attributes
 					 */
-					$SI = _OBJ_si_net($old_object, $new_object);
+					$object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
+					$SI 				= floatval($policy_object->amt_sum_insured); 	// Sum Insured Amount
+
 
 					/**
-					 * Get Tariff Rate
+					 * Compute Premium for Per Breed
 					 */
-					$default_rate 	= floatval($tariff->rate);
-
-
-					// A = SI X Default Rate %
-					$A = ( $SI * $default_rate ) / 100.00;
+					$A = 0.00;
+					foreach($object_attributes->items as $single)
+					{
+						$tariff = _OBJ_AGR_tariff_by_type(IQB_SUB_PORTFOLIO_AGR_POULTRY_ID, $single->breed);
+						$A += ( floatval($tariff->rate) * floatval($single->sum_insured) ) / 100.00;
+					}
 					$cost_calculation_table[] = [
-						'label' => "क. बीमा शुल्क ({$default_rate}%)",
+						'label' => "क. बीमा शुल्क",
 						'value' => $A
 					];
 
@@ -743,17 +755,15 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 					 */
 					$commissionable_premium = NULL;
 					$agent_commission 		= NULL;
-					$direct_discount 		= NULL;
+					$direct_discount 		= 0.00;
+					$dd_formatted 			= 0.00;
 					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
 					{
 						// Direct Discount
 						$direct_discount = ( $A * $pfs_record->direct_discount ) / 100.00 ;
 
 						$dd_formatted = number_format($pfs_record->direct_discount, 2);
-						$cost_calculation_table[] = [
-							'label' => "ख. प्रत्यक्ष छूट ({$dd_formatted}%)",
-							'value' => $direct_discount
-						];
+
 					}
 					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
@@ -761,12 +771,16 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 						$agent_commission 		= ( $A * $pfs_record->agent_commission ) / 100.00;
 					}
 
+					$cost_calculation_table[] = [
+						'label' => "ख. प्रत्यक्ष छूट",
+						'value' => $direct_discount
+					];
 
 
 					// C = A - Direct Discount
 					$C = $A - $direct_discount;
 					$cost_calculation_table[] = [
-						'label' => "ग. (क - ख)",
+						'label' => "ग. छुट पछिको शुल्क (क - ख)",
 						'value' => $C
 					];
 
@@ -774,16 +788,52 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 					// D = 75% of C
 					$D = ($C * 75) / 100.00;
 					$cost_calculation_table[] = [
-						'label' => "घ. ग को ७५% ले हुन आउने छुट",
+						'label' => "घ. ग को ७५% ले हुन आउने रकम",
 						'value' => $D
 					];
 
-					// NET PREMIUM = C - D
-					$BASIC_PREMIUM = $C - $D;
+					// E = C - D
+					$E = $C - $D;
 					$cost_calculation_table[] = [
 						'label' => "ङ. जम्मा (ग - घ)",
-						'value' => $BASIC_PREMIUM
+						'value' => $E
 					];
+
+					// Stamp Duty
+					$F = $post_data['amt_stamp_duty'];
+					$cost_calculation_table[] = [
+						'label' => "च. थप टिकट दस्तुर",
+						'value' => $F
+					];
+
+					// G = E + F
+					$G = $E + $F;
+					$cost_calculation_table[] = [
+						'label' => "छ. बिमितले तिर्नुपर्ने जम्मा बीमा शुल्क (ङ + च)",
+						'value' => $G
+					];
+
+					// Personal Accident
+					$H = floatval($personal_accident);
+					$cost_calculation_table[] = [
+						'label' => "ज. बिमितले दुर्घटना बीमा वपत तिर्नुपर्ने बीमा शुल्क",
+						'value' => $H
+					];
+
+					// Basic Premium
+					$I = $G + $H; // Stamp Duty is Saved Saperately
+					$cost_calculation_table[] = [
+						'label' => "झ. बिमितले तिर्नुपर्ने जम्मा बीमा शुल्क (छ + ज)",
+						'value' => $I
+					];
+
+					// Basic Premium
+					$BASIC_PREMIUM = $E + $H;
+
+					/**
+					 * !!! NO VAT  on AGRICULTURE PORTFOLIOS !!!
+					 */
+					$amount_vat = 0.00;
 
 
 					/**
@@ -795,68 +845,19 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 						'amt_agent_commission'  => $agent_commission,
 						'amt_direct_discount' 	=> $direct_discount,
 						'amt_pool_premium' 		=> 0.00,
-					];
-
-					/**
-					 * Perform Computation Basis for Endorsement
-					 */
-					if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-					{
-						// Transaction Date must be set as today
-						$endorsement_record->txn_date = date('Y-m-d');
-						$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
-					}
-
-					/**
-					 * !!! NO VAT  on AGRICULTURE PORTFOLIOS !!!
-					 */
-					$amount_vat = 0.00;
-
-					if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
-					{
-						// We do not do anything here, because, VAT was applied only on Stamp Duty
-						// For other portfolio, it must be set as -ve value
-
-						/**
-						 * !!! NO POOL PREMIUM !!!
-						 *
-						 * Pool premium is not refunded to customer.
-						 * NULLify Pool Premium
-						 */
-						$premium_data['amt_pool_premium'] = 0.00;
-
-						/**
-						 * !!! VAT RETURN !!!
-						 *
-						 * We must also refund the VAT for as we refund the premium.
-						 *
-						 * NOTE:
-						 * In this portfolio, we have to pay vat for stamp duty if any.
-						 * So there is no vat return in this case.
-						 */
-					}
-
-					/**
-					 * Prepare Other Data
-					 */
-					$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
-					$net_amt_sum_insured 	= $SI;
-					$txn_data = array_merge($premium_data, [
-						'gross_amt_sum_insured' => $gross_amt_sum_insured,
-						'net_amt_sum_insured' 	=> $net_amt_sum_insured,
+						'gross_amt_sum_insured' => $policy_object->amt_sum_insured,
+						'net_amt_sum_insured' 	=> $policy_object->amt_sum_insured,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
 						'txn_date' 				=> date('Y-m-d')
-					]);
-
+					];
 
 
 					/**
 					 * Premium Computation Table
 					 * -------------------------
-					 * NOT Applicable!!!
 					 */
-					$premium_computation_table = NULL;
+					$premium_computation_table = json_encode($post_premium);
 					$txn_data['premium_computation_table'] = $premium_computation_table;
 
 

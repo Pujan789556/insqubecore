@@ -44,10 +44,13 @@ else
                 <tbody>
                     <?php
                     $i = 1;
+                    $total_batch_count = 0;
                     foreach($items as $item_record): ?>
                         <tr>
                             <td><?php echo $i++; ?></td>
-                            <?php foreach($section_elements as $elem):
+                            <?php
+                            $total_batch_count += $item_record->batch_count ?? 0;
+                            foreach($section_elements as $elem):
                                 $key =  $elem['_key'];
                                 $value = $item_record->{$key};
 
@@ -64,7 +67,9 @@ else
                         </tr>
                     <?php endforeach;?>
                     <tr>
-                        <td colspan="6" class="text-bold">जम्मा बीमांक रकम(रु)</td>
+                        <td colspan="4" class="text-bold text-right">जम्मा संख्या</td>
+                        <td class="text-bold"><?php echo $total_batch_count ?></td>
+                        <td colspan="2" class="text-bold text-right">जम्मा बीमांक रकम(रु)</td>
                         <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2) ?></td>
                     </tr>
                 </tbody>
@@ -113,6 +118,25 @@ else
                     <tr>
                         <th><?php echo $elem['label']; ?></th>
                         <td><?php echo htmlspecialchars($attributes->{$elem['_key']}); ?></td>
+                    </tr>
+                <?php endforeach ?>
+            </table>
+        </div>
+    </div>
+
+    <div class="<?php echo $col ?>">
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">इच्छाइएको व्यक्तिको विवरण</h4>
+            </div>
+            <table class="table table-bordered table-condensed no-margin">
+                <?php
+                $basic_elements = $form_elements['nominee'];
+
+                foreach($basic_elements as $elem): ?>
+                    <tr>
+                        <th><?php echo $elem['label']; ?></th>
+                        <td><?php echo htmlspecialchars($attributes->{$elem['_key']} ?? ''); ?></td>
                     </tr>
                 <?php endforeach ?>
             </table>

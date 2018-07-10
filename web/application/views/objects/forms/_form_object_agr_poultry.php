@@ -42,6 +42,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 ?>
             </div>
         </div>
+
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">इच्छाइएको व्यक्तिको विवरण</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <?php
+                $section_elements = $form_elements['nominee'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $section_elements,
+                    'form_record'   => $record
+                ]);
+                ?>
+            </div>
+        </div>
     </div>
 
     <div class="col-sm-12">
@@ -84,6 +99,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                              */
                                             $single_element['_default']    = $item_record->{$single_element['_key']} ?? '';
                                             $single_element['_value']      = $single_element['_default'];
+
                                             $this->load->view('templates/_common/_form_components_inline', [
                                                 'form_elements' => [$single_element],
                                                 'form_record'   => NULL
