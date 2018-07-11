@@ -280,6 +280,7 @@ $config['DX_permissions'] = [
 			'explore.voucher',
 			'add.voucher',
 			'edit.voucher',
+			'print.voucher',
 
 
 			/**
