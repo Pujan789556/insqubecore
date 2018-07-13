@@ -879,10 +879,59 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
     }
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__save_schedule'))
+{
+    /**
+     * Save Policy Schedule HTML on database for future reference. i.e. THE ORIGINAL SCHEDULE CANNOT BE CHANGED.
+     *
+     * @param array $data       ['record' => xxx, 'endorsement_record' => yyy]
+     * @return  void
+     */
+    function _POLICY__save_schedule( $data )
+    {
+
+        $CI =& get_instance();
+
+        /**
+         * Extract Policy Record and Endorsement Record
+         */
+        $record                 = $data['record'];
+        $endorsement_record     = $data['endorsement_record'];
+        $schedule_view          = _POLICY__get_schedule_view($record->portfolio_id);
+
+        /**
+         * Policy Record Active?
+         */
+        if($record->status !== IQB_POLICY_STATUS_ACTIVE )
+        {
+            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: Schedule could not be saved for NON-Active policy.");
+        }
+
+
+        /**
+         * Schedule View?
+         */
+        if(!$schedule_view)
+        {
+            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: No schedule view exists for given portfolio({$record->portfolio_name}).");
+        }
+
+        /**
+         * Let's Save Schedule
+         */
+        load_portfolio_helper($record->portfolio_id);
+        $html = $CI->load->view( $schedule_view, $data, TRUE);
+        $CI->load->model('policy_model');
+        return $CI->policy_model->save_schedule($record->id, $html);
+    }
+}
+
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_POLICY__schedule_pdf'))
+if ( ! function_exists('_POLICY__schedule_pdf_ORIGINAL'))
 {
     /**
      * Save or Print Policy Schedule.
@@ -898,10 +947,10 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
      * Filename: <policycode>.pdf
      *
      * @param array $data 		['record' => xxx, 'endorsement_record' => yyy]
-     * @param string $action 	[save|print]
+     * @param string $action 	[save|print|download]
      * @return  void
      */
-    function _POLICY__schedule_pdf( $data, $action )
+    function _POLICY__schedule_pdf_ORIGINAL( $data, $action )
     {
     	if( !in_array($action, ['save', 'print', 'download']) )
     	{
@@ -969,6 +1018,80 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
 		{
 			throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__schedule_pdf()]: No schedule view exists for given portfolio({$record->portfolio_name}).");
 		}
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__schedule_pdf'))
+{
+    /**
+     * Generate Policy Schedule PDF
+     *
+     * Filename: <policycode>.pdf
+     *
+     * @param object $record    Policy Record
+     * @param string $action    [save|print|download]
+     * @param   html $html  HTML
+     * @return  void
+     */
+    function _POLICY__schedule_pdf( $record, $action, $html )
+    {
+        if( !in_array($action, ['save', 'print', 'download']) )
+        {
+            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__schedule_pdf()]: Invalid Action({$action}).");
+        }
+
+        if(!$html)
+        {
+            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__schedule_pdf()]: NO SCHEDULE DATA FOUND!.");
+        }
+
+        $CI =& get_instance();
+
+        $CI->load->library('pdf');
+        $mpdf = $CI->pdf->load();
+
+        // $mpdf->SetMargins(10, 10, 5);
+        $mpdf->SetMargins(10, 5, 10, 5);
+        $mpdf->margin_header = 5;
+        $mpdf->margin_footer = 5;
+        $mpdf->SetProtection(array('print'));
+        $mpdf->SetTitle("Policy Schedule - {$record->code}");
+        $mpdf->SetAuthor($CI->settings->orgn_name_en);
+
+        /**
+         * Only Active Policy Does not have watermark!!!
+         */
+        if( $action === 'print' ||  $action === 'download')
+        {
+            if( !in_array($record->status, [IQB_POLICY_STATUS_ACTIVE, IQB_POLICY_STATUS_CANCELED, IQB_POLICY_STATUS_EXPIRED]))
+            {
+                $mpdf->SetWatermarkText( 'DEBIT NOTE - ' . strtoupper(_POLICY_status_text($record->status)) );
+            }
+        }
+
+        $mpdf->showWatermarkText = true;
+        $mpdf->watermark_font = 'DejaVuSansCondensed';
+        $mpdf->watermarkTextAlpha = 0.1;
+        $mpdf->SetDisplayMode('fullpage');
+
+        // echo $html;exit;
+        $mpdf->WriteHTML($html);
+        $filename = "policy-{$record->code}.pdf";
+        if( $action === 'save' )
+        {
+            $save_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/policies/' . $filename;
+            $mpdf->Output($save_full_path,'F');
+        }
+        else if($action === 'download')
+        {
+            $mpdf->Output($filename,'D');      // make it to DOWNLOAD
+        }
+        else
+        {
+            $mpdf->Output();
+        }
     }
 }
 

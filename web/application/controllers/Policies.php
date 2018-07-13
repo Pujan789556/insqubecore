@@ -1509,38 +1509,57 @@ class Policies extends MY_Controller
 			$this->template->render_404();
 		}
 
+
 		/**
-		 * Get the Policy Fresh/Renewal Txn Record
+		 * Schedule Render Logic
+		 * --------------------
+		 *
+		 * If policy is active, we render the schedule from the saved html on policy table,
+		 * else we will render as debit note from current data
 		 */
-		try {
-
-			$endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
-
-		} catch (Exception $e) {
-
-			return $this->template->json([
-				'status' => 'error',
-				'message' => $e->getMessage()
-			], 404);
+		if(in_array($record->status, [IQB_POLICY_STATUS_ACTIVE, IQB_POLICY_STATUS_CANCELED, IQB_POLICY_STATUS_EXPIRED]))
+		{
+			$html = $record->schedule_html;
 		}
+		else
+		{
+			load_portfolio_helper($record->portfolio_id);
+			$schedule_view 	= _POLICY__get_schedule_view($record->portfolio_id);
+			if(!$schedule_view)
+			{
+				return $this->template->json([
+					'status' => 'error',
+					'message' => "No schedule view exists for given portfolio({$record->portfolio_name})."
+				], 404);
+			}
+			try {
 
-		/**
-		 * Load Portfolio Helper
-		 */
-		load_portfolio_helper($record->portfolio_id);
+				$endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
 
+			} catch (Exception $e) {
 
-		$data = [
-			'record' 		=> $record,
-			'endorsement_record' 	=> $endorsement_record
-		];
+				return $this->template->json([
+					'status' => 'error',
+					'message' => $e->getMessage()
+				], 404);
+			}
+
+			/**
+			 * Generate Dynamic HTML for Schedule
+			 */
+			$data = [
+				'record' 				=> $record,
+				'endorsement_record' 	=> $endorsement_record
+			];
+			$html = $this->load->view( $schedule_view, $data, TRUE);
+		}
 
 		/**
 		 * Render Print View
 		 */
 		try {
 
-			_POLICY__schedule_pdf($data, 'print');
+			_POLICY__schedule_pdf( $record, 'print', $html );
 		}
 		catch (Exception $e) {
 
@@ -1549,6 +1568,7 @@ class Policies extends MY_Controller
 				'message' => $e->getMessage()
 			], 404);
 		}
+		exit(0);
     }
 
 

@@ -21,28 +21,164 @@ $record = $records[0];
     /**
      * Header & Footer
      */
-    $header_footer = '<htmlpagefooter name="myfooter">
+    $header_footer = '<htmlpageheader name="myheader" value="on">
+                        <table class="table no-border">
+                            <tr>
+                                <td align="left"><img style="margin-bottom: 20px;" src="'.site_url('public/app/images/logo.png').'" alt="'.$this->settings->orgn_name_en.'" width="200"></td>
+                                <td align="right"><h2>'.$schedule_table_title.'</h2></td>
+                            </tr>
+                        </table>
+                    </htmlpageheader>
+                    <sethtmlpageheader name="myheader" show-this-page="1" value="on" />
+                    <htmlpagefooter name="myfooter" value="on">
                         <table class="table table-footer no-border">
                             <tr>
-                                <td class="border-t" align="left">Policy Code: '. $record->code .'</td>
-                                <td class="border-t" align="right">'. $this->settings->orgn_name_en .'</td>
+                                <td class="border-t" align="left">'. $this->settings->orgn_name_en .'</td>
+                                <td class="border-t" align="right">'. $this->settings->address .'</td>
                             </tr>
                         </table>
                     </htmlpagefooter>
-                    <sethtmlpagefooter name="myfooter" value="on" />';
+                    <sethtmlpagefooter name="myfooter" show-this-page="1" value="on" />';
     ?>
     </head>
     <body>
         <!--mpdf
-            <?php echo $header_footer?>
+            <?php echo $header_footer;?>
         mpdf-->
-         <table class="table" width="100%">
-            <thead><tr><td colspan="3" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
-        </table>
+        <br>
         <?php
+        $count = count($records);
+        $i = 1;
+        foreach($records as $record):?>
+            <table class="table" width="100%" >
+                <thead><tr><td colspan="2" align="center"><h3 style="margin:0"><?php echo $schedule_table_title?></h3></td></tr></thead>
+                <tbody>
+                    <tr>
+                        <td colspan="2">Attaching to & forming parto fo policy no. <?php echo $record->code; ?></td>
+                    </tr>
+                    <tr>
+                        <td width="50%">
+                            <table class="no-border">
+                                <tr>
+                                    <td>Endorsement Number</td>
+                                    <td><?php echo $record->id; ?></td>
+                                </tr>
+                                <tr>
+                                    <td>Policy Number</td>
+                                    <td><?php echo $record->code; ?></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="border-top:1px solid #333333 !important">
+                                        <h4 style="margin:0">Insured Party Details</h4>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td>
+                            <table class="no-border">
+                                <tr>
+                                    <td>Agent</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Issued At</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Issued Date</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">Policy Duration</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">From</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">To</td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="50%">
+                            <table class="no-border">
+                                <tr>
+                                    <td>Old Sum Insured</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Added Sum Insured</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Total Sum Insured</td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td>
+                            <h3 style="margin:0">Premium</h3>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <td>Title</td>
+                                        <td>Charge</td>
+                                        <td>Refund</td>
+                                    </tr>
+                                </thead>
+                                <tr>
+                                    <td>Basic Premium</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>RSTMDST</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Ownership Transfer Fee</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>VAT</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Total</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><h3 style="margin: 0">MEMORANDUM</h3></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><?php echo nl2br(htmlspecialchars($record->txn_details)); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        <?php
+            /**
+             * PDF Pagebreak for next Endorsement
+             */
+            if($count > 1 && $i < $count)
+            {
+                echo '<pagebreak>';
+            }
+        endforeach;
         /**
          * Endorsement Per Page
          */
+        // exit;
+        /*
         foreach($records as $record):?>
             <table class="table" width="100%">
                 <tbody>
@@ -80,6 +216,6 @@ $record = $records[0];
                     <?php endif ?>
                 </tbody>
             </table><pagebreak>
-        <?php endforeach ?>
+        <?php endforeach */?>
     </body>
 </html>
