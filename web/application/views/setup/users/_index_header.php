@@ -7,10 +7,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div class="box no-margin">
 	<div class="box-header no-border gray">
 		<div class="row">
-			<div class="col-sm-8">
+			<div class="col-sm-6">
 				<h1 style="margin:0; font-size:24px;"><?php echo $content_header; ?></h1>
 			</div>
-			<div class="col-sm-4 master-actions text-right">
+			<div class="col-sm-6 master-actions text-right">
 				<a href="#"
 					title="Add New User"
 					data-toggle="tooltip"
@@ -34,6 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						<i class="ion-refresh"></i> Refresh</a>
 
 				<a href="#"
+					data-toggle="tooltip"
 					title="Revoke Back Date Setting from All Users"
 					data-title="Revoke Back Date Setting from All Users?"
 					data-confirm="true"
@@ -41,6 +42,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					data-message="Are you sure you want to do this?<br/>Users having back date settings will be reset."
 					data-url="<?php echo site_url('users/revoke_all_backdate/');?>">
 						<i class="fa fa-undo"></i> Back Date</a>
+
+				<a href="#"
+					data-toggle="tooltip"
+					title="Rengerate new password and force-login to all users."
+					data-title="Rengerate new password and force-login to all users?"
+					data-confirm="true"
+					class="btn btn-danger btn-round trg-dialog-action"
+					data-message="Are you sure you want to do this?<br/>This will regenerate new passwords for all users and apply force-relogin."
+					data-url="<?php echo site_url('users/renew_passwords/');?>">
+						<i class="fa fa-lock"></i> Renew Passwords</a>
 			</div>
 		</div>
 	</div>

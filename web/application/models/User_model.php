@@ -75,7 +75,7 @@ class User_model extends MY_Model
 	 */
 	public function rows($params = array())
     {
-    	$this->db->select('U.id, U.code, U.username, U.banned, U.profile, U._profile_name, R.name as role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, D.name as department_name')
+    	$this->db->select('U.id, U.code, U.username, U.email, U.banned, U.profile, U._profile_name, R.name as role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, D.name as department_name')
     			 ->from($this->table_name . ' as U')
     			 ->join('auth_roles R', 'U.role_id = R.id')
     			 ->join('master_branches B', 'U.branch_id = B.id')
@@ -171,6 +171,21 @@ class User_model extends MY_Model
             $this->write_cache($dropdown, $cache_name, CACHE_DURATION_MONTH);
         }
         return $dropdown;
+    }
+
+    // ----------------------------------------------------------------
+
+	/**
+	 * List all users with core attributes
+	 *
+	 * @return array
+	 */
+	public function all_core()
+    {
+    	return $this->db->select('U.id, U.code, U.username, U.email, U.profile')
+	    			 ->from($this->table_name . ' as U')
+	    			 ->get()
+	    			 ->result();
     }
 
     // ----------------------------------------------------------------

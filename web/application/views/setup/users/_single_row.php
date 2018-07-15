@@ -13,6 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		Code: <?php echo $record->code?>
 	</td>
 	<td><?php echo $record->role_name;?></td>
+	<td><?php echo $record->email; ?></td>
 	<td><?php echo $record->department_name;?></td>
 	<td><?php echo $record->branch_name_en;?></td>
 	<td>
