@@ -609,6 +609,27 @@ class Users extends MY_Controller
 				// Trigger event
 				$this->dx_auth->user_changed_password($id, $hashed_password);
 
+
+				/**
+				 * Notify User Via Email
+				 */
+				$from = $this->settings->from_email;
+				$subject = sprintf($this->lang->line('auth_password_changed_subject'), $this->settings->orgn_name_en);
+
+				$profile = $record->profile ? json_decode($record->profile) : NULL;
+				$profile_name = isset($profile) ? $profile->name : $record->username;
+
+				// Trigger event and get email content
+				$this->dx_auth->sending_password_changed_email([
+					'user_profile_name' => $profile_name,
+					'username' 			=> $record->username,
+					'email' 			=> $record->email,
+					'password'  		=> $password,
+					'url'				=> site_url()
+				], $message);
+
+				$this->_email($record->email, $from, $subject, $message);
+
 				$status = 'success';
 				$message = "User's password updated successfully.";
 			}
@@ -1353,5 +1374,116 @@ class Users extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+    /**
+     * Rgenerate password for all users, set force-relogin
+     * and send each users email regarding this changes
+     *
+     * @return json
+     */
+    public function renew_passwords()
+    {
+    	$users = $this->user_model->all_core();
+    	$this->load->library('Token');
 
+    	$total 		= count($users);
+    	$success 	= 0;
+
+    	foreach($users as $record)
+    	{
+    		// Skip Admin
+    		if($record->id == 1) continue;
+
+
+    		$password 	= $this->token->generate(20);
+    		$hasher 		= new PasswordHash(
+									$this->config->item('phpass_hash_strength'),
+									$this->config->item('phpass_hash_portable'));
+
+			// Hash new password using phpass
+			$hashed_password = $hasher->HashPassword($password);
+
+
+			$profile = $record->profile ? json_decode($record->profile) : NULL;
+			$profile_name = isset($profile) ? $profile->name : $record->username;
+
+			// Replace old password with new password
+			if($this->user_model->change_password($record->id, $hashed_password))
+			{
+				// Trigger event (Let's send email with changed password)
+				$this->dx_auth->user_changed_password($record->id, $hashed_password);
+
+				$success++;
+
+				/**
+				 * Let's Send them Email
+				 */
+				$from = $this->settings->from_email;
+				$subject = sprintf($this->lang->line('auth_password_changed_subject'), $this->settings->orgn_name_en);
+
+				// Trigger event and get email content
+				$this->dx_auth->sending_password_changed_email([
+					'user_profile_name' => $profile_name,
+					'username' 			=> $record->username,
+					'email' 			=> $record->email,
+					'password'  		=> $password,
+					'url'				=> site_url()
+				], $message);
+
+				$this->_email($record->email, $from, $subject, $message);
+			}
+
+    	}
+
+    	if( $success )
+    	{
+    		$data = [
+				'status' 	=> 'success',
+				'message' 	=> "{$success} out of {$total} user's password updated successfully."
+			];
+
+			// @TODO: Log activity
+    	}
+    	else
+    	{
+    		$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be updated!'
+			];
+		}
+		return $this->template->json($data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Send email using email helper function
+	 *
+	 * Using email helper function lets check your email on log file if your
+	 * development environment has not email sending facility
+	 *
+	 * @author 	IP Bastola
+	 */
+	function _email($to, $from, $subject, $message)
+	{
+		// Load helper
+		$this->load->helper('email');
+		/**
+    	 * Prepare Email Data
+    	 */
+    	$email_data = [
+    		'mailtype' 	=> 'html',
+
+    		// From Email and From Name will be From Site Settings Data
+   //  		'from' 		=> [
+   //  			'email' => $from,
+   //  			'name' => $this->settings->orgn_name_en
+			// ],
+    		'to' 		=> $to,
+    		'subject' 	=> $subject,
+    		'message' 	=> $message
+    	];
+
+    	// echo '<pre>'; print_r($email_data); echo '</pre>';
+    	send_email($email_data);
+	}
 }
