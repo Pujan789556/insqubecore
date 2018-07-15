@@ -37,7 +37,7 @@ if ( ! function_exists('send_email'))
 		$config['validate'] = TRUE;
 
 		// Mailtrap Configruation if any
-		if( MAIL_DRIVER === 'mailtrap' )
+		if( MAIL_DRIVER === 'mailtrap' || MAIL_DRIVER === 'mail' )
 		{
 			$mailtrap_config = Array(
 				'protocol' 	=> 'smtp',
@@ -45,12 +45,15 @@ if ( ! function_exists('send_email'))
 				'smtp_port' => MAIL_PORT,
 				'smtp_user' => MAIL_USERNAME,
 				'smtp_pass' => MAIL_PASSWORD,
-				'crlf' 		=> "\r\n",
-				'newline' 	=> "\r\n"
+				// 'smtp_crypto' 	=> 'tls',
+				'crlf' 			=> "\r\n",
+				'newline' 		=> "\r\n"
 			);
 			$config = array_merge($config, $mailtrap_config);
 		}
 		$CI->email->initialize($config);
+
+
 
 		//
 		// Mail Specific Settings
