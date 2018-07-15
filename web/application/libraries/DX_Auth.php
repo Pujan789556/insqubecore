@@ -1590,4 +1590,21 @@ class DX_Auth
 			$this->ci->settings->orgn_name_en);
 	}
 
+	// This event occurs right before dx auth send forgot password request email
+	// $data is an array, user_profile_name, username, email, new password
+	// $content is email content, passed by reference
+	// You can customize email content here
+	function sending_password_changed_email($data, &$content)
+	{
+		// Create content
+		$content = sprintf($this->ci->lang->line('auth_password_changed_content'),
+			$data['user_profile_name'],
+			$data['username'],
+			$data['email'],
+			$data['password'],
+			$data['url'],
+			$this->ci->settings->orgn_name_en,
+			$this->ci->settings->orgn_name_en);
+	}
+
 }

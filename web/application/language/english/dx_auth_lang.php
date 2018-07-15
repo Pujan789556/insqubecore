@@ -18,6 +18,7 @@ $lang['auth_incorrect_password'] = "Your password is incorrect.";
 $lang['auth_account_subject'] = "%s account details";
 $lang['auth_activate_subject'] = "%s activation";
 $lang['auth_forgot_password_subject'] = "New password request";
+$lang['auth_password_changed_subject'] = "%s - Your password has been changed";
 
 // Email content
 $lang['auth_account_content'] = "Welcome to %s,
@@ -66,6 +67,23 @@ Your New Password: %s
 Key for Activation: %s
 
 After you successfully complete the process, you can change this new password into password that you want.
+
+If you have any more problems with gaining access to your account please contact %s.
+
+Regards,
+The %s Team";
+
+$lang['auth_password_changed_content'] = "Dear %s,
+
+Your Password has been changed.
+
+You can login with either your username or email address:
+
+Login: %s
+Email: %s
+New Password: %s
+
+You can try logging in now by going to %s
 
 If you have any more problems with gaining access to your account please contact %s.
 
