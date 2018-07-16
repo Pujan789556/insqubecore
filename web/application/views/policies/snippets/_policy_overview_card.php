@@ -102,7 +102,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </tr>
                         <tr>
                             <td class="text-bold">is Short Term?</td>
-                            <td><?php echo _FLAG_yes_no_dropdwon(FALSE)[$record->flag_short_term]?></td>
+                            <td><?php echo _FLAG_yes_no_dropdown(FALSE)[$record->flag_short_term]?></td>
                         </tr>
 
                         <tr>

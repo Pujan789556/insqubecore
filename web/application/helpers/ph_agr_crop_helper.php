@@ -93,7 +93,7 @@ if ( ! function_exists('_OBJ_AGR_CROP_validation_rules'))
 		$object = $post['object'] ?? NULL;
 
 		$ownership_dropdown = _OBJ_AGR_CROP_ownership_dropdown(false);
-		$yesno_dropdown 	= _FLAG_yes_no_dropdwon(false);
+		$yesno_dropdown 	= _FLAG_yes_no_dropdown(false);
 		$area_unit_dropdown = _OBJ_AGR_area_unit_dropdown(false);
 		$category_dropdown  = _OBJ_AGR_category_dropdown($portfolio_id);
 

@@ -94,7 +94,7 @@ if ( ! function_exists('_OBJ_AGR_FISH_validation_rules'))
 
 		$category_dropdown  = _OBJ_AGR_category_dropdown($portfolio_id);
 		$ownership_dropdown = _OBJ_AGR_FISH_ownership_dropdown(false);
-		$yesno_dropdown 	= _FLAG_yes_no_dropdwon(false);
+		$yesno_dropdown 	= _FLAG_yes_no_dropdown(false);
 
 		$v_rules = [
 

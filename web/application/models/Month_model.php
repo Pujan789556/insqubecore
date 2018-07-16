@@ -83,7 +83,6 @@ class Month_model extends MY_Model
 
     public function get_all()
     {
-        $this->clear_cache();
         /**
          * Get Cached Result, If no, cache the query result
          */
@@ -125,7 +124,7 @@ class Month_model extends MY_Model
      */
     public function dropdown_fy()
     {
-        $dropdown = $this->dropdwon();
+        $dropdown = $this->dropdown();
         $dd_first_year = [];
         $dd_second_year = [];
         foreach($dropdown as $key=>$value)

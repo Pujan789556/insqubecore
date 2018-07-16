@@ -86,7 +86,7 @@ if ( ! function_exists('_OBJ_MISC_TMI_validation_rules'))
 		$CI->load->model('tmi_plan_model');
 
 		$plan_dropdown 		= $CI->tmi_plan_model->dropdown_children_tree();
-		$plan_type_dropdwon = _OBJ_MISC_TMI_plan_type_dropdown(FALSE);
+		$plan_type_dropdown = _OBJ_MISC_TMI_plan_type_dropdown(FALSE);
 		$v_rules = [
 
 			/**
@@ -123,9 +123,9 @@ if ( ! function_exists('_OBJ_MISC_TMI_validation_rules'))
 			        'field' => 'object[plan_type]',
 			        '_key' => 'plan_type',
 			        'label' => 'Plan Type',
-			        'rules' => 'trim|required|alpha|in_list['.implode(',', array_keys($plan_type_dropdwon)).']',
+			        'rules' => 'trim|required|alpha|in_list['.implode(',', array_keys($plan_type_dropdown)).']',
 			        '_type'     => 'radio',
-			        '_data' 	=> $plan_type_dropdwon,
+			        '_data' 	=> $plan_type_dropdown,
 			        '_required' => true
 			    ]
 		    ]

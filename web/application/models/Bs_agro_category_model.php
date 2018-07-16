@@ -115,7 +115,7 @@ class Bs_agro_category_model extends MY_Model
      * @param inte $portfolio_id
      * @return array
      */
-    public function dropdwon_by_portfolio($portfolio_id)
+    public function dropdown_by_portfolio($portfolio_id)
     {
         $records = $this->by_portfolio($portfolio_id);
 

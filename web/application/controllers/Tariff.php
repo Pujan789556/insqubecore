@@ -424,10 +424,10 @@ class Tariff extends MY_Controller
 
 
         // $this->load->model('bs_agro_category_model');
-        // $bs_agro_categories = $this->bs_agro_category_model->dropdwon_by_portfolio($record->portfolio_id);
+        // $bs_agro_categories = $this->bs_agro_category_model->dropdown_by_portfolio($record->portfolio_id);
 
         $this->load->model('bs_agro_breed_model');
-        $bs_agro_breeds = $this->bs_agro_breed_model->dropdwon_by_portfolio($record->portfolio_id);
+        $bs_agro_breeds = $this->bs_agro_breed_model->dropdown_by_portfolio($record->portfolio_id);
         if( !$bs_agro_breeds )
         {
             $this->template->json([

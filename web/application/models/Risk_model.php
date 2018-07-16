@@ -47,7 +47,7 @@ class Risk_model extends MY_Model
     public function validation_rules()
     {
         $type_dropdown = risk_type_dropdown(FALSE);
-        $agent_commission_dropdown = _FLAG_on_off_dropdwon(FALSE);
+        $agent_commission_dropdown = _FLAG_on_off_dropdown(FALSE);
         $this->validation_rules = [
             [
                 'field' => 'name',

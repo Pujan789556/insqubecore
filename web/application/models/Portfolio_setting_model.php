@@ -112,8 +112,8 @@ class Portfolio_setting_model extends MY_Model
                 [
                     'field' => 'flag_default_duration[]',
                     'label' => 'Default Duration Applies?',
-                    'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdwon(FALSE))).']',
-                    '_data' => _FLAG_yes_no_dropdwon(),
+                    'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdown(FALSE))).']',
+                    '_data' => _FLAG_yes_no_dropdown(),
                     '_type'     => 'dropdown',
                     '_key'      => 'flag_default_duration',
                     '_required' => true
@@ -130,8 +130,8 @@ class Portfolio_setting_model extends MY_Model
                 [
                     'field' => 'flag_short_term[]',
                     'label' => 'Has short term Policy?',
-                    'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdwon(FALSE))).']',
-                    '_data' => _FLAG_yes_no_dropdwon(),
+                    'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdown(FALSE))).']',
+                    '_data' => _FLAG_yes_no_dropdown(),
                     '_type'     => 'dropdown',
                     '_key'      => 'flag_short_term',
                     '_required' => true
@@ -139,8 +139,8 @@ class Portfolio_setting_model extends MY_Model
                 [
                     'field' => 'flag_installment[]',
                     'label' => 'Allow payment in installment?',
-                    'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdwon(FALSE))).']',
-                    '_data' => _FLAG_yes_no_dropdwon(),
+                    'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdown(FALSE))).']',
+                    '_data' => _FLAG_yes_no_dropdown(),
                     '_type'     => 'dropdown',
                     '_key'      => 'flag_installment',
                     '_required' => true

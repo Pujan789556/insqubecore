@@ -172,7 +172,7 @@ class Ri_setup_pool_model extends MY_Model
                     '_field'            => 'flag_claim_recover_from_ri',
                     '_type'             => 'dropdown',
                     '_show_label'       => false,
-                    '_data'             => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
+                    '_data'             => IQB_BLANK_SELECT + _FLAG_on_off_dropdown(),
                     '_required'         => true
                 ],
                 [

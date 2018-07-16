@@ -243,7 +243,7 @@ class Ri_setup_treaty_model extends MY_Model
                     '_field'            => 'flag_claim_recover_from_ri',
                     '_type'             => 'dropdown',
                     '_show_label'       => false,
-                    '_data'             => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
+                    '_data'             => IQB_BLANK_SELECT + _FLAG_on_off_dropdown(),
                     '_required'         => true
                 ],
                 [
@@ -253,7 +253,7 @@ class Ri_setup_treaty_model extends MY_Model
                     '_field'            => 'flag_comp_cession_apply',
                     '_type'             => 'dropdown',
                     '_show_label'       => false,
-                    '_data'             => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
+                    '_data'             => IQB_BLANK_SELECT + _FLAG_on_off_dropdown(),
                     '_required'         => true
                 ],
                 [
@@ -334,11 +334,11 @@ class Ri_setup_treaty_model extends MY_Model
                 [
                     'field' => 'flag_qs_def_ret_apply[]',
                     'label' => 'Apply defined retention?',
-                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdwon(false)) ) . ']',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdown(false)) ) . ']',
                     '_field'        => 'flag_qs_def_ret_apply',
                     '_type'         => 'dropdown',
                     '_show_label'   => false,
-                    '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
+                    '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdown(),
                     '_required'     => true
                 ],
                 [
@@ -402,11 +402,11 @@ class Ri_setup_treaty_model extends MY_Model
                 [
                     'field' => 'flag_qs_def_ret_apply[]',
                     'label' => 'Apply defined retention?',
-                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdwon(false)) ) . ']',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdown(false)) ) . ']',
                     '_field'        => 'flag_qs_def_ret_apply',
                     '_type'         => 'dropdown',
                     '_show_label'   => false,
-                    '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
+                    '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdown(),
                     '_required'     => true
                 ],
 
@@ -492,11 +492,11 @@ class Ri_setup_treaty_model extends MY_Model
                 [
                     'field' => 'flag_qs_def_ret_apply[]',
                     'label' => 'Apply defined retention?',
-                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdwon(false)) ) . ']',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdown(false)) ) . ']',
                     '_field'        => 'flag_qs_def_ret_apply',
                     '_type'         => 'dropdown',
                     '_show_label'   => false,
-                    '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdwon(),
+                    '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdown(),
                     '_required'     => true
                 ],
                 [

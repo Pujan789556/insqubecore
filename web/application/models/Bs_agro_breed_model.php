@@ -158,7 +158,7 @@ class Bs_agro_breed_model extends MY_Model
      * @param inte $portfolio_id
      * @return array
      */
-    public function dropdwon_by_portfolio($portfolio_id, $lang = 'en')
+    public function dropdown_by_portfolio($portfolio_id, $lang = 'en')
     {
         $records = $this->by_portfolio($portfolio_id);
 

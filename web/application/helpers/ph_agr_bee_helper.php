@@ -93,7 +93,7 @@ if ( ! function_exists('_OBJ_AGR_BEE_validation_rules'))
 		$object = $post['object'] ?? NULL;
 
 		$ownership_dropdown = _OBJ_AGR_BEE_ownership_dropdown(false);
-		$yesno_dropdown 	= _FLAG_yes_no_dropdwon(false);
+		$yesno_dropdown 	= _FLAG_yes_no_dropdown(false);
 		$category_dropdown  = _OBJ_AGR_category_dropdown($portfolio_id);
 
 		$v_rules = [

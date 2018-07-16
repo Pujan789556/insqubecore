@@ -258,7 +258,7 @@ class Fy_month_model extends MY_Model
      * @param inte $portfolio_id
      * @return array
      */
-    public function dropdwon_by_fiscal_year($portfolio_id)
+    public function dropdown_by_fiscal_year($portfolio_id)
     {
         $records = $this->by_fiscal_year($portfolio_id);
 

@@ -659,7 +659,7 @@ if ( ! function_exists('_COMPANY_type_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_FLAG_yes_no_dropdwon'))
+if ( ! function_exists('_FLAG_yes_no_dropdown'))
 {
     /**
      * Get YES/NO DROPDOWN
@@ -668,7 +668,7 @@ if ( ! function_exists('_FLAG_yes_no_dropdwon'))
      * @param bool $flag_blank_select   Whether to append blank select
      * @return  bool
      */
-    function _FLAG_yes_no_dropdwon( $flag_blank_select = true)
+    function _FLAG_yes_no_dropdown( $flag_blank_select = true)
     {
         $dropdown = [
             IQB_FLAG_YES    => 'Yes',
@@ -684,7 +684,7 @@ if ( ! function_exists('_FLAG_yes_no_dropdwon'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_FLAG_on_off_dropdwon'))
+if ( ! function_exists('_FLAG_on_off_dropdown'))
 {
     /**
      * Get ON/OFF DROPDOWN
@@ -693,7 +693,7 @@ if ( ! function_exists('_FLAG_on_off_dropdwon'))
      * @param bool $flag_blank_select   Whether to append blank select
      * @return  bool
      */
-    function _FLAG_on_off_dropdwon( $flag_blank_select = true)
+    function _FLAG_on_off_dropdown( $flag_blank_select = true)
     {
         $dropdown = [
             IQB_FLAG_ON    	=> 'Yes',

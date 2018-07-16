@@ -140,7 +140,7 @@ class Ac_accounts extends MY_Controller
 
 		private function _get_filter_elements()
 		{
-			$dropdwon_account_groups = $this->ac_account_group_model->dropdown_tree();
+			$dropdown_account_groups = $this->ac_account_group_model->dropdown_tree();
 			$filters = [
 				[
 	                'field' => 'filter_account_group_id',
@@ -148,7 +148,7 @@ class Ac_accounts extends MY_Controller
 	                'rules' => 'trim|integer|max_length[8]',
 	                '_type'     => 'dropdown',
 	                '_extra_attributes' => 'style="width:400px; display:block" data-ddtype="select"',
-	                '_data'     => IQB_BLANK_SELECT + $dropdwon_account_groups,
+	                '_data'     => IQB_BLANK_SELECT + $dropdown_account_groups,
 	                '_required' => false
 	            ],
 	            [

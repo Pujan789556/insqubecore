@@ -95,7 +95,7 @@ if ( ! function_exists('_OBJ_AGR_CATTLE_validation_rules'))
 		$category_dropdown  = _OBJ_AGR_category_dropdown($portfolio_id);
 		$keep_type_dropdown = _OBJ_AGR_CATTLE_keep_type_dropdown(FALSE);
 		$ownership_dropdown = _OBJ_AGR_CATTLE_ownership_dropdown(false);
-		$yesno_dropdown 	= _FLAG_yes_no_dropdwon(false);
+		$yesno_dropdown 	= _FLAG_yes_no_dropdown(false);
 
 		$v_rules = [
 

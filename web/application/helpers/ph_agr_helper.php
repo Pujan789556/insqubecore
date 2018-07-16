@@ -57,7 +57,7 @@ if ( ! function_exists('_OBJ_AGR_category_dropdown'))
     {
         $CI =& get_instance();
         $CI->load->model('bs_agro_category_model');
-        $dropdown = $CI->bs_agro_category_model->dropdwon_by_portfolio($portfolio_id);
+        $dropdown = $CI->bs_agro_category_model->dropdown_by_portfolio($portfolio_id);
         if( !$dropdown )
         {
             throw new Exception('Exception [Helper: ph_agr_helper][Method: _OBJ_AGR_category_dropdown()]: Please add the "Beema Samiti Agriculture Category" for this portfolio first.<br><br>Master Setup >> Beema Samiti >> Agriculture Categories');

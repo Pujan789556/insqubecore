@@ -100,7 +100,7 @@ class Fy_months extends MY_Controller
 		 * Existing Categories for this Portfolio and heading type
 		 */
 		$records 		= $this->fy_month_model->by_fiscal_year($fiscal_yr_id);
-		$months = $this->month_model->dropdwon_fy();
+		$months = $this->month_model->dropdown_fy();
 
 		/**
 		 * Format Records according to month id
