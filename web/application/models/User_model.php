@@ -216,7 +216,7 @@ class User_model extends MY_Model
      */
 	public function row($id)
     {
-    	$this->db->select('U.id, U.code, U.username, U.banned, U.profile, R.name as role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, D.name as department_name')
+    	$this->db->select('U.id, U.code, U.username, U.email, U.banned, U.profile, R.name as role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, D.name as department_name')
     			 ->from($this->table_name . ' as U')
     			 ->join('auth_roles R', 'U.role_id = R.id')
     			 ->join('master_branches B', 'U.branch_id = B.id')
