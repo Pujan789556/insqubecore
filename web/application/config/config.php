@@ -368,7 +368,7 @@ $config['encryption_key'] = APP_KEY;
 |
 */
 $config['sess_driver'] = SESSION_DRIVER;
-$config['sess_cookie_name'] = 'ci_session';
+$config['sess_cookie_name'] = SESSION_COOKIE_NAME;
 $config['sess_expiration'] = 7200;
 $config['sess_save_path'] = SESSION_SAVE_PATH;
 $config['sess_match_ip'] = TRUE;
@@ -439,8 +439,8 @@ $config['global_xss_filtering'] = FALSE;
 | 'csrf_exclude_uris' = Array of URIs which ignore CSRF checks
 */
 $config['csrf_protection'] = TRUE;
-$config['csrf_token_name'] = 'csrf_insqube';
-$config['csrf_cookie_name'] = 'csrf_kuki_insqube';
+$config['csrf_token_name'] = CSRF_TOKEN_NAME;
+$config['csrf_cookie_name'] = CSRF_COOKIE_NAME;
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = FALSE;
 $config['csrf_exclude_uris'] = array();
