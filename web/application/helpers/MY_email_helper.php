@@ -45,7 +45,8 @@ if ( ! function_exists('send_email'))
 				'smtp_port' => MAIL_PORT,
 				'smtp_user' => MAIL_USERNAME,
 				'smtp_pass' => MAIL_PASSWORD,
-				// 'smtp_crypto' 	=> 'tls',
+				'smtp_crypto' 	=> 'tls',
+				'smtp_timeout' 	=> 30,
 				'crlf' 			=> "\r\n",
 				'newline' 		=> "\r\n"
 			);
