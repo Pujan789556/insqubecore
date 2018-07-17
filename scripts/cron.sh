@@ -9,7 +9,7 @@
 # 				* 6 * * * sh /home/insqube/repo/insqube-core/scripts/cron.sh &> ~/logs/cron/cron-"`date +\%Y-\%m-\%d`".log
 #
 
-WEB_ROOT=/var/www/html/neco.insqube.local
+WEB_ROOT=/var/www/html/insqube-production/web
 
 #
 # Go to web root folder
