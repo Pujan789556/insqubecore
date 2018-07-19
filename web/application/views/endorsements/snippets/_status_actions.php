@@ -59,7 +59,12 @@ if( _ENDORSEMENT_is_editable($record->status, $record->flag_current, FALSE) ):
             <i class="fa fa-pencil-square-o"></i> Edit</a>
     <?php endif; ?>
 
-    <?php if($is_policy_editable): ?>
+    <?php
+    /**
+     * !!! NOTE !!!
+     * Let's disable this feature as we have dates directly editable on endorsement.
+
+    if($is_policy_editable): ?>
         <a href="#"
             class="action trg-dialog-edit"
             title="Edit Policy Information"
@@ -69,7 +74,7 @@ if( _ENDORSEMENT_is_editable($record->status, $record->flag_current, FALSE) ):
             data-url="<?php echo site_url('policies/edit_endorsement/' . $record->policy_id );?>"
             data-form="#_form-policy">
             <i class="fa fa-pencil-square-o"></i> Policy</a>
-    <?php endif; ?>
+    <?php endif; */?>
 
     <?php if($is_object_editable): ?>
         <a href="#"

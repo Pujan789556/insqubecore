@@ -722,6 +722,14 @@ class Policies extends MY_Controller
 	 */
 	public function edit_endorsement($id)
 	{
+
+		/**
+		 * !!! NOTE !!!
+		 * Let's disable this feature as we have dates directly editable on endorsement.
+		 */
+		$this->template->render_404();
+		exit();
+
 		// Capture the ID
 		$id = (int)$id;
 
