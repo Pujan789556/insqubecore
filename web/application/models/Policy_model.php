@@ -459,9 +459,7 @@ class Policy_model extends MY_Model
                 /**
                  * Policy Endorsement - Txn Details (सम्पुष्टि विवरण), Remarks and Template Reference
                  */
-                'endorsement_basic' => $this->endorsement_model->get_v_rules_basic( IQB_POLICY_ENDORSEMENT_TYPE_FRESH, $portfolio_id, TRUE)
-
-
+                'endorsement_basic' => $this->endorsement_model->get_v_rules_basic_for_debit_note( IQB_POLICY_ENDORSEMENT_TYPE_FRESH, $portfolio_id, TRUE)
 
             ];
         }
@@ -1021,8 +1019,25 @@ class Policy_model extends MY_Model
      */
     public function _save_endorsement_basic($id, $data)
     {
+        /**
+         * The following fields are saved from policy debit note add/edit
+         *
+         * CUSTOMER
+         * ISSUED DATE
+         * START DATE
+         * END DATE
+         * SOLD BY
+         * TXN DETAILS
+         * REMARKS
+         *
+         */
         $endorsement_record = $this->endorsement_model->get_current_endorsement_by_policy($id);
         $endorsement_data = [
+            'customer_id'   => $data['customer_id'],
+            'issued_date'   => $data['issued_date'],
+            'start_date'    => $data['start_date'],
+            'end_date'      => $data['end_date'],
+            'sold_by'       => $data['sold_by'],
             'txn_details'   => $data['txn_details'],
             'remarks'       => $data['remarks']
         ];
@@ -1073,6 +1088,24 @@ class Policy_model extends MY_Model
     public function save_schedule($id, $html)
     {
         $data = ['schedule_html' => $html];
+        return $this->db->where('id', $id)
+                        ->update($this->table_name, $data);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Update Policy End Date
+     *
+     * This is when an endorsement has different end date
+     *
+     * @param int $id
+     * @param date $end_date
+     * @return bool
+     */
+    public function update_end_date($id, $end_date)
+    {
+        $data = ['end_date' => $end_date];
         return $this->db->where('id', $id)
                         ->update($this->table_name, $data);
     }
@@ -1222,26 +1255,22 @@ class Policy_model extends MY_Model
                     $base_data  = $this->_backdate($record, $base_data);
                     $done       = $this->_to_status($record->id, $base_data);
 
-                    /**
-                     * Save original Schedule as PDF
-                     */
-                    if($done)
-                    {
-                        /**
-                         * Updated Records - Policy and Endorsement
-                         */
-                        $record     = $this->get($record->id);
-                        $endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
 
-                        /**
-                         * Save a Fresh PDF copy
-                         */
-                        load_portfolio_helper($record->portfolio_id);
-                        _POLICY__save_schedule([
-                            'record'                => $record,
-                            'endorsement_record'    => $endorsement_record
-                        ]);
-                    }
+                    /**
+                     * Updated Records - Policy and Endorsement
+                     */
+                    $record     = $this->get($record->id);
+                    $endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
+
+
+                    /**
+                     * Save a Original Schedule as HTML on Database
+                     */
+                    load_portfolio_helper($record->portfolio_id);
+                    _POLICY__save_schedule([
+                        'record'                => $record,
+                        'endorsement_record'    => $endorsement_record
+                    ]);
                     break;
 
                 /**
@@ -1303,63 +1332,10 @@ class Policy_model extends MY_Model
          */
         public function _backdate($record, $data)
         {
-            $data['start_date']     = $this->_backdate_process($record->start_date);
-            $data['issued_date']    = $this->_backdate_process($record->issued_date);
+            $data['start_date']     = backdate_process($record->start_date);
+            $data['issued_date']    = backdate_process($record->issued_date);
 
             return $data;
-        }
-
-        // --------------------------------------------------------------------
-
-        /**
-         * Process back-date validation
-         *
-         * @param date     $date
-         * @return array
-         */
-        public function _backdate_process($date)
-        {
-            $timestamp      = strtotime($date);
-
-            /**
-             * Not a past date? or Backdate not allowed?
-             * -----------------------------------------
-             * Simply return today's date
-             */
-            $today              = date('Y-m-d');
-            $dateonly_timestamp = strtotime(date('Y-m-d', $timestamp));
-            $today_timestamp    = strtotime($today);
-            if( ($today_timestamp <=  $dateonly_timestamp) || !$this->dx_auth->is_backdate_allowed() )
-            {
-                return $today;
-            }
-
-
-            /**
-             * Backdate Limit Set by Administrator?
-             */
-            $back_date_limit = $this->settings->back_date_limit;
-            if( !$back_date_limit || !valid_date($back_date_limit) )
-            {
-                throw new Exception('Exception [Model: Policy_model][Method: _valid_backdate()]: "Back Date Limit" is not setup properly.<br/>Please contact Administrator for further assistance.');
-            }
-
-            /**
-             * Within Backdate Range?
-             * ----------------------
-             * i.e. Back Date <= Supplied Date
-             */
-            $back_date_timestamp = strtotime($back_date_limit);
-
-            if($timestamp < $back_date_timestamp )
-            {
-                throw new Exception('Exception [Model: Policy_model][Method: _valid_backdate()]: Supplied date(policy issue date and/or policy start date) can not exceed "Back Date Limit".');
-            }
-
-            /**
-             * Date is withing backdate limit range, simply return it as it is.
-             */
-            return $date;
         }
 
     // ----------------------------------------------------------------

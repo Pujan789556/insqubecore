@@ -203,7 +203,7 @@ class Endorsements extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('endorsements/forms/_form_endorsement',
 			[
-				'form_elements' => $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id),
+				'form_elements' => $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id, $policy_record),
 				'record' 		=> $record,
 				'policy_record' => $policy_record
 			], TRUE);
@@ -272,7 +272,7 @@ class Endorsements extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('endorsements/forms/_form_endorsement',
 			[
-				'form_elements' => $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id),
+				'form_elements' => $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id, $policy_record),
 				'record' 		=> $record,
 				'policy_record' => $policy_record
 			], TRUE);
@@ -307,16 +307,16 @@ class Endorsements extends MY_Controller
 					return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'Invalid policy information.'], 403);
 				}
 
-				$rules = $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id, TRUE);
+				$rules = $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id, $policy_record, TRUE);
 				$this->form_validation->set_rules($rules);
 				if($this->form_validation->run() === TRUE )
 	        	{
-	        		$data = $this->_prepare_data($txn_type, $post_data);
+	        		$data = $this->_prepare_data($txn_type, $post_data, $policy_record);
 
 	        		if($action == 'add')
 	        		{
-	        			$common_data 	= $this->_prepare_common_on_add($policy_record->id, $txn_type);
-	        			$data 		 	= array_merge($common_data, $data);
+	        			$add_only_data 	= $this->_prepare_add_only_data($policy_record->id, $txn_type);
+	        			$data 		 	= array_merge($add_only_data, $data);
 	        			$done 			= $this->endorsement_model->add($data, TRUE);
 	        		}
 	        		else
@@ -337,7 +337,7 @@ class Endorsements extends MY_Controller
 
 	// --------------------------------------------------------------------
 
-		private function _prepare_common_on_add($policy_id, $txn_type)
+		private function _prepare_add_only_data($policy_id, $txn_type)
 		{
 			return [
 				'policy_id' 		=> $policy_id,
@@ -349,13 +349,36 @@ class Endorsements extends MY_Controller
 
 	// --------------------------------------------------------------------
 
-		private function _prepare_data($txn_type, $post_data)
+		private function _prepare_common_data($post_data, $policy_record)
 		{
+			$fields = [ 'issued_date', 'sold_by', 'start_date', 'end_date', 'txn_details', 'remarks'];
+			$data = [];
+			foreach($fields as $key)
+			{
+				$data[$key] = $post_data[$key] ?? NULL;
+			}
+
+			/**
+			 * Customer ID
+			 *
+			 * Same as Policy Customer ID (ownership transfer customer ID has a separate column)
+			 */
+			$data['customer_id'] = $policy_record->customer_id;
+
+			return $data;
+		}
+
+	// --------------------------------------------------------------------
+
+		private function _prepare_data($txn_type, $post_data, $policy_record)
+		{
+			$common_data = $this->_prepare_common_data($post_data, $policy_record);
 			$data = [];
 			switch ($txn_type)
 			{
 				case IQB_POLICY_ENDORSEMENT_TYPE_GENERAL:
-					$data = $this->_prepare_data_general($post_data);
+					// It has only common data
+					// $data = $this->_prepare_data_general($post_data);
 					break;
 
 				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
@@ -371,27 +394,28 @@ class Endorsements extends MY_Controller
 					break;
 
 				case IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE:
-					$data = $this->_prepare_data_terminate($post_data);
+					// It has only common data
+					// $data = $this->_prepare_data_terminate($post_data);
 					break;
 
 				default:
 					# code...
 					break;
 			}
-			return $data;
+			return array_merge($common_data, $data);
 		}
 
-			private function _prepare_data_general($post_data)
-			{
-				return [
-					'txn_details' => $post_data['txn_details'],
-					'remarks' 	  => $post_data['remarks'],
-				];
-			}
+			// private function _prepare_data_general($post_data)
+			// {
+			// 	return [
+			// 		'txn_details' => $post_data['txn_details'],
+			// 		'remarks' 	  => $post_data['remarks'],
+			// 	];
+			// }
 
 			private function _prepare_data_ownership_transfer($post_data)
 			{
-				$fields = ['txn_details', 'remarks', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_stamp_duty', 'transfer_customer_id'];
+				$fields = ['amt_transfer_fee', 'amt_transfer_ncd', 'amt_stamp_duty', 'transfer_customer_id'];
 				$data = [];
 				foreach($fields as $key)
 				{
@@ -414,7 +438,7 @@ class Endorsements extends MY_Controller
 
 			private function _prepare_data_premium_upgrade($post_data)
 			{
-				$fields = ['txn_details', 'remarks', 'computation_basis', 'amt_stamp_duty'];
+				$fields = ['computation_basis', 'amt_stamp_duty'];
 				$data = [];
 				foreach($fields as $key)
 				{
@@ -425,7 +449,7 @@ class Endorsements extends MY_Controller
 
 			private function _prepare_data_premium_refund($post_data)
 			{
-				$fields = ['txn_details', 'remarks', 'computation_basis', 'amt_stamp_duty', 'flag_terminate_on_refund', 'amt_cancellation_fee'];
+				$fields = ['computation_basis', 'amt_stamp_duty', 'flag_terminate_on_refund', 'amt_cancellation_fee'];
 				$data = [];
 				foreach($fields as $key)
 				{
@@ -441,13 +465,13 @@ class Endorsements extends MY_Controller
 				return $data;
 			}
 
-			private function _prepare_data_terminate($post_data)
-			{
-				return [
-					'txn_details' => $post_data['txn_details'],
-					'remarks' 	  => $post_data['remarks'],
-				];
-			}
+			// private function _prepare_data_terminate($post_data)
+			// {
+			// 	return [
+			// 		'txn_details' => $post_data['txn_details'],
+			// 		'remarks' 	  => $post_data['remarks'],
+			// 	];
+			// }
 	// --------------------------------------------------------------------
 
 		private function _return_on_save($action, $done, $policy_id, $id = NULL)
@@ -521,8 +545,38 @@ class Endorsements extends MY_Controller
 
 	    	return TRUE;
 		}
+
 	// --------------------------------------------------------------------
 
+		public function _cb_valid_end_date($end_date)
+		{
+			$policy_id = (int)$this->input->post('policy_id');
+
+			$issued_date 	= $this->input->post('issued_date');
+			$start_date 	= $this->input->post('start_date');
+
+
+			/**
+	    	 * Case I: Start Date > END Date
+	    	 */
+	    	if( strtotime($start_date) > strtotime($end_date) )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_end_date', 'Start Date can not exceed End Date.');
+	            return FALSE;
+	    	}
+
+	    	/**
+	    	 * Case I: Issued Date > Start Date
+	    	 */
+	    	if( strtotime($issued_date) > strtotime($start_date) )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_end_date', 'Issued Date can not exceed Start Date.');
+	            return FALSE;
+	    	}
+
+	    	return TRUE;
+		}
+	// --------------------------------------------------------------------
 
 		/**
 		 * Can I add Endorsement

@@ -17,7 +17,7 @@ class Endorsement_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'txn_type', 'txn_date', 'gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate_on_refund', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'customer_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate_on_refund', 'status', 'schedule_html', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -125,14 +125,14 @@ class Endorsement_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function get_v_rules( $txn_type, $portfolio_id, $formatted = FALSE )
+    public function get_v_rules( $txn_type, $portfolio_id, $policy_record, $formatted = FALSE)
     {
         $txn_type                   = (int)$txn_type;
         $computation_basis_dropdown = _ENDORSEMENT_computation_basis_dropdown(FALSE);
         $v_rules                    = [];
 
         // Basic Rules (Txn Details, Remarks with Template Reference)
-        $basic = $this->get_v_rules_basic( $txn_type, $portfolio_id, TRUE );
+        $basic = $this->_v_rules_basic( $txn_type, $portfolio_id, $policy_record );
 
 
         $computation_basis = [
@@ -275,10 +275,98 @@ class Endorsement_model extends MY_Model
      * i.e. Txn Details and Remarks with Endorsement Template Reference
      * @param type $txn_type
      * @param type $portfolio_id
+     * @param object $policy_record
+     * @return type
+     */
+    private function _v_rules_basic( $txn_type, $portfolio_id, $policy_record )
+    {
+        $txn_type                   = (int)$txn_type;
+        $v_rules                    = [];
+
+        $this->load->model('endorsement_template_model');
+        $template_dropdown = $this->endorsement_template_model->dropdown( $portfolio_id, $txn_type );
+
+        $v_rules = array_merge(
+            [
+                [
+                    'field' => 'sold_by',
+                    'label' => 'Sales Staff',
+                    'rules' => 'trim|integer|max_length[11]',
+                    '_id'       => '_marketing-staff',
+                    '_extra_attributes' => 'style="width:100%; display:block"',
+                    '_type'     => 'dropdown',
+                    '_default'  => $policy_record->sold_by ?? '',
+                    '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown(),
+                    '_required' => false
+                ],
+                [
+                    'field' => 'issued_date',
+                    'label' => 'Endorsement Issued Date',
+                    'rules' => 'trim|required|valid_date',
+                    '_type'             => 'date',
+                    '_default'          => date('Y-m-d'),
+                    '_extra_attributes' => 'data-provide="datepicker-inline"',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'start_date',
+                    'label' => 'Endorsement Start Date',
+                    'rules' => 'trim|required|valid_date',
+                    '_type'             => 'date',
+                    '_default'          => date('Y-m-d'),
+                    '_extra_attributes' => 'data-provide="datepicker-inline"',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'end_date',
+                    'label' => 'Endorsement End Date',
+                    'rules' => 'trim|required|valid_date|callback__cb_valid_end_date',
+                    '_type'             => 'date',
+                    '_default'          => $policy_record->end_date,
+                    '_extra_attributes' => 'data-provide="datepicker-inline"',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'template_reference',
+                    'label' => 'Template Reference',
+                    'rules' => 'trim|integer|max_length[8]',
+                    '_key'      => 'template_reference',
+                    '_id'       => 'template-reference',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $template_dropdown,
+                    '_required' => false
+                ],
+                [
+                    'field' => 'txn_details',
+                    'label' => 'Transaction Details (सम्पुष्टि विवरण)',
+                    'rules' => 'trim|required|htmlspecialchars',
+                    '_id'       => 'txn-details',
+                    '_type'     => 'textarea',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'remarks',
+                    'label' => 'Remarks/कैफियत',
+                    'rules' => 'trim|htmlspecialchars',
+                    '_type'     => 'textarea',
+                    '_required' => false
+                ]
+            ]);
+
+        return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Basic Validation Rules
+     * i.e. Txn Details and Remarks with Endorsement Template Reference
+     * @param type $txn_type
+     * @param type $portfolio_id
      * @param type|bool $formatted
      * @return type
      */
-    public function get_v_rules_basic( $txn_type, $portfolio_id, $formatted = FALSE )
+    public function get_v_rules_basic_for_debit_note( $txn_type, $portfolio_id, $formatted = FALSE )
     {
         $txn_type                   = (int)$txn_type;
         $v_rules                    = [];
@@ -504,6 +592,15 @@ class Endorsement_model extends MY_Model
             break;
 
 
+            /**
+             * Activate Endorsement
+             * Process Backdate on Non First Endorsement
+             */
+            case IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE:
+                $data  = $this->_backdate($record, $data);
+            break;
+
+
             default:
                 break;
         }
@@ -553,6 +650,11 @@ class Endorsement_model extends MY_Model
                     {
                         $this->transfer_ownership($record);
                     }
+
+                    /**
+                     * Update Policy "END DATE"
+                     */
+                    $this->policy_model->update_end_date($record->policy_id, $record->end_date);
                 }
 
                 /**
@@ -651,6 +753,27 @@ class Endorsement_model extends MY_Model
         {
             return $this->db->where('id', $id)
                         ->update($this->table_name, $data);
+        }
+
+    // --------------------------------------------------------------------
+
+        /**
+         * Validate and process Back-date
+         *
+         * If user has supplied backdate, please make sure that :
+         *      1. The user is allowed to enter Backdate
+         *      2. If so, the supplied date should be withing backdate limit
+         *
+         * @param object    $record Policy Record
+         * @param array     $data
+         * @return array
+         */
+        public function _backdate($record, $data)
+        {
+            $data['start_date']     = backdate_process($record->start_date);
+            $data['issued_date']    = backdate_process($record->issued_date);
+
+            return $data;
         }
 
     // --------------------------------------------------------------------
@@ -1046,7 +1169,7 @@ class Endorsement_model extends MY_Model
         private function _rows($policy_id)
         {
             // Data Selection
-            $this->db->select('ENDRSMNT.id, ENDRSMNT.policy_id, ENDRSMNT.txn_type, ENDRSMNT.txn_date, ENDRSMNT.flag_ri_approval, ENDRSMNT.flag_current, ENDRSMNT.status, P.branch_id')
+            $this->db->select('ENDRSMNT.id, ENDRSMNT.policy_id, ENDRSMNT.txn_type, ENDRSMNT.issued_date, ENDRSMNT.flag_ri_approval, ENDRSMNT.flag_current, ENDRSMNT.status, P.branch_id')
                             ->from($this->table_name . ' AS ENDRSMNT')
                             ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
                             ->where('P.id', $policy_id);

@@ -188,6 +188,14 @@ if(isset($record))
 <?php endif ?>
 
 <script type="text/javascript">
+// Initialize Select2
+$.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
+    //Initialize Select2 Elements
+    $("#_marketing-staff").select2();
+    $("#_agent-id").select2();
+    $('.bootbox.modal').removeAttr('tabindex'); // modal workaround
+});
+
 // Load Txn Details from Endorsement Template
 $('#template-reference').on('change', function(){
     var v = parseInt(this.value);
