@@ -525,7 +525,13 @@ class Policy_installments extends MY_Controller
 		$installment_record->endorsement_status 	= IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED;
 		$endorsement_record->status 				= IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED;
 
-		$html_tab_ovrview = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
+		$this->load->model('rel_policy_bsrs_heading_model');
+		$html_tab_ovrview = $this->load->view('policies/tabs/_tab_overview', [
+			'record' => $policy_record,
+			'endorsement_record' => $endorsement_record,
+			'bsrs_headings_policy' => $this->rel_policy_bsrs_heading_model->by_policy($policy_record->id)
+		], TRUE);
+
 		$html_txn_row 	  = $this->load->view('policy_installments/_single_row', ['policy_record' => $policy_record, 'record' => $installment_record], TRUE);
 
 		$ajax_data = [
@@ -1516,7 +1522,13 @@ class Policy_installments extends MY_Controller
 		$installment_record->endorsement_status = IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
 		$endorsement_record->status 			= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
 
-		$html_tab_ovrview 	= $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
+		$this->load->model('rel_policy_bsrs_heading_model');
+		$html_tab_ovrview = $this->load->view('policies/tabs/_tab_overview', [
+			'record' => $policy_record,
+			'endorsement_record' => $endorsement_record,
+			'bsrs_headings_policy' => $this->rel_policy_bsrs_heading_model->by_policy($policy_record->id)
+		], TRUE);
+
 
 		$voucher_record->flag_invoiced = IQB_FLAG_INVOICED__YES;
 		$html_voucher_row 	= $this->load->view('accounting/vouchers/_single_row', ['record' => $voucher_record], TRUE);
@@ -2497,7 +2509,14 @@ class Policy_installments extends MY_Controller
         $policy_record->status      					= IQB_POLICY_STATUS_ACTIVE;
         $invoice_record->flag_paid  					= IQB_FLAG_ON;
 
-        $html_tab_ovrview   = $this->load->view('policies/tabs/_tab_overview', ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
+        $this->load->model('rel_policy_bsrs_heading_model');
+		$html_tab_ovrview = $this->load->view('policies/tabs/_tab_overview', [
+			'record' => $policy_record,
+			'endorsement_record' => $endorsement_record,
+			'bsrs_headings_policy' => $this->rel_policy_bsrs_heading_model->by_policy($policy_record->id)
+		], TRUE);
+
+
         $html_invoice_row 	= $this->load->view('accounting/invoices/_single_row', ['record' => $invoice_record], TRUE);
         $ajax_data = [
             'message'   => 'Successfully Updated!',
