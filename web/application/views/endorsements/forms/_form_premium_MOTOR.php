@@ -20,17 +20,16 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
     $this->load->view('endorsements/snippets/_premium_summary');
 ?>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-            <h4 class="box-title">Premium Information</h4>
-        </div>
-        <div class="box-body form-horizontal">
-            <?php
-            /**
-             * Comprehensive Premium Information
-             */
-            if( $policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE )
-            {
+    <?php if( $policy_record->policy_package == IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE ): ?>
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">Premium Information</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <?php
+                /**
+                 * Comprehensive Premium Information
+                 */
                 $premium_computation_table = $endorsement_record->premium_computation_table ? json_decode($endorsement_record->premium_computation_table) : NULL;
 
                 /**
@@ -40,10 +39,10 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
                     'form_elements'     => $form_elements['premium'],
                     'form_record'       => $premium_computation_table
                 ]);
-            }
-            ?>
+                ?>
+            </div>
         </div>
-    </div>
+    <?php endif; ?>
 
     <?php
     /**
