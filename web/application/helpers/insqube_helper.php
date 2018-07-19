@@ -1125,5 +1125,63 @@ if ( ! function_exists('load_portfolio_helper'))
     }
 }
 
+// --------------------------------------------------------------------
+if ( ! function_exists('backdate_process'))
+{
+    /**
+         * Process back-date validation
+         *
+         * @param date     $date
+         * @return array
+         */
+        function backdate_process($date)
+        {
+            $CI =& get_instance();
+
+            $timestamp      = strtotime($date);
+
+            /**
+             * Not a past date? or Backdate not allowed?
+             * -----------------------------------------
+             * Simply return today's date
+             */
+            $today              = date('Y-m-d');
+            $dateonly_timestamp = strtotime(date('Y-m-d', $timestamp));
+            $today_timestamp    = strtotime($today);
+            if( ($today_timestamp <=  $dateonly_timestamp) || !$CI->dx_auth->is_backdate_allowed() )
+            {
+                return $today;
+            }
+
+
+            /**
+             * Backdate Limit Set by Administrator?
+             */
+            $back_date_limit = $CI->settings->back_date_limit;
+            if( !$back_date_limit || !valid_date($back_date_limit) )
+            {
+                throw new Exception('Exception [Helper: insqube_helper][Method: backdate_process()]: "Back Date Limit" is not setup properly.<br/>Please contact Administrator for further assistance.');
+            }
+
+            /**
+             * Within Backdate Range?
+             * ----------------------
+             * i.e. Back Date <= Supplied Date
+             */
+            $back_date_timestamp = strtotime($back_date_limit);
+
+            if($timestamp < $back_date_timestamp )
+            {
+                throw new Exception('Exception [Helper: insqube_helper][Method: backdate_process()]: Supplied date (Start Date and/or Issued Date) can not exceed "Back Date Limit".');
+            }
+
+            /**
+             * Date is withing backdate limit range, simply return it as it is.
+             */
+            return $date;
+        }
+
+}
+
 // ------------------------------------------------------------------------
 

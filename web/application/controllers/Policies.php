@@ -1818,6 +1818,21 @@ class Policies extends MY_Controller
 				( $record->status === IQB_POLICY_STATUS_DRAFT && $to_updown_status === IQB_POLICY_STATUS_VERIFIED )
 			)
 			{
+
+				/**
+				 * Case 0: Backdate Check
+				 */
+				try {
+					backdate_process($record->start_date);
+            		backdate_process($record->issued_date);
+				} catch (Exception $e) {
+					return $this->template->json([
+						'status' 	=> 'error',
+						'title' 	=> 'Exception Occured!!',
+						'message' 	=> $e->getMessage()
+					], 400);
+				}
+
 				/**
 				 * Case 1: Premium Must be Updated
 				 */
