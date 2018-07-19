@@ -321,9 +321,7 @@ class Endorsements extends MY_Controller
 	        		}
 	        		else
 	        		{
-	        			// Now Update Data
-	        			$data['txn_date'] = date('Y-m-d');
-						$done = $this->endorsement_model->edit($record->id, $data);
+	        			$done = $this->endorsement_model->edit($record->id, $data);
 	        		}
 
 	        		return $this->_return_on_save($action, $done, $policy_record->id, $record->id ?? NULL);
@@ -342,7 +340,6 @@ class Endorsements extends MY_Controller
 			return [
 				'policy_id' 		=> $policy_id,
     			'txn_type'  		=> $txn_type,
-    			'txn_date' 			=> date('Y-m-d'),
     			'flag_ri_approval' 	=> $this->endorsement_model->get_flag_ri_approval_by_policy( $policy_id )
 			];
 		}

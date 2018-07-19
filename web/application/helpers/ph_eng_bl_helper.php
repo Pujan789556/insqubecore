@@ -812,8 +812,6 @@ if ( ! function_exists('__save_premium_ENG_BL'))
 					 */
 					if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 					{
-						// Transaction Date must be set as today
-						$endorsement_record->txn_date = date('Y-m-d');
 						$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
 					}
 
@@ -859,7 +857,6 @@ if ( ! function_exists('__save_premium_ENG_BL'))
 						'net_amt_sum_insured' 	=> $net_amt_sum_insured,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
-						'txn_date' 				=> date('Y-m-d'),
 
 						'premium_computation_table' => $premium_computation_table,	// JSON encoded
 						'cost_calculation_table' 	=> $cost_calculation_table		// JSON encoded

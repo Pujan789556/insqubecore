@@ -795,7 +795,6 @@ if ( ! function_exists('__save_premium_AGR_CROP'))
 						'net_amt_sum_insured' 	=> $policy_object->amt_sum_insured,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
-						'txn_date' 				=> date('Y-m-d')
 					];
 
 

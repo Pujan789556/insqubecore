@@ -1813,11 +1813,11 @@ if ( ! function_exists('_ENDORSEMENT_apply_computation_basis'))
                 break;
 
             case IQB_POLICY_ENDORSEMENT_CB_STR:
-                $computed_data = _ENDORSEMENT__compute_short_term_premium( $pfs_record, $premium_data, $endorsement_record->txn_date, $policy_record->end_date );
+                $computed_data = _ENDORSEMENT__compute_short_term_premium( $pfs_record, $premium_data, $endorsement_record->start_date, $endorsement_record->end_date );
                 break;
 
             case IQB_POLICY_ENDORSEMENT_CB_PRORATA:
-                $computed_data = _ENDORSEMENT__compute_prorata_premium( $premium_data, $endorsement_record->txn_date, $policy_record->end_date );
+                $computed_data = _ENDORSEMENT__compute_prorata_premium( $premium_data, $endorsement_record->start_date, $endorsement_record->end_date );
                 break;
 
             default:
@@ -2211,7 +2211,6 @@ if ( ! function_exists('_ENDORSEMENT__save_premium_manual'))
                     'amt_pool_premium'      => $CI->input->post('amt_pool_premium'),
                     'amt_agent_commission'  => $CI->input->post('amt_agent_commission'),
                     'amt_stamp_duty'        => $CI->input->post('amt_stamp_duty'),
-                    'txn_date'              => date('Y-m-d'),
 
                     // No Premium Computation and Cost Computation
                     'premium_computation_table' => NULL,

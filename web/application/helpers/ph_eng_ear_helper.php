@@ -873,7 +873,6 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 						'amt_direct_discount' 	=> $direct_discount,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
-						'txn_date' 				=> date('Y-m-d'),
 					];
 
 

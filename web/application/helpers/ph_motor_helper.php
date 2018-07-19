@@ -650,8 +650,6 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 		 */
 		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 		{
-			// Transaction Date must be set as today
-			$endorsement_record->txn_date = date('Y-m-d');
 			$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
 		}
 
@@ -689,7 +687,6 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 			'net_amt_sum_insured' 	=> $net_amt_sum_insured,
 			'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 			'amt_vat' 				=> $amount_vat,
-			'txn_date' 				=> date('Y-m-d')
 		]);
 
 		/**
@@ -1361,8 +1358,6 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		 */
 		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 		{
-			// Transaction Date must be set as today
-			$endorsement_record->txn_date = date('Y-m-d');
 			$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
 		}
 
@@ -1400,7 +1395,6 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 			'net_amt_sum_insured' 	=> $net_amt_sum_insured,
 			'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 			'amt_vat' 				=> $amount_vat,
-			'txn_date' 				=> date('Y-m-d')
 		]);
 
 		/**
@@ -2198,8 +2192,6 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 		 */
 		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 		{
-			// Transaction Date must be set as today
-			$endorsement_record->txn_date = date('Y-m-d');
 			$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
 		}
 
@@ -2237,7 +2229,6 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 			'net_amt_sum_insured' 	=> $net_amt_sum_insured,
 			'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 			'amt_vat' 				=> $amount_vat,
-			'txn_date' 				=> date('Y-m-d')
 		]);
 
 		/**
