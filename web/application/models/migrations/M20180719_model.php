@@ -46,7 +46,7 @@ class M20180719_model extends MY_Model
         $success = 0;
         foreach($list as $single)
         {
-            if( $single->e_start_date === '0000-00-00' || !empty($single->e_customer_id) )
+            if( !empty($single->e_customer_id) )
             {
                 continue;
             }
