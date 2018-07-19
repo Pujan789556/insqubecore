@@ -1106,7 +1106,7 @@ class Endorsement_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Get Endorsement Record(s)
+     * Get Endorsement Record(s) for Schedule Print
      *
      * This function is mainly used to get all the active records
      * for Endorsement Printing.
@@ -1114,11 +1114,50 @@ class Endorsement_model extends MY_Model
      * @param int $id
      * @return array
      */
-    public function get_many_by($where)
+    public function schedule_list($where)
     {
-        $this->db->select('ENDRSMNT.*, P.branch_id, P.code')
+        $this->db->select(
+
+                        /**
+                         * Endorsement Table
+                         */
+                        "ENDRSMNT.*, " .
+
+                        /**
+                         * Policy Table
+                         */
+                        "P.branch_id, P.code AS policy_code, P.flag_on_credit, P.care_of, " .
+
+                        /**
+                         * Branch Inofrmation
+                         */
+                         "B.name_en AS branch_name_en, B.name_np AS branch_name_np, " .
+
+                         /**
+                         * Customer Table (code, name, type, pan, picture, pfrofession, contact,
+                         * company reg no, citizenship no, passport no, lock flag)
+                         */
+                        "C.full_name as customer_name, C.contact as customer_contact, " .
+
+                        /**
+                         * Agent Table (agent_id, name, picture, bs code, ud code, contact, active, type)
+                         */
+                        "A.name as agent_name, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, " .
+
+                        /**
+                         * Crediter & Its Branch Info (name, contact), (branch name, branch contact)
+                         */
+                        "CRD.name as creditor_name, CRD.contact as creditor_contact, " .
+                        "CRB.name as creditor_branch_name, CRB.contact as creditor_branch_contact"
+                    )
                     ->from($this->table_name . ' AS ENDRSMNT')
                     ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
+                    ->join('master_branches B', 'B.id = P.branch_id')
+                    ->join('dt_customers C', 'C.id = P.customer_id')
+                    ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
+                    ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
+                    ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
+                    ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
                     ->where($where);
 
         /**

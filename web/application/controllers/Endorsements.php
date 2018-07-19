@@ -1702,11 +1702,12 @@ class Endorsements extends MY_Controller
 			];
 		}
 
-		$records = $this->endorsement_model->get_many_by($where);
+		$records = $this->endorsement_model->schedule_list($where);
 
 		$data = [
 			'records' 	=> $records,
-			'type' 		=> $type
+			'type' 		=> $type,
+			'lang' 		=> 'np'
 		];
 
 

@@ -2,10 +2,50 @@
 /**
  * Endorsement Print
  */
-$this->load->helper('ph_eng_car');
+$schedule_table_title = [
+    'np' => "सम्पुष्टि विवरण",
+    'en' => "ENDORSEMENT"
+];
 
-$schedule_table_title   = "सम्पुष्टि विवरण";
-$record = $records[0];
+$orgn_name = [
+    'np' => $this->settings->orgn_name_np,
+    'en' => $this->settings->orgn_name_en,
+];
+
+$endorsement_title = [
+    'np' => 'सम्पुष्टी वाक्यंश',
+    'en' => 'MEMORANDUM'
+];
+
+
+$labels = [
+    'assigntopolicy' => [
+        'en' => 'Attaching to & forming parto fo policy no.',
+        'np' => 'संग संलग्न र सोको अभिन्न अंगको रुपमा रहेको छ'
+    ],
+    'endorsement_no' => ['en' => 'Endorsement Number', 'np' => 'सम्पुष्टी नं'],
+    'policy_no' => ['en' => 'Policy Number', 'np' => 'बीमालेख नं'],
+    'agent' => ['en' => 'Agent', 'np' => 'अभिकर्ता'],
+    'issued_at' => ['en' => 'Issued At', 'np' => 'जारी स्थान'],
+    'issued_date' => ['en' => 'Issued Date', 'np' => 'जारी मिती'],
+    'duration' => ['en' => 'Policy Duration', 'np' => 'बीमा अवधी'],
+    'from' => ['en' => 'From', 'np' => 'देखी'],
+    'to' => ['en' => 'To', 'np' => 'सम्म'],
+    'till_midnight' => ['en' => 'till midnight.', 'np' => 'रातको १२ बजेसम्म'],
+    'old_si' => ['en' => 'Old Sum Insured (Rs.)', 'np' => 'पुरानो बीमांक (रु)'],
+    'added_si' => ['en' => 'Added Sum Insured (Rs.)', 'np' => 'थपिएको बीमांक (रु)'],
+    'new_si' => ['en' => 'Total Sum Insured (Rs.)', 'np' => 'जम्मा बीमांक (रु)'],
+    'premium' => ['en' => 'Premium', 'np' => 'बीमा शुल्क'],
+    'title' => ['en' => 'Title', 'np' => 'शिर्षक'],
+    'charge' => ['en' => 'Charge', 'np' => 'थप'],
+    'refund' => ['en' => 'Refund', 'np' => 'फिर्ता'],
+    'basic_premium' => ['en' => 'Basic Premium (Rs)', 'np' => 'आधारभुत बीमा शुल्क (रु)'],
+    'pool_premium' => ['en' => 'RSTMDST (Rs.)', 'np' => 'हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (रु)'],
+    'ownership_premium' => ['en' => 'Ownership Transfer Fee (Rs)', 'np' => 'नामसारी शुल्क (रु)'],
+    'vat' => ['en' => 'VAT', 'np' => 'मु अ कर (रु)'],
+    'total_premium' => ['en' => 'Total (Rs)', 'np' => 'जम्मा (रु)'],
+];
+
 ?>
 
 <!DOCTYPE html>
@@ -25,7 +65,7 @@ $record = $records[0];
                         <table class="table no-border">
                             <tr>
                                 <td align="left"><img style="margin-bottom: 20px;" src="'.site_url('public/app/images/logo.png').'" alt="'.$this->settings->orgn_name_en.'" width="200"></td>
-                                <td align="right"><h2>'.$schedule_table_title.'</h2></td>
+                                <td align="right"><h2>'.$schedule_table_title[$lang].'</h2></td>
                             </tr>
                         </table>
                     </htmlpageheader>
@@ -51,25 +91,41 @@ $record = $records[0];
         $i = 1;
         foreach($records as $record):?>
             <table class="table" width="100%" >
-                <thead><tr><td colspan="2" align="center"><h3 style="margin:0"><?php echo $schedule_table_title?></h3></td></tr></thead>
+                <thead><tr><td colspan="2" align="center"><h3 style="margin:0"><?php echo $schedule_table_title[$lang]?></h3></td></tr></thead>
                 <tbody>
-                    <tr>
-                        <td colspan="2">Attaching to & forming parto fo policy no. <?php echo $record->code; ?></td>
-                    </tr>
+                    <?php if($lang == 'en'): ?>
+                        <tr>
+                            <td colspan="2">Attaching to & forming parto fo policy no. <?php echo $record->policy_code; ?></td>
+                        </tr>
+                    <?php endif; ?>
                     <tr>
                         <td width="50%">
                             <table class="no-border">
                                 <tr>
-                                    <td>Endorsement Number</td>
+                                    <td><?php echo $labels['endorsement_no'][$lang]; ?>:</td>
                                     <td><?php echo $record->id; ?></td>
                                 </tr>
                                 <tr>
-                                    <td>Policy Number</td>
-                                    <td><?php echo $record->code; ?></td>
+                                    <td><?php echo $labels['policy_no'][$lang]; ?>:</td>
+                                    <td>
+                                        <?php echo $record->policy_code; ?>
+                                        <?php
+                                        if($lang == 'np')
+                                        {
+                                            echo $labels['assigntopolicy'][$lang];
+                                        }
+                                        ?>
+
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td colspan="2" style="border-top:1px solid #333333 !important">
-                                        <h4 style="margin:0">Insured Party Details</h4>
+                                        <?php
+                                        /**
+                                         * Insured Party, Financer, Other Financer, Careof
+                                         */
+                                        $this->load->view('policies/print/_schedule_insured_party', ['lang' => $lang, 'record' => $record]);
+                                        ?>
                                     </td>
                                 </tr>
                             </table>
@@ -77,88 +133,138 @@ $record = $records[0];
                         <td>
                             <table class="no-border">
                                 <tr>
-                                    <td>Agent</td>
-                                    <td></td>
+                                    <td width="20%"><?php echo $labels['agent'][$lang]; ?>:</td>
+                                    <td>
+                                        <?php
+                                        /**
+                                         * Agent Details
+                                         */
+                                        $agent_text = implode(' ', array_filter([$record->agent_bs_code, $record->agent_ud_code]));
+                                        echo $agent_text;
+                                        ?>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td>Issued At</td>
-                                    <td></td>
+                                    <td><?php echo $labels['issued_at'][$lang]; ?>:</td>
+                                    <td>
+                                        <?php
+                                        $col_name = 'branch_name_' . $lang;
+                                        echo $record->{$col_name};
+                                        ?>
+
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td>Issued Date</td>
-                                    <td></td>
+                                    <td><?php echo $labels['issued_date'][$lang]; ?>:</td>
+                                    <td><?php echo $record->issued_date; ?></td>
                                 </tr>
                                 <tr>
-                                    <td colspan="2">Policy Duration</td>
+                                    <td colspan="2"><?php echo $labels['duration'][$lang]; ?></td>
                                 </tr>
                                 <tr>
-                                    <td class="text-right">From</td>
-                                    <td></td>
+                                    <td class="text-right"><?php echo $labels['from'][$lang]; ?>:</td>
+                                    <td><?php echo $record->start_date; ?></td>
                                 </tr>
                                 <tr>
-                                    <td class="text-right">To</td>
-                                    <td></td>
+                                    <td class="text-right"><?php echo $labels['to'][$lang]; ?>:</td>
+                                    <td><?php echo $record->end_date; ?> <?php echo $labels['till_midnight'][$lang]; ?></td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                     <tr>
                         <td width="50%">
+                            <?php
+                            $old_si     = $record->gross_amt_sum_insured - $record->net_amt_sum_insured;
+                            $added_si   = $record->net_amt_sum_insured;
+                            $new_si     = $record->gross_amt_sum_insured
+                            ?>
                             <table class="no-border">
                                 <tr>
-                                    <td>Old Sum Insured</td>
-                                    <td></td>
+                                    <td><?php echo $labels['old_si'][$lang]; ?> :</td>
+                                    <td class="text-right"><?php echo number_format($old_si, 2); ?></td>
                                 </tr>
                                 <tr>
-                                    <td>Added Sum Insured</td>
-                                    <td></td>
+                                    <td><?php echo $labels['added_si'][$lang]; ?>:</td>
+                                    <td class="text-right"><?php echo number_format($added_si, 2); ?></td>
                                 </tr>
                                 <tr>
-                                    <td>Total Sum Insured</td>
-                                    <td></td>
+                                    <td><?php echo $labels['new_si'][$lang]; ?> :</td>
+                                    <td class="text-right"><?php echo number_format($new_si, 2); ?></td>
                                 </tr>
                             </table>
                         </td>
                         <td>
-                            <h3 style="margin:0">Premium</h3>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <td>Title</td>
-                                        <td>Charge</td>
-                                        <td>Refund</td>
-                                    </tr>
-                                </thead>
-                                <tr>
-                                    <td>Basic Premium</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>RSTMDST</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>Ownership Transfer Fee</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>VAT</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>Total</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </table>
+
+                            <?php
+                            /**
+                             * Premium Refund Computation
+                             */
+                            $basic_premium  = $record->amt_basic_premium;
+                            $pool_premium   = $record->amt_pool_premium;
+                            $transfer_fee   = $record->amt_transfer_fee;
+                            $vat            = $record->amt_vat;
+                            $total_premium  = $basic_premium + $pool_premium + $transfer_fee + $vat;
+                            $premium_table  = [
+                                $labels['basic_premium'][$lang] => $basic_premium,
+                                $labels['pool_premium'][$lang]      => $pool_premium,
+                                $labels['ownership_premium'][$lang] => $transfer_fee,
+                                $labels['vat'][$lang] => $vat
+                            ];
+
+                            if(_ENDORSEMENT_is_transactional_by_type($record->txn_type) ):
+                            ?>
+                                <h3 style="margin:0">Premium</h3>
+
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <td><?php echo $labels['title'][$lang]; ?></td>
+                                            <td><?php echo $labels['charge'][$lang]; ?></td>
+                                            <td><?php echo $labels['refund'][$lang]; ?></td>
+                                        </tr>
+                                    </thead>
+                                    <?php
+                                    foreach($premium_table as $title => $value):
+                                        if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND)
+                                        {
+                                            $row = '<td>'.$title . '</td>' .
+                                                    '<td class="text-right">0.00</td>' .
+                                                    '<td class="text-right">' . number_format($value, 2) . '</td>';
+                                        }
+                                        else
+                                        {
+                                            $row = '<td>'.$title . '</td>' .
+                                                    '<td class="text-right">' . number_format($value, 2) . '</td>'.
+                                                    '<td class="text-right">0.00</td>';
+                                        }
+                                        $row = "<tr>{$row}</tr>";
+                                        echo $row;
+                                        ?>
+                                    <?php
+                                    endforeach;
+
+
+                                    $total_row = '<td class="text-right text-bold">'. $labels['total_premium'][$lang] .'</td>';
+                                    if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND)
+                                    {
+                                        $total_row .=   '<td class="text-right text-bold">0.00</td>' .
+                                                        '<td class="text-right text-bold">' . number_format($total_premium, 2) . '</td>';
+                                    }
+                                    else
+                                    {
+                                        $total_row .=   '<td class="text-right text-bold">' . number_format($total_premium, 2) . '</td>'.
+                                                        '<td class="text-right text-bold">0.00</td>';
+                                    }
+                                    $total_row = "<tr>{$total_row}</tr>";
+                                    echo $total_row;
+                                    ?>
+                                </table>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2"><h3 style="margin: 0">MEMORANDUM</h3></td>
+                        <td colspan="2"><h3 style="margin: 0"><?php echo $endorsement_title[$lang] ?></h3></td>
                     </tr>
                     <tr>
                         <td colspan="2"><?php echo nl2br(htmlspecialchars($record->txn_details)); ?></td>
@@ -173,49 +279,6 @@ $record = $records[0];
             {
                 echo '<pagebreak>';
             }
-        endforeach;
-        /**
-         * Endorsement Per Page
-         */
-        // exit;
-        /*
-        foreach($records as $record):?>
-            <table class="table" width="100%">
-                <tbody>
-                    <tr>
-                        <td width="100%">
-                            <strong>सम्पुष्टि विवरण</strong><br>
-                            <?php echo nl2br(htmlspecialchars($record->txn_details)); ?>
-                        </td>
-                    </tr>
-                    <?php if($record->txn_type == IQB_POLICY_TXN_TYPE_ET ):
-                        $total_premium = (float)$record->amt_basic_premium + (float)$record->amt_pool_premium;
-                        $grand_total = $total_premium + $record->amt_stamp_duty + $record->amt_vat;
-                    ?>
-                        <tr>
-                            <td width="100%" class="no-padding">
-                                <table class="table" width="100%">
-                                    <tr>
-                                        <td>बीमा शुल्क</td>
-                                        <td class="text-right"><?php echo number_format($total_premium, 2); ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>टिकट दस्तुर</td>
-                                        <td class="text-right"><?php echo number_format($record->amt_stamp_duty, 2); ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>मु. अ. क. (VAT)</td>
-                                        <td class="text-right"><?php echo number_format($record->amt_vat, 2);?></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                                        <td class="text-right"><strong><?php echo number_format( $grand_total , 2);?></strong></td>
-                                    </tr>
-                                </table>
-                            </td>
-                    <?php endif ?>
-                </tbody>
-            </table><pagebreak>
-        <?php endforeach */?>
+        endforeach;?>
     </body>
 </html>

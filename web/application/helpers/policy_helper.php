@@ -2093,7 +2093,7 @@ if ( ! function_exists('_ENDORSEMENT_endorsement_pdf'))
 	        $mpdf->margin_header = 5;
 	        $mpdf->margin_footer = 5;
 	        $mpdf->SetProtection(array('print'));
-	        $mpdf->SetTitle("Policy Endorsement - {$record->code}");
+	        $mpdf->SetTitle("Policy Endorsement - {$record->policy_code}");
 	        $mpdf->SetAuthor($CI->settings->orgn_name_en);
 
 	        /**
@@ -2112,7 +2112,7 @@ if ( ! function_exists('_ENDORSEMENT_endorsement_pdf'))
 	        $html = $CI->load->view( $schedule_view, $data, TRUE);
 	        $mpdf->WriteHTML($html);
 
-	        $filename = "endorsement-all-{$record->code}.pdf";
+	        $filename = "endorsement-all-{$record->policy_code}.pdf";
 	        // $mpdf->Output($filename,'D');      // make it to DOWNLOAD
 	        $mpdf->Output();      // make it to DOWNLOAD
 		}
