@@ -131,4 +131,27 @@ class Migrations extends CI_Controller
 		$this->m20180713_model->migrate();
 	}
 
+	// -------------------------------------------------------------------------------------
+
+	/**
+	 * Update Endorsement Attributes
+	 * 		- issured date
+	 * 		- start date
+	 * 		- end date
+	 * 		- customer id
+	 * 		- sold by id
+	 * 	from Policy to Endorsements
+	 *
+	 *
+	 * Usage
+	 * 		$ php index.php migrations m20180719
+	 * 		$ CI_ENV=production php index.php migrations m20180719
+	 * @return void
+	 */
+	public function m20180719( )
+	{
+		$this->load->model('migrations/m20180719_model');
+		$this->m20180719_model->migrate();
+	}
+
 }
