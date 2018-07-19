@@ -355,7 +355,9 @@ class Endorsements extends MY_Controller
 			$data = [];
 			foreach($fields as $key)
 			{
-				$data[$key] = $post_data[$key] ?? NULL;
+				$value = $post_data[$key] ?? NULL; // Extract from post
+				$value = !empty($value) ? $value : NULL; // Set NULL if empty
+				$data[$key] = $value;
 			}
 
 			/**
