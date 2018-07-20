@@ -763,6 +763,8 @@ class Portfolio extends MY_Controller
 				$direct_discount 		= $this->input->post('direct_discount');
 				$pool_premium 			= $this->input->post('pool_premium');
 				$stamp_duty  			= $this->input->post('stamp_duty');
+				$amt_default_basic_premium  	= $this->input->post('amt_default_basic_premium');
+				$amt_default_pool_premium  		= $this->input->post('amt_default_pool_premium');
 				$flag_default_duration 	= $this->input->post('flag_default_duration');
 				$default_duration  		= $this->input->post('default_duration');
 				$flag_short_term  		= $this->input->post('flag_short_term');
@@ -786,6 +788,8 @@ class Portfolio extends MY_Controller
 							'direct_discount' 			=> $direct_discount[$i],
 							'pool_premium' 				=> $pool_premium[$i],
 							'stamp_duty' 				=> $stamp_duty[$i],
+							'amt_default_basic_premium' 	=> $amt_default_basic_premium[$i],
+							'amt_default_pool_premium' 		=> $amt_default_pool_premium[$i],
 							'flag_default_duration' 	=> $flag_default_duration[$i],
 							'default_duration' 			=> $default_duration[$i],
 							'flag_short_term' 			=> $flag_short_term[$i],
@@ -808,6 +812,8 @@ class Portfolio extends MY_Controller
 							'direct_discount' 			=> $direct_discount[$i],
 							'pool_premium' 				=> $pool_premium[$i],
 							'stamp_duty' 				=> $stamp_duty[$i],
+							'amt_default_basic_premium' 	=> $amt_default_basic_premium[$i],
+							'amt_default_pool_premium' 		=> $amt_default_pool_premium[$i],
 							'flag_default_duration' 	=> $flag_default_duration[$i],
 							'default_duration' 			=> $default_duration[$i],
 							'flag_short_term' 			=> $flag_short_term[$i],

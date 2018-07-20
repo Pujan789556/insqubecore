@@ -18,7 +18,7 @@ class Portfolio_setting_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ['id', 'fiscal_yr_id', 'portfolio_id', 'agent_commission', 'bs_service_charge', 'direct_discount', 'pool_premium', 'stamp_duty', 'flag_default_duration', 'default_duration', 'flag_short_term', 'short_term_policy_rate', 'flag_installment', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'fiscal_yr_id', 'portfolio_id', 'agent_commission', 'bs_service_charge', 'direct_discount', 'pool_premium', 'stamp_duty', 'amt_default_basic_premium', 'amt_default_pool_premium', 'flag_default_duration', 'default_duration', 'flag_short_term', 'short_term_policy_rate', 'flag_installment', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -107,6 +107,22 @@ class Portfolio_setting_model extends MY_Model
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
                     '_type'     => 'text',
                     '_key'      => 'stamp_duty',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'amt_default_basic_premium[]',
+                    'label' => 'Default Basic Premium( Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_key'      => 'amt_default_basic_premium',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'amt_default_pool_premium[]',
+                    'label' => 'Default Pool Premium (Rs)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_key'      => 'amt_default_pool_premium',
                     '_required' => true
                 ],
                 [
@@ -242,7 +258,7 @@ class Portfolio_setting_model extends MY_Model
 
     public function get_list_by_fiscal_year($fiscal_yr_id)
     {
-        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.bs_service_charge, PS.direct_discount, PS.pool_premium, PS.stamp_duty, PS.flag_short_term, PS.short_term_policy_rate, PS.flag_default_duration, PS.default_duration, PS.flag_installment, P.name_en as portfolio_name, PP.name_en as portfolio_parent_name, FY.code_en AS fy_code_en, FY.code_np AS fy_code_np')
+        return $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.bs_service_charge, PS.direct_discount, PS.pool_premium, PS.stamp_duty, PS.amt_default_basic_premium, PS.amt_default_pool_premium, PS.flag_short_term, PS.short_term_policy_rate, PS.flag_default_duration, PS.default_duration, PS.flag_installment, P.name_en as portfolio_name, PP.name_en as portfolio_parent_name, FY.code_en AS fy_code_en, FY.code_np AS fy_code_np')
                         ->from($this->table_name . ' PS')
                         ->join('master_fiscal_yrs FY', 'FY.id = PS.fiscal_yr_id')
                         ->join('master_portfolio P', 'P.id = PS.portfolio_id')
