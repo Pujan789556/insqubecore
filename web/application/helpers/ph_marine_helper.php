@@ -172,7 +172,7 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'field' => 'object[transit][from]',
 			        '_key' => 'from',
 			        'label' => 'From',
-			        'rules' => 'trim|required|max_length[100]',
+			        'rules' => 'trim|required|max_length[500]',
 			        '_type'     => 'text',
 			        '_required' => true
 			    ],
@@ -180,7 +180,7 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'field' => 'object[transit][to]',
 			        '_key' => 'to',
 			        'label' => 'To',
-			        'rules' => 'trim|required|max_length[100]',
+			        'rules' => 'trim|required|max_length[500]',
 			        '_type'     => 'text',
 			        '_required' => true
 			    ],
@@ -321,10 +321,10 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'field' => 'object[risk][warranties]',
 			        '_key' => 'warranties',
 			        'label' => 'Warranties',
-			        'rules' => 'trim|required|max_length[500]',
+			        'rules' => 'trim|max_length[1000]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
-			        '_required' => true
+			        '_required' => false
 			    ],
 			    [
 			        'field' => 'object[risk][deductible_excess]',
@@ -417,10 +417,10 @@ if ( ! function_exists('_OBJ_MARINE_deductible_excess_dropdown'))
 			'1' 	=> 'Subject to 1% excess on whole consignment',
 			'2' 	=> 'Subject to 2% excess on whole consignment',
 			'3' 	=> 'Subject to 3% excess on whole consignment',
-			'4' 	=> 'Subject to 0.5% excess on each consignment',
-			'5' 	=> 'Subject to 1% excess on each consignment',
-			'6' 	=> 'Subject to 2% excess on each consignment',
-			'7' 	=> 'Subject to 3% excess on each consignment'
+			'4' 	=> 'Subject to 0.5% excess on each conveyance',
+			'5' 	=> 'Subject to 1% excess on each conveyance',
+			'6' 	=> 'Subject to 2% excess on each conveyance',
+			'7' 	=> 'Subject to 3% excess on each conveyance'
 		];
 
 		if($flag_blank_select)

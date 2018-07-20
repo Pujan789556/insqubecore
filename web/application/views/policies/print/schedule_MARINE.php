@@ -135,67 +135,65 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         <?php echo nl2br( htmlspecialchars($object_attributes->packing) ); ?>
                     </td>
                 </tr>
+                <tr>
+                    <td colspan="2">
 
-                <tr>
-                    <td><strong>Marks &amp; Numbers</strong></td>
-                    <td> <?php echo htmlspecialchars($object_attributes->marks_numbers) ?></td>
+
+                        <table class="table">
+                            <tr>
+                                <td width="30%"><strong>Marks &amp; Numbers</strong></td>
+                                <td> <?php echo htmlspecialchars($object_attributes->marks_numbers) ?></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Voyage From</strong></td>
+                                <td><?php echo htmlspecialchars($object_attributes->transit->from) ?></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Voyage To</strong></td>
+                                <td><?php echo htmlspecialchars($object_attributes->transit->to) ?></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Invoice No. &amp; Date</strong></td>
+                                <td>
+                                    <?php echo htmlspecialchars($object_attributes->transit->invoice_no), ', ', $object_attributes->transit->invoice_date ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td><strong>LC No. &amp; Date</strong></td>
+                                <td>
+                                    <?php
+                                    $text = [htmlspecialchars($object_attributes->transit->lc_no), $object_attributes->transit->lc_date];
+                                    echo implode(', ', array_filter($text));
+                                    ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td><strong>B/L No./C/N No./AW/B No./R/R No. &amp; Date</strong></td>
+                                <td>
+                                    <?php
+                                    $text = [htmlspecialchars($object_attributes->transit->bl_no), $object_attributes->transit->bl_date];
+                                    echo implode(', ', array_filter($text));
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Vessel and / or Conveyance</strong></td>
+                                <td>
+                                    <?php echo _OBJ_MARINE_mode_of_transit_dropdown()[$object_attributes->transit->mode]; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Estimated Date of Departure</strong></td>
+                                <td>
+                                    <?php echo $object_attributes->date_dept ?>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
                 </tr>
 
-                <tr>
-                    <td>
-                        <strong>Voyage From</strong>
-                    </td>
-                    <td>
-                        <?php echo htmlspecialchars($object_attributes->transit->from) ?><br/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <strong>Voyage To</strong>
-                    </td>
-                    <td>
-                        <?php echo htmlspecialchars($object_attributes->transit->to) ?>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td><strong>Invoice No. &amp; Date</strong></td>
-                    <td>
-                        <?php echo htmlspecialchars($object_attributes->transit->invoice_no), ', ', $object_attributes->transit->invoice_date ?>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td><strong>LC No. &amp; Date</strong></td>
-                    <td>
-                        <?php
-                        $text = [htmlspecialchars($object_attributes->transit->lc_no), $object_attributes->transit->lc_date];
-                        echo implode(', ', array_filter($text));
-                        ?>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td><strong>B/L No./C/N No./AW/B No./R/R No. &amp; Date</strong></td>
-                    <td>
-                    	<?php
-                        $text = [htmlspecialchars($object_attributes->transit->bl_no), $object_attributes->transit->bl_date];
-                        echo implode(', ', array_filter($text));
-                        ?>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Vessel and / or Conveyance</strong></td>
-                    <td>
-                        <?php echo _OBJ_MARINE_mode_of_transit_dropdown()[$object_attributes->transit->mode]; ?>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Estimated Date of Departure</strong></td>
-                    <td>
-                        <?php echo $object_attributes->date_dept ?>
-                    </td>
-                </tr>
                 <tr>
                     <td colspan="2">
                         <small>Terms of Insurance: Subject to the following clauses listed and attached hereto and printed warranties below;</small><br/>
@@ -219,8 +217,11 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                                 <td class="smaller"><?php echo implode('<br/>', $secondhalf); ?></td>
                             </tr>
                         </table>
-                        <strong>Warranties:</strong><br/>
-                        <?php echo htmlspecialchars($object_attributes->risk->warranties); ?>
+
+                        <?php if($object_attributes->risk->warranties): ?>
+                            <strong>Warranties:</strong><br/>
+                            <?php echo htmlspecialchars($object_attributes->risk->warranties); ?>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <tr>
@@ -230,7 +231,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                     <td colspan="2">
 	                    <table class="no-border">
 	                    	<tr>
-	                    		<td width="20%"><strong>Surveyor Name</strong></td>
+	                    		<td width="15%"><strong>Surveyor Name</strong></td>
 	                    		<td><?php echo  htmlspecialchars($object_attributes->surveyor->name)?></td>
 	                    	</tr>
 	                    	<tr>
