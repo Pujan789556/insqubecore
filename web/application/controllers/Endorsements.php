@@ -1684,6 +1684,10 @@ class Endorsements extends MY_Controller
 			$this->template->render_404();
 		}
 
+
+
+
+
 		/**
 		 * Get Transaction Records or Record based on type
 		 */
@@ -1691,7 +1695,7 @@ class Endorsements extends MY_Controller
 		if( $type === 'all' )
 		{
 			$where = [
-				'P.id' 			=> $key,
+				'P.id' 				=> $key,
 				'ENDRSMNT.status' 	=> IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
 			];
 		}
@@ -1703,11 +1707,33 @@ class Endorsements extends MY_Controller
 		}
 
 		$records = $this->endorsement_model->schedule_list($where);
+		if(!$records)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'No endorsement found'
+			], 404);
+		}
+
+
+
+		/**
+		 * Schedule Language
+		 */
+		$portfolio_record = $this->portfolio_model->find($records[0]->portfolio_id);
+		if( !$portfolio_record->schedule_lang )
+		{
+			return $this->template->json([
+				'title'  => 'Incomplete Portfolio Setup!',
+				'status' => 'error',
+				'message' => "Schedule Language for {$portfolio_record->name_en} is missing. <br> Please contact Administrator."
+			], 409);
+		}
 
 		$data = [
 			'records' 	=> $records,
 			'type' 		=> $type,
-			'lang' 		=> 'np'
+			'lang' 		=> $portfolio_record->schedule_lang
 		];
 
 

@@ -1126,7 +1126,7 @@ class Endorsement_model extends MY_Model
                         /**
                          * Policy Table
                          */
-                        "P.branch_id, P.code AS policy_code, P.flag_on_credit, P.care_of, " .
+                        "P.portfolio_id, P.branch_id, P.code AS policy_code, P.flag_on_credit, P.care_of, " .
 
                         /**
                          * Branch Inofrmation
@@ -1158,7 +1158,8 @@ class Endorsement_model extends MY_Model
                     ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
                     ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
                     ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
-                    ->where($where);
+                    ->where($where)
+                    ->where_not_in('ENDRSMNT.txn_type', [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]);
 
         /**
          * Apply User Scope
