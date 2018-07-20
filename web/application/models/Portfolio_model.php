@@ -19,7 +19,7 @@ class Portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'risk_ids', 'bs_ri_code', 'bsrs_heading_type_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'schedule_lang', 'risk_ids', 'bs_ri_code', 'bsrs_heading_type_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -115,6 +115,14 @@ class Portfolio_model extends MY_Model
                     'label' => 'Beema Samiti Business Code',
                     'rules' => 'trim|required|integer|max_length[4]',
                     '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'schedule_lang',
+                    'label' => 'Policy Schedule Language',
+                    'rules' => 'trim|required|alpha|exact_length[2]|in_list[en,np]',
+                    '_type'     => 'dropdown',
+                    '_data'     => schedule_lang_dropdown(),
                     '_required' => true
                 ]
             ],

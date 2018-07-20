@@ -1185,3 +1185,27 @@ if ( ! function_exists('backdate_process'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('schedule_lang_dropdown'))
+{
+    /**
+     * Get Policy Schedule Language Dropdown
+     *
+     * @return  bool
+     */
+    function schedule_lang_dropdown( $flag_blank_select = true )
+    {
+        $dropdown = [
+            'en' => 'English',
+            'np' => 'Nepali',
+        ];
+
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
+
+// ------------------------------------------------------------------------
+
