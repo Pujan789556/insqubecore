@@ -38,7 +38,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
          * Policy Schedule
          */
         ?>
-        <table class="table" width="100%">
+        <table class="table small" width="100%">
             <thead><tr><td colspan="3" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
             <tbody>
 
@@ -86,7 +86,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                             </tr>
                             <tr>
                                 <td>Incidental Cost:</td>
-                                <td><?php echo $si_components->incremental_cost ?>% INCREMENTAL COST of ( INVOICE VALUE + ( <?php echo $si_components->tolerance_limit ?> % TOLERANCE LIMIT of INVOICE VALUE ) )</td>
+                                <td><?php echo $si_components->incremental_cost ?>% INCIDENTAL COST of ( INVOICE VALUE + ( <?php echo $si_components->tolerance_limit ?> % TOLERANCE LIMIT of INVOICE VALUE ) )</td>
                             </tr>
                             <tr>
                                 <td>Duty:</td>
@@ -168,7 +168,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                 <tr>
                     <td><strong>LC No. &amp; Date</strong></td>
                     <td>
-                        <?php 
+                        <?php
                         $text = [htmlspecialchars($object_attributes->transit->lc_no), $object_attributes->transit->lc_date];
                         echo implode(', ', array_filter($text));
                         ?>
@@ -178,7 +178,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                 <tr>
                     <td><strong>B/L No./C/N No./AW/B No./R/R No. &amp; Date</strong></td>
                     <td>
-                    	<?php 
+                    	<?php
                         $text = [htmlspecialchars($object_attributes->transit->bl_no), $object_attributes->transit->bl_date];
                         echo implode(', ', array_filter($text));
                         ?>
@@ -215,33 +215,29 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         ?>
                         <table class="table no-border">
                             <tr>
-                                <td><?php echo implode('<br/>', $firsthalf); ?></td>
-                                <td><?php echo implode('<br/>', $secondhalf); ?></td>
+                                <td class="smaller"><?php echo implode('<br/>', $firsthalf); ?></td>
+                                <td class="smaller"><?php echo implode('<br/>', $secondhalf); ?></td>
                             </tr>
                         </table>
-                        <br/>
                         <strong>Warranties:</strong><br/>
                         <?php echo htmlspecialchars($object_attributes->risk->warranties); ?>
                     </td>
                 </tr>
                 <tr>
-                    <td><strong>Deductible Excess</strong></td>
-                    <td>
-                        <?php echo _OBJ_MARINE_deductible_excess_dropdown(FALSE)[$object_attributes->risk->deductible_excess] ?>
-                    </td>
+                    <td colspan="2"><strong>Deductible Excess</strong>: <?php echo _OBJ_MARINE_deductible_excess_dropdown(FALSE)[$object_attributes->risk->deductible_excess] ?></td>
                 </tr>
                 <tr>
                     <td colspan="2">
 	                    <table class="no-border">
-	                    	<tr>	
-	                    		<td><strong>Surveyor Name</strong></td>
+	                    	<tr>
+	                    		<td width="20%"><strong>Surveyor Name</strong></td>
 	                    		<td><?php echo  htmlspecialchars($object_attributes->surveyor->name)?></td>
 	                    	</tr>
-	                    	<tr>	
+	                    	<tr>
 	                    		<td><strong>Contact Person</strong></td>
 	                    		<td><?php echo  htmlspecialchars($object_attributes->surveyor->contact_person)?></td>
 	                    	</tr>
-	                    	<tr>	
+	                    	<tr>
 	                    		<td><strong>Address</strong></td>
 	                    		<td><?php echo  htmlspecialchars($object_attributes->surveyor->address)?></td>
 	                    	</tr>
@@ -249,10 +245,7 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
 	                </td>
                 </tr>
                 <tr>
-                    <td><strong>Claims payable at</strong></td>
-                    <td>
-                        <?php echo htmlspecialchars( $object_attributes->claim_payable_at ) ?>
-                    </td>
+                    <td colspan="2"><strong>Claims payable at</strong>: <?php echo htmlspecialchars( $object_attributes->claim_payable_at ) ?></td>
                 </tr>
             </tbody>
         </table><br>

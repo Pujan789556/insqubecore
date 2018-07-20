@@ -416,8 +416,11 @@ if ( ! function_exists('_OBJ_MARINE_deductible_excess_dropdown'))
 			'0.5' 	=> 'Subject to 0.5% excess on whole consignment',
 			'1' 	=> 'Subject to 1% excess on whole consignment',
 			'2' 	=> 'Subject to 2% excess on whole consignment',
-			'3' 	=> 'Subject to 3% excess on whole consignment'
-
+			'3' 	=> 'Subject to 3% excess on whole consignment',
+			'4' 	=> 'Subject to 0.5% excess on each consignment',
+			'5' 	=> 'Subject to 1% excess on each consignment',
+			'6' 	=> 'Subject to 2% excess on each consignment',
+			'7' 	=> 'Subject to 3% excess on each consignment'
 		];
 
 		if($flag_blank_select)
