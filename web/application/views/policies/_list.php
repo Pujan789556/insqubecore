@@ -9,6 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<tr>
 			<?php if( $this->dx_auth->is_admin() ): ?>
 				<th>ID</th>
+				<th>Branch</th>
 			<?php endif?>
 			<th>Code</th>
 			<th>Customer</th>

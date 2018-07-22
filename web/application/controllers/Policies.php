@@ -188,6 +188,22 @@ class Policies extends MY_Controller
 
 			$status_dropdown = _POLICY_status_dropdown(false);
 
+			$admin_filters = [];
+			if( $this->dx_auth->is_admin() )
+			{
+				$branch_dropdown = branch_dropdown('en', false);
+				$admin_filters = [
+					[
+		                'field' => 'filter_branch_id',
+		                'label' => 'Branch',
+		                'rules' => 'trim|integer|in_list['.implode(',',array_keys($branch_dropdown)).']',
+		                '_id'       => 'filter-branch',
+		                '_type'     => 'dropdown',
+		                '_data'     => IQB_BLANK_SELECT + $branch_dropdown,
+		            ]
+		        ];
+			}
+
 			$filters = [
 				[
 	                'field' => 'filter_status',
@@ -234,7 +250,7 @@ class Policies extends MY_Controller
 	                '_label_extra' => 'data-toggle="tooltip" title="Customer Name, PAN, Citizenship, Passport etc..."'
 				],
 			];
-			return $filters;
+			return array_merge($admin_filters, $filters);
 		}
 
 		private function _get_filter_data()
@@ -248,6 +264,7 @@ class Policies extends MY_Controller
 				if( $this->form_validation->run() )
 				{
 					$data['data'] = [
+						'branch_id' 		=> $this->input->post('filter_branch_id') ?? NULL,
 						'code' 				=> $this->input->post('filter_code') ?? NULL,
 						'status' 			=> $this->input->post('filter_status') ?? NULL,
 						'portfolio_id' 		=> $this->input->post('filter_portfolio_id') ?? NULL,

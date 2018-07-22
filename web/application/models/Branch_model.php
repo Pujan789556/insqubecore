@@ -82,6 +82,7 @@ class Branch_model extends MY_Model
         $list = $this->get_cache('branches_all');
         if(!$list)
         {
+            $this->db->order_by('name_en', 'asc');
             $list = parent::find_all();
             $this->write_cache($list, 'branches_all', CACHE_DURATION_DAY);
         }
@@ -129,7 +130,7 @@ class Branch_model extends MY_Model
     /**
      * Get Dropdown List
      */
-    public function dropdown()
+    public function dropdown( $lang="both" )
     {
         /**
          * Get Cached Result, If no, cache the query result
@@ -138,7 +139,21 @@ class Branch_model extends MY_Model
         $list = [];
         foreach($records as $record)
         {
-            $list["{$record->id}"] = $record->name_en . ' (' . $record->name_np . ')';
+
+            if($lang == 'both')
+            {
+                $text = $record->name_en . ' (' . $record->name_np . ')';
+            }
+            else if( $lang == 'en' )
+            {
+                $text = $record->name_en;
+            }
+            else
+            {
+                $text = $record->name_np;
+            }
+
+            $list["{$record->id}"] = $text;
         }
         return $list;
     }

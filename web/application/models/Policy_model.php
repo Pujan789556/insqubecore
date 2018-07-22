@@ -1421,6 +1421,12 @@ class Policy_model extends MY_Model
                 $this->db->where(['P.status' =>  $status]);
             }
 
+            $branch_id = $params['branch_id'] ?? NULL;
+            if( $branch_id )
+            {
+                $this->db->where(['P.branch_id' =>  $branch_id]);
+            }
+
             $portfolio_id = $params['portfolio_id'] ?? NULL;
             if( $portfolio_id )
             {
