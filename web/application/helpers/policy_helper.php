@@ -2195,6 +2195,41 @@ if ( ! function_exists('_ENDORSEMENT__is_portfolio_premium_manual'))
 }
 
 // ------------------------------------------------------------------------
+
+if ( ! function_exists('_ENDORSEMENT__tariff_premium_defaults'))
+{
+    /**
+     * Compute the Default Premium for Basic and Pool for Tariff Portfolio
+     *
+     * This is when the tariff-computed premium falls below the default basic and/or pool
+     * we use the default
+     *
+     * @param array   $data   Endorsement Data
+     * @param array   $defaults  Default ['basic' => xxx, 'pool' => yyy]
+     * @param bool    $skip_pool_on_zero  Skip Pool Premium if Zero
+     * @return  bool
+     */
+    function _ENDORSEMENT__tariff_premium_defaults( $data, $defaults, $skip_pool_on_zero = FALSE )
+    {
+        $default_basic  = $defaults['basic'];
+        $default_pool   = $defaults['pool'];
+
+        $data['amt_basic_premium']  = $data['amt_basic_premium'] < $default_basic ? $default_basic : $data['amt_basic_premium'];
+
+        /**
+         * This gives a option to compute pool premium only if it is not zero
+         */
+        if( !$skip_pool_on_zero || $data['amt_pool_premium'] > 0.00 )
+        {
+            $data['amt_pool_premium'] = $data['amt_pool_premium'] < $default_pool ? $default_pool : $data['amt_pool_premium'];
+        }
+
+
+        return $data;
+    }
+}
+
+// ------------------------------------------------------------------------
 // POLICY INSTALLMENT HELPER FUNCTIONS
 // ------------------------------------------------------------------------
 
