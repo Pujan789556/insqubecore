@@ -630,6 +630,30 @@ if ( ! function_exists('district_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('branch_dropdown'))
+{
+    /**
+     * Get Branch Dropdown
+     *
+     *
+     * @param bool $flag_blank_select   Whether to append blank select
+     * @return  bool
+     */
+    function branch_dropdown( $lang = 'both', $flag_blank_select = true)
+    {
+        $CI =& get_instance();
+        $CI->load->model('branch_model');
+        $dropdown  = $CI->branch_model->dropdown($lang);
+
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('_COMPANY_type_dropdown'))
 {
     /**
