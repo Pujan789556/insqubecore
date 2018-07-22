@@ -298,7 +298,7 @@ class Portfolio_setting_model extends MY_Model
         $row = $this->get_cache($cache_name);
         if(!$row)
         {
-            $row = $this->db->select('PS.id, PS.fiscal_yr_id, PS.portfolio_id, PS.agent_commission, PS.bs_service_charge, PS.direct_discount, PS.pool_premium, PS.stamp_duty, PS.flag_short_term, PS.short_term_policy_rate, PS.flag_default_duration, PS.default_duration, PS.flag_installment, P.name_en as portfolio_name')
+            $row = $this->db->select('PS.*, P.name_en as portfolio_name')
                         ->from($this->table_name . ' PS')
                         ->join('master_portfolio P', 'P.id = PS.portfolio_id')
                         ->where('PS.fiscal_yr_id', $fiscal_yr_id)
