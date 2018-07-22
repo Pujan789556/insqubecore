@@ -13,7 +13,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<th>Code</th>
 			<th>Customer</th>
 			<th>Portfolio</th>
-			<th>Dates</th>
+			<th>Policy Dates (From - To)</th>
+			<th>Created</th>
+			<th>Last Update</th>
 			<th>Status</th>
 			<th>Actions</th>
 		</tr>

@@ -17,6 +17,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->portfolio_name;?></td>
 
 	<td><?php echo $record->start_date . ' - ' . $record->end_date;?></td>
+	<td><?php echo $record->created_at; ?></td>
+	<td><?php echo $record->updated_at; ?></td>
 	<td><?php echo _POLICY_status_text($record->status);?></td>
 
 	<td class="ins-action">
