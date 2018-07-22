@@ -407,6 +407,53 @@ if ( ! function_exists('__save_premium_FIRE_LOP'))
 					$NET_BASIC_PREMIUM = $BASIC_PREMIUM - $direct_discount;
 
 
+
+					/**
+					 * Below Defautl Basic/Pool Premium Value? - For FRESH/RENEWAL ONLY
+					 */
+					if( _ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+					{
+						$txn_data_defaults = [
+							'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
+							'amt_pool_premium' 		=> $POOL_PREMIUM,
+						];
+						$defaults = [
+							'basic' => floatval($pfs_record->amt_default_basic_premium),
+							'pool' 	=> floatval($pfs_record->amt_default_pool_premium),
+						];
+						$txn_data_defaults = _ENDORSEMENT__tariff_premium_defaults( $txn_data_defaults, $defaults, TRUE);
+
+
+						if(
+							$txn_data_defaults['amt_basic_premium'] != $NET_BASIC_PREMIUM
+							||
+							$txn_data_defaults['amt_pool_premium'] != $POOL_PREMIUM )
+						{
+
+							$txt_basic_premium = $txn_data_defaults['amt_basic_premium'] != $NET_BASIC_PREMIUM
+													? 'BASIC PREMIUM (minimum)' : 'BASIC PREMIUM';
+							$txt_pool_premium = $txn_data_defaults['amt_pool_premium'] != $POOL_PREMIUM
+													? 'POOL PREMIUM (minimum)' : 'POOL PREMIUM';
+
+							// Overwrite Cost Calculation Table
+							$cost_calculation_table = [
+								[
+									'label' => $txt_basic_premium,
+									'value' => $txn_data_defaults['amt_basic_premium']
+								],
+								[
+									'label' => $txt_pool_premium,
+									'value' => $txn_data_defaults['amt_pool_premium']
+								]
+							];
+						}
+
+						// Update basic, pool for further computation
+						$NET_BASIC_PREMIUM 		= $txn_data_defaults['amt_basic_premium'];
+						$POOL_PREMIUM 			= $txn_data_defaults['amt_pool_premium'];
+					}
+
+
 					/**
 					 * Premium Computation Table
 					 * -------------------------

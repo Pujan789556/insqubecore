@@ -796,11 +796,54 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 
 
 					/**
-					 * Premium Computation Table
-					 * -------------------------
-					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+					 * Below Defautl Basic/Pool Premium Value? - For FRESH/RENEWAL ONLY
 					 */
-					$premium_computation_table = json_encode($post_data['premium']);
+					$__flag_defualt_summary_table = FALSE;
+					if( _ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+					{
+						$txn_data_defaults = [
+							'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
+							'amt_pool_premium' 		=> $POOL_PREMIUM,
+						];
+						$defaults = [
+							'basic' => floatval($pfs_record->amt_default_basic_premium),
+							'pool' 	=> floatval($pfs_record->amt_default_pool_premium),
+						];
+						$txn_data_defaults = _ENDORSEMENT__tariff_premium_defaults( $txn_data_defaults, $defaults, TRUE);
+
+
+						if(
+							$txn_data_defaults['amt_basic_premium'] != $NET_BASIC_PREMIUM
+							||
+							$txn_data_defaults['amt_pool_premium'] != $POOL_PREMIUM )
+						{
+							$__flag_defualt_summary_table = TRUE;
+
+
+							$txt_basic_premium = $txn_data_defaults['amt_basic_premium'] != $NET_BASIC_PREMIUM
+													? 'BASIC PREMIUM (minimum)' : 'BASIC PREMIUM';
+							$txt_pool_premium = $txn_data_defaults['amt_pool_premium'] != $POOL_PREMIUM
+													? 'POOL PREMIUM (minimum)' : 'POOL PREMIUM';
+
+
+							// Summary Table
+							$summary_table = [
+								[
+									'label' => $txt_basic_premium,
+									'value' => $txn_data_defaults['amt_basic_premium']
+								],
+								[
+									'label' => $txt_pool_premium,
+									'value' => $txn_data_defaults['amt_pool_premium']
+								]
+							];
+						}
+
+						// Update basic, pool for further computation
+						$NET_BASIC_PREMIUM 	= $txn_data_defaults['amt_basic_premium'];
+						$POOL_PREMIUM 		= $txn_data_defaults['amt_pool_premium'];
+					}
+
 
 
 					/**
@@ -811,27 +854,30 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 					 * 	b. Risk wise summary Table
 					 * 	c. Property wise summary Table
 					 */
-
-					$summary_table = [
-						[
-							'label' => "BASIC PREMIUM",
-							'value' => $GROSS_PREMIUM
-						]
-					];
-
-					if($DIRECT_DISCOUNT)
+					if( !$__flag_defualt_summary_table )
 					{
-						$dd_formatted = number_format($pfs_record->direct_discount, 2);
+						$summary_table = [
+							[
+								'label' => "BASIC PREMIUM",
+								'value' => $GROSS_PREMIUM
+							]
+						];
+
+						if($DIRECT_DISCOUNT)
+						{
+							$dd_formatted = number_format($pfs_record->direct_discount, 2);
+							$summary_table[] = [
+								'label' => "DIRECT DISCOUNT ({$dd_formatted}%)",
+								'value' => $DIRECT_DISCOUNT
+							];
+						}
+
 						$summary_table[] = [
-							'label' => "DIRECT DISCOUNT ({$dd_formatted}%)",
-							'value' => $DIRECT_DISCOUNT
+							'label' => "POOL PREMIUM",
+							'value' => $POOL_PREMIUM
 						];
 					}
 
-					$summary_table[] = [
-						'label' => "POOL PREMIUM",
-						'value' => $POOL_PREMIUM
-					];
 
 					/**
 					 * Cost Calculation Table - Schedule Data
@@ -936,6 +982,13 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 					$CI->load->helper('account');
 					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
+
+					/**
+					 * Premium Computation Table
+					 * -------------------------
+					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+					 */
+					$premium_computation_table = json_encode($post_data['premium']);
 
 
 					/**

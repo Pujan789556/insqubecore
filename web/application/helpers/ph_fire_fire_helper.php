@@ -1193,8 +1193,8 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 
 									// Risk table tmp
-									$risk_table_tmp[$pr->name]['premium'] = $risk_table_tmp[$pr->name] ?? 0.00;
-									$risk_table_tmp[$pr->name]['premium'] += $premium_per_risk;
+									$risk_table_tmp[$pr->name]['premium'] = $risk_table_tmp[$pr->name]['premium'] ?? 0.00;
+									$risk_table_tmp[$pr->name]['premium'] += $risk_table_tmp[$pr->name]['premium'] + $premium_per_risk;
 									$risk_table_tmp[$pr->name]['rate'] = $rate;
 
 									// GROSS - Regular & Pool
@@ -1302,21 +1302,57 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					 * Let's Compute the Total Premium
 					 */
 					$BASIC_PREMIUM 	= $NET_REGULAR_PREMIUM - $DIRECT_DISCOUNT;
-					$taxable_amount = $BASIC_PREMIUM + $post_data['amt_stamp_duty'];
 
-					/**
-					 * Compute VAT
-					 */
-					$CI->load->helper('account');
-					$AMOUNT_VAT = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
 
 					/**
-					 * Premium Computation Table
-					 * -------------------------
-					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+					 * Below Defautl Basic/Pool Premium Value? - For FRESH/RENEWAL ONLY
 					 */
-					$premium_computation_table = json_encode($post_data['premium']);
+					$__flag_defualt_summary_table = FALSE;
+					if( _ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+					{
+						$txn_data_defaults = [
+							'amt_basic_premium' 	=> $BASIC_PREMIUM,
+							'amt_pool_premium' 		=> $NET_POOL_PREMIUM,
+						];
+						$defaults = [
+							'basic' => floatval($pfs_record->amt_default_basic_premium),
+							'pool' 	=> floatval($pfs_record->amt_default_pool_premium),
+						];
+						$txn_data_defaults = _ENDORSEMENT__tariff_premium_defaults( $txn_data_defaults, $defaults, TRUE);
+
+
+						if(
+							$txn_data_defaults['amt_basic_premium'] != $BASIC_PREMIUM
+							||
+							$txn_data_defaults['amt_pool_premium'] != $NET_POOL_PREMIUM )
+						{
+							$__flag_defualt_summary_table = TRUE;
+
+
+							$txt_basic_premium = $txn_data_defaults['amt_basic_premium'] != $BASIC_PREMIUM
+													? 'BASIC PREMIUM (minimum)' : 'BASIC PREMIUM';
+							$txt_pool_premium = $txn_data_defaults['amt_pool_premium'] != $NET_POOL_PREMIUM
+													? 'POOL PREMIUM (minimum)' : 'POOL PREMIUM';
+
+
+							// Summary Table
+							$summary_table = [
+								[
+									'label' => $txt_basic_premium,
+									'value' => $txn_data_defaults['amt_basic_premium']
+								],
+								[
+									'label' => $txt_pool_premium,
+									'value' => $txn_data_defaults['amt_pool_premium']
+								]
+							];
+						}
+
+						// Update basic, pool for further computation
+						$BASIC_PREMIUM 		= $txn_data_defaults['amt_basic_premium'];
+						$NET_POOL_PREMIUM 	= $txn_data_defaults['amt_pool_premium'];
+					}
 
 
 					/**
@@ -1327,45 +1363,42 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					 * 	b. Risk wise summary Table
 					 * 	c. Property wise summary Table
 					 */
-
-					$summary_table = [
-						[
-							'label' => "PREMIUM",
-							'value' => $GROSS_REGULAR_PREMIUM
-						]
-					];
-
-
-
-					$summary_table = array_merge($summary_table, [
-						[
-							'label' => "NWL - Fire Only ({$NWL_RATE}%)",
-							'value' => $NWL_AMOUNT
-						],
-						[
-							'label' => "FFA - Fire Only ({$FFA_RATE}%)",
-							'value' => $FFA_AMOUNT
-						],
-						[
-							'label' => "SDD - Regular ({$SDD_RATE}%)",
-							'value' => $SDD_AMOUNT_REGULAR
-						],
-						[
-							'label' => "SDD - Pool ({$SDD_RATE}%)",
-							'value' => $SDD_AMOUNT_POOL
-						],
-						[
-							'label' => "POOL PREMIUM",
-							'value' => $NET_POOL_PREMIUM
-						]
-					]);
-
-					if($DIRECT_DISCOUNT)
+					if( !$__flag_defualt_summary_table )
 					{
-						$summary_table[] = [
-							'label' => "DIRECT DISCOUNT ({$pfs_record->direct_discount}%)",
-							'value' => $DIRECT_DISCOUNT
+						$summary_table = [
+							[
+								'label' => "GROSS PREMIUM",
+								'value' => $GROSS_REGULAR_PREMIUM
+							],
+							[
+								'label' => "NWL - Fire Only ({$NWL_RATE}%)",
+								'value' => $NWL_AMOUNT
+							],
+							[
+								'label' => "FFA - Fire Only ({$FFA_RATE}%)",
+								'value' => $FFA_AMOUNT
+							],
+							[
+								'label' => "SDD - Regular ({$SDD_RATE}%)",
+								'value' => $SDD_AMOUNT_REGULAR
+							],
+							[
+								'label' => "SDD - Pool ({$SDD_RATE}%)",
+								'value' => $SDD_AMOUNT_POOL
+							],
+							[
+								'label' => "POOL PREMIUM",
+								'value' => $NET_POOL_PREMIUM
+							]
 						];
+
+						if($DIRECT_DISCOUNT)
+						{
+							$summary_table[] = [
+								'label' => "DIRECT DISCOUNT ({$pfs_record->direct_discount}%)",
+								'value' => $DIRECT_DISCOUNT
+							];
+						}
 					}
 
 
@@ -1439,7 +1472,6 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 
 
-
 					/**
 					 * Compute VAT
 					 */
@@ -1447,6 +1479,13 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					$CI->load->helper('account');
 					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
+
+					/**
+					 * Premium Computation Table
+					 * -------------------------
+					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+					 */
+					$premium_computation_table = json_encode($post_data['premium']);
 
 					/**
 					 * Prepare Transactional Data
