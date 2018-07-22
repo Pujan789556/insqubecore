@@ -27,6 +27,7 @@ if ( ! function_exists('dropdown_base_currency'))
     function dropdown_base_currency( bool $flag_blank_select = true )
     {
         $dropdown = [
+            'NPR' => 'NPR',
             'INR' => 'INR',
             'USD' => 'USD',
             'EUR' => 'EUR',
@@ -105,6 +106,15 @@ if ( ! function_exists('forex_conversion'))
      */
     function forex_conversion(string $date, string $currency,  float $amount )
     {
+        /**
+         * IF Currency is NPR, we do not do anything.
+         * Simply return the amount
+         */
+        if( strtoupper($currency) === 'NPR' )
+        {
+            return $amount;
+        }
+
         $forex  = get_forex_rate_by_base_currency($date, $currency);
 
         if( !$forex )
