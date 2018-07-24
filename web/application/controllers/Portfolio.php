@@ -189,6 +189,43 @@ class Portfolio extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
+	 * Edit a Portfolio Specific Risks - JSON
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function risks_json($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->portfolio_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('risks_json', $record);
+
+		// Add already checked values
+		$rules = $this->portfolio_model->validation_rules['risks_json'];
+
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('setup/portfolio/_form_risks',
+			[
+				'form_elements' => $rules,
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Edit a Portfolio Specific Beema Samiti Report Setup - Heading Types
 	 *
 	 *
@@ -235,7 +272,7 @@ class Portfolio extends MY_Controller
 	private function _save($action, $record = NULL)
 	{
 		// Valid action?
-		if( !in_array($action, array('edit', 'accounts', 'risks', 'bsrs_headings')))
+		if( !in_array($action, array('edit', 'accounts', 'risks', 'risks_json', 'bsrs_headings')))
 		{
 			return $this->template->json([
 				'status' => 'error',
@@ -305,6 +342,14 @@ class Portfolio extends MY_Controller
 					];
 
 					// Now Update Data
+					$done = $this->portfolio_model->update($record->id, $risk_data, TRUE);
+				}
+				else if ($action === 'risks_json')
+				{
+					// Format JSON Data
+					$risk_data['risks'] = $this->_format_risk_json($data);
+
+					// // Now Update Data
 					$done = $this->portfolio_model->update($record->id, $risk_data, TRUE);
 				}
 				else if ($action === 'bsrs_headings')
@@ -403,6 +448,7 @@ class Portfolio extends MY_Controller
 
 				case 'accounts':
 				case 'risks':
+				case 'risks_json':
 				case 'bsrs_headings':
 					$rules = $this->portfolio_model->validation_rules[$action];
 					break;
@@ -412,6 +458,58 @@ class Portfolio extends MY_Controller
 			}
 
 			return $rules;
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Format Risk JSON data from "Form Submission"
+		 *
+		 * @param array $post_data
+		 * @return JSON
+		 */
+		private function _format_risk_json ($post_data)
+		{
+			$risk_keys = ['code', 'name', 'type', 'default_min_premium'];
+			$risks = $post_data['risks'];
+
+			$json_data = [
+				'default_premium_computation' => $risks['default_premium_computation']
+			];
+			for($i = 0; $i < count($risks['name']); $i++ )
+			{
+				$single_object = [];
+				foreach($risk_keys as $key)
+				{
+					$single_object[$key] = $risks[$key][$i] ?? NULL;
+				}
+				$json_data['risks'][] = $single_object;
+			}
+
+			return json_encode($json_data);
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Callback - Valid Risk Code
+		 * Must Be Unique
+		 *
+		 * @param type $code
+		 * @return type
+		 */
+		public function _cb_risks_check_duplicate($code)
+		{
+			$codes 	= $this->input->post()['risks']['code'];
+			$total 	= count($codes);
+			$unique = array_unique(array_filter($codes));
+
+	        if( $total !== count($unique) )
+	        {
+	            $this->form_validation->set_message('_cb_risks_check_duplicate', 'The %s must be unique alphabetical characters.');
+	            return FALSE;
+	        }
+	        return TRUE;
 		}
 
 		// --------------------------------------------------------------------

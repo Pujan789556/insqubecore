@@ -606,6 +606,40 @@ if ( ! function_exists('risk_type_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('risk_default_premium_computation_dropdown'))
+{
+    /**
+     * Get Risk default premium computation dropdown.
+     *
+     * This is the computation reference for each risk setup on portfolio.
+     *
+     * "individual"
+     *      - default minimum premium is computed per risk basis
+     *
+     * "cumulative"
+     *      - default minimum premium is computed per risk type
+     *      - this is governed by "Portfolio Settings" -> Default Basic Premium( Rs) , Default Pool Premium (Rs)
+     *
+     *
+     * @param bool $flag_blank_select   Whether to append blank select
+     * @return  bool
+     */
+    function risk_default_premium_computation_dropdown( $flag_blank_select = true)
+    {
+        $dropdown = [
+            'I'     => 'Individual (Per Risk)',
+            'C'     => 'Cumulative (Per Risk Type)'
+        ];
+
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('district_dropdown'))
 {
     /**

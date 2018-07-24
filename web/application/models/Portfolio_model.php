@@ -19,7 +19,7 @@ class Portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'schedule_lang', 'risk_ids', 'bs_ri_code', 'bsrs_heading_type_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'schedule_lang', 'risks', 'risk_ids', 'bs_ri_code', 'bsrs_heading_type_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -139,6 +139,62 @@ class Portfolio_model extends MY_Model
                     '_data'     => $risk_dropdown,
                     '_list_inline' => false,
                     '_checkbox_value' => [],
+                    '_required' => true
+                ]
+            ],
+
+
+            /**
+             * Risk Configuration Rules - JSON
+             *
+             * { 'default_premium_computation':'I|C', 'risks' : [{ 'code': '', name:'', 'type': 'basic|pool', 'default_min_premium':''}]}
+             */
+            'risks_json' => [
+                [
+                    'field' => 'risks[default_premium_computation]',
+                    '_key' => 'default_premium_computation',
+                    'label' => 'Minimum Premium Computation',
+                    'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',',array_keys(risk_default_premium_computation_dropdown(FALSE))).']',
+                    '_type'     => 'dropdown',
+                    '_data'     => risk_default_premium_computation_dropdown(),
+                    '_show_label' => true,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'risks[code][]',
+                    '_key' => 'code',
+                    'label' => 'Risk Code',
+                    'rules' => 'trim|required|alpha|strtoupper|max_length[10]|callback__cb_risks_check_duplicate',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'risks[name][]',
+                    '_key' => 'name',
+                    'label' => 'Risk Name',
+                    'rules' => 'trim|required|max_length[100]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'risks[type][]',
+                    '_key' => 'type',
+                    'label' => 'Risk Type',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list['.implode(',',array_keys(risk_type_dropdown(FALSE))).']',
+                    '_type'     => 'dropdown',
+                    '_data'     => risk_type_dropdown(),
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'risks[default_min_premium][]',
+                    '_key' => 'default_min_premium',
+                    'label' => 'Default Minimum Premium',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
                     '_required' => true
                 ]
             ],
