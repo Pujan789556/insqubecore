@@ -409,8 +409,8 @@ class Customer_model extends MY_Model
             $keywords = $params['keywords'] ?? '';
             if( $keywords )
             {
-                $this->db->where("MATCH ( C.`fts` ) AGAINST ( '{$keywords}*' IN BOOLEAN MODE)", NULL);
-                // $this->db->like('C.full_name', $keywords, 'after');
+                $keywords = addslashes($keywords);
+                $this->db->where("MATCH ( C.`fts` ) AGAINST ( '+{$keywords}' IN BOOLEAN MODE)", NULL);
             }
         }
         return $this->db

@@ -1445,12 +1445,12 @@ class Policy_model extends MY_Model
                 $this->db->where(['P.issued_date <=' =>  $issued_to]);
             }
 
-            // $keywords = $params['keywords'] ?? '';
-            // if( $keywords )
-            // {
-            //     $this->db->where("MATCH ( P.`fts` ) AGAINST ( '{$keywords}*' IN BOOLEAN MODE)", NULL);
-            //     // $this->db->like('P.full_name', $keywords, 'after');
-            // }
+            $keywords = $params['keywords'] ?? '';
+            if( $keywords )
+            {
+                $keywords = addslashes($keywords);
+                $this->db->where("MATCH ( C.`fts` ) AGAINST ( '+{$keywords}' IN BOOLEAN MODE)", NULL);
+            }
         }
         return $this->db->limit($this->settings->per_page+1)
                         ->order_by('P.id', 'desc')
