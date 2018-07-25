@@ -16,7 +16,7 @@ $select_json = [
 
 ?>
 <tr class="selectable pointer"
-	data-selectable='<?php echo json_encode($select_json)?>'
+	data-selectable='<?php echo htmlspecialchars(json_encode($select_json), ENT_QUOTES, 'UTF-8')?>'
 	title="Select this object."
 	onclick="__do_select(this)"
 	id="_data-row-object-<?php echo $record->id;?>">
