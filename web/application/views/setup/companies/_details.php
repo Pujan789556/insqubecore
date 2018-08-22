@@ -61,7 +61,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		/**
 		 * Contact Widget
 		 */
-		echo get_contact_widget($record->contact);
+		echo get_contact_widget($record->ho_contact);
 		?>
 		</div>
 		<!-- /.box -->

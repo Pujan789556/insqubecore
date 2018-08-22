@@ -15,11 +15,11 @@ class Company_branch_model extends MY_Model
 
     protected $before_insert = ['prepare_contact_data'];
     protected $before_update = ['prepare_contact_data'];
-    protected $after_insert  = ['clear_cache'];
-    protected $after_update  = ['clear_cache'];
+    protected $after_insert  = ['trg_after_save', 'clear_cache'];
+    protected $after_update  = ['trg_after_save', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "company_id", "name", "contact", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "company_id", "name", "contact", "is_head_office", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -28,7 +28,15 @@ class Company_branch_model extends MY_Model
             'rules' => 'trim|required|max_length[50]',
             '_type'     => 'text',
             '_required' => true
-        ]
+        ],
+        [
+            'field' => 'is_head_office',
+            'label' => 'Is Head Office?',
+            'rules' => 'trim|integer|in_list[1]',
+            '_type' => 'switch',
+            '_checkbox_value' => '1',
+            '_help_text' => 'Please set this option if this is "Head Office" of the company.'
+        ],
     ];
 
 
@@ -58,6 +66,62 @@ class Company_branch_model extends MY_Model
         return $data;
     }
 
+    // ----------------------------------------------------------------
+
+    public function trg_after_save($arr_record)
+    {
+        /**
+         *
+         * Data Structure
+                Array
+                (
+                    [id] => 10
+                    [fields] => Array
+                        (
+                            [company_id] => 6
+                            [is_head_office] => 1
+                            [contact] => {...}
+
+                            ...
+
+                            [updated_at] => 2016-12-28 15:51:47
+                            [updated_by] => 1
+                        )
+
+                    [result] => 1
+                    [method] => update
+                )
+        */
+        $id = $arr_record['id'] ?? NULL;
+
+        if($id !== NULL)
+        {
+            $fields = $arr_record['fields'];
+
+            $is_head_office = $fields['is_head_office'];
+            $company_id     = $fields['company_id'];
+
+            if($is_head_office)
+            {
+                $this->reset_head_office($id, $company_id);
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------
+
+    public function reset_head_office($id, $company_id)
+    {
+        $data = [
+            'is_head_office' => IQB_FLAG_OFF
+        ];
+
+        $data = $this->modified_on(['fields' => $data]);
+        return $this->db->where('id !=', $id )
+                        ->where('company_id', $company_id)
+                        ->set($data)
+                        ->update($this->table_name);
+    }
 
     // ----------------------------------------------------------------
 
@@ -96,9 +160,10 @@ class Company_branch_model extends MY_Model
         $list = $this->get_cache($cache_name);
         if(!$list)
         {
-            $list = $this->db->select('C.id, C.company_id, C.name, C.contact')
+            $list = $this->db->select('C.id, C.company_id, C.name, C.contact, C.is_head_office')
                                 ->from($this->table_name . ' as C')
                                 ->where('C.company_id', $company_id)
+                                ->order_by('C.is_head_office', 'desc')
                                 ->order_by('C.name', 'asc')
                                 ->get()->result();
 
@@ -154,6 +219,34 @@ class Company_branch_model extends MY_Model
     }
 
 	// --------------------------------------------------------------------
+
+    /**
+     * Update Head Office Contact
+     *
+     * This is used to udpate head office contact while updating company information.
+     *
+     * @param int $company_id
+     * @param json $contact
+     * @return bool
+     */
+    public function update_ho_contact($company_id, $contact)
+    {
+        $data = [ 'contact' => $contact];
+        $data = $this->modified_on(['fields' => $data]);
+
+        $result = $this->db->where(['company_id' => $company_id, 'is_head_office' => IQB_FLAG_ON])
+                            ->set($data)
+                            ->update($this->table_name);
+
+        if($result)
+        {
+            // Delete cache for this company
+            $this->delete_cache('branch_company_'.$company_id);
+        }
+
+        return $result;
+    }
+
 
     /**
      * Delete Cache on Update/Delete Records

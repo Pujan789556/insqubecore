@@ -2,23 +2,25 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Contact Form
- * 
+ *
  * 	Required Variables:
- * 
+ *
  * 		$contact_record
  */
+
+$form_title = $form_title ?? 'Contact Address';
 ?>
 <div class="box-header with-border">
-  <h3 class="box-title">Contact Address</h3>
+  <h3 class="box-title"><?php echo $form_title; ?></h3>
 </div>
-<div class="box-body">        
-    <?php 
+<div class="box-body">
+    <?php
     $contact_form_elements = get_contact_form_fields();
-    foreach($contact_form_elements as $element):?>        
+    foreach($contact_form_elements as $element):?>
         <div class="form-group <?php echo form_error($element['name']) ? 'has-error' : '';?>">
             <label for="" class="col-sm-2 control-label"><?php echo $element['label'] . field_compulsary_text( $element['_required']);?></label>
             <div class="col-sm-10">
-                <?php 
+                <?php
                 /**
                  * Load Form Element
                  */
@@ -27,8 +29,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     'class'         => 'form-control',
                     'placeholder'   => $element['label']
                 );
-                $value = set_value($element['name']) 
-                        ? set_value($element['name'], '', FALSE) 
+                $value = set_value($element['name'])
+                        ? set_value($element['name'], '', FALSE)
                         : ( isset($contact_record) ? ($contact_record->{$element['_key']} ?? '') : '' );
 
                 switch($element['_type'])

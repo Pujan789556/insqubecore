@@ -6,7 +6,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-company-branch-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
-	<td><?php echo $record->name;?></td>
+	<td>
+		<?php
+		if($record->is_head_office)
+		{
+			echo '<i class="fa fa-circle text-green" title="Head Office" data-toggle="tooltip"></i>&nbsp;';
+		}
+		echo $record->name;
+		?>
+	</td>
 	<td><?php echo get_contact_widget($record->contact, true)?></td>
 	<td class="ins-action">
 		<?php if( $this->dx_auth->is_authorized('companies', 'edit.company.branch') ): ?>

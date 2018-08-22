@@ -21,6 +21,138 @@ class M20180822_model extends MY_Model
 
     public function migrate()
     {
+        $this->company_branch();
+    }
+
+    /**
+     * Migrate Company Branches
+     *
+     * Create a Headoffice flag on company branch
+     *
+     * @return void
+     */
+    public function company_branch()
+    {
+        $sql = "ALTER TABLE `master_company_branches` ADD `is_head_office` TINYINT(1) NOT NULL DEFAULT '0' AFTER `contact`, ADD INDEX `idx_head_office` (`is_head_office`);";
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+
+            echo "QUERY: $sql ... ";
+            echo $this->db->query($sql) ? "OK" : "FAIL";
+            echo PHP_EOL;
+
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // incomplete message
+            echo 'Could not migrate database.' . PHP_EOL;
+        }
+        else
+        {
+            echo "Successfully migrated." . PHP_EOL;
+        }
+    }
+
+    /**
+     * Update Company Branches
+     * - create headoffice from company defautl contact
+     * - delete contact after import
+     * @return void
+     */
+    public function update_company_branches()
+    {
+
+        /**
+         * Tasks:
+         *      1. Create a Head Office Branch for all Companies which do not have one with it's Contact data
+         *      2. Delete column "contact" from Company Table
+         *      3. Clear Company and Company Branches Caches
+         */
+
+        $sql = "SELECT C.`id`,  C.`contact`, CB.is_head_office, CB.contact AS ho_contact
+                FROM `master_companies` C
+                LEFT JOIN `master_company_branches` CB ON CB.company_id = C.id AND CB.is_head_office = 1;";
+
+
+        $rows = $this->db->query($sql)->result();
+
+        $total = count($rows);
+        $success = 0;
+        $batch_data = [];
+
+        $this->load->model('company_branch_model');
+        $this->load->model('company_model');
+
+        echo 'Updating database ... ' . PHP_EOL;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            if($rows)
+            {
+
+                foreach ($rows as $row)
+                {
+                    if(!$row->is_head_office)
+                    {
+                        // Insert New Branch as Head office
+
+                        // Create a New Head Office Contact
+                        $batch_data[] = [
+                            'company_id'     => $row->id,
+                            'name'           => 'Head Office',
+                            'is_head_office' => IQB_FLAG_ON,
+                            'contact'        => $row->contact,
+                            'created_by'     => 1,
+                            'created_at'     => date('Y-m-d H:i:s')
+                        ];
+
+                    }
+                }
+
+                if($batch_data)
+                {
+                    $this->db->insert_batch('master_company_branches', $batch_data );
+                }
+            }
+
+            // Remove Columns
+            $sql = "ALTER TABLE `master_companies` DROP `contact`;";
+            echo "SQL: {$sql} ... ";
+            echo $this->db->query($sql) ? 'OK' . PHP_EOL : 'FAIL' . PHP_EOL;
+
+
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // incomplete message
+            echo 'Rollback to previous state. Could not migrate database.' . PHP_EOL;
+        }
+        else
+        {
+            echo 'Clearing cache...';
+            $this->company_model->clear_cache();
+            $this->company_branch_model->clear_cache();
+
+            echo 'OK'. PHP_EOL;
+
+            $success = count($batch_data);
+            echo "{$success} out of {$total} successfully migrated." . PHP_EOL;
+        }
+    }
+
+    public function generate_policy_pdfs()
+    {
 
         /**
          * Task 1: Get all Active Policy IDs

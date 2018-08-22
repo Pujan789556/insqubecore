@@ -13,13 +13,13 @@ class Company_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['prepare_contact_data'];
-    protected $before_update = ['prepare_contact_data'];
-    protected $after_insert  = ['clear_cache'];
-    protected $after_update  = ['clear_cache'];
+    protected $before_insert = [];
+    protected $before_update = [];
+    protected $after_insert  = ['trg_after_save', 'clear_cache'];
+    protected $after_update  = ['trg_after_save', 'clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "name", "picture", "pan_no", "active", "type", "contact", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "name", "picture", "pan_no", "active", "type", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -87,10 +87,58 @@ class Company_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function prepare_contact_data($data)
+    public function trg_after_save($arr_record)
     {
-        $data['contact'] = get_contact_data_from_form();
-        return $data;
+        /**
+         *
+         * Data Structure
+                Array
+                (
+                    [id] => 10
+                    [fields] => Array
+                        (
+                            [name] => 6
+                            [picture] => 1
+                            [pan_no] =>
+
+                            ...
+
+                            [updated_at] => 2016-12-28 15:51:47
+                            [updated_by] => 1
+                        )
+
+                    [result] => 1
+                    [method] => update
+                )
+        */
+        $id = $arr_record['id'] ?? NULL;
+
+        if($id !== NULL)
+        {
+            $fields = $arr_record['fields'];
+            $method = $arr_record['method'];
+
+            $this->load->model('company_branch_model');
+            $contact = get_contact_data_from_form();
+
+            if($method == 'update')
+            {
+                // Update Branch Head Office Contact
+                $this->company_branch_model->update_ho_contact($id, $contact);
+            }
+            else
+            {
+                // Create a New Head Office Contact
+                $branch_data = [
+                    'company_id'     => $id,
+                    'name'           => 'Head Office',
+                    'is_head_office' => IQB_FLAG_ON,
+                    'contact'        => $contact,
+                ];
+                $this->company_branch_model->insert($branch_data, TRUE);
+            }
+        }
+        return TRUE;
     }
 
     // ----------------------------------------------------------------
@@ -247,6 +295,23 @@ class Company_model extends MY_Model
                  ->from($this->table_name . ' as C')
                  ->where('C.id', $id)
                  ->get()->row()->name;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Name
+     *
+     * @param integer $id
+     * @return string
+     */
+    public function get($id)
+    {
+        return $this->db->select('C.*, CB.contact as ho_contact, CB.name as ho_branch_name')
+                 ->from($this->table_name . ' as C')
+                 ->join('master_company_branches CB', "CB.company_id = C.id AND CB.is_head_office ='".IQB_FLAG_ON."'", 'left')
+                 ->where('C.id', $id)
+                 ->get()->row();
     }
 
     // ----------------------------------------------------------------

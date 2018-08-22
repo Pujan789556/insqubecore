@@ -286,7 +286,7 @@ class Companies extends MY_Controller
 
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->company_model->find($id);
+		$record = $this->company_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -567,7 +567,7 @@ class Companies extends MY_Controller
     public function details($id)
     {
     	$id = (int)$id;
-		$record = $this->company_model->find($id);
+		$record = $this->company_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -664,6 +664,9 @@ class Companies extends MY_Controller
         	{
         		$data = $this->input->post();
 
+        		$data['company_id'] 		= $company_id; // required on both add/edit for trigger function - after insert & update
+        		$data['is_head_office'] 	= $data['is_head_office'] ?? 0; // If no headoffice, reset to 0
+
         		// Insert or Update?
 				if($action === 'add')
 				{
@@ -689,21 +692,12 @@ class Companies extends MY_Controller
 
 				if($status === 'success' )
 				{
-					$row_view = 'setup/company_branches/_single_row';
-					if($action === 'add')
-					{
-						$record 	= $this->company_branch_model->find($done);
-						$dom_box 	= '#search-result-company-branch';
-						$dom_method = 'prepend';
-					}
-					else
-					{
-						$record 	= $this->company_branch_model->find($record->id);
-						$dom_box 	= '#_data-row-company-branch-' . $record->id;
-						$dom_method = 'replaceWith';
+					$records 	= $this->company_branch_model->get_by_company($record->company_id);
+					$dom_box 	= '#search-result-company-branch';
+					$dom_method = 'replaceWith';
+					$list_view 	= 'setup/company_branches/_rows';
+					$html 		= $this->load->view($list_view, ['records' => $records], TRUE);
 
-					}
-					$html = $this->load->view($row_view, ['record' => $record], TRUE);
 
 					$ajax_data = [
 						'message' 		=> $message,
