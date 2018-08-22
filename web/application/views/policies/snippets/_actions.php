@@ -3,12 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Policy: Details - Actions
  */
+
+/**
+ * Link to Debit Note or Schedule
+ */
+echo _POLICY__schedule_anchor($record);
 ?>
-<a title="Print Policy Schedule"
-        class="btn bg-navy btn-round"
-        href="<?php echo site_url('policies/schedule/' . $record->id  );?>"
-        target="_blank"
-    ><i class="fa fa-print"></i> Schedule</a>
 
 
 <?php

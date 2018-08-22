@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'schedule_html', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
     protected $endorsement_fields = ['proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time'];
 
@@ -1079,22 +1079,6 @@ class Policy_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Save Policy Schedule HTML
-     *
-     * @param int $id
-     * @param text $html
-     * @return bool
-     */
-    public function save_schedule($id, $html)
-    {
-        $data = ['schedule_html' => $html];
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, $data);
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
      * Update Policy End Date
      *
      * This is when an endorsement has different end date
@@ -1261,16 +1245,6 @@ class Policy_model extends MY_Model
                      */
                     $record     = $this->get($record->id);
                     $endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
-
-
-                    /**
-                     * Save a Original Schedule as HTML on Database
-                     */
-                    load_portfolio_helper($record->portfolio_id);
-                    _POLICY__save_schedule([
-                        'record'                => $record,
-                        'endorsement_record'    => $endorsement_record
-                    ]);
                     break;
 
                 /**

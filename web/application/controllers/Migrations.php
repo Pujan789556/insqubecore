@@ -154,4 +154,21 @@ class Migrations extends CI_Controller
 		$this->m20180719_model->migrate();
 	}
 
+	// -------------------------------------------------------------------------------------
+
+	/**
+	 * Save Policy Schedule PDF of all Active Policies
+	 *
+	 *
+	 * Usage
+	 * 		$ php index.php migrations m20180822
+	 * 		$ CI_ENV=production php index.php migrations m20180822
+	 * @return void
+	 */
+	public function m20180822( )
+	{
+		$this->load->model('migrations/m20180822_model');
+		$this->m20180822_model->migrate();
+	}
+
 }

@@ -14,6 +14,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					</div>
 					<div class="col-sm-6 master-actions text-right">
 
+						<?php
+						/**
+						 * Policy Schedule - Print
+						 */
+						if( $this->dx_auth->is_authorized('policies', 'generate.policy.schedule') )
+						{
+							echo _POLICY__schedule_anchor($policy_record);
+						}
+						?>
+
 						<?php if( $this->dx_auth->is_authorized('endorsements', 'print.endorsement') ): ?>
 							<a href="<?php echo site_url($print_url);?>"
 								target="_blank"

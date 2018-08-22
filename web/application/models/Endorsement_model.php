@@ -1088,7 +1088,7 @@ class Endorsement_model extends MY_Model
         $select =   "ENDRSMNT.*, " .
 
                     // Branch and Portfolio
-                    "P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, " .
+                    "P.code as policy_code, P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, " .
 
                     // Transfer Customer Name
                     "C.full_name as transfer_customer_name, " .

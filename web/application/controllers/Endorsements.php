@@ -264,6 +264,19 @@ class Endorsements extends MY_Controller
 		 */
 		$policy_record = $this->policy_model->get($policy_id);
 
+		/**
+		 * Policy Schedule Generated?
+		 *
+		 * !!! NOTE !!!
+		 * MUST generate and save policy schedule PDF before adding any endorsement!!!
+		 */
+		if(!_POLICY__schedule_exists($policy_record->code))
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'title' => 'Action Not Permitted.',
+				'message' => 'Policy Schedule is not generated Yet. <br/>Please Click on "Schedule" Button once to generate and save Policy Schedule.'], 403);
+		}
 
 		$record 	= NULL;
 		$this->_save($txn_type, $policy_record, 'add', $record);
@@ -590,6 +603,9 @@ class Endorsements extends MY_Controller
 		{
 			$current_txn = $this->endorsement_model->get_current_endorsement_by_policy($policy_id);
 
+			/**
+			 * Valid Status
+			 */
 			return $current_txn->status === IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE && $current_txn->policy_status === IQB_POLICY_STATUS_ACTIVE;
 		}
 

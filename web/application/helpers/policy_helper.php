@@ -881,55 +881,6 @@ if ( ! function_exists('_POLICY__get_short_term_info'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_POLICY__save_schedule'))
-{
-    /**
-     * Save Policy Schedule HTML on database for future reference. i.e. THE ORIGINAL SCHEDULE CANNOT BE CHANGED.
-     *
-     * @param array $data       ['record' => xxx, 'endorsement_record' => yyy]
-     * @return  void
-     */
-    function _POLICY__save_schedule( $data )
-    {
-
-        $CI =& get_instance();
-
-        /**
-         * Extract Policy Record and Endorsement Record
-         */
-        $record                 = $data['record'];
-        $endorsement_record     = $data['endorsement_record'];
-        $schedule_view          = _POLICY__get_schedule_view($record->portfolio_id);
-
-        /**
-         * Policy Record Active?
-         */
-        if($record->status !== IQB_POLICY_STATUS_ACTIVE )
-        {
-            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: Schedule could not be saved for NON-Active policy.");
-        }
-
-
-        /**
-         * Schedule View?
-         */
-        if(!$schedule_view)
-        {
-            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__save_schedule()]: No schedule view exists for given portfolio({$record->portfolio_name}).");
-        }
-
-        /**
-         * Let's Save Schedule
-         */
-        load_portfolio_helper($record->portfolio_id);
-        $html = $CI->load->view( $schedule_view, $data, TRUE);
-        $CI->load->model('policy_model');
-        return $CI->policy_model->save_schedule($record->id, $html);
-    }
-}
-
-// ------------------------------------------------------------------------
-
 if ( ! function_exists('_POLICY__schedule_pdf'))
 {
     /**
@@ -1175,6 +1126,68 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 		}
 
 		return $schedule_view;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__schedule_anchor'))
+{
+    /**
+     * Generate Policy Schedule Anchor
+     *
+     * @param Object $record    Policy Record
+     * @return  html
+     */
+    function _POLICY__schedule_anchor( $record )
+    {
+        if( !in_array($record->status, [IQB_POLICY_STATUS_ACTIVE, IQB_POLICY_STATUS_CANCELED, IQB_POLICY_STATUS_EXPIRED]))
+        {
+            $anchor = anchor(
+                        'policies/debitnote/'.$record->id,
+                        '<i class="fa fa-print"></i> Debit Note',
+                        [
+                            'title' => 'Print Policy Debit Note',
+                            'target' => '_blank',
+                            'class' => 'btn bg-navy btn-round',
+                            'data-toggle' => 'tooltip'
+                        ]
+                    );
+        }
+        else
+        {
+            $anchor = anchor(
+                        'policies/schedule/'.$record->id,
+                        '<i class="fa fa-print"></i> Schedule',
+                        [
+                            'title' => 'Print Policy Schedule',
+                            'target' => '_blank',
+                            'class' => 'btn bg-navy btn-round',
+                            'data-toggle' => 'tooltip'
+                        ]
+                    );
+
+        }
+        return $anchor;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__schedule_exists'))
+{
+    /**
+     * Check if Policy Schedule PDF Exists
+     *
+     * @param   string $code    Policy Code
+     * @return  bool
+     */
+    function _POLICY__schedule_exists( $code )
+    {
+        $filename = "policy-{$code}.pdf";
+        $schedule_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/policies/' . $filename;
+
+        return file_exists($schedule_full_path);
     }
 }
 
