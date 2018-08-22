@@ -21,7 +21,7 @@ class M20180822_model extends MY_Model
 
     public function migrate()
     {
-        $this->company_branch();
+        $this->update_company_branches();
     }
 
     /**
