@@ -1553,7 +1553,7 @@ class Policy_model extends MY_Model
                             /**
                              * Crediter & Its Branch Info (name, contact), (branch name, branch contact)
                              */
-                            "CRD.name as creditor_name, CRD.contact as creditor_contact, " .
+                            "CRD.name as creditor_name, " .
                             "CRB.name as creditor_branch_name, CRB.contact as creditor_branch_contact"
                         )
                      ->from($this->table_name . ' as P')
