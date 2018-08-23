@@ -17,6 +17,13 @@
 	<a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
 		<span class="sr-only">Toggle navigation</span>
 	</a>
+
+      <?php if($this->settings->flag_offline == IQB_FLAG_ON): ?>
+            <div class="navbar navbar-left text-red padding-t-10">
+                  <i class="fa fa-exclamation-triangle"></i> CAUTION: You are working on <strong>MAINTENANCE MODE</strong>.
+            </div>
+      <?php endif; ?>
+
 	<!-- Navbar Right Menu -->
 	<div class="navbar-custom-menu">
 		<ul class="nav navbar-nav">
