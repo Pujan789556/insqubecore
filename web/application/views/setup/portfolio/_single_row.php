@@ -59,18 +59,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			</a>
 
 			<a href="#"
-				title="Edit Portfolio Specific Risks"
-				data-toggle="tooltip"
-				data-box-size="large"
-				class="trg-dialog-edit action"
-				data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio Specific Risks - <?php echo $record->name_en?>'
-				data-url="<?php echo site_url('portfolio/risks_json/' . $record->id);?>"
-				data-form=".form-iqb-general">
-				<i class="fa fa-flag"></i>
-				<span class="hidden-xs">Risks JSON</span>
-			</a>
-
-			<a href="#"
 				title="Edit Portfolio Specific Beema Samiti Report Heading Type"
 				data-toggle="tooltip"
 				data-box-size="large"

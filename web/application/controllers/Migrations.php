@@ -171,4 +171,23 @@ class Migrations extends CI_Controller
 		$this->m20180822_model->migrate();
 	}
 
+	// -------------------------------------------------------------------------------------
+
+	/**
+	 * Portfolio Risks Update
+	 *
+	 * 	- Remove Old Riks table and manage risks on JSON inside portfolio table
+	 *
+	 *
+	 * Usage
+	 * 		$ php index.php migrations m20180829
+	 * 		$ CI_ENV=production php index.php migrations m20180829
+	 * @return void
+	 */
+	public function m20180829( )
+	{
+		$this->load->model('migrations/m20180829_model');
+		$this->m20180829_model->migrate();
+	}
+
 }

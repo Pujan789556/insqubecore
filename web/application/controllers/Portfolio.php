@@ -152,7 +152,7 @@ class Portfolio extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Edit a Portfolio Specific Risks
+	 * Edit a Portfolio Specific Risks - JSON
 	 *
 	 *
 	 * @param integer $id
@@ -173,43 +173,6 @@ class Portfolio extends MY_Controller
 
 		// Add already checked values
 		$rules = $this->portfolio_model->validation_rules['risks'];
-		$rules[0]['_checkbox_value'] = $record->risk_ids ? explode(',', $record->risk_ids) : [];
-
-		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/portfolio/_form',
-			[
-				'form_elements' => $rules,
-				'record' 		=> $record
-			], TRUE);
-
-		// Return HTML
-		$this->template->json($json_data);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Edit a Portfolio Specific Risks - JSON
-	 *
-	 *
-	 * @param integer $id
-	 * @return void
-	 */
-	public function risks_json($id)
-	{
-		// Valid Record ?
-		$id = (int)$id;
-		$record = $this->portfolio_model->find($id);
-		if(!$record)
-		{
-			$this->template->render_404();
-		}
-
-		// Form Submitted? Save the data
-		$json_data = $this->_save('risks_json', $record);
-
-		// Add already checked values
-		$rules = $this->portfolio_model->validation_rules['risks_json'];
 
 
 		// No form Submitted?
@@ -272,7 +235,7 @@ class Portfolio extends MY_Controller
 	private function _save($action, $record = NULL)
 	{
 		// Valid action?
-		if( !in_array($action, array('edit', 'accounts', 'risks', 'risks_json', 'bsrs_headings')))
+		if( !in_array($action, array('edit', 'accounts', 'risks', 'bsrs_headings')))
 		{
 			return $this->template->json([
 				'status' => 'error',
@@ -334,17 +297,8 @@ class Portfolio extends MY_Controller
 					// Now Update Data
 					$done = $this->portfolio_model->update($record->id, $account_data, TRUE);
 				}
-				else if ($action === 'risks')
-				{
-					$risk_ids = $data['risks'] ?? NULL;
-					$risk_data = [
-						'risk_ids' => $risk_ids ? implode(',', $risk_ids) : NULL
-					];
 
-					// Now Update Data
-					$done = $this->portfolio_model->update($record->id, $risk_data, TRUE);
-				}
-				else if ($action === 'risks_json')
+				else if ($action === 'risks')
 				{
 					// Format JSON Data
 					$risk_data['risks'] = $this->_format_risk_json($data);
@@ -448,7 +402,6 @@ class Portfolio extends MY_Controller
 
 				case 'accounts':
 				case 'risks':
-				case 'risks_json':
 				case 'bsrs_headings':
 					$rules = $this->portfolio_model->validation_rules[$action];
 					break;

@@ -19,7 +19,7 @@ class Portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'schedule_lang', 'risks', 'risk_ids', 'bs_ri_code', 'bsrs_heading_type_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'schedule_lang', 'risks', 'bs_ri_code', 'bsrs_heading_type_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -70,9 +70,6 @@ class Portfolio_model extends MY_Model
         $account_id_pe_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_PAYABLE_TO_REINSURER);
         $account_id_ce_dropdown = $this->ac_account_model->dropdown(IQB_AC_ACCOUNT_GROUP_ID_CLAIM_EXPENSE);
 
-
-        $this->load->model('risk_model');
-        $risk_dropdown = $this->risk_model->dropdown();
 
         $this->load->model('bsrs_heading_type_model');
         $bsrs_heading_types_dropdown = $this->bsrs_heading_type_model->dropdown();
@@ -127,29 +124,13 @@ class Portfolio_model extends MY_Model
                 ]
             ],
 
-            /**
-             * Risk Validation Rules
-             */
-            'risks' => [
-                [
-                    'field' => 'risks[]',
-                    'label' => 'Portfolio Risks',
-                    'rules' => 'trim|integer|max_length[11]',
-                    '_type'     => 'checkbox-group',
-                    '_data'     => $risk_dropdown,
-                    '_list_inline' => false,
-                    '_checkbox_value' => [],
-                    '_required' => true
-                ]
-            ],
-
 
             /**
              * Risk Configuration Rules - JSON
              *
              * { 'default_premium_computation':'I|C', 'risks' : [{ 'code': '', name:'', 'type': 'basic|pool', 'default_min_premium':''}]}
              */
-            'risks_json' => [
+            'risks' => [
                 [
                     'field' => 'risks[default_premium_computation]',
                     '_key' => 'default_premium_computation',
@@ -529,14 +510,6 @@ class Portfolio_model extends MY_Model
             $dropdown[$row->code] = $row->name . ' - ' . risk_type_dropdown(FALSE)[$row->type];
         }
         return $dropdown;
-
-        // if($record->risk_ids)
-        // {
-        //     $this->load->model('risk_model');
-        //     $risk_ids = explode(',', $record->risk_ids);
-        //     $dropdown = $this->risk_model->dropdown_selected_ids($risk_ids);
-        // }
-        // return $dropdown;
     }
 
     // ----------------------------------------------------------------
@@ -554,16 +527,6 @@ class Portfolio_model extends MY_Model
         $risk_object    = json_decode($record->risks ?? '[]');
         $list           = $risk_object->risks ?? [];
         return $list;
-
-        // $list   = [];
-        // $record     = $this->find($id);
-        // if($record->risk_ids)
-        // {
-        //     $this->load->model('risk_model');
-        //     $risk_ids = explode(',', $record->risk_ids);
-        //     $list = $this->risk_model->get_selected_ids($risk_ids);
-        // }
-        // return $list;
     }
 
     // ----------------------------------------------------------------
