@@ -164,7 +164,7 @@ class Portfolio_model extends MY_Model
                     'field' => 'risks[code][]',
                     '_key' => 'code',
                     'label' => 'Risk Code',
-                    'rules' => 'trim|required|alpha|strtoupper|max_length[10]|callback__cb_risks_check_duplicate',
+                    'rules' => 'trim|required|alpha|strtoupper|max_length[20]|callback__cb_risks_check_duplicate',
                     '_type'     => 'text',
                     '_show_label' => false,
                     '_required' => true
@@ -523,14 +523,20 @@ class Portfolio_model extends MY_Model
     public function dropdown_risks($id)
     {
         $dropdown   = [];
-        $record     = $this->find($id);
-        if($record->risk_ids)
+        $risks      = $this->portfolio_risks($id);
+        foreach($risks as $row)
         {
-            $this->load->model('risk_model');
-            $risk_ids = explode(',', $record->risk_ids);
-            $dropdown = $this->risk_model->dropdown_selected_ids($risk_ids);
+            $dropdown[$row->code] = $row->name . ' - ' . risk_type_dropdown(FALSE)[$row->type];
         }
         return $dropdown;
+
+        // if($record->risk_ids)
+        // {
+        //     $this->load->model('risk_model');
+        //     $risk_ids = explode(',', $record->risk_ids);
+        //     $dropdown = $this->risk_model->dropdown_selected_ids($risk_ids);
+        // }
+        // return $dropdown;
     }
 
     // ----------------------------------------------------------------
@@ -544,14 +550,20 @@ class Portfolio_model extends MY_Model
     public function portfolio_risks($id)
     {
         $list   = [];
-        $record     = $this->find($id);
-        if($record->risk_ids)
-        {
-            $this->load->model('risk_model');
-            $risk_ids = explode(',', $record->risk_ids);
-            $list = $this->risk_model->get_selected_ids($risk_ids);
-        }
+        $record         = $this->find($id);
+        $risk_object    = json_decode($record->risks ?? '[]');
+        $list           = $risk_object->risks ?? [];
         return $list;
+
+        // $list   = [];
+        // $record     = $this->find($id);
+        // if($record->risk_ids)
+        // {
+        //     $this->load->model('risk_model');
+        //     $risk_ids = explode(',', $record->risk_ids);
+        //     $list = $this->risk_model->get_selected_ids($risk_ids);
+        // }
+        // return $list;
     }
 
     // ----------------------------------------------------------------

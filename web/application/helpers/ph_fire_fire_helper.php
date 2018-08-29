@@ -796,11 +796,11 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_file'))
 			$premium_file_risks_elements = $v_rules['premium_file_risks'];
 
 			// Loop through each portfolio risks
-			foreach($portfolio_risks as $risk_id=>$risk_name)
+			foreach($portfolio_risks as $risk_code=>$risk_name)
 			{
 				foreach ($premium_file_risks_elements as $elem)
                 {
-                	$elem['field'] .= "[{$risk_id}]";
+                	$elem['field'] .= "[{$risk_code}]";
                 	$rules[] = $elem;
                 }
 			}
@@ -888,8 +888,8 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 			'premium_manual_risks' => [
                 [
 	                'field' => 'premium[manual][risk]',
-	                'label' => 'Rate',
-	                'rules' => 'trim|integer|max_length[8]',
+	                'label' => 'Risk Name',
+	                'rules' => 'trim|alpha_numeric|max_length[20]',
 	                '_type'     => 'hidden',
 	                '_key' 		=> 'risk',
 	                '_required' => true
@@ -955,11 +955,11 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 			foreach($items as $item_record)
 			{
 				// Loop through each portfolio risks
-				foreach($portfolio_risks as $risk_id=>$risk_name)
+				foreach($portfolio_risks as $risk_code=>$risk_name)
 				{
 					foreach ($premium_manual_risks_elements as $elem)
                     {
-                    	$elem['field'] .= "[{$risk_id}][{$i}]";
+                    	$elem['field'] .= "[{$risk_code}][{$i}]";
                     	$rules[] = $elem;
                     }
 				}
@@ -1059,6 +1059,14 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 			 * Portfolio Risks
 			 */
 			$portfolio_risks = $CI->portfolio_model->dropdown_risks($policy_record->portfolio_id);
+			if(!$portfolio_risks)
+			{
+				return $CI->template->json([
+					'status' 	=> 'error',
+					'title' 	=> 'Portfolio Risks Missing (Fire Policy)!',
+					'message' 	=> 'Please setup portifolio risks from Setup.<br/>Contact Administrator for further support.'
+				], 404);
+			}
 
 			/**
 			 * Validation Rules for Form Processing
@@ -1111,6 +1119,9 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					$FFA_AMOUNT 	= 0.00;
 					$SDD_AMOUNT_REGULAR 	= 0.00;
 					$SDD_AMOUNT_POOL 		= 0.00;
+					$DIRECT_DISCOUNT 		= 0.00;
+
+					$__flag_minimum_summary_table = FALSE;
 
 					// Risk Distribution Table
 					$risk_table = [];
@@ -1135,7 +1146,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 						// GROSS - Regular & Pool
 						foreach($portfolio_risks as $pr)
 						{
-							$premium_per_risk = floatval($premium_data['file']['premium'][$pr->id]);
+							$premium_per_risk = floatval($premium_data['file']['premium'][$pr->code]);
 
 
 							if( $pr->type == IQB_RISK_TYPE_BASIC )
@@ -1175,7 +1186,8 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 						$item_count         = count($items);
 
 						// Risk table tmp
-						$risk_table_tmp = [];
+						$__RISKS_TABLE = [];
+
 						$i = 0;
 						foreach($items as $item_record)
 						{
@@ -1184,18 +1196,13 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 							foreach($portfolio_risks as $pr)
 							{
 								// Rate is Per Thousand of Sum Insured
-								$rate = floatval($premium_data['manual']['rate'][$pr->id][$i]);
+								$premium_per_risk 	= 0.00;
+								$rate 				= floatval($premium_data['manual']['rate'][$pr->code][$i]);
 
 								// Compute only if rate is supplied
 								if($rate)
 								{
 									$premium_per_risk = $item_sum_insured * $rate / 1000.00;
-
-
-									// Risk table tmp
-									$risk_table_tmp[$pr->name]['premium'] = $risk_table_tmp[$pr->name]['premium'] ?? 0.00;
-									$risk_table_tmp[$pr->name]['premium'] += $risk_table_tmp[$pr->name]['premium'] + $premium_per_risk;
-									$risk_table_tmp[$pr->name]['rate'] = $rate;
 
 									// GROSS - Regular & Pool
 									if( $pr->type == IQB_RISK_TYPE_BASIC )
@@ -1208,9 +1215,9 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 									}
 
 									// Additional Charges/Discount (Per Risk Per Item)
-									$nwl_apply = $premium_data['manual']['nwl_apply'][$pr->id][$i] ?? NULL;
-									$ffa_apply = $premium_data['manual']['ffa_apply'][$pr->id][$i] ?? NULL;
-									$sdd_apply = $premium_data['manual']['sdd_apply'][$pr->id][$i] ?? NULL;
+									$nwl_apply = $premium_data['manual']['nwl_apply'][$pr->code][$i] ?? NULL;
+									$ffa_apply = $premium_data['manual']['ffa_apply'][$pr->code][$i] ?? NULL;
+									$sdd_apply = $premium_data['manual']['sdd_apply'][$pr->code][$i] ?? NULL;
 
 									/**
 									 * NWL Compute
@@ -1250,25 +1257,61 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 										}
 									}
 
-									// NET - Regular & Pool
-									if( $pr->type == IQB_RISK_TYPE_BASIC )
+
+									/**
+									 * Apply Direct Discount
+									 */
+									if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT && $pr->type == IQB_RISK_TYPE_BASIC )
 									{
-										$NET_REGULAR_PREMIUM += $premium_per_risk;
+										// @TODO : Do we need to check __flag_minimum_summary_table fro direct discount
+
+										$dd_per_item 		= ( $premium_per_risk * $pfs_record->direct_discount ) / 100.00;
+										$premium_per_risk 	-= $dd_per_item;
+
+										$DIRECT_DISCOUNT 	+= $dd_per_item;
 									}
-									else
-									{
-										$NET_POOL_PREMIUM += $premium_per_risk;
-									}
+
+
+									// Risk-wise Breakdown - summing all items on risk-basis
+									$__RISKS_TABLE[$pr->code]['premium'] = $__RISKS_TABLE[$pr->code]['premium'] ?? 0.00;
+									$__RISKS_TABLE[$pr->code]['premium'] = $__RISKS_TABLE[$pr->code]['premium'] + $premium_per_risk;
+									$__RISKS_TABLE[$pr->code]['risk_config'] = $pr;
+
 								}
 							}
 
 							$i++;
 						}
 
-						// Update Risk Table
-						foreach($risk_table_tmp as $risk_name=>$goodies)
+						/**
+						 * Compute NET Regular, Pool Premium, Risk Table
+						 */
+						foreach($__RISKS_TABLE as $risk_code=>$tmp_data)
 						{
-							$risk_table[] 		= [$risk_name, $goodies['rate'], $goodies['premium']];
+							$premium_per_risk 	= $tmp_data['premium'];
+							$risk_config 		= $tmp_data['risk_config'];
+
+							$risk_name = $risk_config->name . ' - ' . risk_type_dropdown(FALSE)[$risk_config->type] ;
+							if( _ENDORSEMENT_is_first( $endorsement_record->txn_type) && $premium_per_risk < $risk_config->default_min_premium )
+							{
+								$premium_per_risk = $risk_config->default_min_premium;
+								$risk_name .= ' (minimum)';
+
+								$__flag_minimum_summary_table = TRUE;
+							}
+
+							// NET - Regular & Pool
+							if( $risk_config->type == IQB_RISK_TYPE_BASIC )
+							{
+								$NET_REGULAR_PREMIUM += $premium_per_risk;
+							}
+							else
+							{
+								$NET_POOL_PREMIUM += $premium_per_risk;
+							}
+
+							// Update risk table
+							$risk_table[] 		= [$risk_name, '-', $premium_per_risk];
 						}
 					}
 
@@ -1279,19 +1322,14 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					$premium_computation_table 	= [];
 					$COMMISSIONABLE_PREMIUM 	= NULL;
 					$AGENT_COMMISSION 			= NULL;
-					$DIRECT_DISCOUNT 			= 0.00;
+
 
 					/**
-					 * Direct Discount or Agent Commission?
+					 * Agent Commission?
 					 * ------------------------------------
 					 *
-					 * Note: Direct Discount applies only on Base Premium
 					 */
-					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
-					{
-						$DIRECT_DISCOUNT = ( $NET_REGULAR_PREMIUM * $pfs_record->direct_discount ) / 100.00;
-					}
-					else if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
+					if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_AGENT_COMMISSION )
 					{
 						$COMMISSIONABLE_PREMIUM = $NET_REGULAR_PREMIUM;
 						$AGENT_COMMISSION = ( $COMMISSIONABLE_PREMIUM * $pfs_record->agent_commission ) / 100.00;
@@ -1301,58 +1339,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					/**
 					 * Let's Compute the Total Premium
 					 */
-					$BASIC_PREMIUM 	= $NET_REGULAR_PREMIUM - $DIRECT_DISCOUNT;
-
-
-
-					/**
-					 * Below Defautl Basic/Pool Premium Value? - For FRESH/RENEWAL ONLY
-					 */
-					$__flag_defualt_summary_table = FALSE;
-					if( _ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-					{
-						$txn_data_defaults = [
-							'amt_basic_premium' 	=> $BASIC_PREMIUM,
-							'amt_pool_premium' 		=> $NET_POOL_PREMIUM,
-						];
-						$defaults = [
-							'basic' => floatval($pfs_record->amt_default_basic_premium),
-							'pool' 	=> floatval($pfs_record->amt_default_pool_premium),
-						];
-						$txn_data_defaults = _ENDORSEMENT__tariff_premium_defaults( $txn_data_defaults, $defaults, TRUE);
-
-
-						if(
-							$txn_data_defaults['amt_basic_premium'] != $BASIC_PREMIUM
-							||
-							$txn_data_defaults['amt_pool_premium'] != $NET_POOL_PREMIUM )
-						{
-							$__flag_defualt_summary_table = TRUE;
-
-
-							$txt_basic_premium = $txn_data_defaults['amt_basic_premium'] != $BASIC_PREMIUM
-													? 'BASIC PREMIUM (minimum)' : 'BASIC PREMIUM';
-							$txt_pool_premium = $txn_data_defaults['amt_pool_premium'] != $NET_POOL_PREMIUM
-													? 'POOL PREMIUM (minimum)' : 'POOL PREMIUM';
-
-
-							// Summary Table
-							$summary_table = [
-								[
-									'label' => $txt_basic_premium,
-									'value' => $txn_data_defaults['amt_basic_premium']
-								],
-								[
-									'label' => $txt_pool_premium,
-									'value' => $txn_data_defaults['amt_pool_premium']
-								]
-							];
-						}
-
-						// Update basic, pool for further computation
-						$BASIC_PREMIUM 		= $txn_data_defaults['amt_basic_premium'];
-						$NET_POOL_PREMIUM 	= $txn_data_defaults['amt_pool_premium'];
-					}
+					$BASIC_PREMIUM 	= $NET_REGULAR_PREMIUM;
 
 
 					/**
@@ -1363,12 +1350,16 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					 * 	b. Risk wise summary Table
 					 * 	c. Property wise summary Table
 					 */
-					if( !$__flag_defualt_summary_table )
+					if( !$__flag_minimum_summary_table )
 					{
 						$summary_table = [
 							[
 								'label' => "GROSS PREMIUM",
 								'value' => $GROSS_REGULAR_PREMIUM
+							],
+							[
+								'label' => "GROSS POOL PREMIUM",
+								'value' => $GROSS_POOL_PREMIUM
 							],
 							[
 								'label' => "NWL - Fire Only ({$NWL_RATE}%)",
@@ -1385,10 +1376,6 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 							[
 								'label' => "SDD - Pool ({$SDD_RATE}%)",
 								'value' => $SDD_AMOUNT_POOL
-							],
-							[
-								'label' => "POOL PREMIUM",
-								'value' => $NET_POOL_PREMIUM
 							]
 						];
 
@@ -1399,6 +1386,20 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 								'value' => $DIRECT_DISCOUNT
 							];
 						}
+					}
+					else
+					{
+						// Summary Table
+						$summary_table = [
+							[
+								'label' => 'BASIC PREMIUM',
+								'value' => $BASIC_PREMIUM
+							],
+							[
+								'label' => 'POOL PREMIUM',
+								'value' => $NET_POOL_PREMIUM
+							]
+						];
 					}
 
 
@@ -1437,7 +1438,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 							foreach($portfolio_risks as $pr)
 							{
-								$rate = floatval($premium_data['manual']['rate'][$pr->id][$i]);
+								$rate = floatval($premium_data['manual']['rate'][$pr->code][$i]);
 
 								// Compute only if rate is supplied
 								if($rate)

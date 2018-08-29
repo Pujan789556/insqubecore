@@ -535,8 +535,8 @@ if ( ! function_exists('_TXN_FIRE_HHP_premium_validation_rules'))
 			'premium' => [
                 [
 	                'field' => 'premium[risk]',
-	                'label' => 'Rate',
-	                'rules' => 'trim|required|integer|max_length[8]',
+	                'label' => 'Risk Name',
+	                'rules' => 'trim|alpha_numeric|max_length[20]',
 	                '_type'     => 'hidden',
 	                '_key' 		=> 'risk',
 	                '_required' => true
@@ -689,6 +689,16 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 			 * Portfolio Risks
 			 */
 			$portfolio_risks = $CI->portfolio_model->dropdown_risks($policy_record->portfolio_id);
+			if(!$portfolio_risks)
+			{
+				return $CI->template->json([
+					'status' 	=> 'error',
+					'title' 	=> 'Portfolio Risks Missing (Fire - Householder Policy)!',
+					'message' 	=> 'Please setup portifolio risks from Setup.<br/>Contact Administrator for further support.'
+				]);
+			}
+
+
 
 			/**
 			 * Validation Rules for Form Processing
@@ -747,7 +757,7 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 					foreach($portfolio_risks as $pr)
 					{
 						// Rate in Per Thousand
-						$rate = floatval($premium_data['rate'][$pr->id]);
+						$rate = floatval($premium_data['rate'][$pr->code]);
 
 						$premium = $SI * $rate / 1000.00;
 
@@ -896,7 +906,7 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 					foreach($portfolio_risks as $pr)
 					{
 						// Rate in Per Thousand
-						$rate = floatval($premium_data['rate'][$pr->id]);
+						$rate = floatval($premium_data['rate'][$pr->code]);
 
 						$per_risk_premium = $SI * $rate / 1000.00;
 						$per_risk_base_premium 	= 0.00;

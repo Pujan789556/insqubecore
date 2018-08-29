@@ -182,8 +182,8 @@ if ( ! function_exists('_TXN_MISC_CC_premium_validation_rules'))
 			'premium' => [
                 [
 	                'field' => 'premium[risk]',
-	                'label' => 'Rate',
-	                'rules' => 'trim|integer|max_length[8]',
+	                'label' => 'Risk Name',
+	                'rules' => 'trim|alpha_numeric|max_length[20]',
 	                '_type'     => 'hidden',
 	                '_key' 		=> 'risk',
 	                '_required' => true
@@ -347,6 +347,14 @@ if ( ! function_exists('__save_premium_MISC_CC'))
 			 * Portfolio Risks
 			 */
 			$portfolio_risks = $CI->portfolio_model->dropdown_risks($policy_record->portfolio_id);
+			if(!$portfolio_risks)
+			{
+				return $CI->template->json([
+					'status' 	=> 'error',
+					'title' 	=> "Portfolio Risks Missing (MISC - Cash in Counter)!",
+					'message' 	=> 'Please setup portifolio risks from Setup.<br/>Contact Administrator for further support.'
+				], 404);
+			}
 
 			/**
 			 * Validation Rules for Form Processing
