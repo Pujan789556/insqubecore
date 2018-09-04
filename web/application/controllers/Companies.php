@@ -692,7 +692,7 @@ class Companies extends MY_Controller
 
 				if($status === 'success' )
 				{
-					$records 	= $this->company_branch_model->get_by_company($record->company_id);
+					$records 	= $this->company_branch_model->get_by_company($company_id);
 					$dom_box 	= '#search-result-company-branch';
 					$dom_method = 'replaceWith';
 					$list_view 	= 'setup/company_branches/_rows';
