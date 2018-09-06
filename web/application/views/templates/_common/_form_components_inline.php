@@ -24,7 +24,7 @@ foreach($form_elements as $element):?>
         $show_label = $element['_show_label'] ?? TRUE; // Default : True
         if($show_label):
         ?>
-            <label for="">
+            <label>
                 <?php
                 if( !in_array($element['_type'], ['checkbox', 'radio']))
                 {
