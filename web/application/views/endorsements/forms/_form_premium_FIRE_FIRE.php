@@ -283,7 +283,36 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
         <?php
             $i++;
         endforeach; ?>
+
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">Manual Discount</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <p class="alert alert-info">
+                    This discount applies only after computing the final Basic and Pool Premium. <br>
+                    This case mostly applies for <strong>Under-construction Building</strong>.<br><br>
+                    NOTE: If "Premium" is less or equal to "Default Minimum", the discount will not be computed.
+                </p>
+                <?php
+                /**
+                 * Additional Charge/Discount Rates
+                 */
+                $form_section_record = $premium_computation_table->manual_discount ?? NULL;
+                $manual_discount = $form_elements['manual_discount'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $manual_discount,
+                    'form_record'   => $form_section_record,
+                    'grid_label'    => 'col-sm-8',
+                    'grid_form_control' => 'col-sm-4'
+                ]);
+                ?>
+            </div>
+        </div>
+
     <?php endif; ?>
+
+
 
 
     <?php

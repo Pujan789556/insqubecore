@@ -932,7 +932,47 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 	                '_show_label' => false,
 	                '_required' => false
 	            ],
-			]
+			],
+
+			/**
+			 * Manual Discount
+			 *
+			 * After premium computation, this is the manual discount given.
+			 * This mainly applies on Underconstruction Building.
+			 */
+			'manual_discount' => [
+                [
+	                'field' => 'premium[manual_discount][title]',
+	                'label' => 'Discount Title',
+	                'rules' => 'trim|required|max_length[100]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'title',
+	                '_placeholder' => 'Discount Title (Basic)',
+	                '_help_text' => 'e.g. Underconstruction Discount',
+	                '_default' => 'N/A',
+	                '_required' => true
+	            ],
+	            [
+	                'field' => 'premium[manual_discount][basic_rate]',
+	                'label' => 'Discount on Basic Premium (%)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'basic_rate',
+	                '_placeholder' => 'Discount %',
+	                '_default' => 0,
+	                '_required' => true
+	            ],
+	            [
+	                'field' => 'premium[manual_discount][pool_rate]',
+	                'label' => 'Discount on Pool Premium (%)',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'pool_rate',
+	                '_placeholder' => 'Discount %',
+	                '_default' => 0,
+	                '_required' => true
+	            ],
+			],
 		];
 
 		/**
@@ -940,7 +980,7 @@ if ( ! function_exists('_TXN_FIRE_FIRE_premium_v_rules_manual'))
 		 */
 		if( $for_form_processing )
 		{
-			$rules = array_merge( $v_rules['basic'], $v_rules['premium_manual_additional_rates']);
+			$rules = array_merge( $v_rules['basic'], $v_rules['premium_manual_additional_rates'], $v_rules['manual_discount']);
 
 			/**
 			 * Premium Validation Rules
@@ -1385,6 +1425,48 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 								'label' => "DIRECT DISCOUNT ({$pfs_record->direct_discount}%)",
 								'value' => $DIRECT_DISCOUNT
 							];
+						}
+
+
+						/**
+						 * Manual Discount
+						 */
+						$manual_discount = $premium_data['manual_discount'];
+						$md_title 	= $premium_data['manual_discount']['title'];
+						$basic_rate = $premium_data['manual_discount']['basic_rate'];
+						$pool_rate 	= $premium_data['manual_discount']['pool_rate'];
+
+						if( $basic_rate > 0 || $pool_rate > 0 )
+						{
+
+							/**
+							 * Discount on Basic Premium
+							 */
+							$md_basic = $BASIC_PREMIUM * $basic_rate / 100.00;
+							$BASIC_PREMIUM -= $md_basic;
+
+							if($md_basic)
+							{
+								$summary_table[] = [
+									'label' => "{$md_title} ( Basic -{$basic_rate}%)",
+									'value' => $md_basic
+								];
+							}
+
+							/**
+							 * Discount on Pool Premium
+							 */
+							$md_pool = $NET_POOL_PREMIUM * $pool_rate / 100.00;
+							$NET_POOL_PREMIUM -= $md_pool;
+
+							if($md_pool)
+							{
+								$summary_table[] = [
+									'label' => "{$md_title} ( Pool -{$pool_rate}%)",
+									'value' => $md_pool
+								];
+							}
+
 						}
 					}
 					else
