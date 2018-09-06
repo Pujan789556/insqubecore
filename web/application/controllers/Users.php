@@ -1486,4 +1486,17 @@ class Users extends MY_Controller
     	// echo '<pre>'; print_r($email_data); echo '</pre>';
     	send_email($email_data);
 	}
+
+	// --------------------------------------------------------------------
+
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        $this->user_model->clear_cache();
+        redirect($this->router->class);
+    }
 }

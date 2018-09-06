@@ -33,6 +33,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					onclick="return InsQube.load(event, this)">
 						<i class="ion-refresh"></i> Refresh</a>
 
+				<a href="<?php echo site_url( $this->router->class . '/flush/');?>" title="Flush Cache"
+						class="btn btn-warning btn-round"
+						data-toggle="tooltip"
+					><i class="fa fa-trash-o"></i> Flush Cache</a>
+
 				<a href="#"
 					data-toggle="tooltip"
 					title="Revoke Back Date Setting from All Users"
