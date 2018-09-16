@@ -56,7 +56,7 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                     <td class="no-padding">
                         <table class="table no-margin table-bordered table-condensed">
                             <tr>
-                                <td width="80%" class="text-right"><strong>जम्मा</strong></td>
+                                <td width="80%" class="text-right"><strong>जम्मा बीमाशुल्क</strong></td>
                                 <td class="text-right"><strong><?php echo number_format((float)$total_premium, 2)?></strong></td>
                             </tr>
                             <tr>

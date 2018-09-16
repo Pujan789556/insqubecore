@@ -537,7 +537,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 
 		$__CRF_cc_table__AA = [
 			'column_head' => $tp_column_head,
-			'title_np' 	=> 'तेश्रो पक्ष प्रतिको दायित्व बीमा वापत',
+			'title_np' 	=> 'तेश्रो पक्ष प्रतिको दायित्व तथा व्यक्तिगत दुर्घटना बीमा वापत',
 			'title_en' 	=> 'Third party liability insurance amounted to',
 			'sections' 	=> [
 				// Cost according to CC
