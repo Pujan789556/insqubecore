@@ -204,7 +204,7 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_validation_rules'))
 			        'field' => 'object[land_building][vdc][]',
 			        '_key' => 'vdc',
 			        'label' => 'VDC/Municipality',
-			        'rules' => 'trim|max_length[50]',
+			        'rules' => 'trim|max_length[100]',
 			        '_type'     => 'text',
 			        '_show_label' 	=> false,
 			        '_required' => true
@@ -213,7 +213,7 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_validation_rules'))
 			        'field' => 'object[land_building][ward_no][]',
 			        '_key' => 'ward_no',
 			        'label' => 'Ward No.',
-			        'rules' => 'trim|integer|max_length[2]',
+			        'rules' => 'trim|max_length[20]',
 			        '_type'     => 'text',
 			        '_show_label' 	=> false,
 			        '_required' => true
