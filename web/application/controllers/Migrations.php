@@ -190,4 +190,22 @@ class Migrations extends CI_Controller
 		$this->m20180829_model->migrate();
 	}
 
+	// -------------------------------------------------------------------------------------
+
+	/**
+	 * Update District, VDC/Municipality Structure with Latest Data
+	 *
+	 *
+	 *
+	 * Usage
+	 * 		$ php index.php migrations m20180916
+	 * 		$ CI_ENV=production php index.php migrations m20180916
+	 * @return void
+	 */
+	public function m20180916( )
+	{
+		$this->load->model('migrations/m20180916_model');
+		$this->m20180916_model->migrate();
+	}
+
 }
