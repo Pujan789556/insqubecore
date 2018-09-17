@@ -23,6 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<div class="box-body table-responsive data-rows">
 				<table class="table table-hover" id="live-searchable">
 					<tr>
+						<th>ID</th>
 						<th>Name</th>
 						<th>Alpha 2</th>
 						<th>Alpha 3</th>

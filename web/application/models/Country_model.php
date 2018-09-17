@@ -122,7 +122,7 @@ class Country_model extends MY_Model
     {
         $records = $this->get_all();
         $list = [];
-        if( in_array($column, array('alpha2', 'alpha3')))
+        if( in_array($column, array('id', 'alpha2', 'alpha3')))
         {
             foreach($records as $record)
             {

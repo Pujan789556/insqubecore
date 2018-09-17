@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : State
+ * Form : States
  */
 ?>
 <?php echo form_open( $this->uri->uri_string(),

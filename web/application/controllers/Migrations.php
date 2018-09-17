@@ -208,4 +208,25 @@ class Migrations extends CI_Controller
 		$this->m20180916_model->migrate();
 	}
 
+	// -------------------------------------------------------------------------------------
+
+	/**
+	 * Update State Module
+	 *
+	 * 	- added country relation
+	 * 	- upgraded to a full module having CRUD operations
+	 *
+	 *
+	 *
+	 * Usage
+	 * 		$ php index.php migrations m20180917
+	 * 		$ CI_ENV=production php index.php migrations m20180917
+	 * @return void
+	 */
+	public function m20180917( )
+	{
+		$this->load->model('migrations/m20180917_model');
+		$this->m20180917_model->migrate();
+	}
+
 }
