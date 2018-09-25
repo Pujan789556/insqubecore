@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         $this->load->view('setup/agents/snippets/_profile_card', ['record' => $record]);
         ?>
         <div class="box-footer no-border no-padding">
-            <?php echo get_contact_widget($record->contact);?>
+            <?php echo address_widget($address_record);?>
         </div>
     </div>
 </div>

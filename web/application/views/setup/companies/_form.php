@@ -49,12 +49,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     /**
      * Contact Form
      */
-    $contact_record = isset($record) && !empty($record->ho_contact) ? json_decode($record->ho_contact) : NULL;
-    $contact_data = [
-        'contact_record'  => $contact_record,
-        'form_title'      => 'Head Office - Contact Address'
-    ];
-    $this->load->view('templates/_common/_form_contact', $contact_data);
+    $this->load->view('templates/_common/_form_address', [
+      'record'          => $address_record ?? NULL,
+      'form_elements'   => $address_elements,
+      'form_title'      => 'Head Office - Contact Address'
+    ]);
     ?>
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>

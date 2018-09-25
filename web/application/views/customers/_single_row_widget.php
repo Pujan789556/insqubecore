@@ -62,7 +62,7 @@ else if( $widget_type === 'policy' )
 		Code: <strong><?php echo $record->code;?></strong><br/>
 		PAN: <strong><?php echo $record->pan;?></strong>
 	</td>
-	<td ><?php echo get_contact_widget($record->contact, true, true)?></td>
+	<td ><?php echo address_widget(parse_address_record($record), true, true)?></td>
 	<td>
 		<?php echo $record->type == 'I' ? 'Individual' : 'Company';?>
 		<?php if($record->type == 'C'):?>

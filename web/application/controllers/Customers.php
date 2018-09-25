@@ -317,6 +317,9 @@ class Customers extends MY_Controller
 			$this->template->render_404();
 		}
 
+		// Address Record
+		$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_CUSTOMER, $record->id);
+
 		/**
 		 * You Can not Edit Locked Customer Information
 		 */
@@ -330,14 +333,16 @@ class Customers extends MY_Controller
 		}
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record, $from_widget, $widget_reference);
+		$json_data = $this->_save('edit', $record, $address_record, $from_widget, $widget_reference);
 
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('customers/_form_box',
 			[
-				'form_elements' => $this->customer_model->validation_rules,
-				'record' 		=> $record
+				'form_elements' 	=> $this->customer_model->validation_rules,
+				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
+				'record' 			=> $record,
+				'address_record' 	=> $address_record
 			], TRUE);
 
 		// Return HTML
@@ -361,16 +366,18 @@ class Customers extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
-		$record = NULL;
+		$record 		= NULL;
+		$address_record = NULL;
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add', $record, $from_widget, $widget_reference);
+		$json_data = $this->_save('add', $record, $address_record, $from_widget, $widget_reference);
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('customers/_form_box',
 			[
-				'form_elements' => $this->customer_model->validation_rules,
-				'record' 		=> $record
+				'form_elements' 	=> $this->customer_model->validation_rules,
+				'address_elements' 	=> $this->address_model->v_rules_add(),
+				'record' 			=> $record
 			], TRUE);
 
 		// Return HTML
@@ -388,7 +395,7 @@ class Customers extends MY_Controller
 	 * @param string $widget_reference
 	 * @return array
 	 */
-	private function _save($action, $record = NULL, $from_widget='n', $widget_reference = '')
+	private function _save($action, $record = NULL, $address_record = NULL, $from_widget='n', $widget_reference = '')
 	{
 
 		// Valid action?
@@ -413,7 +420,7 @@ class Customers extends MY_Controller
 			// Extract Old Profile Picture if any
 			$picture = $record->picture ?? NULL;
 
-			$rules = array_merge($this->customer_model->validation_rules, get_contact_form_validation_rules(['mobile' => 'required|']));
+			$rules = array_merge($this->customer_model->validation_rules, $this->address_model->v_rules_on_submit(TRUE));
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -435,12 +442,12 @@ class Customers extends MY_Controller
             		// Insert or Update?
 					if($action === 'add')
 					{
-						$done = $this->customer_model->insert($data, TRUE); // No Validation on Model
+						$done = $this->customer_model->add($data);
 					}
 					else
 					{
 						// Now Update Data
-						$done = $this->customer_model->update($record->id, $data, TRUE);
+						$done = $this->customer_model->edit($record->id, $address_record->id, $data);
 					}
 
 		        	if(!$done)
@@ -470,7 +477,7 @@ class Customers extends MY_Controller
 					'hideBootbox' => true
 				];
 
-				$record 			= $this->customer_model->find( $action === 'add' ? $done : $record->id );
+				$record 			= $this->customer_model->row( $action === 'add' ? $done : $record->id );
 				$single_row 		=  'customers/_single_row';
 				if($action === 'add' && $from_widget === 'y' )
 				{
@@ -499,8 +506,9 @@ class Customers extends MY_Controller
 				'reloadForm' 	=> true,
 				'form' 			=> $this->load->view('customers/_form',
 									[
-										'form_elements' => $this->customer_model->validation_rules,
-										'record' 		=> $record
+										'form_elements' 	=> $this->customer_model->validation_rules,
+										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
+										'record' 			=> $record
 									], TRUE)
 			]);
 		}
@@ -567,6 +575,9 @@ class Customers extends MY_Controller
 			],404);
 		}
 
+		// Address Record
+		$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_CUSTOMER, $record->id);
+
 		 // The above query validates the flag_current, so we get directly txn data here
 		$this->load->model('endorsement_model');
 		$endorsement_record = $this->endorsement_model->get($txn_id);
@@ -607,17 +618,25 @@ class Customers extends MY_Controller
          *
          * !!!NOTE: We need to pass the original record for getting old data. That's why clone.
          */
-		$edit_record = clone $record;
-        $audit_record = $endorsement_record->audit_customer ? json_decode($endorsement_record->audit_customer) : NULL;
+		$edit_record 		 = clone $record;
+		$edit_address_record = clone $address_record;
+        $audit_record 		 = $endorsement_record->audit_customer ? json_decode($endorsement_record->audit_customer) : NULL;
         if($audit_record)
         {
-            // Get the New data
-            $new_data = (array)$audit_record->new;
+            // New Data
+            $new_data_customer = (array)$audit_record->new->customer;
+            $new_data_address = (array)$audit_record->new->address;
 
-            // Overwrite the Policy record with this data
-            foreach($new_data as $key=>$value)
+            // Overwrite the Customer Record with New Data
+            foreach($new_data_customer as $key=>$value)
             {
             	$edit_record->{$key} = $value;
+            }
+
+            // Overwrite the Address Record with New Data
+            foreach($new_data_address as $key=>$value)
+            {
+            	$edit_address_record->{$key} = $value;
             }
         }
 
@@ -627,11 +646,13 @@ class Customers extends MY_Controller
 		$v_rules 	= $this->customer_model->validation_rules;
 		$form_data = [
 			'form_elements' 	=> $v_rules,
-			'record' 			=> $edit_record
+			'address_elements' 	=> $this->address_model->v_rules_edit($edit_address_record),
+			'record' 			=> $edit_record,
+			'address_record' 	=> $edit_address_record
 		];
 
 		// Form Submitted? Save the data
-		$this->_save_endorsement($form_data, $v_rules, $record, $endorsement_record);
+		$this->_save_endorsement($form_data, $v_rules, $record, $address_record, $endorsement_record);
 	}
 
 	// --------------------------------------------------------------------
@@ -640,7 +661,7 @@ class Customers extends MY_Controller
 	 * Save a Record from Endorsement
 	 *
 	 */
-	private function _save_endorsement($form_data, $v_rules, $record, $endorsement_record)
+	private function _save_endorsement($form_data, $v_rules, $record, $address_record, $endorsement_record)
 	{
 		/**
 		 * Form Submitted?
@@ -653,7 +674,8 @@ class Customers extends MY_Controller
 			// Extract Old Profile Picture if any
 			$picture = $edit_record->picture ?? NULL;
 
-			$v_rules = array_merge($v_rules, get_contact_form_validation_rules());
+			// $v_rules = array_merge($v_rules, get_contact_form_validation_rules());
+			$v_rules = array_merge($v_rules, $this->address_model->v_rules_on_submit(TRUE));
 			$this->form_validation->set_rules($v_rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -675,7 +697,7 @@ class Customers extends MY_Controller
         			$audit_data = [
 	        			'endorsement_id' 	=> $endorsement_record->id,
 	        			'customer_id'  		=> $record->id,
-	        			'audit_customer' 		=> $this->_get_endorsement_audit_data($record, $post_data)
+	        			'audit_customer' 		=> $this->_get_endorsement_audit_data($record, $address_record, $post_data)
 	        		];
 
 	        		/**
@@ -728,18 +750,28 @@ class Customers extends MY_Controller
 		$this->template->json($json_data);
 	}
 
-		private function _get_endorsement_audit_data($old_record, $post_data)
+		private function _get_endorsement_audit_data($old_record, $old_address_record, $post_data)
 		{
 			$old_data 	= [];
 			$new_data 	= [];
-			$old_record = (array)$old_record;
+			$old_record 		= (array)$old_record;
+			$old_address_record = (array)$old_address_record;
 
 			// Prepare Contact Data
-			$post_data 	= $this->customer_model->prepare_contact_data($post_data);
-			foreach($this->customer_model->endorsement_fields as $key)
+			// $post_data 	= $this->customer_model->prepare_contact_data($post_data);
+
+			// Customer Data
+			foreach($this->customer_model->endorsement_fields['customer'] as $key)
 			{
-				$old_data[$key] = $old_record[$key] ?? NULL;
-				$new_data[$key] = $post_data[$key] ?? NULL;
+				$old_data['customer'][$key] = $old_record[$key] ?? NULL;
+				$new_data['customer'][$key] = $post_data[$key] ?? NULL;
+			}
+
+			// Address Data
+			foreach($this->customer_model->endorsement_fields['address'] as $key)
+			{
+				$old_data['address'][$key] = $old_record[$key] ?? NULL;
+				$new_data['address'][$key] = $post_data[$key] ?? NULL;
 			}
 
 			return json_encode([
@@ -801,7 +833,7 @@ class Customers extends MY_Controller
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
 				'removeRow' => true,
-				'rowId'		=> '#_data-row-'.$record->id
+				'rowId'		=> '#_data-row-customer-'.$record->id
 			];
 		}
 		else
@@ -842,6 +874,8 @@ class Customers extends MY_Controller
 			$this->template->render_404();
 		}
 
+		$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_CUSTOMER, $record->id);
+
 		// Helpers
 		$this->load->helper('object');
 
@@ -849,7 +883,8 @@ class Customers extends MY_Controller
 		$this->load->model('object_model');
 		$data = [
 			'record' 		=> $record,
-			'objects' 		=> $this->object_model->get_by_customer($record->id)
+			'objects' 		=> $this->object_model->get_by_customer($record->id),
+			'address_record' => $address_record
 		];
 
 

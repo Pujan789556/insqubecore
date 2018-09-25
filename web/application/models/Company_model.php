@@ -15,8 +15,8 @@ class Company_model extends MY_Model
 
     protected $before_insert = [];
     protected $before_update = [];
-    protected $after_insert  = ['trg_after_save', 'clear_cache'];
-    protected $after_update  = ['trg_after_save', 'clear_cache'];
+    protected $after_insert  = ['clear_cache'];
+    protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
     protected $fields = ["id", "name", "picture", "pan_no", "active", "type", "created_at", "created_by", "updated_at", "updated_by"];
@@ -40,6 +40,9 @@ class Company_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+
+        // Load Dependant Model
+        $this->load->model('address_model');
 
         // Validation Rules
         $this->validation_rules();
@@ -87,6 +90,117 @@ class Company_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Add New Record
+     *
+     * @param array $post_data Form Post Data
+     * @return mixed
+     */
+    public function add($post_data)
+    {
+        $cols = ["name", "picture", "pan_no", "active", "type"];
+        $data = [];
+
+        /**
+         * Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Company Record
+            $done = parent::insert($data, TRUE);
+
+            $branch_data = [
+                'company_id'     => $done,
+                'name'           => 'Head Office',
+                'is_head_office' => IQB_FLAG_ON
+            ];
+
+            // Unset All Company Columns
+            foreach($cols as $col)
+            {
+                unset($post_data[$col]);
+            }
+            $post_data = array_merge($branch_data, $post_data);
+
+            // Add Branch and its contact
+            $this->company_branch_model->add_ho($post_data);
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Add New Record
+     *
+     * @param array $post_data Form Post Data
+     * @return mixed
+     */
+    public function edit($id, $post_data)
+    {
+        $cols = ["name", "picture", "pan_no", "active", "type"];
+        $data = [];
+
+        /**
+         * Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Company Record
+            $done = parent::update($id, $data, TRUE);
+
+            // Update Head Office Contact Address
+            $this->company_branch_model->update_ho_contact($id, $post_data);
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
     public function trg_after_save($arr_record)
     {
         /**
@@ -119,12 +233,12 @@ class Company_model extends MY_Model
             $method = $arr_record['method'];
 
             $this->load->model('company_branch_model');
-            $contact = get_contact_data_from_form();
 
+            $post_data = $this->input->post();
             if($method == 'update')
             {
                 // Update Branch Head Office Contact
-                $this->company_branch_model->update_ho_contact($id, $contact);
+                $this->company_branch_model->update_ho_contact($id, $post_data);
             }
             else
             {
@@ -132,8 +246,7 @@ class Company_model extends MY_Model
                 $branch_data = [
                     'company_id'     => $id,
                     'name'           => 'Head Office',
-                    'is_head_office' => IQB_FLAG_ON,
-                    'contact'        => $contact,
+                    'is_head_office' => IQB_FLAG_ON
                 ];
                 $this->company_branch_model->insert($branch_data, TRUE);
             }
@@ -307,7 +420,7 @@ class Company_model extends MY_Model
      */
     public function get($id)
     {
-        return $this->db->select('C.*, CB.contact as ho_contact, CB.name as ho_branch_name')
+        return $this->db->select('C.*, CB.id AS company_branch_id, CB.name as ho_branch_name')
                  ->from($this->table_name . ' as C')
                  ->join('master_company_branches CB', "CB.company_id = C.id AND CB.is_head_office ='".IQB_FLAG_ON."'", 'left')
                  ->where('C.id', $id)
@@ -397,14 +510,21 @@ class Company_model extends MY_Model
             return FALSE;
         }
 
+        $this->load->model('company_branch_model');
+
+
         // Disable DB Debug for transaction to work
         $this->db->db_debug = FALSE;
-
-        $status = TRUE;
+        $status             = TRUE;
 
         // Use automatic transaction
         $this->db->trans_start();
 
+
+            // Delete all branch and it's address first
+            $this->company_branch_model->delete_by_company($id);
+
+            // Delete Main Record
             parent::delete($id);
 
         $this->db->trans_complete();

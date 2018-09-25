@@ -13,13 +13,11 @@ class Agent_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['prepare_contact_data'];
-    protected $before_update = ['prepare_contact_data'];
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "name", "picture", "ud_code", "bs_code", "active", "type", "contact", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "name", "picture", "ud_code", "bs_code", "active", "type", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
@@ -78,15 +76,114 @@ class Agent_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+
+        $this->load->model('address_model');
     }
 
 
     // ----------------------------------------------------------------
 
-    public function prepare_contact_data($data)
+    /**
+     * Add New Record
+     *
+     * @param array $post_data Form Post Data
+     * @return mixed
+     */
+    public function add($post_data)
     {
-        $data['contact'] = get_contact_data_from_form();
-        return $data;
+        $cols = ["name", "picture", "ud_code", "bs_code", "active", "type"];
+        $data = [];
+
+        /**
+         * Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Primary Record
+            $done = parent::insert($data, TRUE);
+
+            // Insert Address
+            if($done)
+            {
+                $this->address_model->add(IQB_ADDRESS_TYPE_AGENT, $done ,$post_data);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Edit an Agent
+     *
+     * @param int $id Agent ID
+     * @param inte $address_id Address ID of this Agent
+     * @param array $post_data Form Post Data
+     * @return mixed
+     */
+    public function edit($id, $address_id, $post_data)
+    {
+        $cols = ["name", "picture", "ud_code", "bs_code", "active", "type"];
+        $data = [];
+
+        /**
+         * Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Primary Record
+            $done = parent::update($id, $data, TRUE);
+
+            // Insert Address
+            if($done)
+            {
+                $this->address_model->edit($address_id ,$post_data);
+            }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
     }
 
     // ----------------------------------------------------------------
@@ -229,7 +326,11 @@ class Agent_model extends MY_Model
         // Use automatic transaction
         $this->db->trans_start();
 
+            // Delete Primary Record
             parent::delete($id);
+
+            // Delete Address Record
+            $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_AGENT, 'type_id' => $id]);
 
         $this->db->trans_complete();
 

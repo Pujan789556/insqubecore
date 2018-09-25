@@ -14,13 +14,14 @@ class Surveyor_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['prepare_contact_data'];
-    protected $before_update = ['prepare_contact_data'];
-    protected $after_insert  = ['update_surveyor_expertise', 'clear_cache'];
-    protected $after_update  = ['update_surveyor_expertise', 'clear_cache'];
+    // protected $before_insert = ['prepare_contact_data'];
+    // protected $before_update = ['prepare_contact_data'];
+
+    protected $after_insert  = ['clear_cache'];
+    protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'name', 'picture', 'resume', 'type', 'flag_vat_registered', 'vat_no', 'active', 'contact', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'name', 'picture', 'resume', 'type', 'flag_vat_registered', 'vat_no', 'active', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -42,8 +43,9 @@ class Surveyor_model extends MY_Model
     {
         parent::__construct();
 
-        // Surveyor Expertise Model
+        // Dependant Models
         $this->load->model('surveyor_expertise_model');
+        $this->load->model('address_model');
 
         // Load Validation Rules
         $this->_v_rules();
@@ -112,10 +114,122 @@ class Surveyor_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function prepare_contact_data($data)
+    /**
+     * Add New Record
+     *
+     * @param array $post_data Form Post Data
+     * @return mixed
+     */
+    public function add($post_data)
     {
-        $data['contact'] = get_contact_data_from_form();
-        return $data;
+        $cols = ['name', 'picture', 'resume', 'type', 'flag_vat_registered', 'vat_no', 'active'];
+        $data = [];
+
+        /**
+         * Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        /**
+         * Expertise Data
+         */
+        $expertise_list = array_unique($post_data['surveyor_expertise']);
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Primary Record
+            $done = parent::insert($data, TRUE);
+
+            // Insert Address
+            if($done)
+            {
+                $this->address_model->add(IQB_ADDRESS_TYPE_SURVEYOR, $done ,$post_data);
+            }
+
+            // Surveyor Expertise
+            $this->update_surveyor_expertise($done, $expertise_list);
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Edit an Surveyor
+     *
+     * @param int $id Surveyor ID
+     * @param inte $address_id Address ID of this Surveyor
+     * @param array $post_data Form Post Data
+     * @return mixed
+     */
+    public function edit($id, $address_id, $post_data)
+    {
+        $cols = ['name', 'picture', 'resume', 'type', 'flag_vat_registered', 'vat_no', 'active'];
+        $data = [];
+
+        /**
+         * Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        /**
+         * Expertise Data
+         */
+        $expertise_list = array_unique($post_data['surveyor_expertise']);
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Primary Record
+            $done = parent::update($id, $data, TRUE);
+
+            // Insert Address
+            if($done)
+            {
+                $this->address_model->edit($address_id ,$post_data);
+            }
+
+            // Surveyor Expertise
+            $this->update_surveyor_expertise($id, $expertise_list);
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
     }
 
     // ----------------------------------------------------------------
@@ -125,46 +239,37 @@ class Surveyor_model extends MY_Model
      *
      * Update Surveyor Expertise Relations on add/edit
      *
-     * @param array $data
+     * @param array $expertise_list Expertise List
      * @return bool
      */
-    public function update_surveyor_expertise($data)
+    public function update_surveyor_expertise($id, $expertise_list)
     {
-        $id = $data['id'] ?? NULL;
+        /**
+         * Get the Surveyor Expertise List
+         */
+        $expertise_list = array_unique($expertise_list);
 
-        if($id !== NULL)
+        /**
+         * Task 1: Delete Old Relation If any
+         */
+        $this->_delete_expertise($id);
+
+        /**
+         * Task 2: Batch Insert Expertise Relation
+         */
+        $batch_data = [];
+        foreach( $expertise_list as $key )
         {
-            /**
-             * Get the Surveyor Expertise List
-             */
-            $fields = $data['fields'];
-            $expertise_list = array_unique($fields['surveyor_expertise']);
-
-            /**
-             * Task 1: Delete Old Relation If any
-             */
-            $this->_delete_expertise($id);
-
-            /**
-             * Task 2: Batch Insert Expertise Relation
-             */
-            $batch_data = [];
-            foreach( $expertise_list as $key )
-            {
-                $batch_data[] = [
-                    'surveyor_id' => $id,
-                    'surveyor_expertise_id' => $key
-                ];
-            }
-            if($batch_data)
-            {
-                $this->_batch_insert_expertise($batch_data);
-            }
-
-            return TRUE;
+            $batch_data[] = [
+                'surveyor_id' => $id,
+                'surveyor_expertise_id' => $key
+            ];
         }
-
-        return FALSE;
+        if($batch_data)
+        {
+            $this->_batch_insert_expertise($batch_data);
+        }
+        return TRUE;
     }
 
         private function _delete_expertise($id)
@@ -332,16 +437,18 @@ class Surveyor_model extends MY_Model
         // Use automatic transaction
         $this->db->trans_start();
 
+            // Delete Primary Record
             parent::delete($id);
 
-        $this->db->trans_complete();
+            // Delete Address Record
+            $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_SURVEYOR, 'type_id' => $id]);
 
+        $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
         {
             // get_allenerate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-
         // Enable db_debug if on development environment
         $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 

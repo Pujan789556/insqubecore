@@ -13,13 +13,13 @@ class Ac_party_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['prepare_contact_data', 'prepare_party_defaults', 'prepare_party_fts_data'];
-    protected $before_update = ['prepare_contact_data', 'prepare_party_fts_data'];
+    // protected $before_insert = ['prepare_contact_data', 'prepare_party_defaults', 'prepare_party_fts_data'];
+    // protected $before_update = ['prepare_contact_data', 'prepare_party_fts_data'];
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'branch_id', 'type', 'pan', 'full_name', 'contact', 'company_reg_no', 'citizenship_no', 'passport_no', 'fts', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'branch_id', 'type', 'pan', 'full_name', 'company_reg_no', 'citizenship_no', 'passport_no', 'fts', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [
         [
@@ -87,23 +87,133 @@ class Ac_party_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
-    }
 
+
+        // Dependant Model
+        $this->load->model('address_model');
+    }
 
     // ----------------------------------------------------------------
 
     /**
-     * Prepare Contact Data
+     * Add New Record
      *
-     * Before Insert/Update Trigger to Get Contact Data From Contact Form
-     *
-     * @param array $data
-     * @return array
+     * @param array $post_data Form Post Data
+     * @return mixed
      */
-    public function prepare_contact_data($data)
+    public function add($post_data)
     {
-        $data['contact'] = get_contact_data_from_form();
-        return $data;
+
+        $cols = ['type', 'pan', 'full_name', 'company_reg_no', 'citizenship_no', 'passport_no'];
+        $data = [];
+
+        /**
+         * Task1: Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        /**
+         * Task 2: Branch ID
+         */
+        $data = $this->prepare_party_defaults($data);
+
+
+        /**
+         * Task 3: Get Fulltext Search Field
+         */
+        $data['fts'] = $this->prepare_party_fts_data($post_data);
+
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Primary Record
+            $done = parent::insert($data, TRUE);
+
+            // Insert Address
+            if($done)
+            {
+                $this->address_model->add(IQB_ADDRESS_TYPE_GENERAL_PARTY, $done ,$post_data);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Edit an Party
+     *
+     * @param int $id Party ID
+     * @param inte $address_id Address ID of this Party
+     * @param array $post_data Form Post Data
+     * @return mixed
+     */
+    public function edit($id, $address_id, $post_data)
+    {
+        $cols = ['type', 'pan', 'full_name', 'company_reg_no', 'citizenship_no', 'passport_no'];
+        $data = [];
+
+        /**
+         * Task1: Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        /**
+         * Task 2: Get Fulltext Search Field
+         */
+        $data['fts'] = $this->prepare_party_fts_data($post_data);
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Primary Record
+            $done = parent::update($id, $data, TRUE);
+
+            // Insert Address
+            if($done)
+            {
+                $this->address_model->edit($address_id ,$post_data);
+            }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
     }
 
     // ----------------------------------------------------------------
@@ -137,7 +247,7 @@ class Ac_party_model extends MY_Model
      */
     public function prepare_party_fts_data($data)
     {
-        $contact_arr = $data['contacts'];
+        // $contact_arr = $data['contacts'];
 
         $dt = $data;
         unset($dt['contacts']);
@@ -160,17 +270,36 @@ class Ac_party_model extends MY_Model
             }
         }
 
-        foreach($contact_arr as $key=>$val)
-        {
-            if($val){
-                $fts_data [] =  $val;
-            }
-        }
+        // foreach($contact_arr as $key=>$val)
+        // {
+        //     if($val){
+        //         $fts_data [] =  $val;
+        //     }
+        // }
         $fts_data = implode(' ', $fts_data);
+        return $fts_data;
 
-        $data['fts'] = $fts_data;
+        // $data['fts'] = $fts_data;
 
-        return $data;
+        // return $data;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Single Data Row by ID
+     *
+     * Get the filtered resulte set for listing purpose
+     *
+     * @param int $id
+     * @return object
+     */
+    public function row($id)
+    {
+        $this->_row_select();
+
+        return $this->db->where('P.id', $id)
+                        ->get()->row();
     }
 
     // ----------------------------------------------------------------
@@ -185,9 +314,7 @@ class Ac_party_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('P.id, P.pan, P.full_name, P.type, P.company_reg_no, P.citizenship_no, P.passport_no, P.contact')
-                 ->from($this->table_name . ' as P');
-
+        $this->_row_select();
 
         if(!empty($params))
         {
@@ -232,6 +359,23 @@ class Ac_party_model extends MY_Model
                         ->order_by('P.id', 'desc')
                         ->limit($this->settings->per_page+1)
                         ->get()->result();
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Select Columns for Data Listing
+     *
+     * @return void
+     */
+    private function _row_select()
+    {
+        $this->db->select('P.id, P.pan, P.full_name, P.type, P.company_reg_no, P.citizenship_no, P.passport_no')
+                 ->from($this->table_name . ' as P');
+
+
+        // Include Address Information
+        $this->address_model->module_select('P', IQB_ADDRESS_TYPE_GENERAL_PARTY);
     }
 
     // --------------------------------------------------------------------
@@ -293,10 +437,13 @@ class Ac_party_model extends MY_Model
         // Use automatic transaction
         $this->db->trans_start();
 
+            // Delete Primary Record
             parent::delete($id);
 
-        $this->db->trans_complete();
+            // Delete Address Record
+            $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_GENERAL_PARTY, 'type_id' => $id]);
 
+        $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error

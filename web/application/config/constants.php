@@ -152,6 +152,25 @@ define('IQB_USER_SCOPE_GLOBAL', 	'global');
 
 /*
 |--------------------------------------------------------------------------
+| ADDRESS TYPE CONSTANTS
+|--------------------------------------------------------------------------
+|
+*/
+define('IQB_ADDRESS_TYPE_AGENT',       		1);
+define('IQB_ADDRESS_TYPE_COMPANY_BRANCH',   2);
+define('IQB_ADDRESS_TYPE_CUSTOMER',      	3);
+define('IQB_ADDRESS_TYPE_GENERAL_PARTY',    4);
+define('IQB_ADDRESS_TYPE_SURVEYOR',      	5);
+define('IQB_ADDRESS_TYPES',  [
+	IQB_ADDRESS_TYPE_AGENT 			=> 'Agent',
+	IQB_ADDRESS_TYPE_COMPANY_BRANCH => 'Company Branch',
+	IQB_ADDRESS_TYPE_CUSTOMER 		=> 'Customer',
+	IQB_ADDRESS_TYPE_GENERAL_PARTY 	=> 'General Party',
+	IQB_ADDRESS_TYPE_SURVEYOR 		=> 'Surveyor'
+]);
+
+/*
+|--------------------------------------------------------------------------
 | RISK TYPE CONSTANTS
 |--------------------------------------------------------------------------
 |

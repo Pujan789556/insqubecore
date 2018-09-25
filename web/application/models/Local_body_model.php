@@ -73,18 +73,35 @@ class Local_body_model extends MY_Model
     /**
      * Get Dropdown List
      */
-    public function dropdown($type="both")
+    public function dropdown_by_state($state_id)
     {
-        $records = $this->get_all();
-        $list = [];
-        foreach($records as $record)
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'localbody_st_' . $state_id;
+        $dropdown   = $this->get_cache($cache_name);
+        if(!$dropdown)
         {
-            $label = $type === "both"
-                        ? $record->name_en . " ({$record->name_np})"
-                        : ($type === "en" ? $record->name_en : $record->name_np);
-            $list["{$record->id}"] = $label;
+            $list = $this->db->select('LB.id, LB.name_en, LB.name_np, D.name_en AS district_name_en, D.name_np AS district_name_np')
+                            ->from($this->table_name . ' LB')
+                            ->join('master_districts D', 'D.id = LB.district_id')
+                            ->join('master_states S', 'S.id = D.state_id')
+                            ->where('S.id', $state_id)
+                            ->order_by('LB.name_en')
+                            ->get()->result();
+
+            $dropdown = [];
+            if($list)
+            {
+                foreach ($list as $record)
+                {
+                    $column = $record->id;
+                    $dropdown["{$column}"] = $record->name_en . ' - ' . $record->district_name_en . ' (' . $record->name_np . ' - ' . $record->district_name_np . ')';
+                }
+                $this->write_cache($dropdown, $cache_name, CACHE_DURATION_DAY);
+            }
         }
-        return $list;
+        return $dropdown;
     }
 
 
@@ -120,6 +137,13 @@ class Local_body_model extends MY_Model
     public function clear_cache()
     {
         // cache name without prefix
-        return $this->delete_cache('lcoalbodies_all');
+        $cache_names = [
+            'localbody_st_*'
+        ];
+
+        // cache name without prefix
+        $this->delete_cache($cache_names);
+
+        return TRUE;
     }
 }

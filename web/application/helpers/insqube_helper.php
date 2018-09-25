@@ -152,6 +152,8 @@ if ( ! function_exists('is_assoc'))
 }
 
 // ------------------------------------------------------------------------
+// START:: Contact Related Functions
+// ------------------------------------------------------------------------
 
 if ( ! function_exists('get_contact_form_fields'))
 {
@@ -440,23 +442,109 @@ if ( ! function_exists('get_contact_widget_two_lines'))
 
 if ( ! function_exists('get_country_name'))
 {
-	/**
-	 * Get country name from code (alpha2|alpha3)
-	 *
-	 * @param string $code country code in alpha2 or alpha3 format
-	 * @param string $column code column alpha2|alpha3
-	 * @return string
-	 */
-	function get_country_name( $code, $column='alpha2' )
-	{
-		$CI =& get_instance();
-		$CI->load->model('country_model');
-		$countries = $CI->country_model->dropdown($column);
-		return array_key_exists($code, $countries) ? $countries[$code] : '';
-	}
+    /**
+     * Get country name from code (alpha2|alpha3)
+     *
+     * @param string $code country code in alpha2 or alpha3 format
+     * @param string $column code column alpha2|alpha3
+     * @return string
+     */
+    function get_country_name( $code, $column='alpha2' )
+    {
+        $CI =& get_instance();
+        $CI->load->model('country_model');
+        $countries = $CI->country_model->dropdown($column);
+        return array_key_exists($code, $countries) ? $countries[$code] : '';
+    }
 }
 
 // ------------------------------------------------------------------------
+
+if ( ! function_exists('parse_address_record'))
+{
+    /**
+     * Parse and Return Address Record from a Module Record
+     * having address columns from module_select() function
+     *
+     * @param object $module_record
+     * @return object
+     */
+    function parse_address_record( $module_record )
+    {
+        $CI =& get_instance();
+
+        $CI->load->model('address_model');
+        return $CI->address_model->parse_address_record( $module_record );
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('address_widget_two_lines'))
+{
+    /**
+     * Get Single Line Contact
+     *
+     * Get the contact widget html
+     * Format:
+     *
+     *      Address1,  address2,  city, state, zip, country
+     *      Tel: ..., Fax: ..., Mobile: ..., Email: ..., Web: ....
+     *
+     * @param Object $record Single Contact Address
+     * @param string $prefix Prefix text if any
+     * @param bool $plain_text  Return only Plain Text(No link on email,mobile,website, No HR)
+     * @return html
+     */
+    function address_widget_two_lines( $record, $prefix = '' )
+    {
+        $CI =& get_instance();
+        $data = ['record' => $record, 'prefix' => $prefix ];
+        $view ='templates/_common/_widget_address_snippet_two_lines';
+        return $CI->load->view( $view, $data, TRUE);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('address_widget'))
+{
+    /**
+     * Get Address Widget Box
+     *
+     * Get the contact widget html
+     * Format:
+     *
+     *      address1
+     *      address2
+     *      city, state, zip
+     *      country
+     *
+     *      Tel:
+     *      Fax:
+     *      Mobile:
+     *      Email:
+     *      Web:
+     *
+     * @param object $record Single Address Record
+     * @param bool $snippet_only Return Only Snippet Text
+     * @param bool $plain_text  Return only Plain Text(No link on email,mobile,website, No HR)
+     * @return html
+     */
+    function address_widget( $record, $snippet_only = false, $plain_text = false )
+    {
+        $CI =& get_instance();
+        $data = ['record' => $record, 'plain_text' => $plain_text ];
+
+        $view = $snippet_only ? 'templates/_common/_widget_address_snippet' : 'templates/_common/_widget_address';
+        return $CI->load->view( $view, $data, TRUE);
+    }
+}
+
+// ------------------------------------------------------------------------
+// END:: Contact Related Functions
+// ------------------------------------------------------------------------
+
 
 if ( ! function_exists('belongs_to_me'))
 {

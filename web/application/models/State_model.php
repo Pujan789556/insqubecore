@@ -148,16 +148,43 @@ class State_model extends MY_Model
 
     // --------------------------------------------------------------------
 
+    public function get_by_country($country_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'state_' . $country_id;
+        $list       = $this->get_cache($cache_name);
+        if(!$list)
+        {
+            $list = $this->db->select('S.*, C.name AS country_name')
+                             ->from($this->table_name . ' S')
+                             ->join('master_countries C', 'C.id = S.country_id')
+                             ->where('S.country_id', $country_id)
+                             ->get()->result();
+
+            $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
+        }
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
+
     /**
      * Get Dropdown List
      *
      * @return array
      */
-    public function dropdown()
+    public function dropdown($country_id)
     {
-       $dropdown = [];
-
-       return $dropdown;
+        $records = $this->get_by_country($country_id);
+        $dropdown = [];
+        foreach($records as $record)
+        {
+            $column = $record->id;
+            $dropdown["{$column}"] = $record->name_en . ' (' . $record->name_np . ')';
+        }
+        return $dropdown;
     }
 
 
@@ -216,7 +243,7 @@ class State_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-
+            'state_*'
         ];
 
         // cache name without prefix

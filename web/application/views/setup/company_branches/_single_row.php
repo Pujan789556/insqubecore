@@ -15,7 +15,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		echo $record->name;
 		?>
 	</td>
-	<td><?php echo get_contact_widget($record->contact, true)?></td>
+	<td><?php echo address_widget( parse_address_record($record), true)?></td>
 	<td class="ins-action">
 		<?php if( $this->dx_auth->is_authorized('companies', 'edit.company.branch') ): ?>
 			<a href="#"

@@ -229,4 +229,29 @@ class Migrations extends CI_Controller
 		$this->m20180917_model->migrate();
 	}
 
+	// -------------------------------------------------------------------------------------
+
+	/**
+	 * Update Address Module
+	 *
+	 * 	- Upgrade contact module to have a relation entry on separate address table
+	 *  - Migrate contact json into address table
+	 * 		- Agents
+	 * 		- Customer
+	 * 		- Company Branch
+	 * 		- General Party
+	 * 		- Surveyor
+	 *
+	 *
+	 * Usage
+	 * 		$ php index.php migrations m20180921
+	 * 		$ CI_ENV=production php index.php migrations m20180921
+	 * @return void
+	 */
+	public function m20180921( )
+	{
+		$this->load->model('migrations/m20180921_model');
+		$this->m20180921_model->migrate();
+	}
+
 }

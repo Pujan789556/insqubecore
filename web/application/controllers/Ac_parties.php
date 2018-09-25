@@ -374,14 +374,19 @@ class Ac_parties extends MY_Controller
 			$this->template->render_404();
 		}
 
+		// Address Record
+		$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_GENERAL_PARTY, $record->id);
+
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record, $from_widget, $widget_reference);
+		$json_data = $this->_save('edit', $record, $address_record, $from_widget, $widget_reference);
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('accounting/parties/_form_box',
 			[
 				'form_elements' => $this->ac_party_model->validation_rules,
-				'record' 		=> $record
+				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
+				'record' 			=> $record,
+				'address_record' 	=> $address_record
 			], TRUE);
 
 		// Return HTML
@@ -405,17 +410,19 @@ class Ac_parties extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
-		$record = NULL;
+		$record 		= NULL;
+		$address_record = NULL;
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add', $record, $from_widget, $widget_reference);
+		$json_data = $this->_save('add', $record, $address_record, $from_widget, $widget_reference);
 
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('accounting/parties/_form_box',
 			[
 				'form_elements' => $this->ac_party_model->validation_rules,
-				'record' 		=> $record
+				'address_elements' 	=> $this->address_model->v_rules_add(),
+				'record' 			=> $record
 			], TRUE);
 
 		// Return HTML
@@ -433,7 +440,7 @@ class Ac_parties extends MY_Controller
 	 * @param string $widget_reference
 	 * @return array
 	 */
-	private function _save($action, $record = NULL, $from_widget='n', $widget_reference = '')
+	private function _save($action, $record = NULL, $address_record = NULL, $from_widget='n', $widget_reference = '')
 	{
 		// Valid action? Valid from_widget
 		if( !in_array($action, array('add', 'edit')) || !in_array($from_widget, array('y', 'n')) )
@@ -453,7 +460,7 @@ class Ac_parties extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = array_merge($this->ac_party_model->validation_rules, get_contact_form_validation_rules());
+			$rules = array_merge($this->ac_party_model->validation_rules, $this->address_model->v_rules_on_submit(TRUE));
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -462,12 +469,12 @@ class Ac_parties extends MY_Controller
         		// Insert or Update?
 				if($action === 'add')
 				{
-					$done = $this->ac_party_model->insert($data, TRUE); // No Validation on Model
+					$done = $this->ac_party_model->add($data); // No Validation on Model
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->ac_party_model->update($record->id, $data, TRUE);
+					$done = $this->ac_party_model->edit($record->id, $address_record->id, $data);
 				}
 
 	        	if(!$done)
@@ -497,7 +504,7 @@ class Ac_parties extends MY_Controller
 					'hideBootbox' => true
 				];
 
-				$record 			= $this->ac_party_model->find( $action === 'add' ? $done : $record->id );
+				$record 			= $this->ac_party_model->row( $action === 'add' ? $done : $record->id );
 				$single_row 		=  'accounting/parties/_single_row';
 				if($action === 'add' && $from_widget === 'y' )
 				{
@@ -513,7 +520,7 @@ class Ac_parties extends MY_Controller
 				return $this->template->json($ajax_data);
 			}
 
-			// Form
+			// Form with validation errors
 			return $this->template->json([
 				'status' 		=> $status,
 				'message' 		=> $message,
@@ -521,7 +528,8 @@ class Ac_parties extends MY_Controller
 				'form' 			=> $this->load->view('accounting/parties/_form',
 									[
 										'form_elements' => $this->ac_party_model->validation_rules,
-										'record' 		=> $record
+										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
+										'record' 			=> $record
 									], TRUE)
 			]);
 		}
@@ -615,6 +623,9 @@ class Ac_parties extends MY_Controller
 			$this->template->render_404();
 		}
 
+		// Address Record
+		$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_GENERAL_PARTY, $record->id);
+
 		// Helpers
 		$this->load->helper('object');
 
@@ -622,7 +633,7 @@ class Ac_parties extends MY_Controller
 		$this->load->model('object_model');
 		$data = [
 			'record' 		=> $record,
-			'objects' 		=> $this->object_model->get_by_customer($record->id)
+			'address_record' => $address_record
 		];
 
 

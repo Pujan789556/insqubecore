@@ -292,15 +292,20 @@ class Companies extends MY_Controller
 			$this->template->render_404();
 		}
 
+		// Address Record
+		$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_COMPANY_BRANCH, $record->company_branch_id);
+
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record, $from_widget, $widget_reference);
+		$json_data = $this->_save('edit', $record, $address_record, $from_widget, $widget_reference);
 
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/companies/_form_box',
 			[
 				'form_elements' => $this->company_model->validation_rules,
-				'record' 		=> $record
+				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
+				'record' 			=> $record,
+				'address_record' 	=> $address_record
 			], TRUE);
 
 		// Return HTML
@@ -324,17 +329,19 @@ class Companies extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
-		$record = NULL;
+		$record 		= NULL;
+		$address_record = NULL;
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add', $record, $from_widget, $widget_reference);
+		$json_data = $this->_save('add', $record, $address_record, $from_widget, $widget_reference);
 
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/companies/_form_box',
 			[
-				'form_elements' => $this->company_model->validation_rules,
-				'record' 		=> $record
+				'form_elements' 	=> $this->company_model->validation_rules,
+				'record' 			=> $record,
+				'address_elements' 	=> $this->address_model->v_rules_add(),
 			], TRUE);
 
 		// Return HTML
@@ -352,7 +359,7 @@ class Companies extends MY_Controller
 	 * @param string $widget_reference
 	 * @return array
 	 */
-	private function _save($action, $record = NULL, $from_widget='n', $widget_reference = '')
+	private function _save($action, $record = NULL, $address_record = NULL, $from_widget='n', $widget_reference = '')
 	{
 		// Valid action? Valid from_widget
 		if( !in_array($action, array('add', 'edit')) || !in_array($from_widget, array('y', 'n')) )
@@ -375,7 +382,7 @@ class Companies extends MY_Controller
 			// Extract Old Profile Picture if any
 			$picture = $record->picture ?? NULL;
 
-			$rules = array_merge($this->company_model->validation_rules, get_contact_form_validation_rules());
+			$rules = array_merge($this->company_model->validation_rules, $this->address_model->v_rules_on_submit(TRUE));
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -397,12 +404,12 @@ class Companies extends MY_Controller
             		// Insert or Update?
 					if($action === 'add')
 					{
-						$done = $this->company_model->insert($data, TRUE); // No Validation on Model
+						$done = $this->company_model->add($data); // No Validation on Model
 					}
 					else
 					{
 						// Now Update Data
-						$done = $this->company_model->update($record->id, $data, TRUE);
+						$done = $this->company_model->edit($record->id, $data);
 					}
 
 		        	if(!$done)
@@ -456,7 +463,8 @@ class Companies extends MY_Controller
 				'form' 			=> $this->load->view('setup/companies/_form',
 									[
 										'form_elements' => $this->company_model->validation_rules,
-										'record' 		=> $record
+										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
+										'record' 			=> $record
 									], TRUE)
 			]);
 		}
@@ -576,7 +584,8 @@ class Companies extends MY_Controller
 
 		$data = [
 			'record' 	=> $record,
-			'branches' 	=>  $this->company_branch_model->get_by_company($record->id)
+			'branches' 	=>  $this->company_branch_model->get_by_company($record->id),
+			'address_record' => $this->company_branch_model->get_ho_address($record->id)
 		];
 
 		$this->data['site_title'] = 'Company Details | ' . $record->name;
@@ -637,16 +646,20 @@ class Companies extends MY_Controller
     private function __branch_save($action, $company_id, $branch_id=NULL)
     {
     	$record = NULL;
+    	$address_record = NULL;
     	if($action === 'edit')
     	{
     		$branch_id 	= (int)$branch_id;
     		$record 	= $this->company_branch_model->find($branch_id);
 
-    		if( !$record || $record->company_id != $company_id )
+    		// Address Record
+			$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_COMPANY_BRANCH, $record->id);
+
+    		if( !$record || $record->company_id != $company_id || !$address_record )
     		{
     			$this->template->json([
 	    			'status' 	=> 'error',
-	    			'message' 	=> 'Either branch not found or supplied branch does not belong to specified company!'
+	    			'message' 	=> 'Either branch not found or supplied branch does not belong to specified company or Branch address does not exists!'
 				], 404);
     		}
     	}
@@ -657,26 +670,26 @@ class Companies extends MY_Controller
     	// Form Posted? Let's save the damn thing!
     	if($this->input->post())
     	{
-    		$rules = array_merge($this->company_branch_model->validation_rules, get_contact_form_validation_rules());
+    		$rules = array_merge($this->company_branch_model->validation_rules, $this->address_model->v_rules_on_submit(TRUE));
             $this->form_validation->set_rules($rules);
             $status = 'error';
 			if($this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
 
-        		$data['company_id'] 		= $company_id; // required on both add/edit for trigger function - after insert & update
+        		$data['company_id'] 		= $company_id; // required on both add/edit for after add/edit tasks
         		$data['is_head_office'] 	= $data['is_head_office'] ?? 0; // If no headoffice, reset to 0
 
         		// Insert or Update?
 				if($action === 'add')
 				{
 					$data['company_id'] = $company_id;
-					$done = $this->company_branch_model->insert($data, TRUE); // No Validation on Model
+					$done = $this->company_branch_model->add($data);
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->company_branch_model->update($record->id, $data, TRUE);
+					$done = $this->company_branch_model->edit($record->id, $address_record->id, $data);
 				}
 
 	        	if(!$done)
@@ -693,8 +706,9 @@ class Companies extends MY_Controller
 				if($status === 'success' )
 				{
 					$records 	= $this->company_branch_model->get_by_company($company_id);
+
 					$dom_box 	= '#search-result-company-branch';
-					$dom_method = 'replaceWith';
+					$dom_method = 'html';
 					$list_view 	= 'setup/company_branches/_rows';
 					$html 		= $this->load->view($list_view, ['records' => $records], TRUE);
 
@@ -728,7 +742,8 @@ class Companies extends MY_Controller
 				'form' 			=> $this->load->view('setup/company_branches/_form',
 									[
 										'form_elements' => $this->company_branch_model->validation_rules,
-										'record' 		=> $record
+										'record' 		=> $record,
+										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
 									], TRUE)
 			]);
     	}
@@ -737,7 +752,11 @@ class Companies extends MY_Controller
 		$json_data['form'] = $this->load->view('setup/company_branches/_form_box',
 		[
 			'form_elements' => $this->company_branch_model->validation_rules,
-			'record' 		=> $record
+			'address_elements' 	=> $action === 'edit'
+										? $this->address_model->v_rules_edit($address_record)
+										: $this->address_model->v_rules_add(),
+			'record' 			=> $record,
+			'address_record' 	=> $address_record
 		], TRUE);
 
 		// Load the form
@@ -762,7 +781,7 @@ class Companies extends MY_Controller
 			$this->template->json([
     			'status' 	=> 'error',
     			'message' 	=> 'Either branch not found or supplied branch does not belong to specified company!'
-			], 404);
+			], 403);
 		}
 
 
@@ -778,7 +797,19 @@ class Companies extends MY_Controller
 			$this->template->json([
     			'status' 	=> 'error',
     			'message' 	=> 'Sorry! You can not delete default records.'
-			], 404);
+			], 403);
+		}
+
+
+		/**
+		 * Can't Delete Head Office
+		 */
+		if( $this->company_branch_model->is_head_office($branch_id) )
+		{
+			$this->template->json([
+    			'status' 	=> 'error',
+    			'message' 	=> 'Sorry! You can not delete Head Office Branch.'
+			], 403);
 		}
 
 		$done = $this->company_branch_model->delete($record->id);

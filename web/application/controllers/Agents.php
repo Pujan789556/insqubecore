@@ -42,6 +42,7 @@ class Agents extends MY_Controller
 
 		// Load Model
 		$this->load->model('agent_model');
+		$this->load->model('address_model');
 	}
 
 	// --------------------------------------------------------------------
@@ -290,15 +291,20 @@ class Agents extends MY_Controller
 			$this->template->render_404();
 		}
 
+		// Address Record
+		$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_AGENT, $record->id);
+
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record, $from_widget, $widget_reference);
+		$json_data = $this->_save('edit', $record, $address_record, $from_widget, $widget_reference);
 
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/agents/_form_box',
 			[
-				'form_elements' => $this->agent_model->validation_rules,
-				'record' 		=> $record
+				'form_elements' 	=> $this->agent_model->validation_rules,
+				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
+				'record' 			=> $record,
+				'address_record' 	=> $address_record
 			], TRUE);
 
 		// Return HTML
@@ -322,17 +328,19 @@ class Agents extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
-		$record = NULL;
+		$record 		= NULL;
+		$address_record = NULL;
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add', $record, $from_widget, $widget_reference);
+		$json_data = $this->_save('add', $record, $address_record, $from_widget, $widget_reference);
 
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/agents/_form_box',
 			[
-				'form_elements' => $this->agent_model->validation_rules,
-				'record' 		=> $record
+				'form_elements' 	=> $this->agent_model->validation_rules,
+				'address_elements' 	=> $this->address_model->v_rules_add(),
+				'record' 			=> $record
 			], TRUE);
 
 		// Return HTML
@@ -350,7 +358,7 @@ class Agents extends MY_Controller
 	 * @param string $widget_reference
 	 * @return array
 	 */
-	private function _save($action, $record = NULL, $from_widget='n', $widget_reference = '')
+	private function _save($action, $record = NULL, $address_record = NULL, $from_widget='n', $widget_reference = '')
 	{
 		// Valid action? Valid from_widget
 		if( !in_array($action, array('add', 'edit')) || !in_array($from_widget, array('y', 'n')) )
@@ -373,7 +381,7 @@ class Agents extends MY_Controller
 			// Extract Old Profile Picture if any
 			$picture = $record->picture ?? NULL;
 
-			$rules = array_merge($this->agent_model->validation_rules, get_contact_form_validation_rules());
+			$rules = array_merge($this->agent_model->validation_rules, $this->address_model->v_rules_on_submit(TRUE));
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -395,12 +403,12 @@ class Agents extends MY_Controller
             		// Insert or Update?
 					if($action === 'add')
 					{
-						$done = $this->agent_model->insert($data, TRUE); // No Validation on Model
+						$done = $this->agent_model->add($data); // No Validation on Model
 					}
 					else
 					{
 						// Now Update Data
-						$done = $this->agent_model->update($record->id, $data, TRUE);
+						$done = $this->agent_model->edit($record->id, $address_record->id, $data);
 					}
 
 		        	if(!$done)
@@ -453,8 +461,9 @@ class Agents extends MY_Controller
 				'reloadForm' 	=> true,
 				'form' 			=> $this->load->view('setup/agents/_form',
 									[
-										'form_elements' => $this->agent_model->validation_rules,
-										'record' 		=> $record
+										'form_elements' 	=> $this->agent_model->validation_rules,
+										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
+										'record' 			=> $record
 									], TRUE)
 			]);
 		}
@@ -571,6 +580,14 @@ class Agents extends MY_Controller
 			$this->template->render_404();
 		}
 
+		// Address Record
+		$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_AGENT, $record->id);
+
+		$view_data = [
+			'record' 		 => $record,
+			'address_record' => $address_record
+		];
+
 		$this->data['site_title'] = 'Agent Details | ' . $record->name;
 		$this->template->partial(
 							'content_header',
@@ -579,7 +596,7 @@ class Agents extends MY_Controller
 								'content_header' => 'Agent Details <small>' . $record->name . '</small>',
 								'breadcrumbs' => ['Agents' => 'agents', 'Details' => NULL]
 						])
-						->partial('content', 'setup/agents/_details', compact('record'))
+						->partial('content', 'setup/agents/_details', $view_data)
 						->render($this->data);
 
     }

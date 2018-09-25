@@ -13,15 +13,19 @@ class Customer_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['prepare_contact_data', 'prepare_customer_defaults', 'prepare_customer_fts_data'];
-    protected $before_update = ['prepare_contact_data', 'prepare_customer_fts_data'];
+    // protected $before_insert = ['prepare_contact_data', 'prepare_customer_defaults', 'prepare_customer_fts_data'];
+    // protected $before_update = ['prepare_contact_data', 'prepare_customer_fts_data'];
+
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'branch_id', 'code', 'type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'contact', 'fts', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'branch_id', 'code', 'type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'fts', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
-    protected $endorsement_fields = ['type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'contact'];
+    protected $endorsement_fields = [
+        'customer' =>  ['type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'],
+        'address' => ['country_id', 'state_id', 'address1_id', 'alt_state_text', 'alt_address1_text', 'address2', 'city', 'zip_postal_code', 'phones', 'faxes', 'mobile', 'email', 'web']
+    ];
 
     protected $validation_rules = [];
 
@@ -42,6 +46,9 @@ class Customer_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+
+        // Load Dependant Model
+        $this->load->model('address_model');
 
         // Validation rules
         $this->validation_rules();
@@ -181,17 +188,125 @@ class Customer_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Prepare Contact Data
+     * Add New Customer
      *
-     * Before Insert/Update Trigger to Get Contact Data From Contact Form
-     *
-     * @param array $data
-     * @return array
+     * @param array $post_data Form Post Data
+     * @return mixed
      */
-    public function prepare_contact_data($data)
+    public function add($post_data)
     {
-        $data['contact'] = get_contact_data_from_form();
-        return $data;
+
+        $cols = ['type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
+        $data = [];
+
+        /**
+         * Task1: Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        /**
+         * Task 2: Branch ID and Customer Code
+         */
+        $data = $this->prepare_customer_defaults($data);
+
+
+        /**
+         * Task 3: Get Fulltext Search Field
+         */
+        $data['fts'] = $this->prepare_customer_fts_data($post_data);
+
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Primary Record
+            $done = parent::insert($data, TRUE);
+
+            // Insert Address
+            if($done)
+            {
+                $this->address_model->add(IQB_ADDRESS_TYPE_CUSTOMER, $done ,$post_data);
+            }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Edit an Customer
+     *
+     * @param int $id Customer ID
+     * @param inte $address_id Address ID of this Customer
+     * @param array $post_data Form Post Data
+     * @return mixed
+     */
+    public function edit($id, $address_id, $post_data)
+    {
+        $cols = ['type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
+        $data = [];
+
+        /**
+         * Task1: Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        /**
+         * Task 2: Get Fulltext Search Field
+         */
+        $data['fts'] = $this->prepare_customer_fts_data($post_data);
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Primary Record
+            $done = parent::update($id, $data, TRUE);
+
+            // Insert Address
+            if($done)
+            {
+                $this->address_model->edit($address_id ,$post_data);
+            }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
     }
 
     // ----------------------------------------------------------------
@@ -231,7 +346,7 @@ class Customer_model extends MY_Model
      */
     public function prepare_customer_fts_data($data)
     {
-        $contact_arr = $data['contacts'];
+        // $contact_arr = $data['contacts'];
 
         $dt = $data;
         unset($dt['code']); // we have  separate field to filter
@@ -255,17 +370,19 @@ class Customer_model extends MY_Model
             }
         }
 
-        foreach($contact_arr as $key=>$val)
-        {
-            if($val){
-                $fts_data [] =  $val;
-            }
-        }
+        // foreach($contact_arr as $key=>$val)
+        // {
+        //     if($val){
+        //         $fts_data [] =  $val;
+        //     }
+        // }
         $fts_data = implode(' ', $fts_data);
+        return $fts_data;
 
-        $data['fts'] = $fts_data;
 
-        return $data;
+        // $data['fts'] = $fts_data;
+
+        // return $data;
     }
 
     // ----------------------------------------------------------------
@@ -301,13 +418,21 @@ class Customer_model extends MY_Model
      * Update Endorsement Changes on Policy Table
      *
      * @param int $id
-     * @param array $data
+     * @param object $data contains both customer and address data
      * @return bool
      */
     public function commit_endorsement($id, $data)
     {
+        $customer = (array)$data->customer;
+        $address  = (array)$data->address;
+
+        // Update Customer Data
         return $this->db->where('id', $id)
-                        ->update($this->table_name, $data);
+                        ->update($this->table_name, $customer)
+
+                        &&
+            // Update Address Data
+            $this->address_model->commit_endorsement(IQB_ADDRESS_TYPE_CUSTOMER, $id, $address);
     }
 
     // ----------------------------------------------------------------
@@ -355,6 +480,24 @@ class Customer_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get Single Data Row by ID
+     *
+     * Get the filtered resulte set for listing purpose
+     *
+     * @param int $id
+     * @return object
+     */
+    public function row($id)
+    {
+        $this->_row_select();
+
+        return $this->db->where('C.id', $id)
+                        ->get()->row();
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Get Data Rows
      *
      * Get the filtered resulte set for listing purpose
@@ -364,9 +507,7 @@ class Customer_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('C.id, C.code, C.pan, C.full_name, C.picture, C.type, C.profession, C.company_reg_no, C.identification_no, C.dob, C.contact, C.flag_locked')
-                 ->from($this->table_name . ' as C');
-
+        $this->_row_select();
 
         if(!empty($params))
         {
@@ -419,6 +560,22 @@ class Customer_model extends MY_Model
                         ->get()->result();
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Select Columns for Data Listing
+     *
+     * @return void
+     */
+    private function _row_select()
+    {
+        $this->db->select('C.id, C.code, C.pan, C.full_name, C.picture, C.type, C.profession, C.company_reg_no, C.identification_no, C.dob, C.flag_locked')
+                 ->from($this->table_name . ' as C');
+
+
+        // Include Address Information
+        $this->address_model->module_select('C', IQB_ADDRESS_TYPE_CUSTOMER);
+    }
 
 	// --------------------------------------------------------------------
 
@@ -456,7 +613,11 @@ class Customer_model extends MY_Model
         // Use automatic transaction
         $this->db->trans_start();
 
+            // Delete Primary Record
             parent::delete($id);
+
+            // Delete Address Record
+            $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_CUSTOMER, 'type_id' => $id]);
 
         $this->db->trans_complete();
 

@@ -974,7 +974,7 @@ class Endorsement_model extends MY_Model
         if( $audit_customer )
         {
             $this->load->model('customer_model');
-            $data = (array)$audit_customer->new;
+            $data = $audit_customer->new; // Pass as Object as it contains both customer and address information
             $this->customer_model->commit_endorsement($obj_cust->customer_id, $data);
         }
 
