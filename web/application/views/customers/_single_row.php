@@ -48,11 +48,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							data-form="#_form-customer">
 							<i class="fa fa-pencil-square-o"></i>
 							<span>Edit Customer Info</span></a>
-					</li>
+					</li><li class="divider"></li>
 				<?php endif;?>
 
 				<?php if( ($this->dx_auth->is_authorized('customers', 'delete.customer')) && safe_to_delete( 'Customer_model', $record->id )):?>
-					<li class="divider"></li>
 					<li>
 						<a href="#"
 							title="Delete"
@@ -61,10 +60,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							data-url="<?php echo site_url('customers/delete/' . $record->id);?>">
 								<i class="fa fa-trash-o"></i>
 								<span>Delete</span></a>
-					</li>
-					<li class="divider"></li>
-				<?php endif?>
+					</li><li class="divider"></li>
 
+				<?php endif?>
 				<li>
 					<a href="<?php echo site_url('customers/details/' . $record->id);?>"
 						title="View customer details.">

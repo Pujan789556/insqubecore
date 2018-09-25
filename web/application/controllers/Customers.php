@@ -321,9 +321,11 @@ class Customers extends MY_Controller
 		$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_CUSTOMER, $record->id);
 
 		/**
-		 * You Can not Edit Locked Customer Information
+		 * Locked Customer???
+		 *
+		 * NOTE: Admin Can Edit Locked Customer Information
 		 */
-		if($record->flag_locked == IQB_FLAG_ON )
+		if(!$this->dx_auth->is_admin() && $record->flag_locked == IQB_FLAG_ON )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
