@@ -381,7 +381,12 @@ switch ($record->portfolio_id)
                 </tr>
                 <tr>
                     <td><strong>२. ठेगाना:</strong></td>
-                    <td><?php echo address_widget_two_lines($customer_address_record); ?></td>
+                    <td><?php
+                    /**
+                     * Parse Address Record - Customer
+                     */
+                    $customer_address_record = parse_address_record($record, 'addrc_');
+                    echo address_widget_two_lines($customer_address_record); ?></td>
                 </tr>
                 <tr>
                     <td><strong>३. टेलिफोन नं.:</strong></td>
