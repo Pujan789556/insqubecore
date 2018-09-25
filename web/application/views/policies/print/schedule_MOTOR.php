@@ -381,7 +381,7 @@ switch ($record->portfolio_id)
                 </tr>
                 <tr>
                     <td><strong>२. ठेगाना:</strong></td>
-                    <td><?php echo get_contact_widget_two_lines($record->customer_contact); ?></td>
+                    <td><?php echo address_widget_two_lines($customer_address_record); ?></td>
                 </tr>
                 <tr>
                     <td><strong>३. टेलिफोन नं.:</strong></td>
