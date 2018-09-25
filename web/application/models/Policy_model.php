@@ -1598,7 +1598,7 @@ class Policy_model extends MY_Model
 
 
         /**
-         * Creditor Branch Address
+         * Creditor Branch Address - Left Join (NON-Compulsory)
          */
         $table_aliases = [
             // Address Table Alias
@@ -1616,7 +1616,7 @@ class Policy_model extends MY_Model
             // Type/Module Table Alias
             'module' => 'CRB'
         ];
-        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addrcrb_');
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addrcrb_', FALSE);
 
 
         $record = $this->db->where('P.id', $id)

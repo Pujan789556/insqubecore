@@ -313,6 +313,7 @@ class Address_model extends MY_Model
      * @param int|null $type_id Module ID
      * @param array $aliases Table Aliases
      * @param string $col_prefix Address Column prefix
+     * @param bool $module_compulsory If module is non compulsory, we perform left join on address and country table
      * @return void
      */
     public function module_select(
@@ -339,7 +340,11 @@ class Address_model extends MY_Model
         ],
 
         // column prefix
-        $col_prefix = 'addr_'
+        $col_prefix = 'addr_',
+
+        // Module Compulsory: If yes, we have address and country table join is "NON-LEFT"
+        // else they will be "left" join - Required by Policy Model -> get()
+        $module_compulsory = TRUE
      )
     {
         /**
@@ -374,14 +379,24 @@ class Address_model extends MY_Model
 
                             // Local Body Table
                             "{$_LCLBD}.name_en AS {$col_prefix}address1_en, {$_LCLBD}.name_np AS {$col_prefix}address1_np"
-                        )
-                    ->join( $this->table_name . " $_ADR", "$_ADR.type = {$type} AND $_ADR.type_id = {$_MODULE}.id")
-                    ->join("master_countries {$_CNTRY}", "{$_CNTRY}.id = $_ADR.country_id")
-                    ->join("master_states {$_STATE}", "{$_STATE}.id = $_ADR.state_id", 'left')
-                    ->join("master_localbodies {$_LCLBD}", "{$_LCLBD}.id = $_ADR.address1_id", 'left');
+                        );
+
+        if($module_compulsory)
+        {
+            $this->db->join( $this->table_name . " $_ADR", "$_ADR.type = {$type} AND $_ADR.type_id = {$_MODULE}.id")
+                    ->join("master_countries {$_CNTRY}", "{$_CNTRY}.id = $_ADR.country_id");
+        }
+        else
+        {
+            $this->db->join( $this->table_name . " $_ADR", "$_ADR.type = {$type} AND $_ADR.type_id = {$_MODULE}.id", 'left')
+                    ->join("master_countries {$_CNTRY}", "{$_CNTRY}.id = $_ADR.country_id", 'left');
+        }
+
+        $this->db->join("master_states {$_STATE}", "{$_STATE}.id = $_ADR.state_id", 'left')
+                ->join("master_localbodies {$_LCLBD}", "{$_LCLBD}.id = $_ADR.address1_id", 'left');
 
 
-        $where = [ "{$_ADR}.type" => $type ];
+        $where = [ ];
         if($type_id)
         {
             $where["{$_ADR}.type_id"] = $type_id;
