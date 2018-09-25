@@ -489,7 +489,14 @@ class Customers extends MY_Controller
 				{
 					$single_row = 'customers/snippets/_widget_profile';
 				}
-				$html = $this->load->view($single_row, ['record' => $record, 'widget_reference' => $widget_reference], TRUE);
+
+				$view_data = [
+					'record' => $record,
+					'address_record' => $this->address_model->parse_address_record($record),
+					'widget_reference' => $widget_reference
+				];
+
+				$html = $this->load->view($single_row, $view_data, TRUE);
 				$ajax_data['updateSectionData'] = [
 					'box' 		=> $action === 'add'
 										? '#search-result-customer'

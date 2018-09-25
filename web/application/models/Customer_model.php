@@ -569,12 +569,28 @@ class Customer_model extends MY_Model
      */
     private function _row_select()
     {
-        $this->db->select('C.id, C.code, C.pan, C.full_name, C.picture, C.type, C.profession, C.company_reg_no, C.identification_no, C.dob, C.flag_locked')
+        $this->db->select('C.*')
                  ->from($this->table_name . ' as C');
 
 
         // Include Address Information
-        $this->address_model->module_select('C', IQB_ADDRESS_TYPE_CUSTOMER);
+        $table_aliases = [
+            // Address Table Alias
+            'address' => 'ADR',
+
+            // Country Table Alias
+            'country' => 'CNTRY',
+
+            // State Table Alias
+            'state' => 'STATE',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBD',
+
+            // Type/Module Table Alias
+            'module' => 'C'
+        ];
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases);
     }
 
 	// --------------------------------------------------------------------

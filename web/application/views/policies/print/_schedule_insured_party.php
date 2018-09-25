@@ -10,6 +10,11 @@ $financer_title         = $lang == 'np' ? 'बैंक वा वित्त �
 $other_financer_title   = $lang == 'np' ? 'अरु बैंक वा वित्त कम्पनीको विवरण'        : 'Other Financer(s)';
 $care_of_title          = $lang == 'np' ? 'मार्फत'                  : 'Care Of';
 
+/**
+ * Parse Address Record - Customer, Creditor Branch
+ */
+$customer_address_record = parse_address_record($record, 'addrc_');
+$creditor_address_record = parse_address_record($record, 'addrcrb_');
 
 /**
  * Policy Financed?
@@ -21,7 +26,7 @@ if($record->flag_on_credit === 'Y')
 
         htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name),
 
-        get_contact_widget($record->creditor_branch_contact, true, true)
+        address_widget($creditor_address_record, true, true)
 
     ];
 
@@ -38,7 +43,7 @@ if($record->flag_on_credit === 'Y')
 <strong><?php echo $insured_title ?></strong><br/>
 <?php
 echo htmlspecialchars($record->customer_name) ,
-        '<br/>' , get_contact_widget($record->customer_contact, true, true);
+        '<br/>' , address_widget($customer_address_record, true, true);
 
 echo  $record->care_of ? '<br/><strong>'.$care_of_title.'</strong><br>' . nl2br(htmlspecialchars($record->care_of)) . '<br/>' : '';
 ?>

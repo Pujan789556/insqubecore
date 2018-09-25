@@ -19,6 +19,12 @@ class Address_model extends MY_Model
 
     protected $fields = ['id', 'type', 'type_id', 'country_id', 'state_id', 'address1_id', 'alt_state_text', 'alt_address1_text', 'address2', 'city', 'zip_postal_code', 'phones', 'faxes', 'mobile', 'email', 'web', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
+    /**
+     * These are the fields selected while joining and getting the address data.
+     * Each column is prefixed with certain identifier to later extract address record
+     */
+    protected $module_select_fields = [ 'id', 'type', 'type_id', 'country_id', 'state_id', 'address1_id', 'alt_state_text', 'alt_address1_text', 'address2', 'city', 'zip_postal_code', 'phones', 'faxes', 'mobile', 'email', 'web'];
+
     protected $validation_rules = [];
 
 	// --------------------------------------------------------------------
@@ -301,22 +307,59 @@ class Address_model extends MY_Model
     /**
      * Select Address columns for joining with dependant module.
      *
-     * It will prefix "addr_" in front of all the address related columns so that we can create separate address record
-     * which can be passed on helper function for rendering address widget
+     * It work with multiple dependant types on a single query. [Refer Policy Model -> get() function for its implementation.]
      *
-     * @param chars $type_table_alias Dependant Module Table Alias
-     * @param int $type IQB_ADDRESS_TYPES
-     * @param int $type_id Module ID
+     * @param int $type IQB_ADDRESS_TYPES Module Type
+     * @param int|null $type_id Module ID
+     * @param array $aliases Table Aliases
+     * @param string $col_prefix Address Column prefix
      * @return void
      */
-    public function module_select($type_table_alias, $type, $type_id = NULL)
+    public function module_select(
+
+        $type,
+
+        $type_id = NULL,
+
+        $aliases = [
+            // Address Table Alias
+            'address' => 'ADR',
+
+            // Country Table Alias
+            'country' => 'CNTRY',
+
+            // State Table Alias
+            'state' => 'STATE',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBD',
+
+            // Type/Module Table Alias
+            'module' => ''
+        ],
+
+        // column prefix
+        $col_prefix = 'addr_'
+     )
     {
-        $columns = [ 'id', 'type', 'type_id', 'country_id', 'state_id', 'address1_id', 'alt_state_text', 'alt_address1_text', 'address2', 'city', 'zip_postal_code', 'phones', 'faxes', 'mobile', 'email', 'web'];
+        /**
+         * Extract Aliases
+         */
+        $_ADR = $aliases['address'] ?? 'ADR';
+        $_CNTRY = $aliases['country'] ?? 'CNTRY';
+        $_STATE = $aliases['state'] ?? 'STATE';
+        $_LCLBD = $aliases['local_body'] ?? 'LCLBD';
+        $_MODULE = $aliases['module'] ?? NULL;
+
+
+        // IF MODULE is not specified, simply return.
+        if(!$_MODULE) return FALSE;
 
         $addr_cols = "";
-        foreach ($columns as $col)
+        foreach ($this->module_select_fields as $col)
         {
-            $addr_cols .= "ADR.{$col} AS addr_{$col}, ";
+            $col_alias = $col_prefix . $col;
+            $addr_cols .= "{$_ADR}.{$col} AS {$col_alias}, ";
         }
 
         $this->db->select(
@@ -324,24 +367,24 @@ class Address_model extends MY_Model
                             "{$addr_cols}" .
 
                             // Country Table
-                            "CNTRY.name AS addr_country_name, " .
+                            "{$_CNTRY}.name AS {$col_prefix}country_name, " .
 
                             // State Table
-                            "STATE.name_en AS addr_state_name_en, STATE.name_np AS addr_state_name_np, ".
+                            "{$_STATE}.name_en AS {$col_prefix}state_name_en, {$_STATE}.name_np AS {$col_prefix}state_name_np, ".
 
                             // Local Body Table
-                            "LCLBD.name_en AS addr_address1_en, LCLBD.name_np AS addr_address1_np"
+                            "{$_LCLBD}.name_en AS {$col_prefix}address1_en, {$_LCLBD}.name_np AS {$col_prefix}address1_np"
                         )
-                    ->join( $this->table_name . ' ADR', "ADR.type = {$type} AND ADR.type_id = {$type_table_alias}.id")
-                    ->join('master_countries CNTRY', 'CNTRY.id = ADR.country_id')
-                    ->join('master_states STATE', 'STATE.id = ADR.state_id', 'left')
-                    ->join('master_localbodies LCLBD', 'LCLBD.id = ADR.address1_id', 'left');
+                    ->join( $this->table_name . " $_ADR", "$_ADR.type = {$type} AND $_ADR.type_id = {$_MODULE}.id")
+                    ->join("master_countries {$_CNTRY}", "{$_CNTRY}.id = $_ADR.country_id")
+                    ->join("master_states {$_STATE}", "{$_STATE}.id = $_ADR.state_id", 'left')
+                    ->join("master_localbodies {$_LCLBD}", "{$_LCLBD}.id = $_ADR.address1_id", 'left');
 
 
-        $where = [ "ADR.type" => $type ];
+        $where = [ "{$_ADR}.type" => $type ];
         if($type_id)
         {
-            $where["ADR.type_id"] = $type_id;
+            $where["{$_ADR}.type_id"] = $type_id;
         }
 
         $this->db->where($where);
@@ -354,9 +397,10 @@ class Address_model extends MY_Model
      * having address columns from module_select() function
      *
      * @param object $module_record
+     * @param string $prefix address column prefix
      * @return object
      */
-    public function parse_address_record($module_record)
+    public function parse_address_record($module_record, $prefix = 'addr_')
     {
         $address_record = new stdClass();
         $module_record = (array)$module_record;
@@ -364,10 +408,10 @@ class Address_model extends MY_Model
         // Assign all the columns with "addr_" prefix removing it.
         foreach($module_record as $key=>$value)
         {
-            if (strpos($key, 'addr_') === 0)
+            if (strpos($key, $prefix) === 0)
             {
                // Get the New key for address record
-                $addr_col = str_replace('addr_', '', $key);
+                $addr_col = str_replace($prefix, '', $key);
                 $address_record->{$addr_col} = $value;
             }
         }

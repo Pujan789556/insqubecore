@@ -375,7 +375,23 @@ class Ac_party_model extends MY_Model
 
 
         // Include Address Information
-        $this->address_model->module_select('P', IQB_ADDRESS_TYPE_GENERAL_PARTY);
+        $table_aliases = [
+            // Address Table Alias
+            'address' => 'ADR',
+
+            // Country Table Alias
+            'country' => 'CNTRY',
+
+            // State Table Alias
+            'state' => 'STATE',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBD',
+
+            // Type/Module Table Alias
+            'module' => 'P'
+        ];
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_GENERAL_PARTY, NULL, $table_aliases);
     }
 
     // --------------------------------------------------------------------

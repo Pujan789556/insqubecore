@@ -8,6 +8,13 @@ $insured_title          = 'Name and address of Contractor';
 $financer_title         = 'Name and address of Financer(s)';
 $other_financer_title   = 'Other Financer(s)';
 $care_of_title          = 'Care Of';
+
+/**
+ * Parse Address Record - Customer, Creditor Branch
+ */
+$customer_address_record = parse_address_record($record, 'addrc_');
+$creditor_address_record = parse_address_record($record, 'addrcrb_');
+
 ?>
 <strong>Name and address of Principal</strong><br/>
 <?php echo nl2br(htmlspecialchars($object_attributes->principal)) ?><br/><br/>
@@ -15,7 +22,7 @@ $care_of_title          = 'Care Of';
 <strong><?php echo $insured_title ?></strong><br/>
 <?php
 echo htmlspecialchars($record->customer_name) ,
-        '<br/>' , get_contact_widget($record->customer_contact, true, true), '<br/>';
+        '<br/>' , address_widget($customer_address_record, true, true), '<br/>';
 
 /**
  * Policy Financed?
@@ -27,7 +34,7 @@ if($record->flag_on_credit === 'Y')
 
         htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name),
 
-        get_contact_widget($record->creditor_branch_contact, true, true)
+        address_widget($creditor_address_record, true, true)
 
     ];
 

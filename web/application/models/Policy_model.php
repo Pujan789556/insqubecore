@@ -1487,91 +1487,139 @@ class Policy_model extends MY_Model
      */
     public function get($id)
     {
-        $record = $this->db->select(
+        $this->load->model('address_model');
 
-                            /**
-                             * Policy Table (all fields, formatted datetime fields)
-                             */
-                            "P.*,
-                            TIMESTAMP( P.`issued_date`, P.`issued_time` ) AS issued_datetime,
-                            TIMESTAMP( P.`start_date`, P.`start_time` ) AS start_datetime,
-                            TIMESTAMP( P.`end_date`, P.`end_time` ) AS end_datetime, " .
+        $this->db->select(
 
-
-                            /**
-                             * Branch Table
-                             */
-                            "B.name_en AS branch_name_en, B.name_np AS branch_name_np, B.code as branch_code, B.contacts as branch_contact, " .
+                        /**
+                         * Policy Table (all fields, formatted datetime fields)
+                         */
+                        "P.*,
+                        TIMESTAMP( P.`issued_date`, P.`issued_time` ) AS issued_datetime,
+                        TIMESTAMP( P.`start_date`, P.`start_time` ) AS start_datetime,
+                        TIMESTAMP( P.`end_date`, P.`end_time` ) AS end_datetime, " .
 
 
-                            /**
-                             * Portfolio Table ( code, name )
-                             */
-                            "PRT.name_en as portfolio_name, PRT.code as portfolio_code, " .
-
-                            /**
-                             * Riks District, State, Region
-                             */
-                            "D.name_en as district_name, ST.name_en as state_name, R.name_en as region_name, " .
-
-                            /**
-                             * Object Table (attributes, sum insured amount, lock flag)
-                             */
-                            "O.portfolio_id AS object_portfolio_id, O.attributes AS object_attributes, O.amt_sum_insured AS object_amt_sum_insured, O.si_breakdown AS object_si_breakdown, O.flag_locked AS object_flag_locked, " .
+                        /**
+                         * Branch Table
+                         */
+                        "B.name_en AS branch_name_en, B.name_np AS branch_name_np, B.code as branch_code, B.contacts as branch_contact, " .
 
 
-                            /**
-                             * Customer Table (code, name, type, pan, picture, pfrofession, contact,
-                             * company reg no, citizenship no, passport no, lock flag)
-                             */
-                            "C.code as customer_code, C.full_name as customer_name, C.grandfather_name as customer_grandfather_name, C.father_name as customer_father_name, C.mother_name as customer_mother_name, C.spouse_name as customer_spouse_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.contact as customer_contact, C.company_reg_no, C.identification_no, C.dob, C.flag_locked AS customer_flag_locked, " .
+                        /**
+                         * Portfolio Table ( code, name )
+                         */
+                        "PRT.name_en as portfolio_name, PRT.code as portfolio_code, " .
+
+                        /**
+                         * Riks District, State, Region
+                         */
+                        "D.name_en as district_name, ST.name_en as state_name, R.name_en as region_name, " .
+
+                        /**
+                         * Object Table (attributes, sum insured amount, lock flag)
+                         */
+                        "O.portfolio_id AS object_portfolio_id, O.attributes AS object_attributes, O.amt_sum_insured AS object_amt_sum_insured, O.si_breakdown AS object_si_breakdown, O.flag_locked AS object_flag_locked, " .
 
 
-                            /**
-                             * User Table - Sales Staff Info ( username, profile)
-                             */
-                            "SU.username as sold_by_username, SU.code AS sold_by_code, SU.profile as sold_by_profile, " .
+                        /**
+                         * Customer Table (code, name, type, pan, picture, pfrofession, contact,
+                         * company reg no, citizenship no, passport no, lock flag)
+                         */
+                        "C.code as customer_code, C.full_name as customer_name, C.grandfather_name as customer_grandfather_name, C.father_name as customer_father_name, C.mother_name as customer_mother_name, C.spouse_name as customer_spouse_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.company_reg_no, C.identification_no, C.dob, C.flag_locked AS customer_flag_locked, " .
 
 
-                            /**
-                             * User Table - Created By User Info (username, code, name)
-                             */
-                            "CU.username as created_by_username, CU.code as created_by_code, CU.profile as created_by_profile, " .
-
-                            /**
-                             * User Table - Verified By User Info (username, code, name)
-                             */
-                            "VU.username as verified_by_username, VU.code as verified_by_code, VU.profile as verified_by_profile, " .
+                        /**
+                         * User Table - Sales Staff Info ( username, profile)
+                         */
+                        "SU.username as sold_by_username, SU.code AS sold_by_code, SU.profile as sold_by_profile, " .
 
 
-                            /**
-                             * Agent Table (agent_id, name, picture, bs code, ud code, contact, active, type)
-                             */
-                            "A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.contact as agent_contact, A.active as agent_active, A.type as agent_type, " .
+                        /**
+                         * User Table - Created By User Info (username, code, name)
+                         */
+                        "CU.username as created_by_username, CU.code as created_by_code, CU.profile as created_by_profile, " .
+
+                        /**
+                         * User Table - Verified By User Info (username, code, name)
+                         */
+                        "VU.username as verified_by_username, VU.code as verified_by_code, VU.profile as verified_by_profile, " .
 
 
-                            /**
-                             * Crediter & Its Branch Info (name, contact), (branch name, branch contact)
-                             */
-                            "CRD.name as creditor_name, " .
-                            "CRB.name as creditor_branch_name, CRB.contact as creditor_branch_contact"
-                        )
-                     ->from($this->table_name . ' as P')
-                     ->join('master_branches B', 'B.id = P.branch_id')
-                     ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
-                     ->join('dt_objects O', 'O.id = P.object_id')
-                     ->join('dt_customers C', 'C.id = P.customer_id')
-                     ->join('master_districts D', 'D.id = P.district_id')
-                     ->join('master_states ST', 'ST.id = D.state_id')
-                     ->join('master_regions R', 'R.id = D.region_id')
-                     ->join('auth_users SU', 'SU.id = P.sold_by', 'left')
-                     ->join('auth_users CU', 'CU.id = P.created_by')
-                     ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
-                     ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
-                     ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
-                     ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
-                     ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
-                     ->where('P.id', $id)
+                        /**
+                         * Agent Table (agent_id, name, picture, bs code, ud code, active, type)
+                         */
+                        "A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.active as agent_active, A.type as agent_type, " .
+
+
+                        /**
+                         * Crediter & Its Branch Info (name, contact), (branch name, branch contact)
+                         */
+                        "CRD.name as creditor_name, " .
+                        "CRB.name as creditor_branch_name"
+                    )
+                 ->from($this->table_name . ' as P')
+                 ->join('master_branches B', 'B.id = P.branch_id')
+                 ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
+                 ->join('dt_objects O', 'O.id = P.object_id')
+                 ->join('dt_customers C', 'C.id = P.customer_id')
+                 ->join('master_districts D', 'D.id = P.district_id')
+                 ->join('master_states ST', 'ST.id = D.state_id')
+                 ->join('master_regions R', 'R.id = D.region_id')
+                 ->join('auth_users SU', 'SU.id = P.sold_by', 'left')
+                 ->join('auth_users CU', 'CU.id = P.created_by')
+                 ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
+                 ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
+                 ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
+                 ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
+                 ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left');
+
+
+        /**
+         * Customer Address
+         */
+        $table_aliases = [
+            // Address Table Alias
+            'address' => 'ADRC',
+
+            // Country Table Alias
+            'country' => 'CNTRYC',
+
+            // State Table Alias
+            'state' => 'STATEC',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBDC',
+
+            // Type/Module Table Alias
+            'module' => 'C'
+        ];
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addrc_');
+
+
+        /**
+         * Creditor Branch Address
+         */
+        $table_aliases = [
+            // Address Table Alias
+            'address' => 'ADRCRB',
+
+            // Country Table Alias
+            'country' => 'CNTRYCRB',
+
+            // State Table Alias
+            'state' => 'STATECRB',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBDCRB',
+
+            // Type/Module Table Alias
+            'module' => 'CRB'
+        ];
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addrcrb_');
+
+
+        $record = $this->db->where('P.id', $id)
                      ->get()->row();
 
          /**

@@ -89,13 +89,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				'dob' 				=> $record->dob,
 				'pan' 				=> $record->customer_pan,
 				'profession' 		=> $record->customer_profession,
-				'contact' 			=> $record->customer_contact,
 				'flag_locked'		=> $record->customer_flag_locked
 			];
+
+			$customer_address_record = parse_address_record($record, 'addrc_');
 			/**
 			* Customer Widget
 			*/
-			$this->load->view('customers/snippets/_widget_profile', ['record' => $customer_record]);
+			$this->load->view('customers/snippets/_widget_profile', ['record' => $customer_record, 'address_record' => $customer_address_record]);
 			?>
 		</div>
 	</div>

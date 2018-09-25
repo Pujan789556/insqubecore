@@ -307,7 +307,23 @@ class Company_branch_model extends MY_Model
                                 ->from($this->table_name . ' as C');
 
             // Include Address Information
-            $this->address_model->module_select('C', IQB_ADDRESS_TYPE_COMPANY_BRANCH);
+            $table_aliases = [
+                // Address Table Alias
+                'address' => 'ADR',
+
+                // Country Table Alias
+                'country' => 'CNTRY',
+
+                // State Table Alias
+                'state' => 'STATE',
+
+                // Local Body Table Alias
+                'local_body' => 'LCLBD',
+
+                // Type/Module Table Alias
+                'module' => 'C'
+            ];
+            $this->address_model->module_select(IQB_ADDRESS_TYPE_COMPANY_BRANCH, NULL, $table_aliases);
 
             $list = $this->db->where('C.company_id', $company_id)
                             ->order_by('C.is_head_office', 'desc')

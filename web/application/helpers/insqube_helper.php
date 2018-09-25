@@ -467,14 +467,15 @@ if ( ! function_exists('parse_address_record'))
      * having address columns from module_select() function
      *
      * @param object $module_record
+     * @param string $prefix address column prefix
      * @return object
      */
-    function parse_address_record( $module_record )
+    function parse_address_record( $module_record, $prefix = 'addr_' )
     {
         $CI =& get_instance();
 
         $CI->load->model('address_model');
-        return $CI->address_model->parse_address_record( $module_record );
+        return $CI->address_model->parse_address_record( $module_record, $prefix );
     }
 }
 
