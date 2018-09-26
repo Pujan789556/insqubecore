@@ -186,7 +186,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             // prefetch: '../data/films/post_1960.json',
             remote: {
-                url: '<?php echo site_url('objects/motor_lookup_reg_no_prefix') ?>/%QUERY.json',
+                url: '<?php echo site_url('objects/motor_lookup_reg_no_prefix') ?>/%QUERY',
                 wildcard: '%QUERY'
             }
         });
