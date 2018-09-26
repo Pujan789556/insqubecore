@@ -2404,13 +2404,14 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 		$flag_to_be_intimated = $object['flag_to_be_intimated'] ?? NULL;
 		if($flag_to_be_intimated)
 		{
-			$reg_no_rules  = 'trim|max_length[30]|strtoupper|in_list[TO BE INTIMATED]';
+			$reg_no_prefix_rules  	= 'trim|required|alpha_numeric_spaces|max_length[30]|strtoupper|in_list[TO BE INTIMATED]';
+			$reg_no_rules  			= 'trim|required|max_length[30]|strtoupper|in_list[TO BE INTIMATED]';
 		}
 		else
 		{
-			$reg_no_rules  = 'trim|max_length[30]|strtoupper|callback__cb_motor_duplicate_reg_no';
+			$reg_no_prefix_rules  	= 'trim|required|alpha_numeric_spaces|max_length[30]|strtoupper|callback__cb_motor_valid_reg_prefix';
+			$reg_no_rules  			= 'trim|required|integer|max_length[4]|callback__cb_motor_duplicate_reg_no';
 		}
-
 		$ec_dropdown = _OBJ_MOTOR_carrying_unit_dropdown(FALSE);
 
 		/**
@@ -2491,38 +2492,6 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        '_type'     => 'text',
 			        '_required' => true
 			    ],
-
-			    // For New Vehicle, It can Have "To Be Intimated"
-			    [
-			        'field' => 'object[flag_to_be_intimated]',
-			        '_key' => 'flag_to_be_intimated',
-			        'label' => 'To Be Intimated',
-			        'rules' => 'trim|integer|in_list[1]',
-			        '_id' 		=> '_motor-vehicle-to-be-intimated',
-			        '_type'     => 'checkbox',
-			        '_checkbox_value' 	=> '1',
-			        '_required' => false,
-			        '_help_text' => 'Click here if the vehicle is not registered yet.'
-			    ],
-
-			    [
-			        'field' => 'object[reg_no]',
-			        '_key' => 'reg_no',
-			        'label' => 'Registration Number',
-			        'rules' => $reg_no_rules,
-			        '_id' 		=> '_motor-registration-no',
-			        '_type'     => 'text',
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[reg_date]',
-			        '_key' => 'reg_date',
-			        'label' => 'Registration Date',
-			        'rules' => 'trim|valid_date',
-			        '_id' 		=> '_motor-registration-date',
-			        '_type'     => 'date',
-			        '_required' => false
-			    ],
 			    [
 			        'field' => 'object[puchase_date]',
 			        '_key' => 'puchase_date',
@@ -2589,6 +2558,56 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        '_required' => true
 			    ]
 		    ],
+
+		    // Vehicle Common Fields - Registration Numbers
+		    'vehicle-registration' => [
+		    	// For New Vehicle, It can Have "To Be Intimated"
+			    [
+			        'field' => 'object[flag_to_be_intimated]',
+			        '_key' => 'flag_to_be_intimated',
+			        'label' => 'To Be Intimated',
+			        'rules' => 'trim|integer|in_list[1]',
+			        '_id' 		=> '_motor-vehicle-to-be-intimated',
+			        '_type'     => 'checkbox',
+			        '_checkbox_value' 	=> '1',
+			        '_required' => false,
+			        '_help_text' => 'Click here if the vehicle is not registered yet.'
+			    ],
+
+			    [
+			        'field' => 'object[reg_no_prefix]',
+			        '_key' => 'reg_no_prefix',
+			        'label' => 'Registration Type',
+			        'rules' => $reg_no_prefix_rules,
+			        '_id' 		=> '_motor-vechicle-reg_no_prefix',
+			        '_class' 	=> 'form-control typeahead vehicle-reg-input',
+			        '_type'     => 'text',
+			        '_help_text' => 'Example - BA 1 PA',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[reg_no]',
+			        '_key' => 'reg_no',
+			        'label' => 'Registration Number',
+			        'rules' => $reg_no_rules,
+			        '_class' 	=> 'form-control vehicle-reg-input',
+			        '_id' 		=> '_motor-vechicle-reg_no',
+			        '_type'     => 'text',
+			        '_help_text' => 'Example - 3039',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[reg_date]',
+			        '_key' => 'reg_date',
+			        'label' => 'Registration Date',
+			        'rules' => 'trim|valid_date',
+			        '_class' 	=> 'form-control vehicle-reg-input',
+			        '_id' 		=> '_motor-vechicle-reg_date',
+			        '_type'     => 'date',
+			        '_required' => false
+			    ],
+		    ],
+
 
 		    // Seating Capacity - PVC and CVC
 		    'seating-capcity' => [
@@ -2674,15 +2693,15 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 
 		if($portfolio_id == IQB_SUB_PORTFOLIO_MOTORCYCLE_ID)
 		{
-			$sections = ['vehicle-common', 'seating-capcity'];
+			$sections = ['vehicle-common', 'vehicle-registration', 'seating-capcity'];
 		}
 		else if($portfolio_id == IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID)
 		{
-			$sections = ['vehicle-common', 'seating-capcity', 'trailer'];
+			$sections = ['vehicle-common', 'vehicle-registration', 'seating-capcity', 'trailer'];
 		}
 		else
 		{
-			$sections = ['vehicle-cvc', 'vehicle-common', 'seating-capcity', 'carrying-capcity',  'staff', 'trailer'];
+			$sections = ['vehicle-cvc', 'vehicle-common', 'vehicle-registration', 'seating-capcity', 'carrying-capcity',  'staff', 'trailer'];
 		}
 
 

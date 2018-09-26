@@ -91,12 +91,14 @@ defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest auto
 |--------------------------------------------------------------------------
 |
 | Cache durations:
+| 		1/2 hour 	= 1 * 30 * 60 	= 1800
 | 		1 hour 	= 1 * 60 * 60 	= 3600
 | 		1 day  	= 24 * 60 * 60 	= 86400 (default)
 | 		1 week 	= 86400 * 7  	= 604800
 | 		1 month = 86400 * 30 	= 2592000
 |
 */
+define('CACHE_DURATION_HALF_HR', 	1800);
 define('CACHE_DURATION_HR', 		3600);
 define('CACHE_DURATION_6HRS', 		21600);
 define('CACHE_DURATION_HALF_DAY', 	43200);

@@ -193,7 +193,7 @@ switch ($record->portfolio_id)
                             </tr>
                             <tr>
                                 <td>दर्ता नं.:</td>
-                                <td><?php echo htmlspecialchars($object_attributes->reg_no);?></td>
+                                <td><?php echo $object_attributes->reg_no_prefix . ' ' . $object_attributes->reg_no;?></td>
                             </tr>
                             <tr>
                                 <td>बनाउने कम्पनी:</td>
@@ -446,7 +446,7 @@ switch ($record->portfolio_id)
                     <tr>
                         <td><?php echo htmlspecialchars($object_attributes->make) ?></td>
                         <td><?php echo htmlspecialchars($object_attributes->model) ?></td>
-                        <td><?php echo htmlspecialchars( implode(' / ', array_filter([$object_attributes->reg_no, $object_attributes->reg_date]) ) ) ?></td>
+                        <td><?php echo htmlspecialchars( implode(' / ', array_filter([$object_attributes->reg_no_prefix . ' ' . $object_attributes->reg_no, $object_attributes->reg_date]) ) ) ?></td>
                         <td><?php echo htmlspecialchars( $object_attributes->chasis_no ) ?></td>
                         <td><?php echo htmlspecialchars( $object_attributes->engine_no ) ?></td>
                         <td>

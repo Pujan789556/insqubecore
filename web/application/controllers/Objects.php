@@ -1186,6 +1186,13 @@ class Objects extends MY_Controller
 	// PORTFOLIO - MOTOR - CRUD HELPER FUNCTIONS
 	// --------------------------------------------------------------------
 
+		/**
+		 * Motor Object Callback - Valid Vehicle engine number?
+		 *
+		 * @param type $engine_no
+		 * @param type|null $id
+		 * @return type
+		 */
 		public function _cb_motor_duplicate_engine_no($engine_no, $id=NULL)
 		{
 			$engine_no = $engine_no ??  $this->input->post('object[engine_no]');
@@ -1199,6 +1206,13 @@ class Objects extends MY_Controller
 	        return TRUE;
 		}
 
+		/**
+		 * Motor Object Callback - Valid Vehicle chasis number?
+		 *
+		 * @param type $chasis_no
+		 * @param type|null $id
+		 * @return type
+		 */
 		public function _cb_motor_duplicate_chasis_no($chasis_no, $id=NULL)
 		{
 			$chasis_no = $chasis_no ??  $this->input->post('object[chasis_no]');
@@ -1212,17 +1226,65 @@ class Objects extends MY_Controller
 	        return TRUE;
 		}
 
+		/**
+		 * Motor Object Callback - Valid Vehicle registration number?
+		 *
+		 * @param type $reg_no
+		 * @param type|null $id
+		 * @return type
+		 */
 		public function _cb_motor_duplicate_reg_no($reg_no, $id=NULL)
 		{
 			$reg_no = $reg_no ??  $this->input->post('object[reg_no]');
+			$reg_no_prefix = $this->input->post('object[reg_no_prefix]');
 	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
 
-	        if( $this->object_model->_cb_motor_duplicate(['_motor_reg_no' => $reg_no], $id))
+	        if( $this->object_model->_cb_motor_duplicate(['_motor_reg_no' => $reg_no, '_motor_reg_no_prefix' => $reg_no_prefix], $id))
 	        {
 	            $this->form_validation->set_message('_cb_motor_duplicate_reg_no', 'The %s already exists.');
 	            return FALSE;
 	        }
 	        return TRUE;
+		}
+
+		/**
+		 * Motor Object Callback - Valid vehicle registration prefix?
+		 *
+		 * @param type $reg_no_prefix
+		 * @return type
+		 */
+		public function _cb_motor_valid_reg_prefix($reg_no_prefix)
+		{
+			$this->load->model('vehicle_reg_prefix_model');
+
+			$reg_no_prefix = $reg_no_prefix ??  $this->input->post('object[reg_no_prefix]');
+
+	        if( !$this->vehicle_reg_prefix_model->exists(['name_en' => $reg_no_prefix]))
+	        {
+	            $this->form_validation->set_message('_cb_motor_valid_reg_prefix', 'Invalid Vehicle Registration Type.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
+
+		/**
+		 * Lookup - Vehicle Registration Prefix
+		 *
+		 * @param string $query
+		 * @return JSON
+		 */
+		public function motor_lookup_reg_no_prefix($query)
+		{
+			// Url Decode
+			$query = urldecode($query);
+
+			// Remove .json from query string
+			$query = str_replace('.JSON', '', strtoupper($query));
+
+			$this->load->model('vehicle_reg_prefix_model');
+			$list = $this->vehicle_reg_prefix_model->lookup($query);
+			echo json_encode($list);
+			exit(0);
 		}
 
 

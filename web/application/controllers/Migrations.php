@@ -254,4 +254,29 @@ class Migrations extends CI_Controller
 		$this->m20180921_model->migrate();
 	}
 
+	// -------------------------------------------------------------------------------------
+
+	/**
+	 * Motor Object - Registration Number Restructured
+	 *
+	 * 	The new motor registration number has two components
+	 * 		a. reg_no_prefix (example ME 1 PA)
+	 * 		b. reg_no 	(example 987)
+	 *
+	 * 	Tasks:
+	 * 	- Old reg_no contains both number and prefix. The task is to separate both in
+	 * 		corresponding fields
+	 *
+	 *
+	 * Usage
+	 * 		$ php index.php migrations m20180926
+	 * 		$ CI_ENV=production php index.php migrations m20180926
+	 * @return void
+	 */
+	public function m20180926( )
+	{
+		$this->load->model('migrations/m20180926_model');
+		$this->m20180926_model->migrate();
+	}
+
 }

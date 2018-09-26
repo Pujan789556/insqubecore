@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Object - Motor
  */
 ?>
+<link rel="stylesheet" href="<?php echo THEME_URL; ?>plugins/typeahead/typeahead.css">
 <div class="row">
     <div class="col-md-6">
         <div class="box box-solid box-bordered">
@@ -25,6 +26,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </div>
     </div>
     <div class="col-md-6">
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">Vehicle Registration Information</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <?php
+                /**
+                 * Vehicle Information
+                 */
+                $vehicle_elements = $form_elements['vehicle-registration'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $vehicle_elements,
+                    'form_record'   => $record
+                ]);
+                ?>
+            </div>
+        </div>
 
         <?php
         /**
@@ -157,23 +175,64 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </div>
 
 
-<script type="text/javascript">
 
+<script type="text/javascript">
+    /**
+     * Typeahead Lookup
+     */
+    $.getScript( "<?php echo THEME_URL; ?>plugins/typeahead/typeahead.bundle.min.js", function( data, textStatus, jqxhr ) {
+        var vehicleRegNumberSuggestions = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            // prefetch: '../data/films/post_1960.json',
+            remote: {
+                url: '<?php echo site_url('objects/motor_lookup_reg_no_prefix') ?>/%QUERY.json',
+                wildcard: '%QUERY'
+            }
+        });
+
+        $('#_motor-vechicle-reg_no_prefix').typeahead(null, {
+            // name: 'best-pictures',
+            highlight : true,
+            limit: 19,
+            display: 'value',
+            source: vehicleRegNumberSuggestions
+        });
+
+        // Select Bind - Focus Reg No Box
+        $('#_motor-vechicle-reg_no_prefix').bind('typeahead:select', function(ev, suggestion) {
+            $('#_motor-vechicle-reg_no').focus();
+        });
+    });
+</script>
+
+<script type="text/javascript">
     function _po_to_be_intimated(d, et){
-        var $this       = $(d), // the source element
-        $reg_box        = $('#_motor-registration-no').closest('.form-group'),
-        $reg_date_box   = $('#_motor-registration-date').closest('.form-group'),
-        $reg_field      = $('#_motor-registration-no'),
-        $reg_date_field = $('#_motor-registration-date');
+        var $this  = $(d), // the source element
+            $boxes = $('input.vehicle-reg-input').closest('.form-group');
 
         if(et === 'ifChecked' || $this.prop('checked') === true){
-            $reg_field.val('TO BE INTIMATED');
-            $reg_date_field.val('');
-            $reg_box.hide(500);
-            $reg_date_box.hide(500);
+
+            // TO be intimated
+            $('input.vehicle-reg-input').val('TO BE INTIMATED');
+
+            // Date Blank
+            $('input#_motor-vechicle-reg_date').val('');
+
+            // Hide the boxes
+            $boxes.hide(500);
+
+
         }else if(typeof et === 'undefined' || et === 'ifUnchecked'){
-            $reg_box.show(500);
-            $reg_date_box.show(500);
+            $boxes.show(500);
+
+            // If user unchecks, empty these fields
+            if(et === 'ifUnchecked'){
+                // empty all fields
+                $('input.vehicle-reg-input').val('');
+                // focus the first field
+                $('input.vehicle-reg-input:first').focus();
+            }
         }
     }
 
