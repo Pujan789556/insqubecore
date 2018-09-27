@@ -100,7 +100,7 @@ $form_title = $form_title ?? 'Contact Address';
                             '</div>'
     };
 
-    $(document).on('change', '#country-id', function(){
+    $('#country-id').on('change', function(){
 
         /**
          * Fetch State List
@@ -134,6 +134,11 @@ $form_title = $form_title ?? 'Contact Address';
                             text : opt.label
                         }));
                     });
+
+                    // Register State Change Event - Because the content is loaded dynamically
+                    $( 'select#state-id').on('change',function(){
+                        __state_change(this);
+                    });
                 }else{
                     // Show State and Address1 TextArea
                     $sbox.html(
@@ -154,8 +159,13 @@ $form_title = $form_title ?? 'Contact Address';
         }
     });
 
-    $(document).on('change', 'select#state-id', function(){
+    // Register State Change Event
+    $( 'select#state-id').on('change',function(){
+        __state_change(this);
+    });
 
+    function __state_change(dom)
+    {
         /**
          * Fetch Address1 List
          *  - if empty, show address1 textarea
@@ -163,7 +173,7 @@ $form_title = $form_title ?? 'Contact Address';
          *      - show address1 dropdown
          */
 
-         var $this = $(this),
+         var $this = $(dom),
             sid = $.trim($this.val()),
             $a1box = $('#address1-box');
 
@@ -172,6 +182,7 @@ $form_title = $form_title ?? 'Contact Address';
             $.getJSON('<?php echo base_url()?>addresses/address1/'+sid, function(r){
                 // If found Address1 Dropdown
                 if ( Array.isArray(r) && r.length > 0 ){
+
                     $a1box.html(
                         '<div class="form-group">' +
                            _iqb_addrconfig.address1_label +
@@ -184,6 +195,7 @@ $form_title = $form_title ?? 'Contact Address';
                             text : opt.label
                         }));
                     });
+
                 }else{
                     // Show Address1 TextArea
                     $a1box.html(
@@ -195,7 +207,7 @@ $form_title = $form_title ?? 'Contact Address';
                 }
             });
         }
-    })
+    }
 </script>
 
 
