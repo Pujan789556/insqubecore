@@ -1341,6 +1341,38 @@ class Users extends MY_Controller
         $this->template->json($json_data);
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Force Re-login to All Users
+     *
+     * Force Relogin to All Users
+     *
+     * @return json
+     */
+    public function force_relogin_all()
+    {
+    	$this->load->model('dx_auth/user_setting_model', 'user_setting_model');
+    	if( $this->user_setting_model->update_flag_all('flag_re_login', IQB_FLAG_ON) )
+    	{
+    		$data = [
+				'status' 	=> 'success',
+				'message' 	=> 'Successfully forced re-login to all Users!',
+				'reloadPage' => true // reload the page
+			];
+
+			// @TODO: Log activity
+    	}
+    	else
+    	{
+    		$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be updated!'
+			];
+		}
+		return $this->template->json($data);
+	}
+
 	// --------------------------------------------------------------------
 
     /**
@@ -1353,7 +1385,7 @@ class Users extends MY_Controller
     public function revoke_all_backdate()
     {
     	$this->load->model('dx_auth/user_setting_model', 'user_setting_model');
-    	if( $this->user_setting_model->update_flag_all('flag_back_date', IQB_STATUS_INACTIVE) )
+    	if( $this->user_setting_model->update_flag_all('flag_back_date', IQB_FLAG_OFF) )
     	{
     		$data = [
 				'status' 	=> 'success',

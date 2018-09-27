@@ -7,10 +7,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div class="box no-margin">
 	<div class="box-header no-border gray">
 		<div class="row">
-			<div class="col-sm-6">
+			<div class="col-md-4">
 				<h1 style="margin:0; font-size:24px;"><?php echo $content_header; ?></h1>
 			</div>
-			<div class="col-sm-6 master-actions text-right">
+			<div class="col-md-8 master-actions text-right">
 				<a href="#"
 					title="Add New User"
 					data-toggle="tooltip"
@@ -50,6 +50,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 				<a href="#"
 					data-toggle="tooltip"
+					title="Force-login to all users."
+					data-title="Force-login to all users?"
+					data-confirm="true"
+					class="btn btn-danger btn-round trg-dialog-action"
+					data-message="Are you sure you want to do this?<br/>This will force all users to re-login."
+					data-url="<?php echo site_url('users/force_relogin_all/');?>">
+						<i class="fa fa-lock"></i> Re-login All</a>
+
+				<a href="#"
+					data-toggle="tooltip"
 					title="Rengerate new password and force-login to all users."
 					data-title="Rengerate new password and force-login to all users?"
 					data-confirm="true"
@@ -57,6 +67,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					data-message="Are you sure you want to do this?<br/>This will regenerate new passwords for all users and apply force-relogin."
 					data-url="<?php echo site_url('users/renew_passwords/');?>">
 						<i class="fa fa-lock"></i> Renew Passwords</a>
+
+
 			</div>
 		</div>
 	</div>

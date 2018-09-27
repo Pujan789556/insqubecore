@@ -542,7 +542,7 @@ class User_model extends MY_Model
 		if($done)
 		{
 			$this->load->model('dx_auth/user_setting_model', 'user_setting_model');
-			$this->user_setting_model->update_flag_by_user($user_id, 'flag_re_login', IQB_STATUS_ACTIVE);
+			$this->user_setting_model->update_flag_by_user($user_id, 'flag_re_login', IQB_FLAG_ON);
 		}
 
 		return $done;

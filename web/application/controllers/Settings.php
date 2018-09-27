@@ -125,6 +125,7 @@ class Settings extends MY_Controller
 				'status' 		=> $status,
 				'message' 		=> $message,
 				'reloadForm' 	=> true,
+				'reloadPage' 	=> $status == 'success' && $this->settings->flag_offline != $data['flag_offline'],
 				'form' 	  		=> $view
 			]);
 		}
