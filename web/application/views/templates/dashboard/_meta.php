@@ -29,7 +29,7 @@
 <!-- Theme style -->
 <link rel="stylesheet" href="<?php echo THEME_URL; ?>dist/css/AdminLTE.min.css">
 
-<link rel="stylesheet" href="<?php echo site_url(insqube_css('public/app/css/insqube', '1.0'))?>">
+<link rel="stylesheet" href="<?php echo site_url(insqube_css('static/app/css/insqube', '1.0'))?>">
 
 <!-- On/Off Switch Style -->
 <link rel="stylesheet" href="<?php echo THEME_URL; ?>dist/css/switch.css">
@@ -52,6 +52,6 @@ folder instead of downloading all of them to reduce the load. -->
 
 <script type="text/javascript">
 var __IQB__APP_BASE_URL = '<?php echo APP_URL; ?>',
-	__IQB__APP_GOODIES_URL = '<?php echo APP_URL; ?>public/app/',
+	__IQB__APP_GOODIES_URL = '<?php echo APP_URL; ?>static/app/',
 	__IQB__APP_THEME_URL = '<?php echo THEME_URL; ?>';
 </script>

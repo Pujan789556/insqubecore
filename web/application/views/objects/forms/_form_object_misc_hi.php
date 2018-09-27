@@ -59,7 +59,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </div>
             </div>
             <div class="box-footer">
-                <h5><a href="<?php echo site_url('public/samples/po-hi-sample.xlsx') ?>" target="_blank"> <i class="fa fa-download"></i> Download Sample File</a></h5>
+                <h5><a href="<?php echo site_url('static/samples/po-hi-sample.xlsx') ?>" target="_blank"> <i class="fa fa-download"></i> Download Sample File</a></h5>
             </div>
         </div>
     </div>

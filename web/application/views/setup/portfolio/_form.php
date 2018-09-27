@@ -33,7 +33,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     ]);
     ?>
 
-    <h5><a href="<?php echo site_url('public/samples/bs-ri-report-sample.xlsx') ?>" target="_blank"> <i class="fa fa-download"></i> Download Beema Samiti Business Code Reference File</a></h5>
+    <h5><a href="<?php echo site_url('static/samples/bs-ri-report-sample.xlsx') ?>" target="_blank"> <i class="fa fa-download"></i> Download Beema Samiti Business Code Reference File</a></h5>
     <div class="alert alert-info">
         <p><strong>Beema Samiti Business Code</strong> is required to generate Beema Samiti Report for Re-Insurance.</p>
         <p>Please download and see the following reference file for finding the correct code.</p>

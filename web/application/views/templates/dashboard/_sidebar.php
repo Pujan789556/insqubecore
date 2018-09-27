@@ -18,7 +18,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
       <!-- Sidebar user panel -->
       <div class="user-panel">
             <div class="pull-left image">
-                  <img src="http://insqube.dev/public/themes/AdminLTE-2.3.6/dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+                  <img src="http://insqube.dev/static/themes/AdminLTE-2.3.6/dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
             </div>
             <div class="pull-left info">
                   <p>Alexander Pierce</p>

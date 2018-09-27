@@ -43,7 +43,7 @@
             <tbody>
                 <tr>
                     <td colspan="2" align="left">
-                        <img style="margin-bottom: 20px;" src="<?php echo site_url('public/app/images/logo.png') ?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
+                        <img style="margin-bottom: 20px;" src="<?php echo site_url('static/app/images/logo.png') ?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
                     </td>
                     <td align="right"><h2>Credit Note # <?php echo $record->id?></h2></td>
                 </tr>

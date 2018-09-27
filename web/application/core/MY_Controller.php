@@ -74,7 +74,7 @@ class MY_Controller extends CI_Controller
 		/**
 		 * Define Theme
 		 */
-		define('THEME_URL', site_url('public/themes/AdminLTE-2.3.6/'));
+		define('THEME_URL', site_url('static/themes/AdminLTE-2.3.6/'));
 
 		/**
 		 * Active Primary Navigation Data
