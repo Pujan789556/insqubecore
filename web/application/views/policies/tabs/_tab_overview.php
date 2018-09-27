@@ -92,7 +92,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				'flag_locked'		=> $record->customer_flag_locked
 			];
 
-			$customer_address_record = parse_address_record($record, 'addrc_');
+			$customer_address_record = parse_address_record($record, 'addr_customer_');
 			/**
 			* Customer Widget
 			*/
