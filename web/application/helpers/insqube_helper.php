@@ -492,15 +492,15 @@ if ( ! function_exists('address_widget_two_lines'))
      *      Address1,  address2,  city, state, zip, country
      *      Tel: ..., Fax: ..., Mobile: ..., Email: ..., Web: ....
      *
-     * @param Object $record Single Contact Address
+     * @param Object $address_record Single Contact Address
      * @param string $prefix Prefix text if any
      * @param bool $plain_text  Return only Plain Text(No link on email,mobile,website, No HR)
      * @return html
      */
-    function address_widget_two_lines( $record, $prefix = '' )
+    function address_widget_two_lines( $address_record, $prefix = '' )
     {
         $CI =& get_instance();
-        $data = ['record' => $record, 'prefix' => $prefix ];
+        $data = ['address_record' => $address_record, 'prefix' => $prefix ];
         $view ='templates/_common/_widget_address_snippet_two_lines';
         return $CI->load->view( $view, $data, TRUE);
     }
@@ -527,15 +527,15 @@ if ( ! function_exists('address_widget'))
      *      Email:
      *      Web:
      *
-     * @param object $record Single Address Record
+     * @param object $address_record Single Address Record
      * @param bool $snippet_only Return Only Snippet Text
      * @param bool $plain_text  Return only Plain Text(No link on email,mobile,website, No HR)
      * @return html
      */
-    function address_widget( $record, $snippet_only = false, $plain_text = false )
+    function address_widget( $address_record, $snippet_only = false, $plain_text = false )
     {
         $CI =& get_instance();
-        $data = ['record' => $record, 'plain_text' => $plain_text ];
+        $data = ['address_record' => $address_record, 'plain_text' => $plain_text ];
 
         $view = $snippet_only ? 'templates/_common/_widget_address_snippet' : 'templates/_common/_widget_address';
         return $CI->load->view( $view, $data, TRUE);
