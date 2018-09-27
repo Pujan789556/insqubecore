@@ -163,12 +163,14 @@ define('IQB_ADDRESS_TYPE_COMPANY_BRANCH',   2);
 define('IQB_ADDRESS_TYPE_CUSTOMER',      	3);
 define('IQB_ADDRESS_TYPE_GENERAL_PARTY',    4);
 define('IQB_ADDRESS_TYPE_SURVEYOR',      	5);
+define('IQB_ADDRESS_TYPE_BRANCH',      		6); // Master Branches
 define('IQB_ADDRESS_TYPES',  [
 	IQB_ADDRESS_TYPE_AGENT 			=> 'Agent',
 	IQB_ADDRESS_TYPE_COMPANY_BRANCH => 'Company Branch',
 	IQB_ADDRESS_TYPE_CUSTOMER 		=> 'Customer',
 	IQB_ADDRESS_TYPE_GENERAL_PARTY 	=> 'General Party',
-	IQB_ADDRESS_TYPE_SURVEYOR 		=> 'Surveyor'
+	IQB_ADDRESS_TYPE_SURVEYOR 		=> 'Surveyor',
+	IQB_ADDRESS_TYPE_BRANCH 		=> 'Branch'
 ]);
 
 /*

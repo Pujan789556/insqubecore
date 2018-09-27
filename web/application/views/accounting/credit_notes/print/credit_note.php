@@ -20,7 +20,7 @@
     $header_footer = '<htmlpagefooter name="myfooter">
                         <table class="table table-footer no-border">
                             <tr>
-                                <td class="border-t">'. get_contact_widget_two_lines($record->branch_contact, $branch_contact_prefix) .'</td>
+                                <td class="border-t">'. address_widget_two_lines( parse_address_record($record), $branch_contact_prefix) .'</td>
                             </tr>
                         </table>
                     </htmlpagefooter>

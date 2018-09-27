@@ -385,7 +385,7 @@ switch ($record->portfolio_id)
                     /**
                      * Parse Address Record - Customer
                      */
-                    $customer_address_record = parse_address_record($record, 'addrc_');
+                    $customer_address_record = parse_address_record($record, 'addr_customer_');
                     echo address_widget_two_lines($customer_address_record); ?></td>
                 </tr>
                 <tr>

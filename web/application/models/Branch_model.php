@@ -13,14 +13,14 @@ class Branch_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['capitalize_code', 'prepare_contact_data'];
-    protected $before_update = ['capitalize_code', 'prepare_contact_data'];
+    // protected $before_insert = ['capitalize_code', 'prepare_contact_data'];
+    // protected $before_update = ['capitalize_code', 'prepare_contact_data'];
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ['id', 'name_en', 'name_np', 'code', 'estd', 'contacts', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'name_en', 'name_np', 'code', 'estd', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [
         [
@@ -70,6 +70,113 @@ class Branch_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+
+        // Load dependant model
+        $this->load->model('address_model');
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Add New Record
+     *
+     * @param array $post_data Form Post Data
+     * @return mixed
+     */
+    public function add($post_data)
+    {
+        $cols = ['name_en', 'name_np', 'code', 'estd'];
+        $data = [];
+
+        /**
+         * Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Primary Record
+            $done = parent::insert($data, TRUE);
+
+            // Insert Address
+            if($done)
+            {
+                $this->address_model->add(IQB_ADDRESS_TYPE_BRANCH, $done ,$post_data);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Edit an Branch
+     *
+     * @param int $id Branch ID
+     * @param inte $address_id Address ID of this Branch
+     * @param array $post_data Form Post Data
+     * @return mixed
+     */
+    public function edit($id, $address_id, $post_data)
+    {
+        $cols = ['name_en', 'name_np', 'code', 'estd'];
+        $data = [];
+
+        /**
+         * Prepare Basic Data
+         */
+        foreach($cols as $col)
+        {
+            $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $done               = FALSE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Primary Record
+            $done = parent::update($id, $data, TRUE);
+
+            // Insert Address
+            if($done)
+            {
+                $this->address_model->edit($address_id ,$post_data);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $done;
     }
 
     // ----------------------------------------------------------------
@@ -87,29 +194,6 @@ class Branch_model extends MY_Model
             $this->write_cache($list, 'branches_all', CACHE_DURATION_DAY);
         }
         return $list;
-    }
-
-    // ----------------------------------------------------------------
-
-    public function capitalize_code($data)
-    {
-        $code_cols = array('code');
-        foreach($code_cols as $col)
-        {
-            if( isset($data[$col]) && !empty($data[$col]) )
-            {
-                $data[$col] = strtoupper($data[$col]);
-            }
-        }
-        return $data;
-    }
-
-    // ----------------------------------------------------------------
-
-    public function prepare_contact_data($data)
-    {
-        $data['contacts'] = get_contact_data_from_form();
-        return $data;
     }
 
     // ----------------------------------------------------------------
@@ -188,16 +272,18 @@ class Branch_model extends MY_Model
 
         // Disable DB Debug for transaction to work
         $this->db->db_debug = FALSE;
-
-        $status = TRUE;
+        $status             = TRUE;
 
         // Use automatic transaction
         $this->db->trans_start();
 
+            // Delete Primary Record
             parent::delete($id);
 
-        $this->db->trans_complete();
+            // Delete Address Record
+            $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_BRANCH, 'type_id' => $id]);
 
+        $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error

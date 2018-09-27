@@ -20,7 +20,7 @@
     $header_footer = '<htmlpagefooter name="myfooter">
                         <table class="table table-footer no-border">
                             <tr>
-                                <td class="border-t">'. get_contact_widget_two_lines($invoice_record->branch_contact, $branch_contact_prefix) .'</td>
+                                <td class="border-t">'. address_widget_two_lines( parse_address_record($record), $branch_contact_prefix) .'</td>
                             </tr>
                         </table>
                     </htmlpagefooter>
@@ -53,7 +53,10 @@
                         <strong>Customer Details</strong><br/>
                         <address>
                             <strong><?php echo $invoice_record->customer_full_name?></strong><br>
-                            <?php echo get_contact_widget($invoice_record->customer_contact, true, true)?>
+                            <?php
+                            $customer_address_record = parse_address_record($invoice_record, 'addr_customer_');
+                            address_widget($customer_address_record, true, true);
+                            ?>
                         </address>
                     </td>
 

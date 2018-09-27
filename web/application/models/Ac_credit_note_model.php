@@ -400,11 +400,28 @@ class Ac_credit_note_model extends MY_Model
         // Common Row Select
         $this->_row_select();
 
+        // Get Branch Address Information
+        $this->load->model('address_model');
+        $table_aliases = [
+            // Address Table Alias
+            'address' => 'ADR',
+
+            // Country Table Alias
+            'country' => 'CNTRY',
+
+            // State Table Alias
+            'state' => 'STATE',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBD',
+
+            // Type/Module Table Alias
+            'module' => 'B'
+        ];
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_BRANCH, NULL, $table_aliases);
+
         // Policy, Customer Related JOIN
         $this->db->select(
-                            // Branch Contact
-                            'B.contacts as branch_contact, ' .
-
                             // Policy Installment ID, Endorsement ID
                             'PTI.id as policy_installment_id, PTI.endorsement_id, ' .
 

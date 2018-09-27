@@ -12,8 +12,8 @@ $care_of_title          = 'Care Of';
 /**
  * Parse Address Record - Customer, Creditor Branch
  */
-$customer_address_record = parse_address_record($record, 'addrc_');
-$creditor_address_record = parse_address_record($record, 'addrcrb_');
+$customer_address_record = parse_address_record($record, 'addr_customer_');
+$creditor_address_record = parse_address_record($record, 'addr_creditor_');
 
 ?>
 <strong>Name and address of Principal</strong><br/>

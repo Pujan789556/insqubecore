@@ -172,7 +172,6 @@ class Agent_model extends MY_Model
             }
 
         $this->db->trans_complete();
-
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error

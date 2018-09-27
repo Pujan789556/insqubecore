@@ -449,11 +449,28 @@ class Ac_invoice_model extends MY_Model
         // Common Row Select
         $this->_row_select();
 
+        // Get Branch Address Information
+        $this->load->model('address_model');
+        $table_aliases = [
+            // Address Table Alias
+            'address' => 'ADR',
+
+            // Country Table Alias
+            'country' => 'CNTRY',
+
+            // State Table Alias
+            'state' => 'STATE',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBD',
+
+            // Type/Module Table Alias
+            'module' => 'B'
+        ];
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_BRANCH, NULL, $table_aliases);
+
         // Policy, Customer Related JOIN
         $this->db->select(
-                            // Branch Contact
-                            'B.contacts as branch_contact, ' .
-
                             // Policy Installment ID, Endorsement ID
                             'PTI.id as policy_installment_id, PTI.endorsement_id, ' .
 
@@ -461,11 +478,32 @@ class Ac_invoice_model extends MY_Model
                             'POLICY.code AS policy_code, ' .
 
                             // Customer Details
-                            'CST.full_name AS customer_full_name, CST.contact as customer_contact'
+                            'CST.full_name AS customer_full_name'
                         )
                     ->join('dt_policies POLICY', 'POLICY.id = REL.policy_id')
                     ->join('dt_policy_installments PTI', "REL.ref = '" . IQB_REL_POLICY_VOUCHER_REF_PI . "' AND REL.ref_id = PTI.id")
                     ->join('dt_customers CST', 'CST.id = I.customer_id');
+
+        /**
+         * Customer Address
+         */
+        $table_aliases = [
+            // Address Table Alias
+            'address' => 'ADRC',
+
+            // Country Table Alias
+            'country' => 'CNTRYC',
+
+            // State Table Alias
+            'state' => 'STATEC',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBDC',
+
+            // Type/Module Table Alias
+            'module' => 'CST'
+        ];
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_');
 
         /**
          * Complete/Active Invoice?

@@ -105,7 +105,7 @@
              * Printable Footer - Show Company Name and Branch Address of Currently Logged in User
              */
             $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $this->user->branch_name_en;
-            echo get_contact_widget_two_lines($this->user->branch_contact, $branch_contact_prefix)
+            echo address_widget_two_lines( parse_address_record($this->user), $branch_contact_prefix);
             ?>
         </footer>
 

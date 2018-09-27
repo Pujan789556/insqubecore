@@ -109,15 +109,20 @@ class Branches extends MY_Controller
 			$this->template->render_404();
 		}
 
+		// Address Record
+		$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_BRANCH, $record->id);
+
 		// Form Submitted? Save the data
-		$json_data = $this->_save('edit', $record);
+		$json_data = $this->_save('edit', $record, $address_record);
 
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/branches/_form',
 			[
-				'form_elements' => $this->branch_model->validation_rules,
-				'record' 		=> $record
+				'form_elements' 	=> $this->branch_model->validation_rules,
+				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
+				'record' 			=> $record,
+				'address_record' 	=> $address_record
 			], TRUE);
 
 		// Return HTML
@@ -133,17 +138,19 @@ class Branches extends MY_Controller
 	 */
 	public function add()
 	{
-		$record = NULL;
+		$record 		= NULL;
+		$address_record = NULL;
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add');
+		$json_data = $this->_save('add', $record, $address_record);
 
 
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('setup/branches/_form',
 			[
-				'form_elements' => $this->branch_model->validation_rules,
-				'record' 		=> $record
+				'form_elements' 	=> $this->branch_model->validation_rules,
+				'address_elements' 	=> $this->address_model->v_rules_add(),
+				'record' 			=> $record
 			], TRUE);
 
 		// Return HTML
@@ -159,7 +166,7 @@ class Branches extends MY_Controller
 	 * @param object|null $record Record Object or NULL
 	 * @return array
 	 */
-	private function _save($action, $record = NULL)
+	private function _save($action, $record = NULL, $address_record = NULL)
 	{
 
 		// Valid action?
@@ -180,7 +187,7 @@ class Branches extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = array_merge($this->branch_model->validation_rules, get_contact_form_validation_rules());
+			$rules = array_merge($this->branch_model->validation_rules, $this->address_model->v_rules_on_submit(TRUE));
 			// if($action === 'edit')
 			// {
 			// 	// Update Validation Rule on Update
@@ -195,12 +202,12 @@ class Branches extends MY_Controller
 				if($action === 'add')
 				{
 					// @NOTE: Activity Log will be automatically inserted
-					$done = $this->branch_model->insert($data, TRUE); // No Validation on Model
+					$done = $this->branch_model->add($data); // No Validation on Model
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->branch_model->update($record->id, $data, TRUE);
+					$done = $this->branch_model->edit($record->id, $address_record->id, $data);
 				}
 
 				if(!$done)
@@ -260,8 +267,9 @@ class Branches extends MY_Controller
 				'form' 	  		=> $status === 'error'
 									? 	$this->load->view('setup/branches/_form',
 											[
-												'form_elements' => $this->branch_model->validation_rules,
-												'record' 		=> $record
+												'form_elements' 	=> $this->branch_model->validation_rules,
+												'address_elements' 	=> $this->address_model->v_rules_on_submit(),
+												'record' 			=> $record
 											], TRUE)
 									: 	null
 
@@ -363,6 +371,15 @@ class Branches extends MY_Controller
 		{
 			$this->template->render_404();
 		}
+
+		// Address Record
+		$address_record = $this->address_model->get_by_type(IQB_ADDRESS_TYPE_BRANCH, $record->id);
+		$view_data = [
+			'record' 		 => $record,
+			'address_record' => $address_record
+		];
+
+
 		$this->data['site_title'] = 'Branch Details | ' . $record->name_en;
 		$this->template->partial(
 							'content_header',
@@ -371,7 +388,7 @@ class Branches extends MY_Controller
 								'content_header' => 'Branch Details <small>' . $record->name_en . '</small>',
 								'breadcrumbs' => ['Branches' => 'branches', 'Details' => NULL]
 						])
-						->partial('content', 'setup/branches/_details', compact('record'))
+						->partial('content', 'setup/branches/_details', $view_data)
 						->render($this->data);
 
     }

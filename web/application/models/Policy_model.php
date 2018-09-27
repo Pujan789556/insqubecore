@@ -1503,7 +1503,7 @@ class Policy_model extends MY_Model
                         /**
                          * Branch Table
                          */
-                        "B.name_en AS branch_name_en, B.name_np AS branch_name_np, B.code as branch_code, B.contacts as branch_contact, " .
+                        "B.name_en AS branch_name_en, B.name_np AS branch_name_np, B.code as branch_code, " .
 
 
                         /**
@@ -1574,6 +1574,27 @@ class Policy_model extends MY_Model
                  ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
                  ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left');
 
+        /**
+         * Branch Address
+         */
+        $table_aliases = [
+            // Address Table Alias
+            'address' => 'ADRB',
+
+            // Country Table Alias
+            'country' => 'CNTRYB',
+
+            // State Table Alias
+            'state' => 'STATEB',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBDB',
+
+            // Type/Module Table Alias
+            'module' => 'B'
+        ];
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_BRANCH, NULL, $table_aliases, 'addr_branch_');
+
 
         /**
          * Customer Address
@@ -1594,7 +1615,7 @@ class Policy_model extends MY_Model
             // Type/Module Table Alias
             'module' => 'C'
         ];
-        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addrc_');
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_');
 
 
         /**
@@ -1616,7 +1637,7 @@ class Policy_model extends MY_Model
             // Type/Module Table Alias
             'module' => 'CRB'
         ];
-        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addrcrb_', FALSE);
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_creditor_', FALSE);
 
 
         $record = $this->db->where('P.id', $id)

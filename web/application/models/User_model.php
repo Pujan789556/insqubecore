@@ -39,6 +39,9 @@ class User_model extends MY_Model
 		$this->_roles_table = $this->_prefix.$this->config->item('DX_roles_table');
 
 		parent::__construct();
+
+		// Dependant Model
+		$this->load->model('address_model');
 	}
 
 	// ----------------------------------------------------------------
@@ -244,13 +247,40 @@ class User_model extends MY_Model
     	$record = $this->get_cache($cache_name);
         if(!$record)
         {
-            $record = $this->db->select('U.id, U.code, U.username, U.email, U.banned, U.profile, U.contact, R.name AS role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, B.contacts AS branch_contact, D.name AS department_name')
+
+
+
+            $this->db->select('U.id, U.code, U.username, U.email, U.banned, U.profile, U.contact, R.name AS role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, D.name AS department_name')
 						->from($this->table_name . ' AS U')
 						->join('auth_roles R', 'U.role_id = R.id')
 						->join('master_branches B', 'U.branch_id = B.id')
-    			 		->join('master_departments D', 'U.department_id = D.id')
-						->where('U.id', $id)
-						->get()->row();
+    			 		->join('master_departments D', 'U.department_id = D.id');
+
+
+			// Include Branch Address Information
+            $table_aliases = [
+                // Address Table Alias
+                'address' => 'ADR',
+
+                // Country Table Alias
+                'country' => 'CNTRY',
+
+                // State Table Alias
+                'state' => 'STATE',
+
+                // Local Body Table Alias
+                'local_body' => 'LCLBD',
+
+                // Type/Module Table Alias
+                'module' => 'B'
+            ];
+            $this->address_model->module_select(IQB_ADDRESS_TYPE_BRANCH, NULL, $table_aliases);
+
+
+            // Get the record
+            $record = $this->db->where('U.id', $id)
+							   ->get()->row();
+
             $this->write_cache($record, $cache_name, CACHE_DURATION_HR);
         }
         return $record;
