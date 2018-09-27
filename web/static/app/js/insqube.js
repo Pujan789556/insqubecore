@@ -428,6 +428,11 @@ $( document ).ajaxError(function( event, request, settings ) {
                 var $bootbox = $this.closest('.bootbox');
                 $('button[data-bb-handler="cancel"]', $bootbox).trigger('click');
             }
+
+            // Do we want to reload the whole page
+            if(typeof r.reloadPage !== 'undefined' && r.reloadPage == true){
+                window.location.reload();
+            }
         }
 
         $btn.button('reset');
@@ -635,6 +640,11 @@ $(document).on('click', '.trg-dialog-popup', function(e){
                         var section = r.multipleUpdate[i];
                         $(section.box)[section.method](section.html);
                     }
+                }
+
+                // Do we want to reload the whole page
+                if(typeof r.reloadPage !== 'undefined' && r.reloadPage == true){
+                    window.location.reload();
                 }
             }
         });
