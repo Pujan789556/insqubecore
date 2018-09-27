@@ -716,11 +716,10 @@ class Policy_model extends MY_Model
          * Short Term Flag???
          * ------------------
          *
-         * !!! DISABLED NOW !!!
          *
          * Find if this start-end date gives a default duration or short term duration
          */
-        // $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
+        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
 
         /**
          * No marketing staff select?
@@ -767,11 +766,10 @@ class Policy_model extends MY_Model
          * Short Term Flag???
          * ------------------
          *
-         * !!! DISABLED NOW !!!
          *
          * Find if this start-end date gives a default duration or short term duration
          */
-        // $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
+        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record, $data['start_date'], $data['end_date'] );
 
 
         // Reset Creditor Info if "No" Selected

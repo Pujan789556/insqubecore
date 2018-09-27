@@ -773,26 +773,6 @@ if ( ! function_exists('_POLICY__get_short_term_flag'))
     }
 }
 
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_POLICY__is_short_term'))
-{
-    /**
-     * Is Policy Short Term?
-     *
-     * @param integer $portfolio_id Portfolio ID
-     * @param date  $start_date Policy Start Date
-     * @param date $end_date    Policy End Date
-     * @return  bool
-     */
-    function _POLICY__is_short_term( $portfolio_id, $fy_record, $start_date, $end_date )
-    {
-        $info = _POLICY__get_short_term_info( $portfolio_id, $fy_record, $start_date, $end_date );
-        return $info['flag'] === IQB_FLAG_NO;
-    }
-}
-
 // ------------------------------------------------------------------------
 
 if ( ! function_exists('_POLICY__get_short_term_info'))
