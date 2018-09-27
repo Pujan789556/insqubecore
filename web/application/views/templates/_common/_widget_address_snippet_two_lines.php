@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Contact Snippet Widget
  *
  * 	Required Variables:
- * 		$record   OBJECT
+ * 		$address_record   OBJECT
  *
  * Address Format:
  *
@@ -13,16 +13,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 ?>
 <?php
-if($record)
+if($address_record)
 {
     echo "<p>";
         $line1   = [$prefix];
-        $line1[] = $record->alt_address1_text ? $record->alt_address1_text : $record->address1_en;
-        $line1[] = $record->address2 ?? NULL;
-        $line1[] = $record->city ?? NULL;
-        $line1[] = $record->alt_state_text ? $record->alt_state_text : $record->state_name_en;
-        $line1[] = $record->zip_postal_code ?? NULL;
-        $line1[] = $record->country_name;
+        $line1[] = $address_record->alt_address1_text ? $address_record->alt_address1_text : $address_record->address1_en;
+        $line1[] = $address_record->address2 ?? NULL;
+        $line1[] = $address_record->city ?? NULL;
+        $line1[] = $address_record->alt_state_text ? $address_record->alt_state_text : $address_record->state_name_en;
+        $line1[] = $address_record->zip_postal_code ?? NULL;
+        $line1[] = $address_record->country_name;
 
         $line1 = array_filter($line1);
 
@@ -30,11 +30,11 @@ if($record)
     echo "</p>";
 
     $line2 = [];
-    $line2[] = isset($record->phones) && !empty($record->phones) ? 'T: ' . $record->phones : NULL;
-    $line2[] = isset($record->faxes) && !empty($record->faxes) ? 'F: ' . $record->faxes : NULL;
-    $line2[] = isset($record->mobile) && !empty($record->mobile) ? 'M: ' . $record->mobile : NULL;
-    $line2[] = isset($record->web) && !empty($record->web) ? 'W: ' . $record->web : NULL;
-    $line2[] = isset($record->email) && !empty($record->email) ? 'E: ' . $record->email : NULL;
+    $line2[] = isset($address_record->phones) && !empty($address_record->phones) ? 'T: ' . $address_record->phones : NULL;
+    $line2[] = isset($address_record->faxes) && !empty($address_record->faxes) ? 'F: ' . $address_record->faxes : NULL;
+    $line2[] = isset($address_record->mobile) && !empty($address_record->mobile) ? 'M: ' . $address_record->mobile : NULL;
+    $line2[] = isset($address_record->web) && !empty($address_record->web) ? 'W: ' . $address_record->web : NULL;
+    $line2[] = isset($address_record->email) && !empty($address_record->email) ? 'E: ' . $address_record->email : NULL;
 
     $line2 = array_filter($line2);
     if(!empty($line2))

@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Contact Snippet Widget
  *
  * 	Required Variables:
- * 		$record   OBJECT
+ * 		$address_record   OBJECT
  *
  * Address Format:
  *
@@ -20,40 +20,40 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *      Email:
  *      Web:
  */
-// echo '<pre>'; print_r($record); echo '</pre>';
+// echo '<pre>'; print_r($address_record); echo '</pre>';
 ?>
-<?php if($record):?>
+<?php if($address_record):?>
     <address class="no-margin-b">
         <?php
         echo "<p>";
             $contact_data = [];
 
             // Address1
-            $contact_data[] = $record->alt_address1_text ? $record->alt_address1_text : $record->address1_en;
+            $contact_data[] = $address_record->alt_address1_text ? $address_record->alt_address1_text : $address_record->address1_en;
 
             // Address 2
-            $contact_data[] = $record->address2 ?? NULL;
+            $contact_data[] = $address_record->address2 ?? NULL;
             echo implode('<br/>', $contact_data) . '<br/>';
 
             // City
-            $city = $record->city ?? NULL;
+            $city = $address_record->city ?? NULL;
 
 
-            $zip_postal_code = $record->zip_postal_code ?? NULL;
+            $zip_postal_code = $address_record->zip_postal_code ?? NULL;
             $ct_state_zip = array_filter([$city, $zip_postal_code]);
             echo $ct_state_zip ? implode(', ', $ct_state_zip) . '<br/>' : '';
 
             // State
-            $state = $record->alt_state_text ? $record->alt_state_text : $record->state_name_en;
-            echo implode(', ', [$state, $record->country_name]);
+            $state = $address_record->alt_state_text ? $address_record->alt_state_text : $address_record->state_name_en;
+            echo implode(', ', [$state, $address_record->country_name]);
         echo "</p>";
 
         // phones, fax, mobile, web, email
-        $phones = $record->phones ?? NULL;
-        $faxes = $record->faxes ?? NULL;
-        $mobile = $record->mobile ?? NULL;
-        $web = $record->web ?? NULL;
-        $email = $record->email ?? NULL;
+        $phones = $address_record->phones ?? NULL;
+        $faxes = $address_record->faxes ?? NULL;
+        $mobile = $address_record->mobile ?? NULL;
+        $web = $address_record->web ?? NULL;
+        $email = $address_record->email ?? NULL;
 
 
         if( $phones || $faxes || $mobile || $web || $email)
