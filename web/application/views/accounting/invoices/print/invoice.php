@@ -43,7 +43,7 @@
             <tbody>
                 <tr>
                     <td colspan="2" align="left">
-                        <img style="margin-bottom: 20px;" src="<?php echo site_url('static/app/images/logo.png') ?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
+                        <img style="margin-bottom: 20px;" src="<?php echo logo_url();?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
                     </td>
                     <td align="right"><h2>Invoice # <?php echo $record->invoice_code?></h2></td>
                 </tr>
@@ -62,7 +62,7 @@
                             <strong><?php echo $record->customer_full_name?></strong><br>
                             <?php
                             $customer_address_record = parse_address_record($record, 'addr_customer_');
-                            address_widget($customer_address_record, true, true);
+                            echo address_widget($customer_address_record, true, true);
                             ?>
                         </address>
                     </td>

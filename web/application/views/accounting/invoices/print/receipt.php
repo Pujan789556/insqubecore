@@ -12,7 +12,6 @@
      * Load Styles (inline)
      */
     $this->load->view('print/style/schedule');
-
     /**
      * Header & Footer
      */
@@ -20,7 +19,7 @@
     $header_footer = '<htmlpagefooter name="myfooter">
                         <table class="table table-footer no-border">
                             <tr>
-                                <td class="border-t">'. address_widget_two_lines( parse_address_record($record), $branch_contact_prefix) .'</td>
+                                <td class="border-t">'. address_widget_two_lines( parse_address_record($invoice_record), $branch_contact_prefix) .'</td>
                             </tr>
                         </table>
                     </htmlpagefooter>
@@ -36,7 +35,7 @@
             <tbody>
                 <tr>
                     <td colspan="2" align="left">
-                        <img style="margin-bottom: 20px;" src="<?php echo site_url('static/app/images/logo.png') ?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
+                        <img style="margin-bottom: 20px;" src="<?php echo logo_url();?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
                     </td>
                     <td align="right"><h2>Receipt# <?php echo $record->receipt_code?></h2></td>
                 </tr>
@@ -55,7 +54,7 @@
                             <strong><?php echo $invoice_record->customer_full_name?></strong><br>
                             <?php
                             $customer_address_record = parse_address_record($invoice_record, 'addr_customer_');
-                            address_widget($customer_address_record, true, true);
+                            echo address_widget($customer_address_record, true, true);
                             ?>
                         </address>
                     </td>

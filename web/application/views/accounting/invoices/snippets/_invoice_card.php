@@ -33,7 +33,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     To
                     <address>
                         <strong><?php echo $record->customer_full_name?></strong><br>
-                        <?php echo get_contact_widget($record->customer_contact, true, true)?>
+                        <?php
+                        $customer_address_record = parse_address_record($record, 'addr_customer_');
+                        echo address_widget($customer_address_record, true, true);
+                        ?>
+                        <?php //echo get_contact_widget($record->customer_contact, true, true)?>
                     </address>
                 </div>
                 <!-- /.col -->
