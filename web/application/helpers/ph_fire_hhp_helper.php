@@ -395,7 +395,7 @@ if ( ! function_exists('_OBJ_FIRE_HHP_pre_save_tasks'))
 		$options = [
 			'config' => [
 				'encrypt_name' 	=> TRUE,
-                'upload_path' 	=> Objects::$upload_path,
+                'upload_path' 	=> Objects::$data_upload_path,
                 'allowed_types' => 'xls|xlsx|doc|docx|jpg|jpeg|png|pdf',
                 'max_size' 		=> '4096'
 			],

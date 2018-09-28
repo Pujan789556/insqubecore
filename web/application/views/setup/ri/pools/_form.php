@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <input type="file" name="file">
                     <p>
                         <?php if(isset($record->file) && !empty($record->file) ):?>
-                            <a href="<?php echo site_url('ri_setup_treaties/download/' . $record->id);?>" target="_blank">Download Treaty File</a>
+                            <a href="<?php echo site_url('ri_setup_pools/download/' . $record->id);?>" target="_blank">Download Treaty File</a>
                         <?php endif?>
                     </p>
                 </div>

@@ -14,9 +14,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Portfolio extends MY_Controller
 {
 	/**
-	 * Files Upload Path
+	 * Files Upload Path - Data
 	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'portfolio/';
+	public static $data_upload_path = INSQUBE_DATA_ROOT . 'portfolio/';
 
 	// --------------------------------------------------------------------
 
@@ -478,7 +478,7 @@ class Portfolio extends MY_Controller
 			$options = [
 				'config' => [
 					'encrypt_name' => TRUE,
-	                'upload_path' => self::$upload_path,
+	                'upload_path' => self::$data_upload_path,
 	                'allowed_types' => 'doc|docx|pdf',
 	                'max_size' => '2048'
 				],
@@ -537,6 +537,14 @@ class Portfolio extends MY_Controller
 		$done = $this->portfolio_model->delete($record->id);
 		if($done)
 		{
+			/**
+			 * Delete Data File If any
+			 */
+			if($record->file_toc)
+			{
+				delete_insqube_document(self::$data_upload_path . $record->file_toc);
+			}
+
 			$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
@@ -553,6 +561,37 @@ class Portfolio extends MY_Controller
 		}
 		return $this->template->json($data);
 	}
+
+	// --------------------------------------------------------------------
+
+    /**
+     * Download Surveyor Documents
+     *
+     * @param alphanumeric $doc_key document key|column that holds the name of the document
+     * @param integer $id
+     * @return void
+     */
+    public function download($doc_key, $id)
+    {
+    	$id = (int)$id;
+		$record = $this->portfolio_model->find($id);
+		if(!$record || !in_array($doc_key, ['file_toc']))
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Download File
+		 */
+		$this->load->helper('download');
+		$filename = $record->{$doc_key} ?? NULL;
+		if($filename)
+		{
+			force_download( self::$data_upload_path . $filename, NULL, TRUE);
+		}
+		exit(1);
+
+    }
 
 	// --------------------------------------------------------------------
 

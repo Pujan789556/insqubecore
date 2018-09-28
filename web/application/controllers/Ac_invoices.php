@@ -12,6 +12,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Ac_invoices extends MY_Controller
 {
+	/**
+	 * Files Upload Path - Data (Invoices)
+	 */
+	public static $data_upload_path 		= INSQUBE_DATA_ROOT . 'invoices/';
+
+	/**
+	 * Files Upload Path - Data (Receipts)
+	 */
+	public static $data_upload_path_receipts = INSQUBE_DATA_ROOT . 'receipts/';
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -672,8 +684,8 @@ class Ac_invoices extends MY_Controller
 			/**
 			 * Download the physical copy if already exist
 			 */
-			$filename =  "invoice-{$record->invoice_code}.pdf";
-			$file = rtrim(INSQUBE_MEDIA_PATH, '/') . '/invoices/' . $filename;
+			$filename 	=  "invoice-{$record->invoice_code}.pdf";
+			$file 		= rtrim(self::$data_upload_path, '/') . '/' . $filename;
 			if( file_exists($file) )
 			{
 				$this->load->helper('download');
@@ -728,8 +740,8 @@ class Ac_invoices extends MY_Controller
 			/**
 			 * Download the physical copy if already exist
 			 */
-			$filename =  "receipt-{$record->receipt_code}.pdf";
-			$file = rtrim(INSQUBE_MEDIA_PATH, '/') . '/receipts/' . $filename;
+			$filename 	=  "receipt-{$record->receipt_code}.pdf";
+			$file 		= rtrim(self::$data_upload_path_receipts, '/') . '/' . $filename;
 			if( file_exists($file) )
 			{
 				$this->load->helper('download');

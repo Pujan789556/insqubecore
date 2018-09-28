@@ -624,7 +624,7 @@ if ( ! function_exists('_INVOICE__pdf'))
         if( $action === 'save' )
         {
 
-        	$filepath = rtrim(INSQUBE_MEDIA_PATH, '/') . '/invoices/';
+        	$filepath = Ac_invoices::$data_upload_path;
         	if( !file_exists($filepath) )
         	{
         		throw new Exception("Exception [Helper: account_helper][Method: _INVOICE__pdf()]: File path ({$filepath}) not found.");
@@ -696,7 +696,7 @@ if ( ! function_exists('_RECEIPT__pdf'))
         if( $action === 'save' )
         {
 
-        	$filepath = rtrim(INSQUBE_MEDIA_PATH, '/') . '/receipts/';
+        	$filepath = Ac_invoices::$data_upload_path_receipts;
         	if( !file_exists($filepath) )
         	{
         		throw new Exception("Exception [Helper: account_helper][Method: _RECEIPT__pdf()]: File path ({$filepath}) not found.");
@@ -769,7 +769,7 @@ if ( ! function_exists('_CREDIT_NOTE__pdf'))
         $filename =  "credit_note-{$record->id}.pdf";
         if( $action === 'save' )
         {
-        	$filepath = rtrim(INSQUBE_MEDIA_PATH, '/') . '/credit_notes/';
+        	$filepath = Ac_credit_notes::$data_upload_path;
         	if( !file_exists($filepath) )
         	{
         		throw new Exception("Exception [Helper: account_helper][Method: _CREDIT_NOTE__pdf()]: File path ({$filepath}) not found.");

@@ -55,7 +55,11 @@ else if( $widget_type === 'policy' )
 	<?php endif?>
 	<td>
 		<?php if($record->picture):?>
-			<img class="thumbnail" style="width:100px; float:left; margin-right:10px;" src="<?php echo INSQUBE_MEDIA_URL?>customers/<?php echo thumbnail_name($record->picture);?>" alt="<?php echo $record->full_name;?>">
+			<img
+				class="thumbnail"
+				style="width:100px; float:left; margin-right:10px;"
+				src="<?php echo site_url('static/media/customers/'.thumbnail_name($record->picture));?>"
+				alt="<?php echo $record->full_name;?>">
 		<?php endif;?>
 		<strong id="_text-ref-<?php echo $record->id?>"><?php echo $record->full_name;?></strong>
 		<br/>

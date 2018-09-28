@@ -23,10 +23,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <p id="picture-preview" class="ins-img-ipb">
                     <?php if(isset($record->picture)  && !empty($record->picture) ):?>
                         <img
-                          src="<?php echo INSQUBE_MEDIA_URL?>companies/<?php echo thumbnail_name($record->picture);?>"
+                          src="<?php echo site_url('static/media/companies/' . thumbnail_name($record->picture))?>"
                           title="Click here to view large"
                           class="thumbnail ins-img-ip"
-                          data-src="<?php echo INSQUBE_MEDIA_URL?>companies/<?php echo $record->picture?>"
+                          data-src="<?php echo site_url('static/media/companies/' . $record->picture)?>"
                           onclick="InsQube.imagePopup(this, 'Company Logo')">
                     <?php else:?>
                     <i class="ion-ios-person-outline text-muted img-alt"></i>

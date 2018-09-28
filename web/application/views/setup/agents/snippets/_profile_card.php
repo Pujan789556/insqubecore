@@ -12,9 +12,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <img
                     class="img-circle ins-img-ip"
                     title="View large"
-                    src="<?php echo INSQUBE_MEDIA_URL?>agents/<?php echo thumbnail_name($record->picture);?>"
+                    src="<?php echo site_url('static/media/agents/' . thumbnail_name($record->picture));?>"
                     alt="User profile picture"
-                    data-src="<?php echo INSQUBE_MEDIA_URL?>agents/<?php echo $record->picture?>"
+                    data-src="<?php echo site_url('static/media/agents/' . $record->picture)?>"
                     onclick="InsQube.imagePopup(this, 'Profile Picture')">
             <?php endif?>
         </div>

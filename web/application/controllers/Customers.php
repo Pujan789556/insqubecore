@@ -16,7 +16,7 @@ class Customers extends MY_Controller
 	/**
 	 * Files Upload Path
 	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'customers/';
+	public static $media_upload_path = INSQUBE_MEDIA_ROOT . 'media/customers/';
 
 	// --------------------------------------------------------------------
 
@@ -536,7 +536,7 @@ class Customers extends MY_Controller
 			$options = [
 				'config' => [
 					'encrypt_name' => TRUE,
-	                'upload_path' => self::$upload_path,
+	                'upload_path' => self::$media_upload_path,
 	                'allowed_types' => 'gif|jpg|jpeg|png',
 	                'max_size' => '2048'
 				],
@@ -835,7 +835,7 @@ class Customers extends MY_Controller
 			 */
 			if($record->picture)
 			{
-				delete_insqube_document(self::$upload_path . $record->picture);
+				delete_insqube_document(self::$media_upload_path . $record->picture);
 			}
 
 			$data = [

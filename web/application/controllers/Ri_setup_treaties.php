@@ -15,9 +15,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Ri_setup_treaties extends MY_Controller
 {
 	/**
-	 * Files Upload Path
+	 * Files Upload Path - Data (Treaties Document)
 	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'treaties/';
+	public static $data_upload_path = INSQUBE_DATA_ROOT . 'treaties/';
 
 	// --------------------------------------------------------------------
 
@@ -926,7 +926,7 @@ class Ri_setup_treaties extends MY_Controller
 			$options = [
 				'config' => [
 					'encrypt_name' => TRUE,
-	                'upload_path' => self::$upload_path,
+	                'upload_path' => self::$data_upload_path,
 	                'allowed_types' => 'pdf',
 	                'max_size' => '4096'
 				],
@@ -1150,7 +1150,7 @@ class Ri_setup_treaties extends MY_Controller
 
 		// Let's Download
 		$this->load->helper('download');
-        $download_file = $record->file ? self::$upload_path . $record->file : NULL;
+        $download_file = $record->file ? self::$data_upload_path . $record->file : NULL;
         if( $download_file && file_exists($download_file) )
         {
             force_download($download_file, NULL, true);

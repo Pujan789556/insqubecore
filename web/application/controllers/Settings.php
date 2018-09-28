@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Settings extends MY_Controller
 {
 	/**
-	 * Files Upload Path
+	 * Files Upload Path - Media
 	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'settings/';
+	public static $media_upload_path = INSQUBE_MEDIA_ROOT . 'media/settings/';
 
 	// --------------------------------------------------------------------
 
@@ -156,7 +156,7 @@ class Settings extends MY_Controller
 		$options = [
 			'config' => [
 				'encrypt_name' => TRUE,
-                'upload_path' => self::$upload_path,
+                'upload_path' => self::$media_upload_path,
                 'allowed_types' => 'gif|jpg|jpeg|png',
                 'max_size' => '2048'
 			],

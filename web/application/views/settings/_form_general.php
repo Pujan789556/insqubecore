@@ -16,10 +16,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <p id="logo-preview" class="ins-img-ipb">
                 <?php if($record->logo):?>
                     <img
-                      src="<?php echo INSQUBE_MEDIA_URL?>settings/<?php echo thumbnail_name($record->logo);?>"
+                      src="<?php echo site_url('static/media/settings/' . thumbnail_name($record->logo))?>"
                       title="Click here to view large"
                       class="thumbnail ins-img-ip"
-                      data-src="<?php echo INSQUBE_MEDIA_URL?>settings/<?php echo $record->logo?>"
+                      data-src="<?php echo site_url('static/media/settings/' . $record->logo)?>"
                       onclick="InsQube.imagePopup(this)">
                 <?php else:?>
                 <i class="ion-ios-flower-outline text-muted img-alt"></i>

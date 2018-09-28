@@ -15,12 +15,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Policy_installments extends MY_Controller
 {
-	/**
-	 * Files Upload Path
-	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'policy_installments/';
-
-	// --------------------------------------------------------------------
 
 	function __construct()
 	{

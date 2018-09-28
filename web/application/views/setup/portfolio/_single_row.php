@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<?php
 		if( $record->file_toc )
 		{
-			echo anchor('downloads/get/portfolio/' . $record->file_toc, '<i class="fa fa-fw fa-download"></i> Download', 'target="_blank" title="Download terms & conditions document"');
+			echo anchor('portfolio/download/file_toc/' . $record->id, '<i class="fa fa-fw fa-download"></i> Download', 'target="_blank" title="Download terms & conditions document"');
 		}
 		else
 		{

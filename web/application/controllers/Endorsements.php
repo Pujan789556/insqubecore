@@ -15,12 +15,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Endorsements extends MY_Controller
 {
-	/**
-	 * Files Upload Path
-	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'endorsements/';
-
-	// --------------------------------------------------------------------
 
 	function __construct()
 	{

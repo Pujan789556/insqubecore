@@ -30,10 +30,10 @@ if (isset($record) )
                 <p id="picture-preview" class="ins-img-ipb">
                     <?php if(isset($form_record->picture)  && !empty($form_record->picture) ):?>
                         <img
-                          src="<?php echo INSQUBE_MEDIA_URL?>users/<?php echo thumbnail_name($form_record->picture);?>"
+                          src="<?php echo site_url('static/media/users/' . thumbnail_name($form_record->picture))?>"
                           title="Click here to view large"
                           class="thumbnail ins-img-ip"
-                          data-src="<?php echo INSQUBE_MEDIA_URL?>users/<?php echo $form_record->picture?>"
+                          data-src="<?php echo site_url('static/media/users/' . $form_record->picture)?>"
                           onclick="InsQube.imagePopup(this, 'Profile Picture')">
                     <?php else:?>
                     <i class="ion-ios-person-outline text-muted img-alt"></i>

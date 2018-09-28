@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <input type="file" id="file_toc" name="file_toc">
             <p class="help-block">Only doc, docx, pdf file allowed.</p>
             <?php if(isset($record->file_toc)  && !empty($record->file_toc) ):?>
-                <p><?php echo anchor('downloads/get/portfolio/' . $record->file_toc, 'Download', 'target="_blank"') ?></p>
+                <p><?php echo anchor('portfolio/download/file_toc/' . $record->id, 'Download', 'target="_blank"') ?></p>
             <?php endif?>
         </div>
     </div>

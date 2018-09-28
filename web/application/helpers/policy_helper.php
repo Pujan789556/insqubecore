@@ -919,7 +919,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
         $filename = "policy-{$record->code}.pdf";
         if( $action === 'save' )
         {
-            $save_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/policies/' . $filename;
+            $save_full_path = rtrim(Policies::$data_upload_path, '/') . '/' . $filename;
             $mpdf->Output($save_full_path,'F');
         }
         else if($action === 'download')
@@ -1165,7 +1165,7 @@ if ( ! function_exists('_POLICY__schedule_exists'))
     function _POLICY__schedule_exists( $code )
     {
         $filename = "policy-{$code}.pdf";
-        $schedule_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/policies/' . $filename;
+        $schedule_full_path = rtrim(Policies::$data_upload_path, '/') . '/' . $filename;
 
         return file_exists($schedule_full_path);
     }

@@ -15,7 +15,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</td>
 	<td>
 		<?php if(isset($record->resume)  && !empty($record->resume) ):?>
-          <a data-toggle="tooltip" title="Download Sureveyor's Resume/Bio-data/Profile" href="<?php echo INSQUBE_MEDIA_URL . 'surveyors/' . $record->resume?>" target="_blank"><i class="fa fa-file-pdf-o"></i></a>
+          <a data-toggle="tooltip" title="Download Sureveyor's Resume/Bio-data/Profile" href="<?php echo site_url('surveyors/download/resume/' . $record->id)?>" target="_blank"><i class="fa fa-file-pdf-o"></i></a>
       	<?php else: ?>
       		<i class="fa fa-minus text-muted" title="Not Available" data-toggle="tooltip"></i>
       	<?php endif?>

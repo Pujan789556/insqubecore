@@ -55,7 +55,7 @@ class Downloads extends MY_Controller
 
 		// Let's Download
 		$this->load->helper('download');
-        $download_file = INSQUBE_MEDIA_PATH . $module . '/' . $filename;
+        $download_file = rtrim(INSQUBE_DATA_ROOT, '/') . '/' . $module . '/' . $filename;
         if( file_exists($download_file) )
         {
             force_download($download_file, NULL, true);

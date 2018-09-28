@@ -14,9 +14,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Policies extends MY_Controller
 {
 	/**
-	 * Files Upload Path
+	 * Files Upload Path - Data (Invoices)
 	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'policies/';
+	public static $data_upload_path = INSQUBE_DATA_ROOT . 'policies/';
 
 	// --------------------------------------------------------------------
 
@@ -1633,7 +1633,7 @@ class Policies extends MY_Controller
 
 		$this->load->helper('file');
 		$filename 		= "policy-{$record->code}.pdf";
-		$file_full_path = rtrim(self::$upload_path, '/') . '/' . $filename;
+		$file_full_path = rtrim(self::$data_upload_path, '/') . '/' . $filename;
 		if( file_exists($file_full_path) )
 		{
 			render_pdf($file_full_path);

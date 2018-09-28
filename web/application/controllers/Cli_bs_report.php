@@ -37,9 +37,9 @@ class Cli_bs_report extends CI_Controller
     public $current_fy_month;
 
     /**
-     * Files Upload Path
+     * Files Upload Path - Data (Beema Samiti Reports)
      */
-    public static $upload_path = INSQUBE_MEDIA_PATH . 'reports/bs/';
+    public static $data_upload_path = INSQUBE_DATA_ROOT . 'reports/bs/';
 
     // --------------------------------------------------------------------
 
@@ -664,7 +664,7 @@ class Cli_bs_report extends CI_Controller
         /**
          * Let's Save in CSV file
          */
-        $csv_file_path   = self::$upload_path . $filename;
+        $csv_file_path   = self::$data_upload_path . $filename;
 
 
         $fp = fopen($csv_file_path, 'w') or die("ERROR: Permission Denied. Unable to create file!" . PHP_EOL);
@@ -690,7 +690,7 @@ class Cli_bs_report extends CI_Controller
 
         // Output Zip File
         $zip_file       = uniqid("bs-monthly-{$fy_code_np}-{$fy_month_record->name_en}-AGR", true). ".zip";
-        $csv_zip_file   = self::$upload_path . $zip_file;
+        $csv_zip_file   = self::$data_upload_path . $zip_file;
 
         // Remove any Zip file already
         @unlink($csv_zip_file);
@@ -698,7 +698,7 @@ class Cli_bs_report extends CI_Controller
         // Remove old record file
         if($record->filename)
         {
-            @unlink(self::$upload_path . $record->filename);
+            @unlink(self::$data_upload_path . $record->filename);
         }
 
 
@@ -773,7 +773,7 @@ class Cli_bs_report extends CI_Controller
 
 
             // File to write content to
-            $csv_files[] = $csv_file = self::$upload_path . $filename;
+            $csv_files[] = $csv_file = self::$data_upload_path . $filename;
 
             // Write into individual csv files
             // We need these individual files for range query to merge them together
@@ -792,7 +792,7 @@ class Cli_bs_report extends CI_Controller
 
         // Output Zip File
         $zip_file       = uniqid("bs-quarterly-{$fy_code_np}-{$fy_quarter}", true). ".zip";
-        $csv_zip_file   = self::$upload_path . $zip_file;
+        $csv_zip_file   = self::$data_upload_path . $zip_file;
 
         // Remove any Zip file already
         @unlink($csv_zip_file);
@@ -800,7 +800,7 @@ class Cli_bs_report extends CI_Controller
         // Remove old record file
         if($record->filename)
         {
-            @unlink(self::$upload_path . $record->filename);
+            @unlink(self::$data_upload_path . $record->filename);
         }
 
         echo "Generating CSVs Zip ($zip_file)... " ;

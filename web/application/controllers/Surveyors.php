@@ -14,9 +14,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Surveyors extends MY_Controller
 {
 	/**
-	 * Files Upload Path
+	 * Files Upload Path - Media
 	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'surveyors/';
+	public static $media_upload_path = INSQUBE_MEDIA_ROOT . 'media/surveyors/';
+
+	/**
+	 * Files Upload Path - Data
+	 */
+	public static $data_upload_path = INSQUBE_DATA_ROOT . 'surveyors/';
 
 	// --------------------------------------------------------------------
 
@@ -521,7 +526,7 @@ class Surveyors extends MY_Controller
 			$options = [
 				'config' => [
 					'encrypt_name' => TRUE,
-	                'upload_path' => self::$upload_path,
+	                'upload_path' => self::$media_upload_path,
 	                'allowed_types' => 'gif|jpg|jpeg|png',
 	                'max_size' => '2048'
 				],
@@ -550,7 +555,7 @@ class Surveyors extends MY_Controller
 			$options = [
 				'config' => [
 					'encrypt_name' 	=> TRUE,
-	                'upload_path' 	=> self::$upload_path,
+	                'upload_path' 	=> self::$data_upload_path,
 	                'allowed_types' => 'doc|docx|pdf',
 	                'max_size' 		=> '4098'
 				],
@@ -611,7 +616,15 @@ class Surveyors extends MY_Controller
 			 */
 			if($record->picture)
 			{
-				delete_insqube_document(self::$upload_path . $record->picture);
+				delete_insqube_document(self::$media_upload_path . $record->picture);
+			}
+
+			/**
+			 * Delete Data File If any
+			 */
+			if($record->resume)
+			{
+				delete_insqube_document(self::$data_upload_path . $record->resume);
 			}
 
 			$data = [
@@ -671,6 +684,37 @@ class Surveyors extends MY_Controller
 						])
 						->partial('content', 'setup/surveyors/_details', $view_data)
 						->render($this->data);
+
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Download Surveyor Documents
+     *
+     * @param alphanumeric $doc_key document key|column that holds the name of the document
+     * @param integer $id
+     * @return void
+     */
+    public function download($doc_key, $id)
+    {
+    	$id = (int)$id;
+		$record = $this->surveyor_model->find($id);
+		if(!$record || !in_array($doc_key, ['resume']))
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Download File
+		 */
+		$this->load->helper('download');
+		$filename = $record->{$doc_key} ?? NULL;
+		if($filename)
+		{
+			force_download( self::$data_upload_path . $filename, NULL, TRUE);
+		}
+		exit(1);
 
     }
 }

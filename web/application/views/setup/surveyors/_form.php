@@ -28,10 +28,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <p id="picture-preview" class="ins-img-ipb">
                     <?php if(isset($record->picture)  && !empty($record->picture) ):?>
                         <img
-                          src="<?php echo INSQUBE_MEDIA_URL?>surveyors/<?php echo thumbnail_name($record->picture);?>"
+                          src="<?php echo site_url('static/media/surveyors/' . thumbnail_name($record->picture))?>"
                           title="Click here to view large"
                           class="thumbnail ins-img-ip"
-                          data-src="<?php echo INSQUBE_MEDIA_URL?>surveyors/<?php echo $record->picture?>"
+                          data-src="<?php echo site_url('static/media/surveyors/' . $record->picture)?>"
                           onclick="InsQube.imagePopup(this, 'Profile Picture')">
                     <?php else:?>
                     <i class="ion-ios-person-outline text-muted img-alt"></i>
@@ -45,7 +45,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <input type="file" id="resume" name="resume">
                 <p class="help-block">Only PDF, DOC or DOCX files supported.</p>
                 <?php if(isset($record->resume)  && !empty($record->resume) ):?>
-                      <p><a href="<?php echo INSQUBE_MEDIA_URL . 'surveyors/' . $record->resume?>" target="_blank"><i class="fa fa-download"></i> Download Existing Document</a></p>
+                      <p><a href="<?php echo site_url('surveyors/download/resume/' . $record->id)?>" target="_blank"><i class="fa fa-download"></i> Download Existing Document</a></p>
                   <?php endif?>
 
             </div>

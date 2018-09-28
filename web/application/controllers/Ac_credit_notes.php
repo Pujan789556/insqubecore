@@ -12,6 +12,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Ac_credit_notes extends MY_Controller
 {
+	/**
+	 * Files Upload Path - Data
+	 */
+	public static $data_upload_path = INSQUBE_DATA_ROOT . 'credit_notes/';
+
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -652,8 +660,8 @@ class Ac_credit_notes extends MY_Controller
 		/**
 		 * Download the physical copy if already exist
 		 */
-		$filename =  "credit_note-{$record->id}.pdf";
-		$file = rtrim(INSQUBE_MEDIA_PATH, '/') . '/credit_notes/' . $filename;
+		$filename 	=  "credit_note-{$record->id}.pdf";
+		$file 		= rtrim(self::$data_upload_path, '/') . '/' . $filename;
 		if( file_exists($file) )
 		{
 			$this->load->helper('download');

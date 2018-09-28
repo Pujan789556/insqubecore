@@ -14,9 +14,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Bs_reports extends MY_Controller
 {
 	/**
-	 * Files Upload Path
+	 * Files Upload Path - Data (Beema Samiti Reports)
 	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'reports/bs/';
+	public static $data_upload_path = INSQUBE_DATA_ROOT . 'reports/bs/';
 
 	// --------------------------------------------------------------------
 
@@ -261,7 +261,7 @@ class Bs_reports extends MY_Controller
 
 		// Let's Download
 		$this->load->helper('download');
-        $download_file = self::$upload_path . '/' . $record->filename;
+        $download_file = self::$data_upload_path . '/' . $record->filename;
         if( file_exists($download_file) )
         {
             force_download($download_file, NULL, true);

@@ -14,9 +14,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Objects extends MY_Controller
 {
 	/**
-	 * Files Upload Path
+	 * Files Upload Path - Data (Invoices)
 	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'objects/';
+	public static $data_upload_path = INSQUBE_DATA_ROOT . 'objects/';
 
 	// --------------------------------------------------------------------
 
@@ -1171,7 +1171,7 @@ class Objects extends MY_Controller
 
 		// Let's Download
 		$this->load->helper('download');
-        $download_file = self::$upload_path . $filename;
+        $download_file = self::$data_upload_path . $filename;
         if( file_exists($download_file) )
         {
             force_download($download_file, NULL, true);

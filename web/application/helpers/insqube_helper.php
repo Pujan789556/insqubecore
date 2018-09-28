@@ -60,7 +60,7 @@ if ( ! function_exists('logo_url'))
     function logo_url( )
     {
         $CI =& get_instance();
-        return INSQUBE_MEDIA_PATH . 'settings/' . $CI->settings->logo;
+        return site_url('static/media/settings/'.$CI->settings->logo);
     }
 }
 

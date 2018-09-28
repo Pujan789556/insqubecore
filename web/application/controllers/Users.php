@@ -16,7 +16,7 @@ class Users extends MY_Controller
 	/**
 	 * Files Upload Path
 	 */
-	public static $upload_path = INSQUBE_MEDIA_PATH . 'surveyors/';
+	public static $media_upload_path = INSQUBE_MEDIA_ROOT . 'media/users/';
 
 	// --------------------------------------------------------------------
 
@@ -979,7 +979,7 @@ class Users extends MY_Controller
 			$options = [
 				'config' => [
 					'encrypt_name' => TRUE,
-	                'upload_path' => self::$upload_path,
+	                'upload_path' => self::$media_upload_path,
 	                'allowed_types' => 'gif|jpg|jpeg|png',
 	                'max_size' => '2048'
 				],
@@ -1129,7 +1129,7 @@ class Users extends MY_Controller
 			$profile = $record->profile ? json_decode($record->profile) : NULL;
 			if(isset($profile->picture) && $profile->picture != '' )
 			{
-				delete_insqube_document(self::$upload_path . $profile->picture);
+				delete_insqube_document(self::$media_upload_path . $profile->picture);
 			}
 
 			$data = [

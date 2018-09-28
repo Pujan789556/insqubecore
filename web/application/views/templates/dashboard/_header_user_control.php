@@ -7,7 +7,7 @@
 
 $loggedin_user_profile 	= $this->user->profile ? json_decode($this->user->profile) : NULL;
 $profile_image 			= $loggedin_user_profile->picture ?? NULL;
-$profile_picture_url 	= $profile_image ? INSQUBE_MEDIA_URL . 'users/' . thumbnail_name($profile_image) : '';
+$profile_picture_url 	= $profile_image ? site_url('static/media/users/' . thumbnail_name($profile_image)) : '';
 $profile_picture_url = '';
 ?>
 <!-- User Account: style can be found in dropdown.less -->
