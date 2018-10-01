@@ -478,6 +478,16 @@ defined('IQB_POLICY_ENDORSEMENT_CB_PRORATA')    OR define('IQB_POLICY_ENDORSEMEN
 
 /*
 |--------------------------------------------------------------------------
+| POLICY ENDORSEMENT - SHORT TERM COMPUTATION CONFIG
+|--------------------------------------------------------------------------
+|
+*/
+define('IQB_POLICY_ENDORSEMENT_SPR_CONFIG_BOTH',       1);
+define('IQB_POLICY_ENDORSEMENT_SPR_CONFIG_BASIC',      2);
+
+
+/*
+|--------------------------------------------------------------------------
 | POLICY INSTALLMENT STATUS CONSTANTS
 |--------------------------------------------------------------------------
 */

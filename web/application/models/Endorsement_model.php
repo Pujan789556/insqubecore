@@ -17,7 +17,7 @@ class Endorsement_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'customer_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate_on_refund', 'status', 'schedule_html', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'customer_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate_on_refund', 'flag_short_term', 'short_term_config', 'short_term_rate', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 

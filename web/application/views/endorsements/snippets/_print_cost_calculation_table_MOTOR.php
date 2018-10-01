@@ -54,10 +54,26 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                 <td>&nbsp;</td>
                 <td class="no-padding">
                     <table class="table" cellpadding="0" cellspacing="0">
-                        <tr>
-                            <td width="80%" align="right"><strong>जम्मा</strong></td>
-                            <td width="100px" align="right"><strong><?php echo number_format((float)$total_premium, 2)?></strong></td>
-                        </tr>
+                        <?php
+                        if($endorsement_record->flag_short_term === IQB_FLAG_YES):
+                            $full_premium_obj   = (object)_ENDORSEMENT__compute_full_premium($endorsement_record);
+                            $total_premium_full = (float)$full_premium_obj->amt_basic_premium + (float)$full_premium_obj->amt_pool_premium;
+                            $spr_rate = $endorsement_record->short_term_rate;
+                            ?>
+                            <tr>
+                                <td width="80%" align="right"><strong>जम्मा वार्षिक बीमाशुल्क</strong></td>
+                                <td width="100px" align="right"><strong><?php echo number_format((float)$total_premium_full, 2)?></strong></td>
+                            </tr>
+                            <tr>
+                                <td width="80%" align="right"><strong>छोटो अवधिको जम्मा बीमाशुल्क (वार्षिक बीमाशुल्कको <?php echo number_format($spr_rate, 2) ?>%)</strong></td>
+                                <td width="100px" align="right"><strong><?php echo number_format((float)$total_premium, 2)?></strong></td>
+                            </tr>
+                        <?php else: ?>
+                            <tr>
+                                <td width="80%" align="right"><strong>जम्मा बीमाशुल्क</strong></td>
+                                <td width="100px" align="right"><strong><?php echo number_format((float)$total_premium, 2)?></strong></td>
+                            </tr>
+                        <?php endif; ?>
                         <tr>
                             <td align="right"><strong>टिकट दस्तुर</strong></td>
                             <td align="right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2);?></strong></td>
