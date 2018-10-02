@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <tr data-name="<?php echo $record->name_en;?>" class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
-	<td><?php echo $record->name_en;?></td>
+	<td><?php echo active_inactive_text($record->active), ' ', $record->name_en;?></td>
 	<td><?php echo $record->name_np;?></td>
 	<td><?php echo $record->code;?></td>
 	<td><?php echo $record->parent_name ?? '-';?></td>
@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<?php
 		if( $record->file_toc )
 		{
-			echo anchor('portfolio/download/file_toc/' . $record->id, '<i class="fa fa-fw fa-download"></i> Download', 'target="_blank" title="Download terms & conditions document"');
+			echo anchor('portfolio/download/file_toc/' . $record->id, '<i class="fa fa-fw fa-download"></i>', 'target="_blank" title="Download terms & conditions document"');
 		}
 		else
 		{
@@ -69,6 +69,36 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<i class="fa fa-th-large"></i>
 				<span class="hidden-xs">BS Headings</span>
 			</a>
+
+			<?php
+			if($record->active == IQB_FLAG_ON)
+			{
+				$title 				= "Disable";
+				$a_title 			= $title . ' Portfolio?';
+				$confirm_message 	= "Are you sure you want to Disable this Portfolio?<br/>You will not be able to issue policy after disabling this portfolio.";
+				$url 				= site_url('portfolio/disable/'.$record->id);
+				$btn_class 			= 'btn-danger';
+				$icon 				= 'fa-ban';
+			}
+			else
+			{
+				$title 				= "Enable";
+				$a_title 			= $title . ' Portfolio?';
+				$confirm_message 	= "Are you sure you want to Enable this Portfolio?";
+				$url 				= site_url('portfolio/enable/'.$record->id);
+				$btn_class 			= 'btn-success';
+				$icon 				= 'fa-check';
+			}
+			?>
+			<a href="#"
+					data-toggle="tooltip"
+					title="<?php echo $a_title ?>"
+					data-title="<?php echo $a_title ?>"
+					data-confirm="true"
+					class="btn btn-xs <?php echo $btn_class ?> btn-round trg-dialog-action"
+					data-message="<?php echo $confirm_message ?>"
+					data-url="<?php echo $url?>">
+						<i class="fa <?php echo $icon ?>"></i> <?php echo $title ?></a>
 		<?php endif?>
 
 		<?php if(safe_to_delete( 'Portfolio_model', $record->id )):?>

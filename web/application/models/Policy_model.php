@@ -188,7 +188,7 @@ class Policy_model extends MY_Model
                         'rules' => 'trim|required|integer|max_length[11]',
                         '_type'     => 'dropdown',
                         '_id'       => '_portfolio-id',
-                        '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_children_tree(),
+                        '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_children_tree(TRUE),
                         '_extra_attributes' => 'style="width:100%; display:block"',
                         '_required' => true
                     ],

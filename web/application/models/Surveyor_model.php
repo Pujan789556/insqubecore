@@ -106,7 +106,7 @@ class Surveyor_model extends MY_Model
                 'label' => 'Is Active?',
                 'rules' => 'trim|required|integer|exact_length[1]',
                 '_type'     => 'dropdown',
-                '_data'     => [ '' => 'Select...', '1' => 'Active', '0' => 'Not Active'],
+                '_data'     => _FLAG_on_off_dropdown(),
                 '_required' => true
             ]
         ];

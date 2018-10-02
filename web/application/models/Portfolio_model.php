@@ -19,7 +19,7 @@ class Portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'schedule_lang', 'risks', 'bs_ri_code', 'bsrs_heading_type_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'schedule_lang', 'risks', 'bs_ri_code', 'bsrs_heading_type_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'active', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -479,12 +479,12 @@ class Portfolio_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function dropdown_children_tree()
+    public function dropdown_children_tree($active_only = FALSE)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $records    = $this->get_children();
+        $records    = $this->get_children(NULL, $active_only);
         $list       = [];
         foreach($records as $record)
         {
@@ -539,19 +539,32 @@ class Portfolio_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function get_children($parent_id=NULL)
+    public function get_children($parent_id=NULL, $active_only = FALSE)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        if(!$parent_id)
+        $cache_var = 'pf_children_';
+
+        $cache_postfix = [];
+        if($parent_id)
         {
-            $cache_var = 'pf_children_all';
+            $cache_postfix[] = $parent_id;
         }
-        else
+
+        if($active_only)
         {
-            $cache_var = 'pf_children_' . $parent_id;
+            $cache_postfix[] = IQB_FLAG_ON;
         }
+
+        $cache_postfix = implode('_', $cache_postfix);
+        if(!$cache_postfix)
+        {
+            $cache_postfix = 'all';
+        }
+        $cache_var .= $cache_postfix;
+
+
 
         $list = $this->get_cache($cache_var);
         if(!$list)
@@ -568,6 +581,12 @@ class Portfolio_model extends MY_Model
             {
                 $this->db->where('L1.parent_id !=', NULL);
             }
+
+            if($active_only)
+            {
+                $this->db->where('L1.active', IQB_FLAG_ON);
+            }
+
             $list = $this->db->get()->result();
 
             if(!empty($list))
@@ -638,6 +657,38 @@ class Portfolio_model extends MY_Model
     {
         return $this->db->where('parent_id', $id)
                         ->count_all_results($this->table_name);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Enable a Portfolio
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function enable($id)
+    {
+        $this->clear_cache();
+        return $this->db->where('id', $id)
+                        ->set('active', IQB_FLAG_ON)
+                        ->update($this->table_name);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Disable a Portfolio
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function disable($id)
+    {
+        $this->clear_cache();
+        return $this->db->where('id', $id)
+                        ->set('active', IQB_FLAG_OFF)
+                        ->update($this->table_name);
     }
 
     // ----------------------------------------------------------------

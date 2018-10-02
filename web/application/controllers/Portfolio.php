@@ -506,8 +506,98 @@ class Portfolio extends MY_Controller
         redirect($this->router->class);
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Enable Portfolio
+     *
+     * @param int $id
+     * @return json
+     */
+	public function enable($id)
+	{
+		// Valid Record ?
+		$id 	= (int)$id;
+		$record = $this->portfolio_model->find($id);
+		if( !$record )
+		{
+			$this->template->render_404();
+		}
+
+		// Admin Constraint?
+		$done = $this->portfolio_model->enable($record->id);
+		if($done)
+		{
+			$record->active = IQB_FLAG_ON;
+			$row = $this->load->view('setup/portfolio/_single_row', ['record' => $record], TRUE);
+			$data = [
+				'status' 	=> 'success',
+				'message' 	=> 'Successfully deleted!',
+				'reloadRow' => true,
+				'rowId' 	=> '#_data-row-' . $record->id,
+				'row' 		=> $row
+			];
+		}
+		else
+		{
+			$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be enabled.'
+			];
+		}
+		return $this->template->json($data);
+	}
+
 	// --------------------------------------------------------------------
 
+    /**
+     * Enable Portfolio
+     *
+     * @param int $id
+     * @return json
+     */
+	public function disable($id)
+	{
+		// Valid Record ?
+		$id 	= (int)$id;
+		$record = $this->portfolio_model->find($id);
+		if( !$record )
+		{
+			$this->template->render_404();
+		}
+
+		// Admin Constraint?
+		$done = $this->portfolio_model->disable($record->id);
+		if($done)
+		{
+			$record->active = IQB_FLAG_OFF;
+			$row = $this->load->view('setup/portfolio/_single_row', ['record' => $record], TRUE);
+			$data = [
+				'status' 	=> 'success',
+				'message' 	=> 'Successfully deleted!',
+				'reloadRow' => true,
+				'rowId' 	=> '#_data-row-' . $record->id,
+				'row' 		=> $row
+			];
+		}
+		else
+		{
+			$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be disabled.'
+			];
+		}
+		return $this->template->json($data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Delete a Portfolio
+	 *
+	 * @param inte $id Portfolio ID
+	 * @return JSON
+	 */
 	public function delete($id)
 	{
 		// Valid Record ?
