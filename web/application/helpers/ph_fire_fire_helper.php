@@ -1556,9 +1556,41 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 
 					/**
-					 * Compute VAT
+					 * Prepare Premium Data
 					 */
-					$taxable_amount = $BASIC_PREMIUM + $NET_POOL_PREMIUM + $post_data['amt_stamp_duty'];
+					$premium_data = [
+						'amt_basic_premium' 	=> $BASIC_PREMIUM,
+						'amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
+						'amt_agent_commission'  => $AGENT_COMMISSION,
+						'amt_direct_discount' 	=> $DIRECT_DISCOUNT,
+						'amt_pool_premium' 		=> $NET_POOL_PREMIUM,
+					];
+
+					/**
+					 * Short Term Policy???
+					 *
+					 * Only Fres/Renewal Policy have Short Term Facility
+					 */
+					if($policy_record->flag_short_term == IQB_FLAG_YES)
+					{
+						$spr_goodies 	= _POLICY__get_spr_goodies( $pfs_record, $policy_record->start_date, $policy_record->end_date );
+						$premium_data 	= _POLICY__compute_short_term_premium( $spr_goodies['record']->rate ?? NULL, $premium_data, IQB_POLICY_ENDORSEMENT_SPR_CONFIG_BOTH);
+					}
+					else
+					{
+						/**
+						 * NULLIFY Sort Term Related Fields on Endorsement Table
+						 */
+						$premium_data = _POLICY__nullify_short_term_premium( $premium_data );
+					}
+
+
+					/**
+					 * Compute VAT
+					 *
+					 * NOTE: On premium refund, we should also be refunding VAT
+					 */
+					$taxable_amount = $premium_data['amt_basic_premium'] + $premium_data['amt_pool_premium'] + $post_data['amt_stamp_duty'];
 					$CI->load->helper('account');
 					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
@@ -1571,24 +1603,19 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					$premium_computation_table = json_encode($post_data['premium']);
 
 					/**
-					 * Prepare Transactional Data
-					 *
+					 * Prepare Other Data
 					 */
-					$txn_data = [
-						'gross_amt_sum_insured' => $policy_object->amt_sum_insured,
-						'net_amt_sum_insured' 	=> $policy_object->amt_sum_insured,
-						'amt_basic_premium' 	=> $BASIC_PREMIUM,
-						'amt_pool_premium' 		=> $NET_POOL_PREMIUM,
-						'amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
-						'amt_agent_commission'  => $AGENT_COMMISSION,
-						'amt_direct_discount' 	=> $DIRECT_DISCOUNT,
+					$gross_amt_sum_insured 	= $policy_object->amt_sum_insured;
+					$net_amt_sum_insured 	= $policy_object->amt_sum_insured;
+					$txn_data = array_merge($premium_data, [
+						'gross_amt_sum_insured' => $gross_amt_sum_insured,
+						'net_amt_sum_insured' 	=> $net_amt_sum_insured,
 						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
 						'amt_vat' 				=> $amount_vat,
 
-						'premium_computation_table' 	=> $premium_computation_table, // JSON encoded
-						'cost_calculation_table' 		=> $cost_calculation_table		// JSON encoded
-
-					];
+						'premium_computation_table' => $premium_computation_table,	// JSON encoded
+						'cost_calculation_table' 	=> $cost_calculation_table		// JSON encoded
+					]);
 
 					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
 

@@ -613,6 +613,23 @@ if ( ! function_exists('__save_premium_MISC_FG'))
 					{
 						$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
 					}
+					/**
+					 * Short Term Policy???
+					 *
+					 * Only Fres/Renewal Policy have Short Term Facility
+					 */
+					else if($policy_record->flag_short_term == IQB_FLAG_YES)
+					{
+						$spr_goodies 	= _POLICY__get_spr_goodies( $pfs_record, $policy_record->start_date, $policy_record->end_date );
+						$premium_data 	= _POLICY__compute_short_term_premium( $spr_goodies['record']->rate ?? NULL, $premium_data, IQB_POLICY_ENDORSEMENT_SPR_CONFIG_BOTH);
+					}
+					else
+					{
+						/**
+						 * NULLIFY Sort Term Related Fields on Endorsement Table
+						 */
+						$premium_data = _POLICY__nullify_short_term_premium( $premium_data );
+					}
 
 
 					if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
