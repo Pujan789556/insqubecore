@@ -6,9 +6,6 @@ $this->load->helper('ph_fire_lop');
 
 $object_attributes      = json_decode($record->object_attributes);
 $schedule_table_title   = 'LOSS OF PROFIT(FIRE) SCHEDULE';
-
-$total_premium  = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
-$grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
 ?>
 
 <!DOCTYPE html>
@@ -81,44 +78,14 @@ $grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endors
                         To: : <?php echo $record->end_date ?>
                     </td>
                     <td>
-
-                        <?php $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL); ?>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <td colspan="2"><strong>COST CALCULATION TABLE</strong></td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach($cost_calculation_table as $row):?>
-                                    <tr>
-                                        <td><?php echo $row->label ?></td>
-                                        <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
-                                    </tr>
-                                <?php endforeach ?>
-                            </tbody>
-
-                        </table><br>
-
-                        <table class="table table-condensed no-border">
-                            <tr>
-                                <td align="right"><strong>Premium</strong></td>
-                                <td class="text-right"><?php echo number_format($total_premium, 2)?></td>
-                            </tr>
-                            <tr>
-                                <td align="right"><strong>Stamp Duty</strong></td>
-                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_stamp_duty, 2)?></td>
-                            </tr>
-                            <tr>
-                                <td align="right"><strong>VAT</strong></td>
-                                <td class="text-right"><?php echo number_format((float)$endorsement_record->amt_vat, 2)?></td>
-                            </tr>
-                            <tr><td colspan="2"><hr/></td></tr>
-                            <tr>
-                                <td class="border-t" align="right"><strong>TOTAL (NRs.)</strong></td>
-                                <td class="text-right border-t"><strong><?php echo number_format($grand_total, 2);?></strong></td>
-                            </tr>
-                        </table>
+                        <?php
+                        /**
+                         * Load Cost Calculation Table
+                         */
+                        $this->load->view('endorsements/snippets/premium/_index',
+                            ['lang' => 'en', 'endorsement_record' => $endorsement_record]
+                        );
+                        ?>
                     </td>
                 </tr>
                 <tr>

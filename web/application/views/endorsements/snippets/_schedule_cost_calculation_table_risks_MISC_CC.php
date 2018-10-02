@@ -50,24 +50,14 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
             <?php endif ?>
             <tr>
                 <td class="no-padding">
-                    <table class="table no-margin table-bordered table-condensed">
-                        <tr>
-                            <td width="80%" class="text-right"><strong>जम्मा</strong></td>
-                            <td class="text-right"><strong><?php echo number_format($total_premium, 2)?></strong></td>
-                        </tr>
-                        <tr>
-                            <td class="text-right"><strong>टिकट दस्तुर</strong></td>
-                            <td class="text-right"><strong><?php echo number_format($endorsement_record->amt_stamp_duty, 2);?></strong></td>
-                        </tr>
-                        <tr>
-                            <td class="text-right"><strong>मु. अ. क. (VAT)</strong></td>
-                            <td class="text-right"><strong><?php echo number_format($endorsement_record->amt_vat, 2);?></strong></td>
-                        </tr>
-                        <tr>
-                            <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                            <td class="text-right"><strong><?php echo number_format( $grand_total, 2);?></strong></td>
-                        </tr>
-                    </table>
+                    <?php
+                    /**
+                     * Load Cost Calculation Table
+                     */
+                    $this->load->view('endorsements/snippets/premium/_summary_table',
+                        ['lang' => 'np', 'endorsement_record' => $endorsement_record]
+                    );
+                    ?>
                 </td>
             </tr>
         <?php else:?>

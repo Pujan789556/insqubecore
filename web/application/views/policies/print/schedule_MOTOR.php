@@ -3,9 +3,6 @@
  * Schedule Print : Motor - Motorcycle
  */
 $object_attributes      = json_decode($record->object_attributes);
-$total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
-$grand_total            = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
-
 
 /**
  * Let's get the Required Records

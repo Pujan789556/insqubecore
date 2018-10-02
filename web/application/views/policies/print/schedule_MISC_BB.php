@@ -3,11 +3,7 @@
  * Schedule Print : MISCELLANEOUS - BANKER'S BLANKET(BB)
  */
 $object_attributes  = json_decode($record->object_attributes);
-$premium_attributes = json_decode($record->premium_attributes);
-$total_premium  = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
-$grand_total    = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
 $schedule_table_title   = 'बैंकरको क्षतिपूर्ति बीमालेख';
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -139,42 +135,14 @@ $schedule_table_title   = 'बैंकरको क्षतिपूर्त�
 
                             <tr>
                                 <td>
-                                    <?php $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);
-                                        if($cost_calculation_table):?>
-                                            <table class="table">
-                                                <thead>
-                                                    <tr>
-                                                        <td colspan="2"><strong>बीमाशुल्क तालिका</strong></td>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php foreach($cost_calculation_table as $row):?>
-                                                        <tr>
-                                                            <td><?php echo $row->label ?></td>
-                                                            <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
-                                                        </tr>
-                                                    <?php endforeach ?>
-                                                </tbody>
-                                            </table><br>
-                                        <?php endif ?>
-                                    <table class="table no-margin table-bordered table-condensed">
-                                        <tr>
-                                            <td width="80%" class="text-right"><strong>कुल बीमा शुल्क</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format($total_premium, 2)?></strong></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-right"><strong>टिकट दस्तुर</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2)?></strong></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-right"><strong>टिकटको मु. अ. क. (VAT)</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2);?></strong></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                                            <td class="text-right"><strong><?php echo number_format($grand_total , 2);?></strong></td>
-                                        </tr>
-                                    </table>
+                                    <?php
+                                    /**
+                                     * Load Cost Calculation Table
+                                     */
+                                    $this->load->view('endorsements/snippets/premium/_index',
+                                        ['lang' => 'np', 'endorsement_record' => $endorsement_record]
+                                    );
+                                    ?>
                                 </td>
                             </tr>
                         </table>

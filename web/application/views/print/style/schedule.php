@@ -44,6 +44,8 @@
     .border-t, td.border-t{border-top: 0.1mm solid #000000 !important;}
     .underline{text-decoration: underline;}
 
+    .border-t-thicker, td.border-t-thicker{border-top: 0.3mm solid #000000 !important;}
+
     .table td.cost {
         text-align: "." center;
     }

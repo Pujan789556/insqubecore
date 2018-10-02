@@ -3,10 +3,8 @@
  * Schedule Print : MISCELLANEOUS - HEALTH INSURANCE (HI)
  */
 $this->load->helper('ph_misc_hi');
-$object_attributes  = json_decode($record->object_attributes);
-
+$object_attributes      = json_decode($record->object_attributes);
 $schedule_table_title   = 'स्वास्थ्य उपचार बीमालेख';
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -114,13 +112,13 @@ $schedule_table_title   = 'स्वास्थ्य उपचार बीम
 
                             <tr>
                                 <td>
-                                    <strong class="border-b">बीमाशुल्क गणना</strong><br><br>
                                     <?php
                                     /**
-                                     * Policy Premium Card
+                                     * Load Cost Calculation Table
                                      */
-                                    $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($record->portfolio_id);
-                                    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record, 'title' => $cost_table_title]);
+                                    $this->load->view('endorsements/snippets/premium/_index',
+                                        ['lang' => 'np', 'endorsement_record' => $endorsement_record]
+                                    );
                                     ?>
                                 </td>
                             </tr>

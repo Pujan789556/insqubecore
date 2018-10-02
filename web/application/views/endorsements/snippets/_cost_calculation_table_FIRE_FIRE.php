@@ -25,7 +25,7 @@ $grand_total = $total_premium + $endorsement_record->amt_stamp_duty + $endorseme
                 <?php if($property_table): ?>
                     <tr>
                        <td class="no-padding">
-                           <table class="table no-margin table-bordered">
+                           <table class="table table-condensed no-margin table-bordered">
                                <thead>
                                     <tr>
                                         <th colspan="3"><h4>Item/Property-wise Premium Distribution</h4></th>
@@ -53,7 +53,7 @@ $grand_total = $total_premium + $endorsement_record->amt_stamp_duty + $endorseme
                 <?php if($risk_table): ?>
                     <tr>
                        <td class="no-padding">
-                           <table class="table no-margin table-bordered">
+                           <table class="table table-condensed no-margin table-bordered">
                                 <thead>
                                     <tr>
                                         <th colspan="2"><h4>Risk-wise Premium Distribution</h4></th>
@@ -81,7 +81,7 @@ $grand_total = $total_premium + $endorsement_record->amt_stamp_duty + $endorseme
                 <?php if($summary_table): ?>
                   <tr>
                        <td class="no-padding margin-b-10">
-                          <table class="table no-margin table-bordered">
+                          <table class="table table-condensed no-margin table-bordered">
                               <thead>
                                 <tr>
                                   <th colspan="2"><h4>Summary Table</h4></th>
@@ -100,24 +100,14 @@ $grand_total = $total_premium + $endorsement_record->amt_stamp_duty + $endorseme
 
                 <tr>
                     <td class="no-padding">
-                        <table class="table no-margin table-bordered table-condensed">
-                            <tr>
-                                <td width="80%" class="text-right"><strong>जम्मा</strong></td>
-                                <td class="text-right"><strong><?php echo number_format((float)$total_premium, 2)?></strong></td>
-                            </tr>
-                            <tr>
-                                <td class="text-right"><strong>टिकट दस्तुर</strong></td>
-                                <td class="text-right"><strong><?php echo number_format($endorsement_record->amt_stamp_duty, 2);?></strong></td>
-                            </tr>
-                            <tr>
-                                <td class="text-right"><strong>मु. अ. क. (VAT)</strong></td>
-                                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2);?></strong></td>
-                            </tr>
-                            <tr>
-                                <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>
-                                <td class="text-right"><strong><?php echo number_format( (float)$grand_total , 2);?></strong></td>
-                            </tr>
-                        </table>
+                        <?php
+                        /**
+                         * Load Cost Summary
+                         */
+                        $this->load->view('endorsements/snippets/premium/_summary_table',
+                            ['lang' => 'np', 'endorsement_record' => $endorsement_record]
+                        );
+                        ?>
                     </td>
                 </tr>
             <?php else:?>

@@ -3,11 +3,9 @@
  * Schedule Print : MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
  */
 $this->load->helper('ph_misc_tmi');
-
 $object_attributes      = json_decode($record->object_attributes);
 $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
 ?>
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -121,13 +119,13 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
 
                             <tr>
                                 <td>
-                                    <strong class="border-b">Premium Information</strong><br><br>
                                     <?php
                                     /**
-                                     * Policy Premium Card
+                                     * Load Cost Calculation Table
                                      */
-                                    $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($record->portfolio_id);
-                                    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record]);
+                                    $this->load->view('endorsements/snippets/premium/_index',
+                                        ['lang' => 'en', 'endorsement_record' => $endorsement_record]
+                                    );
                                     ?>
                                 </td>
                             </tr>

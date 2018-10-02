@@ -149,10 +149,11 @@ $schedule_table_title   = 'माछाको बीमालेख';
                                 <td>
                                     <?php
                                     /**
-                                     * Policy Premium Card
+                                     * Load Cost Calculation Table
                                      */
-                                    $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($record->portfolio_id);
-                                    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $record]);
+                                    $this->load->view('endorsements/snippets/premium/_index',
+                                        ['lang' => 'np', 'endorsement_record' => $endorsement_record]
+                                    );
                                     ?>
                                 </td>
                             </tr>
