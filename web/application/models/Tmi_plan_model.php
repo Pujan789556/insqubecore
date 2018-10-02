@@ -145,6 +145,15 @@ class Tmi_plan_model extends MY_Model
                     '_show_label' => false,
                     '_required' => true
                 ],
+                [
+                    'field' => 'tariff[age_71_above_rate][]',
+                    '_key'  => 'age_71_above_rate',
+                    'label' => 'Age Band (71 - above) Rate (USD)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
             ],
 
             /**
