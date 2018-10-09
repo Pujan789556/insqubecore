@@ -465,31 +465,73 @@ class Cli_bs_report extends Base_Controller
          * Let's build the query
          *
          */
-        $sql    = "SELECT
-                        P.id AS policy_id, P.portfolio_id, P.code AS policy_code, P.flag_dc, P.start_date, P.end_date,  O.attributes AS object_attributes,
-                        C.full_name AS customer_name, C.contact AS customer_contact,
-                        D.code as district_code,
-                        E.net_amt_sum_insured AS amt_sum_insured,
-                        PINST.amt_basic_premium + PINST.amt_pool_premium AS amt_total_premium
-                    FROM dt_policies AS P
-                    JOIN dt_objects O ON P.object_id = O.id
-                    JOIN master_portfolio PF ON P.portfolio_id = PF.id
-                    JOIN dt_customers C ON P.customer_id = C.id
-                    JOIN master_districts D ON P.district_id = D.id
-                    JOIN master_regions R ON D.region_id = R.id
-                    JOIN dt_endorsements E ON E.policy_id = P.id
-                    JOIN dt_policy_installments PINST ON PINST.endorsement_id = E.id
-                    WHERE
-                        P.fiscal_yr_id = {$fiscal_yr_id} AND
-                        PF.parent_id = 1 AND
-                        PINST.installment_date >= '{$month_start}' AND
-                        PINST.installment_date <= '{$month_end}';";
+        $this->load->model('address_model');
+        $this->db->select(
+                // Policy
+                "P.id AS policy_id, P.portfolio_id, P.code AS policy_code, P.flag_dc, P.start_date, P.end_date, " .
+
+                // Object
+                "O.attributes AS object_attributes, " .
+
+                // Customer
+                "C.full_name AS customer_name, " .
+
+                // Distrct
+                "D.code as district_code, " .
+
+                // Endorsement
+                "E.net_amt_sum_insured AS amt_sum_insured"
+            )
+                // Installment
+            ->select("PINST.amt_basic_premium + PINST.amt_pool_premium AS amt_total_premium", FALSE)
+            ->from('dt_policies P')
+            ->join('dt_objects O', "P.object_id = O.id")
+            ->join('master_portfolio PF', 'P.portfolio_id = PF.id')
+            ->join('dt_customers C', 'P.customer_id = C.id')
+            ->join('master_districts D', 'P.district_id = D.id')
+            ->join('master_regions R', 'D.region_id = R.id')
+            ->join('dt_endorsements E', 'E.policy_id = P.id')
+            ->join('dt_policy_installments PINST', 'PINST.endorsement_id = E.id');
+
+            /**
+             * Customer Address
+             */
+            $table_aliases = [
+                // Address Table Alias
+                'address' => 'ADRC',
+
+                // Country Table Alias
+                'country' => 'CNTRYC',
+
+                // State Table Alias
+                'state' => 'STATEC',
+
+                // Local Body Table Alias
+                'local_body' => 'LCLBDC',
+
+                // Type/Module Table Alias
+                'module' => 'C'
+            ];
+            $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_');
+
+            $params = [
+                'P.fiscal_yr_id'            => $fiscal_yr_id,
+                'PF.parent_id'              => IQB_MASTER_PORTFOLIO_AGR_ID,
+                'PINST.installment_date >=' => $month_start,
+                'PINST.installment_date <=' => $month_end
+            ];
+
+        /**
+         * Get the Data
+         */
+        $data = $this->db->where($params)
+                         ->get()
+                         ->result();
+
 
 
         $bs_category_codes  = $this->bs_agro_category_model->dropdown_codes();
         $bs_breeds          = $this->bs_agro_breed_model->dropdown();
-
-        $data = $this->db->query($sql)->result();
 
         $csv_data[] = ['NAME', 'DISTRICT', 'POLICY_NO', 'PARTICULARS', 'EFFECTIVE_FROM', 'EFFECTIVE_TO', 'SUMINSURED', 'PREMIUM', 'EXEMPTED_PREMIUM', 'AREA', 'CASTE', 'REMARKS', 'TAG_NO', 'CONTACTNO', 'ADDRESS'];
 
@@ -497,24 +539,12 @@ class Cli_bs_report extends Base_Controller
         {
             load_portfolio_helper($single->portfolio_id);
 
-            $attributes = json_decode($single->object_attributes);
-            $contact    = json_decode($single->customer_contact);
-            $address    = strip_tags(get_contact_widget_two_lines($single->customer_contact));
-            $contact_no = $contact->mobile ?? '';
+            $attributes     = json_decode($single->object_attributes);
+            $address_record = parse_address_record($single, 'addr_customer_');
 
-
-
-            /**
-             * Tariff Record
-             */
-            try {
-
-                $tariff = _OBJ_AGR_tariff_by_type($single->portfolio_id, $attributes->bs_agro_category_id);
-
-            } catch (Exception $e) {
-
-                die('ERROR: ' . $e->getMessage() . PHP_EOL);
-            }
+            // $contact    = json_decode($single->customer_contact);
+            $address    = strip_tags(address_widget_two_lines($address_record));
+            $contact_no = $address_record->mobile ?? '';
 
             /**
              * Portfolio Setting Record
@@ -531,11 +561,21 @@ class Cli_bs_report extends Base_Controller
                 $single->end_date,
             ];
 
-            for($i=0; $i < count($attributes->items->sum_insured); $i++ )
+            for($i=0; $i < count($attributes->items); $i++ )
             {
+                $item = $attributes->items[$i];
+                $sum_insured = $item->sum_insured;
 
+                /**
+                 * Tariff Record
+                 */
+                try {
+                    $tariff = _OBJ_AGR_tariff_by_type($single->portfolio_id, $item->breed);
 
-                $sum_insured = $attributes->items->sum_insured[$i];
+                } catch (Exception $e) {
+
+                    die('ERROR: ' . $e->getMessage() . PHP_EOL);
+                }
 
                 /**
                  * Compute Individual Premium Here
@@ -555,10 +595,10 @@ class Cli_bs_report extends Base_Controller
                 // 75% of total individual premium
                 $exempted_premium    = $premium * 75 / 100.00;
 
-                $area       = $attributes->items->area[$i] ?? '';
-                $caste      = $bs_breeds[$attributes->items->breed[$i]];
+                $area       = $item->area ?? '';
+                $caste      = $bs_breeds[$item->breed];
                 $remarks    = '';
-                $tag_no     = $attributes->items->tag_no[$i] ?? '';
+                $tag_no     = $item->tag_no ?? '';
 
                 $_repeat = [$sum_insured, $premium, $exempted_premium, $area, $caste, $remarks, $tag_no, $contact_no, $address];
 
