@@ -103,7 +103,7 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
                                 <td>
                                     <strong>Policy Start Date</strong>: <?php echo $record->start_date?><br>
                                     <strong>Policy End Date</strong>: <?php echo $record->end_date?><br>
-                                    <strong>No. of Days</strong>: <?php echo date_difference($record->start_date, $record->end_date, 'd') + 1 ?> days
+                                    <strong>No. of Days</strong>: <?php echo _POLICY_duration($record->start_date, $record->end_date, 'd') ?> days
                                 </td>
                             </tr>
 

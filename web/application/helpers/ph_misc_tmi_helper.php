@@ -377,44 +377,52 @@ if ( ! function_exists('_OBJ_MISC_TMI_tariff_rate'))
 		$tariffs = json_decode ( $plan_type == 'M' ? $tariff_record->tariff_medical : $tariff_record->tariff_package);
 		$rate 	= 0.00;
 
+		// Get the Age Band (Rate Column)
+		$rate_column = _OBJ_MISC_TMI_tariff_rate_column_by_age( $age );
+
+		// Get the Rate for given duration for given age band
 		foreach($tariffs as $single)
 		{
 			if(  $tmi_days >= $single->day_min && $tmi_days <= $single->day_max )
 			{
-				$rate_column = '';
-
-				// Get the Age Band
-				if( $age >= 5 && $age <= 40 )
-				{
-					$rate_column = 'age_5_40_rate';
-				}
-				else if( $age >= 41 && $age <= 60 )
-				{
-					$rate_column = 'age_41_60_rate';
-				}
-				else if( $age >= 61 && $age <= 70 )
-				{
-					$rate_column = 'age_61_70_rate';
-				}
-				else if( $age >= 71 && $age <= 79 )
-				{
-					$rate_column = 'age_71_79_rate';
-				}
-				else if( $age >= 80 && $age <= 84 )
-				{
-					$rate_column = 'age_80_84_rate';
-				}
-				else if( $age >= 85  )
-				{
-					$rate_column = 'age_85_above_rate';
-				}
-
-				if($rate_column)
-				{
-					$rate = floatval($single->{$rate_column});
-				}
+				$rate = floatval($single->{$rate_column});
 				break;
 			}
+		}
+
+
+		/**
+		 * IMPORTANT: For all package except student,
+		 * 	if total duration is greater than 180 ( for which we do not have tariff setup)
+		 * 	The Rate = Total Days * (Total Rate of 180 Days)/180
+		 *
+		 *
+		 * 	NOTE:
+		 * 		PARENT ID of STUDENT PACKAGES = 4
+		 */
+		if( !$rate && $tariff_record->parent_id != 4 && $tmi_days > 180 )
+		{
+			/**
+			 * Let's get the 180 days rate
+			 */
+			foreach($tariffs as $single)
+			{
+				if(  $single->day_max == 180 )
+				{
+					$rate = floatval($single->{$rate_column});
+					break;
+				}
+			}
+
+			if(!$rate)
+			{
+				throw new Exception("Exception [Helper: ph_misc_tmi_helper][Method: _OBJ_MISC_TMI_tariff_rate()]: No Tariff Rate Found for NON-Student Package for 180 Days.");
+			}
+
+			/**
+			 * Let's Find the Rate
+			 */
+			$rate = $tmi_days * $rate / 180;
 		}
 
 		/**
@@ -427,6 +435,50 @@ if ( ! function_exists('_OBJ_MISC_TMI_tariff_rate'))
 		}
 
 		return $rate;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MISC_TMI_tariff_rate_column_by_age'))
+{
+	/**
+	 * Get Tariff Rate Column from Age
+	 * @param int $age
+	 * @return alphanum
+	 */
+	function _OBJ_MISC_TMI_tariff_rate_column_by_age( $age )
+	{
+
+		$rate_column = '';
+
+		// Get the Age Band (Rate Column)
+		if( $age >= 5 && $age <= 40 )
+		{
+			$rate_column = 'age_5_40_rate';
+		}
+		else if( $age >= 41 && $age <= 60 )
+		{
+			$rate_column = 'age_41_60_rate';
+		}
+		else if( $age >= 61 && $age <= 70 )
+		{
+			$rate_column = 'age_61_70_rate';
+		}
+		else if( $age >= 71 && $age <= 79 )
+		{
+			$rate_column = 'age_71_79_rate';
+		}
+		else if( $age >= 80 && $age <= 84 )
+		{
+			$rate_column = 'age_80_84_rate';
+		}
+		else
+		{
+			$rate_column = 'age_85_above_rate';
+		}
+
+		return $rate_column;
 	}
 }
 
@@ -549,7 +601,7 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 					/**
 					 * Compute Age in Years and Rate (in NRS which is Premium)
 					 */
-					$policy_duration = date_difference($policy_record->start_date, $policy_record->end_date, 'd');
+					$policy_duration = _POLICY_duration($policy_record->start_date, $policy_record->end_date, 'd');
 
 					$age 		= date_difference($object_attributes->dob, date('Y-m-d'), 'y');
 					$forex_date = $post_data['premium']['forex_date'];
