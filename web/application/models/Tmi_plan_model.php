@@ -146,32 +146,32 @@ class Tmi_plan_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'tariff[age_71_80_rate][]',
-                    '_key'  => 'age_71_80_rate',
-                    'label' => 'Age Band (71 - 80) Rate (USD)',
+                    'field' => 'tariff[age_71_79_rate][]',
+                    '_key'  => 'age_71_79_rate',
+                    'label' => 'Age Band (71 - 79) Rate (USD)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_show_label' => false,
                     '_required' => true
                 ],
                 [
-                    'field' => 'tariff[age_81_90_rate][]',
-                    '_key'  => 'age_81_90_rate',
-                    'label' => 'Age Band (81 - 90) Rate (USD)',
+                    'field' => 'tariff[age_80_84_rate][]',
+                    '_key'  => 'age_80_84_rate',
+                    'label' => 'Age Band (80 - 84) Rate (USD)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_show_label' => false,
                     '_required' => true
                 ],
                 [
-                    'field' => 'tariff[age_91_above_rate][]',
-                    '_key'  => 'age_91_above_rate',
-                    'label' => 'Age Band (91 - above) Rate (USD)',
+                    'field' => 'tariff[age_85_above_rate][]',
+                    '_key'  => 'age_85_above_rate',
+                    'label' => 'Age Band (85 - above) Rate (USD)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_show_label' => false,
                     '_required' => true
-                ],
+                ]
             ],
 
             /**

@@ -396,17 +396,17 @@ if ( ! function_exists('_OBJ_MISC_TMI_tariff_rate'))
 				{
 					$rate_column = 'age_61_70_rate';
 				}
-				else if( $age >= 71 && $age <= 80 )
+				else if( $age >= 71 && $age <= 79 )
 				{
-					$rate_column = 'age_71_80_rate';
+					$rate_column = 'age_71_79_rate';
 				}
-				else if( $age >= 81 && $age <= 90 )
+				else if( $age >= 80 && $age <= 84 )
 				{
-					$rate_column = 'age_81_90_rate';
+					$rate_column = 'age_80_84_rate';
 				}
-				else if( $age >= 91  )
+				else if( $age >= 85  )
 				{
-					$rate_column = 'age_91_above_rate';
+					$rate_column = 'age_85_above_rate';
 				}
 
 				if($rate_column)
