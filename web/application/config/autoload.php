@@ -132,4 +132,4 @@ $autoload['language'] = array();
 |
 |	$autoload['model'] = array('first_model' => 'first');
 */
-$autoload['model'] = array('setting_model', 'fiscal_year_model', 'fy_quarter_model', 'fy_month_model');
+$autoload['model'] = array('setting_model', 'user_model', 'fiscal_year_model', 'fy_quarter_model', 'fy_month_model');

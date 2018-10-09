@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * All the background Tasks or Command Line Jobs are Carried Out using this controller.
  */
-class Cli extends CI_Controller
+class Cli extends Base_Controller
 {
 
 	public function __construct()
@@ -18,9 +18,6 @@ class Cli extends CI_Controller
             	show_404();
             	exit(1);
             }
-
-            // Default Timezone Set: Katmandu
-            date_default_timezone_set('Asia/Katmandu');
     }
 
 	// -------------------------------------------------------------------------------------

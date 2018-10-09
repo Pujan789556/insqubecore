@@ -6,36 +6,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * All the background Tasks or Command Line Jobs are Carried Out using this controller.
  */
-class Cli_bs_report extends CI_Controller
+class Cli_bs_report extends Base_Controller
 {
-    /**
-     * Application Settings from DB
-     *
-     * @var object
-     */
-    public $settings;
-
-    /**
-     * Application's Current Fiscal Year from DB
-     *
-     * @var object
-     */
-    public $current_fiscal_year;
-
-    /**
-     * Application's Current Quarter of Current Fiscal Year from DB
-     *
-     * @var object
-     */
-    public $current_fy_quarter;
-
-    /**
-     * Application's Current Month of Current Fiscal Year from DB
-     *
-     * @var object
-     */
-    public $current_fy_month;
-
     /**
      * Files Upload Path - Data (Beema Samiti Reports)
      */
@@ -54,61 +26,8 @@ class Cli_bs_report extends CI_Controller
         	exit(1);
         }
 
-        /**
-         * App Settings
-         */
-        $this->_app_settings();
-        $this->_app_fiscal_year();
-
-
-
-        // Default Timezone Set: Katmandu
-        date_default_timezone_set('Asia/Katmandu');
-
         // Load models
         $this->load->model('bs_report_model');
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Set Application Settings from DB
-     *
-     * @return void
-     */
-    private function _app_settings()
-    {
-        /**
-         * Get Cached Result, If no, cache the query result
-         */
-        $this->settings = $this->setting_model->get(['id' => 1]);
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Set Current Fiscal Year From DB
-     *
-     * @return void
-     */
-    private function _app_fiscal_year()
-    {
-        /**
-         * Get Cached Result, If no, cache the query result
-         */
-        $today = date('Y-m-d');
-        $this->current_fiscal_year = $this->fiscal_year_model->get_fiscal_year($today);
-
-        /**
-         * Current Quarter
-         */
-        $this->current_fy_quarter = $this->fy_quarter_model->get_quarter_by_date($today);
-
-
-        /**
-         * Current Month
-         */
-        $this->current_fy_month = $this->fy_month_model->get_month_by_date($today);
     }
 
 	// -------------------------------------------------------------------------------------
