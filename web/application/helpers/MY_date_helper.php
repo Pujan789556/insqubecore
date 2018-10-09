@@ -84,6 +84,79 @@ if ( ! function_exists('date_difference'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('duration_formatted'))
+{
+	/**
+	 * Get Date Difference Formatted
+	 *
+	 * 	Return X Years Y Months Z Days
+	 *
+	 * @param	date
+	 * @param 	date
+	 * @param 	str 	Language
+	 * @return	string
+	 */
+	function duration_formatted($from, $to, $lang = 'en')
+	{
+		$d1 = new DateTime($from);
+		$d2 = new DateTime($to);
+
+		$diff = $d1->diff($d2);
+
+		if( !$diff )
+		{
+			return FALSE;
+		}
+
+		$formatted = [];
+
+		if($diff->y)
+		{
+			$formatted[] = $diff->y;
+			if($lang == 'en')
+			{
+				$formatted[] = $diff->y > 1 ? 'years' : 'year';
+			}
+			else
+			{
+				$formatted[] = 'वर्ष';
+			}
+
+		}
+
+		if($diff->m)
+		{
+			$formatted[] = $diff->m;
+			if($lang == 'en')
+			{
+				$formatted[] = $diff->m > 1 ? 'months' : 'month';
+			}
+			else
+			{
+				$formatted[] = 'महिना';
+			}
+
+		}
+
+		if($diff->d)
+		{
+			$formatted[] = $diff->d;
+			if($lang == 'en')
+			{
+				$formatted[] = $diff->d > 1 ? 'days' : 'day';
+			}
+			else
+			{
+				$formatted[] = 'दिन';
+			}
+		}
+
+		return implode(' ', $formatted);
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('belong_to_current_fy_quarter'))
 {
 	/**
