@@ -67,6 +67,11 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                         <strong>Bill No.:</strong> <br/>
                         <strong>Receipt No.:</strong><br>
                         <strong>Issued at:</strong> <?php echo htmlspecialchars($record->branch_name_en) ?>
+
+                        <br/><br/><strong>Period of Insurance:</strong><br>
+                        From: : <?php echo $record->start_date ?><br>
+                        To: : <?php echo $record->end_date ?>
+                        (<?php echo _POLICY_duration_formatted($record->start_date, $record->end_date, 'en'); ?>)
                     </td>
                 </tr>
 

@@ -98,7 +98,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </tr>
                         <tr>
                             <td class="text-bold">Policy End Date</td>
-                            <td><?php echo $record->end_date?></td>
+                            <td><?php echo $record->end_date ?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Policy Duration</td>
+                            <td><?php echo _POLICY_duration_formatted($record->start_date, $record->end_date); ?></td>
                         </tr>
                         <tr>
                             <td class="text-bold">is Short Term?</td>

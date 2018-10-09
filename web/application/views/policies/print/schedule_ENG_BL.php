@@ -71,6 +71,7 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                                     <strong>Period of Insurance:</strong><br>
                                     From: <?php echo $record->start_date ?><br>
                                     To: <?php echo $record->end_date ?>
+                                    (<?php echo _POLICY_duration_formatted($record->start_date, $record->end_date, 'en'); ?>)
                                 </td>
                             </tr>
                             <tr>

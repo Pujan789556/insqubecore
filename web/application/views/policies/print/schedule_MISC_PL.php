@@ -61,6 +61,7 @@ $schedule_table_title   = "Public Liability (Schedule)";
                         <strong>Period of Insurance:</strong><br>
                         From: <strong><?php echo $record->start_date ?></strong><br>
                         To: <strong><?php echo $record->end_date ?></strong>
+                        (<?php echo _POLICY_duration_formatted($record->start_date, $record->end_date, 'en'); ?>)
                     </td>
                 </tr>
 

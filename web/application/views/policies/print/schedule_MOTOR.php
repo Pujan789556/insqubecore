@@ -151,7 +151,10 @@ switch ($record->portfolio_id)
                             </tr>
 
                             <tr>
-                                <td>बीमा अवधि: <?php echo $record->start_date?> देखि <?php echo $record->end_date?> सम्म</td>
+                                <td>
+                                    बीमा अवधि: <?php echo $record->start_date?> देखि <?php echo $record->end_date?> सम्म
+                                    (<?php echo _POLICY_duration_formatted($record->start_date, $record->end_date, 'np'); ?>)
+                                </td>
                             </tr>
 
                             <tr>
