@@ -87,13 +87,18 @@ function ___environment_defaults()
         $value 		= trim(isset($pair[1]) ? $pair[1] : '');
 
         // convert true/false into boolean
-        if(strtolower($value) == 'true')
+        if(strtolower($value) === 'true')
         {
             $value = TRUE;
         }
-        else if(strtolower($value) == 'false')
+        else if(strtolower($value) === 'false')
         {
             $value = FALSE;
+        }
+        // Null into NULL
+        else if(strtolower($value) === 'null')
+        {
+            $value = NULL;
         }
 
         // Define constants
