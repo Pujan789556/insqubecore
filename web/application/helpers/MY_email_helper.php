@@ -45,8 +45,9 @@ if ( ! function_exists('send_email'))
 				'smtp_port' => MAIL_PORT,
 				'smtp_user' => MAIL_USERNAME,
 				'smtp_pass' => MAIL_PASSWORD,
-				'smtp_crypto' 	=> 'tls',
+				'smtp_crypto' 	=> MAIL_ENCRYPTION,
 				'smtp_timeout' 	=> 30,
+				'verify_peer' 	=> MAIL_VERIFY_PEER,
 				'crlf' 			=> "\r\n",
 				'newline' 		=> "\r\n"
 			);
@@ -61,13 +62,10 @@ if ( ! function_exists('send_email'))
 		//
 
 		// FROM
-		$from = isset($options['from']) ? $options['from'] : NULL;
-		$from_email = isset($from['email']) ? $from['email'] : $CI->settings->from_email;
-		$from_name 	= isset($from['name']) ? $from['name'] : $CI->settings->orgn_name_en;
-		if( !empty($from_email) || !empty($from_name) )
-		{
-			$CI->email->from( $from_email, $from_name );
-		}
+		$CI->email->from( MAIL_USERNAME, $CI->settings->orgn_name_en );
+
+		// REPLY-TO
+		$CI->email->reply_to(MAIL_NO_REPLY ?? MAIL_USERNAME, $CI->settings->orgn_name_en);
 
 		// TO
 		$CI->email->to($options['to']);
