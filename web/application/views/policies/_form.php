@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <?php
 echo form_open( $this->uri->uri_string(),
     [
-        'class' => 'form-horizontal form-iqb-general',
+        'class' => 'form-iqb-general',
         'id'    => '_form-policy',
         'data-pc' => '#form-box-policy' // parent container ID
     ],
@@ -23,7 +23,7 @@ echo form_open( $this->uri->uri_string(),
         <div class="box-header with-border">
           <h4 class="box-title">Select Customer</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
             <div id="_customer-box">
                 <div class="form-group <?php echo form_error('customer_id') ? 'has-error' : '';?>">
                   <label class="col-sm-2 control-label">Customer<?php echo field_compulsary_text( TRUE )?></label>
@@ -91,7 +91,7 @@ echo form_open( $this->uri->uri_string(),
         <div class="box-header with-border">
           <h4 class="box-title">Risk District</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
             <?php
             /**
              * Load Form Components
@@ -109,7 +109,7 @@ echo form_open( $this->uri->uri_string(),
         <div class="box-header with-border">
           <h4 class="box-title">Select Portfolio</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
             <?php
             /**
              * Load Form Components
@@ -127,7 +127,7 @@ echo form_open( $this->uri->uri_string(),
         <div class="box-header with-border">
           <h4 class="box-title">Select Policy Object</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
 
             <div id="_policy-object-box">
                 <div class="form-group <?php echo form_error('object_id') ? 'has-error' : '';?>">
@@ -161,7 +161,7 @@ echo form_open( $this->uri->uri_string(),
         <div class="box-header with-border">
           <h4 class="box-title">Proposer Information</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
             <?php
             /**
              * Load Form Components : Proposer, Care Of
@@ -181,16 +181,39 @@ echo form_open( $this->uri->uri_string(),
           <h4 class="box-title">Select Duration</h4>
         </div>
         <div class="box-body">
-            <?php
-            /**
-             * Load Form Components
-             */
-            $duration_elements = $form_elements['duration'];
-            $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements' => $duration_elements,
-                'form_record'   => $record
-            ]);
-            ?>
+            <div class="form-horizontal no-margin-b">
+                <?php
+                /**
+                 * Load Form Components
+                 */
+                $duration_elements = $form_elements['duration'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $duration_elements,
+                    'form_record'   => $record
+                ]);
+                ?>
+            </div>
+            <div class="form-inline">
+                <div class="row">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <div class="alert alert-info no-margin-b">
+                            <div class="form-group">
+                                <select class="form-control" id="_ed-type">
+                                  <option value="y">Year(s)</option>
+                                  <option value="m">Month(s)</option>
+                                  <option value="w">Week(s)</option>
+                                  <option value="d">Day(s)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="_ed-qty" placeholder="Type duration...">
+                            </div>
+                            <a class="btn btn-warning btn-sm" href="javascript:void(0)" id="_btn-apply-end_date">Apply</a>
+                            <p>Please select and Click <strong>Apply</strong> button for automatic "<strong>End Date</strong>" calculation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -198,7 +221,7 @@ echo form_open( $this->uri->uri_string(),
         <div class="box-header with-border">
           <h4 class="box-title">Sales Info</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
 
             <?php
             /**
@@ -217,7 +240,7 @@ echo form_open( $this->uri->uri_string(),
         <div class="box-header with-border">
           <h4 class="box-title">Disclaimer Information (सम्पुष्टि विवरण)</h4>
         </div>
-        <div class="box-body">
+        <div class="box-body form-horizontal">
 
             <?php
             /**
@@ -470,5 +493,26 @@ $('#template-reference').on('change', function(){
             }
         });
     }
+});
+
+
+// End Date Helper
+$('#_end_datetime').closest('.form-group').css('margin-bottom','0');
+$('#_ed-qty').on('focus', function(){$(this).select()});
+$('#_btn-apply-end_date').on('click', function(){
+    var st_dt = moment($('#_start_datetime').val()).format('YYYY-MM-DD'),
+        type = $('#_ed-type').val(),
+        qty  = $('#_ed-qty').val(),
+        ed_dt = '';
+        if(type != '' && qty !=''){
+            ed_dt = moment(st_dt)
+                            .add(qty, type)
+                            .add('-1', 'day')
+                            .format('YYYY-MM-DD') + ' 23:59:00';
+            $('#_end_datetime').val(ed_dt);
+            $('#_end_datetime').hide(200, function(){
+                $(this).val(ed_dt).show();
+            });
+        }
 });
 </script>

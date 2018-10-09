@@ -394,6 +394,7 @@ class Policy_model extends MY_Model
                         'rules' => 'trim|required|valid_date',
                         '_type'             => 'datetime',
                         '_default'          => date('Y-m-d H:i:00'),
+                        '_id'               => '_start_datetime',
                         '_extra_attributes' => 'data-provide="datetimepicker-inline"',
                         '_required' => true
                     ],
@@ -403,6 +404,7 @@ class Policy_model extends MY_Model
                         'rules' => 'trim|required|valid_date|callback__cb_valid_policy_duration',
                         '_type'             => 'datetime',
                         '_default'          => $default_end_datetime,
+                        '_id'               => '_end_datetime',
                         '_extra_attributes' => 'data-provide="datetimepicker-inline"',
                         '_required' => true
                     ]
