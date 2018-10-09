@@ -459,8 +459,8 @@ if ( ! function_exists('RI__distribute_endorsement'))
 					$policy_start_date 	= $policy_installment_record->policy_start_date;
 					$policy_end_date 	= $policy_installment_record->policy_end_date;
 
-					$duration_consumed 	= date_difference($policy_start_date, $today, 'd') + 1;
-					$policy_duration 	= date_difference($policy_start_date, $policy_end_date, 'd') + 1;
+					$duration_consumed 	= _POLICY_duration($policy_start_date, $today, 'd');
+					$policy_duration 	= _POLICY_duration($policy_start_date, $policy_end_date, 'd');
 
 					$charged_premium_gross 	= ($ri_transaction_latest->premium_gross / $policy_duration) * $duration_consumed;
 					$charged_premium_pool 	= ($ri_transaction_latest->premium_pool / $policy_duration) * $duration_consumed;

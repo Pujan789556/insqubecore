@@ -1837,8 +1837,8 @@ if ( ! function_exists('_ENDORSEMENT__compute_prorata_premium'))
     function _ENDORSEMENT__compute_prorata_premium( $premium_data, $start_date, $end_date )
     {
         $today = date('Y-m-d');
-        $policy_duration  = date_difference($start_date, $end_date, 'd');
-        $prorata_duration = date_difference($today, $end_date, 'd');
+        $policy_duration  = _POLICY_duration($start_date, $end_date, 'd');
+        $prorata_duration = _POLICY_duration($today, $end_date, 'd');
 
 
         $rate = $prorata_duration / $policy_duration;
