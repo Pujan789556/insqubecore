@@ -18,6 +18,34 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // POLICY HELPER FUNCTIONS
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('_POLICY_duration'))
+{
+    /**
+     * Get Policy Duration
+     *
+     *  Logic: We need to add 1 days on regular date difference
+     *
+     *  Return Years or Months or Days
+     *
+     * @param   date start Date
+     * @param   date end Date
+     * @param   str     Return Type y: years | m: months | d: days
+     * @return  integer
+     */
+    function _POLICY_duration($from, $to, $what)
+    {
+        // Add 1 day on end date
+        $end_date = new DateTime($to);
+        $end_date->modify('+1 day');
+        $to = $end_date->format('Y-m-d');
+
+        // Let's get the date difference
+        return date_difference($from, $to, $what);
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_POLICY_status_dropdown'))
 {
 	/**
