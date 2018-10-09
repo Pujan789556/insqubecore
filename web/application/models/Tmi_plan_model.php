@@ -244,6 +244,8 @@ class Tmi_plan_model extends MY_Model
             $list = $this->db->select('L1.*, L2.name as parent_name')
                              ->from($this->table_name . ' L1')
                              ->join($this->table_name . ' L2', 'L1.parent_id = L2.id', 'left')
+                             ->order_by('L1.parent_id')
+                             ->order_by('L1.name')
                              ->get()->result();
             $this->write_cache($list, 'tmiplan_all', CACHE_DURATION_DAY);
         }
