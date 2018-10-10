@@ -719,7 +719,8 @@ if ( ! function_exists('_INVOICE__pdf'))
         $rows      = $data['rows'];
 
         $CI->load->library('pdf');
-        $mpdf = $CI->pdf->load();
+        $mpdf = $CI->pdf->load(['format'=>'A5-L']);
+
         $mpdf->SetMargins(10, 5, 10, 5);
         $mpdf->margin_header = 5;
         $mpdf->margin_footer = 5;
@@ -791,7 +792,7 @@ if ( ! function_exists('_RECEIPT__pdf'))
         $record    = $data['record'];
 
         $CI->load->library('pdf');
-        $mpdf = $CI->pdf->load();
+        $mpdf = $CI->pdf->load(['format'=>'A5-L']);
         $mpdf->SetMargins(10, 5, 10, 5);
         $mpdf->margin_header = 5;
         $mpdf->margin_footer = 5;
