@@ -1261,6 +1261,7 @@ class Ri_setup_treaty_model extends MY_Model
         }
 
         return $this->db->limit($this->settings->per_page+1)
+                        ->order_by('T.id', 'desc')
                         ->order_by('T.fiscal_yr_id', 'desc')
                         ->get()->result();
     }
@@ -1335,7 +1336,7 @@ class Ri_setup_treaty_model extends MY_Model
 
     public function get_brokers_by_treaty($id)
     {
-        return $this->db->select('TB.treaty_id, TB.company_id, C.name, C.picture, C.pan_no, C.active, C.type, C.contact')
+        return $this->db->select('TB.treaty_id, TB.company_id, C.name, C.picture, C.pan_no, C.active, C.type')
                         ->from(self::$table_treaty_brokers . ' AS TB')
                         ->join('master_companies C', 'C.id = TB.company_id')
                         ->where('TB.treaty_id', $id)
