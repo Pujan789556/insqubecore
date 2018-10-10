@@ -47,21 +47,22 @@ class Pdf {
 
     function load($config=NULL)
     {
-        if ($config == NULL)
+        $default_config = [
+            'format' => 'A4',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 15,
+            'margin_bottom' => 15,
+            'margin_header' => 9,
+            'margin_footer' => 9,
+            'orientation' => 'P'
+        ];
+        if ( $config )
         {
-            $config = [
-                'format' => 'A4',
-                'margin_left' => 10,
-                'margin_right' => 10,
-                'margin_top' => 15,
-                'margin_bottom' => 15,
-                'margin_header' => 9,
-                'margin_footer' => 9,
-                'orientation' => 'P'
-            ];
+            $default_config = array_merge($default_config, $config);
         }
         // return new mPDF($param);
-        return new \Mpdf\Mpdf($config);
+        return new \Mpdf\Mpdf($default_config);
     }
 
 }
