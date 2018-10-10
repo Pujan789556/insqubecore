@@ -227,6 +227,7 @@ $config['DX_permissions'] = [
 			 */
 			'status.to.draft',
 			'status.to.verified',
+			'status.to.ri.approved', // Permission to RI Approve
 			'status.to.vouchered',
 			'status.to.invoiced',
 			'status.to.active', // Issue Endorsement
