@@ -99,7 +99,7 @@
                                     Amount in Words (Rs.):
                                     <strong>
                                         <?php
-                                        echo ucfirst( number_to_words( number_format(abs($record->amount), 2) ) );
+                                        echo ucfirst( amount_in_words( number_format(abs($record->amount), 2) ) );
                                         ?>
                                     </strong>
                                 </td>

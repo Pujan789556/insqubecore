@@ -86,10 +86,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 </tr>
                                 <tr>
                                     <td colspan="2">
-                                        Amount in Words:
+                                        Amount in Words (Rs.):
                                         <strong>
                                             <?php
-                                            echo ucfirst( number_to_words( number_format($record->amount, 2, '.', '') ) );
+                                            echo ucfirst( amount_in_words( number_format($record->amount, 2, '.', '') ) );
                                             ?>
                                         </strong>
                                     </td>

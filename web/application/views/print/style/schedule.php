@@ -54,8 +54,8 @@
     .table-footer td.border-t{border-top: 0.1mm solid #999;}
 
     /* -- Receipt Styles --*/
-    .receipt-box{border: 0.1mm solid #666; padding:10px;}
-    p.receipt-description {font-weight:14px; font-style: italic;}
-    p.receipt-description strong{font-size: 16px; font-style: normal;}
+    .receipt-box{border: 0.1mm solid #666; padding:5px;}
+    p.receipt-description {font-size:10pt;}
+    p.receipt-description strong{font-size: 11pt;}
 
 </style>
