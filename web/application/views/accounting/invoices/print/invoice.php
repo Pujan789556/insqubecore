@@ -48,7 +48,12 @@
                     <td colspan="2" align="left">
                         <img style="margin-bottom: 20px;" src="<?php echo logo_url();?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
                     </td>
-                    <td align="right"><h2>Invoice # <?php echo $record->invoice_code?></h2></td>
+                    <td align="right">
+                        <h2>Invoice # <?php echo $record->invoice_code?></h2>
+                        <?php if($record->flag_printed == IQB_FLAG_ON): ?>
+                            <h3 style="color:#666666;">DUPLICATE COPY</h3>
+                        <?php endif ?>
+                    </td>
                 </tr>
                 <tr>
                     <td>

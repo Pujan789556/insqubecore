@@ -719,7 +719,7 @@ if ( ! function_exists('_INVOICE__pdf'))
         $rows      = $data['rows'];
 
         $CI->load->library('pdf');
-        $mpdf = $CI->pdf->load(['format'=>'A5-L']);
+        $mpdf = $CI->pdf->load();
 
         $mpdf->SetMargins(10, 5, 10, 5);
         $mpdf->margin_header = 5;
@@ -727,11 +727,6 @@ if ( ! function_exists('_INVOICE__pdf'))
         $mpdf->SetProtection(array('print'));
         $mpdf->SetTitle("Policy Invoice - {$record->invoice_code}");
         $mpdf->SetAuthor($CI->settings->orgn_name_en);
-
-        if( $record->flag_printed == IQB_FLAG_ON )
-        {
-            $mpdf->SetWatermarkText( 'INVOICE COPY - ' . $CI->settings->orgn_name_en );
-        }
 
         $mpdf->showWatermarkText = true;
         $mpdf->watermark_font = 'DejaVuSansCondensed';
@@ -792,18 +787,13 @@ if ( ! function_exists('_RECEIPT__pdf'))
         $record    = $data['record'];
 
         $CI->load->library('pdf');
-        $mpdf = $CI->pdf->load(['format'=>'A5-L']);
+        $mpdf = $CI->pdf->load();
         $mpdf->SetMargins(10, 5, 10, 5);
         $mpdf->margin_header = 5;
         $mpdf->margin_footer = 5;
         $mpdf->SetProtection(array('print'));
         $mpdf->SetTitle("Invoice Receipt - {$record->receipt_code}");
         $mpdf->SetAuthor($CI->settings->orgn_name_en);
-
-        if( $record->flag_printed == IQB_FLAG_ON )
-        {
-            $mpdf->SetWatermarkText( 'RECEIPT COPY - ' . $CI->settings->orgn_name_en );
-        }
 
         $mpdf->showWatermarkText = true;
         $mpdf->watermark_font = 'DejaVuSansCondensed';

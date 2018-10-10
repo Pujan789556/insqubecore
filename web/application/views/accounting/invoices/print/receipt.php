@@ -41,7 +41,12 @@
                         <img style="margin-bottom: 20px;" src="<?php echo logo_url();?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
                     </td>
                     <td width="20%" align="center"><h2>RECEIPT</h2></td>
-                    <td width="40%" align="right"><h3>Receipt# <?php echo $record->receipt_code?></h3></td>
+                    <td width="40%" align="right">
+                        <h3>Receipt# <?php echo $record->receipt_code?></h3>
+                        <?php if($record->flag_printed == IQB_FLAG_ON): ?>
+                            <h3 style="color:#666666;">DUPLICATE COPY</h3>
+                        <?php endif ?>
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="2">
