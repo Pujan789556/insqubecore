@@ -113,7 +113,7 @@
         <div class="row">
             <!-- accepted payments column -->
             <div class="col-xs-12">
-                <p class="text-muted well well-sm no-shadow">
+                <p class="text-muted well well-sm no-shadow" style="font-size:8pt">
                     Payment by Cheque/Drafts are subject to realisation.
                 </p>
                 <br/>
@@ -127,6 +127,6 @@
          * Show Footer
          */
         echo $inline_footer;
-         ?>
+        ?>
     </body>
 </html>

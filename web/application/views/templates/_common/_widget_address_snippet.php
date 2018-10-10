@@ -9,8 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Address Format:
  *
  *      <strong>Contact Name</strong> *
- *      address1
- *      address2
+ *      address1, address2
  *      city, state, zip
  *      country
  *
@@ -29,23 +28,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $contact_data = [];
 
             // Address1
-            $contact_data[] = $address_record->alt_address1_text ? $address_record->alt_address1_text : $address_record->address1_en;
-
+            $addr1 = $address_record->alt_address1_text ? $address_record->alt_address1_text : $address_record->address1_en;
+            $addr2 = NULL;
             // Address 2
-            $contact_data[] = $address_record->address2 ?? NULL;
-            echo implode('<br/>', $contact_data) . '<br/>';
+            if($address_record->address2){
+                $addr2 = $address_record->address2;
+            }
 
-            // City
-            $city = $address_record->city ?? NULL;
+            // address1, address2
+            $contact_data[] = implode(', ', array_filter([$addr1, $addr2]));
 
-
+            // City, state, zip
+            $city   = $address_record->city ?? NULL;
+            $state  = $address_record->alt_state_text ? $address_record->alt_state_text : $address_record->state_name_en;
             $zip_postal_code = $address_record->zip_postal_code ?? NULL;
-            $ct_state_zip = array_filter([$city, $zip_postal_code]);
-            echo $ct_state_zip ? implode(', ', $ct_state_zip) . '<br/>' : '';
+            $ct_state_zip = array_filter([$city, $state, $zip_postal_code]);
 
-            // State
-            $state = $address_record->alt_state_text ? $address_record->alt_state_text : $address_record->state_name_en;
-            echo implode(', ', [$state, $address_record->country_name]);
+            $contact_data[] = implode(', ', $ct_state_zip);
+
+            // Country
+            $contact_data[] = $address_record->country_name;
+
+            echo implode('<br/>', $contact_data);
+
         echo "</p>";
 
         // phones, fax, mobile, web, email

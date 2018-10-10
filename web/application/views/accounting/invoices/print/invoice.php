@@ -17,20 +17,23 @@
      * Header & Footer
      */
     $branch_contact_prefix = $this->settings->orgn_name_en . ', ' . $record->branch_name_en;
-    $header_footer = '<htmlpagefooter name="myfooter">
-                        <table class="table table-footer no-border">
-                            <tr>
-                                <td class="border-t">'. address_widget_two_lines( parse_address_record($record), $branch_contact_prefix) .'</td>
-                            </tr>
-                        </table>
-                    </htmlpagefooter>
-                    <sethtmlpagefooter name="myfooter" value="on" />';
+    // $header_footer = '<htmlpagefooter name="myfooter">
+    //                     <table class="table table-footer no-border">
+    //                         <tr>
+    //                             <td class="border-t">'. address_widget_two_lines( parse_address_record($record), $branch_contact_prefix) .'</td>
+    //                         </tr>
+    //                     </table>
+    //                 </htmlpagefooter>
+    //                 <sethtmlpagefooter name="myfooter" value="on" />';
+
+    $inline_footer = '<table class="table table-footer no-border">
+                        <tr>
+                            <td class="border-t">'. address_widget_two_lines( parse_address_record($record), $branch_contact_prefix) .'</td>
+                        </tr>
+                    </table>';
     ?>
     </head>
     <body>
-        <!--mpdf
-            <?php echo $header_footer?>
-        mpdf-->
         <?php
         /**
          * Invoice
@@ -63,13 +66,31 @@
                             <?php
                             $customer_address_record = parse_address_record($record, 'addr_customer_');
                             echo address_widget($customer_address_record, true, true);
+                            if($record->customer_pan)
+                            {
+                                echo '<br>PAN:', $record->customer_pan;
+                            }
                             ?>
                         </address>
+
                     </td>
-                    <td align="right">
-                        Invoice Date: <strong><?php echo $record->invoice_date?></strong><br/>
-                        Policy # <strong><?php echo $record->policy_code?></strong><br/>
-                        Branch: <strong><?php echo $record->branch_name_en?></strong>
+                    <td>
+                        <table class="no-border">
+                            <tr>
+                                <td align="right" width="35%">Invoice Date:</td>
+                                <td align="right"><strong><?php echo $record->invoice_date?></strong></td>
+                            </tr>
+
+                            <tr>
+                                <td align="right" width="35%">Policy #:</td>
+                                <td align="right"><strong><?php echo $record->policy_code?></strong></td>
+                            </tr>
+                            <tr>
+                                <td align="right" width="35%">Branch:</td>
+                                <td align="right"><strong><?php echo $record->branch_name_en?></strong></td>
+                            </tr>
+                        </table>
+
                     </td>
                 </tr>
             </tbody>
@@ -128,14 +149,18 @@
         <div class="row">
             <!-- accepted payments column -->
             <div class="col-xs-12">
-                <p class="text-muted well well-sm no-shadow" style="margin-top: 10px;">
+                <p class="text-muted well well-sm no-shadow" style="font-size:8pt">
                     Payment by Cheque/Drafts are subject to realisation
                 </p>
-                <br/>
-                <br/>
                 <br/>
                 <p style="text-align: right">Authorised Signature</p>
             </div>
         </div>
+        <?php
+        /**
+         * Show Footer
+         */
+        echo $inline_footer;
+        ?>
     </body>
 </html>

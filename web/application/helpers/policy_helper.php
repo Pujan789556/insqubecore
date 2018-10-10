@@ -1262,7 +1262,7 @@ if ( ! function_exists('_POLICY__schedule_exists'))
     function _POLICY__schedule_exists( $code )
     {
         $filename = "policy-{$code}.pdf";
-        $schedule_full_path = rtrim(Policies::$data_upload_path, '/') . '/' . $filename;
+        $schedule_full_path = rtrim(INSQUBE_DATA_ROOT, '/') . '/policies/' . $filename;
 
         return file_exists($schedule_full_path);
     }
