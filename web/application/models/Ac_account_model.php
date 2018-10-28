@@ -110,23 +110,35 @@ class Ac_account_model extends MY_Model
      * Get Dropdown List by Account Group ID
      *
      * @param integer $account_group_id
+     * @param bool $include_group_path
      * @return array
      */
-    public function dropdown($account_group_id)
+    public function dropdown($account_group_id=NULL, $include_group_path=FALSE)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_name = 'ac_account_' . $account_group_id;
-
-        $list = $this->get_cache($cache_name);
-        if(!$list)
+        $igp = $include_group_path ? 1 : 0;
+        if($account_group_id)
         {
             $where = [
                 'AC.account_group_id'   => $account_group_id,
                 'AC.active'             => IQB_FLAG_ON
             ];
-            $records = $this->db->select('AC.id, AC.name')
+            $cache_name = 'ac_account_' . $account_group_id . '_' . $igp;
+        }
+        else
+        {
+            $where = [
+                'AC.active'             => IQB_FLAG_ON
+            ];
+            $cache_name = 'ac_account_all_' . $igp;
+        }
+
+        $list = $this->get_cache($cache_name);
+        if(!$list)
+        {
+            $records = $this->db->select('AC.id, AC.account_group_id,  AC.name')
                                  ->from($this->table_name . ' as AC')
                                  ->where($where)
                                  ->get()->result();
@@ -134,7 +146,14 @@ class Ac_account_model extends MY_Model
             $list = [];
             foreach($records as $record)
             {
-                $list["{$record->id}"] =  $record->name;
+                $label = $record->name;
+                if( $include_group_path )
+                {
+                    $path  = $this->ac_account_group_model->get_path($record->account_group_id);
+                    $label = ac_account_group_path_formatted($path, $label, 'regular');
+                }
+
+                $list["{$record->id}"] =  $label;
             }
             $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
         }
