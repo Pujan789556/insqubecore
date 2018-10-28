@@ -265,6 +265,13 @@ $config['DX_permissions'] = [
 		],
 
 		/**
+		 * Ledgers
+		 */
+		'ac_ledgers'  => [
+			'explore.ledger',
+		],
+
+		/**
 		 * Accounting Parties
 		 */
 		'ac_parties'  => [
