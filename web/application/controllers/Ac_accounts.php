@@ -445,6 +445,19 @@ class Ac_accounts extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        $this->ac_account_model->clear_cache();
+        redirect($this->router->class);
+    }
+
+	// --------------------------------------------------------------------
+
 	/**
 	 * Delete a Agent
 	 * @param integer $id
