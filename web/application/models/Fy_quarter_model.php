@@ -164,6 +164,29 @@ class Fy_quarter_model extends MY_Model
         return $list;
     }
 
+    // ----------------------------------------------------------------
+
+    public function get_by_fiscal_year_quarter( $fiscal_yr_id, $quarter )
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'fy_quarter_' . $fiscal_yr_id . '_' . $quarter;
+        $list = $this->get_cache($cache_name);
+        if(!$list)
+        {
+            $list = $this->db->select('Q.id, Q.fiscal_yr_id, Q.quarter, Q.starts_at, Q.ends_at, FY.starts_at_en as fy_starts_at, FY.ends_at_en as fy_ends_at, FY.code_np as fy_code_np')
+                            ->from($this->table_name . ' as Q')
+                            ->join('master_fiscal_yrs FY', 'FY.id = Q.fiscal_yr_id')
+                            ->where('Q.fiscal_yr_id', $fiscal_yr_id)
+                            ->where('Q.quarter', $quarter)
+                            ->get()
+                            ->result();
+            $this->write_cache($list, $cache_name, CACHE_DURATION_MONTH);
+        }
+        return $list;
+    }
+
     // --------------------------------------------------------------------
 
     /**
