@@ -9,9 +9,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
 	<td><?php echo IQB_BS_REPORT_CATEGORIES[$record->category];?></td>
-	<td><?php echo IQB_BS_REPORT_TYPES[$record->type];?></td>
+	<td><?php echo IQB_REPORT_TYPES[$record->type];?></td>
 	<td><?php echo $record->fy_code_np, ' (', $record->fy_code_en, ')';?></td>
-	<td><?php echo $record->type === IQB_BS_REPORT_TYPE_MONTHLY
+	<td><?php echo $record->type === IQB_REPORT_TYPE_MONTHLY
 						? nepali_month_dropdown(FALSE)[$record->fy_quarter_month]
 						: fiscal_year_quarters_dropdown(false)[$record->fy_quarter_month];?></td>
 	<td>

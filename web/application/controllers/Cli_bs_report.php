@@ -80,11 +80,11 @@ class Cli_bs_report extends Base_Controller
             {
                 switch ($record->type)
                 {
-                    case IQB_BS_REPORT_TYPE_QUARTELRY:
+                    case IQB_REPORT_TYPE_QUARTELRY:
                         $this->uw_quarterly( $record->id );
                         break;
 
-                    case IQB_BS_REPORT_TYPE_MONTHLY:
+                    case IQB_REPORT_TYPE_MONTHLY:
                         $this->uw_monthly( $record->id );
                         break;
 
@@ -97,11 +97,11 @@ class Cli_bs_report extends Base_Controller
             {
                 switch ($record->type)
                 {
-                    case IQB_BS_REPORT_TYPE_QUARTELRY:
+                    case IQB_REPORT_TYPE_QUARTELRY:
                         $this->claim_quarterly( $record->id );
                         break;
 
-                    case IQB_BS_REPORT_TYPE_MONTHLY:
+                    case IQB_REPORT_TYPE_MONTHLY:
                         // @TODO
                         break;
 
@@ -241,7 +241,7 @@ class Cli_bs_report extends Base_Controller
                             PINST.fy_quarter = {$fy_quarter}
                         GROUP BY P0.policy_id, {$sql_group_headings};";
         }
-        $this->_csv_export($record, $fy_record, $fy_quarter, $SQLS, IQB_BS_REPORT_TYPE_QUARTELRY);
+        $this->_csv_export($record, $fy_record, $fy_quarter, $SQLS, IQB_REPORT_TYPE_QUARTELRY);
 	}
 
     // -------------------------------------------------------------------------------------
@@ -408,7 +408,7 @@ class Cli_bs_report extends Base_Controller
 
         // echo '<pre>'; print_r($SQLS);exit;
 
-        $this->_csv_export($record, $fy_record, $fy_quarter, $SQLS, IQB_BS_REPORT_TYPE_QUARTELRY);
+        $this->_csv_export($record, $fy_record, $fy_quarter, $SQLS, IQB_REPORT_TYPE_QUARTELRY);
     }
 
     // -------------------------------------------------------------------------------------

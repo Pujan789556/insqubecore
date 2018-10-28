@@ -151,9 +151,9 @@ class Bs_reports extends MY_Controller
 	            [
 	                'field' => 'filter_type',
 	                'label' => 'Report Type',
-	                'rules' => 'trim|alpha|exact_length[1]|in_list[' . implode(',', array_keys(IQB_BS_REPORT_TYPES)) . ']',
+	                'rules' => 'trim|alpha|exact_length[1]|in_list[' . implode(',', array_keys(IQB_REPORT_TYPES)) . ']',
 	                '_type'     => 'dropdown',
-	                '_data'     => IQB_BLANK_SELECT + IQB_BS_REPORT_TYPES,
+	                '_data'     => IQB_BLANK_SELECT + IQB_REPORT_TYPES,
 	                '_required' => false
 	            ],
 	            [
@@ -333,7 +333,7 @@ class Bs_reports extends MY_Controller
 
 		$rules = $this->bs_report_model->validation_rules;
 		// Find type
-		if($record->type === IQB_BS_REPORT_TYPE_QUARTELRY )
+		if($record->type === IQB_REPORT_TYPE_QUARTELRY )
 		{
 			$fy_quarter_month_dd = fiscal_year_quarters_dropdown();
 		}
@@ -534,13 +534,13 @@ class Bs_reports extends MY_Controller
 	        return FALSE;
         }
 
-        if($type == IQB_BS_REPORT_TYPE_QUARTELRY && $fy_quarter_month > $this->current_fy_quarter->quarter )
+        if($type == IQB_REPORT_TYPE_QUARTELRY && $fy_quarter_month > $this->current_fy_quarter->quarter )
         {
         	$this->form_validation->set_message('check_duplicate', 'You can not generate report for Future Quarter.');
         	return FALSE;
 
         }
-        else if($type == IQB_BS_REPORT_TYPE_MONTHLY && $fy_quarter_month > $this->current_fy_month->month_id )
+        else if($type == IQB_REPORT_TYPE_MONTHLY && $fy_quarter_month > $this->current_fy_month->month_id )
         {
         	$this->form_validation->set_message('check_duplicate', 'You can not generate report for Future Month.');
         	return FALSE;

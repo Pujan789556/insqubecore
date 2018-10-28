@@ -748,14 +748,14 @@ defined('IQB_BS_REPORT_CATEGORIES')    	OR define('IQB_BS_REPORT_CATEGORIES', 	[
 
 /*
 |--------------------------------------------------------------------------
-| BEEMA SAMITI REPORT TYPES CONSTANTS
+| REPORT TYPES CONSTANTS
 |--------------------------------------------------------------------------
 |
 */
-define('IQB_BS_REPORT_TYPE_QUARTELRY',  'Q');
-define('IQB_BS_REPORT_TYPE_MONTHLY',  	'M');
-defined('IQB_BS_REPORT_TYPES')    	OR define('IQB_BS_REPORT_TYPES', 	[
-	IQB_BS_REPORT_TYPE_MONTHLY		=> 'Monthly',
-	IQB_BS_REPORT_TYPE_QUARTELRY	=> 'Quarterly',
+define('IQB_REPORT_TYPE_QUARTELRY',  'Q');
+define('IQB_REPORT_TYPE_MONTHLY',  	'M');
+defined('IQB_REPORT_TYPES')    	OR define('IQB_REPORT_TYPES', 	[
+	IQB_REPORT_TYPE_MONTHLY		=> 'Monthly',
+	IQB_REPORT_TYPE_QUARTELRY	=> 'Quarterly',
 ]);
 

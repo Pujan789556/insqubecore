@@ -59,9 +59,9 @@ class Bs_report_model extends MY_Model
                 [
                     'field' => 'type',
                     'label' => 'Report Type',
-                    'rules' => 'trim|required|alpha|exact_length[1]|in_list[' . implode(',', array_keys(IQB_BS_REPORT_TYPES)) . ']',
+                    'rules' => 'trim|required|alpha|exact_length[1]|in_list[' . implode(',', array_keys(IQB_REPORT_TYPES)) . ']',
                     '_type'     => 'dropdown',
-                    '_data'     => IQB_BLANK_SELECT + IQB_BS_REPORT_TYPES,
+                    '_data'     => IQB_BLANK_SELECT + IQB_REPORT_TYPES,
                     '_required' => false
                 ],
                 [
