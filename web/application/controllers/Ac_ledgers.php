@@ -70,7 +70,7 @@ class Ac_ledgers extends MY_Controller
 						'accounting/ledgers/_index_header',
 						['content_header' => 'Manage Ledgers'] + $data)
 					->partial('content', 'accounting/ledgers/_index', $data)
-					->partial('dynamic_js', 'accounting/ledgers/_script_list')
+					->partial('dynamic_js', 'accounting/ledgers/_js')
 					->render($this->data);
 	}
 
@@ -113,7 +113,15 @@ class Ac_ledgers extends MY_Controller
 		/**
 		 * Compute Data
 		 */
-		$data = $this->_ledger_data($params);
+		try {
+			$data = $this->_ledger_data($params);
+		} catch (Exception $e) {
+			return $this->template->json([
+				'status' => 'error',
+				'title'  => 'Exception Occured!',
+				'message' => $e->getMessage()
+			], 404);
+		}
 		$data['record'] = $record;
 
 
@@ -165,9 +173,6 @@ class Ac_ledgers extends MY_Controller
         $mpdf->SetTitle($title);
         $mpdf->SetAuthor($this->settings->orgn_name_en);
 
-        // $mpdf->showWatermarkText = true;
-        // $mpdf->watermark_font = 'DejaVuSansCondensed';
-        // $mpdf->watermarkTextAlpha = 0.1;
         $mpdf->SetDisplayMode('fullpage');
 
         $mpdf->WriteHTML($html);
@@ -186,6 +191,10 @@ class Ac_ledgers extends MY_Controller
 
 			// Fiscal Year Record
 			$fy_record 	= $this->fiscal_year_model->get($fiscal_yr_id);
+			if(!$fy_record)
+			{
+				throw new Exception("Exception [Method: _ledger_data()]: No Fiscal Year Record Found.<br/><br/>Please ask administrator to setup this data.");
+			}
 
 			// Opening Balance
 			$ob_record = $this->ac_opening_balance_model->by_account_fiscal_yr($account_id, $fiscal_yr_id);
@@ -299,10 +308,17 @@ class Ac_ledgers extends MY_Controller
 				// Get Quarter Record
 				$this->load->model('fy_quarter_model');
 				$qtr_record = $this->fy_quarter_model->get_by_fiscal_year_quarter($fiscal_yr_id, $params['fy_quarter_month']);
+				if($qtr_record)
+				{
+					// Ledger Dates
+					$ledger_dates['from'] = $qtr_record->starts_at;
+					$ledger_dates['to'] = $qtr_record->ends_at;
+				}
+				else
+				{
+					throw new Exception("Exception [Method: _filter_goodies()]: No Quarter Record Found for supplied Fiscal Year and Quarter.<br/><br/>Please ask administrator to setup this data.");
+				}
 
-				// Ledger Dates
-				$ledger_dates['from'] = $qtr_record->starts_at;
-				$ledger_dates['to'] = $qtr_record->ends_at;
 
 			}
 			else if( $params['fy_duration_type'] == IQB_REPORT_TYPE_MONTHLY && !empty($params['fy_quarter_month']) )
@@ -324,6 +340,10 @@ class Ac_ledgers extends MY_Controller
 					// Ledger Dates
 					$ledger_dates['from'] 	= $fy_month_record->starts_at;
 					$ledger_dates['to'] 	= $fy_month_record->ends_at;
+				}
+				else
+				{
+					throw new Exception("Exception [Method: _filter_goodies()]: No Month Record Found for supplied Fiscal Year and Month.<br/><br/>Please ask administrator to setup this data.");
 				}
 			}
 			else if( !empty($params['start_date']) )

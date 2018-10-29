@@ -1,9 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Script for list Page:
-*
-* Account ID filter selectable
+* Javascript Goodies for Ledger Filter
 */
 ?>
 <script type="text/javascript">

@@ -272,6 +272,13 @@ $config['DX_permissions'] = [
 		],
 
 		/**
+		 * Trial Balance
+		 */
+		'ac_trial_balance'  => [
+			'explore.trial.balance',
+		],
+
+		/**
 		 * Accounting Parties
 		 */
 		'ac_parties'  => [
