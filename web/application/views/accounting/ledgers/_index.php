@@ -10,16 +10,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		/**
 		 * Search Filters
 		 */
-		$this->load->view('templates/_common/_advanced_search_filter_general');
+		$this->load->view('accounting/ledgers/_filters');
 		?>
 		<div class="box box-solid">
 			<div class="box-body table-responsive data-rows" id="<?php echo $DOM_DataListBoxId?>">
-				<?php
-				/**
-				 * Load Rows from View
-				 */
-				// $this->load->view('accounting/vouchers/_list');
-				?>
+
 			</div>
 			<!-- /.box-body -->
 		</div>

@@ -164,7 +164,7 @@ class Ac_ledgers extends MY_Controller
 			$records 	= $this->db->select(
 
 									// Voucher
-									"V.voucher_code, V.voucher_date, V.narration, " .
+									"V.id, V.voucher_code, V.voucher_date, V.narration, " .
 
 									// Voucher Details
 									"VD.flag_type, VD.amount"
@@ -192,10 +192,13 @@ class Ac_ledgers extends MY_Controller
 		  	}
 
 
+		  	// Party Name if Any
+		  	$party_name = $this->_party_name($params['party_type'], $params['party_id']);
 			return [
 				'bf_record' 	=> $bf_record,
 				'records' 		=> $records,
-				'ledger_dates' 	=> $goodies['ledger_dates']
+				'ledger_dates' 	=> $goodies['ledger_dates'],
+				'party_name' 	=> $party_name
 			];
 
 		}
@@ -296,7 +299,7 @@ class Ac_ledgers extends MY_Controller
 			}
 
 			/**
-			 * Branch ID??
+			 * Branch ID ???
 			 */
 			if( !empty($params['branch_id']) )
 			{
@@ -307,6 +310,20 @@ class Ac_ledgers extends MY_Controller
 				$query_params['txn']['V.branch_id'] = $params['branch_id'];
 			}
 
+			/**
+			 * Party ??
+			 */
+			if( !empty($params['party_type']) && !empty($params['party_id']) )
+			{
+				// Balance
+				$query_params['bf']['VD.party_type'] = $params['party_type'];
+				$query_params['bf']['VD.party_id'] = $params['party_id'];
+
+				// Transaction
+				$query_params['txn']['VD.party_type'] = $params['party_type'];
+				$query_params['txn']['VD.party_id'] = $params['party_id'];
+			}
+
 			return [
 				'query_params' => $query_params,
 				'ledger_dates' => $ledger_dates
@@ -314,73 +331,124 @@ class Ac_ledgers extends MY_Controller
 		}
 
 
-		private function _get_filter_elements()
+		private function _get_filter_elements($formatted = FALSE)
 		{
 			$this->load->model('branch_model');
-			$dropdown_accounts 		 = $this->ac_account_model->dropdown();
-			$dropdown_branch 		 = $this->branch_model->dropdown();
+			$dropdown_accounts 		= $this->ac_account_model->dropdown();
+			$dropdown_branch 		= $this->branch_model->dropdown();
+			$dropdown_party_types 	= ac_party_types_dropdown(false);
+
 			$filters = [
-				[
-	                'field' => 'filter_account_id',
-	                'label' => 'Account',
-	                'rules' => 'trim|required|integer|max_length[11]',
-	                '_type'     => 'dropdown',
-	                '_id' 		=> 'filter_account_id',
-	                '_data'     => IQB_BLANK_SELECT + $dropdown_accounts,
-	                '_extra_attributes' => 'style="display:block" data-ddtype="select"',
-	                '_required' => false
-	            ],
-	            [
-	                'field' => 'filter_fiscal_yr_id',
-	                'label' => 'Fiscal Year',
-	                'rules' => 'trim|required|integer|max_length[3]',
-	                '_type'     => 'dropdown',
-	                '_default' 	=> $this->current_fiscal_year->id,
-	                '_data'     => $this->fiscal_year_model->dropdown(),
-	                '_required' => false
-	            ],
-				[
-	                'field' => 'filter_branch_id',
-	                'label' => 'Branch',
-	                'rules' => 'trim|integer|max_length[8]',
-	                '_type'     => 'dropdown',
-	                '_data'     => IQB_BLANK_SELECT + $dropdown_branch,
-	                '_required' => false
-	            ],
-	            [
-	                'field' => 'filter_type',
-	                'label' => 'Report Type',
-	                'rules' => 'trim|alpha|exact_length[1]|in_list[' . implode(',', array_keys(IQB_REPORT_TYPES)) . ']',
-	                '_type'     => 'dropdown',
-	                '_data'     => IQB_BLANK_SELECT + IQB_REPORT_TYPES,
-	                '_required' => false
-	            ],
-	            [
-	                'field' => 'filter_fy_quarter_month',
-	                'label' => 'Quarter/Month',
-	                'rules' => 'trim|integer|max_length[8]',
-	                '_type'     => 'dropdown',
-	                '_data'     => IQB_BLANK_SELECT,
-	                '_required' => false
-	            ],
-	            [
-		            'field' => 'filter_start_date',
-		            'label' => 'From Date',
-		            'rules' => 'trim|valid_date',
-		            '_type'     => 'date',
-		            '_default' 	=> $this->current_fiscal_year->starts_at_en,
-		            '_required' => false
-		        ],
-		        [
-		            'field' => 'filter_end_date',
-		            'label' => 'To Date',
-		            'rules' => 'trim|valid_date',
-		            '_type'     => 'date',
-		            '_default' 	=> date('Y-m-d'),
-		            '_required' => false
-		        ]
+
+				/**
+				 * Section I: Account ID, Fiscal Year, Branch
+				 */
+				'section-1' => [
+					[
+		                'field' => 'filter_account_id',
+		                'label' => 'Account',
+		                'rules' => 'trim|required|integer|max_length[11]',
+		                '_type'     => 'dropdown',
+		                '_id' 		=> 'filter_account_id',
+		                '_data'     => IQB_BLANK_SELECT + $dropdown_accounts,
+		                '_extra_attributes' => 'style="display:block" data-ddtype="select"',
+		                '_required' => false
+		            ],
+		            [
+		                'field' => 'filter_fiscal_yr_id',
+		                'label' => 'Fiscal Year',
+		                'rules' => 'trim|required|integer|max_length[3]',
+		                '_type'     => 'dropdown',
+		                '_default' 	=> $this->current_fiscal_year->id,
+		                '_data'     => $this->fiscal_year_model->dropdown(),
+		                '_required' => false
+		            ],
+					[
+		                'field' => 'filter_branch_id',
+		                'label' => 'Branch',
+		                'rules' => 'trim|integer|max_length[8]',
+		                '_type'     => 'dropdown',
+		                '_data'     => IQB_BLANK_SELECT + $dropdown_branch,
+		                '_required' => false
+		            ],
+				],
+
+				/**
+				 * Section II: Party Name ( Party Type, Party ID)
+				 */
+				'section-2' => [
+					[
+                        'field' => 'filter_party_type',
+                        'label' => 'Party Type',
+                        'rules' => 'trim|alpha|exact_length[1]|in_list[' . implode(',', array_keys($dropdown_party_types)) . ']',
+                        '_type'     => 'dropdown',
+                        '_data'     => IQB_BLANK_SELECT + $dropdown_party_types,
+                        '_extra_attributes' => 'data-field="party_type" onchange="__reset_party(this)"',
+                        '_required' => false
+                    ],
+                    [
+		                'field' => 'filter_party_id',
+		                'label' => 'Party ID',
+		                'rules' => 'trim|integer|max_length[11]',
+		                '_type'     => 'hidden',
+		                '_data'     => IQB_BLANK_SELECT + $dropdown_branch,
+		                '_required' => false
+		            ],
+				],
+
+				/**
+				 * Section III: Date Filters
+				 */
+				'section-3' => [
+					[
+		                'field' => 'filter_type',
+		                'label' => 'Report Type',
+		                'rules' => 'trim|alpha|exact_length[1]|in_list[' . implode(',', array_keys(IQB_REPORT_TYPES)) . ']',
+		                '_type'     => 'dropdown',
+		                '_data'     => IQB_BLANK_SELECT + IQB_REPORT_TYPES,
+		                '_required' => false
+		            ],
+		            [
+		                'field' => 'filter_fy_quarter_month',
+		                'label' => 'Quarter/Month',
+		                'rules' => 'trim|integer|max_length[8]',
+		                '_type'     => 'dropdown',
+		                '_data'     => IQB_BLANK_SELECT,
+		                '_required' => false
+		            ],
+		            [
+			            'field' => 'filter_start_date',
+			            'label' => 'From Date',
+			            'rules' => 'trim|valid_date',
+			            '_type'     => 'date',
+			            '_default' 	=> $this->current_fiscal_year->starts_at_en,
+			            '_required' => false
+			        ],
+			        [
+			            'field' => 'filter_end_date',
+			            'label' => 'To Date',
+			            'rules' => 'trim|valid_date',
+			            '_type'     => 'date',
+			            '_default' 	=> date('Y-m-d'),
+			            '_required' => false
+			        ]
+				]
 			];
-			return $filters;
+
+			if(!$formatted)
+			{
+				return $filters;
+			}
+
+			/**
+			 * Formatted for Filter Processing
+			 */
+			$v_rules = [];
+			foreach($filters as $section => $rules)
+	        {
+	            $v_rules = array_merge($v_rules, $rules);
+	        }
+			return $v_rules;
 		}
 
 		private function _get_filter_data( $do_filter=TRUE )
@@ -394,7 +462,7 @@ class Ac_ledgers extends MY_Controller
 			}
 			if( $this->input->post() )
 			{
-				$rules = $this->_get_filter_elements();
+				$rules = $this->_get_filter_elements(TRUE);
 				$this->form_validation->set_rules($rules);
 				if( $this->form_validation->run() )
 				{
@@ -402,6 +470,10 @@ class Ac_ledgers extends MY_Controller
 						'account_id' 		=> $this->input->post('filter_account_id') ?? NULL,
 						'fiscal_yr_id' 		=> $this->input->post('filter_fiscal_yr_id') ?? NULL,
 						'branch_id' 		=> $this->input->post('filter_branch_id') ?? NULL,
+
+						'party_type' 		=> $this->input->post('filter_party_type') ?? NULL,
+						'party_id' 		=> $this->input->post('filter_party_id') ?? NULL,
+
 						'fy_duration_type' 	=> $this->input->post('filter_type') ?? NULL,
 						'fy_quarter_month' 	=> $this->input->post('filter_fy_quarter_month') ?? NULL,
 						'start_date' 		=> $this->input->post('filter_start_date') ?? NULL,
@@ -428,7 +500,7 @@ class Ac_ledgers extends MY_Controller
 	// --------------------------------------------------------------------
 
 
-    	private function _party_name($party_type, $party_id)
+    	private function _party_name($party_type=NULL, $party_id=NULL)
     	{
     		$party_name = '';
     		if( !$party_type || !$party_id ) return $party_name;

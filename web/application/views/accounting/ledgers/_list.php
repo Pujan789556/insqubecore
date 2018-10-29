@@ -13,7 +13,7 @@ $cr_total = 0.00;
 		<tr>
 			<th class="text-center" colspan="6">
 				Ledger
-				<h3 class="no-margin"><?php echo '[', $record->id, '] ', $record->name; ?></h3>
+				<h3 class="no-margin"><?php echo implode( '', ['[', $record->id, '] ', $record->name, $party_name ? ' - ' . $party_name : '']); ?></h3>
 				FROM <?php echo $ledger_dates['from'] ?> TO <?php echo $ledger_dates['to'] ?>
 			</th>
 		</tr>
@@ -55,7 +55,7 @@ $cr_total = 0.00;
 			?>
 			<tr>
 				<td><?php echo $single->voucher_date ?></td>
-				<td><?php echo $single->voucher_code ?></td>
+				<td><?php echo anchor( 'ac_vouchers/details/' . $single->id, $single->voucher_code, ['target' => '_blank']) ?></td>
 				<td><?php echo $single->narration ?></td>
 				<td class="text-right"><?php echo number_format($dr, 2); ?></td>
 				<td class="text-right"><?php echo number_format($cr, 2); ?></td>

@@ -36,4 +36,85 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				$('#month-dropdown-template option').clone().appendTo($target);
 			}
 	});
+
+    // ---------------------------------------------------------------
+
+	// Find Party
+    function __find_party(a)
+    {
+        var $this       = $(a),
+            rowId       = 'party-box',
+            widgetType = $('#'+rowId).data('widget-party'),
+            $targetRow  = $('#' + rowId ),
+            $partyType  = $( 'select[data-field="party_type"]', $targetRow ),
+            pt          = $partyType.val();
+
+        // Valid Party Type?
+        if( ! pt )
+        {
+            toastr.warning('Please select party type first.', 'OOPS!');
+            $partyType.closest('div.form-group').addClass('has-error');
+            return false;
+        }
+        var widgetReference = rowId + ':' + widgetType;
+
+        $this.button('loading');
+        InsQube.options.__btn_loading = $this;
+        $.getJSON('<?php echo base_url()?>ac_parties/finder/' + pt + '/' + widgetReference, function(r){
+            if( typeof r.html !== 'undefined' && r.html != '' ){
+                bootbox.dialog({
+                    className: 'modal-default',
+                    size: 'large',
+                    title: 'Find Party',
+                    closeButton: true,
+                    message: r.html,
+                    buttons:{
+                        cancel: {
+                            label: "Close",
+                            className: 'btn-default'
+                        }
+                    }
+                });
+            }
+            // Reset Loading
+            $this.button('reset');
+        });
+    }
+
+    // Reset Party
+    function __reset_party(a)
+    {
+        var $this       = $(a),
+            rowId       = 'party-box';
+
+        $( '#' + rowId + ' ._text-ref-party').html('');
+        $( '#' + rowId + ' input[data-field="party_id"]').val('');
+    }
+
+    // Select Party
+    function __do_select(a){
+        var $a = $(a),
+        selectable  = $a.data('selectable'),
+        $targetRow  = $('#' + $a.data('target-rowid')),
+        fields      = selectable.fields,
+        html        = selectable.html;
+
+        if( typeof fields === 'object'){
+            for(var i = 0; i < fields.length; i++) {
+
+                var obj = fields[i];
+                $( 'input[data-field="'+obj.ref+'"]', $targetRow ).val(obj.val);
+            }
+        }
+        if( typeof html === 'object'){
+            for(var i = 0; i < html.length; i++) {
+                var obj = html[i];
+                $('.' + obj.ref, $targetRow ).html(obj.val);
+            }
+        }
+
+        // Close the bootbox if any
+        var $bootbox = $a.closest('.bootbox');
+        $('button[data-bb-handler="cancel"]', $bootbox).trigger('click');
+    }
 </script>
