@@ -58,7 +58,8 @@ class Ac_ledgers extends MY_Controller
 			'DOM_DataListBoxId'	=> '_iqb-data-list-box-ac_ledgers', 	// List box ID
 			'DOM_FilterFormId'	=> '_iqb-filter-form-ac_ledgers', 		// Filter Form ID
 			'filters' 			=> $this->_get_filter_elements(),
-			'filter_url' 		=> site_url($this->router->class . '/filter/')
+			'filter_url' 		=> site_url($this->router->class . '/filter/'),
+			'print_url' 		=> site_url($this->router->class . '/filter/1/')
 		];
 
 		$this->template
@@ -72,12 +73,14 @@ class Ac_ledgers extends MY_Controller
 					->render($this->data);
 	}
 
+	// --------------------------------------------------------------------
+
 	/**
 	 * Get Ledger Details
 	 *
 	 * @return void
 	 */
-	public function filter( )
+	public function filter( $print = 0 )
 	{
 		/**
 		 * Check Permissions? OR Deny on Fail!
@@ -112,7 +115,15 @@ class Ac_ledgers extends MY_Controller
 		$data = $this->_ledger_data($params);
 		$data['record'] = $record;
 
-		// echo '<pre>'; print_r($data);exit;
+
+		/**
+		 * Print or Display Result
+		 */
+		if( $print == '1')
+		{
+			return $this->_print($data);
+		}
+
 
 		$view = 'accounting/ledgers/_list';
 		$html = $this->load->view($view, $data, TRUE);
@@ -122,6 +133,50 @@ class Ac_ledgers extends MY_Controller
 		];
 		$this->template->json($ajax_data);
 	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Print a Ledger
+	 *
+	 * @return html
+	 */
+	public function _print( $data )
+	{
+		/**
+		 * @TODO:
+		 * 	cache the file
+		 * 	if exists, render output
+		 */
+		$view = 'accounting/ledgers/print/ledger';
+		$data['mode'] = 'print';
+		$html = $this->load->view($view, $data, TRUE);
+
+		$title = "Ledger - " . $data['record']->name . ' ' . $data['ledger_dates']['from'] . ' to ' . $data['ledger_dates']['to'];
+
+        $this->load->library('pdf');
+        $mpdf = $this->pdf->load();
+
+        $mpdf->SetMargins(10, 5, 10, 5);
+        $mpdf->margin_header = 5;
+        $mpdf->margin_footer = 5;
+        $mpdf->SetProtection(array('print'));
+        $mpdf->SetTitle($title);
+        $mpdf->SetAuthor($this->settings->orgn_name_en);
+
+        // $mpdf->showWatermarkText = true;
+        // $mpdf->watermark_font = 'DejaVuSansCondensed';
+        // $mpdf->watermarkTextAlpha = 0.1;
+        $mpdf->SetDisplayMode('fullpage');
+
+        $mpdf->WriteHTML($html);
+
+        $filename = $title . '.pdf';
+        $mpdf->Output($filename, 'I');
+	}
+
+	// --------------------------------------------------------------------
+
 
 		private function _ledger_data($params)
 		{
@@ -200,7 +255,6 @@ class Ac_ledgers extends MY_Controller
 				'ledger_dates' 	=> $goodies['ledger_dates'],
 				'party_name' 	=> $party_name
 			];
-
 		}
 
 		private function _filter_goodies($params)
@@ -491,8 +545,21 @@ class Ac_ledgers extends MY_Controller
 					$this->template->json($data);
 				}
 			}
+			else
+			{
+				$data = [
+					'status' 	=> 'error',
+					'message' 	=> 'Please supply query parameters'
+				];
+
+				$this->template->json($data, 403);
+			}
 			return $data;
 		}
+
+
+	// --------------------------------------------------------------------
+
 
 
 	// --------------------------------------------------------------------

@@ -15,9 +15,13 @@ $DOM_FilterFormId = $DOM_FilterFormId ?? '_form-iqb-filter';
 	<?php echo form_open( $filter_url,
             [
             	'id'  			=> $DOM_FilterFormId,
-                'class' 		=> 'form-inline form-iqb-filter',
+                // 'class' 		=> 'form-inline form-iqb-filter',
+                'class' 		=> 'form-inline',
+                'method' 		=> 'post',
                 'data-box' 		=> '#' . $DOM_DataListBoxId, // Filter Result Box
-                'data-method' 	=> 'html'
+                'data-method' 	=> 'html',
+                'data-filter-url' => $filter_url,
+                'data-print-url' => $print_url
             ]);?>
 		<div class="box-body">
 			<?php
@@ -64,10 +68,10 @@ $DOM_FilterFormId = $DOM_FilterFormId ?? '_form-iqb-filter';
 	            'form_record'   => NULL
 	        ]);
 			?>
-
 		</div>
 		<div class="box-footer text-right">
-			<button type="submit" class="btn btn-info filter" id="_btn-filter-submit"><i class="fa fa-search"></i> Search</button>
+			<button type="submit" class="btn btn-info filter" name="btn_search" id="_btn-filter-search" value="search"><i class="fa fa-search"></i> Search</button>
+			<button type="submit" class="btn btn-info filter" id="_btn-filter-print" name="btn_print" value="print"><i class="fa fa-print"></i> Print</button>
 			<button type="reset" class="btn btn-default" id="_btn-filter-reset"
 				onclick='var f = $(this).closest("form"); f[0].reset(); $("#_iqb-data-list-box-ac_ledgers").fadeOut(300, function(){$(this).html("").fadeIn();}); return false;'>Clear</button>
 		</div>

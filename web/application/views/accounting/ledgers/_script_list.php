@@ -17,6 +17,46 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         });
     });
 
+    // ---------------------------------------------------------------
+
+    /**
+     * Filter Print Action
+     */
+    $(document).on('click', '#_btn-filter-print', function(e){
+        e.preventDefault();
+        var $this = $(this),
+            $form = $this.closest('form'),
+            print_url = $form.data('print-url');
+
+            $form.attr('action', print_url)
+                 .attr('target', '_blank')
+                 .submit();
+    });
+
+    /**
+    * Filter Search Action
+    */
+    $(document).on('click', '#_btn-filter-search', function(e){
+        e.preventDefault();
+        var $this = $(this),
+            $form = $this.closest("form"),
+            $box = $($form.data('box')),
+            method = $form.data('method'),
+            filter_url = $form.data('filter-url');
+
+        $form.attr('action', filter_url)
+             .removeAttr('target');
+
+        $this.button('loading');
+        InsQube.postForm($form[0], function(r){
+            if(typeof r.status !== 'undefined' && r.status === 'success' && typeof r.html != 'undefined'){
+                $box[method](r.html);
+            }
+            $this.button('reset');
+        });
+        return false;
+    });
+
 
     // ---------------------------------------------------------------
 
