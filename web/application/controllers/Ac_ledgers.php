@@ -28,7 +28,8 @@ class Ac_ledgers extends MY_Controller
         // Setup Navigation
 		$this->active_nav_primary([
 			'level_0' => 'accounting',
-			'level_1' => $this->router->class
+			'level_1' => 'reports',
+			'level_2' => $this->router->class
 		]);
 
 		// Load Model

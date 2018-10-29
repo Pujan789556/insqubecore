@@ -333,11 +333,24 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                         <li class="<?php echo set_menu_active($nav_level_1, 'ac_invoices');?>">
                               <a href="<?php echo site_url('ac_invoices');?>"><i class="fa fa-circle-o"></i> Invoices</a>
                         </li>
-                        <li class="<?php echo set_menu_active($nav_level_1, 'ac_ledgers');?>">
-                              <a href="<?php echo site_url('ac_ledgers');?>"><i class="fa fa-circle-o"></i> Ledgers</a>
-                        </li>
                         <li class="<?php echo set_menu_active($nav_level_1, 'ac_parties');?>">
                               <a href="<?php echo site_url('ac_parties');?>"><i class="fa fa-circle-o"></i> Parties</a>
+                        </li>
+                        <li class="<?php echo set_menu_active($nav_level_1, 'reports');?>">
+
+                              <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Reports
+                                    <span class="pull-right-container">
+                                          <i class="fa fa-angle-left pull-right"></i>
+                                    </span>
+                              </a>
+                              <ul class="treeview-menu">
+                                    <li class="<?php echo set_menu_active($nav_level_2, 'ac_ledgers');?>">
+                                          <a href="<?php echo site_url('ac_ledgers');?>"><i class="fa fa-file-text-o"></i> Ledgers</a>
+                                    </li>
+                                    <li class="<?php echo set_menu_active($nav_level_2, 'ac_trial_balance');?>">
+                                          <a href="<?php echo site_url('ac_trial_balance');?>"><i class="fa fa-file-text-o"></i> Trial Balance</a>
+                                    </li>
+                              </ul>
                         </li>
                         <li class="<?php echo set_menu_active($nav_level_1, 'ac_vouchers');?>">
                               <a href="<?php echo site_url('ac_vouchers');?>"><i class="fa fa-circle-o"></i> Vouchers</a>
