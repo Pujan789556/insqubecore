@@ -204,6 +204,13 @@ foreach($form_elements as $element):?>
                 echo form_switch($element_config, $element['_checkbox_value'], $checked, $extra_attributes);
                 break;
         }
+
+        /**
+         * Do We have extra html right after the element, Just below the element?
+         *
+         *  HTML with JS or anything that is required in some cases to perform certain tasks
+         */
+        echo $element['_extra_html_after'] ?? '';
         ?>
         <?php if(isset($element['_help_text'])):?><p class="help-block"><?php echo $element['_help_text']; ?></p><?php endif?>
 
