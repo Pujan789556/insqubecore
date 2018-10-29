@@ -181,7 +181,7 @@ class Fy_quarter_model extends MY_Model
                             ->where('Q.fiscal_yr_id', $fiscal_yr_id)
                             ->where('Q.quarter', $quarter)
                             ->get()
-                            ->result();
+                            ->row();
             $this->write_cache($list, $cache_name, CACHE_DURATION_MONTH);
         }
         return $list;
