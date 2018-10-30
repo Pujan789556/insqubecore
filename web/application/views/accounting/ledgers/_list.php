@@ -13,7 +13,7 @@ $mode = $mode ?? 'list';
 		<tr>
 			<th class="text-center" colspan="6">
 				Ledger
-				<h3 class="no-margin"><?php echo implode( '', ['[', $record->id, '] ', $record->name, $party_name ? ' - ' . $party_name : '']); ?></h3>
+				<h3 class="no-margin"><?php echo $ledger_title; ?></h3>
 				FROM <?php echo $ledger_dates['from'] ?> TO <?php echo $ledger_dates['to'] ?>
 			</th>
 		</tr>

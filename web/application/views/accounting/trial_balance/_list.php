@@ -9,7 +9,7 @@ $mode = $mode ?? 'list';
 	<thead>
 		<tr>
 			<th class="text-center" colspan="7">
-				<h3 class="no-margin">TRIAL BALANCE</h3>
+				<h3 class="no-margin"><?php echo $trial_balance_title; ?></h3>
 				FROM <?php echo $ledger_dates['from'] ?> TO <?php echo $ledger_dates['to'] ?>
 			</th>
 		</tr>

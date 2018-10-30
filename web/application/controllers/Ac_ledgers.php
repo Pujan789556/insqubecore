@@ -37,6 +37,7 @@ class Ac_ledgers extends MY_Controller
 		$this->load->model('ac_account_model');
 		$this->load->model('ac_voucher_model');
 		$this->load->model('ac_opening_balance_model');
+		$this->load->model('branch_model');
 	}
 
 	// --------------------------------------------------------------------
@@ -114,7 +115,7 @@ class Ac_ledgers extends MY_Controller
 		 * Compute Data
 		 */
 		try {
-			$data = $this->_ledger_data($params);
+			$data = $this->_ledger_data($params, $record);
 		} catch (Exception $e) {
 			return $this->template->json([
 				'status' => 'error',
@@ -122,7 +123,7 @@ class Ac_ledgers extends MY_Controller
 				'message' => $e->getMessage()
 			], 404);
 		}
-		$data['record'] = $record;
+		// $data['record'] = $record;
 
 
 		/**
@@ -184,7 +185,7 @@ class Ac_ledgers extends MY_Controller
 	// --------------------------------------------------------------------
 
 
-		private function _ledger_data($params)
+		private function _ledger_data($params, $record)
 		{
 			$fiscal_yr_id 	= $params['fiscal_yr_id'];
 			$account_id 	= $params['account_id'];
@@ -261,14 +262,29 @@ class Ac_ledgers extends MY_Controller
 		  		$bf_record->cr = $bf_record->cr + (float)$ob_record->cr;
 		  	}
 
-
+		  	/**
+		  	 * Ledger Title
+		  	 */
 		  	// Party Name if Any
 		  	$party_name = $this->_party_name($params['party_type'], $params['party_id']);
+		  	$ledger_title = [ "[{$record->id}]", $record->name, $party_name ? ' - ' . $party_name : ''];
+
+	  		// Branch Info
+			$branch_id = $params['branch_id'];
+			if($branch_id)
+			{
+				$dropdown_branch 	= $this->branch_model->dropdown('en');
+				$ledger_title[] 	= '[' . $dropdown_branch[$branch_id] . ']';
+			}
+			$ledger_title = implode(' ', $ledger_title);
+
+
+
 			return [
 				'bf_record' 	=> $bf_record,
 				'records' 		=> $records,
 				'ledger_dates' 	=> $goodies['ledger_dates'],
-				'party_name' 	=> $party_name
+				'ledger_title' 	=> $ledger_title
 			];
 		}
 
@@ -413,7 +429,6 @@ class Ac_ledgers extends MY_Controller
 
 		private function _get_filter_elements($formatted = FALSE)
 		{
-			$this->load->model('branch_model');
 			$dropdown_accounts 		= $this->ac_account_model->dropdown();
 			$dropdown_branch 		= $this->branch_model->dropdown();
 			$dropdown_party_types 	= ac_party_types_dropdown(false);

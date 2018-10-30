@@ -223,9 +223,23 @@ class Ac_trial_balance extends MY_Controller
 
 			$records = $this->db->query($sql)->result();
 
+			/**
+			 * Trial Balance Title Postfix - Branch Name ??
+			 */
+			$trial_balance_title = ['TRIAL BALANCE'];
+			// Branch Info
+			$branch_id = $params['branch_id'];
+			if($branch_id)
+			{
+				$dropdown_branch 	= $this->branch_model->dropdown('en');
+				$trial_balance_title[] 	= '[' . $dropdown_branch[$branch_id] . ']';
+			}
+			$trial_balance_title = implode(' ', $trial_balance_title);
+
 			return [
-				'records' 		=> $records,
-				'ledger_dates' 	=> $goodies['ledger_dates'],
+				'records' 				=> $records,
+				'ledger_dates' 			=> $goodies['ledger_dates'],
+				'trial_balance_title' 	=> $trial_balance_title
 			];
 		}
 
