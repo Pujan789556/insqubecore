@@ -426,6 +426,35 @@ if ( ! function_exists('ac_account_group_path_formatted'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('ac_format_number'))
+{
+	/**
+	 * Format Number for Accounting Reporting Display
+	 * i.e. negative number are displayed inside parenthesis
+	 *
+	 * @param float $number The number being formatted.
+	 * @param int $decimals Sets the number of decimal points.
+	 * @return type
+	 */
+	function ac_format_number( float $number, int $decimals = 0 )
+	{
+		if($number < 0)
+		{
+			$number = abs($number);
+			$number = number_format($number, $decimals);
+			// Negative Value is represented inside parenthesis
+			$number = "({$number})";
+		}
+		else{
+			$number = number_format($number, $decimals);
+		}
+
+		return $number;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('amount_in_words'))
 {
 	/**
