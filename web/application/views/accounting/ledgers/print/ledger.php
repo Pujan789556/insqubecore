@@ -1,5 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 ini_set('memory_limit', '-1');
+ini_set("pcre.backtrack_limit", "10000000");
 /**
  * Ledger Print
  */
