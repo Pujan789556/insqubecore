@@ -178,7 +178,7 @@ class Ac_ledgers extends MY_Controller
         $mpdf->WriteHTML($html);
 
         $filename = $title . '.pdf';
-        $mpdf->Output($filename, 'I');
+        $mpdf->Output($filename, 'D');
 	}
 
 	// --------------------------------------------------------------------
