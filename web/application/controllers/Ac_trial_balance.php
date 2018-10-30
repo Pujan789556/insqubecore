@@ -152,7 +152,7 @@ class Ac_trial_balance extends MY_Controller
 		$data['mode'] = 'print';
 		$html = $this->load->view($view, $data, TRUE);
 
-		$title = "Trial Balance - " . $data['ledger_dates']['from'] . ' to ' . $data['ledger_dates']['to'];
+		$title = $data['trial_balance_title'];
 
         $this->load->library('pdf');
         $mpdf = $this->pdf->load();

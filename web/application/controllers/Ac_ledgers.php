@@ -162,7 +162,7 @@ class Ac_ledgers extends MY_Controller
 		$data['mode'] = 'print';
 		$html = $this->load->view($view, $data, TRUE);
 
-		$title = "Ledger - " . $data['record']->name . ' ' . $data['ledger_dates']['from'] . ' to ' . $data['ledger_dates']['to'];
+		$title = $data['ledger_title'];
 
         $this->load->library('pdf');
         $mpdf = $this->pdf->load();
