@@ -6,11 +6,12 @@ ini_set('memory_limit', '-1');
 $header_footer = '<htmlpagefooter name="myfooter">
                             <table class="table table-footer no-border">
                                 <tr>
-                                    <td colspan="3" class="border-t">' .
+                                    <td class="border-t">' .
                                         $this->settings->orgn_name_en . '<br/>' .
                                         $this->settings->address .
-                                    '</td>
-                                </tr>
+                                    '</td>' .
+                                    '<td class="border-t" align="right">Page {PAGENO} of {nb}</td>' .
+                                '</tr>
                             </table>
                         </htmlpagefooter>
                         <sethtmlpagefooter name="myfooter" value="on" />';

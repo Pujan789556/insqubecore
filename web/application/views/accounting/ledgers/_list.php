@@ -33,7 +33,7 @@ $mode = $mode ?? 'list';
 			<td>B/F</td>
 			<td></td>
 			<td></td>
-			<td class="text-right"><?php echo number_format($balance, 2); ?></td>
+			<td class="text-right"><?php echo ac_format_number($balance, 2); ?></td>
 		</tr>
 		<?php foreach($records as $single):
 			$dr = 0.00;
@@ -59,7 +59,7 @@ $mode = $mode ?? 'list';
 				<td><?php echo $single->narration ?></td>
 				<td class="text-right"><?php echo number_format($dr, 2); ?></td>
 				<td class="text-right"><?php echo number_format($cr, 2); ?></td>
-				<td class="text-right"><?php echo number_format($balance, 2); ?></td>
+				<td class="text-right"><?php echo ac_format_number($balance, 2); ?></td>
 			</tr>
 		<?php endforeach ?>
 	</tbody>
@@ -68,7 +68,7 @@ $mode = $mode ?? 'list';
 			<td colspan="3" class="text-right">Total</td>
 			<td class="text-right"><?php echo number_format($dr_total); ?></td>
 			<td class="text-right"><?php echo number_format($cr_total); ?></td>
-			<td class="text-right"><?php echo number_format($balance); ?></td>
+			<td class="text-right"><?php echo ac_format_number($balance); ?></td>
 		</tr>
 	</tfoot>
 </table>
