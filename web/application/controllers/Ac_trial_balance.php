@@ -193,10 +193,15 @@ class Ac_trial_balance extends MY_Controller
 			$query_params = implode(' AND ', $goodies['query_params']);
 			$sql = "SELECT
 						AC.id AS account_id, AC.name AS account_name,
-						OB.dr AS ob_dr, OB.cr AS ob_cr, OB.balance AS ob_balance,
+						OB.ob_dr, OB.ob_cr, OB.ob_balance,
 						DR.dr_txn_total, CR.cr_txn_total
 						FROM ac_accounts AC
-						LEFT JOIN ac_opening_balances OB ON OB.account_id = AC.id AND OB.fiscal_yr_id = '{$fiscal_yr_id}'
+						LEFT JOIN (
+							SELECT OBI.account_id, OBI.fiscal_yr_id, SUM(OBI.dr) AS ob_dr, SUM(OBI.cr) AS ob_cr, SUM(OBI.balance) AS ob_balance
+							FROM ac_opening_balances OBI
+							WHERE OBI.fiscal_yr_id = '{$fiscal_yr_id}'
+							GROUP BY OBI.account_id, OBI.fiscal_yr_id
+						) OB ON OB.account_id = AC.id AND OB.fiscal_yr_id = '{$fiscal_yr_id}'
 						LEFT JOIN (
 							SELECT VD.account_id, SUM(VD.amount) AS dr_txn_total
 							FROM ac_voucher_details AS VD

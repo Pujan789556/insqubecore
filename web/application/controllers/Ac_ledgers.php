@@ -186,8 +186,12 @@ class Ac_ledgers extends MY_Controller
 
 		private function _ledger_data($params)
 		{
-			$fiscal_yr_id = $params['fiscal_yr_id'];
-			$account_id = $params['account_id'];
+			$fiscal_yr_id 	= $params['fiscal_yr_id'];
+			$account_id 	= $params['account_id'];
+
+			// Party Info
+			$party_type = $params['party_type'];
+			$party_id 	= $params['party_id'];
 
 			// Fiscal Year Record
 			$fy_record 	= $this->fiscal_year_model->get($fiscal_yr_id);
@@ -197,7 +201,8 @@ class Ac_ledgers extends MY_Controller
 			}
 
 			// Opening Balance
-			$ob_record = $this->ac_opening_balance_model->by_account_fiscal_yr($account_id, $fiscal_yr_id);
+			$ob_record = $this->ac_opening_balance_model->by_account_fiscal_yr($account_id, $fiscal_yr_id, $party_type, $party_id);
+
 
 			// Get the goodies
 			$goodies = $this->_filter_goodies($params);

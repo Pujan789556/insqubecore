@@ -17,7 +17,7 @@ class Ac_opening_balance_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'account_id', 'fiscal_yr_id', 'dr', 'cr', 'balance', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'account_id', 'fiscal_yr_id', 'party_type', 'party_id', 'dr', 'cr', 'balance', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -67,29 +67,47 @@ class Ac_opening_balance_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Get Dropdown List by Account Group ID
+     * Get Opening Balance For Supplied Account ( with/out Party)
      *
-     * @param integer $account_group_id
-     * @param bool $include_group_path
-     * @return array
+     * @param int $account_id
+     * @param int $fiscal_yr_id
+     * @param char|null $party_type
+     * @param int|null $party_id
+     * @return mixed
      */
-    public function by_account_fiscal_yr($account_id, $fiscal_yr_id)
+    public function by_account_fiscal_yr($account_id, $fiscal_yr_id, $party_type=NULL, $party_id=NULL)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
         $cache_name = 'ac_ob_' . $account_id . '_' . $fiscal_yr_id;
         $where = [
-            'ACOB.account_id' => $account_id,
-            'ACOB.fiscal_yr_id' => $fiscal_yr_id
+            'OB.account_id' => $account_id,
+            'OB.fiscal_yr_id' => $fiscal_yr_id
         ];
+        $group_by = ['account_id', 'fiscal_yr_id'];
+
+        /**
+         * Party Supplied?
+         */
+        if( !empty($party_type) && !empty($party_id))
+        {
+            $where['OB.party_type'] = $party_type;
+            $where['OB.party_id'] = $party_id;
+
+            $group_by = array_merge($group_by, ['party_type', 'party_id']);
+
+            $cache_name .= '_' . $party_type . '_' . $party_id;
+        }
 
         $record = $this->get_cache($cache_name);
         if(!$record)
         {
-            $record = $this->db->select('ACOB.*')
-                                 ->from($this->table_name . ' as ACOB')
+            $select = "OB.account_id, SUM(OB.dr) AS dr, SUM(OB.cr) AS cr, SUM(OB.balance) AS balance";
+            $record = $this->db->select($select)
+                                 ->from($this->table_name . ' as OB')
                                  ->where($where)
+                                 ->group_by($group_by)
                                  ->get()->row();
 
             if($record)
