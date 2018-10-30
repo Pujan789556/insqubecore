@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 ini_set('memory_limit', '-1');
+ini_set("pcre.backtrack_limit", "10000000");
+ini_set('max_execution_time', 300); //300 seconds = 5 minutes
 /**
  * Trial Balance Print
  */
