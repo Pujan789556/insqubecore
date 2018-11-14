@@ -1137,7 +1137,7 @@ class Endorsement_model extends MY_Model
                          * Customer Table (code, name, type, pan, picture, pfrofession, contact,
                          * company reg no, citizenship no, passport no, lock flag)
                          */
-                        "C.full_name as customer_name, C.contact as customer_contact, " .
+                        "C.full_name as customer_name, " .
 
                         /**
                          * Agent Table (agent_id, name, picture, bs code, ud code, contact, active, type)
@@ -1160,6 +1160,28 @@ class Endorsement_model extends MY_Model
                     ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
                     ->where($where)
                     ->where_not_in('ENDRSMNT.txn_type', [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]);
+
+        /**
+         * Customer Address
+         */
+        $table_aliases = [
+            // Address Table Alias
+            'address' => 'ADRC',
+
+            // Country Table Alias
+            'country' => 'CNTRYC',
+
+            // State Table Alias
+            'state' => 'STATEC',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBDC',
+
+            // Type/Module Table Alias
+            'module' => 'C'
+        ];
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_');
+
 
         /**
          * Creditor Branch Address - Left Join (NON-Compulsory)
