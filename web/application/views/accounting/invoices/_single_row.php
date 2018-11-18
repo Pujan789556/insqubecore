@@ -103,6 +103,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								data-url="<?php echo site_url('ac_invoices/printed/invoice/' . $record->id);?>">
 									<i class="fa fa-check-square-o"></i> Mark as Invoice Printed</a>
 						</li>
+					<?php elseif($this->dx_auth->is_admin()): ?>
+						<li>
+			                <a href="#"
+			                	data-toggle="tooltip"
+								title="Remove Invoice Printed Flag"
+								class="trg-row-action text-red"
+								data-confirm="true"
+								data-message="Are you sure you want to do this?"
+								data-url="<?php echo site_url('ac_invoices/unprinted/invoice/' . $record->id);?>">
+									<i class="fa fa-close"></i> Remove Invoice Printed Flag</a>
+						</li>
 					<?php endif;?><li class="divider"></li>
 				<?php endif?>
 
@@ -126,6 +137,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								data-message="Are you sure you want to do this? <br/>Once you do this, printing receipt gives a copy."
 								data-url="<?php echo site_url('ac_invoices/printed/receipt/' . $record->id);?>">
 									<i class="fa fa-check-square-o"></i> Mark as Receipt Printed</a>
+						</li>
+					<?php elseif($this->dx_auth->is_admin()): ?>
+						<li>
+			                <a href="#"
+			                	data-toggle="tooltip"
+								title="Remove Receipt Printed Flag"
+								class="trg-row-action text-red"
+								data-confirm="true"
+								data-message="Are you sure you want to do this?"
+								data-url="<?php echo site_url('ac_invoices/unprinted/receipt/' . $record->id);?>">
+									<i class="fa fa-close"></i> Remove Receipt Printed Flag</a>
 						</li>
 					<?php endif?><li class="divider"></li>
 		        <?php endif?>

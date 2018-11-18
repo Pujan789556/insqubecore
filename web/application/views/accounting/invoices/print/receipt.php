@@ -38,7 +38,7 @@
             <tbody>
                 <tr>
                     <td align="left" width="40%">
-                        <img style="margin-bottom: 20px;" src="<?php echo logo_url();?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
+                        <img style="margin-bottom: 20px;" src="<?php echo logo_path();?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
                     </td>
                     <td width="20%" align="center"><h2>RECEIPT</h2></td>
                     <td width="40%" align="right">

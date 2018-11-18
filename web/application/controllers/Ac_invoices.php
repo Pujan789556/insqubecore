@@ -878,6 +878,124 @@ class Ac_invoices extends MY_Controller
 	    }
 
 	// --------------------------------------------------------------------
+	//  FLAG AS UNPRINT
+	// --------------------------------------------------------------------
+
+	public function unprinted($type, $id, $policy_id = NULL)
+    {
+    	/**
+		 * Valid Type?
+		 */
+    	if( !in_array($type, ['invoice', 'receipt']) )
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Check Permissions
+		 *
+		 * !!! ONLY ADMINS can access
+		 */
+		if( !$this->dx_auth->is_admin() )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+
+		/**
+		 * Main Record (Complete Invoice + Receipt Data)
+		 */
+    	$id = (int)$id;
+		$record = $this->ac_invoice_model->get($id, IQB_FLAG_ON);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+    	 * Already Printed?
+    	 */
+		$already_unprinted = FALSE;
+		if( $type === 'invoice' )
+		{
+			$already_unprinted = $record->flag_printed == IQB_FLAG_OFF;
+		}
+		else
+		{
+			// Must have Receipt
+			$already_unprinted = $record->receipt_id && $record->receipt_flag_printed == IQB_FLAG_OFF;
+		}
+		if( $already_unprinted )
+		{
+			return $this->template->json([
+				'title' 	=> 'Invalid Action!',
+				'status' 	=> 'error',
+				'message' 	=> 'It seems, you have already updated print flag!'
+			], 404);
+		}
+
+
+
+		/**
+		 * Call Individual Unprinted Method
+		 */
+		$method =  "_unprinted_{$type}";
+		$record = $this->$method($record);
+
+		if($record === FALSE )
+		{
+			return $this->template->json([
+				'title' 	=> 'Could not Update',
+				'status' 	=> 'error',
+				'message' 	=> 'Could not update flag!'
+			], 500);
+		}
+
+		/**
+		 * Clear the Cache
+		 */
+		$this->ac_invoice_model->clear_cache();
+
+		/**
+		 * Update The Row
+		 */
+		$row_html = $this->load->view('accounting/invoices/_single_row', ['record' => $record, 'policy_id' => $policy_id], TRUE);
+		$ajax_data = [
+			'message' => 'Successfully Updated',
+			'status'  => 'success',
+			'reloadRow' => true,
+			'rowId' 	=> '#_data-row-invoice-' . $record->id,
+			'row' 		=> $row_html
+		];
+		return $this->template->json($ajax_data);
+    }
+
+    	// --------------------------------------------------------------------
+
+    	private function _unprinted_invoice($record)
+	    {
+	    	if( $this->ac_invoice_model->update_flag($record->id, 'flag_printed', IQB_FLAG_OFF) )
+	    	{
+	    		$record->flag_printed = IQB_FLAG_OFF;
+
+	    		return $record;
+	    	}
+	    	return FALSE;
+	    }
+
+		// --------------------------------------------------------------------
+
+	    private function _unprinted_receipt($record)
+	    {
+	    	$this->load->model('ac_receipt_model');
+	    	if( $this->ac_receipt_model->update_flag($record->receipt_id, 'flag_printed', IQB_FLAG_OFF) )
+	    	{
+	    		$record->receipt_flag_printed = IQB_FLAG_OFF;
+
+	    		return $record;
+	    	}
+	    	return FALSE;
+	    }
 
 
 }
