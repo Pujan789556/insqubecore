@@ -2055,9 +2055,12 @@ if ( ! function_exists('_ENDORSEMENT_endorsement_pdf'))
 			$CI->load->library('pdf');
 	        $mpdf = $CI->pdf->load();
 	        // $mpdf->SetMargins(10, 10, 5);
-	        $mpdf->SetMargins(10, 5, 10, 5);
-	        $mpdf->margin_header = 5;
-	        $mpdf->margin_footer = 5;
+	        // $mpdf->SetMargins(10, 5, 10, 5);
+	        // $mpdf->margin_header = 5;
+	        // $mpdf->margin_footer = 5;
+            $mpdf->setAutoTopMargin = true;
+            $mpdf->setAutoBottomMargin = true;
+
 	        $mpdf->SetProtection(array('print'));
 	        $mpdf->SetTitle("Policy Endorsement - {$record->policy_code}");
 	        $mpdf->SetAuthor($CI->settings->orgn_name_en);

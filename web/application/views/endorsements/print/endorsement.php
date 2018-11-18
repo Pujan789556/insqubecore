@@ -57,14 +57,13 @@ $labels = [
      * Load Styles (inline)
      */
     $this->load->view('print/style/schedule');
-
     /**
      * Header & Footer
      */
     $header_footer = '<htmlpageheader name="myheader" value="on">
                         <table class="table no-border">
                             <tr>
-                                <td align="left"><img style="margin-bottom: 20px;" src="'.site_url('static/app/images/logo.png').'" alt="'.$this->settings->orgn_name_en.'" width="200"></td>
+                                <td align="left"><img style="margin-bottom: 20px;" src="'.site_url( 'static/media/settings/' . $this->settings->logo).'" alt="'.$this->settings->orgn_name_en.'" width="200"></td>
                                 <td align="right"><h2>'.$schedule_table_title[$lang].'</h2></td>
                             </tr>
                         </table>
@@ -85,7 +84,6 @@ $labels = [
         <!--mpdf
             <?php echo $header_footer;?>
         mpdf-->
-        <br>
         <?php
         $count = count($records);
         $i = 1;
