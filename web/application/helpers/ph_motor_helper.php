@@ -2600,9 +2600,18 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        '_required' => true
 			    ],
 			    [
+			        'field' => 'object[accessories]',
+			        '_key' => 'accessories',
+			        'label' => 'Accessories',
+			        'rules' => 'trim|max_length[500]',
+			        '_id' 		=> '_motor-accessories',
+			        '_type'     => 'textarea',
+			        '_required' => false
+			    ],
+			    [
 			        'field' => 'object[price_accessories]',
 			        '_key' => 'price_accessories',
-			        'label' => 'Acessories Price',
+			        'label' => 'Accessories Total Price',
 			        'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
 			        '_id' 		=> '_motor-accessories-price',
 			        '_type'     => 'text',
@@ -2658,6 +2667,20 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 			        '_type'     => 'date',
 			        '_required' => false
 			    ],
+		    ],
+
+		    // Vehicle Common Fields - Vehicle Transit from Custom to KTM or other places
+		    'vehicle-custom' => [
+		    	// For New Vehicle while transferring from Custom to City
+			    [
+			        'field' => 'object[custom_info]',
+			        '_key' => 'custom_info',
+			        'label' => 'Custom Info',
+			        'rules' => 'trim|max_length[500]',
+			        '_type'     => 'textarea',
+			        '_required' => false,
+			        '_help_text' => 'This field is for LC NO/Date, Invoice NO/Date, Bank Info etc for those vehicle in transit/custom to showroom.'
+			    ]
 		    ],
 
 
@@ -2745,15 +2768,15 @@ if ( ! function_exists('_OBJ_MOTOR_validation_rules'))
 
 		if($portfolio_id == IQB_SUB_PORTFOLIO_MOTORCYCLE_ID)
 		{
-			$sections = ['vehicle-common', 'vehicle-registration', 'seating-capcity'];
+			$sections = ['vehicle-common', 'vehicle-registration', 'vehicle-custom', 'seating-capcity'];
 		}
 		else if($portfolio_id == IQB_SUB_PORTFOLIO_PRIVATE_VEHICLE_ID)
 		{
-			$sections = ['vehicle-common', 'vehicle-registration', 'seating-capcity', 'trailer'];
+			$sections = ['vehicle-common', 'vehicle-registration', 'vehicle-custom', 'seating-capcity', 'trailer'];
 		}
 		else
 		{
-			$sections = ['vehicle-cvc', 'vehicle-common', 'vehicle-registration', 'seating-capcity', 'carrying-capcity',  'staff', 'trailer'];
+			$sections = ['vehicle-cvc', 'vehicle-common', 'vehicle-registration', 'vehicle-custom', 'seating-capcity', 'carrying-capcity',  'staff', 'trailer'];
 		}
 
 

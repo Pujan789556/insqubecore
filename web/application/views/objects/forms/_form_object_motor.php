@@ -171,6 +171,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </div>
             </div>
         <?php endif ?>
+
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">Vehicle Custom Information</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <?php
+                /**
+                 * Vehicle Information
+                 */
+                $vehicle_elements = $form_elements['vehicle-custom'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $vehicle_elements,
+                    'form_record'   => $record
+                ]);
+                ?>
+            </div>
+        </div>
+
     </div>
 </div>
 

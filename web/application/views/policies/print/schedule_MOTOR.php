@@ -226,6 +226,11 @@ switch ($record->portfolio_id)
                                     }?>
                                 </td>
                             </tr>
+
+                            <tr>
+                                <td>सरसामानको विवरण:</td>
+                                <td> <?php echo nl2br(htmlspecialchars($object_attributes->accessories ?? ''));?></td>
+                            </tr>
                         </table>
                     </td>
                     <td>
@@ -280,6 +285,13 @@ switch ($record->portfolio_id)
                         </table>
                     </td>
                 </tr>
+                <?php if(isset($object_attributes->custom_info)): ?>
+                    <tr>
+                        <td colspan="2" style="font-size:8pt">
+                            <?php echo nl2br(htmlspecialchars($object_attributes->custom_info ?? ''));?>
+                        </td>
+                    </tr>
+                <?php endif ?>
 
                 <tr>
                     <td colspan="2" style="font-size:8pt">
