@@ -610,12 +610,25 @@ class Policy_installments extends MY_Controller
 	        /**
 	         * Voucher Amount Computation
 	         */
-	        $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
+	        $precision = 4;
+	        $gross_premium_amount 	= 	bcadd(
+	        								(float)$installment_record->amt_basic_premium,
+	        								(float)$installment_record->amt_pool_premium,
+	        								$precision
+        								); // basic + pool premium
+
 	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
 	        $vat_payable_amount 		= $installment_record->amt_vat;
 
-	        $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
-	        $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
+	        // $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
+	        $beema_samiti_service_charge_amount = 	bcdiv(
+	        											bcmul($gross_premium_amount, $pfs_record->bs_service_charge, $precision),
+	        											100,
+        												$precision
+        											); // gross premium X bs_service_charge / 100
+
+	        // $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
+	        $total_to_receive_from_insured_party_amount = ac_bcsum([$gross_premium_amount, $stamp_income_amount, $vat_payable_amount], $precision);
 	        $agent_commission_amount 					= $installment_record->amt_agent_commission ?? NULL;
 
 			// --------------------------------------------------------------------
@@ -797,13 +810,42 @@ class Policy_installments extends MY_Controller
 
 	        	// Agent TDS -- TDS Amount, Agent Commission Payable -- Agent Payable Amount
 	        	$this->load->model('ac_duties_and_tax_model');
-	        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount);
-	        	$agent_commission_payable_amount = $agent_commission_amount - $agent_tds_amount;
+	        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount, $precision);
+	        	$agent_commission_payable_amount = bcsub($agent_commission_amount, $agent_tds_amount, $precision);
 	        	$cr_rows['amounts'][] = $agent_tds_amount;
 	        	$cr_rows['amounts'][] = $agent_commission_payable_amount;
 	        }
 
 	        // --------------------------------------------------------------------
+
+	        /**
+	         * DR === CR
+	         */
+	        $dr_total = $cr_total = 0;
+	        foreach($dr_rows['amounts'] as $amount)
+	        {
+	        	$dr_total = bcadd($dr_total, $amount, $precision);
+	        }
+	        foreach($cr_rows['amounts'] as $amount)
+	        {
+	        	$cr_total = bcadd($cr_total, $amount, $precision);
+	        }
+	        if($dr_total !== $cr_total)
+	        {
+	            $diff_total     = bcsub($dr_total, $cr_total, 4);
+	            $abs_diff_total = abs($diff_total);
+
+	            if($diff_total > 0)
+	            {
+	                // First Credit Row
+	                $cr_rows['amounts'][0] = bcadd($cr_rows['amounts'][0], $abs_diff_total);
+	            }
+	            else
+	            {
+	                // First Debit Row
+	                $dr_rows['amounts'][0] = bcadd($dr_rows['amounts'][0], $abs_diff_total);
+	            }
+	        }
 
 
 	        return [
