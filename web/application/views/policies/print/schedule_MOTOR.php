@@ -353,7 +353,7 @@ switch ($record->portfolio_id)
             <table class="table no-border">
                 <tr>
                     <td align="center" colspan="2">
-                        <img src="<?php echo logo_url();?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
+                        <img src="<?php echo logo_path();?>" alt="<?php echo $this->settings->orgn_name_en?>" width="200">
                     </td>
                 </tr>
                 <tr>
