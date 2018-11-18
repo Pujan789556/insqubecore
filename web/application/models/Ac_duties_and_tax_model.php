@@ -69,14 +69,15 @@ class Ac_duties_and_tax_model extends MY_Model
      * @param decimal $src_amount
      * @return decimal
      */
-    public function compute_tax($id, $src_amount)
+    public function compute_tax($id, $src_amount, $precision=4)
     {
         $record = $this->get($id);
         if(!$record)
         {
             throw new Exception("Exception [Model: Ac_duties_and_tax_model][Method: compute_vat()]: Duty & Tax record could not be found.");
         }
-        $vat_amount = $src_amount * ($record->rate/100.00);
+        // amount X rate / 100
+        $vat_amount = bcdiv( bcmul($src_amount, $record->rate, $precision), 100.00, $precision);
 
         return $vat_amount;
     }

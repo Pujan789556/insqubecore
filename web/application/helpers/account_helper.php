@@ -697,14 +697,45 @@ if ( ! function_exists('number_to_words'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('ac_bcsum'))
+{
+	/**
+	 * Use BC Math Function bcadd() to sum more than two variables
+	 *
+	 * @param array $values
+	 * @param int $precision
+	 * @return string
+	 */
+	function ac_bcsum( array $values, int $precision = 4 )
+	{
+		if(!function_exists('bcadd'))
+		{
+			throw new Exception("Exception [Helper: account_helper][Method: ac_bcsum()]: Undefined method bcadd(). Please install BC Math extension in order to use this function.");
+		}
+
+		$total = 0;
+		foreach($values as $value)
+		{
+			$total = bcadd($total, $value, $precision);
+		}
+
+		return $total;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('ac_compute_tax'))
 {
 	/**
 	 * Compute Tax Based on TaxID and Suppplied Amount
 	 *
-	 * @return	decimal
+	 * @param int $duty_and_tax_id
+	 * @param decimal $amount
+	 * @param int $precision
+	 * @return	string
 	 */
-	function ac_compute_tax( $duty_and_tax_id, $amount )
+	function ac_compute_tax( $duty_and_tax_id, $amount, $precision=4 )
 	{
 		$CI =& get_instance();
 
@@ -712,7 +743,7 @@ if ( ! function_exists('ac_compute_tax'))
 		 * Compute TAX
 		 */
 		$CI->load->model('ac_duties_and_tax_model');
-		$tax = $CI->ac_duties_and_tax_model->compute_tax($duty_and_tax_id, $amount);
+		$tax = $CI->ac_duties_and_tax_model->compute_tax($duty_and_tax_id, $amount, $precision);
 
 		return $tax;
 	}
