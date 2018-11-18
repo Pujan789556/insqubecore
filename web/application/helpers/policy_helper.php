@@ -125,13 +125,13 @@ if ( ! function_exists('_POLICY_status_text'))
 			}
 			else if( $key === IQB_POLICY_STATUS_EXPIRED )
 			{
-				// Gray
-				$css_class = 'text-gray';
+			    // Red
+                $css_class = 'text-red';
 			}
 			else if( $key === IQB_POLICY_STATUS_CANCELED )
 			{
-				// Red
-				$css_class = 'text-red';
+                // Gray
+                $css_class = 'text-gray';
 			}
 			else
 			{
@@ -143,6 +143,52 @@ if ( ! function_exists('_POLICY_status_text'))
 		}
 		return $text;
 	}
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_POLICY_status_icon'))
+{
+    /**
+     * Get Policy Status Icon
+     *
+     *
+     * @param char $key
+     * @return  html
+     */
+    function _POLICY_status_icon($key)
+    {
+        $status_list  = _POLICY_status_dropdown(FALSE);
+
+        $title  = $status_list[$key] ?? '';
+        $icon   = '';
+
+        if( in_array($key, array_keys( $status_list )) )
+        {
+            if( $key === IQB_POLICY_STATUS_ACTIVE )
+            {
+                // Green
+                $css_class = 'text-green';
+            }
+            else if( $key === IQB_POLICY_STATUS_EXPIRED )
+            {
+                // Red
+                $css_class = 'text-red';
+            }
+            else if( $key === IQB_POLICY_STATUS_CANCELED )
+            {
+                // Gray
+                $css_class = 'text-gray';
+            }
+            else
+            {
+                // Orange
+                $css_class = 'text-orange';
+            }
+
+            $icon = '<i class="fa fa-circle '.$css_class.'" title="'.$title.'" data-toggle="tooltip"></i>';
+        }
+        return $icon;
+    }
 }
 
 // ------------------------------------------------------------------------
