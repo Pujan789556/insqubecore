@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy:  Data List
 */
 ?>
-<table class="table table-hover">
+<table class="table table-hover" style="margin-bottom: 200px;">
 	<thead>
 		<tr>
 			<?php if( $this->dx_auth->is_admin() ): ?>

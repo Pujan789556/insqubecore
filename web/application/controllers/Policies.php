@@ -313,6 +313,48 @@ class Policies extends MY_Controller
 		$this->page('l');
 	}
 
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get all Policies by Customer
+	 *
+	 * @param int $customer_id
+	 * @param int $flush_cache
+	 * @return JSON
+	 */
+	function by_customer($customer_id, $flush_cache = 0)
+	{
+		/**
+		 * Check Permissions? OR Deny on Fail!
+		 */
+		$this->dx_auth->is_authorized('policies', 'explore.policy', TRUE);
+
+		$customer_id 	= (int)$customer_id;
+
+		/**
+		 * Clear Cache??
+		 */
+		if($flush_cache)
+		{
+			$cache_var = 'policy_cst_' . $customer_id;
+			$this->policy_model->clear_cache($cache_var);
+		}
+
+		$records = $this->policy_model->rows_by_customer($customer_id);
+		$data = [
+			'records' 					=> $records,
+			'customer_id' 				=> $customer_id,
+			'next_id' 					=> NULL
+		];
+		$html = $this->load->view('policies/_customer/_list_widget', $data, TRUE);
+		$ajax_data = [
+			'status' => 'success',
+			'html'   => $html
+		];
+
+		$this->template->json($ajax_data);
+	}
+
 
 
 	// --------------------------------------------------------------------
@@ -464,28 +506,35 @@ class Policies extends MY_Controller
         	{
         		$data = $this->input->post();
 
-        		// Insert or Update?
-				if($action === 'add')
-				{
-					$done = $this->policy_model->add_debit_note($data); // No Validation on Model
-				}
-				else
-				{
-
-					// Now Update Data
-					$done = $this->policy_model->edit_debit_note($record->id, $data);
-
-
-					/**
-					 * Policy Package Changed?
-					 * --------------------------
-					 * If changed, we have to reset the premium info
-					 */
-					if($done)
+        		try {
+    				// Insert or Update?
+					if($action === 'add')
 					{
-						$this->__reset_premium_on_debitnote_update($record, $data);
+						$done = $this->policy_model->add_debit_note($data); // No Validation on Model
 					}
-				}
+					else
+					{
+
+						// Now Update Data
+						$done = $this->policy_model->edit_debit_note($record->id, $data);
+
+
+						/**
+						 * Policy Package Changed?
+						 * --------------------------
+						 * If changed, we have to reset the premium info
+						 */
+						if($done)
+						{
+							$this->__reset_premium_on_debitnote_update($record, $data);
+						}
+					}
+        		} catch (Exception $e) {
+        			return $this->template->json([
+						'status' => 'error',
+						'message' => $e->getMessage()
+					], 500);
+        		}
 
 	        	if(!$done)
 				{

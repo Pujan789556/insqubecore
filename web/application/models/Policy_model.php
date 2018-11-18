@@ -15,9 +15,9 @@ class Policy_model extends MY_Model
 
     protected $before_insert = ['before_insert__defaults'];
     protected $before_update = ['before_update__defaults'];
-    protected $after_insert  = ['after_insert__defaults', 'clear_cache'];
-    protected $after_update  = ['after_update__defaults', 'clear_cache'];
-    protected $after_delete  = ['clear_cache'];
+    protected $after_insert  = ['after_insert__defaults'];
+    protected $after_update  = ['after_update__defaults'];
+    protected $after_delete  = [];
 
 
     protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
@@ -911,6 +911,14 @@ class Policy_model extends MY_Model
             $tags = $fields['tags'] ?? [];
             $this->rel_policy_tag_model->save($id, $tags);
 
+
+            /**
+             * Task 4: Clear Cache
+             * ---------------------
+             */
+            $customer_id = $fields['customer_id'];
+            $this->clear_cache('policy_cst_'.$customer_id);
+
             return TRUE;
 
         }
@@ -1002,6 +1010,13 @@ class Policy_model extends MY_Model
             $this->load->model('rel_policy_tag_model');
             $tags = $fields['tags'] ?? [];
             $this->rel_policy_tag_model->save($id, $tags);
+
+            /**
+             * Task 4: Clear Cache
+             * ---------------------
+             */
+            $customer_id = $fields['customer_id'];
+            $this->clear_cache('policy_cst_'.$customer_id);
         }
 
         return TRUE;
@@ -1450,6 +1465,46 @@ class Policy_model extends MY_Model
                         ->get()->row();
     }
 
+    // ----------------------------------------------------------------
+
+    public function rows_by_customer($customer_id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var = 'policy_cst_'.$customer_id;
+        $rows = $this->get_cache($cache_var);
+        if(!$rows)
+        {
+            $rows = $this->_rows_by_customer($customer_id);
+
+            if($rows)
+            {
+                $this->write_cache($rows, $cache_var, CACHE_DURATION_HR);
+            }
+        }
+        return $rows;
+    }
+
+        /**
+         * Get Rows from Database
+         *
+         * @param int $customer_id
+         * @return array
+         */
+        private function _rows_by_customer($customer_id)
+        {
+            // Common Row Select
+            $this->__row_select();
+
+            return $this->db->where('P.customer_id', $customer_id)
+                            ->order_by('P.id', 'DESC')
+                            ->get()->result();
+        }
+
+    // ----------------------------------------------------------------
+
+
         private function __row_select($signle_select = FALSE)
         {
 
@@ -1720,8 +1775,24 @@ class Policy_model extends MY_Model
      */
     public function clear_cache($data=null)
     {
-        $cache_names = [
-        ];
+        /**
+         * If no data supplied, delete all caches
+         */
+        if( !$data )
+        {
+            $cache_names = [
+                'policy_*'
+            ];
+        }
+        else
+        {
+            /**
+             * If data supplied, we only delete the supplied
+             * caches
+             */
+            $cache_names = is_array($data) ? $data : [$data];
+        }
+
         // cache name without prefix
         foreach($cache_names as $cache)
         {
@@ -1766,6 +1837,15 @@ class Policy_model extends MY_Model
         {
             // generate an error... or use the log_message() function to log your error
             $status = FALSE;
+        }
+        else
+        {
+            /**
+             * Clear Cache
+             * ---------------------
+             */
+            $customer_id = $record->customer_id;
+            $this->clear_cache('policy_cst_'.$customer_id);
         }
 
         // Enable db_debug if on development environment

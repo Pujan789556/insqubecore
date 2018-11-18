@@ -362,6 +362,17 @@ $( document ).ajaxError(function( event, request, settings ) {
     }
 }));
 
+// ---------------------------------------------------------------
+
+/**
+ * AJAX Load Contents
+ */
+$(document).on('click', '.insqube-load', function(e){
+    e.preventDefault();
+    InsQube.load(e, this);
+});
+
+// ---------------------------------------------------------------
 
 /**
  * General Form Submission Handling
@@ -438,6 +449,9 @@ $( document ).ajaxError(function( event, request, settings ) {
         $btn.button('reset');
     })
  });
+
+// ---------------------------------------------------------------
+
 
 /**
  * Ajax: Edit Form Dialog (using bootbox)
@@ -568,11 +582,13 @@ $(document).on('click', '.trg-dialog-popup', function(e){
     });
 });
 
+// ---------------------------------------------------------------
 
- /**
+
+/**
  * Ajax: Delete Record (using bootbox)
  */
- $(document).on('click', '.trg-row-action, .trg-dialog-action', function(e){
+$(document).on('click', '.trg-row-action, .trg-dialog-action', function(e){
     e.preventDefault();
 
     // Remove any opened tooltip UI (eg. edit button tooltip)
@@ -651,6 +667,8 @@ $(document).on('click', '.trg-dialog-popup', function(e){
     };
  });
 
+// ---------------------------------------------------------------
+
 
 /**
  * Search Filter
@@ -681,6 +699,9 @@ $('.input-group.date').datepicker({
     format: 'yyyy-mm-dd'
 });
 
+// ---------------------------------------------------------------
+
+
 /**
  * Popover Initialization
  *
@@ -701,6 +722,9 @@ $('.input-group.date').datepicker({
     });
  });
 
+// ---------------------------------------------------------------
+
+
 /**
  * Global Initialize Tooltip ( works well on dynamic content)
  */
@@ -708,6 +732,9 @@ $('body').tooltip({
     selector: '[data-toggle="tooltip"]',
     container: 'body'
 });
+
+// ---------------------------------------------------------------
+
 
 /**
  * Multiple Bootbox Opened?
@@ -723,6 +750,9 @@ $(document).on('hidden.bs.modal', '.bootbox[role="dialog"]', function(){
     // Remove any opened tooltip UI on bootbox
     $('div.tooltip[role="tooltip"]').remove();
 });
+
+// ---------------------------------------------------------------
+
 
 /**
  * After Bootbox Shown?

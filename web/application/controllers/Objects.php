@@ -345,6 +345,49 @@ class Objects extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+
+	/**
+	 * Get all Objects by Customer
+	 *
+	 * @param int $customer_id
+	 * @param int $flush_cache
+	 * @return JSON
+	 */
+	function by_customer($customer_id, $flush_cache = 0)
+	{
+		/**
+		 * Check Permissions? OR Deny on Fail!
+		 */
+		$this->dx_auth->is_authorized('policies', 'explore.object', TRUE);
+
+		$customer_id 	= (int)$customer_id;
+
+		/**
+		 * Clear Cache??
+		 */
+		if($flush_cache)
+		{
+			$cache_var = 'object_cst_' . $customer_id;
+			$this->object_model->clear_cache($cache_var);
+		}
+
+		$records = $this->object_model->get_by_customer($customer_id);
+		$data = [
+			'records' 					=> $records,
+			'customer_id' 				=> $customer_id,
+			'next_id' 					=> NULL,
+			'add_url' 					=> 'objects/add/' . $customer_id
+		];
+		$html = $this->load->view('objects/_customer/_list_widget', $data, TRUE);
+		$ajax_data = [
+			'status' => 'success',
+			'html'   => $html
+		];
+
+		$this->template->json($ajax_data);
+	}
+
+	// --------------------------------------------------------------------
 	// CRUD OPERATIONS
 	// --------------------------------------------------------------------
 

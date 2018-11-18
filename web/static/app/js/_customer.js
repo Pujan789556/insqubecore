@@ -1,8 +1,32 @@
 /**
  * InsQube: Customer Management
  *
- * Version: 1.0
+ * Version: 1.1
  */
+
+// ---------------------------------------------------------------
+
+/**
+ * Customer Details Page - Tab Click
+ */
+$(document).on('click', '#customer-tabs a', function(e){
+    e.preventDefault();
+    var $this = $(this),
+    $tab_box  = $($this.data('box'));
+    $this.tab('show');
+
+
+    /**
+     * AJAX Load Content if this is not Overview Tab
+     */
+    if($this.attr('aria-controls') !== 'tab-customer-overview' )
+    {
+        $tab_box.html('Loading...');
+        InsQube.load(e, this);
+    }
+});
+
+// ---------------------------------------------------------------
 
 // Hide Element on Load if any
 $('[data-hideonload=yes]').closest('.form-group').hide();

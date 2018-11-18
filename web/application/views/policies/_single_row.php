@@ -11,8 +11,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<?php endif?>
 	<td>
 		<a href="<?php echo site_url('policies/details/' . $record->id);?>"
-						title="View policy details.">
-						<?php echo $record->code;?></a>
+			target="_blank"
+			title="View policy details.">
+			<?php echo $record->code;?></a>
 	</td>
 	<td><?php echo $record->customer_name;?></td>
 	<td><?php echo $record->portfolio_name;?></td>
@@ -41,7 +42,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					</li>
 				<?php endif;?>
 
-				<?php if( ($this->dx_auth->is_authorized('policies', 'delete.policy')) && safe_to_delete( 'Policy_model', $record->id )):?>
+				<?php if( $record->status === IQB_POLICY_STATUS_DRAFT && $this->dx_auth->is_authorized('policies', 'delete.policy') && safe_to_delete( 'Policy_model', $record->id )):?>
 					<li class="divider"></li>
 					<li>
 						<a href="#"
@@ -57,6 +58,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 				<li>
 					<a href="<?php echo site_url('policies/details/' . $record->id);?>"
+						target="_blank"
 						title="View policy details.">
 						<i class="fa fa-user"></i>
 						<span>View Details</span></a>

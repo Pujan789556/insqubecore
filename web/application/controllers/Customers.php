@@ -892,7 +892,6 @@ class Customers extends MY_Controller
 		$this->load->model('object_model');
 		$data = [
 			'record' 		=> $record,
-			'objects' 		=> $this->object_model->get_by_customer($record->id),
 			'address_record' => $address_record
 		];
 

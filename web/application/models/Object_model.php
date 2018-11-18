@@ -14,10 +14,10 @@ class Object_model extends MY_Model
     protected $protected_attributes = ['id'];
 
     protected $before_insert = [];
-    protected $after_insert  = ['after_insert__defaults', 'clear_cache'];
+    protected $after_insert  = ['after_insert__defaults'];
     protected $before_update = ['before_update__defaults'];
-    protected $after_update  = ['after_update__defaults', 'clear_cache'];
-    protected $after_delete  = ['clear_cache'];
+    protected $after_update  = ['after_update__defaults'];
+    protected $after_delete  = [];
 
     protected $fields = ['id', 'portfolio_id', 'attributes', 'amt_sum_insured', 'si_breakdown', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
@@ -119,6 +119,12 @@ class Object_model extends MY_Model
         {
             $this->load->model('rel_customer_object_model');
             $this->rel_customer_object_model->add_new_object_owner($id, $customer_id);
+
+            /**
+             * Clear Cache
+             * ---------------------
+             */
+            $this->clear_cache('object_cst_'.$customer_id);
         }
         return FALSE;
     }
@@ -182,6 +188,13 @@ class Object_model extends MY_Model
                 $this->load->model('endorsement_model');
                 $this->endorsement_model->reset_by_policy($policy_record->id);
             }
+
+            /**
+             * Clear Cache
+             * ---------------------
+             */
+            $record = $this->row($id);
+            $this->clear_cache('object_cst_'.$record->customer_id);
         }
         return FALSE;
     }
@@ -434,7 +447,7 @@ class Object_model extends MY_Model
             'RCO.customer_id' => $customer_id,
             'RCO.flag_current' => IQB_FLAG_ON
         ];
-        $cache_name = 'object_customer_' . $customer_id;
+        $cache_name = 'object_cst_' . $customer_id;
         if($portfolio_id)
         {
             $cache_name             .= '_' . $portfolio_id;
@@ -541,11 +554,25 @@ class Object_model extends MY_Model
     /**
      * Delete Cache on Update/Delete Records
      */
-    public function clear_cache()
+    public function clear_cache($data=null)
     {
-        $cache_names = [
-            'object_customer_*',
-        ];
+        /**
+         * If no data supplied, delete all caches
+         */
+        if( !$data )
+        {
+            $cache_names = [
+                'object_*'
+            ];
+        }
+        else
+        {
+            /**
+             * If data supplied, we only delete the supplied
+             * caches
+             */
+            $cache_names = is_array($data) ? $data : [$data];
+        }
 
     	// cache name without prefix
         foreach($cache_names as $cache)
@@ -590,8 +617,11 @@ class Object_model extends MY_Model
         }
         else
         {
-            // Clear cache for this customer
-            $cache_var = 'object_customer_' . $record->customer_id;
+            /**
+             * Clear Cache
+             * ---------------------
+             */
+            $cache_var = 'object_cst_' . $record->customer_id;
             $this->delete_cache($cache_var);
         }
 
