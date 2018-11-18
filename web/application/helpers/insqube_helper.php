@@ -66,6 +66,30 @@ if ( ! function_exists('logo_url'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('logo_path'))
+{
+    /**
+     *  Get Logo Absolute Path
+     *
+     * @return string
+     */
+    function logo_path( )
+    {
+        $CI =& get_instance();
+
+        // remove trailing slash if any
+        $media_root =  strtr(
+                rtrim(INSQUBE_MEDIA_ROOT, '/\\'),
+                '/\\',
+                DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR
+            );
+
+        return $media_root . '/media/settings/' . $CI->settings->logo;
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('set_menu_active'))
 {
 	/**
