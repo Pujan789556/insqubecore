@@ -2061,6 +2061,9 @@ if ( ! function_exists('_ENDORSEMENT_endorsement_pdf'))
             $mpdf->setAutoTopMargin = true;
             $mpdf->setAutoBottomMargin = true;
 
+            // Image Error
+            $mpdf->showImageErrors = true;
+
 	        $mpdf->SetProtection(array('print'));
 	        $mpdf->SetTitle("Policy Endorsement - {$record->policy_code}");
 	        $mpdf->SetAuthor($CI->settings->orgn_name_en);
