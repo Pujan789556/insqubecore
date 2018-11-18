@@ -1126,7 +1126,7 @@ class Endorsement_model extends MY_Model
                         /**
                          * Policy Table
                          */
-                        "P.portfolio_id, P.branch_id, P.code AS policy_code, P.flag_on_credit, P.care_of, " .
+                        "P.portfolio_id, P.branch_id, P.code AS policy_code, P.flag_on_credit, P.care_of, P.other_creditors, " .
 
                         /**
                          * Branch Inofrmation
