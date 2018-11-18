@@ -60,10 +60,11 @@ $labels = [
     /**
      * Header & Footer
      */
+    $logo_path = INSQUBE_MEDIA_ROOT . 'media/settings/' . $this->settings->logo;
     $header_footer = '<htmlpageheader name="myheader" value="on">
                         <table class="table no-border">
                             <tr>
-                                <td align="left"><img style="margin-bottom: 20px;" src="'.site_url( 'static/media/settings/' . $this->settings->logo).'" alt="'.$this->settings->orgn_name_en.'" width="200"></td>
+                                <td align="left"><img style="margin-bottom: 20px;" src="'. $logo_path .'" alt="'.$this->settings->orgn_name_en.'" width="200"></td>
                                 <td align="right"><h2>'.$schedule_table_title[$lang].'</h2></td>
                             </tr>
                         </table>
