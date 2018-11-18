@@ -63,13 +63,13 @@ $mode = $mode ?? 'list';
 			$cr_txn_total = $single->cr_txn_total ?? 0.00;
 
 			// Grand total cr
-			$grand_total_txn_dr += $dr_txn_total;
-			$grand_total_txn_cr += $cr_txn_total;
+			$grand_total_txn_dr = bcadd($grand_total_txn_dr, $dr_txn_total, 4);
+			$grand_total_txn_cr = bcadd($grand_total_txn_cr, $cr_txn_total, 4);
 
 			// Closing Balance
-			$total_per_dr 	= $ob_dr + $dr_txn_total;
-			$total_per_cr 	= $ob_cr + $cr_txn_total;
-			$cb_balance 	= $total_per_dr - $total_per_cr;
+			$total_per_dr 	= bcadd($ob_dr, $dr_txn_total, 4);
+			$total_per_cr 	= bcadd($ob_cr, $cr_txn_total, 4);
+			$cb_balance 	= bcsub($total_per_dr, $total_per_cr, 4);
 			if($cb_balance > 0.00)
 			{
 				$cb_dr = $cb_balance;
@@ -82,8 +82,8 @@ $mode = $mode ?? 'list';
 			}
 
 			// Grand total CB
-			$grand_total_cb_dr += $cb_dr;
-			$grand_total_cb_cr += $cb_cr;
+			$grand_total_cb_dr = bcadd($grand_total_cb_dr, $cb_dr);
+			$grand_total_cb_cr = bcadd($grand_total_cb_cr, $cb_cr);
 
 
 			/**

@@ -444,6 +444,10 @@ class Ac_voucher_model extends MY_Model
         $party_ids      = $data['party_id']['dr'];
         $amounts        = $data['amount']['dr'];
         $count_dr       = count($accounts);
+        $dr_total       = 0.00;
+        $cr_total       = 0.00;
+
+
 
         $batch_data = [];
         for($i = 0; $i < $count_dr; $i++)
@@ -457,6 +461,7 @@ class Ac_voucher_model extends MY_Model
                 $party_id   = NULL;
             }
 
+            $amount =  $amounts[$i];
             $batch_data[] = [
                 'sno'           => $i+1,
                 'flag_type'     => IQB_AC_FLAG_DEBIT,
@@ -465,6 +470,8 @@ class Ac_voucher_model extends MY_Model
                 'party_id'      => $party_id,
                 'amount'        => $amounts[$i]
             ];
+
+            $dr_total = bcadd($dr_total, $amount, 4);
         }
 
         // ----------------------------------------------------------------
@@ -476,17 +483,42 @@ class Ac_voucher_model extends MY_Model
         $party_types    = $data['party_type']['cr'];
         $party_ids      = $data['party_id']['cr'];
         $amounts        = $data['amount']['cr'];
-        $count_dr       = count($accounts);
-        for($i = 0; $i < $count_dr; $i++)
+        $count_cr       = count($accounts);
+        for($i = 0; $i < $count_cr; $i++)
         {
+            $amount =  $amounts[$i];
             $batch_data[] = [
                 'sno'           => $i+1,
                 'flag_type'     => IQB_AC_FLAG_CREDIT,
                 'account_id'    => $accounts[$i],
                 'party_type'    => $party_types[$i] ? $party_types[$i] : NULL,
                 'party_id'      => $party_ids[$i] ? $party_ids[$i] : NULL,
-                'amount'        => $amounts[$i]
+                'amount'        => $amount
             ];
+
+            $cr_total = bcadd($cr_total, $amount, 4);
+        }
+
+        /**
+         * DR === CR
+         */
+        if($dr_total !== $cr_total)
+        {
+            throw new Exception("Exception [Model: Ac_voucher_model][Method: _build_voucher_details_batch_data()]: Debit Total is NOT EXACT equal to Credit Total.");
+
+            // $diff_total     = bcsub($dr_total, $cr_total, 4);
+            // $abs_diff_total = abs($diff_total);
+
+            // if($diff_total > 0)
+            // {
+            //     // First Credit Row
+            //     $batch_data[$count_dr][$amount] = bcadd($batch_data[$count_dr][$amount], $abs_diff_total);
+            // }
+            // else
+            // {
+            //     // First Debit Row
+            //     $batch_data[0][$amount] = bcadd($batch_data[0][$amount], $abs_diff_total);
+            // }
         }
 
         return $batch_data;
