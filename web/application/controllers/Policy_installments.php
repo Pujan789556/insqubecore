@@ -1856,11 +1856,22 @@ class Policy_installments extends MY_Controller
 		/**
          * Voucher Amount Computation
          */
-        $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
+		$precision 		= 4;
+
+        $gross_premium_amount = bcadd(
+    								(float)$installment_record->amt_basic_premium,
+    								(float)$installment_record->amt_pool_premium,
+    								$precision
+    							);
+
         $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
         $amt_cancellation_fee 		= floatval($installment_record->amt_cancellation_fee);
         $vat_payable_amount 		= floatval($installment_record->amt_vat);
-        $total_refund_amount 		= $gross_premium_amount + $stamp_income_amount + $vat_payable_amount + $amt_cancellation_fee;
+
+        $total_refund_amount = 	ac_bcsum(
+    								[$gross_premium_amount, $stamp_income_amount, $vat_payable_amount, $amt_cancellation_fee],
+    								$precision
+								);
 
 		$credit_note_data = [
 			'customer_id' 		=> $policy_record->customer_id,
