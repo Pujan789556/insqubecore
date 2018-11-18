@@ -1594,6 +1594,7 @@ class Policy_installments extends MY_Controller
 	            'invoice_date'      => date('Y-m-d'),
 	            'voucher_id'   		=> $voucher_id
 	        ];
+	        $precision = 4;
 
 			/**
 	         * Amount Computation
@@ -1606,10 +1607,15 @@ class Policy_installments extends MY_Controller
 				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
 				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
 				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
-					$amount = floatval($installment_record->amt_basic_premium) +
-								floatval($installment_record->amt_pool_premium) +
-								floatval($installment_record->amt_stamp_duty) +
-								floatval($installment_record->amt_vat);
+					$amount = 	ac_bcsum(
+									[
+										floatval($installment_record->amt_basic_premium),
+										floatval($installment_record->amt_pool_premium),
+										floatval($installment_record->amt_stamp_duty),
+										floatval($installment_record->amt_vat)
+									],
+									$precision
+								);
 
 					// Regular Policy Customer ID
 					$customer_id  = $endorsement_record->customer_id;
@@ -1617,10 +1623,15 @@ class Policy_installments extends MY_Controller
 
 
 				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
-					$amount = floatval($installment_record->amt_transfer_fee) +
-								floatval($installment_record->amt_transfer_ncd) +
-								floatval($installment_record->amt_stamp_duty) +
-								floatval($installment_record->amt_vat);
+					$amount = 	ac_bcsum(
+									[
+										floatval($installment_record->amt_transfer_fee),
+										floatval($installment_record->amt_transfer_ncd),
+										floatval($installment_record->amt_stamp_duty),
+										floatval($installment_record->amt_vat)
+									],
+									$precision
+							  	);
 
 					// Customer ID to be Transferred
 					$customer_id  = $endorsement_record->transfer_customer_id;
@@ -1649,23 +1660,31 @@ class Policy_installments extends MY_Controller
 			/**
 	         * Amount Computation
 	         */
-			$amount 	= NULL;
-			$description = '';
-	        $txn_type 	= (int)$installment_record->txn_type;
+			$amount 		= NULL;
+			$description 	= '';
+	        $txn_type 		= (int)$installment_record->txn_type;
+	        $precision 		= 4;
+
 			switch ($txn_type)
 			{
 				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
 				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
 				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
-					$amount = floatval($installment_record->amt_basic_premium) +
-								floatval($installment_record->amt_pool_premium) ;
+					$amount = bcadd(
+								floatval($installment_record->amt_basic_premium),
+								floatval($installment_record->amt_pool_premium),
+								$precision
+							  );
 					$description = "Policy Premium Amount (Policy Code - {$installment_record->policy_code})";
 					break;
 
 
 				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
-					$amount 	= floatval($installment_record->amt_transfer_fee) +
-								floatval($installment_record->amt_transfer_ncd);
+					$amount = 	bcadd(
+									floatval($installment_record->amt_transfer_fee),
+									floatval($installment_record->amt_transfer_ncd),
+									$precision
+								);
 					$description = "Policy Ownership Transfer Amount (Policy Code - {$installment_record->policy_code})";
 					break;
 
