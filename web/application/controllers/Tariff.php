@@ -1852,7 +1852,9 @@ class Tariff extends MY_Controller
                 {
                 	$no_claim_discount_data[] = [
                 		'years'   => $no_claim_discount['years'][$i],
-                		'rate'    => $no_claim_discount['rate'][$i]
+                        'rate'    => $no_claim_discount['rate'][$i],
+                        'label_en'    => $no_claim_discount['label_en'][$i],
+                		'label_np'    => $no_claim_discount['label_np'][$i]
                 	];
                 }
                 $post_data['no_claim_discount'] = json_encode($no_claim_discount_data);

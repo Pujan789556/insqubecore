@@ -723,7 +723,7 @@ class Tariff_motor_model extends MY_Model
                     [
                         'field' => 'no_claim_discount[years][]',
                         'label' => 'Consecutive Years',
-                        'rules' => 'trim|required|integer|max_length[2]',
+                        'rules' => 'trim|required|alpha_numeric|max_length[20]',
                         '_type'     => 'text',
                         '_key'      => 'years',
                         '_show_label' => false,
@@ -737,7 +737,26 @@ class Tariff_motor_model extends MY_Model
                         '_key'      => 'rate',
                         '_show_label' => false,
                         '_required' => true
-                    ]
+                    ],
+                    [
+                        'field' => 'no_claim_discount[label_en][]',
+                        'label' => 'Label(EN)',
+                        'rules' => 'trim|required|max_length[50]',
+                        '_type'     => 'text',
+                        '_key'      => 'label_en',
+                        '_show_label' => false,
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'no_claim_discount[label_np][]',
+                        'label' => 'Label(NP)',
+                        'rules' => 'trim|required|max_length[50]',
+                        '_type'     => 'text',
+                        '_key'      => 'label_np',
+                        '_show_label' => false,
+                        '_required' => true
+                    ],
+
                 ],
 
 

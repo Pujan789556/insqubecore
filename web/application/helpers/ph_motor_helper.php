@@ -58,15 +58,16 @@ if ( ! function_exists('_PO_MOTOR_no_claim_discount_dropdown'))
 	 * @param JSON $no_claim_discount  Tariff Record's "No Claim Discount" JSON
 	 * @return	array
 	 */
-	function _PO_MOTOR_no_claim_discount_dropdown( $no_claim_discount, $flag_blank_select = true, $suffix = ' years' )
+	function _PO_MOTOR_no_claim_discount_dropdown( $no_claim_discount, $lang = 'en', $flag_blank_select = true )
 	{
 		$dropdown = [];
 		$no_claim_discount = $no_claim_discount ? json_decode($no_claim_discount) : NULL;
 		if($no_claim_discount )
 		{
+			$label = "label_{$lang}";
 			foreach ($no_claim_discount as $r)
 			{
-				$dropdown[$r->years] =  $r->years . $suffix;
+				$dropdown[$r->years] =  $r->{$label} ?? $r->years . ' years';
 			}
 		}
 
@@ -252,8 +253,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
         // No Claim Discount - Years & Rate
   		$year_no_claim_discount = $premium_computation_table['no_claim_discount'] ?? 0;
 		$no_claim_discount_rate = _PO_MOTOR_no_claim_discount_rate($year_no_claim_discount, $tariff_record->no_claim_discount);
-
-
+		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np')[$year_no_claim_discount] ?? '';
 
         // Rsik Group
         $tariff_rsik_group = json_decode($tariff_record->riks_group);
@@ -338,9 +338,10 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 				$__premium_A_row_6 = $__premium_A_row_5 * ($no_claim_discount_rate/100.00);
 			}
 			$__CRF_cc_table__A['sections'][] = [
-				'title' 	=> "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ग” को $no_claim_discount_rate %",
+				'title' 	=> "{$text_ncd_prefix} दावी नगरे वापत छूटः “ग” को $no_claim_discount_rate %",
 				'amount' 	=> $__premium_A_row_6
 			];
+
 
 
 			// Sub Total : घ
@@ -553,7 +554,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			$__CRF_cc_table__AA['sections'][] = [
-				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः \"{$tp_label}\" को $no_claim_discount_rate %",
+				'title' => "{$text_ncd_prefix} दावी नगरे वापत छूटः \"{$tp_label}\" को $no_claim_discount_rate %",
 				'amount' => $amount_noClaimDiscount_on_thirdParty
 			];
 		}
@@ -844,6 +845,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
         // No Claim Discount - Years & Rate
         $year_no_claim_discount = $premium_computation_table['no_claim_discount'] ?? 0;
 		$no_claim_discount_rate = _PO_MOTOR_no_claim_discount_rate($year_no_claim_discount, $tariff_record->no_claim_discount);
+		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np')[$year_no_claim_discount] ?? '';
 
         // Rsik Group
         $tariff_rsik_group = json_decode($tariff_record->riks_group);
@@ -996,7 +998,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 				$__premium_A_row_12 = $__premium_A_row_GHA * ($no_claim_discount_rate/100.00);
 			}
 			$__CRF_cc_table__A['sections'][] = [
-				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “घ” को {$no_claim_discount_rate} %",
+				'title' => "{$text_ncd_prefix} दावी नगरे वापत छूटः “घ” को {$no_claim_discount_rate} %",
 				'amount' => $__premium_A_row_12
 			];
 
@@ -1284,7 +1286,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
 		{
 			$__CRF_cc_table__AA['sections'][] = [
-				'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः \"{$tp_label}\" को $no_claim_discount_rate %",
+				'title' => "{$text_ncd_prefix} दावी नगरे वापत छूटः \"{$tp_label}\" को $no_claim_discount_rate %",
 				'amount' => $__premium_AA_row_2
 			];
 		}
@@ -1557,6 +1559,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
         // No Claim Discount - Years & Rate
         $year_no_claim_discount = $premium_computation_table['no_claim_discount'] ?? 0;
 		$no_claim_discount_rate = _PO_MOTOR_no_claim_discount_rate($year_no_claim_discount, $tariff_record->no_claim_discount);
+		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np')[$year_no_claim_discount] ?? '';
 
         // Rsik Group
         $tariff_rsik_group = json_decode($tariff_record->riks_group);
@@ -1767,7 +1770,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
                 $__discount_A_row__no_claim_discount = $__premium_A_row_GA * ($no_claim_discount_rate/100.00);
             }
             $__CRF_cc_table__A['sections'][] = [
-                'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः “ग” को {$no_claim_discount_rate} %",
+                'title' => "{$text_ncd_prefix} दावी नगरे वापत छूटः “ग” को {$no_claim_discount_rate} %",
                 'amount' => $__discount_A_row__no_claim_discount
             ];
 
@@ -2131,7 +2134,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
         if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_COMPREHENSIVE)
         {
             $__CRF_cc_table__AA['sections'][] = [
-                'title' => "{$year_no_claim_discount} वर्षसम्म दावी नगरे वापत छूटः \"{$tp_label}\" को $no_claim_discount_rate %",
+                'title' => "{$text_ncd_prefix} दावी नगरे वापत छूटः \"{$tp_label}\" को $no_claim_discount_rate %",
                 'amount' => $__premium_AA_row_2
             ];
         }
@@ -3120,7 +3123,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
                 [
                     'field' => 'premium[no_claim_discount]',
                     'label' => 'No Claim Discount',
-                    'rules' => 'trim|integer|max_length[5]',
+                    'rules' => 'trim|alpha_numeric|max_length[20]',
                     '_key' 		=> 'no_claim_discount',
                     '_type'     => 'dropdown',
                     '_data' 	=> _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount),
