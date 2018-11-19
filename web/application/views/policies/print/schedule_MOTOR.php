@@ -270,7 +270,9 @@ switch ($record->portfolio_id)
                             </tr>
 
                             <?php
-                            $trailer_price = $object_attributes->trailer_price ?? 0;
+                            $trailer_price      = $object_attributes->trailer_price ?? 0;
+                            $price_accessories  = $object_attributes->price_accessories ?? 0;
+                            $price_vehicle      = $object_attributes->price_vehicle ?? 0;
                             if($trailer_price): ?>
                                 <tr>
                                     <td>ट्रेलरको घोषित मूल्य:</td>
@@ -280,7 +282,11 @@ switch ($record->portfolio_id)
 
                             <tr>
                                 <td><strong>जम्मा घोषित मूल्य:</strong></td>
-                                <td align="right"><strong>रु. <?php echo number_format( (float)$object_attributes->price_vehicle + $object_attributes->price_accessories + $trailer_price, 2 );?></strong></td>
+                                <td align="right"><strong>रु. <?php echo number_format(
+                                                                            (float)$price_vehicle +
+                                                                            (float)$price_accessories +
+                                                                            (float)$trailer_price, 2
+                                                                        );?></strong></td>
                             </tr>
                         </table>
                     </td>
