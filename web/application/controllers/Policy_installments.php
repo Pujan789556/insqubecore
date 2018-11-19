@@ -610,11 +610,10 @@ class Policy_installments extends MY_Controller
 	        /**
 	         * Voucher Amount Computation
 	         */
-	        $precision = 4;
 	        $gross_premium_amount 	= 	bcadd(
 	        								(float)$installment_record->amt_basic_premium,
 	        								(float)$installment_record->amt_pool_premium,
-	        								$precision
+	        								IQB_AC_DECIMAL_PRECISION
         								); // basic + pool premium
 
 	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
@@ -622,13 +621,13 @@ class Policy_installments extends MY_Controller
 
 	        // $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
 	        $beema_samiti_service_charge_amount = 	bcdiv(
-	        											bcmul($gross_premium_amount, $pfs_record->bs_service_charge, $precision),
+	        											bcmul($gross_premium_amount, $pfs_record->bs_service_charge, IQB_AC_DECIMAL_PRECISION),
 	        											100,
-        												$precision
+        												IQB_AC_DECIMAL_PRECISION
         											); // gross premium X bs_service_charge / 100
 
 	        // $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
-	        $total_to_receive_from_insured_party_amount = ac_bcsum([$gross_premium_amount, $stamp_income_amount, $vat_payable_amount], $precision);
+	        $total_to_receive_from_insured_party_amount = ac_bcsum([$gross_premium_amount, $stamp_income_amount, $vat_payable_amount], IQB_AC_DECIMAL_PRECISION);
 	        $agent_commission_amount 					= $installment_record->amt_agent_commission ?? NULL;
 
 			// --------------------------------------------------------------------
@@ -810,8 +809,8 @@ class Policy_installments extends MY_Controller
 
 	        	// Agent TDS -- TDS Amount, Agent Commission Payable -- Agent Payable Amount
 	        	$this->load->model('ac_duties_and_tax_model');
-	        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount, $precision);
-	        	$agent_commission_payable_amount = bcsub($agent_commission_amount, $agent_tds_amount, $precision);
+	        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount, IQB_AC_DECIMAL_PRECISION);
+	        	$agent_commission_payable_amount = bcsub($agent_commission_amount, $agent_tds_amount, IQB_AC_DECIMAL_PRECISION);
 	        	$cr_rows['amounts'][] = $agent_tds_amount;
 	        	$cr_rows['amounts'][] = $agent_commission_payable_amount;
 	        }
@@ -824,11 +823,11 @@ class Policy_installments extends MY_Controller
 	        $dr_total = $cr_total = 0;
 	        foreach($dr_rows['amounts'] as $amount)
 	        {
-	        	$dr_total = bcadd($dr_total, $amount, $precision);
+	        	$dr_total = bcadd($dr_total, $amount, IQB_AC_DECIMAL_PRECISION);
 	        }
 	        foreach($cr_rows['amounts'] as $amount)
 	        {
-	        	$cr_total = bcadd($cr_total, $amount, $precision);
+	        	$cr_total = bcadd($cr_total, $amount, IQB_AC_DECIMAL_PRECISION);
 	        }
 	        if($dr_total !== $cr_total)
 	        {
@@ -838,12 +837,12 @@ class Policy_installments extends MY_Controller
 	            if($diff_total > 0)
 	            {
 	                // First Credit Row
-	                $cr_rows['amounts'][0] = bcadd($cr_rows['amounts'][0], $abs_diff_total);
+	                $cr_rows['amounts'][0] = bcadd($cr_rows['amounts'][0], $abs_diff_total, IQB_AC_DECIMAL_PRECISION);
 	            }
 	            else
 	            {
 	                // First Debit Row
-	                $dr_rows['amounts'][0] = bcadd($dr_rows['amounts'][0], $abs_diff_total);
+	                $dr_rows['amounts'][0] = bcadd($dr_rows['amounts'][0], $abs_diff_total, IQB_AC_DECIMAL_PRECISION);
 	            }
 	        }
 
@@ -1594,7 +1593,6 @@ class Policy_installments extends MY_Controller
 	            'invoice_date'      => date('Y-m-d'),
 	            'voucher_id'   		=> $voucher_id
 	        ];
-	        $precision = 4;
 
 			/**
 	         * Amount Computation
@@ -1614,7 +1612,7 @@ class Policy_installments extends MY_Controller
 										floatval($installment_record->amt_stamp_duty),
 										floatval($installment_record->amt_vat)
 									],
-									$precision
+									IQB_AC_DECIMAL_PRECISION
 								);
 
 					// Regular Policy Customer ID
@@ -1630,7 +1628,7 @@ class Policy_installments extends MY_Controller
 										floatval($installment_record->amt_stamp_duty),
 										floatval($installment_record->amt_vat)
 									],
-									$precision
+									IQB_AC_DECIMAL_PRECISION
 							  	);
 
 					// Customer ID to be Transferred
@@ -1663,7 +1661,6 @@ class Policy_installments extends MY_Controller
 			$amount 		= NULL;
 			$description 	= '';
 	        $txn_type 		= (int)$installment_record->txn_type;
-	        $precision 		= 4;
 
 			switch ($txn_type)
 			{
@@ -1673,7 +1670,7 @@ class Policy_installments extends MY_Controller
 					$amount = bcadd(
 								floatval($installment_record->amt_basic_premium),
 								floatval($installment_record->amt_pool_premium),
-								$precision
+								IQB_AC_DECIMAL_PRECISION
 							  );
 					$description = "Policy Premium Amount (Policy Code - {$installment_record->policy_code})";
 					break;
@@ -1683,7 +1680,7 @@ class Policy_installments extends MY_Controller
 					$amount = 	bcadd(
 									floatval($installment_record->amt_transfer_fee),
 									floatval($installment_record->amt_transfer_ncd),
-									$precision
+									IQB_AC_DECIMAL_PRECISION
 								);
 					$description = "Policy Ownership Transfer Amount (Policy Code - {$installment_record->policy_code})";
 					break;
@@ -1856,12 +1853,10 @@ class Policy_installments extends MY_Controller
 		/**
          * Voucher Amount Computation
          */
-		$precision 		= 4;
-
         $gross_premium_amount = bcadd(
     								(float)$installment_record->amt_basic_premium,
     								(float)$installment_record->amt_pool_premium,
-    								$precision
+    								IQB_AC_DECIMAL_PRECISION
     							);
 
         $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
@@ -1870,7 +1865,7 @@ class Policy_installments extends MY_Controller
 
         $total_refund_amount = 	ac_bcsum(
     								[$gross_premium_amount, $stamp_income_amount, $vat_payable_amount, $amt_cancellation_fee],
-    								$precision
+    								IQB_AC_DECIMAL_PRECISION
 								);
 
 		$credit_note_data = [

@@ -586,6 +586,12 @@ defined('IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED')  	OR define('IQB_CLAIM_FLAG_SRV_V
 defined('IQB_CLAIM_FLAG_SRV_VOUCHER_VOUCHERED')  	OR define('IQB_CLAIM_FLAG_SRV_VOUCHER_VOUCHERED', 		2);
 
 
+/*
+|--------------------------------------------------------------------------
+| ACCOUNT DECIMAL PRECISION CONSTANT
+|--------------------------------------------------------------------------
+*/
+defined('IQB_AC_DECIMAL_PRECISION')  OR define('IQB_AC_DECIMAL_PRECISION',	4);
 
 
 
