@@ -35,6 +35,7 @@ $mode = $mode ?? 'list';
 	<tbody id="search-result-voucher" class="ledger-data">
 
 		<?php
+		$precision = 4;
 
 		// Grand Total - Opening Balance
 		$grand_total_ob_dr = 0.00;
@@ -55,21 +56,21 @@ $mode = $mode ?? 'list';
 			$ob_cr = $single->ob_cr ?? 0.00;
 
 			// Grand total dr
-			$grand_total_ob_dr += $ob_dr;
-			$grand_total_ob_cr += $ob_cr;
+			$grand_total_ob_dr = bcadd($grand_total_ob_dr, $ob_dr, $precision);
+			$grand_total_ob_cr = bcadd($grand_total_ob_cr, $ob_cr, $precision);
 
 			// TXN
 			$dr_txn_total = $single->dr_txn_total ?? 0.00;
 			$cr_txn_total = $single->cr_txn_total ?? 0.00;
 
 			// Grand total cr
-			$grand_total_txn_dr = bcadd($grand_total_txn_dr, $dr_txn_total, 4);
-			$grand_total_txn_cr = bcadd($grand_total_txn_cr, $cr_txn_total, 4);
+			$grand_total_txn_dr = bcadd($grand_total_txn_dr, $dr_txn_total, $precision);
+			$grand_total_txn_cr = bcadd($grand_total_txn_cr, $cr_txn_total, $precision);
 
 			// Closing Balance
-			$total_per_dr 	= bcadd($ob_dr, $dr_txn_total, 4);
-			$total_per_cr 	= bcadd($ob_cr, $cr_txn_total, 4);
-			$cb_balance 	= bcsub($total_per_dr, $total_per_cr, 4);
+			$total_per_dr 	= bcadd($ob_dr, $dr_txn_total, $precision);
+			$total_per_cr 	= bcadd($ob_cr, $cr_txn_total, $precision);
+			$cb_balance 	= bcsub($total_per_dr, $total_per_cr, $precision);
 			if($cb_balance > 0.00)
 			{
 				$cb_dr = $cb_balance;
@@ -82,8 +83,8 @@ $mode = $mode ?? 'list';
 			}
 
 			// Grand total CB
-			$grand_total_cb_dr = bcadd($grand_total_cb_dr, $cb_dr);
-			$grand_total_cb_cr = bcadd($grand_total_cb_cr, $cb_cr);
+			$grand_total_cb_dr = bcadd($grand_total_cb_dr, $cb_dr, $precision);
+			$grand_total_cb_cr = bcadd($grand_total_cb_cr, $cb_cr, $precision);
 
 
 			/**
