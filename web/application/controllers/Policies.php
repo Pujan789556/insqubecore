@@ -1335,7 +1335,7 @@ class Policies extends MY_Controller
 	    	/**
 	    	 * Case III: Start Date < End Date
 	    	 */
-	    	if( $start_timestamp >= $end_timestamp )
+	    	if( $start_timestamp > $end_timestamp )
 	    	{
 	    		$this->form_validation->set_message('_cb_valid_policy_duration', '"Start Date & Time" must not exceed "End Date & Time"');
 	            return FALSE;

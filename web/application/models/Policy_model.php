@@ -812,6 +812,11 @@ class Policy_model extends MY_Model
             unset($data['start_datetime']);
             unset($data['end_datetime']);
 
+
+            // process backdate
+            $data = $this->_backdate($data);
+
+
             return $data;
         }
 
@@ -1248,10 +1253,6 @@ class Policy_model extends MY_Model
                  * to Active
                  */
                 case IQB_POLICY_STATUS_ACTIVE:
-                    /**
-                     * Process Back-date
-                     */
-                    $base_data  = $this->_backdate($record, $base_data);
                     $done       = $this->_to_status($record->id, $base_data);
 
 
@@ -1315,14 +1316,31 @@ class Policy_model extends MY_Model
          *      1. The user is allowed to enter Backdate
          *      2. If so, the supplied date should be withing backdate limit
          *
-         * @param object    $record Policy Record
          * @param array     $data
          * @return array
          */
-        public function _backdate($record, $data)
+        private function _backdate($data)
         {
-            $data['start_date']     = backdate_process($record->start_date);
-            $data['issued_date']    = backdate_process($record->issued_date);
+            $old_issued_date = $data['issued_date'];
+            $old_start_date  = $data['start_date'];
+            $old_end_date    = $data['end_date'];
+
+            $new_issued_date    = backdate_process($old_issued_date);
+            $new_start_date     = backdate_process($old_start_date);
+
+            /**
+             * If backdate is not allowed, we have to recompute the end date as per new start date
+             */
+            if( strtotime($old_start_date) != strtotime($new_start_date))
+            {
+                $days               = date_difference($old_start_date, $new_start_date, 'd');
+                $new_end_date       = date('Y-m-d', strtotime($old_end_date. " + {$days} days"));
+                $data['end_date']   = $new_end_date;
+            }
+
+            // Start and Issued Date
+            $data['issued_date']    = $new_issued_date;
+            $data['start_date']     = $new_start_date;
 
             return $data;
         }
