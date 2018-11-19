@@ -1071,7 +1071,7 @@ class Policy_installments extends MY_Controller
 
 	        	// Agent TDS -- TDS Amount, Agent Commission Payable -- Agent Payable Amount
 	        	$this->load->model('ac_duties_and_tax_model');
-	        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount);
+	        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount, IQB_AC_DECIMAL_PRECISION);
 	        	$agent_commission_payable_amount = $agent_commission_amount - $agent_tds_amount;
 	        	$dr_rows['amounts'][] = abs($agent_tds_amount);
 	        	$dr_rows['amounts'][] = abs($agent_commission_payable_amount);

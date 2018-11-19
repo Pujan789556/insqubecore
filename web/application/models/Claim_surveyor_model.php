@@ -159,11 +159,11 @@ class Claim_surveyor_model extends MY_Model
                 $tds_amount = NULL;
                 if($single->flag_vat_registered == IQB_FLAG_ON)
                 {
-                    $vat_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $data['surveyor_fee'][$index]);
-                    $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVR, $data['surveyor_fee'][$index]);
+                    $vat_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $data['surveyor_fee'][$index], IQB_AC_DECIMAL_PRECISION);
+                    $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVR, $data['surveyor_fee'][$index], IQB_AC_DECIMAL_PRECISION);
                 }
                 else{
-                    $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVNR, $data['surveyor_fee'][$index]);
+                    $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVNR, $data['surveyor_fee'][$index], IQB_AC_DECIMAL_PRECISION);
                 }
                 $to_edit_data["{$single->id}"]['vat_amount'] = $vat_amount;
                 $to_edit_data["{$single->id}"]['tds_amount'] = $tds_amount;
@@ -183,11 +183,11 @@ class Claim_surveyor_model extends MY_Model
             $tds_amount = NULL;
             if($surveyor->flag_vat_registered == IQB_FLAG_ON)
             {
-                $vat_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $data['surveyor_fee'][$index]);
-                $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVR, $data['surveyor_fee'][$index]);
+                $vat_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $data['surveyor_fee'][$index], IQB_AC_DECIMAL_PRECISION);
+                $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVR, $data['surveyor_fee'][$index], IQB_AC_DECIMAL_PRECISION);
             }
             else{
-                $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVNR, $data['surveyor_fee'][$index]);
+                $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVNR, $data['surveyor_fee'][$index], IQB_AC_DECIMAL_PRECISION);
             }
 
             $batch_data[] = [
