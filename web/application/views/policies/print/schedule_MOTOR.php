@@ -193,7 +193,7 @@ switch ($record->portfolio_id)
                             </tr>
                             <tr>
                                 <td>दर्ता नं.:</td>
-                                <td><?php echo $object_attributes->reg_no_prefix . ' ' . $object_attributes->reg_no;?></td>
+                                <td><?php echo implode(' ', array_unique([$object_attributes->reg_no_prefix, $object_attributes->reg_no]) );?></td>
                             </tr>
                             <tr>
                                 <td>बनाउने कम्पनी:</td>
