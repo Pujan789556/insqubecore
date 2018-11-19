@@ -1144,9 +1144,10 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 				'title_en' 	=> 'Insured Party & Passenger Accident Insurance'
 			];
 
-			$premium_EE_total =  ($object_attributes->seating_capacity - 1) * $accident_premium->pramt_accident_per_passenger;
+			$passenger_count = $object_attributes->seating_capacity - 1;
+			$premium_EE_total =  $passenger_count * $accident_premium->pramt_accident_per_passenger;
 			$__CRF_cc_table__EE['sections'][] = [
-				'title' => "प्रति व्यक्ति बीमांक रु. {$insured_value_tariff->passenger} को लागी बीमाशुल्क प्रति सिट रु. {$accident_premium->pramt_accident_per_passenger} का दरले",
+				'title' => "प्रति व्यक्ति बीमांक रु. {$insured_value_tariff->passenger} को लागी बीमाशुल्क प्रति सिट रु. {$accident_premium->pramt_accident_per_passenger} का दरले ({$passenger_count} जना)",
 				'amount' => $premium_EE_total
 			];
 
@@ -1965,7 +1966,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 
             $premium_EE_total =  $accident_premium->pramt_accident_per_staff * $staff_count;
             $__CRF_cc_table__EE['sections'][] = [
-                'title' => "प्रति ब्यक्ति (बीमांक रु. {$insured_value_tariff->staff}  को लागि प्रति ब्यक्ति रु. {$accident_premium->pramt_accident_per_staff} का दरले)",
+                'title' => "प्रति ब्यक्ति (बीमांक रु. {$insured_value_tariff->staff}  को लागि प्रति ब्यक्ति रु. {$accident_premium->pramt_accident_per_staff} का दरले) ({$staff_count} जना)",
                 'amount' => $premium_EE_total
             ];
 
@@ -1990,7 +1991,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 
             $premium_U_total   =  $accident_premium->pramt_accident_per_passenger * $passenger_count;
             $__CRF_cc_table__U['sections'][] = [
-                'title' => "प्रति ब्यक्ति (बीमांक रु. {$insured_value_tariff->staff}  को लागि प्रति ब्यक्ति रु. {$accident_premium->pramt_accident_per_passenger} का दरले)",
+                'title' => "प्रति ब्यक्ति (बीमांक रु. {$insured_value_tariff->passenger}  को लागि प्रति ब्यक्ति रु. {$accident_premium->pramt_accident_per_passenger} का दरले) ({$passenger_count} जना)",
                 'amount' => $premium_U_total
             ];
 
