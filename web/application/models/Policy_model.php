@@ -1692,7 +1692,7 @@ class Policy_model extends MY_Model
             // Type/Module Table Alias
             'module' => 'CRB'
         ];
-        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_creditor_', FALSE);
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_COMPANY_BRANCH, NULL, $table_aliases, 'addr_creditor_', FALSE);
 
 
         $record = $this->db->where('P.id', $id)
