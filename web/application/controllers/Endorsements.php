@@ -432,11 +432,16 @@ class Endorsements extends MY_Controller
 				 * We have to compute VAT manually
 				 */
 				$this->load->helper('account');
-				$taxable_amount = 	floatval($data['amt_transfer_fee']) +
-									floatval($data['amt_transfer_ncd']) +
-									floatval($data['amt_stamp_duty']);
+				$taxable_amount = 	ac_bcsum(
+										[
+											floatval($data['amt_transfer_fee']),
+											floatval($data['amt_transfer_ncd']),
+											floatval($data['amt_stamp_duty'])
+										],
+										IQB_AC_DECIMAL_PRECISION
+									);
 
-				$amt_vat 		 = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+				$amt_vat 		 = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount, IQB_AC_DECIMAL_PRECISION);
 				$data['amt_vat'] = $amt_vat;
 
 				return $data;
