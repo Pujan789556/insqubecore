@@ -253,7 +253,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
         // No Claim Discount - Years & Rate
   		$year_no_claim_discount = $premium_computation_table['no_claim_discount'] ?? 0;
 		$no_claim_discount_rate = _PO_MOTOR_no_claim_discount_rate($year_no_claim_discount, $tariff_record->no_claim_discount);
-		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np')[$year_no_claim_discount] ?? '';
+		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np', FALSE)[$year_no_claim_discount] ?? '';
 
         // Rsik Group
         $tariff_rsik_group = json_decode($tariff_record->riks_group);
@@ -845,7 +845,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
         // No Claim Discount - Years & Rate
         $year_no_claim_discount = $premium_computation_table['no_claim_discount'] ?? 0;
 		$no_claim_discount_rate = _PO_MOTOR_no_claim_discount_rate($year_no_claim_discount, $tariff_record->no_claim_discount);
-		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np')[$year_no_claim_discount] ?? '';
+		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np', FALSE)[$year_no_claim_discount] ?? '';
 
         // Rsik Group
         $tariff_rsik_group = json_decode($tariff_record->riks_group);
@@ -1560,7 +1560,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
         // No Claim Discount - Years & Rate
         $year_no_claim_discount = $premium_computation_table['no_claim_discount'] ?? 0;
 		$no_claim_discount_rate = _PO_MOTOR_no_claim_discount_rate($year_no_claim_discount, $tariff_record->no_claim_discount);
-		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np')[$year_no_claim_discount] ?? '';
+		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np', FALSE)[$year_no_claim_discount] ?? '';
 
         // Rsik Group
         $tariff_rsik_group = json_decode($tariff_record->riks_group);
