@@ -84,6 +84,9 @@ if ( ! function_exists('_OBJ_ENG_EEI_validation_rules'))
 	{
 		$CI =& get_instance();
 
+		$default_deductible = "1. Value upto Rs. 100,000.00 - 5% of claim amount subject to minimum of Rs. 5,000.00." . PHP_EOL .
+							  "2. Value above Rs. 100,000.00 - 10% of claim amount subject to minimum of Rs. 10,000.00.";
+
 		$v_rules = [
 			/**
 			 * Basic Data
@@ -103,7 +106,7 @@ if ( ! function_exists('_OBJ_ENG_EEI_validation_rules'))
 			        '_key' => 'deductible',
 			        'label' => 'Deductible / Excess',
 			        'rules' => 'trim|required|max_length[1000]',
-			        '_default' => '__% of claim amount subject to minimum of Rs. ______ on each and every item.',
+			        '_default' => $default_deductible,
 			        'rows' 		=> 5,
 			        '_type'     => 'textarea',
 			        '_required' => true

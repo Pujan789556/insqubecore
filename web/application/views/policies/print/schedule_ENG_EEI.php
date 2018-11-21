@@ -133,7 +133,9 @@ $schedule_table_title   = 'Electronic Equipment Insurance (Schedule)';
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2" class="small"><strong>Excess/Deductible:</strong> <?php echo nl2br(htmlspecialchars($object_attributes->deductible)); ?></td>
+                    <td colspan="2" class="small">
+                        <strong>Excess/Deductible:</strong><br>
+                        <?php echo nl2br(htmlspecialchars($object_attributes->deductible)); ?></td>
                 </tr>
                 <tr>
                     <td colspan="2" class="small"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
