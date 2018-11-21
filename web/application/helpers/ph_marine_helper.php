@@ -138,10 +138,10 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'field' => 'object[packing]',
 			        '_key' => 'packing',
 			        'label' => 'Details of Packing',
-			        'rules' => 'trim|required|max_length[200]',
+			        'rules' => 'trim|max_length[200]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
-			        '_required' => true
+			        '_required' => false
 			    ],
 			    [
 			        'field' => 'object[marks_numbers]',

@@ -126,7 +126,12 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                     <td colspan="2">
                         <strong>Subject matter insured/Interest</strong><br/>
                         <?php echo nl2br( htmlspecialchars($object_attributes->description) ); ?>
-                        <?php echo nl2br( htmlspecialchars($object_attributes->packing) ); ?>
+                        <?php
+                        if($object_attributes->packing)
+                        {
+                            echo '<br>', nl2br( htmlspecialchars($object_attributes->packing) );
+                        }
+                        ?>
                     </td>
                 </tr>
                 <tr>
