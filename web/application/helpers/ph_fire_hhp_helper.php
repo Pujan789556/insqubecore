@@ -931,7 +931,7 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 							$per_risk_base_premium 	-= $direct_discount;
 						}
 						$per_risk_premium 	= $per_risk_base_premium  + $per_risk_pool_premium;
-						$risk_table[] 		= [$pr->name, $per_risk_premium];
+						$risk_table[] 		= [$pr->name_np, $per_risk_premium];
 					}
 
 					$cost_calculation_table = json_encode([

@@ -151,9 +151,18 @@ class Portfolio_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'risks[name][]',
-                    '_key' => 'name',
-                    'label' => 'Risk Name',
+                    'field' => 'risks[name_en][]',
+                    '_key' => 'name_en',
+                    'label' => 'Risk Name (EN)',
+                    'rules' => 'trim|required|max_length[100]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'risks[name_np][]',
+                    '_key' => 'name_np',
+                    'label' => 'Risk Name (NP)',
                     'rules' => 'trim|required|max_length[100]',
                     '_type'     => 'text',
                     '_show_label' => false,
@@ -501,13 +510,14 @@ class Portfolio_model extends MY_Model
      * @param integer $id
      * @return array
      */
-    public function dropdown_risks($id)
+    public function dropdown_risks($id, $lang = 'en')
     {
         $dropdown   = [];
         $risks      = $this->portfolio_risks($id);
+        $name_col = $lang == 'en' ? 'name_en' : 'name_np';
         foreach($risks as $row)
         {
-            $dropdown[$row->code] = $row->name . ' - ' . risk_type_dropdown(FALSE)[$row->type];
+            $dropdown[$row->code] = $row->{$name_col} . ' - ' . risk_type_dropdown(FALSE)[$row->type];
         }
         return $dropdown;
     }

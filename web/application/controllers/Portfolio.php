@@ -423,13 +423,13 @@ class Portfolio extends MY_Controller
 		 */
 		private function _format_risk_json ($post_data)
 		{
-			$risk_keys = ['code', 'name', 'type', 'default_min_premium'];
+			$risk_keys = ['code', 'name_en', 'name_np', 'type', 'default_min_premium'];
 			$risks = $post_data['risks'];
 
 			$json_data = [
 				'default_premium_computation' => $risks['default_premium_computation']
 			];
-			for($i = 0; $i < count($risks['name']); $i++ )
+			for($i = 0; $i < count($risks['code']); $i++ )
 			{
 				$single_object = [];
 				foreach($risk_keys as $key)

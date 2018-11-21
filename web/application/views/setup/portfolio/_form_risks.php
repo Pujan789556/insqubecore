@@ -50,7 +50,8 @@ $risks          = $risks_config->risks ?? [];
                 <thead>
                     <tr>
                         <th>Risk Code <?php echo field_compulsary_text( TRUE )?></th>
-                        <th>Risk Name <?php echo field_compulsary_text( TRUE )?></th>
+                        <th>Risk Name (EN) <?php echo field_compulsary_text( TRUE )?></th>
+                        <th>Risk Name (NP) <?php echo field_compulsary_text( TRUE )?></th>
                         <th>Risk Type <?php echo field_compulsary_text( TRUE )?></th>
                         <th>Default Minimum Premium (Rs.) <?php echo field_compulsary_text( TRUE )?></th>
                         <th>Action</th>

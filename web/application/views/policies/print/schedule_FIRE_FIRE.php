@@ -182,5 +182,121 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
          */
         $this->load->view('policies/print/_schedule_footer', ['lang' => 'np']);
         ?>
+
+        <?php
+        /**
+         * Details Premium Distribution
+         */
+        $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_decode($endorsement_record->cost_calculation_table) : NULL;
+        $detail_premium_table = NULL;
+        if($cost_calculation_table)
+        {
+            $summary_table          = $cost_calculation_table->summary_table;
+            $detail_premium_table   = $cost_calculation_table->detail_premium_table ?? NULL;
+        }
+
+        $premium_computation_table  = json_decode($endorsement_record->premium_computation_table ?? '[]', TRUE);
+        $portfolio_risks            = portfolio_risks($record->portfolio_id);
+        $items                      = $object_attributes->items ?? [];
+
+        $risk_dropdown = [];
+        foreach($portfolio_risks as $pr)
+        {
+            $risk_dropdown[$pr->code] = $pr->name_en;
+        }
+
+        $manual_rate_table = $premium_computation_table['manual']['rate'] ?? [];
+
+        if($manual_rate_table && $object_attributes->item_attached == IQB_FLAG_NO):
+            $risk_reference = [];
+        ?>
+            <pagebreak>
+            <h3>Schedule attaching to and forming part of the Policy No: <?php echo $record->code; ?></h3>
+            <table class="table" style="font-size: 8pt">
+                <thead>
+                    <tr>
+                        <td align="left">SNO</td>
+                        <td align="left">Property</td>
+                        <td align="left">Description</td>
+                        <td align="right">Sum Insured</td>
+                        <td align="right">Risk</td>
+                        <td align="right">Rate</td>
+                        <td align="right">Premium</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $item_index = 0;
+                    foreach($items as $item):
+                        /**
+                         * Risk Premium Table
+                         */
+                        $premium_table = [];
+                        foreach( $manual_rate_table as $risk_code => $rates )
+                        {
+                            $rate = $rates[$item_index];
+                            if($rate)
+                            {
+                                $premium_table[] = (object)[
+                                    'risk'      => $risk_code,
+                                    'rate'      => $rate,
+                                    'premium'   => $item->sum_insured * $rate / 1000.00
+                                ];
+                                $risk_reference[$risk_code] = $risk_dropdown[$risk_code];
+                            }
+                        }
+
+                        $risk_count = count($premium_table);
+                        if($risk_count > 1)
+                        {
+                            $rowspan = $risk_count + 1;
+                            $rowspan = 'rowspan="'.$rowspan.'"';
+                        }
+                        else
+                        {
+                            $rowspan = '';
+                        }
+                        ?>
+                        <tr>
+                            <td <?php echo $rowspan ?>><?php echo $i++ ?></td>
+                            <td <?php echo $rowspan ?>><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item->category ] ?></td>
+                            <td <?php echo $rowspan ?>><?php echo nl2br(htmlspecialchars($item->description)) ?></td>
+                            <td <?php echo $rowspan ?> align="right"><?php echo number_format($item->sum_insured, 2) ?></td>
+
+                            <?php if($rowspan): ?>
+                                </tr>
+                                <?php foreach($premium_table as $pt):?>
+                                        <tr>
+                                            <td align="right"><?php echo $pt->risk ?></td>
+                                            <td align="right"><?php echo number_format($pt->rate, 4) ?></td>
+                                            <td align="right"><?php echo number_format($pt->premium, 2) ?></td>
+                                        </tr>
+                                    <?php
+                                endforeach ?>
+                            <?php else:
+                                    $pt = $premium_table[0];
+                                    ?>
+                                    <td align="right"><?php echo $pt->risk ?></td>
+                                    <td align="right"><?php echo number_format($pt->rate, 4) ?></td>
+                                    <td align="right"><?php echo number_format($pt->premium, 2) ?></td>
+                                </tr>
+                            <?php endif ?>
+                    <?php
+                        // Next item index
+                        $item_index++;
+                    endforeach ?>
+
+                </tbody>
+            </table>
+            <h4>KEYS</h4>
+            <table class="no-border">
+                <?php foreach($risk_reference as $key=>$label): ?>
+                    <tr>
+                        <td><?php echo $key ?></td>
+                        <td><?php echo $label ?></td>
+                    </tr>
+                <?php endforeach ?>
+            </table>
+        <?php endif; ?>
     </body>
 </html>

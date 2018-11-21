@@ -31,7 +31,7 @@ if($cost_calculation_table)
                                <?php foreach($risk_table as $dt): ?>
                                     <tr>
                                         <td><?php echo $dt[0] ?></td>
-                                        <td class="text-right"><?php echo number_format((float)$dt[1], 3);?></td>
+                                        <td class="text-right"><?php //echo number_format((float)$dt[1], 3);?></td>
                                         <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
                                     </tr>
                                 <?php endforeach ?>

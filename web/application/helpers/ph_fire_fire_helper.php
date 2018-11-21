@@ -1330,8 +1330,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 						{
 							$premium_per_risk 	= $tmp_data['premium'];
 							$risk_config 		= $tmp_data['risk_config'];
-
-							$risk_name = $risk_config->name . ' - ' . risk_type_dropdown(FALSE)[$risk_config->type] ;
+							$risk_name = $risk_config->name_np;
 							if( _ENDORSEMENT_is_first( $endorsement_record->txn_type) && $premium_per_risk < $risk_config->default_min_premium )
 							{
 								$premium_per_risk = $risk_config->default_min_premium;
@@ -1595,7 +1594,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
 
 
-					/**
+					/*
 					 * Premium Computation Table
 					 * -------------------------
 					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
