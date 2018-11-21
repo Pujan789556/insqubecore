@@ -620,7 +620,7 @@ if ( ! function_exists('_TXN_MARINE_premium_validation_rules'))
 	                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
 	                '_type'     => 'text',
 	                '_key' 		=> 'container_discount',
-	                '_default' 	=> '10',
+	                '_default' 	=> '0.00',
 	                '_required' => false
 	            ],
 	            [
@@ -653,7 +653,7 @@ if ( ! function_exists('_TXN_MARINE_premium_validation_rules'))
 	                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
 	                '_type'     => 'text',
 	                '_key' 		=> 'large_sum_insured_discount',
-	                '_default' 	=> '20',
+	                '_default' 	=> '0.00',
 	                '_required' => false
 	            ]
 			],
