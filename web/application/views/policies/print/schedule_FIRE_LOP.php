@@ -57,7 +57,7 @@ $schedule_table_title   = 'LOSS OF PROFIT(FIRE) SCHEDULE';
                         ?>
                     </td>
                     <td>
-                        <strong>Sum Insured/Annual Gross Profit(Rs.):</strong><br>
+                        <strong>Sum Insured on <?php echo $object_attributes->profit_type ?>(Rs.):</strong><br>
                         <?php echo number_format($record->object_amt_sum_insured, 2) ?><br><br>
 
                         <strong>Location of Risk:</strong><br>

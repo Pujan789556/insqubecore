@@ -91,9 +91,19 @@ if ( ! function_exists('_OBJ_FIRE_LOP_validation_rules'))
 				[
 			        'field' => 'object[sum_insured]',
 			        '_key' => 'sum_insured',
-			        'label' => 'Sum Insured/Annual Gross Profit (Rs.)',
+			        'label' => 'Sum Insured (Rs.)',
 			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
 			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[profit_type]',
+			        '_key' => 'profit_type',
+			        'label' => 'Profit Type',
+			        'rules' => 'trim|required|alpha_numeric_spaces|max_length[40]',
+			        '_type'     => 'radio',
+			        '_data' 	=> ['Annual Gross Profit' => 'Annual Gross Profit', 'Semi Annual Gross Profit' => 'Semi Annual Gross Profit'],
+			        '_show_label' => true,
 			        '_required' => true
 			    ],
 			    [
