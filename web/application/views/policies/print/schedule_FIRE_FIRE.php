@@ -95,10 +95,6 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                             </tr>
 
                             <tr>
-                                <td>रक्षावरण गरिएका जोखिमहरु: <?php echo _OBJ_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
-                            </tr>
-
-                            <tr>
                                 <td>
                                     जोखिम बहन गर्न शूरु हुने मिति: <?php echo $record->start_date?><br/>
                                     समय:
@@ -142,6 +138,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                                     <tr>
                                         <td>क्र. स.</td>
                                         <td>सम्पत्ति</td>
+                                        <td>स्वामित्व</td>
                                         <td>विवरण</td>
                                         <td align="right">बीमांक (रु)</td>
                                     </tr>
@@ -156,6 +153,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                                             <tr>
                                                 <td><?php echo ++$i; ?></td>
                                                 <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item_record->category ]?></td>
+                                                <td><?php echo _OBJ_FIRE_FIRE_item_ownership_dropdown( FALSE )[$item_record->ownership] ?? ''; ?></td>
                                                 <td><?php echo nl2br(htmlspecialchars($item_record->description)); ?></td>
                                                 <td align="right"><?php echo number_format($item_record->sum_insured, 2); ?></td>
                                             </tr>
@@ -163,7 +161,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                                         endforeach;
                                     endif;?>
                                     <tr>
-                                        <td colspan="3" align="right">जम्मा बीमांक (रु)</td>
+                                        <td colspan="4" align="right">जम्मा बीमांक (रु)</td>
                                         <td align="right"><?php echo  number_format($record->object_amt_sum_insured, 2);?></td>
                                     </tr>
                                 </tbody>

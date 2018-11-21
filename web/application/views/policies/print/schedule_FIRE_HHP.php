@@ -95,10 +95,6 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                             </tr>
 
                             <tr>
-                                <td>रक्षावरण गरिएका जोखिमहरु: <?php echo _OBJ_policy_package_dropdown($record->portfolio_id)[$record->policy_package]?></td>
-                            </tr>
-
-                            <tr>
                                 <td>
                                     जोखिम बहन गर्न शूरु हुने मिति: <?php echo $record->start_date?><br/>
                                     समय:

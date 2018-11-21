@@ -241,7 +241,7 @@ if ( ! function_exists('_OBJ_FIRE_HHP_validation_rules'))
 			        'field' => 'object[land_building][storey_no][]',
 			        '_key' => 'storey_no',
 			        'label' => 'No. of Stories',
-			        'rules' => 'trim|numeric|max_length[5]',
+			        'rules' => 'trim|max_length[10]',
 			        '_type'     => 'text',
 			        '_show_label' 	=> false,
 			        '_required' => true
