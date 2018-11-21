@@ -157,8 +157,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                                 <td><strong>LC No. &amp; Date</strong></td>
                                 <td>
                                     <?php
-                                    $text = [htmlspecialchars($object_attributes->transit->lc_no), $object_attributes->transit->lc_date];
-                                    echo implode(', ', array_filter($text));
+                                    echo htmlspecialchars( implode(', ', array_unique([$object_attributes->transit->lc_no, $object_attributes->transit->lc_date]) ) );
                                     ?>
                                 </td>
                             </tr>
@@ -167,8 +166,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                                 <td><strong>B/L No./C/N No./AW/B No./R/R No. &amp; Date</strong></td>
                                 <td>
                                     <?php
-                                    $text = [htmlspecialchars($object_attributes->transit->bl_no), $object_attributes->transit->bl_date];
-                                    echo implode(', ', array_filter($text));
+                                    echo htmlspecialchars( implode(', ', array_unique([$object_attributes->transit->bl_no, $object_attributes->transit->bl_date]) ) );
                                     ?>
                                 </td>
                             </tr>
@@ -214,7 +212,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
 
                         <?php if($object_attributes->risk->warranties): ?>
                             <strong>Warranties:</strong><br/>
-                            <?php echo htmlspecialchars($object_attributes->risk->warranties); ?>
+                            <?php echo nl2br(htmlspecialchars($object_attributes->risk->warranties)); ?>
                         <?php endif; ?>
                     </td>
                 </tr>

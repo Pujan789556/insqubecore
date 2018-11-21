@@ -103,6 +103,13 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 		$deductible_excess_dropdown 	= _OBJ_MARINE_deductible_excess_dropdown( FALSE );
 		$invoice_currency_dropdown 		= dropdown_base_currency( FALSE );
 
+		$default_warranties = '';
+		if($portfolio_id == IQB_SUB_PORTFOLIO_MARINE_OPEN_MARINE_ID)
+		{
+			$default_warranties = 'i. Maximum limit per sending per truck NRS. .......' . PHP_EOL .
+								  'ii. Each consignment should be declared from time to time before shipment.';
+		}
+
 		$v_rules = [
 			/**
 			 * Basic Data
@@ -124,6 +131,7 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'rules' => 'trim|required|max_length[200]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
+			        '_default' 	=> 'ON ......... DETAILS OF PACKING LIST AND INVOICE TO BE SUBMITTED TO THE COMPANY.',
 			        '_required' => true
 			    ],
 			    [
@@ -216,15 +224,16 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'label' => 'LC No.',
 			        'rules' => 'trim|max_length[100]',
 			        '_type'     => 'text',
+			        '_default' 	=> 'TO BE INTIMATED',
 			        '_required' => false
 			    ],
 			    [
 			        'field' => 'object[transit][lc_date]',
 			        '_key' => 'lc_date',
 			        'label' => 'LC Date',
-			        'rules' => 'trim|valid_date',
-			        '_extra_attributes' => 'data-provide="datepicker-inline"',
-			        '_type'             => 'date',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'             => 'text',
+			        '_default' 	=> 'TO BE INTIMATED',
 			        '_required' => false
 			    ],
 			    [
@@ -233,15 +242,16 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'label' => 'B/L No./C/N No./AW/B No./R/R No. No.',
 			        'rules' => 'trim|max_length[100]',
 			        '_type'     => 'text',
+			        '_default' 	=> 'TO BE INTIMATED',
 			        '_required' => false
 			    ],
 			    [
 			        'field' => 'object[transit][bl_date]',
 			        '_key' => 'bl_date',
 			        'label' => 'B/L No./C/N No./AW/B No./R/R No. Date',
-			        'rules' => 'trim|valid_date',
-			        '_extra_attributes' => 'data-provide="datepicker-inline"',
-			        '_type'             => 'date',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_default' 	=> 'TO BE INTIMATED',
 			        '_required' => false
 			    ]
 
@@ -324,6 +334,7 @@ if ( ! function_exists('_OBJ_MARINE_validation_rules'))
 			        'rules' => 'trim|max_length[1000]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
+			        '_default' 	=> $default_warranties,
 			        '_required' => false
 			    ],
 			    [
@@ -445,6 +456,7 @@ if ( ! function_exists('_OBJ_MARINE_mode_of_transit_dropdown'))
 	{
 		$dropdown = [
 			'AIR' 		=> 'Air',
+			'AIRROAD' 	=> 'Air/Road',
 			'RAILROAD' 	=> 'Rail/Road',
 			'ROAD'		=> 'Road',
 			'SEA' 		=> 'Sea/Rail/Road',
