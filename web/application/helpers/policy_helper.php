@@ -2603,5 +2603,23 @@ if ( ! function_exists('_POLICY_INSTALLMENT_compute_total_amount'))
 }
 
 // ------------------------------------------------------------------------
+// GENERAL PORTFOLIO HELPERS
+// ------------------------------------------------------------------------
 
+
+if ( ! function_exists('portfolio_risks'))
+{
+    /**
+     * Get the list of Portfolio risks
+     *
+     * @param integer $portfolio_id   Portfolio ID
+     * @return  array
+     */
+    function portfolio_risks( $portfolio_id )
+    {
+        $CI =& get_instance();
+        $CI->load->model('portfolio_model');
+        return $CI->portfolio_model->portfolio_risks($portfolio_id);
+    }
+}
 
