@@ -75,6 +75,43 @@ if ( ! function_exists('_POLICY_duration_formatted'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('_POLICY_duration_days_formatted'))
+{
+    /**
+     * Get Policy Duration Formatted - Days
+     *
+     * Logic: We need to add 1 days on regular date difference
+     *
+     *  Return X Years Y Months Z Days
+     *
+     * @param   date    Start date
+     * @param   date    End Date
+     * @param   str     Language
+     * @return  string
+     */
+    function _POLICY_duration_days_formatted($from, $to, $lang = 'en')
+    {
+        // Add 1 day on end date
+        $end_date = new DateTime($to);
+        $end_date->modify('+1 day');
+        $to = $end_date->format('Y-m-d');
+
+        $days = date_difference($from, $to, 'd');
+
+        if($lang == 'en')
+        {
+            $text =  $days == 1 ? $days . ' day' : $days . ' days';
+        }
+        else
+        {
+            $text = $days . ' दिन';
+        }
+        return $text;
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_POLICY_status_dropdown'))
 {
 	/**

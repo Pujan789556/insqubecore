@@ -136,7 +136,7 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                             <tr>
                                 <td>
                                     बीमा अवधि: <?php echo $record->start_date?> देखि <?php echo $record->end_date?> सम्म
-                                    (<?php echo _POLICY_duration_formatted($record->start_date, $record->end_date, 'np'); ?>)
+                                    (<?php echo _POLICY_duration_days_formatted($record->start_date, $record->end_date, 'np'); ?>)
                                 </td>
                             </tr>
 
