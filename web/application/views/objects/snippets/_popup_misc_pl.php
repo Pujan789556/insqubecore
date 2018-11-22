@@ -82,7 +82,7 @@ else
                             ?>
 
                                 <td <?php echo $key == 'limit' ? 'class="text-right"' : '' ?>>
-                                    <?php echo $key == 'limit' ? number_format($value, 2) : htmlspecialchars($value);?>
+                                    <?php echo htmlspecialchars($value);?>
                                 </td>
                             <?php endforeach ?>
                         </tr>
