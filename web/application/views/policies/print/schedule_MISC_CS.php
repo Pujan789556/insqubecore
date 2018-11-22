@@ -53,7 +53,8 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                                 </td>
                             </tr>
                             <tr>
-                                <td><strong>अधिक:</strong> <?php echo nl2br(htmlspecialchars($object_attributes->excess ?? '')) ?></td>
+                                <td><strong>अधिक:</strong><br>
+                                    <?php echo nl2br(htmlspecialchars($object_attributes->excess ?? '')) ?></td>
                             </tr>
                             <tr>
                                 <td>

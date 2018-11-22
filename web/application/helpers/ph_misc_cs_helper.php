@@ -108,7 +108,8 @@ if ( ! function_exists('_OBJ_MISC_CS_validation_rules'))
 			        'rules' => 'trim|required|max_length[500]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
-			        '_default' 	=> '10 % of claim amount subject to minimum of Rs. 50000 for RSMDST Claims 10% of claim amount subject to minimum of Rs. 25000 for Normal claims',
+			        '_default' 	=> '1. 10 % of claim amount subject to minimum of Rs. 50000 for RSMDST claims.' . PHP_EOL .
+			        				'2. 10% of claim amount subject to minimum of Rs. 25000 for Normal claims.',
 			        '_required' => false
 			    ],
 		    ]
@@ -199,20 +200,6 @@ if ( ! function_exists('_TXN_MISC_CS_premium_validation_rules'))
 			],
 
 			/**
-			 * Pool Premium
-			 */
-			'pool' => [
-				[
-	                'field' => 'premium[pool_rate]',
-	                'label' => 'Pool Premium Rate (Rs per Thousand)',
-	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
-	                '_type'     => 'text',
-	                '_key' 		=> 'pool_rate',
-	                '_required' => true
-	            ]
-			],
-
-			/**
 			 * Common to All Package Type
 			 * ----------------------------
 			 * Sampusti Bibaran and Remarks are common to all type of policy package.
@@ -230,7 +217,7 @@ if ( ! function_exists('_TXN_MISC_CS_premium_validation_rules'))
 		 */
 		if( $for_form_processing )
 		{
-			$rules = array_merge( $validation_rules['basic'], $validation_rules['pool']);
+			$rules = $validation_rules['basic'];
 
 			/**
 			 * Premium Validation Rules
@@ -377,37 +364,55 @@ if ( ! function_exists('__save_premium_MISC_CS'))
 				try{
 
 					/**
+					 * Portfolio Risks Rows
+					 */
+					$portfolio_risks = $CI->portfolio_model->portfolio_risks($policy_record->portfolio_id);
+
+					/**
 					 * NET Sum Insured
 					 */
 					$SI = _OBJ_si_net($old_object, $new_object);
 
 					/**
-					 * Compute Premium From Post Data
-					 * ------------------------------
-					 * 	From the Portfolio Risks - We compute two type of premiums
-					 * 	a. Pool Premium
-					 *  b. Base Premium
+					 * Initialization of Computational Variables
 					 */
-					$pool_rate 	= floatval($post_premium['pool_rate']); 		// Per Thousand Rate
+					$BASE_PREMIUM  	= 0.00; // Gross Premium (Without Pool Premium)
+					$POOL_PREMIUM  	= 0.00; // Pool Premium
+					$risk_table 	= [];
 
 
 					/**
-					 * Compute Base Premium
+					 * -------------------------------------------------------------------------------------
+					 * COMPUTE GROSS & POOL PREMIUM
+					 * -------------------------------------------------------------------------------------
 					 */
-					$base_premium  = 0.00;
-					foreach($portfolio_risks as $risk_id => $risk_name)
+					// Compute Base and Pool Premium
+					foreach($portfolio_risks as $pr)
 					{
-						$rate = $post_data['premium']['rate'][$risk_id];
+						// Rate in Per Thousand
+						$rate = floatval($post_premium['rate'][$pr->code]);
 
-						// Compute only if rate is supplied
 						if($rate)
 						{
-							$base_premium += ($SI * $rate)/1000.00;
+							$premium = $SI * $rate / 1000.00;
+
+							// Assign to Pool or Base based on Risk Type
+							if( $pr->type == IQB_RISK_TYPE_BASIC )
+							{
+								$BASE_PREMIUM += $premium;
+							}
+							else
+							{
+								$POOL_PREMIUM += $premium;
+							}
+
+							$risk_table[] 		= [$pr->name_np, $rate, $premium];
 						}
 					}
 
+
 					// A =  SI X Default Rate
-					$A = $base_premium;
+					$A = $BASE_PREMIUM;
 					$cost_table[] = [
 						'label' => "बिमा शुल्क",
 						'value' => $A
@@ -441,7 +446,6 @@ if ( ! function_exists('__save_premium_MISC_CS'))
 
 
 					// Pool Premium
-					$POOL_PREMIUM = ( $SI * $pool_rate ) / 1000.00;
 					$cost_table[] = [
 						'label' => "हुलदंगा/आतंकवाद/द्वेष्पूर्ण बिमा शुल्क",
 						'value' => $POOL_PREMIUM
@@ -454,52 +458,6 @@ if ( ! function_exists('__save_premium_MISC_CS'))
 						'value' => $NET_BASIC_PREMIUM + $POOL_PREMIUM
 					];
 
-
-					/**
-					 * Premium Computation Table
-					 * -------------------------
-					 * This should hold the variable structure exactly so as to populate on _form_premium_CT.php
-					 */
-					// $premium_computation_table 				= json_encode($post_premium);
-					// $txn_data['premium_computation_table'] 	= $premium_computation_table;
-
-
-					/**
-					 * Cost Calculation Table
-					 *
-					 *  Regular Cost Table and Risk Table
-					 *
-					 * 	Risk Details
-					 * 	-----------------------------------------
-					 * 	| Risk | Rate Rs per Thousand | Premium |
-					 * 	-----------------------------------------
-					 * 	|	   |		 			  | 		|
-					 * 	-----------------------------------------
-					 */
-
-					$risk_table = [];
-					foreach($portfolio_risks as $risk_id => $risk_name)
-					{
-						$per_risk_premium 		= 0.00;
-						$per_risk_base_premium 	= 0.00;
-						$per_risk_pool_premium 	= 0.00;
-
-						$rate 				= $post_data['premium']['rate'][$risk_id];
-
-						// Compute only if rate is supplied
-						if($rate)
-						{
-							$per_risk_premium = ($SI * $rate ) / 1000.00;
-						}
-
-						/**
-						 * Include the risk only with premium
-						 */
-						if( $per_risk_premium )
-						{
-							$risk_table[] 		= [$risk_name, $rate, $per_risk_premium];
-						}
-					}
 					// --------------------------------------------------------------------------------------------
 
 					$cost_calculation_table = [

@@ -35,32 +35,33 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                                         <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
                                     </tr>
                                 <?php endforeach ?>
-
+                           </tbody>
+                       </table>
+                       <br>
+                       <table class="table no-margin table-bordered">
+                           <tbody>
                                 <?php if($cost_table): ?>
                                   <?php foreach($cost_table as $row):?>
                                     <tr>
-                                      <th class="text-left" colspan="2"><?php echo $row->label ?></th>
+                                      <td class="text-left"><?php echo $row->label ?></td>
                                       <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
                                     </tr>
                                   <?php endforeach ?>
                               <?php endif ?>
                            </tbody>
                        </table>
+                       <br>
+                       <?php
+                        /**
+                         * Load Cost Calculation Table
+                         */
+                        $this->load->view('endorsements/snippets/premium/_summary_table',
+                            ['lang' => 'np', 'endorsement_record' => $endorsement_record]
+                        );
+                        ?>
                    </td>
                 </tr>
             <?php endif ?>
-            <tr>
-                <td class="no-padding">
-                    <?php
-                    /**
-                     * Load Cost Calculation Table
-                     */
-                    $this->load->view('endorsements/snippets/premium/_summary_table',
-                        ['lang' => 'np', 'endorsement_record' => $endorsement_record]
-                    );
-                    ?>
-                </td>
-            </tr>
         <?php else:?>
             <tr><td class="text-muted text-center">No Premium Information Found!</td></tr>
         <?php endif?>

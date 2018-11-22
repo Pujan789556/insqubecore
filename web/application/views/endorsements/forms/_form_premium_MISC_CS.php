@@ -86,23 +86,6 @@ $premium_computation_table = $endorsement_record->premium_computation_table ? js
         </div>
     </div>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-            <h4 class="box-title">Pool Premium</h4>
-        </div>
-        <div class="box-body">
-            <?php
-            /**
-             * Load Form Components - Pool Premium
-             */
-            $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements'     => $form_elements['pool'],
-                'form_record'       => (object)$premium_computation_table
-            ]);
-            ?>
-        </div>
-    </div>
-
     <?php
     /**
      * Load TXN Common Elements
