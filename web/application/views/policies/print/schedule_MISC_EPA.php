@@ -147,7 +147,7 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                                      * Load Cost Calculation Table (Schedule Cost Table)
                                      */
                                     $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);
-                                    $schedule_cost_table = $cost_calculation_table->schedule_cost_table;
+                                    $schedule_cost_table    = $cost_calculation_table->schedule_cost_table ?? NULL;
                                     $this->load->view('endorsements/snippets/premium/_calculation_table_inline',[
                                         'lang'                      => 'np',
                                         'cost_calculation_table'    => $schedule_cost_table
