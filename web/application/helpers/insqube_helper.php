@@ -760,13 +760,38 @@ if ( ! function_exists('district_dropdown'))
      *
      *
      * @param bool $flag_blank_select   Whether to append blank select
-     * @return  bool
+     * @return  array
      */
-    function district_dropdown( $flag_blank_select = true)
+    function district_dropdown( $lang="both", $flag_blank_select = true)
     {
         $CI =& get_instance();
         $CI->load->model('district_model');
-        $dropdown  = $CI->district_model->dropdown();
+        $dropdown  = $CI->district_model->dropdown($lang);
+
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('local_body_dropdown_by_district'))
+{
+    /**
+     * Get Districts Dropdown
+     *
+     * @param int   $district_id
+     * @param string $lang
+     * @param bool $flag_blank_select   Whether to append blank select
+     * @return  array
+     */
+    function local_body_dropdown_by_district( $district_id, $lang="both", $flag_blank_select = true)
+    {
+        $CI =& get_instance();
+        $CI->load->model('local_body_model');
+        $dropdown  = $CI->local_body_model->dropdown_by_district($district_id, $lang);
 
         if($flag_blank_select)
         {

@@ -104,6 +104,44 @@ class Local_body_model extends MY_Model
         return $dropdown;
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Dropdown List
+     */
+    public function dropdown_by_district($district_id, $lang="both")
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_name = 'localbody_dst_' . $district_id . '_' . $lang;
+        $dropdown   = $this->get_cache($cache_name);
+        if(!$dropdown)
+        {
+            $list = $this->db->select('LB.id, LB.name_en, LB.name_np')
+                            ->from($this->table_name . ' LB')
+                            ->join('master_districts D', 'D.id = LB.district_id')
+                            ->where('D.id', $district_id)
+                            ->order_by('LB.name_en')
+                            ->get()->result();
+
+            $dropdown = [];
+            if($list)
+            {
+                foreach ($list as $record)
+                {
+                    $column = $record->id;
+                    $label = $lang === "both"
+                        ? $record->name_en . " ({$record->name_np})"
+                        : ($lang === "en" ? $record->name_en : $record->name_np);
+                    $dropdown["{$column}"] = $label;
+                }
+                $this->write_cache($dropdown, $cache_name, CACHE_DURATION_DAY);
+            }
+        }
+        return $dropdown;
+    }
+
 
     // ----------------------------------------------------------------
 
@@ -138,7 +176,8 @@ class Local_body_model extends MY_Model
     {
         // cache name without prefix
         $cache_names = [
-            'localbody_st_*'
+            'localbody_st_*',
+            'localbody_dst_*'
         ];
 
         // cache name without prefix

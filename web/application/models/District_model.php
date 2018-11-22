@@ -74,15 +74,15 @@ class District_model extends MY_Model
     /**
      * Get Dropdown List
      */
-    public function dropdown($type="both")
+    public function dropdown($lang="both")
     {
         $records = $this->get_all();
         $list = [];
         foreach($records as $record)
         {
-            $label = $type === "both"
+            $label = $lang === "both"
                         ? $record->name_en . " ({$record->name_np})"
-                        : ($type === "en" ? $record->name_en : $record->name_np);
+                        : ($lang === "en" ? $record->name_en : $record->name_np);
             $list["{$record->id}"] = $label;
         }
         return $list;

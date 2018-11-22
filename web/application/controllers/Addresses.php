@@ -76,5 +76,22 @@ class Addresses extends MY_Controller
 		exit(0);
 	}
 
+	// --------------------------------------------------------------------
+
+	public function address1_by_district($district_id)
+	{
+		$this->load->model('local_body_model');
+		$dropdown = $this->local_body_model->dropdown_by_district((int)$district_id);
+
+		$list = [];
+		foreach($dropdown as $key=>$label)
+		{
+			$list[] = ['value' => $key, 'label' => $label];
+		}
+
+		echo json_encode($list);
+		exit(0);
+	}
+
 
 }
