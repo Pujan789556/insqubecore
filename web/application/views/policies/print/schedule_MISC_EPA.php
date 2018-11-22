@@ -144,11 +144,23 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                                 <td>
                                     <?php
                                     /**
-                                     * Load Cost Calculation Table
+                                     * Load Cost Calculation Table (Schedule Cost Table)
                                      */
-                                    $this->load->view('endorsements/snippets/premium/_index',
-                                        ['lang' => 'np', 'endorsement_record' => $endorsement_record]
-                                    );
+                                    $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);
+                                    $schedule_cost_table = $cost_calculation_table->schedule_cost_table;
+                                    $this->load->view('endorsements/snippets/premium/_calculation_table_inline',[
+                                        'lang'                      => 'np',
+                                        'cost_calculation_table'    => $schedule_cost_table
+                                    ]);
+                                    echo '<br>';
+
+                                    /**
+                                     * Load Cost Summary
+                                     */
+                                    $this->load->view('endorsements/snippets/premium/_summary_table', [
+                                        'lang'               => 'np',
+                                        'endorsement_record' => $endorsement_record
+                                    ]);
                                     ?>
                                 </td>
                             </tr>
@@ -317,6 +329,5 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                 <td><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)) ?></td>
             </tr>
         </table>
-
     </body>
 </html>
