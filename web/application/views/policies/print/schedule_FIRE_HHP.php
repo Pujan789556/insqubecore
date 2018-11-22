@@ -54,19 +54,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                                     पेशा: <?php echo $record->customer_profession;?>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <strong>बीमाको विषयवस्तु रहेको स्थान, भवन वा सम्पत्तिको विवरण</strong><br/>
-                                    <?php
 
-                                    $object = (object)[
-                                        'attributes' => $record->object_attributes
-                                    ];
-
-                                    $this->load->view('objects/snippets/_schedule_snippet_fire', ['record' => $object ]);
-                                     ?>
-                                </td>
-                            </tr>
                             <tr>
                                 <td>
                                     रसिद नं.: <br/>
@@ -128,41 +116,111 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                         </table>
                     </td>
                 </tr>
-
                 <tr>
                     <td colspan="2">
-                        <strong>बीमालेखले रक्षावरण गरेको सम्पत्तिको विवरण</strong>
+                        <strong>बीमालेखले रक्षावरण गरेको सम्पत्तिको विवरण</strong><br/>
                         <table>
                             <thead>
                                 <tr>
                                     <td>क्र. स.</td>
-                                    <td>सम्पत्ति</td>
                                     <td>विवरण</td>
                                     <td align="right">बीमांक (रु)</td>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php
-                                $items      = $object_attributes->items ?? NULL;
-                                $item_count = count( $items );
-                                $i = 1;
-                                foreach($items as $item_record):?>
-                                    <tr>
-                                        <td><?php echo $i++; ?>.</td>
-                                        <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item_record->category ]?></td>
-                                        <td><?php echo nl2br(htmlspecialchars($item_record->description)) ?></td>
-                                        <td align="right"><?php echo number_format((float)$item_record->sum_insured, 2); ?></td>
-                                    </tr>
-                                <?php endforeach?>
                                 <tr>
-                                    <td colspan="3" align="right">जम्मा बीमांक (रु)</td>
-                                    <td align="right"><?php echo number_format((float)$record->object_amt_sum_insured, 2);?></td>
+                                    <td>खण्ड १</td>
+                                    <td>
+                                        <?php
+                                        $building = $object_attributes->building;
+
+                                        /**
+                                         * Building Details
+                                         * ------------------
+                                         *  Address:
+                                         *  house no - x, tole, vdc ward no - x, district
+                                         *
+                                         *  Kitta No: xx, Storey No: yy
+                                         */
+
+                                        $bld_data = [];
+                                        if($building->house_no)
+                                            $bld_data[] = 'घर नं ' . $building->house_no;
+
+                                        if($building->tole)
+                                            $bld_data[] = $building->tole;
+
+                                        $vdc_text = local_body_dropdown_by_district($building->district, 'np', FALSE)[$building->vdc] ?? '';
+                                        if($vdc_text)
+                                            $bld_data[] = $vdc_text . ' - ' . $building->ward_no;
+
+                                        $district_text = district_dropdown('np', FALSE)[$building->district] ?? '';
+                                        if($district_text)
+                                            $bld_data[] = $district_text;
+
+                                        echo "<strong>भवन स्थान</strong><br/>", implode(', ', $bld_data), '<br/>';
+
+                                        $bld_data_other = [];
+                                        if($building->plot_no)
+                                            $bld_data_other[] = 'कित्ता नं: ' . $building->plot_no;
+
+                                        if($building->storey_no)
+                                            $bld_data_other[] = 'तल्ला ' . $building->storey_no;
+
+                                        echo implode(', ', $bld_data_other);
+                                         ?>
+                                    </td>
+                                    <td align="right"><?php echo number_format($building->sum_insured, 2); ?></td>
+                                </tr>
+
+                                <tr>
+                                    <td>खण्ड २</td>
+                                    <td>
+                                        <strong>मालसामान</strong><br>
+                                        <?php
+                                        /**
+                                         * SUM Insured of Goods must be Mentioned in order to have goods information.
+                                         */
+                                        $goods = $object_attributes->goods;
+                                        if($goods->sum_insured)
+                                        {
+                                            echo nl2br(htmlspecialchars($goods->description));
+
+                                            $attached_text = "<br/>संलग्न सूची बमोजिम: ";
+                                            if($object_attributes->document)
+                                            {
+                                                $attached_text .= "छ ।";
+                                            }
+                                            else
+                                            {
+                                                $attached_text .= "छैन ।";
+                                            }
+                                            echo $attached_text;
+                                        }
+                                        ?>
+                                    </td>
+                                    <td align="right">
+                                        <?php  echo number_format($goods->sum_insured, 2);?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>खण्ड ३</td>
+                                    <td>टेलिभिजन दुर्घटनाबाट फुटेमा : अधिकतम क्षतिपूर्ति रकम रु. १५,०००।००</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>खण्ड ४</td>
+                                    <td>व्यक्तिगत दुर्घटना बीमा  : अधिकतम क्षतिपूर्ति रकम रु. १००,०००।०० </td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" align="right"><strong>खण्ड १ र २ को जम्मा (रु)</strong></td>
+                                    <td align="right"><strong><?php echo number_format($record->object_amt_sum_insured, 2) ?></strong></td>
                                 </tr>
                             </tbody>
                         </table>
                     </td>
                 </tr>
-
                 <tr>
                     <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>

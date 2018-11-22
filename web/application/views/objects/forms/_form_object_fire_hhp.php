@@ -3,21 +3,37 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Form : Object - Fire - Householder
  */
-$item_form_elements     = $form_elements['items'];
-$old_document           = $record->document ?? NULL;
+$old_document   = $record->document ?? NULL;
+$district_id    = $record->building->district ?? NULL;
+$vdc_id         = $record->building->vdc ?? NULL;
 ?>
 <div class="row">
     <div class="col-md-6">
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
-                <h4 class="box-title">Basic Information</h4>
+                <h4 class="box-title">Building Details</h4>
             </div>
             <div class="box-body form-horizontal">
                 <?php
-                $section_elements = $form_elements['basic'];
+                $section_elements = $form_elements['building'];
                 $this->load->view('templates/_common/_form_components_horz', [
                     'form_elements' => $section_elements,
-                    'form_record'   => $record
+                    'form_record'   => $record->building ?? NULL
+                ]);?>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">Goods Details</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <?php
+                $section_elements = $form_elements['goods'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $section_elements,
+                    'form_record'   => $record->goods ?? NULL
                 ]);
                 if($old_document):
                 ?>
@@ -33,188 +49,81 @@ $old_document           = $record->document ?? NULL;
             </div>
         </div>
     </div>
-
-    <div class="col-md-8">
-        <div class="box box-solid box-bordered">
-            <div class="box-header with-border">
-                <h4 class="box-title">Item Details</h4>
-            </div>
-            <table class="table table-bordered table-condensed no-margin">
-                <thead>
-                    <tr>
-                        <?php foreach($item_form_elements as $elem): ?>
-                            <th>
-                                <?php echo $elem['label'] . field_compulsary_text($elem['_required']) ?>
-                            </th>
-                        <?php endforeach; ?>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <?php
-                $items                  = $record->items ?? NULL;
-                $item_count             = count( $items ?? [] );
-                ?>
-                <tbody class="form-inline">
-                    <?php
-                        if($item_count):
-                            $i = 0;
-                            foreach($items as $item_record):?>
-                            <tr <?php echo $i++ == 0 ? 'id="__fire_items_row"' : '' ?>>
-                                <?php foreach($item_form_elements as $single_element):?>
-                                    <td>
-                                        <?php
-                                        /**
-                                         * Load Single Element
-                                         */
-                                        $single_element['_default']    = $item_record->{$single_element['_key']} ?? '';
-                                        $single_element['_value']      = $single_element['_default'];
-                                        $this->load->view('templates/_common/_form_components_inline', [
-                                            'form_elements' => [$single_element],
-                                            'form_record'   => NULL
-                                        ]);
-                                        ?>
-                                    </td>
-                                <?php
-                                endforeach;
-                                if($i == 0):?>
-                                    <td>&nbsp;</td>
-                                <?php else:?>
-                                    <td width="10%" align="right"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'>Remove</a></td>
-                                <?php endif;?>
-                            </tr>
-                        <?php
-                            endforeach;
-                        else:?>
-                            <tr id="__fire_items_row">
-                                <?php foreach($item_form_elements as $single_element):?>
-                                    <td>
-                                        <?php
-                                        /**
-                                         * Load Single Element
-                                         */
-                                        $this->load->view('templates/_common/_form_components_inline', [
-                                            'form_elements' => [$single_element],
-                                            'form_record'   => NULL
-                                        ]);
-                                        ?>
-                                    </td>
-                                <?php endforeach?>
-                                <td>&nbsp;</td>
-                            </tr>
-                        <?php endif;?>
-                </tbody>
-            </table>
-            <div class="box-footer bg-info">
-                <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__fire_items_row', this)">Add More</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="box box-solid box-bordered">
-    <div class="box-header with-border">
-        <h4 class="box-title">Land/Building Details</h4>
-    </div>
-    <div class="box-body" style="overflow-x: scroll;">
-        <table class="table table-bordered table-condensed no-margin" >
-            <thead>
-                <tr>
-                    <th>Owner Name(s)</th>
-                    <th>Owner Address</th>
-                    <th>Owner Contacts (Mobile/Phone)</th>
-                    <th>Land Plot No.</th>
-                    <th>House No.</th>
-                    <th>Tole/Street Address</th>
-                    <th>District</th>
-                    <th>VDC/Municipality</th>
-                    <th>Ward No.</th>
-                    <th>No. of Storeys</th>
-                    <th>Construction Category</th>
-                    <th>Used For</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <?php
-            $land_building_owner_elements = $form_elements['land_building_owner'];
-            $land_building      = $record->land_building ?? NULL;
-            $item_count         = count( $land_building->owner_name ?? [] );
-            ?>
-            <tbody class="form-inline">
-                <?php
-                    if($item_count):
-                        for ($i=0; $i < $item_count; $i++):?>
-                        <tr <?php echo $i == 0 ? 'id="__fire_land_building_row"' : '' ?>>
-                            <?php foreach($land_building_owner_elements as $single_element):?>
-                                <td>
-                                    <?php
-                                    /**
-                                     * Load Single Element
-                                     */
-                                    $single_element['_default']    = $land_building->{$single_element['_key']}[$i] ?? '';
-                                    $single_element['_value']      = $single_element['_default'];
-                                    $this->load->view('templates/_common/_form_components_inline', [
-                                        'form_elements' => [$single_element],
-                                        'form_record'   => NULL
-                                    ]);
-                                    ?>
-                                </td>
-                            <?php
-                            endforeach;
-                            if($i == 0):?>
-                                <td>&nbsp;</td>
-                            <?php else:?>
-                                <td width="10%" align="right"><a href="#" class="btn btn-danger btn-sm" onclick='$(this).closest("tr").remove()'>Remove</a></td>
-                            <?php endif;?>
-                        </tr>
-                    <?php
-                        endfor;
-                    else:?>
-                        <tr id="__fire_land_building_row">
-                            <?php foreach($land_building_owner_elements as $single_element):?>
-                                <td>
-                                    <?php
-                                    /**
-                                     * Load Single Element
-                                     */
-                                    $this->load->view('templates/_common/_form_components_inline', [
-                                        'form_elements' => [$single_element],
-                                        'form_record'   => NULL
-                                    ]);
-                                    ?>
-                                </td>
-                            <?php endforeach?>
-                            <td>&nbsp;</td>
-                        </tr>
-                    <?php endif;?>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="box-footer bg-info">
-        <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__fire_land_building_row', this)">Add More</a>
-    </div>
 </div>
 
 <script type="text/javascript">
-    /**
-     * Duplicate Treaty Distribution Row
-     */
-    function __duplicate_tr(src, a)
+    // Register District Change Event
+    $( 'select#district-dropdown').on('change',function(){
+        __district_change();
+    });
+
+    // Register VDC Change Event
+    $( 'select#vdc-dropdown').on('change',function(){
+        __vdc_change();
+    });
+
+    // ON EDIT MODE - list the vdc from selected district
+    var __iqb_did = '<?php echo $district_id ?>';
+    var __iqb_vid = '<?php echo $vdc_id ?>';
+    if(__iqb_did){
+        __district_change(function(){
+            if(__iqb_vid){
+                $('#vdc-dropdown').val(__iqb_vid);
+                $('#vdc-dropdown').trigger('change');
+            }
+        });
+    }
+
+    // District Change Function
+    function __district_change(callback)
     {
-        var $src = $(src),
-            $box = $src.closest('tbody'),
-            html = $src.html(),
-            $row  = $('<tr></tr>');
+        /**
+         * Fetch Address1 List
+         *  - if empty, show address1 textarea
+         * - else
+         *      - show address1 dropdown
+         */
 
-        $row.html(html);
+         var $this = $('#district-dropdown'),
+            did = $.trim($this.val());
 
-        // remove last blank td
-        $row.find('td:last').remove();
+        if(did)
+        {
+            $.getJSON('<?php echo base_url()?>addresses/address1_by_district/'+did, function(r){
+                // If found Address1 Dropdown
+                if ( Array.isArray(r) && r.length > 0 ){
 
-        // Add Remover Column
-        $row.append('<td width="10%" align="right"><a href="#" class="btn btn-danger btn-sm" onclick=\'$(this).closest("tr").remove();\'>Remove</a></td>');
+                    $('#vdc-dropdown')
+                        .empty()
+                        .append('<option selected="selected" value="">Select...</option>');
+                    $.each(r, function(idx, opt) {
+                        $('#vdc-dropdown').append($('<option>', {
+                            value: opt.value,
+                            text : opt.label
+                        }));
+                    });
+                }
 
-        // Append to table body
-        $box.append($row);
+                // Callback if any
+                if (callback && typeof(callback) === "function") {
+                    callback();
+                }
+            });
+        }
+    }
+
+    // VDC Change Function
+    function __vdc_change()
+    {
+        /**
+         * Update the vdc text field
+         */
+         var $this = $('#vdc-dropdown'),
+            vdc = $.trim($this.val());
+
+        if(vdc){
+            var text = $('#vdc-dropdown option:selected').text();
+            $('input[name="object[building][vdc_text]"]').val(text);
+        }
     }
 </script>

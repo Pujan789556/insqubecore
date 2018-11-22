@@ -130,52 +130,17 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                 </tr>
 
                 <tr>
-                    <td colspan="2">
-                        <strong>बीमालेखले रक्षावरण गरेको सम्पत्तिको विवरण</strong>
-                        <?php if($object_attributes->item_attached === 'N'): ?>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <td>क्र. स.</td>
-                                        <td>सम्पत्ति</td>
-                                        <td>स्वामित्व</td>
-                                        <td>विवरण</td>
-                                        <td align="right">बीमांक (रु)</td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    $items      = $object_attributes->items ?? NULL;
-                                    $item_count = count( $items ?? [] );
-                                    $i = 0;
-                                    if($item_count):
-                                        foreach($items as $item_record):?>
-                                            <tr>
-                                                <td><?php echo ++$i; ?></td>
-                                                <td><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item_record->category ]?></td>
-                                                <td><?php echo _OBJ_FIRE_FIRE_item_ownership_dropdown( FALSE )[$item_record->ownership] ?? ''; ?></td>
-                                                <td><?php echo nl2br(htmlspecialchars($item_record->description)); ?></td>
-                                                <td align="right"><?php echo number_format($item_record->sum_insured, 2); ?></td>
-                                            </tr>
-                                        <?php
-                                        endforeach;
-                                    endif;?>
-                                    <tr>
-                                        <td colspan="4" align="right">जम्मा बीमांक (रु)</td>
-                                        <td align="right"><?php echo  number_format($record->object_amt_sum_insured, 2);?></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        <?php endif;?>
+                    <td colspan="2" style="font-size: 9pt">
+                        माथि उल्लेखित बीमाशुल्कको हिसाब विवरण तथा मालसामानको विवरण पछाडि पृष्‍ठमा उल्लेख भए बमोजिम कायम गरिएको छ ।
                     </td>
                 </tr>
 
                 <tr>
-                    <td colspan="2"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
+                    <td colspan="2" style="font-size: 8pt"><?php echo nl2br(htmlspecialchars($endorsement_record->txn_details)); ?></td>
                 </tr>
             </tbody>
         </table>
-        <p style="text-align: center;">यस तालिकामा उल्लेख भएको प्रयोगको सीमा उल्लघंन भएमा बीमकले बीमितलाई क्षतिपूर्ति दिनेछैन ।</p>
+        <p style="text-align: center; font-size: 9pt">यस तालिकामा उल्लेख भएको प्रयोगको सीमा उल्लघंन भएमा बीमकले बीमितलाई क्षतिपूर्ति दिनेछैन ।</p>
         <?php
         /**
          * Load Footer
@@ -227,6 +192,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                 <tbody>
                     <?php
                     $item_index = 0;
+                    $sn = 1;
                     foreach($items as $item):
                         /**
                          * Risk Premium Table
@@ -258,7 +224,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                         }
                         ?>
                         <tr>
-                            <td <?php echo $rowspan ?>><?php echo $i++ ?></td>
+                            <td <?php echo $rowspan ?>><?php echo $sn++ ?></td>
                             <td <?php echo $rowspan ?>><?php echo _OBJ_FIRE_FIRE_item_category_dropdown(FALSE)[ $item->category ] ?></td>
                             <td <?php echo $rowspan ?>><?php echo nl2br(htmlspecialchars($item->description)) ?></td>
                             <td <?php echo $rowspan ?> align="right"><?php echo number_format($item->sum_insured, 2) ?></td>

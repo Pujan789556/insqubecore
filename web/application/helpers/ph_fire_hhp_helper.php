@@ -77,193 +77,143 @@ if ( ! function_exists('_OBJ_FIRE_HHP_validation_rules'))
 	 */
 	function _OBJ_FIRE_HHP_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
-		$category_dropdown 	= _OBJ_FIRE_HHP_item_category_dropdown( FALSE );
-		$ownership_dropdown = _OBJ_FIRE_HHP_item_ownership_dropdown( FALSE );
-
 		$conscat_dropdown 	= _OBJ_FIRE_HHP_item_building_category_dropdown( FALSE );
 		$district_dropdown 	= district_dropdown( FALSE );
 
 
 		$v_rules = [
 			/**
-			 * Basic Data
+			 * Building
 			 */
-			'basic' =>[
+			'building' => [
 				[
+			        'field' => 'object[building][plot_no]',
+			        '_key' => 'plot_no',
+			        'label' => 'Land Plot No.',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[building][house_no]',
+			        '_key' => 'house_no',
+			        'label' => 'House No.',
+			        'rules' => 'trim|max_length[50]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[building][tole]',
+			        '_key' => 'tole',
+			        'label' => 'Tole/Street Address',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[building][district]',
+			        '_key' => 'district',
+			        'label' => 'District',
+			        'rules' => 'trim|required|numeric|max_length[2]|in_list['. implode(',', array_keys($district_dropdown)) .']',
+			        '_type'     => 'dropdown',
+			        '_id' 		=> 'district-dropdown',
+			        '_data' 	=> IQB_BLANK_SELECT + $district_dropdown,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[building][vdc]',
+			        '_key' => 'vdc',
+			        'label' => 'VDC / Municipality',
+			        'rules' => 'trim|required|integer|max_length[11]',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> IQB_BLANK_SELECT,
+			        '_id' 		=> 'vdc-dropdown',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[building][vdc_text]',
+			        '_key' => 'vdc_text',
+			        'label' => 'VDC / Municipality',
+			        'rules' => 'trim|required|max_length[150]',
+			        '_type'     => 'hidden',
+			        '_id' 		=> 'vdc-dropdown-text',
+			        '_show_label' => false,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[building][ward_no]',
+			        '_key' => 'ward_no',
+			        'label' => 'Ward No.',
+			        'rules' => 'trim|required|max_length[20]',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[building][storey_no]',
+			        '_key' => 'storey_no',
+			        'label' => 'No. of Stories',
+			        'rules' => 'trim|required|max_length[10]',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[building][category]',
+			        '_key' => 'category',
+			        'label' => 'Construction Category',
+			        'rules' => 'trim|integer|exact_length[1]|in_list['. implode(',', array_keys($conscat_dropdown)) .']',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> IQB_BLANK_SELECT + $conscat_dropdown,
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[building][used_for]',
+			        '_key' => 'used_for',
+			        'label' => 'Used For',
+			        'rules' => 'trim|max_length[50]',
+			        '_type'     => 'text',
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[building][sum_insured]',
+			        '_key' => 'sum_insured',
+			        'label' => 'Building Sum Insured (Rs)',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+			        '_type'     => 'text',
+			        '_required' => true
+			    ],
+
+		    ],
+
+		    /**
+			 * Goods List
+			 */
+			'goods' => [
+				[
+			        'field' => 'object[goods][description]',
+			        '_key' => 'description',
+			        'label' => 'Goods Description',
+			        'rules' => 'trim|max_length[1000]',
+			        '_type'     => 'textarea',
+			        'rows' 		=> 4,
+			        '_show_label' 	=> true,
+			        '_required' => false
+			    ],
+			    [
+			        'field' => 'object[goods][sum_insured]',
+			        '_key' => 'sum_insured',
+			        'label' => 'Goods Sum Insured (Rs)',
+			        'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> true,
+			        '_required' => false
+			    ],
+			    [
 			        'field' => 'document',
 			        '_key' => 'document',
 			        'label' => 'Upload Item List (.doc, .docx, .pdf, .jpg, .png, .xls or .xlsx)',
 			        'rules' => '',
 			        '_type'     => 'file',
 			        '_required' => false
-			    ],
-		    ],
-
-
-			/**
-			 * Item List
-			 */
-			'items' => [
-				[
-			        'field' => 'object[items][category][]',
-			        '_key' => 'category',
-			        'label' => 'Item Category',
-			        'rules' => 'trim|required|alpha|in_list['. implode(',', array_keys($category_dropdown)) .']',
-			        '_type'     => 'dropdown',
-			        '_data' 	=> IQB_BLANK_SELECT + $category_dropdown,
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[items][description][]',
-			        '_key' => 'description',
-			        'label' => 'Item Description',
-			        'rules' => 'trim|max_length[500]',
-			        '_type'     => 'textarea',
-			        'rows' 		=> 4,
-			        '_show_label' 	=> false,
-			        '_required' => false
-			    ],
-			    [
-			        'field' => 'object[items][sum_insured][]',
-			        '_key' => 'sum_insured',
-			        'label' => 'Item Price(Sum Insured)',
-			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[items][ownership][]',
-			        '_key' => 'ownership',
-			        'label' => 'Item Ownership',
-			        'rules' => 'trim|required|alpha|in_list['. implode(',', array_keys($ownership_dropdown)) .']',
-			        '_type'     => 'dropdown',
-			        '_data' 	=> IQB_BLANK_SELECT + $ownership_dropdown,
-			        '_show_label' 	=> false,
-			        '_required' 	=> true
-			    ]
-		    ],
-
-		    /**
-		     * Land Owner Details (Building)
-		     */
-		    'land_building_owner' => [
-		    	[
-			        'field' => 'object[land_building][owner_name][]',
-			        '_key' => 'owner_name',
-			        'label' => 'Owner Name(s)',
-			        'rules' => 'trim|max_length[200]',
-			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[land_building][owner_address][]',
-			        '_key' => 'owner_address',
-			        'label' => 'Owner Address',
-			        'rules' => 'trim|max_length[200]',
-			        '_type'     => 'textarea',
-			        'rows' 		=> 4,
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[land_building][owner_contacts][]',
-			        '_key' => 'owner_contacts',
-			        'label' => 'Owner Contacts(Mobile/Phone)',
-			        'rules' => 'trim|max_length[200]',
-			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-
-
-			    /**
-			     * Land Details (Building)
-			     */
-		    	[
-			        'field' => 'object[land_building][plot_no][]',
-			        '_key' => 'plot_no',
-			        'label' => 'Land Plot No.',
-			        'rules' => 'trim|max_length[100]',
-			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[land_building][house_no][]',
-			        '_key' => 'house_no',
-			        'label' => 'House No.',
-			        'rules' => 'trim|max_length[50]',
-			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[land_building][tole][]',
-			        '_key' => 'tole',
-			        'label' => 'Tole/Street Address',
-			        'rules' => 'trim|max_length[100]',
-			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[land_building][district][]',
-			        '_key' => 'district',
-			        'label' => 'District',
-			        'rules' => 'trim|numeric|max_length[2]|in_list['. implode(',', array_keys($district_dropdown)) .']',
-			        '_type'     => 'dropdown',
-			        '_data' 	=> IQB_BLANK_SELECT + $district_dropdown,
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[land_building][vdc][]',
-			        '_key' => 'vdc',
-			        'label' => 'VDC/Municipality',
-			        'rules' => 'trim|max_length[100]',
-			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[land_building][ward_no][]',
-			        '_key' => 'ward_no',
-			        'label' => 'Ward No.',
-			        'rules' => 'trim|max_length[20]',
-			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[land_building][storey_no][]',
-			        '_key' => 'storey_no',
-			        'label' => 'No. of Stories',
-			        'rules' => 'trim|max_length[10]',
-			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[land_building][category][]',
-			        '_key' => 'category',
-			        'label' => 'Construction Category',
-			        'rules' => 'trim|integer|exact_length[1]|in_list['. implode(',', array_keys($conscat_dropdown)) .']',
-			        '_type'     => 'dropdown',
-			        '_data' 	=> IQB_BLANK_SELECT + $conscat_dropdown,
-			        '_show_label' 	=> false,
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[land_building][used_for][]',
-			        '_key' => 'used_for',
-			        'label' => 'Used For',
-			        'rules' => 'trim|max_length[50]',
-			        '_type'     => 'text',
-			        '_show_label' 	=> false,
-			        '_required' => true
 			    ],
 		    ]
 		];
@@ -301,59 +251,6 @@ if ( ! function_exists('_OBJ_FIRE_HHP_item_building_category_dropdown'))
 			'3'	=> 'Third',
 			'4' => 'Fourth',
 			'5' => 'Open Space'
-		];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_OBJ_FIRE_HHP_item_category_dropdown'))
-{
-	/**
-	 * Get Policy Object - FIRE - Object's Item category dropdown
-	 *
-	 * @param bool $flag_blank_select 	Whether to append blank select
-	 * @return	array
-	 */
-	function _OBJ_FIRE_HHP_item_category_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = [
-			'BWALL' => 'Boundary Wall',
-			'BLDNG' => 'Building',
-			'GOODS'	=> 'Goods/Stock',
-			'MCNRY' => 'Machinary',
-			'OTH' 	=> 'Others'
-		];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_OBJ_FIRE_HHP_item_ownership_dropdown'))
-{
-	/**
-	 * Get Policy Object - FIRE - Object's Item ownership dropdown
-	 *
-	 * @param bool $flag_blank_select 	Whether to append blank select
-	 * @return	array
-	 */
-	function _OBJ_FIRE_HHP_item_ownership_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = [
-			'O' => 'Owned',
-			'R' => 'Rented'
 		];
 
 		if($flag_blank_select)
@@ -431,46 +328,6 @@ if ( ! function_exists('_OBJ_FIRE_HHP_pre_save_tasks'))
         	throw new Exception("Exception [Helper: ph_fire_hhp_helper][Method: _OBJ_FIRE_HHP_pre_save_tasks()]: " . $message );
         }
 
-        /**
-		 * Format Items
-		 */
-		$data = _OBJ_FIRE_HHP_format_items($data);
-
-		return $data;
-	}
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_OBJ_FIRE_HHP_format_items'))
-{
-	/**
-	 * Format Fire Object Items
-	 *
-	 * @param array $data 		Post Data
-	 * @return array
-	 */
-	function _OBJ_FIRE_HHP_format_items( array $data )
-	{
-		$items 		= $data['object']['items'];
-		$item_rules = _OBJ_FIRE_HHP_validation_rules(IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID)['items'];
-
-		$items_formatted = [];
-		$count = count($items['category']);
-
-		for($i=0; $i < $count; $i++)
-		{
-			$single = [];
-			foreach($item_rules as $rule)
-			{
-				$key = $rule['_key'];
-				$single[$key] = $items[$key][$i];
-			}
-			$items_formatted[] = $single;
-		}
-
-		$data['object']['items'] = $items_formatted;
-
 		return $data;
 	}
 }
@@ -491,20 +348,22 @@ if ( ! function_exists('_OBJ_FIRE_HHP_compute_sum_insured_amount'))
 	function _OBJ_FIRE_HHP_compute_sum_insured_amount( $portfolio_id, $data )
 	{
 		/**
-		 * Compute Sum of all items' sum_insured
+		 * Compute Sum of Building and Goods SI
 		 */
 		$amt_sum_insured = 0;
-		$items = $data['items'];
-		foreach($items as $single)
-		{
-			$si_per_item = $single['sum_insured'];
-			// Clean all formatting ( as data can come from excel sheet with comma on thousands eg. 10,00,000.00 )
-			$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-			$amt_sum_insured +=  $si_per_item;
-		}
 
-		// NO SI Breakdown for this Portfolio
-		return ['amt_sum_insured' => $amt_sum_insured];
+		$si_building = floatval($data['building']['sum_insured'] ? $data['building']['sum_insured'] : 0);
+		$si_goods 	 = floatval($data['goods']['sum_insured'] ? $data['goods']['sum_insured'] : 0);
+
+		$amt_sum_insured = $si_building + $si_goods;
+
+		$si_breakdown = json_encode([
+			'si_goods' 		=> $si_goods,
+			'si_building'  	=> $si_building
+		]);
+
+		// With SI Breakdown
+		return ['amt_sum_insured' => $amt_sum_insured, 'si_breakdown' => $si_breakdown];
 	}
 }
 
