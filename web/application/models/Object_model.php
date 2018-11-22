@@ -124,7 +124,11 @@ class Object_model extends MY_Model
              * Clear Cache
              * ---------------------
              */
-            $this->clear_cache('object_cst_'.$customer_id);
+            $cache_vars = [
+                'object_cst_' . $customer_id,
+                'object_cst_' . $customer_id . '_*'
+            ];
+            $this->clear_cache($cache_vars);
         }
         return FALSE;
     }
@@ -194,7 +198,11 @@ class Object_model extends MY_Model
              * ---------------------
              */
             $record = $this->row($id);
-            $this->clear_cache('object_cst_'.$record->customer_id);
+            $cache_vars = [
+                'object_cst_' . $record->customer_id,
+                'object_cst_' . $record->customer_id . '_*'
+            ];
+            $this->clear_cache($cache_vars);
         }
         return FALSE;
     }
@@ -621,8 +629,11 @@ class Object_model extends MY_Model
              * Clear Cache
              * ---------------------
              */
-            $cache_var = 'object_cst_' . $record->customer_id;
-            $this->delete_cache($cache_var);
+            $cache_vars = [
+                'object_cst_' . $record->customer_id,
+                'object_cst_' . $record->customer_id . '_*'
+            ];
+            $this->clear_cache($cache_vars);
         }
 
         // Enable db_debug if on development environment
