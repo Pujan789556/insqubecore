@@ -1334,17 +1334,28 @@ if ( ! function_exists('backdate_process'))
         {
             $CI =& get_instance();
 
-            $timestamp      = strtotime($date);
+            $timestamp          = strtotime($date);
+            $today              = date('Y-m-d');
+            $today_timestamp    = strtotime($today);
+            $dateonly_timestamp = strtotime(date('Y-m-d', $timestamp));
 
             /**
-             * Not a past date? or Backdate not allowed?
+             * NOT a PAST date?
+             * -----------------------------------------
+             * Simply return as it is
+             */
+            if( ($today_timestamp <=  $dateonly_timestamp) )
+            {
+                return $date;
+            }
+
+
+            /**
+             * Backdate not allowed?
              * -----------------------------------------
              * Simply return today's date
              */
-            $today              = date('Y-m-d');
-            $dateonly_timestamp = strtotime(date('Y-m-d', $timestamp));
-            $today_timestamp    = strtotime($today);
-            if( ($today_timestamp <=  $dateonly_timestamp) || !$CI->dx_auth->is_backdate_allowed() )
+            if( !$CI->dx_auth->is_backdate_allowed() )
             {
                 return $today;
             }
