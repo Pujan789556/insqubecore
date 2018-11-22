@@ -200,7 +200,7 @@ echo form_open( $this->uri->uri_string(),
                             <div class="form-group">
                                 <select class="form-control" id="_ed-type">
                                   <option value="y">Year(s)</option>
-                                  <option value="M">Month(s)</option>
+                                  <!-- <option value="M">Month(s)</option> -->
                                   <option value="w">Week(s)</option>
                                   <option value="d">Day(s)</option>
                                 </select>
