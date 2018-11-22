@@ -89,11 +89,11 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
                             </tr>
 
                             <tr>
-                                <td><strong>Proposed Date</strong>: <?php echo $record->proposed_date?></td>
+                                <td><strong>Proposed Date</strong>: <?php echo date('j M Y', strtotime($record->proposed_date))?></td>
                             </tr>
 
                             <tr>
-                                <td><strong>Issued Date</strong>: <?php echo $record->issued_date?></td>
+                                <td><strong>Issued Date</strong>: <?php echo date('j M Y', strtotime($record->issued_date))?></td>
                             </tr>
                             <tr>
                                 <td><strong>Issued At</strong>: <?php echo $this->dx_auth->get_branch_code()?></td>
@@ -101,8 +101,8 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
 
                             <tr>
                                 <td>
-                                    <strong>Policy Start Date</strong>: <?php echo $record->start_date?><br>
-                                    <strong>Policy End Date</strong>: <?php echo $record->end_date?><br>
+                                    <strong>Policy Start Date</strong>: <?php echo date('j M Y', strtotime($record->start_date))?><br>
+                                    <strong>Policy End Date</strong>: <?php echo date('j M Y', strtotime($record->end_date))?><br>
                                     <strong>No. of Days</strong>: <?php echo _POLICY_duration($record->start_date, $record->end_date, 'd') ?> days
                                 </td>
                             </tr>
