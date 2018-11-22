@@ -57,7 +57,7 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                                     <strong>सम्पत्ति विवरण</strong><br/>
                                     <?php echo nl2br(htmlspecialchars($object_attributes->items)); ?>
                                     <br><strong>कूल बीमंक रकम (रु)</strong>:
-                                    <?php echo number_format($record->obj_amt_sum_insured); ?>
+                                    <?php echo number_format($record->object_amt_sum_insured); ?>
                                 </td>
                             </tr>
                             <tr>
