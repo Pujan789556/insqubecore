@@ -153,7 +153,7 @@ if ( ! function_exists('_OBJ_MISC_HI_item_headings_dropdown'))
 			'age' 			=> 'Age',
 			'sex' 			=> 'Sex',
 			'family_details' 	=> 'Family Members',
-			'sum_insured' 		=> 'Sum Insured (Rs)',
+			'sum_insured' 		=> 'Benefits (Rs)',
 			'premium' 			=> 'Premium (Rs)',
 			'medical_group_nr' 	=> 'Medical Group Number'
 		];
