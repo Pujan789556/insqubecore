@@ -23,8 +23,52 @@ $form_elements 	= _OBJ_MISC_BRG_validation_rules($record->portfolio_id);
     </table>
 </div>
 
-<div class="box-body" style="overflow-x: scroll;">
-	<table class="table table-bordered table-condensed no-margin" >
+<div class="box box-solid box-bordered">
+    <div class="box-header with-border">
+        <h4 class="box-title">Item Details</h4>
+    </div>
+    <table class="table table-bordered table-condensed no-margin">
+        <?php
+        $section_elements   = $form_elements['items'];
+        $items              = $attributes->items ?? NULL;
+        $item_count         = count( $items ?? [] );
+        ?>
+        <thead>
+            <tr>
+                <th>SN</th>
+                <?php foreach($section_elements as $elem): ?>
+                    <th><?php echo $elem['label'] ?></th>
+                <?php endforeach; ?>
+            </tr>
+        </thead>
+
+        <tbody>
+            <?php
+            $i = 1;
+            foreach($items as $item_record): ?>
+                <tr>
+                    <td><?php echo $i++; ?></td>
+                    <?php foreach($section_elements as $elem):
+                        $key =  $elem['_key'];
+                        $value = $item_record->{$key};
+                    ?>
+
+                        <td <?php echo $key == 'sum_insured' ? 'class="text-right"' : '' ?>>
+                            <?php echo $key == 'sum_insured' ? number_format($value, 2) : nl2br(htmlspecialchars($value));?>
+                        </td>
+                    <?php endforeach ?>
+                </tr>
+            <?php endforeach ?>
+            <tr>
+                <td colspan="2" class="text-bold">Total Sum Insured Amount(Rs.)</td>
+                <td class="text-bold text-right"><?php echo number_format($record->amt_sum_insured, 2) ?></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="box box-solid box-bordered" style="overflow-x: scroll;">
+	<table class="table table-bordered table-condensed no-margin">
 	    <thead>
 	        <tr>
 	            <th>Owner Name(s)</th>

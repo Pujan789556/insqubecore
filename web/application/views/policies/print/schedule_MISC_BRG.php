@@ -54,10 +54,10 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                             </tr>
                             <tr>
                                 <td>
-                                    <strong>सम्पत्ति विवरण</strong><br/>
-                                    <?php echo nl2br(htmlspecialchars($object_attributes->items)); ?>
-                                    <br><strong>कूल बीमंक रकम (रु)</strong>:
+                                    <strong>कूल बीमंक रकम (रु)</strong>:
                                     <?php echo number_format($record->object_amt_sum_insured, 2); ?>
+                                    <br><br><strong>अधिक</strong><br>
+                                    <?php echo nl2br(htmlspecialchars($object_attributes->excess)) ?>
                                 </td>
                             </tr>
                             <tr>
@@ -128,10 +128,14 @@ $schedule_table_title   = $record->portfolio_name . ' बीमालेखक�
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <strong>बीमाको विषयवस्तु रहेको स्थान, भवन वा सम्पत्तिको विवरण</strong><br/>
                         <?php
+                        /**
+                         * Building and Item Information
+                         */
                         $object = (object)[
-                            'attributes' => $record->object_attributes
+                            'portfolio_id' => $record->portfolio_id,
+                            'attributes' => $record->object_attributes,
+                            'amt_sum_insured' => $record->object_amt_sum_insured
                         ];
                         $this->load->view('objects/snippets/_schedule_snippet_brg', ['record' => $object ]);
                          ?>

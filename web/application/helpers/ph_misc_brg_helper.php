@@ -57,7 +57,6 @@ if ( ! function_exists('_OBJ_MISC_BRG_select_text'))
 		$attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 
 		$snippet = [
-			'<strong>' . $attributes->items . '</strong>',
 			'Sum Insured(NRS): ' . '<strong>' . $record->amt_sum_insured . '</strong>'
 		];
 
@@ -92,23 +91,6 @@ if ( ! function_exists('_OBJ_MISC_BRG_validation_rules'))
 			 */
 			'basic' =>[
 			    [
-			        'field' => 'object[items]',
-			        '_key' => 'items',
-			        'label' => 'माल समान',
-			        'rules' => 'trim|required|max_length[500]',
-			        'rows' 		=> 4,
-			        '_type'     => 'textarea',
-			        '_required' => true
-			    ],
-			    [
-			        'field' => 'object[sum_insured]',
-			        '_key' => 'sum_insured',
-			        'label' => 'बिमांक रकम (रु)',
-			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-			        '_type'     => 'text',
-			        '_required' => true
-			    ],
-			    [
 			        'field' => 'object[excess]',
 			        '_key' => 'excess',
 			        'label' => 'अधिक',
@@ -117,6 +99,31 @@ if ( ! function_exists('_OBJ_MISC_BRG_validation_rules'))
 			        '_type'     => 'textarea',
 			        '_required' => false
 			    ],
+		    ],
+
+		    /**
+		     * Item Details
+		     */
+		    'items' => [
+		    	[
+			        'field' => 'object[items][description][]',
+			        '_key' => 'description',
+			        'label' => 'Description',
+			        'rules' => 'trim|required|max_length[2000]',
+			        '_type' => 'textarea',
+			        'rows'  => 4,
+			        '_show_label' 	=> false,
+			        '_required' 	=> true
+			    ],
+			    [
+			        'field' => 'object[items][sum_insured][]',
+			        '_key' => 'sum_insured',
+			        'label' => 'Sum Insured(Rs)',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+			        '_type' => 'text',
+			        '_show_label' 	=> false,
+			        '_required' 	=> true
+			    ]
 		    ],
 
 		    /**
@@ -197,7 +204,7 @@ if ( ! function_exists('_OBJ_MISC_BRG_validation_rules'))
 			        'field' => 'object[land_building][vdc][]',
 			        '_key' => 'vdc',
 			        'label' => 'VDC/Municipality',
-			        'rules' => 'trim|max_length[50]',
+			        'rules' => 'trim|max_length[150]',
 			        '_type'     => 'text',
 			        '_show_label' 	=> false,
 			        '_required' => true
@@ -206,7 +213,7 @@ if ( ! function_exists('_OBJ_MISC_BRG_validation_rules'))
 			        'field' => 'object[land_building][ward_no][]',
 			        '_key' => 'ward_no',
 			        'label' => 'Ward No.',
-			        'rules' => 'trim|integer|max_length[2]',
+			        'rules' => 'trim|max_length[10]',
 			        '_type'     => 'text',
 			        '_show_label' 	=> false,
 			        '_required' => true
@@ -215,7 +222,7 @@ if ( ! function_exists('_OBJ_MISC_BRG_validation_rules'))
 			        'field' => 'object[land_building][storey_no][]',
 			        '_key' => 'storey_no',
 			        'label' => 'No. of Stories',
-			        'rules' => 'trim|integer|max_length[4]',
+			        'rules' => 'trim|max_length[20]',
 			        '_type'     => 'text',
 			        '_show_label' 	=> false,
 			        '_required' => true
@@ -234,7 +241,7 @@ if ( ! function_exists('_OBJ_MISC_BRG_validation_rules'))
 			        'field' => 'object[land_building][used_for][]',
 			        '_key' => 'used_for',
 			        'label' => 'Used For',
-			        'rules' => 'trim|max_length[50]',
+			        'rules' => 'trim|max_length[100]',
 			        '_type'     => 'text',
 			        '_show_label' 	=> false,
 			        '_required' => true
@@ -285,6 +292,65 @@ if ( ! function_exists('_OBJ_MISC_BRG_item_building_category_dropdown'))
 	}
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MISC_BRG_pre_save_tasks'))
+{
+	/**
+	 * Object Pre Save Tasks
+	 *
+	 * Perform tasks that are required before saving a policy objects.
+	 * Return the processed data for further computation or saving in DB
+	 *
+	 * @param array $data 		Post Data
+	 * @param object $record 	Object Record (for edit mode)
+	 * @return array
+	 */
+	function _OBJ_MISC_BRG_pre_save_tasks( array $data, $record )
+	{
+		/**
+		 * Format Items
+		 */
+		$data = _OBJ_MISC_BRG_format_items($data);
+
+		return $data;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_MISC_BRG_format_items'))
+{
+	/**
+	 * Format Fire Object Items
+	 *
+	 * @param array $data 		Post Data
+	 * @return array
+	 */
+	function _OBJ_MISC_BRG_format_items( array $data )
+	{
+		$items 		= $data['object']['items'];
+		$item_rules = _OBJ_MISC_BRG_validation_rules(IQB_SUB_PORTFOLIO_MISC_BRGJWL_ID)['items'];
+
+		$items_formatted = [];
+		$count = count($items['sum_insured']);
+
+		for($i=0; $i < $count; $i++)
+		{
+			$single = [];
+			foreach($item_rules as $rule)
+			{
+				$key = $rule['_key'];
+				$single[$key] = $items[$key][$i];
+			}
+			$items_formatted[] = $single;
+		}
+
+		$data['object']['items'] = $items_formatted;
+
+		return $data;
+	}
+}
 
 // ------------------------------------------------------------------------
 
@@ -302,12 +368,22 @@ if ( ! function_exists('_OBJ_MISC_BRG_compute_sum_insured_amount'))
 	function _OBJ_MISC_BRG_compute_sum_insured_amount( $portfolio_id, $data )
 	{
 		/**
-		 * There is a direct field to supply sum_insured amount
+		 * Sum up all the item's sum insured amount to get the total Sum Insured
+		 * Amount
 		 */
-		$amt_sum_insured = floatval($data['sum_insured']);
+		$amt_sum_insured 	= 0.00;
+		$items = $data['items'] ?? [];
+		foreach($items as $single)
+		{
+			$si_per_item = $single['sum_insured'];
+			// Clean all formatting ( as data can come from excel sheet with comma on thousands eg. 10,00,000.00 )
+			$si_per_item 	= (float) filter_var($si_per_item, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+			$amt_sum_insured +=  $si_per_item;
+		}
 
 		// NO SI Breakdown for this Portfolio
 		return ['amt_sum_insured' => $amt_sum_insured];
+
 	}
 }
 

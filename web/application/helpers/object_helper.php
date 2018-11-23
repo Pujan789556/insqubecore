@@ -1523,6 +1523,16 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
                 $method = '_OBJ_MISC_HI_pre_save_tasks';
                 break;
 
+            /**
+             * MISCELLANEOUS - BRG (Jewelry, Housebreaking, Cash in Safe)
+             * ----------------------------------------------------------
+             */
+            case IQB_SUB_PORTFOLIO_MISC_BRGJWL_ID:
+            case IQB_SUB_PORTFOLIO_MISC_BRGHB_ID:
+            case IQB_SUB_PORTFOLIO_MISC_BRGCS_ID:
+                $method = '_OBJ_MISC_BRG_pre_save_tasks';
+                break;
+
 			default:
 				# code...
 				break;
