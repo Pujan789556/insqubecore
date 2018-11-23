@@ -12,58 +12,63 @@ if($cost_calculation_table)
 }
 $total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
 $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
-?>
-<table class="table no-margin table-bordered">
-    <tbody>
-        <?php if($cost_calculation_table):?>
-            <?php if($risk_table): ?>
+
+if($cost_calculation_table):?>
+    <?php
+    /**
+     * NOTE: RISK Table is NOT Necessary
+     */
+    /*
+    if($risk_table): ?>
+         <table class="table no-margin table-bordered">
+             <thead>
+                 <tr>
+                     <td>रक्षावरण गरिएका जोेखिमहरु</td>
+                     <td>दर (रु प्रति हजारमा) </td>
+                     <td class="text-right">बीमाशुल्क (रु.)</td>
+                 </tr>
+             </thead>
+             <tbody>
+                 <?php foreach($risk_table as $dt): ?>
+                      <tr>
+                          <td><?php echo $dt[0] ?></td>
+                          <td class="text-right"><?php echo number_format((float)$dt[1], 2);?></td>
+                          <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
+                      </tr>
+                  <?php endforeach ?>
+             </tbody>
+         </table>
+         <br>
+     <?php endif */?>
+     <?php
+      if($cost_table): ?>
+         <table class="table no-margin table-bordered">
+            <thead>
                 <tr>
-                   <td class="no-padding">
-                       <table class="table no-margin table-bordered">
-                           <thead>
-                               <tr>
-                                   <td>रक्षावरण गरिएका जोेखिमहरु</td>
-                                   <td>दर (रु प्रति हजारमा) </td>
-                                   <td class="text-right">बीमाशुल्क (रु.)</td>
-                               </tr>
-                           </thead>
-                           <tbody>
-                               <?php foreach($risk_table as $dt): ?>
-                                    <tr>
-                                        <td><?php echo $dt[0] ?></td>
-                                        <td class="text-right"><?php echo number_format((float)$dt[1], 2);?></td>
-                                        <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
-                                    </tr>
-                                <?php endforeach ?>
-                           </tbody>
-                       </table>
-                       <br>
-                       <table class="table no-margin table-bordered">
-                           <tbody>
-                                <?php if($cost_table): ?>
-                                  <?php foreach($cost_table as $row):?>
-                                    <tr>
-                                      <td class="text-left"><?php echo $row->label ?></td>
-                                      <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
-                                    </tr>
-                                  <?php endforeach ?>
-                              <?php endif ?>
-                           </tbody>
-                       </table>
-                       <br>
-                       <?php
-                        /**
-                         * Load Cost Calculation Table
-                         */
-                        $this->load->view('endorsements/snippets/premium/_summary_table',
-                            ['lang' => 'np', 'endorsement_record' => $endorsement_record]
-                        );
-                        ?>
-                   </td>
+                    <td colspan="2"><strong>बीमाशुल्क गणना तालिका</strong></td>
                 </tr>
-            <?php endif ?>
-        <?php else:?>
-            <tr><td class="text-muted text-center">No Premium Information Found!</td></tr>
-        <?php endif?>
-    </tbody>
-</table>
+            </thead>
+             <tbody>
+                <?php foreach($cost_table as $row):?>
+                  <tr>
+                    <td class="text-left"><?php echo $row->label ?></td>
+                    <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
+                  </tr>
+                <?php endforeach ?>
+
+             </tbody>
+         </table>
+         <br>
+     <?php endif ?>
+     <?php
+      /**
+       * Load Cost Calculation Table
+       */
+      $this->load->view('endorsements/snippets/premium/_summary_table',
+          ['lang' => 'np', 'endorsement_record' => $endorsement_record]
+      );
+      ?>
+
+<?php else:?>
+    <span class="text-muted text-center">No Premium Information Found!</span>
+<?php endif?>
