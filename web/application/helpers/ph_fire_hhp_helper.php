@@ -78,7 +78,7 @@ if ( ! function_exists('_OBJ_FIRE_HHP_validation_rules'))
 	function _OBJ_FIRE_HHP_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
 		$conscat_dropdown 	= _OBJ_FIRE_HHP_item_building_category_dropdown( FALSE );
-		$district_dropdown 	= district_dropdown( FALSE );
+		$district_dropdown 	= district_dropdown( 'both', FALSE );
 
 
 		$v_rules = [
@@ -604,7 +604,7 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 					 */
 					$GROSS_PREMIUM 	= 0.00; // Gross Premium (Without Pool Premium)
 					$POOL_PREMIUM  	= 0.00; // Pool Premium
-
+					$risk_table 	= [];
 
 
 					/**
@@ -618,16 +618,22 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 						// Rate in Per Thousand
 						$rate = floatval($premium_data['rate'][$pr->code]);
 
-						$premium = $SI * $rate / 1000.00;
+						if($rate)
+						{
+							$premium = $SI * $rate / 1000.00;
 
-						// Assign to Pool or Base based on Risk Type
-						if( $pr->type == IQB_RISK_TYPE_BASIC )
-						{
-							$GROSS_PREMIUM += $premium;
-						}
-						else
-						{
-							$POOL_PREMIUM += $premium;
+							// Assign to Pool or Base based on Risk Type
+							if( $pr->type == IQB_RISK_TYPE_BASIC )
+							{
+								$GROSS_PREMIUM += $premium;
+							}
+							else
+							{
+								$POOL_PREMIUM += $premium;
+							}
+
+							// Risk Table
+							$risk_table[] 		= [$pr->name_np, $rate, $premium];
 						}
 					}
 
@@ -751,48 +757,8 @@ if ( ! function_exists('__save_premium_FIRE_HHP'))
 					/**
 					 * Cost Calculation Table - Schedule Data
 					 *
-					 * 	Risk Table
-					 * 	------------------
-					 * 	| Risk | Premium |
-					 * 	------------------
-					 * 	|	   |		 |
-					 * 	------------------
+					 * 	Summary & Risk Table
 					 */
-					$risk_table = [];
-
-					// Only Risk Table
-					// Compute Gross and Pool Premium
-					foreach($portfolio_risks as $pr)
-					{
-						// Rate in Per Thousand
-						$rate = floatval($premium_data['rate'][$pr->code]);
-
-						$per_risk_premium = $SI * $rate / 1000.00;
-						$per_risk_base_premium 	= 0.00;
-						$per_risk_pool_premium 	= 0.00;
-
-						// Assign to Pool or Base based on Risk Type
-						if( $pr->type == IQB_RISK_TYPE_BASIC )
-						{
-							$per_risk_base_premium = $per_risk_premium;
-						}
-						else
-						{
-							$per_risk_pool_premium = $per_risk_premium;
-						}
-
-						/**
-						 * Direct Discount Applies?
-						 */
-						if( $policy_record->flag_dc == IQB_POLICY_FLAG_DC_DIRECT )
-						{
-							$direct_discount 		= ( $per_risk_base_premium * $pfs_record->direct_discount ) / 100.00 ;
-							$per_risk_base_premium 	-= $direct_discount;
-						}
-						$per_risk_premium 	= $per_risk_base_premium  + $per_risk_pool_premium;
-						$risk_table[] 		= [$pr->name_np, $per_risk_premium];
-					}
-
 					$cost_calculation_table = json_encode([
 						'summary_table' 	=> $summary_table,
 						'risk_table'		=> $risk_table

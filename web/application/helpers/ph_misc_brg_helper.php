@@ -82,7 +82,7 @@ if ( ! function_exists('_OBJ_MISC_BRG_validation_rules'))
 	function _OBJ_MISC_BRG_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
 		$conscat_dropdown 	= _OBJ_MISC_BRG_item_building_category_dropdown( FALSE );
-		$district_dropdown 	= district_dropdown( FALSE );
+		$district_dropdown 	= district_dropdown( 'both', FALSE );
 
 		$v_rules = [
 

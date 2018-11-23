@@ -158,7 +158,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                                         if($district_text)
                                             $bld_data[] = $district_text;
 
-                                        echo "<strong>भवन स्थान</strong><br/>", implode(', ', $bld_data), '<br/>';
+                                        echo "<strong>भवन</strong><br/>", implode(', ', $bld_data), '<br/>';
 
                                         $bld_data_other = [];
                                         if($building->plot_no)
@@ -226,7 +226,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                 </tr>
             </tbody>
         </table>
-        <p style="text-align: center;">यस तालिकामा उल्लेख भएको प्रयोगको सीमा उल्लघंन भएमा बीमकले बीमितलाई क्षतिपूर्ति दिनेछैन ।</p>
+        <p style="text-align: center;">यस तालिकामा उल्लेख भएको प्रयोगको सीमा उल्लङ्घन भएमा बीमकले बीमितलाई क्षतिपूर्ति दिनेछैन ।</p>
         <?php
         /**
          * Load Footer

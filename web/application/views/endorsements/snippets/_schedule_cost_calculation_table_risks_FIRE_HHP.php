@@ -24,6 +24,7 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                                <thead>
                                    <tr>
                                        <td>रक्षावरण गरिएका जोेखिमहरु</td>
+                                       <td>दर (रु प्रति हजार)</td>
                                        <td class="text-right">बीमाशुल्क (रु.)</td>
                                    </tr>
                                </thead>
@@ -31,7 +32,8 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                                    <?php foreach($risk_table as $dt): ?>
                                         <tr>
                                             <td><?php echo $dt[0] ?></td>
-                                            <td class="text-right"><?php echo number_format((float)$dt[1], 2);?></td>
+                                            <td class="text-right"><?php echo number_format((float)$dt[1], 3)?></td>
+                                            <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
                                         </tr>
                                     <?php endforeach ?>
                                </tbody>

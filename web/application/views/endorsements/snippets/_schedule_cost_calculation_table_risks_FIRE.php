@@ -16,51 +16,26 @@ if($cost_calculation_table)
 <table class="table no-margin table-bordered">
     <tbody>
         <?php if($cost_calculation_table):?>
-            <?php if($risk_table): ?>
-                <tr>
-                   <td class="no-padding">
-                       <table class="table no-margin table-bordered">
-                           <thead>
-                               <tr>
-                                   <td>रक्षावरण गरिएका जोेखिमहरु</td>
-                                   <td class="text-right">दर (रु प्रति हजार)</td>
-                                   <td class="text-right">बीमाशुल्क (रु.)</td>
-                               </tr>
-                           </thead>
-                           <tbody>
-                               <?php foreach($risk_table as $dt): ?>
-                                    <tr>
-                                        <td><?php echo $dt[0] ?></td>
-                                        <td class="text-right"><?php //echo number_format((float)$dt[1], 3);?></td>
-                                        <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
-                                    </tr>
-                                <?php endforeach ?>
-                           </tbody>
-                       </table>
-                   </td>
-                </tr>
-            <?php endif ?>
-            <?php if($summary_table): ?>
-              <tr>
-                   <td class="no-padding margin-b-10">
-                      <table class="table no-margin table-bordered">
-                          <thead>
-                            <tr>
-                              <th colspan="2"><h4>बीमा शुल्क गणना</h4></th>
-                            </tr>
-                          </thead>
-                          <?php foreach($summary_table as $row):?>
-                              <tr>
-                                  <td class="text-left"><?php echo $row->label ?></td>
-                                  <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
-                              </tr>
-                          <?php endforeach ?>
-                      </table>
-                   </td>
-             </tr>
-            <?php endif; ?>
             <tr>
                 <td class="no-padding">
+                    <?php if($summary_table): ?>
+                        <table class="table no-margin table-bordered">
+                            <thead>
+                              <tr>
+                                <td colspan="2"><h4>बीमा शुल्क गणना</h4></td>
+                              </tr>
+                            </thead>
+                            <?php foreach($summary_table as $row):
+                                $amount = (float)$row->value;
+                                if($amount == 0) continue;
+                              ?>
+                                <tr>
+                                    <td class="text-left"><?php echo $row->label ?></td>
+                                    <td class="text-right"><?php echo number_format( $amount, 2);?></td>
+                                </tr>
+                            <?php endforeach ?>
+                        </table>
+                    <?php endif ?>
                     <?php
                     /**
                      * Load Cost Summary

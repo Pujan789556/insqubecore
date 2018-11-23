@@ -79,7 +79,7 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_validation_rules'))
 
 
 		$conscat_dropdown 	= _OBJ_FIRE_FIRE_item_building_category_dropdown( FALSE );
-		$district_dropdown 	= district_dropdown( FALSE );
+		$district_dropdown 	= district_dropdown( 'both', FALSE );
 
 		$v_rules = [
 			/**

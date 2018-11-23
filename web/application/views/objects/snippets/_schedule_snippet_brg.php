@@ -12,6 +12,7 @@ $form_elements  = _OBJ_MISC_BRG_validation_rules($record->portfolio_id);
 <table class="table table-bordered table-condensed no-margin" >
     <thead>
         <tr>
+            <td>क्र. स.</td>
             <td>भवन/सम्पत्ति धनीको नाम</td>
             <td>ठेगाना</td>
             <td>सम्पर्क नं</td>
@@ -35,6 +36,7 @@ $form_elements  = _OBJ_MISC_BRG_validation_rules($record->portfolio_id);
         if($item_count):
             for ($i=0; $i < $item_count; $i++):?>
         		<tr>
+                    <td><?php echo $i+1 ?></td>
         			<td><?php echo $land_building->owner_name[$i] ?? ''?></td>
         			<td><?php echo $land_building->owner_address[$i] ?? ''?></td>
         			<td><?php echo $land_building->owner_contacts[$i] ?? ''?></td>

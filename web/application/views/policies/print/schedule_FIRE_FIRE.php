@@ -56,17 +56,40 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                             </tr>
                             <tr>
                                 <td>
-                                    <strong>बीमाको विषयवस्तु रहेको स्थान, भवन वा सम्पत्तिको विवरण</strong><br/>
-                                    <?php
-
-                                    $object = (object)[
-                                        'attributes' => $record->object_attributes
-                                    ];
-
-                                    $this->load->view('objects/snippets/_schedule_snippet_fire', ['record' => $object ]);
-                                     ?>
+                                    <strong>कूल बीमंक रकम (रु)</strong>: <?php echo number_format($record->object_amt_sum_insured, 2); ?>
                                 </td>
                             </tr>
+                            <?php
+                            $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_decode($endorsement_record->cost_calculation_table) : NULL;
+                            $risk_table     = NULL;
+                            if($cost_calculation_table)
+                            {
+                                $risk_table       = $cost_calculation_table->risk_table;
+                            }
+                             if($risk_table): ?>
+                                <tr>
+                                   <td class="no-padding">
+                                       <table class="table no-margin table-bordered">
+                                           <thead>
+                                               <tr>
+                                                   <td>रक्षावरण गरिएका जोेखिमहरु</td>
+                                                   <td class="text-right">दर (रु प्रति हजार)</td>
+                                                   <td class="text-right">बीमाशुल्क (रु.)</td>
+                                               </tr>
+                                           </thead>
+                                           <tbody>
+                                               <?php foreach($risk_table as $dt): ?>
+                                                    <tr>
+                                                        <td><?php echo $dt[0] ?></td>
+                                                        <td class="text-right"><?php //echo number_format((float)$dt[1], 3);?></td>
+                                                        <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
+                                                    </tr>
+                                                <?php endforeach ?>
+                                           </tbody>
+                                       </table>
+                                   </td>
+                                </tr>
+                            <?php endif ?>
                             <tr>
                                 <td>
                                     रसिद नं.: <br/>
@@ -126,6 +149,20 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
                                 </td>
                             </tr>
                         </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <strong>बीमाको विषयवस्तु रहेको स्थान, भवन वा सम्पत्तिको विवरण</strong><br/>
+                        <?php
+
+                        $object = (object)[
+                            'attributes' => $record->object_attributes
+                        ];
+
+                        $this->load->view('objects/snippets/_schedule_snippet_fire', ['record' => $object ]);
+                         ?>
                     </td>
                 </tr>
 
