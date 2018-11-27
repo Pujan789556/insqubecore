@@ -21,8 +21,11 @@ $creditor_address_record = parse_address_record($record, 'addr_creditor_');
 
 <strong><?php echo $insured_title ?></strong><br/>
 <?php
-echo htmlspecialchars($record->customer_name) ,
-        '<br/>' , address_widget($customer_address_record, true, true), '<br/>';
+// Insured Party Name
+echo htmlspecialchars($record->customer_name), '<br/>';
+
+// Insured Party Address
+$this->load->view('policies/print/_snippet_address', ['address_record' => $customer_address_record]);
 
 /**
  * Policy Financed?
@@ -30,18 +33,18 @@ echo htmlspecialchars($record->customer_name) ,
 if($record->flag_on_credit === 'Y')
 {
     $financer_info = [
-        '<strong>' . $financer_title . '</strong>',
+        '<br/><strong>' . $financer_title . '</strong>',
 
         htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name),
 
-        address_widget($creditor_address_record, true, true)
+        $this->load->view('policies/print/_snippet_address', ['address_record' => $creditor_address_record], TRUE)
 
     ];
 
     if( $record->other_creditors )
     {
         $financer_info = array_merge($financer_info, [
-            '<strong>'.$other_financer_title.'</strong>',
+            '<br/><strong>'.$other_financer_title.'</strong>',
             nl2br(htmlspecialchars($record->other_creditors))
         ]);
     }

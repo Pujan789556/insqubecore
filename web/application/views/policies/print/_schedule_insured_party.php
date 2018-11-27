@@ -26,7 +26,7 @@ if($record->flag_on_credit === 'Y')
 
         htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name),
 
-        address_widget($creditor_address_record, true, true)
+        $this->load->view('policies/print/_snippet_address', ['address_record' => $creditor_address_record], TRUE)
 
     ];
 
@@ -42,8 +42,12 @@ if($record->flag_on_credit === 'Y')
 ?>
 <strong><?php echo $insured_title ?></strong><br/>
 <?php
-echo htmlspecialchars($record->customer_name) ,
-        '<br/>' , address_widget($customer_address_record, true, true);
+
+// Insured Party Name
+echo htmlspecialchars($record->customer_name), '<br/>';
+
+// Insured Party Address
+$this->load->view('policies/print/_snippet_address', ['address_record' => $customer_address_record]);
 
 echo  $record->care_of ? '<br/><strong>'.$care_of_title.'</strong><br>' . nl2br(htmlspecialchars($record->care_of)) . '<br/>' : '';
 ?>
