@@ -563,6 +563,13 @@ class Endorsement_model extends MY_Model
             'updated_at'    => $this->set_date()
         ];
 
+        /**
+         * Process Back Dates on Every Status Transaction
+         *
+         * This is required because you might have verified/vouchered yesterday and today you are invoicing
+         */
+        $data  = $this->_backdate($record, $data);
+
         switch($to_status_flag)
         {
             /**
@@ -596,9 +603,9 @@ class Endorsement_model extends MY_Model
              * Activate Endorsement
              * Process Backdate on Non First Endorsement
              */
-            case IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE:
-                $data  = $this->_backdate($record, $data);
-            break;
+            // case IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE:
+            //     $data  = $this->_backdate($record, $data);
+            // break;
 
 
             default:
@@ -770,8 +777,27 @@ class Endorsement_model extends MY_Model
          */
         public function _backdate($record, $data)
         {
-            $data['start_date']     = backdate_process($record->start_date);
-            $data['issued_date']    = backdate_process($record->issued_date);
+
+            $old_issued_date = $record->issued_date;
+            $old_start_date  = $record->start_date;
+            $old_end_date    = $record->end_date;
+
+            $new_issued_date    = backdate_process($old_issued_date);
+            $new_start_date     = backdate_process($old_start_date);
+
+            /**
+             * If backdate is not allowed, we have to recompute the end date as per new start date
+             */
+            if( strtotime($old_start_date) != strtotime($new_start_date))
+            {
+                $days               = date_difference($old_start_date, $new_start_date, 'd');
+                $new_end_date       = date('Y-m-d', strtotime($old_end_date. " + {$days} days"));
+                $data['end_date']   = $new_end_date;
+            }
+
+            // Start and Issued Date
+            $data['issued_date']    = $new_issued_date;
+            $data['start_date']     = $new_start_date;
 
             return $data;
         }

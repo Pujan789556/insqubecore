@@ -1193,10 +1193,21 @@ class Policy_model extends MY_Model
     {
         // Prepare Basic Update Data
         $base_data = [
+            'issued_date'   => $record->issued_date,
+            'start_date'    => $record->start_date,
+            'end_date'      => $record->end_date,
             'status'        => $to_status_flag,
             'updated_by'    => $this->dx_auth->get_user_id(),
             'updated_at'    => $this->set_date()
         ];
+
+        /**
+         * Process Back Dates on Every Status Transaction
+         *
+         * This is required because you might have verified/vouchered yesterday and today you are invoicing
+         */
+        $base_data = $this->_backdate($base_data);
+
 
         /**
          * ==================== TRANSACTIONS BEGIN =========================
