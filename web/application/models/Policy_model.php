@@ -1347,6 +1347,13 @@ class Policy_model extends MY_Model
                 $days               = date_difference($old_start_date, $new_start_date, 'd');
                 $new_end_date       = date('Y-m-d', strtotime($old_end_date. " + {$days} days"));
                 $data['end_date']   = $new_end_date;
+
+                /**
+                 * Start/Issued Time Must be NOW
+                 */
+                $today_time = date('H:i:s');
+                $data['issued_time']    = $today_time;
+                $data['start_time']     = $today_time;
             }
 
             // Start and Issued Date
