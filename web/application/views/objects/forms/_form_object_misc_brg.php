@@ -29,7 +29,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <?php
             $section_elements   = $form_elements['items'];
             $items               = $record->items ?? NULL;
-            $item_count          = count( $items ?? [] );
+            $item_count          = count( is_array($items) ? $items : [] );
             ?>
             <table class="table table-bordered table-condensed no-margin">
                 <thead>
