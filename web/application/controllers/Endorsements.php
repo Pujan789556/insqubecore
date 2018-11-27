@@ -371,6 +371,13 @@ class Endorsements extends MY_Controller
 			 */
 			$data['customer_id'] = $policy_record->customer_id;
 
+
+			/**
+			 * Endorsement's Gross Sum Insured = OLD Object's SUM Insured
+			 */
+			$object = $this->object_model->find($policy_record->object_id);
+			$data['gross_amt_sum_insured'] = $object->amt_sum_insured;
+
 			return $data;
 		}
 

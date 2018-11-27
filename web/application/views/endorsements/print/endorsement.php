@@ -39,6 +39,7 @@ $labels = [
     'title' => ['en' => 'Title', 'np' => 'शिर्षक'],
     'charge' => ['en' => 'Charge', 'np' => 'थप'],
     'refund' => ['en' => 'Refund', 'np' => 'फिर्ता'],
+    'additional_premium' => ['en' => 'ADDITIONAL PREMIUM', 'np' => 'थप बीमांक'],
     'basic_premium' => ['en' => 'Basic Premium (Rs)', 'np' => 'आधारभुत बीमा शुल्क (रु)'],
     'pool_premium' => ['en' => 'RSTMDST (Rs.)', 'np' => 'हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (रु)'],
     'ownership_premium' => ['en' => 'Ownership Transfer Fee (Rs)', 'np' => 'नामसारी शुल्क (रु)'],
@@ -73,7 +74,7 @@ $labels = [
                         <table class="table table-footer no-border">
                             <tr>
                                 <td class="border-t" align="left">'. $this->settings->orgn_name_en .'</td>
-                                <td class="border-t" align="right">'. $this->settings->address .'</td>
+                                <td class="border-t" align="right">'. $this->settings->website .'</td>
                             </tr>
                         </table>
                     </htmlpagefooter>
@@ -212,7 +213,7 @@ $labels = [
 
                             if(_ENDORSEMENT_is_transactional_by_type($record->txn_type) ):
                             ?>
-                                <h3 style="margin:0">Premium</h3>
+                                <h3 style="margin:0"><?php echo $labels['additional_premium'][$lang]; ?></h3>
 
                                 <table class="table">
                                     <thead>
@@ -269,6 +270,12 @@ $labels = [
                     </tr>
                 </tbody>
             </table>
+            <?php
+            /**
+             * Load Footer
+             */
+            $this->load->view('endorsements/print/_endorsement_footer', ['lang' => $lang]);
+            ?>
         <?php
             /**
              * PDF Pagebreak for next Endorsement
