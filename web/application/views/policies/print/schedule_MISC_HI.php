@@ -36,8 +36,7 @@ $schedule_table_title   = 'स्वास्थ्य उपचार बीम
             <thead><tr><td colspan="2" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
             <tbody>
                 <tr>
-                    <td><?php echo _POLICY_schedule_title_prefix($record->status)?>: <strong><?php echo $record->code;?></strong></td>
-                    <td>बीमालेखको किसिम: <strong><?php echo htmlspecialchars($record->portfolio_name); ?></strong></td>
+                    <td colspan="2"><?php echo _POLICY_schedule_title_prefix($record->status)?>: <strong><?php echo $record->code;?></strong></td>
                 </tr>
                 <tr>
                     <td width="50%" class="no-padding">

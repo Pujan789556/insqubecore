@@ -3,7 +3,7 @@
  * Schedule Print : MISCELLANEOUS - CASH IN SAFE
  */
 $object_attributes      = json_decode($record->object_attributes);
-$schedule_table_title   = $record->portfolio_name . ' बीमालेखको अनुसुची (सेड्युल)';
+$schedule_table_title   = $record->portfolio_name_np . ' बीमालेखको अनुसुची (सेड्युल)';
 ?>
 <!DOCTYPE html>
 <html>

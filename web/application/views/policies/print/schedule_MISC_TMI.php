@@ -81,7 +81,7 @@ $schedule_table_title   = 'Travel Medical Insurance (Schedule)';
                     <td width="50%" class="no-padding">
                         <table class="table">
                             <tr>
-                                <td><strong>Portfolio</strong>: <?php echo htmlspecialchars($record->portfolio_name); ?></td>
+                                <td><strong>Portfolio</strong>: <?php echo htmlspecialchars($record->portfolio_name_en); ?></td>
                             </tr>
 
                             <tr>
