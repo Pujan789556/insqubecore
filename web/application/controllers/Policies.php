@@ -178,7 +178,7 @@ class Policies extends MY_Controller
 							'policies/_index_header',
 							['content_header' => 'Manage Policies'] + $dom_data)
 						->partial('content', 'policies/_index', $data)
-						->partial('dynamic_js', 'customers/_customer_js')
+						->partial('dynamic_js', 'policies/_list_js')
 						->render($this->data);
 	}
 
@@ -217,7 +217,7 @@ class Policies extends MY_Controller
 	                'field' => 'filter_portfolio_id',
 	                'label' => 'Portfolio',
 	                'rules' => 'trim|integer|max_length[11]',
-	                '_id'       => 'filter-status',
+	                '_id'       => 'filter-portfolio',
 	                '_type'     => 'dropdown',
 	                '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_children_tree(),
 	            ],
