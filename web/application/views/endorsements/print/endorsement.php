@@ -17,6 +17,7 @@ $endorsement_title = [
     'en' => 'MEMORANDUM'
 ];
 
+// echo '<pre>'; print_r($records);exit;
 
 $labels = [
     'assigntopolicy' => [
@@ -123,7 +124,7 @@ $labels = [
                                         /**
                                          * Insured Party, Financer, Other Financer, Careof
                                          */
-                                        $this->load->view('policies/print/_schedule_insured_party', ['lang' => $lang, 'record' => $record]);
+                                        $this->load->view('endorsements/print/_endorsement_insured_party', ['lang' => $lang, 'record' => $record]);
                                         ?>
                                     </td>
                                 </tr>

@@ -1133,11 +1133,15 @@ class Endorsement_model extends MY_Model
                          */
                          "B.name_en AS branch_name_en, B.name_np AS branch_name_np, " .
 
-                         /**
-                         * Customer Table (code, name, type, pan, picture, pfrofession, contact,
-                         * company reg no, citizenship no, passport no, lock flag)
+                        /**
+                         * Current Customer Info
                          */
                         "C.full_name as customer_name, " .
+
+                        /**
+                         * Ownership Transferred Customer Info
+                         */
+                        "COT.full_name as cot_customer_name, " .
 
                         /**
                          * Agent Table (agent_id, name, picture, bs code, ud code, contact, active, type)
@@ -1154,6 +1158,7 @@ class Endorsement_model extends MY_Model
                     ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
                     ->join('master_branches B', 'B.id = P.branch_id')
                     ->join('dt_customers C', 'C.id = P.customer_id')
+                    ->join('dt_customers COT', 'COT.id = ENDRSMNT.transfer_customer_id', 'left')
                     ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
                     ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
                     ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
@@ -1203,6 +1208,28 @@ class Endorsement_model extends MY_Model
             'module' => 'CRB'
         ];
         $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_creditor_', FALSE);
+
+
+        /**
+         * Ownership Transferred Customer Address
+         */
+        $table_aliases = [
+            // Address Table Alias
+            'address' => 'ADRCOT',
+
+            // Country Table Alias
+            'country' => 'CNTRYCOT',
+
+            // State Table Alias
+            'state' => 'STATECOT',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBDCOT',
+
+            // Type/Module Table Alias
+            'module' => 'COT'
+        ];
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_cot_', FALSE);
 
 
         /**
