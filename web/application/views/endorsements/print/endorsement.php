@@ -43,7 +43,9 @@ $labels = [
     'additional_premium' => ['en' => 'ADDITIONAL PREMIUM', 'np' => 'थप बीमांक'],
     'basic_premium' => ['en' => 'Basic Premium (Rs)', 'np' => 'आधारभुत बीमा शुल्क (रु)'],
     'pool_premium' => ['en' => 'RSTMDST (Rs.)', 'np' => 'हुल्दंगा हडताल र द्वेश(रिसइवी) पूर्ण कार्य (रु)'],
-    'ownership_premium' => ['en' => 'Ownership Transfer Fee (Rs)', 'np' => 'नामसारी शुल्क (रु)'],
+    'ownership_transfer_fee' => ['en' => 'Ownership Transfer Fee (Rs)', 'np' => 'नामसारी शुल्क (रु)'],
+    'ownership_transfer_ncd' => ['en' => 'No Claim Discount (Rs)', 'np' => 'दावी नगरे वापत छुट (रु)'],
+    'stamp_duty' => ['en' => 'Stamp Duty (Rs)', 'np' => 'टिकट दस्तुर (रु)'],
     'vat' => ['en' => 'VAT', 'np' => 'मु अ कर (रु)'],
     'total_premium' => ['en' => 'Total (Rs)', 'np' => 'जम्मा (रु)'],
 ];
@@ -200,17 +202,50 @@ $labels = [
                             /**
                              * Premium Refund Computation
                              */
-                            $basic_premium  = $record->amt_basic_premium;
-                            $pool_premium   = $record->amt_pool_premium;
-                            $transfer_fee   = $record->amt_transfer_fee;
-                            $vat            = $record->amt_vat;
-                            $total_premium  = $basic_premium + $pool_premium + $transfer_fee + $vat;
-                            $premium_table  = [
-                                $labels['basic_premium'][$lang] => $basic_premium,
-                                $labels['pool_premium'][$lang]      => $pool_premium,
-                                $labels['ownership_premium'][$lang] => $transfer_fee,
-                                $labels['vat'][$lang] => $vat
-                            ];
+                            // echo '<pre>'; print_r($record);exit;
+                            $basic_premium  = (float)$record->amt_basic_premium;
+                            $pool_premium   = (float)$record->amt_pool_premium;
+                            $transfer_fee   = (float)$record->amt_transfer_fee;
+                            $transfer_ncd   = (float)$record->amt_transfer_ncd;
+                            $stamp_duty = (float)$record->amt_stamp_duty;
+                            $vat            = (float)$record->amt_vat;
+                            $premium_table = [];
+                            if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER)
+                            {
+                                $premium_table [ $labels['ownership_transfer_fee'][$lang] ]  = $transfer_fee;
+
+                                if($transfer_ncd)
+                                {
+                                    $premium_table [ $labels['ownership_transfer_ncd'][$lang] ]  = $transfer_ncd;
+                                }
+                                $total_premium  = bcsub($transfer_fee, $transfer_ncd, IQB_AC_DECIMAL_PRECISION);
+                            }
+                            else
+                            {
+                                $premium_table  = [
+                                    $labels['basic_premium'][$lang]             => $basic_premium,
+                                    $labels['pool_premium'][$lang]              => $pool_premium
+                                ];
+
+                                $total_premium  = bcadd($basic_premium, $pool_premium, IQB_AC_DECIMAL_PRECISION);
+                            }
+
+                            // Stamp Duty
+                            if($stamp_duty)
+                            {
+                                $premium_table[ $labels['stamp_duty'][$lang] ] = $stamp_duty;
+                                $total_premium = bcadd($total_premium, $stamp_duty, IQB_AC_DECIMAL_PRECISION);
+                            }
+
+                            // VAT
+                            if($vat)
+                            {
+                                $premium_table[ $labels['vat'][$lang] ] = $vat;
+
+                                $total_premium = bcadd($total_premium, $vat, IQB_AC_DECIMAL_PRECISION);
+                            }
+
+
 
                             if(_ENDORSEMENT_is_transactional_by_type($record->txn_type) ):
                             ?>
