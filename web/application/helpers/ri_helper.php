@@ -1386,8 +1386,8 @@ if ( ! function_exists('RI__pool_distribute__QS_SP'))
 		if((int)$treaty_record->treaty_type_id === IQB_RI_TREATY_TYPE_QS )
 		{
 			// Sum Insured
-			$si_treaty_retaintion 	= ( $qs * $treaty_record->qs_retention_percent ) / 100.00;
-			$si_treaty_quota		= ( $qs * $treaty_record->qs_quota_percent ) / 100.00;
+			$si_treaty_retaintion 	= ( $si_qs * $treaty_record->qs_retention_percent ) / 100.00;
+			$si_treaty_quota		= ( $si_qs * $treaty_record->qs_quota_percent ) / 100.00;
 
 			// Premium
 			$premium_treaty_retaintion 	= ( $si_treaty_retaintion / $si_treaty_total ) * $premium_treaty_total;
