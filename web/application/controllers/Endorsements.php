@@ -1863,52 +1863,25 @@ class Endorsements extends MY_Controller
 				}
 
 				/**
-				 * What to reload/render after success?
-				 * -----------------------------------
-				 * 	1. RI Approval Triggered from Policy Overview Tab
+				 * Refresh View
 				 */
-				if( $ref == 'tab-policy-overview' )
-				{
-					/**
-					 * Update View
-					 */
-					$view = 'policies/tabs/_tab_overview';
-					$html = $this->load->view($view, ['record' => $policy_record, 'endorsement_record' => $endorsement_record], TRUE);
+				// Replace the Row
+				$html = $this->load->view(
+											'endorsements/_single_row',
+											['record' => $endorsement_record, 'policy_record' => $policy_record],
+										TRUE);
 
-					$ajax_data = [
-						'message' 	=> 'Successfully Updated!',
-						'status'  	=> 'success',
-						'multipleUpdate' => [
-							[
-								'box' 		=> '#tab-policy-overview-inner',
-								'method' 	=> 'replaceWith',
-								'html' 		=> $html
-							],
-							[
-								'box' 		=> '#page-title-policy-code',
-								'method' 	=> 'html',
-								'html' 		=> $policy_record->code
-							]
+				return $this->template->json([
+					'message' 	=> 'Successfully Updated!',
+					'status'  	=> 'success',
+					'multipleUpdate' => [
+						[
+							'box' 		=> '#_data-row-endorsements-' . $endorsement_record->id,
+							'method' 	=> 'replaceWith',
+							'html' 		=> $html
 						]
-					];
-					return $this->template->json($ajax_data);
-				}
-				else
-				{
-					// Replace the Row
-					$html = $this->load->view('endorsements/_single_row', ['record' => $endorsement_record, 'policy_record' => $policy_record], TRUE);
-					return $this->template->json([
-						'message' 	=> 'Successfully Updated!',
-						'status'  	=> 'success',
-						'multipleUpdate' => [
-							[
-								'box' 		=> '#_data-row-endorsements-' . $endorsement_record->id,
-								'method' 	=> 'replaceWith',
-								'html' 		=> $html
-							]
-						]
-					]);
-				}
+					]
+				]);
 			}
 
 		} catch (Exception $e) {

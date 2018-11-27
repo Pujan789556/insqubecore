@@ -9,7 +9,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<div class="nav-tabs-custom">
 			<ul class="nav nav-tabs" id="policy-tabs">
 				<li role="presentation" class="active">
-					<a href="#tab-policy-overview" aria-controls="tab-policy-overview" role="tab" data-toggle="tab">Overview</a>
+					<!-- <a href="#tab-policy-overview" aria-controls="tab-policy-overview" role="tab" data-toggle="tab">Overview</a> -->
+
+					<a href="#tab-policy-overview"
+						data-url="<?php echo site_url('policies/details/'. $record->id)?>"
+						data-load-method="get"
+						data-box="#tab-policy-overview"
+						data-method="html"
+						aria-controls="tab-policy-overview"
+						role="tab"
+						data-toggle="tab">Overview</a>
+
 				</li>
 				<li role="presentation">
 					<a href="#tab-endorsements"

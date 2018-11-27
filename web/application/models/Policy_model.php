@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = [];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'creditor_id', 'creditor_branch_id', 'other_creditors', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
     protected $endorsement_fields = ['proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time'];
 
@@ -123,8 +123,8 @@ class Policy_model extends MY_Model
              * If posted and Direct Discount Checked, We don't need agent
              */
             $agent_validation           = 'trim|required|integer|max_length[11]';
-            $creditor_validation        = 'trim|integer|max_length[11]';
-            $creditor_branch_validation = 'trim|integer|max_length[11]';
+            // $creditor_validation        = 'trim|integer|max_length[11]';
+            // $creditor_branch_validation = 'trim|integer|max_length[11]';
             if($this->input->post())
             {
                 $flag_dc = $this->input->post('flag_dc');
@@ -133,12 +133,12 @@ class Policy_model extends MY_Model
                     $agent_validation = 'trim|integer|max_length[11]';
                 }
 
-                $flag_on_credit = $this->input->post('flag_on_credit');
-                if($flag_on_credit === 'Y')
-                {
-                    $creditor_validation        = 'trim|required|integer|max_length[11]';
-                    $creditor_branch_validation = 'trim|required|integer|max_length[11]|callback__cb_valid_company_branch';
-                }
+                // $flag_on_credit = $this->input->post('flag_on_credit');
+                // if($flag_on_credit === 'Y')
+                // {
+                //     $creditor_validation        = 'trim|required|integer|max_length[11]';
+                //     $creditor_branch_validation = 'trim|required|integer|max_length[11]|callback__cb_valid_company_branch';
+                // }
             }
 
             /**
@@ -159,7 +159,7 @@ class Policy_model extends MY_Model
                 $policy_package_dropdown    = _OBJ_policy_package_dropdown($portfolio_id);
             }
 
-            $creditor_branch_dropdown   = $creditor_id ? IQB_BLANK_SELECT + $this->company_branch_model->dropdown_by_company($creditor_id) : IQB_BLANK_SELECT;
+            // $creditor_branch_dropdown   = $creditor_id ? IQB_BLANK_SELECT + $this->company_branch_model->dropdown_by_company($creditor_id) : IQB_BLANK_SELECT;
 
             /**
              * Default End Duration as 1 Year (including start date)
@@ -303,46 +303,46 @@ class Policy_model extends MY_Model
                         '_data'     => [ 'Y' => 'Yes', 'N' => 'No'],
                         '_default'  => 'N',
                         '_show_label'   => true,
-                        '_help_text' => '<i class="fa fa-info-circle"></i> If policy object, eg. motor, is on loan/financed by a bank or financial institution, then  the "<strong>Insured Party</strong>" of this policy  will be that financial institute. The customer will be "<strong>Account Party</strong>" in this case.',
+                        '_help_text' => '<i class="fa fa-info-circle"></i> If you have selected yes, you must supply Bank/Financial Institution information on <strong>Policy Detail Page</strong>.',
                         '_required'     => true
                     ]
                 ],
 
-                'creditor_info' => [
-                    [
-                        'field' => 'creditor_id',
-                        'label' => 'Primary Financer(Bank/Finance Institution)',
-                        'rules' => $creditor_validation,
-                        '_id'       => '_creditor-id',
-                        '_extra_attributes' => 'style="width:100%; display:block"',
-                        '_type'     => 'dropdown',
-                        '_data'     => IQB_BLANK_SELECT + $this->company_model->dropdown_creditor(true),
-                        '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Creditor Company" if not available in this list and try again.',
-                        '_required' => true
-                    ],
-                    [
-                        'field' => 'creditor_branch_id',
-                        'label' => 'Financer Branch',
-                        'rules' => $creditor_branch_validation,
-                        '_id'       => '_creditor-branch-id',
-                        '_extra_attributes' => 'style="width:100%; display:block"',
-                        '_type'     => 'dropdown',
-                        '_data'     => $creditor_branch_dropdown,
-                        '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Company Branch" of selected "Creditor Company" if not available in this list and try again.',
-                        '_required' => true
-                    ],
-                    [
-                        'field' => 'other_creditors',
-                        'label' => 'Other Financers',
-                        'rules' => 'trim|htmlspecialchars|max_length[500]',
-                        '_id'               => '_other-creditors',
-                        '_extra_attributes' => 'style="width:100%; display:block"',
-                        '_type'     => 'textarea',
-                        'rows'      => 4,
-                        '_help_text' => '<i class="fa fa-info-circle"></i> If you have more than one financers, please mention here with branch information.',
-                        '_required' => false
-                    ]
-                ],
+                // 'creditor_info' => [
+                //     [
+                //         'field' => 'creditor_id',
+                //         'label' => 'Primary Financer(Bank/Finance Institution)',
+                //         'rules' => $creditor_validation,
+                //         '_id'       => '_creditor-id',
+                //         '_extra_attributes' => 'style="width:100%; display:block"',
+                //         '_type'     => 'dropdown',
+                //         '_data'     => IQB_BLANK_SELECT + $this->company_model->dropdown_creditor(true),
+                //         '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Creditor Company" if not available in this list and try again.',
+                //         '_required' => true
+                //     ],
+                //     [
+                //         'field' => 'creditor_branch_id',
+                //         'label' => 'Financer Branch',
+                //         'rules' => $creditor_branch_validation,
+                //         '_id'       => '_creditor-branch-id',
+                //         '_extra_attributes' => 'style="width:100%; display:block"',
+                //         '_type'     => 'dropdown',
+                //         '_data'     => $creditor_branch_dropdown,
+                //         '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Company Branch" of selected "Creditor Company" if not available in this list and try again.',
+                //         '_required' => true
+                //     ],
+                //     [
+                //         'field' => 'other_creditors',
+                //         'label' => 'Other Financers',
+                //         'rules' => 'trim|htmlspecialchars|max_length[500]',
+                //         '_id'               => '_other-creditors',
+                //         '_extra_attributes' => 'style="width:100%; display:block"',
+                //         '_type'     => 'textarea',
+                //         'rows'      => 4,
+                //         '_help_text' => '<i class="fa fa-info-circle"></i> If you have more than one financers, please mention here with branch information.',
+                //         '_required' => false
+                //     ]
+                // ],
 
                 /**
                  * Policy Object Information
@@ -532,6 +532,48 @@ class Policy_model extends MY_Model
                         '_required' => true
                     ]
                 ];
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Creditor Validation Rules
+     *
+     * @return array
+     */
+    public function get_creditor_validation_rules($record = NULL)
+    {
+        $this->load->model('company_model');
+        $this->load->model('company_branch_model');
+
+
+        $creditor_id = $this->input->post('creditor_id') ? (int)$this->input->post('creditor_id') : ($record->creditor_id ?? NULL);
+        $creditor_branch_dropdown   = $creditor_id ? IQB_BLANK_SELECT + $this->company_branch_model->dropdown_by_company($creditor_id) : IQB_BLANK_SELECT;
+
+        return  [
+            [
+                'field' => 'creditor_id',
+                'label' => 'Creditor Bank/Finance Institution',
+                'rules' => 'trim|required|integer|max_length[11]',
+                '_id'               => '_creditor-id',
+                '_extra_attributes' => 'style="width:100%; display:block"',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_BLANK_SELECT + $this->company_model->dropdown_creditor(true),
+                '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Creditor Company" if not available in this list and try again.',
+                '_required' => true
+            ],
+            [
+                'field' => 'creditor_branch_id',
+                'label' => 'Creditor Branch',
+                'rules' => 'trim|required|integer|max_length[11]|callback__cb_valid_creditor_branch',
+                '_id'       => '_creditor-branch-id',
+                '_extra_attributes' => 'style="width:100%; display:block"',
+                '_type'     => 'dropdown',
+                '_data'     => $creditor_branch_dropdown,
+                '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Company Branch" of selected "Creditor Company" if not available in this list and try again.',
+                '_required' => true
+            ]
+        ];
     }
 
     // ----------------------------------------------------------------
@@ -1017,7 +1059,17 @@ class Policy_model extends MY_Model
             $this->rel_policy_tag_model->save($id, $tags);
 
             /**
-             * Task 4: Clear Cache
+             * Task 4: Delete Creditors if Flag on Credits is NO
+             */
+            if( isset($fields['flag_on_credit']) && $fields['flag_on_credit'] === IQB_FLAG_NO)
+            {
+                $this->load->model('rel_policy_creditor_model');
+                $this->rel_policy_creditor_model->delete_by_policy($id);
+            }
+
+
+            /**
+             * Task 5: Clear Cache
              * ---------------------
              */
             $customer_id = $fields['customer_id'];
@@ -1640,14 +1692,8 @@ class Policy_model extends MY_Model
                         /**
                          * Agent Table (agent_id, name, picture, bs code, ud code, active, type)
                          */
-                        "A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.active as agent_active, A.type as agent_type, " .
+                        "A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.active as agent_active, A.type as agent_type"
 
-
-                        /**
-                         * Crediter & Its Branch Info (name, contact), (branch name, branch contact)
-                         */
-                        "CRD.name as creditor_name, " .
-                        "CRB.name as creditor_branch_name"
                     )
                  ->from($this->table_name . ' as P')
                  ->join('master_branches B', 'B.id = P.branch_id')
@@ -1661,9 +1707,7 @@ class Policy_model extends MY_Model
                  ->join('auth_users CU', 'CU.id = P.created_by')
                  ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
                  ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
-                 ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
-                 ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
-                 ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left');
+                 ->join('master_agents A', 'RAP.agent_id = A.id', 'left');
 
         /**
          * Branch Address
@@ -1707,28 +1751,6 @@ class Policy_model extends MY_Model
             'module' => 'C'
         ];
         $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_');
-
-
-        /**
-         * Creditor Branch Address - Left Join (NON-Compulsory)
-         */
-        $table_aliases = [
-            // Address Table Alias
-            'address' => 'ADRCRB',
-
-            // Country Table Alias
-            'country' => 'CNTRYCRB',
-
-            // State Table Alias
-            'state' => 'STATECRB',
-
-            // Local Body Table Alias
-            'local_body' => 'LCLBDCRB',
-
-            // Type/Module Table Alias
-            'module' => 'CRB'
-        ];
-        $this->address_model->module_select(IQB_ADDRESS_TYPE_COMPANY_BRANCH, NULL, $table_aliases, 'addr_creditor_', FALSE);
 
 
         $record = $this->db->where('P.id', $id)

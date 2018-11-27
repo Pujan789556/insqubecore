@@ -72,18 +72,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <td class="text-bold">Object on Loan/Financed?</td>
                             <td><?php echo $record->flag_on_credit === 'Y' ? 'Yes' : 'No';?></td>
                         </tr>
-                        <?php if($record->flag_on_credit === 'Y'):?>
-                            <tr>
-                                <td class="text-bold">Primary Financer</td>
-                                <td>
-                                    <?php echo $this->security->xss_clean($record->creditor_name);?>, <?php echo $this->security->xss_clean($record->creditor_branch_name); ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-bold">Other Financer(s)</td>
-                                <td><?php echo nl2br($this->security->xss_clean($record->other_creditors));?></td>
-                            </tr>
-                        <?php endif?>
+
                         <tr>
                                 <td class="text-bold">Care of</td>
                                 <td><?php echo nl2br($this->security->xss_clean($record->care_of));?></td>
@@ -137,3 +126,44 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         ?>
     </div>
 </div>
+
+<?php if( $record->flag_on_credit === IQB_FLAG_YES ): ?>
+    <div class="box box-bordered box-warning">
+        <div class="box-header with-border border-dark">
+            <h4 class="no-margin">
+                <span class="pull-left">Creditor (Bank/Financial Institution) Information</span>
+                <span class="pull-right">
+                    <?php if( _POLICY_is_editable($record->status, FALSE) ): ?>
+                            <a href="#"
+                                class="trg-dialog-edit btn btn-primary btn-sm"
+                                title="Add Bank/Financial Institution"
+                                data-toggle="tooltip"
+                                data-box-size="large"
+                                data-title='<i class="fa fa-pencil-square-o"></i> Add Bank/Financial Institution - <?php echo $record->code?>'
+                                data-url="<?php echo site_url('policies/save_creditor/' . $record->id);?>"
+                                data-form="#_form-policy">
+                                <i class="fa fa-plus"></i>
+                            </a>
+                    <?php endif?>
+                </span>
+            </h4>
+        </div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Branch</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="policy-creditor-list">
+                <?php
+                /**
+                 * Bank Rows
+                 */
+                $this->load->view('policies/_rows_creditor', ['policy_record' => $record, 'creditors' => $creditors]);
+                ?>
+            </tbody>
+        </table>
+    </div>
+<?php endif; ?>

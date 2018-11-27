@@ -615,6 +615,13 @@ class Policies extends MY_Controller
 						 */
 						$this->load->model('rel_policy_bsrs_heading_model');
 						$view_data['bsrs_headings_policy'] = $this->rel_policy_bsrs_heading_model->by_policy($record->id);
+
+						/**
+						 * Creditors List
+						 */
+						$this->load->model('rel_policy_creditor_model');
+						$view_data['creditors'] = $this->rel_policy_creditor_model->rows(['REL.policy_id' => $record->id]);
+
 					}
 
 					$html = $this->load->view($view, $view_data, TRUE);
@@ -1083,6 +1090,216 @@ class Policies extends MY_Controller
 		return $this->template->json($data);
 	}
 
+	// --------------------------------------------------------------------
+
+	/**
+	 * Add a Creditor
+	 *
+	 * @return void
+	 */
+	public function save_creditor($id, $creditor_id = NULL, $creditor_branch_id = NULL)
+	{
+
+		$this->load->model('rel_policy_creditor_model');
+
+		// Capture the ID
+		$id 				= (int)$id;
+		$creditor_id 		= (int)$creditor_id;
+		$creditor_branch_id = (int)$creditor_branch_id;
+
+
+		// Valid Record ?
+		$policy_record = $this->policy_model->row($id);
+		if(!$policy_record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Policy not found!'
+			],404);
+		}
+
+		$record = $this->rel_policy_creditor_model->get($id, $creditor_id, $creditor_branch_id);
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($policy_record->branch_id);
+
+
+		/**
+		 * Check Editable?
+		 */
+		_POLICY_is_editable($policy_record->status);
+
+
+		$form_data = [
+			'form_elements' => $this->policy_model->get_creditor_validation_rules($record),
+			'record' 		=> $record,
+			'policy_record' => $policy_record
+		];
+
+		// Form Submitted? Save the data
+		$this->_save_creditor($form_data, $policy_record, $record);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Save a Record from Endorsement
+	 *
+	 */
+	private function _save_creditor($form_data, $policy_record, $record = NULL)
+	{
+		/**
+		 * Form Submitted?
+		 */
+		if( $this->input->post() )
+		{
+			$done = FALSE;
+			$v_rules = $this->policy_model->get_creditor_validation_rules();
+			$this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$post_data = $this->input->post();
+
+        		$data = [
+        			'policy_id' 			=> $policy_record->id,
+        			'creditor_id' 		 	=> $post_data['creditor_id'],
+        			'creditor_branch_id' 	=> $post_data['creditor_branch_id']
+        		];
+
+        		$done = $this->rel_policy_creditor_model->save($data, $record);
+
+	        	if(!$done)
+				{
+					$status = 'error';
+					$message = 'Could not update.';
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+				}
+
+				$updateSectionData = NULL;
+				if($done)
+				{
+					$creditors = $this->rel_policy_creditor_model->rows(['REL.policy_id' => $policy_record->id]);
+					$html = $this->load->view(
+											'policies/_rows_creditor',
+											[
+												'creditors' => $creditors,
+												'policy_record' => $policy_record
+											], TRUE);
+
+					$updateSectionData = [
+						'box' 		=> '#policy-creditor-list',
+						'method' 	=> 'html',
+						'html'		=> $html
+					];
+				}
+
+				return $this->template->json([
+					'status' 		=> $status,
+					'message' 		=> $message,
+					'hideBootbox' 	=> true,
+					'updateSection' => $done,
+					'updateSectionData' => $updateSectionData
+				]);
+        	}
+        	else
+        	{
+        		return $this->template->json([
+					'status' 		=> 'error',
+					'message' 		=> 'Validation Error.',
+					'reloadForm' 	=> true,
+					'form' 			=> $this->load->view('policies/_form_creditor', $form_data, TRUE)
+				]);
+        	}
+		}
+
+		/**
+		 * Render The Form
+		 */
+		$json_data = [
+			'form' => $this->load->view('policies/_form_creditor', $form_data, TRUE)
+		];
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Add a Creditor
+	 *
+	 * @return void
+	 */
+	public function delete_creditor($id, $creditor_id, $creditor_branch_id)
+	{
+
+		$this->load->model('rel_policy_creditor_model');
+
+		// Capture the ID
+		$id 				= (int)$id;
+		$creditor_id 		= (int)$creditor_id;
+		$creditor_branch_id = (int)$creditor_branch_id;
+
+
+		// Valid Record ?
+		$policy_record = $this->policy_model->row($id);
+		if(!$policy_record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Policy not found!'
+			],404);
+		}
+
+		$record = $this->rel_policy_creditor_model->get($id, $creditor_id, $creditor_branch_id);
+		if(!$record)
+		{
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Creditor not found!'
+			],404);
+		}
+
+		/**
+		 * Belongs to Me? i.e. My Branch? OR Terminate
+		 */
+		belongs_to_me($policy_record->branch_id);
+
+
+		/**
+		 * Check Editable?
+		 */
+		_POLICY_is_editable($policy_record->status);
+
+		/**
+		 * Let's Delete the Creditor
+		 */
+		$done = $this->rel_policy_creditor_model->delete_creditor($record);
+		if($done)
+		{
+			$row_id = '_policy-creditor-' . $record->policy_id . '-' . $record->creditor_id . '-' . $record->creditor_branch_id;
+			$data = [
+				'status' 	=> 'success',
+				'message' 	=> 'Successfully deleted!',
+				'removeRow' => true,
+				'rowId'		=> '#' . $row_id
+			];
+		}
+		else
+		{
+			$data = [
+				'status' 	=> 'error',
+				'message' 	=> 'Could not be deleted. It might have references to other module(s)/component(s).'
+			];
+		}
+		return $this->template->json($data);
+
+	}
+
 
 	// --------------------------------------------------------------------
 	// CRUD HELPER - FUNCTIONS
@@ -1195,26 +1412,40 @@ class Policies extends MY_Controller
 	    // --------------------------------------------------------------------
 
 		/**
-		 * Callback: Valid Company Branch
+		 * Callback: Valid Creditor Branch
 		 *
-		 * Logic:
-		 * 		If flag_on_credit is set to Yes, you should supply both creditor company
-		 * 		and its branch.
 		 *
-		 * @param type $branch_id
+		 * @param int $creditor_branch_id
 		 * @return type
 		 */
-	    public function _cb_valid_company_branch($branch_id)
+	    public function _cb_valid_creditor_branch($creditor_branch_id)
 	    {
-	    	$branch_id = (int)$branch_id;
+	    	$creditor_branch_id = (int)$creditor_branch_id;
 	    	$creditor_id = (int)$this->input->post('creditor_id');
 	    	$this->load->model('company_branch_model');
 
-	    	if( !$this->company_branch_model->valid_branch($creditor_id, $branch_id) )
+	    	if( !$this->company_branch_model->valid_branch($creditor_id, $creditor_branch_id) )
 	    	{
-	    		$this->form_validation->set_message('_cb_valid_company_branch', 'The supplied "Branch" does not belong to selected "Creditor Company".');
+	    		$this->form_validation->set_message('_cb_valid_creditor_branch', 'The supplied "Branch" does not belong to selected "Creditor Company".');
 	            return FALSE;
 	    	}
+
+	    	/**
+	    	 * Check if already exists?
+	    	 */
+	    	$this->load->model('rel_policy_creditor_model');
+	    	$policy_id = $this->input->post('policy_id');
+	    	$where = [
+	            'policy_id'             => $policy_id,
+	            'creditor_id'           => $creditor_id,
+	            'creditor_branch_id'    => $creditor_branch_id,
+	        ];
+	        if( $this->rel_policy_creditor_model->check_duplicate($where) )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_creditor_branch', 'The supplied Creditor already exists.');
+	            return FALSE;
+	    	}
+
 	        return TRUE;
 	    }
 
@@ -1534,11 +1765,32 @@ class Policies extends MY_Controller
 		$this->load->model('rel_policy_bsrs_heading_model');
 		$bsrs_headings_policy 		= $this->rel_policy_bsrs_heading_model->by_policy($record->id);
 
+		$this->load->model('rel_policy_creditor_model');
+		$creditors = $this->rel_policy_creditor_model->rows(['REL.policy_id' => $record->id]);
+
 		$data = [
 			'record' 				=> $record,
 			'endorsement_record' 	=> $endorsement_record,
-			'bsrs_headings_policy' 	=> $bsrs_headings_policy
+			'bsrs_headings_policy' 	=> $bsrs_headings_policy,
+			'creditors' 			=> $creditors
 		];
+
+
+		if ( $this->input->is_ajax_request() )
+		{
+			$html = $this->load->view('policies/tabs/_tab_overview', $data, TRUE);
+			$ajax_data = [
+				'status' => 'success',
+				'html'   => $html
+			];
+
+			if( !empty($ajax_extra))
+			{
+				$ajax_data = array_merge($ajax_data, $ajax_extra);
+			}
+			$this->template->json($ajax_data);
+		}
+
 
 		$page_header = 'Policy Details - <span id="page-title-policy-code">' . $record->code . '</span>';
 
@@ -1617,9 +1869,12 @@ class Policies extends MY_Controller
 		/**
 		 * Generate Dynamic HTML for Schedule
 		 */
+		$this->load->model('rel_policy_creditor_model');
+		$creditors = $this->rel_policy_creditor_model->rows(['REL.policy_id' => $record->id]);
 		$data = [
 			'record' 				=> $record,
-			'endorsement_record' 	=> $endorsement_record
+			'endorsement_record' 	=> $endorsement_record,
+			'creditors' 			=> $creditors
 		];
 		$html = $this->load->view( $schedule_view, $data, TRUE);
 
@@ -1716,9 +1971,12 @@ class Policies extends MY_Controller
 			/**
 			 * Generate Dynamic HTML for Schedule
 			 */
+			$this->load->model('rel_policy_creditor_model');
+			$creditors = $this->rel_policy_creditor_model->rows(['REL.policy_id' => $record->id]);
 			$data = [
 				'record' 				=> $record,
-				'endorsement_record' 	=> $endorsement_record
+				'endorsement_record' 	=> $endorsement_record,
+				'creditors' 			=> $creditors
 			];
 			$html = $this->load->view( $schedule_view, $data, TRUE);
 
@@ -1825,10 +2083,12 @@ class Policies extends MY_Controller
 				 * Beema Samiti Report Headings
 				 */
 				$this->load->model('rel_policy_bsrs_heading_model');
+				$this->load->model('rel_policy_creditor_model');
 				$view_data = [
-					'record' => $record,
-					'endorsement_record' => $endorsement_record,
-					'bsrs_headings_policy' => $this->rel_policy_bsrs_heading_model->by_policy($record->id)
+					'record' 				=> $record,
+					'endorsement_record' 	=> $endorsement_record,
+					'bsrs_headings_policy' 	=> $this->rel_policy_bsrs_heading_model->by_policy($record->id),
+					'creditors' 			=> $this->rel_policy_creditor_model->rows(['REL.policy_id' => $record->id])
 				];
 				$html = $this->load->view($view, $view_data, TRUE);
 				$ajax_data = [
@@ -2005,9 +2265,23 @@ class Policies extends MY_Controller
 				}
 
 				/**
+				 * Case 0.1: Creditor Setup?
+				 */
+				if($record->flag_on_credit == IQB_FLAG_YES)
+				{
+					$this->load->model('rel_policy_creditor_model');
+					if( !$this->rel_policy_creditor_model->check_duplicate(['policy_id' => $record->id]) )
+					{
+						$__flag_passed 		= FALSE;
+						$failed_message 	= 'Please Update "Policy Creditor (Bank/Finance) Information" First!';
+					}
+				}
+
+
+				/**
 				 * Case 1: Premium Must be Updated
 				 */
-				if( !$endorsement_record->amt_basic_premium )
+				if( $__flag_passed && !$endorsement_record->amt_basic_premium )
 				{
 					$__flag_passed 		= FALSE;
 					$failed_message 	= 'Please Update "Policy Premium" First!';

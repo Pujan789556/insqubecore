@@ -65,11 +65,11 @@ echo form_open( $this->uri->uri_string(),
                  /**
                  * Load Form Components : Creditor Info
                  */
-                $creditor_info_elements = $form_elements['creditor_info'];
-                $this->load->view('templates/_common/_form_components_horz', [
-                    'form_elements' => $creditor_info_elements,
-                    'form_record'   => $record
-                ]);
+                // $creditor_info_elements = $form_elements['creditor_info'];
+                // $this->load->view('templates/_common/_form_components_horz', [
+                //     'form_elements' => $creditor_info_elements,
+                //     'form_record'   => $record
+                // ]);
                 ?>
             </div>
 
@@ -284,19 +284,19 @@ function __do_select(a){
 }
 
 // Creator Info Toggler
-function __toggle_creditor_info(){
+// function __toggle_creditor_info(){
 
-    var $box    = $('#__creditor_info_box'),
-        flag    = $("input[type=radio][name=flag_on_credit]:checked").val();
+//     var $box    = $('#__creditor_info_box'),
+//         flag    = $("input[type=radio][name=flag_on_credit]:checked").val();
 
-    if(typeof flag === 'undefined' || flag === 'N'){
-        $box.fadeOut();
-        $('#_creditor-id').prop('selectedIndex',0).trigger('change');
-        $('#_other-creditors').val('');
-    }else{
-        $box.fadeIn();
-    }
-}
+//     if(typeof flag === 'undefined' || flag === 'N'){
+//         $box.fadeOut();
+//         $('#_creditor-id').prop('selectedIndex',0).trigger('change');
+//         $('#_other-creditors').val('');
+//     }else{
+//         $box.fadeIn();
+//     }
+// }
 
 // Agent Info Toggler
 function __toggle_agent_info(){
@@ -310,31 +310,31 @@ function __toggle_agent_info(){
     }
 }
 
-// Change Branch Options on Creditor Change
-$('#_creditor-id').on('change', function(e){
-    var v = this.value,
-        $target = $('#_creditor-branch-id');
-    $target.empty();
-    if(v){
-        // load the object form
-        $.getJSON('<?php echo base_url()?>policies/gccbc/'+v, function(r){
-            // Update dropdown
-            if(r.status == 'success' && typeof r.options !== 'undefined'){
-                $target.append($('<option>', {
-                    value: '',
-                    text : 'Select...'
-                }));
-                $.each(r.options, function(key, value) {
-                    $target.append($('<option>', {
-                        value: key,
-                        text : value
-                    }));
-                });
-                $target.prop('selectedIndex',0).trigger('change');
-              }
-        });
-    }
-});
+// // Change Branch Options on Creditor Change
+// $('#_creditor-id').on('change', function(e){
+//     var v = this.value,
+//         $target = $('#_creditor-branch-id');
+//     $target.empty();
+//     if(v){
+//         // load the object form
+//         $.getJSON('<?php echo base_url()?>policies/gccbc/'+v, function(r){
+//             // Update dropdown
+//             if(r.status == 'success' && typeof r.options !== 'undefined'){
+//                 $target.append($('<option>', {
+//                     value: '',
+//                     text : 'Select...'
+//                 }));
+//                 $.each(r.options, function(key, value) {
+//                     $target.append($('<option>', {
+//                         value: key,
+//                         text : value
+//                     }));
+//                 });
+//                 $target.prop('selectedIndex',0).trigger('change');
+//               }
+//         });
+//     }
+// });
 
 // Policy Package Changer
 $('#_portfolio-id').on('change', function(e){
@@ -450,10 +450,10 @@ $('.input-group.datetime, .input-group.datetime input').datetimepicker({
 });
 
 // Hide Creditor Info if Not on Loan
-__toggle_creditor_info();
-$(document).on('ifChecked', 'input[name="flag_on_credit"]', function(e){
-    __toggle_creditor_info();
-});
+// __toggle_creditor_info();
+// $(document).on('ifChecked', 'input[name="flag_on_credit"]', function(e){
+//     __toggle_creditor_info();
+// });
 
 
 // Hide agent list on Direct Discount Checked
