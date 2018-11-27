@@ -119,7 +119,7 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                             <tr>
                                 <td>
                                     जोखिम बहन गर्न शूरु हुने मिति: <?php echo $record->start_date?><br/>
-                                    समय:
+                                    समय: <?php echo $record->start_time?>
                                 </td>
                             </tr>
 

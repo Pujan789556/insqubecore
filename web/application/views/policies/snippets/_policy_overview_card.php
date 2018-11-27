@@ -40,7 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </tr>
                         <tr>
                             <td class="text-bold">Portfolio</td>
-                            <td><?php echo $record->portfolio_name?></td>
+                            <td><?php echo $record->portfolio_name_en?></td>
                         </tr>
                         <tr>
                             <td class="text-bold">Policy Package</td>

@@ -62,7 +62,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			$object_record = (object)[
 				'id' 				=> $record->object_id,
 	            'portfolio_id'  	=> $record->portfolio_id,
-	            'portfolio_name' 	=> $record->portfolio_name,
+	            'portfolio_name' 	=> $record->portfolio_name_en,
 	            'customer_name' 	=> $record->customer_name,
 	            'amt_sum_insured' 	=> $record->object_amt_sum_insured,
 	            'attributes'    	=> $record->object_attributes,

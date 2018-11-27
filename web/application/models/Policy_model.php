@@ -1600,7 +1600,7 @@ class Policy_model extends MY_Model
                         /**
                          * Portfolio Table ( code, name )
                          */
-                        "PRT.name_en as portfolio_name, PRT.code as portfolio_code, " .
+                        "PRT.name_en AS portfolio_name_en, PRT.name_np AS portfolio_name_np, PRT.code AS portfolio_code, " .
 
                         /**
                          * Riks District, State, Region

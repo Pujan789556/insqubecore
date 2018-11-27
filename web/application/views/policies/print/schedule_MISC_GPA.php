@@ -93,48 +93,15 @@ $schedule_table_title   = 'सामुहिक दुर्घटना बी
                     </td>
 
                     <td width="50%" class="no-padding no-border">
+                        <?php
+                        /**
+                         * Basic Information
+                         */
+                        $this->load->view('policies/print/_schedule_basic',
+                            ['lang' => 'np', 'record' => $record]
+                        );
+                        ?>
                         <table class="table">
-                            <tr>
-                                <td>
-                                    <strong>बीमालेख धारकको तर्फबाट बीमा प्रस्ताव गर्ने प्रस्तावकको</strong><br/>
-                                    नाम: <?php echo nl2br(htmlspecialchars($record->proposer));?><br/>
-                                    ठेगाना: <?php echo nl2br(htmlspecialchars($record->proposer_address));?><br>
-                                    पेशा: <?php echo nl2br(htmlspecialchars($record->proposer_profession));?>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>बीमा प्रस्ताव भएको मिति: <?php echo $record->proposed_date?></td>
-                            </tr>
-
-                            <tr>
-                                <td>बीमालेख जारी भएको स्थान र मिति: <?php echo $this->dx_auth->get_branch_code()?>, <?php echo $record->issued_date?></td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    जोखिम बहन गर्न शूरु हुने मिति: <?php echo $record->start_date?><br/>
-                                    समय:
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <?php
-                                /**
-                                 * Agent Details
-                                 */
-                                $agent_text = implode(' ', array_filter([$record->agent_bs_code, $record->agent_ud_code]));
-                                ?>
-                                <td>बीमा अभिकर्ताको नाम र इजाजत पत्र नम्बर: <?php echo $agent_text;?></td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    बीमा अवधि: <?php echo $record->start_date?> देखि <?php echo $record->end_date?> सम्म
-                                    (<?php echo _POLICY_duration_formatted($record->start_date, $record->end_date, 'np'); ?>)
-                                </td>
-                            </tr>
-
                             <tr>
                                 <td>
                                     <?php
