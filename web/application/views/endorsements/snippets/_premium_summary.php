@@ -55,7 +55,7 @@ else
                 <tbody>
                     <tr>
                         <th>Portfolio</th>
-                        <td class="text-right"><?php echo $policy_record->portfolio_name;?></td>
+                        <td class="text-right"><?php echo $policy_record->portfolio_name_en;?></td>
                     </tr>
                     <tr>
                         <th>Gross Sum Insured (Rs.)</th>
