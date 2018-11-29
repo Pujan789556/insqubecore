@@ -440,13 +440,15 @@ class Endorsements extends MY_Controller
 				 */
 				$this->load->helper('account');
 
-				// $taxable amount = Transfer Fee - Transfer NCD + Stamp Duty
-				$taxable_amount = 	bcsub(
-										floatval($data['amt_transfer_fee']),
-										floatval($data['amt_transfer_ncd']),
+				// $taxable amount = Transfer Fee + Transfer NCD + Stamp Duty
+				$taxable_amount = 	ac_bcsum(
+										[
+											floatval($data['amt_transfer_fee']),
+											floatval($data['amt_transfer_ncd']),
+											floatval($data['amt_stamp_duty'])
+										],
 										IQB_AC_DECIMAL_PRECISION
 									);
-				$taxable_amount = bcadd($taxable_amount, floatval($data['amt_stamp_duty']), IQB_AC_DECIMAL_PRECISION);
 
 				$amt_vat 		 = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount, IQB_AC_DECIMAL_PRECISION);
 				$data['amt_vat'] = $amt_vat;

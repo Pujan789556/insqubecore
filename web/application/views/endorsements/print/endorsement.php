@@ -218,7 +218,7 @@ $labels = [
                                 {
                                     $premium_table [ $labels['ownership_transfer_ncd'][$lang] ]  = $transfer_ncd;
                                 }
-                                $total_premium  = bcsub($transfer_fee, $transfer_ncd, IQB_AC_DECIMAL_PRECISION);
+                                $total_premium  = bcadd($transfer_fee, $transfer_ncd, IQB_AC_DECIMAL_PRECISION);
                             }
                             else
                             {
@@ -311,8 +311,8 @@ $labels = [
              * Load Footer
              */
             $this->load->view('endorsements/print/_endorsement_footer', ['lang' => $lang]);
-            ?>
-        <?php
+
+
             /**
              * PDF Pagebreak for next Endorsement
              */
