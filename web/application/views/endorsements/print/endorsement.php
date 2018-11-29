@@ -316,11 +316,11 @@ $labels = [
             /**
              * PDF Pagebreak for next Endorsement
              */
-            $i++;
             if($i < $count)
             {
                 echo '<pagebreak>';
             }
+            $i++;
         endforeach;?>
     </body>
 </html>
