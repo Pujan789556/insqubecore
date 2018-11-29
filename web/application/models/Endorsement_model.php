@@ -193,11 +193,11 @@ class Endorsement_model extends MY_Model
                         ],
                         [
                             'field' => 'amt_transfer_ncd',
-                            'label' => 'No Claim Discount',
+                            'label' => 'NCD Return (Rs.)',
                             'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                             '_type'     => 'text',
                             '_default'  => 0.00,
-                            '_help_text' => 'This applies only in <strong class="text-red">MOTOR</strong> portfoliios.',
+                            '_help_text' => '<strong>No Claim Discount Return:</strong> This applies only in <strong class="text-red">MOTOR</strong> portfoliios.',
                             '_required' => true
                         ],
                         [
