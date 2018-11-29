@@ -123,8 +123,6 @@ class Policy_model extends MY_Model
              * If posted and Direct Discount Checked, We don't need agent
              */
             $agent_validation           = 'trim|required|integer|max_length[11]';
-            // $creditor_validation        = 'trim|integer|max_length[11]';
-            // $creditor_branch_validation = 'trim|integer|max_length[11]';
             if($this->input->post())
             {
                 $flag_dc = $this->input->post('flag_dc');
@@ -132,13 +130,6 @@ class Policy_model extends MY_Model
                 {
                     $agent_validation = 'trim|integer|max_length[11]';
                 }
-
-                // $flag_on_credit = $this->input->post('flag_on_credit');
-                // if($flag_on_credit === 'Y')
-                // {
-                //     $creditor_validation        = 'trim|required|integer|max_length[11]';
-                //     $creditor_branch_validation = 'trim|required|integer|max_length[11]|callback__cb_valid_company_branch';
-                // }
             }
 
             /**
@@ -158,8 +149,6 @@ class Policy_model extends MY_Model
                 $portfolio_id               = (int)$portfolio_id;
                 $policy_package_dropdown    = _OBJ_policy_package_dropdown($portfolio_id);
             }
-
-            // $creditor_branch_dropdown   = $creditor_id ? IQB_BLANK_SELECT + $this->company_branch_model->dropdown_by_company($creditor_id) : IQB_BLANK_SELECT;
 
             /**
              * Default End Duration as 1 Year (including start date)
@@ -307,42 +296,6 @@ class Policy_model extends MY_Model
                         '_required'     => true
                     ]
                 ],
-
-                // 'creditor_info' => [
-                //     [
-                //         'field' => 'creditor_id',
-                //         'label' => 'Primary Financer(Bank/Finance Institution)',
-                //         'rules' => $creditor_validation,
-                //         '_id'       => '_creditor-id',
-                //         '_extra_attributes' => 'style="width:100%; display:block"',
-                //         '_type'     => 'dropdown',
-                //         '_data'     => IQB_BLANK_SELECT + $this->company_model->dropdown_creditor(true),
-                //         '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Creditor Company" if not available in this list and try again.',
-                //         '_required' => true
-                //     ],
-                //     [
-                //         'field' => 'creditor_branch_id',
-                //         'label' => 'Financer Branch',
-                //         'rules' => $creditor_branch_validation,
-                //         '_id'       => '_creditor-branch-id',
-                //         '_extra_attributes' => 'style="width:100%; display:block"',
-                //         '_type'     => 'dropdown',
-                //         '_data'     => $creditor_branch_dropdown,
-                //         '_help_text' => '<i class="fa fa-info-circle"></i> Please ask your IT Support to add "Company Branch" of selected "Creditor Company" if not available in this list and try again.',
-                //         '_required' => true
-                //     ],
-                //     [
-                //         'field' => 'other_creditors',
-                //         'label' => 'Other Financers',
-                //         'rules' => 'trim|htmlspecialchars|max_length[500]',
-                //         '_id'               => '_other-creditors',
-                //         '_extra_attributes' => 'style="width:100%; display:block"',
-                //         '_type'     => 'textarea',
-                //         'rows'      => 4,
-                //         '_help_text' => '<i class="fa fa-info-circle"></i> If you have more than one financers, please mention here with branch information.',
-                //         '_required' => false
-                //     ]
-                // ],
 
                 /**
                  * Policy Object Information
@@ -743,15 +696,6 @@ class Policy_model extends MY_Model
         $data['fiscal_yr_id'] = $fy_record->id;
 
 
-        // Reset Creditor Info if "No" Selected
-        if($data['flag_on_credit'] === 'N')
-        {
-            $data['creditor_id']        = NULL;
-            $data['creditor_branch_id'] = NULL;
-            $data['other_creditors']    = NULL;
-        }
-
-
         // Refactor Date & time
         $data = $this->__refactor_datetime_fields($data);
 
@@ -815,14 +759,6 @@ class Policy_model extends MY_Model
          */
         $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record->id, $data['start_date'], $data['end_date'] );
 
-
-        // Reset Creditor Info if "No" Selected
-        if($data['flag_on_credit'] === 'N')
-        {
-            $data['creditor_id']        = NULL;
-            $data['creditor_branch_id'] = NULL;
-            $data['other_creditors']    = NULL;
-        }
 
         /**
          * No marketing staff select?
