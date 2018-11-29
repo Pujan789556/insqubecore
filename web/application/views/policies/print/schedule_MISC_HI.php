@@ -47,7 +47,7 @@ $schedule_table_title   = 'स्वास्थ्य उपचार बीम
                                     /**
                                      * Insured Party, Financer, Other Financer, Careof
                                      */
-                                    $this->load->view('policies/print/_schedule_insured_party', ['lang' => 'np']);
+                                    $this->load->view('policies/print/_snippet_insured_party', ['lang' => 'np']);
                                     ?>
                                 </td>
                             </tr>
@@ -62,8 +62,12 @@ $schedule_table_title   = 'स्वास्थ्य उपचार बीम
 
                             <tr>
                                 <td>
-                                    रसिद नं.: <br/>
-                                    रसिदको मिति:  समय:
+                                    <?php
+                                    /**
+                                     * Invoice, Receipt Info
+                                     */
+                                    $this->load->view('policies/print/_snippet_invoice_info', ['lang' => 'np']);
+                                    ?>
                                 </td>
                             </tr>
                         </table>
@@ -74,7 +78,7 @@ $schedule_table_title   = 'स्वास्थ्य उपचार बीम
                         /**
                          * Basic Information
                          */
-                        $this->load->view('policies/print/_schedule_basic',
+                        $this->load->view('policies/print/_snippet_basic',
                             ['lang' => 'np', 'record' => $record]
                         );
                         ?>
@@ -144,7 +148,7 @@ $schedule_table_title   = 'स्वास्थ्य उपचार बीम
         /**
          * Load Footer
          */
-        $this->load->view('policies/print/_schedule_footer', ['lang' => 'np']);
+        $this->load->view('policies/print/_snippet_footer', ['lang' => 'np']);
         ?>
     </body>
 </html>

@@ -102,7 +102,7 @@ if ( ! function_exists('_OBJ_ENG_EAR_validation_rules'))
 			        'field' => 'object[principal]',
 			        '_key' => 'principal',
 			        'label' => 'Name & Address of Pricipal',
-			        'rules' => 'trim|required|max_length[250]',
+			        'rules' => 'trim|required|max_length[1000]',
 			        'rows' 		=> 4,
 			        '_type'     => 'textarea',
 			        '_required' => true

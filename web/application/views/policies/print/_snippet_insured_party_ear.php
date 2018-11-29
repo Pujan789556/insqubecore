@@ -6,7 +6,6 @@
  */
 $insured_title          = 'Name and address of Contractor';
 $financer_title         = 'Name and address of Financer(s)';
-$other_financer_title   = 'Other Financer(s)';
 $care_of_title          = 'Care Of';
 
 /**

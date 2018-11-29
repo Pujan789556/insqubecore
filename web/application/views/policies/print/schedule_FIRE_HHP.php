@@ -45,7 +45,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                                     /**
                                      * Insured Party, Financer, Other Financer, Careof
                                      */
-                                    $this->load->view('policies/print/_schedule_insured_party', ['lang' => 'np']);
+                                    $this->load->view('policies/print/_snippet_insured_party', ['lang' => 'np']);
                                     ?>
                                 </td>
                             </tr>
@@ -57,8 +57,12 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
 
                             <tr>
                                 <td>
-                                    रसिद नं.: <br/>
-                                    रसिदको मिति:  समय:
+                                    <?php
+                                    /**
+                                     * Invoice, Receipt Info
+                                     */
+                                    $this->load->view('policies/print/_snippet_invoice_info', ['lang' => 'np']);
+                                    ?>
                                 </td>
                             </tr>
                         </table>
@@ -69,7 +73,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                         /**
                          * Basic Information
                          */
-                        $this->load->view('policies/print/_schedule_basic',
+                        $this->load->view('policies/print/_snippet_basic',
                             ['lang' => 'np', 'record' => $record]
                         );
                         ?>
@@ -199,7 +203,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
         /**
          * Load Footer
          */
-        $this->load->view('policies/print/_schedule_footer', ['lang' => 'np']);
+        $this->load->view('policies/print/_snippet_footer', ['lang' => 'np']);
         ?>
     </body>
 </html>

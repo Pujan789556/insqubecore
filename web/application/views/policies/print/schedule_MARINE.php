@@ -55,17 +55,31 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
                     <td><strong>Agent:</strong> <?php echo $agent_text;?> </td>
                 </tr>
                 <tr>
-                    <td>
-                        <?php
-                        /**
-                         * Insured Party, Financer, Other Financer, Careof
-                         */
-                        $this->load->view('policies/print/_schedule_insured_party', ['lang' => 'en']);
-                        ?>
+                    <td class="no-padding">
+                        <table>
+                            <tr>
+                                <td>
+                                    <?php
+                                    /**
+                                     * Insured Party, Financer, Other Financer, Careof
+                                     */
+                                    $this->load->view('policies/print/_snippet_insured_party', ['lang' => 'en']);
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <?php
+                                    /**
+                                     * Invoice, Receipt Info
+                                     */
+                                    $this->load->view('policies/print/_snippet_invoice_info', ['lang' => 'en']);
+                                    ?>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                     <td>
-                        <strong>Bill No.:</strong> <br/>
-                        <strong>Receipt No.:</strong><br>
                         <strong>Issued at:</strong> <?php echo htmlspecialchars($record->branch_name_en) ?>
 
                         <br/><br/><strong>Period of Insurance:</strong><br>
@@ -251,7 +265,7 @@ $schedule_table_title   = 'Marine Insurance Policy (Schedule)';
         /**
          * Load Footer
          */
-        $this->load->view('policies/print/_schedule_footer', ['lang' => 'en']);
+        $this->load->view('policies/print/_snippet_footer', ['lang' => 'en']);
         ?>
 
         <?php $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);

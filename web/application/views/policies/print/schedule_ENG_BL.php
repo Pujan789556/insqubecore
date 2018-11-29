@@ -50,13 +50,29 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
                 </tr>
 
                 <tr>
-                    <td>
-                        <?php
-                        /**
-                         * Insured Party, Financer, Other Financer, Careof
-                         */
-                        $this->load->view('policies/print/_schedule_insured_party', ['lang' => 'en']);
-                        ?>
+                    <td class="no-padding">
+                        <table>
+                            <tr>
+                                <td>
+                                    <?php
+                                    /**
+                                     * Insured Party, Financer, Other Financer, Careof
+                                     */
+                                    $this->load->view('policies/print/_snippet_insured_party', ['lang' => 'en']);
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <?php
+                                    /**
+                                     * Invoice, Receipt Info
+                                     */
+                                    $this->load->view('policies/print/_snippet_invoice_info', ['lang' => 'en']);
+                                    ?>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                     <td>
                         <table>
@@ -225,7 +241,7 @@ $schedule_table_title   = 'Boiler Explosion (Schedule)';
         /**
          * Load Footer
          */
-        $this->load->view('policies/print/_schedule_footer', ['lang' => 'en']);
+        $this->load->view('policies/print/_snippet_footer', ['lang' => 'en']);
         ?>
     </body>
 </html>

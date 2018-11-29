@@ -1969,14 +1969,25 @@ class Policies extends MY_Controller
 			}
 
 			/**
-			 * Generate Dynamic HTML for Schedule
+			 * Creditors
 			 */
 			$this->load->model('rel_policy_creditor_model');
 			$creditors = $this->rel_policy_creditor_model->rows(['REL.policy_id' => $record->id]);
+
+			/**
+			 * Invoice & Receipt Data
+			 */
+			$this->load->model('ac_invoice_model');
+			$first_invoice = $this->ac_invoice_model->first_invoice($record->id);
+
+			/**
+			 * Generate Dynamic HTML for Schedule
+			 */
 			$data = [
 				'record' 				=> $record,
 				'endorsement_record' 	=> $endorsement_record,
-				'creditors' 			=> $creditors
+				'creditors' 			=> $creditors,
+				'first_invoice' 		=> $first_invoice
 			];
 			$html = $this->load->view( $schedule_view, $data, TRUE);
 

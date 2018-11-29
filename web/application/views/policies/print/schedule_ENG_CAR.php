@@ -48,13 +48,29 @@ $schedule_table_title   = "Contractor's All Risks (Schedule)";
                     <td><strong>Agent:</strong> <?php echo $agent_text;?> </td>
                 </tr>
                 <tr>
-                    <td>
-                        <?php
-                        /**
-                         * Insured Party, Financer, Other Financer, Careof
-                         */
-                        $this->load->view('policies/print/_schedule_insured_party_car', ['object_attributes' => $object_attributes, 'record' => $record]);
-                        ?>
+                    <td class="no-padding">
+                        <table>
+                            <tr>
+                                <td>
+                                    <?php
+                                    /**
+                                     * Insured Party, Financer, Other Financer, Careof
+                                     */
+                                    $this->load->view('policies/print/_snippet_insured_party_car', ['lang' => 'en', 'object_attributes' => $object_attributes]);
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <?php
+                                    /**
+                                     * Invoice, Receipt Info
+                                     */
+                                    $this->load->view('policies/print/_snippet_invoice_info', ['lang' => 'en']);
+                                    ?>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                     <td>
                         <strong>Contract Title:</strong><br>
@@ -94,7 +110,7 @@ $schedule_table_title   = "Contractor's All Risks (Schedule)";
                         /**
                          * Policy Installments
                          */
-                        $this->load->view('policies/print/_schedule_installments');
+                        $this->load->view('policies/print/_snippet_installments');
                         ?>
                     </td>
                 </tr>
@@ -256,7 +272,7 @@ $schedule_table_title   = "Contractor's All Risks (Schedule)";
         /**
          * Load Footer
          */
-        $this->load->view('policies/print/_schedule_footer', ['lang' => 'en']);
+        $this->load->view('policies/print/_snippet_footer', ['lang' => 'en']);
         ?>
     </body>
 </html>

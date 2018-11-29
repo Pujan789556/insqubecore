@@ -444,6 +444,37 @@ class Ac_invoice_model extends MY_Model
 
     // --------------------------------------------------------------------
 
+    /**
+     * Get the First Invoice of a Policy
+     *
+     * @param int $policy_id
+     * @return object
+     */
+    public function first_invoice($policy_id)
+    {
+        return $this->db->select(
+                            // Invoice Table
+                            'I.*, ' .
+
+                            // Receipt Data
+                            'RCPT.id as receipt_id, RCPT.receipt_code, RCPT.created_at AS receipt_datetime, ' .
+
+                            // Policy Voucher Relation Data
+                            'REL.policy_id, REL.ref, REL.ref_id'
+                        )
+                    ->from($this->table_name . ' AS I')
+                    ->join('ac_receipts RCPT', 'I.id = RCPT.invoice_id', 'left')
+                    ->join('ac_vouchers V', 'V.id = I.voucher_id')
+                    ->join('rel_policy__voucher REL', 'REL.voucher_id = I.voucher_id')
+                    ->where('REL.policy_id', $policy_id)
+                    ->where('I.flag_complete', IQB_FLAG_ON)
+                    ->where('V.flag_complete', IQB_FLAG_ON)
+                    ->order_by('I.id', 'ASC')
+                    ->get()->row();
+    }
+
+    // --------------------------------------------------------------------
+
     public function get($id, $flag_complete=NULL)
     {
         // Common Row Select

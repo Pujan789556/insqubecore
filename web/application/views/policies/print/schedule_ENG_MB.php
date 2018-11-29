@@ -48,13 +48,29 @@ $schedule_table_title   = 'Machine Breakdown (Schedule)';
                     <td><strong>Agent:</strong> <?php echo $agent_text;?> </td>
                 </tr>
                 <tr>
-                    <td>
-                        <?php
-                        /**
-                         * Insured Party, Financer, Other Financer, Careof
-                         */
-                        $this->load->view('policies/print/_schedule_insured_party', ['lang' => 'en']);
-                        ?>
+                    <td class="no-padding">
+                        <table>
+                            <tr>
+                                <td>
+                                    <?php
+                                    /**
+                                     * Insured Party, Financer, Other Financer, Careof
+                                     */
+                                    $this->load->view('policies/print/_snippet_insured_party', ['lang' => 'en']);
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <?php
+                                    /**
+                                     * Invoice, Receipt Info
+                                     */
+                                    $this->load->view('policies/print/_snippet_invoice_info', ['lang' => 'en']);
+                                    ?>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                     <td>
                         <strong>Location of Risk:</strong><br>
@@ -146,7 +162,7 @@ $schedule_table_title   = 'Machine Breakdown (Schedule)';
         /**
          * Load Footer
          */
-        $this->load->view('policies/print/_schedule_footer', ['lang' => 'en']);
+        $this->load->view('policies/print/_snippet_footer', ['lang' => 'en']);
         ?>
     </body>
 </html>

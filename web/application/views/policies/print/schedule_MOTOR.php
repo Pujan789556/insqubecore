@@ -89,7 +89,7 @@ switch ($record->portfolio_id)
                                     /**
                                      * Insured Party, Financer, Other Financer, Careof
                                      */
-                                    $this->load->view('policies/print/_schedule_insured_party', ['lang' => 'np']);
+                                    $this->load->view('policies/print/_snippet_insured_party', ['lang' => 'np']);
                                     ?>
                                 </td>
                             </tr>
@@ -104,8 +104,12 @@ switch ($record->portfolio_id)
 
                             <tr>
                                 <td>
-                                    रसिद नं.: <br/>
-                                    रसिदको मिति:  समय:
+                                    <?php
+                                    /**
+                                     * Invoice, Receipt Info
+                                     */
+                                    $this->load->view('policies/print/_snippet_invoice_info', ['lang' => 'np']);
+                                    ?>
                                 </td>
                             </tr>
                         </table>
@@ -116,7 +120,7 @@ switch ($record->portfolio_id)
                         /**
                          * Basic Information
                          */
-                        $this->load->view('policies/print/_schedule_basic',
+                        $this->load->view('policies/print/_snippet_basic',
                             ['lang' => 'np', 'record' => $record]
                         );
                         ?>
@@ -309,7 +313,7 @@ switch ($record->portfolio_id)
         /**
          * Load Footer
          */
-        $this->load->view('policies/print/_schedule_footer', ['lang' => 'np']);
+        $this->load->view('policies/print/_snippet_footer', ['lang' => 'np']);
         ?>
 
         <pagebreak>
