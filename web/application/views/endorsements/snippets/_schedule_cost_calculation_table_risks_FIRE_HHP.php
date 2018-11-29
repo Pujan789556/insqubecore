@@ -4,10 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy: Details - Policy Premium Overview Card - FIRE
 */
 $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_decode($endorsement_record->cost_calculation_table) : NULL;
-$risk_table     = NULL;
 if($cost_calculation_table)
 {
-    $risk_table     = $cost_calculation_table->risk_table;
     $summary_table    = $cost_calculation_table->summary_table;
 }
 $total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
@@ -16,30 +14,8 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
 <table class="table no-margin table-bordered">
     <tbody>
         <?php if($cost_calculation_table):?>
-
                 <tr>
                    <td class="no-padding no-border">
-                      <?php if($risk_table): ?>
-                           <table class="table no-margin table-bordered">
-                               <thead>
-                                   <tr>
-                                       <td>रक्षावरण गरिएका जोेखिमहरु</td>
-                                       <td>दर (रु प्रति हजार)</td>
-                                       <td class="text-right">बीमाशुल्क (रु.)</td>
-                                   </tr>
-                               </thead>
-                               <tbody>
-                                   <?php foreach($risk_table as $dt): ?>
-                                        <tr>
-                                            <td><?php echo $dt[0] ?></td>
-                                            <td class="text-right"><?php echo number_format((float)$dt[1], 3)?></td>
-                                            <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
-                                        </tr>
-                                    <?php endforeach ?>
-                               </tbody>
-                           </table><br>
-                       <?php endif ?>
-
                        <table class="table no-margin table-bordered">
                             <thead>
                               <tr>
@@ -52,8 +28,7 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
                                     <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
                                 </tr>
                             <?php endforeach ?>
-                        </table><br>
-
+                        </table>
                         <?php
                         /**
                          * Load Cost Summary

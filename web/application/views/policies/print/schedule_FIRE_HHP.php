@@ -65,6 +65,33 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                                     ?>
                                 </td>
                             </tr>
+                            <tr>
+                                <td class="no-padding">
+                                    <?php
+                                    $cct = json_decode($endorsement_record->cost_calculation_table ?? NULL);
+                                    $risk_table     = $cct->risk_table ?? NULL;
+                                    if($risk_table): ?>
+                                       <table class="table no-margin table-bordered">
+                                           <thead>
+                                               <tr>
+                                                   <td>रक्षावरण गरिएका जोेखिमहरु</td>
+                                                   <td>दर (रु प्रति हजार)</td>
+                                                   <td class="text-right">बीमाशुल्क (रु.)</td>
+                                               </tr>
+                                           </thead>
+                                           <tbody>
+                                               <?php foreach($risk_table as $dt): ?>
+                                                    <tr>
+                                                        <td><?php echo $dt[0] ?></td>
+                                                        <td class="text-right"><?php echo number_format((float)$dt[1], 3)?></td>
+                                                        <td class="text-right"><?php echo number_format((float)$dt[2], 2);?></td>
+                                                    </tr>
+                                                <?php endforeach ?>
+                                           </tbody>
+                                       </table>
+                                   <?php endif ?>
+                                </td>
+                            </tr>
                         </table>
                     </td>
 
