@@ -1152,7 +1152,7 @@ class Endorsement_model extends MY_Model
                         /**
                          * Policy Table
                          */
-                        "P.portfolio_id, P.branch_id, P.code AS policy_code, P.flag_on_credit, P.care_of, P.other_creditors, " .
+                        "P.portfolio_id, P.branch_id, P.code AS policy_code, P.flag_on_credit, P.care_of, " .
 
                         /**
                          * Branch Inofrmation
@@ -1172,13 +1172,7 @@ class Endorsement_model extends MY_Model
                         /**
                          * Agent Table (agent_id, name, picture, bs code, ud code, contact, active, type)
                          */
-                        "A.name as agent_name, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, " .
-
-                        /**
-                         * Crediter & Its Branch Info (name, contact), (branch name, branch contact)
-                         */
-                        "CRD.name as creditor_name, " .
-                        "CRB.name as creditor_branch_name"
+                        "A.name as agent_name, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code"
                     )
                     ->from($this->table_name . ' AS ENDRSMNT')
                     ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
@@ -1187,8 +1181,6 @@ class Endorsement_model extends MY_Model
                     ->join('dt_customers COT', 'COT.id = ENDRSMNT.transfer_customer_id', 'left')
                     ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
                     ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
-                    ->join('master_companies CRD', 'CRD.id = P.creditor_id', 'left')
-                    ->join('master_company_branches CRB', 'CRB.id = P.creditor_branch_id AND CRB.company_id = CRD.id', 'left')
                     ->where($where)
                     ->where_not_in('ENDRSMNT.txn_type', [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]);
 
@@ -1212,28 +1204,6 @@ class Endorsement_model extends MY_Model
             'module' => 'C'
         ];
         $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_');
-
-
-        /**
-         * Creditor Branch Address - Left Join (NON-Compulsory)
-         */
-        $table_aliases = [
-            // Address Table Alias
-            'address' => 'ADRCRB',
-
-            // Country Table Alias
-            'country' => 'CNTRYCRB',
-
-            // State Table Alias
-            'state' => 'STATECRB',
-
-            // Local Body Table Alias
-            'local_body' => 'LCLBDCRB',
-
-            // Type/Module Table Alias
-            'module' => 'CRB'
-        ];
-        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_creditor_', FALSE);
 
 
         /**

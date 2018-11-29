@@ -1708,8 +1708,6 @@ class Endorsements extends MY_Controller
 
 
 
-
-
 		/**
 		 * Get Transaction Records or Record based on type
 		 */
@@ -1737,6 +1735,12 @@ class Endorsements extends MY_Controller
 			], 404);
 		}
 
+		/**
+		 * Creditors
+		 */
+		$this->load->model('rel_policy_creditor_model');
+		$creditors = $this->rel_policy_creditor_model->rows(['REL.policy_id' => $records[0]->policy_id]);
+
 
 
 		/**
@@ -1754,6 +1758,7 @@ class Endorsements extends MY_Controller
 
 		$data = [
 			'records' 	=> $records,
+			'creditors' => $creditors,
 			'type' 		=> $type,
 			'lang' 		=> $portfolio_record->schedule_lang
 		];

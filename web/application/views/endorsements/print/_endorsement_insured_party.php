@@ -5,10 +5,9 @@
  * Language: English & Nepali
  */
 
-$insured_title          = $lang == 'np' ? 'बीमीतको नाम थर, ठेगाना'                  : 'Name and address of Insured';
-$financer_title         = $lang == 'np' ? 'बैंक वा वित्तिय कम्पनीको नाम, ठेगाना'   : 'Name and address of Financer(s)';
-$other_financer_title   = $lang == 'np' ? 'अरु बैंक वा वित्त कम्पनीको विवरण'        : 'Other Financer(s)';
-$care_of_title          = $lang == 'np' ? 'मार्फत'                  : 'Care Of';
+$insured_title          = $lang == 'np' ? 'बीमीतको नाम थर, ठेगाना'                   : 'Name and address of Insured';
+$financer_title         = $lang == 'np' ? 'बैंक वा वित्तिय कम्पनीको नाम, ठेगाना'    : 'Name and address of Financer(s)';
+$care_of_title          = $lang == 'np' ? 'मार्फत'                                     : 'Care Of';
 
 /**
  * Parse Address Record - Customer, Creditor Branch
@@ -35,21 +34,10 @@ else
  */
 if($record->flag_on_credit === 'Y')
 {
-    $financer_info = [
-        '<strong>' . $financer_title . '</strong>',
-
-        htmlspecialchars($record->creditor_name) . ', ' . htmlspecialchars($record->creditor_branch_name),
-
-        address_widget($creditor_address_record, true, true)
-
-    ];
-
-    if( $record->other_creditors )
+    $financer_info = ["<strong>{$financer_title}</strong>"];
+    foreach($creditors as $single)
     {
-        $financer_info = array_merge($financer_info, [
-            '<strong>'.$other_financer_title.'</strong>',
-            nl2br(htmlspecialchars($record->other_creditors))
-        ]);
+        $financer_info[] = $single->name . ', ' . $single->branch_name;
     }
     echo implode('<br/>', $financer_info), '<br/><br/>';
 }

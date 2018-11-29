@@ -7,7 +7,6 @@
 
 $insured_title          = $lang == 'np' ? 'बीमीतको नाम थर, ठेगाना'                  : 'Name and address of Insured';
 $financer_title         = $lang == 'np' ? 'बैंक वा वित्तिय कम्पनीको नाम, ठेगाना'   : 'Name and address of Financer(s)';
-$other_financer_title   = $lang == 'np' ? 'अरु बैंक वा वित्त कम्पनीको विवरण'        : 'Other Financer(s)';
 $care_of_title          = $lang == 'np' ? 'मार्फत'                  : 'Care Of';
 
 /**
