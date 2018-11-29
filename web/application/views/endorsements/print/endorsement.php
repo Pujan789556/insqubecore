@@ -316,7 +316,8 @@ $labels = [
             /**
              * PDF Pagebreak for next Endorsement
              */
-            if($count > 1 && $i < $count)
+            $i++;
+            if($i < $count)
             {
                 echo '<pagebreak>';
             }

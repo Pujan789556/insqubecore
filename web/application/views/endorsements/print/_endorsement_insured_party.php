@@ -14,19 +14,14 @@ $care_of_title          = $lang == 'np' ? 'मार्फत'                  
  */
 $customer_address_record        = parse_address_record($record, 'addr_customer_');
 $cot_customer_address_record    = parse_address_record($record, 'addr_customer_cot_');
-$creditor_address_record        = parse_address_record($record, 'addr_creditor_');
 
 if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER)
 {
-    $insured_details =  htmlspecialchars($record->cot_customer_name) .
-                        '<br/>' .
-                        address_widget($cot_customer_address_record, true, true);
+    $insured_party_name =  htmlspecialchars($record->cot_customer_name) . '<br/>';
 }
 else
 {
-    $insured_details =  htmlspecialchars($record->customer_name) .
-                        '<br/>' .
-                        address_widget($customer_address_record, true, true);
+    $insured_party_name =  htmlspecialchars($record->customer_name) . '<br/>';
 }
 
 /**
@@ -44,7 +39,15 @@ if($record->flag_on_credit === 'Y')
 ?>
 <strong><?php echo $insured_title ?></strong><br/>
 <?php
-echo $insured_details;
+// Insured Party Name
+echo $insured_party_name;
+
+
+// Insured Party Address
+$address_record = $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER
+                        ? $cot_customer_address_record
+                        : $customer_address_record;
+$this->load->view('policies/print/_snippet_address', ['address_record' => $address_record]);
 
 echo  $record->care_of ? '<br/><strong>'.$care_of_title.'</strong><br>' . nl2br(htmlspecialchars($record->care_of)) . '<br/>' : '';
 ?>
