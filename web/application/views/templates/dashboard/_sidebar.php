@@ -115,6 +115,8 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           <li class="<?php echo set_menu_active($nav_level_2, 'surveyors');?>"><a href="<?php echo site_url('surveyors');?>"><i class="fa fa-circle-o"></i> Surveyors</a></li>
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'tags');?>"><a href="<?php echo site_url('tags');?>"><i class="fa fa-circle-o"></i> Tags</a></li>
+
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'vehicle_reg_prefix');?>"><a href="<?php echo site_url('vehicle_reg_prefix');?>"><i class="fa fa-circle-o"></i> Vehicle Reg Prefix</a></li>
                                     </ul>
                               </li>
 

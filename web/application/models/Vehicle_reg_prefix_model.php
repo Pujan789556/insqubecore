@@ -19,14 +19,37 @@ class Vehicle_reg_prefix_model extends MY_Model
 
     protected $fields = ['id', 'type', 'name_en', 'name_np', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
-    protected $validation_rules = [];
+   protected $validation_rules = [
+        [
+            'field' => 'type',
+            'label' => 'Prefix Type',
+            'rules' => 'trim|required|integer|exact_length[1]|in_list[1,2,3]',
+            '_type'     => 'dropdown',
+            '_data'     => [ '' => 'Select...', '1' => 'Old', '2' => 'New 4-Wheeler', '3' => 'New 2-Wheeler'],
+            '_required' => true
+        ],
+        [
+            'field' => 'name_en',
+            'label' => 'Name (EN)',
+            'rules' => 'trim|required|max_length[80]|callback_check_duplicate_en',
+            '_type'     => 'text',
+            '_required' => true
+        ],
+        [
+            'field' => 'name_np',
+            'label' => 'Name (NP)',
+            'rules' => 'trim|required|max_length[80]|callback_check_duplicate_np',
+            '_type'     => 'text',
+            '_required' => true
+        ]
+    ];
 
 
     /**
      * Protect Default Records?
      */
-    public static $protect_default = TRUE;
-    public static $protect_max_id = 12; // Prevent first 12 records from deletion.
+    public static $protect_default = FALSE;
+    public static $protect_max_id = 0; // Prevent first 12 records from deletion.
 
 	// --------------------------------------------------------------------
 
@@ -38,6 +61,61 @@ class Vehicle_reg_prefix_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Data Rows
+     *
+     * Get the filtered resulte set for listing purpose
+     *
+     * @param array $params
+     * @return type
+     */
+    public function rows($params = array())
+    {
+        $this->db->select('V.*')
+                 ->from($this->table_name . ' as V');
+
+
+        if(!empty($params))
+        {
+            $next_id = $params['next_id'] ?? NULL;
+            if( $next_id )
+            {
+                $this->db->where(['V.id >=' => $next_id]);
+            }
+
+
+            $type = $params['type'] ?? NULL;
+            if( $type )
+            {
+                $this->db->where(['V.type' =>  $type]);
+            }
+
+
+            $keywords = $params['keywords'] ?? '';
+            if( $keywords )
+            {
+                $this->db->like('V.name_en', $keywords, 'after');
+            }
+        }
+        return $this->db->limit($this->settings->per_page+1)
+                    ->get()->result();
+    }
+
+    // ----------------------------------------------------------------
+
+    public function check_duplicate($where, $id=NULL)
+    {
+        if( $id )
+        {
+            $this->db->where('id !=', $id);
+        }
+        // $where is array ['key' => $value]
+        return $this->db->where($where)
+                        ->count_all_results($this->table_name);
     }
 
     // ----------------------------------------------------------------
@@ -113,6 +191,33 @@ class Vehicle_reg_prefix_model extends MY_Model
 
     public function delete($id = NULL)
     {
-        return FALSE;
+        $id = intval($id);
+        if( !safe_to_delete( get_class(), $id ) )
+        {
+            return FALSE;
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $status             = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Delete Primary Record
+            parent::delete($id);
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $status;
     }
 }
