@@ -849,13 +849,39 @@ class Policy_installments extends MY_Controller
 	        /**
 	         * Voucher Amount Computation
 	         */
-	        $gross_premium_amount 		= (float)$installment_record->amt_basic_premium + (float)$installment_record->amt_pool_premium;
+
+	        // basic + pool
+	        $gross_premium_amount 		= 	bcadd(
+		        								(float)$installment_record->amt_basic_premium,
+		        								(float)$installment_record->amt_pool_premium,
+		        								IQB_AC_DECIMAL_PRECISION
+	        								);
 	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
 	        $vat_payable_amount 		= $installment_record->amt_vat;
 	        $amt_cancellation_fee 		= floatval($installment_record->amt_cancellation_fee);
 
-	        $beema_samiti_service_charge_amount 	= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
-	        $total_refund_to_insured_party_amount 	= $gross_premium_amount + $stamp_income_amount + $vat_payable_amount + $amt_cancellation_fee;
+	        // Gross X BS Service Charge %
+	        $beema_samiti_service_charge_amount = 	bcdiv (
+	        											bcmul(
+        													$gross_premium_amount,
+        													$pfs_record->bs_service_charge,
+        													IQB_AC_DECIMAL_PRECISION
+        												),
+        												100.00,
+        												IQB_AC_DECIMAL_PRECISION
+    												);
+
+	        // gross + stamp + vat payble + cancellation
+	        $total_refund_to_insured_party_amount 	= 	ac_bcsum(
+	        												[
+	        													$gross_premium_amount,
+		        												 $stamp_income_amount,
+		        												 $vat_payable_amount,
+		        												 $amt_cancellation_fee
+	        												],
+	        												IQB_AC_DECIMAL_PRECISION
+	        											);
+
 	        $agent_commission_amount 				= $installment_record->amt_agent_commission ?? NULL;
 
 			// --------------------------------------------------------------------
@@ -1061,7 +1087,7 @@ class Policy_installments extends MY_Controller
 	        	// Agent TDS -- TDS Amount, Agent Commission Payable -- Agent Payable Amount
 	        	$this->load->model('ac_duties_and_tax_model');
 	        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount, IQB_AC_DECIMAL_PRECISION);
-	        	$agent_commission_payable_amount = $agent_commission_amount - $agent_tds_amount;
+	        	$agent_commission_payable_amount = bcsub($agent_commission_amount, $agent_tds_amount, IQB_AC_DECIMAL_PRECISION);
 	        	$dr_rows['amounts'][] = abs($agent_tds_amount);
 	        	$dr_rows['amounts'][] = abs($agent_commission_payable_amount);
 	        }
@@ -1084,12 +1110,20 @@ class Policy_installments extends MY_Controller
 	         */
 	        $vat_payable_amount 		= floatval($installment_record->amt_vat);
 	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
-	        $ownership_transfer_charge 	= floatval($installment_record->amt_transfer_fee) +
-				        			  	  floatval($installment_record->amt_transfer_ncd);
+	        $ownership_transfer_charge 	= 	bcadd(
+	        									floatval($installment_record->amt_transfer_fee),
+				        			  	  		floatval($installment_record->amt_transfer_ncd),
+				        			  	  		IQB_AC_DECIMAL_PRECISION
+			        			  	  		);
 
-	        $total_amount = $ownership_transfer_charge +
-							$stamp_income_amount +
-							$vat_payable_amount;
+	        $total_amount = ac_bcsum(
+		        				[
+		        					$ownership_transfer_charge,
+									$stamp_income_amount,
+									$vat_payable_amount
+								],
+								IQB_AC_DECIMAL_PRECISION
+							);
 
 			// --------------------------------------------------------------------
 
