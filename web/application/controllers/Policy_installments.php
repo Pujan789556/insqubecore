@@ -230,6 +230,11 @@ class Policy_installments extends MY_Controller
 		// --------------------------------------------------------------------
 
 		/**
+		 * Account Helper
+		 */
+		$this->load->helper('account');
+
+		/**
 		 * Load voucher models
 		 */
 		$this->load->model('ac_voucher_model');
@@ -293,7 +298,7 @@ class Policy_installments extends MY_Controller
 		 * Voucher Master Data
 		 */
 		try{
-			$voucher_data = $this->_data_voucher_master($policy_record->code, $endorsement_record->txn_type);
+			$voucher_data['master'] = $this->_data_voucher_master($policy_record->code, $endorsement_record->txn_type);
 		}
 		catch (Exception $e) {
 			return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
@@ -313,24 +318,8 @@ class Policy_installments extends MY_Controller
 
 		// echo '<pre>'; print_r($voucher_data); print_r($voucher_rows);exit;
 
-		$dr_rows = $voucher_rows['dr_rows'];
-		$cr_rows = $voucher_rows['cr_rows'];
-
-		// --------------------------------------------------------------------
-
-
-        /**
-         * Format Data
-         */
-        $voucher_data['account_id']['dr'] 	= $dr_rows['accounts'];
-        $voucher_data['party_type']['dr'] 	= $dr_rows['party_types'];
-        $voucher_data['party_id']['dr'] 	= $dr_rows['parties'];
-        $voucher_data['amount']['dr'] 		= $dr_rows['amounts'];
-
-        $voucher_data['account_id']['cr'] 	= $cr_rows['accounts'];
-        $voucher_data['party_type']['cr'] 	= $cr_rows['party_types'];
-        $voucher_data['party_id']['cr'] 	= $cr_rows['parties'];
-        $voucher_data['amount']['cr'] 		= $cr_rows['amounts'];
+		// Add Voucher Rows on Voucher Data
+        $voucher_data = array_merge($voucher_data, $voucher_rows);
 
 
 		// --------------------------------------------------------------------
@@ -559,40 +548,321 @@ class Policy_installments extends MY_Controller
 
 		private function _data_voucher_details($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record)
 		{
-			$txn_type 	= (int)$installment_record->txn_type;
-			$data 		= NULL;
 
-			switch ($txn_type)
+			/**
+			 * Policy Category - FAC-Inward???
+			 *
+			 * If so we need to build specific Voucher for that case
+			 */
+			if($policy_record->category == IQB_POLICY_CATEGORY_FAC_IN )
 			{
-				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
-				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
-				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
-					$data = $this->_data_voucher_details_for_premium_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
-					break;
-
-				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-					$data = $this->_data_voucher_details_for_credit_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
-					break;
-
-				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
-					$data = $this->_data_voucher_details_for_transfer_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
-					break;
-
-
-				default:
-					# code...
-					break;
+				$data = $this->_data_voucher_details_for_premium_voucher_fac_in($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
 			}
+			else
+			{
+				$txn_type 	= (int)$installment_record->txn_type;
+				$data 		= NULL;
+
+				switch ($txn_type)
+				{
+					case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
+					case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
+					case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+						$data = $this->_data_voucher_details_for_premium_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
+						break;
+
+					case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+						$data = $this->_data_voucher_details_for_credit_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
+						break;
+
+					case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+						$data = $this->_data_voucher_details_for_transfer_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
+						break;
+
+
+					default:
+						# code...
+						break;
+				}
+			}
+
 
 			if( !$data )
 			{
-				throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details()]: No voucher details found for supplied 'Endorsement Type'.");
+				throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details()]: No voucher details found for supplied 'Endorsement Type' or 'Policy Category'.");
 			}
 
 			return $data;
 		}
 
+		private function _data_voucher_details_for_premium_voucher_fac_in($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record)
+		{
+			/**
+			 * --------------------------------------------------------------------
+			 * 	VOUCHER STRUCTURE
+			 * --------------------------------------------------------------------
+			 *
+			 * 		Comission on Fac Accepted 	|	DR 	| 		|
+			 * 		Service Charge-Reimbursed 	|	DR 	| 		|
+			 * 		Party Account 				|	DR 	| 		|
+			 * 		Service Charge-Beema Samiti |	DR 	| 		|
+			 *
+			 * 			Fac. Premium Accepted 	| 		|	CR 	|
+			 * 			Tds Payble 				|		|	CR 	|
+			 * 			Bemma Samiti Payble 	|		}	CR 	|
+			 * --------------------------------------------------------------------
+			 */
+			$this->load->model('ac_duties_and_tax_model');
+
+			// --------------------------------------------------------------------
+
+	        /**
+	         * Check if portfolio has "Direct Premium Income Account ID"
+	         */
+	        if( !$portfolio_record->account_id_fpi || !$portfolio_record->account_id_fce )
+	        {
+	        	throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details_for_premium_voucher_fac_in()]: No 'FAC Premium Income Account' OR 'FAC Commission Expense Account' for this Portfolio (({$portfolio_record->name_en})).<br/>Please add portfolio 'FAC Premium Income Account' and 'FAC Commission Expense Account' for portfolio ({$portfolio_record->name_en}) from Master Setup > Portfolio.");
+	        }
+
+			// --------------------------------------------------------------------
+
+			$dr_rows = [];
+			$cr_rows = [];
+
+			// [CR] FAC Premium Accepted (Income) = Total FAC Premium
+			$fac_premium_accepted = (float)$installment_record->amt_basic_premium;
+			$cr_rows[] = [
+				'account_id' => $portfolio_record->account_id_fpi,
+				'party_type' => NULL,
+				'party_id'   => NULL,
+				'amount' 	 => $fac_premium_accepted
+			];
+
+			// [DR] Comission on Fac Accepted (Already calculated on Premium Update)
+			$comm_on_fac_accepted = (float)$installment_record->amt_ri_commission;
+			if($comm_on_fac_accepted)
+			{
+				$dr_rows[] = [
+					'account_id' => $portfolio_record->account_id_fce,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => $comm_on_fac_accepted
+				];
+			}
+
+			// [DR] Service Charge Reimbursed ( 1% of Premium)
+			$service_charge_reimbursed = bcdiv($fac_premium_accepted, 100.00, IQB_AC_DECIMAL_PRECISION);
+			$dr_rows[] = [
+				'account_id' => IQB_AC_ACCOUNT_ID_SERVICE_CHARGE_REIMBURSED,
+				'party_type' => NULL,
+				'party_id'   => NULL,
+				'amount' 	 => $service_charge_reimbursed
+			];
+
+			// [CR] TDS Payble ( TDS% of Commission on FAC Accepted)
+			$tds_payable = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $comm_on_fac_accepted, IQB_AC_DECIMAL_PRECISION);
+			$cr_rows[] = [
+				'account_id' => IQB_AC_ACCOUNT_ID_TDS_REINSURANCE,
+				'party_type' => NULL,
+				'party_id'   => NULL,
+				'amount' 	 => $tds_payable
+			];
+
+
+
+			// [DR] Party Account =  $fac_premium_accepted - $comm_on_fac_accepted - $service_charge_reimbursed + $tds_payable
+			$minus_data 		= [$comm_on_fac_accepted, $service_charge_reimbursed];
+			$amt_party_account 	= bcadd($fac_premium_accepted, $tds_payable, IQB_AC_DECIMAL_PRECISION);
+			foreach ($minus_data as $value)
+			{
+				$amt_party_account = bcsub($amt_party_account, $value, IQB_AC_DECIMAL_PRECISION);
+			}
+			$dr_rows[] = [
+				'account_id' => IQB_AC_ACCOUNT_ID_INSURED_PARTY,
+				'party_type' => IQB_AC_PARTY_TYPE_COMPANY,
+				'party_id'   => $policy_record->insurance_company_id,
+				'amount' 	 => $amt_party_account
+			];
+
+
+			// [DR] Service Charge-Beema Samiti (1% of PREMIUM)
+			$bs_service_charge = bcdiv($fac_premium_accepted, 100.00, IQB_AC_DECIMAL_PRECISION);
+			$dr_rows[] = [
+				'account_id' => IQB_AC_ACCOUNT_ID_EXPENSE_BS_SERVICE_CHARGE,
+				'party_type' => IQB_AC_PARTY_TYPE_COMPANY,
+				'party_id'   => IQB_COMPANY_ID_BEEMA_SAMITI,
+				'amount' 	 => $bs_service_charge
+			];
+
+			// [CR] Bemma Samiti Payble (1% of PREMIUM) = Service Charge-Beema Samiti
+			$cr_rows[] = [
+				'account_id' => IQB_AC_ACCOUNT_ID_LIABILITY_BS_SERVICE_CHARGE,
+				'party_type' => IQB_AC_PARTY_TYPE_COMPANY,
+				'party_id'   => IQB_COMPANY_ID_BEEMA_SAMITI,
+				'amount' 	 => $bs_service_charge
+			];
+
+	        // --------------------------------------------------------------------
+
+	        /**
+	         * DR === CR
+	         */
+	        $data = ac_equate_dr_cr_rows($dr_rows, $cr_rows);
+
+	        return $data;
+		}
+
 		private function _data_voucher_details_for_premium_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record)
+		{
+			// --------------------------------------------------------------------
+
+	        /**
+	         * Voucher Amount Computation
+	         */
+	        $gross_premium_amount 	= 	bcadd(
+	        								(float)$installment_record->amt_basic_premium,
+	        								(float)$installment_record->amt_pool_premium,
+	        								IQB_AC_DECIMAL_PRECISION
+        								); // basic + pool premium
+
+	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
+	        $vat_payable_amount 		= $installment_record->amt_vat;
+
+	        // $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
+	        $beema_samiti_service_charge_amount = 	bcdiv(
+	        											bcmul($gross_premium_amount, $pfs_record->bs_service_charge, IQB_AC_DECIMAL_PRECISION),
+	        											100,
+        												IQB_AC_DECIMAL_PRECISION
+        											); // gross premium X bs_service_charge / 100
+
+	        // $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
+	        $total_to_receive_from_insured_party_amount = ac_bcsum([$gross_premium_amount, $stamp_income_amount, $vat_payable_amount], IQB_AC_DECIMAL_PRECISION);
+	        $agent_commission_amount 					= $installment_record->amt_agent_commission ?? NULL;
+
+			// --------------------------------------------------------------------
+
+
+	        /**
+	         * Debit Rows
+	         */
+	        $dr_rows = [
+
+	        	// Insured Party
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_INSURED_PARTY,
+					'party_type' => IQB_AC_PARTY_TYPE_CUSTOMER,
+					'party_id'   => $policy_record->customer_id,
+					'amount' 	 => $total_to_receive_from_insured_party_amount
+	        	],
+
+	        	// Expense - Beema Samiti Service Charge
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_EXPENSE_BS_SERVICE_CHARGE,
+					'party_type' => IQB_AC_PARTY_TYPE_COMPANY,
+					'party_id'   => IQB_COMPANY_ID_BEEMA_SAMITI,
+					'amount' 	 => $beema_samiti_service_charge_amount
+	        	]
+	        ];
+
+			// --------------------------------------------------------------------
+
+	        /**
+	         * Check if portfolio has "Direct Premium Income Account ID"
+	         */
+	        if( !$portfolio_record->account_id_dpi )
+	        {
+	        	throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details_for_premium_voucher()]: No 'Direct Premium Income Account' for this Portfolio (({$portfolio_record->name_en})).<br/>Please add portfolio 'Direct Premium Income Account' for portfolio ({$portfolio_record->name_en}) from Master Setup > Portfolio.");
+	        }
+
+	        /**
+	         * Credit Rows
+	         */
+	        $cr_rows = [
+
+	        	// Vat Payable
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_VAT_PAYABLE,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => $vat_payable_amount
+	        	],
+
+	        	// Stamp Income
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_STAMP_INCOME,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => $stamp_income_amount
+	        	],
+
+	        	// Direct Premium Income Portfolio Wise
+	        	[
+	        		'account_id' => $portfolio_record->account_id_dpi,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => $gross_premium_amount
+	        	],
+
+	        	// Liability - Service fee Beema Samiti
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_LIABILITY_BS_SERVICE_CHARGE,
+					'party_type' => IQB_AC_PARTY_TYPE_COMPANY,
+					'party_id'   => IQB_COMPANY_ID_BEEMA_SAMITI,
+					'amount' 	 => $beema_samiti_service_charge_amount
+	        	]
+
+	        ];
+
+	        // --------------------------------------------------------------------
+
+	        /**
+	         * Additional Debit/Credit Rows if Agent Commission Apply?
+	         *
+	         * NOTE: You must have $agent_commission_amount (NOT NULL or Non Zero Value)
+	         */
+	        if( $agent_commission_amount &&  $policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $policy_record->agent_id )
+	        {
+	        	// Agency Commission
+	        	$dr_rows[] = [
+	        		'account_id' => IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION,
+					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
+					'party_id'   => $policy_record->agent_id,
+					'amount' 	 => $agent_commission_amount
+	        	];
+
+	        	// Agent TDS Amount, Agent Commission Payable
+	        	$this->load->model('ac_duties_and_tax_model');
+	        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount, IQB_AC_DECIMAL_PRECISION);
+	        	$agent_commission_payable_amount = bcsub($agent_commission_amount, $agent_tds_amount, IQB_AC_DECIMAL_PRECISION);
+
+	        	// Agent TDS
+	        	$cr_rows[] = [
+	        		'account_id' => IQB_AC_ACCOUNT_ID_TDS_AGENCY_COMMISSION,
+					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
+					'party_id'   => $policy_record->agent_id,
+					'amount' 	 => $agent_tds_amount
+	        	];
+
+	        	// Agent Commission Payable
+	        	$cr_rows[] = [
+	        		'account_id' => IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION_PAYABLE,
+					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
+					'party_id'   => $policy_record->agent_id,
+					'amount' 	 => $agent_commission_payable_amount
+	        	];
+	        }
+
+	        // --------------------------------------------------------------------
+
+	        /**
+	         * DR === CR
+	         */
+	        $data = ac_equate_dr_cr_rows($dr_rows, $cr_rows);
+
+	        return $data;
+		}
+
+		private function _data_voucher_details_for_premium_voucher_OLD($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record)
 		{
 			// --------------------------------------------------------------------
 
@@ -891,51 +1161,21 @@ class Policy_installments extends MY_Controller
 	         */
 	        $cr_rows = [
 
-	        	/**
-	        	 * Accounts
-	        	 */
-	        	 'accounts' => 	[
-		        	// Insured Party
-		        	IQB_AC_ACCOUNT_ID_INSURED_PARTY,
+	        	// Insured Party
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_INSURED_PARTY,
+					'party_type' => IQB_AC_PARTY_TYPE_CUSTOMER,
+					'party_id'   => $policy_record->customer_id,
+					'amount' 	 => abs($total_refund_to_insured_party_amount)
+	        	],
 
-		        	// Expense - Beema Samiti Service Charge
-		        	IQB_AC_ACCOUNT_ID_EXPENSE_BS_SERVICE_CHARGE
-		        ],
-
-		        /**
-		         * Party Types
-		         */
-		        'party_types' => [
-		        	// Insured Party -- Customer
-		        	IQB_AC_PARTY_TYPE_CUSTOMER,
-
-		        	// Beema Samiti Service Charge -- Company
-		        	IQB_AC_PARTY_TYPE_COMPANY,
-		        ],
-
-		        /**
-		         * Party IDs
-		         */
-		        'parties' => [
-
-		        	// Insured Party -- Customr ID
-		        	$policy_record->customer_id,
-
-		        	// Beema Samiti Service Charge -- Beema Samiti ID
-		        	IQB_COMPANY_ID_BEEMA_SAMITI
-		        ],
-
-		        /**
-		         * Amounts
-		         */
-		        'amounts' => [
-
-		        	// Insured Party -- Amount Refund to Insured Party
-		        	abs($total_refund_to_insured_party_amount),
-
-		        	// Beema Samiti Service Charge -- Beema Samiti Service Charge
-		        	abs($beema_samiti_service_charge_amount)
-		        ]
+	        	// Expense - Beema Samiti Service Charge
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_EXPENSE_BS_SERVICE_CHARGE,
+					'party_type' => IQB_AC_PARTY_TYPE_COMPANY,
+					'party_id'   => IQB_COMPANY_ID_BEEMA_SAMITI,
+					'amount' 	 => abs($beema_samiti_service_charge_amount)
+	        	]
 
 	        ];
 
@@ -946,10 +1186,12 @@ class Policy_installments extends MY_Controller
 	         */
 	        if( $stamp_income_amount )
 	        {
-	        	$cr_rows['accounts'][] 		= IQB_AC_ACCOUNT_ID_STAMP_INCOME;
-	        	$cr_rows['party_types'][] 	= NULL;
-	        	$cr_rows['parties'][] 		= NULL;
-	        	$cr_rows['amounts'][] 		= $stamp_income_amount;
+	        	$cr_rows[] = [
+	        		'account_id' => IQB_AC_ACCOUNT_ID_STAMP_INCOME,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => $stamp_income_amount
+	        	];
 	        }
 
 	        /**
@@ -959,10 +1201,12 @@ class Policy_installments extends MY_Controller
 	         */
 	        if( $amt_cancellation_fee )
 	        {
-	        	$cr_rows['accounts'][] 		= IQB_AC_ACCOUNT_ID_SERVICE_CHARGE_RECOVERY;
-	        	$cr_rows['party_types'][] 	= NULL;
-	        	$cr_rows['parties'][] 		= NULL;
-	        	$cr_rows['amounts'][] 		= $amt_cancellation_fee;
+	        	$cr_rows[] = [
+	        		'account_id' => IQB_AC_ACCOUNT_ID_SERVICE_CHARGE_RECOVERY,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => $amt_cancellation_fee
+	        	];
 	        }
 
 
@@ -980,53 +1224,21 @@ class Policy_installments extends MY_Controller
 	         * Credit Rows
 	         */
 	        $dr_rows = [
+	        	// Direct Premium Income Portfolio Wise
+	        	[
+	        		'account_id' => $portfolio_record->account_id_dpi,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => abs($gross_premium_amount)
+	        	],
 
-	        	/**
-	        	 * Accounts
-	        	 */
-	        	 'accounts' => 	[
-		        	// Direct Premium Income Portfolio Wise
-		        	$portfolio_record->account_id_dpi,
-
-		        	// Liability - Service fee Beema Samiti
-		        	IQB_AC_ACCOUNT_ID_LIABILITY_BS_SERVICE_CHARGE
-		        ],
-
-		        /**
-		         * Party Types
-		         */
-		        'party_types' => [
-		        	// Direct Premium Income -- NULL
-		        	NULL,
-
-		        	// Beema Samiti Service Charge -- Company
-		        	IQB_AC_PARTY_TYPE_COMPANY
-		        ],
-
-		        /**
-		         * Party IDs
-		         */
-		        'parties' => [
-
-		        	// Direct Premium Income -- NULL
-		        	NULL,
-
-		        	// Beema Samiti Service Charge -- Beema Samiti ID
-		        	IQB_COMPANY_ID_BEEMA_SAMITI
-		        ],
-
-		        /**
-		         * Amounts
-		         */
-		        'amounts' => [
-
-		        	// Direct Premium Income -- Gross Premium Amount
-		        	abs($gross_premium_amount),
-
-		        	// Beema Samiti Service Charge -- Beema Samiti Service Charge
-		        	abs($beema_samiti_service_charge_amount)
-		        ]
-
+	        	// Liability - Service fee Beema Samiti
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_LIABILITY_BS_SERVICE_CHARGE,
+					'party_type' => IQB_AC_PARTY_TYPE_COMPANY,
+					'party_id'   => IQB_COMPANY_ID_BEEMA_SAMITI,
+					'amount' 	 => abs($beema_samiti_service_charge_amount)
+	        	]
 	        ];
 
 	        // --------------------------------------------------------------------
@@ -1040,17 +1252,21 @@ class Policy_installments extends MY_Controller
 	         */
 	        if( $vat_payable_amount > 0 )
 	        {
-	        	$cr_rows['accounts'][] 		= IQB_AC_ACCOUNT_ID_VAT_PAYABLE;
-	        	$cr_rows['party_types'][] 	= NULL;
-	        	$cr_rows['parties'][] 		= NULL;
-	        	$cr_rows['amounts'][] 		= $vat_payable_amount;
+	        	$cr_rows[] = [
+	        		'account_id' => IQB_AC_ACCOUNT_ID_VAT_PAYABLE,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => abs($vat_payable_amount)
+	        	];
 	        }
 	        else
 	        {
-	        	$dr_rows['accounts'][] 		= IQB_AC_ACCOUNT_ID_VAT_PAYABLE;
-	        	$dr_rows['party_types'][] 	= NULL;
-	        	$dr_rows['parties'][] 		= NULL;
-	        	$dr_rows['amounts'][] 		= abs($vat_payable_amount);
+	        	$dr_rows[] = [
+	        		'account_id' => IQB_AC_ACCOUNT_ID_VAT_PAYABLE,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => abs($vat_payable_amount)
+	        	];
 	        }
 
 	        // --------------------------------------------------------------------
@@ -1063,42 +1279,45 @@ class Policy_installments extends MY_Controller
 	        if( $agent_commission_amount &&  $policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $policy_record->agent_id )
 	        {
 	        	// Agency Commission
-	        	$cr_rows['accounts'][] 		= IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION;
-	        	$cr_rows['party_types'][] 	= IQB_AC_PARTY_TYPE_AGENT;
-	        	$cr_rows['parties'][] 		= $policy_record->agent_id;
-	        	$cr_rows['amounts'][] 		= abs($agent_commission_amount);
+	        	$cr_rows[] = [
+	        		'account_id' => IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION,
+					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
+					'party_id'   => $policy_record->agent_id,
+					'amount' 	 => abs($agent_commission_amount)
+	        	];
 
 
-
-
-
-	        	// Agent TDS, Agent Commission Payable
-	        	$dr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_TDS_AGENCY_COMMISSION;
-	        	$dr_rows['accounts'][] = IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION_PAYABLE;
-
-	        	// Agent TDS -- Agent, Agent Commission Payable -- Agent
-	        	$dr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
-	        	$dr_rows['party_types'][] = IQB_AC_PARTY_TYPE_AGENT;
-
-	        	// Agent TDS -- Agent ID, Agent Commission Payable -- Agent ID
-	        	$dr_rows['parties'][] = $policy_record->agent_id;
-	        	$dr_rows['parties'][] = $policy_record->agent_id;
-
-	        	// Agent TDS -- TDS Amount, Agent Commission Payable -- Agent Payable Amount
+	        	//  Agent TDS, Agent Commission Payable
 	        	$this->load->model('ac_duties_and_tax_model');
 	        	$agent_tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_AC, $agent_commission_amount, IQB_AC_DECIMAL_PRECISION);
 	        	$agent_commission_payable_amount = bcsub($agent_commission_amount, $agent_tds_amount, IQB_AC_DECIMAL_PRECISION);
-	        	$dr_rows['amounts'][] = abs($agent_tds_amount);
-	        	$dr_rows['amounts'][] = abs($agent_commission_payable_amount);
+
+	        	//  Agent TDS
+	        	$dr_rows[] = [
+	        		'account_id' => IQB_AC_ACCOUNT_ID_TDS_AGENCY_COMMISSION,
+					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
+					'party_id'   => $policy_record->agent_id,
+					'amount' 	 => abs($agent_tds_amount)
+	        	];
+
+	        	// Agent Commission Payable
+	        	$dr_rows[] = [
+	        		'account_id' => IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION_PAYABLE,
+					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
+					'party_id'   => $policy_record->agent_id,
+					'amount' 	 => abs($agent_commission_payable_amount)
+	        	];
+
 	        }
 
 	        // --------------------------------------------------------------------
 
+	        /**
+	         * DR === CR
+	         */
+	        $data = ac_equate_dr_cr_rows($dr_rows, $cr_rows);
 
-	        return [
-	        	'dr_rows' => $dr_rows,
-	        	'cr_rows' => $cr_rows
-	        ];
+	        return $data;
 		}
 
 		private function _data_voucher_details_for_transfer_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record)
@@ -1132,40 +1351,13 @@ class Policy_installments extends MY_Controller
 	         */
 	        $dr_rows = [
 
-	        	/**
-	        	 * Accounts
-	        	 */
-	        	 'accounts' => 	[
-		        	// Insured Party
-		        	IQB_AC_ACCOUNT_ID_INSURED_PARTY
-		        ],
-
-		        /**
-		         * Party Types
-		         */
-		        'party_types' => [
-		        	// Insured Party -- Customer
-		        	IQB_AC_PARTY_TYPE_CUSTOMER
-		        ],
-
-		        /**
-		         * Party IDs
-		         */
-		        'parties' => [
-
-		        	// Insured Party -- New Owner (Customr ID)
-		        	$endorsement_record->transfer_customer_id
-		        ],
-
-		        /**
-		         * Amounts
-		         */
-		        'amounts' => [
-
-		        	// Insured Party -- Amount Received From Insured Party
-		        	$total_amount
-		        ]
-
+	        	//  Insured Party -- New Owner (Customr ID)
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_INSURED_PARTY,
+					'party_type' => IQB_AC_PARTY_TYPE_CUSTOMER,
+					'party_id'   => $endorsement_record->transfer_customer_id,
+					'amount' 	 => $total_amount
+	        	]
 	        ];
 
 			// --------------------------------------------------------------------
@@ -1176,74 +1368,41 @@ class Policy_installments extends MY_Controller
 	         */
 	        $cr_rows = [
 
-	        	/**
-	        	 * Accounts
-	        	 */
-	        	 'accounts' => 	[
-		        	// Vat Payable
-		        	IQB_AC_ACCOUNT_ID_VAT_PAYABLE,
+	        	// Vat Payable
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_VAT_PAYABLE,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => $vat_payable_amount
+	        	],
 
-		        	// Stamp Income
-		        	IQB_AC_ACCOUNT_ID_STAMP_INCOME,
+	        	// Stamp Income
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_STAMP_INCOME,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => $stamp_income_amount
+	        	],
 
-		        	// Ownership Transfer Charge
-		        	IQB_AC_ACCOUNT_ID_OWNERSHIP_TRANSFER_CHARGE
-		        ],
-
-		        /**
-		         * Party Types
-		         */
-		        'party_types' => [
-		        	// Vat Payable -- NULL
-		        	NULL,
-
-		        	// Stamp Income -- NULL
-		        	NULL,
-
-		        	// Ownership Transfer Charge -- NULL
-		        	NULL
-		        ],
-
-		        /**
-		         * Party IDs
-		         */
-		        'parties' => [
-
-		        	// Vat Payable -- NULL
-		        	NULL,
-
-		        	// Stamp Income -- NULL
-		        	NULL,
-
-		        	// Ownership Transfer Charge -- NULL
-		        	NULL
-		        ],
-
-		        /**
-		         * Amounts
-		         */
-		        'amounts' => [
-
-		        	// Vat Payable -- Vat Amount
-		        	$vat_payable_amount,
-
-		        	// Stamp Income -- Stamp Income Amount
-		        	$stamp_income_amount,
-
-		        	// Ownership Transfer Charge
-		        	$ownership_transfer_charge
-		        ]
-
+	        	// Stamp Income
+	        	[
+	        		'account_id' => IQB_AC_ACCOUNT_ID_OWNERSHIP_TRANSFER_CHARGE,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => $ownership_transfer_charge
+	        	]
 	        ];
 
 	        // --------------------------------------------------------------------
 
+	        /**
+	         * DR === CR
+	         */
+	        $data = ac_equate_dr_cr_rows($dr_rows, $cr_rows);
 
-	        return [
-	        	'dr_rows' => $dr_rows,
-	        	'cr_rows' => $cr_rows
-	        ];
+	        return $data;
 		}
+
 
 		private function _voucher_type_by_txn_type($txn_type)
 		{
@@ -2246,7 +2405,7 @@ class Policy_installments extends MY_Controller
         $narration = "Receipt against Policy ({$policy_record->code}) Invoice ({$invoice_record->invoice_code})";
         $narration .= $payment_data['narration'] ? PHP_EOL . $payment_data['narration'] : '';
 
-        $voucher_data = [
+        $voucher_data['master'] = [
             'voucher_date'      => date('Y-m-d'),
             'voucher_type_id'   => IQB_AC_VOUCHER_TYPE_RCPT,
             'narration'         => $narration,
@@ -2260,36 +2419,13 @@ class Policy_installments extends MY_Controller
          */
         $dr_rows = [
 
-            /**
-             * Accounts
-             */
-             'accounts' =>  [
-                // Collection
-                IQB_AC_ACCOUNT_ID_COLLECTION
-            ],
-
-            /**
-             * Party Types
-             */
-            'party_types' => [
-                NULL
-            ],
-
-            /**
-             * Party IDs
-             */
-            'parties' => [
-
-                NULL
-            ],
-
-            /**
-             * Amounts
-             */
-            'amounts' => [
-
-                $invoice_record->amount
-            ]
+        	// Collection
+        	[
+        		'account_id' => IQB_AC_ACCOUNT_ID_COLLECTION,
+				'party_type' => NULL,
+				'party_id'   => NULL,
+				'amount' 	 => $invoice_record->amount
+        	]
 
         ];
 
@@ -2299,39 +2435,13 @@ class Policy_installments extends MY_Controller
          * Credit Rows
          */
         $cr_rows = [
-
-            /**
-             * Accounts
-             */
-             'accounts' =>  [
-                // Insured Party
-                IQB_AC_ACCOUNT_ID_INSURED_PARTY,
-            ],
-
-            /**
-             * Party Types
-             */
-            'party_types' => [
-                // Insured Party -- Customer
-                IQB_AC_PARTY_TYPE_CUSTOMER
-            ],
-
-            /**
-             * Party IDs
-             */
-            'parties' => [
-
-                // Insured Party -- Customr ID
-                $invoice_record->customer_id
-            ],
-
-            /**
-             * Amounts
-             */
-            'amounts' => [
-
-                $invoice_record->amount
-            ]
+        	// Insured Party
+        	[
+        		'account_id' => IQB_AC_ACCOUNT_ID_INSURED_PARTY,
+				'party_type' => IQB_AC_PARTY_TYPE_CUSTOMER,
+				'party_id'   => $invoice_record->customer_id,
+				'amount' 	 => $invoice_record->amount
+        	]
 
         ];
 
@@ -2340,16 +2450,8 @@ class Policy_installments extends MY_Controller
         /**
          * Format Data
          */
-        $voucher_data['account_id']['dr']   = $dr_rows['accounts'];
-        $voucher_data['party_type']['dr']   = $dr_rows['party_types'];
-        $voucher_data['party_id']['dr']     = $dr_rows['parties'];
-        $voucher_data['amount']['dr']       = $dr_rows['amounts'];
-
-        $voucher_data['account_id']['cr']   = $cr_rows['accounts'];
-        $voucher_data['party_type']['cr']   = $cr_rows['party_types'];
-        $voucher_data['party_id']['cr']     = $cr_rows['parties'];
-        $voucher_data['amount']['cr']       = $cr_rows['amounts'];
-
+        $voucher_data['dr_rows'] = $dr_rows;
+        $voucher_data['cr_rows'] = $cr_rows;
 
         // --------------------------------------------------------------------
 

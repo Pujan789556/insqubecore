@@ -254,11 +254,7 @@ class Ac_voucher_model extends MY_Model
         /**
          * Prepare Master Record Data
          */
-        $master_data = [
-            'voucher_date'      => $data['voucher_date'],
-            'voucher_type_id'   => $data['voucher_type_id'],
-            'narration'         => $data['narration']
-        ];
+        $master_data = $data['master'];
 
         // ----------------------------------------------------------------
 
@@ -312,16 +308,10 @@ class Ac_voucher_model extends MY_Model
      */
     public function add($data, $policy_id=NULL)
     {
-
         /**
          * Prepare Master Record Data
          */
-        $master_data = [
-            'voucher_date'      => $data['voucher_date'],
-            'voucher_type_id'   => $data['voucher_type_id'],
-            'narration'         => $data['narration'],
-            'flag_internal'     => $data['flag_internal']
-        ];
+        $master_data = $data['master'];
 
         // ----------------------------------------------------------------
 
@@ -336,10 +326,10 @@ class Ac_voucher_model extends MY_Model
          * Internal Voucher
          * Check DEBIT === CREDIT ???
          */
-        if( $data['flag_internal'] == IQB_FLAG_ON && !$this->_valid_voucher_amount($batch_data_details) )
-        {
-            throw new Exception("Exception [Model: Ac_voucher_model][Method: add()]: Computation Error: Debit Total is Not Equal to Credit Total.");
-        }
+        // if( $data['flag_internal'] == IQB_FLAG_ON && !$this->_valid_voucher_amount($batch_data_details) )
+        // {
+        //     throw new Exception("Exception [Model: Ac_voucher_model][Method: add()]: Computation Error: Debit Total is Not Equal to Credit Total.");
+        // }
         // ----------------------------------------------------------------
 
 
@@ -436,89 +426,49 @@ class Ac_voucher_model extends MY_Model
      */
     private function _build_voucher_details_batch_data($data)
     {
-        /**
-         * Debit Rows
-         */
-        $accounts       = $data['account_id']['dr'];
-        $party_types    = $data['party_type']['dr'];
-        $party_ids      = $data['party_id']['dr'];
-        $amounts        = $data['amount']['dr'];
-        $count_dr       = count($accounts);
         $dr_total       = 0.00;
         $cr_total       = 0.00;
-
-
-
         $batch_data = [];
-        for($i = 0; $i < $count_dr; $i++)
+
+        // ----------------------------------------------------------------
+
+
+        // Build Debit Rows
+        $sno = 1;
+        foreach( $data['dr_rows'] as $row)
         {
-            // Both Party Type and Party ID must be Supplied else nullify them!
-            $party_type = $party_types[$i] ? $party_types[$i] : NULL;
-            $party_id   = $party_ids[$i] ? $party_ids[$i] : NULL;
-            if( $party_type == NULL || $party_id == NULL )
-            {
-                $party_type = NULL;
-                $party_id   = NULL;
-            }
+            $row['sno']         = $sno;
+            $row['flag_type']   = IQB_AC_FLAG_DEBIT;
 
-            $amount =  $amounts[$i];
-            $batch_data[] = [
-                'sno'           => $i+1,
-                'flag_type'     => IQB_AC_FLAG_DEBIT,
-                'account_id'    => $accounts[$i],
-                'party_type'    => $party_type,
-                'party_id'      => $party_id,
-                'amount'        => $amounts[$i]
-            ];
+            $batch_data[]   = $row;
+            $dr_total       = bcadd($dr_total, $row['amount'], IQB_AC_DECIMAL_PRECISION);
 
-            $dr_total = bcadd($dr_total, $amount, 4);
+            $sno++;
+        }
+
+        // ----------------------------------------------------------------
+
+        // Build Credit Rows
+        $sno = 1;
+        foreach( $data['cr_rows'] as $row)
+        {
+            $row['sno']         = $sno;
+            $row['flag_type']   = IQB_AC_FLAG_CREDIT;
+
+            $batch_data[]   = $row;
+            $cr_total       = bcadd($cr_total, $row['amount'], IQB_AC_DECIMAL_PRECISION);
+
+            $sno++;
         }
 
         // ----------------------------------------------------------------
 
         /**
-         * Credit Rows
-         */
-        $accounts       = $data['account_id']['cr'];
-        $party_types    = $data['party_type']['cr'];
-        $party_ids      = $data['party_id']['cr'];
-        $amounts        = $data['amount']['cr'];
-        $count_cr       = count($accounts);
-        for($i = 0; $i < $count_cr; $i++)
-        {
-            $amount =  $amounts[$i];
-            $batch_data[] = [
-                'sno'           => $i+1,
-                'flag_type'     => IQB_AC_FLAG_CREDIT,
-                'account_id'    => $accounts[$i],
-                'party_type'    => $party_types[$i] ? $party_types[$i] : NULL,
-                'party_id'      => $party_ids[$i] ? $party_ids[$i] : NULL,
-                'amount'        => $amount
-            ];
-
-            $cr_total = bcadd($cr_total, $amount, 4);
-        }
-
-        /**
-         * DR === CR
+         * DR === CR ???
          */
         if($dr_total !== $cr_total)
         {
             throw new Exception("Exception [Model: Ac_voucher_model][Method: _build_voucher_details_batch_data()]: Debit Total is NOT EXACT equal to Credit Total.");
-
-            // $diff_total     = bcsub($dr_total, $cr_total, 4);
-            // $abs_diff_total = abs($diff_total);
-
-            // if($diff_total > 0)
-            // {
-            //     // First Credit Row
-            //     $batch_data[$count_dr][$amount] = bcadd($batch_data[$count_dr][$amount], $abs_diff_total);
-            // }
-            // else
-            // {
-            //     // First Debit Row
-            //     $batch_data[0][$amount] = bcadd($batch_data[0][$amount], $abs_diff_total);
-            // }
         }
 
         return $batch_data;

@@ -751,6 +751,100 @@ if ( ! function_exists('ac_compute_tax'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('ac_equate_dr_cr_rows'))
+{
+	/**
+	 * Equate DR and CR rows Total
+	 *
+	 * Compute the dr_total and cr_total.
+	 * If difference, add the difference to the
+	 * row of DR or CR having lowest decimal fraction
+	 *
+	 * @param array $dr_rows
+	 * @param array $cr_rows
+	 * @return array
+	 */
+	function ac_equate_dr_cr_rows( array $dr_rows, array $cr_rows )
+	{
+		/**
+         * DR === CR
+         */
+        $dr_total = $cr_total = 0;
+        foreach($dr_rows as $row)
+        {
+        	$dr_total = bcadd($dr_total, $row['amount'], IQB_AC_DECIMAL_PRECISION);
+        }
+        foreach($cr_rows as $row)
+        {
+        	$cr_total = bcadd($cr_total, $row['amount'], IQB_AC_DECIMAL_PRECISION);
+        }
+
+        if($dr_total !== $cr_total)
+        {
+            $diff_total     = bcsub($dr_total, $cr_total, IQB_AC_DECIMAL_PRECISION);
+            $abs_diff_total = abs($diff_total);
+
+            if($diff_total > 0)
+            {
+                // Add dfference to credit rows having smallest fraction
+                $cr_rows = ac_add_to_lowest_fraction($cr_rows, $abs_diff_total);
+            }
+            else
+            {
+                // Add dfference to debit rows having smallest fraction
+                $dr_rows = ac_add_to_lowest_fraction($dr_rows, $abs_diff_total);
+            }
+        }
+
+
+        return [
+        	'dr_rows' => $dr_rows,
+        	'cr_rows' => $cr_rows
+        ];
+	}
+}
+
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('ac_add_to_lowest_fraction'))
+{
+	/**
+	 * Add the value to the row having lowest decimal fraction
+	 * and return updated array of DR/CR Rows
+	 *
+	 * @param array $rows
+	 * @param float $value
+	 * @return array
+	 */
+	function ac_add_to_lowest_fraction( array $rows, $value )
+	{
+		$count = count($rows);
+
+		// Extract fraction of first amount
+		$fraction1 	= bcsub($rows[0]['amount'], floor($rows[0]['amount']), IQB_AC_DECIMAL_PRECISION);
+		$index = 0;
+		for( $i = 1; $i < $count; $i++)
+		{
+			// Extract fraction of second amount
+			$fraction2 	= bcsub($rows[$i]['amount'], floor($rows[$i]['amount']), IQB_AC_DECIMAL_PRECISION);
+
+			if($fraction2 < $fraction1 )
+			{
+				$index = $i;
+				$fraction1 = $fraction2;
+			}
+		}
+
+		// Add the value to the row with smallest fraction
+		$rows[$index]['amount'] = bcadd($rows[$index]['amount'], $value, IQB_AC_DECIMAL_PRECISION);
+
+		return $rows;
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_INVOICE__pdf'))
 {
     /**

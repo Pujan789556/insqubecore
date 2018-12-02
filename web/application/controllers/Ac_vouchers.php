@@ -469,29 +469,29 @@ class Ac_vouchers extends MY_Controller
         		$data = $this->input->post();
         		// echo '<pre>'; print_r($data);exit;
 
-        		// Insert or Update?
-				if($action === 'add')
-				{
-					$data['flag_internal'] = IQB_FLAG_OFF;
+        		// Build Boucher Data
+        		$voucher_data = $this->__build_voucher_data($data, $action);
 
-					try {
+        		try {
 
-						$done = $this->ac_voucher_model->add($data);
-
-					} catch (Exception $e) {
-
-						return $this->template->json([
-							'title' 	=> 'Exception Occured!',
-							'status' 	=> $status,
-							'message' 	=> $e->getMessage()
-						]);
+        			if($action === 'add')
+					{
+						$done = $this->ac_voucher_model->add($voucher_data);
 					}
+					else
+					{
+						$done = $this->ac_voucher_model->edit($record->id, $voucher_data);
+					}
+
+				} catch (Exception $e) {
+
+					return $this->template->json([
+						'title' 	=> 'Exception Occured!',
+						'status' 	=> 'error',
+						'message' 	=> $e->getMessage()
+					]);
 				}
-				else
-				{
-					// Now Update Data
-					$done = $this->ac_voucher_model->edit($record->id, $data);
-				}
+
 
 	        	if(!$done)
 				{
@@ -544,6 +544,72 @@ class Ac_vouchers extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+		private function __build_voucher_data($data, $action)
+		{
+
+			/**
+			 * Build Master Data
+			 */
+			$master = [
+				'voucher_date'      => $data['voucher_date'],
+	            'voucher_type_id'   => $data['voucher_type_id'],
+	            'narration'         => $data['narration']
+			];
+			if($action == 'add')
+			{
+				$master['flag_internal'] = IQB_FLAG_OFF;
+			}
+
+
+			/**
+			 * Build Details Data = Debit Rows
+			 */
+			$dr_count = count($data['amount']['dr']);
+			$dr_rows = [];
+			for($i=0; $i<$dr_count; $i++)
+			{
+				$account_id 	= $data['account_id']['dr'][$i];
+				$party_type 	= $data['party_type']['dr'][$i];
+				$party_id 		= $data['party_id']['dr'][$i];
+				$amount 		= $data['amount']['dr'][$i];
+
+				$dr_rows[] = [
+					'account_id' => $account_id,
+					'party_type' => $party_type ? $party_type : NULL,
+					'party_id'   => $party_id ? $party_id : NULL,
+					'amount' 	 => $amount
+				];
+			}
+
+			/**
+			 * Build Details Data = Credit Rows
+			 */
+			$cr_count = count($data['amount']['cr']);
+			$cr_rows = [];
+			for($i=0; $i<$cr_count; $i++)
+			{
+				$account_id 	= $data['account_id']['cr'][$i];
+				$party_type 	= $data['party_type']['cr'][$i];
+				$party_id 		= $data['party_id']['cr'][$i];
+				$amount 		= $data['amount']['cr'][$i];
+
+				$cr_rows[] = [
+					'account_id' => $account_id,
+					'party_type' => $party_type ? $party_type : NULL,
+					'party_id'   => $party_id ? $party_id : NULL,
+					'amount' 	 => $amount
+				];
+			}
+
+			return [
+				'master' => $master,
+				'dr_rows' => $dr_rows,
+				'cr_rows' => $cr_rows
+			];
+		}
+
+	// --------------------------------------------------------------------
+
 	/**
 	 * Callback: Valid Voucher Date?
 	 *
@@ -591,17 +657,18 @@ class Ac_vouchers extends MY_Controller
 		// Compute Debit Total
 		foreach($debits as $amount)
 		{
-			$debit_total += $amount;
+			$debit_total = bcadd($debit_total, $amount, IQB_AC_DECIMAL_PRECISION);
 		}
 
 		// Compute Debit Total
 		foreach($credits as $amount)
 		{
-			$credit_total += $amount;
+			$credit_total = bcadd($credit_total, $amount, IQB_AC_DECIMAL_PRECISION);
 		}
 
 		$epsilon = 0.00001;
-		if( abs($debit_total - $credit_total) < $epsilon )
+		// if( abs($debit_total - $credit_total) < $epsilon )
+		if( $credit_total === $debit_total )
 		{
 			return TRUE;
 		}

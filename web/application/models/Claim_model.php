@@ -1008,6 +1008,11 @@ class Claim_model extends MY_Model
      */
     public function voucher($record, $surveyor_fee_only = FALSE )
     {
+        /**
+         * Account Helper
+         */
+        $this->load->helper('account');
+
         // Models
         $this->load->model('claim_surveyor_model');
         $this->load->model('portfolio_model');
@@ -1043,10 +1048,13 @@ class Claim_model extends MY_Model
 
         $narration = "Claim Voucher ({$record->claim_code}) for Policy({$record->policy_code}).";
         $voucher_data = [
-            'voucher_date'      => date('Y-m-d'),
-            'voucher_type_id'   => IQB_AC_VOUCHER_TYPE_JRNL,
-            'narration'         => $narration,
-            'flag_internal'     => IQB_FLAG_ON
+            // Master Table Data
+            'master' => [
+                'voucher_date'      => date('Y-m-d'),
+                'voucher_type_id'   => IQB_AC_VOUCHER_TYPE_JRNL,
+                'narration'         => $narration,
+                'flag_internal'     => IQB_FLAG_ON
+            ]
         ];
 
         // --------------------------------------------------------------------
@@ -1056,18 +1064,25 @@ class Claim_model extends MY_Model
          */
 
         $claim_expense       = $claim_ri_breakdown['cl_treaty_retaintion'];
-        $portfolio_withdrawl = $this->_total_claim_amount($record) - $claim_expense;
+        $portfolio_withdrawl = bcsub( $this->_total_claim_amount($record), $claim_expense, IQB_AC_DECIMAL_PRECISION);
 
-        $dr_accounts = [
+        $dr_rows = [
             // Claim Expense (Portfolio-wise)
-            $portfolio->account_id_ce,
+            [
+                'account_id' => $portfolio->account_id_ce,
+                'party_type' => NULL,
+                'party_id'   => NULL,
+                'amount'     => $claim_expense
+            ],
 
             // Claim Receivable (Portfolio-wise)
-            $portfolio->account_id_cr
+            [
+                'account_id' => $portfolio->account_id_cr,
+                'party_type' => NULL,
+                'party_id'   => NULL,
+                'amount'     => $portfolio_withdrawl
+            ],
         ];
-        $dr_party_types = [NULL, NULL];
-        $dr_parties     = [NULL, NULL];
-        $dr_amounts     = [$claim_expense, $portfolio_withdrawl];
 
 
         // Surveyor VAT??
@@ -1076,10 +1091,13 @@ class Claim_model extends MY_Model
             $vat = (float)$single->vat_amount;
             if($vat)
             {
-                $dr_accounts[]      = IQB_AC_ACCOUNT_ID_VAT_PAYABLE;
-                $dr_party_types[]   = IQB_AC_PARTY_TYPE_SURVEYOR;
-                $dr_parties[]       = $single->surveyor_id;
-                $dr_amounts[]       = $vat;
+                // Surveyor VAT - Per Surveyor
+                $dr_rows[] = [
+                    'account_id' => IQB_AC_ACCOUNT_ID_VAT_PAYABLE,
+                    'party_type' => IQB_AC_PARTY_TYPE_SURVEYOR,
+                    'party_id'   => $single->surveyor_id,
+                    'amount'     => $vat
+                ];
             }
         }
 
@@ -1090,16 +1108,16 @@ class Claim_model extends MY_Model
         /**
          * CREDIT SECTION
          */
-        $cr_accounts    = [];
-        $cr_party_types = [];
-        $cr_parties     = [];
-        $cr_amounts     = [];
+        $cr_rows = [];
         if( !$surveyor_fee_only )
         {
-            $cr_accounts[]    = IQB_AC_ACCOUNT_ID_CLAIM_PARTY;
-            $cr_party_types[] = IQB_AC_PARTY_TYPE_CUSTOMER;
-            $cr_parties[]     = $record->customer_id;
-            $cr_amounts[]     = (float)$record->settlement_claim_amount;
+            // Claim Party
+            $cr_rows[] = [
+                'account_id' => IQB_AC_ACCOUNT_ID_CLAIM_PARTY,
+                'party_type' => IQB_AC_PARTY_TYPE_CUSTOMER,
+                'party_id'   => $record->customer_id,
+                'amount'     => (float)$record->settlement_claim_amount
+            ];
         }
 
 
@@ -1109,36 +1127,40 @@ class Claim_model extends MY_Model
             $vat = (float)$single->vat_amount;
             $tds = (float)$single->tds_amount;
             $fee = (float)$single->surveyor_fee;
-            $surveyor_party = $fee + $vat - $tds;
+
+            // Fee + VAT - TDS
+            $surveyor_party =   bcsub(
+                                    bcadd($fee, $vat, IQB_AC_DECIMAL_PRECISION),
+                                    $tds,
+                                    IQB_AC_DECIMAL_PRECISION
+                                );
 
             // Surveyor Party
-            $cr_accounts[]      = IQB_AC_ACCOUNT_ID_SURVEYOR_PARTY;
-            $cr_party_types[]   = IQB_AC_PARTY_TYPE_SURVEYOR;
-            $cr_parties[]       = $single->surveyor_id;
-            $cr_amounts[]       = $surveyor_party;
+            $cr_rows[] = [
+                'account_id' => IQB_AC_ACCOUNT_ID_SURVEYOR_PARTY,
+                'party_type' => IQB_AC_PARTY_TYPE_SURVEYOR,
+                'party_id'   => $single->surveyor_id,
+                'amount'     => $surveyor_party
+            ];
 
             // TDS Payable
-            $cr_accounts[]      = IQB_AC_ACCOUNT_ID_TDS_SURVEYOR;
-            $cr_party_types[]   = IQB_AC_PARTY_TYPE_SURVEYOR;
-            $cr_parties[]       = $single->surveyor_id;
-            $cr_amounts[]       = $tds;
+            $cr_rows[] = [
+                'account_id' => IQB_AC_ACCOUNT_ID_TDS_SURVEYOR,
+                'party_type' => IQB_AC_PARTY_TYPE_SURVEYOR,
+                'party_id'   => $single->surveyor_id,
+                'amount'     => $tds
+            ];
         }
 
         // --------------------------------------------------------------------
 
         /**
-         * Format Data
+         * DR === CR
          */
-        $voucher_data['account_id']['dr']   = $dr_accounts;
-        $voucher_data['party_type']['dr']   = $dr_party_types;
-        $voucher_data['party_id']['dr']     = $dr_parties;
-        $voucher_data['amount']['dr']       = $dr_amounts;
+        $voucher_rows = ac_equate_dr_cr_rows($dr_rows, $cr_rows);
 
-        $voucher_data['account_id']['cr']   = $cr_accounts;
-        $voucher_data['party_type']['cr']   = $cr_party_types;
-        $voucher_data['party_id']['cr']     = $cr_parties;
-        $voucher_data['amount']['cr']       = $cr_amounts;
-
+        // Add Voucher Rows on Voucher Data
+        $voucher_data = array_merge($voucher_data, $voucher_rows);
 
         // --------------------------------------------------------------------
 
@@ -1167,20 +1189,22 @@ class Claim_model extends MY_Model
             $ri_distribution    = $this->ri_transaction_model->latest_build_by_policy($record->policy_id);
             $si_gross           = $ri_distribution->si_gross;
 
+            $ratio = bcdiv($total_claim_amount, $si_gross, IQB_AC_DECIMAL_PRECISION);
+
             return [
-                'cl_comp_cession'       => ( (float)$ri_distribution->si_comp_cession / $si_gross ) * $total_claim_amount,
-                'cl_treaty_retaintion'  => ( (float)$ri_distribution->si_treaty_retaintion / $si_gross ) * $total_claim_amount,
-                'cl_treaty_quota'       => ( (float)$ri_distribution->si_treaty_quota / $si_gross ) * $total_claim_amount,
-                'cl_treaty_1st_surplus' => ( (float)$ri_distribution->si_treaty_1st_surplus / $si_gross ) * $total_claim_amount,
-                'cl_treaty_2nd_surplus' => ( (float)$ri_distribution->si_treaty_2nd_surplus / $si_gross ) * $total_claim_amount,
-                'cl_treaty_3rd_surplus' => ( (float)$ri_distribution->si_treaty_3rd_surplus / $si_gross ) * $total_claim_amount,
-                'cl_treaty_fac'         => ( (float)$ri_distribution->si_treaty_fac / $si_gross ) * $total_claim_amount,
+                'cl_comp_cession'       => bcmul( (float)$ri_distribution->si_comp_cession, $ratio, IQB_AC_DECIMAL_PRECISION ),
+                'cl_treaty_retaintion'  => bcmul( (float)$ri_distribution->si_treaty_retaintion, $ratio, IQB_AC_DECIMAL_PRECISION ),
+                'cl_treaty_quota'       => bcmul( (float)$ri_distribution->si_treaty_quota, $ratio, IQB_AC_DECIMAL_PRECISION ),
+                'cl_treaty_1st_surplus' => bcmul( (float)$ri_distribution->si_treaty_1st_surplus, $ratio, IQB_AC_DECIMAL_PRECISION ),
+                'cl_treaty_2nd_surplus' => bcmul( (float)$ri_distribution->si_treaty_2nd_surplus, $ratio, IQB_AC_DECIMAL_PRECISION ),
+                'cl_treaty_3rd_surplus' => bcmul( (float)$ri_distribution->si_treaty_3rd_surplus, $ratio, IQB_AC_DECIMAL_PRECISION ),
+                'cl_treaty_fac'         => bcmul( (float)$ri_distribution->si_treaty_fac, $ratio, IQB_AC_DECIMAL_PRECISION ),
             ];
         }
 
         private function _total_claim_amount($record)
         {
-            return (float)$record->total_surveyor_fee_amount + (float)$record->settlement_claim_amount;
+            return bcadd((float)$record->total_surveyor_fee_amount, (float)$record->settlement_claim_amount, IQB_AC_DECIMAL_PRECISION);
         }
 
     // ----------------------------------------------------------------
