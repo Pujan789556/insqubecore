@@ -17,7 +17,7 @@ class Policy_installment_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'endorsement_id', 'fiscal_yr_id', 'fy_quarter', 'installment_date', 'type', 'percent', 'amt_basic_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'endorsement_id', 'fiscal_yr_id', 'fy_quarter', 'installment_date', 'type', 'percent', 'amt_basic_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_ri_commission', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -120,24 +120,27 @@ class Policy_installment_model extends MY_Model
                 $installment_type   = $installment_data['installment_type'];
 
                 // First Installment Only Fields
-                $first_instlmnt_only_fields = ['amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee'];
+                $first_instlmnt_only_fields = ['amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_ri_commission'];
 
                 $batch_data = [];
                 for($i = 0; $i < count($dates); $i++ )
                 {
                     $installment_date       = $dates[$i];
                     $percent                = $percents[$i];
-                    $amt_basic_premium      = ( $endorsement_record->amt_basic_premium * $percent ) / 100.00;
+
+                    $p_val = bcdiv($percent, 100.00, IQB_AC_DECIMAL_PRECISION);
+
+                    $amt_basic_premium      = bcmul( $endorsement_record->amt_basic_premium, $p_val, IQB_AC_DECIMAL_PRECISION);
                     $amt_pool_premium       = $endorsement_record->amt_pool_premium
-                                                ? ( $endorsement_record->amt_pool_premium * $percent ) / 100.00 : NULL;
+                                                ? bcmul( $endorsement_record->amt_pool_premium, $p_val, IQB_AC_DECIMAL_PRECISION): 0.00;
                     $amt_agent_commission   = $endorsement_record->amt_agent_commission
-                                                ? ( $endorsement_record->amt_agent_commission * $percent ) / 100.00 : NULL;
+                                                ? bcmul( $endorsement_record->amt_agent_commission , $p_val, IQB_AC_DECIMAL_PRECISION) : NULL;
 
 
                     /**
                      * Compute Taxable Amount
                      */
-                    $taxable_amount = $amt_basic_premium +  $amt_pool_premium;
+                    $taxable_amount = bcadd($amt_basic_premium, $amt_pool_premium, IQB_AC_DECIMAL_PRECISION);
 
 
                     /**
@@ -146,7 +149,8 @@ class Policy_installment_model extends MY_Model
                      *  - Stamp Duty
                      *  - Cancellation Fee
                      *  - Transfer Fee
-                     *  - No calaim Discount
+                     *  - No calaim Discount (return)
+                     *  - RI Commission
                      */
                     $fst_inst_only_data = [];
                     if($i === 0 )
@@ -159,7 +163,7 @@ class Policy_installment_model extends MY_Model
                             // Update Taxable Amount
                             if($value)
                             {
-                                $taxable_amount += $value;
+                                $taxable_amount = bcadd($taxable_amount, $value, IQB_AC_DECIMAL_PRECISION);
                             }
                         }
                     }
@@ -173,9 +177,18 @@ class Policy_installment_model extends MY_Model
 
                     /**
                      * Let's Compute VAT
+                     *
+                     * NOTE: IF POlicy is FAC-Inward, NO VAT Computation
                      */
-                    $this->load->helper('account');
-                    $amt_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+                    $amt_vat = 0.00;
+                    if( in_array(
+                            $endorsement_record->policy_category,
+                            [IQB_POLICY_CATEGORY_REGULAR, IQB_POLICY_CATEGORY_CO_INSURANCE])
+                    )
+                    {
+                        $this->load->helper('account');
+                        $amt_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+                    }
 
 
                     $batch_data[] = array_merge( $fst_inst_only_data, [

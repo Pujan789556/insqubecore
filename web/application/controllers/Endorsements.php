@@ -821,10 +821,21 @@ class Endorsements extends MY_Controller
 				$done = FALSE;
 
 				/**
+				 * FAC-Inward Policy???
+				 * ----------------------
+				 * IF Policy is FAC-Inward, Regardless of Portfolio - Common to all portfolio
+				 */
+				if($policy_record->category == IQB_POLICY_CATEGORY_FAC_IN )
+				{
+					$done = $this->__save_premium_FAC_IN($policy_record, $endorsement_record);
+				}
+
+
+				/**
 		         * AGRICULTURE - CROP SUB-PORTFOLIO
 		         * ---------------------------------
 		         */
-		        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
 		        {
 		            $done = __save_premium_AGR_CROP($policy_record, $endorsement_record);
 		        }
@@ -1116,6 +1127,72 @@ class Endorsements extends MY_Controller
 			}
 		}
 
+		/**
+		 * Save FAC-Inward Policy premium
+		 *
+		 * @param object $policy_record
+		 * @param object $endorsement_record
+		 * @return boolean
+		 */
+		private function __save_premium_FAC_IN($policy_record, $endorsement_record)
+		{
+			$v_rules = $this->endorsement_model->fac_in_premium_v_rules();
+
+			$this->form_validation->set_rules($v_rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$policy_object 	= get_object_from_policy_record($policy_record);
+        		$post_data 		= $this->input->post();
+
+        		$amt_basic_premium 		= $post_data['amt_basic_premium'];
+        		$percent_ri_commission 	= $post_data['percent_ri_commission'];
+
+        		// Compute amt_ri_commission
+        		$comm_percent 		= bcdiv($percent_ri_commission, 100.00, IQB_AC_DECIMAL_PRECISION);
+        		$amt_ri_commission 	= bcmul( $amt_basic_premium, $comm_percent, IQB_AC_DECIMAL_PRECISION);
+
+        		// Cost Calculation Table
+        		$cost_calculation_table = [
+        			[
+        				'label' => 'FAC - Inward Premium (Rs.)',
+        				'value' => $amt_basic_premium
+        			],
+        			// [
+        			// 	'label' => "Commission on FAC Accepted ({$percent_ri_commission}%)",
+        			// 	'value' => $amt_ri_commission
+        			// ]
+        		];
+
+        		// Prepare Premium Data
+        		$premium_data = [
+        			'gross_amt_sum_insured' => $policy_object->amt_sum_insured,
+					'net_amt_sum_insured' 	=> $policy_object->amt_sum_insured,
+					'amt_basic_premium' 	=> $amt_basic_premium,
+					'percent_ri_commission' => $percent_ri_commission,
+					'amt_ri_commission' 	=> $amt_ri_commission,
+					'amt_commissionable'	=> NULL,
+					'amt_agent_commission'  => NULL,
+					'amt_direct_discount' 	=> NULL,
+					'amt_pool_premium' 		=> 0.00,
+					'amt_stamp_duty' 		=> 0.00,
+					'amt_vat' 				=> 0.00,
+
+					'premium_computation_table' => json_encode([]),
+					'cost_calculation_table' 	=> json_encode($cost_calculation_table),
+				];
+
+				return $this->endorsement_model->save($endorsement_record->id, $premium_data);
+        	}
+        	else
+        	{
+        		return $this->template->json([
+					'status' 	=> 'error',
+					'title' 	=> 'Validation Error!',
+					'message' 	=> validation_errors()
+				]);
+        	}
+		}
+
 		// --------------------------------------------------------------------
 
 		/**
@@ -1141,8 +1218,15 @@ class Endorsements extends MY_Controller
 			 * Portfolio Setting Record
 			 */
 			$pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
-			if($pfs_record->flag_installment === IQB_FLAG_YES )
-			{
+
+			/**
+			 * Installment applies only on Regular/CO-Inusrance Policy
+			 */
+			if(
+				in_array($policy_record->category, [IQB_POLICY_CATEGORY_REGULAR, IQB_POLICY_CATEGORY_CO_INSURANCE])
+				&&
+				$pfs_record->flag_installment === IQB_FLAG_YES
+			){
 				// Get Multiple Installments
 				$dates 		= $this->input->post('installment_date') ?? NULL;
 				$percents 	= $this->input->post('percent') ?? NULL;
@@ -1287,6 +1371,14 @@ class Endorsements extends MY_Controller
 	{
 
 		/**
+		 * IF Policy is FAC-Inward, It has a Different FORM
+		 */
+		if($policy_record->category == IQB_POLICY_CATEGORY_FAC_IN )
+		{
+			return $this->__render_premium_form_FAC_IN($policy_record, $endorsement_record, $json_extra);
+		}
+
+		/**
 		 *  Let's Load The Endorsement Form For this Record
 		 */
 		$policy_object = get_object_from_policy_record($policy_record);
@@ -1377,6 +1469,17 @@ class Endorsements extends MY_Controller
         $this->template->json($json_data);
 	}
 
+
+	private function __render_premium_form_FAC_IN($policy_record, $endorsement_record, $json_extra=[])
+	{
+		$json_data['form'] = $this->load->view('endorsements/forms/_form_premium_fac_in', [
+								                'form_elements'         => $this->endorsement_model->fac_in_premium_v_rules(),
+								                'policy_record'         => $policy_record,
+								                'endorsement_record'    => $endorsement_record
+								            ], TRUE);
+		$json_data = array_merge($json_data, $json_extra);
+		$this->template->json($json_data);
+	}
 
 	// --------------------------------------------------------------------
 	// PREMIUM GOODIES FUNCTIONS

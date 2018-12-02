@@ -17,7 +17,27 @@ class Endorsement_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'customer_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate_on_refund', 'flag_short_term', 'short_term_config', 'short_term_rate', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'customer_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'percent_ri_commission', 'amt_ri_commission', 'amt_direct_discount', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate_on_refund', 'flag_short_term', 'short_term_config', 'short_term_rate', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
+
+    // Resetable Fields on Policy/Object Edit, Endorsement Edit
+    protected static $nullable_fields = [
+        'gross_amt_sum_insured',
+        'net_amt_sum_insured',
+        'amt_basic_premium',
+        'amt_pool_premium',
+        'amt_commissionable',
+        'amt_agent_commission',
+        'percent_ri_commission',
+        'amt_ri_commission',
+        'amt_direct_discount',
+        'amt_transfer_fee',
+        'amt_transfer_ncd',
+        'amt_cancellation_fee',
+        'amt_vat',
+        'cost_calculation_table',
+        'flag_ri_approval'
+    ];
+
 
     protected $validation_rules = [];
 
@@ -116,6 +136,37 @@ class Endorsement_model extends MY_Model
                 'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
                 '_type'     => 'text',
                 '_default'  => 0,
+                '_required' => true
+            ]
+        ];
+
+        return $rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * FAC-IN Premium Validation Rules.
+     *
+     * Validation rules for policy of Category FAC-Inward.
+     *
+     * @return array
+     */
+    public function fac_in_premium_v_rules()
+    {
+        $rules = [
+            [
+                'field' => 'amt_basic_premium',
+                'label' => 'FAC Premium (Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            [
+                'field' => 'percent_ri_commission',
+                'label' => 'Commission on FAC Accepted(%)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+                '_type'     => 'text',
                 '_required' => true
             ]
         ];
@@ -453,11 +504,9 @@ class Endorsement_model extends MY_Model
         /**
          * Task 1: Reset Endorsement Record
          */
-        $nullable_fields = ['gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount', 'amt_vat', 'cost_calculation_table', 'flag_ri_approval'];
-
         $reset_data = [];
 
-        foreach ($nullable_fields as $field)
+        foreach (self::$nullable_fields as $field)
         {
              $reset_data[$field] = NULL;
         }
@@ -518,7 +567,7 @@ class Endorsement_model extends MY_Model
         $nullable_fields = [];
         if( _ENDORSEMENT_is_premium_computable_by_type($txn_type) )
         {
-            $nullable_fields = ['gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount', 'amt_vat', 'cost_calculation_table', 'flag_ri_approval'];
+            $nullable_fields = self::$nullable_fields;
         }
 
         foreach ($nullable_fields as $field)
@@ -823,6 +872,7 @@ class Endorsement_model extends MY_Model
         $this->load->model('policy_model');
         $this->policy_model->transfer_ownership($record->policy_id, $record->transfer_customer_id);
 
+        // @TODO : Please Chedk if this customer has another active policy, in that case it should not be unlocked
         $this->load->model('customer_model');
         $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
 
@@ -1114,7 +1164,7 @@ class Endorsement_model extends MY_Model
         $select =   "ENDRSMNT.*, " .
 
                     // Branch and Portfolio
-                    "P.code as policy_code, P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, " .
+                    "P.category as policy_category, P.insurance_company_id, P.code as policy_code, P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, " .
 
                     // Transfer Customer Name
                     "C.full_name as transfer_customer_name, " .
