@@ -21,6 +21,37 @@ echo form_open( $this->uri->uri_string(),
 
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">
+          <h4 class="box-title">Select Category</h4>
+        </div>
+        <div class="box-body form-horizontal">
+            <?php
+            /**
+             * Load Form Components
+             */
+            $portfolio_elements = $form_elements['category'];
+            $this->load->view('templates/_common/_form_components_horz', [
+                'form_elements' => $portfolio_elements,
+                'form_record'   => $record
+            ]);
+            ?>
+
+            <div id="__insurance_company_box">
+                <?php
+                 /**
+                 * Load Form Components : Creditor Info
+                 */
+                $section_elements = $form_elements['insurance_company'];
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $section_elements,
+                    'form_record'   => $record
+                ]);
+                ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="box box-solid box-bordered">
+        <div class="box-header with-border">
           <h4 class="box-title">Select Customer</h4>
         </div>
         <div class="box-body form-horizontal">
@@ -298,6 +329,20 @@ function __do_select(a){
 //     }
 // }
 
+// Creator Info Toggler
+function __toggle_insurance_company(){
+
+    var $box    = $('#__insurance_company_box'),
+        cat    = $("#policy-category-id").val();
+
+    if(typeof cat === 'undefined' || cat == 1){
+        $("#insurance-company-id").val('').trigger('change');
+        $box.fadeOut();
+    }else{
+        $box.fadeIn();
+    }
+}
+
 // Agent Info Toggler
 function __toggle_agent_info(){
     var v = $("input[type=radio][name=flag_dc]:checked").val(),
@@ -455,6 +500,11 @@ $('.input-group.datetime, .input-group.datetime input').datetimepicker({
 //     __toggle_creditor_info();
 // });
 
+// Hide Insurance Company if Policy Category is Regular
+__toggle_insurance_company();
+$(document).on('change', '#policy-category-id', function(e){
+    __toggle_insurance_company();
+});
 
 // Hide agent list on Direct Discount Checked
 __toggle_agent_info();
@@ -467,6 +517,7 @@ $(document).on('ifChecked', 'input[name="flag_dc"]', function(e){
 // Initialize Select2
 $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
     //Initialize Select2 Elements
+    $("#insurance-company-id").select2();
     $("#_portfolio-id").select2();
     $("#_marketing-staff").select2();
     $("#_agent-id").select2();

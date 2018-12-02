@@ -31,6 +31,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <table class="table table-hover">
                     <tbody>
                         <tr>
+                            <td class="text-bold">Policy Category</td>
+                            <td><?php echo IQB_POLICY_CATEGORIES[$record->category]?></td>
+                        </tr>
+                        <?php if($record->category != IQB_POLICY_CATEGORY_REGULAR): ?>
+                            <tr>
+                                <td class="text-bold">FAC/CO-in From (Insurance Company)</td>
+                                <td>
+                                    <?php
+                                    echo '<span class="margin-r-5">', htmlspecialchars($record->insurance_company_name), '</span>';
+                                    echo anchor(
+                                                site_url('companies/details/' . $record->insurance_company_id),
+                                                '<i class="fa fa-external-link small"></i>',
+                                                ['target' => '_blank', 'title' => 'View Company Details']);?>
+                                </td>
+                            </tr>
+                        <?php endif ?>
+
+                        <tr>
                             <td class="text-bold">Policy Code</td>
                             <td><?php echo $record->code?></td>
                         </tr>

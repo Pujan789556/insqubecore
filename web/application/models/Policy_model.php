@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = [];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'category', 'insurance_company_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
     protected $endorsement_fields = ['proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time'];
 
@@ -114,21 +114,35 @@ class Policy_model extends MY_Model
             $this->load->model('district_model');
 
             /**
-             * District Dropdown
+             * Dropdowns
              */
-            $district_dropdown = $this->district_model->dropdown();
+            $district_dropdown  = $this->district_model->dropdown();
+            $insurance_dropdown = $this->company_model->dropdown_insurance();
+
+            /**
+             * FAC-in Company ID Validation
+             */
 
 
             /**
-             * If posted and Direct Discount Checked, We don't need agent
+             * Run-Time Validation Rules
              */
-            $agent_validation           = 'trim|required|integer|max_length[11]';
+            $insurance_company_validation   = 'trim|integer|max_length[8]';
+            $agent_validation               = 'trim|required|integer|max_length[11]';
             if($this->input->post())
             {
                 $flag_dc = $this->input->post('flag_dc');
                 if( in_array($flag_dc, [IQB_POLICY_FLAG_DC_DIRECT, IQB_POLICY_FLAG_DC_NONE]) )
                 {
+                    // If posted and Direct Discount Checked, We don't need agent
                     $agent_validation = 'trim|integer|max_length[11]';
+                }
+
+                // If Category FAC-in or CO-in, We must need FAC-in Company ID
+                $category = $this->input->post('category');
+                if($category != IQB_POLICY_CATEGORY_REGULAR)
+                {
+                    $insurance_company_validation  = 'trim|required|integer|max_length[8]';
                 }
             }
 
@@ -167,6 +181,40 @@ class Policy_model extends MY_Model
                  *  c. Renewal Policy Add
                  *  d. Renewal Policy Draft Edit
                  */
+
+                /**
+                 * Policy Category
+                 */
+                'category' => [
+                    [
+                        'field' => 'category',
+                        'label' => 'Category',
+                        'rules' => 'trim|required|integer|exact_length[1]|in_list['.implode(',', array_keys(IQB_POLICY_CATEGORIES)).']',
+                        '_type'     => 'dropdown',
+                        '_data'     => IQB_POLICY_CATEGORIES,
+                        '_default'  => IQB_POLICY_CATEGORY_REGULAR,
+                        '_id'       => 'policy-category-id',
+                        '_required' => true
+                    ]
+                ],
+
+                /**
+                 * Insurance Company  in Case Category is FAC-in or CO-Insurance.
+                 */
+                'insurance_company' => [
+                    [
+                        'field' => 'insurance_company_id',
+                        'label' => 'FAC/CO-in From (Insurance Company)',
+                        'rules' => $insurance_company_validation,
+                        '_type'     => 'dropdown',
+                        '_data'     => IQB_BLANK_SELECT + $insurance_dropdown,
+                        '_extra_attributes' => 'style="width:100%; display:block"',
+                        '_id'       => 'insurance-company-id',
+                        '_required' => true
+                    ]
+                ],
+
+
                 /**
                  * Portfolio Information
                  */
@@ -700,6 +748,10 @@ class Policy_model extends MY_Model
         $data = $this->__refactor_datetime_fields($data);
 
 
+        // Category and Insurance Company ID
+        $data = $this->__category_defaults($data);
+
+
         /**
          * Short Term Flag???
          * ------------------
@@ -738,17 +790,13 @@ class Policy_model extends MY_Model
         // Refactor Date & time
         $data = $this->__refactor_datetime_fields($data);
 
-        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
+        // Category and Insurance Company ID
+        $data = $this->__category_defaults($data);
 
 
         // Status
         $data['status'] = IQB_POLICY_STATUS_DRAFT;
 
-        /**
-         * Short Term Flag???
-         * ------------------
-         * Find if this start-end date gives a default duration or short term duration
-         */
 
         /**
          * Short Term Flag???
@@ -757,6 +805,7 @@ class Policy_model extends MY_Model
          *
          * Find if this start-end date gives a default duration or short term duration
          */
+        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
         $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record->id, $data['start_date'], $data['end_date'] );
 
 
@@ -794,6 +843,30 @@ class Policy_model extends MY_Model
             // process backdate
             $data = $this->_backdate($data);
 
+
+            return $data;
+        }
+
+    // --------------------------------------------------------------------
+
+        /**
+         * Before Insert/Update Defaults - Sub-Function
+         *
+         * Set Policy Category and Insurance Company Properly
+         * i.e. Insurance Company Must be set to "NULL"
+         *      for foreign key constraint
+         *
+         * @param array $data
+         * @return array
+         */
+        private function __category_defaults($data)
+        {
+            $category = (int)$data['category'];
+
+            if($category === IQB_POLICY_CATEGORY_REGULAR )
+            {
+                $data['insurance_company_id'] = NULL;
+            }
 
             return $data;
         }
@@ -1049,6 +1122,8 @@ class Policy_model extends MY_Model
             'txn_details'   => $data['txn_details'],
             'remarks'       => $data['remarks']
         ];
+
+        // echo '<pre>'; print_r($endorsement_data);exit;
 
         return $this->endorsement_model->save($endorsement_record->id, $endorsement_data);
     }
@@ -1609,6 +1684,12 @@ class Policy_model extends MY_Model
 
 
                         /**
+                         * Insurance Company Name (IF Policy is FAC-inward or CO-insurance)
+                         */
+                        "IC.name as insurance_company_name, ".
+
+
+                        /**
                          * User Table - Sales Staff Info ( username, profile)
                          */
                         "SU.username as sold_by_username, SU.code AS sold_by_code, SU.profile as sold_by_profile, " .
@@ -1643,7 +1724,8 @@ class Policy_model extends MY_Model
                  ->join('auth_users CU', 'CU.id = P.created_by')
                  ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
                  ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
-                 ->join('master_agents A', 'RAP.agent_id = A.id', 'left');
+                 ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
+                 ->join('master_companies IC', 'IC.id = P.insurance_company_id', 'left');
 
         /**
          * Branch Address

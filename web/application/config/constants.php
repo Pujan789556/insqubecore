@@ -410,6 +410,24 @@ define('IQB_MOTOR_CVC_TYPE_TRACTOR_POWER_TRILLER',      'TRPT');    // Tractor &
 define('IQB_MOTOR_CVC_TYPE_CONSTRUCTION_EQUIPMENT',     'CE');      // Construction Equipment Vehicle
 
 
+
+/*
+|--------------------------------------------------------------------------
+| POLICY CATEGORIES CONSTANTS
+|--------------------------------------------------------------------------
+|
+*/
+define('IQB_POLICY_CATEGORY_REGULAR',  		1); 	// Regular Policy
+define('IQB_POLICY_CATEGORY_CO_INSURANCE',  2); 	// Co-Insurance Policy
+define('IQB_POLICY_CATEGORY_FAC_IN',  		3); 	// FACultative Inward Policy
+
+// Policy Categories List
+define('IQB_POLICY_CATEGORIES',  [
+	IQB_POLICY_CATEGORY_REGULAR 		=> 'Regular',
+	IQB_POLICY_CATEGORY_CO_INSURANCE 	=> 'Co-Insurance',
+	IQB_POLICY_CATEGORY_FAC_IN 			=> 'FAC Inward'
+]);
+
 /*
 |--------------------------------------------------------------------------
 | POLICY STATUS CONSTANTS
