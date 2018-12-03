@@ -401,6 +401,18 @@ class Customer_model extends MY_Model
             return FALSE;
         }
 
+
+        /**
+         * !!! NOTE
+         *
+         *  While unlocking a customr, please make sure that customer do not have
+         *  an active policy
+         */
+        if( $flag == IQB_FLAG_UNLOCKED && $this->has_active_policy($id))
+        {
+            return FALSE;
+        }
+
         // Let's Update the Flag
         $data = [
             'flag_locked'   => $flag,
@@ -411,6 +423,14 @@ class Customer_model extends MY_Model
                         ->update($this->table_name, $data);
     }
 
+
+    // ----------------------------------------------------------------
+
+    public function has_active_policy($id)
+    {
+        $this->load->model('policy_model');
+        return $this->policy_model->has_active_policy_by_customer($id);
+    }
 
     // ----------------------------------------------------------------
 

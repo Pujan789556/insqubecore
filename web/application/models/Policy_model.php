@@ -2057,6 +2057,23 @@ class Policy_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     *
+     * @param type $where
+     * @return type
+     */
+    public function has_active_policy_by_customer($customer_id)
+    {
+        $where = [
+            'customer_id'  => $customer_id,
+            'status'       => IQB_POLICY_STATUS_ACTIVE
+        ];
+        return $this->db->where($where)
+                        ->count_all_results($this->table_name);
+    }
+
+    // ----------------------------------------------------------------
+
 
     /**
      * Delete Cache on Update/Delete Records
