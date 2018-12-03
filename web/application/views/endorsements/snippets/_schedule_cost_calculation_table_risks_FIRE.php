@@ -7,8 +7,8 @@ $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_dec
 $risk_table     = NULL;
 if($cost_calculation_table)
 {
-    $risk_table       = $cost_calculation_table->risk_table;
-    $summary_table    = $cost_calculation_table->summary_table;
+    $risk_table       = $cost_calculation_table->risk_table ?? NULL;
+    $summary_table    = $cost_calculation_table->summary_table ?? NULL;
 }
 
 // echo '<pre>'; print_r($risk_table);exit;

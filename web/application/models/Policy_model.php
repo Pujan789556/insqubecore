@@ -1184,11 +1184,9 @@ class Policy_model extends MY_Model
     /**
      * Update Policy Status
      *
-     * This method only performs the following.
-     *      - Policy Table - Status, User Date/Time
-     *      - Endorsement Table - Status, User Date/Time
-     *      - Object Table - Lock Flag
-     *      - Customer Table - Lock Flag
+     *
+     * NOTE: This method must be triggered by controller method
+     *  within try-catch block.
      *
      * @param integer|object $record Policy ID | Policy Record
      * @param alpha $to_status_flag Status Code
@@ -1211,9 +1209,48 @@ class Policy_model extends MY_Model
             throw new Exception("Exception [Model: Policy_model][Method: update_status()]: Current Status does not qualify to upgrade/downgrade.");
         }
 
+        $transaction_status = FALSE;
 
-        // Update Status and It's Dependency
-        return $this->_do_status_transaction($record, $to_status_flag);
+        /**
+         * Update Status
+         */
+        switch($to_status_flag)
+        {
+            /**
+             * to Draft
+             */
+            case IQB_POLICY_STATUS_DRAFT:
+                $transaction_status = $this->to_draft($record);
+                break;
+
+
+            /**
+             * to Verified
+             */
+            case IQB_POLICY_STATUS_VERIFIED:
+                $transaction_status = $this->to_verified($record);
+                break;
+
+            /**
+             * to Active
+             */
+            case IQB_POLICY_STATUS_ACTIVE:
+                $transaction_status = $this->to_activated($record);
+                break;
+
+            /**
+             * to Cancel/Expire
+             */
+            case IQB_POLICY_STATUS_CANCELED:
+                $transaction_status = $this->to_canceled($record);
+                break;
+
+            case IQB_POLICY_STATUS_EXPIRED:
+                $transaction_status = $this->to_expired($record);
+                break;
+        }
+
+        return $transaction_status;
     }
 
     // ----------------------------------------------------------------
@@ -1252,58 +1289,284 @@ class Policy_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    private function _do_status_transaction($record, $to_status_flag)
+    public function to_expired($id_record)
     {
-        // Prepare Basic Update Data
-        $base_data = [
-            'issued_date'   => $record->issued_date,
-            'start_date'    => $record->start_date,
-            'end_date'      => $record->end_date,
-            'status'        => $to_status_flag,
-            'updated_by'    => $this->dx_auth->get_user_id(),
-            'updated_at'    => $this->set_date()
-        ];
+        // Get the Policy Record
+        $record = is_numeric($id_record) ? $this->get( (int)$id_record ) : $id_record;
 
-        /**
-         * Process Back Dates on Every Status Transaction
-         *
-         * This is required because you might have verified/vouchered yesterday and today you are invoicing
-         */
-        $base_data = $this->_backdate($base_data);
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Policy_model][Method: to_expired()]: Policy record could not be found.");
+        }
 
-
-        /**
-         * ==================== TRANSACTIONS BEGIN =========================
-         */
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
         $transaction_status = TRUE;
 
-        /**
-         * Disable DB Debugging
-         */
-        $this->db->db_debug = FALSE;
+        // Use automatic transaction
         $this->db->trans_start();
 
-
-            // ----------------------------------------------------------------
+            // Update Endorsement Status
+            $this->_do_status_transaction($record, IQB_POLICY_STATUS_EXPIRED);
 
             /**
-             * Update Case to Case basis data dependency on Transaction, Object, Customer Tables
+             * Unlock Policy Object and Customer
              */
-            switch($to_status_flag)
+            $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
+            $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $transaction_status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+        // Throw Exception on ERROR
+        if( !$transaction_status )
+        {
+            throw new Exception("Exception [Model: Policy_model][Method: to_expired()]: Policy status and post-status update task could not be updated.");
+        }
+
+        // return result/status
+        return $transaction_status;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function to_canceled($id_record)
+    {
+        // Get the Policy Record
+        $record = is_numeric($id_record) ? $this->get( (int)$id_record ) : $id_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Policy_model][Method: to_canceled()]: Policy record could not be found.");
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $transaction_status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Endorsement Status
+            $this->_do_status_transaction($record, IQB_POLICY_STATUS_CANCELED);
+
+            /**
+             * Unlock Policy Object and Customer
+             */
+            $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
+            $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $transaction_status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+        // Throw Exception on ERROR
+        if( !$transaction_status )
+        {
+            throw new Exception("Exception [Model: Policy_model][Method: to_canceled()]: Policy status and post-status update task could not be updated.");
+        }
+
+        // return result/status
+        return $transaction_status;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function to_activated($id_record)
+    {
+        // Get the Policy Record
+        $record = is_numeric($id_record) ? $this->get( (int)$id_record ) : $id_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Policy_model][Method: to_activated()]: Policy record could not be found.");
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $transaction_status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Endorsement Status
+            $this->_do_status_transaction($record, IQB_POLICY_STATUS_ACTIVE);
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $transaction_status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+        // Throw Exception on ERROR
+        if( !$transaction_status )
+        {
+            throw new Exception("Exception [Model: Policy_model][Method: to_activated()]: Policy status and post-status update task could not be updated.");
+        }
+
+        // return result/status
+        return $transaction_status;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function to_verified($id_record)
+    {
+        // Get the Policy Record
+        $record = is_numeric($id_record) ? $this->get( (int)$id_record ) : $id_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Policy_model][Method: to_verified()]: Policy record could not be found.");
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $transaction_status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Endorsement Status
+            $this->_do_status_transaction($record, IQB_POLICY_STATUS_VERIFIED);
+
+            /**
+             * Update Transaction Status, Lock Object, Customer
+             */
+            $endorsement_record = $this->endorsement_model->get_current_endorsement_by_policy($record->id);
+            $this->endorsement_model->to_verified($endorsement_record);
+            $this->object_model->update_lock($record->object_id, IQB_FLAG_LOCKED);
+            $this->customer_model->update_lock($record->customer_id, IQB_FLAG_LOCKED);
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $transaction_status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+        // Throw Exception on ERROR
+        if( !$transaction_status )
+        {
+            throw new Exception("Exception [Model: Policy_model][Method: to_verified()]: Policy status and post-status update task could not be updated.");
+        }
+
+        // return result/status
+        return $transaction_status;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function to_draft($id_record)
+    {
+        // Get the Policy Record
+        $record = is_numeric($id_record) ? $this->get( (int)$id_record ) : $id_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Policy_model][Method: to_draft()]: Policy record could not be found.");
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $transaction_status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Endorsement Status
+            $this->_do_status_transaction($record, IQB_POLICY_STATUS_DRAFT);
+
+            // Txn Status to draft, Editable Object & Customer
+            $endorsement_record = $this->endorsement_model->get_current_endorsement_by_policy($record->id);
+            $this->endorsement_model->to_draft($endorsement_record);
+            $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
+            $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $transaction_status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+        // Throw Exception on ERROR
+        if( !$transaction_status )
+        {
+            throw new Exception("Exception [Model: Policy_model][Method: to_draft()]: Policy status and post-status update task could not be updated.");
+        }
+
+        // return result/status
+        return $transaction_status;
+    }
+
+    // ----------------------------------------------------------------
+
+        private function _do_status_transaction($record, $status)
+        {
+            $data = [
+                'issued_date'   => $record->issued_date,
+                'start_date'    => $record->start_date,
+                'end_date'      => $record->end_date,
+                'status'        => $status,
+                'updated_by'    => $this->dx_auth->get_user_id(),
+                'updated_at'    => $this->set_date()
+            ];
+
+            /**
+             * Get status Specific Data. Eg. Verified by/at
+             */
+            $data = $this->_prep_status_data($status, $data);
+
+            /**
+             * Process Back Dates on Every Status Transaction
+             *
+             * This is required because you might have verified/vouchered yesterday and today you are invoicing
+             */
+            $data = $this->_backdate($data);
+
+            return $this->_to_status($record->id, $data);
+        }
+
+        // ----------------------------------------------------------------
+
+        private function _prep_status_data($status, $data)
+        {
+            switch($status)
             {
                 /**
                  * to Draft
                  */
                 case IQB_POLICY_STATUS_DRAFT:
-                    $base_data['verified_at'] = NULL;
-                    $base_data['verified_by'] = NULL;
-                    $this->_to_status($record->id, $base_data);
-
-
-                    // Txn Status to draft, Editable Object & Customer
-                    $this->endorsement_model->update_status($record->id, IQB_POLICY_ENDORSEMENT_STATUS_DRAFT);
-                    $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
-                    $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
+                    $data['verified_at'] = NULL;
+                    $data['verified_by'] = NULL;
                     break;
 
 
@@ -1311,69 +1574,18 @@ class Policy_model extends MY_Model
                  * to Verified
                  */
                 case IQB_POLICY_STATUS_VERIFIED:
-                    $base_data['verified_at'] = $this->set_date();
-                    $base_data['verified_by'] = $this->dx_auth->get_user_id();
-                    $this->_to_status($record->id, $base_data);
-
-                    /**
-                     * Update Transaction Status, Lock Object, Customer
-                     */
-                    $this->endorsement_model->update_status($record->id, IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED);
-                    $this->object_model->update_lock($record->object_id, IQB_FLAG_LOCKED);
-                    $this->customer_model->update_lock($record->customer_id, IQB_FLAG_LOCKED);
+                    $data['verified_at'] = $this->set_date();
+                    $data['verified_by'] = $this->dx_auth->get_user_id();
                     break;
 
-                /**
-                 * to Active
-                 */
-                case IQB_POLICY_STATUS_ACTIVE:
-                    $done       = $this->_to_status($record->id, $base_data);
-
-
-                    /**
-                     * Updated Records - Policy and Endorsement
-                     */
-                    $record     = $this->get($record->id);
-                    $endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
-                    break;
-
-                /**
-                 * to Cancel/Expire
-                 */
-                case IQB_POLICY_STATUS_CANCELED:
-                case IQB_POLICY_STATUS_EXPIRED:
-                    $this->_to_status($record->id, $base_data);
-
-                    /**
-                     * Unlock Policy Object and Customer
-                     */
-                    $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
-                    $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
+                default:
                     break;
             }
 
-        /**
-         * Complete transactions or Rollback
-         */
-        $this->db->trans_complete();
-        if ($this->db->trans_status() === FALSE)
-        {
-            $transaction_status = FALSE;
+            return $data;
         }
 
-        /**
-         * Restore DB Debug Configuration
-         */
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-        /**
-         * ==================== TRANSACTIONS END =========================
-         */
-
-        return $transaction_status;
-    }
-
-    // ----------------------------------------------------------------
+        // ----------------------------------------------------------------
 
         private function _to_status($id, $data)
         {

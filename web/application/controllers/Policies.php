@@ -1792,7 +1792,7 @@ class Policies extends MY_Controller
 		}
 
 
-		$page_header = 'Policy Details - <span id="page-title-policy-code">' . $record->code . '</span>';
+		$page_header = 'Policy Details';
 
 		$this->data['site_title'] = 'Policy Details | ' . $record->code;
 		$this->template->partial(

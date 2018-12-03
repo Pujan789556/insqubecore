@@ -10,9 +10,9 @@ $risk_table     = NULL;
 $summary_table = NULL;
 if($cost_calculation_table)
 {
-    $property_table   = $cost_calculation_table->property_table;
-    $risk_table       = $cost_calculation_table->risk_table;
-    $summary_table    = $cost_calculation_table->summary_table;
+    $property_table   = $cost_calculation_table->property_table ?? NULL;
+    $risk_table       = $cost_calculation_table->risk_table ?? NULL;
+    $summary_table    = $cost_calculation_table->summary_table ?? NULL;
 }
 
 $total_premium = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
@@ -96,6 +96,21 @@ $grand_total = $total_premium + $endorsement_record->amt_stamp_duty + $endorseme
                           </table>
                        </td>
                  </tr>
+                <?php endif; ?>
+
+                <?php if($endorsement_record->policy_category == IQB_POLICY_CATEGORY_FAC_IN): ?>
+                    <tr>
+                        <td class="no-padding">
+                            <table class="table table-condensed no-margin table-bordered">
+                                <?php foreach($cost_calculation_table as $row):?>
+                                    <tr>
+                                        <td class="text-left"><?php echo $row->label ?></td>
+                                        <td class="text-right"><?php echo number_format( (float)$row->value, 2);?></td>
+                                    </tr>
+                                <?php endforeach ?>
+                            </table>
+                        </td>
+                    </tr>
                 <?php endif; ?>
 
                 <tr>

@@ -583,7 +583,12 @@ class Endorsement_model extends MY_Model
     /**
      * Update Endorsement Status
      *
-     * !!! NOTE: We can only change status of current Transaction Record
+     * !!! NOTE:
+     *      This method must be triggered by controller method
+     *      within try-catch block.
+     *
+     * !!! NOTE:
+     *      We can only change status of current Transaction Record
      *
      * @param integer $policy_id_or_endorsement_record Policy ID or Transaction Record
      * @param alpha $to_status_flag Status Code
@@ -606,162 +611,49 @@ class Endorsement_model extends MY_Model
             throw new Exception("Exception [Model:Endorsement_model][Method: update_status()]: Current Status does not qualify to upgrade/downgrade.");
         }
 
-        $data = [
-            'status'        => $to_status_flag,
-            'updated_by'    => $this->dx_auth->get_user_id(),
-            'updated_at'    => $this->set_date()
-        ];
-
-        /**
-         * Process Back Dates on Every Status Transaction
-         *
-         * This is required because you might have verified/vouchered yesterday and today you are invoicing
-         */
-        $data  = $this->_backdate($record, $data);
-
+        $transaction_status = FALSE;
         switch($to_status_flag)
         {
             /**
              * Reset Verified date/user to NULL
              */
             case IQB_POLICY_ENDORSEMENT_STATUS_DRAFT:
-                $data['verified_at'] = NULL;
-                $data['verified_by'] = NULL;
+                $transaction_status = $this->to_draft($record);
                 break;
 
             /**
              * Update Verified date/user and Reset ri_approved date/user to null
              */
             case IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED:
-                $data['verified_at'] = $this->set_date();
-                $data['verified_by'] = $this->dx_auth->get_user_id();
-                $data['ri_approved_at'] = NULL;
-                $data['ri_approved_by'] = NULL;
-            break;
+                $transaction_status = $this->to_verified($record);
+                break;
 
             /**
              * Update RI Approved date/user
              */
             case IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED:
-                $data['ri_approved_at'] = $this->set_date();
-                $data['ri_approved_by'] = $this->dx_auth->get_user_id();
-            break;
+                $transaction_status = $this->to_ri_approved($record);
+                break;
 
 
-            /**
-             * Activate Endorsement
-             * Process Backdate on Non First Endorsement
-             */
-            // case IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE:
-            //     $data  = $this->_backdate($record, $data);
-            // break;
+            case IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED:
+                $transaction_status = $this->to_vouchered($record);
+                break;
 
+
+            case IQB_POLICY_ENDORSEMENT_STATUS_INVOICED:
+                $transaction_status = $this->to_invoiced($record);
+                break;
+
+            case IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE:
+                $transaction_status = $this->to_activated($record);
+                break;
 
             default:
                 break;
         }
 
-        /**
-         * Update Status and Clear Cache Specific to this Policy ID
-         */
-
-
-        if( $this->_to_status($record->id, $data) )
-        {
-            /**
-             * Post Status Update Tasks
-             * ------------------------
-             *
-             * If this is activate status
-             *      - Endorsement Record, we need to commit the changes
-             *      - Fresh/Renewal - Activate Policy Record
-             *
-             */
-            if( $to_status_flag === IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE )
-            {
-                if( !_ENDORSEMENT_is_first($record->txn_type) )
-                {
-
-                    /**
-                     * Update Endorsement Changes to Object, Policy, Customer - If any
-                     */
-                    $this->_commit_endorsement_audit($record);
-
-                    /**
-                     * Policy Termination the following Endorsement
-                     *  - Refund and Terminate
-                     *  - Simply Terminate
-                     */
-                    $terminate_policy = $terminate_policy || $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE;
-                    if($terminate_policy)
-                    {
-                        $this->policy_model->update_status($record->policy_id, IQB_POLICY_STATUS_CANCELED);
-                    }
-
-
-                    /**
-                     * Policy Ownership Transfer
-                     */
-                    if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER )
-                    {
-                        $this->transfer_ownership($record);
-                    }
-
-                    /**
-                     * Update Policy "END DATE"
-                     */
-                    $this->policy_model->update_end_date($record->policy_id, $record->end_date);
-                }
-
-                /**
-                 * Activate Policy on Fresh/Renewal Endorsement Activation
-                 */
-                else
-                {
-                    $this->policy_model->update_status($record->policy_id, IQB_POLICY_STATUS_ACTIVE);
-                }
-            }
-            /**
-             * If FRESH/RENEWAL transaction and status is verified,
-             * Update the Sum Insured Value from Policy Object
-             */
-            else if($to_status_flag === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED)
-            {
-                /**
-                 * Task 1: FRESH/RENEWAL - RI Approval Constraint
-                 */
-                if( in_array($record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]) )
-                {
-                    /**
-                     * RI Approval Constraint
-                     */
-                    $this->load->helper('ri');
-                    $flag_ri_approval = RI__compute_flag_ri_approval($record->portfolio_id, $record->net_amt_sum_insured);
-                    $update_data = [
-                        'flag_ri_approval' => $flag_ri_approval
-                    ];
-                    parent::update($record->id, $update_data, TRUE);
-                }
-            }
-
-
-            /**
-             * Cleare Caches
-             *
-             *      1. List of transaction by this policy
-             *      2. List of installment by this policy
-             */
-            $cache_var = 'endrsmnt_' . $record->policy_id;
-            $this->clear_cache($cache_var);
-
-            $this->load->model('policy_installment_model');
-            $cache_var = 'ptxi_bypolicy_' . $record->policy_id;
-            $this->policy_installment_model->clear_cache($cache_var);
-
-            return TRUE;
-        }
-
-        return FALSE;
+        return $transaction_status;
     }
 
     // ----------------------------------------------------------------
@@ -803,12 +695,452 @@ class Endorsement_model extends MY_Model
         return $flag_qualifies;
     }
 
+    // ----------------------------------------------------------------
+
+    public function to_draft($id_record)
+    {
+        // Get the Endorsement Record
+        $record = is_numeric($id_record) ? $this->get( (int)$id_record ) : $id_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_draft()]: Endorsement record could not be found.");
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $transaction_status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Endorsement Status
+            $this->_do_status_transaction($record, IQB_POLICY_ENDORSEMENT_STATUS_DRAFT);
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $transaction_status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+
+        // Throw Exception on ERROR
+        if( !$transaction_status )
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_draft()]: Endorsement status and post-status update task could not be updated.");
+        }
+
+        // Clean Cache
+        $this->_clean_cache_by_policy($record->policy_id);
+
+        // return result/status
+        return $transaction_status;
+    }
+
+
+    // ----------------------------------------------------------------
+
+    public function to_verified($id_record)
+    {
+        // Get the Endorsement Record
+        $record = is_numeric($id_record) ? $this->get( (int)$id_record ) : $id_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_verified()]: Endorsement record could not be found.");
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $transaction_status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Endorsement Status
+            $this->_do_status_transaction($record, IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED);
+
+            /**
+             * Task 1: FRESH/RENEWAL - RI Approval Constraint
+             */
+            if( _ENDORSEMENT_is_first($record->txn_type) )
+            {
+                /**
+                 * RI Approval Constraint
+                 */
+                $this->load->helper('ri');
+                $flag_ri_approval = RI__compute_flag_ri_approval($record->portfolio_id, $record->net_amt_sum_insured);
+                $update_data = [
+                    'flag_ri_approval' => $flag_ri_approval
+                ];
+                parent::update($record->id, $update_data, TRUE);
+            }
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $transaction_status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+
+        // Throw Exception on ERROR
+        if( !$transaction_status )
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_verified()]: Endorsement status and post-status update task could not be updated.");
+        }
+
+        // Clean Cache
+        $this->_clean_cache_by_policy($record->policy_id);
+
+        // return result/status
+        return $transaction_status;
+    }
+
+
+    // ----------------------------------------------------------------
+
+    public function to_ri_approved($id_record)
+    {
+        // Get the Endorsement Record
+        $record = is_numeric($id_record) ? $this->get( (int)$id_record ) : $id_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_ri_approved()]: Endorsement record could not be found.");
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $transaction_status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Endorsement Status
+            $this->_do_status_transaction($record, IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED);
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $transaction_status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+
+        // Throw Exception on ERROR
+        if( !$transaction_status )
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_ri_approved()]: Endorsement status and post-status update task could not be updated.");
+        }
+
+        // Clean Cache
+        $this->_clean_cache_by_policy($record->policy_id);
+
+        // return result/status
+        return $transaction_status;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function to_vouchered($id_record)
+    {
+        // Get the Endorsement Record
+        $record = is_numeric($id_record) ? $this->get( (int)$id_record ) : $id_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_vouchered()]: Endorsement record could not be found.");
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $transaction_status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Endorsement Status
+            $this->_do_status_transaction($record, IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED);
+
+            /**
+             * Generate Policy Number if Endorsement FRESH/Renewal
+             */
+            if( _ENDORSEMENT_is_first($record->txn_type) )
+            {
+                $this->policy_model->generate_policy_number( $record->policy_id );
+            }
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $transaction_status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+
+        // Throw Exception on ERROR
+        if( !$transaction_status )
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_vouchered()]: Endorsement status and post-status update task could not be updated.");
+        }
+
+        // Clean Cache
+        $this->_clean_cache_by_policy($record->policy_id);
+
+        // return result/status
+        return $transaction_status;
+    }
+
+
+    // ----------------------------------------------------------------
+
+    public function to_invoiced($id_record)
+    {
+        // Get the Endorsement Record
+        $record = is_numeric($id_record) ? $this->get( (int)$id_record ) : $id_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_invoiced()]: Endorsement record could not be found.");
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $transaction_status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Endorsement Status
+            $this->_do_status_transaction($record, IQB_POLICY_ENDORSEMENT_STATUS_INVOICED);
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $transaction_status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+
+        // Throw Exception on ERROR
+        if( !$transaction_status )
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_invoiced()]: Endorsement status and post-status update task could not be updated.");
+        }
+
+        // Clean Cache
+        $this->_clean_cache_by_policy($record->policy_id);
+
+        // return result/status
+        return $transaction_status;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function to_activated($id_record, $terminate_policy = FALSE)
+    {
+        // Get the Endorsement Record
+        $record = is_numeric($id_record) ? $this->get( (int)$id_record ) : $id_record;
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_activated()]: Endorsement record could not be found.");
+        }
+
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $transaction_status = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Update Endorsement Status
+            $this->_do_status_transaction($record, IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE);
+
+            if( !_ENDORSEMENT_is_first($record->txn_type) )
+            {
+
+                /**
+                 * Update Endorsement Changes to Object, Policy, Customer - If any
+                 */
+                $this->_commit_endorsement_audit($record);
+
+                /**
+                 * Policy Termination the following Endorsement
+                 *  - Refund and Terminate
+                 *  - Simply Terminate
+                 */
+                $terminate_policy = $terminate_policy || $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE;
+                if($terminate_policy)
+                {
+                    $policy_record = $this->policy_model->get($record->policy_id);
+                    $this->policy_model->to_canceled($record->policy_id);
+                }
+
+
+                /**
+                 * Policy Ownership Transfer
+                 */
+                else if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER )
+                {
+                    $this->transfer_ownership($record);
+                }
+
+                /**
+                 * Update Policy "END DATE"
+                 */
+                $this->policy_model->update_end_date($record->policy_id, $record->end_date);
+            }
+
+            /**
+             * Activate Policy on Fresh/Renewal Endorsement Activation
+             */
+            else
+            {
+                $this->policy_model->to_activated($record->policy_id);
+            }
+
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $transaction_status = FALSE;
+        }
+
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+
+        // Throw Exception on ERROR
+        if( !$transaction_status )
+        {
+            throw new Exception("Exception [Model: Endorsement_model][Method: to_activated()]: Endorsement status and post-status update task could not be updated.");
+        }
+
+        // Clean Cache
+        $this->_clean_cache_by_policy($record->policy_id);
+
+        // return result/status
+        return $transaction_status;
+    }
+
+        // ----------------------------------------------------------------
+
+        private function _do_status_transaction($record, $status)
+        {
+            $data = [
+                'status'        => $status,
+                'updated_by'    => $this->dx_auth->get_user_id(),
+                'updated_at'    => $this->set_date()
+            ];
+
+            /**
+             * Get status Specific Data. Eg. Verified by/at
+             */
+            $data = $this->_prep_status_data($status, $data);
+
+            /**
+             * Process Back Dates on Every Status Transaction
+             *
+             * This is required because you might have verified/vouchered yesterday and today you are invoicing
+             */
+            $data  = $this->_backdate($record, $data);
+
+            return $this->_to_status($record->id, $data);
+        }
+
+        // ----------------------------------------------------------------
+
+        private function _prep_status_data($status, $data)
+        {
+            switch($status)
+            {
+                /**
+                 * Reset Verified date/user to NULL
+                 */
+                case IQB_POLICY_ENDORSEMENT_STATUS_DRAFT:
+                    $data['verified_at'] = NULL;
+                    $data['verified_by'] = NULL;
+                    break;
+
+                /**
+                 * Update Verified date/user and Reset ri_approved date/user to null
+                 */
+                case IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED:
+                    $data['verified_at'] = $this->set_date();
+                    $data['verified_by'] = $this->dx_auth->get_user_id();
+                    $data['ri_approved_at'] = NULL;
+                    $data['ri_approved_by'] = NULL;
+                break;
+
+                /**
+                 * Update RI Approved date/user
+                 */
+                case IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED:
+                    $data['ri_approved_at'] = $this->set_date();
+                    $data['ri_approved_by'] = $this->dx_auth->get_user_id();
+                break;
+
+                default:
+                    break;
+            }
+
+            return $data;
+        }
+
         // ----------------------------------------------------------------
 
         private function _to_status($id, $data)
         {
             return $this->db->where('id', $id)
                         ->update($this->table_name, $data);
+        }
+
+        // --------------------------------------------------------------------
+
+        private function _clean_cache_by_policy($policy_id)
+        {
+            /**
+             * Cleare Caches
+             *
+             *      1. List of transaction by this policy
+             *      2. List of installment by this policy
+             */
+            $cache_var = 'endrsmnt_' . $policy_id;
+            $this->clear_cache($cache_var);
+
+            $this->load->model('policy_installment_model');
+            $cache_var = 'ptxi_bypolicy_' . $policy_id;
+            $this->policy_installment_model->clear_cache($cache_var);
         }
 
     // --------------------------------------------------------------------

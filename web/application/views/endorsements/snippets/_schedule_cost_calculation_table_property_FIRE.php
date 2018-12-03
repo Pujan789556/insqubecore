@@ -9,8 +9,8 @@ $property_table = NULL;
 $risk_table     = NULL;
 if($cost_calculation_table)
 {
-    $property_table = $cost_calculation_table->property_table;
-    $risk_table     = $cost_calculation_table->risk_table;
+    $property_table = $cost_calculation_table->property_table ?? NULL;
+    $risk_table     = $cost_calculation_table->risk_table ?? NULL;
 }
 
 $total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;

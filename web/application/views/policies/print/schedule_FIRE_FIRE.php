@@ -161,13 +161,6 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
         /**
          * Details Premium Distribution
          */
-        $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_decode($endorsement_record->cost_calculation_table) : NULL;
-        $detail_premium_table = NULL;
-        if($cost_calculation_table)
-        {
-            $summary_table          = $cost_calculation_table->summary_table;
-            $detail_premium_table   = $cost_calculation_table->detail_premium_table ?? NULL;
-        }
 
         $premium_computation_table  = json_decode($endorsement_record->premium_computation_table ?? '[]', TRUE);
         $portfolio_risks            = portfolio_risks($record->portfolio_id);

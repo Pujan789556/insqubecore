@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_decode($endorsement_record->cost_calculation_table) : NULL;
 if($cost_calculation_table)
 {
-    $summary_table    = $cost_calculation_table->summary_table;
+    $summary_table    = $cost_calculation_table->summary_table ?? [];
 }
 $total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
 $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;

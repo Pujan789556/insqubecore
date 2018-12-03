@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div class="box box-bordered box-success">
     <div class="box-header with-border border-dark">
         <h3 class="no-margin">
-            <span class="pull-left">Policy Details</span>
+            <span class="pull-left">Policy Details - <small><?php echo $record->code ?></small></span>
             <span class="pull-right">
                 <?php if( _POLICY_is_editable($record->status, FALSE) ): ?>
                         <a href="#"

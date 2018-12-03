@@ -7,8 +7,8 @@ $cost_calculation_table = $endorsement_record->cost_calculation_table ? json_dec
 $risk_table     = NULL;
 if($cost_calculation_table)
 {
-    $risk_table     = $cost_calculation_table->risk_table;
-    $cost_table     = $cost_calculation_table->cost_table;
+    $risk_table     = $cost_calculation_table->risk_table ?? [];
+    $cost_table     = $cost_calculation_table->cost_table ?? [];
 }
 $total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
 $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
