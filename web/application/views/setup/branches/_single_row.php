@@ -6,7 +6,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <tr data-name="<?php echo $record->name_en;?>" class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
-	<td><a href="#"
+	<td>
+		<?php
+		if($record->is_head_office)
+		{
+			echo '<i class="fa fa-circle text-green" title="Head Office" data-toggle="tooltip"></i>&nbsp;';
+		}
+		?>
+		<a href="#"
 		data-toggle="tooltip"
 		title="Edit branch"
 		class="trg-dialog-edit"

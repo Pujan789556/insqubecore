@@ -20,7 +20,7 @@ class Branch_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ['id', 'name_en', 'name_np', 'code', 'estd', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'name_en', 'name_np', 'is_head_office', 'code', 'estd', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [
         [
@@ -36,6 +36,14 @@ class Branch_model extends MY_Model
             'rules' => 'trim|required|max_length[100]',
             '_type'     => 'text',
             '_required' => true
+        ],
+        [
+            'field' => 'is_head_office',
+            'label' => 'Is Head Office?',
+            'rules' => 'trim|integer|in_list[1]',
+            '_type' => 'switch',
+            '_checkbox_value' => '1',
+            '_help_text' => 'Please set this option if this is "Head Office" of the company.'
         ],
         [
             'field' => 'code',
@@ -85,7 +93,7 @@ class Branch_model extends MY_Model
      */
     public function add($post_data)
     {
-        $cols = ['name_en', 'name_np', 'code', 'estd'];
+        $cols = ['name_en', 'name_np', 'code', 'estd', 'is_head_office'];
         $data = [];
 
         /**
@@ -110,6 +118,12 @@ class Branch_model extends MY_Model
             if($done)
             {
                 $this->address_model->add(IQB_ADDRESS_TYPE_BRANCH, $done ,$post_data);
+            }
+
+            // Reset Head Office
+            if($data['is_head_office'])
+            {
+                $this->reset_head_office($done);
             }
 
         $this->db->trans_complete();
@@ -138,7 +152,7 @@ class Branch_model extends MY_Model
      */
     public function edit($id, $address_id, $post_data)
     {
-        $cols = ['name_en', 'name_np', 'code', 'estd'];
+        $cols = ['name_en', 'name_np', 'code', 'estd', 'is_head_office'];
         $data = [];
 
         /**
@@ -147,6 +161,16 @@ class Branch_model extends MY_Model
         foreach($cols as $col)
         {
             $data[$col] = $post_data[$col] ?? NULL;
+        }
+
+        /**
+         * Head Office Reset !!!
+         *
+         * You can not reset head office from current record.
+         */
+        if( !$data['is_head_office'] && $this->is_head_office($id))
+        {
+            $data['is_head_office'] = IQB_FLAG_ON;
         }
 
         // Disable DB Debug for transaction to work
@@ -165,6 +189,12 @@ class Branch_model extends MY_Model
                 $this->address_model->edit($address_id ,$post_data);
             }
 
+            // Reset Head Office
+            if($data['is_head_office'])
+            {
+                $this->reset_head_office($id);
+            }
+
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
         {
@@ -177,6 +207,32 @@ class Branch_model extends MY_Model
 
         // return result/status
         return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function is_head_office($id)
+    {
+        $where = [
+            'id'            => $id,
+            'is_head_office' => IQB_FLAG_ON,
+        ];
+        return $this->db->where($where)
+                        ->count_all_results($this->table_name);
+    }
+
+    // ----------------------------------------------------------------
+
+    public function reset_head_office($id)
+    {
+        $data = [
+            'is_head_office' => IQB_FLAG_OFF
+        ];
+
+        $data = $this->modified_on(['fields' => $data]);
+        return $this->db->where('id !=', $id )
+                        ->set($data)
+                        ->update($this->table_name);
     }
 
     // ----------------------------------------------------------------
