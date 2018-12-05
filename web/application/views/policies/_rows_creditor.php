@@ -13,7 +13,7 @@ foreach($creditors as $single):
 			<a href="<?php echo site_url('companies/details/' . $single->creditor_id);?>"
 				target="_blank"
 				title="View company details.">
-				<?php echo $single->name;?></a>
+				<?php echo $single->name_en;?></a>
 		</td>
 		<td><?php echo $single->branch_name;?></td>
 		<td class="ins-action">

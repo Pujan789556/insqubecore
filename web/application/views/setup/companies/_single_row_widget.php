@@ -25,7 +25,7 @@ if($widget_type === 'party')
 				['ref' => 'party_id', 'val' => $record->id],
 			],
 			'html' => [
-				['ref' => '_text-ref-party', 'val' => $record->name ]
+				['ref' => '_text-ref-party', 'val' => $record->name_en ]
 			]
 		];
 }
@@ -40,7 +40,7 @@ if($widget_type === 'party')
 	<?php if( $this->dx_auth->is_admin() ): ?>
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
-	<td><?php echo $record->name;?></td>
+	<td><?php echo $record->name_en;?></td>
 	<td><?php echo $record->pan_no;?></td>
 	<td><?php echo _COMPANY_type_dropdown(FALSE)[$record->type];?></td>
 	<td>

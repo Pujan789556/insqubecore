@@ -19,7 +19,7 @@ class Company_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "name", "picture", "pan_no", "active", "type", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "name_en", "name_np", "picture", "pan_no", "active", "type", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [];
 
@@ -56,9 +56,16 @@ class Company_model extends MY_Model
         $type_in_list = implode(',', array_keys(_COMPANY_type_dropdown(FALSE)));
         $this->validation_rules = [
             [
-                'field' => 'name',
-                'label' => 'Company Name',
-                'rules' => 'trim|required|max_length[80]',
+                'field' => 'name_en',
+                'label' => 'Company Name(EN)',
+                'rules' => 'trim|required|max_length[150]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            [
+                'field' => 'name_np',
+                'label' => 'Company Name(ने)',
+                'rules' => 'trim|required|max_length[200]',
                 '_type'     => 'text',
                 '_required' => true
             ],
@@ -98,7 +105,7 @@ class Company_model extends MY_Model
      */
     public function add($post_data)
     {
-        $cols = ["name", "picture", "pan_no", "active", "type"];
+        $cols = ["name_en", "name_np", "picture", "pan_no", "active", "type"];
         $data = [];
 
         /**
@@ -160,7 +167,7 @@ class Company_model extends MY_Model
      */
     public function edit($id, $post_data)
     {
-        $cols = ["name", "picture", "pan_no", "active", "type"];
+        $cols = ["name_en", "name_np", "picture", "pan_no", "active", "type"];
         $data = [];
 
         /**
@@ -261,29 +268,25 @@ class Company_model extends MY_Model
      *
      * @return array
      */
-    public function dropdown_creditor()
+    public function dropdown_creditor($lang="both")
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('company_creditor_dropdown');
+        $cache_var = 'company_creditor_dd_' . $lang;
+        $list = $this->get_cache($cache_var);
         if(!$list)
         {
-            $records = $this->db->select('C.id, C.name')
+            $records = $this->db->select('C.id, C.name_en, C.name_np')
                              ->from($this->table_name . ' as C')
                              ->where('C.type', IQB_COMPANY_TYPE_BANK)
                              ->where('C.active', IQB_STATUS_ACTIVE)
                              ->get()->result();
 
-            $list = [];
-            foreach($records as $record)
-            {
-                $column = $record->id;
-                $list["{$column}"] = $record->name;
-            }
+            $list = $this->_format_dropdown($records, $lang);
             if(!empty($list))
             {
-                $this->write_cache($list, 'company_creditor_dropdown', CACHE_DURATION_DAY);
+                $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
             }
         }
         return $list;
@@ -296,29 +299,25 @@ class Company_model extends MY_Model
      *
      * @return array
      */
-    public function dropdown_general()
+    public function dropdown_general($lang="both")
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('company_general_dropdown');
+        $cache_var = 'company_general_dd_' . $lang;
+        $list = $this->get_cache($cache_var);
         if(!$list)
         {
-            $records = $this->db->select('C.id, C.name')
+            $records = $this->db->select('C.id, C.name_en, C.name_np')
                              ->from($this->table_name . ' as C')
                              ->where('C.type', IQB_COMPANY_TYPE_GENERAL)
                              ->where('C.active', IQB_STATUS_ACTIVE)
                              ->get()->result();
 
-            $list = [];
-            foreach($records as $record)
-            {
-                $column = $record->id;
-                $list["{$column}"] = $record->name;
-            }
+            $list = $this->_format_dropdown($records, $lang);
             if(!empty($list))
             {
-                $this->write_cache($list, 'company_general_dropdown', CACHE_DURATION_DAY);
+                $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
             }
         }
         return $list;
@@ -331,29 +330,25 @@ class Company_model extends MY_Model
      *
      * @return array
      */
-    public function dropdown_brokers()
+    public function dropdown_brokers($lang="both")
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('company_broker_dropdown');
+        $cache_var = 'company_broker_dd_' . $lang;
+        $list = $this->get_cache($cache_var);
         if(!$list)
         {
-            $records = $this->db->select('C.id, C.name')
+            $records = $this->db->select('C.id, C.name_en, C.name_np')
                              ->from($this->table_name . ' as C')
                              ->where('C.type', IQB_COMPANY_TYPE_BROKER)
                              ->where('C.active', IQB_STATUS_ACTIVE)
                              ->get()->result();
 
-            $list = [];
-            foreach($records as $record)
-            {
-                $column = $record->id;
-                $list["{$column}"] = $record->name;
-            }
+            $list = $this->_format_dropdown($records, $lang);
             if(!empty($list))
             {
-                $this->write_cache($list, 'company_broker_dropdown', CACHE_DURATION_DAY);
+                $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
             }
         }
         return $list;
@@ -366,29 +361,25 @@ class Company_model extends MY_Model
      *
      * @return array
      */
-    public function dropdown_reinsurers()
+    public function dropdown_reinsurers($lang="both")
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('company_reinsurer_dropdown');
+        $cache_var = 'company_reinsurer_dd_' . $lang;
+        $list = $this->get_cache($cache_var);
         if(!$list)
         {
-            $records = $this->db->select('C.id, C.name')
+            $records = $this->db->select('C.id, C.name_en, C.name_np')
                              ->from($this->table_name . ' as C')
                              ->where('C.type', IQB_COMPANY_TYPE_RE_INSURANCE)
                              ->where('C.active', IQB_STATUS_ACTIVE)
                              ->get()->result();
 
-            $list = [];
-            foreach($records as $record)
-            {
-                $column = $record->id;
-                $list["{$column}"] = $record->name;
-            }
+            $list = $this->_format_dropdown($records, $lang);
             if(!empty($list))
             {
-                $this->write_cache($list, 'company_reinsurer_dropdown', CACHE_DURATION_DAY);
+                $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
             }
         }
         return $list;
@@ -401,51 +392,56 @@ class Company_model extends MY_Model
      *
      * @return array
      */
-    public function dropdown_insurance()
+    public function dropdown_insurance($lang="both")
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('company_insurance_dropdown');
+        $cache_var = 'company_insurance_dd_' . $lang;
+        $list = $this->get_cache($cache_var);
         if(!$list)
         {
-            $records = $this->db->select('C.id, C.name')
+            $records = $this->db->select('C.id, C.name_en, C.name_np')
                              ->from($this->table_name . ' as C')
                              ->where('C.type', IQB_COMPANY_TYPE_INSURANCE)
                              ->where('C.active', IQB_STATUS_ACTIVE)
                              ->get()->result();
 
-            $list = [];
-            foreach($records as $record)
-            {
-                $column = $record->id;
-                $list["{$column}"] = $record->name;
-            }
+            $list = $this->_format_dropdown($records, $lang);
             if(!empty($list))
             {
-                $this->write_cache($list, 'company_insurance_dropdown', CACHE_DURATION_DAY);
+                $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
             }
         }
         return $list;
     }
 
-
-
     // ----------------------------------------------------------------
 
-    /**
-     * Get Name
-     *
-     * @param integer $id
-     * @return string
-     */
-    public function name($id)
-    {
-        return $this->db->select('C.name')
-                 ->from($this->table_name . ' as C')
-                 ->where('C.id', $id)
-                 ->get()->row()->name;
-    }
+        private function _format_dropdown($records, $lang)
+        {
+            $list = [];
+            foreach($records as $record)
+            {
+                $column = $record->id;
+                if($lang == 'both')
+                {
+                    $value = $record->name_en . ' (' . $record->name_np . ')';
+                }
+                else if($lang == 'en')
+                {
+                    $value = $record->name_en;
+                }
+                else
+                {
+                    $value = $record->name_np;
+                }
+
+                $list["{$column}"] = $value;
+            }
+
+            return $list;
+        }
 
     // ----------------------------------------------------------------
 
@@ -476,7 +472,7 @@ class Company_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('C.id, C.name, C.pan_no, C.type, C.active')
+        $this->db->select('C.id, C.name_en, C.name_np, C.pan_no, C.type, C.active')
                  ->from($this->table_name . ' as C');
 
         if(!empty($params))
@@ -509,7 +505,7 @@ class Company_model extends MY_Model
             $keywords = $params['keywords'] ?? '';
             if( $keywords )
             {
-                $this->db->like('C.name', $keywords, 'after');
+                $this->db->like('C.name_en', $keywords, 'after');
             }
         }
         return $this->db->limit($this->settings->per_page+1)
@@ -524,11 +520,11 @@ class Company_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'company_creditor_dropdown',
-            'company_general_dropdown',
-            'company_broker_dropdown',
-            'company_reinsurer_dropdown',
-            'company_insurance_dropdown',
+            'company_creditor_dd_*',
+            'company_general_dd_*',
+            'company_broker_dd_*',
+            'company_reinsurer_dd_*',
+            'company_insurance_dd_*',
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)

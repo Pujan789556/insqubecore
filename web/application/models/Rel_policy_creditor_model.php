@@ -132,7 +132,7 @@ class Rel_policy_creditor_model extends MY_Model
                             "REL.*, " .
 
                             // Creditor Table
-                            "C.name, " .
+                            "C.name_en, C.name_np, " .
 
                             // Creditro Branch Table
                             "CB.name as branch_name"

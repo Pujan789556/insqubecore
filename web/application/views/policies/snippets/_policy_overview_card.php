@@ -39,7 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <td class="text-bold">FAC/CO-in From (Insurance Company)</td>
                                 <td>
                                     <?php
-                                    echo '<span class="margin-r-5">', htmlspecialchars($record->insurance_company_name), '</span>';
+                                    echo '<span class="margin-r-5">', htmlspecialchars($record->insurance_company_name_en), '</span>';
                                     echo anchor(
                                                 site_url('companies/details/' . $record->insurance_company_id),
                                                 '<i class="fa fa-external-link small"></i>',

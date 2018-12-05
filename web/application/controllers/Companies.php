@@ -588,12 +588,12 @@ class Companies extends MY_Controller
 			'address_record' => $this->company_branch_model->get_ho_address($record->id)
 		];
 
-		$this->data['site_title'] = 'Company Details | ' . $record->name;
+		$this->data['site_title'] = 'Company Details | ' . $record->name_en;
 		$this->template->partial(
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Company Details <small>' . $record->name . '</small>',
+								'content_header' => 'Company Details <small>' . $record->name_en . '</small>',
 								'breadcrumbs' => ['Companies' => 'companies', 'Details' => NULL]
 						])
 						->partial('content', 'setup/companies/_details', $data)

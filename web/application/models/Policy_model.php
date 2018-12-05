@@ -1898,7 +1898,7 @@ class Policy_model extends MY_Model
                         /**
                          * Insurance Company Name (IF Policy is FAC-inward or CO-insurance)
                          */
-                        "IC.name as insurance_company_name, ".
+                        "IC.name_en as insurance_company_name_en, IC.name_np as insurance_company_name_np, ".
 
 
                         /**

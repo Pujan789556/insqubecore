@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td>
 		<a href="<?php echo site_url('companies/details/' . $record->id);?>"
 						title="View company details.">
-						<?php echo $record->name;?></a>
+						<?php echo $record->name_en;?></a>
 	</td>
 	<td><?php echo $record->pan_no;?></td>
 	<td><?php echo _COMPANY_type_dropdown(FALSE)[$record->type];?></td>
