@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<em class="text-bold" data-toggle="tooltip" title="Sum Insured Amount">RS. <?php echo $record->amt_sum_insured;?></em>
 	</td>
 
-	<td><?php echo $record->customer_name;?></td>
+	<td><?php echo $record->customer_name_en;?></td>
 
 	<?php echo _OBJ_row_snippet($record);?>
 

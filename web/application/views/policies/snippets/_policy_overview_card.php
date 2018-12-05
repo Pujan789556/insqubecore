@@ -77,7 +77,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <td class="text-bold">Insured Party(Customer)</td>
                             <td>
                                 <?php
-                                echo '<span class="margin-r-5">', $this->security->xss_clean($record->customer_name), '</span>';
+                                echo '<span class="margin-r-5">', $this->security->xss_clean($record->customer_name_en), '</span>';
                                 echo anchor(
                                             site_url('customers/details/' . $record->customer_id),
                                             '<i class="fa fa-external-link small"></i>',

@@ -246,11 +246,6 @@ $old_document = $record->document ?? NULL;
         }
     });
 
-    // Fullname copy to Contact Field
-    $('input[name="full_name"]').on('keyup', function(){
-        $('input[name="contacts[contact_name]"]').val($(this).val());
-    });
-
 })(jQuery);
 </script>
 

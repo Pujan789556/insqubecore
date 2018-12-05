@@ -20,10 +20,10 @@ class Customer_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'branch_id', 'code', 'type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'fts', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'branch_id', 'code', 'type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'fts', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $endorsement_fields = [
-        'customer' =>  ['type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'],
+        'customer' =>  ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'],
         'address' => ['country_id', 'state_id', 'address1_id', 'alt_state_text', 'alt_address1_text', 'address2', 'city', 'zip_postal_code', 'phones', 'faxes', 'mobile', 'email', 'web']
     ];
 
@@ -87,9 +87,16 @@ class Customer_model extends MY_Model
                 '_required' => true
             ],
             [
-                'field' => 'full_name',
-                'label' => 'Full Name',
+                'field' => 'full_name_en',
+                'label' => 'Full Name (EN)',
                 'rules' => 'trim|required|max_length[150]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+            [
+                'field' => 'full_name_np',
+                'label' => 'Full Name (ने)',
+                'rules' => 'trim|required|max_length[200]',
                 '_type'     => 'text',
                 '_required' => true
             ],
@@ -196,7 +203,7 @@ class Customer_model extends MY_Model
     public function add($post_data)
     {
 
-        $cols = ['type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
+        $cols = ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
         $data = [];
 
         /**
@@ -262,7 +269,7 @@ class Customer_model extends MY_Model
      */
     public function edit($id, $address_id, $post_data)
     {
-        $cols = ['type', 'pan', 'full_name', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
+        $cols = ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
         $data = [];
 
         /**
@@ -479,22 +486,6 @@ class Customer_model extends MY_Model
                  ->join('dt_endorsements ENDRSMNT', 'P.id = ENDRSMNT.policy_id')
                  ->where($where)
                  ->get()->row();
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Get Name
-     *
-     * @param integer $id
-     * @return string
-     */
-    public function name($id)
-    {
-        return $this->db->select('C.full_name')
-                 ->from($this->table_name . ' as C')
-                 ->where('C.id', $id)
-                 ->get()->row()->full_name;
     }
 
     // ----------------------------------------------------------------

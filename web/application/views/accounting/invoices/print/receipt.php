@@ -92,7 +92,7 @@
                     $two_lines = explode('</p>', $two_lines);
                     $first_line = str_replace('<p>', '', $two_lines[0]);
                      ?>
-                    Received with thanks from <strong class="border-b"><?php echo $invoice_record->customer_full_name?>,</strong>
+                    Received with thanks from <strong class="border-b"><?php echo $invoice_record->customer_full_name_en?>,</strong>
                     <span class="border-b"><?php echo $first_line ?></span>
 
                     a sum of Nepalese Rupees <strong class="border-b"><?php echo number_format($invoice_record->amount, 2)?> (<?php echo ucfirst( amount_in_words( number_format($invoice_record->amount, 2, '.', '') ) );?>)</strong>

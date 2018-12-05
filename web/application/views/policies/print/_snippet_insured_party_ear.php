@@ -19,7 +19,7 @@ $customer_address_record = parse_address_record($record, 'addr_customer_');
 <strong><?php echo $insured_title ?></strong><br/>
 <?php
 // Insured Party Name
-echo htmlspecialchars($record->customer_name), '<br/>';
+echo htmlspecialchars($record->customer_name_en), '<br/>';
 
 // Insured Party Address
 $this->load->view('policies/print/_snippet_address', ['address_record' => $customer_address_record]);

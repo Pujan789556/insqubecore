@@ -15,7 +15,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			title="View policy details.">
 			<?php echo $record->code;?></a>
 	</td>
-	<td><?php echo $record->customer_name;?></td>
+	<td><?php echo $record->customer_name_en;?></td>
 	<td><?php echo $record->portfolio_name;?></td>
 
 	<td><?php echo $record->start_date . ' - ' . $record->end_date;?></td>

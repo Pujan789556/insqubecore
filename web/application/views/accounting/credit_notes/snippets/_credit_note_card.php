@@ -32,7 +32,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <div class="col-sm-4 invoice-col">
                     To
                     <address>
-                        <strong><?php echo $record->customer_full_name?></strong><br>
+                        <strong><?php echo $record->customer_full_name_en?></strong><br>
                         <?php echo get_contact_widget($record->customer_contact, true, true)?>
                     </address>
                 </div>

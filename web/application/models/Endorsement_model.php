@@ -1499,7 +1499,7 @@ class Endorsement_model extends MY_Model
                     "P.category as policy_category, P.insurance_company_id, P.code as policy_code, P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, " .
 
                     // Transfer Customer Name
-                    "C.full_name as transfer_customer_name, " .
+                    "C.full_name_en as transfer_customer_name_en, C.full_name_np as transfer_customer_name_np, " .
 
                     // Endorsement Audit
                     "AE.id AS audit_endorsement_id, AE.object_id AS audit_object_id, AE.customer_id AS audit_customer_id, AE.audit_policy, AE.audit_object, AE.audit_customer";
@@ -1544,12 +1544,12 @@ class Endorsement_model extends MY_Model
                         /**
                          * Current Customer Info
                          */
-                        "C.full_name as customer_name, " .
+                        "C.full_name_en as customer_name_en,  C.full_name_np as customer_name_np, " .
 
                         /**
                          * Ownership Transferred Customer Info
                          */
-                        "COT.full_name as cot_customer_name, " .
+                        "COT.full_name_en as cot_customer_name_en, COT.full_name_np as cot_customer_name_np, " .
 
                         /**
                          * Agent Table (agent_id, name, picture, bs code, ud code, contact, active, type)

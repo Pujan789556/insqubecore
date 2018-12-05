@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <?php endif?>
         </div>
         <!-- /.widget-user-image -->
-        <h3 class="widget-user-username"><?php echo  $record->full_name;?></h3>
+        <h3 class="widget-user-username"><?php echo  $record->full_name_en, '<br/>', $record->full_name_np;?></h3>
         <h5 class="widget-user-desc"><?php echo  $record->profession;?></h5>
     </div>
     <div class="box-footer">

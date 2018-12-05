@@ -94,10 +94,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
     });
 
-    // Fullname copy to Contact Field
-    $('input[name="full_name"]').on('keyup', function(){
-        $('input[name="contacts[contact_name]"]').val($(this).val());
-    });
-
 })(jQuery);
 </script>

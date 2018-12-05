@@ -1172,25 +1172,27 @@ class Objects extends MY_Controller
 			$this->dx_auth->deny_access();
 		}
 
-    	$id = (int)$id;
-		$record = $this->object_model->find($id);
-		if(!$record)
-		{
-			$this->template->render_404();
-		}
+		$this->template->render_404();
+
+  //   	$id = (int)$id;
+		// $record = $this->object_model->find($id);
+		// if(!$record)
+		// {
+		// 	$this->template->render_404();
+		// }
 
 
-		$this->data['site_title'] = 'Customer Details | ' . $record->full_name;
-		$this->template->partial(
-							'content_header',
-							'templates/_common/_content_header',
-							[
-								'content_header' => 'Customer Details <small>' . $record->full_name . '</small>',
-								'breadcrumbs' => ['Objects' => 'objects', 'Details' => NULL]
-						])
-						->partial('content', 'objects/_details', compact('record'))
-						->partial('dynamic_js', 'objects/_object_js')
-						->render($this->data);
+		// $this->data['site_title'] = 'Customer Details | ' . $record->full_name;
+		// $this->template->partial(
+		// 					'content_header',
+		// 					'templates/_common/_content_header',
+		// 					[
+		// 						'content_header' => 'Customer Details <small>' . $record->full_name . '</small>',
+		// 						'breadcrumbs' => ['Objects' => 'objects', 'Details' => NULL]
+		// 				])
+		// 				->partial('content', 'objects/_details', compact('record'))
+		// 				->partial('dynamic_js', 'objects/_object_js')
+		// 				->render($this->data);
 
     }
 

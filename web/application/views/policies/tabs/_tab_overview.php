@@ -63,7 +63,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				'id' 				=> $record->object_id,
 	            'portfolio_id'  	=> $record->portfolio_id,
 	            'portfolio_name' 	=> $record->portfolio_name_en,
-	            'customer_name' 	=> $record->customer_name,
+	            'customer_name_en' 	=> $record->customer_name_en,
 	            'amt_sum_insured' 	=> $record->object_amt_sum_insured,
 	            'attributes'    	=> $record->object_attributes,
 	            'flag_locked'		=> $record->object_flag_locked,
@@ -76,7 +76,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			*/
 			$customer_record = (object)[
 				'id' 				=> $record->customer_id,
-				'full_name' 		=> $record->customer_name,
+				'full_name_en' 		=> $record->customer_name_en,
+				'full_name_np' 		=> $record->customer_name_np,
 				'grandfather_name' 	=> $record->customer_grandfather_name,
 				'father_name'		=> $record->customer_father_name,
 				'mother_name'		=> $record->customer_mother_name,

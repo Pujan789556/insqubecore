@@ -507,7 +507,7 @@ class Object_model extends MY_Model
             if( $keywords )
             {
                 // $this->db->where("MATCH ( C.`fts` ) AGAINST ( '{$keywords}*' IN BOOLEAN MODE)", NULL);
-                // $this->db->like('C.full_name', $keywords, 'after');
+                // $this->db->like('C.full_name_en', $keywords, 'after');
             }
         }
         return $this->db
@@ -529,7 +529,7 @@ class Object_model extends MY_Model
         $this->db->select(
                             "O.id, O.portfolio_id, O.attributes, O.amt_sum_insured, O.flag_locked,
                             P.code as portfolio_code, P.name_en as portfolio_name,
-                            C.id as customer_id, C.full_name as customer_name")
+                            C.id as customer_id, C.full_name_en as customer_name_en, C.full_name_np as customer_name_np")
                  ->from($this->table_name . ' as O')
                  ->join('master_portfolio P', 'P.id = O.portfolio_id')
                  ->join('rel_customer__object RCO', 'RCO.object_id = O.id')

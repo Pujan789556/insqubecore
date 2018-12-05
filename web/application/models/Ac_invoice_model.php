@@ -509,7 +509,7 @@ class Ac_invoice_model extends MY_Model
                             'POLICY.code AS policy_code, ' .
 
                             // Customer Details
-                            'CST.full_name AS customer_full_name, CST.pan AS customer_pan'
+                            'CST.full_name_en AS customer_full_name_en, CST.full_name_np AS customer_full_name_np, CST.pan AS customer_pan'
                         )
                     ->join('dt_policies POLICY', 'POLICY.id = REL.policy_id')
                     ->join('dt_policy_installments PTI', "REL.ref = '" . IQB_REL_POLICY_VOUCHER_REF_PI . "' AND REL.ref_id = PTI.id")

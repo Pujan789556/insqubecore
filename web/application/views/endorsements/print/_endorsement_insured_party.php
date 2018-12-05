@@ -17,11 +17,11 @@ $cot_customer_address_record    = parse_address_record($record, 'addr_customer_c
 
 if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER)
 {
-    $insured_party_name =  htmlspecialchars($record->cot_customer_name) . '<br/>';
+    $insured_party_name =  htmlspecialchars($record->cot_customer_name_en) . '<br/>';
 }
 else
 {
-    $insured_party_name =  htmlspecialchars($record->customer_name) . '<br/>';
+    $insured_party_name =  htmlspecialchars($record->customer_name_en) . '<br/>';
 }
 
 /**

@@ -284,7 +284,7 @@ class Policy_model extends MY_Model
                         '_required' => true
                     ],
                     [
-                        'field' => 'customer_name',
+                        'field' => 'customer_name_en',
                         'label' => 'Customer',
                         'rules' => 'trim|required',
                         '_id'       => 'customer-text',
@@ -910,7 +910,7 @@ class Policy_model extends MY_Model
                         [portfolio_id] => 6
                         [fiscal_yr_id] => x
                         [policy_package] => tp
-                        [customer_name] => Sonam Singh
+                        [customer_name_en] => Sonam Singh
                         [customer_id] => 15
                         [object_name] => Scooter, Dio, FFF, 9879879, ADSF
                         [object_id] => 21
@@ -1005,7 +1005,7 @@ class Policy_model extends MY_Model
                         (
                             [portfolio_id] => 6
                             [policy_package] => tp
-                            [customer_name] => Bishal Lepcha
+                            [customer_name_en] => Bishal Lepcha
                             [customer_id] => 16
                             [object_name] => Motorcycle, Pulsar 250, , 98798, 987987
                             [object_id] => 22
@@ -1825,7 +1825,7 @@ class Policy_model extends MY_Model
                         TIMESTAMP( P.`issued_date`, P.`issued_time` ) AS issued_datetime,
                         TIMESTAMP( P.`start_date`, P.`start_time` ) AS start_datetime,
                         TIMESTAMP( P.`end_date`, P.`end_time` ) AS end_datetime,
-                        PRT.name_en as portfolio_name, C.full_name as customer_name";
+                        PRT.name_en as portfolio_name, C.full_name_en as customer_name_en, C.full_name_np as customer_name_np";
             if($signle_select)
             {
                 $select .= ', RAP.agent_id';
@@ -1892,7 +1892,7 @@ class Policy_model extends MY_Model
                          * Customer Table (code, name, type, pan, picture, pfrofession, contact,
                          * company reg no, citizenship no, passport no, lock flag)
                          */
-                        "C.code as customer_code, C.full_name as customer_name, C.grandfather_name as customer_grandfather_name, C.father_name as customer_father_name, C.mother_name as customer_mother_name, C.spouse_name as customer_spouse_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.company_reg_no, C.identification_no, C.dob, C.flag_locked AS customer_flag_locked, " .
+                        "C.code as customer_code, C.full_name_en as customer_name_en, C.full_name_np as customer_name_np, C.grandfather_name as customer_grandfather_name, C.father_name as customer_father_name, C.mother_name as customer_mother_name, C.spouse_name as customer_spouse_name, C.type as customer_type, C.pan as customer_pan, C.picture as customer_picture, C.profession as customer_profession, C.company_reg_no, C.identification_no, C.dob, C.flag_locked AS customer_flag_locked, " .
 
 
                         /**

@@ -31,7 +31,7 @@ if($record->flag_on_credit === 'Y')
 <?php
 
 // Insured Party Name
-echo htmlspecialchars($record->customer_name), '<br/>';
+echo htmlspecialchars($record->customer_name_en), '<br/>';
 
 // Insured Party Address
 $this->load->view('policies/print/_snippet_address', ['address_record' => $customer_address_record]);

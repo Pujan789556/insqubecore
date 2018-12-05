@@ -25,7 +25,7 @@ if( $widget_type === 'party' )
 			['ref' => 'party_id', 'val' => $record->id],
 		],
 		'html' => [
-			['ref' => '_text-ref-party', 'val' => $record->full_name]
+			['ref' => '_text-ref-party', 'val' => $record->full_name_en]
 		]
 	];
 }
@@ -34,10 +34,10 @@ else if( $widget_type === 'policy' )
 	$select_json = [
 		'fields' => [
 			['id' => 'customer-id', 'val' => $record->id],
-			['id' => 'customer-text', 'val' => $record->full_name]
+			['id' => 'customer-text', 'val' => $record->full_name_en]
 		],
 		'html' => [
-			['id' => '_text-ref-customer', 'val' => $record->full_name]
+			['id' => '_text-ref-customer', 'val' => $record->full_name_en]
 		]
 	];
 }
@@ -59,9 +59,9 @@ else if( $widget_type === 'policy' )
 				class="thumbnail"
 				style="width:100px; float:left; margin-right:10px;"
 				src="<?php echo site_url('static/media/customers/'.thumbnail_name($record->picture));?>"
-				alt="<?php echo $record->full_name;?>">
+				alt="<?php echo $record->full_name_en;?>">
 		<?php endif;?>
-		<strong id="_text-ref-<?php echo $record->id?>"><?php echo $record->full_name;?></strong>
+		<strong id="_text-ref-<?php echo $record->id?>"><?php echo $record->full_name_en;?></strong>
 		<br/>
 		Code: <strong><?php echo $record->code;?></strong><br/>
 		PAN: <strong><?php echo $record->pan;?></strong>

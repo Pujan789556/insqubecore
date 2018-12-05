@@ -897,12 +897,12 @@ class Customers extends MY_Controller
 
 
 
-		$this->data['site_title'] = 'Customer Details | ' . $record->full_name;
+		$this->data['site_title'] = 'Customer Details | ' . $record->full_name_en;
 		$this->template->partial(
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Customer Details <small>' . $record->full_name . '</small>',
+								'content_header' => 'Customer Details <small>' . $record->full_name_en . '</small>',
 								'breadcrumbs' => ['Customers' => 'customers', 'Details' => NULL]
 						])
 						->partial('content', 'customers/_details', $data)

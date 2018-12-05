@@ -3042,7 +3042,7 @@ class Policy_installments extends MY_Controller
      */
 	private function _sms_activation( $endorsement_record, $policy_record, $invoice_record = NULL, $installment_record = NULL)
 	{
-		$customer_name 		= $policy_record->customer_name;
+		$customer_name_en 		= $policy_record->customer_name_en;
 		$customer_contact 	= $policy_record->customer_contact ? json_decode($policy_record->customer_contact) : NULL;
 		$mobile 			= $customer_contact->mobile ? $customer_contact->mobile : NULL;
 
@@ -3051,7 +3051,7 @@ class Policy_installments extends MY_Controller
 			return FALSE;
 		}
 
-		$message 	= "Dear {$customer_name}," . PHP_EOL;
+		$message 	= "Dear {$customer_name_en}," . PHP_EOL;
 		$txn_type 	= (int)$endorsement_record->txn_type;
 
 		$amount = abs($invoice_record->amount ?? 0);

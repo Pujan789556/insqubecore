@@ -59,7 +59,7 @@
                     <td>
                         To<br/>
                         <address>
-                            <strong><?php echo $record->customer_full_name?></strong><br>
+                            <strong><?php echo $record->customer_full_name_en?></strong><br>
                             <?php echo get_contact_widget($record->customer_contact, true, true)?>
                         </address>
                     </td>

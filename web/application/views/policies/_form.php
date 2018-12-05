@@ -66,15 +66,15 @@ echo form_open( $this->uri->uri_string(),
                         $customer_id = set_value('customer_id', '', FALSE);
                       }
 
-                      $customer_name = $record->customer_name ?? '';
-                      if(set_value('customer_name', '', FALSE))
+                      $customer_name_en = $record->customer_name_en ?? '';
+                      if(set_value('customer_name_en', '', FALSE))
                       {
-                        $customer_name = set_value('customer_name', '', FALSE);
+                        $customer_name_en = set_value('customer_name_en', '', FALSE);
                       }
                       ?>
-                      <span id="_text-ref-customer" class="mrg-r-5 text-purple" readonly><?php echo $customer_name;?></span>
+                      <span id="_text-ref-customer" class="mrg-r-5 text-purple" readonly><?php echo $customer_name_en;?></span>
                       <a href="#" id="_find-customer" class="btn btn-sm btn-round bg-purple" data-toggle="tooltip" title="Find Customer"><i class="fa fa-filter"></i>...</a>
-                      <input type="hidden" id="customer-text" name="customer_name" value="<?php echo $customer_name;?>">
+                      <input type="hidden" id="customer-text" name="customer_name_en" value="<?php echo $customer_name_en;?>">
                       <input type="hidden" id="customer-id" name="customer_id" value="<?php echo $customer_id;?>">
                       <?php if(form_error('customer_id')):?><span class="help-block"><?php echo form_error('customer_id'); ?></span><?php endif?>
                   </div>

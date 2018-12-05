@@ -363,7 +363,7 @@ switch ($record->portfolio_id)
                 </tr>
                 <tr>
                     <td><strong>१. बीमितको नाम:</strong></td>
-                    <td><?php echo $record->customer_name; ?></td>
+                    <td><?php echo $record->customer_name_en; ?></td>
                 </tr>
                 <tr>
                     <td><strong>२. ठेगाना:</strong></td>

@@ -474,7 +474,7 @@ class Cli_bs_report extends Base_Controller
                 "O.attributes AS object_attributes, " .
 
                 // Customer
-                "C.full_name AS customer_name, " .
+                "C.full_name_en AS customer_name_en, C.full_name_np AS customer_name_np, " .
 
                 // Distrct
                 "D.code as district_code, " .
@@ -553,7 +553,7 @@ class Cli_bs_report extends Base_Controller
 
 
             $_data = [
-                $single->customer_name,
+                $single->customer_name_en,
                 $single->district_code,
                 $single->policy_code,
                 $bs_category_codes[$attributes->bs_agro_category_id] ?? '',

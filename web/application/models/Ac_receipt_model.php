@@ -329,7 +329,7 @@ class Ac_receipt_model extends MY_Model
         //                     'POLICY.code AS policy_code, ' .
 
         //                     // Customer Details
-        //                     'CST.full_name AS customer_full_name, CST.contact as customer_contact'
+        //                     'CST.full_name_en AS customer_full_name_en, CST.contact as customer_contact'
         //                 )
         //             ->join('ac_vouchers V', 'V.id = I.voucher_id')
         //             ->join('rel_policy_installment_voucher RELENDRSMNTVHR', 'RELENDRSMNTVHR.voucher_id = I.voucher_id')
