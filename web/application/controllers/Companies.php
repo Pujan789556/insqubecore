@@ -401,6 +401,9 @@ class Companies extends MY_Controller
         			$data['picture'] = $picture;
 
 
+        			// Active ??
+        			$data['active'] = $data['active'] ?? IQB_FLAG_OFF;
+
             		// Insert or Update?
 					if($action === 'add')
 					{

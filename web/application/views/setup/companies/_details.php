@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <?php endif?>
 
 
-				<h3 class="profile-username text-center"><?php echo  $record->name_en;?></h3>
+				<h3 class="profile-username text-center"><?php echo  $record->name_en, '<br/>', $record->name_np;?></h3>
 
 				<ul class="list-group list-group-unbordered">
 					<li class="list-group-item">

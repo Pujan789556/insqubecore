@@ -15,7 +15,7 @@ foreach($creditors as $single):
 				title="View company details.">
 				<?php echo $single->name_en;?></a>
 		</td>
-		<td><?php echo $single->branch_name;?></td>
+		<td><?php echo $single->branch_name_en;?></td>
 		<td class="ins-action">
 			<?php if( _POLICY_is_editable($policy_record->status, FALSE) ): ?>
 				<a href="#"

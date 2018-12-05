@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		{
 			echo '<i class="fa fa-circle text-green" title="Head Office" data-toggle="tooltip"></i>&nbsp;';
 		}
-		echo $record->name;
+		echo $record->name_en, ' (', $record->name_np, ')';
 		?>
 	</td>
 	<td><?php echo address_widget( parse_address_record($record), true)?></td>

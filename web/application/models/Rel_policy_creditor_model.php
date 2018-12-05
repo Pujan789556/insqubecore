@@ -135,7 +135,7 @@ class Rel_policy_creditor_model extends MY_Model
                             "C.name_en, C.name_np, " .
 
                             // Creditro Branch Table
-                            "CB.name as branch_name"
+                            "CB.name_en as branch_name_en, CB.name_np as branch_name_np"
                         )
                         ->from($this->table_name . ' AS REL')
                         ->join('master_companies C', 'REL.creditor_id = C.id')

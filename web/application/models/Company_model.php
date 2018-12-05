@@ -87,10 +87,9 @@ class Company_model extends MY_Model
             [
                 'field' => 'active',
                 'label' => 'Is Active?',
-                'rules' => 'trim|required|integer|exact_length[1]',
-                '_type'     => 'dropdown',
-                '_data'     => [ '' => 'Select...', '1' => 'Active', '0' => 'Not Active'],
-                '_required' => true
+                'rules' => 'trim|integer|in_list[1]',
+                '_type' => 'switch',
+                '_checkbox_value' => '1'
             ]
         ];
     }
@@ -116,10 +115,7 @@ class Company_model extends MY_Model
             $data[$col] = $post_data[$col] ?? NULL;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $done               = FALSE;
-
+        $done  = FALSE;
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -127,9 +123,10 @@ class Company_model extends MY_Model
             $done = parent::insert($data, TRUE);
 
             $branch_data = [
-                'company_id'     => $done,
-                'name'           => 'Head Office',
-                'is_head_office' => IQB_FLAG_ON
+                'company_id'        => $done,
+                'name_en'           => 'Head Office',
+                'name_np'           => 'प्रधान कार्यालय',
+                'is_head_office'    => IQB_FLAG_ON
             ];
 
             // Unset All Company Columns
@@ -149,9 +146,6 @@ class Company_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $done = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $done;
@@ -179,8 +173,7 @@ class Company_model extends MY_Model
         }
 
         // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $done               = FALSE;
+        $done = FALSE;
 
         // Use automatic transaction
         $this->db->trans_start();
@@ -199,66 +192,8 @@ class Company_model extends MY_Model
             $done = FALSE;
         }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
         // return result/status
         return $done;
-    }
-
-    // ----------------------------------------------------------------
-
-    public function trg_after_save($arr_record)
-    {
-        /**
-         *
-         * Data Structure
-                Array
-                (
-                    [id] => 10
-                    [fields] => Array
-                        (
-                            [name] => 6
-                            [picture] => 1
-                            [pan_no] =>
-
-                            ...
-
-                            [updated_at] => 2016-12-28 15:51:47
-                            [updated_by] => 1
-                        )
-
-                    [result] => 1
-                    [method] => update
-                )
-        */
-        $id = $arr_record['id'] ?? NULL;
-
-        if($id !== NULL)
-        {
-            $fields = $arr_record['fields'];
-            $method = $arr_record['method'];
-
-            $this->load->model('company_branch_model');
-
-            $post_data = $this->input->post();
-            if($method == 'update')
-            {
-                // Update Branch Head Office Contact
-                $this->company_branch_model->update_ho_contact($id, $post_data);
-            }
-            else
-            {
-                // Create a New Head Office Contact
-                $branch_data = [
-                    'company_id'     => $id,
-                    'name'           => 'Head Office',
-                    'is_head_office' => IQB_FLAG_ON
-                ];
-                $this->company_branch_model->insert($branch_data, TRUE);
-            }
-        }
-        return TRUE;
     }
 
     // ----------------------------------------------------------------
@@ -418,6 +353,13 @@ class Company_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+        /**
+         * Format Dropdown based on Language
+         *
+         * @param array $records
+         * @param string $lang
+         * @return array
+         */
         private function _format_dropdown($records, $lang)
         {
             $list = [];
@@ -453,7 +395,7 @@ class Company_model extends MY_Model
      */
     public function get($id)
     {
-        return $this->db->select('C.*, CB.id AS company_branch_id, CB.name as ho_branch_name')
+        return $this->db->select('C.*, CB.id AS company_branch_id, CB.name_en as ho_branch_name_en, CB.name_np as ho_branch_name_np')
                  ->from($this->table_name . ' as C')
                  ->join('master_company_branches CB', "CB.company_id = C.id AND CB.is_head_office ='".IQB_FLAG_ON."'", 'left')
                  ->where('C.id', $id)

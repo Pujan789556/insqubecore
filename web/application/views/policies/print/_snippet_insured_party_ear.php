@@ -32,7 +32,7 @@ if($record->flag_on_credit === 'Y')
     $financer_info = ["<br/><strong>{$financer_title}</strong>"];
     foreach($creditors as $single)
     {
-        $financer_info[] = $single->name_en . ', ' . $single->branch_name;
+        $financer_info[] = $single->name_en . ', ' . $single->branch_name_en;
     }
     echo implode('<br/>', $financer_info), '<br/>';
 }

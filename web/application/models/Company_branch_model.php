@@ -20,13 +20,20 @@ class Company_branch_model extends MY_Model
     // protected $after_update  = ['trg_after_save', 'clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ["id", "company_id", "name", "is_head_office", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ["id", "company_id", "name_en", "name_np", "is_head_office", "created_at", "created_by", "updated_at", "updated_by"];
 
     protected $validation_rules = [
         [
-            'field' => 'name',
-            'label' => 'Branch Name',
-            'rules' => 'trim|required|max_length[50]',
+            'field' => 'name_en',
+            'label' => 'Branch Name (EN)',
+            'rules' => 'trim|required|max_length[150]',
+            '_type'     => 'text',
+            '_required' => true
+        ],
+        [
+            'field' => 'name_np',
+            'label' => 'Branch Name (ने)',
+            'rules' => 'trim|required|max_length[200]',
             '_type'     => 'text',
             '_required' => true
         ],
@@ -76,7 +83,7 @@ class Company_branch_model extends MY_Model
      */
     public function add_ho($post_data)
     {
-        $cols = ["company_id", "name", "is_head_office",];
+        $cols = ["company_id", "name_en", "name_np", "is_head_office",];
         $data = [];
 
         /**
@@ -117,7 +124,7 @@ class Company_branch_model extends MY_Model
      */
     public function add($post_data)
     {
-        $cols = ["company_id", "name", "is_head_office",];
+        $cols = ["company_id", "name_en", "name_np", "is_head_office",];
         $data = [];
 
         /**
@@ -177,7 +184,7 @@ class Company_branch_model extends MY_Model
      */
     public function edit($id, $address_id, $post_data)
     {
-        $cols = ["company_id", "name", "is_head_office",];
+        $cols = ["company_id", "name_en", "name_np", "is_head_office",];
         $data = [];
 
         /**
@@ -303,8 +310,8 @@ class Company_branch_model extends MY_Model
         $list = $this->get_cache($cache_name);
         if(!$list)
         {
-            $this->db->select('C.id, C.company_id, C.name, C.is_head_office')
-                                ->from($this->table_name . ' as C');
+            $this->db->select('CB.id, CB.company_id, CB.name_en, CB.name_np, CB.is_head_office')
+                                ->from($this->table_name . ' as CB');
 
             // Include Address Information
             $table_aliases = [
@@ -321,13 +328,13 @@ class Company_branch_model extends MY_Model
                 'local_body' => 'LCLBD',
 
                 // Type/Module Table Alias
-                'module' => 'C'
+                'module' => 'CB'
             ];
             $this->address_model->module_select(IQB_ADDRESS_TYPE_COMPANY_BRANCH, NULL, $table_aliases);
 
-            $list = $this->db->where('C.company_id', $company_id)
-                            ->order_by('C.is_head_office', 'desc')
-                            ->order_by('C.name', 'asc')
+            $list = $this->db->where('CB.company_id', $company_id)
+                            ->order_by('CB.is_head_office', 'desc')
+                            ->order_by('CB.name_en', 'asc')
                             ->get()->result();
 
             $this->write_cache($list, $cache_name, CACHE_DURATION_DAY);
@@ -337,17 +344,46 @@ class Company_branch_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function dropdown_by_company($company_id)
+    public function dropdown_by_company($company_id, $lang="both")
     {
         $records = $this->get_by_company($company_id);
-        $list = [];
-        foreach($records as $record)
-        {
-            $column = $record->id;
-            $list["{$column}"] = $record->name;
-        }
-        return $list;
+
+        return $this->_format_dropdown($records, $lang);
     }
+
+    // ----------------------------------------------------------------
+
+    /**
+         * Format Dropdown based on Language
+         *
+         * @param array $records
+         * @param string $lang
+         * @return array
+         */
+        private function _format_dropdown($records, $lang)
+        {
+            $list = [];
+            foreach($records as $record)
+            {
+                $column = $record->id;
+                if($lang == 'both')
+                {
+                    $value = $record->name_en . ' (' . $record->name_np . ')';
+                }
+                else if($lang == 'en')
+                {
+                    $value = $record->name_en;
+                }
+                else
+                {
+                    $value = $record->name_np;
+                }
+
+                $list["{$column}"] = $value;
+            }
+
+            return $list;
+        }
 
     // ----------------------------------------------------------------
 
@@ -362,21 +398,21 @@ class Company_branch_model extends MY_Model
      */
     public function rows($params = array())
     {
-        $this->db->select('C.id, C.company_id, C.name')
-                 ->from($this->table_name . ' as C');
+        $this->db->select('CB.id, CB.company_id, CB.name_en, CB.name_np')
+                 ->from($this->table_name . ' as CB');
 
         if(!empty($params))
         {
             $next_id = $params['next_id'] ?? NULL;
             if( $next_id )
             {
-                $this->db->where(['C.id >=' => $next_id]);
+                $this->db->where(['CB.id >=' => $next_id]);
             }
 
             $keywords = $params['keywords'] ?? '';
             if( $keywords )
             {
-                $this->db->like('C.name', $keywords, 'after');
+                $this->db->like('CB.name_en', $keywords, 'after');
             }
         }
         return $this->db->limit($this->settings->per_page+1)
@@ -480,10 +516,7 @@ class Company_branch_model extends MY_Model
 
         $record = parent::find($id);
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
         $status = TRUE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -503,9 +536,6 @@ class Company_branch_model extends MY_Model
             // get_allenerate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;
