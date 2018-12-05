@@ -16,7 +16,7 @@ class Claim_model extends MY_Model
     // protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'fy_quarter', 'branch_id', 'accident_date', 'accident_time', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'total_surveyor_fee_amount', 'settlement_claim_amount', 'cl_comp_cession', 'cl_treaty_retaintion', 'cl_treaty_quota', 'cl_treaty_1st_surplus', 'cl_treaty_2nd_surplus', 'cl_treaty_3rd_surplus', 'cl_treaty_fac', 'flag_paid', 'flag_surveyor_voucher', 'settlement_date', 'status', 'status_remarks', 'progress_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'fy_quarter', 'branch_id', 'category', 'accident_date', 'accident_time', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'total_surveyor_fee_amount', 'settlement_claim_amount', 'cl_comp_cession', 'cl_treaty_retaintion', 'cl_treaty_quota', 'cl_treaty_1st_surplus', 'cl_treaty_2nd_surplus', 'cl_treaty_3rd_surplus', 'cl_treaty_fac', 'flag_paid', 'flag_surveyor_voucher', 'settlement_date', 'file_intimation', 'status', 'status_remarks', 'progress_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -58,10 +58,19 @@ class Claim_model extends MY_Model
             /**
              * Accident Details
              */
-            'accident_details' => [
+            'incident_details' => [
+                [
+                    'field' => 'category',
+                    'label' => 'Settlement From',
+                    'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(IQB_CLAIM_CATEGORIES)).']',
+                    '_type'     => 'dropdown',
+                    '_default'  => IQB_CLAIM_CATEGORY_REGULAR,
+                    '_data'     => IQB_BLANK_SELECT + IQB_CLAIM_CATEGORIES,
+                    '_required' => true
+                ],
                 [
                     'field' => 'accident_date_time',
-                    'label' => 'Accident Date & Time',
+                    'label' => 'Incident Date & Time',
                     'rules' => 'trim|required|valid_date',
                     '_type'             => 'datetime',
                     '_extra_attributes' => 'data-provide="datetimepicker-inline"',
@@ -69,7 +78,7 @@ class Claim_model extends MY_Model
                 ],
                 [
                     'field' => 'accident_location',
-                    'label' => 'Accident Location',
+                    'label' => 'Incident Location',
                     'rules' => 'trim|required|htmlspecialchars|max_length[200]',
                     '_type'     => 'textarea',
                     'rows'      => 4,
@@ -77,10 +86,18 @@ class Claim_model extends MY_Model
                 ],
                 [
                     'field' => 'accident_details',
-                    'label' => 'Accident Details',
+                    'label' => 'Incident Details',
                     'rules' => 'trim|required|htmlspecialchars',
                     '_type'     => 'textarea',
                     '_required' => true
+                ],
+                [
+                    'field' => 'file_intimation',
+                    '_key' => 'file_intimation',
+                    'label' => 'Upload Intimation File',
+                    'rules' => '',
+                    '_type'     => 'file',
+                    '_required' => false
                 ],
 
             ],
@@ -147,7 +164,7 @@ class Claim_model extends MY_Model
                     'field' => 'death_injured[type][]',
                     '_key' => 'type',
                     'label' => 'Type',
-                    'rules' => 'trim|alpha|exact_length[1]',
+                    'rules' => 'trim|alpha|exact_length[3]',
                     '_type' => 'dropdown',
                     '_data'         => CLAIM__death_injured_type_dropdown(),
                     '_show_label'   => false,
@@ -190,14 +207,14 @@ class Claim_model extends MY_Model
             'intimation_details' => [
                 [
                     'field' => 'intimation_name',
-                    'label' => 'Name',
+                    'label' => 'Contact Name',
                     'rules' => 'trim|required|htmlspecialchars|max_length[150]',
                     '_type' => 'text',
                     '_required'     => true
                 ],
                 [
                     'field' => 'initimation_address',
-                    'label' => 'Address',
+                    'label' => 'Contact Address',
                     'rules' => 'trim|required|htmlspecialchars|max_length[150]',
                     '_type' => 'textarea',
                     'rows'  => 4,
@@ -205,7 +222,7 @@ class Claim_model extends MY_Model
                 ],
                 [
                     'field' => 'initimation_contact',
-                    'label' => 'Contact No.',
+                    'label' => 'Contact Phone/Mobile',
                     'rules' => 'trim|required|htmlspecialchars|max_length[40]',
                     '_type' => 'text',
                     '_required'     => true
@@ -312,7 +329,7 @@ class Claim_model extends MY_Model
      */
     public function draft_v_rules($formatted = FALSE )
     {
-        $sections = ['accident_details', 'loss_details', 'death_injured_details', 'intimation_details', 'claim_estimation'];
+        $sections = ['incident_details', 'loss_details', 'death_injured_details', 'intimation_details', 'claim_estimation'];
         $rules = [];
         foreach($sections as $section)
         {
@@ -529,8 +546,7 @@ class Claim_model extends MY_Model
     public function add_draft( $data )
     {
         // Disable DB Debug for transaction to work
-        $this->db->db_debug = TRUE;
-        $id                 = FALSE;
+        $id  = FALSE;
 
         // Use automatic transaction
         $this->db->trans_start();
@@ -554,9 +570,6 @@ class Claim_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $id = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $id;
@@ -630,9 +643,6 @@ class Claim_model extends MY_Model
      */
     public function edit_draft( $id, $data )
     {
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -655,9 +665,6 @@ class Claim_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $done = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $done;
@@ -696,7 +703,7 @@ class Claim_model extends MY_Model
 
     private function __build_draft_data($data)
     {
-        $columns = ['accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount'];
+        $columns = ['category', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'file_intimation'];
 
         $draft_data = [];
         foreach($columns as $key)

@@ -12,6 +12,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Claims extends MY_Controller
 {
+	/**
+	 * Files Upload Path - Data (Invoices)
+	 */
+	public static $data_upload_path = INSQUBE_DATA_ROOT . 'claims/';
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -550,89 +557,120 @@ class Claims extends MY_Controller
         	{
         		$data 				= $this->input->post();
         		$done 				= false;
+        		$status 			= 'success';
 
-        		switch ($action)
-        		{
-        			case 'add_draft':
-        				$data['policy_id'] 	= $policy_id;
-						$done = $this->claim_model->add_draft($data);
-        				break;
+        		/**
+        		 * File Upload on Add/Edit Draft
+        		 */
+				$file_intimation = $record->file_intimation ?? NULL;
+				if(in_array($action, ['add_draft', 'edit_draft']))
+				{
+					/**
+					 * Upload File If any?
+					 */
+					$upload_result 	= $this->_upload_file_intimation($file_intimation);
+					$status 		= $upload_result['status'];
+					$message 		= $upload_result['message'];
+					$files 			= $upload_result['files'];
+					$file_intimation = $status === 'success' ? $files[0] : $file_intimation;
 
-    				case 'edit_draft':
-    					$data['policy_id'] 	= $policy_id;
-						$done = $this->claim_model->edit_draft($record->id, $data);
-        				break;
+					// Update data
+					$data['file_intimation'] = $file_intimation;
+				}
 
-    				case 'close_claim':
-    					$update_data = [
-							'status' 		 => IQB_CLAIM_STATUS_CLOSED,
-							'status_remarks' => $data['status_remarks']
-    					];
+				if( $status === 'success' || $status === 'no_file_selected')
+	            {
+	            	switch ($action)
+	        		{
+	        			case 'add_draft':
+	        				$data['policy_id'] 	= $policy_id;
+							$done = $this->claim_model->add_draft($data);
+	        				break;
 
-    					// Surveyor Claim Voucher Required?
-    					if($record->total_surveyor_fee_amount)
-    					{
-    						$update_data['flag_surveyor_voucher'] = IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED;
-    					}
-    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
-        				break;
+	    				case 'edit_draft':
+	    					$data['policy_id'] 	= $policy_id;
+							$done = $this->claim_model->edit_draft($record->id, $data);
+	        				break;
 
-    				case 'withdraw_claim':
-    					$update_data = [
-							'status' 		 => IQB_CLAIM_STATUS_WITHDRAWN,
-							'status_remarks' => $data['status_remarks']
-    					];
-    					// Surveyor Claim Voucher Required?
-    					if($record->total_surveyor_fee_amount)
-    					{
-    						$update_data['flag_surveyor_voucher'] = IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED;
-    					}
-						$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
-        				break;
+	    				case 'close_claim':
+	    					$update_data = [
+								'status' 		 => IQB_CLAIM_STATUS_CLOSED,
+								'status_remarks' => $data['status_remarks']
+	    					];
 
-    				case 'assign_surveyors':
-    					$done = $this->claim_surveyor_model->assign_to_claim($record->id, $data);
-    					break;
+	    					// Surveyor Claim Voucher Required?
+	    					if($record->total_surveyor_fee_amount)
+	    					{
+	    						$update_data['flag_surveyor_voucher'] = IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED;
+	    					}
+	    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
+	        				break;
 
-					case 'update_assessment':
-						$update_data = [
-							'assessment_brief' 	=> $data['assessment_brief'],
-							'other_info' 		=> $data['other_info'],
-							'supporting_docs' 	=> implode(',', $data['supporting_docs'])
-    					];
-    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
-						break;
+	    				case 'withdraw_claim':
+	    					$update_data = [
+								'status' 		 => IQB_CLAIM_STATUS_WITHDRAWN,
+								'status_remarks' => $data['status_remarks']
+	    					];
+	    					// Surveyor Claim Voucher Required?
+	    					if($record->total_surveyor_fee_amount)
+	    					{
+	    						$update_data['flag_surveyor_voucher'] = IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED;
+	    					}
+							$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
+	        				break;
 
-					case 'update_settlement':
-						$done = $this->claim_settlement_model->assign_to_claim($record->id, $data);
-						break;
+	    				case 'assign_surveyors':
+	    					$done = $this->claim_surveyor_model->assign_to_claim($record->id, $data);
+	    					break;
 
-					case 'update_scheme':
-						$update_data = [
-							'claim_scheme_id' 	=> $data['claim_scheme_id']
-    					];
-    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
-						break;
+						case 'update_assessment':
+							$update_data = [
+								'assessment_brief' 	=> $data['assessment_brief'],
+								'other_info' 		=> $data['other_info'],
+								'supporting_docs' 	=> implode(',', $data['supporting_docs'])
+	    					];
+	    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
+							break;
 
-					case 'update_progress':
-						$update_data = [
-							'progress_remarks' 	=> $data['progress_remarks']
-    					];
-    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
-						break;
+						case 'update_settlement':
+							$done = $this->claim_settlement_model->assign_to_claim($record->id, $data);
+							break;
 
-					case 'bs_tags':
-						$bsrs_heading_ids = array_unique( $this->input->post('bsrs_heading_id') );
-		        		if($bsrs_heading_ids)
-		        		{
-		        			$done = $this->rel_claim_bsrs_heading_model->save($record->id, $bsrs_heading_ids);
-		        		}
-						break;
+						case 'update_scheme':
+							$update_data = [
+								'claim_scheme_id' 	=> $data['claim_scheme_id']
+	    					];
+	    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
+							break;
 
-        			default:
-        				# code...
-        				break;
-        		}
+						case 'update_progress':
+							$update_data = [
+								'progress_remarks' 	=> $data['progress_remarks']
+	    					];
+	    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
+							break;
+
+						case 'bs_tags':
+							$bsrs_heading_ids = array_unique( $this->input->post('bsrs_heading_id') );
+			        		if($bsrs_heading_ids)
+			        		{
+			        			$done = $this->rel_claim_bsrs_heading_model->save($record->id, $bsrs_heading_ids);
+			        		}
+							break;
+
+	        			default:
+	        				# code...
+	        				break;
+	        		}
+	            }
+	            else
+	            {
+	            	return $this->template->json([
+						'status' => $status,
+						'message' => $message
+					]);
+	            }
+
 
 	        	if(!$done)
 				{
@@ -766,6 +804,61 @@ class Claims extends MY_Controller
 			return $rules;
 		}
 
+		// --------------------------------------------------------------------
+
+		/**
+		 * Sub-function: Upload Claim Intimation File
+		 *
+		 * @param string|null $old_file
+		 * @return array
+		 */
+		private function _upload_file_intimation( $old_file = NULL )
+		{
+			$options = [
+				'config' => [
+					'encrypt_name' => TRUE,
+	                'upload_path' => self::$data_upload_path,
+	                'allowed_types' => 'pdf|jpg|jpeg|png|gif',
+	                'max_size' => '2048'
+				],
+				'form_field' => 'file_intimation',
+
+				'create_thumb' => FALSE,
+
+				// Delete Old file
+				'old_files' => $old_file ? [$old_file] : [],
+				'delete_old' => TRUE
+			];
+			return upload_insqube_media($options);
+		}
+
+	// --------------------------------------------------------------------
+
+    /**
+     * Download a file related to Object
+     *
+     * @param string $filename
+     * @return void
+     */
+	public function download($filename)
+	{
+		/**
+		 * Check Permissions
+		 */
+		$this->dx_auth->is_authorized('claims', 'explore.claim', TRUE);
+
+		// Let's Download
+		$this->load->helper('download');
+        $download_file = self::$data_upload_path . $filename;
+        if( file_exists($download_file) )
+        {
+            force_download($download_file, NULL, true);
+        }
+        else
+        {
+        	$this->template->render_404('', "Sorry! File Not Found.");
+        }
+	}
 
 	// --------------------------------------------------------------------
 
@@ -838,6 +931,14 @@ class Claims extends MY_Controller
 
 		if($done)
 		{
+			/**
+			 * Delete Media if any
+			 */
+			if($record->file_intimation)
+			{
+				delete_insqube_document(self::$data_upload_path . $record->file_intimation);
+			}
+
 			$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',

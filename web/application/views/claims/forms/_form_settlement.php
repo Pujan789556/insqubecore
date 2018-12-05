@@ -103,6 +103,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         $row.html(html);
 
+        // Empty Row
+        $row.find('input').val('');
+        $row.find('select').val('');
+
         // remove last blank td
         $row.find('td:last').remove();
 

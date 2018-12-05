@@ -72,12 +72,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <div class="col-sm-6">
                     <div class="box box-bordered box-default">
                         <div class="box-header with-border">
-                            <h4 class="box-title">Accident Details</h4>
+                            <h4 class="box-title">Incident Details</h4>
                         </div>
                         <table class="table table-responsive table-condensed">
                             <tbody>
                                 <tr>
-                                    <th width="30%">Accident Date & Time</th>
+                                    <th width="30%">Settlement From</th>
+                                    <td><?php echo IQB_CLAIM_CATEGORIES[$record->category];?></td>
+                                </tr>
+                                <tr>
+                                    <th width="30%">Incident Date & Time</th>
                                     <td><?php echo $record->accident_date, ' ', $record->accident_time;?></td>
                                 </tr>
                                 <tr>
@@ -87,6 +91,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <tr>
                                     <th>Details</th>
                                     <td><?php echo nl2br(htmlspecialchars($record->accident_details));?></td>
+                                </tr>
+                                <tr>
+                                    <th>Intimation File</th>
+                                    <td>
+                                        <?php
+                                        if($record->file_intimation)
+                                        {
+                                            echo anchor('claims/download/'.$record->file_intimation, '<i class="fa fa-download"></i> Download', ['target' => '_blank']);
+                                        }
+                                         ?>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -230,7 +245,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 class="trg-dialog-edit btn btn-primary btn-sm"
                                 data-title='<i class="fa fa-pencil-square-o"></i> Manage Surveyors - <?php echo $record->claim_code?>'
                                 data-url="<?php echo site_url('claims/surveyors/' . $record->id . '/d');?>"
-                                data-box-size="large"
+                                data-box-size="full-width"
                                 data-form="#_form-claims">
                                 <i class="fa fa-pencil-square-o"></i></a>
                     <?php endif;?>
@@ -247,7 +262,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <th>Type</th>
                     <th>Assigned Date</th>
                     <th>Status</th>
-                    <th class="text-right">Fee (Rs.)</th>
+                    <th class="text-right">Professional Fee (Rs.)</th>
+                    <th class="text-right">Other Fee (Rs.)</th>
+                    <th class="text-right">VAT (Rs.)</th>
+                    <th class="text-right">TDS (Rs.)</th>
+                    <th class="text-right">Total (Rs.)</th>
+
                 </tr>
             </thead>
             <tbody id="search-result-claim-surveyors">

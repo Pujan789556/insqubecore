@@ -106,7 +106,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         class="text-green trg-dialog-edit"
                         data-title='<i class="fa fa-pencil-square-o"></i> Assign Surveyors - <?php echo $record->claim_code?>'
                         data-url="<?php echo site_url('claims/surveyors/' . $record->id . '/' . $ref);?>"
-                        data-box-size="large"
+                        data-box-size="full-width"
                         data-form="#_form-claims">
                         <i class="fa fa-pencil-square-o"></i> Assign Surveyors</a>
                 </li>

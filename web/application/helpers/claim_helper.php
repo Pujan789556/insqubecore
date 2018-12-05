@@ -54,8 +54,11 @@ if ( ! function_exists('CLAIM__death_injured_type_dropdown'))
 	function CLAIM__death_injured_type_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			'D' => 'Dead',
-			'I' => 'Injured'
+			'DTH' => 'Death',
+			'INJ' => 'Injured',
+			'PRD' => 'Partially Disabled',
+			'FLD' => 'Fully Disabled',
+			'ILN' => 'Illness'
 		];
 
 		if($flag_blank_select)
@@ -268,7 +271,8 @@ if ( ! function_exists('CLAIM__settlement_category_dropdown'))
 	{
 		$dropdown = [
 			'OD' => 'Own Damage',
-			'TP' => 'Third Party'
+			'TP' => 'Third Party',
+			'NA' => 'Not Applicable'
 		];
 
 		if($flag_blank_select)
@@ -291,9 +295,12 @@ if ( ! function_exists('CLAIM__settlement_subcategory_dropdown'))
 	function CLAIM__settlement_subcategory_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			'D' => 'Death',
-			'I' => 'Injury',
-			'P' => 'Property Damage'
+			'DTH' => 'Death',
+			'INJ' => 'Injured',
+			'PRD' => 'Partially Disabled',
+			'FLD' => 'Fully Disabled',
+			'ILN' => 'Illness',
+			'PRP' => 'Property Damage'
 		];
 
 		if($flag_blank_select)

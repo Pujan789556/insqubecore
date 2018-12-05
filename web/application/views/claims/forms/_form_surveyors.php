@@ -4,6 +4,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Claim - Surveyors
  */
 ?>
+<style type="text/css">
+    .form-inline input, .form-inline select{width: 100% !important}
+    .form-inline .form_group{display: block; margin:0;}
+</style>
 <?php echo form_open( $this->uri->uri_string(),
                         [
                             'class'     => 'form-iqb-general',
@@ -106,6 +110,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $row  = $('<tr></tr>');
 
         $row.html(html);
+
+        // Empty Row
+        $row.find('input').val('');
+        $row.find('select').val('');
 
         // remove last blank td
         $row.find('td:last').remove();

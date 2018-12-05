@@ -3,6 +3,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Form : Claim - Draft
  */
+
+// Restructure Record
+if($record)
+{
+    $record->accident_date_time = $record->accident_date . ' ' . $record->accident_time;
+}
+$old_document = $record->file_intimation ?? NULL;
 ?>
 <?php echo form_open( $this->uri->uri_string(),
                         [
@@ -17,15 +24,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <div class="col-md-6">
             <div class="box box-solid box-bordered">
                 <div class="box-header with-border">
-                  <h4 class="box-title">Accident Details</h4>
+                  <h4 class="box-title">Incident Details</h4>
                 </div>
                 <div class="box-body form-horizontal">
                     <?php
                     /**
                      * Load Form Components
                      */
+                    $section_elements = $form_elements['incident_details'];
+                    if($old_document)
+                    {
+                        $downlad_link = anchor('claims/download/'.$old_document, '<i class="fa fa-download"></i> Download Existing Document', ['target' => '_blank']);
+                        $section_elements[count($section_elements) - 1]['_help_text'] = $downlad_link;
+                    }
                     $this->load->view('templates/_common/_form_components_horz', [
-                        'form_elements' => $form_elements['accident_details'],
+                        'form_elements' => $section_elements,
                         'form_record'   => $record
                     ]);
                     ?>
@@ -205,6 +218,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $row  = $('<tr></tr>');
 
         $row.html(html);
+
+        // Empty Row
+        $row.find('input').val('');
+        $row.find('select').val('');
+        $row.find('textarea').val('');
 
         // remove last blank td
         $row.find('td:last').remove();

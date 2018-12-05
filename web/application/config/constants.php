@@ -606,6 +606,18 @@ defined('IQB_CLAIM_FLAG_SRV_VOUCHER_VOUCHERED')  	OR define('IQB_CLAIM_FLAG_SRV_
 
 /*
 |--------------------------------------------------------------------------
+| CLAIM SETTLEMENT FROM CONSTANTS
+|--------------------------------------------------------------------------
+*/
+defined('IQB_CLAIM_CATEGORY_REGULAR')    OR define('IQB_CLAIM_CATEGORY_REGULAR',     'R');
+defined('IQB_CLAIM_CATEGORY_POOL')       OR define('IQB_CLAIM_CATEGORY_POOL',        'P');
+defined('IQB_CLAIM_CATEGORIES')  OR define('IQB_CLAIM_CATEGORIES', 	[
+	IQB_CLAIM_CATEGORY_REGULAR 	=> 'Regular Risks',
+	IQB_CLAIM_CATEGORY_POOL 	=> 'Pool Risks'
+]);
+
+/*
+|--------------------------------------------------------------------------
 | ACCOUNT DECIMAL PRECISION CONSTANT
 |--------------------------------------------------------------------------
 */
