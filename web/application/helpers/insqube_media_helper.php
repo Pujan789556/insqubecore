@@ -95,7 +95,7 @@ if ( ! function_exists('upload_insqube_media'))
             {
                 $message = 'No upload path found!';
             }
-            else if(!is_dir($config['upload_path']))
+            else if( is_dir($config['upload_path']) === FALSE)
             {
                 $message = 'Invalid upload path ('.$config['upload_path'].')!';
             }
