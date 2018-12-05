@@ -17,11 +17,13 @@ $cot_customer_address_record    = parse_address_record($record, 'addr_customer_c
 
 if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER)
 {
-    $insured_party_name =  htmlspecialchars($record->cot_customer_name_en) . '<br/>';
+    $customer_name_col = "cot_customer_name_{$lang}";
+    $insured_party_name =  htmlspecialchars($record->{$customer_name_col}) . '<br/>';
 }
 else
 {
-    $insured_party_name =  htmlspecialchars($record->customer_name_en) . '<br/>';
+    $customer_name_col = "customer_name_{$lang}";
+    $insured_party_name =  htmlspecialchars($record->{$customer_name_col}) . '<br/>';
 }
 
 /**
@@ -29,10 +31,12 @@ else
  */
 if($record->flag_on_credit === 'Y')
 {
-    $financer_info = ["<strong>{$financer_title}</strong>"];
+    $creditor_name          = "name_{$lang}";
+    $creditor_branch_name   = "branch_name_{$lang}";
+    $financer_info          = ["<strong>{$financer_title}</strong>"];
     foreach($creditors as $single)
     {
-        $financer_info[] = $single->name_en . ', ' . $single->branch_name_en;
+        $financer_info[] = $single->{$creditor_name} . ', ' . $single->{$creditor_branch_name};
     }
     echo implode('<br/>', $financer_info), '<br/><br/>';
 }
@@ -47,7 +51,7 @@ echo $insured_party_name;
 $address_record = $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER
                         ? $cot_customer_address_record
                         : $customer_address_record;
-$this->load->view('policies/print/_snippet_address', ['address_record' => $address_record]);
+$this->load->view('policies/print/_snippet_address', ['address_record' => $address_record, 'lang' => $lang]);
 
 echo  $record->care_of ? '<br/><strong>'.$care_of_title.'</strong><br>' . nl2br(htmlspecialchars($record->care_of)) . '<br/>' : '';
 ?>

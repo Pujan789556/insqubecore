@@ -16,7 +16,8 @@ if($address_record)
     $contact_data = [];
 
     // Address1
-    $addr1 = $address_record->alt_address1_text ? $address_record->alt_address1_text : $address_record->address1_en;
+    $a1_name_col = "address1_{$lang}";
+    $addr1 = $address_record->alt_address1_text ? $address_record->alt_address1_text : $address_record->{$a1_name_col};
     $addr2 = NULL;
     // Address 2
     if($address_record->address2){
@@ -27,8 +28,9 @@ if($address_record)
     $contact_data[] = implode(', ', array_filter([$addr1, $addr2]));
 
     // City, state, zip
+    $state_name_col = "state_name_{$lang}";
     $city   = $address_record->city ?? NULL;
-    $state  = $address_record->alt_state_text ? $address_record->alt_state_text : $address_record->state_name_en;
+    $state  = $address_record->alt_state_text ? $address_record->alt_state_text : $address_record->{$state_name_col};
     $zip_postal_code = $address_record->zip_postal_code ?? NULL;
     $ct_state_zip = array_filter([$city, $state, $zip_postal_code]);
 
