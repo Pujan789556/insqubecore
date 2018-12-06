@@ -372,9 +372,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     ?>
                         <tr>
                             <td><?php echo $i++; ?></td>
-                            <td><?php echo htmlspecialchars($single->title) ?></td>
                             <td><?php echo CLAIM__settlement_category_dropdown(FALSE)[$single->category] ?></td>
                             <td><?php echo CLAIM__settlement_subcategory_dropdown(FALSE)[$single->sub_category] ?></td>
+                            <td><?php echo htmlspecialchars($single->title) ?></td>
                             <td class="text-right"><?php echo number_format($single->claimed_amount, 2) ?></td>
                             <td class="text-right"><?php echo number_format($single->assessed_amount, 2) ?></td>
                             <td class="text-right"><?php echo number_format($single->recommended_amount, 2) ?></td>
