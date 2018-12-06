@@ -250,70 +250,6 @@ class Claim_model extends MY_Model
                     '_default'  => 0.00,
                     '_required' => true
                 ]
-            ],
-
-            /**
-             * Claim Assessment
-             */
-            'claim_assessment' => [
-                [
-                    'field' => 'assessment_brief',
-                    'label' => 'Assessment Brief',
-                    'rules' => 'trim|required|htmlspecialchars|max_length[30000]',
-                    '_type' => 'textarea',
-                    '_help_text' => "Brief details of Surveyor's/Doctor's/Investigator's/Department's report and assessment.",
-                    '_required' => true
-                ],
-                [
-                    'field' => 'other_info',
-                    'label' => 'Other Information',
-                    'rules' => 'trim|required|htmlspecialchars|max_length[5000]',
-                    '_type' => 'textarea',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'supporting_docs[]',
-                    'label' => 'Supporting Documents',
-                    'rules' => 'trim|required|alpha|max_length[2]',
-                    '_type' => 'checkbox-group',
-                    '_data' => CLAIM__supporting_docs_dropdown(FALSE),
-                    '_required' => true
-                ]
-            ],
-
-
-            /**
-             * Claim Settlement Amount Breakdown
-             */
-            'claim_settlement_breakdown' => [
-                [
-                    'field' => 'csb[title][]',
-                    'label' => 'Title',
-                    'rules' => 'trim|required|htmlspecialchars|max_length[150]',
-                    '_type' => 'text',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'csb[amt_claimed][]',
-                    'label' => 'Claimed Amount (Rs.)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_type' => 'text',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'csb[amt_assessed][]',
-                    'label' => 'Assessed Amount (Rs.)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_type' => 'text',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'csb[amt_recommended][]',
-                    'label' => 'Recommended Amount (Rs.)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_type' => 'text',
-                    '_required' => true
-                ]
             ]
 
        ];
@@ -446,8 +382,11 @@ class Claim_model extends MY_Model
      * @param bool $formatted
      * @return array
      */
-    public function assessment_v_rules($formatted = TRUE )
+    public function assessment_v_rules($portfolio_id, $formatted = TRUE )
     {
+        $this->load->model('portfolio_model');
+        $docs_dropdown = $this->portfolio_model->dropdown_claim_docs($portfolio_id);
+
         return [
             [
                 'field' => 'assessment_brief',
@@ -466,10 +405,10 @@ class Claim_model extends MY_Model
             [
                 'field' => 'supporting_docs[]',
                 'label' => 'Supporting Docs',
-                'rules' => 'trim|required|alpha|max_length[2]',
+                'rules' => 'trim|required|alpha|max_length[20]',
                 '_type' => 'checkbox-group',
                 '_checkbox_value'   => [],
-                '_data'             => CLAIM__supporting_docs_dropdown(FALSE),
+                '_data'             => $docs_dropdown,
                 '_list_inline'      => FALSE,
                 '_required'         => true,
 

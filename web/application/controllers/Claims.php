@@ -550,7 +550,7 @@ class Claims extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->_v_rules($action, TRUE);
+			$rules = $this->_v_rules($action, $record, TRUE);
 
 			$this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
@@ -627,7 +627,7 @@ class Claims extends MY_Controller
 							$update_data = [
 								'assessment_brief' 	=> $data['assessment_brief'],
 								'other_info' 		=> $data['other_info'],
-								'supporting_docs' 	=> implode(',', $data['supporting_docs'])
+								'supporting_docs' 	=> implode(',', $data['supporting_docs'] ?? [])
 	    					];
 	    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
 							break;
@@ -755,7 +755,7 @@ class Claims extends MY_Controller
 	}
 
 
-		private function _v_rules($action, $formatted=FALSE)
+		private function _v_rules($action, $record=NULL, $formatted=FALSE)
 		{
 			$rules = [];
 			switch($action)
@@ -778,7 +778,7 @@ class Claims extends MY_Controller
 					break;
 
 				case 'update_assessment':
-					$rules = $this->claim_model->assessment_v_rules($formatted);
+					$rules = $this->claim_model->assessment_v_rules($record->portfolio_id, $formatted);
 					break;
 
 				case 'update_settlement':
@@ -2041,7 +2041,7 @@ class Claims extends MY_Controller
 		$json_data = $this->_save('update_assessment', $record->policy_id, $record, $ref);
 
 		// Supporting Documents (On Edit mode)
-		$form_elements 	= $this->_v_rules('update_assessment');
+		$form_elements 	= $this->_v_rules('update_assessment', $record);
 		$supporting_docs = explode(',', $record->supporting_docs);
 		$form_elements[2]['_checkbox_value'] = $supporting_docs;
 

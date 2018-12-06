@@ -103,26 +103,12 @@ if ( ! function_exists('CLAIM__supporting_docs_dropdown'))
 	 *
 	 * @return	array
 	 */
-	function CLAIM__supporting_docs_dropdown( $flag_blank_select = true )
+	function CLAIM__supporting_docs_dropdown( $portfolio_id, $flag_blank_select = true )
 	{
-		$dropdown = [
-			'a' => "Surveyors / Doctors / Investigators / Department's Report",
-			'b' => 'Muchulka',
-			'c' => 'Police Report',
-			'd' => 'Post-mortem Report',
-			'e' => 'Death Certificate',
-			'f' => 'Succession Certificate',
-			'g' => 'Claim Form',
-			'h' => 'Bills / Invoice / Receipts',
-			'i' => 'X-ray / Photos / Reports',
-			'j' => 'Invoice',
-			'k' => 'B/L, C/N, R/R, AwB',
-			'l' => 'Claim Bill',
-			'm' => 'Regd. Book / Driving License',
-			'n' => 'Route Permit / Janch Pass / Chalan',
-			'o' => 'Others'
-		];
+		$CI =& get_instance();
 
+		$CI->load->model('portfolio_model');
+        $dropdown = $CI->portfolio_model->dropdown_claim_docs($portfolio_id);
 		if($flag_blank_select)
 		{
 			$dropdown = IQB_BLANK_SELECT + $dropdown;

@@ -568,9 +568,10 @@ class Portfolio_model extends MY_Model
     public function dropdown_claim_docs($id, $lang = 'en')
     {
         $dropdown   = [];
-        $risks      = $this->portfolio_claim_docs($id);
+        $claim_docs      = $this->portfolio_claim_docs($id);
         $name_col = $lang == 'en' ? 'name_en' : 'name_np';
-        foreach($risks as $row)
+
+        foreach($claim_docs as $row)
         {
             $dropdown[$row->code] = $row->{$name_col};
         }
@@ -605,9 +606,9 @@ class Portfolio_model extends MY_Model
     public function portfolio_claim_docs($id)
     {
         $list   = [];
-        $record         = $this->find($id);
-        return json_decode($record->claim_docs ?? '[]');
-        $list           = $claim_doc_obj->claim_docs ?? [];
+        $record             = $this->find($id);
+        $claim_docs_object  = json_decode($record->claim_docs ?? '[]');
+        $list               = $claim_docs_object->claim_docs ?? [];
         return $list;
     }
 

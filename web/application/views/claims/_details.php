@@ -312,12 +312,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <h4 class="box-title page-header no-margin-b">Supporting Documents</h4>
                     <?php
                     $supporting_docs = array_filter(explode(',', $record->supporting_docs));
-                    $doc_reference = CLAIM__supporting_docs_dropdown(FALSE);
+                    $doc_reference = CLAIM__supporting_docs_dropdown($record->portfolio_id, FALSE);
+
                     echo '<ol>';
-                    foreach($supporting_docs as $key)
-                    {
-                        echo '<li>', $doc_reference[$key], '</li>';
-                    }
+                        foreach($supporting_docs as $key)
+                        {
+                            echo '<li>', $doc_reference[$key], '</li>';
+                        }
                     echo '</ol>';
                     ?>
                 </div>
