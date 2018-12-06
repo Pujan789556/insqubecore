@@ -387,8 +387,7 @@ if ( ! function_exists('CLAIM__discharge_voucher_pdf'))
         $mpdf->WriteHTML($html);
 
         $filename = "claim-discharge-voucher-{$record->claim_code}.pdf";
-        // $mpdf->Output($filename,'D');      // make it to DOWNLOAD
-        $mpdf->Output();      // make it to DOWNLOAD
+        $mpdf->Output($filename, 'I'); // Render in Browser
 
 
 
