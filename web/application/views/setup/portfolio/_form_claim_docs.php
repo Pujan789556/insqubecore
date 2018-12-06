@@ -1,11 +1,11 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : Portfolio - Risk JSON
+ * Form : Portfolio - Claim Docs JSON
  */
 
-$risks_config   = json_decode($record->risks ?? '[]');
-$risks          = $risks_config->risks ?? [];
+$claim_docs_config   = json_decode($record->claim_docs ?? '[]');
+$claim_docs          = $claim_docs_config->claim_docs ?? [];
 ?>
 <style type="text/css">
     td .form-group{margin-bottom: 0;}
@@ -20,40 +20,15 @@ $risks          = $risks_config->risks ?? [];
 
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">
-            <h4 class="box-title">Portfolio Risk Table - <?php echo $record->name_en; ?></h4>
+            <h4 class="box-title">Portfolio Claim Document Setup Table - <?php echo $record->name_en; ?></h4>
         </div>
         <div class="box-body">
-            <div class="form-horizontal">
-                <?php
-                /**
-                 * Premium Computation Reference
-                 * The first element of the validation rules
-                 */
-                $default_premium_computation = array_shift($form_elements);
-                $object = (object)['default_premium_computation' => $risks_config->default_premium_computation ?? NULL ];
-                $this->load->view('templates/_common/_form_components_horz', [
-                    'form_elements' => [$default_premium_computation],
-                    'form_record'   => $object
-                ]);
-                ?>
-                <p class="help-block">
-                    <strong>!!! NOTE !!!</strong> <br>
-                    If Minimum Premium Computation is selected as <span class="text-red">"Cumulative (Per Risk Type)"</span>, <br>
-                    the default minimum premium is govenred by <span class="text-red">"Portfolio Settings" -> Default Basic Premium( Rs) , Default Pool Premium (Rs)</span>. <br>
-                    In that case, please set <span class="text-red">Default Minimum Premium (Rs.) = 0</span> for all risks.
-                </p>
-            </div>
-
-
-
             <table class="table table-bordered table-condensed">
                 <thead>
                     <tr>
-                        <th>Risk Code <?php echo field_compulsary_text( TRUE )?></th>
-                        <th>Risk Name (EN) <?php echo field_compulsary_text( TRUE )?></th>
-                        <th>Risk Name (ने) <?php echo field_compulsary_text( TRUE )?></th>
-                        <th>Risk Type <?php echo field_compulsary_text( TRUE )?></th>
-                        <th>Default Minimum Premium (Rs.) <?php echo field_compulsary_text( TRUE )?></th>
+                        <th>Doc Code <?php echo field_compulsary_text( TRUE )?></th>
+                        <th>Doc Name (EN) <?php echo field_compulsary_text( TRUE )?></th>
+                        <th>Doc Name (ने) <?php echo field_compulsary_text( TRUE )?></th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -61,10 +36,10 @@ $risks          = $risks_config->risks ?? [];
                 <tbody>
                     <?php
                     $i = 0;
-                    if($risks):
-                        foreach ($risks as $single):
+                    if($claim_docs):
+                        foreach ($claim_docs as $single):
                             ?>
-                        <tr <?php echo $i == 0 ? 'id="__risk_heading_row"' : '' ?>>
+                        <tr <?php echo $i == 0 ? 'id="__claim_doc_heading_row"' : '' ?>>
                             <?php foreach($form_elements as $element):?>
                                 <td class="<?php echo $element['_type'] == 'hidden' ? 'hide' : '' ?>">
                                     <?php
@@ -91,7 +66,7 @@ $risks          = $risks_config->risks ?? [];
                         $i++;
                         endforeach;
                     else:?>
-                        <tr id="__risk_heading_row">
+                        <tr id="__claim_doc_heading_row">
                             <?php foreach($form_elements as $element):?>
                                 <td class="<?php echo $element['_type'] == 'hidden' ? 'hide' : '' ?>">
                                     <?php
@@ -112,7 +87,7 @@ $risks          = $risks_config->risks ?? [];
             </table>
         </div>
         <div class="box-footer bg-info">
-            <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__risk_heading_row', this)">Add More</a>
+            <a href="#" class="btn bg-teal" onclick="__duplicate_tr('#__claim_doc_heading_row', this)">Add More</a>
         </div>
     </div>
     <button type="submit" class="hide">Submit</button>

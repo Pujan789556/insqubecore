@@ -22,7 +22,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		}
 		?>
 	</td>
-	<td class="ins-action">
+	<td class="ins-action text-right">
 		<a href="#"
 			title="Edit portfolio"
 			data-toggle="tooltip"
@@ -56,6 +56,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				data-form=".form-iqb-general">
 				<i class="fa fa-flag"></i>
 				<span class="hidden-xs">Risks</span>
+			</a>
+
+			<a href="#"
+				title="Edit Portfolio Specific Claim Documents"
+				data-toggle="tooltip"
+				data-box-size="large"
+				class="trg-dialog-edit action"
+				data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio Specific Claim Documents - <?php echo $record->name_en?>'
+				data-url="<?php echo site_url('portfolio/claim_docs/' . $record->id);?>"
+				data-form=".form-iqb-general">
+				<i class="fa fa-files-o"></i>
+				<span class="hidden-xs">Claim Docs</span>
 			</a>
 
 			<a href="#"

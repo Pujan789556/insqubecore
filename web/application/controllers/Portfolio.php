@@ -189,6 +189,43 @@ class Portfolio extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
+	 * Edit a Portfolio Specific Claim Docs - JSON
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function claim_docs($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->portfolio_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('claim_docs', $record);
+
+		// Add already checked values
+		$rules = $this->portfolio_model->validation_rules['claim_docs'];
+
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('setup/portfolio/_form_claim_docs',
+			[
+				'form_elements' => $rules,
+				'record' 		=> $record
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Edit a Portfolio Specific Beema Samiti Report Setup - Heading Types
 	 *
 	 *
@@ -235,7 +272,7 @@ class Portfolio extends MY_Controller
 	private function _save($action, $record = NULL)
 	{
 		// Valid action?
-		if( !in_array($action, array('edit', 'accounts', 'risks', 'bsrs_headings')))
+		if( !in_array($action, array('edit', 'accounts', 'risks', 'claim_docs', 'bsrs_headings')))
 		{
 			return $this->template->json([
 				'status' => 'error',
@@ -301,10 +338,18 @@ class Portfolio extends MY_Controller
 				else if ($action === 'risks')
 				{
 					// Format JSON Data
-					$risk_data['risks'] = $this->_format_risk_json($data);
+					$risk_data['risks'] = $this->_format_risks_json($data);
 
 					// // Now Update Data
 					$done = $this->portfolio_model->update($record->id, $risk_data, TRUE);
+				}
+				else if ($action === 'claim_docs')
+				{
+					// Format JSON Data
+					$claim_docs_data['claim_docs'] = $this->_format_claim_docs_json($data);
+
+					// // Now Update Data
+					$done = $this->portfolio_model->update($record->id, $claim_docs_data, TRUE);
 				}
 				else if ($action === 'bsrs_headings')
 				{
@@ -402,6 +447,7 @@ class Portfolio extends MY_Controller
 
 				case 'accounts':
 				case 'risks':
+				case 'claim_docs':
 				case 'bsrs_headings':
 					$rules = $this->portfolio_model->validation_rules[$action];
 					break;
@@ -421,7 +467,7 @@ class Portfolio extends MY_Controller
 		 * @param array $post_data
 		 * @return JSON
 		 */
-		private function _format_risk_json ($post_data)
+		private function _format_risks_json ($post_data)
 		{
 			$risk_keys = ['code', 'name_en', 'name_np', 'type', 'default_min_premium'];
 			$risks = $post_data['risks'];
@@ -445,6 +491,33 @@ class Portfolio extends MY_Controller
 		// --------------------------------------------------------------------
 
 		/**
+		 * Format Claim Document JSON data from "Form Submission"
+		 *
+		 * @param array $post_data
+		 * @return JSON
+		 */
+		private function _format_claim_docs_json ($post_data)
+		{
+			$json_keys = ['code', 'name_en', 'name_np'];
+			$claim_docs = $post_data['claim_docs'];
+
+			$json_data['claim_docs'] = [];
+			for($i = 0; $i < count($claim_docs['code']); $i++ )
+			{
+				$single_object = [];
+				foreach($json_keys as $key)
+				{
+					$single_object[$key] = $claim_docs[$key][$i] ?? NULL;
+				}
+				$json_data['claim_docs'][] = $single_object;
+			}
+
+			return json_encode($json_data);
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
 		 * Callback - Valid Risk Code
 		 * Must Be Unique
 		 *
@@ -460,6 +533,29 @@ class Portfolio extends MY_Controller
 	        if( $total !== count($unique) )
 	        {
 	            $this->form_validation->set_message('_cb_risks_check_duplicate', 'The %s must be unique alphabetical characters.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Callback - Valid Claim Doc Code
+		 * Must Be Unique
+		 *
+		 * @param type $code
+		 * @return type
+		 */
+		public function _cb_claim_docs_check_duplicate($code)
+		{
+			$codes 	= $this->input->post()['claim_docs']['code'];
+			$total 	= count($codes);
+			$unique = array_unique(array_filter($codes));
+
+	        if( $total !== count($unique) )
+	        {
+	            $this->form_validation->set_message('_cb_claim_docs_check_duplicate', 'The %s must be unique alphabetical characters.');
 	            return FALSE;
 	        }
 	        return TRUE;

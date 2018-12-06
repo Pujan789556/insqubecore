@@ -19,7 +19,7 @@ class Portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'schedule_lang', 'risks', 'bs_ri_code', 'bsrs_heading_type_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'active', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'parent_id', 'code', 'name_en', 'name_np', 'file_toc', 'schedule_lang', 'risks', 'claim_docs', 'bs_ri_code', 'bsrs_heading_type_ids', 'account_id_dpi', 'account_id_tpc', 'account_id_fpc', 'account_id_rtc', 'account_id_rfc', 'account_id_fpi', 'account_id_fce', 'account_id_pw', 'account_id_pe', 'account_id_ce', 'account_id_cr', 'active', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -162,7 +162,7 @@ class Portfolio_model extends MY_Model
                 [
                     'field' => 'risks[name_np][]',
                     '_key' => 'name_np',
-                    'label' => 'Risk Name (NP)',
+                    'label' => 'Risk Name (ने)',
                     'rules' => 'trim|required|max_length[100]',
                     '_type'     => 'text',
                     '_show_label' => false,
@@ -183,6 +183,41 @@ class Portfolio_model extends MY_Model
                     '_key' => 'default_min_premium',
                     'label' => 'Default Minimum Premium',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ]
+            ],
+
+            /**
+             * Claim Documents Rules - JSON
+             *
+             * { claim_docs[{code: xxx, name_en: xxx, name_np:yyy}, ...] }
+             */
+            'claim_docs' => [
+                [
+                    'field' => 'claim_docs[code][]',
+                    '_key' => 'code',
+                    'label' => 'Claim Doc Code',
+                    'rules' => 'trim|required|alpha|strtoupper|max_length[20]|callback__cb_claim_docs_check_duplicate',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'claim_docs[name_en][]',
+                    '_key' => 'name_en',
+                    'label' => 'Claim Doc Name (EN)',
+                    'rules' => 'trim|required|max_length[200]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'claim_docs[name_np][]',
+                    '_key' => 'name_np',
+                    'label' => 'Claim Doc Name (ने)',
+                    'rules' => 'trim|required|max_length[200]',
                     '_type'     => 'text',
                     '_show_label' => false,
                     '_required' => true
@@ -525,6 +560,26 @@ class Portfolio_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get Claim Document Dropdown for this portfolio
+     *
+     * @param integer $id
+     * @return array
+     */
+    public function dropdown_claim_docs($id, $lang = 'en')
+    {
+        $dropdown   = [];
+        $risks      = $this->portfolio_claim_docs($id);
+        $name_col = $lang == 'en' ? 'name_en' : 'name_np';
+        foreach($risks as $row)
+        {
+            $dropdown[$row->code] = $row->{$name_col};
+        }
+        return $dropdown;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Get all risks records for this portfolio
      *
      * @param integer $id
@@ -536,6 +591,23 @@ class Portfolio_model extends MY_Model
         $record         = $this->find($id);
         $risk_object    = json_decode($record->risks ?? '[]');
         $list           = $risk_object->risks ?? [];
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get all claim_docs records for this portfolio
+     *
+     * @param integer $id
+     * @return array
+     */
+    public function portfolio_claim_docs($id)
+    {
+        $list   = [];
+        $record         = $this->find($id);
+        return json_decode($record->claim_docs ?? '[]');
+        $list           = $claim_doc_obj->claim_docs ?? [];
         return $list;
     }
 

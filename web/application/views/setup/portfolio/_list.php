@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<th>Code</th>
 		<th>Parent Portfolio</th>
 		<th title="Terms & Condition Document">TOC</th>
-		<th width="35%">Actions</th>
+		<th width="50%" class="text-right">Actions</th>
 	</tr>
 	<?php
 	/**
