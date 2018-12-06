@@ -89,7 +89,7 @@ if ( ! function_exists('upload_insqube_media'))
         $config = array_merge($default_config, $config);
 
         // We must have "upload_path" Set
-        if( empty($form_field) OR !isset($config['upload_path']) OR !is_dir($config['upload_path']))
+        if( empty($form_field) OR !isset($config['upload_path']) OR is_dir($config['upload_path']) === FALSE )
         {
             if(!isset($config['upload_path']))
             {
