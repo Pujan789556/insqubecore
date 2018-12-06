@@ -2285,6 +2285,62 @@ class Claims extends MY_Controller
 						->render($this->data);
     }
 
+
+    public function discharge_voucher($id)
+    {
+    	/**
+		 * Check Permissions
+		 */
+		$this->dx_auth->is_authorized('claims', 'explore.claim', TRUE);
+
+		/**
+		 * Main Record
+		 */
+    	$id = (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Check if Belongs to me?
+		 */
+		belongs_to_me( $record->branch_id );
+
+		/**
+		 * Last Active Endorsement No
+		 */
+		$this->load->model('endorsement_model');
+		$endorsement = $this->endorsement_model->get_latest_active_by_policy($record->policy_id);
+
+
+		$data = [
+			'record' 		=> $record,
+			'endorsement' 	=> $endorsement
+		];
+
+		// echo '<pre>'; print_r($record); print_r($endorsement);exit;
+
+		/**
+		 * Render Print View
+		 */
+		try {
+
+			CLAIM__discharge_voucher_pdf($data);
+		}
+		catch (Exception $e) {
+
+			return $this->template->json([
+				'status' => 'error',
+				'message' => $e->getMessage()
+			], 404);
+		}
+
+
+    }
+
+
 }
 
 

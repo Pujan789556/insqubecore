@@ -298,6 +298,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <i class="fa fa-dollar"></i> Surveyor Voucher</a>
                 </li>
         <?php endif;?>
+        <li class="divider"></li>
+        <li>
+            <a href="<?php echo site_url('claims/discharge_voucher/' . $record->id );?>" target="_blank">
+                <i class="fa fa-file-pdf-o"></i> Discharge Voucher
+            </a>
+        </li>
+
     </ul>
 </div>
 

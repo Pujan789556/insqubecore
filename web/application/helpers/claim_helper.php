@@ -326,4 +326,88 @@ if ( ! function_exists('CLAIM__flag_surveyor_voucher_dropdown'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('CLAIM__discharge_voucher_pdf'))
+{
+    /**
+     * Print Policy Endorsement PDF
+     *
+     * @param array $data
+     * @return  void
+     */
+    function CLAIM__discharge_voucher_pdf( $data )
+    {
+    	$CI =& get_instance();
+
+    	// Claim Record??
+    	if( !isset($data['record']) )
+		{
+			throw new Exception("Exception [Helper: claim_helper][Method: CLAIM__discharge_voucher_pdf()]: No claim information Found.");
+		}
+
+		// Endorsement Record??
+		if( !isset($data['endorsement']) )
+		{
+			throw new Exception("Exception [Helper: claim_helper][Method: CLAIM__discharge_voucher_pdf()]: No endorsement information Found.");
+		}
+
+		$record = $data['record'];
+
+		$CI->load->library('pdf');
+        $mpdf = $CI->pdf->load();
+        // $mpdf->SetMargins(10, 20, 10, 20);
+        // $mpdf->SetMargins(10, 5, 10, 5);
+        // $mpdf->margin_header = 5;
+        // $mpdf->margin_footer = 5;
+        $mpdf->setAutoTopMargin = true;
+        $mpdf->setAutoBottomMargin = true;
+
+        // Image Error
+        $mpdf->showImageErrors = true;
+
+        $mpdf->SetProtection(array('print'));
+        $mpdf->SetTitle("Policy Claim - {$record->claim_code}");
+        $mpdf->SetAuthor($CI->settings->orgn_name_en);
+
+        /**
+         * Only Active Endorsement Does not have watermark!!!
+         */
+        if( in_array($record->status, [IQB_CLAIM_STATUS_DRAFT, IQB_CLAIM_STATUS_VERIFIED]) )
+        {
+        	$mpdf->SetWatermarkText( 'DRAFT - ' . strtoupper(CLAIM__status_dropdown(FALSE)[$record->status] ) );
+
+        	$mpdf->showWatermarkText = true;
+	        $mpdf->watermark_font = 'DejaVuSansCondensed';
+	        $mpdf->watermarkTextAlpha = 0.1;
+        }
+
+        $mpdf->SetDisplayMode('fullpage');
+
+        $schedule_view 	= 'claims/print/discharge_voucher';
+        $html 			= $CI->load->view( $schedule_view, $data, TRUE);
+        $mpdf->WriteHTML($html);
+
+        $filename = "claim-discharge-voucher-{$record->claim_code}.pdf";
+        // $mpdf->Output($filename,'D');      // make it to DOWNLOAD
+        $mpdf->Output();      // make it to DOWNLOAD
+
+
+
+        // if( $action === 'save' )
+        // {
+        // 	$save_full_path = rtrim(INSQUBE_MEDIA_PATH, '/') . '/policies/' . $filename;
+        // 	$mpdf->Output($save_full_path,'F');
+        // }
+        // else if($action === 'download')
+        // {
+		// 		$mpdf->Output($filename,'D');      // make it to DOWNLOAD
+        // }
+        // else
+        // {
+        // 	$mpdf->Output();
+        // }
+    }
+}
+
+// ------------------------------------------------------------------------
+
 

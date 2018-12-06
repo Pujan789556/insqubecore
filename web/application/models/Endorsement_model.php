@@ -1476,6 +1476,28 @@ class Endorsement_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
+     * Get Last active Endorsement Record for Supplied Policy
+     *
+     * @param int $policy_id
+     * @return object
+     */
+    public function get_latest_active_by_policy($policy_id)
+    {
+        $where = [
+            'ENDRSMNT.policy_id'    => $policy_id,
+            'ENDRSMNT.status'       => IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
+        ];
+
+        $this->_single_select();
+
+        return $this->db->where($where)
+                        ->order_by('ENDRSMNT.id', 'desc') // latest active
+                        ->get()->row();
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
      * Get Endorsement Record
      *
      * @param int $id
