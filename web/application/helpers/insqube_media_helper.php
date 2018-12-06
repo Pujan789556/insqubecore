@@ -89,15 +89,11 @@ if ( ! function_exists('upload_insqube_media'))
         $config = array_merge($default_config, $config);
 
         // We must have "upload_path" Set
-        if( empty($form_field) OR !isset($config['upload_path']) OR is_dir($config['upload_path']) === FALSE )
+        if( empty($form_field) OR !isset($config['upload_path']) )
         {
             if(!isset($config['upload_path']))
             {
-                $message = 'No upload path found!';
-            }
-            elseif( is_dir($config['upload_path']) === FALSE)
-            {
-                $message = 'Invalid upload path!';
+                $message = '"upload_path" Options is missing. Please specify "upload_path" option!';
             }
             return ['status' => $status, 'message' => $message, 'files' => []];
         }
