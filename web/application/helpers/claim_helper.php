@@ -371,7 +371,7 @@ if ( ! function_exists('CLAIM__discharge_voucher_pdf'))
         /**
          * Only Active Endorsement Does not have watermark!!!
          */
-        if( in_array($record->status, [IQB_CLAIM_STATUS_DRAFT, IQB_CLAIM_STATUS_VERIFIED]) )
+        if( $record->status == IQB_CLAIM_STATUS_DRAFT )
         {
         	$mpdf->SetWatermarkText( 'DRAFT - ' . strtoupper(CLAIM__status_dropdown(FALSE)[$record->status] ) );
 
