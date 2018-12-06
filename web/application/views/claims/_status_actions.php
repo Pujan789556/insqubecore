@@ -260,6 +260,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 
         <?php if($record->status === IQB_CLAIM_STATUS_APPROVED && $this->dx_auth->is_authorized('claims', 'status.to.settled')): ?>
+            <li class="divider"></li>
             <li>
                     <a href="#"
                         title="Settle this Claim"
@@ -298,12 +299,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <i class="fa fa-dollar"></i> Surveyor Voucher</a>
                 </li>
         <?php endif;?>
-        <li class="divider"></li>
-        <li>
-            <a href="<?php echo site_url('claims/discharge_voucher/' . $record->id );?>" target="_blank">
-                <i class="fa fa-file-pdf-o"></i> Discharge Voucher
-            </a>
-        </li>
+
+        <?php if($record->status != IQB_CLAIM_STATUS_DRAFT): ?>
+            <?php if($this->dx_auth->is_authorized('claims', 'generate.claim.discharge.voucher')): ?>
+                <li class="divider"></li>
+                <li>
+                    <a href="<?php echo site_url('claims/note/' . $record->id );?>" target="_blank">
+                        <i class="fa fa-file-pdf-o"></i> Claim Note
+                    </a>
+                </li>
+            <?php endif;?>
+            <?php if($this->dx_auth->is_authorized('claims', 'generate.claim.note')): ?>
+                <li class="divider"></li>
+                <li>
+                    <a href="<?php echo site_url('claims/discharge_voucher/' . $record->id );?>" target="_blank">
+                        <i class="fa fa-file-pdf-o"></i> Discharge Voucher
+                    </a>
+                </li>
+            <?php endif;?>
+        <?php endif;?>
 
     </ul>
 </div>

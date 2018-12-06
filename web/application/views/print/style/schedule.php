@@ -29,7 +29,7 @@
     p { margin: 0pt; }
 
     td { vertical-align: top; padding: 3px; border:0.1mm solid #000000;}
-    td.bold{font-weight: bold;}
+    .bold, td.bold, .bold td{font-weight: bold;}
     td.no-padding{padding: 0}
     .table td.border-top{border-top:0.1mm solid #000000;}
     .table td.bold{font-weight: bold}
@@ -40,7 +40,9 @@
         font-variant: small-caps;
     }
     .no-border, td.no-border, table.no-border td, table.no-border th{border:none !important;}
-    .border-b, td.border-b{border-bottom: 0.1mm solid #000000 !important;}
+    .border-b,
+    td.border-b, table.no-border td.border-b,
+    th.border-b, table.no-border th.border-b{border-bottom: 0.1mm solid #000000 !important;}
     .border-t, td.border-t{border-top: 0.1mm solid #000000 !important;}
     .underline{text-decoration: underline;}
 

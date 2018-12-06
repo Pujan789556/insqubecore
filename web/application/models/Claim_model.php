@@ -411,7 +411,14 @@ class Claim_model extends MY_Model
                 '_data'             => $docs_dropdown,
                 '_list_inline'      => FALSE,
                 '_required'         => true,
-
+            ],
+            [
+                'field' => 'status_remarks',
+                'label' => 'Approval Remarks',
+                'rules' => 'trim|required|htmlspecialchars|max_length[5000]',
+                '_type' => 'textarea',
+                '_default' => 'The mentioned loss has occurred during the period of insurance and covered under the insurance policy. The loss has been found to be reasonable and in order. Hence, it is recommended for settlement.',
+                '_required' => true
             ]
         ];
     }

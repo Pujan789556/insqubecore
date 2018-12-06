@@ -389,6 +389,12 @@ $config['DX_permissions'] = [
 			'status.to.closed',
 			'status.to.withdrawn',
 
+			// claim note
+			'generate.claim.note',
+
+			// discharge voucher
+			'generate.claim.discharge.voucher',
+
 			// Voucher on closed/withdrawn claim (for surveyor settlement)
 			'generate.claim.voucher'
 		],

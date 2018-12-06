@@ -384,7 +384,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="6">Claim Settlement Amount (Rs.)</th>
+                        <th colspan="6">Amount Payable to Insured (Rs.)</th>
                         <th class="text-right"><?php echo number_format($record->settlement_claim_amount, 2) ?></th>
                     </tr>
                     <tr>

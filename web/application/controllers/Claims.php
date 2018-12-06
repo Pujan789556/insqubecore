@@ -627,7 +627,8 @@ class Claims extends MY_Controller
 							$update_data = [
 								'assessment_brief' 	=> $data['assessment_brief'],
 								'other_info' 		=> $data['other_info'],
-								'supporting_docs' 	=> implode(',', $data['supporting_docs'] ?? [])
+								'supporting_docs' 	=> implode(',', $data['supporting_docs'] ?? []),
+								'status_remarks' 	=> $data['status_remarks']
 	    					];
 	    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
 							break;
@@ -2285,13 +2286,20 @@ class Claims extends MY_Controller
 						->render($this->data);
     }
 
+	// --------------------------------------------------------------------
 
+    /**
+     * Generate Discharge Voucher
+     *
+     * @param int $id
+     * @return void
+     */
     public function discharge_voucher($id)
     {
     	/**
 		 * Check Permissions
 		 */
-		$this->dx_auth->is_authorized('claims', 'explore.claim', TRUE);
+		$this->dx_auth->is_authorized('claims', 'generate.claim.discharge.voucher', TRUE);
 
 		/**
 		 * Main Record
@@ -2304,9 +2312,20 @@ class Claims extends MY_Controller
 		}
 
 		/**
+		 * Allowed Status?
+		 */
+		if($record->status === IQB_CLAIM_STATUS_DRAFT )
+		{
+			$this->dx_auth->deny_access('deny', 'You cannot generate discharge voucher at this stage.');
+			exit(1);
+		}
+
+
+		/**
 		 * Check if Belongs to me?
 		 */
 		belongs_to_me( $record->branch_id );
+
 
 		/**
 		 * Last Active Endorsement No
@@ -2319,8 +2338,6 @@ class Claims extends MY_Controller
 			'record' 		=> $record,
 			'endorsement' 	=> $endorsement
 		];
-
-		// echo '<pre>'; print_r($record); print_r($endorsement);exit;
 
 		/**
 		 * Render Print View
@@ -2336,11 +2353,85 @@ class Claims extends MY_Controller
 				'message' => $e->getMessage()
 			], 404);
 		}
-
-
     }
 
+    // --------------------------------------------------------------------
 
+    /**
+     * Generate Claim Note
+     *
+     * @param int $id
+     * @return void
+     */
+    public function note($id)
+    {
+    	/**
+		 * Check Permissions
+		 */
+		$this->dx_auth->is_authorized('claims', 'generate.claim.note', TRUE);
+
+		/**
+		 * Main Record
+		 */
+    	$id = (int)$id;
+		$record = $this->claim_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+
+		/**
+		 * Allowed Status?
+		 */
+		if($record->status === IQB_CLAIM_STATUS_DRAFT )
+		{
+			$this->dx_auth->deny_access('deny', 'You cannot generate discharge voucher at this stage.');
+			exit(1);
+		}
+
+
+		/**
+		 * Check if Belongs to me?
+		 */
+		belongs_to_me( $record->branch_id );
+
+		/**
+		 * Last Active Endorsement No
+		 */
+		$this->load->model('policy_model');
+		$policy_record = $this->policy_model->get($record->policy_id);
+
+		/**
+		 * Creditors
+		 */
+		$this->load->model('rel_policy_creditor_model');
+		$creditors = $this->rel_policy_creditor_model->rows(['REL.policy_id' => $policy_record->id]);
+
+
+		$data = [
+			'record' 			=> $record,
+			'policy_record' 	=> $policy_record,
+			'creditors' 		=> $creditors,
+			'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
+			'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
+		];
+
+		/**
+		 * Render Print View
+		 */
+		try {
+
+			CLAIM__note_pdf($data);
+		}
+		catch (Exception $e) {
+
+			return $this->template->json([
+				'status' => 'error',
+				'message' => $e->getMessage()
+			], 404);
+		}
+    }
 }
 
 

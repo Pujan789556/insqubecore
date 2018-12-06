@@ -928,8 +928,8 @@ class Ri_setup_pool_model extends MY_Model
 
         return $this->db->select(
                         'TD.treaty_id, TD.broker_id, TD.company_id, TD.distribution_percent, TD.flag_leader, '.
-                        'C.name as reinsurer_name, ' .
-                        'B.name as broker_name'
+                        'C.name_en as reinsurer_name, ' .
+                        'B.name_en as broker_name'
                     )
                         ->from(self::$table_treaty_distribution . ' TD')
                         ->join('master_companies C', 'C.id = TD.company_id')
