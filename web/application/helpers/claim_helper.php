@@ -272,6 +272,7 @@ if ( ! function_exists('CLAIM__settlement_category_dropdown'))
 		$dropdown = [
 			'OD' => 'Own Damage',
 			'TP' => 'Third Party',
+			'ED' => 'Excess Deductible',
 			'NA' => 'Not Applicable'
 		];
 
@@ -300,7 +301,8 @@ if ( ! function_exists('CLAIM__settlement_subcategory_dropdown'))
 			'PRD' => 'Partially Disabled',
 			'FLD' => 'Fully Disabled',
 			'ILN' => 'Illness',
-			'PRP' => 'Property Damage'
+			'PRP' => 'Property Damage',
+			'NA'  => 'Not Applicable'
 		];
 
 		if($flag_blank_select)

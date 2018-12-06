@@ -289,13 +289,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $this->dx_auth->is_authorized('claims', 'generate.claim.voucher')): ?>
             <li>
                     <a href="#"
-                        title="Generate Claim Voucher"
+                        title="Generate Surveyor Voucher"
                         data-toggle="tooltip"
                         data-confirm="true"
                         class="text-green trg-dialog-action"
                         data-message="Are you sure you want to do this?<br/>This will generate the claim voucher for surveyor settlement. The action can not be <strong>UNDONE</strong>."
                         data-url="<?php echo site_url('claims/voucher_surveyor/' . $record->id . '/' . $ref);?>">
-                        <i class="fa fa-dollar"></i> Voucher</a>
+                        <i class="fa fa-dollar"></i> Surveyor Voucher</a>
                 </li>
         <?php endif;?>
     </ul>

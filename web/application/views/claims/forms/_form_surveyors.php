@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <style type="text/css">
     .form-inline input, .form-inline select{width: 100% !important}
-    .form-inline .form_group{display: block; margin:0;}
+    .form-inline .form-group{display: block; margin:0;}
 </style>
 <?php echo form_open( $this->uri->uri_string(),
                         [

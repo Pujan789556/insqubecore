@@ -115,7 +115,6 @@ class Claim_surveyor_model extends MY_Model
     public function assign_to_claim( $claim_id, $data )
     {
         $this->load->model('claim_model');
-        $this->load->model('ac_duties_and_tax_model');
         $this->load->model('surveyor_model');
 
         /**
@@ -132,26 +131,26 @@ class Claim_surveyor_model extends MY_Model
         }
 
         $total_surveyor_fee_amount = 0.00;
-        for($i=0; $i < count($data['surveyor_fee']); $i++)
-        {
-            $surveyor_fee       = floatval($data['surveyor_fee'][$i] ?? 0.00);
-            $other_fee          = floatval($data['other_fee'][$i] ?? 0.00);
-            $total_surveyor_fee_amount = ac_bcsum([$total_surveyor_fee_amount, $surveyor_fee, $other_fee], IQB_AC_DECIMAL_PRECISION);
-        }
+        // for($i=0; $i < count($data['surveyor_fee']); $i++)
+        // {
+        //     $surveyor_fee       = floatval($data['surveyor_fee'][$i] ?? 0.00);
+        //     $other_fee          = floatval($data['other_fee'][$i] ?? 0.00);
+        //     $total_surveyor_fee_amount = ac_bcsum([$total_surveyor_fee_amount, $surveyor_fee, $other_fee], IQB_AC_DECIMAL_PRECISION);
+        // }
 
         /**
          * Prepare Data
          */
         $old_surveyors = $this->get_many_by_claim($claim_id);
         $old_sids = [];
-        foreach($old_surveyors as $single)
+        foreach($old_surveyors as $surveyor)
         {
-            $sid = (int)$single->surveyor_id;
+            $sid = (int)$surveyor->surveyor_id;
             $old_sids[] = $sid;
 
             if( !in_array($sid, $post_sids) )
             {
-                $to_del_ids[] = (int)$single->id;
+                $to_del_ids[] = (int)$surveyor->id;
             }
             else
             {
@@ -164,35 +163,29 @@ class Claim_surveyor_model extends MY_Model
                 $surveyor_fee       = floatval($data['surveyor_fee'][$index] ?? 0.00);
                 $other_fee          = floatval($data['other_fee'][$index] ?? 0.00);
 
+                // VAT & TDS
+                $taxes = $this->_compute_tax($surveyor, $surveyor_fee);
 
-                $to_edit_data["{$single->id}"] = [
+                // Single Update Data
+                $single_data = [
                     'assigned_date' => $data['assigned_date'][$index],
                     'survey_type'   => $data['survey_type'][$index],
                     'surveyor_fee'  => $surveyor_fee,
                     'other_fee'     => $other_fee,
+                    'vat_amount'    => $taxes['vat_amount'],
+                    'tds_amount'    => $taxes['tds_amount'],
                 ];
 
-                /**
-                 * VAT & TDS
-                 * ----------
-                 *
-                 * NOTE:
-                 *      VAT = Applies on both surveyor_fee  & other_fee
-                 *      TDS = Applies only on surveyor_fee
-                 */
-                $vat_amount = NULL;
-                $tds_amount = NULL;
-                if($single->flag_vat_registered == IQB_FLAG_ON)
-                {
-                    $vat_taxable_amount = bcadd($surveyor_fee, $other_fee, IQB_AC_DECIMAL_PRECISION);
-                    $vat_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $vat_taxable_amount, IQB_AC_DECIMAL_PRECISION);
-                    $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVR, $surveyor_fee, IQB_AC_DECIMAL_PRECISION);
-                }
-                else{
-                    $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVNR, $surveyor_fee, IQB_AC_DECIMAL_PRECISION);
-                }
-                $to_edit_data["{$single->id}"]['vat_amount'] = $vat_amount;
-                $to_edit_data["{$single->id}"]['tds_amount'] = $tds_amount;
+                // Add to update array
+                $to_edit_data["{$surveyor->id}"] = $single_data;
+
+
+                // Update Grand Total Surveyor Fee
+                $total_surveyor_fee_amount = bcadd(
+                    $total_surveyor_fee_amount,
+                    $this->_compute_fee_total((object)$single_data),
+                    IQB_AC_DECIMAL_PRECISION
+                );
             }
         }
 
@@ -209,31 +202,31 @@ class Claim_surveyor_model extends MY_Model
             $other_fee          = floatval($data['other_fee'][$index] ?? 0.00);
 
 
-            // TDS and VAT
-            $vat_amount = NULL;
-            $tds_amount = NULL;
+            // VAT & TDS
+            $taxes = $this->_compute_tax($surveyor, $surveyor_fee);
 
-
-            if($surveyor->flag_vat_registered == IQB_FLAG_ON)
-            {
-                $vat_taxable_amount = bcadd($surveyor_fee, $other_fee, IQB_AC_DECIMAL_PRECISION);
-                $vat_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $vat_taxable_amount, IQB_AC_DECIMAL_PRECISION);
-                $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVR, $surveyor_fee, IQB_AC_DECIMAL_PRECISION);
-            }
-            else{
-                $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVNR, $surveyor_fee, IQB_AC_DECIMAL_PRECISION);
-            }
-
-            $batch_data[] = [
+            // Single Insert Data
+            $single_data = [
                 'claim_id'      => $claim_id,
                 'surveyor_id'   => $sid,
                 'assigned_date' => $data['assigned_date'][$index],
                 'survey_type'   => $data['survey_type'][$index],
                 'surveyor_fee'  => $surveyor_fee,
                 'other_fee'     => $other_fee,
-                'vat_amount'    => $vat_amount,
-                'tds_amount'    => $tds_amount,
+                'vat_amount'    => $taxes['vat_amount'],
+                'tds_amount'    => $taxes['tds_amount']
             ];
+
+            // Add to Batch Insert
+            $batch_data[] = $single_data;
+
+
+            // Update Grand Total Surveyor Fee
+            $total_surveyor_fee_amount = bcadd(
+                $total_surveyor_fee_amount,
+                $this->_compute_fee_total((object)$single_data),
+                IQB_AC_DECIMAL_PRECISION
+            );
         }
 
 
@@ -301,37 +294,67 @@ class Claim_surveyor_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    private function _build_update_data($old_surveyors, $data)
-    {
+        /**
+         * Compute Surveyor Taxes - VAT and TDS
+         *
+         * @param int   $surveyor_id
+         * @param decimal $surveyor_fee Surveyor Professional Fee
+         */
+        private function _compute_tax($surveyor, $surveyor_fee)
+        {
+            $this->load->model('surveyor_model');
+            $this->load->model('ac_duties_and_tax_model');
+
+            // Get the Surveyor Record
+            $surveyor = is_numeric($surveyor) ? $this->surveyor_model->find((int)$surveyor) : $surveyor;
+
+
+            /**
+             * VAT & TDS
+             * ----------
+             *
+             * NOTE:
+             *      VAT = Professional Fee X VAT %
+             *      TDS = Professional Fee X TDS %
+             *      TOTAL = Professional Fee + Other Fee + VAT - TDS
+             */
+            $vat_amount     = NULL;
+            $tds_amount     = NULL;
+            $surveyor_fee   = floatval($surveyor_fee);
+            if($surveyor->flag_vat_registered == IQB_FLAG_ON)
+            {
+                $vat_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_VAT, $surveyor_fee, IQB_AC_DECIMAL_PRECISION);
+                $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVR, $surveyor_fee, IQB_AC_DECIMAL_PRECISION);
+            }
+            else{
+                $tds_amount = $this->ac_duties_and_tax_model->compute_tax(IQB_AC_DNT_ID_TDS_ON_SFVNR, $surveyor_fee, IQB_AC_DECIMAL_PRECISION);
+            }
+
+            return [
+                'vat_amount' => $vat_amount,
+                'tds_amount' => $tds_amount
+            ];
+        }
 
         /**
-         * !!!NOTE!!!
-         *      Must use "surveyor_id" and "surveyor_type" combination as key
-         *      to differntiate
+         * Compute Total Surveyor Fee for a Single surveyor
+         *
+         * @param object Claim_surveyor Record
+         * @return decimal
          */
-        /**
-         * Tasks:
-         *  1. Find to del ids
-         *  2. To Update ids
-         *  3. To New Insert Data
-         */
-        $update_list = [];
+        private function _compute_fee_total($record)
+        {
+            /**
+             * Per Surveyor Total = Professional Fee + Other Fee + VAT - TDS
+             */
+            $total_fee = bcsub(
+                ac_bcsum([$record->surveyor_fee, $record->other_fee, floatval($record->vat_amount)], IQB_AC_DECIMAL_PRECISION),
+                floatval($record->tds_amount),
+                IQB_AC_DECIMAL_PRECISION
+            );
 
-
-
-
-        // $surveyor_id = $this->input->post('surveyor_id');
-        // $survey_type = $this->input->post('survey_type');
-
-        // $total_count = count($surveyor_id);
-        // $complex_list = [];
-        // for($i = 0; $i< $total_count; $i++ )
-        // {
-        //     $complex_list[] = implode('-', [$surveyor_id[$i], $survey_type[$i]]);
-        // }
-
-
-    }
+            return $total_fee;
+        }
 
     // ----------------------------------------------------------------
 

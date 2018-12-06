@@ -100,7 +100,7 @@ class Claim_settlement_model extends MY_Model
             ],
             [
                 'field' => 'recommended_amount[]',
-                'label' => 'Recommended Amount',
+                'label' => 'Recommended / Settled Amount',
                 'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                 '_key'  => 'recommended_amount',
                 '_type' => 'text',
@@ -127,10 +127,7 @@ class Claim_settlement_model extends MY_Model
          * Variables
          */
         $settlement_claim_amount = 0.00;
-        foreach($data['recommended_amount'] as $recommended_amount)
-        {
-            $settlement_claim_amount += (float)$recommended_amount;
-        }
+
 
         /**
          * Prepare Batch Data
@@ -148,6 +145,22 @@ class Claim_settlement_model extends MY_Model
                 $single[$key] = $data[$key][$index];
             }
             $batch_data[] = $single;
+
+            /**
+             * Total Claim Settlement Amount
+             *
+             * NOTE: Excess Deductible is Subtracted from Total
+             */
+            $category           = $single['category'];
+            $recommended_amount = $single['recommended_amount'];
+            if($category == 'ED')
+            {
+                $settlement_claim_amount = bcsub($settlement_claim_amount, $recommended_amount, IQB_AC_DECIMAL_PRECISION);
+            }
+            else
+            {
+                $settlement_claim_amount = bcadd($settlement_claim_amount, $recommended_amount, IQB_AC_DECIMAL_PRECISION);
+            }
         }
 
 

@@ -4,6 +4,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Claim - Settlement Breakdown
  */
 ?>
+<style type="text/css">
+    .form-inline input, .form-inline select{width: 100% !important}
+    .form-inline .form-group{display: block; margin:0;}
+</style>
 <?php echo form_open( $this->uri->uri_string(),
                         [
                             'class'     => 'form-iqb-general',

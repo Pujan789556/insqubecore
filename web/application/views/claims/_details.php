@@ -345,7 +345,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 class="trg-dialog-edit btn btn-primary btn-sm"
                                 data-title='<i class="fa fa-pencil-square-o"></i> Update Claim Settlement - <?php echo $record->claim_code?>'
                                 data-url="<?php echo site_url('claims/settlement/' . $record->id . '/d');?>"
-                                data-box-size="large"
+                                data-box-size="full-width"
                                 data-form="#_form-claims">
                                 <i class="fa fa-pencil-square-o"></i></a>
                     <?php endif;?>
