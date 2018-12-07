@@ -16,7 +16,7 @@ class Claim_model extends MY_Model
     // protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'fy_quarter', 'branch_id', 'category', 'accident_date', 'accident_time', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'gross_amt_surveyor_fee', 'net_amt_payable_insured', 'cl_comp_cession', 'cl_treaty_retaintion', 'cl_treaty_quota', 'cl_treaty_1st_surplus', 'cl_treaty_2nd_surplus', 'cl_treaty_3rd_surplus', 'cl_treaty_fac', 'flag_paid', 'flag_surveyor_voucher', 'settlement_date', 'file_intimation', 'status', 'status_remarks', 'progress_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'fy_quarter', 'branch_id', 'category', 'accident_date', 'accident_time', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'gross_amt_surveyor_fee', 'vat_amt_surveyor_fee', 'net_amt_payable_insured', 'cl_comp_cession', 'cl_treaty_retaintion', 'cl_treaty_quota', 'cl_treaty_1st_surplus', 'cl_treaty_2nd_surplus', 'cl_treaty_3rd_surplus', 'cl_treaty_fac', 'flag_paid', 'flag_surveyor_voucher', 'settlement_date', 'file_intimation', 'status', 'status_remarks', 'progress_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
 
     /**
@@ -59,6 +59,7 @@ class Claim_model extends MY_Model
         $this->validation_rules();
 
         $this->load->model('claim_surveyor_model');
+        $this->load->model('claim_settlement_model');
     }
 
     // ----------------------------------------------------------------
@@ -1075,12 +1076,12 @@ class Claim_model extends MY_Model
          * DEBIT SECTION
          */
         $dr_rows = [
-            // Claim Expense (Portfolio-wise)
+            // Claim Expense (Portfolio-wise) = Claim GROSS TOTAL
             [
                 'account_id' => $portfolio->account_id_ce,
                 'party_type' => NULL,
                 'party_id'   => NULL,
-                'amount'     => $this->_total_claim_amount($record, $surveyor_fee_only)
+                'amount'     => $this->compute_claim_gross_total($record, $surveyor_fee_only)
             ],
         ];
 
@@ -1164,7 +1165,7 @@ class Claim_model extends MY_Model
              *      1. Amount paid by the Insurance company
              *      2. Rest Amount paid by Re-insurer
              */
-            $total_claim_amount = $this->_total_claim_amount($record, $surveyor_fee_only);
+            $total_claim_amount = $this->compute_claim_net_total($record->id, $surveyor_fee_only);
 
             /**
              * Current RI Transaction State
@@ -1192,18 +1193,41 @@ class Claim_model extends MY_Model
             return $data;
         }
 
-        private function _total_claim_amount($record, $surveyor_fee_only = FALSE)
-        {
-            /**
-             * If Claim is Closed/Withdrawn - Total Claim Expense is Surveyor Fee only
-             */
-            if($surveyor_fee_only)
-            {
-                return (float)$record->gross_amt_surveyor_fee;
-            }
+    // ----------------------------------------------------------------
 
-            return bcadd((float)$record->gross_amt_surveyor_fee, (float)$record->net_amt_payable_insured, IQB_AC_DECIMAL_PRECISION);
+    /**
+     * Gross Total Claim Amount
+     *
+     *  Gross Total = Payable Insured Party + Gross Total of Surveyor
+     */
+    public function compute_claim_gross_total($id, $surveyor_fee_only = FALSE)
+    {
+        $surveyor_gross_total   = $this->claim_surveyor_model->compute_gross_total_fee_by_claim($id);
+        if($surveyor_fee_only)
+        {
+            return $surveyor_gross_total;
         }
+
+        $net_payable            = $this->claim_settlement_model->compute_net_payable($id);
+
+        return bcadd($net_payable, $surveyor_gross_total, IQB_AC_DECIMAL_PRECISION);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Net Total Claim Amount
+     *
+     *  Net Total = Payable Insured Party + Gross Total of Surveyor + VAT of Surveyors
+     */
+    public function compute_claim_net_total($id, $surveyor_fee_only = FALSE)
+    {
+        $gross_total = $this->compute_claim_gross_total($id, $surveyor_fee_only);
+        $vat_total = $this->claim_surveyor_model->compute_vat_total_by_claim($id);
+
+        return bcadd($gross_total, $vat_total, IQB_AC_DECIMAL_PRECISION);
+    }
+
 
     // ----------------------------------------------------------------
 

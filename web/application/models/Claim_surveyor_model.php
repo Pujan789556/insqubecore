@@ -120,7 +120,7 @@ class Claim_surveyor_model extends MY_Model
 
 
         $gross_amt_surveyor_fee = 0.00;
-
+        $vat_amt_surveyor_fee   = 0.00;
         /**
          * Prepare Data
          */
@@ -164,6 +164,9 @@ class Claim_surveyor_model extends MY_Model
                 ],
                 IQB_AC_DECIMAL_PRECISION
             );
+
+            // Update Total VAT
+            $vat_amt_surveyor_fee = bcadd($vat_amt_surveyor_fee, $taxes['vat_amount'], IQB_AC_DECIMAL_PRECISION);
         }
 
 
@@ -188,7 +191,8 @@ class Claim_surveyor_model extends MY_Model
              * Task 4: Update Total Surveyor Fee On Claim Table
              */
             $claim_data = [
-                'gross_amt_surveyor_fee' => $gross_amt_surveyor_fee
+                'gross_amt_surveyor_fee' => $gross_amt_surveyor_fee,
+                'vat_amt_surveyor_fee'   => $vat_amt_surveyor_fee
             ];
             $this->claim_model->update_data($claim_id, $claim_data);
 
@@ -288,6 +292,27 @@ class Claim_surveyor_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Compute NET Total Fee for a Claim
+     *
+     * @param int $claim_id
+     * @return decimal
+     */
+    public function compute_net_total_fee_by_claim($claim_id)
+    {
+        $list = $this->get_many_by_claim($claim_id);
+
+        $net_total = 0.00;
+        foreach($list as $single)
+        {
+            $net_total = bcadd($net_total, $this->compute_net_total_fee($single));
+        }
+
+        return $net_total;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Compute Gross Total Fee for a Surveyor
      *
      * FORMULA = surveyor_fee + other_fee
@@ -307,6 +332,48 @@ class Claim_surveyor_model extends MY_Model
          * Per Surveyor Total = Professional Fee + Other Fee
          */
         return bcadd($record->surveyor_fee, $record->other_fee, IQB_AC_DECIMAL_PRECISION);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Compute Gross Total Fee for a Claim
+     *
+     * @param int $claim_id
+     * @return decimal
+     */
+    public function compute_gross_total_fee_by_claim($claim_id)
+    {
+        $list = $this->get_many_by_claim($claim_id);
+
+        $gross_total = 0.00;
+        foreach($list as $single)
+        {
+            $gross_total = bcadd($gross_total, $this->compute_gross_total_fee($single));
+        }
+
+        return $gross_total;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Compute Total VAT for a Claim
+     *
+     * @param int $claim_id
+     * @return decimal
+     */
+    public function compute_vat_total_by_claim($claim_id)
+    {
+        $list = $this->get_many_by_claim($claim_id);
+
+        $vat_total = 0.00;
+        foreach($list as $single)
+        {
+            $vat_total = bcadd($vat_total, $single->vat_amount ?? 0.00, IQB_AC_DECIMAL_PRECISION);
+        }
+
+        return $vat_total;
     }
 
     // ----------------------------------------------------------------

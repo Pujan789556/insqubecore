@@ -326,21 +326,20 @@ if ( ! function_exists('CLAIM__flag_surveyor_voucher_dropdown'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('CLAIM__surveyors_vat_total'))
+if ( ! function_exists('CLAIM__surveyor_vat_total_by_claim'))
 {
 	/**
 	 * VAT Total - From All surveyors of a Claim
 	 *
+	 * @param int $claim_id
 	 * @return	decimal
 	 */
-	function CLAIM__surveyors_vat_total( $surveyors)
+	function CLAIM__surveyor_vat_total_by_claim( $claim_id)
 	{
-		$vat_total = 0.00;
-		foreach($surveyors as $single)
-		{
-			$vat_total = bcadd($vat_total, $single->vat_amount, IQB_AC_DECIMAL_PRECISION);
-		}
-		return $vat_total;
+		$CI =& get_instance();
+		$CI->load->model('claim_surveyor_model');
+
+		return $CI->claim_surveyor_model->compute_vat_total_by_claim($claim_id);
 	}
 }
 
@@ -368,6 +367,26 @@ if ( ! function_exists('CLAIM__surveyor_net_total_fee'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('CLAIM__surveyor_net_total_fee_by_claim'))
+{
+	/**
+	 * Get NET Total Surveyor Fee for a Claim
+	 *
+	 *
+	 * @param 	int $claim_id
+	 * @return	decimal
+	 */
+	function CLAIM__surveyor_net_total_fee_by_claim( $claim_id)
+	{
+		$CI =& get_instance();
+		$CI->load->model('claim_surveyor_model');
+
+		return $CI->claim_surveyor_model->compute_net_total_fee_by_claim($claim_id);
+	}
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('CLAIM__surveyor_gross_total_fee'))
 {
 	/**
@@ -385,6 +404,85 @@ if ( ! function_exists('CLAIM__surveyor_gross_total_fee'))
 
 		return $CI->claim_surveyor_model->compute_gross_total_fee($claim_surveyor_record);
 
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__surveyor_gross_total_fee_by_claim'))
+{
+	/**
+	 * Get Gross Total Surveyor Fee for a Claim
+	 *
+	 *
+	 * @param 	int $claim_id
+	 * @return	decimal
+	 */
+	function CLAIM__surveyor_gross_total_fee_by_claim( $claim_id)
+	{
+		$CI =& get_instance();
+		$CI->load->model('claim_surveyor_model');
+
+		return $CI->claim_surveyor_model->compute_gross_total_fee_by_claim($claim_id);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__net_total_payable_insured'))
+{
+	/**
+	 * Get Net Total Payble to Insured Party
+	 *
+	 * @param 	int $claim_id
+	 * @return	decimal
+	 */
+	function CLAIM__net_total_payable_insured( $claim_id)
+	{
+		$CI =& get_instance();
+		$CI->load->model('claim_settlement_model');
+
+		return $CI->claim_settlement_model->compute_net_payable($claim_id);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__gross_total'))
+{
+	/**
+	 * Gross Total of a Claim
+	 *
+	 * @param 	int $claim_id
+	 * @param 	bool $surveyor_fee_only
+	 * @return	decimal
+	 */
+	function CLAIM__gross_total($claim_id, $surveyor_fee_only = FALSE)
+	{
+		$CI =& get_instance();
+		$CI->load->model('claim_model');
+
+		return $CI->claim_model->compute_claim_gross_total($claim_id, $surveyor_fee_only);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__net_total'))
+{
+	/**
+	 * NET Total of a Claim
+	 *
+	 * @param 	int $claim_id
+	 * @param 	bool $surveyor_fee_only
+	 * @return	decimal
+	 */
+	function CLAIM__net_total($claim_id, $surveyor_fee_only = FALSE)
+	{
+		$CI =& get_instance();
+		$CI->load->model('claim_model');
+
+		return $CI->claim_model->compute_claim_net_total($claim_id, $surveyor_fee_only);
 	}
 }
 

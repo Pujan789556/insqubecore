@@ -310,34 +310,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </span>
             </h4>
         </div>
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <?php if( $this->dx_auth->is_admin() ): ?>
-                        <th>ID</th>
-                    <?php endif;?>
-                    <th>Surveyor</th>
-                    <th>Type</th>
-                    <th>Assigned Date</th>
-                    <th>Status</th>
-                    <th class="text-right">Professional Fee (Rs.)</th>
-                    <th class="text-right">Other Fee (Rs.)</th>
-                    <th class="text-right">Gross Total Fee (Rs.)</th>
-                    <th class="text-right">VAT (Rs.)</th>
-                    <th class="text-right">TDS (Rs.)</th>
-                    <th class="text-right">Net Total (Rs.)</th>
 
-                </tr>
-            </thead>
-            <tbody id="search-result-claim-surveyors">
-                <?php
-                /**
-                 * Load Rows & Next Link (if any)
-                 */
-                $this->load->view('claims/_list_surveyors', ['records' => $surveyors]);
-                ?>
-            </tbody>
-        </table>
+        <?php
+        /**
+         * Load Rows & Next Link (if any)
+         */
+        $this->load->view('claims/_list_surveyors', ['records' => $surveyors]);
+        ?>
+
     </div>
 
     <div class="box box-bordered box-default">
@@ -374,14 +354,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </thead>
                 <tbody>
                     <?php
-
-                    $surveyors_vat_total = CLAIM__surveyors_vat_total($surveyors);
-
-                    $gross_total_claim_amount = ac_bcsum(
-                        [$record->net_amt_payable_insured, $record->gross_amt_surveyor_fee],
-                        IQB_AC_DECIMAL_PRECISION
-                    );
-                    $grand_total_claim_amount = bcadd($gross_total_claim_amount, $surveyors_vat_total, IQB_AC_DECIMAL_PRECISION);
+                    $payable_to_insured     = CLAIM__net_total_payable_insured($record->id);
+                    $surveyor_gorss_total   = CLAIM__surveyor_gross_total_fee_by_claim($record->id);
+                    $surveyors_vat_total    = CLAIM__surveyor_vat_total_by_claim($record->id);
+                    $claim_gorss_total      = CLAIM__gross_total($record->id);
+                    $claim_net_total        = CLAIM__net_total($record->id);
                     $i = 1;
                     foreach($settlements as $single):
                     ?>
@@ -398,15 +375,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                     <tr>
                         <td class="border-t-thick" colspan="6">Amount Payable to Insured Party (Rs.)</td>
-                        <td class="text-right border-t-thick"><?php echo number_format($record->net_amt_payable_insured, 2) ?></td>
+                        <td class="text-right border-t-thick"><?php echo number_format($payable_to_insured, 2) ?></td>
                     </tr>
                     <tr>
                         <td colspan="6">Surveyor Fee (Rs.)</td>
-                        <td class="text-right"><?php echo number_format($record->gross_amt_surveyor_fee, 2) ?></td>
+                        <td class="text-right"><?php echo number_format($surveyor_gorss_total, 2) ?></td>
                     </tr>
                     <tr>
                         <th colspan="6" class="border-t-thick">Gross Total (Rs.)</th>
-                        <th class="text-right border-t-thick"><?php echo number_format($gross_total_claim_amount, 2) ?></th>
+                        <th class="text-right border-t-thick"><?php echo number_format($claim_gorss_total, 2) ?></th>
                     </tr>
                     <tr>
                         <th colspan="6">Surveyor VAT (Rs.)</th>
@@ -414,7 +391,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </tr>
                     <tr>
                         <th colspan="6">Grand Total (Rs.)</th>
-                        <th class="text-right"><?php echo number_format($grand_total_claim_amount, 2) ?></th>
+                        <th class="text-right"><?php echo number_format($claim_net_total, 2) ?></th>
                     </tr>
                 </tbody>
             </table>

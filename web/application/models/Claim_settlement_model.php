@@ -174,6 +174,7 @@ class Claim_settlement_model extends MY_Model
             /**
              * Task 1: Delete old Records
              */
+            parent::delete_by(['claim_id' => $claim_id]);
             $this->db->where('claim_id', $claim_id)
                         ->delete($this->table_name);
 
@@ -238,6 +239,36 @@ class Claim_settlement_model extends MY_Model
             $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
         }
         return $list;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Compute Net Payable Amount
+     *
+     * @param int $claim_id
+     * @return decimal
+     */
+    public function compute_net_payable($claim_id)
+    {
+        $list = $this->get_many_by_claim($claim_id);
+        $net_payable = 0.00;
+
+        foreach($list as $single)
+        {
+            $category           = $single->category;
+            $recommended_amount = $single->recommended_amount;
+            if($category == 'ED')
+            {
+                $net_payable = bcsub($net_payable, $recommended_amount, IQB_AC_DECIMAL_PRECISION);
+            }
+            else
+            {
+                $net_payable = bcadd($net_payable, $recommended_amount, IQB_AC_DECIMAL_PRECISION);
+            }
+        }
+
+        return $net_payable;
     }
 
 

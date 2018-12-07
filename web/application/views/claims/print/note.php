@@ -147,36 +147,6 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
             <tr>
                 <td colspan="2">
                     <strong>Estimated Claim Amount (Rs.)</strong>: <?php echo number_format($record->estimated_claim_amount, 2);?>
-                    <!-- <table class="table">
-                        <thead>
-                            <tr>
-                                <td>S.N.</td>
-                                <td>Loss/Damage</td>
-                                <td>Details</td>
-                                <td align="right">Estimated Amount (Rs.)</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            <tr>
-                                <td>1.</td>
-                                <td>Insured Property</td>
-                                <td><?php echo nl2br(htmlspecialchars($record->loss_details_ip));?></td>
-                                <td align="right"><?php echo number_format($record->loss_amount_ip, 2);?></td>
-                            </tr>
-
-                            <tr>
-                                <td>2.</td>
-                                <td>Third Party Property</td>
-                                <td><?php echo nl2br(htmlspecialchars($record->loss_details_tpp));?></td>
-                                <td align="right"><?php echo number_format($record->loss_amount_tpp, 2);?></td>
-                            </tr>
-                            <tr>
-                                <td colspan="3"><strong>Estimated Claim Amount (Rs.)</strong></td>
-                                <td align="right"><strong><?php echo number_format($record->estimated_claim_amount, 2);?></strong></td>
-                            </tr>
-                        </tbody>
-                    </table> -->
                 </td>
             </tr>
         </table>
@@ -197,13 +167,11 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                                         </tr>
                                         <tbody>
                                             <?php
-                                            $surveyors_vat_total = CLAIM__surveyors_vat_total($surveyors);
-
-                                            $gross_total_claim_amount = ac_bcsum(
-                                                [$record->net_amt_payable_insured, $record->gross_amt_surveyor_fee],
-                                                IQB_AC_DECIMAL_PRECISION
-                                            );
-                                            $grand_total_claim_amount = bcadd($gross_total_claim_amount, $surveyors_vat_total, IQB_AC_DECIMAL_PRECISION);
+                                            $payable_to_insured     = CLAIM__net_total_payable_insured($record->id);
+                                            $surveyor_gorss_total   = CLAIM__surveyor_gross_total_fee_by_claim($record->id);
+                                            $surveyors_vat_total    = CLAIM__surveyor_vat_total_by_claim($record->id);
+                                            $claim_gorss_total      = CLAIM__gross_total($record->id);
+                                            $claim_net_total        = CLAIM__net_total($record->id);
 
                                             $i = 1;
                                             foreach($settlements as $single):
@@ -220,7 +188,6 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                                                         }
                                                         echo $value;
                                                         ?>
-
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
@@ -229,15 +196,15 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                                         <tfoot>
                                             <tr>
                                                 <td class="border-t" align="left" colspan="2">Payable to Insured Party (Rs.)</td>
-                                                <td class="border-t" align="right"><?php echo number_format($record->net_amt_payable_insured, 2) ?></td>
+                                                <td class="border-t" align="right"><?php echo number_format($payable_to_insured, 2) ?></td>
                                             </tr>
                                             <tr>
                                                 <td align="left" colspan="2">Surveyor Fee (Rs.)</td>
-                                                <td align="right"><?php echo number_format($record->gross_amt_surveyor_fee, 2) ?></td>
+                                                <td align="right"><?php echo number_format($surveyor_gorss_total, 2) ?></td>
                                             </tr>
                                             <tr>
                                                 <td class="bold border-t" align="left" colspan="2">Gross Total (Rs.)</td>
-                                                <td class="bold border-t" align="right"><?php echo number_format($gross_total_claim_amount, 2) ?></td>
+                                                <td class="bold border-t" align="right"><?php echo number_format($claim_gorss_total, 2) ?></td>
                                             </tr>
                                             <tr>
                                                 <td class="bold" align="left" colspan="2">Surveyor VAT (Rs.)</td>
@@ -245,7 +212,7 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                                             </tr>
                                             <tr>
                                                 <td class="bold" align="left" colspan="2">Grand Total (Rs.)</td>
-                                                <td class="bold" align="right"><?php echo number_format($grand_total_claim_amount, 2) ?></td>
+                                                <td class="bold" align="right"><?php echo number_format($claim_net_total, 2) ?></td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -310,20 +277,17 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                                         </tr>
                                         <?php
                                         $sn = 1;
-                                        $grand_total = 0.00;
                                         foreach($surveyors as $single):
-                                            $single_gross_total = CLAIM__surveyor_gross_total_fee($single);
-                                            $grand_total = bcadd($grand_total, $single_gross_total, IQB_AC_DECIMAL_PRECISION);
                                          ?>
                                             <tr>
                                                 <td align="center"><?php echo $sn++ ?></td>
                                                 <td><?php echo  $single->surveyor_name?></td>
-                                                <td align="right"><?php echo number_format($single_gross_total, 2) ?></td>
+                                                <td align="right"><?php echo number_format(CLAIM__surveyor_gross_total_fee($single), 2) ?></td>
                                             </tr>
                                         <?php endforeach ?>
                                         <tr>
                                             <td colspan="2"><strong>Total Surveyor Fee:</strong></td>
-                                            <td align="right"><strong><?php echo number_format($grand_total, 2) ?></strong></td>
+                                            <td align="right"><strong><?php echo number_format(CLAIM__surveyor_gross_total_fee_by_claim($record->id), 2) ?></strong></td>
                                         </tr>
                                     </table>
                                 </td>
