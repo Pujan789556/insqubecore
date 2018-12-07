@@ -603,7 +603,7 @@ class Claims extends MY_Controller
 	    					{
 	    						$update_data['flag_surveyor_voucher'] = IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED;
 	    					}
-	    					$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
+	    					$done = $this->claim_model->close($record->id, $update_data, $policy_id);
 	        				break;
 
 	    				case 'withdraw_claim':
@@ -616,7 +616,7 @@ class Claims extends MY_Controller
 	    					{
 	    						$update_data['flag_surveyor_voucher'] = IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED;
 	    					}
-							$done = $this->claim_model->update_data($record->id, $update_data, $policy_id);
+	    					$done = $this->claim_model->withdraw($record->id, $update_data, $policy_id);
 	        				break;
 
 	    				case 'assign_surveyors':

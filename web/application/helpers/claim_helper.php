@@ -329,9 +329,9 @@ if ( ! function_exists('CLAIM__flag_surveyor_voucher_dropdown'))
 if ( ! function_exists('CLAIM__surveyors_vat_total'))
 {
 	/**
-	 * Get supporting documents dropdown
+	 * VAT Total - From All surveyors of a Claim
 	 *
-	 * @return	array
+	 * @return	decimal
 	 */
 	function CLAIM__surveyors_vat_total( $surveyors)
 	{
@@ -341,6 +341,71 @@ if ( ! function_exists('CLAIM__surveyors_vat_total'))
 			$vat_total = bcadd($vat_total, $single->vat_amount, IQB_AC_DECIMAL_PRECISION);
 		}
 		return $vat_total;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__surveyor_net_total_fee'))
+{
+	/**
+	 * Get NET Total fee for a surveyor
+	 *
+	 * FORMULA: surveyor_fee + other_fee + vat_amount - tds_amount
+	 *
+	 * @param 	Object $claim_surveyor_record Surveyor_Claim Record or dt_claim_surveyors Primary KEY (ID)
+	 * @return	decimal
+	 */
+	function CLAIM__surveyor_net_total_fee( $claim_surveyor_record)
+	{
+		$CI =& get_instance();
+		$CI->load->model('claim_surveyor_model');
+
+		return $CI->claim_surveyor_model->compute_net_total_fee($claim_surveyor_record);
+
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__surveyor_gross_total_fee'))
+{
+	/**
+	 * Get Gross Total fee for a surveyor
+	 *
+	 * FORMULA: surveyor_fee + other_fee
+	 *
+	 * @param 	Object $claim_surveyor_record Surveyor_Claim Record or dt_claim_surveyors Primary KEY (ID)
+	 * @return	decimal
+	 */
+	function CLAIM__surveyor_gross_total_fee( $claim_surveyor_record)
+	{
+		$CI =& get_instance();
+		$CI->load->model('claim_surveyor_model');
+
+		return $CI->claim_surveyor_model->compute_gross_total_fee($claim_surveyor_record);
+
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__ri_breakdown'))
+{
+	/**
+	 * Get Claim RI Breakdown
+	 *
+	 * @param 	Object $record Claim Record
+	 * @param 	Object $for_display For Data Display?
+	 * @return	decimal
+	 */
+	function CLAIM__ri_breakdown( $record, $for_display = FALSE)
+	{
+		$CI =& get_instance();
+		$CI->load->model('claim_model');
+
+		return $CI->claim_model->ri_breakdown($record, $for_display);
+
 	}
 }
 

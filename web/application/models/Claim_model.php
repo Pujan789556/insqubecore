@@ -18,6 +18,21 @@ class Claim_model extends MY_Model
     protected $protected_attributes = ['id'];
     protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'fy_quarter', 'branch_id', 'category', 'accident_date', 'accident_time', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'gross_amt_surveyor_fee', 'net_amt_payable_insured', 'cl_comp_cession', 'cl_treaty_retaintion', 'cl_treaty_quota', 'cl_treaty_1st_surplus', 'cl_treaty_2nd_surplus', 'cl_treaty_3rd_surplus', 'cl_treaty_fac', 'flag_paid', 'flag_surveyor_voucher', 'settlement_date', 'file_intimation', 'status', 'status_remarks', 'progress_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
+
+    /**
+     * Claim RI-Distribuion Columns
+     */
+    protected static $claim_ri_fields = [
+        'cl_comp_cession'       => 'Compulsory Cession',
+        'cl_treaty_retaintion'  => 'Treaty Retention',
+        'cl_treaty_quota'       => 'Treaty Quota',
+        'cl_treaty_1st_surplus' => 'Treaty 1st Surplus',
+        'cl_treaty_2nd_surplus' => 'Treaty 2nd Surplus',
+        'cl_treaty_3rd_surplus' => 'Treaty 3rd Surplus',
+        'cl_treaty_fac'         => 'Treaty FAC'
+    ];
+
+
     protected $validation_rules = [];
 
     /**
@@ -42,6 +57,8 @@ class Claim_model extends MY_Model
 
         // Set validation rule
         $this->validation_rules();
+
+        $this->load->model('claim_surveyor_model');
     }
 
     // ----------------------------------------------------------------
@@ -837,12 +854,18 @@ class Claim_model extends MY_Model
     /**
      * Approve a Claim
      *
+     * While approving a claim, we also update the Claim Recovery - RI Breakdown
+     *
      * @param object $record
      * @return bool
      */
     public function approve( $record )
     {
-        $this->load->model('claim_surveyor_model');
+        $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Claim_model][Method: approve()]: Claim information could not be found.");
+        }
 
         $data = [
             'status'                    => IQB_CLAIM_STATUS_APPROVED,
@@ -850,43 +873,90 @@ class Claim_model extends MY_Model
             'approved_by'               => $this->dx_auth->get_user_id()
         ];
 
-        // Updated by/at
-        $data = $this->modified_on(['fields' => $data]);
+        /**
+         * Get Claim Recovery - Breakdown Data
+         */
+        $ri_breakdown_data = $this->_build_claim_ri_breakdown($record);
+        $data = array_merge($data, $ri_breakdown_data);
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = TRUE;
+        /**
+         * Let's Update the Data
+         */
+        return $this->update_data($record->id, $data, $record->policy_id);
+    }
 
-        // Use automatic transaction
-        $this->db->trans_start();
+    // ----------------------------------------------------------------
 
-            // Task a: Update Status
-            $done = $this->db->where('id', $record->id)
-                        ->update($this->table_name, $data);
-
-
-
-            // Task b. activity, cache
-            if($done)
-            {
-                // Clean Cache by policy belonging to this policy
-                $this->clear_cache( 'claim_list_by_policy_' . $record->policy_id );
-            }
-
-        // Commit all transactions on success, rollback else
-        $this->db->trans_complete();
-
-        // Check Transaction Status
-        if ($this->db->trans_status() === FALSE)
+    /**
+     * Close a Claim
+     *
+     * While closing a claim, we also update the Claim Recovery - RI Breakdown - If surveyors assigned
+     *
+     * @param object $record
+     * @return bool
+     */
+    public function close( $record, $data )
+    {
+        $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
+        if(!$record)
         {
-            // generate an error... or use the log_message() function to log your error
-            $done = FALSE;
+            throw new Exception("Exception [Model: Claim_model][Method: close()]: Claim information could not be found.");
         }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+        /**
+         * Get Claim Recovery - Breakdown Data and Merge with supplied data
+         *
+         * !!! NOTE !!!
+         * Must have surveyor assigned
+         */
+        if( $this->claim_surveyor_model->has_surveyors($record->id) )
+        {
+            $ri_breakdown_data = $this->_build_claim_ri_breakdown($record, TRUE);
+            $data = array_merge($data, $ri_breakdown_data);
+        }
 
-        // return result/status
-        return $done;
+
+        /**
+         * Let's Update the Data
+         */
+        return $this->update_data($record->id, $data, $record->policy_id);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Withdraw a Claim
+     *
+     * While withdrawing a claim, we also update the Claim Recovery - RI Breakdown - If surveyors assigned
+     *
+     * @param object $record
+     * @return bool
+     */
+    public function withdraw( $record, $data )
+    {
+        $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Claim_model][Method: withdraw()]: Claim information could not be found.");
+        }
+
+        /**
+         * Get Claim Recovery - Breakdown Data and Merge with supplied data
+         *
+         * !!! NOTE !!!
+         * Must have surveyor assigned
+         */
+        if( $this->claim_surveyor_model->has_surveyors($record->id) )
+        {
+            $ri_breakdown_data = $this->_build_claim_ri_breakdown($record, TRUE);
+            $data = array_merge($data, $ri_breakdown_data);
+        }
+
+
+        /**
+         * Let's Update the Data
+         */
+        return $this->update_data($record->id, $data, $record->policy_id);
     }
 
     // ----------------------------------------------------------------
@@ -901,6 +971,12 @@ class Claim_model extends MY_Model
      */
     public function settle( $record )
     {
+        $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Claim_model][Method: settle()]: Claim information could not be found.");
+        }
+
         $settlement_date = date('Y-m-d');
 
         $fy_record  = $this->fiscal_year_model->get_fiscal_year($settlement_date);
@@ -920,34 +996,21 @@ class Claim_model extends MY_Model
          * Build Claim Master Record
          *  - status, fiscal year id, fiscal year quarter, settlement date
          *  - claim ri breakdown
-         *  - modified at/by
          */
-        // Claim RI-Breakdown
-        $claim_data = $this->_claim_ri_breakdown($record);
-
-        $claim_data = array_merge($claim_data, [
+        // Update Claim RI-Breakdown
+        $data = $this->_build_claim_ri_breakdown($record);
+        $data = array_merge($data, [
             'settlement_date'   => $settlement_date,
             'fiscal_yr_id'      => $fy_record->id,
             'fy_quarter'        => $fy_quarter->quarter,
             'status'            => IQB_CLAIM_STATUS_SETTLED,
         ]);
 
-        // Updated by/at
-        $claim_data = $this->modified_on(['fields' => $claim_data]);
 
-        // Task a: Update data
-        $done = $this->db->where('id', $record->id)
-                    ->update($this->table_name, $claim_data);
-
-        // Task b. activity, cache
-        if($done)
-        {
-            // Clean Cache by policy belonging to this policy
-            $this->clear_cache( 'claim_list_by_policy_' . $record->policy_id );
-        }
-
-        // return result/status
-        return $done;
+        /**
+         * Let's Update the Data
+         */
+        return $this->update_data($record->id, $data, $record->policy_id);
     }
 
     // ----------------------------------------------------------------
@@ -967,7 +1030,6 @@ class Claim_model extends MY_Model
         $this->load->helper('account');
 
         // Models
-        $this->load->model('claim_surveyor_model');
         $this->load->model('portfolio_model');
 
         // Get the list of surveyor
@@ -980,26 +1042,20 @@ class Claim_model extends MY_Model
             throw new Exception("Exception [Model: Claim_model][Method: voucher()]: Default internal accounts(Claim Expense, Claim Receivable) for this portfolio not found. Please contact Administrator for this.");
         }
 
-
-        // Claim RI-Breakdown
-        $claim_ri_breakdown = $this->_claim_ri_breakdown($record);
-
-
         /**
          * --------------------------------------------------------------
          * Account                              |   DR      |   CR      |
          * --------------------------------------------------------------
          * Claim Expense (Portfolio-wise)       |   *       |           |
-         * Portfolio Withdrawl (Portfolio-wise) |   *       |           |
-         * Vat on Surveyor Fee                  |   *       |           |
-         *                                                              |
-         * Surveyor Party                       |           |   *       |
-         * TDS Payable                          |           |   *       |
+         * Vat on Surveyor Fee (multiple)       |   *       |           |
+         * --------------------------------------------------------------                                                             |
+         * Surveyor Party (multiple)            |           |   *       |
+         * TDS Payable (multiple)               |           |   *       |
          * Claim Party                          |           |   *       |
          * --------------------------------------------------------------
          */
 
-        $narration = "Claim Voucher ({$record->claim_code}) for Policy({$record->policy_code}).";
+        $narration = "Being Claim Booked of Claim No. ({$record->claim_code}) of Policy No.({$record->policy_code}).";
         $voucher_data = [
             // Master Table Data
             'master' => [
@@ -1012,56 +1068,63 @@ class Claim_model extends MY_Model
 
         // --------------------------------------------------------------------
 
+        $cr_rows = [];
+
+
         /**
          * DEBIT SECTION
          */
-
-        $claim_expense       = $claim_ri_breakdown['cl_treaty_retaintion'];
-        $portfolio_withdrawl = bcsub( $this->_total_claim_amount($record), $claim_expense, IQB_AC_DECIMAL_PRECISION);
-
         $dr_rows = [
             // Claim Expense (Portfolio-wise)
             [
                 'account_id' => $portfolio->account_id_ce,
                 'party_type' => NULL,
                 'party_id'   => NULL,
-                'amount'     => $claim_expense
-            ],
-
-            // Claim Receivable (Portfolio-wise)
-            [
-                'account_id' => $portfolio->account_id_cr,
-                'party_type' => NULL,
-                'party_id'   => NULL,
-                'amount'     => $portfolio_withdrawl
+                'amount'     => $this->_total_claim_amount($record, $surveyor_fee_only)
             ],
         ];
 
-
-        // Surveyor VAT??
+        /**
+         * Surveyor VATs (DR), Surveyor Party(CR), TDS Payable(CR)
+         */
         foreach($surveyors as $single)
         {
-            $vat = (float)$single->vat_amount;
-            if($vat)
+            if($single->vat_amount)
             {
-                // Surveyor VAT - Per Surveyor
                 $dr_rows[] = [
                     'account_id' => IQB_AC_ACCOUNT_ID_VAT_PAYABLE,
                     'party_type' => IQB_AC_PARTY_TYPE_SURVEYOR,
                     'party_id'   => $single->surveyor_id,
-                    'amount'     => $vat
+                    'amount'     => $single->vat_amount
                 ];
             }
+
+            /**
+             * CREDIT ROWS: TDS and Surveyor Party
+             */
+
+            // Surveyor Party
+            $cr_rows[] = [
+                'account_id' => IQB_AC_ACCOUNT_ID_SURVEYOR_PARTY,
+                'party_type' => IQB_AC_PARTY_TYPE_SURVEYOR,
+                'party_id'   => $single->surveyor_id,
+                'amount'     => $this->claim_surveyor_model->compute_net_total_fee($single)
+            ];
+
+            // TDS Payable
+            $cr_rows[] = [
+                'account_id' => IQB_AC_ACCOUNT_ID_TDS_SURVEYOR,
+                'party_type' => IQB_AC_PARTY_TYPE_SURVEYOR,
+                'party_id'   => $single->surveyor_id,
+                'amount'     => $single->tds_amount
+            ];
         }
-
-
 
         // --------------------------------------------------------------------
 
         /**
          * CREDIT SECTION
          */
-        $cr_rows = [];
         if( !$surveyor_fee_only )
         {
             // Claim Party
@@ -1070,38 +1133,6 @@ class Claim_model extends MY_Model
                 'party_type' => IQB_AC_PARTY_TYPE_CUSTOMER,
                 'party_id'   => $record->customer_id,
                 'amount'     => (float)$record->net_amt_payable_insured
-            ];
-        }
-
-
-        // Surveyor VAT??
-        foreach($surveyors as $single)
-        {
-            $vat = (float)$single->vat_amount;
-            $tds = (float)$single->tds_amount;
-            $fee = (float)$single->surveyor_fee;
-
-            // Fee + VAT - TDS
-            $surveyor_party =   bcsub(
-                                    bcadd($fee, $vat, IQB_AC_DECIMAL_PRECISION),
-                                    $tds,
-                                    IQB_AC_DECIMAL_PRECISION
-                                );
-
-            // Surveyor Party
-            $cr_rows[] = [
-                'account_id' => IQB_AC_ACCOUNT_ID_SURVEYOR_PARTY,
-                'party_type' => IQB_AC_PARTY_TYPE_SURVEYOR,
-                'party_id'   => $single->surveyor_id,
-                'amount'     => $surveyor_party
-            ];
-
-            // TDS Payable
-            $cr_rows[] = [
-                'account_id' => IQB_AC_ACCOUNT_ID_TDS_SURVEYOR,
-                'party_type' => IQB_AC_PARTY_TYPE_SURVEYOR,
-                'party_id'   => $single->surveyor_id,
-                'amount'     => $tds
             ];
         }
 
@@ -1117,8 +1148,6 @@ class Claim_model extends MY_Model
 
         // --------------------------------------------------------------------
 
-        echo '<pre>'; print_r($voucher_data);exit;
-
 
         /**
          * Save Voucher and Its Relation with Policy and return Voucher ID
@@ -1126,7 +1155,7 @@ class Claim_model extends MY_Model
         return $this->ac_voucher_model->add($voucher_data, $record->policy_id);
     }
 
-        private function _claim_ri_breakdown($record)
+        private function _build_claim_ri_breakdown($record, $surveyor_fee_only = FALSE)
         {
             $this->load->model('ri_transaction_model');
 
@@ -1135,7 +1164,7 @@ class Claim_model extends MY_Model
              *      1. Amount paid by the Insurance company
              *      2. Rest Amount paid by Re-insurer
              */
-            $total_claim_amount = $this->_total_claim_amount($record);
+            $total_claim_amount = $this->_total_claim_amount($record, $surveyor_fee_only);
 
             /**
              * Current RI Transaction State
@@ -1147,22 +1176,83 @@ class Claim_model extends MY_Model
 
             $ratio = bcdiv($total_claim_amount, $si_gross, IQB_AC_DECIMAL_PRECISION);
 
-            return [
-                'cl_comp_cession'       => bcmul( (float)$ri_distribution->si_comp_cession, $ratio, IQB_AC_DECIMAL_PRECISION ),
-                'cl_treaty_retaintion'  => bcmul( (float)$ri_distribution->si_treaty_retaintion, $ratio, IQB_AC_DECIMAL_PRECISION ),
-                'cl_treaty_quota'       => bcmul( (float)$ri_distribution->si_treaty_quota, $ratio, IQB_AC_DECIMAL_PRECISION ),
-                'cl_treaty_1st_surplus' => bcmul( (float)$ri_distribution->si_treaty_1st_surplus, $ratio, IQB_AC_DECIMAL_PRECISION ),
-                'cl_treaty_2nd_surplus' => bcmul( (float)$ri_distribution->si_treaty_2nd_surplus, $ratio, IQB_AC_DECIMAL_PRECISION ),
-                'cl_treaty_3rd_surplus' => bcmul( (float)$ri_distribution->si_treaty_3rd_surplus, $ratio, IQB_AC_DECIMAL_PRECISION ),
-                'cl_treaty_fac'         => bcmul( (float)$ri_distribution->si_treaty_fac, $ratio, IQB_AC_DECIMAL_PRECISION ),
-            ];
+            $data               = [];
+            $ri_claim_columns   = array_keys(self::$claim_ri_fields);
+
+            foreach($ri_claim_columns as $cl_col)
+            {
+                // get RI distribution column name
+                // cl_ prefix is replaced by si_
+                $ri_col = substr_replace($cl_col, 'si', 0, 2); // replace 'cl' by 'si'
+
+                // eg: cl_comp_cession  = bcmul( (float)$ri_distribution->si_comp_cession, $ratio, IQB_AC_DECIMAL_PRECISION )
+                $data[$cl_col] = bcmul( (float)$ri_distribution->{$ri_col}, $ratio, IQB_AC_DECIMAL_PRECISION );
+            }
+
+            return $data;
         }
 
-        private function _total_claim_amount($record)
+        private function _total_claim_amount($record, $surveyor_fee_only = FALSE)
         {
+            /**
+             * If Claim is Closed/Withdrawn - Total Claim Expense is Surveyor Fee only
+             */
+            if($surveyor_fee_only)
+            {
+                return (float)$record->gross_amt_surveyor_fee;
+            }
+
             return bcadd((float)$record->gross_amt_surveyor_fee, (float)$record->net_amt_payable_insured, IQB_AC_DECIMAL_PRECISION);
         }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Claim RI Breakdown Data
+     *
+     * @param Object/Int $record Claim ID or Claim Record
+     * @return array
+     */
+    public function ri_breakdown($record, $for_display = FALSE)
+    {
+        $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Claim_model][Method: ri_breakdown()]: Claim information could not be found.");
+        }
+
+        $data = [];
+
+        /**
+         * If status is below Approval, we need to generate runtime
+         * else it will be saved on database
+         */
+        if( $record->status == IQB_CLAIM_STATUS_VERIFIED )
+        {
+            $data = $this->_build_claim_ri_breakdown($record);
+        }
+        else
+        {
+            foreach(self::$claim_ri_fields as $col => $label)
+            {
+                $data[$col] = $record->{$col};
+            }
+        }
+
+        if( !$for_display )
+        {
+            return $data;
+        }
+
+
+        // Format for Display
+        $display_data = [];
+        foreach(self::$claim_ri_fields as $col => $label)
+        {
+            $display_data[$label] = $data[$col] ?? NULL;
+        }
+        return $display_data;
+    }
     // ----------------------------------------------------------------
 
 

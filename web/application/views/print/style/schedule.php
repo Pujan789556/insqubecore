@@ -40,10 +40,15 @@
         font-variant: small-caps;
     }
     .no-border, td.no-border, table.no-border td, table.no-border th{border:none !important;}
+
     .border-b,
     td.border-b, table.no-border td.border-b,
     th.border-b, table.no-border th.border-b{border-bottom: 0.1mm solid #000000 !important;}
-    .border-t, td.border-t{border-top: 0.1mm solid #000000 !important;}
+
+    .border-t,
+    td.border-t, table.no-border td.border-t,
+    th.border-t, table.no-border th.border-t{border-top: 0.1mm solid #000000 !important;}
+
     .underline{text-decoration: underline;}
 
     .border-t-thicker, td.border-t-thicker{border-top: 0.3mm solid #000000 !important;}

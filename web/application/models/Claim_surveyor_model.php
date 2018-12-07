@@ -117,87 +117,20 @@ class Claim_surveyor_model extends MY_Model
         $this->load->model('claim_model');
         $this->load->model('surveyor_model');
 
-        /**
-         * Variables
-         */
-        $to_del_ids         = [];
-        $to_edit_sids        = [];
-        $to_edit_data       = [];
 
-        $post_sids = [];
-        foreach($data['surveyor_id'] as $sid)
-        {
-            $post_sids[] = (int)$sid;
-        }
 
         $gross_amt_surveyor_fee = 0.00;
-        // for($i=0; $i < count($data['surveyor_fee']); $i++)
-        // {
-        //     $surveyor_fee       = floatval($data['surveyor_fee'][$i] ?? 0.00);
-        //     $other_fee          = floatval($data['other_fee'][$i] ?? 0.00);
-        //     $gross_amt_surveyor_fee = ac_bcsum([$gross_amt_surveyor_fee, $surveyor_fee, $other_fee], IQB_AC_DECIMAL_PRECISION);
-        // }
 
         /**
          * Prepare Data
          */
-        $old_surveyors = $this->get_many_by_claim($claim_id);
-        $old_sids = [];
-        foreach($old_surveyors as $surveyor)
-        {
-            $sid = (int)$surveyor->surveyor_id;
-            $old_sids[] = $sid;
-
-            if( !in_array($sid, $post_sids) )
-            {
-                $to_del_ids[] = (int)$surveyor->id;
-            }
-            else
-            {
-                $to_edit_sids[] = $sid;
-
-                // index of this sid
-                $index = array_search($sid, $post_sids);
-
-                // Individual Surveyor Fee and Other Fee
-                $surveyor_fee       = floatval($data['surveyor_fee'][$index] ?? 0.00);
-                $other_fee          = floatval($data['other_fee'][$index] ?? 0.00);
-
-                // VAT & TDS
-                $taxes = $this->_compute_tax($surveyor, $surveyor_fee);
-
-                // Single Update Data
-                $single_data = [
-                    'assigned_date' => $data['assigned_date'][$index],
-                    'survey_type'   => $data['survey_type'][$index],
-                    'surveyor_fee'  => $surveyor_fee,
-                    'other_fee'     => $other_fee,
-                    'vat_amount'    => $taxes['vat_amount'],
-                    'tds_amount'    => $taxes['tds_amount'],
-                ];
-
-                // Add to update array
-                $to_edit_data["{$surveyor->id}"] = $single_data;
-
-
-                // Update Grand Total Surveyor Fee
-                $gross_amt_surveyor_fee = ac_bcsum([
-                        $gross_amt_surveyor_fee,
-                        $surveyor_fee,
-                        $other_fee
-                    ],
-                    IQB_AC_DECIMAL_PRECISION
-                );
-            }
-        }
-
-        $to_insert_sids = array_diff($post_sids, $to_edit_sids);
         $batch_data = [];
-        foreach($to_insert_sids as $sid)
+        $count = count($data['surveyor_id']);
+        for($index =0; $index < $count; $index++ )
         {
             // index of this sid
-            $index = array_search($sid, $post_sids);
-            $surveyor = $this->surveyor_model->find($sid);
+            $surveyor_id = $data['surveyor_id'][$index];
+            $surveyor = $this->surveyor_model->find($surveyor_id);
 
             // Individual Surveyor Fee and Other Fee
             $surveyor_fee       = floatval($data['surveyor_fee'][$index] ?? 0.00);
@@ -210,7 +143,7 @@ class Claim_surveyor_model extends MY_Model
             // Single Insert Data
             $single_data = [
                 'claim_id'      => $claim_id,
-                'surveyor_id'   => $sid,
+                'surveyor_id'   => $surveyor_id,
                 'assigned_date' => $data['assigned_date'][$index],
                 'survey_type'   => $data['survey_type'][$index],
                 'surveyor_fee'  => $surveyor_fee,
@@ -239,25 +172,9 @@ class Claim_surveyor_model extends MY_Model
         $this->db->trans_start();
 
             /**
-             * Task 1: Delete old Records(Not in New)
+             * Task 1: Delete Old Surveyors
              */
-            if($to_del_ids)
-            {
-                $this->db->where_in('id', $to_del_ids)
-                        ->delete($this->table_name);
-            }
-
-
-            /**
-             * Task 2: Update on Existing Old
-             */
-             if($to_edit_data)
-            {
-                foreach($to_edit_data as $id=>$edit_data)
-                {
-                    parent::update($id, $edit_data, TRUE);
-                }
-            }
+            parent::delete_by(['claim_id' => $claim_id]);
 
             /**
              * Task 3: Batch insert new data (if any)
@@ -340,25 +257,57 @@ class Claim_surveyor_model extends MY_Model
             ];
         }
 
-        /**
-         * Compute Total Surveyor Fee for a Single surveyor
-         *
-         * @param object Claim_surveyor Record
-         * @return decimal
-         */
-        private function _compute_fee_total($record)
-        {
-            /**
-             * Per Surveyor Total = Professional Fee + Other Fee + VAT - TDS
-             */
-            $total_fee = bcsub(
-                ac_bcsum([$record->surveyor_fee, $record->other_fee, floatval($record->vat_amount)], IQB_AC_DECIMAL_PRECISION),
-                floatval($record->tds_amount),
-                IQB_AC_DECIMAL_PRECISION
-            );
+    // ----------------------------------------------------------------
 
-            return $total_fee;
+    /**
+     * Compute NET Total Fee for a Surveyor
+     *
+     * FORMULA = surveyor_fee + other_fee + vat - tds
+     *
+     * @param object Claim_surveyor Record
+     * @return decimal
+     */
+    public function compute_net_total_fee($record)
+    {
+        $record = is_numeric($record) ? $this->find( (int)$record ) : $record;
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Claim_surveyor_model][Method: compute_net_total_fee()]: Claim Surveyor information could not be found.");
         }
+
+        /**
+         * Per Surveyor Total = Professional Fee + Other Fee + VAT - TDS
+         */
+        return bcsub(
+            ac_bcsum([$record->surveyor_fee, $record->other_fee, floatval($record->vat_amount)], IQB_AC_DECIMAL_PRECISION),
+            floatval($record->tds_amount),
+            IQB_AC_DECIMAL_PRECISION
+        );
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Compute Gross Total Fee for a Surveyor
+     *
+     * FORMULA = surveyor_fee + other_fee
+     *
+     * @param object Claim_surveyor Record
+     * @return decimal
+     */
+    public function compute_gross_total_fee($record)
+    {
+        $record = is_numeric($record) ? $this->find( (int)$record ) : $record;
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Claim_surveyor_model][Method: compute_gross_total_fee()]: Claim Surveyor information could not be found.");
+        }
+
+        /**
+         * Per Surveyor Total = Professional Fee + Other Fee
+         */
+        return bcadd($record->surveyor_fee, $record->other_fee, IQB_AC_DECIMAL_PRECISION);
+    }
 
     // ----------------------------------------------------------------
 
@@ -386,6 +335,19 @@ class Claim_surveyor_model extends MY_Model
         return $list;
     }
 
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Check if a Claim has surveyors assigned?
+     *
+     * @param int $claim_id
+     * @return mixed
+     */
+    public function has_surveyors($claim_id)
+    {
+        return $this->check_duplicate(['claim_id' => $claim_id]);
+    }
 
     // ----------------------------------------------------------------
 

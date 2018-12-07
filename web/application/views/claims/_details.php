@@ -282,6 +282,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  * Beema Samit Report Information
                  */
                 $this->load->view('claims/_claim_bsrs_headings');
+
+                /**
+                 * Claim Recovery
+                 */
+                $this->load->view('claims/_snippet_claim_recovery');
              ?>
         </div>
     </div>

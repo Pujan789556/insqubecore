@@ -6,6 +6,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $debit_total = 0;
 $credit_total = 0;
 ?>
+<style type="text/css">
+    .cr-indent{padding-left: 50px !important;}
+</style>
 <div class="box box-bordered box-default">
     <div class="box-header with-border border-dark bg-gray">
         <h3 class="no-margin">
@@ -45,14 +48,12 @@ $credit_total = 0;
                 		</tr>
                 	</tbody>
                 </table>
-                <table class="table table-bordered dont-break">
+                <table class="table table-bordered dont-break table-hover">
                 	<thead>
                 		<tr>
-                			<th>S.N.</th>
-                			<th>Account</th>
-                			<th>Party</th>
-                			<th class="text-right">Debit (Rs.)</th>
-                			<th class="text-right">Credit (Rs.)</th>
+                			<th class="text-center">Particulars (Account-Party)</th>
+                			<th class="text-center">Debit (Rs.)</th>
+                			<th class="text-center">Credit (Rs.)</th>
                 		</tr>
                 	</thead>
                 	<tbody>
@@ -61,14 +62,19 @@ $credit_total = 0;
                 			$debit_total += $row->amount;
                 			?>
                 			<tr>
-                				<td><?php echo $row->sno?></td>
-                				<td><?php echo ac_account_group_path_formatted($row->acg_path, $row->account_name);?></td>
+                				<!-- <td><?php echo $row->sno?></td> -->
                 				<td>
-                					<?php
-                					echo $row->party_name;
-                					echo $row->party_name ? ' (' . ac_party_types_dropdown(false)[$row->party_type] . ')' : '';
-                					?>
-                				</td>
+                                    <?php
+                                    // echo ac_account_group_path_formatted($row->acg_path, $row->account_name);
+                                    // Account Name - Party Name (Party Type)
+                                    $particulars = [$row->account_name];
+                                    if($row->party_name)
+                                    {
+                                        $particulars[] = $row->party_name . ' (' . ac_party_types_dropdown(false)[$row->party_type] . ')';
+                                    }
+                                    echo implode(' - ', $particulars);
+                                    ?>
+                                </td>
                 				<td class="text-right"><?php echo number_format($row->amount, 2)?></td>
                 				<td>&nbsp;</td>
                 			</tr>
@@ -81,37 +87,34 @@ $credit_total = 0;
                 			$credit_total += $row->amount;
                 			?>
                 			<tr>
-                				<td><?php echo $row->sno?></td>
-                				<td><?php echo ac_account_group_path_formatted($row->acg_path, $row->account_name);?></td>
-                				<td>
-                					<?php
-                					echo $row->party_name;
-                					echo $row->party_name ? ' (' . ac_party_types_dropdown(false)[$row->party_type] . ')' : '';
-                					?>
-                				</td>
+                				<!-- <td><?php echo $row->sno?></td> -->
+                                <td class="cr-indent">
+                                    <?php
+                                    // echo ac_account_group_path_formatted($row->acg_path, $row->account_name);
+                                    // Account Name - Party Name (Party Type)
+                                    $particulars = [$row->account_name];
+                                    if($row->party_name)
+                                    {
+                                        $particulars[] = $row->party_name . ' (' . ac_party_types_dropdown(false)[$row->party_type] . ')';
+                                    }
+                                    echo implode(' - ', $particulars);
+                                    ?>
+                                </td>
                 				<td>&nbsp;</td>
                 				<td class="text-right"><?php echo number_format($row->amount, 2)?></td>
                 			</tr>
             			<?php endforeach;?>
                 	</tbody>
                 	<tfoot class="text-bold">
-                		<?php if($record->narration):?>
-                			<tr>
-                				<td>&nbsp;</td>
-                				<td colspan="2">
-                					<em>
-                						<?php echo nl2br(htmlspecialchars( $this->security->xss_clean($record->narration)));?>
-                					</em>
-                				</td>
-                				<td>&nbsp;</td>
-                				<td>&nbsp;</td>
-                			</tr>
-                		<?php endif;?>
                 		<tr>
-                			<td colspan="3">&nbsp;</td>
-                			<td class="text-right"><?php echo number_format($debit_total, 2);?></td>
-                			<td class="text-right"><?php echo number_format($credit_total, 2);?></td>
-                		</tr>
+                            <td>
+                                <em>
+                                    <?php echo nl2br(htmlspecialchars( $this->security->xss_clean($record->narration)));?>
+                                </em>
+                            </td>
+                            <td class="text-right"><?php echo number_format($debit_total, 2);?></td>
+                            <td class="text-right"><?php echo number_format($credit_total, 2);?></td>
+                        </tr>
                 	</tfoot>
                 </table>
             </div>
