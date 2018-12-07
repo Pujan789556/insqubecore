@@ -402,6 +402,27 @@ class Claim_surveyor_model extends MY_Model
         return $list;
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Merged list of Surveyor for Voucher
+     *
+     * We will Merge Multiple Same surveyor
+     */
+    public function merged_list_for_voucher_by_claim($claim_id)
+    {
+        return $this->db->select(
+                                    "CS.claim_id, CS.surveyor_id,
+                                    SUM( CS.surveyor_fee + CS.other_fee + COALESCE(CS.vat_amount, 0) - COALESCE(CS.tds_amount, 0) ) AS net_total_fee,
+                                    SUM(CS.vat_amount) AS vat_amount, SUM(CS.tds_amount) AS tds_amount"
+                                )
+                            ->from($this->table_name . ' CS')
+                            ->where('CS.claim_id', $claim_id)
+                            ->group_by('CS.surveyor_id')
+                            ->get()
+                            ->result();
+    }
+
 
     // ----------------------------------------------------------------
 

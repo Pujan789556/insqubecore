@@ -1034,7 +1034,7 @@ class Claim_model extends MY_Model
         $this->load->model('portfolio_model');
 
         // Get the list of surveyor
-        $surveyors = $this->claim_surveyor_model->get_many_by_claim($record->id);
+        $surveyors = $this->claim_surveyor_model->merged_list_for_voucher_by_claim($record->id);
 
         // List of accounts for the portfolio
         $portfolio = $this->portfolio_model->find($record->portfolio_id);
@@ -1081,7 +1081,7 @@ class Claim_model extends MY_Model
                 'account_id' => $portfolio->account_id_ce,
                 'party_type' => NULL,
                 'party_id'   => NULL,
-                'amount'     => $this->compute_claim_gross_total($record, $surveyor_fee_only)
+                'amount'     => $this->compute_claim_gross_total($record->id, $surveyor_fee_only)
             ],
         ];
 
@@ -1109,7 +1109,7 @@ class Claim_model extends MY_Model
                 'account_id' => IQB_AC_ACCOUNT_ID_SURVEYOR_PARTY,
                 'party_type' => IQB_AC_PARTY_TYPE_SURVEYOR,
                 'party_id'   => $single->surveyor_id,
-                'amount'     => $this->claim_surveyor_model->compute_net_total_fee($single)
+                'amount'     => $single->net_total_fee
             ];
 
             // TDS Payable

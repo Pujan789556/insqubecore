@@ -454,6 +454,28 @@ class Company_model extends MY_Model
                     ->get()->result();
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Name
+     *
+     * Required By Voucher
+     *
+     * @param integer $id
+     * @return string
+     */
+    public function name($id, $lang="en")
+    {
+        $record = $this->db->select('C.name_en, C.name_np')
+                             ->from($this->table_name . ' as C')
+                             ->where('C.id', $id)
+                             ->get()->row();
+
+        $name = $lang == 'en' ? $record->name_en : $record->name_np;
+
+        return $name;
+    }
+
 	// --------------------------------------------------------------------
 
     /**

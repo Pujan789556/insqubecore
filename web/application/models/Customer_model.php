@@ -604,6 +604,28 @@ class Customer_model extends MY_Model
         $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases);
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Name
+     *
+     * Required By Voucher
+     *
+     * @param integer $id
+     * @return string
+     */
+    public function name($id, $lang="en")
+    {
+        $record = $this->db->select('C.full_name_en, C.full_name_np')
+                             ->from($this->table_name . ' as C')
+                             ->where('C.id', $id)
+                             ->get()->row();
+
+        $name = $lang == 'en' ? $record->full_name_en : $record->full_name_np;
+
+        return $name;
+    }
+
 	// --------------------------------------------------------------------
 
     /**
