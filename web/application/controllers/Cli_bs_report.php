@@ -356,9 +356,9 @@ class Cli_bs_report extends Base_Controller
             $claim_inline_sql = "(
                                     SELECT
                                         CLM.id AS claim_id, CLM.policy_id, CLM.fiscal_yr_id, CLM.fy_quarter,
-                                        CLM.settlement_claim_amount + CLM.total_surveyor_fee_amount AS total_claim_amount,
-                                        CLM.settlement_claim_amount + CLM.total_surveyor_fee_amount - CLM.cl_treaty_retaintion AS total_ri_amount,
-                                        CLM.total_surveyor_fee_amount AS total_surveyor_amount,
+                                        CLM.net_amt_payable_insured + CLM.gross_amt_surveyor_fee AS total_claim_amount,
+                                        CLM.net_amt_payable_insured + CLM.gross_amt_surveyor_fee - CLM.cl_treaty_retaintion AS total_ri_amount,
+                                        CLM.gross_amt_surveyor_fee AS total_surveyor_amount,
                                         P.district_id, H.id as bsrs_heading_id, H.code AS bsrs_code, H.name as bsrs_name
                                     FROM dt_claims AS CLM
                                     JOIN dt_policies P ON CLM.policy_id = P.id

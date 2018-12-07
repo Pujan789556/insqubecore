@@ -130,12 +130,12 @@ class Claim_surveyor_model extends MY_Model
             $post_sids[] = (int)$sid;
         }
 
-        $total_surveyor_fee_amount = 0.00;
+        $gross_amt_surveyor_fee = 0.00;
         // for($i=0; $i < count($data['surveyor_fee']); $i++)
         // {
         //     $surveyor_fee       = floatval($data['surveyor_fee'][$i] ?? 0.00);
         //     $other_fee          = floatval($data['other_fee'][$i] ?? 0.00);
-        //     $total_surveyor_fee_amount = ac_bcsum([$total_surveyor_fee_amount, $surveyor_fee, $other_fee], IQB_AC_DECIMAL_PRECISION);
+        //     $gross_amt_surveyor_fee = ac_bcsum([$gross_amt_surveyor_fee, $surveyor_fee, $other_fee], IQB_AC_DECIMAL_PRECISION);
         // }
 
         /**
@@ -181,9 +181,11 @@ class Claim_surveyor_model extends MY_Model
 
 
                 // Update Grand Total Surveyor Fee
-                $total_surveyor_fee_amount = bcadd(
-                    $total_surveyor_fee_amount,
-                    $this->_compute_fee_total((object)$single_data),
+                $gross_amt_surveyor_fee = ac_bcsum([
+                        $gross_amt_surveyor_fee,
+                        $surveyor_fee,
+                        $other_fee
+                    ],
                     IQB_AC_DECIMAL_PRECISION
                 );
             }
@@ -222,9 +224,11 @@ class Claim_surveyor_model extends MY_Model
 
 
             // Update Grand Total Surveyor Fee
-            $total_surveyor_fee_amount = bcadd(
-                $total_surveyor_fee_amount,
-                $this->_compute_fee_total((object)$single_data),
+            $gross_amt_surveyor_fee = ac_bcsum([
+                    $gross_amt_surveyor_fee,
+                    $surveyor_fee,
+                    $other_fee
+                ],
                 IQB_AC_DECIMAL_PRECISION
             );
         }
@@ -267,7 +271,7 @@ class Claim_surveyor_model extends MY_Model
              * Task 4: Update Total Surveyor Fee On Claim Table
              */
             $claim_data = [
-                'total_surveyor_fee_amount' => $total_surveyor_fee_amount
+                'gross_amt_surveyor_fee' => $gross_amt_surveyor_fee
             ];
             $this->claim_model->update_data($claim_id, $claim_data);
 

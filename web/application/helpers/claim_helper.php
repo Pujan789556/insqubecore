@@ -181,7 +181,7 @@ if ( ! function_exists('CLAIM__approval_constraint'))
 	 * Check if the given policy claim is valid for approval.
 	 * The following criteria must be met:
 	 *
-	 * 		1. settlement_claim_amount must be set
+	 * 		1. net_amt_payable_insured must be set
      *  	2. claim_scheme_id must be set
      *  	3. assessment_brief must be set
 	 *
@@ -201,7 +201,7 @@ if ( ! function_exists('CLAIM__approval_constraint'))
 		 * Check Claim Criteria
 		 */
 		if(
-			$record->settlement_claim_amount === NULL
+			$record->net_amt_payable_insured === NULL
 				||
 			$record->claim_scheme_id === NULL
 				||
@@ -321,6 +321,26 @@ if ( ! function_exists('CLAIM__flag_surveyor_voucher_dropdown'))
 			$dropdown = IQB_BLANK_SELECT + $dropdown;
 		}
 		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__surveyors_vat_total'))
+{
+	/**
+	 * Get supporting documents dropdown
+	 *
+	 * @return	array
+	 */
+	function CLAIM__surveyors_vat_total( $surveyors)
+	{
+		$vat_total = 0.00;
+		foreach($surveyors as $single)
+		{
+			$vat_total = bcadd($vat_total, $single->vat_amount, IQB_AC_DECIMAL_PRECISION);
+		}
+		return $vat_total;
 	}
 }
 

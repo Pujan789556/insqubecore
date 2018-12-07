@@ -599,7 +599,7 @@ class Claims extends MY_Controller
 	    					];
 
 	    					// Surveyor Claim Voucher Required?
-	    					if($record->total_surveyor_fee_amount)
+	    					if($record->gross_amt_surveyor_fee)
 	    					{
 	    						$update_data['flag_surveyor_voucher'] = IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED;
 	    					}
@@ -612,7 +612,7 @@ class Claims extends MY_Controller
 								'status_remarks' => $data['status_remarks']
 	    					];
 	    					// Surveyor Claim Voucher Required?
-	    					if($record->total_surveyor_fee_amount)
+	    					if($record->gross_amt_surveyor_fee)
 	    					{
 	    						$update_data['flag_surveyor_voucher'] = IQB_CLAIM_FLAG_SRV_VOUCHER_REQUIRED;
 	    					}

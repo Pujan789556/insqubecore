@@ -16,7 +16,7 @@ class Claim_model extends MY_Model
     // protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'fy_quarter', 'branch_id', 'category', 'accident_date', 'accident_time', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'total_surveyor_fee_amount', 'settlement_claim_amount', 'cl_comp_cession', 'cl_treaty_retaintion', 'cl_treaty_quota', 'cl_treaty_1st_surplus', 'cl_treaty_2nd_surplus', 'cl_treaty_3rd_surplus', 'cl_treaty_fac', 'flag_paid', 'flag_surveyor_voucher', 'settlement_date', 'file_intimation', 'status', 'status_remarks', 'progress_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'fy_quarter', 'branch_id', 'category', 'accident_date', 'accident_time', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'gross_amt_surveyor_fee', 'net_amt_payable_insured', 'cl_comp_cession', 'cl_treaty_retaintion', 'cl_treaty_quota', 'cl_treaty_1st_surplus', 'cl_treaty_2nd_surplus', 'cl_treaty_3rd_surplus', 'cl_treaty_fac', 'flag_paid', 'flag_surveyor_voucher', 'settlement_date', 'file_intimation', 'status', 'status_remarks', 'progress_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -1069,7 +1069,7 @@ class Claim_model extends MY_Model
                 'account_id' => IQB_AC_ACCOUNT_ID_CLAIM_PARTY,
                 'party_type' => IQB_AC_PARTY_TYPE_CUSTOMER,
                 'party_id'   => $record->customer_id,
-                'amount'     => (float)$record->settlement_claim_amount
+                'amount'     => (float)$record->net_amt_payable_insured
             ];
         }
 
@@ -1117,6 +1117,9 @@ class Claim_model extends MY_Model
 
         // --------------------------------------------------------------------
 
+        echo '<pre>'; print_r($voucher_data);exit;
+
+
         /**
          * Save Voucher and Its Relation with Policy and return Voucher ID
          */
@@ -1157,7 +1160,7 @@ class Claim_model extends MY_Model
 
         private function _total_claim_amount($record)
         {
-            return bcadd((float)$record->total_surveyor_fee_amount, (float)$record->settlement_claim_amount, IQB_AC_DECIMAL_PRECISION);
+            return bcadd((float)$record->gross_amt_surveyor_fee, (float)$record->net_amt_payable_insured, IQB_AC_DECIMAL_PRECISION);
         }
 
     // ----------------------------------------------------------------

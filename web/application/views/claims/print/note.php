@@ -187,14 +187,6 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                                     <p><?php echo nl2br(htmlspecialchars($record->assessment_brief));?></p>
                                 </td>
                             </tr>
-                            <?php if($record->other_info): ?>
-                                <tr>
-                                    <td>
-                                        <p><strong>Other Information:</strong></p>
-                                        <p><?php echo nl2br(htmlspecialchars($record->other_info));?></p>
-                                    </td>
-                                </tr>
-                            <?php endif ?>
                         </tbody>
                     </table>
                 </td>
@@ -286,6 +278,14 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                                         </thead>
                                         <tbody>
                                             <?php
+                                            $surveyors_vat_total = CLAIM__surveyors_vat_total($surveyors);
+
+                                            $gross_total_claim_amount = ac_bcsum(
+                                                [$record->net_amt_payable_insured, $record->gross_amt_surveyor_fee],
+                                                IQB_AC_DECIMAL_PRECISION
+                                            );
+                                            $grand_total_claim_amount = bcadd($gross_total_claim_amount, $surveyors_vat_total, IQB_AC_DECIMAL_PRECISION);
+
                                             $i = 1;
                                             foreach($settlements as $single):
                                             ?>
@@ -299,18 +299,26 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                                             <?php endforeach; ?>
                                         </tbody>
 
-                                        <tfoot class="bold">
+                                        <tfoot>
                                             <tr>
-                                                <td align="left" colspan="4">Amount Payable to Insured (Rs.)</td>
-                                                <td align="right"><?php echo number_format($record->settlement_claim_amount, 2) ?></td>
+                                                <td align="left" colspan="4">Amount Payable to Insured Party (Rs.)</td>
+                                                <td align="right"><?php echo number_format($record->net_amt_payable_insured, 2) ?></td>
                                             </tr>
                                             <tr>
                                                 <td align="left" colspan="4">Surveyor Fee (Rs.)</td>
-                                                <td align="right"><?php echo number_format($record->total_surveyor_fee_amount, 2) ?></td>
+                                                <td align="right"><?php echo number_format($record->gross_amt_surveyor_fee, 2) ?></td>
                                             </tr>
                                             <tr>
-                                                <td align="left" colspan="4">Total Settlement Amount (Rs.)</td>
-                                                <td align="right"><?php echo number_format($record->total_surveyor_fee_amount + $record->settlement_claim_amount, 2) ?></td>
+                                                <td class="bold" align="left" colspan="4">Gross Total (Rs.)</td>
+                                                <td class="bold" align="right"><?php echo number_format($gross_total_claim_amount, 2) ?></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bold" align="left" colspan="4">Surveyor VAT (Rs.)</td>
+                                                <td class="bold" align="right"><?php echo number_format($surveyors_vat_total, 2) ?></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bold" align="left" colspan="4">Grand Total (Rs.)</td>
+                                                <td class="bold" align="right"><?php echo number_format($grand_total_claim_amount, 2) ?></td>
                                             </tr>
                                         </tfoot>
                                     </table>

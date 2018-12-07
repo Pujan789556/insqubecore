@@ -126,7 +126,7 @@ class Claim_settlement_model extends MY_Model
         /**
          * Variables
          */
-        $settlement_claim_amount = 0.00;
+        $net_amt_payable_insured = 0.00;
 
 
         /**
@@ -155,11 +155,11 @@ class Claim_settlement_model extends MY_Model
             $recommended_amount = $single['recommended_amount'];
             if($category == 'ED')
             {
-                $settlement_claim_amount = bcsub($settlement_claim_amount, $recommended_amount, IQB_AC_DECIMAL_PRECISION);
+                $net_amt_payable_insured = bcsub($net_amt_payable_insured, $recommended_amount, IQB_AC_DECIMAL_PRECISION);
             }
             else
             {
-                $settlement_claim_amount = bcadd($settlement_claim_amount, $recommended_amount, IQB_AC_DECIMAL_PRECISION);
+                $net_amt_payable_insured = bcadd($net_amt_payable_insured, $recommended_amount, IQB_AC_DECIMAL_PRECISION);
             }
         }
 
@@ -190,7 +190,7 @@ class Claim_settlement_model extends MY_Model
              * Task 3: Update Total Surveyor Fee On Claim Table
              */
             $claim_data = [
-                'settlement_claim_amount' => $settlement_claim_amount
+                'net_amt_payable_insured' => $net_amt_payable_insured
             ];
             $this->claim_model->update_data($claim_id, $claim_data);
 

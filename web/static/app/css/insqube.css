@@ -1,6 +1,8 @@
 /**
  * InsQube Styles
  */
+ .border-b-thick{border-bottom-width: 2px !important}
+ .border-t-thick{border-top-width: 2px !important;}
 .pointer{cursor:pointer;}
 .padding-t-10{padding-top: 10px}
 .margin-t-10{margin-top:10px;}

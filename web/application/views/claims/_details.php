@@ -233,54 +233,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </table>
     </div>
 
-    <div class="box box-bordered box-default">
-        <div class="box-header with-border">
-            <h4 class="no-margin">
-                <span class="pull-left">Manage Surveyors</span>
-                <span class="pull-right">
-                    <?php if($record->status === IQB_CLAIM_STATUS_VERIFIED && $this->dx_auth->is_authorized('claims', 'assign.claim.surveyors')): ?>
-                        <a href="#"
-                                title="Manage Surveyors"
-                                data-toggle="tooltip"
-                                class="trg-dialog-edit btn btn-primary btn-sm"
-                                data-title='<i class="fa fa-pencil-square-o"></i> Manage Surveyors - <?php echo $record->claim_code?>'
-                                data-url="<?php echo site_url('claims/surveyors/' . $record->id . '/d');?>"
-                                data-box-size="full-width"
-                                data-form="#_form-claims">
-                                <i class="fa fa-pencil-square-o"></i></a>
-                    <?php endif;?>
-                </span>
-            </h4>
-        </div>
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <?php if( $this->dx_auth->is_admin() ): ?>
-                        <th>ID</th>
-                    <?php endif;?>
-                    <th>Surveyor</th>
-                    <th>Type</th>
-                    <th>Assigned Date</th>
-                    <th>Status</th>
-                    <th class="text-right">Professional Fee (Rs.)</th>
-                    <th class="text-right">Other Fee (Rs.)</th>
-                    <th class="text-right">VAT (Rs.)</th>
-                    <th class="text-right">TDS (Rs.)</th>
-                    <th class="text-right">Total (Rs.)</th>
-
-                </tr>
-            </thead>
-            <tbody id="search-result-claim-surveyors">
-                <?php
-                /**
-                 * Load Rows & Next Link (if any)
-                 */
-                $this->load->view('claims/_list_surveyors', ['records' => $surveyors]);
-                ?>
-            </tbody>
-        </table>
-    </div>
-
     <div class="row">
         <div class="col-md-7">
             <div class="box box-bordered box-default">
@@ -336,6 +288,55 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
     <div class="box box-bordered box-default">
         <div class="box-header with-border">
+            <h4 class="no-margin">
+                <span class="pull-left">Manage Surveyors</span>
+                <span class="pull-right">
+                    <?php if($record->status === IQB_CLAIM_STATUS_VERIFIED && $this->dx_auth->is_authorized('claims', 'assign.claim.surveyors')): ?>
+                        <a href="#"
+                                title="Manage Surveyors"
+                                data-toggle="tooltip"
+                                class="trg-dialog-edit btn btn-primary btn-sm"
+                                data-title='<i class="fa fa-pencil-square-o"></i> Manage Surveyors - <?php echo $record->claim_code?>'
+                                data-url="<?php echo site_url('claims/surveyors/' . $record->id . '/d');?>"
+                                data-box-size="full-width"
+                                data-form="#_form-claims">
+                                <i class="fa fa-pencil-square-o"></i></a>
+                    <?php endif;?>
+                </span>
+            </h4>
+        </div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <?php if( $this->dx_auth->is_admin() ): ?>
+                        <th>ID</th>
+                    <?php endif;?>
+                    <th>Surveyor</th>
+                    <th>Type</th>
+                    <th>Assigned Date</th>
+                    <th>Status</th>
+                    <th class="text-right">Professional Fee (Rs.)</th>
+                    <th class="text-right">Other Fee (Rs.)</th>
+                    <th class="text-right">Gross Total Fee (Rs.)</th>
+                    <th class="text-right">VAT (Rs.)</th>
+                    <th class="text-right">TDS (Rs.)</th>
+                    <th class="text-right">Net Total (Rs.)</th>
+
+                </tr>
+            </thead>
+            <tbody id="search-result-claim-surveyors">
+                <?php
+                /**
+                 * Load Rows & Next Link (if any)
+                 */
+                $this->load->view('claims/_list_surveyors', ['records' => $surveyors]);
+                ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="box box-bordered box-default">
+        <div class="box-header with-border">
             <h3 class="no-margin">
                 Claim Settlement
                 <span class="pull-right">
@@ -354,20 +355,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             </h3>
         </div>
         <div class="box-body" style="overflow-x: scroll;">
-            <table class="table table-responsive table-condensed">
+            <table class="table table-responsive table-condensed table-hover">
                 <thead>
                     <tr>
                         <th>S.N.</th>
                         <th>Category</th>
                         <th>Sub-Category</th>
                         <th>Title</th>
-                        <th>Claimed Amt (Rs.)</th>
-                        <th>Assessed Amt (Rs.)</th>
-                        <th>Recommended Amt (Rs.)</th>
+                        <th class="text-right">Claimed Amt (Rs.)</th>
+                        <th class="text-right">Assessed Amt (Rs.)</th>
+                        <th class="text-right">Recommended Amt (Rs.)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
+
+                    $surveyors_vat_total = CLAIM__surveyors_vat_total($surveyors);
+
+                    $gross_total_claim_amount = ac_bcsum(
+                        [$record->net_amt_payable_insured, $record->gross_amt_surveyor_fee],
+                        IQB_AC_DECIMAL_PRECISION
+                    );
+                    $grand_total_claim_amount = bcadd($gross_total_claim_amount, $surveyors_vat_total, IQB_AC_DECIMAL_PRECISION);
                     $i = 1;
                     foreach($settlements as $single):
                     ?>
@@ -381,21 +390,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <td class="text-right"><?php echo number_format($single->recommended_amount, 2) ?></td>
                         </tr>
                     <?php endforeach; ?>
+
+                    <tr>
+                        <td class="border-t-thick" colspan="6">Amount Payable to Insured Party (Rs.)</td>
+                        <td class="text-right border-t-thick"><?php echo number_format($record->net_amt_payable_insured, 2) ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">Surveyor Fee (Rs.)</td>
+                        <td class="text-right"><?php echo number_format($record->gross_amt_surveyor_fee, 2) ?></td>
+                    </tr>
+                    <tr>
+                        <th colspan="6" class="border-t-thick">Gross Total (Rs.)</th>
+                        <th class="text-right border-t-thick"><?php echo number_format($gross_total_claim_amount, 2) ?></th>
+                    </tr>
+                    <tr>
+                        <th colspan="6">Surveyor VAT (Rs.)</th>
+                        <th class="text-right"><?php echo number_format($surveyors_vat_total, 2) ?></th>
+                    </tr>
+                    <tr>
+                        <th colspan="6">Grand Total (Rs.)</th>
+                        <th class="text-right"><?php echo number_format($grand_total_claim_amount, 2) ?></th>
+                    </tr>
                 </tbody>
-                <tfoot>
-                    <tr>
-                        <th colspan="6">Amount Payable to Insured (Rs.)</th>
-                        <th class="text-right"><?php echo number_format($record->settlement_claim_amount, 2) ?></th>
-                    </tr>
-                    <tr>
-                        <th colspan="6">Surveyor Fee (Rs.)</th>
-                        <th class="text-right"><?php echo number_format($record->total_surveyor_fee_amount, 2) ?></th>
-                    </tr>
-                    <tr>
-                        <th colspan="6">Total Settlement Amount (Rs.)</th>
-                        <th class="text-right"><?php echo number_format($record->total_surveyor_fee_amount + $record->settlement_claim_amount, 2) ?></th>
-                    </tr>
-                </tfoot>
             </table>
         </div>
     </div>
