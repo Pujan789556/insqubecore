@@ -44,8 +44,8 @@ $premium_columns = [
             </tr>
             <tr>
                 <th>Distribution Type</th>
-                <td class="<?php echo $record->premium_type == IQB_RI_TRANSACTION_PREMIUM_TYPE_BASIC ? 'text-green' : 'text-orange'?>">
-                    <strong><?php echo IQB_RI_TRANSACTION_PREMIUM_TYPES[$record->premium_type];?></strong>
+                <td class="<?php echo $record->ri_txn_for == IQB_RI_TXN_FOR_BASIC ? 'text-green' : 'text-orange'?>">
+                    <strong><?php echo IQB_RI_TXN_FOR_TYPES[$record->ri_txn_for];?></strong>
                 </td>
             </tr>
 

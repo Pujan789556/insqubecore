@@ -1180,7 +1180,7 @@ class Claim_model extends MY_Model
              *
              *  Compute the sum of all ri transactions of this policy
              */
-            $ri_distribution    = $this->ri_transaction_model->latest_build_by_policy($policy_id);
+            $ri_distribution    = $this->ri_transaction_model->latest_build_by_policy($policy_id, IQB_RI_TXN_FOR_BASIC);
             $si_gross           = $ri_distribution->si_gross;
 
             $ratio = $claim_amount / $si_gross; // Do not apply precision here.

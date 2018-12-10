@@ -79,16 +79,16 @@ if ( ! function_exists('RI__pool_treaty_types_dropdown'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('RI__transaction_premium_type_dropdown'))
+if ( ! function_exists('RI__transaction_ri_txn_for_dropdown'))
 {
 	/**
 	 * Get RI Transaction Premium Type Dropdown
 	 *
 	 * @return	string
 	 */
-	function RI__transaction_premium_type_dropdown( $flag_blank_select = true )
+	function RI__transaction_ri_txn_for_dropdown( $flag_blank_select = true )
 	{
-		$dropdown = IQB_RI_TRANSACTION_PREMIUM_TYPES;
+		$dropdown = IQB_RI_TXN_FOR_TYPES;
 
 		if($flag_blank_select)
 		{
@@ -351,7 +351,7 @@ if ( ! function_exists('RI__distribute'))
 				'treaty_id' 			=> $treaty_record->id,
 				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
 				'fy_quarter' 			=> $CI->current_fy_quarter->quarter,
-				'premium_type' 			=> IQB_RI_TRANSACTION_PREMIUM_TYPE_BASIC
+				'ri_txn_for' 			=> IQB_RI_TXN_FOR_BASIC
 			];
 			$ri_data = array_merge($ri_data, $relation_data);
 
@@ -427,7 +427,7 @@ if ( ! function_exists('RI__distribute_endorsement'))
 		 *
 		 * 	Compute the sum of all ri transactions of this policy
 		 */
-		$ri_transaction_latest 	= $CI->ri_transaction_model->latest_build_by_policy($policy_installment_record->policy_id);
+		$ri_transaction_latest 	= $CI->ri_transaction_model->latest_build_by_policy($policy_installment_record->policy_id, IQB_RI_TXN_FOR_BASIC);
 
 
 		// Last reference values
@@ -538,7 +538,7 @@ if ( ! function_exists('RI__distribute_endorsement'))
 				'treaty_id' 			=> $treaty_record->id,
 				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
 				'fy_quarter' 			=> $CI->current_fy_quarter->quarter,
-				'premium_type' 			=> IQB_RI_TRANSACTION_PREMIUM_TYPE_BASIC
+				'ri_txn_for' 			=> IQB_RI_TXN_FOR_BASIC
 			];
 			$ri_data = array_merge($ri_data, $relation_data);
 
@@ -1137,7 +1137,7 @@ if ( ! function_exists('RI__pool_distribute'))
 				'treaty_id' 			=> $treaty_record->id,
 				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
 				'fy_quarter' 			=> $CI->current_fy_quarter->quarter,
-				'premium_type' 			=> IQB_RI_TRANSACTION_PREMIUM_TYPE_POOL
+				'ri_txn_for' 			=> IQB_RI_TXN_FOR_POOL
 			];
 			$ri_data = array_merge($ri_data, $relation_data);
 
@@ -1246,7 +1246,7 @@ if ( ! function_exists('RI__pool_distribute_endorsement'))
 				'treaty_id' 			=> $treaty_record->id,
 				'fiscal_yr_id' 			=> $CI->current_fiscal_year->id,
 				'fy_quarter' 			=> $CI->current_fy_quarter->quarter,
-				'premium_type' 			=> IQB_RI_TRANSACTION_PREMIUM_TYPE_POOL
+				'ri_txn_for' 			=> IQB_RI_TXN_FOR_POOL
 			];
 			$ri_data = array_merge($ri_data, $relation_data);
 
