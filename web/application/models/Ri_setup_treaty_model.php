@@ -1336,7 +1336,7 @@ class Ri_setup_treaty_model extends MY_Model
 
     public function get_brokers_by_treaty($id)
     {
-        return $this->db->select('TB.treaty_id, TB.company_id, C.name, C.picture, C.pan_no, C.active, C.type')
+        return $this->db->select('TB.treaty_id, TB.company_id, C.name_en, C.picture, C.pan_no, C.active, C.type')
                         ->from(self::$table_treaty_brokers . ' AS TB')
                         ->join('master_companies C', 'C.id = TB.company_id')
                         ->where('TB.treaty_id', $id)
@@ -1431,8 +1431,8 @@ class Ri_setup_treaty_model extends MY_Model
     {
         return $this->db->select(
                         'TD.treaty_id, TD.broker_id, TD.company_id, TD.distribution_percent, TD.flag_leader, '.
-                        'C.name as reinsurer_name, ' .
-                        'B.name as broker_name'
+                        'C.name_en as reinsurer_name, ' .
+                        'B.name_en as broker_name'
                     )
                         ->from(self::$table_treaty_distribution . ' TD')
                         ->join('master_companies C', 'C.id = TD.company_id')
