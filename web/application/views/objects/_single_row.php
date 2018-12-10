@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<?php endif?>
 
 	<td>
-		<?php echo $record->portfolio_name;?><br/>
+		<?php echo $record->portfolio_name_en;?><br/>
 		<em class="text-bold" data-toggle="tooltip" title="Sum Insured Amount">RS. <?php echo $record->amt_sum_insured;?></em>
 	</td>
 

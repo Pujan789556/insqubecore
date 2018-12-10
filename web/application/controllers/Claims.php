@@ -2408,11 +2408,18 @@ class Claims extends MY_Controller
 		$this->load->model('rel_policy_creditor_model');
 		$creditors = $this->rel_policy_creditor_model->rows(['REL.policy_id' => $policy_record->id]);
 
+		/**
+		 * Object Record
+		 */
+		$this->load->model('object_model');
+		$object_record = $this->object_model->get($policy_record->object_id);
+
 
 		$data = [
 			'record' 			=> $record,
 			'policy_record' 	=> $policy_record,
 			'creditors' 		=> $creditors,
+			'object_record' 	=> $object_record,
 			'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
 			'settlements' 		=> $this->claim_settlement_model->get_many_by_claim($record->id),
 		];

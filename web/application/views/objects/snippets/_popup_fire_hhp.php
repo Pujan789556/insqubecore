@@ -71,7 +71,7 @@ $form_elements 	= _OBJ_FIRE_HHP_validation_rules($record->portfolio_id);
                         $value = $elem_data[$value];
                     }
                     if($key == 'sum_insured'){
-                        $value = number_format($value, 2);
+                        $value = number_format(floatval($value), 2);
                     }
                     echo htmlspecialchars($value);
                     ?>

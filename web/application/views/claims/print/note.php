@@ -78,12 +78,22 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                     </table>
                 </td>
                 <td>
-                    <h3>@TODO: Load Object Summary - claim_object_summary($policy_object)</h3>
-                    <p>
-                        Define on each portfolio helper function and extract some basic information:<br>
-                        Sum Insured:<br>
-                        Other Details if you can extract any
-                    </p>
+                    <table class="no-border">
+                        <tbody>
+                            <tr>
+                                <th width="30%" align="left">Portfolio</th>
+                                <td><?php echo $record->portfolio_name_en;?></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <?php
+                                    /**
+                                     * Object Snippet
+                                     */
+                                    echo _OBJ_select_text($object_record);?>
+                                </td>
+                            </tr>
+                    </table>
                 </td>
             </tr>
         </table>

@@ -29,7 +29,7 @@ if($attributes)
 	<div class="box no-border">
         <div class="box-body no-padding">
         	<table class="table table-responsive table-condensed table-hover">
-				<tr><td width="50%"><strong>Portfolio</strong></td><td><?php echo $record->portfolio_name;?></td></tr>
+				<tr><td width="50%"><strong>Portfolio</strong></td><td><?php echo $record->portfolio_name_en;?></td></tr>
 				<tr><td><strong>Customer</strong></td><td><?php echo $record->customer_name_en;?></td></tr>
 				<tr><td><strong>Sum Insured Amount</strong></td><td>Rs. <?php echo $record->amt_sum_insured;?></td></tr>
 				<?php foreach($formatted_attriutes as $key=>$value):?>

@@ -440,6 +440,289 @@ if ( ! function_exists('_OBJ_row_snippet'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('OBJECT__popup_view'))
+{
+    /**
+     * Get the Object Popup View
+     *
+     * @param integer $portfolio_id  Portfolio ID
+     * @return  string
+     */
+    function OBJECT__popup_view( $portfolio_id )
+    {
+        $attribute_form = '';
+
+        /**
+         * AGRICULTURE - CROP SUB-PORTFOLIO
+         * ---------------------------------
+         */
+        if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_agr_crop';
+        }
+
+        /**
+         * AGRICULTURE - CATTLE SUB-PORTFOLIO
+         * -----------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_agr_cattle';
+        }
+
+        /**
+         * AGRICULTURE - POULTRY SUB-PORTFOLIO
+         * -----------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_agr_poultry';
+        }
+
+        /**
+         * AGRICULTURE - FISH(Pisciculture) SUB-PORTFOLIO
+         * ----------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_agr_fish';
+        }
+
+        /**
+         * AGRICULTURE - BEE(Apiculture) SUB-PORTFOLIO
+         * -------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_agr_bee';
+        }
+
+        /**
+         * MOTOR
+         * -----
+         * For all type of motor portfolios, we have same object form
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+        {
+            $attribute_form = 'objects/snippets/_popup_motor';
+        }
+
+        /**
+         * FIRE - FIRE
+         * -------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_fire_fire';
+        }
+
+        /**
+         * FIRE - HOUSEHOLDER
+         * -------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_fire_hhp';
+        }
+
+        /**
+         * FIRE - LOSS OF PROFIT
+         * ----------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_fire_lop';
+        }
+
+        /**
+         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+         * --------------------------------------------------
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_brg';
+        }
+
+        /**
+         * MARINE
+         * -----
+         * For all type of marine portfolios, we have same object form
+         */
+        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+        {
+            $attribute_form = 'objects/snippets/_popup_marine';
+        }
+
+        /**
+         * ENGINEERING - BOILER EXPLOSION
+         * ------------------------------
+         * Sub-portfolio wise object form
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_eng_bl';
+        }
+
+        /**
+         * ENGINEERING - CONTRACTOR ALL RISK
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_eng_car';
+        }
+
+        /**
+         * ENGINEERING - CONTRACTOR PLANT & MACHINARY
+         * ------------------------------------------
+         * Sub-portfolio wise object form
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_eng_cpm';
+        }
+
+        /**
+         * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+         * ---------------------------------------------
+         * Sub-portfolio wise object form
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_eng_eei';
+        }
+
+        /**
+         * ENGINEERING - ERECTION ALL RISKS
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_eng_ear';
+        }
+
+        /**
+         * ENGINEERING - MACHINE BREAKDOWN
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_eng_mb';
+        }
+
+        /**
+         * MISCELLANEOUS - BANKER'S BLANKET(BB)
+         * -------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_bb';
+        }
+
+        /**
+         * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_gpa';
+        }
+
+        /**
+         * MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+         * ---------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_pa';
+        }
+
+        /**
+         * MISCELLANEOUS - PUBLIC LIABILITY(PL)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_pl';
+        }
+
+        /**
+         * MISCELLANEOUS - CASH IN TRANSIT
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_ct';
+        }
+
+        /**
+         * MISCELLANEOUS - CASH IN SAFE
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_cs';
+        }
+
+        /**
+         * MISCELLANEOUS - CASH IN COUNTER
+         * -------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_cc';
+        }
+
+        /**
+         * MISCELLANEOUS - EXPEDITION PERSONNEL ACCIDENT(EPA)
+         * --------------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_epa';
+        }
+
+        /**
+         * MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
+         * --------------------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_tmi';
+        }
+
+        /**
+         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_fg';
+        }
+
+        /**
+         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+         * ----------------------------------------
+         */
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+        {
+            $attribute_form = 'objects/snippets/_popup_misc_hi';
+        }
+
+        /**
+         * Throw Exception
+         */
+        else
+        {
+            throw new Exception("Exception [Helper: object_helper][Method: OBJECT__popup_view()]: No popup view defined for supplied portfolio.");
+        }
+
+        return $attribute_form;
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('_OBJ_select_text'))
 {
 	/**

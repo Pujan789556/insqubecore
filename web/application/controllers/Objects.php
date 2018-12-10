@@ -1156,6 +1156,50 @@ class Objects extends MY_Controller
 	// DETAILS EXPLORATION
 	// --------------------------------------------------------------------
 
+
+	public function popup($id)
+	{
+		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('objects', 'explore.object') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		/**
+		 * Main Record
+		 */
+    	$id = (int)$id;
+		$record = $this->object_model->get($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Check if Belongs to me?
+		 */
+		// belongs_to_me( $record->branch_id );
+
+		try {
+
+			$view = OBJECT__popup_view($record->portfolio_id);
+
+		} catch (Exception $e) {
+
+			return $this->template->json([
+						'status' => 'error',
+						'message' => $e->getMessage()
+					], 500);
+		}
+
+		/**
+		 * Return the Popup
+		 */
+		$this->template->json([
+			'html' 	=> $this->load->view($view,['record' => $record], TRUE),
+			'title' => 'Policy Object Details - ' .  $record->id
+		]);
+	}
+
     /**
      * View Customer Details
      *

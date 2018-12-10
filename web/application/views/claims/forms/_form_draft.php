@@ -80,7 +80,7 @@ $old_document = $record->file_intimation ?? NULL;
                     <div class="form-group ">
                         <label class="col-sm-4 control-label">Total Estimated Amount (Rs.)</label>
                         <div class="col-sm-8">
-                            <span id="__amt-estimated-total"><?php echo CLAIM__total_estimated_amount($record) ?></span>
+                            <span id="__amt-estimated-total"><?php echo $record ? CLAIM__total_estimated_amount($record) : '' ?></span>
                         </div>
                     </div>
                 </div>

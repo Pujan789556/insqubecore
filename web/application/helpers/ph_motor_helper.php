@@ -2425,7 +2425,15 @@ if ( ! function_exists('_OBJ_MOTOR_select_text'))
 		$select_text = '';
 		if($attributes)
 		{
-			$select_text = implode(', ', [$attributes->make, $attributes->model, $attributes->reg_no, $attributes->engine_no, $attributes->chasis_no]);
+			$data = [
+				$attributes->make,
+				$attributes->model,
+				'Reg No: ' . implode(' ', array_unique([$attributes->reg_no_prefix, $attributes->reg_no]) ),
+				'Engine NO: ' . $attributes->engine_no,
+				'Chasis No: ' . $attributes->chasis_no
+			];
+
+			$select_text = implode(', ', $data);
 		}
 		return $select_text;
 	}

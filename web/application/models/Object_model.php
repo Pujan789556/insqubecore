@@ -381,6 +381,35 @@ class Object_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get the Object Details
+     *
+     * @param integer $id
+     * @return mixed
+     */
+    public function get($id)
+    {
+        return $this->db->select(
+                            // Object Details
+                            "O.*, " .
+
+                            // Portfolio Details
+                            "P.code AS portfolio_code, P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np, " .
+
+                            // Customr Details
+                            "C.id AS customer_id, C.full_name_en AS customer_name_en, C.full_name_np AS customer_name_np"
+                        )
+                        ->from($this->table_name . ' as O')
+                        ->join('master_portfolio P', 'P.id = O.portfolio_id')
+                        ->join('rel_customer__object REL', 'REL.object_id = O.id AND flag_current = ' . IQB_FLAG_ON)
+                        ->join('dt_customers C', 'C.id = REL.customer_id')
+                        ->where('O.id', $id)
+                        ->get()->row();
+    }
+
+
+    // ----------------------------------------------------------------
+
+    /**
      * Get the Latest policy Record of "This Object"
      *
      * @param integer $id
@@ -528,9 +557,9 @@ class Object_model extends MY_Model
     {
         $this->db->select(
                             "O.id, O.portfolio_id, O.attributes, O.amt_sum_insured, O.flag_locked,
-                            P.code as portfolio_code, P.name_en as portfolio_name,
-                            C.id as customer_id, C.full_name_en as customer_name_en, C.full_name_np as customer_name_np")
-                 ->from($this->table_name . ' as O')
+                            P.code AS portfolio_code, P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np,
+                            C.id AS customer_id, C.full_name_en AS customer_name_en, C.full_name_np AS customer_name_np")
+                 ->from($this->table_name . ' AS O')
                  ->join('master_portfolio P', 'P.id = O.portfolio_id')
                  ->join('rel_customer__object RCO', 'RCO.object_id = O.id')
                  ->join('dt_customers C', 'RCO.customer_id = C.id')

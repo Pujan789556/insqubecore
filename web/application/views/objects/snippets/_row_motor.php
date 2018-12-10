@@ -30,7 +30,7 @@ $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 <?php if( !$_flag__show_widget_row ):?>
 	<td>
 		<?php if($attributes):?>
-		<a tabindex="0" class="preview-dom btn bg-orange btn-xs pull-left margin-r-5" data-dom="#_popover-motor-<?php echo $record->id?>" role="button" data-toggle="popup" title="Object Details - <?php echo $record->portfolio_name;?>"><i class="fa fa-search"></i></a>
+		<a tabindex="0" class="preview-dom btn bg-orange btn-xs pull-left margin-r-5" data-dom="#_popover-motor-<?php echo $record->id?>" role="button" data-toggle="popup" title="Object Details - <?php echo $record->portfolio_name_en;?>"><i class="fa fa-search"></i></a>
 		<?php endif;?>
 	</td>
 <?php endif;?>

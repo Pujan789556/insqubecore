@@ -1467,11 +1467,15 @@ class Claim_model extends MY_Model
                         // Policy Table Data
                         'P.code as policy_code, P.portfolio_id, P.customer_id, ' .
 
+                        // Portfolio Data
+                        'PRT.name_en AS portfolio_name_en, PRT.name_np AS portfolio_name_np, ' .
+
                         // Fiscal Year Data
                         'F.code_np AS fy_code_np, F.code_en AS fy_code_en'
                     )
                     ->from($this->table_name . ' AS CLM')
                     ->join('dt_policies P', 'P.id = CLM.policy_id')
+                    ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
                     ->join('master_claim_schemes CLMSCM', 'CLMSCM.id = CLM.claim_scheme_id', 'left')
                     ->join('master_fiscal_yrs F', 'F.id = CLM.fiscal_yr_id')
                     ->where('CLM.id', $id)

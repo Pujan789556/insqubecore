@@ -32,8 +32,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <table class="table table-bordered table-responsive table-condensed">
                             <tbody>
                                 <tr>
+                                    <th>Portfolio</th>
+                                    <td><?php echo $record->portfolio_name_en;?></td>
+                                </tr>
+                                <tr>
                                     <th width="30%">Policy Code</th>
                                     <td><?php echo anchor('policies/details/' . $record->policy_id, $record->policy_code, ['target' => '_blank']);?></td>
+                                </tr>
+                                <tr>
+                                    <th>Policy Object</th>
+                                    <td>
+                                        <?php echo anchor(
+                                            '#',
+                                            '<i class="fa fa-search"></i> View Details',
+                                            [
+                                                'class'         => 'trg-dialog-popup action',
+                                                'data-url'      => site_url('objects/popup/'.$record->id),
+                                                'data-box-size' => 'large',
+                                            ]);
+                                        ?>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th>Claim Code</th>
