@@ -160,33 +160,32 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <td>1.</td>
                             <td>Insured Property</td>
                             <td><?php echo nl2br(htmlspecialchars($record->loss_details_ip));?></td>
-                            <td><?php echo $record->loss_amount_ip;?></td>
+                            <td class="text-right"><?php echo number_format($record->amt_estimated_loss_ip, 2);?></td>
                         </tr>
 
                         <tr>
                             <td>2.</td>
                             <td>Third Party Property</td>
                             <td><?php echo nl2br(htmlspecialchars($record->loss_details_tpp));?></td>
-                            <td><?php echo $record->loss_amount_tpp;?></td>
+                            <td class="text-right"><?php echo number_format($record->amt_estimated_loss_tpp, 2);?></td>
+                        </tr>
+
+                        <tr>
+                            <th colspan="3">Total Estimated Amount (Rs.)</th>
+                            <th class="text-right"><?php echo number_format(CLAIM__total_estimated_amount($record), 2); ?></th>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
         <div class="col-sm-6">
-            <div class="box box-bordered box-default">
-                <div class="box-header with-border">
-                    <h4 class="box-title">Claim Estimation</h4>
-                </div>
-                <table class="table table-responsive table-condensed">
-                    <tbody>
-                        <tr>
-                            <th>Estimated Claim Amount (Rs.)</th>
-                            <td><?php echo $record->estimated_claim_amount;?></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <?php
+            /**
+             * Claim Recovery
+             */
+            $this->load->view('claims/_snippet_claim_recovery_estimated');
+            ?>
         </div>
     </div>
 
@@ -278,15 +277,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </div>
         <div class="col-md-5">
             <?php
-                /**
-                 * Beema Samit Report Information
-                 */
-                $this->load->view('claims/_claim_bsrs_headings');
+            /**
+             * Beema Samit Report Information
+             */
+            $this->load->view('claims/_claim_bsrs_headings');
 
-                /**
-                 * Claim Recovery
-                 */
-                $this->load->view('claims/_snippet_claim_recovery');
+            /**
+             * Claim Recovery
+             */
+            $this->load->view('claims/_snippet_claim_recovery');
              ?>
         </div>
     </div>

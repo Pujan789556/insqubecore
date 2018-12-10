@@ -32,3 +32,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
     <button type="submit" class="hide">Submit</button>
 <?php echo form_close();?>
+<script type="text/javascript">
+
+    function __default_status_remarks(a){
+        $('#assessment-box').val('The mentioned loss has occurred during the period of insurance and covered under the insurance policy. The loss has been found to be reasonable and in order. Hence, it is recommended for settlement.');
+    }
+</script>

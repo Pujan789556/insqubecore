@@ -326,6 +326,27 @@ if ( ! function_exists('CLAIM__flag_surveyor_voucher_dropdown'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('CLAIM__total_estimated_amount'))
+{
+	/**
+	 * Get Total Esitmated Claim Amount
+	 *
+	 *
+	 * @param 	object|id $record 	Claim Record or ID
+	 * @return	decimal
+	 */
+	function CLAIM__total_estimated_amount( $record )
+	{
+		$CI =& get_instance();
+		$CI->load->model('claim_model');
+
+		return $CI->claim_model->compute_total_estimated_amount($record);
+	}
+}
+
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('CLAIM__surveyor_vat_total_by_claim'))
 {
 	/**
@@ -503,6 +524,27 @@ if ( ! function_exists('CLAIM__ri_breakdown'))
 		$CI->load->model('claim_model');
 
 		return $CI->claim_model->ri_breakdown($record, $for_display);
+
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__ri_breakdown_estimated'))
+{
+	/**
+	 * Get Claim RI Breakdown
+	 *
+	 * @param 	Object $record Claim Record
+	 * @param 	Object $for_display For Data Display?
+	 * @return	decimal
+	 */
+	function CLAIM__ri_breakdown_estimated( $record, $for_display = FALSE)
+	{
+		$CI =& get_instance();
+		$CI->load->model('claim_model');
+
+		return $CI->claim_model->ri_breakdown_estimated($record, $for_display);
 
 	}
 }

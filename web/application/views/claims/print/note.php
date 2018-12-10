@@ -146,7 +146,7 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
             </tr>
             <tr>
                 <td colspan="2">
-                    <strong>Estimated Claim Amount (Rs.)</strong>: <?php echo number_format($record->estimated_claim_amount, 2);?>
+                    <strong>Estimated Claim Amount (Rs.)</strong>: <?php echo number_format(CLAIM__total_estimated_amount($record), 2); ?>
                 </td>
             </tr>
         </table>

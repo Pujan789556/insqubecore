@@ -76,23 +76,13 @@ $old_document = $record->file_intimation ?? NULL;
                         'form_record'   => $record
                     ]);
                     ?>
-                </div>
-            </div>
 
-            <div class="box box-solid box-bordered">
-                <div class="box-header with-border">
-                  <h4 class="box-title">Claim Estimation</h4>
-                </div>
-                <div class="box-body form-horizontal">
-                    <?php
-                    /**
-                     * Load Form Components
-                     */
-                    $this->load->view('templates/_common/_form_components_horz', [
-                        'form_elements' => $form_elements['claim_estimation'],
-                        'form_record'   => $record
-                    ]);
-                    ?>
+                    <div class="form-group ">
+                        <label class="col-sm-4 control-label">Total Estimated Amount (Rs.)</label>
+                        <div class="col-sm-8">
+                            <span id="__amt-estimated-total"><?php echo CLAIM__total_estimated_amount($record) ?></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -186,25 +176,25 @@ $old_document = $record->file_intimation ?? NULL;
     });
 
     // Compute Claim Estimation
-    $('#loss_amount_ip').on('keyup', function(){
+    $('#amt_estimated_loss_ip').on('keyup', function(){
         __compute_claim_estimation();
     } )
-    $('#loss_amount_tpp').on('keyup', function(){
+    $('#amt_estimated_loss_tpp').on('keyup', function(){
         __compute_claim_estimation();
     } )
 
     function __compute_claim_estimation()
     {
-        var $dst    = $('#estimated_claim_amount'),
-            $ip     = $('#loss_amount_ip'),
-            $tpp    = $('#loss_amount_tpp'),
+        var $dst    = $('#__amt-estimated-total'),
+            $ip     = $('#amt_estimated_loss_ip'),
+            $tpp    = $('#amt_estimated_loss_tpp'),
             v1      = parseFloat($ip.val()),
             v2      = parseFloat($tpp.val()),
             total   = 0;
             if(v1) total += v1;
             if(v2) total += v2;
 
-        $dst.val( total );
+        $dst.html( total );
     }
 
     /**

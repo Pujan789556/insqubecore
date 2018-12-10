@@ -16,7 +16,7 @@ class Claim_model extends MY_Model
     // protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'fy_quarter', 'branch_id', 'category', 'accident_date', 'accident_time', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'assessment_brief', 'supporting_docs', 'other_info', 'gross_amt_surveyor_fee', 'vat_amt_surveyor_fee', 'net_amt_payable_insured', 'cl_comp_cession', 'cl_treaty_retaintion', 'cl_treaty_quota', 'cl_treaty_1st_surplus', 'cl_treaty_2nd_surplus', 'cl_treaty_3rd_surplus', 'cl_treaty_fac', 'flag_paid', 'flag_surveyor_voucher', 'settlement_date', 'file_intimation', 'status', 'status_remarks', 'progress_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'fy_quarter', 'branch_id', 'category', 'accident_date', 'accident_time', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'amt_estimated_loss_ip', 'loss_details_tpp', 'amt_estimated_loss_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'assessment_brief', 'supporting_docs', 'other_info', 'gross_amt_surveyor_fee', 'vat_amt_surveyor_fee', 'net_amt_payable_insured', 'cl_comp_cession', 'cl_treaty_retaintion', 'cl_treaty_quota', 'cl_treaty_1st_surplus', 'cl_treaty_2nd_surplus', 'cl_treaty_3rd_surplus', 'cl_treaty_fac', 'flag_paid', 'flag_surveyor_voucher', 'settlement_date', 'file_intimation', 'status', 'status_remarks', 'progress_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
 
     /**
@@ -140,11 +140,11 @@ class Claim_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'loss_amount_ip',
+                    'field' => 'amt_estimated_loss_ip',
                     'label' => 'Estimated Amount(Insured Property) (Rs.)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                     '_type' => 'text',
-                    '_id'   => 'loss_amount_ip',
+                    '_id'   => 'amt_estimated_loss_ip',
                     '_required'     => true
                 ],
                 [
@@ -156,11 +156,11 @@ class Claim_model extends MY_Model
                     '_required' => false
                 ],
                 [
-                    'field' => 'loss_amount_tpp',
+                    'field' => 'amt_estimated_loss_tpp',
                     'label' => 'Estimated Amount(Third Party Property) (Rs.)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                     '_type' => 'text',
-                    '_id'   => 'loss_amount_tpp',
+                    '_id'   => 'amt_estimated_loss_tpp',
                     '_required'     => true
                 ],
             ],
@@ -253,23 +253,7 @@ class Claim_model extends MY_Model
                     '_extra_attributes' => 'data-provide="datepicker-inline"',
                     '_required' => true
                 ],
-            ],
-
-            /**
-             * Claim Estimation
-             */
-            'claim_estimation' => [
-                [
-                    'field' => 'estimated_claim_amount',
-                    'label' => 'Estimated Claim Amount (Rs.)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                    '_type' => 'text',
-                    '_id'   => 'estimated_claim_amount',
-                    '_default'  => 0.00,
-                    '_required' => true
-                ]
             ]
-
        ];
     }
 
@@ -283,7 +267,7 @@ class Claim_model extends MY_Model
      */
     public function draft_v_rules($formatted = FALSE )
     {
-        $sections = ['incident_details', 'loss_details', 'death_injured_details', 'intimation_details', 'claim_estimation'];
+        $sections = ['incident_details', 'loss_details', 'death_injured_details', 'intimation_details'];
         $rules = [];
         foreach($sections as $section)
         {
@@ -434,8 +418,10 @@ class Claim_model extends MY_Model
                 'field' => 'status_remarks',
                 'label' => 'Approval Remarks',
                 'rules' => 'trim|required|htmlspecialchars|max_length[5000]',
+                '_id'   => 'assessment-box',
                 '_type' => 'textarea',
                 '_default' => 'The mentioned loss has occurred during the period of insurance and covered under the insurance policy. The loss has been found to be reasonable and in order. Hence, it is recommended for settlement.',
+                '_extra_html_below' => '<a href="#" data-target-dom-id="assessment-box" onclick="__default_status_remarks(this)">Use Default Text</a>',
                 '_required' => true
             ]
         ];
@@ -667,7 +653,7 @@ class Claim_model extends MY_Model
 
     private function __build_draft_data($data)
     {
-        $columns = ['category', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'loss_amount_ip', 'loss_details_tpp', 'loss_amount_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'estimated_claim_amount', 'file_intimation'];
+        $columns = ['category', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'amt_estimated_loss_ip', 'loss_details_tpp', 'amt_estimated_loss_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'file_intimation'];
 
         $draft_data = [];
         foreach($columns as $key)
@@ -1156,26 +1142,48 @@ class Claim_model extends MY_Model
         return $this->ac_voucher_model->add($voucher_data, $record->policy_id);
     }
 
+    // ----------------------------------------------------------------
+
         private function _build_claim_ri_breakdown($record, $surveyor_fee_only = FALSE)
         {
-            $this->load->model('ri_transaction_model');
+
+            // Total Settled Claim Amount
+            $total_claim_amount = $this->compute_claim_net_total($record->id, $surveyor_fee_only);
 
             /**
-             * We have to breakdwon total Claim into
-             *      1. Amount paid by the Insurance company
-             *      2. Rest Amount paid by Re-insurer
+             * Return the RI - Claim Recovery
              */
-            $total_claim_amount = $this->compute_claim_net_total($record->id, $surveyor_fee_only);
+            return $this->_compute_ri_breakdown($total_claim_amount, $record->policy_id);
+        }
+
+        // ----------------------------------------------------------------
+
+        private function _build_claim_ri_breakdown_estimated($record)
+        {
+            // Total Estimated Claim Amount
+            $total_claim_amount = $this->compute_total_estimated_amount($record);
+
+            /**
+             * Return the RI - Claim Recovery
+             */
+            return $this->_compute_ri_breakdown($total_claim_amount, $record->policy_id);
+        }
+
+        // ----------------------------------------------------------------
+
+        private function _compute_ri_breakdown($claim_amount, $policy_id)
+        {
+            $this->load->model('ri_transaction_model');
 
             /**
              * Current RI Transaction State
              *
              *  Compute the sum of all ri transactions of this policy
              */
-            $ri_distribution    = $this->ri_transaction_model->latest_build_by_policy($record->policy_id);
+            $ri_distribution    = $this->ri_transaction_model->latest_build_by_policy($policy_id);
             $si_gross           = $ri_distribution->si_gross;
 
-            $ratio = bcdiv($total_claim_amount, $si_gross, IQB_AC_DECIMAL_PRECISION);
+            $ratio = bcdiv($claim_amount, $si_gross, IQB_AC_DECIMAL_PRECISION);
 
             $data               = [];
             $ri_claim_columns   = array_keys(self::$claim_ri_fields);
@@ -1214,6 +1222,27 @@ class Claim_model extends MY_Model
     }
 
     // ----------------------------------------------------------------
+
+    /**
+     * Get Total Esitmated Claim Amount
+     *
+     *
+     * @param   object|int $record  Claim Record
+     * @return  decimal
+     */
+    public function compute_total_estimated_amount($record)
+    {
+        $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Claim_model][Method: compute_total_estimated_amount()]: Claim information could not be found.");
+        }
+
+        return bcadd(floatval($record->amt_estimated_loss_ip), floatval($record->amt_estimated_loss_tpp), IQB_AC_DECIMAL_PRECISION);
+    }
+
+    // ----------------------------------------------------------------
+
 
     /**
      * Net Total Claim Amount
@@ -1262,6 +1291,39 @@ class Claim_model extends MY_Model
                 $data[$col] = $record->{$col};
             }
         }
+
+        if( !$for_display )
+        {
+            return $data;
+        }
+
+
+        // Format for Display
+        $display_data = [];
+        foreach(self::$claim_ri_fields as $col => $label)
+        {
+            $display_data[$label] = $data[$col] ?? NULL;
+        }
+        return $display_data;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Claim RI Breakdown Data - For Estimated Amount
+     *
+     * @param Object/Int $record Claim ID or Claim Record
+     * @return array
+     */
+    public function ri_breakdown_estimated($record, $for_display = FALSE)
+    {
+        $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Claim_model][Method: ri_breakdown_estimated()]: Claim information could not be found.");
+        }
+
+        $data = $this->_build_claim_ri_breakdown_estimated($record);
 
         if( !$for_display )
         {

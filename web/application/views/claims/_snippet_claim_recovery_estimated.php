@@ -3,11 +3,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Claim: Details - Snippet - Claim Recovery
 */
-$claim_ri_data = CLAIM__ri_breakdown($record, TRUE);
+$claim_ri_data = CLAIM__ri_breakdown_estimated($record, TRUE);
 ?>
 <div class="box box-bordered box-default">
     <div class="box-header with-border">
-        <h4 class="box-title">Claim Recovery - Settled</h4>
+        <h4 class="box-title">Claim Recovery - Estimated</h4>
     </div>
     <table class="table table-responsive table-condensed">
         <tbody>
