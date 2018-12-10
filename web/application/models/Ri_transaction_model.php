@@ -205,7 +205,7 @@ class Ri_transaction_model extends MY_Model
      * @param int $ri_txn_for
      * @return object
      */
-    public function latest_build_by_policy($policy_id)
+    public function latest_build_by_policy($policy_id, $ri_txn_for)
     {
         $sum_fields = [];
         $fields     = ['si_gross', 'si_comp_cession', 'si_treaty_total', 'si_treaty_retaintion', 'si_treaty_quota', 'si_treaty_1st_surplus', 'si_treaty_2nd_surplus', 'si_treaty_3rd_surplus', 'si_treaty_fac', 'premium_gross', 'premium_pool', 'premium_net', 'premium_comp_cession', 'premium_treaty_total', 'premium_treaty_retaintion', 'premium_treaty_quota', 'premium_treaty_1st_surplus', 'premium_treaty_2nd_surplus', 'premium_treaty_3rd_surplus', 'premium_treaty_fac', 'claim_gross', 'claim_comp_cession', 'claim_treaty_total', 'claim_treaty_retaintion', 'claim_treaty_quota', 'claim_treaty_1st_surplus', 'claim_treaty_2nd_surplus', 'claim_treaty_3rd_surplus', 'claim_treaty_fac'];

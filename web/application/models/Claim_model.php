@@ -1153,7 +1153,7 @@ class Claim_model extends MY_Model
             /**
              * Return the RI - Claim Recovery
              */
-            return $this->_compute_ri_breakdown($total_claim_amount, $record->policy_id);
+            return $this->_compute_ri_breakdown($total_claim_amount, $record->policy_id, $record->category);
         }
 
         // ----------------------------------------------------------------
@@ -1166,12 +1166,12 @@ class Claim_model extends MY_Model
             /**
              * Return the RI - Claim Recovery
              */
-            return $this->_compute_ri_breakdown($total_claim_amount, $record->policy_id);
+            return $this->_compute_ri_breakdown($total_claim_amount, $record->policy_id, $record->category);
         }
 
         // ----------------------------------------------------------------
 
-        private function _compute_ri_breakdown($claim_amount, $policy_id)
+        private function _compute_ri_breakdown($claim_amount, $policy_id, $category)
         {
             $this->load->model('ri_transaction_model');
 
@@ -1180,9 +1180,11 @@ class Claim_model extends MY_Model
              *
              *  Compute the sum of all ri transactions of this policy
              */
-            $ri_distribution    = $this->ri_transaction_model->latest_build_by_policy($policy_id, IQB_RI_TXN_FOR_BASIC);
+            $ri_txn_for         = $this->_ri_txn_for($category);
+            $ri_distribution    = $this->ri_transaction_model->latest_build_by_policy($policy_id, $ri_txn_for);
             $si_gross           = $ri_distribution->si_gross;
 
+            // RATIO
             $ratio = $claim_amount / $si_gross; // Do not apply precision here.
 
             $data               = [];
@@ -1199,6 +1201,25 @@ class Claim_model extends MY_Model
             }
 
             return $data;
+        }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Get RI's ri_txn_for value based on Claim Category
+         *
+         * @param char $category
+         * @return int
+         */
+        private function _ri_txn_for($category)
+        {
+            $ri_txn_for = IQB_RI_TXN_FOR_BASIC;
+            if($category == IQB_CLAIM_CATEGORY_POOL )
+            {
+                $ri_txn_for = IQB_RI_TXN_FOR_POOL;
+            }
+
+            return $ri_txn_for;
         }
 
     // ----------------------------------------------------------------
