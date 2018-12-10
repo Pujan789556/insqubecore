@@ -7,6 +7,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <h3 class="no-margin">
                 Claim Information
                 <span class="pull-right">
+                    <?php if($record->status != IQB_CLAIM_STATUS_DRAFT): ?>
+                        <?php if($this->dx_auth->is_authorized('claims', 'generate.claim.discharge.voucher')): ?>
+                            <a
+                                href="<?php echo site_url('claims/discharge_voucher/' . $record->id );?>"
+                                title="Print Discharge Voucher"
+                                target="_blank"
+                                class="btn btn-sm bg-navy btn-round action"
+                                data-toggle="tooltip"
+                                ><i class="fa fa-print"></i> Discharge Voucher</a>
+                        <?php endif;?>
+                        <?php if($this->dx_auth->is_authorized('claims', 'generate.claim.note')): ?>
+
+                            <a
+                                href="<?php echo site_url('claims/note/' . $record->id );?>"
+                                title="Print Claim Note"
+                                target="_blank"
+                                class="btn btn-sm bg-navy btn-round action narrow"
+                                data-toggle="tooltip"
+                                ><i class="fa fa-print"></i> Claim Note</a>
+                        <?php endif;?>
+                    <?php endif;?>
+
                     <?php
                     /**
                      * Editable, Status Action
@@ -358,42 +380,57 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </div>
         <div class="box-body" style="overflow-x: scroll;">
             <table class="table table-responsive table-condensed table-hover">
-                <thead>
-                    <tr>
-                        <th>S.N.</th>
-                        <th>Category</th>
-                        <th>Sub-Category</th>
-                        <th>Title</th>
-                        <th class="text-right">Claimed Amt (Rs.)</th>
-                        <th class="text-right">Assessed Amt (Rs.)</th>
-                        <th class="text-right">Recommended Amt (Rs.)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $payable_to_insured     = CLAIM__net_total_payable_insured($record->id);
-                    $surveyor_gorss_total   = CLAIM__surveyor_gross_total_fee_by_claim($record->id);
-                    $surveyors_vat_total    = CLAIM__surveyor_vat_total_by_claim($record->id);
-                    $claim_gorss_total      = CLAIM__gross_total($record->id);
-                    $claim_net_total        = CLAIM__net_total($record->id);
-                    $i = 1;
-                    foreach($settlements as $single):
-                    ?>
-                        <tr>
-                            <td><?php echo $i++; ?></td>
-                            <td><?php echo CLAIM__settlement_category_dropdown(FALSE)[$single->category] ?></td>
-                            <td><?php echo CLAIM__settlement_subcategory_dropdown(FALSE)[$single->sub_category] ?></td>
-                            <td><?php echo htmlspecialchars($single->title) ?></td>
-                            <td class="text-right"><?php echo number_format($single->claimed_amount, 2) ?></td>
-                            <td class="text-right"><?php echo number_format($single->assessed_amount, 2) ?></td>
-                            <td class="text-right"><?php echo number_format($single->recommended_amount, 2) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
 
-                    <tr>
-                        <td class="border-t-thick" colspan="6">Amount Payable to Insured Party (Rs.)</td>
-                        <td class="text-right border-t-thick"><?php echo number_format($payable_to_insured, 2) ?></td>
-                    </tr>
+                <?php
+                /**
+                 * !!!NOTE!!!
+                 *
+                 * If claim is closed or withdrawn, only surveyor fee is payable.
+                 */
+                $flag_surveyor_only     = CLAIM__is_widthdrawn($record->status) || CLAIM__is_closed($record->status);
+                $payable_to_insured     = CLAIM__net_total_payable_insured($record->id);
+                $surveyor_gorss_total   = CLAIM__surveyor_gross_total_fee_by_claim($record->id);
+                $surveyors_vat_total    = CLAIM__surveyor_vat_total_by_claim($record->id);
+                $claim_gorss_total      = CLAIM__gross_total($record->id, $flag_surveyor_only);
+                $claim_net_total        = CLAIM__net_total($record->id, $flag_surveyor_only);
+
+                if( !$flag_surveyor_only ): ?>
+
+                    <thead>
+                        <tr>
+                            <th>S.N.</th>
+                            <th>Category</th>
+                            <th>Sub-Category</th>
+                            <th>Title</th>
+                            <th class="text-right">Claimed Amt (Rs.)</th>
+                            <th class="text-right">Assessed Amt (Rs.)</th>
+                            <th class="text-right">Recommended Amt (Rs.)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $i = 1;
+                        foreach($settlements as $single):
+                        ?>
+                            <tr>
+                                <td><?php echo $i++; ?></td>
+                                <td><?php echo CLAIM__settlement_category_dropdown(FALSE)[$single->category] ?></td>
+                                <td><?php echo CLAIM__settlement_subcategory_dropdown(FALSE)[$single->sub_category] ?></td>
+                                <td><?php echo htmlspecialchars($single->title) ?></td>
+                                <td class="text-right"><?php echo number_format($single->claimed_amount, 2) ?></td>
+                                <td class="text-right"><?php echo number_format($single->assessed_amount, 2) ?></td>
+                                <td class="text-right"><?php echo number_format($single->recommended_amount, 2) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+
+                        <tr>
+                            <td class="border-t-thick" colspan="6">Amount Payable to Insured Party (Rs.)</td>
+                            <td class="text-right border-t-thick"><?php echo number_format($payable_to_insured, 2) ?></td>
+                        </tr>
+
+                    </tbody>
+                <?php endif ?>
+                <tbody>
                     <tr>
                         <td colspan="6">Surveyor Fee (Rs.)</td>
                         <td class="text-right"><?php echo number_format($surveyor_gorss_total, 2) ?></td>

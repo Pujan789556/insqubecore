@@ -41,6 +41,36 @@ if ( ! function_exists('CLAIM__status_dropdown'))
 	}
 }
 
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__is_closed'))
+{
+	/**
+	 * Is Claim Closed?
+	 *
+	 * @return	bool
+	 */
+	function CLAIM__is_closed( $status )
+	{
+		return $status === IQB_CLAIM_STATUS_CLOSED;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('CLAIM__is_widthdrawn'))
+{
+	/**
+	 * Is Claim Withdrawn?
+	 *
+	 * @return	bool
+	 */
+	function CLAIM__is_widthdrawn( $status )
+	{
+		return $status === IQB_CLAIM_STATUS_WITHDRAWN;
+	}
+}
+
 
 // ------------------------------------------------------------------------
 
@@ -198,23 +228,38 @@ if ( ! function_exists('CLAIM__approval_constraint'))
 
 
 		/**
-		 * Check Claim Criteria
+		 * Applied Claim Scheme?
 		 */
-		if(
-			$record->net_amt_payable_insured === NULL
-				||
-			$record->claim_scheme_id === NULL
-				||
-			$record->assessment_brief === NULL
-		)
+		if( $record->claim_scheme_id == NULL )
 		{
 			$__flag_authorized = FALSE;
 
-			$message = 'You must first set "Claim Settlement Amount", "Claim Scheme",  "Settlement Brief" & "Beema Samiti Report Headings" in order to approve a claim.';
+			$message = 'You must first set  <strong>"Claim Scheme"</strong> in order to approve a claim.';
 		}
 
 		/**
-		 * Beema Samiti Reports
+		 * Claim Settlement ??
+		 */
+		elseif( !CLAIM__net_total_payable_insured($record->id) )
+		{
+			$__flag_authorized = FALSE;
+
+			$message = 'You must first update <strong>"Claim Settlement Amount"</strong> in order to approve a claim.';
+		}
+
+		/**
+		 * Claim Assessment ??
+		 */
+		elseif( empty($record->assessment_brief) OR empty($record->status_remarks))
+		{
+			$__flag_authorized = FALSE;
+
+			$message = 'You must first update <strong>"Update Claim Assessment"</strong> in order to approve a claim.';
+		}
+
+
+		/**
+		 * Beema Samiti Reports ??
 		 */
 		if( $__flag_authorized  )
 		{
@@ -224,11 +269,9 @@ if ( ! function_exists('CLAIM__approval_constraint'))
 			if(!$rel_exists)
 			{
 				$__flag_authorized 	= FALSE;
-				$message = 'You must first set "Beema Samiti Report Headings" in order to approve a claim.';
+				$message = 'You must first update <strong>"Beema Samiti Report Information"</strong> in order to approve a claim.';
 			}
 		}
-
-
 
 
 		// Terminate on Exit?

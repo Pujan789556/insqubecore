@@ -177,37 +177,47 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                                         </tr>
                                         <tbody>
                                             <?php
+                                            /**
+                                             * !!!NOTE!!!
+                                             *
+                                             * If claim is closed or withdrawn, only surveyor fee is payable.
+                                             */
+                                            $flag_surveyor_only = CLAIM__is_widthdrawn($record->status) || CLAIM__is_closed($record->status);
                                             $payable_to_insured     = CLAIM__net_total_payable_insured($record->id);
                                             $surveyor_gorss_total   = CLAIM__surveyor_gross_total_fee_by_claim($record->id);
                                             $surveyors_vat_total    = CLAIM__surveyor_vat_total_by_claim($record->id);
-                                            $claim_gorss_total      = CLAIM__gross_total($record->id);
-                                            $claim_net_total        = CLAIM__net_total($record->id);
+                                            $claim_gorss_total      = CLAIM__gross_total($record->id, $flag_surveyor_only);
+                                            $claim_net_total        = CLAIM__net_total($record->id, $flag_surveyor_only);
 
-                                            $i = 1;
-                                            foreach($settlements as $single):
-                                            ?>
-                                                <tr>
-                                                    <td align="center"><?php echo $i++; ?></td>
-                                                    <td><?php echo htmlspecialchars($single->title) ?></td>
-                                                    <td align="right">
-                                                        <?php
-                                                        $value = number_format($single->recommended_amount, 2);
-                                                        if($single->category == 'ED')
-                                                        {
-                                                            $value = "({$value})";
-                                                        }
-                                                        echo $value;
-                                                        ?>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
+                                            if( !$flag_surveyor_only ):
+                                                $i = 1;
+                                                foreach($settlements as $single):
+                                                ?>
+                                                    <tr>
+                                                        <td align="center"><?php echo $i++; ?></td>
+                                                        <td><?php echo htmlspecialchars($single->title) ?></td>
+                                                        <td align="right">
+                                                            <?php
+                                                            $value = number_format($single->recommended_amount, 2);
+                                                            if($single->category == 'ED')
+                                                            {
+                                                                $value = "({$value})";
+                                                            }
+                                                            echo $value;
+                                                            ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif ?>
                                         </tbody>
 
                                         <tfoot>
-                                            <tr>
-                                                <td class="border-t" align="left" colspan="2">Payable to Insured Party (Rs.)</td>
-                                                <td class="border-t" align="right"><?php echo number_format($payable_to_insured, 2) ?></td>
-                                            </tr>
+                                            <?php if( !$flag_surveyor_only ): ?>
+                                                <tr>
+                                                    <td class="border-t" align="left" colspan="2">Payable to Insured Party (Rs.)</td>
+                                                    <td class="border-t" align="right"><?php echo number_format($payable_to_insured, 2) ?></td>
+                                                </tr>
+                                            <?php endif ?>
                                             <tr>
                                                 <td align="left" colspan="2">Surveyor Fee (Rs.)</td>
                                                 <td align="right"><?php echo number_format($surveyor_gorss_total, 2) ?></td>

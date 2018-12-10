@@ -4,10 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Endorsement : Row Actions
  */
 ?>
-
-<div class="btn-group">
-    <button type="button" class="btn btn-primary btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
-    <i class="fa fa-pencil-square-o margin-r-5"></i>Edit <i class="fa fa-caret-down"></i></button>
+<div class="btn-group margin-l-5">
+    <button type="button" class="btn btn-round btn-primary btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
+    <i class="fa fa-cog margin-r-5"></i> <i class="fa fa-caret-down"></i></button>
     <ul class="dropdown-menu pull-right" role="menu">
         <?php
         /**
@@ -179,8 +178,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
              *
              *
              */
-            $flag_eligible_to_approve = CLAIM__approval_constraint($record, FALSE);
-            if( $flag_eligible_to_approve == TRUE  && $this->dx_auth->is_authorized('claims', 'status.to.approved') ): ?>
+            if( $this->dx_auth->is_authorized('claims', 'status.to.approved') ): ?>
                 <li class="divider"></li><li>
                     <a href="#"
                         title="Approve"
@@ -299,26 +297,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <i class="fa fa-dollar"></i> Surveyor Voucher</a>
                 </li>
         <?php endif;?>
-
-        <?php if($record->status != IQB_CLAIM_STATUS_DRAFT): ?>
-            <?php if($this->dx_auth->is_authorized('claims', 'generate.claim.discharge.voucher')): ?>
-                <li class="divider"></li>
-                <li>
-                    <a href="<?php echo site_url('claims/note/' . $record->id );?>" target="_blank">
-                        <i class="fa fa-file-pdf-o"></i> Claim Note
-                    </a>
-                </li>
-            <?php endif;?>
-            <?php if($this->dx_auth->is_authorized('claims', 'generate.claim.note')): ?>
-                <li class="divider"></li>
-                <li>
-                    <a href="<?php echo site_url('claims/discharge_voucher/' . $record->id );?>" target="_blank">
-                        <i class="fa fa-file-pdf-o"></i> Discharge Voucher
-                    </a>
-                </li>
-            <?php endif;?>
-        <?php endif;?>
-
     </ul>
 </div>
 

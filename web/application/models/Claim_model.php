@@ -1183,7 +1183,7 @@ class Claim_model extends MY_Model
             $ri_distribution    = $this->ri_transaction_model->latest_build_by_policy($policy_id);
             $si_gross           = $ri_distribution->si_gross;
 
-            $ratio = bcdiv($claim_amount, $si_gross, IQB_AC_DECIMAL_PRECISION);
+            $ratio = $claim_amount / $si_gross; // Do not apply precision here.
 
             $data               = [];
             $ri_claim_columns   = array_keys(self::$claim_ri_fields);
