@@ -1488,8 +1488,8 @@ class Endorsement_model extends MY_Model
     public function get_current_endorsement_by_policy($policy_id)
     {
         $where = [
-            'ENDRSMNT.policy_id'    => $policy_id,
-            'ENDRSMNT.flag_current' => IQB_FLAG_ON
+            'E.policy_id'    => $policy_id,
+            'E.flag_current' => IQB_FLAG_ON
         ];
 
         $this->_single_select();
@@ -1509,14 +1509,14 @@ class Endorsement_model extends MY_Model
     public function get_latest_active_by_policy($policy_id)
     {
         $where = [
-            'ENDRSMNT.policy_id'    => $policy_id,
-            'ENDRSMNT.status'       => IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
+            'E.policy_id'    => $policy_id,
+            'E.status'       => IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
         ];
 
         $this->_single_select();
 
         return $this->db->where($where)
-                        ->order_by('ENDRSMNT.id', 'desc') // latest active
+                        ->order_by('E.id', 'desc') // latest active
                         ->get()->row();
     }
 
@@ -1532,7 +1532,7 @@ class Endorsement_model extends MY_Model
     {
         $this->_single_select();
 
-        return $this->db->where('ENDRSMNT.id', $id)
+        return $this->db->where('E.id', $id)
                         ->get()->row();
     }
 
@@ -1540,7 +1540,7 @@ class Endorsement_model extends MY_Model
 
     private function _single_select()
     {
-        $select =   "ENDRSMNT.*, " .
+        $select =   "E.*, " .
 
                     // Branch and Portfolio
                     "P.category as policy_category, P.insurance_company_id, P.code as policy_code, P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, " .
@@ -1548,14 +1548,27 @@ class Endorsement_model extends MY_Model
                     // Transfer Customer Name
                     "C.full_name_en as transfer_customer_name_en, C.full_name_np as transfer_customer_name_np, " .
 
+
                     // Endorsement Audit
-                    "AE.id AS audit_endorsement_id, AE.object_id AS audit_object_id, AE.customer_id AS audit_customer_id, AE.audit_policy, AE.audit_object, AE.audit_customer";
+                    "AE.id AS audit_endorsement_id, AE.object_id AS audit_object_id, AE.customer_id AS audit_customer_id, AE.audit_policy, AE.audit_object, AE.audit_customer, " .
+
+                    /**
+                     * User Table - Sales Staff Info ( username, code)
+                     */
+                    "SU.username as sold_by_username, SU.code AS sold_by_code, " .
+
+                    /**
+                     * Agent Name
+                     */
+                    "A.name as agent_name";
 
         $this->db->select($select)
-                ->from($this->table_name . ' AS ENDRSMNT')
-                ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
-                ->join('audit_endorsements AE', 'AE.endorsement_id = ENDRSMNT.id', 'left')
-                ->join('dt_customers C', 'C.id = ENDRSMNT.transfer_customer_id', 'left');
+                ->from($this->table_name . ' AS E')
+                ->join('dt_policies P', 'P.id = E.policy_id')
+                ->join('audit_endorsements AE', 'AE.endorsement_id = E.id', 'left')
+                ->join('dt_customers C', 'C.id = E.transfer_customer_id', 'left')
+                ->join('auth_users SU', 'SU.id = E.sold_by', 'left')
+                ->join('master_agents A', 'E.agent_id = A.id', 'left');
     }
 
     // --------------------------------------------------------------------
@@ -1576,7 +1589,7 @@ class Endorsement_model extends MY_Model
                         /**
                          * Endorsement Table
                          */
-                        "ENDRSMNT.*, " .
+                        "E.*, " .
 
                         /**
                          * Policy Table
@@ -1603,14 +1616,14 @@ class Endorsement_model extends MY_Model
                          */
                         "A.name as agent_name, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code"
                     )
-                    ->from($this->table_name . ' AS ENDRSMNT')
-                    ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
+                    ->from($this->table_name . ' AS E')
+                    ->join('dt_policies P', 'P.id = E.policy_id')
                     ->join('master_branches B', 'B.id = P.branch_id')
                     ->join('dt_customers C', 'C.id = P.customer_id')
-                    ->join('dt_customers COT', 'COT.id = ENDRSMNT.transfer_customer_id', 'left')
-                    ->join('master_agents A', 'ENDRSMNT.agent_id = A.id', 'left')
+                    ->join('dt_customers COT', 'COT.id = E.transfer_customer_id', 'left')
+                    ->join('master_agents A', 'E.agent_id = A.id', 'left')
                     ->where($where)
-                    ->where_not_in('ENDRSMNT.txn_type', [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]);
+                    ->where_not_in('E.txn_type', [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]);
 
         /**
          * Customer Address
@@ -1662,7 +1675,7 @@ class Endorsement_model extends MY_Model
         $this->dx_auth->apply_user_scope('P');
 
         // Get the damn result
-        return $this->db->order_by('ENDRSMNT.id', 'DESC')
+        return $this->db->order_by('E.id', 'DESC')
                         ->get()->result();
     }
 
@@ -1757,8 +1770,8 @@ class Endorsement_model extends MY_Model
             throw new Exception("Exception [Model:Endorsement_model][Method: get_fresh_renewal_by_policy()]: Invalid Transaction Type.");
         }
         $where = [
-            'ENDRSMNT.policy_id'    => $policy_id,
-            'ENDRSMNT.txn_type'     => $txn_type
+            'E.policy_id'    => $policy_id,
+            'E.txn_type'     => $txn_type
         ];
         $this->_single_select();
         return $this->db->where($where)
@@ -1775,9 +1788,9 @@ class Endorsement_model extends MY_Model
      */
     public function get_flag_ri_approval_by_policy($policy_id)
     {
-        return $this->db->select('ENDRSMNT.flag_ri_approval')
-                        ->from($this->table_name . ' AS ENDRSMNT')
-                        ->where('ENDRSMNT.policy_id', $policy_id)
+        return $this->db->select('E.flag_ri_approval')
+                        ->from($this->table_name . ' AS E')
+                        ->where('E.policy_id', $policy_id)
                         ->limit(1)
                         ->get()->row()->flag_ri_approval;
     }
