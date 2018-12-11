@@ -184,7 +184,7 @@ if ( ! function_exists('_TXN_MISC_CS_premium_validation_rules'))
                 [
 	                'field' => 'premium[risk]',
 	                'label' => 'Risk Name',
-	                'rules' => 'trim|alpha_numeric|max_length[20]',
+	                'rules' => 'trim|required|alpha_numeric|max_length[20]',
 	                '_type'     => 'hidden',
 	                '_key' 		=> 'risk',
 	                '_required' => true
@@ -192,7 +192,7 @@ if ( ! function_exists('_TXN_MISC_CS_premium_validation_rules'))
 	            [
 	                'field' => 'premium[rate]',
 	                'label' => 'Rate (Rs Per Thousand)',
-	                'rules' => 'trim|prep_decimal|decimal|max_length[10]',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
 	                '_type'     => 'text',
 	                '_key' 		=> 'rate',
 	                '_required' => true

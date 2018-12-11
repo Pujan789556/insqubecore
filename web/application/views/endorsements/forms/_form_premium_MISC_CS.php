@@ -30,7 +30,7 @@ $premium_computation_table = $endorsement_record->premium_computation_table ? js
                 <thead>
                     <tr>
                         <th>Risk</th>
-                        <th>Rate (Rs. Per Thousand)</th>
+                        <th>Rate (Rs. Per Thousand) <?php echo field_compulsary_text( TRUE ) ?></th>
                     </tr>
                 </thead>
                 <tbody>

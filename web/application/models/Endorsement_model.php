@@ -234,32 +234,7 @@ class Endorsement_model extends MY_Model
                     /**
                      * Transfer Fee
                      */
-                    'fees' => [
-                        [
-                            'field' => 'amt_transfer_fee',
-                            'label' => 'Transfer Fee (Rs.)',
-                            'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                            '_type'     => 'text',
-                            '_required' => true
-                        ],
-                        [
-                            'field' => 'amt_transfer_ncd',
-                            'label' => 'NCD Return (Rs.)',
-                            'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                            '_type'     => 'text',
-                            '_default'  => 0.00,
-                            '_help_text' => '<strong>No Claim Discount Return:</strong> This applies only in <strong class="text-red">MOTOR</strong> portfoliios.',
-                            '_required' => true
-                        ],
-                        [
-                            'field' => 'amt_stamp_duty',
-                            'label' => 'Stamp Duty (Rs.)',
-                            'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-                            '_type'     => 'text',
-                            '_default'  => 0,
-                            '_required' => true
-                        ]
-                    ]
+                    'fees' => $this->_v_rules_OT_FEE($portfolio_id)
                 ];
                 break;
 
@@ -318,6 +293,48 @@ class Endorsement_model extends MY_Model
             return $rules;
         }
     }
+
+    // ----------------------------------------------------------------
+
+        private function _v_rules_OT_FEE($portfolio_id)
+        {
+
+            $motor_portfolio_ids = array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR);
+
+            $rules = [
+                [
+                    'field' => 'amt_transfer_fee',
+                    'label' => 'Transfer Fee (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_default'  => 100,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'amt_stamp_duty',
+                    'label' => 'Stamp Duty (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_default'  => 0,
+                    '_required' => true
+                ]
+            ];
+
+            if(in_array($portfolio_id, $motor_portfolio_ids))
+            {
+                $rules[] = [
+                    'field' => 'amt_transfer_ncd',
+                    'label' => 'NCD Return (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_default'  => 0.00,
+                    '_help_text' => '<strong>No Claim Discount Return:</strong> This applies only in <strong class="text-red">MOTOR</strong> portfoliios.',
+                    '_required' => true
+                ];
+            }
+
+            return $rules;
+        }
 
     // ----------------------------------------------------------------
 
