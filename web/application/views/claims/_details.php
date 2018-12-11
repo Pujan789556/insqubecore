@@ -419,7 +419,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <td><?php echo htmlspecialchars($single->title) ?></td>
                                 <td class="text-right"><?php echo number_format($single->claimed_amount, 2) ?></td>
                                 <td class="text-right"><?php echo number_format($single->assessed_amount, 2) ?></td>
-                                <td class="text-right"><?php echo number_format($single->recommended_amount, 2) ?></td>
+                                <td class="text-right">
+                                    <?php
+                                    $value = number_format($single->recommended_amount, 2);
+                                    if($single->category == 'ED')
+                                    {
+                                        $value = "({$value})";
+                                    }
+                                    echo $value; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
 

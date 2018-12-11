@@ -29,7 +29,7 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                         <table class="table table-footer no-border">
                             <tr>
                                 <td class="border-t" align="left">'. $this->settings->orgn_name_en  . '</td>
-                                <td class="border-t" align="right">CLAIM NO. '. $record->claim_code . ', ' . $print_date . '</td>
+                                <td class="border-t" align="right">CLAIM NO. '. $record->claim_code . ', ' . $print_date . ', Page {PAGENO} of {nb}</td>
                             </tr>
                         </table>
                     </htmlpagefooter>
@@ -107,33 +107,6 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
         </table>
         <table class="outer-table">
             <tr>
-                <td width="50%">
-                    <table class="no-border">
-                        <tbody>
-                            <tr><th colspan="2" class="border-b">CLAIM INTIMATION DETAILS</th></tr>
-                            <tr>
-                                <th width="30%" align="left">Name:</th>
-                                <td><?php echo $record->intimation_name;?></td>
-                            </tr>
-                            <tr>
-                                <th align="left">Address:</th>
-                                <td><?php echo nl2br(htmlspecialchars($record->initimation_address));?></td>
-                            </tr>
-                            <tr>
-                                <th align="left">Contact No.:</th>
-                                <td><?php echo $record->initimation_contact;?></td>
-                            </tr>
-                            <tr>
-                                <th align="left">Date:</th>
-                                <td><?php echo $record->intimation_date;?></td>
-                            </tr>
-                            <tr>
-                                <th align="left">Nature of Loss:</th>
-                                <td align="left"><?php echo $record->loss_nature;?></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </td>
                 <td>
                     <table class="no-border">
                         <tbody>
@@ -157,6 +130,33 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                             <tr>
                                 <th align="left">Details:</th>
                                 <td><?php echo nl2br(htmlspecialchars($record->accident_details));?></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td width="50%">
+                    <table class="no-border">
+                        <tbody>
+                            <tr><th colspan="2" class="border-b">CLAIM INTIMATION DETAILS</th></tr>
+                            <tr>
+                                <th width="30%" align="left">Name:</th>
+                                <td><?php echo $record->intimation_name;?></td>
+                            </tr>
+                            <tr>
+                                <th align="left">Address:</th>
+                                <td><?php echo nl2br(htmlspecialchars($record->initimation_address));?></td>
+                            </tr>
+                            <tr>
+                                <th align="left">Contact No.:</th>
+                                <td><?php echo $record->initimation_contact;?></td>
+                            </tr>
+                            <tr>
+                                <th align="left">Date:</th>
+                                <td><?php echo $record->intimation_date;?></td>
+                            </tr>
+                            <tr>
+                                <th align="left">Nature of Loss:</th>
+                                <td align="left"><?php echo $record->loss_nature;?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -194,7 +194,7 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
 
         <table class="outer-table">
             <tr>
-                <td width="60%">
+                <td width="55%">
                     <table class="no-border">
                         <tbody>
                             <tr><th class="border-b">CLAIM SETTLEMENT DETAILS</th></tr>
@@ -272,49 +272,7 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                         </tbody>
                     </table>
                 </td>
-                <td width="40%">
-                    <table class="no-border">
-                        <tbody>
-                            <tr><th class="border-b" colspan="2">CLAIM RECOVERY</th></tr>
-                            <?php
-                            $claim_ri_data = CLAIM__ri_breakdown($record, TRUE);
-                            foreach($claim_ri_data as $label => $value): ?>
-                                <tr>
-                                    <td align="left"><?php echo $label ?> (Rs.)</td>
-                                    <td align="right"><?php echo $value ? number_format($value, 2) : '';?></td>
-                                </tr>
-                            <?php endforeach ?>
-                        </tbody>
-                    </table>
-                </td>
-            </tr>
-        </table>
-
-        <table class="outer-table">
-            <tr>
-                <td width="50%">
-                    <table class="no-border">
-                        <tbody>
-                            <tr><th class="border-b">VERIFIED DOCUMENTS</th></tr>
-                            <tr>
-                                <td>
-                                    <?php
-                                    $supporting_docs = array_filter(explode(',', $record->supporting_docs));
-                                    $doc_reference = CLAIM__supporting_docs_dropdown($record->portfolio_id, FALSE);
-
-                                    echo '<ol>';
-                                        foreach($supporting_docs as $key)
-                                        {
-                                            echo '<li>', $doc_reference[$key], '</li>';
-                                        }
-                                    echo '</ol>';
-                                    ?>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </td>
-                <td>
+                <td width="45%">
                     <table class="no-border">
                         <tbody>
                             <tr><th class="border-b">SURVEYOR DETAILS</th></tr>
@@ -347,16 +305,13 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                     </table>
                 </td>
             </tr>
-
-            <tr>
-                <td colspan="2">
-                    <p><strong>Assessment Note:</strong></p>
-                    <p><?php echo nl2br(htmlspecialchars($record->assessment_note));?></p>
-                </td>
-            </tr>
         </table>
         <table class="no-border">
-            <tr><td style="font-size: 9pt"><?php echo htmlspecialchars($record->status_remarks); ?></td></tr>
+            <tr>
+                <td style="font-size: 9pt">
+                    <?php echo htmlspecialchars($record->status_remarks); ?>
+                </td>
+            </tr>
         </table>
         <br>
         <table class="no-border">
@@ -384,6 +339,57 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                         <tr><td>Name:</td></tr>
                         <tr><td>Designation:</td></tr>
                     </table>
+                </td>
+            </tr>
+        </table>
+
+        <pagebreak>
+        <h3>Claim Note attaching to and forming part of the Claim No: <?php echo $record->claim_code; ?></h3>
+        <table>
+            <tr>
+                <td width="50%">
+                    <table class="no-border">
+                        <tbody>
+                            <tr><th class="border-b">VERIFIED DOCUMENTS</th></tr>
+                            <tr>
+                                <td>
+                                    <?php
+                                    $supporting_docs = array_filter(explode(',', $record->supporting_docs));
+                                    $doc_reference = CLAIM__supporting_docs_dropdown($record->portfolio_id, FALSE);
+
+                                    echo '<ol>';
+                                        foreach($supporting_docs as $key)
+                                        {
+                                            echo '<li>', $doc_reference[$key], '</li>';
+                                        }
+                                    echo '</ol>';
+                                    ?>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td>
+                    <table class="no-border">
+                        <tbody>
+                            <tr><th class="border-b" colspan="2">CLAIM RECOVERY</th></tr>
+                            <?php
+                            $claim_ri_data = CLAIM__ri_breakdown($record, TRUE);
+                            foreach($claim_ri_data as $label => $value): ?>
+                                <tr>
+                                    <td align="left"><?php echo $label ?> (Rs.)</td>
+                                    <td align="right"><?php echo $value ? number_format($value, 2) : '';?></td>
+                                </tr>
+                            <?php endforeach ?>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    <p><strong>Assessment Note:</strong></p>
+                    <p><?php echo nl2br(htmlspecialchars($record->assessment_note));?></p>
                 </td>
             </tr>
         </table>
