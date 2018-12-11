@@ -952,29 +952,13 @@ class Policy_model extends MY_Model
             $fields = $arr_record['fields'];
 
             /**
-             * TASK 1: Add agent relation
-             * --------------------------
-             */
-            // if( isset($fields['flag_dc']) && $fields['flag_dc'] === IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
-            // {
-            //     // Get the agent id
-            //     $agent_id = $fields['agent_id'];
-            //     $relation_data = [
-            //         'agent_id'  => $agent_id,
-            //         'policy_id' => $id
-            //     ];
-            //     $this->load->model('rel_agent_policy_model');
-            //     $this->rel_agent_policy_model->insert($relation_data, TRUE);
-            // }
-
-            /**
-             * Task 2: Fresh/Renewal Endorsement Data
+             * Task 1: Fresh/Renewal Endorsement Data
              * --------------------------------------
              */
             $this->_save_endorsement_basic($id, $fields);
 
             /**
-             * Task 3: Policy Tags
+             * Task 2: Policy Tags
              * ---------------------
              */
             $this->load->model('rel_policy_tag_model');
@@ -983,7 +967,7 @@ class Policy_model extends MY_Model
 
 
             /**
-             * Task 4: Clear Cache
+             * Task 3: Clear Cache
              * ---------------------
              */
             $customer_id = $fields['customer_id'];
@@ -1045,36 +1029,14 @@ class Policy_model extends MY_Model
             $fields = $arr_record['fields'];
 
             /**
-             * TASK 1: Update Agent Relation
-             * ------------------------------
-             */
-            $this->load->model('rel_agent_policy_model');
-            $relation_data = [
-                'policy_id' => $id
-            ];
-
-            // if( isset($fields['flag_dc']) && $fields['flag_dc'] === IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
-            // {
-            //     // Add or Update the Relation
-            //     // Get the agent id
-            //     $relation_data['agent_id'] = $fields['agent_id'];
-            //     $this->rel_agent_policy_model->insert_or_update($relation_data);
-            // }
-            // else
-            // {
-            //     // Delete if we have any existing record having this policy
-            //     $this->rel_agent_policy_model->delete_by($relation_data);
-            // }
-
-            /**
-             * Task 2: Fresh/Renewal Endorsement Data
+             * Task 1: Fresh/Renewal Endorsement Data
              * --------------------------------------
              */
             $this->_save_endorsement_basic($id, $fields);
 
 
             /**
-             * Task 3: Policy Tags
+             * Task 2: Policy Tags
              * ---------------------
              */
             $this->load->model('rel_policy_tag_model');
@@ -1082,7 +1044,7 @@ class Policy_model extends MY_Model
             $this->rel_policy_tag_model->save($id, $tags);
 
             /**
-             * Task 4: Delete Creditors if Flag on Credits is NO
+             * Task 3: Delete Creditors if Flag on Credits is NO
              */
             if( isset($fields['flag_on_credit']) && $fields['flag_on_credit'] === IQB_FLAG_NO)
             {
@@ -1092,7 +1054,7 @@ class Policy_model extends MY_Model
 
 
             /**
-             * Task 5: Clear Cache
+             * Task 4: Clear Cache
              * ---------------------
              */
             $customer_id = $fields['customer_id'];
@@ -1941,7 +1903,6 @@ class Policy_model extends MY_Model
                  ->join('auth_users SU', 'SU.id = P.sold_by', 'left')
                  ->join('auth_users CU', 'CU.id = P.created_by')
                  ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
-                 // ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
                  ->join('master_agents A', 'P.agent_id = A.id', 'left')
                  ->join('master_companies IC', 'IC.id = P.insurance_company_id', 'left');
 

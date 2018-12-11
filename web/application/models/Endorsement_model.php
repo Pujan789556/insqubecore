@@ -1608,8 +1608,7 @@ class Endorsement_model extends MY_Model
                     ->join('master_branches B', 'B.id = P.branch_id')
                     ->join('dt_customers C', 'C.id = P.customer_id')
                     ->join('dt_customers COT', 'COT.id = ENDRSMNT.transfer_customer_id', 'left')
-                    ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
-                    ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
+                    ->join('master_agents A', 'ENDRSMNT.agent_id = A.id', 'left')
                     ->where($where)
                     ->where_not_in('ENDRSMNT.txn_type', [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]);
 
