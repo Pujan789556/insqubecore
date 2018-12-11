@@ -35,9 +35,6 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                     </htmlpagefooter>
                     <sethtmlpagefooter name="myfooter" show-this-page="1" value="on" />';
     ?>
-    <style type="text/css">
-        .outer-table{margin-bottom: 5px;}
-    </style>
     </head>
     <body>
         <!--mpdf
@@ -74,6 +71,17 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                                     <td><?php echo implode('<br/>', $financer_info) ?></td>
                                 </tr>
                             <?php endif ?>
+
+                            <tr>
+                                <td colspan="2">
+                                    <?php
+                                    /**
+                                     * Invoice, Receipt Info
+                                     */
+                                    $this->load->view('policies/print/_snippet_invoice_info', ['lang' => 'en', 'first_invoice' => $first_invoice]);
+                                    ?>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </td>
@@ -154,11 +162,34 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
                     </table>
                 </td>
             </tr>
-            <tr>
-                <td colspan="2">
-                    <strong>Estimated Claim Amount (Rs.)</strong>: <?php echo number_format(CLAIM__total_estimated_amount($record), 2); ?>
-                </td>
-            </tr>
+        </table>
+        <table class="outer-table">
+            <thead>
+                <tr><td colspan="3" class="bold">LOSS/DAMAGE DETAILS</td></tr>
+                <tr>
+                    <td>Loss/Damage</td>
+                    <td>Details</td>
+                    <td>Estimated Amount (Rs.)</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1. Insured Property</td>
+                    <td><?php echo nl2br(htmlspecialchars($record->loss_details_ip));?></td>
+                    <td class="text-right"><?php echo number_format($record->amt_estimated_loss_ip, 2);?></td>
+                </tr>
+
+                <tr>
+                    <td>2. Third Party Property</td>
+                    <td><?php echo nl2br(htmlspecialchars($record->loss_details_tpp));?></td>
+                    <td class="text-right"><?php echo number_format($record->amt_estimated_loss_tpp, 2);?></td>
+                </tr>
+
+                <tr>
+                    <td colspan="2" class="text-right bold">Total Estimated Amount (Rs.)</td>
+                    <td class="text-right bold"><?php echo number_format(CLAIM__total_estimated_amount($record), 2); ?></td>
+                </tr>
+            </tbody>
         </table>
 
         <table class="outer-table">
@@ -319,8 +350,8 @@ $print_date = "Print Date: " . date('Y-m-d H:i:s');
 
             <tr>
                 <td colspan="2">
-                    <p><strong>Assessment Brief:</strong></p>
-                    <p><?php echo nl2br(htmlspecialchars($record->assessment_brief));?></p>
+                    <p><strong>Assessment Note:</strong></p>
+                    <p><?php echo nl2br(htmlspecialchars($record->assessment_note));?></p>
                 </td>
             </tr>
         </table>

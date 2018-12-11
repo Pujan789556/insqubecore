@@ -295,7 +295,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </div>
                 <div class="box-body">
                     <h4 class="box-title page-header no-margin-b">Assessment Brief</h4>
-                    <p><?php echo $record->assessment_brief ? nl2br(htmlspecialchars($record->assessment_brief)) : '<small>Not Available!</small>';?></p><br>
+                    <p><?php echo $record->assessment_note ? nl2br(htmlspecialchars($record->assessment_note)) : '<small>Not Available!</small>';?></p><br>
 
                     <h4 class="box-title page-header no-margin-b">Other Information</h4>
                     <p><?php echo $record->other_info ? nl2br(htmlspecialchars($record->other_info)) : '<small>Not Available!</small>';?></p><br>

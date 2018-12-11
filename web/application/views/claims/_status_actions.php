@@ -174,7 +174,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
              *  --------------
              *  1. net_amt_payable_insured must be set
              *  2. claim_scheme_id must be set
-             *  3. assessment_brief must be set
+             *  3. assessment_note must be set
              *
              *
              */

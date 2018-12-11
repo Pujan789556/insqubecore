@@ -24,7 +24,7 @@
     .text-right{text-align: right}
     .text-left{text-align: left}
     .text-bold{font-weight: bold;}
-
+    .outer-table, table.outer-table{margin-bottom: 10px;}
     table.margin-b-10,.margin-b-10{margin-bottom:10pt;}
     p { margin: 0pt; }
 

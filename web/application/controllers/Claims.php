@@ -625,7 +625,7 @@ class Claims extends MY_Controller
 
 						case 'update_assessment':
 							$update_data = [
-								'assessment_brief' 	=> $data['assessment_brief'],
+								'assessment_note' 	=> $data['assessment_note'],
 								'other_info' 		=> $data['other_info'],
 								'supporting_docs' 	=> implode(',', $data['supporting_docs'] ?? []),
 								'status_remarks' 	=> $data['status_remarks']
@@ -2415,9 +2415,16 @@ class Claims extends MY_Controller
 		$object_record = $this->object_model->get($policy_record->object_id);
 
 
+		/**
+		 * Invoice & Receipt Data
+		 */
+		$this->load->model('ac_invoice_model');
+		$first_invoice = $this->ac_invoice_model->first_invoice($policy_record->id);
+
 		$data = [
 			'record' 			=> $record,
 			'policy_record' 	=> $policy_record,
+			'first_invoice' 	=> $first_invoice,
 			'creditors' 		=> $creditors,
 			'object_record' 	=> $object_record,
 			'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),

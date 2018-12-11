@@ -213,7 +213,7 @@ if ( ! function_exists('CLAIM__approval_constraint'))
 	 *
 	 * 		1. net_amt_payable_insured must be set
      *  	2. claim_scheme_id must be set
-     *  	3. assessment_brief must be set
+     *  	3. assessment_note must be set
 	 *
 	 * @param object $record 	Claim Record
 	 * @param bool $terminate_on_fail Terminate Right Here if not editable.
@@ -250,7 +250,7 @@ if ( ! function_exists('CLAIM__approval_constraint'))
 		/**
 		 * Claim Assessment ??
 		 */
-		elseif( empty($record->assessment_brief) OR empty($record->status_remarks))
+		elseif( empty($record->assessment_note) OR empty($record->status_remarks))
 		{
 			$__flag_authorized = FALSE;
 
