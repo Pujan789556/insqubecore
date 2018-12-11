@@ -20,7 +20,7 @@ class Policy_model extends MY_Model
     protected $after_delete  = [];
 
 
-    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'category', 'insurance_company_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'care_of', 'policy_package', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
+    protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'category', 'insurance_company_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'care_of', 'policy_package', 'agent_id', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
 
     protected $endorsement_fields = ['proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time'];
 
@@ -418,12 +418,12 @@ class Policy_model extends MY_Model
                     [
                         'field' => 'sold_by',
                         'label' => 'Staff',
-                        'rules' => 'trim|integer|max_length[11]',
+                        'rules' => 'trim|required|integer|max_length[11]',
                         '_id'       => '_marketing-staff',
                         '_extra_attributes' => 'style="width:100%; display:block"',
                         '_type'     => 'dropdown',
                         '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown(),
-                        '_required' => false
+                        '_required' => true
                     ],
                     [
                         'field' => 'flag_dc',
@@ -752,6 +752,13 @@ class Policy_model extends MY_Model
         $data = $this->__category_defaults($data);
 
 
+        // Nullify Current Agent ID if Not on Agent Commission
+        if( isset($data['flag_dc']) && $data['flag_dc'] !== IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
+        {
+            $data['agent_id'] = NULL;
+        }
+
+
         /**
          * Short Term Flag???
          * ------------------
@@ -764,7 +771,7 @@ class Policy_model extends MY_Model
         /**
          * No marketing staff select?
          */
-        $data['sold_by'] = $data['sold_by'] ? $data['sold_by'] : NULL;
+        // $data['sold_by'] = $data['sold_by'] ? $data['sold_by'] : NULL;
 
         return $data;
     }
@@ -812,7 +819,14 @@ class Policy_model extends MY_Model
         /**
          * No marketing staff select?
          */
-        $data['sold_by'] = $data['sold_by'] ? $data['sold_by'] : NULL;
+        // $data['sold_by'] = $data['sold_by'] ? $data['sold_by'] : NULL;
+
+
+        // Nullify Current Agent ID if Not on Agent Commission
+        if( isset($data['flag_dc']) && $data['flag_dc'] !== IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
+        {
+            $data['agent_id'] = NULL;
+        }
 
 
         return $data;
@@ -941,17 +955,17 @@ class Policy_model extends MY_Model
              * TASK 1: Add agent relation
              * --------------------------
              */
-            if( isset($fields['flag_dc']) && $fields['flag_dc'] === IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
-            {
-                // Get the agent id
-                $agent_id = $fields['agent_id'];
-                $relation_data = [
-                    'agent_id'  => $agent_id,
-                    'policy_id' => $id
-                ];
-                $this->load->model('rel_agent_policy_model');
-                $this->rel_agent_policy_model->insert($relation_data, TRUE);
-            }
+            // if( isset($fields['flag_dc']) && $fields['flag_dc'] === IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
+            // {
+            //     // Get the agent id
+            //     $agent_id = $fields['agent_id'];
+            //     $relation_data = [
+            //         'agent_id'  => $agent_id,
+            //         'policy_id' => $id
+            //     ];
+            //     $this->load->model('rel_agent_policy_model');
+            //     $this->rel_agent_policy_model->insert($relation_data, TRUE);
+            // }
 
             /**
              * Task 2: Fresh/Renewal Endorsement Data
@@ -1039,18 +1053,18 @@ class Policy_model extends MY_Model
                 'policy_id' => $id
             ];
 
-            if( isset($fields['flag_dc']) && $fields['flag_dc'] === IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
-            {
-                // Add or Update the Relation
-                // Get the agent id
-                $relation_data['agent_id'] = $fields['agent_id'];
-                $this->rel_agent_policy_model->insert_or_update($relation_data);
-            }
-            else
-            {
-                // Delete if we have any existing record having this policy
-                $this->rel_agent_policy_model->delete_by($relation_data);
-            }
+            // if( isset($fields['flag_dc']) && $fields['flag_dc'] === IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
+            // {
+            //     // Add or Update the Relation
+            //     // Get the agent id
+            //     $relation_data['agent_id'] = $fields['agent_id'];
+            //     $this->rel_agent_policy_model->insert_or_update($relation_data);
+            // }
+            // else
+            // {
+            //     // Delete if we have any existing record having this policy
+            //     $this->rel_agent_policy_model->delete_by($relation_data);
+            // }
 
             /**
              * Task 2: Fresh/Renewal Endorsement Data
@@ -1118,6 +1132,7 @@ class Policy_model extends MY_Model
             'issued_date'   => $data['issued_date'],
             'start_date'    => $data['start_date'],
             'end_date'      => $data['end_date'],
+            'agent_id'      => $data['agent_id'],
             'sold_by'       => $data['sold_by'],
             'txn_details'   => $data['txn_details'],
             'remarks'       => $data['remarks']
@@ -1770,7 +1785,7 @@ class Policy_model extends MY_Model
     public function row($id)
     {
         // Selects
-        $this->__row_select(TRUE);
+        $this->__row_select();
 
         return $this->db->where('P.id', $id)
                         ->get()->row();
@@ -1816,9 +1831,8 @@ class Policy_model extends MY_Model
     // ----------------------------------------------------------------
 
 
-        private function __row_select($signle_select = FALSE)
+        private function __row_select()
         {
-
             // IF CALLED FROM row() function, we should also provide agent id and agent name
             // as it is required while editing the record
             $select = "P.*,
@@ -1826,19 +1840,11 @@ class Policy_model extends MY_Model
                         TIMESTAMP( P.`start_date`, P.`start_time` ) AS start_datetime,
                         TIMESTAMP( P.`end_date`, P.`end_time` ) AS end_datetime,
                         PRT.name_en as portfolio_name, C.full_name_en as customer_name_en, C.full_name_np as customer_name_np";
-            if($signle_select)
-            {
-                $select .= ', RAP.agent_id';
-            }
+
             $this->db->select($select)
                      ->from($this->table_name . ' as P')
                      ->join('master_portfolio PRT', 'PRT.id = P.portfolio_id')
                      ->join('dt_customers C', 'C.id = P.customer_id');
-
-            if($signle_select)
-            {
-                $this->db->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left');
-            }
         }
 
     // ----------------------------------------------------------------
@@ -1921,7 +1927,7 @@ class Policy_model extends MY_Model
                         /**
                          * Agent Table (agent_id, name, picture, bs code, ud code, active, type)
                          */
-                        "A.id as agent_id, A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.active as agent_active, A.type as agent_type"
+                        "A.name as agent_name, A.picture as agent_picture, A.bs_code as agent_bs_code, A.ud_code as agent_ud_code, A.active as agent_active, A.type as agent_type"
 
                     )
                  ->from($this->table_name . ' as P')
@@ -1935,8 +1941,8 @@ class Policy_model extends MY_Model
                  ->join('auth_users SU', 'SU.id = P.sold_by', 'left')
                  ->join('auth_users CU', 'CU.id = P.created_by')
                  ->join('auth_users VU', 'VU.id = P.verified_by', 'left')
-                 ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
-                 ->join('master_agents A', 'RAP.agent_id = A.id', 'left')
+                 // ->join('rel_agent__policy RAP', 'RAP.policy_id = P.id', 'left')
+                 ->join('master_agents A', 'P.agent_id = A.id', 'left')
                  ->join('master_companies IC', 'IC.id = P.insurance_company_id', 'left');
 
         /**

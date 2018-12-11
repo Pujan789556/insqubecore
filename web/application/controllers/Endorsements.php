@@ -355,7 +355,7 @@ class Endorsements extends MY_Controller
 
 		private function _prepare_common_data($post_data, $policy_record)
 		{
-			$fields = [ 'issued_date', 'sold_by', 'start_date', 'end_date', 'txn_details', 'remarks'];
+			$fields = [ 'issued_date', 'agent_id', 'sold_by', 'start_date', 'end_date', 'txn_details', 'remarks'];
 			$data = [];
 			foreach($fields as $key)
 			{

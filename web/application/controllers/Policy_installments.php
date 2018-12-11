@@ -952,13 +952,13 @@ class Policy_installments extends MY_Controller
 	         *
 	         * NOTE: You must have $agent_commission_amount (NOT NULL or Non Zero Value)
 	         */
-	        if( $agent_commission_amount &&  $policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $policy_record->agent_id )
+	        if( $agent_commission_amount &&  $policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $endorsement_record->agent_id )
 	        {
 	        	// Agency Commission
 	        	$dr_rows[] = [
 	        		'account_id' => IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION,
 					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
-					'party_id'   => $policy_record->agent_id,
+					'party_id'   => $endorsement_record->agent_id,
 					'amount' 	 => $agent_commission_amount
 	        	];
 
@@ -971,7 +971,7 @@ class Policy_installments extends MY_Controller
 	        	$cr_rows[] = [
 	        		'account_id' => IQB_AC_ACCOUNT_ID_TDS_AGENCY_COMMISSION,
 					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
-					'party_id'   => $policy_record->agent_id,
+					'party_id'   => $endorsement_record->agent_id,
 					'amount' 	 => $agent_tds_amount
 	        	];
 
@@ -979,7 +979,7 @@ class Policy_installments extends MY_Controller
 	        	$cr_rows[] = [
 	        		'account_id' => IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION_PAYABLE,
 					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
-					'party_id'   => $policy_record->agent_id,
+					'party_id'   => $endorsement_record->agent_id,
 					'amount' 	 => $agent_commission_payable_amount
 	        	];
 	        }
@@ -1158,13 +1158,13 @@ class Policy_installments extends MY_Controller
 	         *
 	         * NOTE: You must have $agent_commission_amount (NOT NULL or Non Zero Value)
 	         */
-	        if( $agent_commission_amount &&  $policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $policy_record->agent_id )
+	        if( $agent_commission_amount &&  $policy_record->flag_dc === IQB_POLICY_FLAG_DC_AGENT_COMMISSION && $endorsement_record->agent_id )
 	        {
 	        	// Agency Commission
 	        	$cr_rows[] = [
 	        		'account_id' => IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION,
 					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
-					'party_id'   => $policy_record->agent_id,
+					'party_id'   => $endorsement_record->agent_id,
 					'amount' 	 => abs($agent_commission_amount)
 	        	];
 
@@ -1178,7 +1178,7 @@ class Policy_installments extends MY_Controller
 	        	$dr_rows[] = [
 	        		'account_id' => IQB_AC_ACCOUNT_ID_TDS_AGENCY_COMMISSION,
 					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
-					'party_id'   => $policy_record->agent_id,
+					'party_id'   => $endorsement_record->agent_id,
 					'amount' 	 => abs($agent_tds_amount)
 	        	];
 
@@ -1186,7 +1186,7 @@ class Policy_installments extends MY_Controller
 	        	$dr_rows[] = [
 	        		'account_id' => IQB_AC_ACCOUNT_ID_AGENCY_COMMISSION_PAYABLE,
 					'party_type' => IQB_AC_PARTY_TYPE_AGENT,
-					'party_id'   => $policy_record->agent_id,
+					'party_id'   => $endorsement_record->agent_id,
 					'amount' 	 => abs($agent_commission_payable_amount)
 	        	];
 

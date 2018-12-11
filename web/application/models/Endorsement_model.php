@@ -17,7 +17,7 @@ class Endorsement_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'customer_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'percent_ri_commission', 'amt_ri_commission', 'amt_direct_discount', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate_on_refund', 'flag_short_term', 'short_term_config', 'short_term_rate', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'customer_id', 'agent_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'percent_ri_commission', 'amt_ri_commission', 'amt_direct_discount', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate_on_refund', 'flag_short_term', 'short_term_config', 'short_term_rate', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
 
     // Resetable Fields on Policy/Object Edit, Endorsement Edit
     protected static $nullable_fields = [
@@ -335,6 +335,7 @@ class Endorsement_model extends MY_Model
         $v_rules                    = [];
 
         $this->load->model('endorsement_template_model');
+        $this->load->model('agent_model');
         $template_dropdown = $this->endorsement_template_model->dropdown( $portfolio_id, $txn_type );
 
         $v_rules = array_merge(
@@ -342,12 +343,23 @@ class Endorsement_model extends MY_Model
                 [
                     'field' => 'sold_by',
                     'label' => 'Sales Staff',
-                    'rules' => 'trim|integer|max_length[11]',
+                    'rules' => 'trim|required|integer|max_length[11]',
                     '_id'       => '_marketing-staff',
                     '_extra_attributes' => 'style="width:100%; display:block"',
                     '_type'     => 'dropdown',
                     '_default'  => $policy_record->sold_by ?? '',
                     '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown(),
+                    '_required' => true
+                ],
+                [
+                    'field' => 'agent_id',
+                    'label' => 'Agent Name',
+                    'rules' => 'trim|integer|max_length[11]',
+                    '_id'       => '_agent-id',
+                    '_extra_attributes' => 'style="width:100%; display:block"',
+                    '_type'     => 'dropdown',
+                    '_default'  => $policy_record->agent_id ?? '',
+                    '_data'     => IQB_BLANK_SELECT + $this->agent_model->dropdown(true),
                     '_required' => false
                 ],
                 [
@@ -1388,13 +1400,26 @@ class Endorsement_model extends MY_Model
 
         /**
          * Task 3: Policy Changes
+         *
+         * Policy's Current Sold By and Agnet ID From This Endorsement
          */
+        $policy_data = [];
+        if( $record->agent_id )
+        {
+            $policy_data['agent_id'] = $record->agent_id;
+        }
+        $policy_data['sold_by'] = $record->sold_by;
+
+        /**
+         * NOTE: The following code is non-functional NOW as we do not edit policy directly
+         *
         $audit_policy = $record->audit_policy ? json_decode($record->audit_policy) : NULL;
         $policy_data = [];
         if( $audit_policy )
         {
             $policy_data = (array)$audit_policy->new;
         }
+        */
 
         // Update Policy Table
         if( $policy_data )
@@ -1680,9 +1705,27 @@ class Endorsement_model extends MY_Model
         private function _rows($policy_id)
         {
             // Data Selection
-            $this->db->select('ENDRSMNT.id, ENDRSMNT.policy_id, ENDRSMNT.txn_type, ENDRSMNT.issued_date, ENDRSMNT.flag_ri_approval, ENDRSMNT.flag_current, ENDRSMNT.status, P.branch_id')
-                            ->from($this->table_name . ' AS ENDRSMNT')
-                            ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
+            $this->db->select(
+                            // Endorsement
+                            "E.id, E.policy_id, E.txn_type, E.issued_date, E.flag_ri_approval, E.flag_current, E.status, " .
+
+                            // Policy
+                            "P.branch_id, " .
+
+                            /**
+                             * User Table - Sales Staff Info ( username, code)
+                             */
+                            "SU.username as sold_by_username, SU.code AS sold_by_code, " .
+
+                            /**
+                             * Agent Name
+                             */
+                            "A.name as agent_name"
+                        )
+                            ->from($this->table_name . ' AS E')
+                            ->join('dt_policies P', 'P.id = E.policy_id')
+                            ->join('auth_users SU', 'SU.id = E.sold_by', 'left')
+                            ->join('master_agents A', 'E.agent_id = A.id', 'left')
                             ->where('P.id', $policy_id);
 
             /**
@@ -1692,7 +1735,7 @@ class Endorsement_model extends MY_Model
 
 
             // Get the damn result
-            return $this->db->order_by('ENDRSMNT.id', 'DESC')
+            return $this->db->order_by('E.id', 'DESC')
                             ->get()->result();
         }
 
