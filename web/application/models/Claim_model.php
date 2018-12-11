@@ -80,9 +80,9 @@ class Claim_model extends MY_Model
                 [
                     'field' => 'category',
                     'label' => 'Settlement From',
-                    'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(IQB_CLAIM_CATEGORIES)).']',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list['.implode(',', array_keys(IQB_CLAIM_CATEGORIES)).']',
                     '_type'     => 'dropdown',
-                    '_default'  => IQB_CLAIM_CATEGORY_REGULAR,
+                    '_default'  => IQB_CLAIM_CATEGORY_NORMAL,
                     '_data'     => IQB_BLANK_SELECT + IQB_CLAIM_CATEGORIES,
                     '_required' => true
                 ],

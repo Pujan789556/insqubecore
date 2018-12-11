@@ -548,6 +548,9 @@ defined('IQB_POLICY_PACKAGE_NOT_APPLICABLE')         OR define('IQB_POLICY_PACKA
 |--------------------------------------------------------------------------
 */
 
+
+
+
 // ACCOUNT BASIC TYPES
 defined('IQB_RI_SETUP_AC_BASIC_TYPE_AY')    OR define('IQB_RI_SETUP_AC_BASIC_TYPE_AY',	1);
 defined('IQB_RI_SETUP_AC_BASIC_TYPE_LOY')   OR define('IQB_RI_SETUP_AC_BASIC_TYPE_LOY', 2);
@@ -557,6 +560,15 @@ defined('IQB_RI_SETUP_AC_BASIC_TYPES')    	OR define('IQB_RI_SETUP_AC_BASIC_TYPE
 	IQB_RI_SETUP_AC_BASIC_TYPE_LOY 	=> 'Loss Occuring Year',
 	IQB_RI_SETUP_AC_BASIC_TYPE_UWY 	=> 'Under Writing Year'
 ]);
+
+// RI TREATY CATEGORY
+defined('IQB_RI_TREATY_CATEGORY_NORMAL')    OR define('IQB_RI_TREATY_CATEGORY_NORMAL',     1);
+defined('IQB_RI_TREATY_CATEGORY_POOL')       OR define('IQB_RI_TREATY_CATEGORY_POOL',      2);
+defined('IQB_RI_TREATY_CATEGORIES')  OR define('IQB_RI_TREATY_CATEGORIES', 	[
+	IQB_RI_TREATY_CATEGORY_NORMAL 	=> 'Normal Risks',
+	IQB_RI_TREATY_CATEGORY_POOL 	=> 'Pool Risks'
+]);
+
 
 // TREATY TYPES (Must Match with Database)
 defined('IQB_RI_TREATY_TYPE_SP')    OR define('IQB_RI_TREATY_TYPE_SP',	1);
@@ -609,10 +621,10 @@ defined('IQB_CLAIM_FLAG_SRV_VOUCHER_VOUCHERED')  	OR define('IQB_CLAIM_FLAG_SRV_
 | CLAIM SETTLEMENT FROM CONSTANTS
 |--------------------------------------------------------------------------
 */
-defined('IQB_CLAIM_CATEGORY_REGULAR')    OR define('IQB_CLAIM_CATEGORY_REGULAR',     'R');
-defined('IQB_CLAIM_CATEGORY_POOL')       OR define('IQB_CLAIM_CATEGORY_POOL',        'P');
+defined('IQB_CLAIM_CATEGORY_NORMAL')    OR define('IQB_CLAIM_CATEGORY_NORMAL',     1);
+defined('IQB_CLAIM_CATEGORY_POOL')      OR define('IQB_CLAIM_CATEGORY_POOL',        2);
 defined('IQB_CLAIM_CATEGORIES')  OR define('IQB_CLAIM_CATEGORIES', 	[
-	IQB_CLAIM_CATEGORY_REGULAR 	=> 'Regular Risks',
+	IQB_CLAIM_CATEGORY_NORMAL 	=> 'Normal Risks',
 	IQB_CLAIM_CATEGORY_POOL 	=> 'Pool Risks'
 ]);
 
