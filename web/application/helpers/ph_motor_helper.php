@@ -375,17 +375,17 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 
 
 			/**
-			 * Default Premium Check
-			 * ---------------------
+			 * Default Premium Check -- Fresh/Renewal ONLY
+			 * -------------------------------------------
 			 *
 			 * If $premium_A_total  is below the default premium amount, we should use
 			 * the default premium amount from Motor Tariff.
 			 */
-			if( $tariff_record->default_premium > $premium_A_total )
+			if( _ENDORSEMENT_is_first( $endorsement_record->txn_type) && $tariff_record->default_premium > $premium_A_total )
 			{
 
 				// Premium Total and Commissionable Amount to Default.
-				$premium_A_total 				= $tariff_record->default_premium;
+				$premium_A_total 			= $tariff_record->default_premium;
 				$commissionable_premium 	= $premium_A_total;
 
 				// Remove all the sections
@@ -1056,13 +1056,13 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 			$premium_A_total  = $__premium_A_row_17 = $__premium_A_row_CHA + $__premium_A_row_16;
 
 			/**
-			 * Default Premium Check
-			 * ---------------------
+			 * Default Premium Check -- Fresh/Renewal ONLY
+			 * -------------------------------------------
 			 *
 			 * If $premium_A_total  is below the default premium amount, we should use
 			 * the default premium amount from Motor Tariff.
 			 */
-			if( $tariff_record->default_premium > $premium_A_total )
+			if( _ENDORSEMENT_is_first( $endorsement_record->txn_type) && $tariff_record->default_premium > $premium_A_total )
 			{
 
 				// Premium Total and Commissionable Amount to Default.
@@ -1873,13 +1873,13 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
             $premium_A_total =  $__premium_A_row_NGA - $direct_discount + $__premium_A_row_towing;
 
             /**
-			 * Default Premium Check
-			 * ---------------------
+			 * Default Premium Check -- Fresh/Renewal ONLY
+			 * -------------------------------------------
 			 *
 			 * If $premium_A_total  is below the default premium amount, we should use
 			 * the default premium amount from Motor Tariff.
 			 */
-			if( $tariff_record->default_premium > $premium_A_total )
+			if( _ENDORSEMENT_is_first( $endorsement_record->txn_type) && $tariff_record->default_premium > $premium_A_total )
 			{
 
 				// Premium Total and Commissionable Amount to Default.
