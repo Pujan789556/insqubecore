@@ -8,6 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<tr>
 		<th>ID</th>
 		<th>Title</th>
+		<th>For</th>
 		<th>Fiscal Year</th>
 		<th>Treaty Type</th>
 		<th>Actions</th>

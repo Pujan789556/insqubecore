@@ -22,6 +22,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 			<?php echo $record->name;?>
 		</a>
 	</td>
+	<td><?php echo IQB_RI_TREATY_CATEGORIES[$record->category];?></td>
 	<td><?php echo $record->fy_code_np . " ({$record->fy_code_en})";?></td>
 	<td><?php echo $record->treaty_type_name;?></td>
 	<td class="ins-action">

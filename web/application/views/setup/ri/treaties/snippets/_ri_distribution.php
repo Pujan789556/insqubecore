@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             	class="action narrow trg-dialog-edit pull-right btn btn-sm btn-primary"
             	title="Edit RI Distribution"
             	data-toggle="tooltip"
-            	data-box-size="large"
+            	data-box-size="full-width"
             	data-title="<i class='fa fa-pencil-square-o'></i> Edit RI Distribution"
             	data-url="<?php echo site_url('ri_setup_treaties/distribution/'. $record->id)?>"
             	data-form="#__form-treaty-setup-distribution">

@@ -193,6 +193,14 @@ class Ri_setup_treaties extends MY_Controller
 	                '_required' => false
 	            ],
 	            [
+	                'field' => 'filter_category',
+	                'label' => 'Treaty For',
+	                'rules' => 'trim|integer|max_length[1]',
+	                '_type'     => 'dropdown',
+	                '_data'     => IQB_BLANK_SELECT + IQB_RI_TREATY_CATEGORIES,
+	                '_required' => false
+	            ],
+	            [
 	                'field' => 'filter_treaty_type_id',
 	                'label' => 'Treaty Type',
 	                'rules' => 'trim|integer|max_length[3]',
@@ -221,6 +229,7 @@ class Ri_setup_treaties extends MY_Controller
 				{
 					$data['data'] = [
 						'fiscal_yr_id' 		=> $this->input->post('filter_fiscal_yr_id') ?? NULL,
+						'category' 			=> $this->input->post('filter_category') ?? NULL,
 						'treaty_type_id' 	=> $this->input->post('filter_treaty_type_id') ?? NULL
 					];
 					$data['status'] = 'success';
@@ -955,8 +964,9 @@ class Ri_setup_treaties extends MY_Controller
 		public function _cb_treaty_type__check_duplicate($treaty_type_id, $id=NULL)
 		{
 			$treaty_type_id = strtoupper( $treaty_type_id ? $treaty_type_id : $this->input->post('treaty_type_id') );
-	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
-	    	$fiscal_yr_id = (int)$this->input->post('fiscal_yr_id');
+	    	$id   			= $id ? (int)$id : (int)$this->input->post('id');
+	    	$fiscal_yr_id 	= (int)$this->input->post('fiscal_yr_id');
+	    	$category 		= (int)$this->input->post('category');
 
 	    	// Check if Fiscal Year has not been selected yet?
 	    	if( !$fiscal_yr_id )
@@ -966,7 +976,7 @@ class Ri_setup_treaties extends MY_Controller
 	    	}
 
 	    	// Check Duplicate
-	        if( $this->ri_setup_treaty_model->check_duplicate(['fiscal_yr_id' => $fiscal_yr_id, 'treaty_type_id' => $treaty_type_id], $id))
+	        if( $this->ri_setup_treaty_model->check_duplicate(['category' => $category, 'fiscal_yr_id' => $fiscal_yr_id, 'treaty_type_id' => $treaty_type_id], $id))
 	        {
 	            $this->form_validation->set_message('_cb_treaty_type__check_duplicate', 'The %s already exists for supplied Fiscal Year.');
 	            return FALSE;
@@ -987,9 +997,10 @@ class Ri_setup_treaties extends MY_Controller
 		 */
 		public function _cb_portfolio__check_duplicate($portfolio_id, $id=NULL)
 		{
-			$portfolio_id = strtoupper( $portfolio_id ? $portfolio_id : $this->input->post('portfolio_id') );
-	    	$id   = $id ? (int)$id : (int)$this->input->post('id');
-	    	$fiscal_yr_id = (int)$this->input->post('fiscal_yr_id');
+			$portfolio_id 	= strtoupper( $portfolio_id ? $portfolio_id : $this->input->post('portfolio_id') );
+	    	$id   			= $id ? (int)$id : (int)$this->input->post('id');
+	    	$fiscal_yr_id 	= (int)$this->input->post('fiscal_yr_id');
+	    	$category 		= (int)$this->input->post('category');
 
 	    	// Check if Fiscal Year has not been selected yet?
 	    	if( !$fiscal_yr_id )
@@ -999,7 +1010,7 @@ class Ri_setup_treaties extends MY_Controller
 	    	}
 
 	    	// Check Duplicate - Treaty Record Exist with given portfolio for given fiscal year other than supplied treaty id
-	        if( $this->ri_setup_treaty_model->_cb_portfolio__check_duplicate($fiscal_yr_id, $portfolio_id, $id) )
+	        if( $this->ri_setup_treaty_model->_cb_portfolio__check_duplicate($category, $fiscal_yr_id, $portfolio_id, $id) )
 	        {
 	            $this->form_validation->set_message('_cb_portfolio__check_duplicate', 'The %s already exists for supplied Fiscal Year in another Treaty.');
 	            return FALSE;

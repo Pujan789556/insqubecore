@@ -30,7 +30,7 @@ class Ri_setup_treaty_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'name', 'fiscal_yr_id', 'treaty_type_id', 'estimated_premium_income', 'treaty_effective_date', 'file', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'name', 'category', 'fiscal_yr_id', 'treaty_type_id', 'estimated_premium_income', 'treaty_effective_date', 'file', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -76,6 +76,14 @@ class Ri_setup_treaty_model extends MY_Model
 
             // Master Table (Treaty Setup)
             'basic' => [
+                [
+                    'field' => 'category',
+                    'label' => 'Treaty For',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list['.implode(',', array_keys(IQB_RI_TREATY_CATEGORIES)).']',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + IQB_RI_TREATY_CATEGORIES,
+                    '_required' => true
+                ],
                 [
                     'field' => 'fiscal_yr_id',
                     'label' => 'Fiscal Year',
@@ -1196,11 +1204,12 @@ class Ri_setup_treaty_model extends MY_Model
      * @param integernull $id
      * @return bool
      */
-    public function _cb_portfolio__check_duplicate($fiscal_yr_id, $portfolio_id, $id=NULL)
+    public function _cb_portfolio__check_duplicate($category, $fiscal_yr_id, $portfolio_id, $id=NULL)
     {
         $this->db
                 ->from($this->table_name . ' AS T')
                 ->join(self::$table_treaty_portfolios . ' TP', 'T.id = TP.treaty_id')
+                ->where('T.category', $category)
                 ->where('T.fiscal_yr_id', $fiscal_yr_id)
                 ->where('TP.portfolio_id', $portfolio_id);
 
@@ -1247,6 +1256,12 @@ class Ri_setup_treaty_model extends MY_Model
                 $this->db->where(['T.id <=' => $next_id]);
             }
 
+            $category = $params['category'] ?? NULL;
+            if( $category )
+            {
+                $this->db->where(['T.category' =>  $category]);
+            }
+
             $fiscal_yr_id = $params['fiscal_yr_id'] ?? NULL;
             if( $fiscal_yr_id )
             {
@@ -1270,7 +1285,7 @@ class Ri_setup_treaty_model extends MY_Model
 
     private function _row_select()
     {
-        $this->db->select('T.id, T.name, T.fiscal_yr_id, T.treaty_type_id, T.estimated_premium_income, T.treaty_effective_date, T.file, FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, TT.name AS treaty_type_name')
+        $this->db->select('T.id, T.name, T.category, T.fiscal_yr_id, T.treaty_type_id, T.estimated_premium_income, T.treaty_effective_date, T.file, FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, TT.name AS treaty_type_name')
                 ->from($this->table_name . ' AS T')
                 ->join('master_fiscal_yrs FY', 'FY.id = T.fiscal_yr_id')
                 ->join(self::$table_treaty_types . ' TT', 'TT.id = T.treaty_type_id');
@@ -1351,7 +1366,7 @@ class Ri_setup_treaty_model extends MY_Model
         $brokers = [];
         foreach($list as $record)
         {
-            $brokers["{$record->company_id}"] = $record->name;
+            $brokers["{$record->company_id}"] = $record->name_en;
         }
         return $brokers;
     }
