@@ -1184,6 +1184,12 @@ class Claim_model extends MY_Model
             $ri_distribution    = $this->ri_transaction_model->latest_build_by_policy($policy_id, $ri_txn_for);
             $si_gross           = $ri_distribution->si_gross;
 
+            if(!$si_gross)
+            {
+                throw new Exception("Exception [Model: Claim_model][Method: _compute_ri_breakdown()]: RI Distribution could not be found.");
+            }
+
+
             // RATIO
             $ratio = $claim_amount / $si_gross; // Do not apply precision here.
 
