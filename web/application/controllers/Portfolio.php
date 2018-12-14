@@ -936,11 +936,7 @@ class Portfolio extends MY_Controller
 
 		$json_data['form'] 	= $this->load->view('setup/portfolio/_form_settings',
 			[
-
-				'form_elements' 		=> $this->portfolio_setting_model->validation_rules,
-				'portfolios_tree' 		=> $portfolios_tree,
-				'settings' 				=> [],
-				'action' 				=> 'add',
+				'form_elements' 		=> $this->portfolio_setting_model->get_validation_rules('add'),
 				'record' 				=> $record
 			], TRUE);
 
@@ -951,38 +947,28 @@ class Portfolio extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Edit Portfolio Settings for Specific Fiscal Year
+	 * Edit Portfolio Settings for Specific Portfolio for Specific Fiscal year
 	 *
 	 *
-	 * @param integer $fiscal_yr_id
+	 * @param integer $setting_id
 	 * @return void
 	 */
-	public function edit_settings($fiscal_yr_id)
+	public function edit_settings($setting_id)
 	{
 		$this->load->model('portfolio_setting_model');
 
-		// Valid Record ?
-		$fiscal_yr_id 	= (int)$fiscal_yr_id;
-		$record 		= $this->portfolio_setting_model->get_row_single($fiscal_yr_id);
-		$settings 		= $this->portfolio_setting_model->get_list_by_fiscal_year($fiscal_yr_id);
+		$record = $this->portfolio_setting_model->find($setting_id);
 		if(!$record)
 		{
 			$this->template->render_404();
 		}
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save_settings('edit', $record, $settings);
-
-		// No form Submitted?
-		$portfolios_tree 		= $this->portfolio_model->dropdown_children_tree();
-		$children_portfolios 	= $this->portfolio_model->dropdown_children();
+		$json_data = $this->_save_settings('edit', $record);
 
 		$json_data['form'] = $this->load->view('setup/portfolio/_form_settings',
 			[
-				'form_elements' 			=> $this->portfolio_setting_model->validation_rules,
-				'action' 			=> 'edit',
-				'portfolios_tree' 	=> $portfolios_tree,
-				'settings' 			=> $settings,
+				'form_elements' 	=> $this->portfolio_setting_model->get_validation_rules('edit'),
 				'record' 			=> $record
 			], TRUE);
 
@@ -1018,95 +1004,36 @@ class Portfolio extends MY_Controller
 
 		if( $this->input->post() )
 		{
-
-			// $portfolios = $this->portfolio_model->dropdown_parent();
-
-			$portfolios_tree 		= $this->portfolio_model->dropdown_children_tree();
-			$children_portfolios 	= $this->portfolio_model->dropdown_children();
-
-			$done = FALSE;
-
-			$rules = $this->portfolio_setting_model->get_validation_rules(['fiscal_yr', 'basic'], TRUE);
+			$done 	= FALSE;
+			$rules 	= $this->portfolio_setting_model->get_validation_rules($action);
 
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
-				$data = $this->input->post();
-
-				$fiscal_yr_id 			= $this->input->post('fiscal_yr_id');
-				$agent_commission 		= $this->input->post('agent_commission');
-				$bs_service_charge 		= $this->input->post('bs_service_charge');
-				$direct_discount 		= $this->input->post('direct_discount');
-				$pool_premium 			= $this->input->post('pool_premium');
-				$stamp_duty  			= $this->input->post('stamp_duty');
-				$amt_default_basic_premium  	= $this->input->post('amt_default_basic_premium');
-				$amt_default_pool_premium  		= $this->input->post('amt_default_pool_premium');
-				$flag_default_duration 	= $this->input->post('flag_default_duration');
-				$default_duration  		= $this->input->post('default_duration');
-				$flag_short_term  		= $this->input->post('flag_short_term');
-				$flag_installment  		= $this->input->post('flag_installment');
-
-
-				/**
-				 * Prepare Data
-				 */
 				if($action === 'add')
 				{
-					$batch_data = [];
-					$i = 0;
-					foreach($children_portfolios as $portfolio_id => $portfolio_name)
-					{
-						$batch_data[] = [
-							'fiscal_yr_id' 				=> $fiscal_yr_id,
-							'portfolio_id'    			=> $portfolio_id,
-							'agent_commission' 			=> $agent_commission[$i],
-							'bs_service_charge' 		=> $bs_service_charge[$i],
-							'direct_discount' 			=> $direct_discount[$i],
-							'pool_premium' 				=> $pool_premium[$i],
-							'stamp_duty' 				=> $stamp_duty[$i],
-							'amt_default_basic_premium' 	=> $amt_default_basic_premium[$i],
-							'amt_default_pool_premium' 		=> $amt_default_pool_premium[$i],
-							'flag_default_duration' 	=> $flag_default_duration[$i],
-							'default_duration' 			=> $default_duration[$i],
-							'flag_short_term' 			=> $flag_short_term[$i],
-							'flag_installment' 			=> $flag_installment[$i]
-						];
-						$i++;
-					}
-
-					$done = $this->portfolio_setting_model->insert_batch($batch_data, TRUE); // No Validation on Model
+					$fiscal_yr_id = $this->input->post('fiscal_yr_id');
+					$done = $this->portfolio_setting_model->add($fiscal_yr_id);
 				}
 				else
 				{
-					$i = 0;
-					$setting_ids = $this->input->post('setting_id');
-					foreach($children_portfolios as $portfolio_id => $portfolio_name)
+					$post_data	 = $this->input->post();
+					$update_data = [];
+
+					foreach($rules as $r)
 					{
-						$single_data = [
-							'agent_commission' 			=> $agent_commission[$i],
-							'bs_service_charge' 		=> $bs_service_charge[$i],
-							'direct_discount' 			=> $direct_discount[$i],
-							'pool_premium' 				=> $pool_premium[$i],
-							'stamp_duty' 				=> $stamp_duty[$i],
-							'amt_default_basic_premium' 	=> $amt_default_basic_premium[$i],
-							'amt_default_pool_premium' 		=> $amt_default_pool_premium[$i],
-							'flag_default_duration' 	=> $flag_default_duration[$i],
-							'default_duration' 			=> $default_duration[$i],
-							'flag_short_term' 			=> $flag_short_term[$i],
-							'flag_installment' 			=> $flag_installment[$i]
-						];
-
-						$setting_id = $setting_ids[$i];
-						$done = $this->portfolio_setting_model->update($setting_id, $single_data, TRUE);
-
-						$i++;
+						$key = $r['field'];
+						$update_data[$key] = $post_data[$key] ?? NULL;
 					}
+					$done = $this->portfolio_setting_model->update($record->id, $update_data, TRUE);
 				}
 
 				if(!$done)
 				{
-					$status = 'error';
-					$message = 'Could not update.';
+					return $this->template->json([
+						'status' 		=> 'error',
+						'message' 		=> 'Could not be updated!'
+					]);
 				}
 				else
 				{
@@ -1116,48 +1043,34 @@ class Portfolio extends MY_Controller
 			}
 			else
 			{
-				$status = 'error';
-				$message = validation_errors();
+				return $this->template->json([
+					'status' 		=> 'error',
+					'message' 		=> validation_errors()
+				]);
 			}
 
-			// Success HTML
-			$success_html = '';
 			if($status === 'success' )
 			{
+				$success_return = [
+					'status' 		=> $status,
+					'message' 		=> $message,
+					'hideBootbox' 	=> true,
+					'updateSection' => $action == 'add'
+				];
 				if($action === 'add')
 				{
-					$records = $this->portfolio_setting_model->get_row_list();
-					$success_html = $this->load->view('setup/portfolio/_list_settings_default', ['records' => $records], TRUE);
+					$records 		= $this->portfolio_setting_model->get_row_list();
+					$success_html 	= $this->load->view('setup/portfolio/_list_settings_default', ['records' => $records], TRUE);
+					$success_return = array_merge($success_return, [
+						'updateSectionData'	=> [
+							'box' 		=> '#iqb-data-list',
+							'html' 		=> $success_html,
+							'method' 	=> 'html'
+						]
+					]);
 				}
-				else
-				{
-					// Get Updated Record
-					$record = $this->portfolio_setting_model->get_row_single($fiscal_yr_id);
-					$success_html = $this->load->view('setup/portfolio/_single_row_settings_default', ['record' => $record], TRUE);
-				}
+				return $this->template->json($success_return);
 			}
-
-			$return_data = [
-				'status' 		=> $status,
-				'message' 		=> $message,
-				'reloadForm' 	=> false,
-				'hideBootbox' 	=> $status === 'success',
-				'updateSection' => $status === 'success',
-				'updateSectionData'	=> $status === 'success'
-										? 	[
-												'box' 	=> $action === 'add'
-															? '#iqb-data-list'
-															: '#_data-row-' . $record->fiscal_yr_id,
-												'html' 	=> $success_html,
-
-												//
-												// How to Work with success html?
-												// Jquery Method 	html|replaceWith|append|prepend etc.
-												//
-												'method' 	=> $action === 'add' ? 'html' : 'replaceWith'
-											]
-										: NULL
-			];
 		}
 
 		return $return_data;

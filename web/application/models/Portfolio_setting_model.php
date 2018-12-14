@@ -18,7 +18,7 @@ class Portfolio_setting_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ['id', 'fiscal_yr_id', 'portfolio_id', 'agent_commission', 'bs_service_charge', 'direct_discount', 'pool_premium', 'stamp_duty', 'amt_default_basic_premium', 'amt_default_pool_premium', 'flag_default_duration', 'default_duration', 'flag_short_term', 'short_term_policy_rate', 'flag_installment', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'fiscal_yr_id', 'portfolio_id', 'agent_commission', 'bs_service_charge', 'direct_discount', 'pool_premium', 'stamp_duty', 'amt_default_basic_premium', 'amt_default_pool_premium', 'flag_default_duration', 'default_duration', 'flag_short_term', 'short_term_policy_rate', 'flag_apply_vat_on_premium', 'flag_installment', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -49,7 +49,7 @@ class Portfolio_setting_model extends MY_Model
     {
         $this->validation_rules = [
 
-            'fiscal_yr' => [
+            'add' => [
                [
                     'field' => 'fiscal_yr_id',
                     'label' => 'Fiscal Year',
@@ -60,17 +60,9 @@ class Portfolio_setting_model extends MY_Model
                 ],
             ],
 
-            'basic' => [
+            'edit' => [
                 [
-                    'field' => 'portfolio_id[]',
-                    'label' => 'Portfolio',
-                    'rules' => 'trim|required|integer|max_length[11]',
-                    '_type'     => 'hidden',
-                    '_key'      => 'portfolio_id',
-                    '_required' => true
-                ],
-                [
-                    'field' => 'agent_commission[]',
+                    'field' => 'agent_commission',
                     'label' => 'Agent Commission(%)',
                     'rules' => 'trim|required|prep_decimal4|decimal|max_length[8]',
                     '_key'      => 'agent_commission',
@@ -78,7 +70,7 @@ class Portfolio_setting_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'bs_service_charge[]',
+                    'field' => 'bs_service_charge',
                     'label' => 'Beema Samiti Service Charge(%)',
                     'rules' => 'trim|required|prep_decimal4|decimal|max_length[8]',
                     '_type'     => 'text',
@@ -86,7 +78,7 @@ class Portfolio_setting_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'direct_discount[]',
+                    'field' => 'direct_discount',
                     'label' => 'Direct Discount(%)',
                     'rules' => 'trim|required|prep_decimal4|decimal|max_length[8]',
                     '_type'     => 'text',
@@ -94,7 +86,7 @@ class Portfolio_setting_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'pool_premium[]',
+                    'field' => 'pool_premium',
                     'label' => 'Pool Premium(%)',
                     'rules' => 'trim|required|prep_decimal4|decimal|max_length[8]',
                     '_type'     => 'text',
@@ -102,7 +94,7 @@ class Portfolio_setting_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'stamp_duty[]',
+                    'field' => 'stamp_duty',
                     'label' => 'Stamp Duty(Rs)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
                     '_type'     => 'text',
@@ -110,7 +102,7 @@ class Portfolio_setting_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'amt_default_basic_premium[]',
+                    'field' => 'amt_default_basic_premium',
                     'label' => 'Default Basic Premium( Rs)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
                     '_type'     => 'text',
@@ -118,7 +110,7 @@ class Portfolio_setting_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'amt_default_pool_premium[]',
+                    'field' => 'amt_default_pool_premium',
                     'label' => 'Default Pool Premium (Rs)',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
                     '_type'     => 'text',
@@ -126,7 +118,7 @@ class Portfolio_setting_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'flag_default_duration[]',
+                    'field' => 'flag_default_duration',
                     'label' => 'Default Duration Applies?',
                     'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdown(FALSE))).']',
                     '_data' => _FLAG_yes_no_dropdown(),
@@ -135,7 +127,7 @@ class Portfolio_setting_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'default_duration[]',
+                    'field' => 'default_duration',
                     'label' => 'Default Duration (Days)',
                     'rules' => 'trim|required|integer|max_length[5]',
                     '_default'  => 365,
@@ -144,7 +136,7 @@ class Portfolio_setting_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'flag_short_term[]',
+                    'field' => 'flag_short_term',
                     'label' => 'Has short term Policy?',
                     'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdown(FALSE))).']',
                     '_data' => _FLAG_yes_no_dropdown(),
@@ -153,24 +145,21 @@ class Portfolio_setting_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'flag_installment[]',
+                    'field' => 'flag_apply_vat_on_premium',
+                    'label' => 'Apply VAT on Policy Premium?',
+                    'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdown(FALSE))).']',
+                    '_data' => _FLAG_yes_no_dropdown(),
+                    '_type'     => 'dropdown',
+                    '_key'      => 'flag_apply_vat_on_premium',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'flag_installment',
                     'label' => 'Allow payment in installment?',
                     'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdown(FALSE))).']',
                     '_data' => _FLAG_yes_no_dropdown(),
                     '_type'     => 'dropdown',
                     '_key'      => 'flag_installment',
-                    '_required' => true
-                ],
-
-                /**
-                 * !!!NOTE: This MUST be the last element
-                 */
-                [
-                    'field' => 'setting_id[]',
-                    'label' => 'Settings',
-                    'rules' => 'trim|integer|max_length[11]',
-                    '_type'     => 'hidden',
-                    '_key'      => 'setting_id',
                     '_required' => true
                 ]
             ]
@@ -180,38 +169,40 @@ class Portfolio_setting_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function get_validation_rules( $sections = [], $formatted = FALSE )
+    public function get_validation_rules( $action)
     {
-        $rules = [];
+        return $this->validation_rules[$action];
+    }
 
-        if( !empty($sections) )
+    // ----------------------------------------------------------------
+
+    /**
+     * Add Blank Portfolio Settings Record for given fiscal year
+     *
+     * @param int $fiscal_yr_id
+     * @return bool
+     */
+    public function add($fiscal_yr_id)
+    {
+        $this->load->model('portfolio_model');
+        $children_portfolios = $this->portfolio_model->dropdown_children();
+
+        $batch_data = [];
+        foreach($children_portfolios as $portfolio_id => $portfolio_name)
         {
-            foreach($sections as $section)
-            {
-                $rules[$section] = $this->validation_rules[$section];
-            }
+            $batch_data[] = [
+                'fiscal_yr_id'              => $fiscal_yr_id,
+                'portfolio_id'              => $portfolio_id
+            ];
         }
-        else
+        $done = FALSE;
+        if($batch_data)
         {
-            $rules = $this->validation_rules;
+            $done = $this->portfolio_setting_model->insert_batch($batch_data, TRUE);
+            $this->clear_cache();
         }
 
-
-        /**
-         * Formatted Rules
-         */
-        $v_rules = [];
-        if($formatted)
-        {
-            foreach($rules as $section=>$section_rules)
-            {
-                $v_rules = array_merge($v_rules, $section_rules);
-            }
-            return $v_rules;
-        }
-
-        // Return Sectioned Rules
-        return $rules;
+        return $done;
     }
 
     // ----------------------------------------------------------------

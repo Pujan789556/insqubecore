@@ -24,17 +24,6 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 	<td class="ins-action">
 		<a href="#"
 			data-toggle="tooltip"
-			title="Edit Portfolio Settings"
-			data-box-size="full-width"
-			class="trg-dialog-edit action"
-			data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio Settings'
-			data-url="<?php echo site_url('portfolio/edit_settings/' . $record->fiscal_yr_id);?>"
-			data-form=".form-iqb-general">
-			<i class="fa fa-pencil-square-o"></i>
-			<span class="hidden-xs">Edit</span>
-		</a>
-		<a href="#"
-			data-toggle="tooltip"
 			title="Import Missing Portfolio Settings for This Fiscal Year"
 			data-box-size="large"
 			class="trg-row-action action"
