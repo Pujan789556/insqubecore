@@ -1664,6 +1664,31 @@ if ( ! function_exists('_ENDORSEMENT_is_transactional_by_type'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('_ENDORSEMENT_premium_only_types'))
+{
+    /**
+     *  Get the list of all premium types constants
+     *
+     *  - Fresh
+     *  - Renewal
+     *  - Premium Upgrade
+     *  - Premium Downgrade
+     *
+     * @param   int     Transaction Type
+     * @return  array
+     */
+    function _ENDORSEMENT_premium_only_types(  )
+    {
+        return [
+            IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
+            IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
+            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
+            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
+        ];
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('_ENDORSEMENT_is_first'))
 {
 	/**
@@ -1675,13 +1700,10 @@ if ( ! function_exists('_ENDORSEMENT_is_first'))
 	 */
 	function _ENDORSEMENT_is_first( $txn_type )
 	{
-		$txn_type 		= (int)$txn_type;
-		$allowed_types 	= [
-			IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-			IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL
-		];
+        $CI =& get_instance();
+        $CI->load->model('endorsement_model');
 
-		return in_array($txn_type, $allowed_types);
+        return $CI->endorsement_model->is_first($txn_type);
 	}
 }
 
@@ -1844,14 +1866,14 @@ if ( ! function_exists('_ENDORSEMENT_is_customer_editable_by_type'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_computation_basis_dropdown'))
+if ( ! function_exists('_ENDORSEMENT_compute_reference_dropdown'))
 {
 	/**
 	 * Get Endorsement Computation Basis Dropdown
 	 *
 	 * @return	array
 	 */
-	function _ENDORSEMENT_computation_basis_dropdown( $flag_blank_select = true )
+	function _ENDORSEMENT_compute_reference_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
 			IQB_POLICY_ENDORSEMENT_CB_ANNUAL     => 'Annual/Complete',
@@ -1865,135 +1887,6 @@ if ( ! function_exists('_ENDORSEMENT_computation_basis_dropdown'))
 		}
 		return $dropdown;
 	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_apply_computation_basis'))
-{
-    /**
-     * Apply computation Basis for given endorsement data
-     *
-     * @param record $policy_record Policy Record
-     * @param record $endorsement_record Endorsement Record
-     * @param record $pfs_record    Portfoli Setting Record
-     * @param array $premium_data       Endorsement Data
-     * @return type
-     */
-    function _ENDORSEMENT_apply_computation_basis( $policy_record, $endorsement_record, $pfs_record, $premium_data )
-    {
-        $computed_data = [];
-        $computation_basis = (int)$endorsement_record->computation_basis;
-        switch ($computation_basis)
-        {
-            /**
-             * No computation needed. The whole amount is used.
-             */
-            case IQB_POLICY_ENDORSEMENT_CB_ANNUAL:
-                $computed_data = $premium_data;
-                break;
-
-            case IQB_POLICY_ENDORSEMENT_CB_STR:
-                $computed_data = _ENDORSEMENT__compute_short_term_premium( $pfs_record, $premium_data, $endorsement_record->start_date, $endorsement_record->end_date );
-                break;
-
-            case IQB_POLICY_ENDORSEMENT_CB_PRORATA:
-                $computed_data = _ENDORSEMENT__compute_prorata_premium( $premium_data, $endorsement_record->start_date, $endorsement_record->end_date );
-                break;
-
-            default:
-                # code...
-                break;
-        }
-
-        /**
-         * Computation Right?
-         * i.e.
-         *  If endorsement is premium upgrade -> total premium and/or pool premium MUST be positive
-         *  If endorsement is premium refund -> total premium and/or pool premium MUST be negative
-         */
-        $allowed_types  = [
-            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
-            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
-        ];
-        if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-        {
-            $txn_type           = (int)$endorsement_record->txn_type;
-            $amt_basic_premium  = $computed_data['amt_basic_premium'];
-
-            if( $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE && $amt_basic_premium < 0 )
-            {
-                throw new Exception("Exception [Helper: policy_helper][Method: _ENDORSEMENT_apply_computation_basis()]: Negative Premium. Please change the endorsement type to 'Premium Refund' and update premium again!");
-            }
-            else if ($txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND && $amt_basic_premium > 0 )
-            {
-                throw new Exception("Exception [Helper: policy_helper][Method: _ENDORSEMENT_apply_computation_basis()]: Positive Premium. Please change the endorsement type to 'Premium Upgrade' and update premium again!");
-            }
-        }
-
-        return $computed_data;
-    }
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_ENDORSEMENT__compute_prorata_premium'))
-{
-    /**
-     * Compute Prorata Premium of a Policy
-     *
-     * @param array $premium_data
-     * @param date $start_date
-     * @param date $end_date
-     * @return array
-     */
-    function _ENDORSEMENT__compute_prorata_premium( $premium_data, $start_date, $end_date )
-    {
-        $today = date('Y-m-d');
-        $policy_duration  = _POLICY_duration($start_date, $end_date, 'd');
-        $prorata_duration = _POLICY_duration($today, $end_date, 'd');
-
-
-        $rate = $prorata_duration / $policy_duration;
-
-        // Compute Total Amount (Pool do not apply prorata)
-        $premium_data['amt_basic_premium']  = $premium_data['amt_basic_premium'] * $rate ;
-
-        // Update Commissionable Amount and Commission
-        $amt_commissionable = $cost_table['amt_commissionable'] ?? NULL;
-        if($amt_commissionable)
-        {
-            $premium_data['amt_commissionable']     = (float)$premium_data['amt_basic_premium'] * $rate ;
-            $premium_data['amt_agent_commission']   = (float)$premium_data['amt_agent_commission'] * $rate ;
-        }
-
-        // Direct Discount
-        if( $premium_data['amt_direct_discount'] )
-        {
-            $premium_data['amt_direct_discount'] = ($premium_data['amt_direct_discount'] * $rate)/100.00;
-        }
-
-        return $premium_data;
-    }
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_ENDORSEMENT__compute_short_term_premium'))
-{
-    /**
-     * Compute Short Term Policy Premium
-     *
-     * @param object $pfs_record Portfolio Settings Record
-     * @param array $premium_data Cost Table computed by Specific cost table function
-     * @param date $start_date Endorsement/Policy Start Date
-     * @param date $end_date Policy End Date
-     * @return  array
-     */
-    function _ENDORSEMENT__compute_short_term_premium( $pfs_record, $premium_data, $start_date, $end_date, $spr_config = NULL )
-    {
-        $spr_goodies = _POLICY__get_spr_goodies( $pfs_record, $start_date, $end_date );
-        return _POLICY__compute_short_term_premium( $spr_goodies['record']->rate ?? NULL, $premium_data, $spr_config );
-    }
 }
 
 // ------------------------------------------------------------------------
@@ -2046,6 +1939,7 @@ if ( ! function_exists('_ENDORSEMENT__compute_full_premium'))
         return $premium_data;
     }
 }
+
 
 
 // ------------------------------------------------------------------------
@@ -2260,8 +2154,8 @@ if ( ! function_exists('_ENDORSEMENT__save_premium_manual'))
             if($CI->form_validation->run() === TRUE )
             {
                 $data = [
-                    'gross_amt_sum_insured' => $CI->input->post('gross_amt_sum_insured'),
-                    'net_amt_sum_insured'   => $CI->input->post('net_amt_sum_insured'),
+                    'amt_sum_insured_object' => $CI->input->post('amt_sum_insured_object'),
+                    'amt_sum_insured_net'   => $CI->input->post('amt_sum_insured_net'),
                     'amt_basic_premium'     => $CI->input->post('amt_basic_premium'),
                     'amt_pool_premium'      => $CI->input->post('amt_pool_premium'),
                     'amt_agent_commission'  => $CI->input->post('amt_agent_commission'),
@@ -2376,6 +2270,10 @@ if ( ! function_exists('_ENDORSEMENT__tariff_premium_defaults'))
         return $data;
     }
 }
+
+
+
+
 
 // ------------------------------------------------------------------------
 // POLICY INSTALLMENT HELPER FUNCTIONS

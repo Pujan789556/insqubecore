@@ -229,7 +229,7 @@ class Cli_bs_report extends Base_Controller
             $SQLS[$filename] = "{$select_sql},
                             R.id AS region_id,
                             COUNT(P0.policy_id) AS policy_count,
-                            SUM(E.net_amt_sum_insured) AS amt_sum_insured,
+                            SUM(E.amt_sum_insured_net) AS amt_sum_insured,
                             SUM(PINST.amt_basic_premium + PINST.amt_pool_premium) AS amt_total_premium
                         {$from_join_sql}
                         JOIN dt_endorsements E ON E.policy_id = P0.policy_id
@@ -480,7 +480,7 @@ class Cli_bs_report extends Base_Controller
                 "D.code as district_code, " .
 
                 // Endorsement
-                "E.net_amt_sum_insured AS amt_sum_insured"
+                "E.amt_sum_insured_net AS amt_sum_insured"
             )
                 // Installment
             ->select("PINST.amt_basic_premium + PINST.amt_pool_premium AS amt_total_premium", FALSE)

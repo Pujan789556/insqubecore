@@ -17,12 +17,12 @@ class Endorsement_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'customer_id', 'agent_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'gross_amt_sum_insured', 'net_amt_sum_insured', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'percent_ri_commission', 'amt_ri_commission', 'amt_direct_discount', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'computation_basis', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate_on_refund', 'flag_short_term', 'short_term_config', 'short_term_rate', 'status', 'audit_policy', 'audit_object', 'audit_customer', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'customer_id', 'agent_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'amt_sum_insured_object', 'amt_sum_insured_net', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'percent_ri_commission', 'amt_ri_commission', 'amt_direct_discount', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'refund_compute_reference', 'premium_compute_reference', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_terminate_on_refund', 'flag_short_term', 'short_term_config', 'short_term_rate', 'status', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
 
     // Resetable Fields on Policy/Object Edit, Endorsement Edit
     protected static $nullable_fields = [
-        'gross_amt_sum_insured',
-        'net_amt_sum_insured',
+        'amt_sum_insured_object',
+        'amt_sum_insured_net',
         'amt_basic_premium',
         'amt_pool_premium',
         'amt_commissionable',
@@ -91,7 +91,7 @@ class Endorsement_model extends MY_Model
     {
         $rules = [
             [
-                'field' => 'gross_amt_sum_insured',
+                'field' => 'amt_sum_insured_object',
                 'label' => 'Gross Sum Insured (Rs.)',
                 'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                 '_type'     => 'text',
@@ -99,7 +99,7 @@ class Endorsement_model extends MY_Model
                 '_required' => true
             ],
             [
-                'field' => 'net_amt_sum_insured',
+                'field' => 'amt_sum_insured_net',
                 'label' => 'Net Sum Insured (Rs.)',
                 'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
                 '_type'     => 'text',
@@ -179,19 +179,29 @@ class Endorsement_model extends MY_Model
     public function get_v_rules( $txn_type, $portfolio_id, $policy_record, $formatted = FALSE)
     {
         $txn_type                   = (int)$txn_type;
-        $computation_basis_dropdown = _ENDORSEMENT_computation_basis_dropdown(FALSE);
+        $computation_basis_dropdown = _ENDORSEMENT_compute_reference_dropdown(FALSE);
         $v_rules                    = [];
 
         // Basic Rules (Txn Details, Remarks with Template Reference)
         $basic = $this->_v_rules_basic( $txn_type, $portfolio_id, $policy_record );
 
 
-        $computation_basis = [
+        $refund_compute_reference = [
             [
-                'field' => 'computation_basis',
-                'label' => 'Computation Basis',
+                'field' => 'refund_compute_reference',
+                'label' => 'Refund Compute Reference',
                 'rules' => 'trim|required|integer|exact_length[1]|in_list['. implode( ',', array_keys( $computation_basis_dropdown ) ) .']',
                 '_type'     => 'dropdown',
+                '_default'  => IQB_POLICY_ENDORSEMENT_CB_STR,
+                '_data'     => IQB_BLANK_SELECT + $computation_basis_dropdown,
+                '_required' => true
+            ],
+            [
+                'field' => 'premium_compute_reference',
+                'label' => 'Premium Compute Reference',
+                'rules' => 'trim|required|integer|exact_length[1]|in_list['. implode( ',', array_keys( $computation_basis_dropdown ) ) .']',
+                '_type'     => 'dropdown',
+                '_default'  => IQB_POLICY_ENDORSEMENT_CB_PRORATA,
                 '_data'     => IQB_BLANK_SELECT + $computation_basis_dropdown,
                 '_required' => true
             ],
@@ -239,13 +249,13 @@ class Endorsement_model extends MY_Model
                 break;
 
             case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
-                $v_rules = ['basic' => $basic, 'computation_basis' => $computation_basis];
+                $v_rules = ['basic' => $basic, 'refund_compute_reference' => $refund_compute_reference];
                 break;
 
             case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
                 $v_rules = [
                     'basic'             => $basic,
-                    'computation_basis' => $computation_basis,
+                    'refund_compute_reference' => $refund_compute_reference,
 
                     /**
                      * Option To Terminate
@@ -626,7 +636,7 @@ class Endorsement_model extends MY_Model
      */
     public function update_status($policy_id_or_endorsement_record, $to_status_flag, $terminate_policy=FALSE)
     {
-        // Get the Policy Record
+        // Get the Endorsement Record
         $record = is_numeric($policy_id_or_endorsement_record) ? $this->get_current_endorsement_by_policy( (int)$policy_id_or_endorsement_record ) : $policy_id_or_endorsement_record;
 
         if(!$record)
@@ -804,7 +814,7 @@ class Endorsement_model extends MY_Model
                  * RI Approval Constraint
                  */
                 $this->load->helper('ri');
-                $flag_ri_approval = RI__compute_flag_ri_approval($record->portfolio_id, $record->net_amt_sum_insured);
+                $flag_ri_approval = RI__compute_flag_ri_approval($record->portfolio_id, $record->amt_sum_insured_net);
                 $update_data = [
                     'flag_ri_approval' => $flag_ri_approval
                 ];
@@ -1253,6 +1263,11 @@ class Endorsement_model extends MY_Model
     public function add($data)
     {
         /**
+         * Last Premium Computation Data
+         */
+        $data['premium_computation_table'] = $this->_last_premium_computation_table($data['txn_type'], $data['policy_id']);
+
+        /**
          * ==================== TRANSACTIONS BEGIN =========================
          */
         $transaction_status = TRUE;
@@ -1300,6 +1315,36 @@ class Endorsement_model extends MY_Model
 
         return $transaction_status;
     }
+
+            /**
+             * Get the latest premium computation
+             * if endorsement is Premium Upgrade/Downgrade
+             */
+            private function _last_premium_computation_table($txn_type, $policy_id)
+            {
+                $pct = NULL;
+                if( in_array($txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND]) )
+                {
+
+                    $where_in = [
+                        IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
+                        IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
+                        IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
+                        IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND
+                    ];
+                    $row = $this->db->select('E.premium_computation_table')
+                                    ->from($this->table_name . ' AS E')
+                                    ->join('dt_policies P', 'P.id = E.policy_id')
+                                    ->where('E.policy_id', $policy_id)
+                                    ->where_in('E.txn_type', $where_in)
+                                    ->order_by('E.id', 'desc')
+                                    ->get()
+                                    ->row();
+
+                    $pct = $row->premium_computation_table ?? NULL;
+                }
+                return $pct;
+            }
 
     // --------------------------------------------------------------------
 
@@ -1473,6 +1518,13 @@ class Endorsement_model extends MY_Model
                 parent::update($id, $txn_data, TRUE);
 
 
+                /**
+                 * Task2: Clear Cache for This Policy
+                 */
+                $single = parent::find($id);
+                $this->clear_cache( 'endrsmnt_' . $single->policy_id );
+
+
         /**
          * Complete transactions or Rollback
          */
@@ -1492,6 +1544,564 @@ class Endorsement_model extends MY_Model
          */
 
         return $transaction_status;
+    }
+
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Save Endorsement Premium
+     *
+     * @param object|int $record Current Endorsement Record | ID
+     * @param object|int $policy_record Policy Record | ID
+     * @param array $premium_data Premium data
+     * @param array $post_data Original Post Data
+     * @param array $cc_table Cost Calculation Table
+     * @return bool
+     */
+    public function save_premium($record, $policy_record, $premium_data, $post_data, $cc_table)
+    {
+        // Get the Endorsement Record
+        $record         = is_numeric($record) ? $this->get( (int)$record ) : $record;
+        $policy_record   = is_numeric($policy_record) ? $this->policy_model->get( (int)$policy_record ) : $policy_record;
+
+        /**
+         * ==================== BUILD DATA =========================
+         */
+
+        /**
+         * NON-FIRST ENDORSEMENT
+         * ---------------------
+         */
+        if( !$this->is_first( $record->txn_type) )
+        {
+            $premium_data = $this->_build_updowngrade_premium_data( $premium_data, $record, $policy_record );
+        }
+
+        /**
+         * FIRST ENDORSEMENT - FRESH/RENEWAL
+         * ---------------------------------
+         */
+        else
+        {
+            $premium_data   = $this->_build_fresh_premium_data( $premium_data, $policy_record );
+        }
+
+
+        /**
+         * Object Sum Insured, Net Sum Insured
+         *
+         * NET SI = (Latest Object SI) - (OLD Object SI)
+         * GROSS SI = Latest Object SI
+         */
+        $old_object         =   get_object_from_policy_record($policy_record);
+        $latest_object      =   _OBJ__get_latest(
+                                    $policy_record->object_id,
+                                    $record->txn_type,
+                                    $record->audit_object
+                                );
+        $net_si = bcsub($latest_object->amt_sum_insured, $old_object->amt_sum_insured, IQB_AC_DECIMAL_PRECISION);
+        $premium_data['amt_sum_insured_object'] = $latest_object->amt_sum_insured;
+        $premium_data['amt_sum_insured_net']    = $net_si;
+
+
+        /**
+         * Compute VAT
+         */
+        $premium_data['amt_stamp_duty'] = $post_data['amt_stamp_duty'] ?? 0.00;
+        $premium_data = $this->_update_vat_on_premium_data( $premium_data, $policy_record->fiscal_yr_id, $policy_record->portfolio_id );
+
+
+        /**
+         * Prepare Other Data
+         */
+        $premium_data = array_merge($premium_data, [
+            'premium_computation_table' => json_encode($post_data['premium'] ?? NULL),
+            'cost_calculation_table'    => json_encode($cc_table)
+        ]);
+
+
+        // echo '<pre>'; print_r($premium_data);exit;
+
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+        $transaction_status = TRUE;
+
+        /**
+         * Disable DB Debugging
+         */
+        $this->db->db_debug = FALSE;
+        $this->db->trans_start();
+
+                /**
+                 * Task 1: Update TXN Data
+                 */
+                parent::update($record->id, $premium_data, TRUE);
+
+
+                /**
+                 * Task2: Clear Cache for This Policy
+                 */
+                $this->clear_cache( 'endrsmnt_' . $record->policy_id );
+
+
+        /**
+         * Complete transactions or Rollback
+         */
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            $transaction_status = FALSE;
+        }
+
+        /**
+         * Restore DB Debug Configuration
+         */
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        return $transaction_status;
+    }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Build UP/Down Grade Premium Data for current Endorsement
+         *
+         * @param array $premium_data
+         * @param object $record Current Endorsement Record
+         * @param object $policy_record Policy Record
+         * @return array
+         */
+        private function _build_updowngrade_premium_data( $premium_data, $record, $policy_record )
+        {
+            /**
+             * Task 1: Build Premium For Current Endorsement
+             *
+             *  - Apply `premium_compute_reference` on the Annual/Full Premium Data
+             */
+            // echo 'FULL NEW: <pre>'; print_r($premium_data);
+            // Get the Premium Compute Reference Rate
+            $rate = $this->_compute_reference_rate( $record->premium_compute_reference, $record, $policy_record );
+
+
+            // Apply the computation rate
+            $premium_data = $this->_premium_data_apply_rate( $premium_data, $rate, TRUE );
+            // echo 'Rated NEW: <pre>'; print_r($premium_data);
+            // --------------------------------------------------------------------
+
+
+            /**
+             * Task 2: Build Refund For Previous Endorsement
+             *
+             *  - Apply `refund_compute_reference` on the Previous Endorsement's Premium Data
+             *
+             * NOTE: DO NOT REFUND POOL
+             */
+
+            $refund_data = $this->_build_refund_data($record, $policy_record);
+            // echo 'Refund : <pre>'; print_r($refund_data); exit;
+            // --------------------------------------------------------------------
+
+
+            /**
+             * Task 3: Compute the Net Difference between Premium and Refund Data
+             */
+            $premium_data = $this->_compute_net_premium_data($premium_data, $refund_data);
+
+            // --------------------------------------------------------------------
+
+
+            /**
+             * Task 3: Update the txn_type based on NET Premium
+             */
+            $premium_data = $this->_assign_txn_type_on_premium_data( $premium_data );
+
+            return $premium_data;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Get the rate based on the compute_reference
+         *
+         *
+         * @param int $compute_reference
+         * @param object $record Endorsement Record
+         * @param object $policy_record Policy Record
+         * @return decimal
+         */
+        private function _compute_reference_rate( $compute_reference, $record, $policy_record )
+        {
+            $rate               = FALSE;
+            $compute_reference  = (int)$compute_reference;
+            switch ($compute_reference)
+            {
+                /**
+                 * No computation needed. The whole amount is used.
+                 */
+                case IQB_POLICY_ENDORSEMENT_CB_ANNUAL:
+                    $rate = 1;
+                    break;
+
+                /**
+                 * Short Term Rate
+                 */
+                case IQB_POLICY_ENDORSEMENT_CB_STR:
+                    $this->load->model('portfolio_setting_model');
+                    $pfs_record     =   $this->portfolio_setting_model->get_by_fiscal_yr_portfolio(
+                                            $policy_record->fiscal_yr_id,
+                                            $policy_record->portfolio_id
+                                        );
+
+                    $e_start_date   = $record->start_date;
+                    $e_end_date     = $record->end_date;
+
+                    $spr_goodies    = _POLICY__get_spr_goodies( $pfs_record, $e_start_date, $e_end_date );
+                    $rate_percent   = floatval($spr_goodies['record']->rate ?? 100);
+                    $rate           = $rate_percent / 100;
+                    break;
+
+                /**
+                 * Prorata Rate
+                 */
+                case IQB_POLICY_ENDORSEMENT_CB_PRORATA:
+                    $policy_duration        = _POLICY_duration($policy_record->start_date, $policy_record->end_date, 'd');
+                    $endorsement_duration   = _POLICY_duration($record->start_date, $record->end_date, 'd');
+                    $rate                   = $endorsement_duration / $policy_duration;
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+
+            if( $rate === FALSE )
+            {
+                throw new Exception("Exception [Model: Endorsement_model][Method: _compute_reference_rate()]: Invalid Premium Computation Reference.");
+            }
+
+            return $rate;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Get the rate based on the compute_reference for Premium Refund
+         *
+         *
+         * @param int $compute_reference
+         * @param object $prev_record Previous Endorsement Record
+         * @param object $cur_record Current Endorsement Record
+         * @param object $policy_record Policy Record
+         * @return decimal
+         */
+        private function _compute_reference_rate_on_refund( $compute_reference, $prev_record, $cur_record, $policy_record )
+        {
+            $refund_rate               = FALSE;
+            $compute_reference  = (int)$compute_reference;
+            switch ($compute_reference)
+            {
+                /**
+                 * No computation needed. The whole amount is used.
+                 */
+                case IQB_POLICY_ENDORSEMENT_CB_ANNUAL:
+                    $refund_rate = 1;
+                    break;
+
+                /**
+                 * Short Term Rate
+                 *
+                 * Refund Rate = (1 - Charged Rate)
+                 *
+                 * Charged Rate = Short Term Rate for Previous Endorsement's Consumed period
+                 *                  i.e. Current Endorsement Start Date - Prev Endorsement Start Date
+                 *
+                 */
+                case IQB_POLICY_ENDORSEMENT_CB_STR:
+                    $this->load->model('portfolio_setting_model');
+                    $pfs_record     =   $this->portfolio_setting_model->get_by_fiscal_yr_portfolio(
+                                            $policy_record->fiscal_yr_id,
+                                            $policy_record->portfolio_id
+                                        );
+
+                    // Short Term Duration (Consumed) = Current Endosrement Start - Prev Endorsement Start
+                    // So, we charge Short Term Rate on Consumed Duration and retrun the rest
+                    $e_start_date   = $prev_record->start_date;
+                    $e_end_date     = $cur_record->start_date;
+                    $spr_goodies            = _POLICY__get_spr_goodies( $pfs_record, $e_start_date, $e_end_date );
+                    $rate_percent_charged   = floatval($spr_goodies['record']->rate ?? 100);
+                    $refund_rate            = 1 - $rate_percent_charged / 100;
+                    break;
+
+                /**
+                 * Prorata Rate
+                 *
+                 * Refund Rate = Prev-Endorsement's Left Duration / Prev Endorsement Total Duration
+                 */
+                case IQB_POLICY_ENDORSEMENT_CB_PRORATA:
+                    $total_duration   = _POLICY_duration($prev_record->start_date, $prev_record->end_date, 'd');
+                    $left_duration    = _POLICY_duration($cur_record->start_date, $prev_record->end_date, 'd');
+                    $refund_rate      = $left_duration / $total_duration;
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+
+            if( $refund_rate === FALSE )
+            {
+                throw new Exception("Exception [Model: Endorsement_model][Method: _compute_reference_rate_on_refund()]: Invalid Premium Computation Reference.");
+            }
+
+            return $refund_rate;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Rebuild Premium Data Applying - Short Term Rate or Prorata Rate
+         *
+         *
+         * @param array $premium_data
+         * @param float $rate  short term rate or prorata rate
+         * @param type|bool $apply_on_pool
+         * @return array
+         */
+        private function _premium_data_apply_rate( $premium_data, $rate, $apply_on_pool = FALSE )
+        {
+            /**
+             * APPLY COMPUTATION REFERENCE TO PREMIUM DATA
+             * --------------------------------------------
+             *
+             * amt_basic_premium
+             * amt_commissionable
+             * amt_agent_commission
+             * amt_direct_discount
+             * amt_pool_premium
+             */
+            $keys = [ 'amt_basic_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount'];
+            foreach($keys as $key)
+            {
+                $premium_data[$key] = bcmul( $premium_data[$key], $rate, IQB_AC_DECIMAL_PRECISION);
+            }
+
+            /**
+             * Apply on Pool Premium?
+             */
+            if($apply_on_pool )
+            {
+                $premium_data['amt_pool_premium'] = bcmul($premium_data['amt_pool_premium'], $rate, IQB_AC_DECIMAL_PRECISION);
+            }
+
+            return $premium_data;
+        }
+
+        // --------------------------------------------------------------------
+
+
+        /**
+         * Build and get the Refund Data From Previous Endorsement
+         * after applyig computation reference rate
+         *
+         * @param   object  $record  Current Endorsement Record
+         * @param   object  $policy_record Policy Record
+         * @param   bool    $refund_pool  Refund Pool Premium if set yes
+         * @return  array
+         */
+        function _build_refund_data( $record, $policy_record, $refund_pool = FALSE )
+        {
+            $refund_data = [
+                'amt_basic_premium'     => 0.00,
+                'amt_commissionable'    => 0.00,
+                'amt_agent_commission'  => 0.00,
+                'amt_direct_discount'   => 0.00,
+                'amt_pool_premium'      => 0.00
+            ];
+
+            $keys           = [ 'amt_basic_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount'];
+            $p_endorsement  = $this->endorsement_model->get_prev_premium_record_by_policy($record->id, $policy_record->id);
+            if($p_endorsement)
+            {
+                foreach($keys as $col)
+                {
+                    $refund_data[$col] = $p_endorsement->{$col};
+                }
+
+                /**
+                 * Refund Pool ??
+                 */
+                $flag_refund = $refund_pool || !$record->flag_terminate_on_refund == IQB_FLAG_YES;
+                if( $flag_refund )
+                {
+                    $refund_data['amt_pool_premium'] = $p_endorsement->amt_pool_premium;
+                }
+
+                // Get the Refund Compute Reference Rate
+                $rate = $this->_compute_reference_rate_on_refund( $record->refund_compute_reference, $p_endorsement, $record, $policy_record );
+
+                // Apply the computation rate
+                $refund_data = $this->_premium_data_apply_rate( $refund_data, $rate, $flag_refund );
+            }
+
+            return $refund_data;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Compute Premium Difference $premium1 - $premium2
+         *
+         * @param array $premium1
+         * @param array $premium2
+         * @return array
+         */
+        function _compute_net_premium_data( $premium1, $premium2 )
+        {
+            /**
+             * APPLY DIFFERENCE ON THE FOLLOWINGS?
+             * ----------------------------------------
+             *
+             * amt_basic_premium
+             * amt_commissionable
+             * amt_agent_commission
+             * amt_direct_discount
+             * amt_pool_premium
+             */
+
+            $premium_data = [];
+            $keys = [ 'amt_basic_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount', 'amt_pool_premium'];
+
+            foreach($keys as $key)
+            {
+                $val1 = floatval($premium1[$key] ?? 0.00);
+                $val2 = floatval($premium2[$key] ?? 0.00);
+                $premium_data[$key] = bcsub($val1, $val2, IQB_AC_DECIMAL_PRECISION);
+            }
+
+            return $premium_data;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Assign txn_type based on total premium +ve or -ve
+         *
+         * @param array $premium_data
+         * @return array
+         */
+        function _assign_txn_type_on_premium_data( $premium_data )
+        {
+            $total_premium = floatval( $premium_data['amt_basic_premium'] ?? 0) + floatval($premium_data['amt_pool_premium'] ?? 0);
+            if($total_premium > 0 )
+            {
+                $premium_data['txn_type'] = IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE;
+            }
+            else
+            {
+                $premium_data['txn_type'] = IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND;
+            }
+            return $premium_data;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Build Fresh/Renewal Premium Data
+         *
+         * If short term Policy, apply short term rate.
+         *
+         * @param array $premium_data
+         * @param object $policy_record
+         * @return array
+         */
+        function _build_fresh_premium_data( $premium_data, $policy_record )
+        {
+            /**
+             * Short-Term Policy???
+             */
+            if($policy_record->flag_short_term == IQB_FLAG_YES)
+            {
+                $this->load->model('portfolio_setting_model');
+                $pfs_record     =   $this->portfolio_setting_model->get_by_fiscal_yr_portfolio(
+                                        $policy_record->fiscal_yr_id,
+                                        $policy_record->portfolio_id
+                                    );
+
+                $spr_goodies    = _POLICY__get_spr_goodies( $pfs_record, $policy_record->start_date, $policy_record->end_date );
+                $rate_percent   = floatval($spr_goodies['record']->rate ?? 100.00);
+                $rate           = $rate_percent / 100.00;
+                $premium_data   = $this->_premium_data_apply_rate( $premium_data, $rate, TRUE);
+
+                // Update Short Term Related Info on Endorsement as well
+                $premium_data['flag_short_term']    = IQB_FLAG_YES;
+                $premium_data['short_term_config']  = IQB_POLICY_ENDORSEMENT_SPR_CONFIG_BOTH;
+                $premium_data['short_term_rate']    = $rate_percent;
+            }
+
+            return $premium_data;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Update Endorsement VAT on Premium data
+         *
+         * @param array $premium_data
+         * @param int $fiscal_yr_id
+         * @param int $portfolio_id
+         * @return array
+         */
+        function _update_vat_on_premium_data( $premium_data, $fiscal_yr_id, $portfolio_id )
+        {
+            $this->load->model('portfolio_setting_model');
+            $pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($fiscal_yr_id, $portfolio_id);
+
+            if( $pfs_record->flag_apply_vat_on_premium === NULL )
+            {
+                throw new Exception("Exception [Model: Endorsement_model][Method: _update_vat_on_premium_data()]: No VAT configuration (Apply Vat on Premium) found on portfolio settings for this portfolio. Please contact administrator to update the portfolio settings.");
+            }
+
+            $amt_vat = 0.00;
+            if( $pfs_record->flag_apply_vat_on_premium === IQB_FLAG_YES )
+            {
+                $this->load->helper('account');
+                $taxable_amount = ac_bcsum([
+                        (float)$premium_data['amt_stamp_duty'],
+                        (float)$premium_data['amt_basic_premium'],
+                        (float)$premium_data['amt_pool_premium']
+                    ],
+                    IQB_AC_DECIMAL_PRECISION
+                 );
+                $amt_vat     = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+            }
+            $premium_data['amt_vat'] = $amt_vat;
+
+            return $premium_data;
+        }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Check if given endorsement type is First- Fresh/Renewal
+     *
+     * @param int $txn_type
+     * @return bool
+     */
+    public function is_first($txn_type)
+    {
+        $txn_type       = (int)$txn_type;
+        $allowed_types  = [
+            IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
+            IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL
+        ];
+
+        return in_array($txn_type, $allowed_types);
     }
 
     // --------------------------------------------------------------------
@@ -1550,6 +2160,70 @@ class Endorsement_model extends MY_Model
         $this->_single_select();
 
         return $this->db->where('E.id', $id)
+                        ->get()->row();
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Endorsement Record
+     *
+     * @param int $id
+     * @return object
+     */
+    public function get_prev_premium_record_by_policy($id, $policy_id)
+    {
+        $txn_types = _ENDORSEMENT_premium_only_types();
+        $where = [
+            'E.id !='       => $id,
+            'E.policy_id'   => $policy_id,
+            'E.status'      => IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
+        ];
+
+        $this->_single_select();
+
+        return $this->db->where($where)
+                        ->where_in('E.txn_type', $txn_types)
+                        ->order_by('E.id', 'desc') // latest active
+                        ->get()->row();
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Latest Build of Premium for Fresh/Renewal, Premium Upgrade and Premium Refund
+     *
+     * @param int $policy_id
+     * @return object
+     */
+    public function premium_latest_build($policy_id)
+    {
+        $sum_fields = [];
+        $fields = [ 'amt_sum_insured_net', 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount'];
+
+        // Build SUM Fields
+        foreach($fields as $field )
+        {
+            $sum_fields[] = "SUM({$field}) AS {$field}";
+        }
+        $select =  implode(', ', $sum_fields);
+
+
+        $where = [
+            'E.policy_id'   => $policy_id,
+            'E.status'      => IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
+        ];
+
+        $where_in = [
+            IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
+            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
+            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND
+        ];
+
+        return $this->db->select($select)
+                        ->from($this->table_name . ' AS E')
+                        ->where($where)
+                        ->where_in($where_in)
                         ->get()->row();
     }
 
@@ -1738,8 +2412,8 @@ class Endorsement_model extends MY_Model
                             // Endorsement
                             "E.id, E.policy_id, E.txn_type, E.issued_date, E.flag_ri_approval, E.flag_current, E.status, " .
 
-                            // Policy
-                            "P.branch_id, " .
+                            // Branch and Portfolio
+                            "P.category as policy_category, P.insurance_company_id, P.code as policy_code, P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, " .
 
                             /**
                              * User Table - Sales Staff Info ( username, code)

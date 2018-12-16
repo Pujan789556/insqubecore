@@ -1014,7 +1014,7 @@ class Objects extends MY_Controller
 			$old_data 	= [];
 			$new_data 	= [];
 			$old_record = (array)$old_record;
-			foreach($this->object_model->endorsement_fields as $key)
+			foreach(Object_model::$endorsement_fields as $key)
 			{
 				$old_data[$key] = $old_record[$key];
 				$new_data[$key] = $post_data[$key] ?? NULL;

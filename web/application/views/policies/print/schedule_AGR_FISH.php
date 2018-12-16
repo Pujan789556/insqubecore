@@ -121,7 +121,7 @@ $schedule_table_title   = 'माछाको बीमालेख';
                         ?>
                         <table class="table">
                             <tr>
-                                <td>कुल बीमांक रकम(रु): <?php echo  number_format($endorsement_record->net_amt_sum_insured, 2);?></td>
+                                <td>कुल बीमांक रकम(रु): <?php echo  number_format($endorsement_record->amt_sum_insured_net, 2);?></td>
                             </tr>
                             <tr>
                                 <td>
@@ -193,7 +193,7 @@ $schedule_table_title   = 'माछाको बीमालेख';
                 </tr>
                 <tr>
                     <td colspan="8" class="text-bold">जम्मा बीमांक रकम(रु)</td>
-                    <td class="text-bold text-right"><?php echo number_format($endorsement_record->net_amt_sum_insured, 2) ?></td>
+                    <td class="text-bold text-right"><?php echo number_format($endorsement_record->amt_sum_insured_net, 2) ?></td>
                 </tr>
             </tbody>
         </table><br/>

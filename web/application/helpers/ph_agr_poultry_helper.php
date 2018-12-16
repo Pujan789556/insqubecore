@@ -672,9 +672,13 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 		if( $CI->input->post() )
 		{
 			/**
-			 * Policy Object Record
+			 * Policy Object Record - Latest
 			 */
-			$policy_object 		= get_object_from_policy_record($policy_record);
+			$policy_object 	= 	_OBJ__get_latest(
+									$policy_record->object_id,
+									$endorsement_record->txn_type,
+									$endorsement_record->audit_object
+								);
 
 			/**
 			 * Portfolio Setting Record
@@ -830,11 +834,7 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 					// Basic Premium
 					$BASIC_PREMIUM = $E + $H;
 
-					/**
-					 * !!! NO VAT  on AGRICULTURE PORTFOLIOS !!!
-					 */
-					$amount_vat = 0.00;
-
+					// -----------------------------------------------------------------------------
 
 					/**
 					 * Prepare Premium Data
@@ -845,32 +845,28 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 						'amt_agent_commission'  => $agent_commission,
 						'amt_direct_discount' 	=> $direct_discount,
 						'amt_pool_premium' 		=> 0.00,
-						'gross_amt_sum_insured' => $policy_object->amt_sum_insured,
-						'net_amt_sum_insured' 	=> $policy_object->amt_sum_insured,
-						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-						'amt_vat' 				=> $amount_vat,
 					];
 
+					// -----------------------------------------------------------------------------
 
 					/**
-					 * Premium Computation Table
-					 * -------------------------
+					 * SAVE PREMIUM
+					 * --------------
 					 */
-					$premium_computation_table 					= json_encode($post_premium);
-					$premium_data['premium_computation_table'] 	= $premium_computation_table;
-
-
-					/**
-					 * Cost Calculation Table
-					 */
-					$premium_data['cost_calculation_table'] = json_encode($cost_calculation_table);
-					return $CI->endorsement_model->save($endorsement_record->id, $premium_data);
+					return $CI->endorsement_model->save_premium(
+														$endorsement_record,
+														$policy_record,
+														$premium_data,
+														$post_data,
+														$cost_calculation_table
+													);
 
 				} catch (Exception $e){
 
 					return $CI->template->json([
-						'status' 	=> 'error',
-						'message' 	=> $e->getMessage()
+							'status' => 'error',
+							'title' => 'Exception Occured',
+							'message' => $e->getMessage()
 					], 404);
 				}
         	}

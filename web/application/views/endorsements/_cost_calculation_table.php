@@ -9,14 +9,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Find The Proper Premium Overview Card
  */
-$cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($policy_record->portfolio_id);
+$cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($endorsement_record->portfolio_id);
 ?>
 <div class="box box-bordered box-success" id="_premium-card">
     <div class="box-header with-border border-dark">
         <h3 class="no-margin">
             <span class="text-left">Transaction Details</span>
             <span class="pull-right">
-                <?php if( _POLICY_is_editable($policy_record->status, FALSE) ):
+                <?php if( _POLICY_is_editable($endorsement_record->policy_status, FALSE) ):
                     $update_premium_url = site_url('endorsements/premium/' . $endorsement_record->id);
                 ?>
                         <a href="#"
@@ -24,7 +24,7 @@ $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($po
                             title="Update Premium"
                             data-toggle="tooltip"
                             data-box-size="large"
-                            data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $policy_record->code?>'
+                            data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $endorsement_record->policy_code?>'
                             data-url="<?php echo $update_premium_url;?>"
                             data-form="#_form-premium">
                             <i class="fa fa-pencil-square-o"></i>
@@ -39,7 +39,7 @@ $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($po
     /**
      * Load Partial Overview Card
      */
-    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record, 'policy_record' => $policy_record]);
+    $this->load->view($cost_calculation_table_view, ['endorsement_record' => $endorsement_record]);
     ?>
 
     <div class="box-footer">

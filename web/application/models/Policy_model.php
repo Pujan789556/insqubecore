@@ -815,6 +815,9 @@ class Policy_model extends MY_Model
         $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
         $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record->id, $data['start_date'], $data['end_date'] );
 
+        // Fiscal Year
+        $data['fiscal_yr_id'] = $fy_record->id;
+
 
         /**
          * No marketing staff select?

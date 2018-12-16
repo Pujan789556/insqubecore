@@ -120,7 +120,7 @@ $schedule_table_title   = 'बाली/फलफुलको बीमाले
                         ?>
                         <table class="table">
                             <tr>
-                                <td>कुल बीमांक रकम(रु): <?php echo  number_format($endorsement_record->net_amt_sum_insured, 2);?></td>
+                                <td>कुल बीमांक रकम(रु): <?php echo  number_format($endorsement_record->amt_sum_insured_net, 2);?></td>
                             </tr>
 
                             <tr>

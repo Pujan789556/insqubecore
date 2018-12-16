@@ -171,30 +171,14 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 		$CI =& get_instance();
 
 		/**
-		 * Policy Object Record
-		 *
-		 * In case of endorsements, we will be needing both current policy object and edited object information
-		 * to compute premium.
+		 * Policy Object Record - Latest
 		 */
-		$old_object = get_object_from_policy_record($policy_record);
-		$new_object = NULL;
-		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-		{
-			try {
-				$new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
-			} catch (Exception $e) {
-
-				return $CI->template->json([
-                    'status'        => 'error',
-                    'title' 		=> 'Exception Occured',
-                    'message' 	=> $e->getMessage()
-                ], 404);
-			}
-		}
-
-		// Newest object attributes should be used.
-		$object_attributes  = json_decode($new_object->attributes ?? $old_object->attributes);
-
+		$policy_object 		= 	_OBJ__get_latest(
+									$policy_record->object_id,
+									$endorsement_record->txn_type,
+									$endorsement_record->audit_object
+								);
+		$object_attributes  = json_decode($policy_object->attributes);
 
 		// Form Posted Data - Extra Fields Required to Perform Cost Calculation
 		$premium_computation_table = $post_data['premium'] ?? NULL;
@@ -202,18 +186,8 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 		// Tariff Extracts
 		$default_tariff = json_decode($tariff_record->tariff);
 
-		/**
-		 * NET Sum Insured & Its Breakdown
-		 *
-		 *  A. Net SI
-		 * 	B. Vehicle Price
-		 * 	C. Accessories Price
-		 */
-		$SI 			= _OBJ_si_net($old_object, $new_object);
-		$SI_BREAKDOWN 	= _OBJ_si_breakdown_net($old_object, $new_object);
-		$si_vehicle 	= $SI_BREAKDOWN['si_vehicle'];
-		$si_accessories = $SI_BREAKDOWN['si_accessories'];
-		$vehicle_total_si = $si_vehicle + $si_accessories;
+		// Sum Insured
+		$SI = $policy_object->amt_sum_insured;
 
 
 		// Vehicle Age (If registration date is there use it otherwise mfd year)
@@ -279,7 +253,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 			];
 
 			// Default Premium =  X% of Vehicle Price
-			$__premium_A_row_1 =  $vehicle_total_si * ($default_rate/100.00);
+			$__premium_A_row_1 =  $SI * ($default_rate/100.00);
 			$__CRF_cc_table__A['sections'][] = [
 				'label' 	=> 'क',
 				'title' 	=> "सि.सि.तथा घोषित मूल्य (सरसामान सहित) अनुसार बीमा शुल्क (घोषित मूल्यको {$default_rate}%)",
@@ -431,8 +405,8 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 			$premium_for_insured_covered_on_terorrism = 0.00;
 			if($flag_risk_pool)
 			{
-				$premium_risk_mob 		= $vehicle_total_si * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
-				$premium_risk_terorrism = $vehicle_total_si * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
+				$premium_risk_mob 		= $SI * ($tariff_rsik_group->rate_pool_risk_mob/100.00);
+				$premium_risk_terorrism = $SI * ($tariff_rsik_group->rate_pool_risk_terorrism/100.00);
 
 				// Premium for "Per Thousand Insured Amount" on Terorrism rate_additionl_per_thousand_on_extra_rate
 
@@ -634,6 +608,8 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 			}
 		}
 
+		// -----------------------------------------------------------------------------
+
 
 		/**
 		 * Prepare Premium Data
@@ -646,80 +622,20 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 			'amt_pool_premium' 		=> $POOL_PREMIUM,
 		];
 
-		/**
-		 * Perform Computation Basis for Endorsement
-		 */
-		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-		{
-			$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
-		}
-		/**
-		 * Short Term Policy???
-		 *
-		 * Only Fres/Renewal Policy have Short Term Facility
-		 */
-		else if($policy_record->flag_short_term == IQB_FLAG_YES)
-		{
-			$spr_goodies 	= _POLICY__get_spr_goodies( $pfs_record, $policy_record->start_date, $policy_record->end_date );
-			$premium_data 	= _POLICY__compute_short_term_premium( $spr_goodies['record']->rate ?? NULL, $premium_data, IQB_POLICY_ENDORSEMENT_SPR_CONFIG_BOTH);
-		}
-		else
-		{
-			/**
-			 * NULLIFY Sort Term Related Fields on Endorsement Table
-			 */
-			$premium_data = _POLICY__nullify_short_term_premium( $premium_data );
-		}
 
+		// -----------------------------------------------------------------------------
 
 		/**
-		 * Compute VAT
-		 *
-		 * NOTE:
-		 * On premium refund, we should also be refunding VAT
+		 * SAVE PREMIUM
+		 * --------------
 		 */
-		if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
-		{
-			// We do not do anything here, because, VAT was applied only on Stamp Duty
-			// For other portfolio, it must be set as -ve value
-
-			/**
-			 * !!! NO POOL PREMIUM !!!
-			 *
-			 * Pool premium is not refunded to customer.
-			 * NULLify Pool Premium so that it reflects on VAT Computation
-			 */
-			$premium_data['amt_pool_premium'] = 0.00;
-		}
-		$CI->load->helper('account');
-		$taxable_amount = $post_data['amt_stamp_duty'] + $premium_data['amt_basic_premium'] + $premium_data['amt_pool_premium'];
-		$amount_vat 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
-
-		/**
-		 * Prepare Other Data
-		 */
-		$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
-		$net_amt_sum_insured 	= $SI;
-		$txn_data = array_merge($premium_data, [
-			'gross_amt_sum_insured' => $gross_amt_sum_insured,
-			'net_amt_sum_insured' 	=> $net_amt_sum_insured,
-			'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-			'amt_vat' 				=> $amount_vat,
-		]);
-
-		/**
-		 * Premium Computation Table
-		 * -------------------------
-		 */
-		$txn_data['premium_computation_table'] = $premium_computation_table ? json_encode($premium_computation_table) : NULL;
-
-
-		/**
-		 * Cost Calculation Table
-		 */
-		$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
-		return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
+		return $CI->endorsement_model->save_premium(
+								$endorsement_record,
+								$policy_record,
+								$premium_data,
+								$post_data,
+								$cost_calculation_table
+							);
 	}
 }
 
@@ -744,29 +660,14 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		$CI =& get_instance();
 
 		/**
-		 * Policy Object Record
-		 *
-		 * In case of endorsements, we will be needing both current policy object and edited object information
-		 * to compute premium.
+		 * Policy Object Record - Latest
 		 */
-		$old_object = get_object_from_policy_record($policy_record);
-		$new_object = NULL;
-		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-		{
-			try {
-				$new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
-			} catch (Exception $e) {
-
-				return $CI->template->json([
-                    'status'        => 'error',
-                    'title' 		=> 'Exception Occured',
-                    'message' 	=> $e->getMessage()
-                ], 404);
-			}
-		}
-
-		// Newest object attributes should be used.
-		$object_attributes  = json_decode($new_object->attributes ?? $old_object->attributes);
+		$policy_object 		= 	_OBJ__get_latest(
+									$policy_record->object_id,
+									$endorsement_record->txn_type,
+									$endorsement_record->audit_object
+								);
+		$object_attributes  = json_decode($policy_object->attributes);
 
 		// Form Posted Data - Extra Fields Required to Perform Cost Calculation
 		$premium_computation_table = $post_data['premium'] ?? NULL;
@@ -779,19 +680,18 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		$trolly_tariff = $tariff_record->trolly_tariff ? json_decode($tariff_record->trolly_tariff) : NULL;
 
 		/**
-		 * NET Sum Insured & Its Breakdown
+		 * SI Breakdown
 		 *
 		 *  A. Net SI
 		 * 	B. Vehicle Price
 		 * 	C. Accessories Price
 		 * 	D. Trailer Price
 		 */
-		$SI 			= _OBJ_si_net($old_object, $new_object);
-		$SI_BREAKDOWN 	= _OBJ_si_breakdown_net($old_object, $new_object);
-		$si_vehicle 	= $SI_BREAKDOWN['si_vehicle'];
-		$si_accessories = $SI_BREAKDOWN['si_accessories'];
-		$si_trailer 	= $SI_BREAKDOWN['si_trailer'];
-		$vehicle_total_si = $si_vehicle + $si_accessories;
+		$SI_BREAKDOWN 		= json_decode($policy_object->si_breakdown ?? NULL, TRUE); // Array
+		$si_vehicle 		= floatval($SI_BREAKDOWN['si_vehicle'] ?? 0.00);
+		$si_accessories 	= floatval($SI_BREAKDOWN['si_accessories'] ?? 0.00);
+		$si_trailer 		= floatval($SI_BREAKDOWN['si_trailer']?? 0.00);
+		$vehicle_total_si 	= $si_vehicle + $si_accessories;
 
 
 		// Vehicle Age (If registration date is there use it otherwise mfd year)
@@ -1362,6 +1262,8 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 			}
 		}
 
+		// -----------------------------------------------------------------------------
+
 		/**
 		 * Prepare Premium Data
 		 */
@@ -1374,79 +1276,19 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		];
 
 
-		/**
-		 * Perform Computation Basis for Endorsement
-		 */
-		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-		{
-			$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
-		}
-		/**
-		 * Short Term Policy???
-		 *
-		 * Only Fres/Renewal Policy have Short Term Facility
-		 */
-		else if($policy_record->flag_short_term == IQB_FLAG_YES)
-		{
-			$spr_goodies 	= _POLICY__get_spr_goodies( $pfs_record, $policy_record->start_date, $policy_record->end_date );
-			$premium_data 	= _POLICY__compute_short_term_premium( $spr_goodies['record']->rate ?? NULL, $premium_data, IQB_POLICY_ENDORSEMENT_SPR_CONFIG_BOTH);
-		}
-		else
-		{
-			/**
-			 * NULLIFY Sort Term Related Fields on Endorsement Table
-			 */
-			$premium_data = _POLICY__nullify_short_term_premium( $premium_data );
-		}
+		// -----------------------------------------------------------------------------
 
 		/**
-		 * Compute VAT
-		 *
-		 * NOTE:
-		 * On premium refund, we should also be refunding VAT
+		 * SAVE PREMIUM
+		 * --------------
 		 */
-		if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
-		{
-			// We do not do anything here, because, VAT was applied only on Stamp Duty
-			// For other portfolio, it must be set as -ve value
-
-			/**
-			 * !!! NO POOL PREMIUM !!!
-			 *
-			 * Pool premium is not refunded to customer.
-			 * NULLify Pool Premium so that it reflects on VAT Computation
-			 */
-			$premium_data['amt_pool_premium'] = 0.00;
-		}
-		$CI->load->helper('account');
-		$taxable_amount = $post_data['amt_stamp_duty'] + $premium_data['amt_basic_premium'] + $premium_data['amt_pool_premium'];
-		$amount_vat 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
-
-		/**
-		 * Prepare Other Data
-		 */
-		$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
-		$net_amt_sum_insured 	= $SI;
-		$txn_data = array_merge($premium_data, [
-			'gross_amt_sum_insured' => $gross_amt_sum_insured,
-			'net_amt_sum_insured' 	=> $net_amt_sum_insured,
-			'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-			'amt_vat' 				=> $amount_vat,
-		]);
-
-		/**
-		 * Premium Computation Table
-		 * -------------------------
-		 */
-		$txn_data['premium_computation_table'] = $premium_computation_table ? json_encode($premium_computation_table) : NULL;
-
-
-		/**
-		 * Cost Calculation Table
-		 */
-		$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
-		return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
+		return $CI->endorsement_model->save_premium(
+								$endorsement_record,
+								$policy_record,
+								$premium_data,
+								$post_data,
+								$cost_calculation_table
+							);
 	}
 }
 
@@ -1471,29 +1313,14 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
         $CI =& get_instance();
 
 		/**
-		 * Policy Object Record
-		 *
-		 * In case of endorsements, we will be needing both current policy object and edited object information
-		 * to compute premium.
+		 * Policy Object Record - Latest
 		 */
-		$old_object = get_object_from_policy_record($policy_record);
-		$new_object = NULL;
-		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-		{
-			try {
-				$new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
-			} catch (Exception $e) {
-
-				return $CI->template->json([
-                    'status'        => 'error',
-                    'title' 		=> 'Exception Occured',
-                    'message' 	=> $e->getMessage()
-                ], 404);
-			}
-		}
-
-		// Newest object attributes should be used.
-		$object_attributes  = json_decode($new_object->attributes ?? $old_object->attributes);
+		$policy_object 		= 	_OBJ__get_latest(
+									$policy_record->object_id,
+									$endorsement_record->txn_type,
+									$endorsement_record->audit_object
+								);
+		$object_attributes  = json_decode($policy_object->attributes);
 
         // Form Posted Data - Extra Fields Required to Perform Cost Calculation
         $premium_computation_table = $post_data['premium'] ?? NULL;
@@ -1514,8 +1341,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 		 * 	C. Accessories Price
 		 * 	D. Trailer Price
 		 */
-		$SI 			= _OBJ_si_net($old_object, $new_object);
-		$SI_BREAKDOWN 	= _OBJ_si_breakdown_net($old_object, $new_object);
+		$SI_BREAKDOWN 	= json_decode($policy_object->si_breakdown ?? NULL, TRUE); // Array
 		$si_vehicle 	= $SI_BREAKDOWN['si_vehicle'];
 		$si_accessories = $SI_BREAKDOWN['si_accessories'];
 		$si_trailer 	= $SI_BREAKDOWN['si_trailer'];
@@ -2226,79 +2052,19 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 		];
 
 
-		/**
-		 * Perform Computation Basis for Endorsement
-		 */
-		if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-		{
-			$premium_data = _ENDORSEMENT_apply_computation_basis($policy_record, $endorsement_record, $pfs_record, $premium_data );
-		}
-		/**
-		 * Short Term Policy???
-		 *
-		 * Only Fres/Renewal Policy have Short Term Facility
-		 */
-		else if($policy_record->flag_short_term == IQB_FLAG_YES)
-		{
-			$spr_goodies 	= _POLICY__get_spr_goodies( $pfs_record, $policy_record->start_date, $policy_record->end_date );
-			$premium_data 	= _POLICY__compute_short_term_premium( $spr_goodies['record']->rate ?? NULL, $premium_data, IQB_POLICY_ENDORSEMENT_SPR_CONFIG_BOTH);
-		}
-		else
-		{
-			/**
-			 * NULLIFY Sort Term Related Fields on Endorsement Table
-			 */
-			$premium_data = _POLICY__nullify_short_term_premium( $premium_data );
-		}
+		// -----------------------------------------------------------------------------
 
 		/**
-		 * Compute VAT
-		 *
-		 * NOTE:
-		 * On premium refund, we should also be refunding VAT
+		 * SAVE PREMIUM
+		 * --------------
 		 */
-		if( $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
-		{
-			// We do not do anything here, because, VAT was applied only on Stamp Duty
-			// For other portfolio, it must be set as -ve value
-
-			/**
-			 * !!! NO POOL PREMIUM !!!
-			 *
-			 * Pool premium is not refunded to customer.
-			 * NULLify Pool Premium so that it reflects on VAT Computation
-			 */
-			$premium_data['amt_pool_premium'] = 0.00;
-		}
-		$CI->load->helper('account');
-		$taxable_amount = $post_data['amt_stamp_duty'] + $premium_data['amt_basic_premium'] + $premium_data['amt_pool_premium'];
-		$amount_vat 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
-
-		/**
-		 * Prepare Other Data
-		 */
-		$gross_amt_sum_insured 	= $new_object->amt_sum_insured ?? $old_object->amt_sum_insured;
-		$net_amt_sum_insured 	= $SI;
-		$txn_data = array_merge($premium_data, [
-			'gross_amt_sum_insured' => $gross_amt_sum_insured,
-			'net_amt_sum_insured' 	=> $net_amt_sum_insured,
-			'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-			'amt_vat' 				=> $amount_vat,
-		]);
-
-		/**
-		 * Premium Computation Table
-		 * -------------------------
-		 */
-		$txn_data['premium_computation_table'] = $premium_computation_table ? json_encode($premium_computation_table) : NULL;
-
-
-		/**
-		 * Cost Calculation Table
-		 */
-		$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
-		return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
+		return $CI->endorsement_model->save_premium(
+								$endorsement_record,
+								$policy_record,
+								$premium_data,
+								$post_data,
+								$cost_calculation_table
+							);
     }
 }
 
@@ -3369,7 +3135,11 @@ if ( ! function_exists('__save_premium_MOTOR'))
 			/**
 			 * Let's get the Required Records
 			 */
-			$policy_object 		= get_object_from_policy_record($policy_record);
+			$policy_object 		= 	_OBJ__get_latest(
+									$policy_record->object_id,
+									$endorsement_record->txn_type,
+									$endorsement_record->audit_object
+								);
 			$premium_goodies 	= _TXN_MOTOR_premium_goodies($policy_record, $policy_object);
 
 			$v_rules 			= $premium_goodies['validation_rules'];
@@ -3405,18 +3175,6 @@ if ( ! function_exists('__save_premium_MOTOR'))
 						 * Get the Cost Reference Data
 						 */
 						return call_user_func($method, $policy_record, $endorsement_record, $tariff_record, $pfs_record, $post_data);
-
-
-						// /**
-						//  * Compute VAT ON Taxable Amount
-						//  */
-			   //      	$CI->load->helper('account');
-				  //       $taxable_amount 		= $txn_data['amt_total_premium'] + $txn_data['amt_stamp_duty'];
-				  //       $txn_data['amt_vat'] 	= ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
-						// $done 	  = $CI->endorsement_model->save($endorsement_record->id, $txn_data);
-
-						// return $done;
 
 					} catch (Exception $e){
 

@@ -376,7 +376,7 @@ class Endorsements extends MY_Controller
 			 * Endorsement's Gross Sum Insured = OLD Object's SUM Insured
 			 */
 			$object = $this->object_model->find($policy_record->object_id);
-			$data['gross_amt_sum_insured'] = $object->amt_sum_insured;
+			$data['amt_sum_insured_object'] = $object->amt_sum_insured;
 
 			return $data;
 		}
@@ -458,7 +458,7 @@ class Endorsements extends MY_Controller
 
 			private function _prepare_data_premium_upgrade($post_data)
 			{
-				$fields = ['computation_basis', 'amt_stamp_duty'];
+				$fields = ['refund_compute_reference', 'premium_compute_reference', 'amt_stamp_duty'];
 				$data = [];
 				foreach($fields as $key)
 				{
@@ -469,7 +469,7 @@ class Endorsements extends MY_Controller
 
 			private function _prepare_data_premium_refund($post_data)
 			{
-				$fields = ['computation_basis', 'amt_stamp_duty', 'flag_terminate_on_refund', 'amt_cancellation_fee'];
+				$fields = ['refund_compute_reference', 'premium_compute_reference', 'amt_stamp_duty', 'flag_terminate_on_refund', 'amt_cancellation_fee'];
 				$data = [];
 				foreach($fields as $key)
 				{
@@ -1107,22 +1107,47 @@ class Endorsements extends MY_Controller
 						return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
 					}
 
-					$ajax_data = [
-						'message' 		=> 'Successfully Updated.',
-						'status'  		=> 'success',
-						'updateSection' => true,
-						'hideBootbox' 	=> true,
-						'updateSectionData' => [
-							/**
-							 * Policy Cost Calculation Table
-							 */
-							'box' 		=> '#_premium-card',
-							'method' 	=> 'replaceWith',
-							'html'		=> $this->load->view('endorsements/_cost_calculation_table', ['endorsement_record' => $endorsement_record, 'policy_record' => $policy_record], TRUE)
-						]
-					];
 
-					return $this->template->json($ajax_data);
+
+					// Get Updated Record or Premium Box
+					if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+					{
+						return $this->template->json([
+							'message' 		=> 'Successfully Updated.',
+							'status'  			=> 'success',
+							'reloadForm' 	=> false,
+							'hideBootbox' 	=> true,
+							'updateSection' => true,
+							'updateSectionData' => [
+								'box' 		=> '#_data-row-endorsements-' . $endorsement_record->id,
+								'method' 	=> 'replaceWith',
+								'html'		=> $this->load->view('endorsements/_single_row', ['record' => $endorsement_record], TRUE)
+							]
+						]);
+					}
+					else
+					{
+						return $this->template->json([
+							'message' 		=> 'Successfully Updated.',
+							'status'  		=> 'success',
+							'updateSection' => true,
+							'hideBootbox' 	=> true,
+							'updateSectionData' => [
+								/**
+								 * Policy Cost Calculation Table
+								 */
+								'box' 		=> '#_premium-card',
+								'method' 	=> 'replaceWith',
+								'html'		=> $this->load->view('endorsements/_cost_calculation_table', ['endorsement_record' => $endorsement_record, 'policy_record' => $policy_record], TRUE)
+							]
+						]);
+					}
+
+
+
+
+
+
 				}
 			}
 		}
@@ -1165,8 +1190,8 @@ class Endorsements extends MY_Controller
 
         		// Prepare Premium Data
         		$premium_data = [
-        			'gross_amt_sum_insured' => $policy_object->amt_sum_insured,
-					'net_amt_sum_insured' 	=> $policy_object->amt_sum_insured,
+        			'amt_sum_insured_object' => $policy_object->amt_sum_insured,
+					'amt_sum_insured_net' 	=> $policy_object->amt_sum_insured,
 					'amt_basic_premium' 	=> $amt_basic_premium,
 					'percent_ri_commission' => $percent_ri_commission,
 					'amt_ri_commission' 	=> $amt_ri_commission,
@@ -1821,13 +1846,13 @@ class Endorsements extends MY_Controller
 		{
 			$where = [
 				'P.id' 				=> $key,
-				'ENDRSMNT.status' 	=> IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
+				'E.status' 	=> IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
 			];
 		}
 		else
 		{
 			$where = [
-				'ENDRSMNT.id' 	=> $key
+				'E.id' 	=> $key
 			];
 		}
 

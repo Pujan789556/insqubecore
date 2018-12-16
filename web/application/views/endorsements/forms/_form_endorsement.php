@@ -34,7 +34,7 @@ if(isset($record))
         </div>
     </div>
 
-    <?php if(isset($form_elements['computation_basis'])): ?>
+    <?php if(isset($form_elements['refund_compute_reference'])): ?>
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
               <h4 class="box-title">Premium Computation Basis</h4>
@@ -45,7 +45,7 @@ if(isset($record))
                  * Load Form Components
                  */
                 $this->load->view('templates/_common/_form_components_horz', [
-                    'form_elements' => $form_elements['computation_basis'],
+                    'form_elements' => $form_elements['refund_compute_reference'],
                     'form_record'   => $record
                 ]);
                 ?>

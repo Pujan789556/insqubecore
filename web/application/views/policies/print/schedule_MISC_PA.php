@@ -73,7 +73,7 @@ $schedule_table_title   = 'व्यक्तिगत दुर्घटना 
 
                             <tr>
                                 <td>
-                                    बीमांक रकम (रु): <?php echo number_format($endorsement_record->net_amt_sum_insured, 2)?>
+                                    बीमांक रकम (रु): <?php echo number_format($endorsement_record->amt_sum_insured_net, 2)?>
                                 </td>
                             </tr>
                             <tr>

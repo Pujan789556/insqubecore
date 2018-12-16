@@ -73,10 +73,10 @@ if ( ! function_exists('get_object_from_object_audit'))
             // Customer ID
             $object->customer_id = $policy_record->customer_id;
         }
-        else
-        {
-            throw new Exception("Exception [Helper: object_helper][Method: get_object_from_object_audit()]: No modified policy object found!");
-        }
+        // else
+        // {
+        //     throw new Exception("Exception [Helper: object_helper][Method: get_object_from_object_audit()]: No modified policy object found!");
+        // }
 
         return $object;
     }
@@ -150,6 +150,122 @@ if ( ! function_exists('_OBJ_si_breakdown_net'))
             $net_si_breakdown = $old_si_breakdown;
         }
         return $net_si_breakdown;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ__has_si_changed'))
+{
+    /**
+     * Check if Object's SI changed during Endorsement
+     *
+     * @param object $old_object Policy Object - OLD Version (Current Version for Fresh/Renewal)
+     * @param object $new_object Policy Object - NEW Version (Audit Object for Endorsements)
+     * @return  html
+     */
+    function _OBJ__has_si_changed( $old_object, $new_object = NULL )
+    {
+        $flag = FALSE;
+
+        if($new_object)
+        {
+            $changed_si = abs( (float)$new_object->amt_sum_insured - (float)$old_object->amt_sum_insured );
+
+            $flag = $changed_si > 0 ? TRUE : FALSE;
+        }
+
+        return $flag;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ__get_latest'))
+{
+    /**
+     * Policy Object Record - Latest for Premium Computation
+     *
+     * Case 1: Fresh/Renewal Endorsement
+     *      Current Policy Object is used
+     *
+     * Case 2: Other Endorsement
+     *      Use Audit Object information if Current Object is Edited
+     *      Else Current Policy Object is used
+     *
+     * In case of endorsements, we will be needing both current policy object and edited object information
+     * to compute premium.
+     *
+     * @param int   $object_id
+     * @param int   $txn_type  Endorsement Type
+     * @param JSON  $json_audit_object 'audit_object' column value from 'audit_endorsements' table
+     * @return object
+     */
+    function _OBJ__get_latest( $object_id, $txn_type, $json_audit_object = NULL )
+    {
+        $CI =& get_instance();
+        $CI->load->model('object_model');
+
+        // Get the Object Record
+        $object_record = $CI->object_model->get($object_id);
+
+        if( _ENDORSEMENT_is_first( $txn_type) )
+        {
+            return $object_record;
+        }
+
+        /**
+         * If we have object audit, get the object information from there
+         */
+        if($json_audit_object)
+        {
+            $audit_object = _OBJ__get_from_audit($json_audit_object, 'new');
+            $audit_fields = Object_model::$endorsement_fields;
+
+            // Update the current object record to have these audited data
+            foreach(Object_model::$endorsement_fields as $col)
+            {
+                $object_record->{$col} = $audit_object->{$col};
+            }
+        }
+
+        return $object_record;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ__get_from_audit'))
+{
+    /**
+     * Get object from audit data
+     *
+     * Based on which, return old, new or both objects from audit data
+     *
+     * @param JSON $json_audit_object 'audit_object' column value from 'audit_endorsements' table
+     * @param type|string $which
+     * @return mixed
+     */
+    function _OBJ__get_from_audit( $json_audit_object, $which = 'new' )
+    {
+        $object         = NULL;
+        $audit_record   = $json_audit_object ? json_decode($json_audit_object) : NULL;
+        if($audit_record)
+        {
+            if($which == 'new')
+            {
+                $object = $audit_record->new;
+            }
+            elseif($which == 'old')
+            {
+                $object = $audit_record->old;
+            }
+            else
+            {
+                $object = $audit_record;
+            }
+        }
+        return $object;
     }
 }
 

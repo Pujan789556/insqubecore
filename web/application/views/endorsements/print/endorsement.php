@@ -177,9 +177,9 @@ $labels = [
                     <tr>
                         <td width="50%">
                             <?php
-                            $old_si     = $record->gross_amt_sum_insured - $record->net_amt_sum_insured;
-                            $added_si   = $record->net_amt_sum_insured;
-                            $new_si     = $record->gross_amt_sum_insured
+                            $old_si     = $record->amt_sum_insured_object - $record->amt_sum_insured_net;
+                            $added_si   = $record->amt_sum_insured_net;
+                            $new_si     = $record->amt_sum_insured_object
                             ?>
                             <table class="no-border">
                                 <tr>

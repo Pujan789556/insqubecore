@@ -540,9 +540,13 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 		{
 
 			/**
-			 * Policy Object Record
+			 * Policy Object Record - Latest
 			 */
-			$policy_object 		= get_object_from_policy_record($policy_record);
+			$policy_object 	= 	_OBJ__get_latest(
+									$policy_record->object_id,
+									$endorsement_record->txn_type,
+									$endorsement_record->audit_object
+								);
 
 			/**
 			 * Portfolio Setting Record
@@ -637,51 +641,41 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 					}
 
 
-					/**
-					 * Compute VAT
-					 */
-					$taxable_amount = $PREMIUM_TOTAL + $POOL_PREMIUM + $post_data['amt_stamp_duty'];
-					$CI->load->helper('account');
-					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+					$cost_calculation_table = [];
 
+					// -----------------------------------------------------------------------------
 
 					/**
-					 * Prepare Transactional Data
-					 *
+					 * Prepare Premium Data
 					 */
-					$txn_data = [
-						'gross_amt_sum_insured' => $policy_object->amt_sum_insured,
-						'net_amt_sum_insured' 	=> $policy_object->amt_sum_insured,
+					$premium_data = [
 						'amt_basic_premium' 	=> $PREMIUM_TOTAL,
-						'amt_pool_premium' 		=> $POOL_PREMIUM,
 						'amt_commissionable'	=> $commissionable_premium,
 						'amt_agent_commission'  => $agent_commission,
 						'amt_direct_discount' 	=> $direct_discount,
-						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-						'amt_vat' 				=> $amount_vat,
+						'amt_pool_premium' 		=> $POOL_PREMIUM,
 					];
 
+					// -----------------------------------------------------------------------------
 
 					/**
-					 * Premium Computation Table
-					 * -------------------------
-					 * 	!!! No additional premium computation information.
+					 * SAVE PREMIUM
+					 * --------------
 					 */
-					$txn_data['premium_computation_table'] = json_encode($post_data['premium']);
-
-
-					/**
-					 * Cost Calculation Table
-					 * !!! No cost calculation table
-					 */
-					$txn_data['cost_calculation_table'] = NULL;
-					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
+					return $CI->endorsement_model->save_premium(
+														$endorsement_record,
+														$policy_record,
+														$premium_data,
+														$post_data,
+														$cost_calculation_table
+													);
 
 				} catch (Exception $e){
 
 					return $CI->template->json([
-						'status' 	=> 'error',
-						'message' 	=> $e->getMessage()
+							'status' => 'error',
+							'title' => 'Exception Occured',
+							'message' => $e->getMessage()
 					], 404);
 				}
         	}

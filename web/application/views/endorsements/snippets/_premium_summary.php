@@ -6,9 +6,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $old_object = get_object_from_policy_record($policy_record);
 $new_object = NULL;
 $computation_basis_text = '';
-if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) && $endorsement_record->computation_basis )
+if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) && $endorsement_record->refund_compute_reference )
 {
-    $computation_basis_text = _ENDORSEMENT_computation_basis_dropdown(FALSE)[$endorsement_record->computation_basis];
+    $computation_basis_text = _ENDORSEMENT_compute_reference_dropdown(FALSE)[$endorsement_record->refund_compute_reference];
     try {
         $new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
     } catch (Exception $e) {
@@ -35,8 +35,8 @@ $grand_total +=  floatval($endorsement_record->amt_stamp_duty) +
  */
 if($endorsement_record->status == IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE )
 {
-    $gross_si   = $endorsement_record->gross_amt_sum_insured;
-    $net_si     = $endorsement_record->net_amt_sum_insured;
+    $gross_si   = $endorsement_record->amt_sum_insured_object;
+    $net_si     = $endorsement_record->amt_sum_insured_net;
 }
 else
 {

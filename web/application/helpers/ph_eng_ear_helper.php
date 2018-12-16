@@ -700,9 +700,13 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 		{
 
 			/**
-			 * Policy Object Record
+			 * Policy Object Record - Latest
 			 */
-			$policy_object 		= get_object_from_policy_record($policy_record);
+			$policy_object 	= 	_OBJ__get_latest(
+									$policy_record->object_id,
+									$endorsement_record->txn_type,
+									$endorsement_record->audit_object
+								);
 
 			/**
 			 * Portfolio Setting Record
@@ -747,7 +751,6 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 					 * ------------------------------
 					 */
 					$cost_calculation_table 	= [];
-					$premium_computation_table 	= [];
 
 
 					/**
@@ -851,99 +854,39 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 					];
 
 
-					/**
-					 * Compute VAT
-					 */
-					$taxable_amount = $NET_BASIC_PREMIUM + $POOL_PREMIUM + $post_data['amt_stamp_duty'];
-					$CI->load->helper('account');
-					$amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
+					// -----------------------------------------------------------------------------
 
 					/**
-					 * Prepare Transactional Data
-					 *
+					 * Prepare Premium Data
 					 */
-					$txn_data = [
-						'gross_amt_sum_insured' => $policy_object->amt_sum_insured,
-						'net_amt_sum_insured' 	=> $policy_object->amt_sum_insured,
+					$premium_data = [
 						'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
-						'amt_pool_premium' 		=> $POOL_PREMIUM,
 						'amt_commissionable'	=> $commissionable_premium,
 						'amt_agent_commission'  => $agent_commission,
 						'amt_direct_discount' 	=> $direct_discount,
-						'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-						'amt_vat' 				=> $amount_vat,
+						'amt_pool_premium' 		=> $POOL_PREMIUM,
 					];
 
+					// -----------------------------------------------------------------------------
 
 					/**
-					 * Premium Computation Table
-					 * -------------------------
-					 * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
+					 * SAVE PREMIUM
+					 * --------------
 					 */
-					$premium_computation_table = json_encode($post_premium);
-					$txn_data['premium_computation_table'] = $premium_computation_table;
-
-
-					/**
-					 * Cost Calculation Table
-					 */
-					$txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
-					return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
-
-					// /**
-					//  * Compute VAT
-					//  */
-					// $taxable_amount = $NET_BASIC_PREMIUM + $post_data['amt_stamp_duty'];
-					// $CI->load->helper('account');
-					// $amount_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
-
-					// /**
-					//  * Prepare Transactional Data
-					//  *
-					//  * @TODO: What is Pool Premium Amount?
-					//  */
-					// $txn_data = [
-					// 	'amt_total_premium' 	=> $NET_BASIC_PREMIUM,
-					// 	'amt_pool_premium' 		=> $POOL_PREMIUM,
-					// 	'amt_commissionable'	=> $commissionable_premium,
-					// 	'amt_agent_commission'  => $agent_commission,
-					// 	'amt_stamp_duty' 		=> $post_data['amt_stamp_duty'],
-					// 	'amt_vat' 				=> $amount_vat,
-					// 	'txn_details' 			=> $post_data['txn_details'],
-					// 	'remarks' 				=> $post_data['remarks'],
-					// ];
-
-
-					// /**
-					//  * Premium Computation Table
-					//  * -------------------------
-					//  * This should hold the variable structure exactly so as to populate on _form_premium_FIRE.php
-					//  */
-					// $premium_computation_table = json_encode($post_premium);
-					// $txn_data['premium_computation_table'] = $premium_computation_table;
-
-
-					// /**
-					//  * Cost Calculation Table
-					//  */
-					// $txn_data['cost_calculation_table'] = json_encode($cost_calculation_table);
-					// return $CI->endorsement_model->save($endorsement_record->id, $txn_data);
-
-
-					/**
-					 * @TODO
-					 *
-					 * 1. Build RI Distribution Data For This Policy
-					 * 2. RI Approval Constraint for this Policy
-					 */
+					return $CI->endorsement_model->save_premium(
+														$endorsement_record,
+														$policy_record,
+														$premium_data,
+														$post_data,
+														$cost_calculation_table
+													);
 
 				} catch (Exception $e){
 
 					return $CI->template->json([
-						'status' 	=> 'error',
-						'message' 	=> $e->getMessage()
+							'status' => 'error',
+							'title' => 'Exception Occured',
+							'message' => $e->getMessage()
 					], 404);
 				}
         	}

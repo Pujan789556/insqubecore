@@ -30,7 +30,7 @@ if( _ENDORSEMENT_is_editable($record->status, $record->flag_current, FALSE) ):
         data-toggle="tooltip"
         class="action trg-dialog-edit"
         data-box-size="large"
-        data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $policy_record->code?>'
+        data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $record->policy_code?>'
         data-url="<?php echo $update_premium_url;?>"
         data-form="#_form-premium">
         <i class="fa fa-dollar"></i> Premium</a>
@@ -53,7 +53,7 @@ if( _ENDORSEMENT_is_editable($record->status, $record->flag_current, FALSE) ):
             data-toggle="tooltip"
             class="action trg-dialog-edit"
             data-box-size="large"
-            data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $policy_record->code?>'
+            data-title='<i class="fa fa-pencil-square-o"></i> Edit Transaction/Endorsement - <?php echo $record->policy_code?>'
             data-url="<?php echo site_url('endorsements/edit/' . $record->id);?>"
             data-form="#_form-endorsements">
             <i class="fa fa-pencil-square-o"></i> Edit</a>
@@ -70,7 +70,7 @@ if( _ENDORSEMENT_is_editable($record->status, $record->flag_current, FALSE) ):
             title="Edit Policy Information"
             data-toggle="tooltip"
             data-box-size="large"
-            data-title='<i class="fa fa-pencil-square-o"></i> Edit Policy Info for Endorsement- <?php echo $policy_record->code?>'
+            data-title='<i class="fa fa-pencil-square-o"></i> Edit Policy Info for Endorsement- <?php echo $record->policy_code?>'
             data-url="<?php echo site_url('policies/edit_endorsement/' . $record->policy_id );?>"
             data-form="#_form-policy">
             <i class="fa fa-pencil-square-o"></i> Policy</a>
@@ -82,8 +82,8 @@ if( _ENDORSEMENT_is_editable($record->status, $record->flag_current, FALSE) ):
                 data-toggle="tooltip"
                 class="action trg-dialog-edit"
                 data-box-size="full-width"
-                data-title='<i class="fa fa-pencil-square-o"></i> Edit Object Info for Endorsement - <?php echo $policy_record->code?>'
-                data-url="<?php echo site_url('objects/edit_endorsement/' . $policy_record->id . '/' . $record->id . '/' . $policy_record->object_id);?>"
+                data-title='<i class="fa fa-pencil-square-o"></i> Edit Object Info for Endorsement - <?php echo $record->policy_code?>'
+                data-url="<?php echo site_url('objects/edit_endorsement/' . $record->policy_id . '/' . $record->id . '/' . $record->object_id);?>"
                 data-form="#_form-object">
                 <i class="fa fa-pencil-square-o"></i> Object</a>
     <?php endif; ?>
@@ -94,8 +94,8 @@ if( _ENDORSEMENT_is_editable($record->status, $record->flag_current, FALSE) ):
                 data-toggle="tooltip"
                 class="action trg-dialog-edit"
                 data-box-size="large"
-                data-title='<i class="fa fa-pencil-square-o"></i> Edit Customer Info for Endorsement - <?php echo $policy_record->code?>'
-                data-url="<?php echo site_url('customers/edit_endorsement/' . $policy_record->id . '/' . $record->id . '/' . $policy_record->customer_id);?>"
+                data-title='<i class="fa fa-pencil-square-o"></i> Edit Customer Info for Endorsement - <?php echo $record->policy_code?>'
+                data-url="<?php echo site_url('customers/edit_endorsement/' . $record->policy_id . '/' . $record->id . '/' . $record->customer_id);?>"
                 data-form="#_form-customer">
                 <i class="fa fa-pencil-square-o"></i> Customer</a>
 

@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		 * Editable, Status Action
 		 * ----------------------------
 		 */
-		$this->load->view('endorsements/snippets/_status_actions', ['record' => $record, 'policy_record' => $policy_record]);
+		$this->load->view('endorsements/snippets/_status_actions', ['record' => $record]);
 		?>
 	</td>
 </tr>
