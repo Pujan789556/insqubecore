@@ -203,12 +203,12 @@ $labels = [
                              * Premium Refund Computation
                              */
                             // echo '<pre>'; print_r($record);exit;
-                            $basic_premium  = (float)$record->amt_basic_premium;
-                            $pool_premium   = (float)$record->amt_pool_premium;
-                            $transfer_fee   = (float)$record->amt_transfer_fee;
-                            $transfer_ncd   = (float)$record->amt_transfer_ncd;
-                            $stamp_duty = (float)$record->amt_stamp_duty;
-                            $vat            = (float)$record->amt_vat;
+                            $basic_premium  = (float)$record->net_amt_basic_premium;
+                            $pool_premium   = (float)$record->net_amt_pool_premium;
+                            $transfer_fee   = (float)$record->net_amt_transfer_fee;
+                            $transfer_ncd   = (float)$record->net_amt_transfer_ncd;
+                            $stamp_duty = (float)$record->net_amt_stamp_duty;
+                            $vat            = (float)$record->net_amt_vat;
                             $premium_table = [];
                             if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER)
                             {

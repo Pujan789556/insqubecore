@@ -479,10 +479,6 @@ defined('IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND')  		OR define('IQB_POLICY_E
 defined('IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE')  			OR define('IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE',    		7);
 
 
-// @TODO : TO DEL
-defined('IQB_POLICY_TXN_TYPE_ET')       OR define('IQB_POLICY_TXN_TYPE_ET',     	3); // ENDORSEMENT TRANSACTIONAL
-defined('IQB_POLICY_TXN_TYPE_EG')       OR define('IQB_POLICY_TXN_TYPE_EG',     	4); // ENDORSEMENT GENERAL
-defined('IQB_POLICY_TXN_TYPE_EC')       OR define('IQB_POLICY_TXN_TYPE_EC',     	5); // ENDORSEMENT CANCEL/REFUND
 
 /*
 |--------------------------------------------------------------------------

@@ -563,7 +563,17 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 			 */
 			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 			{
-				return _ENDORSEMENT__save_premium_manual($endorsement_record->id, $pfs_record->agent_commission);
+				try{
+
+					return _ENDORSEMENT__save_premium_manual($policy_record, $endorsement_record, $CI->input->post());
+
+				} catch (Exception $e){
+
+					return $CI->template->json([
+						'status' 	=> 'error',
+						'message' 	=> $e->getMessage()
+					], 404);
+				}
 			}
 
 
@@ -649,11 +659,11 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 					 * Prepare Premium Data
 					 */
 					$premium_data = [
-						'amt_basic_premium' 	=> $PREMIUM_TOTAL,
-						'amt_commissionable'	=> $commissionable_premium,
-						'amt_agent_commission'  => $agent_commission,
-						'amt_direct_discount' 	=> $direct_discount,
-						'amt_pool_premium' 		=> $POOL_PREMIUM,
+						'gross_amt_basic_premium' 	=> $PREMIUM_TOTAL,
+						'gross_amt_commissionable'	=> $commissionable_premium,
+						'gross_amt_agent_commission'  => $agent_commission,
+						'gross_amt_direct_discount' 	=> $direct_discount,
+						'gross_amt_pool_premium' 		=> $POOL_PREMIUM,
 					];
 
 					// -----------------------------------------------------------------------------

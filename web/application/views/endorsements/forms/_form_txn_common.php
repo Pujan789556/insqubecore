@@ -14,13 +14,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         /**
          * Default Stamp Duty if NULL
          */
-        if($endorsement_record->amt_stamp_duty === NULL )
+        if($endorsement_record->net_amt_stamp_duty === NULL )
         {
             foreach($form_elements as $elem)
             {
-                if($elem['field'] === 'amt_stamp_duty')
+                if($elem['field'] === 'net_amt_stamp_duty')
                 {
-                    $endorsement_record->amt_stamp_duty = $elem['_default'];
+                    $endorsement_record->net_amt_stamp_duty = $elem['_default'];
                 }
             }
         }

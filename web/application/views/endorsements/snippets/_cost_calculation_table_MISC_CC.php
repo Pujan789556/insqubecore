@@ -12,8 +12,8 @@ if($cost_calculation_table)
     $cost_table     = $cost_calculation_table->cost_table;
     $risk_table     = $cost_calculation_table->risk_table;
 }
-$total_premium  = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
-$grand_total  = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
+$total_premium  = (float)$endorsement_record->net_amt_basic_premium + (float)$endorsement_record->net_amt_pool_premium;
+$grand_total  = $total_premium + $endorsement_record->net_amt_stamp_duty + $endorsement_record->net_amt_vat;
 ?>
 <div class="box-body">
     <table class="table no-margin table-bordered">
@@ -61,11 +61,11 @@ $grand_total  = $total_premium + $endorsement_record->amt_stamp_duty + $endorsem
                             </tr>
                             <tr>
                                 <td class="text-right"><strong>टिकट दस्तुर</strong></td>
-                                <td class="text-right"><strong><?php echo $endorsement_record->amt_stamp_duty;?></strong></td>
+                                <td class="text-right"><strong><?php echo $endorsement_record->net_amt_stamp_duty;?></strong></td>
                             </tr>
                             <tr>
                                 <td class="text-right"><strong>मु. अ. क. (VAT)</strong></td>
-                                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2);?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->net_amt_vat, 2);?></strong></td>
                             </tr>
                             <tr>
                                 <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>

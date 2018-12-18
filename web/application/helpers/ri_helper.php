@@ -479,10 +479,10 @@ if ( ! function_exists('RI__distribute_endorsement'))
 		/**
 		 * Task 3: Update Premium ( If changed )
 		 */
-		if( $policy_installment_record->amt_basic_premium )
+		if( $policy_installment_record->net_amt_basic_premium )
 		{
-			$policy_installment_record->amt_basic_premium 	+= $premium_gross;
-			$policy_installment_record->amt_pool_premium 	+= $premium_pool;
+			$policy_installment_record->net_amt_basic_premium 	+= $premium_gross;
+			$policy_installment_record->net_amt_pool_premium 	+= $premium_pool;
 		}
 
 
@@ -680,8 +680,8 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 		$si_treaty_3rd_surplus 	= NULL;
 		$si_treaty_fac 			= NULL;
 
-		$premium_gross 				= $policy_installment_record->amt_basic_premium + (float)$policy_installment_record->amt_pool_premium;
-		$premium_pool 				= floatval($policy_installment_record->amt_pool_premium);
+		$premium_gross 				= $policy_installment_record->net_amt_basic_premium + (float)$policy_installment_record->net_amt_pool_premium;
+		$premium_pool 				= floatval($policy_installment_record->net_amt_pool_premium);
 		$premium_net 				= $premium_gross - $premium_pool;
 		$premium_comp_cession 		= NULL;
 		$premium_treaty_total 		= NULL;
@@ -884,8 +884,8 @@ if ( ! function_exists('RI__distribute__QT'))
 		$si_treaty_quota 		= NULL;
 
 
-		$premium_gross 				= $policy_installment_record->amt_basic_premium + (float)$policy_installment_record->amt_pool_premium;
-		$premium_pool 				= floatval($policy_installment_record->amt_pool_premium);
+		$premium_gross 				= $policy_installment_record->net_amt_basic_premium + (float)$policy_installment_record->net_amt_pool_premium;
+		$premium_pool 				= floatval($policy_installment_record->net_amt_pool_premium);
 		$premium_net 				= $premium_gross - $premium_pool;
 		$premium_comp_cession 		= NULL;
 		$premium_treaty_total 		= NULL;
@@ -981,8 +981,8 @@ if ( ! function_exists('RI__distribute__EOL'))
 		$si_treaty_retaintion 	= NULL;
 
 
-		$premium_gross 				= $policy_installment_record->amt_basic_premium + (float)$policy_installment_record->amt_pool_premium;
-		$premium_pool 				= floatval($policy_installment_record->amt_pool_premium);
+		$premium_gross 				= $policy_installment_record->net_amt_basic_premium + (float)$policy_installment_record->net_amt_pool_premium;
+		$premium_pool 				= floatval($policy_installment_record->net_amt_pool_premium);
 		$premium_net 				= $premium_gross - $premium_pool;
 		$premium_comp_cession 		= NULL;
 		$premium_treaty_retaintion 	= NULL;
@@ -1071,8 +1071,8 @@ if ( ! function_exists('RI__pool_distribute'))
 		/**
 		 * Do we have Pool Premium?
 		 */
-		$amt_pool_premium = floatval($policy_installment_record->amt_pool_premium);
-		if( !$amt_pool_premium )
+		$net_amt_pool_premium = floatval($policy_installment_record->net_amt_pool_premium);
+		if( !$net_amt_pool_premium )
 		{
 			return FALSE;
 		}
@@ -1174,8 +1174,8 @@ if ( ! function_exists('RI__pool_distribute_endorsement'))
 		/**
 		 * Do we have Pool Premium?
 		 */
-		$amt_pool_premium = floatval($policy_installment_record->amt_pool_premium);
-		if( !$amt_pool_premium )
+		$net_amt_pool_premium = floatval($policy_installment_record->net_amt_pool_premium);
+		if( !$net_amt_pool_premium )
 		{
 			return FALSE;
 		}
@@ -1348,8 +1348,8 @@ if ( ! function_exists('RI__pool_distribute__QS_SP'))
 		$si_treaty_3rd_surplus 	= NULL;
 		$si_treaty_fac 			= NULL;
 
-		$premium_gross 				= $policy_installment_record->amt_basic_premium + (float)$policy_installment_record->amt_pool_premium;
-		$premium_pool 				= floatval($policy_installment_record->amt_pool_premium);
+		$premium_gross 				= $policy_installment_record->net_amt_basic_premium + (float)$policy_installment_record->net_amt_pool_premium;
+		$premium_pool 				= floatval($policy_installment_record->net_amt_pool_premium);
 		$premium_net 				= $premium_pool;
 		$premium_treaty_total 		= NULL;
 		$premium_treaty_retaintion 	= NULL;
@@ -1532,8 +1532,8 @@ if ( ! function_exists('RI__pool_distribute__QT'))
 		$si_treaty_quota 		= NULL;
 
 
-		$premium_gross 				= $policy_installment_record->amt_basic_premium + (float)$policy_installment_record->amt_pool_premium;
-		$premium_pool 				= floatval($policy_installment_record->amt_pool_premium);
+		$premium_gross 				= $policy_installment_record->net_amt_basic_premium + (float)$policy_installment_record->net_amt_pool_premium;
+		$premium_pool 				= floatval($policy_installment_record->net_amt_pool_premium);
 		$premium_net 				= $premium_pool;
 		$premium_comp_cession 		= NULL;
 		$premium_treaty_total 		= NULL;

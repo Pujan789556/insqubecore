@@ -144,7 +144,7 @@ endif;
  */
 if( !$is_first && $record->status === IQB_POLICY_ENDORSEMENT_STATUS_DRAFT && $this->dx_auth->is_authorized('endorsements', 'status.to.verified') ): ?>
     <a href="#"
-        title="Verify Debit Note"
+        title="Verify Draft Endorsement"
         data-toggle="tooltip"
         data-confirm="true"
         class="btn btn-sm bg-orange btn-round trg-dialog-action"
@@ -193,7 +193,7 @@ if(
     /**
      * Let's activate the Non-transactional Endorsements
      */
-    if( !_ENDORSEMENT_is_transactional_by_type((int)$record->txn_type) && $this->dx_auth->is_authorized('endorsements', 'status.to.active')): ?>
+    if( !_ENDORSEMENT_is_transactional($record) && $this->dx_auth->is_authorized('endorsements', 'status.to.active')): ?>
         <a href="#"
             title="Activate Transaction/Endorsement"
             data-toggle="tooltip"
@@ -208,7 +208,7 @@ if(
 /**
  * Premium/Refind or Ownership Transfer Summary
  */
-if( _ENDORSEMENT_is_transactional_by_type($record->txn_type) )
+if( _ENDORSEMENT_is_transactional($record) )
 {
     echo anchor(
         '#',

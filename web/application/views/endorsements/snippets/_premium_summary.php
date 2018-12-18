@@ -5,30 +5,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 $old_object = get_object_from_policy_record($policy_record);
 $new_object = NULL;
-$computation_basis_text = '';
-if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) && $endorsement_record->refund_compute_reference )
+$premium_compute_text = '';
+$refund_compute_text = '';
+if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 {
-    $computation_basis_text = _ENDORSEMENT_compute_reference_dropdown(FALSE)[$endorsement_record->refund_compute_reference];
-    try {
-        $new_object = get_object_from_object_audit($policy_record, $endorsement_record->audit_object);
-    } catch (Exception $e) {
-    }
+    $compute_ref_dd = _ENDORSEMENT_compute_reference_dropdown(FALSE);
+    $premium_compute_text   = $compute_ref_dd[$endorsement_record->premium_compute_reference] ?? '';
+    $refund_compute_text    = $compute_ref_dd[$endorsement_record->refund_compute_reference] ?? '';
 }
 
-if( _ENDORSEMENT_is_premium_computable_by_type($endorsement_record->txn_type) )
-{
-    $grand_total =  floatval($endorsement_record->amt_basic_premium) +
-                    floatval($endorsement_record->amt_pool_premium) +
-                    floatval($endorsement_record->amt_cancellation_fee);
-}
-else
-{
-    $grand_total =  floatval($endorsement_record->amt_transfer_fee) +
-                    floatval($endorsement_record->amt_transfer_ncd) ;
-}
-$grand_total +=  floatval($endorsement_record->amt_stamp_duty) +
-                floatval($endorsement_record->amt_vat) +
-                floatval($endorsement_record->amt_cancellation_fee);
+$grand_total = _ENDORSEMENT__compute_total_amount($endorsement_record);
+
 
 /**
  * If active, use endorsement record else from object information
@@ -40,8 +27,15 @@ if($endorsement_record->status == IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE )
 }
 else
 {
-    $gross_si   = $old_object->amt_sum_insured;
-    $net_si     = _OBJ_si_net($old_object, $new_object);
+    $policy_object  =   _OBJ__get_latest(
+                            $policy_record->object_id,
+                            $endorsement_record->txn_type,
+                            $endorsement_record->audit_object
+                        );
+    $old_object = get_object_from_policy_record($policy_record);
+
+    $gross_si   = $policy_object->amt_sum_insured;
+    $net_si     = $gross_si - $old_object->amt_sum_insured;
 }
 ?>
 
@@ -71,7 +65,11 @@ else
                     </tr>
                     <tr>
                         <th>Premium Computation Basis</th>
-                        <td class="text-right"><?php echo $computation_basis_text;?></td>
+                        <td class="text-right"><?php echo $premium_compute_text;?></td>
+                    </tr>
+                    <tr>
+                        <th>Refund Computation Basis</th>
+                        <td class="text-right"><?php echo $refund_compute_text;?></td>
                     </tr>
                 </tbody>
             </table>
@@ -84,37 +82,33 @@ else
             </div>
             <table class="table table-responsive table-condensed">
                 <tbody>
-                    <?php if( _ENDORSEMENT_is_premium_computable_by_type($endorsement_record->txn_type) ): ?>
-                        <tr>
-                            <td>Basic Premium (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_basic_premium, 2);?></td>
-                        </tr>
-                        <tr>
-                            <td>Pool Premium (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_pool_premium, 2);?></td>
-                        </tr>
-                        <tr>
-                            <td>Stamp Duty (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_stamp_duty, 2);?></td>
-                        </tr>
-                        <tr>
-                            <td>Cancellation Fee (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_cancellation_fee, 2);?></td>
-                        </tr>
-                    <?php else: ?>
-                        <tr>
-                            <td>Ownership Transfer Fee (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_transfer_fee, 2);?></td>
-                        </tr>
-                        <tr>
-                            <td>No Claim Discount Fee (Rs.)</td>
-                            <td class="text-right"><?php echo number_format($endorsement_record->amt_transfer_ncd, 2);?></td>
-                        </tr>
-                    <?php endif ?>
-
+                    <tr>
+                        <td>Basic Premium (Rs.)</td>
+                        <td class="text-right"><?php echo number_format($endorsement_record->net_amt_basic_premium, 2);?></td>
+                    </tr>
+                    <tr>
+                        <td>Pool Premium (Rs.)</td>
+                        <td class="text-right"><?php echo number_format($endorsement_record->net_amt_pool_premium, 2);?></td>
+                    </tr>
+                    <tr>
+                        <td>Stamp Duty (Rs.)</td>
+                        <td class="text-right"><?php echo number_format($endorsement_record->net_amt_stamp_duty, 2);?></td>
+                    </tr>
+                    <tr>
+                        <td>Cancellation Fee (Rs.)</td>
+                        <td class="text-right"><?php echo number_format($endorsement_record->net_amt_cancellation_fee, 2);?></td>
+                    </tr>
+                    <tr>
+                        <td>Ownership Transfer Fee (Rs.)</td>
+                        <td class="text-right"><?php echo number_format($endorsement_record->net_amt_transfer_fee, 2);?></td>
+                    </tr>
+                    <tr>
+                        <td>No Claim Discount Fee (Rs.)</td>
+                        <td class="text-right"><?php echo number_format($endorsement_record->net_amt_transfer_ncd, 2);?></td>
+                    </tr>
                     <tr>
                         <td>VAT (Rs.)</td>
-                        <td class="text-right"><?php echo number_format($endorsement_record->amt_vat, 2);?></td>
+                        <td class="text-right"><?php echo number_format($endorsement_record->net_amt_vat, 2);?></td>
                     </tr>
                 </tbody>
                 <tfoot>

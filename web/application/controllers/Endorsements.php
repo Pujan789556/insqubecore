@@ -250,7 +250,7 @@ class Endorsements extends MY_Controller
 			return $this->template->json([
 				'status' => 'error',
 				'title' => 'Action Not Permitted.',
-				'message' => 'Either Policy or the last Endorsement is not complete (issued or active).'], 403);
+				'message' => 'Either Policy or the last Endorsement is not complete (issued or active) OR Policy is Canceled/Expired.'], 403);
 		}
 
 		/**
@@ -318,7 +318,7 @@ class Endorsements extends MY_Controller
 				$this->form_validation->set_rules($rules);
 				if($this->form_validation->run() === TRUE )
 	        	{
-	        		$data = $this->_prepare_data($txn_type, $post_data, $policy_record);
+	        		$data = $this->_prepare_data($txn_type, $post_data, $policy_record, $record);
 
 	        		if($action == 'add')
 	        		{
@@ -353,7 +353,7 @@ class Endorsements extends MY_Controller
 
 	// --------------------------------------------------------------------
 
-		private function _prepare_common_data($post_data, $policy_record)
+		private function _prepare_common_data($txn_type, $post_data, $policy_record, $record)
 		{
 			$fields = [ 'issued_date', 'agent_id', 'sold_by', 'start_date', 'end_date', 'txn_details', 'remarks'];
 			$data = [];
@@ -373,19 +373,23 @@ class Endorsements extends MY_Controller
 
 
 			/**
-			 * Endorsement's Gross Sum Insured = OLD Object's SUM Insured
+			 * Current Object's Sum Insured (Latest Object's SI)
 			 */
-			$object = $this->object_model->find($policy_record->object_id);
-			$data['amt_sum_insured_object'] = $object->amt_sum_insured;
+			$policy_object 	= 	_OBJ__get_latest(
+									$policy_record->object_id,
+									$txn_type,
+									$endorsement_record->audit_object ?? NULL
+								);
+			$data['amt_sum_insured_object'] = $policy_object->amt_sum_insured;
 
 			return $data;
 		}
 
 	// --------------------------------------------------------------------
 
-		private function _prepare_data($txn_type, $post_data, $policy_record)
+		private function _prepare_data($txn_type, $post_data, $policy_record, $record = NULL)
 		{
-			$common_data = $this->_prepare_common_data($post_data, $policy_record);
+			$common_data = $this->_prepare_common_data($txn_type, $post_data, $policy_record, $record);
 			$data = [];
 			switch ($txn_type)
 			{
@@ -399,16 +403,13 @@ class Endorsements extends MY_Controller
 					break;
 
 				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
-					$data = $this->_prepare_data_premium_upgrade($post_data);
+				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+					$data = $this->_prepare_data_premium_updowngrade($post_data);
 					break;
 
-				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-					$data = $this->_prepare_data_premium_refund($post_data);
-					break;
 
 				case IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE:
-					// It has only common data
-					// $data = $this->_prepare_data_terminate($post_data);
+					$data = $this->_prepare_data_terminate($post_data, $policy_record, $record);
 					break;
 
 				default:
@@ -418,21 +419,13 @@ class Endorsements extends MY_Controller
 			return array_merge($common_data, $data);
 		}
 
-			// private function _prepare_data_general($post_data)
-			// {
-			// 	return [
-			// 		'txn_details' => $post_data['txn_details'],
-			// 		'remarks' 	  => $post_data['remarks'],
-			// 	];
-			// }
-
 			private function _prepare_data_ownership_transfer($post_data)
 			{
-				$fields = ['amt_transfer_fee', 'amt_transfer_ncd', 'amt_stamp_duty', 'transfer_customer_id'];
+				$fields = ['net_amt_transfer_fee', 'net_amt_transfer_ncd', 'net_amt_stamp_duty', 'transfer_customer_id'];
 				$data = [];
 				foreach($fields as $key)
 				{
-					$data[$key] = $post_data[$key] ?? NULL;
+					$data[$key] =  $post_data[$key] ?? NULL;
 				}
 
 				/**
@@ -443,55 +436,51 @@ class Endorsements extends MY_Controller
 				// $taxable amount = Transfer Fee + Transfer NCD + Stamp Duty
 				$taxable_amount = 	ac_bcsum(
 										[
-											floatval($data['amt_transfer_fee']),
-											floatval($data['amt_transfer_ncd']),
-											floatval($data['amt_stamp_duty'])
+											floatval($data['net_amt_transfer_fee']),
+											floatval($data['net_amt_transfer_ncd']),
+											floatval($data['net_amt_stamp_duty'])
 										],
 										IQB_AC_DECIMAL_PRECISION
 									);
 
-				$amt_vat 		 = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount, IQB_AC_DECIMAL_PRECISION);
-				$data['amt_vat'] = $amt_vat;
+				$net_amt_vat 		 = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount, IQB_AC_DECIMAL_PRECISION);
+				$data['net_amt_vat'] = $net_amt_vat;
 
 				return $data;
 			}
 
-			private function _prepare_data_premium_upgrade($post_data)
+			private function _prepare_data_premium_updowngrade($post_data)
 			{
-				$fields = ['refund_compute_reference', 'premium_compute_reference', 'amt_stamp_duty'];
+				$fields = ['refund_compute_reference', 'premium_compute_reference', 'net_amt_stamp_duty'];
 				$data = [];
 				foreach($fields as $key)
 				{
-					$data[$key] = $post_data[$key] ?? NULL;
+					$data[$key] =  $post_data[$key] ?? NULL;
 				}
 				return $data;
 			}
 
-			private function _prepare_data_premium_refund($post_data)
+			private function _prepare_data_terminate($post_data, $policy_record, $record = NULL)
 			{
-				$fields = ['refund_compute_reference', 'premium_compute_reference', 'amt_stamp_duty', 'flag_terminate_on_refund', 'amt_cancellation_fee'];
+				$fields = ['net_amt_cancellation_fee', 'flag_refund_on_terminate', 'refund_compute_reference'];
 				$data = [];
 				foreach($fields as $key)
 				{
-					$data[$key] = $post_data[$key] ?? NULL;
+					$data[$key] =  $post_data[$key] ?? NULL;
 				}
 
-				// Reset cancellation fee if no terminate set
-				if( !$data['flag_terminate_on_refund'])
+				// Reset all if no refund on termination
+				if( !$data['flag_refund_on_terminate'])
 				{
-					$data['amt_cancellation_fee'] = NULL;
+					foreach($fields as $key)
+					{
+						$data[$key] =  NULL;
+					}
 				}
 
 				return $data;
 			}
 
-			// private function _prepare_data_terminate($post_data)
-			// {
-			// 	return [
-			// 		'txn_details' => $post_data['txn_details'],
-			// 		'remarks' 	  => $post_data['remarks'],
-			// 	];
-			// }
 	// --------------------------------------------------------------------
 
 		private function _return_on_save($action, $done, $policy_id, $id = NULL)
@@ -1169,39 +1158,70 @@ class Endorsements extends MY_Controller
         		$policy_object 	= get_object_from_policy_record($policy_record);
         		$post_data 		= $this->input->post();
 
-        		$amt_basic_premium 		= $post_data['amt_basic_premium'];
-        		$percent_ri_commission 	= $post_data['percent_ri_commission'];
+        		$gross_amt_basic_premium = $post_data['gross_amt_basic_premium'];
+        		$percent_ri_commission 	 = $post_data['percent_ri_commission'];
 
         		// Compute amt_ri_commission
-        		$comm_percent 		= bcdiv($percent_ri_commission, 100.00, IQB_AC_DECIMAL_PRECISION);
-        		$amt_ri_commission 	= bcmul( $amt_basic_premium, $comm_percent, IQB_AC_DECIMAL_PRECISION);
+        		$comm_percent 				= bcdiv($percent_ri_commission, 100.00, IQB_AC_DECIMAL_PRECISION);
+        		$gross_amt_ri_commission 	= bcmul( $gross_amt_basic_premium, $comm_percent, IQB_AC_DECIMAL_PRECISION);
 
         		// Cost Calculation Table
         		$cost_calculation_table = [
         			[
         				'label' => 'FAC - Inward Premium (Rs.)',
-        				'value' => $amt_basic_premium
+        				'value' => $gross_amt_basic_premium
         			],
         			// [
         			// 	'label' => "Commission on FAC Accepted ({$percent_ri_commission}%)",
-        			// 	'value' => $amt_ri_commission
+        			// 	'value' => $gross_amt_ri_commission
         			// ]
         		];
 
-        		// Prepare Premium Data
+        		// Update only FAC IN related Fields
         		$premium_data = [
-        			'amt_sum_insured_object' => $policy_object->amt_sum_insured,
-					'amt_sum_insured_net' 	=> $policy_object->amt_sum_insured,
-					'amt_basic_premium' 	=> $amt_basic_premium,
-					'percent_ri_commission' => $percent_ri_commission,
-					'amt_ri_commission' 	=> $amt_ri_commission,
-					'amt_commissionable'	=> NULL,
-					'amt_agent_commission'  => NULL,
-					'amt_direct_discount' 	=> NULL,
-					'amt_pool_premium' 		=> 0.00,
-					'amt_stamp_duty' 		=> 0.00,
-					'amt_vat' 				=> 0.00,
 
+        			// Sum Insured
+        			'amt_sum_insured_object' 	=> $policy_object->amt_sum_insured,
+					'amt_sum_insured_net' 		=> $policy_object->amt_sum_insured,
+
+					// Basic Premium
+					'gross_amt_basic_premium' 	=> $gross_amt_basic_premium,
+					'refund_amt_basic_premium' 	=> 0.00,
+					'net_amt_basic_premium' 	=> $gross_amt_basic_premium,
+
+					// Pool Premium
+					'gross_amt_pool_premium' 	=> 0.00,
+					'refund_amt_pool_premium' 	=> 0.00,
+					'net_amt_pool_premium' 		=> 0.00,
+
+					// NO COMMISSION
+					'gross_amt_commissionable' 	=> NULL,
+					'refund_amt_commissionable' => NULL,
+					'net_amt_commissionable' 	=> NULL,
+					'gross_amt_agent_commission' 	=> NULL,
+					'refund_amt_agent_commission' 	=> NULL,
+					'net_amt_agent_commission' 		=> NULL,
+
+					// NO Direct Discount
+					'gross_amt_direct_discount' 	=> NULL,
+					'refund_amt_direct_discount' 	=> NULL,
+					'net_amt_direct_discount' 		=> NULL,
+
+					// NO Stamp Duty, NO VAT, NO Transfer fee
+					// no cancelation fee
+					'net_amt_stamp_duty' 		=> 0.00,
+					'net_amt_vat' 				=> 0.00,
+					'net_amt_transfer_fee' 		=> NULL,
+					'net_amt_transfer_ncd' 		=> NULL,
+					'net_amt_cancellation_fee' 	=> NULL,
+
+					// Percent RI Commission
+					'percent_ri_commission' 	=> $percent_ri_commission,
+					'gross_amt_ri_commission' 	=> $gross_amt_ri_commission,
+					'refund_amt_ri_commission' 	=> 0.00,
+					'net_amt_ri_commission' 	=> $gross_amt_ri_commission,
+
+					// Other Fields
 					'premium_computation_table' => json_encode([]),
 					'cost_calculation_table' 	=> json_encode($cost_calculation_table),
 				];
@@ -2159,7 +2179,7 @@ class Endorsements extends MY_Controller
 				&&
 				$to_updown_status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED
 				&&
-				!$endorsement_record->amt_basic_premium
+				!$endorsement_record->net_amt_basic_premium
 			)
 			{
 				$__flag_passed 		= FALSE;

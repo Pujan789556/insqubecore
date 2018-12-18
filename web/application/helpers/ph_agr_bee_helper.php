@@ -631,7 +631,17 @@ if ( ! function_exists('__save_premium_AGR_BEE'))
 			 */
 			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 			{
-				return _ENDORSEMENT__save_premium_manual($endorsement_record->id, $pfs_record->agent_commission);
+				try{
+
+					return _ENDORSEMENT__save_premium_manual($policy_record, $endorsement_record, $CI->input->post());
+
+				} catch (Exception $e){
+
+					return $CI->template->json([
+						'status' 	=> 'error',
+						'message' 	=> $e->getMessage()
+					], 404);
+				}
 			}
 
 
@@ -739,7 +749,7 @@ if ( ! function_exists('__save_premium_AGR_BEE'))
 					];
 
 					// Stamp Duty
-					$F = $post_data['amt_stamp_duty'];
+					$F = $post_data['net_amt_stamp_duty'];
 					$cost_calculation_table[] = [
 						'label' => "च. थप टिकट दस्तुर",
 						'value' => $F
@@ -775,11 +785,11 @@ if ( ! function_exists('__save_premium_AGR_BEE'))
 					 * Prepare Premium Data
 					 */
 					$premium_data = [
-						'amt_basic_premium' 	=> $BASIC_PREMIUM,
-						'amt_commissionable'	=> $commissionable_premium,
-						'amt_agent_commission'  => $agent_commission,
-						'amt_direct_discount' 	=> $direct_discount,
-						'amt_pool_premium' 		=> 0.00,
+						'gross_amt_basic_premium' 	=> $BASIC_PREMIUM,
+						'gross_amt_commissionable'	=> $commissionable_premium,
+						'gross_amt_agent_commission'  => $agent_commission,
+						'gross_amt_direct_discount' 	=> $direct_discount,
+						'gross_amt_pool_premium' 		=> 0.00,
 					];
 
 					// -----------------------------------------------------------------------------

@@ -11,9 +11,9 @@ class Ac_credit_note_model extends MY_Model
     protected $protected_attributes = ['id'];
 
     protected $before_insert = ['before_insert__defaults'];
-    protected $after_insert  = ['clear_cache'];
-    protected $after_update  = ['clear_cache'];
-    protected $after_delete  = ['clear_cache'];
+    // protected $after_insert  = ['clear_cache'];
+    // protected $after_update  = ['clear_cache'];
+    // protected $after_delete  = ['clear_cache'];
 
     protected $fields = ['id', 'customer_id', 'voucher_id', 'branch_id', 'fiscal_yr_id', 'fy_quarter', 'credit_note_date', 'amount', 'flag_paid', 'flag_printed', 'flag_complete', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
@@ -79,11 +79,6 @@ class Ac_credit_note_model extends MY_Model
              * ==================== TRANSACTIONS BEGIN =========================
              */
 
-
-                /**
-                 * Disable DB Debugging
-                 */
-                $this->db->db_debug = FALSE;
                 $this->db->trans_start();
 
 
@@ -124,11 +119,6 @@ class Ac_credit_note_model extends MY_Model
                     throw new Exception("Exception [Model: Ac_credit_note_model][Method: add()]: Could not save Credit Note details and other details.");
                 }
 
-                /**
-                 * Restore DB Debug Configuration
-                 */
-                $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
             /**
              * ==================== TRANSACTIONS END =========================
              */
@@ -152,8 +142,7 @@ class Ac_credit_note_model extends MY_Model
      */
     public function enable_credit_note($id)
     {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, ['flag_complete' => IQB_FLAG_ON]);
+        return parent::update($id, ['flag_complete' => IQB_FLAG_ON]);
     }
 
     // --------------------------------------------------------------------
@@ -166,8 +155,7 @@ class Ac_credit_note_model extends MY_Model
      */
     public function disable_credit_note($id)
     {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, ['flag_complete' => IQB_FLAG_OFF]);
+        return parent::update($id, ['flag_complete' => IQB_FLAG_OFF]);
     }
 
     // --------------------------------------------------------------------

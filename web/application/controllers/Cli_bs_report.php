@@ -230,7 +230,7 @@ class Cli_bs_report extends Base_Controller
                             R.id AS region_id,
                             COUNT(P0.policy_id) AS policy_count,
                             SUM(E.amt_sum_insured_net) AS amt_sum_insured,
-                            SUM(PINST.amt_basic_premium + PINST.amt_pool_premium) AS amt_total_premium
+                            SUM(PINST.net_amt_basic_premium + PINST.net_amt_pool_premium) AS amt_total_premium
                         {$from_join_sql}
                         JOIN dt_endorsements E ON E.policy_id = P0.policy_id
                         JOIN master_districts D ON P0.district_id = D.id
@@ -483,7 +483,7 @@ class Cli_bs_report extends Base_Controller
                 "E.amt_sum_insured_net AS amt_sum_insured"
             )
                 // Installment
-            ->select("PINST.amt_basic_premium + PINST.amt_pool_premium AS amt_total_premium", FALSE)
+            ->select("PINST.net_amt_basic_premium + PINST.net_amt_pool_premium AS amt_total_premium", FALSE)
             ->from('dt_policies P')
             ->join('dt_objects O', "P.object_id = O.id")
             ->join('master_portfolio PF', 'P.portfolio_id = PF.id')

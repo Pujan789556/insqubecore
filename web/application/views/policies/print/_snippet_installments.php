@@ -27,7 +27,7 @@ if( $inst_count > 1 ):
             $i = 1;
             $installment_total = 0;
             foreach($installments as $single):
-                $row_total = $single->amt_basic_premium + $single->amt_pool_premium + $single->amt_stamp_duty + $single->amt_vat;
+                $row_total = $single->net_amt_basic_premium + $single->net_amt_pool_premium + $single->net_amt_stamp_duty + $single->net_amt_vat;
 
                 $installment_total += $row_total;
                 ?>
@@ -36,9 +36,9 @@ if( $inst_count > 1 ):
                     <td><?php echo ordinal($i++); ?></td>
                     <td><?php echo $single->percent; ?></td>
                     <td><?php echo $single->installment_date; ?></td>
-                    <td class="text-right"><?php echo number_format($single->amt_basic_premium + $single->amt_pool_premium, 2); ?></td>
-                    <td class="text-right"><?php echo number_format($single->amt_stamp_duty, 2); ?></td>
-                    <td class="text-right"><?php echo number_format($single->amt_vat, 2); ?></td>
+                    <td class="text-right"><?php echo number_format($single->net_amt_basic_premium + $single->net_amt_pool_premium, 2); ?></td>
+                    <td class="text-right"><?php echo number_format($single->net_amt_stamp_duty, 2); ?></td>
+                    <td class="text-right"><?php echo number_format($single->net_amt_vat, 2); ?></td>
                     <td class="text-right"><?php echo number_format($row_total, 2); ?></td>
                 </tr>
             <?php endforeach ?>

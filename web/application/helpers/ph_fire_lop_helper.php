@@ -409,8 +409,8 @@ if ( ! function_exists('__save_premium_FIRE_LOP'))
 					if( _ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 					{
 						$txn_data_defaults = [
-							'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
-							'amt_pool_premium' 		=> $POOL_PREMIUM,
+							'gross_amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
+							'gross_amt_pool_premium' 		=> $POOL_PREMIUM,
 						];
 						$defaults = [
 							'basic' => floatval($pfs_record->amt_default_basic_premium),
@@ -420,32 +420,32 @@ if ( ! function_exists('__save_premium_FIRE_LOP'))
 
 
 						if(
-							$txn_data_defaults['amt_basic_premium'] != $NET_BASIC_PREMIUM
+							$txn_data_defaults['gross_amt_basic_premium'] != $NET_BASIC_PREMIUM
 							||
-							$txn_data_defaults['amt_pool_premium'] != $POOL_PREMIUM )
+							$txn_data_defaults['gross_amt_pool_premium'] != $POOL_PREMIUM )
 						{
 
-							$txt_basic_premium = $txn_data_defaults['amt_basic_premium'] != $NET_BASIC_PREMIUM
+							$txt_basic_premium = $txn_data_defaults['gross_amt_basic_premium'] != $NET_BASIC_PREMIUM
 													? 'BASIC PREMIUM (minimum)' : 'BASIC PREMIUM';
-							$txt_pool_premium = $txn_data_defaults['amt_pool_premium'] != $POOL_PREMIUM
+							$txt_pool_premium = $txn_data_defaults['gross_amt_pool_premium'] != $POOL_PREMIUM
 													? 'POOL PREMIUM (minimum)' : 'POOL PREMIUM';
 
 							// Overwrite Cost Calculation Table
 							$cost_calculation_table = [
 								[
 									'label' => $txt_basic_premium,
-									'value' => $txn_data_defaults['amt_basic_premium']
+									'value' => $txn_data_defaults['gross_amt_basic_premium']
 								],
 								[
 									'label' => $txt_pool_premium,
-									'value' => $txn_data_defaults['amt_pool_premium']
+									'value' => $txn_data_defaults['gross_amt_pool_premium']
 								]
 							];
 						}
 
 						// Update basic, pool for further computation
-						$NET_BASIC_PREMIUM 		= $txn_data_defaults['amt_basic_premium'];
-						$POOL_PREMIUM 			= $txn_data_defaults['amt_pool_premium'];
+						$NET_BASIC_PREMIUM 		= $txn_data_defaults['gross_amt_basic_premium'];
+						$POOL_PREMIUM 			= $txn_data_defaults['gross_amt_pool_premium'];
 					}
 
 
@@ -456,11 +456,11 @@ if ( ! function_exists('__save_premium_FIRE_LOP'))
 					 * Prepare Premium Data
 					 */
 					$premium_data = [
-						'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
-						'amt_commissionable'	=> $commissionable_premium,
-						'amt_agent_commission'  => $agent_commission,
-						'amt_direct_discount' 	=> $direct_discount,
-						'amt_pool_premium' 		=> $POOL_PREMIUM,
+						'gross_amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
+						'gross_amt_commissionable'	=> $commissionable_premium,
+						'gross_amt_agent_commission'  => $agent_commission,
+						'gross_amt_direct_discount' 	=> $direct_discount,
+						'gross_amt_pool_premium' 		=> $POOL_PREMIUM,
 					];
 
 

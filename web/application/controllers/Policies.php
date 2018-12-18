@@ -2292,7 +2292,7 @@ class Policies extends MY_Controller
 				/**
 				 * Case 1: Premium Must be Updated
 				 */
-				if( $__flag_passed && !$endorsement_record->amt_basic_premium )
+				if( $__flag_passed && !$endorsement_record->net_amt_basic_premium )
 				{
 					$__flag_passed 		= FALSE;
 					$failed_message 	= 'Please Update "Policy Premium" First!';

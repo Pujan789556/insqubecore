@@ -10,7 +10,7 @@ class Migration_Add_spr_fields_on_endorsement extends CI_Migration {
         public function up()
         {
             $sql = "ALTER TABLE `dt_endorsements`
-					ADD `flag_short_term` CHAR(1) NULL DEFAULT NULL COMMENT 'Is this short term policy?' AFTER `flag_terminate_on_refund`,
+					ADD `flag_short_term` CHAR(1) NULL DEFAULT NULL COMMENT 'Is this short term policy?' AFTER `flag_refund_on_terminate`,
 					ADD `short_term_config` TINYINT(1) NULL COMMENT 'Apply Short Term on 1: Both Basic and Pool Premium 2: Basic Only' AFTER `flag_short_term`,
 					ADD `short_term_rate` DECIMAL(8,4) NULL COMMENT 'The Rate it applies on Annual Premium' AFTER `short_term_config`;";
 

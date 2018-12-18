@@ -1009,11 +1009,11 @@ if ( ! function_exists('__save_premium_MARINE'))
 					 * Prepare Premium Data
 					 */
 					$premium_data = [
-						'amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
-						'amt_commissionable'	=> $commissionable_premium,
-						'amt_agent_commission'  => $agent_commission,
-						'amt_direct_discount' 	=> $direct_discount,
-						'amt_pool_premium' 		=> 0.00,
+						'gross_amt_basic_premium' 	=> $NET_BASIC_PREMIUM,
+						'gross_amt_commissionable'	=> $commissionable_premium,
+						'gross_amt_agent_commission'  => $agent_commission,
+						'gross_amt_direct_discount' 	=> $direct_discount,
+						'gross_amt_pool_premium' 		=> 0.00,
 					];
 
 

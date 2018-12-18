@@ -4,8 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy: MOTOR - Cost calculation Summary Table
 */
 $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? '[]');
-$total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
-$grand_total            = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
+$total_premium          = (float)$endorsement_record->net_amt_basic_premium + (float)$endorsement_record->net_amt_pool_premium;
+$grand_total            = $total_premium + $endorsement_record->net_amt_stamp_duty + $endorsement_record->net_amt_vat;
 ?>
 <table class="table no-margin table-bordered">
     <tbody>
@@ -19,8 +19,7 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
 
             <?php
             if($endorsement_record->flag_short_term === IQB_FLAG_YES):
-                $full_premium_obj   = (object)_ENDORSEMENT__compute_full_premium($endorsement_record);
-                $total_premium_full = (float)$full_premium_obj->amt_basic_premium + (float)$full_premium_obj->amt_pool_premium;
+                $total_premium_full = (float)$endorsement_record->gross_amt_basic_premium + (float)$endorsement_record->gross_amt_pool_premium;
                 $spr_rate = $endorsement_record->short_term_rate;
                 ?>
                 <tr>
@@ -39,11 +38,11 @@ $grand_total            = $total_premium + $endorsement_record->amt_stamp_duty +
             <?php endif; ?>
             <tr>
                 <td class="text-right"><strong>टिकट दस्तुर</strong></td>
-                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_stamp_duty, 2);?></strong></td>
+                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->net_amt_stamp_duty, 2);?></strong></td>
             </tr>
             <tr>
                 <td class="text-right"><strong>मु. अ. क. (VAT)</strong></td>
-                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->amt_vat, 2);?></strong></td>
+                <td class="text-right"><strong><?php echo number_format( (float)$endorsement_record->net_amt_vat, 2);?></strong></td>
             </tr>
             <tr>
                 <td class="text-right"><strong>मु. अ. क.(VAT) सहित जम्मा दस्तुर</strong></td>

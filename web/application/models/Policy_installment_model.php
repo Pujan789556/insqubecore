@@ -17,7 +17,7 @@ class Policy_installment_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'endorsement_id', 'fiscal_yr_id', 'fy_quarter', 'installment_date', 'type', 'percent', 'amt_basic_premium', 'amt_pool_premium', 'amt_agent_commission', 'amt_ri_commission', 'amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'endorsement_id', 'fiscal_yr_id', 'fy_quarter', 'installment_date', 'type', 'percent', 'net_amt_basic_premium', 'net_amt_pool_premium', 'net_amt_agent_commission', 'net_amt_ri_commission', 'net_amt_stamp_duty', 'net_amt_transfer_fee', 'net_amt_transfer_ncd', 'net_amt_cancellation_fee', 'net_amt_vat', 'flag_first', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -120,7 +120,7 @@ class Policy_installment_model extends MY_Model
                 $installment_type   = $installment_data['installment_type'];
 
                 // First Installment Only Fields
-                $first_instlmnt_only_fields = ['amt_stamp_duty', 'amt_transfer_fee', 'amt_transfer_ncd', 'amt_cancellation_fee', 'amt_ri_commission'];
+                $first_instlmnt_only_fields = ['net_amt_stamp_duty', 'net_amt_transfer_fee', 'net_amt_transfer_ncd', 'net_amt_cancellation_fee', 'net_amt_ri_commission'];
 
                 $batch_data = [];
                 for($i = 0; $i < count($dates); $i++ )
@@ -130,17 +130,17 @@ class Policy_installment_model extends MY_Model
 
                     $p_val = bcdiv($percent, 100.00, IQB_AC_DECIMAL_PRECISION);
 
-                    $amt_basic_premium      = bcmul( $endorsement_record->amt_basic_premium, $p_val, IQB_AC_DECIMAL_PRECISION);
-                    $amt_pool_premium       = $endorsement_record->amt_pool_premium
-                                                ? bcmul( $endorsement_record->amt_pool_premium, $p_val, IQB_AC_DECIMAL_PRECISION): 0.00;
-                    $amt_agent_commission   = $endorsement_record->amt_agent_commission
-                                                ? bcmul( $endorsement_record->amt_agent_commission , $p_val, IQB_AC_DECIMAL_PRECISION) : NULL;
+                    $net_amt_basic_premium      = bcmul( $endorsement_record->net_amt_basic_premium, $p_val, IQB_AC_DECIMAL_PRECISION);
+                    $net_amt_pool_premium       = $endorsement_record->net_amt_pool_premium
+                                                ? bcmul( $endorsement_record->net_amt_pool_premium, $p_val, IQB_AC_DECIMAL_PRECISION): 0.00;
+                    $net_amt_agent_commission   = $endorsement_record->net_amt_agent_commission
+                                                ? bcmul( $endorsement_record->net_amt_agent_commission , $p_val, IQB_AC_DECIMAL_PRECISION) : NULL;
 
 
                     /**
                      * Compute Taxable Amount
                      */
-                    $taxable_amount = bcadd($amt_basic_premium, $amt_pool_premium, IQB_AC_DECIMAL_PRECISION);
+                    $taxable_amount = bcadd($net_amt_basic_premium, $net_amt_pool_premium, IQB_AC_DECIMAL_PRECISION);
 
 
                     /**
@@ -180,14 +180,14 @@ class Policy_installment_model extends MY_Model
                      *
                      * NOTE: IF POlicy is FAC-Inward, NO VAT Computation
                      */
-                    $amt_vat = 0.00;
+                    $net_amt_vat = 0.00;
                     if( in_array(
                             $endorsement_record->policy_category,
                             [IQB_POLICY_CATEGORY_REGULAR, IQB_POLICY_CATEGORY_CO_INSURANCE])
                     )
                     {
                         $this->load->helper('account');
-                        $amt_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
+                        $net_amt_vat = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
                     }
 
 
@@ -196,10 +196,10 @@ class Policy_installment_model extends MY_Model
                         'installment_date'      => $installment_date,
                         'type'                  => $installment_type,
                         'percent'               => $percent,
-                        'amt_basic_premium'     => $amt_basic_premium,
-                        'amt_pool_premium'      => $amt_pool_premium,
-                        'amt_agent_commission'  => $amt_agent_commission,
-                        'amt_vat'               => $amt_vat,
+                        'net_amt_basic_premium'     => $net_amt_basic_premium,
+                        'net_amt_pool_premium'      => $net_amt_pool_premium,
+                        'net_amt_agent_commission'  => $net_amt_agent_commission,
+                        'net_amt_vat'               => $net_amt_vat,
                         'flag_first'            => $i === 0 ? IQB_FLAG_ON : IQB_FLAG_OFF
                     ]);
                 }
@@ -605,7 +605,19 @@ class Policy_installment_model extends MY_Model
          */
         private function _rows_select($where)
         {
-            $this->db->select('PTI.*, P.branch_id, P.code AS policy_code, ENDRSMNT.flag_current as endorsement_flag_current, ENDRSMNT.status AS endorsement_status, ENDRSMNT.flag_ri_approval AS endorsement_flag_ri_approval')
+            $this->db->select(
+                        // Policy Installment Table Data
+                        'PTI.*, '.
+
+                        // Policy Table Data
+                        'P.id AS policy_id, P.branch_id, P.code AS policy_code, P.portfolio_id, P.start_date as policy_start_date, P.end_date as policy_end_date, '.
+
+                        // Endorsement Table Data
+                        'ENDRSMNT.txn_type,
+                            ENDRSMNT.amt_sum_insured_net as endorsement_amt_sum_insured,
+                            ENDRSMNT.flag_current as endorsement_flag_current,
+                            ENDRSMNT.status AS endorsement_status,
+                            ENDRSMNT.flag_ri_approval AS endorsement_flag_ri_approval')
                     ->from($this->table_name . ' AS PTI')
                     ->join('dt_endorsements ENDRSMNT', 'ENDRSMNT.id = PTI.endorsement_id')
                     ->join('dt_policies P', 'P.id = ENDRSMNT.policy_id')
@@ -634,6 +646,29 @@ class Policy_installment_model extends MY_Model
                             ->order_by('PTI.endorsement_id', 'DESC')
                             ->get()->result();
         }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get the Total Amount of a Installment
+     *
+     * @param int|object $record Installment Record or ID
+     * @return float
+     */
+    public function total_amount($record)
+    {
+        $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
+
+        // @TODO: SUM Based on Txn_Type
+        return  floatval($record->net_amt_basic_premium) +
+                floatval($record->net_amt_pool_premium) +
+                floatval($record->net_amt_stamp_duty) +
+                floatval($record->net_amt_transfer_fee) +
+                floatval($record->net_amt_transfer_ncd) +
+                floatval($record->net_amt_cancellation_fee) +
+                floatval($record->net_amt_vat);
+
+    }
 
     // --------------------------------------------------------------------
 

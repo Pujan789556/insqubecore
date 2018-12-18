@@ -496,7 +496,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 		//
 		// Stamp Duty
 		//
-		$amt_stamp_duty = $post_data['amt_stamp_duty'];
+		$net_amt_stamp_duty = $post_data['net_amt_stamp_duty'];
 
 
 		/**
@@ -615,11 +615,11 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 		 * Prepare Premium Data
 		 */
 		$premium_data = [
-			'amt_basic_premium' 	=> $BASIC_PREMIUM,
-			'amt_commissionable'	=> $commissionable_premium,
-			'amt_agent_commission'  => $agent_commission,
-			'amt_direct_discount' 	=> $direct_discount,
-			'amt_pool_premium' 		=> $POOL_PREMIUM,
+			'gross_amt_basic_premium' 	=> $BASIC_PREMIUM,
+			'gross_amt_commissionable'	=> $commissionable_premium,
+			'gross_amt_agent_commission'  => $agent_commission,
+			'gross_amt_direct_discount' 	=> $direct_discount,
+			'gross_amt_pool_premium' 		=> $POOL_PREMIUM,
 		];
 
 
@@ -1216,7 +1216,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		//
 		// Stamp Duty
 		//
-		$amt_stamp_duty 	= $post_data['amt_stamp_duty'];
+		$net_amt_stamp_duty 	= $post_data['net_amt_stamp_duty'];
 
 
 		if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
@@ -1268,11 +1268,11 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		 * Prepare Premium Data
 		 */
 		$premium_data = [
-			'amt_basic_premium' 	=> $BASIC_PREMIUM,
-			'amt_commissionable'	=> $commissionable_premium,
-			'amt_agent_commission'  => $agent_commission,
-			'amt_direct_discount' 	=> $direct_discount,
-			'amt_pool_premium' 		=> $POOL_PREMIUM,
+			'gross_amt_basic_premium' 	=> $BASIC_PREMIUM,
+			'gross_amt_commissionable'	=> $commissionable_premium,
+			'gross_amt_agent_commission'  => $agent_commission,
+			'gross_amt_direct_discount' 	=> $direct_discount,
+			'gross_amt_pool_premium' 		=> $POOL_PREMIUM,
 		];
 
 
@@ -1990,7 +1990,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
         //
         // Stamp Duty
         //
-        $amt_stamp_duty = $post_data['amt_stamp_duty'];
+        $net_amt_stamp_duty = $post_data['net_amt_stamp_duty'];
 
 
         if(strtoupper($policy_record->policy_package) === IQB_POLICY_PACKAGE_MOTOR_THIRD_PARTY)
@@ -2044,11 +2044,11 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 		 * Prepare Premium Data
 		 */
 		$premium_data = [
-			'amt_basic_premium' 	=> $BASIC_PREMIUM,
-			'amt_commissionable'	=> $commissionable_premium,
-			'amt_agent_commission'  => $agent_commission,
-			'amt_direct_discount' 	=> $direct_discount,
-			'amt_pool_premium' 		=> $POOL_PREMIUM,
+			'gross_amt_basic_premium' 	=> $BASIC_PREMIUM,
+			'gross_amt_commissionable'	=> $commissionable_premium,
+			'gross_amt_agent_commission'  => $agent_commission,
+			'gross_amt_direct_discount' 	=> $direct_discount,
+			'gross_amt_pool_premium' 		=> $POOL_PREMIUM,
 		];
 
 
@@ -2871,7 +2871,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
 			 */
 			// 'third_party' => [
 			// 	[
-	  //               'field' => 'amt_stamp_duty',
+	  //               'field' => 'net_amt_stamp_duty',
 	  //               'label' => 'Stamp Duty(Rs.)',
 	  //               'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
 	  //               '_type'     => 'text',
@@ -2916,7 +2916,7 @@ if ( ! function_exists('_TXN_MOTOR_premium_validation_rules'))
                     '_help_text' => '<small>This covers both (हुलदंगा, हडताल र द्वेशपूर्ण कार्य जोखिम बीमा) & (आतंककारी/विध्वंशात्मक कार्य जोखिम बीमा) </small>'
                 ],
              //    [
-	            //     'field' => 'amt_stamp_duty',
+	            //     'field' => 'net_amt_stamp_duty',
 	            //     'label' => 'Stamp Duty(Rs.)',
 	            //     'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
 	            //     '_type'     => 'text',

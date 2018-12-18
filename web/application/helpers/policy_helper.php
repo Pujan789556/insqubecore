@@ -843,90 +843,6 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_POLICY__compute_short_term_premium'))
-{
-    /**
-     * Compute Short Term Policy Premium
-     *
-     * @param float $rate Short Term Rate
-     * @param array $premium_data Premium Data
-     * @param int $spr_config Short Term Premium Computation Config(Flag) from Endorsement Table
-     * @return  array
-     */
-    function _POLICY__compute_short_term_premium( $rate, $premium_data, $spr_config )
-    {
-        /**
-         * APPLY SHORT TERM RATE ON THE FOLLOWINGS?
-         * ----------------------------------------
-         *
-         * amt_basic_premium
-         * amt_commissionable
-         * amt_agent_commission
-         * amt_direct_discount
-         * amt_pool_premium
-         */
-        $keys = [ 'amt_basic_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount'];
-        if( !$rate )
-        {
-            // Simpliy nullify short term related fields and return Premium Data As It Is.
-            return _POLICY__nullify_short_term_premium( $premium_data );
-        }
-
-        foreach($keys as $key)
-        {
-            $premium_data[$key] = $premium_data[$key] * $rate / 100.00;
-        }
-
-        /**
-         * Apply SPR on POOL???
-         */
-        if($spr_config == IQB_POLICY_ENDORSEMENT_SPR_CONFIG_BOTH )
-        {
-            $premium_data['amt_pool_premium'] = $premium_data['amt_pool_premium'] * $rate / 100.00;
-        }
-
-        /**
-         * Add dependant Columns
-         */
-        $premium_data['flag_short_term']    = IQB_FLAG_YES;
-        $premium_data['short_term_config']  = $spr_config;
-        $premium_data['short_term_rate']    = $rate;
-
-        return $premium_data;
-    }
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_POLICY__nullify_short_term_premium'))
-{
-    /**
-     * Nullify Short Term Policy Premium
-     *
-     * @param array $premium_data Premium Data
-     * @return  array Premium Data after Nullified
-     */
-    function _POLICY__nullify_short_term_premium( $premium_data )
-    {
-        /**
-         * NULLIFY THE FOLLOWING FIELDS
-         * ----------------------------------------
-         *
-         * flag_short_term
-         * short_term_config
-         * short_term_rate
-         */
-        $keys = [ 'flag_short_term', 'short_term_config', 'short_term_rate'];
-        foreach($keys as $key)
-        {
-            $premium_data[$key] = NULL;
-        }
-        return $premium_data;
-    }
-}
-
-// ------------------------------------------------------------------------
-
 if ( ! function_exists('_POLICY__get_spr_goodies'))
 {
     /**
@@ -1663,6 +1579,33 @@ if ( ! function_exists('_ENDORSEMENT_is_transactional_by_type'))
     }
 }
 
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_ENDORSEMENT_is_transactional'))
+{
+    /**
+     * Check if given Endorsement is Transactional.
+     *
+     * Either its type must be transactional
+     * OR Termination type with Refund Premium
+     *
+     * @param   object  $record Endorsement Record
+     * @return  array
+     */
+    function _ENDORSEMENT_is_transactional( $record )
+    {
+        $allowed = _ENDORSEMENT_is_transactional_by_type( $record->txn_type )
+                        ||
+                    (
+                        $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE
+                            &&
+                        $record->flag_refund_on_terminate === IQB_FLAG_YES
+                    );
+
+        return $allowed;
+    }
+}
+
 // ------------------------------------------------------------------------
 if ( ! function_exists('_ENDORSEMENT_premium_only_types'))
 {
@@ -1890,59 +1833,6 @@ if ( ! function_exists('_ENDORSEMENT_compute_reference_dropdown'))
 }
 
 // ------------------------------------------------------------------------
-
-if ( ! function_exists('_ENDORSEMENT__compute_full_premium'))
-{
-    /**
-     * Compute Full Premium if The policy is short term
-     *
-     * @param object $endorsement_record Endorsement Record
-     * @param array $premium_data Premium Data
-     * @param int $spr_config Short Term Premium Computation Config
-     * @return  array
-     */
-    function _ENDORSEMENT__compute_full_premium( $endorsement_record )
-    {
-        /**
-         * APPLY FULL RATE ON THE FOLLOWINGS?
-         * ----------------------------------------
-         *
-         * amt_basic_premium
-         * amt_commissionable
-         * amt_agent_commission
-         * amt_direct_discount
-         * amt_pool_premium
-         */
-
-        $premium_data = [];
-        $keys = [ 'amt_basic_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount'];
-
-        if( $endorsement_record->flag_short_term === IQB_FLAG_YES )
-        {
-            $rate       = $endorsement_record->short_term_rate ?? 100.00;
-            $spr_config = $endorsement_record->short_term_config;
-
-            foreach($keys as $key)
-            {
-                $premium_data[$key] = $endorsement_record->{$key} * 100.00 / $rate;
-            }
-
-            /**
-             * Applied SPR on POOL???
-             */
-            if($spr_config == IQB_POLICY_ENDORSEMENT_SPR_CONFIG_BOTH )
-            {
-                $premium_data['amt_pool_premium'] = $endorsement_record->amt_pool_premium * 100.00 / $rate;
-            }
-        }
-
-        return $premium_data;
-    }
-}
-
-
-
-// ------------------------------------------------------------------------
 if ( ! function_exists('_ENDORSEMENT_type_text'))
 {
 	/**
@@ -2105,7 +1995,7 @@ if ( ! function_exists('_ENDORSEMENT_premium_basic_v_rules'))
 
 		$basic_rules = [
 			[
-                'field' => 'amt_stamp_duty',
+                'field' => 'net_amt_stamp_duty',
                 'label' => 'Stamp Duty(Rs.)',
                 'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
                 '_type'     => 'text',
@@ -2135,11 +2025,11 @@ if ( ! function_exists('_ENDORSEMENT__save_premium_manual'))
      *  - FIRE - FIRE
      *  - MISC - TMI
      *
-     * @param int   $id             Endorsement ID
-     * @param float $agent_commission_rate  Portfolio Agent Commission Rate
+     * @param Ojbect $endorsement_record
+     * @param Ojbect $policy_record
      * @return  bool
      */
-    function _ENDORSEMENT__save_premium_manual( $id, $agent_commission_rate )
+    function _ENDORSEMENT__save_premium_manual( $endorsement_record, $policy_record, $post_data )
     {
         $CI =& get_instance();
 
@@ -2153,38 +2043,7 @@ if ( ! function_exists('_ENDORSEMENT__save_premium_manual'))
 
             if($CI->form_validation->run() === TRUE )
             {
-                $data = [
-                    'amt_sum_insured_object' => $CI->input->post('amt_sum_insured_object'),
-                    'amt_sum_insured_net'   => $CI->input->post('amt_sum_insured_net'),
-                    'amt_basic_premium'     => $CI->input->post('amt_basic_premium'),
-                    'amt_pool_premium'      => $CI->input->post('amt_pool_premium'),
-                    'amt_agent_commission'  => $CI->input->post('amt_agent_commission'),
-                    'amt_stamp_duty'        => $CI->input->post('amt_stamp_duty'),
-
-                    // No Premium Computation and Cost Computation
-                    'premium_computation_table' => NULL,
-                    'cost_calculation_table'    => NULL
-                ];
-
-                /**
-                 * Let's Compute VAT
-                 */
-                $taxable_amount = $data['amt_basic_premium'] + $data['amt_pool_premium'] + $data['amt_stamp_duty'];
-                $CI->load->helper('account');
-                $data['amt_vat'] = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
-
-
-                /**
-                 * Commissionable Amount
-                 */
-                $amt_commissionable = NULL;
-                if( $data['amt_agent_commission'] != 0 && $agent_commission_rate > 0 )
-                {
-                    $data['amt_commissionable'] = ( $data['amt_agent_commission'] * 100 ) / $agent_commission_rate;
-                }
-
-                return $CI->endorsement_model->save($id, $data);
-
+                return $CI->endorsement_model->save_premium_manual($endorsement_record, $policy_record, $post_data);
             }
             else
             {
@@ -2210,6 +2069,7 @@ if ( ! function_exists('_ENDORSEMENT__is_portfolio_premium_manual'))
      *  - Premium Refund
      *
      * Currently Identified Portfolios are:
+     *  - AGR - ALL SUB PORTFOLIO
      *  - ENG - CAR
      *  - ENG - EAR
      *  - FIRE - FIRE
@@ -2226,6 +2086,8 @@ if ( ! function_exists('_ENDORSEMENT__is_portfolio_premium_manual'))
 
         // Allowed Portfolios
         $manual_portolios   = [IQB_SUB_PORTFOLIO_ENG_CAR_ID, IQB_SUB_PORTFOLIO_ENG_EAR_ID, IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID, IQB_SUB_PORTFOLIO_MISC_TMI_ID];
+        $agro_ids           = array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR);
+        $manual_portolios   = array_merge($manual_portolios, $agro_ids);
 
         // Allowed Txn Types
         $txn_types          = [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND];
@@ -2256,14 +2118,14 @@ if ( ! function_exists('_ENDORSEMENT__tariff_premium_defaults'))
         $default_basic  = $defaults['basic'];
         $default_pool   = $defaults['pool'];
 
-        $data['amt_basic_premium']  = $data['amt_basic_premium'] < $default_basic ? $default_basic : $data['amt_basic_premium'];
+        $data['gross_amt_basic_premium']  = $data['gross_amt_basic_premium'] < $default_basic ? $default_basic : $data['gross_amt_basic_premium'];
 
         /**
          * This gives a option to compute pool premium only if it is not zero
          */
-        if( !$skip_pool_on_zero || $data['amt_pool_premium'] > 0.00 )
+        if( !$skip_pool_on_zero || $data['gross_amt_pool_premium'] > 0.00 )
         {
-            $data['amt_pool_premium'] = $data['amt_pool_premium'] < $default_pool ? $default_pool : $data['amt_pool_premium'];
+            $data['gross_amt_pool_premium'] = $data['gross_amt_pool_premium'] < $default_pool ? $default_pool : $data['gross_amt_pool_premium'];
         }
 
 
@@ -2271,6 +2133,24 @@ if ( ! function_exists('_ENDORSEMENT__tariff_premium_defaults'))
     }
 }
 
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_ENDORSEMENT__compute_total_amount'))
+{
+    /**
+     * Compute the Total Amount for this Endorsement
+     *
+     * @param integer $record   Policy Endorsement Record
+     * @return  float
+     */
+    function _ENDORSEMENT__compute_total_amount( $record )
+    {
+        $CI =& get_instance();
+        $CI->load->model('endorsement_model');
+        return $CI->endorsement_model->total_amount($record);
+    }
+}
 
 
 
@@ -2389,6 +2269,7 @@ if ( ! function_exists('_POLICY_INSTALLMENT_type_by_endorsement_type'))
                 break;
 
             case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+            case IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE:
                 $installment_type = IQB_POLICY_INSTALLMENT_TYPE_REFUND_TO_CUSTOMER;
                 break;
 
@@ -2527,13 +2408,9 @@ if ( ! function_exists('_POLICY_INSTALLMENT_compute_total_amount'))
      */
     function _POLICY_INSTALLMENT_compute_total_amount( $record )
     {
-        return  floatval($record->amt_basic_premium) +
-                floatval($record->amt_pool_premium) +
-                floatval($record->amt_stamp_duty) +
-                floatval($record->amt_transfer_fee) +
-                floatval($record->amt_transfer_ncd) +
-                floatval($record->amt_cancellation_fee) +
-                floatval($record->amt_vat);
+        $CI =& get_instance();
+        $CI->load->model('policy_installment_model');
+        return $CI->policy_installment_model->total_amount($record);
     }
 }
 

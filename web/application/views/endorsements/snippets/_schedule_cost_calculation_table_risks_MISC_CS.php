@@ -10,8 +10,8 @@ if($cost_calculation_table)
     $risk_table     = $cost_calculation_table->risk_table ?? [];
     $cost_table     = $cost_calculation_table->cost_table ?? [];
 }
-$total_premium          = (float)$endorsement_record->amt_basic_premium + (float)$endorsement_record->amt_pool_premium;
-$grand_total            = $total_premium + $endorsement_record->amt_stamp_duty + $endorsement_record->amt_vat;
+$total_premium          = (float)$endorsement_record->net_amt_basic_premium + (float)$endorsement_record->net_amt_pool_premium;
+$grand_total            = $total_premium + $endorsement_record->net_amt_stamp_duty + $endorsement_record->net_amt_vat;
 
 if($cost_calculation_table):?>
     <?php

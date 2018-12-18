@@ -704,6 +704,7 @@ class Policy_installments extends MY_Controller
 						break;
 
 					case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+					case IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE:
 						$data = $this->_data_voucher_details_for_credit_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
 						break;
 
@@ -762,7 +763,7 @@ class Policy_installments extends MY_Controller
 			$cr_rows = [];
 
 			// [CR] FAC Premium Accepted (Income) = Total FAC Premium
-			$fac_premium_accepted = (float)$installment_record->amt_basic_premium;
+			$fac_premium_accepted = (float)$installment_record->net_amt_basic_premium;
 			$cr_rows[] = [
 				'account_id' => $portfolio_record->account_id_fpi,
 				'party_type' => NULL,
@@ -771,7 +772,7 @@ class Policy_installments extends MY_Controller
 			];
 
 			// [DR] Comission on Fac Accepted (Already calculated on Premium Update)
-			$comm_on_fac_accepted = (float)$installment_record->amt_ri_commission;
+			$comm_on_fac_accepted = (float)$installment_record->net_amt_ri_commission;
 			if($comm_on_fac_accepted)
 			{
 				$dr_rows[] = [
@@ -852,13 +853,13 @@ class Policy_installments extends MY_Controller
 	         * Voucher Amount Computation
 	         */
 	        $gross_premium_amount 	= 	bcadd(
-	        								(float)$installment_record->amt_basic_premium,
-	        								(float)$installment_record->amt_pool_premium,
+	        								(float)$installment_record->net_amt_basic_premium,
+	        								(float)$installment_record->net_amt_pool_premium,
 	        								IQB_AC_DECIMAL_PRECISION
         								); // basic + pool premium
 
-	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
-	        $vat_payable_amount 		= $installment_record->amt_vat;
+	        $stamp_income_amount 		= floatval($installment_record->net_amt_stamp_duty	);
+	        $vat_payable_amount 		= $installment_record->net_amt_vat	;
 
 	        // $beema_samiti_service_charge_amount 		= ($gross_premium_amount * $pfs_record->bs_service_charge) / 100.00;
 	        $beema_samiti_service_charge_amount = 	bcdiv(
@@ -869,7 +870,7 @@ class Policy_installments extends MY_Controller
 
 	        // $total_to_receive_from_insured_party_amount = $gross_premium_amount + $stamp_income_amount + $vat_payable_amount;
 	        $total_to_receive_from_insured_party_amount = ac_bcsum([$gross_premium_amount, $stamp_income_amount, $vat_payable_amount], IQB_AC_DECIMAL_PRECISION);
-	        $agent_commission_amount 					= $installment_record->amt_agent_commission ?? NULL;
+	        $agent_commission_amount 					= $installment_record->net_amt_agent_commission ?? NULL;
 
 			// --------------------------------------------------------------------
 
@@ -1004,13 +1005,13 @@ class Policy_installments extends MY_Controller
 
 	        // basic + pool
 	        $gross_premium_amount 		= 	bcadd(
-		        								(float)$installment_record->amt_basic_premium,
-		        								(float)$installment_record->amt_pool_premium,
+		        								(float)$installment_record->net_amt_basic_premium,
+		        								(float)$installment_record->net_amt_pool_premium,
 		        								IQB_AC_DECIMAL_PRECISION
 	        								);
-	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
-	        $vat_payable_amount 		= $installment_record->amt_vat;
-	        $amt_cancellation_fee 		= floatval($installment_record->amt_cancellation_fee);
+	        $stamp_income_amount 		= floatval($installment_record->net_amt_stamp_duty	);
+	        $vat_payable_amount 		= $installment_record->net_amt_vat	;
+	        $net_amt_cancellation_fee	 		= floatval($installment_record->net_amt_cancellation_fee	);
 
 	        // Gross X BS Service Charge %
 	        $beema_samiti_service_charge_amount = 	bcdiv (
@@ -1029,12 +1030,12 @@ class Policy_installments extends MY_Controller
 	        													$gross_premium_amount,
 		        												 $stamp_income_amount,
 		        												 $vat_payable_amount,
-		        												 $amt_cancellation_fee
+		        												 $net_amt_cancellation_fee
 	        												],
 	        												IQB_AC_DECIMAL_PRECISION
 	        											);
 
-	        $agent_commission_amount 				= $installment_record->amt_agent_commission ?? NULL;
+	        $agent_commission_amount 				= $installment_record->net_amt_agent_commission ?? NULL;
 
 			// --------------------------------------------------------------------
 
@@ -1081,13 +1082,13 @@ class Policy_installments extends MY_Controller
 	         *
 	         * Cancellation Fee is Credit if any
 	         */
-	        if( $amt_cancellation_fee )
+	        if( $net_amt_cancellation_fee	 )
 	        {
 	        	$cr_rows[] = [
 	        		'account_id' => IQB_AC_ACCOUNT_ID_SERVICE_CHARGE_RECOVERY,
 					'party_type' => NULL,
 					'party_id'   => NULL,
-					'amount' 	 => $amt_cancellation_fee
+					'amount' 	 => $net_amt_cancellation_fee
 	        	];
 	        }
 
@@ -1209,11 +1210,11 @@ class Policy_installments extends MY_Controller
 	        /**
 	         * Voucher Amount Computation
 	         */
-	        $vat_payable_amount 		= floatval($installment_record->amt_vat);
-	        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
+	        $vat_payable_amount 		= floatval($installment_record->net_amt_vat	);
+	        $stamp_income_amount 		= floatval($installment_record->net_amt_stamp_duty	);
 	        $ownership_transfer_charge 	= 	bcadd(
-	        									floatval($installment_record->amt_transfer_fee),
-				        			  	  		floatval($installment_record->amt_transfer_ncd),
+	        									floatval($installment_record->net_amt_transfer_fee	),
+				        			  	  		floatval($installment_record->net_amt_transfer_ncd	),
 				        			  	  		IQB_AC_DECIMAL_PRECISION
 			        			  	  		);
 
@@ -1301,6 +1302,7 @@ class Policy_installments extends MY_Controller
 					break;
 
 				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+				case IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE:
 					$voucher_type_id = IQB_AC_VOUCHER_TYPE_CRDN; // Credit Voucher
 					break;
 
@@ -1659,10 +1661,10 @@ class Policy_installments extends MY_Controller
 				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 					$amount = 	ac_bcsum(
 									[
-										floatval($installment_record->amt_basic_premium),
-										floatval($installment_record->amt_pool_premium),
-										floatval($installment_record->amt_stamp_duty),
-										floatval($installment_record->amt_vat)
+										floatval($installment_record->net_amt_basic_premium),
+										floatval($installment_record->net_amt_pool_premium),
+										floatval($installment_record->net_amt_stamp_duty	),
+										floatval($installment_record->net_amt_vat	)
 									],
 									IQB_AC_DECIMAL_PRECISION
 								);
@@ -1675,10 +1677,10 @@ class Policy_installments extends MY_Controller
 				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
 					$amount = 	ac_bcsum(
 									[
-										floatval($installment_record->amt_transfer_fee),
-										floatval($installment_record->amt_transfer_ncd),
-										floatval($installment_record->amt_stamp_duty),
-										floatval($installment_record->amt_vat)
+										floatval($installment_record->net_amt_transfer_fee	),
+										floatval($installment_record->net_amt_transfer_ncd	),
+										floatval($installment_record->net_amt_stamp_duty	),
+										floatval($installment_record->net_amt_vat	)
 									],
 									IQB_AC_DECIMAL_PRECISION
 							  	);
@@ -1720,8 +1722,8 @@ class Policy_installments extends MY_Controller
 				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
 				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 					$amount = bcadd(
-								floatval($installment_record->amt_basic_premium),
-								floatval($installment_record->amt_pool_premium),
+								floatval($installment_record->net_amt_basic_premium),
+								floatval($installment_record->net_amt_pool_premium),
 								IQB_AC_DECIMAL_PRECISION
 							  );
 					$description = "Policy Premium Amount (Policy Code - {$installment_record->policy_code})";
@@ -1730,8 +1732,8 @@ class Policy_installments extends MY_Controller
 
 				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
 					$amount = 	bcadd(
-									floatval($installment_record->amt_transfer_fee),
-									floatval($installment_record->amt_transfer_ncd),
+									floatval($installment_record->net_amt_transfer_fee	),
+									floatval($installment_record->net_amt_transfer_ncd	),
 									IQB_AC_DECIMAL_PRECISION
 								);
 					$description = "Policy Ownership Transfer Amount (Policy Code - {$installment_record->policy_code})";
@@ -1761,11 +1763,11 @@ class Policy_installments extends MY_Controller
 			/**
 			 * Add Stamp Duty Amount
 			 */
-			if($installment_record->amt_stamp_duty)
+			if($installment_record->net_amt_stamp_duty	)
 	        {
 	        	$invoice_details_data[] = [
 		        	'description' 	=> "Stamp Duty",
-		        	'amount'		=> $installment_record->amt_stamp_duty
+		        	'amount'		=> $installment_record->net_amt_stamp_duty
 		        ];
 	        }
 
@@ -1774,7 +1776,7 @@ class Policy_installments extends MY_Controller
 			 */
 	        $invoice_details_data[] = [
 	        	'description' 	=> "VAT",
-	        	'amount'		=> $installment_record->amt_vat
+	        	'amount'		=> $installment_record->net_amt_vat
 	        ];
 
 
@@ -1821,7 +1823,7 @@ class Policy_installments extends MY_Controller
 		 * Get the endorsement record, Valid Type?
 		 */
 		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if(!$endorsement_record || $endorsement_record->txn_type != IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
+		if(!$endorsement_record || !in_array($endorsement_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND, IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE]) )
 		{
 			return $this->template->json([
 				'title' 	=> 'Invalid Action!',
@@ -1906,17 +1908,17 @@ class Policy_installments extends MY_Controller
          * Voucher Amount Computation
          */
         $gross_premium_amount = bcadd(
-    								(float)$installment_record->amt_basic_premium,
-    								(float)$installment_record->amt_pool_premium,
+    								(float)$installment_record->net_amt_basic_premium,
+    								(float)$installment_record->net_amt_pool_premium,
     								IQB_AC_DECIMAL_PRECISION
     							);
 
-        $stamp_income_amount 		= floatval($installment_record->amt_stamp_duty);
-        $amt_cancellation_fee 		= floatval($installment_record->amt_cancellation_fee);
-        $vat_payable_amount 		= floatval($installment_record->amt_vat);
+        $stamp_income_amount 		= floatval($installment_record->net_amt_stamp_duty	);
+        $net_amt_cancellation_fee	= floatval($installment_record->net_amt_cancellation_fee);
+        $vat_payable_amount 		= floatval($installment_record->net_amt_vat	);
 
         $total_refund_amount = 	ac_bcsum(
-    								[$gross_premium_amount, $stamp_income_amount, $vat_payable_amount, $amt_cancellation_fee],
+    								[$gross_premium_amount, $stamp_income_amount, $vat_payable_amount, $net_amt_cancellation_fee	],
     								IQB_AC_DECIMAL_PRECISION
 								);
 
@@ -1955,11 +1957,11 @@ class Policy_installments extends MY_Controller
 	        ];
         }
 
-        if($amt_cancellation_fee)
+        if($net_amt_cancellation_fee	)
         {
         	$credit_note_details_data[] = [
 	        	'description' 	=> "Cancellation Charge",
-	        	'amount'		=> $amt_cancellation_fee
+	        	'amount'		=> $net_amt_cancellation_fee
 	        ];
         }
 
@@ -2697,7 +2699,7 @@ class Policy_installments extends MY_Controller
 		 * Get the endorsement record, Valid Type?
 		 */
 		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if(!$endorsement_record || $endorsement_record->txn_type != IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND)
+		if(!$endorsement_record || !in_array($endorsement_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND, IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE]) )
 		{
 			return $this->template->json([
 				'title' 	=> 'Invalid Action!',
@@ -2891,7 +2893,7 @@ class Policy_installments extends MY_Controller
 							 * we have to terminate the policy.
 							 */
 							$terminate_policy = FALSE;
-							if($endorsement_record->flag_terminate_on_refund == IQB_FLAG_YES )
+							if($endorsement_record->flag_refund_on_terminate == IQB_FLAG_YES )
 							{
 								$terminate_policy = TRUE;
 							}
@@ -3095,7 +3097,7 @@ class Policy_installments extends MY_Controller
 		else if( $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
 		{
 
-			if($endorsement_record->flag_terminate_on_refund == IQB_FLAG_YES )
+			if($endorsement_record->flag_refund_on_terminate == IQB_FLAG_YES )
 			{
 				$message .= "Your Policy endorsement has been issued and policy has been terminated." . PHP_EOL;
 			}
