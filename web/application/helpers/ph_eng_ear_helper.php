@@ -721,20 +721,20 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 			 * 	- Premium Upgrade
 			 * 	- Premium Refund
 			 */
-			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-			{
-				try{
+			// if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+			// {
+			// 	try{
 
-					return _ENDORSEMENT__save_premium_manual($policy_record, $endorsement_record, $CI->input->post());
+			// 		return _ENDORSEMENT__save_premium_manual($policy_record, $endorsement_record, $CI->input->post());
 
-				} catch (Exception $e){
+			// 	} catch (Exception $e){
 
-					return $CI->template->json([
-						'status' 	=> 'error',
-						'message' 	=> $e->getMessage()
-					], 404);
-				}
-			}
+			// 		return $CI->template->json([
+			// 			'status' 	=> 'error',
+			// 			'message' 	=> $e->getMessage()
+			// 		], 404);
+			// 	}
+			// }
 
 
 			/**
