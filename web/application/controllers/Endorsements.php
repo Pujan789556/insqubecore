@@ -269,7 +269,7 @@ class Endorsements extends MY_Controller
 			return $this->template->json([
 				'status' => 'error',
 				'title' => 'Action Not Permitted.',
-				'message' => 'Policy Schedule is not generated Yet. <br/>Please Click on "Schedule" Button once to generate and save Policy Schedule.'], 403);
+				'message' => 'Policy Schedule is not generated Yet. <br/>Please Click on <span class="btn btn-xs bg-navy btn-round"><i class="fa fa-print"></i> Schedule</span> Button once to generate and save Policy Schedule.'], 403);
 		}
 
 		$record 	= NULL;
@@ -1865,8 +1865,9 @@ class Endorsements extends MY_Controller
 		if( $type === 'all' )
 		{
 			$where = [
-				'P.id' 				=> $key,
-				'E.status' 	=> IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
+				'P.id' 			=> $key,
+				'E.status' 		=> IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE,
+				'E.txn_type !=' => IQB_POLICY_ENDORSEMENT_TYPE_FRESH
 			];
 		}
 		else

@@ -49,7 +49,7 @@ class M20180713_model extends MY_Model
 
             try {
 
-                $endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
+                $endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id);
 
                 /**
                  * Save a Fresh PDF copy
@@ -72,7 +72,7 @@ class M20180713_model extends MY_Model
          echo "Successfully migrated records: {$success}." . PHP_EOL;
 
         // $record     = $this->get($record->id);
-        // $endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
+        // $endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id );
 
         // /**
         //  * Save a Fresh PDF copy

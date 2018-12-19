@@ -1504,8 +1504,8 @@ if ( ! function_exists('_ENDORSEMENT_type_dropdown'))
 	function _ENDORSEMENT_type_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			IQB_POLICY_ENDORSEMENT_TYPE_FRESH 		=> 'Fresh',
-			IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL 	=> 'Renewal',
+			IQB_POLICY_ENDORSEMENT_TYPE_FRESH 		         => 'Fresh',
+			IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED 	      => 'Time Extended',
 
 			IQB_POLICY_ENDORSEMENT_TYPE_GENERAL 			=> 'General (Nil)',
 			IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER 	=> 'Ownership Transfer',
@@ -1569,10 +1569,38 @@ if ( ! function_exists('_ENDORSEMENT_is_transactional_by_type'))
         $txn_type       = (int)$txn_type;
         $allowed_types  = [
             IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-            IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
+            IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED,
             IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER,
             IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
             IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
+        ];
+
+        return in_array($txn_type, $allowed_types);
+    }
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('_ENDORSEMENT_is_refundable'))
+{
+    /**
+     * Check if given Endorsement type is Transactional.
+     *
+     * Allowed Transaction Types
+     *  - Fresh
+     *  - Renewal
+     *  - Ownership Transfer
+     *  - Premium Upgrade
+     *  - Premium Refund
+     *
+     * @param   int     Transaction Type
+     * @return  array
+     */
+    function _ENDORSEMENT_is_refundable( $txn_type )
+    {
+        $txn_type       = (int)$txn_type;
+        $allowed_types  = [
+            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
+            IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE // In case of Terminate and Refund
         ];
 
         return in_array($txn_type, $allowed_types);
@@ -1624,7 +1652,7 @@ if ( ! function_exists('_ENDORSEMENT_premium_only_types'))
     {
         return [
             IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-            IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
+            IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED,
             IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
             IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
         ];
@@ -1690,7 +1718,7 @@ if ( ! function_exists('_ENDORSEMENT_is_premium_computable_by_type'))
 		$txn_type 		= (int)$txn_type;
 		$allowed_types 	= [
 			IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-			IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
+			IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED,
 			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
 			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
 		];
@@ -1718,7 +1746,7 @@ if ( ! function_exists('_ENDORSEMENT_is_invoicable_by_type'))
         $txn_type       = (int)$txn_type;
         $allowed_types  = [
             IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-            IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
+            IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED,
             IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
             IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER,
         ];
@@ -1907,7 +1935,7 @@ if ( ! function_exists('_ENDORSEMENT_endorsement_pdf'))
 			// check if this is not fresh/renewal transaction
 			$record = $records[0] ?? NULL;
 
-			if($record && in_array($record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]) )
+			if($record && $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_FRESH )
 			{
 				throw new Exception("Exception [Helper: policy_helper][Method: _ENDORSEMENT_endorsement_pdf()]: You can not have endrosement print of FRESH/RENEWAL Transaction/endorsement.");
 			}
@@ -2262,7 +2290,7 @@ if ( ! function_exists('_POLICY_INSTALLMENT_type_by_endorsement_type'))
         switch($txn_type)
         {
             case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
-            case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
+            case IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED:
             case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
             case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
                 $installment_type = IQB_POLICY_INSTALLMENT_TYPE_INVOICE_TO_CUSTOMER;

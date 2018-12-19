@@ -247,7 +247,7 @@ $labels = [
 
 
 
-                            if(_ENDORSEMENT_is_transactional_by_type($record->txn_type) ):
+                            if(_ENDORSEMENT_is_transactional($record) ):
                             ?>
                                 <h3 style="margin:0"><?php echo $labels['additional_premium'][$lang]; ?></h3>
 
@@ -261,16 +261,16 @@ $labels = [
                                     </thead>
                                     <?php
                                     foreach($premium_table as $title => $value):
-                                        if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND)
+                                        if( _ENDORSEMENT_is_refundable($record->txn_type) )
                                         {
                                             $row = '<td>'.$title . '</td>' .
                                                     '<td class="text-right">0.00</td>' .
-                                                    '<td class="text-right">' . number_format($value, 2) . '</td>';
+                                                    '<td class="text-right">' . ac_format_number($value, 2) . '</td>';
                                         }
                                         else
                                         {
                                             $row = '<td>'.$title . '</td>' .
-                                                    '<td class="text-right">' . number_format($value, 2) . '</td>'.
+                                                    '<td class="text-right">' . ac_format_number($value, 2) . '</td>'.
                                                     '<td class="text-right">0.00</td>';
                                         }
                                         $row = "<tr>{$row}</tr>";
@@ -281,14 +281,14 @@ $labels = [
 
 
                                     $total_row = '<td class="text-right text-bold">'. $labels['total_premium'][$lang] .'</td>';
-                                    if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND)
+                                    if( _ENDORSEMENT_is_refundable($record->txn_type) )
                                     {
                                         $total_row .=   '<td class="text-right text-bold">0.00</td>' .
-                                                        '<td class="text-right text-bold">' . number_format($total_premium, 2) . '</td>';
+                                                        '<td class="text-right text-bold">' . ac_format_number($total_premium, 2) . '</td>';
                                     }
                                     else
                                     {
-                                        $total_row .=   '<td class="text-right text-bold">' . number_format($total_premium, 2) . '</td>'.
+                                        $total_row .=   '<td class="text-right text-bold">' . ac_format_number($total_premium, 2) . '</td>'.
                                                         '<td class="text-right text-bold">0.00</td>';
                                     }
                                     $total_row = "<tr>{$total_row}</tr>";

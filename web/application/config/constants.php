@@ -413,6 +413,15 @@ define('IQB_MOTOR_CVC_TYPE_CONSTRUCTION_EQUIPMENT',     'CE');      // Construct
 
 /*
 |--------------------------------------------------------------------------
+| POLICY TYPE CONSTANTS
+|--------------------------------------------------------------------------
+|
+*/
+defined('IQB_POLICY_TYPE_FRESH')    OR define('IQB_POLICY_TYPE_FRESH', 		1);
+defined('IQB_POLICY_TYPE_RENEWAL')  OR define('IQB_POLICY_TYPE_RENEWAL',	2);
+
+/*
+|--------------------------------------------------------------------------
 | POLICY CATEGORIES CONSTANTS
 |--------------------------------------------------------------------------
 |
@@ -468,8 +477,8 @@ defined('IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE')         OR define('IQB_POLICY_EN
 | POLICY ENDORSEMENT TYPES CONSTANTS
 |--------------------------------------------------------------------------
 */
-defined('IQB_POLICY_ENDORSEMENT_TYPE_FRESH')    OR define('IQB_POLICY_ENDORSEMENT_TYPE_FRESH',      1);
-defined('IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL')  OR define('IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL',    2);
+defined('IQB_POLICY_ENDORSEMENT_TYPE_FRESH')    		OR define('IQB_POLICY_ENDORSEMENT_TYPE_FRESH',      	1);
+defined('IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED')  	OR define('IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED',   2);
 
 // OTHER ENDORSEMENTS
 defined('IQB_POLICY_ENDORSEMENT_TYPE_GENERAL')  			OR define('IQB_POLICY_ENDORSEMENT_TYPE_GENERAL',    		3);

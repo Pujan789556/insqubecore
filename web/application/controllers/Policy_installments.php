@@ -385,150 +385,6 @@ class Policy_installments extends MY_Controller
 		$message = '';
 
 
-		/**
-		 * --------------------------------------------------------------------
-		 * Post Voucher Add Tasks
-		 *
-		 * NOTE
-		 * 		We perform post voucher add tasks which are mainly to insert
-		 * 		voucher internal relation with policy txn record and  update
-		 * 		policy status.
-		 *
-		 * 		Please note that, if any of installment fails or exception
-		 * 		happens, we rollback and disable voucher. (We can not delete
-		 * 		voucher as we need to maintain sequential order for audit trail)
-		 * --------------------------------------------------------------------
-		 */
-
-
-		/**
-         * ==================== MANUAL TRANSACTIONS BEGIN =========================
-         */
-
-
-            /**
-             * Disable DB Debugging
-             */
-            // $this->db->db_debug = FALSE;
-            // $this->db->trans_begin();
-
-
-                // --------------------------------------------------------------------
-
-            	/**
-				 * Task 2: Add Voucher-Policy Installment Relation
-				 */
-
-				// try {
-
-				// 	$relation_data = [
-				// 		'policy_id' 	=> $installment_record->policy_id,
-				// 		'voucher_id' 	=> $voucher_id,
-				// 		'ref' 			=> IQB_REL_POLICY_VOUCHER_REF_PI,
-				// 		'ref_id' 		=> $installment_record->id,
-				// 		'flag_invoiced' => $this->_voucher_flag_invoiced($policy_record->category)
-				// 	];
-				// 	$this->rel_policy_voucher_model->add($relation_data);
-
-				// } catch (Exception $e) {
-
-				// 	$flag_exception = TRUE;
-				// 	$message = $e->getMessage();
-				// }
-
-                // --------------------------------------------------------------------
-
-				/**
-				 * Task 4: Update Installment Status to "Vouchered", Clean Cache
-				 */
-				// if( !$flag_exception )
-				// {
-				// 	try{
-
-				// 		/**
-				// 		 * If first installment of this transaction
-				// 		 */
-				// 		if($installment_record->flag_first == IQB_FLAG_ON)
-				// 		{
-				// 			$this->endorsement_model->update_status($endorsement_record, IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED);
-				// 		}
-
-				// 		// Update installment status
-				// 		$this->policy_installment_model->to_vouchered($installment_record);
-
-				// 	} catch (Exception $e) {
-
-				// 		$flag_exception = TRUE;
-				// 		$message = $e->getMessage();
-				// 	}
-				// }
-
-                // --------------------------------------------------------------------
-
-				/**
-				 * Task 5: Generate Policy Number
-				 *
-				 * NOTE: Policy TXN must be fresh or Renewal & First Installment
-				 */
-				// if(
-				// 		$flag_exception == FALSE
-				// 			&&
-				// 		$installment_record->flag_first == IQB_FLAG_ON
-				// 			&&
-				// 		in_array($endorsement_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL])
-				// 	)
-				// {
-				// 	try{
-				// 		$policy_code = $this->policy_model->generate_policy_number( $policy_record );
-				// 		if($policy_code)
-				// 		{
-				// 			$policy_record->code = $policy_code;
-
-				// 			// Update Voucher Narration
-				// 			$narration = 'POLICY VOUCHER - POLICY CODE : ' . $policy_record->code;
-				// 			$this->ac_voucher_model->update($voucher_id, ['narration' => $narration], TRUE);
-				// 		}
-				// 	} catch (Exception $e) {
-				// 		$flag_exception = TRUE;
-				// 		$message = $e->getMessage();
-				// 	}
-				// }
-
-                // --------------------------------------------------------------------
-
-			/**
-             * Complete transactions or Rollback
-             */
-			// if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
-			// {
-		 //        $this->db->trans_rollback();
-
-		 //        /**
-   //          	 * Set Voucher Flag Complete to OFF
-   //          	 */
-   //          	$this->ac_voucher_model->disable_voucher($voucher_id);
-
-   //          	return $this->template->json([
-			// 		'title' 	=> 'Something went wrong!',
-			// 		'status' 	=> 'error',
-			// 		'message' 	=> $message ? $message : 'Could not perform save voucher relation or update policy status'
-			// 	]);
-			// }
-			// else
-			// {
-			//         $this->db->trans_commit();
-			// }
-
-   //          /**
-   //           * Restore DB Debug Configuration
-   //           */
-   //          $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-        /**
-         * ==================== MANUAL TRANSACTIONS END =========================
-         */
-
-
 		// --------------------------------------------------------------------
 
         /**
@@ -698,7 +554,7 @@ class Policy_installments extends MY_Controller
 				switch ($txn_type)
 				{
 					case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
-					case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
+					case IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED:
 					case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 						$data = $this->_data_voucher_details_for_premium_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
 						break;
@@ -1296,7 +1152,7 @@ class Policy_installments extends MY_Controller
 			switch ($txn_type)
 			{
 				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
-				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
+				case IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED:
 				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 					$voucher_type_id = IQB_AC_VOUCHER_TYPE_PRI; // Premium Voucher
 					break;
@@ -1657,7 +1513,7 @@ class Policy_installments extends MY_Controller
 			switch ($txn_type)
 			{
 				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
-				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
+				case IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED:
 				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 					$amount = 	ac_bcsum(
 									[
@@ -1719,7 +1575,7 @@ class Policy_installments extends MY_Controller
 			switch ($txn_type)
 			{
 				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
-				case IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL:
+				case IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED:
 				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 					$amount = bcadd(
 								floatval($installment_record->net_amt_basic_premium),

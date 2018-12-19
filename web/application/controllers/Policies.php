@@ -598,7 +598,7 @@ class Policies extends MY_Controller
 						 */
 						try {
 
-							$endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
+							$endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id);
 
 						} catch (Exception $e) {
 
@@ -1745,7 +1745,7 @@ class Policies extends MY_Controller
 		 */
 		try {
 
-			$endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
+			$endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id );
 
 		} catch (Exception $e) {
 
@@ -1856,7 +1856,7 @@ class Policies extends MY_Controller
 		}
 		try {
 
-			$endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
+			$endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id );
 
 		} catch (Exception $e) {
 
@@ -1958,7 +1958,7 @@ class Policies extends MY_Controller
 			}
 			try {
 
-				$endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
+				$endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id);
 
 			} catch (Exception $e) {
 
@@ -2084,7 +2084,7 @@ class Policies extends MY_Controller
 				 */
 				try {
 
-					$endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
+					$endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id);
 				} catch (Exception $e) {
 
 					return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage() ], 404);
@@ -2248,8 +2248,7 @@ class Policies extends MY_Controller
 			 * Get the Current Txn Record
 			 */
 			$endorsement_record = $__flag_passed === TRUE
-									? $this->endorsement_model->get_fresh_renewal_by_policy($record->id,
-											$record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH) : NULL;
+									? $this->endorsement_model->get_first_by_policy($record->id) : NULL;
 
 			/**
 			 * Premium Must be Updated Before Verifying

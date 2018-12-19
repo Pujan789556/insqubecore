@@ -1338,7 +1338,6 @@ class Endorsement_model extends MY_Model
 
                     $where_in = [
                         IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-                        IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL,
                         IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
                         IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND
                     ];
@@ -1877,10 +1876,9 @@ class Endorsement_model extends MY_Model
              *
              *  - Apply `refund_compute_reference` on the Previous Endorsement's GROSS Premium Data
              *
-             * NOTE: REFUND POOL ON Regular Endorsement UP/DOWN-grade
              */
 
-            $refund_data = $this->_build_refund_data($record, $policy_record, TRUE);
+            $refund_data = $this->_build_refund_data($record, $policy_record);
             // echo 'Refund : <pre>'; print_r($refund_data);
             // --------------------------------------------------------------------
 
@@ -1893,7 +1891,7 @@ class Endorsement_model extends MY_Model
             // --------------------------------------------------------------------
 
             /**
-             * Task 4: Compute NET Premium Data = GROSS - REFUND
+             * Task 4: Compute NET Premium Data = GROSS - REFUND, DO not refund POOL
              */
             $premium_data = $this->_compute_net_premium_data($premium_data);
             // echo 'GROSS, REFUND, NET : <pre>'; print_r($premium_data); exit;
@@ -2119,10 +2117,9 @@ class Endorsement_model extends MY_Model
          *
          * @param array $premium_data
          * @param float $rate  short term rate or prorata rate
-         * @param type|bool $apply_on_pool
          * @return array
          */
-        private function _apply_rate_on_refund_premium_data( $premium_data, $rate, $apply_on_pool = FALSE )
+        private function _apply_rate_on_refund_premium_data( $premium_data, $rate )
         {
             /**
              * APPLY COMPUTATION REFERENCE TO PREMIUM DATA
@@ -2141,14 +2138,6 @@ class Endorsement_model extends MY_Model
                 $premium_data[$key] = bcmul( $premium_data[$key], $rate, IQB_AC_DECIMAL_PRECISION);
             }
 
-            /**
-             * Apply on Pool Premium?
-             */
-            if( !$apply_on_pool )
-            {
-                $premium_data['refund_amt_pool_premium'] = 0.00;
-            }
-
             return $premium_data;
         }
 
@@ -2161,10 +2150,9 @@ class Endorsement_model extends MY_Model
          *
          * @param   object  $record  Current Endorsement Record
          * @param   object  $policy_record Policy Record
-         * @param   bool    $refund_pool  Refund Pool Premium if set yes
          * @return  array
          */
-        private function _build_refund_data( $record, $policy_record, $refund_pool = FALSE )
+        private function _build_refund_data( $record, $policy_record )
         {
             $refund_data = [];
             $keys        = [ 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount'];
@@ -2181,17 +2169,6 @@ class Endorsement_model extends MY_Model
                 }
                 // echo '<pre> REFUND FULL: '; print_r($refund_data);
 
-                /**
-                 * Refund Pool ??
-                 *
-                 * If flag set or Endorsement is not going to terminate the policy
-                 */
-                $flag_refund_pool = $refund_pool || $record->flag_refund_on_terminate != IQB_FLAG_YES;
-                if( !$flag_refund_pool )
-                {
-                    $refund_data['refund_amt_pool_premium'] = 0.00;
-                }
-
 
                 /**
                  * Apply Compute Reference Rate
@@ -2200,7 +2177,7 @@ class Endorsement_model extends MY_Model
                 $rate = $this->_compute_reference_rate_on_refund( $record->refund_compute_reference, $p_endorsement, $record, $policy_record );
 
                 // Apply the computation rate
-                $refund_data = $this->_apply_rate_on_refund_premium_data( $refund_data, $rate, $flag_refund_pool );
+                $refund_data = $this->_apply_rate_on_refund_premium_data( $refund_data, $rate );
                 // echo '<pre> Refund Rate: ', $rate; print_r($refund_data); exit;
             }
             else
@@ -2318,9 +2295,10 @@ class Endorsement_model extends MY_Model
          * NET = GROSS - REFUND
          *
          * @param array $premium_data MUST have gross_* and refund_* fields
+         * @param bool $refund_pool
          * @return array
          */
-        private function _compute_net_premium_data($premium_data)
+        private function _compute_net_premium_data($premium_data, $refund_pool = FALSE)
         {
             $keys = [ 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount'];
 
@@ -2335,6 +2313,14 @@ class Endorsement_model extends MY_Model
                     floatval($premium_data[$refund_key]),
                     IQB_AC_DECIMAL_PRECISION
                 );
+            }
+
+            /**
+             * Pool Refund ??
+             */
+            if( !$refund_pool && $premium_data['net_amt_pool_premium'] < 0.00 )
+            {
+                $premium_data['net_amt_pool_premium'] = 0.00;
             }
 
             return $premium_data;
@@ -2427,10 +2413,9 @@ class Endorsement_model extends MY_Model
          *
          *  - Apply `refund_compute_reference` on the Previous Endorsement's GROSS Premium Data
          *
-         * NOTE: REFUND POOL ON Regular Endorsement UP/DOWN-grade
          */
 
-        $refund_data = $this->_build_refund_data($record, $policy_record, FALSE);
+        $refund_data = $this->_build_refund_data($record, $policy_record);
         // echo 'Refund : <pre>'; print_r($refund_data);
         // --------------------------------------------------------------------
 
@@ -2498,13 +2483,7 @@ class Endorsement_model extends MY_Model
      */
     public function is_first($txn_type)
     {
-        $txn_type       = (int)$txn_type;
-        $allowed_types  = [
-            IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-            IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL
-        ];
-
-        return in_array($txn_type, $allowed_types);
+        return $txn_type === IQB_POLICY_ENDORSEMENT_TYPE_FRESH;
     }
 
     // --------------------------------------------------------------------
@@ -2677,8 +2656,7 @@ class Endorsement_model extends MY_Model
                     ->join('dt_customers C', 'C.id = P.customer_id')
                     ->join('dt_customers COT', 'COT.id = E.transfer_customer_id', 'left')
                     ->join('master_agents A', 'E.agent_id = A.id', 'left')
-                    ->where($where)
-                    ->where_not_in('E.txn_type', [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]);
+                    ->where($where);
 
         /**
          * Customer Address
@@ -2833,23 +2811,17 @@ class Endorsement_model extends MY_Model
 
 
     /**
-     * Get Fresh/Renewal Transaction Record of the Policy
+     * Get First/Fresh Endorsement Record by Policy
      *
-     * If the policy is renewed, we need renewed record or fresh
-     * txn record
      *
      * @param int $policy_id
      * @return object
      */
-    public function get_fresh_renewal_by_policy($policy_id, $txn_type)
+    public function get_first_by_policy($policy_id)
     {
-        if( !in_array($txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_FRESH, IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL]) )
-        {
-            throw new Exception("Exception [Model:Endorsement_model][Method: get_fresh_renewal_by_policy()]: Invalid Transaction Type.");
-        }
         $where = [
             'E.policy_id'    => $policy_id,
-            'E.txn_type'     => $txn_type
+            'E.txn_type'     => IQB_POLICY_ENDORSEMENT_TYPE_FRESH
         ];
         $this->_single_select();
         return $this->db->where($where)

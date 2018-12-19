@@ -191,7 +191,7 @@ class M20180822_model extends MY_Model
                 }
                 try {
 
-                    $endorsement_record = $this->endorsement_model->get_fresh_renewal_by_policy( $record->id, $record->ancestor_id ? IQB_POLICY_ENDORSEMENT_TYPE_RENEWAL : IQB_POLICY_ENDORSEMENT_TYPE_FRESH );
+                    $endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id);
 
                 } catch (Exception $e) {
 
