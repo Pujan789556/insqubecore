@@ -60,7 +60,10 @@
                         To<br/>
                         <address>
                             <strong><?php echo $record->customer_full_name_en?></strong><br>
-                            <?php echo get_contact_widget($record->customer_contact, true, true)?>
+                            <?php
+                            $customer_address_record = parse_address_record($record, 'addr_customer_');
+                            echo address_widget($customer_address_record, true, true);
+                             ?>
                         </address>
                     </td>
                     <td align="right">
@@ -83,23 +86,34 @@
                     </thead>
                     <tbody>
                         <?php
-                        foreach($rows as $row):?>
+                        foreach($rows as $row):
+                            $minus = $row->amount < 0;
+                            $value = number_format(abs($row->amount), 2);
+                            $value = $minus ? "({$value})" : $value;
+                            ?>
                             <tr>
                                 <td><?php echo $row->description?></td>
-                                <td align="right"><?php echo number_format($row->amount, 2)?></td>
+                                <td align="right"><?php echo $value?></td>
                             </tr>
                         <?php
                         endforeach;?>
                             <tr>
                                 <td align="right" class="bold">Grand Total</td>
-                                <td align="right" class="bold"><?php echo number_format($record->amount, 2)?></td>
+                                <td align="right" class="bold">
+                                    <?php
+                                    $minus = $record->amount < 0;
+                                    $grand_total = number_format(abs($record->amount), 2);
+                                    $grand_total = $minus ? "({$grand_total})" : $grand_total;
+                                    echo $grand_total;
+                                    ?>
+                                </td>
                             </tr>
                             <tr>
                                 <td colspan="2">
                                     Amount in Words (Rs.):
                                     <strong>
                                         <?php
-                                        echo ucfirst( amount_in_words( number_format(abs($record->amount), 2) ) );
+                                        echo ucfirst( amount_in_words( abs($record->amount) ) );
                                         ?>
                                     </strong>
                                 </td>

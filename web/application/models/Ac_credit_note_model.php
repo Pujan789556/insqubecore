@@ -423,6 +423,29 @@ class Ac_credit_note_model extends MY_Model
                     ->join('dt_policy_installments PTI', "REL.ref = '" . IQB_REL_POLICY_VOUCHER_REF_PI . "' AND REL.ref_id = PTI.id")
                     ->join('dt_customers CST', 'CST.id = CN.customer_id');
 
+
+        /**
+         * Customer Address
+         */
+        $table_aliases = [
+            // Address Table Alias
+            'address' => 'ADRCST',
+
+            // Country Table Alias
+            'country' => 'CNTRYCST',
+
+            // State Table Alias
+            'state' => 'STATECST',
+
+            // Local Body Table Alias
+            'local_body' => 'LCLBDCST',
+
+            // Type/Module Table Alias
+            'module' => 'CST'
+        ];
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_');
+
+
         /**
          * Complete/Active Credit Note?
          */
