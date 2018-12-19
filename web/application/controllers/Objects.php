@@ -782,11 +782,11 @@ class Objects extends MY_Controller
 	 *
 	 *
 	 * @param integer $policy_id
-	 * @param integer $txn_id
+	 * @param integer $endorsement_id
 	 * @param integer $id
 	 * @return void
 	 */
-	public function edit_endorsement($policy_id, $txn_id, $id)
+	public function edit_endorsement($policy_id, $endorsement_id, $id)
 	{
 		/**
 		 * Check Permissions
@@ -798,7 +798,7 @@ class Objects extends MY_Controller
 
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->object_model->get_for_endorsement($policy_id, $txn_id, $id);
+		$record = $this->object_model->get_for_endorsement($policy_id, $endorsement_id, $id);
 		if(!$record)
 		{
 			return $this->template->json([
@@ -809,7 +809,7 @@ class Objects extends MY_Controller
 
 		 // The above query validates the flag_current, so we get directly txn data here
 		$this->load->model('endorsement_model');
-		$endorsement_record = $this->endorsement_model->get($txn_id);
+		$endorsement_record = $this->endorsement_model->get($endorsement_id);
 		if(!$endorsement_record)
 		{
 			return $this->template->json([
@@ -954,10 +954,24 @@ class Objects extends MY_Controller
 					return $this->template->json(['status' => 'error', 'title' => 'Exception Occured!', 'message' => $e->getMessage()], 404);
 				}
 
+				/**
+				 * Audit Data
+				 */
 				$audit_data = [
         			'endorsement_id' 	=> $endorsement_record->id,
         			'object_id'  		=> $record->id,
         			'audit_object' 		=> $this->_get_endorsement_audit_data($record, $post_data)
+        		];
+
+
+        		/**
+        		 * Endorsement Data
+        		 */
+        		$si_latest 	= $si_data['amt_sum_insured'];
+        		$si_old 	= $record->amt_sum_insured;
+        		$endorsement_data = [
+        			'amt_sum_insured_object' => $si_latest,
+        			'amt_sum_insured_net' 	 => $si_latest - $si_old
         		];
 
         		/**
@@ -980,6 +994,11 @@ class Objects extends MY_Controller
 				}
 				else
 				{
+					/**
+					 * Update Endorsement Data
+					 */
+					$this->endorsement_model->save($endorsement_record->id, $endorsement_data);
+
 					$status = 'success';
 					$message = 'Successfully Updated.';
 				}
