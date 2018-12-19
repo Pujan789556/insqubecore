@@ -59,27 +59,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </thead>
                         <tbody>
                             <?php
-                            foreach($rows as $row):
-                                $minus = $row->amount < 0;
-                                $value = number_format(abs($row->amount), 2);
-                                $value = $minus ? "({$value})" : $value;
-                                ?>
+                            foreach($rows as $row):?>
                                 <tr>
                                     <td><?php echo $row->description?></td>
-                                    <td class="text-right"><?php echo $value?></td>
+                                    <td class="text-right"><?php echo ac_format_number($row->amount, 2)?></td>
                                 </tr>
                             <?php
                             endforeach;?>
                                 <tr>
                                     <th class="text-right">Grand Total</th>
-                                    <th class="text-right">
-                                        <?php
-                                        $minus = $record->amount < 0;
-                                        $grand_total = number_format(abs($record->amount), 2);
-                                        $grand_total = $minus ? "({$grand_total})" : $grand_total;
-                                        echo $grand_total;
-                                        ?>
-                                    </th>
+                                    <th class="text-right"><?php echo ac_format_number($record->amount, 2)?></th>
                                 </tr>
                                 <tr>
                                     <td colspan="2">

@@ -86,27 +86,16 @@
                     </thead>
                     <tbody>
                         <?php
-                        foreach($rows as $row):
-                            $minus = $row->amount < 0;
-                            $value = number_format(abs($row->amount), 2);
-                            $value = $minus ? "({$value})" : $value;
-                            ?>
+                        foreach($rows as $row):?>
                             <tr>
                                 <td><?php echo $row->description?></td>
-                                <td align="right"><?php echo $value?></td>
+                                <td align="right"><?php echo ac_format_number($row->amount, 2)?></td>
                             </tr>
                         <?php
                         endforeach;?>
                             <tr>
                                 <td align="right" class="bold">Grand Total</td>
-                                <td align="right" class="bold">
-                                    <?php
-                                    $minus = $record->amount < 0;
-                                    $grand_total = number_format(abs($record->amount), 2);
-                                    $grand_total = $minus ? "({$grand_total})" : $grand_total;
-                                    echo $grand_total;
-                                    ?>
-                                </td>
+                                <td align="right" class="bold"><?php echo ac_format_number($record->amount, 2)?></td>
                             </tr>
                             <tr>
                                 <td colspan="2">
