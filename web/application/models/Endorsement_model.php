@@ -2483,6 +2483,7 @@ class Endorsement_model extends MY_Model
      */
     public function is_first($txn_type)
     {
+        $txn_type = (int)$txn_type;
         return $txn_type === IQB_POLICY_ENDORSEMENT_TYPE_FRESH;
     }
 

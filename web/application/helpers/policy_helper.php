@@ -1537,6 +1537,7 @@ if ( ! function_exists('_ENDORSEMENT_type_eonly_dropdown'))
 			IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER 	=> 'Ownership Transfer',
 			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE 	=> 'Premium Upgrade',
 			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND 		=> 'Premium Refund',
+            IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED       => 'Time Extended',
 			IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE 			=> 'Terminate'
 		];
 
