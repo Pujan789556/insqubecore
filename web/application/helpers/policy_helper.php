@@ -873,7 +873,7 @@ if ( ! function_exists('_POLICY__get_spr_goodies'))
         $false_return['default_duration'] = (int)$pfs_record->default_duration;
         if($pfs_record->flag_short_term === IQB_FLAG_NO )
         {
-            return $false_return;
+            throw new Exception("Exception [Helper: policy_helper][Method: _POLICY__get_spr_goodies()]: The Portfolio does not apply short term rates.");
         }
 
         /**

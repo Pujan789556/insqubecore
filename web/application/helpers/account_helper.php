@@ -436,8 +436,9 @@ if ( ! function_exists('ac_format_number'))
 	 * @param int $decimals Sets the number of decimal points.
 	 * @return type
 	 */
-	function ac_format_number( float $number, int $decimals = 0 )
+	function ac_format_number( $number, int $decimals = 0 )
 	{
+		$number = floatval($number);
 		if($number < 0)
 		{
 			$number = abs($number);

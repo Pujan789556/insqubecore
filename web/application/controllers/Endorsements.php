@@ -319,17 +319,23 @@ class Endorsements extends MY_Controller
 				if($this->form_validation->run() === TRUE )
 	        	{
 	        		$data = $this->_prepare_data($txn_type, $post_data, $policy_record, $record);
+	        		try {
 
-	        		if($action == 'add')
-	        		{
-	        			$add_only_data 	= $this->_prepare_add_only_data($policy_record->id, $txn_type);
-	        			$data 		 	= array_merge($add_only_data, $data);
-	        			$done 			= $this->endorsement_model->add($data, TRUE);
-	        		}
-	        		else
-	        		{
-	        			$done = $this->endorsement_model->edit($record->id, $data);
-	        		}
+						if($action == 'add')
+		        		{
+		        			$add_only_data 	= $this->_prepare_add_only_data($policy_record->id, $txn_type);
+		        			$data 		 	= array_merge($add_only_data, $data);
+		        			$done 			= $this->endorsement_model->add($data, TRUE);
+		        		}
+		        		else
+		        		{
+		        			$done = $this->endorsement_model->edit($record->id, $data);
+		        		}
+
+					} catch (Exception $e) {
+						return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
+					}
+
 
 	        		return $this->_return_on_save($action, $done, $policy_record->id, $record->id ?? NULL);
 	        	}
