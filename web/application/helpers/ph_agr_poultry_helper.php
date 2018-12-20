@@ -686,28 +686,6 @@ if ( ! function_exists('__save_premium_AGR_POULTRY'))
 			$pfs_record = $CI->portfolio_setting_model->get_by_fiscal_yr_portfolio($policy_record->fiscal_yr_id, $policy_record->portfolio_id);
 
 
-			/**
-			 * !!! MANUAL PREMIUM COMPUTATION ENDORSEMENT !!!
-			 *
-			 * Manual Endorsement should be done on
-			 * 	- Premium Upgrade
-			 * 	- Premium Refund
-			 */
-			// if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-			// {
-			// 	try{
-
-			// 		return _ENDORSEMENT__save_premium_manual($policy_record, $endorsement_record, $CI->input->post());
-
-			// 	} catch (Exception $e){
-
-			// 		return $CI->template->json([
-			// 			'status' 	=> 'error',
-			// 			'message' 	=> $e->getMessage()
-			// 		], 404);
-			// 	}
-			// }
-
 
 			/**
 			 * Validation Rules for Form Processing

@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Endorsement - Manual Premium Form
  */
 $hidden_fields = ['policy_id' => $policy_record->id];
-if(isset($record))
+if(isset($endorsement_record))
 {
-    $hidden_fields['id'] = $record->id;
+    $hidden_fields['id'] = $endorsement_record->id;
 }
 ?>
 <?php echo form_open( $this->uri->uri_string(),
@@ -22,10 +22,22 @@ if(isset($record))
           <h4 class="box-title">Supply Premium Information</h4>
         </div>
         <div class="box-body form-horizontal">
+            <table class="table table-responsive table-hover table-bordered margin-b-10">
+                <tbody>
+                    <tr>
+                        <th width="30%">Gross Sum Insured (Rs.)</th>
+                        <td><?php echo number_format($endorsement_record->amt_sum_insured_object, 2) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Net Sum Insured (Changed) (Rs.)</th>
+                        <td><?php echo ac_format_number($endorsement_record->amt_sum_insured_net, 2) ?></td>
+                    </tr>
+                </tbody>
+            </table>
             <div class="alert alert-warning">
                 NOTE!!!<br/>
-                Basic Premium, Pool Premium must be net actual amount. i.e. if you have to compute PRORATA or SHORT-TERM,
-                it should be computed value.
+                Basic Premium, Pool Premium must be net actual amount.<br>
+                If you are returning premium, use (-) sign. Example: <strong>-4000.95</strong>
             </div>
             <?php
             /**

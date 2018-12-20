@@ -635,29 +635,6 @@ if ( ! function_exists('__save_premium_AGR_CROP'))
 
 
 			/**
-			 * !!! MANUAL PREMIUM COMPUTATION ENDORSEMENT !!!
-			 *
-			 * Manual Endorsement should be done on
-			 * 	- Premium Upgrade
-			 * 	- Premium Refund
-			 */
-			// if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-			// {
-			// 	try{
-
-			// 		return _ENDORSEMENT__save_premium_manual($policy_record, $endorsement_record, $CI->input->post());
-
-			// 	} catch (Exception $e){
-
-			// 		return $CI->template->json([
-			// 			'status' 	=> 'error',
-			// 			'message' 	=> $e->getMessage()
-			// 		], 404);
-			// 	}
-			// }
-
-
-			/**
 			 * Validation Rules for Form Processing
 			 */
 			$validation_rules = _TXN_AGR_CROP_premium_validation_rules($policy_record, $pfs_record, $policy_object, TRUE );

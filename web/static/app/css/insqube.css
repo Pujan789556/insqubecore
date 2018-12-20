@@ -4,14 +4,14 @@
  .border-b-thick{border-bottom-width: 2px !important}
  .border-t-thick{border-top-width: 2px !important;}
 .pointer{cursor:pointer;}
-.padding-t-10{padding-top: 10px}
-.margin-t-10{margin-top:10px;}
-.margin-b-10{margin-bottom:10px;}
-.margin-r-10{margin-right:10px;}
-.margin-l-10{margin-left:10px;}
-.margin-b-5{margin-bottom: 5px}
-.margin-r-5{margin-right: 5px;}
-.margin-l-5{margin-left: 5px;}
+.padding-t-10{padding-top: 10px !important}
+.margin-t-10{margin-top:10px !important}
+.margin-b-10{margin-bottom:10px !important}
+.margin-r-10{margin-right:10px !important}
+.margin-l-10{margin-left:10px !important}
+.margin-b-5{margin-bottom: 5px !important}
+.margin-r-5{margin-right: 5px !important}
+.margin-l-5{margin-left: 5px !important}
 .no-margin-t{margin-top:0px !important;}
 .no-padding-t{padding-top:0px !important;}
 .no-padding-b{padding-bottom:0px !important;}

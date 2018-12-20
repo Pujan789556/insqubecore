@@ -1468,7 +1468,7 @@ class Endorsements extends MY_Controller
 		 *
 		 * If so, let's render manual premium form
 		 */
-		if( _ENDORSEMENT__is_portfolio_premium_manual($endorsement_record->portfolio_id, $endorsement_record->txn_type) )
+		if( $this->endorsement_model->is_endorsement_manual($endorsement_record->portfolio_id, $endorsement_record->txn_type) )
 		{
 			$json_data['form'] = $this->load->view('endorsements/forms/_form_premium_manual', [
 								                'form_elements'         => $this->endorsement_model->manual_premium_v_rules(),

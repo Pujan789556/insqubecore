@@ -1088,28 +1088,6 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 
 
 			/**
-			 * !!! MANUAL PREMIUM COMPUTATION ENDORSEMENT !!!
-			 *
-			 * Manual Endorsement should be done on
-			 * 	- Premium Upgrade
-			 * 	- Premium Refund
-			 */
-			// if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-			// {
-			// 	try{
-
-			// 		return _ENDORSEMENT__save_premium_manual($policy_record, $endorsement_record, $CI->input->post());
-
-			// 	} catch (Exception $e){
-
-			// 		return $CI->template->json([
-			// 			'status' 	=> 'error',
-			// 			'message' 	=> $e->getMessage()
-			// 		], 404);
-			// 	}
-			// }
-
-			/**
 			 * Portfolio Risks
 			 */
 			$portfolio_risks = $CI->portfolio_model->dropdown_risks($policy_record->portfolio_id);

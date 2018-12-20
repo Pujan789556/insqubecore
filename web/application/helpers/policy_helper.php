@@ -2072,7 +2072,12 @@ if ( ! function_exists('_ENDORSEMENT__save_premium_manual'))
 
             if($CI->form_validation->run() === TRUE )
             {
-                return $CI->endorsement_model->save_premium_manual($endorsement_record, $policy_record, $post_data);
+                $post_data = $CI->input->post();
+                $premium_data = [
+                    'net_amt_basic_premium' => $post_data['net_amt_basic_premium'],
+                    'net_amt_pool_premium'  => $post_data['net_amt_pool_premium']
+                ];
+                return $CI->endorsement_model->save_premium($endorsement_record, $policy_record, $premium_data, $post_data);
             }
             else
             {
@@ -2083,47 +2088,6 @@ if ( ! function_exists('_ENDORSEMENT__save_premium_manual'))
                 ]);
             }
         }
-    }
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('_ENDORSEMENT__is_portfolio_premium_manual'))
-{
-    /**
-     * Check if given portfolio's Endorsement's Premium is to compute manually.
-     *
-     * This function is used to save manual endorsement for the following types
-     *  - Premium Upgrade
-     *  - Premium Refund
-     *
-     * Currently Identified Portfolios are:
-     *  - AGR - ALL SUB PORTFOLIO
-     *  - ENG - CAR
-     *  - ENG - EAR
-     *  - FIRE - FIRE
-     *  - MISC - TMI
-     *
-     * @param int   $portfolio_id   Portfolio ID
-     * @param int   $txn_type  Endorsement TXN Type
-     * @return  bool
-     */
-    function _ENDORSEMENT__is_portfolio_premium_manual( $portfolio_id, $txn_type )
-    {
-        $portfolio_id = (int)$portfolio_id;
-        $txn_type = (int)$txn_type;
-
-        // Allowed Portfolios
-        $manual_portolios   = [IQB_SUB_PORTFOLIO_ENG_CAR_ID, IQB_SUB_PORTFOLIO_ENG_EAR_ID, IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID, IQB_SUB_PORTFOLIO_MISC_TMI_ID];
-        $agro_ids           = array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__AGR);
-        $manual_portolios   = array_merge($manual_portolios, $agro_ids);
-
-        // Allowed Txn Types
-        $txn_types          = [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND];
-
-
-        return in_array($portfolio_id, $manual_portolios) && in_array($txn_type, $txn_types);
-
     }
 }
 
