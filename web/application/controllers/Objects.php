@@ -973,6 +973,8 @@ class Objects extends MY_Controller
         			'amt_sum_insured_object' => $si_latest,
         			'amt_sum_insured_net' 	 => $si_latest - $si_old
         		];
+        		$endorsement_data = $this->endorsement_model->nullify_premium_data($endorsement_record->txn_type, $endorsement_data);
+
 
         		/**
         		 * Save Data (Insert if new, Update else)

@@ -49,6 +49,7 @@ class Policy_model extends MY_Model
         $this->load->helper('policy');
 
         // Dependent Model
+        $this->load->model('portfolio_setting_model');
         $this->load->model('object_model');
         $this->load->model('customer_model');
         $this->load->model('endorsement_model');
@@ -766,7 +767,12 @@ class Policy_model extends MY_Model
          *
          * Find if this start-end date gives a default duration or short term duration
          */
-        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record->id, $data['start_date'], $data['end_date'] );
+        $data['flag_short_term'] = $this->portfolio_setting_model->compute_short_term_flag(
+            $fy_record->id,
+            $data['portfolio_id'],
+            $data['start_date'],
+            $data['end_date']
+        );
 
         /**
          * No marketing staff select?
@@ -794,6 +800,8 @@ class Policy_model extends MY_Model
      */
     public function before_update__defaults($data)
     {
+
+
         // Refactor Date & time
         $data = $this->__refactor_datetime_fields($data);
 
@@ -808,12 +816,16 @@ class Policy_model extends MY_Model
         /**
          * Short Term Flag???
          * ------------------
-         *
-         *
          * Find if this start-end date gives a default duration or short term duration
          */
         $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
-        $data['flag_short_term'] = _POLICY__get_short_term_flag( $data['portfolio_id'], $fy_record->id, $data['start_date'], $data['end_date'] );
+        $data['flag_short_term'] = $this->portfolio_setting_model->compute_short_term_flag(
+            $fy_record->id,
+            $data['portfolio_id'],
+            $data['start_date'],
+            $data['end_date']
+        );
+
 
         // Fiscal Year
         $data['fiscal_yr_id'] = $fy_record->id;

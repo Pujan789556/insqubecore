@@ -302,6 +302,174 @@ class Portfolio_setting_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Get Shortterm Flag from Portfolio Settings
+     *
+     * @param int $fiscal_yr_id
+     * @param int $portfolio_id
+     * @return char
+     */
+    public function get_short_term_flag($fiscal_yr_id, $portfolio_id)
+    {
+        $record = $this->get_by_fiscal_yr_portfolio($fiscal_yr_id, $portfolio_id);
+
+        if(!$record)
+        {
+            $fy_record = $this->fiscal_year_model->get($fiscal_yr_id);
+            throw new Exception("Exception [Model: Portfolio_setting_model][Method: get_short_term_flag()]: No Portfolio Setting Record found for specified fiscal year {$fy_record->code_np}({$fy_record->code_en})");
+        }
+
+        return $record->flag_short_term;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Compute Short Term Flag for Policy For Given Duration
+     *
+     * If portfolio setting has no short term flag set, return NO
+     * else compute if the duration falls on short term
+     *
+     * @param int $fiscal_yr_id
+     * @param int $portfolio_id
+     * @param date $start_date
+     * @param date $end_date
+     * @return char
+     */
+    public function compute_short_term_flag($fiscal_yr_id, $portfolio_id, $start_date, $end_date)
+    {
+        $goodies = $this->compute_short_term_goodies($fiscal_yr_id, $portfolio_id, $start_date, $end_date);
+
+        return $goodies['flag'];
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Compute Short Term Rate for Policy For Given Duration
+     *
+     * If portfolio setting has no short term flag set, return NO
+     * else compute if the duration falls on short term
+     *
+     * @param int $fiscal_yr_id
+     * @param int $portfolio_id
+     * @param date $start_date
+     * @param date $end_date
+     * @return char
+     */
+    public function compute_short_term_rate($fiscal_yr_id, $portfolio_id, $start_date, $end_date)
+    {
+        $goodies    = $this->compute_short_term_goodies($fiscal_yr_id, $portfolio_id, $start_date, $end_date);
+        $spr        = $goodies['spr_record'];
+
+        if(!$spr)
+        {
+            /**
+             * If we do not have any sort term rate, the policy falls under default duration.
+             * So we return full rate.
+             */
+            $spr = (object)['rate' => 100, 'duration' => $goodies['pfs_record']->default_duration, 'title' => 'Full-term Rate'];
+        }
+
+        return $spr->rate;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Compute Short Term Goodies for Policy For Given Duration
+     *
+     *
+     * @param int $fiscal_yr_id
+     * @param int $portfolio_id
+     * @param date $start_date
+     * @param date $end_date
+     * @return char
+     */
+    public function compute_short_term_goodies($fiscal_yr_id, $portfolio_id, $start_date, $end_date)
+    {
+        $record     = $this->get_by_fiscal_yr_portfolio($fiscal_yr_id, $portfolio_id);
+        $fy_record  = $this->fiscal_year_model->get($fiscal_yr_id);
+
+        if(!$record)
+        {
+            throw new Exception("Exception [Model: Portfolio_setting_model][Method: compute_short_term_flag()]: No Portfolio Setting Record found for specified fiscal year {$fy_record->code_np}({$fy_record->code_en}).");
+        }
+
+        // FLAG NOT SET???
+        if( empty($record->flag_short_term) )
+        {
+            throw new Exception("Exception [Model: Portfolio_setting_model][Method: compute_short_term_flag()]: Short term flag has not been configured for this Portfolio Setting for specified fiscal year {$fy_record->code_np}({$fy_record->code_en}).");
+        }
+
+        // Portfolio does not support short term policy? Return NO
+        if( $record->flag_short_term !== IQB_FLAG_YES )
+        {
+            return [
+                'flag'          => $record->flag_short_term,
+                'spr_record'    => NULL
+            ];
+        }
+
+        /**
+         * Durations
+         */
+        $default_duration   = (int)$record->default_duration;
+        $policy_duration    = _POLICY_duration($start_date, $end_date, 'd');
+
+        /**
+         * Policy Duration > Default Duration
+         */
+        if( $policy_duration > $default_duration )
+        {
+            throw new Exception("Exception [Model: Portfolio_setting_model][Method: compute_short_term_flag()]: 'Policy Duration' is greater than 'Defualt Duration' for this Portfolio Setting for specified fiscal year {$fy_record->code_np}({$fy_record->code_en}).");
+        }
+
+
+        $rates = json_decode($record->short_term_policy_rate ?? NULL);
+        if( !$rates )
+        {
+            throw new Exception("Exception [Model: Portfolio_setting_model][Method: compute_short_term_flag()]: No Short Term Policy Rates found for the supplied portfolio for specified fiscal year {$fy_record->code_np}({$fy_record->code_en}).");
+        }
+
+        $rate_list = [];
+        foreach($rates as $r)
+        {
+            $rate_list[$r->duration] = $r;
+        }
+        ksort($rate_list);
+
+        $flag_found_short_term_rate = FALSE;
+        $spr_record                 = NULL;
+        foreach($rate_list as $duration=>$spr)
+        {
+            if( $policy_duration <= $duration )
+            {
+                $spr_record = $spr; // {rate:xxx, duration:xxx, title:xxx}
+                $flag_found_short_term_rate  = TRUE;
+                break;
+            }
+        }
+
+        if( $flag_found_short_term_rate )
+        {
+            $flag_short_term = IQB_FLAG_YES;
+        }
+        else
+        {
+            $flag_short_term = IQB_FLAG_NO;
+        }
+
+        // Return the goodies
+        return [
+            'flag'          => $flag_short_term,
+            'spr_record'    => $spr_record,
+            'pfs_record'    => $record
+        ];
+    }
+
+    // ----------------------------------------------------------------
+
     public function check_duplicate($where, $setting_ids=NULL)
     {
         if( $setting_ids )

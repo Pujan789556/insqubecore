@@ -597,14 +597,14 @@ class Endorsement_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Reset Data on Edit
+     * Nullify Premium Related Data for an endorsement
      *
      * We should nullify the fields on premium computable endorsement i.e.
      *  - Fresh/Renewal
      *  - Premium Upgrade
      *  - Premium Refund
      */
-    public function _reset_on_edit($txn_type, $data)
+    public function nullify_premium_data($txn_type, $data)
     {
 
         $nullable_fields = [];
@@ -1364,7 +1364,7 @@ class Endorsement_model extends MY_Model
         /**
          * Reset Data by Type
          */
-        $data = $this->_reset_on_edit($record->txn_type, $data);
+        $data = $this->nullify_premium_data($record->txn_type, $data);
 
         /**
          * ==================== TRANSACTIONS BEGIN =========================
@@ -1858,12 +1858,6 @@ class Endorsement_model extends MY_Model
             $rate               = FALSE;
             $compute_reference  = (int)$compute_reference;
 
-            $this->load->model('portfolio_setting_model');
-            $pfs_record     =   $this->portfolio_setting_model->get_by_fiscal_yr_portfolio(
-                                    $policy_record->fiscal_yr_id,
-                                    $policy_record->portfolio_id
-                                );
-
             switch ($compute_reference)
             {
                 /**
@@ -1877,11 +1871,12 @@ class Endorsement_model extends MY_Model
                  * Short Term Rate
                  */
                 case IQB_POLICY_ENDORSEMENT_CB_STR:
-                    $e_start_date   = $record->start_date;
-                    $e_end_date     = $record->end_date;
-
-                    $spr_goodies    = _POLICY__get_spr_goodies( $pfs_record, $e_start_date, $e_end_date );
-                    $rate_percent   = floatval($spr_goodies['record']->rate ?? 100);
+                    $rate_percent = $this->portfolio_setting_model->compute_short_term_rate(
+                        $policy_record->fiscal_yr_id,
+                        $policy_record->portfolio_id,
+                        $record->start_date,
+                        $record->end_date
+                    );
                     $rate           = $rate_percent / 100;
                     break;
 
@@ -1890,13 +1885,8 @@ class Endorsement_model extends MY_Model
                  */
                 case IQB_POLICY_ENDORSEMENT_CB_PRORATA:
                     $endorsement_duration   = _POLICY_duration($record->start_date, $record->end_date, 'd');
-                    // Default Policy Duration
-                    $default_duration = $pfs_record->default_duration;
-                    if(!$default_duration)
-                    {
-                        throw new Exception("Exception [Model: Endorsement_model][Method: _compute_reference_rate()]: Portfolio default duration not configured. Please ask administrator to configure default duration of this portfolio.");
-                    }
-                    $rate = $endorsement_duration / $default_duration;
+                    $policy_duration        = _POLICY_duration($policy_record->start_date, $policy_record->end_date, 'd');
+                    $rate                   = $endorsement_duration / $policy_duration;
                     break;
 
                 default:
@@ -1947,18 +1937,14 @@ class Endorsement_model extends MY_Model
                  *
                  */
                 case IQB_POLICY_ENDORSEMENT_CB_STR:
-                    $this->load->model('portfolio_setting_model');
-                    $pfs_record     =   $this->portfolio_setting_model->get_by_fiscal_yr_portfolio(
-                                            $policy_record->fiscal_yr_id,
-                                            $policy_record->portfolio_id
-                                        );
-
                     // Short Term Duration (Consumed) = Current Endosrement Start - Prev Endorsement Start
                     // So, we charge Short Term Rate on Consumed Duration and retrun the rest
-                    $e_start_date   = $prev_record->start_date;
-                    $e_end_date     = $cur_record->start_date;
-                    $spr_goodies            = _POLICY__get_spr_goodies( $pfs_record, $e_start_date, $e_end_date );
-                    $rate_percent_charged   = floatval($spr_goodies['record']->rate ?? 100);
+                    $rate_percent_charged = $this->portfolio_setting_model->compute_short_term_rate(
+                        $policy_record->fiscal_yr_id,
+                        $policy_record->portfolio_id,
+                        $prev_record->start_date,
+                        $cur_record->start_date
+                    );
                     $refund_rate            = 1 - $rate_percent_charged / 100;
                     break;
 
@@ -2210,14 +2196,13 @@ class Endorsement_model extends MY_Model
              */
             if($policy_record->flag_short_term == IQB_FLAG_YES)
             {
-                $this->load->model('portfolio_setting_model');
-                $pfs_record     =   $this->portfolio_setting_model->get_by_fiscal_yr_portfolio(
-                                        $policy_record->fiscal_yr_id,
-                                        $policy_record->portfolio_id
-                                    );
+                $rate_percent = $this->portfolio_setting_model->compute_short_term_rate(
+                    $policy_record->fiscal_yr_id,
+                    $policy_record->portfolio_id,
+                    $policy_record->start_date,
+                    $policy_record->end_date
+                );
 
-                $spr_goodies    = _POLICY__get_spr_goodies( $pfs_record, $policy_record->start_date, $policy_record->end_date );
-                $rate_percent   = floatval($spr_goodies['record']->rate ?? 100.00);
                 $rate           = $rate_percent / 100.00;
                 $premium_data   = $this->_apply_rate_on_gross_premium_data( $premium_data, $rate, TRUE);
 
