@@ -10,8 +10,8 @@ $refund_compute_text = '';
 if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 {
     $compute_ref_dd = _ENDORSEMENT_compute_reference_dropdown(FALSE);
-    $premium_compute_text   = $compute_ref_dd[$endorsement_record->premium_compute_reference] ?? '';
-    $refund_compute_text    = $compute_ref_dd[$endorsement_record->refund_compute_reference] ?? '';
+    $premium_compute_text   = $compute_ref_dd[$endorsement_record->pc_ref_basic] ?? '';
+    $refund_compute_text    = $compute_ref_dd[$endorsement_record->rc_ref_basic] ?? '';
 }
 
 $grand_total = _ENDORSEMENT__compute_total_amount($endorsement_record);

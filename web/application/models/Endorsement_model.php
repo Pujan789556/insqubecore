@@ -17,7 +17,7 @@ class Endorsement_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'customer_id', 'agent_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'amt_sum_insured_object', 'amt_sum_insured_net', 'gross_amt_basic_premium', 'gross_amt_pool_premium', 'gross_amt_commissionable', 'gross_amt_agent_commission', 'gross_amt_ri_commission', 'gross_amt_direct_discount', 'refund_amt_basic_premium', 'refund_amt_pool_premium', 'refund_amt_commissionable', 'refund_amt_agent_commission', 'refund_amt_ri_commission', 'refund_amt_direct_discount', 'net_amt_basic_premium', 'net_amt_pool_premium', 'net_amt_commissionable', 'net_amt_agent_commission', 'net_amt_ri_commission', 'net_amt_direct_discount', 'net_amt_stamp_duty', 'net_amt_transfer_fee', 'net_amt_transfer_ncd', 'net_amt_cancellation_fee', 'net_amt_vat', 'percent_ri_commission', 'refund_compute_reference', 'premium_compute_reference', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_refund_on_terminate', 'flag_short_term', 'short_term_config', 'short_term_rate', 'status', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'customer_id', 'agent_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'amt_sum_insured_object', 'amt_sum_insured_net', 'gross_amt_basic_premium', 'gross_amt_pool_premium', 'gross_amt_commissionable', 'gross_amt_agent_commission', 'gross_amt_ri_commission', 'gross_amt_direct_discount', 'refund_amt_basic_premium', 'refund_amt_pool_premium', 'refund_amt_commissionable', 'refund_amt_agent_commission', 'refund_amt_ri_commission', 'refund_amt_direct_discount', 'net_amt_basic_premium', 'net_amt_pool_premium', 'net_amt_commissionable', 'net_amt_agent_commission', 'net_amt_ri_commission', 'net_amt_direct_discount', 'net_amt_stamp_duty', 'net_amt_transfer_fee', 'net_amt_transfer_ncd', 'net_amt_cancellation_fee', 'net_amt_vat', 'percent_ri_commission', 'rc_ref_basic', 'pc_ref_basic', 'premium_computation_table', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_refund_on_terminate', 'flag_short_term', 'short_term_config', 'short_term_rate', 'status', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
 
     // Resetable Fields on Policy/Object Edit, Endorsement Edit
     protected static $nullable_fields = [
@@ -203,7 +203,7 @@ class Endorsement_model extends MY_Model
         {
             $updown_compute_reference = [
                 [
-                    'field' => 'refund_compute_reference',
+                    'field' => 'rc_ref_basic',
                     'label' => 'Refund Compute Reference',
                     'rules' => 'trim|required|integer|exact_length[1]|in_list['. implode( ',', array_keys( $computation_basis_dropdown ) ) .']',
                     '_type'     => 'dropdown',
@@ -212,7 +212,7 @@ class Endorsement_model extends MY_Model
                     '_required' => true
                 ],
                 [
-                    'field' => 'premium_compute_reference',
+                    'field' => 'pc_ref_basic',
                     'label' => 'Premium Compute Reference',
                     'rules' => 'trim|required|integer|exact_length[1]|in_list['. implode( ',', array_keys( $computation_basis_dropdown ) ) .']',
                     '_type'     => 'dropdown',
@@ -300,7 +300,7 @@ class Endorsement_model extends MY_Model
                             '_required' => true
                         ],
                         [
-                            'field' => 'refund_compute_reference',
+                            'field' => 'rc_ref_basic',
                             'label' => 'Refund Compute Reference',
                             'rules' => 'trim|'.$required.'integer|exact_length[1]|in_list['. implode( ',', array_keys( $computation_basis_dropdown ) ) .']',
                             '_type'     => 'dropdown',
@@ -1744,11 +1744,11 @@ class Endorsement_model extends MY_Model
             /**
              * Task 1: Build Premium For Current Endorsement
              *
-             *  - Apply `premium_compute_reference` on the Annual/Full Premium Data
+             *  - Apply `pc_ref_basic` on the Annual/Full Premium Data
              */
             // echo 'FULL NEW: <pre>'; print_r($premium_data);
             // Get the Premium Compute Reference Rate
-            $rate = $this->_compute_reference_rate( $record->premium_compute_reference, $record, $policy_record );
+            $rate = $this->_compute_reference_rate( $record->pc_ref_basic, $record, $policy_record );
 
 
             // Apply the computation rate on GROSS premium Data
@@ -1760,7 +1760,7 @@ class Endorsement_model extends MY_Model
             /**
              * Task 2: Build Refund For Previous Endorsement
              *
-             *  - Apply `refund_compute_reference` on the Previous Endorsement's GROSS Premium Data
+             *  - Apply `rc_ref_basic` on the Previous Endorsement's GROSS Premium Data
              *
              */
 
@@ -1920,8 +1920,8 @@ class Endorsement_model extends MY_Model
                 'net_amt_ri_commission'     => NULL,
 
                 // Compute Reference - Set Both To Manual
-                'premium_compute_reference' => IQB_POLICY_ENDORSEMENT_CB_MANUAL,
-                'refund_compute_reference'  => IQB_POLICY_ENDORSEMENT_CB_MANUAL
+                'pc_ref_basic' => IQB_POLICY_ENDORSEMENT_CB_MANUAL,
+                'rc_ref_basic'  => IQB_POLICY_ENDORSEMENT_CB_MANUAL
             ]);
 
 
@@ -2199,7 +2199,7 @@ class Endorsement_model extends MY_Model
                  * Apply Compute Reference Rate
                  */
                 // Get the Refund Compute Reference Rate
-                $rate = $this->_compute_reference_rate_on_refund( $record->refund_compute_reference, $p_endorsement, $record, $policy_record );
+                $rate = $this->_compute_reference_rate_on_refund( $record->rc_ref_basic, $p_endorsement, $record, $policy_record );
 
                 // Apply the computation rate
                 $refund_data = $this->_apply_rate_on_refund_premium_data( $refund_data, $rate );
@@ -2492,7 +2492,7 @@ class Endorsement_model extends MY_Model
         /**
          * Task 1: Build Refund For Previous Endorsement
          *
-         *  - Apply `refund_compute_reference` on the Previous Endorsement's GROSS Premium Data
+         *  - Apply `rc_ref_basic` on the Previous Endorsement's GROSS Premium Data
          *
          */
 

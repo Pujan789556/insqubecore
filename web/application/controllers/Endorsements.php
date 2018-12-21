@@ -460,7 +460,7 @@ class Endorsements extends MY_Controller
 
 			private function _prepare_data_premium_updowngrade($post_data)
 			{
-				$fields = ['refund_compute_reference', 'premium_compute_reference', 'net_amt_stamp_duty'];
+				$fields = ['rc_ref_basic', 'pc_ref_basic', 'net_amt_stamp_duty'];
 				$data = [];
 				foreach($fields as $key)
 				{
@@ -471,7 +471,7 @@ class Endorsements extends MY_Controller
 
 			private function _prepare_data_terminate($post_data, $policy_record, $record = NULL)
 			{
-				$fields = ['net_amt_cancellation_fee', 'flag_refund_on_terminate', 'refund_compute_reference'];
+				$fields = ['net_amt_cancellation_fee', 'flag_refund_on_terminate', 'rc_ref_basic'];
 				$data = [];
 				foreach($fields as $key)
 				{
