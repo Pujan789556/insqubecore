@@ -456,7 +456,7 @@ class Endorsement_model extends MY_Model
                         'label' => 'Endorsement End Date',
                         'rules' => 'trim|required|valid_date|callback__cb_valid_end_date',
                         '_type'             => 'date',
-                        '_default'          => date('Y-m-d'),
+                        '_default'          => '',
                         '_extra_attributes' => 'data-provide="datepicker-inline"',
                         '_extra_html_below' => '<div class="text-warning"><strong>Endorsement Start Date</strong>:' . $start_date . '</div>',
                         '_required' => true
@@ -1786,8 +1786,17 @@ class Endorsement_model extends MY_Model
 
             /**
              * Task 5: Update the txn_type based on NET Premium
+             *
+             * NOTE: Type must be either UP/DOWN
              */
-            $premium_data = $this->_assign_txn_type_on_premium_data( $premium_data );
+            if( in_array($record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND]) )
+            {
+                $premium_data = $this->_assign_txn_type_on_premium_data( $premium_data );
+            }
+            else
+            {
+                $premium_data['txn_type'] = $record->txn_type;
+            }
 
 
             // --------------------------------------------------------------------
@@ -1921,8 +1930,18 @@ class Endorsement_model extends MY_Model
 
             /**
              * Task 5: Update the txn_type based on NET Premium
+             *
+             * NOTE: Type must be either UP/DOWN
              */
-            $premium_data = $this->_assign_txn_type_on_premium_data( $premium_data );
+            if( in_array($record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND]) )
+            {
+                $premium_data = $this->_assign_txn_type_on_premium_data( $premium_data );
+            }
+            else
+            {
+                $premium_data['txn_type'] = $record->txn_type;
+            }
+
 
 
             // --------------------------------------------------------------------
