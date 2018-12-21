@@ -29,7 +29,7 @@ if( _ENDORSEMENT_is_editable($record->status, $record->flag_current, FALSE) ):
         title="Update Premium"
         data-toggle="tooltip"
         class="action trg-dialog-edit"
-        data-box-size="large"
+        data-box-size="full-width"
         data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $record->policy_code?>'
         data-url="<?php echo $update_premium_url;?>"
         data-form="#_form-premium">
@@ -218,7 +218,7 @@ if( _ENDORSEMENT_is_transactional($record) )
             'data-toggle'   => 'tooltip',
             'title'         => 'View Premium/Refund/Transfer Information',
             'data-url'      => site_url('endorsements/premium_summary/'.$record->id),
-            'data-box-size' => 'large',
+            'data-box-size' => 'full-width',
         ]);
 }
 ?>

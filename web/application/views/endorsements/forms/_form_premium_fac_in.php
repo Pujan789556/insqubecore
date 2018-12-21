@@ -17,22 +17,27 @@ if(isset($record))
                         ],
                         // Hidden Fields
                         $hidden_fields); ?>
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-          <h4 class="box-title">Supply Premium Information</h4>
-        </div>
-        <div class="box-body form-horizontal">
-            <?php
-            /**
-             * Load Form Components
-             */
-            $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements' => $form_elements,
-                'form_record'   => $endorsement_record
-            ]);
-            ?>
-        </div>
-    </div>
+<div class="row">
+    <div class="col-md-6">
 
-    <button type="submit" class="hide">Submit</button>
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+              <h4 class="box-title">Supply Premium Information</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <?php
+                /**
+                 * Load Form Components
+                 */
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $form_elements,
+                    'form_record'   => $endorsement_record
+                ]);
+                ?>
+            </div>
+        </div>
+
+        <button type="submit" class="hide">Submit</button>
+    </div>
+</div>
 <?php echo form_close();?>

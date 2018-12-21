@@ -20,42 +20,45 @@ $premium_computation_table  = json_decode( $endorsement_record->premium_computat
      */
     $this->load->view('endorsements/snippets/_premium_summary');
 ?>
+<div class="row">
+    <div class="col-md-6">
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+                <h4 class="box-title">Premium Information</h4>
+            </div>
+            <div class="box-body form-horizontal">
+                <?php
+                /**
+                 * Portfolio Specific Premium Fields
+                 */
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements'     => $form_elements['premium'],
+                    'form_record'       => $premium_computation_table,
+                    'grid_label'        => 'col-md-4',
+                    'grid_form_control' => 'col-md-8'
+                ]);
+                ?>
+            </div>
+        </div>
 
-    <div class="box box-solid box-bordered">
-        <div class="box-header with-border">
-            <h4 class="box-title">Premium Information</h4>
-        </div>
-        <div class="box-body form-horizontal">
-            <?php
-            /**
-             * Portfolio Specific Premium Fields
-             */
-            $this->load->view('templates/_common/_form_components_horz', [
-                'form_elements'     => $form_elements['premium'],
-                'form_record'       => $premium_computation_table,
-                'grid_label'        => 'col-md-4',
-                'grid_form_control' => 'col-md-8'
-            ]);
-            ?>
-        </div>
+        <?php
+        /**
+         * Load TXN Common Elements
+         */
+        $this->load->view('endorsements/forms/_form_txn_common', [
+            'endorsement_record'        => $endorsement_record,
+            'form_elements'     => $form_elements['basic']
+        ]);
+
+        /**
+         * Other Common Components
+         *  1. Premium Installments
+         */
+        echo $common_components;
+        ?>
+
+        <button type="submit" class="hide">Submit</button>
     </div>
-
-    <?php
-    /**
-     * Load TXN Common Elements
-     */
-    $this->load->view('endorsements/forms/_form_txn_common', [
-        'endorsement_record'        => $endorsement_record,
-        'form_elements'     => $form_elements['basic']
-    ]);
-
-    /**
-     * Other Common Components
-     *  1. Premium Installments
-     */
-    echo $common_components;
-    ?>
-
-    <button type="submit" class="hide">Submit</button>
+</div>
 <?php echo form_close();?>
 

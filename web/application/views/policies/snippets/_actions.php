@@ -23,7 +23,7 @@ if( _POLICY_is_editable($record->status, FALSE) ):
     <a href="#"
         title="Update Premium"
         class="btn btn-success btn-round trg-dialog-edit"
-        data-box-size="large"
+        data-box-size="full-width"
         data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $record->code?>'
         data-url="<?php echo $update_premium_url;?>"
         data-form="#_form-premium">

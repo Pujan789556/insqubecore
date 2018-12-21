@@ -23,7 +23,7 @@ $cost_calculation_table_view = _POLICY__partial_view__cost_calculation_table($en
                             class="action trg-dialog-edit btn btn-primary btn-sm"
                             title="Update Premium"
                             data-toggle="tooltip"
-                            data-box-size="large"
+                            data-box-size="full-width"
                             data-title='<i class="fa fa-pencil-square-o"></i> Update Premium - <?php echo $endorsement_record->policy_code?>'
                             data-url="<?php echo $update_premium_url;?>"
                             data-form="#_form-premium">

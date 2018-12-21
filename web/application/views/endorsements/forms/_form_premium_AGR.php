@@ -14,54 +14,55 @@ $premium_computation_table  = $endorsement_record->premium_computation_table ? j
         ],
         // Hidden Fields
         isset($policy_record) ? ['id' => $policy_record->id] : []);
-?>
 
-
-
-    <?php
     /**
      * Premium Summary Table
      */
     $this->load->view('endorsements/snippets/_premium_summary');
-
-    $premium_elements = $form_elements['premium'] ?? NULL;
-    if($premium_elements):
-    ?>
-        <div class="box box-solid box-bordered">
-            <div class="box-header with-border">
-                <h4 class="box-title">Premium Information</h4>
+?>
+<div class="row">
+    <div class="col-md-6">
+        <?php
+        $premium_elements = $form_elements['premium'] ?? NULL;
+        if($premium_elements):
+        ?>
+            <div class="box box-solid box-bordered">
+                <div class="box-header with-border">
+                    <h4 class="box-title">Premium Information</h4>
+                </div>
+                <div class="box-body form-horizontal">
+                    <?php
+                    /**
+                     * Portfolio Specific Premium Fields
+                     */
+                    $this->load->view('templates/_common/_form_components_horz', [
+                        'form_elements'     => $premium_elements,
+                        'form_record'       => $premium_computation_table,
+                        'grid_label'        => 'col-md-4',
+                        'grid_form_control' => 'col-md-8'
+                    ]);
+                    ?>
+                </div>
             </div>
-            <div class="box-body form-horizontal">
-                <?php
-                /**
-                 * Portfolio Specific Premium Fields
-                 */
-                $this->load->view('templates/_common/_form_components_horz', [
-                    'form_elements'     => $premium_elements,
-                    'form_record'       => $premium_computation_table,
-                    'grid_label'        => 'col-md-4',
-                    'grid_form_control' => 'col-md-8'
-                ]);
-                ?>
-            </div>
-        </div>
-    <?php
-    endif;
+        <?php
+        endif;
 
-    /**
-     * Load TXN Common Elements
-     */
-    $this->load->view('endorsements/forms/_form_txn_common', [
-        'endorsement_record' => $endorsement_record,
-        'form_elements'      => $form_elements['basic']
-    ]);
+        /**
+         * Load TXN Common Elements
+         */
+        $this->load->view('endorsements/forms/_form_txn_common', [
+            'endorsement_record' => $endorsement_record,
+            'form_elements'      => $form_elements['basic']
+        ]);
 
-    /**
-     * Other Common Components
-     *  1. Premium Installments
-     */
-    echo $common_components;
-    ?>
+        /**
+         * Other Common Components
+         *  1. Premium Installments
+         */
+        echo $common_components;
+        ?>
 
-    <button type="submit" class="hide">Submit</button>
+        <button type="submit" class="hide">Submit</button>
+    </div>
+</div>
 <?php echo form_close();?>

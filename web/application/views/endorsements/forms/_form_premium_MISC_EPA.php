@@ -20,22 +20,25 @@ $premium_computation_table  = $endorsement_record->premium_computation_table ? j
      */
     $this->load->view('endorsements/snippets/_premium_summary');
 ?>
+<div class="row">
+    <div class="col-md-6">
+        <?php
+        /**
+         * Load TXN Common Elements
+         */
+        $this->load->view('endorsements/forms/_form_txn_common', [
+            'endorsement_record'        => $endorsement_record,
+            'form_elements'     => $form_elements['basic']
+        ]);
 
-    <?php
-    /**
-     * Load TXN Common Elements
-     */
-    $this->load->view('endorsements/forms/_form_txn_common', [
-        'endorsement_record'        => $endorsement_record,
-        'form_elements'     => $form_elements['basic']
-    ]);
+        /**
+         * Other Common Components
+         *  1. Premium Installments
+         */
+        echo $common_components;
+        ?>
 
-    /**
-     * Other Common Components
-     *  1. Premium Installments
-     */
-    echo $common_components;
-    ?>
-
-    <button type="submit" class="hide">Submit</button>
+        <button type="submit" class="hide">Submit</button>
+    </div>
+</div>
 <?php echo form_close();?>
