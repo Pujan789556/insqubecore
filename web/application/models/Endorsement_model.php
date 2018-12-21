@@ -2581,6 +2581,10 @@ class Endorsement_model extends MY_Model
      */
     public function is_endorsement_manual( $portfolio_id, $txn_type )
     {
+        // DISABLE FOR NOW
+        return FALSE;
+
+
         $portfolio_id   = (int)$portfolio_id;
         $txn_type       = (int)$txn_type;
 

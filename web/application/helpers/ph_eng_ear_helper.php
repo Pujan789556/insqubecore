@@ -569,14 +569,23 @@ if ( ! function_exists('_TXN_ENG_EAR_premium_validation_rules'))
 	                '_required' => true
 	            ],
 	            [
-                    'field' => 'premium[flag_pool_risk]',
-                    'label' => 'Pool Risk',
-                    'rules' => 'trim|integer|in_list[1]',
-                    '_key' 		=> 'flag_pool_risk',
-                    '_type'     => 'checkbox',
-                    '_checkbox_value' 	=> '1',
-                    '_required' => false,
-                ]
+	                'field' => 'premium[pool_rate]',
+	                'label' => 'Pool Premium Rate',
+	                'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+	                '_type'     => 'text',
+	                '_key' 		=> 'pool_rate',
+	                '_default' 	=> floatval($pfs_record->pool_premium ?? 0.00),
+	                '_required' => true
+	            ],
+	            // [
+             //        'field' => 'premium[flag_pool_risk]',
+             //        'label' => 'Pool Risk',
+             //        'rules' => 'trim|integer|in_list[1]',
+             //        '_key' 		=> 'flag_pool_risk',
+             //        '_type'     => 'checkbox',
+             //        '_checkbox_value' 	=> '1',
+             //        '_required' => false,
+             //    ]
 			],
 
 			/**
@@ -721,20 +730,20 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 			 * 	- Premium Upgrade
 			 * 	- Premium Refund
 			 */
-			if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
-			{
-				try{
+			// if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+			// {
+			// 	try{
 
-					return _ENDORSEMENT__save_premium_manual($endorsement_record, $policy_record, $CI->input->post());
+			// 		return _ENDORSEMENT__save_premium_manual($endorsement_record, $policy_record, $CI->input->post());
 
-				} catch (Exception $e){
+			// 	} catch (Exception $e){
 
-					return $CI->template->json([
-						'status' 	=> 'error',
-						'message' 	=> $e->getMessage()
-					], 404);
-				}
-			}
+			// 		return $CI->template->json([
+			// 			'status' 	=> 'error',
+			// 			'message' 	=> $e->getMessage()
+			// 		], 404);
+			// 	}
+			// }
 
 
 			/**
@@ -781,10 +790,11 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 					 * 	c. Pool Premium Flag
 					 * 	d. Other common data
 					 */
-					$post_premium 				= $post_data['premium'];
-					$items_premium 				= _OBJ_ENG_EAR_compute_premium_total_by_items($post_premium['items'], $object_attributes->items);
-					$tp_rate 					= floatval($post_premium['tp_rate']);
-					$flag_pool_risk 			= $post_premium['flag_pool_risk'] ?? 0;
+					$post_premium 	= $post_data['premium'];
+					$items_premium 	= _OBJ_ENG_EAR_compute_premium_total_by_items($post_premium['items'], $object_attributes->items);
+					$tp_rate 		= floatval($post_premium['tp_rate']);
+					$pool_rate 		= floatval($post_premium['pool_rate']);
+					// $flag_pool_risk = $post_premium['flag_pool_risk'] ?? 0;
 
 
 					// A = Default Premium for all item
@@ -840,11 +850,10 @@ if ( ! function_exists('__save_premium_ENG_EAR'))
 					 * Pool Premium
 					 */
 					$POOL_PREMIUM 	= 0.00;
-					$pool_rate 		= 0.00;
-					if($flag_pool_risk)
+					if($pool_rate)
 					{
 						// Pool Premium = x% of Default SI (A - 2. Clearance & Removal of Debris )
-						$pool_rate = floatval($pfs_record->pool_premium);
+						// $pool_rate = floatval($pfs_record->pool_premium);
 
 						// Debris Premium
 						$debris_record = _OBJ_ENG_EAR_get_debris_record($object_attributes->items); // SN = I2
