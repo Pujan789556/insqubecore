@@ -207,7 +207,7 @@ class Endorsement_model extends MY_Model
                     'label' => 'Refund Compute Reference',
                     'rules' => 'trim|required|integer|exact_length[1]|in_list['. implode( ',', array_keys( $computation_basis_dropdown ) ) .']',
                     '_type'     => 'dropdown',
-                    '_default'  => IQB_POLICY_ENDORSEMENT_CB_STR,
+                    '_default'  => IQB_POLICY_ENDORSEMENT_CB_PRORATA,
                     '_data'     => IQB_BLANK_SELECT + $computation_basis_dropdown,
                     '_required' => true
                 ],
