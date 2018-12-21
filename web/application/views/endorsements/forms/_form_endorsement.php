@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Form : Policy TXN - Endorsement
  */
-$hidden_fields = ['policy_id' => $policy_record->id];
+$hidden_fields = ['policy_id' => $policy_record->id, 'txn_type' => $txn_type];
 if(isset($record))
 {
     $hidden_fields['id'] = $record->id;

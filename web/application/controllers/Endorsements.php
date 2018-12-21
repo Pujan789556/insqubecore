@@ -199,7 +199,8 @@ class Endorsements extends MY_Controller
 			[
 				'form_elements' => $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id, $policy_record),
 				'record' 		=> $record,
-				'policy_record' => $policy_record
+				'policy_record' => $policy_record,
+				'txn_type' 		=> $record->txn_type
 			], TRUE);
 
 		// Return HTML
@@ -281,7 +282,8 @@ class Endorsements extends MY_Controller
 			[
 				'form_elements' => $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id, $policy_record),
 				'record' 		=> $record,
-				'policy_record' => $policy_record
+				'policy_record' => $policy_record,
+				'txn_type' 		=> $txn_type
 			], TRUE);
 
 		// Return HTML
@@ -325,11 +327,12 @@ class Endorsements extends MY_Controller
 		        		{
 		        			$add_only_data 	= $this->_prepare_add_only_data($policy_record->id, $txn_type);
 		        			$data 		 	= array_merge($add_only_data, $data);
-		        			$done 			= $this->endorsement_model->add($data, TRUE);
+		        			$done 			= $this->endorsement_model->add($data, $policy_record);
 		        		}
 		        		else
 		        		{
-		        			$done = $this->endorsement_model->edit($record->id, $data);
+		        			$data['txn_type'] = $record->txn_type; // Required to perform Befor save data function _assign_end_date()
+		        			$done = $this->endorsement_model->edit($record->id, $data, $policy_record);
 		        		}
 
 					} catch (Exception $e) {
@@ -563,32 +566,76 @@ class Endorsements extends MY_Controller
 
 	// --------------------------------------------------------------------
 
-		public function _cb_valid_end_date($end_date)
+		public function _cb_valid_issued_date($issued_date)
 		{
-			$policy_id = (int)$this->input->post('policy_id');
-
-			$issued_date 	= $this->input->post('issued_date');
-			$start_date 	= $this->input->post('start_date');
-
+			$policy_id 		= (int)$this->input->post('policy_id');
+			$start_date 	= $this->input->post('start_date') ?? NULL;
+			$policy_record 	= $this->policy_model->find($policy_id);
 
 			/**
-	    	 * Case I: Start Date > END Date
+	    	 * Case I:  Start Date < Issued Date
 	    	 */
-	    	if( strtotime($start_date) > strtotime($end_date) )
+	    	if( $start_date !== NULL && strtotime($start_date) < strtotime($issued_date) )
 	    	{
-	    		$this->form_validation->set_message('_cb_valid_end_date', 'Start Date can not exceed End Date.');
+	    		$this->form_validation->set_message('_cb_valid_issued_date', 'Issued Date can not exceed Start Date.');
 	            return FALSE;
 	    	}
 
 	    	/**
-	    	 * Case I: Issued Date > Start Date
+	    	 * Case II: Issued Date < Policy Start Date
 	    	 */
-	    	if( strtotime($issued_date) > strtotime($start_date) )
+	    	if( strtotime($issued_date) < strtotime($policy_record->start_date) )
 	    	{
-	    		$this->form_validation->set_message('_cb_valid_end_date', 'Issued Date can not exceed Start Date.');
+	    		$this->form_validation->set_message('_cb_valid_issued_date', 'Issued Date can not be earlier than Policy Start Date.');
 	            return FALSE;
 	    	}
 
+	    	return TRUE;
+		}
+
+		public function _cb_valid_start_date($start_date)
+		{
+			$policy_id = (int)$this->input->post('policy_id');
+
+			$issued_date 	= $this->input->post('issued_date');
+			$end_date 		= $this->input->post('end_date') ?? NULL;
+			$policy_record 	= $this->policy_model->find($policy_id);
+
+			/**
+	    	 * Case I: Start Date > END Date
+	    	 */
+	    	if( $end_date !== NULL && strtotime($start_date) > strtotime($end_date) )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_start_date', 'Start Date can not exceed End Date.');
+	            return FALSE;
+	    	}
+
+	    	/**
+	    	 * Case II: Start Date > Policy END Date
+	    	 */
+	    	if( strtotime($start_date) > strtotime($policy_record->end_date) )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_start_date', 'Endorsement Start Date can not exceed Policy End Date.');
+	            return FALSE;
+	    	}
+
+	    	return TRUE;
+		}
+
+		public function _cb_valid_end_date($end_date)
+		{
+			$policy_id = (int)$this->input->post('policy_id');
+			$start_date 	= $this->input->post('start_date');
+			$policy_record 	= $this->policy_model->find($policy_id);
+
+			/**
+	    	 * Case I: END Date <= Policy END Date
+	    	 */
+	    	if( strtotime($end_date) <= strtotime($policy_record->end_date) )
+	    	{
+	    		$this->form_validation->set_message('_cb_valid_end_date', 'Endorsement End Date must be greater than Policy End Date.');
+	            return FALSE;
+	    	}
 	    	return TRUE;
 		}
 	// --------------------------------------------------------------------

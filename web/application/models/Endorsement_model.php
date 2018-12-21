@@ -235,6 +235,7 @@ class Endorsement_model extends MY_Model
         switch ($txn_type)
         {
             case IQB_POLICY_ENDORSEMENT_TYPE_GENERAL:
+            case IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED:
                 $v_rules = ['basic' => $basic];
                 break;
 
@@ -392,89 +393,129 @@ class Endorsement_model extends MY_Model
             $this->load->model('agent_model');
             $template_dropdown = $this->endorsement_template_model->dropdown( $portfolio_id, $txn_type );
 
-            $end_date = $policy_record->end_date;
-            if($txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE )
-            {
-                $end_date = date('Y-m-d');
-            }
 
-            $v_rules = array_merge(
+
+            $v_rules = [
                 [
-                    [
-                        'field' => 'sold_by',
-                        'label' => 'Sales Staff',
-                        'rules' => 'trim|required|integer|max_length[11]',
-                        '_id'       => '_marketing-staff',
-                        '_extra_attributes' => 'style="width:100%; display:block"',
-                        '_type'     => 'dropdown',
-                        '_default'  => $policy_record->sold_by ?? '',
-                        '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown(),
-                        '_required' => true
-                    ],
-                    [
-                        'field' => 'agent_id',
-                        'label' => 'Agent Name',
-                        'rules' => 'trim|integer|max_length[11]',
-                        '_id'       => '_agent-id',
-                        '_extra_attributes' => 'style="width:100%; display:block"',
-                        '_type'     => 'dropdown',
-                        '_default'  => $policy_record->agent_id ?? '',
-                        '_data'     => IQB_BLANK_SELECT + $this->agent_model->dropdown(true),
-                        '_required' => false
-                    ],
-                    [
-                        'field' => 'issued_date',
-                        'label' => 'Endorsement Issued Date',
-                        'rules' => 'trim|required|valid_date',
-                        '_type'             => 'date',
-                        '_default'          => date('Y-m-d'),
-                        '_extra_attributes' => 'data-provide="datepicker-inline"',
-                        '_required' => true
-                    ],
-                    [
-                        'field' => 'start_date',
-                        'label' => 'Endorsement Start Date',
-                        'rules' => 'trim|required|valid_date',
-                        '_type'             => 'date',
-                        '_default'          => date('Y-m-d'),
-                        '_extra_attributes' => 'data-provide="datepicker-inline"',
-                        '_required' => true
-                    ],
+                    'field' => 'sold_by',
+                    'label' => 'Sales Staff',
+                    'rules' => 'trim|required|integer|max_length[11]',
+                    '_id'       => '_marketing-staff',
+                    '_extra_attributes' => 'style="width:100%; display:block"',
+                    '_type'     => 'dropdown',
+                    '_default'  => $policy_record->sold_by ?? '',
+                    '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown(),
+                    '_required' => true
+                ],
+                [
+                    'field' => 'agent_id',
+                    'label' => 'Agent Name',
+                    'rules' => 'trim|integer|max_length[11]',
+                    '_id'       => '_agent-id',
+                    '_extra_attributes' => 'style="width:100%; display:block"',
+                    '_type'     => 'dropdown',
+                    '_default'  => $policy_record->agent_id ?? '',
+                    '_data'     => IQB_BLANK_SELECT + $this->agent_model->dropdown(true),
+                    '_required' => false
+                ],
+                [
+                    'field' => 'issued_date',
+                    'label' => 'Endorsement Issued Date',
+                    'rules' => 'trim|required|valid_date|callback__cb_valid_issued_date',
+                    '_type'             => 'date',
+                    '_default'          => date('Y-m-d'),
+                    '_extra_attributes' => 'data-provide="datepicker-inline"',
+                    '_required' => true
+                ]
+            ];
+
+            /**
+             * Dates
+             * ------
+             *
+             * 1. For NIL, UP/DOWN, Ownership Transfer (AUTOMATIC)
+             *      END DATE = POLICY END DATE
+             *
+             * 2. FOR Terminate  (AUTOMATIC)
+             *      END DATE = TODAY
+             *
+             * 3. FOR Time Extended (EDITABLE)
+             *      END DATE > POLICY END DATE
+             *
+             */
+            if( $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED )
+            {
+
+                $st_date_obj = new DateTime($policy_record->end_date);
+                $st_date_obj->modify('+1 day');
+                $start_date = $st_date_obj->format('Y-m-d');
+
+                $v_rules = array_merge($v_rules, [
                     [
                         'field' => 'end_date',
                         'label' => 'Endorsement End Date',
                         'rules' => 'trim|required|valid_date|callback__cb_valid_end_date',
                         '_type'             => 'date',
-                        '_default'          => $end_date,
+                        '_default'          => date('Y-m-d'),
                         '_extra_attributes' => 'data-provide="datepicker-inline"',
+                        '_extra_html_below' => '<div class="text-warning"><strong>Endorsement Start Date</strong>:' . $start_date . '</div>',
                         '_required' => true
-                    ],
-                    [
-                        'field' => 'template_reference',
-                        'label' => 'Template Reference',
-                        'rules' => 'trim|integer|max_length[8]',
-                        '_key'      => 'template_reference',
-                        '_id'       => 'template-reference',
-                        '_type'     => 'dropdown',
-                        '_data'     => IQB_BLANK_SELECT + $template_dropdown,
-                        '_required' => false
-                    ],
-                    [
-                        'field' => 'txn_details',
-                        'label' => 'Transaction Details (सम्पुष्टि विवरण)',
-                        'rules' => 'trim|required|htmlspecialchars',
-                        '_id'       => 'txn-details',
-                        '_type'     => 'textarea',
-                        '_required' => true
-                    ],
-                    [
-                        'field' => 'remarks',
-                        'label' => 'Remarks/कैफियत',
-                        'rules' => 'trim|htmlspecialchars',
-                        '_type'     => 'textarea',
-                        '_required' => false
                     ]
                 ]);
+            }
+            else
+            {
+                // Show End date right after startdate
+                if($txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE)
+                {
+                    $end_date = date('Y-m-d');
+                }
+                else
+                {
+                    $end_date = $policy_record->end_date;
+                }
+                $v_rules = array_merge($v_rules, [
+                    [
+                        'field' => 'start_date',
+                        'label' => 'Endorsement Start Date',
+                        'rules' => 'trim|required|valid_date|callback__cb_valid_start_date', // Cannot be earlier than Policy Start date
+                        '_type'             => 'date',
+                        '_default'          => date('Y-m-d'),
+                        '_extra_attributes' => 'data-provide="datepicker-inline"',
+                        '_extra_html_below' => '<div class="text-warning"><strong>Endorsement End Date</strong>:' . $end_date . '</div>',
+                        '_required' => true
+                    ]
+                ]);
+            }
+
+
+            $v_rules = array_merge($v_rules, [
+                [
+                    'field' => 'template_reference',
+                    'label' => 'Template Reference',
+                    'rules' => 'trim|integer|max_length[8]',
+                    '_key'      => 'template_reference',
+                    '_id'       => 'template-reference',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $template_dropdown,
+                    '_required' => false
+                ],
+                [
+                    'field' => 'txn_details',
+                    'label' => 'Transaction Details (सम्पुष्टि विवरण)',
+                    'rules' => 'trim|required|htmlspecialchars',
+                    '_id'       => 'txn-details',
+                    '_type'     => 'textarea',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'remarks',
+                    'label' => 'Remarks/कैफियत',
+                    'rules' => 'trim|htmlspecialchars',
+                    '_type'     => 'textarea',
+                    '_required' => false
+                ]
+            ]);
 
             return $v_rules;
         }
@@ -1263,12 +1304,17 @@ class Endorsement_model extends MY_Model
      * @param array $data
      * @return bool
      */
-    public function add($data)
+    public function add($data, $policy_record)
     {
         /**
          * Last Premium Computation Data
          */
         $data['premium_computation_table'] = $this->_last_premium_computation_table($data['txn_type'], $data['policy_id']);
+
+        /**
+         * END DATE
+         */
+        $data = $this->_assign_dates($data, $policy_record->end_date);
 
         /**
          * ==================== TRANSACTIONS BEGIN =========================
@@ -1290,8 +1336,7 @@ class Endorsement_model extends MY_Model
                 /**
                  * Task 3: Refund on Terminate???
                  */
-                $record = parent::find($id);
-                if( $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE )
+                if( $data['txn_type'] == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE )
                 {
                     $this->_update_terminate_refund_data($id);
                 }
@@ -1300,7 +1345,7 @@ class Endorsement_model extends MY_Model
                 /**
                  * Task 4: Clear Cache
                  */
-                $cache_var = 'endrsmnt_'.$data['policy_id'];
+                $cache_var = 'endrsmnt_' . $policy_record->id;
                 $this->clear_cache($cache_var);
 
         /**
@@ -1326,7 +1371,7 @@ class Endorsement_model extends MY_Model
             private function _last_premium_computation_table($txn_type, $policy_id)
             {
                 $pct = NULL;
-                if( in_array($txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND]) )
+                if( in_array($txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND, IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED]) )
                 {
 
                     $where_in = [
@@ -1357,7 +1402,7 @@ class Endorsement_model extends MY_Model
      * @param array $data
      * @return bool
      */
-    public function edit($id, $data)
+    public function edit($id, $data, $policy_record)
     {
         $record = parent::find($id);
 
@@ -1365,6 +1410,11 @@ class Endorsement_model extends MY_Model
          * Reset Data by Type
          */
         $data = $this->nullify_premium_data($record->txn_type, $data);
+
+        /**
+         * END DATE
+         */
+        $data = $this->_assign_dates($data, $policy_record->end_date);
 
         /**
          * ==================== TRANSACTIONS BEGIN =========================
@@ -1382,7 +1432,7 @@ class Endorsement_model extends MY_Model
                 /**
                  * Task 2: Refund on Terminate???
                  */
-                if( $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE )
+                if( $data['txn_type'] == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE )
                 {
                     $this->_update_terminate_refund_data($id);
                 }
@@ -1390,7 +1440,7 @@ class Endorsement_model extends MY_Model
                 /**
                  * Task 2: Clear Cache
                  */
-                $cache_var = 'endrsmnt_' . $record->policy_id;
+                $cache_var = 'endrsmnt_' . $policy_record->id;
                 $this->clear_cache($cache_var);
 
         /**
@@ -1408,6 +1458,59 @@ class Endorsement_model extends MY_Model
 
         return $transaction_status;
     }
+
+        // --------------------------------------------------------------------
+
+        private function _assign_dates($data, $policy_end_date)
+        {
+            $txn_type   = $data['txn_type'];
+
+
+            /**
+             * Dates
+             * ------
+             *
+             * 1. For NIL, UP/DOWN, Ownership Transfer
+             *      START DATE =  DYNAMIC (Form Input)
+             *      END DATE = POLICY END DATE
+             *
+             * 2. FOR Terminate
+             *      START DATE = DYNAMIC (Form Input)
+             *      END DATE = START DATE
+             *
+             * 3. FOR Time Extended (EDITABLE)
+             *      START DATE = POLIY END DATE + 1 DAY
+             *      END DATE =  DYNAMIC (Form Input) > POLICY END DATE
+             *
+             */
+            if( $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED )
+            {
+                $st_date_obj = new DateTime($policy_end_date);
+                $st_date_obj->modify('+1 day');
+                $start_date = $st_date_obj->format('Y-m-d');
+
+                $data['start_date'] = $start_date;
+            }
+            else
+            {
+                if($txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE)
+                {
+                    $start_date = $data['start_date'];
+                    $end_date   = date('Y-m-d');
+                    if( strtotime($start_date) > strtotime($end_date) )
+                    {
+                        $end_date = $start_date;
+                    }
+                }
+                else
+                {
+                    $end_date = $policy_end_date;
+                }
+                $data['end_date'] = $end_date;
+            }
+
+            return $data;
+        }
 
         // --------------------------------------------------------------------
 
@@ -2466,7 +2569,7 @@ class Endorsement_model extends MY_Model
         $manual_portolios = [IQB_SUB_PORTFOLIO_ENG_CAR_ID, IQB_SUB_PORTFOLIO_ENG_EAR_ID, IQB_SUB_PORTFOLIO_MISC_TMI_ID];
 
         // Allowed Txn Types
-        $txn_types = [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND];
+        $txn_types = [IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND];
 
         return in_array($portfolio_id, $manual_portolios) && in_array($txn_type, $txn_types);
     }
@@ -2760,7 +2863,7 @@ class Endorsement_model extends MY_Model
             // Data Selection
             $this->db->select(
                             // Endorsement
-                            "E.id, E.policy_id, E.txn_type, E.issued_date, E.flag_ri_approval, E.flag_current, E.flag_refund_on_terminate, E.status, " .
+                            "E.id, E.policy_id, E.txn_type, E.issued_date, E.start_date, E.end_date, E.flag_ri_approval, E.flag_current, E.flag_refund_on_terminate, E.status, " .
 
                             // Branch and Portfolio
                             "P.category as policy_category, P.insurance_company_id, P.code as policy_code, P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, " .

@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<?php if($record->flag_current == IQB_FLAG_ON): ?>
 			<i class="fa fa-circle text-green" data-toggle="tooltip" title="Current Endorsement"></i>
 		<?php endif;?>
-		<?php echo _ENDORSEMENT_type_text($record->txn_type);?>
+		<?php echo _ENDORSEMENT_type_text($record->txn_type), '<br>', $record->start_date, ' - ', $record->end_date;?>
 	</td>
 	<td><?php echo $record->sold_by_username; ?></td>
 	<td><?php echo $record->agent_name; ?></td>
