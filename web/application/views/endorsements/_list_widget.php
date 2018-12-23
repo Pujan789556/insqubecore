@@ -39,8 +39,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								<i class="ion-plus-circled margin-r-5"></i> Add <i class="fa fa-caret-down"></i></button>
 								<ul class="dropdown-menu pull-right" role="menu">
 									<?php
-									$txn_types = _ENDORSEMENT_type_eonly_dropdown(FALSE);
-									foreach($txn_types as $key=>$label):
+        							$e_only_type_dropdown = _ENDORSEMENT_type_dropdown(TRUE, FALSE);
+									foreach($e_only_type_dropdown as $key=>$label):
 										$label = "Add Endorsement - " . $label;
 									 ?>
 									 	<li>

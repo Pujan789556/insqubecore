@@ -56,7 +56,7 @@ $grand_total            = $total_premium + $endorsement_record->net_amt_stamp_du
                     <table class="table" cellpadding="0" cellspacing="0">
                         <?php
                         if($endorsement_record->flag_short_term === IQB_FLAG_YES):
-                            $total_premium_full = (float)$endorsement_record->gross_amt_basic_premium + (float)$endorsement_record->gross_amt_pool_premium;
+                            $total_premium_full = (float)$endorsement_record->gross_full_amt_basic_premium + (float)$endorsement_record->gross_full_amt_pool_premium;
                             $spr_rate = $endorsement_record->short_term_rate;
                             ?>
                             <tr>

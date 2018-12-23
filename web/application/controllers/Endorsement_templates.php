@@ -172,7 +172,7 @@ class Endorsement_templates extends MY_Controller
 
 		private function _get_filter_elements()
 		{
-			$e_type_dropdown = _ENDORSEMENT_type_dropdown(false);
+			$e_type_dropdown = _ENDORSEMENT_type_dropdown(TRUE, FALSE);
 			$select = ['' => 'Select ...'];
 			$filters = [
 				[

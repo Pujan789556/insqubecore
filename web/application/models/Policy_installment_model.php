@@ -45,6 +45,8 @@ class Policy_installment_model extends MY_Model
         $this->load->helper('policy');
         $this->load->helper('object');
 
+        // Model
+        $this->load->model('endorsement_model');
 
         // Set validation rules
         $this->validation_rules();
@@ -325,7 +327,7 @@ class Policy_installment_model extends MY_Model
              *  - Premium Upgrade
              *  - Premium Refund
              */
-            else if( _ENDORSEMENT_is_premium_computable_by_type($record->txn_type) )
+            else if( $this->endorsement_model->is_ri_distributable($record->txn_type) )
             {
                 RI__distribute_endorsement($record->id);
             }
@@ -404,7 +406,7 @@ class Policy_installment_model extends MY_Model
         }
 
         // Status Qualified?
-        if( !$this->status_qualifies($record->status, IQB_POLICY_ENDORSEMENT_STATUS_INVOICED) )
+        if( !$this->status_qualifies($record->status, IQB_ENDORSEMENT_STATUS_INVOICED) )
         {
             throw new Exception("Exception [Model:Policy_installment_model][Method: to_invoiced()]: Current Status does not qualify to upgrade/downgrade.");
         }
@@ -413,7 +415,7 @@ class Policy_installment_model extends MY_Model
         /**
          * Update Status and Clear Cache Specific to this Policy ID
          */
-        if( $this->_update($record->id, ['status' => IQB_POLICY_ENDORSEMENT_STATUS_INVOICED]) )
+        if( $this->_update($record->id, ['status' => IQB_ENDORSEMENT_STATUS_INVOICED]) )
         {
 
             /**
@@ -447,13 +449,13 @@ class Policy_installment_model extends MY_Model
                 $flag_qualifies = $current_status === IQB_POLICY_INSTALLMENT_STATUS_DRAFT;
                 break;
 
-            case IQB_POLICY_ENDORSEMENT_STATUS_INVOICED:
+            case IQB_ENDORSEMENT_STATUS_INVOICED:
                 $flag_qualifies = $current_status === IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED;
                 break;
 
             // For non-txnal endorsement, its from approved
             case IQB_POLICY_INSTALLMENT_STATUS_PAID:
-                $flag_qualifies = $current_status === IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
+                $flag_qualifies = $current_status === IQB_ENDORSEMENT_STATUS_INVOICED;
                 break;
 
             default:

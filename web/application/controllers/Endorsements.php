@@ -197,7 +197,7 @@ class Endorsements extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('endorsements/forms/_form_endorsement',
 			[
-				'form_elements' => $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id, $policy_record),
+				'form_elements' => $this->endorsement_model->get_validation_rules($txn_type, $policy_record->portfolio_id, $policy_record),
 				'record' 		=> $record,
 				'policy_record' => $policy_record,
 				'txn_type' 		=> $record->txn_type
@@ -236,8 +236,7 @@ class Endorsements extends MY_Controller
 		 * Valid Transaction Type?
 		 */
 		$txn_type = (int)$txn_type;
-		$txn_types = array_keys( _ENDORSEMENT_type_eonly_dropdown(FALSE) );
-		if( !in_array($txn_type, $txn_types) )
+		if( !$this->endorsement_model->type_dropdown( FALSE, FALSE ) )
 		{
 			return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'Invalid Endorsement Type.'], 403);
 		}
@@ -280,7 +279,7 @@ class Endorsements extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('endorsements/forms/_form_endorsement',
 			[
-				'form_elements' => $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id, $policy_record),
+				'form_elements' => $this->endorsement_model->get_validation_rules($txn_type, $policy_record->portfolio_id, $policy_record),
 				'record' 		=> $record,
 				'policy_record' => $policy_record,
 				'txn_type' 		=> $txn_type
@@ -316,10 +315,68 @@ class Endorsements extends MY_Controller
 					return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'Invalid policy information.'], 403);
 				}
 
-				$rules = $this->endorsement_model->get_v_rules($txn_type, $policy_record->portfolio_id, $policy_record, TRUE);
+				$rules = $this->endorsement_model->get_validation_rules($txn_type, $policy_record->portfolio_id, $policy_record, TRUE);
 				$this->form_validation->set_rules($rules);
 				if($this->form_validation->run() === TRUE )
 	        	{
+	        		$data = $this->_build_draft_data($rules, $post_data, $policy_record, $record);
+	        		try {
+
+						if($action == 'add')
+		        		{
+		        			$add_only_data 	= $this->_prepare_add_only_data($policy_record->id, $txn_type);
+		        			$data 		 	= array_merge($add_only_data, $data);
+		        			$done 			= $this->endorsement_model->add($data, $policy_record);
+		        		}
+		        		else
+		        		{
+		        			$data['txn_type'] = $record->txn_type; // Required to perform Befor save data function __refactor_dates()
+		        			$done = $this->endorsement_model->edit($record->id, $data, $policy_record);
+		        		}
+
+					} catch (Exception $e) {
+						return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
+					}
+
+
+	        		return $this->_return_on_save($action, $done, $policy_record->id, $record->id ?? NULL);
+	        	}
+	        	else
+	        	{
+	        		return $this->template->json(['status' => 'error', 'message' => validation_errors()]);
+	        	}
+			}
+		}
+
+		/**
+		 * Save Endorsement
+		 *
+		 * @param int $txn_type
+		 * @param object $policy_record
+		 * @param string $action
+		 * @param object|null $record
+		 * @return mixed
+		 */
+		private function _save_OLD($txn_type, $policy_record, $action, $record = NULL)
+		{
+			$post_data = $this->input->post();
+			if( $this->input->post() )
+			{
+				/**
+				 * Valid Policy ID?
+				 * Coz we need it in ballback
+				 */
+				$policy_id = $post_data['policy_id'];
+				if($policy_id != $policy_record->id)
+				{
+					return $this->template->json(['status' => 'error', 'title' => 'OOPS!', 'message' => 'Invalid policy information.'], 403);
+				}
+
+				$rules = $this->endorsement_model->get_validation_rules($txn_type, $policy_record->portfolio_id, $policy_record, TRUE);
+				$this->form_validation->set_rules($rules);
+				if($this->form_validation->run() === TRUE )
+	        	{
+
 	        		$data = $this->_prepare_data($txn_type, $post_data, $policy_record, $record);
 	        		try {
 
@@ -351,26 +408,13 @@ class Endorsements extends MY_Controller
 
 	// --------------------------------------------------------------------
 
-		private function _prepare_add_only_data($policy_id, $txn_type)
+		private function _build_draft_data ($rules, $post_data, $policy_record, $record = NULL)
 		{
-			return [
-				'policy_id' 		=> $policy_id,
-    			'txn_type'  		=> $txn_type,
-    			'flag_ri_approval' 	=> $this->endorsement_model->get_flag_ri_approval_by_policy( $policy_id )
-			];
-		}
-
-	// --------------------------------------------------------------------
-
-		private function _prepare_common_data($txn_type, $post_data, $policy_record, $record)
-		{
-			$fields = [ 'issued_date', 'agent_id', 'sold_by', 'start_date', 'end_date', 'txn_details', 'remarks'];
 			$data = [];
-			foreach($fields as $key)
+			foreach($rules as $single)
 			{
-				$value = $post_data[$key] ?? NULL; // Extract from post
-				$value = !empty($value) ? $value : NULL; // Set NULL if empty
-				$data[$key] = $value;
+				$field = $single['field'];
+				$data[$field] = $post_data[$field] ?? NULL;
 			}
 
 			/**
@@ -382,113 +426,22 @@ class Endorsements extends MY_Controller
 
 
 			/**
-			 * Current Object's Sum Insured (Latest Object's SI)
+			 * SUM Insured - Object, NET
 			 */
-			$policy_object 	= 	_OBJ__get_latest(
-									$policy_record->object_id,
-									$txn_type,
-									$endorsement_record->audit_object ?? NULL
-								);
-			$data['amt_sum_insured_object'] = $policy_object->amt_sum_insured;
+
+
 
 			return $data;
 		}
 
-	// --------------------------------------------------------------------
-
-		private function _prepare_data($txn_type, $post_data, $policy_record, $record = NULL)
+		private function _prepare_add_only_data($policy_id, $txn_type)
 		{
-			$common_data = $this->_prepare_common_data($txn_type, $post_data, $policy_record, $record);
-			$data = [];
-			switch ($txn_type)
-			{
-				case IQB_POLICY_ENDORSEMENT_TYPE_GENERAL:
-					// It has only common data
-					// $data = $this->_prepare_data_general($post_data);
-					break;
-
-				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
-					$data = $this->_prepare_data_ownership_transfer($post_data);
-					break;
-
-				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
-				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-					$data = $this->_prepare_data_premium_updowngrade($post_data);
-					break;
-
-
-				case IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE:
-					$data = $this->_prepare_data_terminate($post_data, $policy_record, $record);
-					break;
-
-				default:
-					# code...
-					break;
-			}
-			return array_merge($common_data, $data);
+			return [
+				'policy_id' 		=> $policy_id,
+    			'txn_type'  		=> $txn_type,
+    			'flag_ri_approval' 	=> $this->endorsement_model->get_flag_ri_approval_by_policy( $policy_id )
+			];
 		}
-
-			private function _prepare_data_ownership_transfer($post_data)
-			{
-				$fields = ['net_amt_transfer_fee', 'net_amt_transfer_ncd', 'net_amt_stamp_duty', 'transfer_customer_id'];
-				$data = [];
-				foreach($fields as $key)
-				{
-					$data[$key] =  $post_data[$key] ?? NULL;
-				}
-
-				/**
-				 * We have to compute VAT manually
-				 */
-				$this->load->helper('account');
-
-				// $taxable amount = Transfer Fee + Transfer NCD + Stamp Duty
-				$taxable_amount = 	ac_bcsum(
-										[
-											floatval($data['net_amt_transfer_fee']),
-											floatval($data['net_amt_transfer_ncd']),
-											floatval($data['net_amt_stamp_duty'])
-										],
-										IQB_AC_DECIMAL_PRECISION
-									);
-
-				$net_amt_vat 		 = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount, IQB_AC_DECIMAL_PRECISION);
-				$data['net_amt_vat'] = $net_amt_vat;
-
-				return $data;
-			}
-
-			private function _prepare_data_premium_updowngrade($post_data)
-			{
-				$fields = ['rc_ref_basic', 'pc_ref_basic', 'net_amt_stamp_duty'];
-				$data = [];
-				foreach($fields as $key)
-				{
-					$data[$key] =  $post_data[$key] ?? NULL;
-				}
-				return $data;
-			}
-
-			private function _prepare_data_terminate($post_data, $policy_record, $record = NULL)
-			{
-				$fields = ['net_amt_cancellation_fee', 'flag_refund_on_terminate', 'rc_ref_basic'];
-				$data = [];
-				foreach($fields as $key)
-				{
-					$data[$key] =  $post_data[$key] ?? NULL;
-				}
-
-				// Reset all if no refund on termination
-				if( !$data['flag_refund_on_terminate'])
-				{
-					foreach($fields as $key)
-					{
-						$data[$key] =  NULL;
-					}
-				}
-
-				return $data;
-			}
 
 	// --------------------------------------------------------------------
 
@@ -656,7 +609,7 @@ class Endorsements extends MY_Controller
 			/**
 			 * Valid Status
 			 */
-			return $current_txn->status === IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE && $current_txn->policy_status === IQB_POLICY_STATUS_ACTIVE;
+			return $current_txn->status === IQB_ENDORSEMENT_STATUS_ACTIVE && $current_txn->policy_status === IQB_POLICY_STATUS_ACTIVE;
 		}
 
 	// --------------------------------------------------------------------
@@ -741,9 +694,7 @@ class Endorsements extends MY_Controller
 
 		// Deletable Status?
 		if(
-			$record->status !== IQB_POLICY_ENDORSEMENT_STATUS_DRAFT
-							||
-			! _ENDORSEMENT_is_deletable_by_type($record->txn_type)
+			! _ENDORSEMENT_is_deletable($record->txn_type, $record->status)
 							||
 			!$this->dx_auth->is_authorized('endorsements', 'delete.draft.endorsement')
 		)
@@ -826,7 +777,7 @@ class Endorsements extends MY_Controller
 		/**
 		 * Valid Transaction Type for Premium Computation?
 		 */
-		if( !_ENDORSEMENT_is_premium_computable_by_type($record->txn_type) )
+		if( !_ENDORSEMENT_is_transactional($record->txn_type) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
@@ -1184,12 +1135,6 @@ class Endorsements extends MY_Controller
 							]
 						]);
 					}
-
-
-
-
-
-
 				}
 			}
 		}
@@ -1211,22 +1156,22 @@ class Endorsements extends MY_Controller
         		$policy_object 	= get_object_from_policy_record($policy_record);
         		$post_data 		= $this->input->post();
 
-        		$gross_amt_basic_premium = $post_data['gross_amt_basic_premium'];
+        		$gross_full_amt_basic_premium = $post_data['gross_full_amt_basic_premium'];
         		$percent_ri_commission 	 = $post_data['percent_ri_commission'];
 
         		// Compute amt_ri_commission
         		$comm_percent 				= bcdiv($percent_ri_commission, 100.00, IQB_AC_DECIMAL_PRECISION);
-        		$gross_amt_ri_commission 	= bcmul( $gross_amt_basic_premium, $comm_percent, IQB_AC_DECIMAL_PRECISION);
+        		$gross_full_amt_ri_commission 	= bcmul( $gross_full_amt_basic_premium, $comm_percent, IQB_AC_DECIMAL_PRECISION);
 
         		// Cost Calculation Table
         		$cost_calculation_table = [
         			[
         				'label' => 'FAC - Inward Premium (Rs.)',
-        				'value' => $gross_amt_basic_premium
+        				'value' => $gross_full_amt_basic_premium
         			],
         			// [
         			// 	'label' => "Commission on FAC Accepted ({$percent_ri_commission}%)",
-        			// 	'value' => $gross_amt_ri_commission
+        			// 	'value' => $gross_full_amt_ri_commission
         			// ]
         		];
 
@@ -1238,27 +1183,33 @@ class Endorsements extends MY_Controller
 					'amt_sum_insured_net' 		=> $policy_object->amt_sum_insured,
 
 					// Basic Premium
-					'gross_amt_basic_premium' 	=> $gross_amt_basic_premium,
-					'refund_amt_basic_premium' 	=> 0.00,
-					'net_amt_basic_premium' 	=> $gross_amt_basic_premium,
+					'gross_full_amt_basic_premium' 		=> $gross_full_amt_basic_premium,
+					'gross_computed_amt_basic_premium' 	=> $gross_full_amt_basic_premium,
+					'refund_amt_basic_premium' 			=> 0.00,
+					'net_amt_basic_premium' 			=> $gross_full_amt_basic_premium,
 
 					// Pool Premium
-					'gross_amt_pool_premium' 	=> 0.00,
-					'refund_amt_pool_premium' 	=> 0.00,
-					'net_amt_pool_premium' 		=> 0.00,
+					'gross_full_amt_pool_premium' 		=> 0.00,
+					'gross_computed_amt_pool_premium' 	=> 0.00,
+					'refund_amt_pool_premium' 			=> 0.00,
+					'net_amt_pool_premium' 				=> 0.00,
 
 					// NO COMMISSION
-					'gross_amt_commissionable' 	=> NULL,
-					'refund_amt_commissionable' => NULL,
-					'net_amt_commissionable' 	=> NULL,
-					'gross_amt_agent_commission' 	=> NULL,
-					'refund_amt_agent_commission' 	=> NULL,
-					'net_amt_agent_commission' 		=> NULL,
+					'gross_full_amt_commissionable' 		=> NULL,
+					'gross_computed_amt_commissionable' 	=> NULL,
+					'refund_amt_commissionable' 			=> NULL,
+					'net_amt_commissionable' 				=> NULL,
+
+					'gross_full_amt_agent_commission' 		=> NULL,
+					'gross_computed_amt_agent_commission' 	=> NULL,
+					'refund_amt_agent_commission' 			=> NULL,
+					'net_amt_agent_commission' 				=> NULL,
 
 					// NO Direct Discount
-					'gross_amt_direct_discount' 	=> NULL,
-					'refund_amt_direct_discount' 	=> NULL,
-					'net_amt_direct_discount' 		=> NULL,
+					'gross_full_amt_direct_discount' 		=> NULL,
+					'gross_computed_amt_direct_discount' 	=> NULL,
+					'refund_amt_direct_discount' 			=> NULL,
+					'net_amt_direct_discount' 				=> NULL,
 
 					// NO Stamp Duty, NO VAT, NO Transfer fee
 					// no cancelation fee
@@ -1269,13 +1220,14 @@ class Endorsements extends MY_Controller
 					'net_amt_cancellation_fee' 	=> NULL,
 
 					// Percent RI Commission
-					'percent_ri_commission' 	=> $percent_ri_commission,
-					'gross_amt_ri_commission' 	=> $gross_amt_ri_commission,
-					'refund_amt_ri_commission' 	=> 0.00,
-					'net_amt_ri_commission' 	=> $gross_amt_ri_commission,
+					'percent_ri_commission' 			=> $percent_ri_commission,
+					'gross_full_amt_ri_commission' 		=> $gross_full_amt_ri_commission,
+					'gross_computed_amt_ri_commission' 	=> $gross_full_amt_ri_commission,
+					'refund_amt_ri_commission' 			=> 0.00,
+					'net_amt_ri_commission' 			=> $gross_full_amt_ri_commission,
 
 					// Other Fields
-					'premium_computation_table' => json_encode([]),
+					'premium_compute_options' => json_encode([]),
 					'cost_calculation_table' 	=> json_encode($cost_calculation_table),
 				];
 
@@ -1919,8 +1871,8 @@ class Endorsements extends MY_Controller
 		{
 			$where = [
 				'P.id' 			=> $key,
-				'E.status' 		=> IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE,
-				'E.txn_type !=' => IQB_POLICY_ENDORSEMENT_TYPE_FRESH
+				'E.status' 		=> IQB_ENDORSEMENT_STATUS_ACTIVE,
+				'E.txn_type !=' => IQB_ENDORSEMENT_TYPE_FRESH
 			];
 		}
 		else
@@ -2057,7 +2009,7 @@ class Endorsements extends MY_Controller
 				 * 		Since this type does not have premium update function. So we have to do this while we verify it
 				 */
 				$txn_type = (int)$endorsement_record->txn_type;
-				if( $to_status_code == IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED && $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER )
+				if( $to_status_code == IQB_ENDORSEMENT_STATUS_VERIFIED && $txn_type == IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER )
 				{
 					try { $this->_save_installment_OT($policy_record, $endorsement_record); } catch (Exception $e) {
 						return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
@@ -2149,27 +2101,27 @@ class Endorsements extends MY_Controller
 			$permission_name 	= '';
 			switch ($to_updown_status)
 			{
-				case IQB_POLICY_ENDORSEMENT_STATUS_DRAFT:
+				case IQB_ENDORSEMENT_STATUS_DRAFT:
 					$permission_name = 'status.to.draft';
 					break;
 
-				case IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED:
+				case IQB_ENDORSEMENT_STATUS_VERIFIED:
 					$permission_name = 'status.to.verified';
 					break;
 
-				case IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED:
+				case IQB_ENDORSEMENT_STATUS_RI_APPROVED:
 					$permission_name = 'status.to.ri.approved';
 					break;
 
-				case IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED:
+				case IQB_ENDORSEMENT_STATUS_VOUCHERED:
 					$permission_name = 'status.to.vouchered';
 					break;
 
-				case IQB_POLICY_ENDORSEMENT_STATUS_INVOICED:
+				case IQB_ENDORSEMENT_STATUS_INVOICED:
 					$permission_name = 'status.to.invoiced';
 					break;
 
-				case IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE:
+				case IQB_ENDORSEMENT_STATUS_ACTIVE:
 					$permission_name = 'status.to.active';
 					break;
 
@@ -2217,9 +2169,9 @@ class Endorsements extends MY_Controller
 				if( _ENDORSEMENT_is_first($endorsement_record->txn_type) )
 				{
 					$__flag_passed = !in_array($to_updown_status, [
-						IQB_POLICY_ENDORSEMENT_STATUS_DRAFT,
-						IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED,
-						IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE
+						IQB_ENDORSEMENT_STATUS_DRAFT,
+						IQB_ENDORSEMENT_STATUS_VERIFIED,
+						IQB_ENDORSEMENT_STATUS_ACTIVE
 					]);
 				}
 			}
@@ -2229,9 +2181,9 @@ class Endorsements extends MY_Controller
 			 * Premium Must be Updated Before Verifying
 			 */
 			if(
-				$__flag_passed && _ENDORSEMENT_is_premium_computable_by_type($endorsement_record->txn_type)
+				$__flag_passed && _ENDORSEMENT_is_transactional($endorsement_record->txn_type)
 				&&
-				$to_updown_status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED
+				$to_updown_status === IQB_ENDORSEMENT_STATUS_VERIFIED
 				&&
 				!$endorsement_record->net_amt_basic_premium
 			)
@@ -2248,8 +2200,8 @@ class Endorsements extends MY_Controller
 			if( $__flag_passed )
 			{
 				$__flag_passed = !in_array($to_updown_status, [
-					IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED,
-					IQB_POLICY_ENDORSEMENT_STATUS_INVOICED
+					IQB_ENDORSEMENT_STATUS_VOUCHERED,
+					IQB_ENDORSEMENT_STATUS_INVOICED
 				]);
 			}
 
@@ -2259,15 +2211,15 @@ class Endorsements extends MY_Controller
 			 *
 			 * !!! If RI-Approval Constraint Required, It should Come from That Status else from Verified
 			 */
-			if( $__flag_passed && $to_updown_status === IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE && $endorsement_record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_GENERAL )
+			if( $__flag_passed && $to_updown_status === IQB_ENDORSEMENT_STATUS_ACTIVE && $endorsement_record->txn_type == IQB_ENDORSEMENT_TYPE_GENERAL )
 			{
 				if( (int)$endorsement_record->flag_ri_approval === IQB_FLAG_ON )
 				{
-					$__flag_passed = $endorsement_record->status === IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED;
+					$__flag_passed = $endorsement_record->status === IQB_ENDORSEMENT_STATUS_RI_APPROVED;
 				}
 				else
 				{
-					$__flag_passed = $endorsement_record->status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED;
+					$__flag_passed = $endorsement_record->status === IQB_ENDORSEMENT_STATUS_VERIFIED;
 				}
 			}
 

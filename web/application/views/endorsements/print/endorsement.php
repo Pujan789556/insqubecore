@@ -210,7 +210,7 @@ $labels = [
                             $stamp_duty = (float)$record->net_amt_stamp_duty;
                             $vat            = (float)$record->net_amt_vat;
                             $premium_table = [];
-                            if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER)
+                            if($record->txn_type == IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER)
                             {
                                 $premium_table [ $labels['ownership_transfer_fee'][$lang] ]  = $transfer_fee;
 

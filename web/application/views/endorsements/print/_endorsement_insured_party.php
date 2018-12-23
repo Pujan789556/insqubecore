@@ -15,7 +15,7 @@ $care_of_title          = $lang == 'np' ? 'मार्फत'                  
 $customer_address_record        = parse_address_record($record, 'addr_customer_');
 $cot_customer_address_record    = parse_address_record($record, 'addr_customer_cot_');
 
-if($record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER)
+if($record->txn_type == IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER)
 {
     $customer_name_col = "cot_customer_name_{$lang}";
     $insured_party_name =  htmlspecialchars($record->{$customer_name_col}) . '<br/>';
@@ -48,7 +48,7 @@ echo $insured_party_name;
 
 
 // Insured Party Address
-$address_record = $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER
+$address_record = $record->txn_type == IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER
                         ? $cot_customer_address_record
                         : $customer_address_record;
 $this->load->view('policies/print/_snippet_address', ['address_record' => $address_record, 'lang' => $lang]);

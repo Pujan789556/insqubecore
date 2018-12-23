@@ -463,7 +463,7 @@ class Policy_model extends MY_Model
                 /**
                  * Policy Endorsement - Txn Details (सम्पुष्टि विवरण), Remarks and Template Reference
                  */
-                'endorsement_basic' => $this->endorsement_model->get_v_rules_basic_for_debit_note( IQB_POLICY_ENDORSEMENT_TYPE_FRESH, $portfolio_id, TRUE)
+                'endorsement_basic' => $this->endorsement_model->get_v_rules_basic_for_debit_note( IQB_ENDORSEMENT_TYPE_FRESH, $portfolio_id, TRUE)
 
             ];
         }

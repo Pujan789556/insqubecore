@@ -29,7 +29,7 @@ $grand_total                = number_format($total_premium + $endorsement_record
 <table class="table table-condensed">
     <?php
     if($endorsement_record->flag_short_term === IQB_FLAG_YES):
-        $annual_total_premium = (float)$endorsement_record->gross_amt_basic_premium + (float)$endorsement_record->gross_amt_pool_premium;
+        $annual_total_premium = (float)$endorsement_record->gross_full_amt_basic_premium + (float)$endorsement_record->gross_full_amt_pool_premium;
         $spr_rate               = number_format($endorsement_record->short_term_rate, 2);
         ?>
         <tr>

@@ -5,7 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 $object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
 
-$premium_computation_table = $endorsement_record->premium_computation_table ? json_decode($endorsement_record->premium_computation_table, TRUE) : NULL;
+$premium_compute_options = $endorsement_record->premium_compute_options ? json_decode($endorsement_record->premium_compute_options, TRUE) : NULL;
 ?>
 <?php echo form_open( $this->uri->uri_string(),
         [
@@ -34,7 +34,7 @@ $premium_computation_table = $endorsement_record->premium_computation_table ? js
                  */
                 $this->load->view('templates/_common/_form_components_horz', [
                     'form_elements'     => $form_elements['premium'],
-                    'form_record'       => (object)$premium_computation_table,
+                    'form_record'       => (object)$premium_compute_options,
                     'grid_label'        => 'col-md-4',
                     'grid_form_control' => 'col-md-8'
                 ]);
@@ -58,7 +58,7 @@ $premium_computation_table = $endorsement_record->premium_computation_table ? js
                     <tbody>
                         <?php
                         $premium_elements = $form_elements['premium_others'];
-                        $other_risks = $premium_computation_table['others'] ?? [];
+                        $other_risks = $premium_compute_options['others'] ?? [];
 
                         foreach($portfolio_risks as $risk_id=>$risk_name):
 

@@ -1350,7 +1350,7 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					/**
 					 * Other computational data
 					 */
-					$premium_computation_table 	= [];
+					$premium_compute_options 	= [];
 					$COMMISSIONABLE_PREMIUM 	= NULL;
 					$AGENT_COMMISSION 			= NULL;
 
@@ -1551,11 +1551,11 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 					 * Prepare Premium Data
 					 */
 					$premium_data = [
-						'gross_amt_basic_premium' 	=> $BASIC_PREMIUM,
-						'gross_amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
-						'gross_amt_agent_commission'  => $AGENT_COMMISSION,
-						'gross_amt_direct_discount' 	=> $DIRECT_DISCOUNT,
-						'gross_amt_pool_premium' 		=> $NET_POOL_PREMIUM,
+						'gross_full_amt_basic_premium' 	=> $BASIC_PREMIUM,
+						'gross_full_amt_commissionable'	=> $COMMISSIONABLE_PREMIUM,
+						'gross_full_amt_agent_commission'  => $AGENT_COMMISSION,
+						'gross_full_amt_direct_discount' 	=> $DIRECT_DISCOUNT,
+						'gross_full_amt_pool_premium' 		=> $NET_POOL_PREMIUM,
 					];
 
 					// -----------------------------------------------------------------------------

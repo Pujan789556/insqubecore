@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form - Premium : MISCELLANEOUS - EXPEDITION PERSONNEL ACCIDENT(EPA)
  */
 $object_attributes          = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-$premium_computation_table  = $endorsement_record->premium_computation_table ? json_decode($endorsement_record->premium_computation_table) : NULL;
+$premium_compute_options  = $endorsement_record->premium_compute_options ? json_decode($endorsement_record->premium_compute_options) : NULL;
 ?>
 <?php echo form_open( $this->uri->uri_string(),
         [

@@ -833,7 +833,7 @@ class Objects extends MY_Controller
 		/**
 		 * Endorsement Type Allows Object to Edit?
 		 */
-		if( !_ENDORSEMENT_is_object_editable_by_type($endorsement_record->txn_type) )
+		if( !_ENDORSEMENT_is_object_editable($endorsement_record->txn_type) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
@@ -973,7 +973,6 @@ class Objects extends MY_Controller
         			'amt_sum_insured_object' => $si_latest,
         			'amt_sum_insured_net' 	 => $si_latest - $si_old
         		];
-        		$endorsement_data = $this->endorsement_model->nullify_premium_data($endorsement_record->txn_type, $endorsement_data);
 
 
         		/**
@@ -997,9 +996,9 @@ class Objects extends MY_Controller
 				else
 				{
 					/**
-					 * Update Endorsement Data
+					 * Update Endorsement Record - SI, Reset Premium Fields
 					 */
-					$this->endorsement_model->save($endorsement_record->id, $endorsement_data);
+					$this->endorsement_model->post_object_update($endorsement_record->id, $endorsement_data);
 
 					$status = 'success';
 					$message = 'Successfully Updated.';

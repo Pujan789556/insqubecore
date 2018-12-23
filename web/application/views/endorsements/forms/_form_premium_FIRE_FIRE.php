@@ -4,8 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Premium Form : FIRE - FIRE
  */
 $object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-$premium_computation_table      = json_decode($endorsement_record->premium_computation_table ?? NULL);
-$premium_computation_table_arr  = json_decode($endorsement_record->premium_computation_table ?? NULL, TRUE);
+$premium_compute_options      = json_decode($endorsement_record->premium_compute_options ?? NULL);
+$premium_computation_table_arr  = json_decode($endorsement_record->premium_compute_options ?? NULL, TRUE);
 ?>
 <?php echo form_open( $this->uri->uri_string(),
         [
@@ -86,7 +86,7 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
                          * Additional Charge/Discount Rates
                          */
                         $premium_file_additional_rates = $form_elements['premium_file_additional_rates'];
-                        $form_section_record = $premium_computation_table->file ?? NULL;
+                        $form_section_record = $premium_compute_options->file ?? NULL;
 
                         $this->load->view('templates/_common/_form_components_horz', [
                             'form_elements' => $premium_file_additional_rates,
@@ -152,7 +152,7 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
 
 
                             /**
-                             * Apply Premium  We have $premium_computation_table
+                             * Apply Premium  We have $premium_compute_options
                              */
                             if($premium_computation_table_arr)
                             {
@@ -189,7 +189,7 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
                 /**
                  * Additional Charge/Discount Rates
                  */
-                $form_section_record = $premium_computation_table->manual ?? NULL;
+                $form_section_record = $premium_compute_options->manual ?? NULL;
                 $premium_manual_additional_rates = $form_elements['premium_manual_additional_rates'];
                 $this->load->view('templates/_common/_form_components_horz', [
                     'form_elements' => $premium_manual_additional_rates,
@@ -244,7 +244,7 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
 
 
                                 /**
-                                 * Apply data from $premium_computation_table
+                                 * Apply data from $premium_compute_options
                                  */
                                 if($premium_computation_table_arr)
                                 {
@@ -298,7 +298,7 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
                 /**
                  * Additional Charge/Discount Rates
                  */
-                $form_section_record = $premium_computation_table->manual_discount ?? NULL;
+                $form_section_record = $premium_compute_options->manual_discount ?? NULL;
                 $manual_discount = $form_elements['manual_discount'];
                 $this->load->view('templates/_common/_form_components_horz', [
                     'form_elements' => $manual_discount,

@@ -191,7 +191,7 @@ class M20180822_model extends MY_Model
                 }
                 try {
 
-                    $endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id);
+                    $endorsement_record = $this->endorsement_model->get_first( $record->id);
 
                 } catch (Exception $e) {
 

@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : ENGINEERING - ERECTION ALL RISK Policy Premium
  */
 $object_attributes          = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-$premium_computation_table  = $endorsement_record->premium_computation_table ? json_decode($endorsement_record->premium_computation_table) : NULL;
+$premium_compute_options  = $endorsement_record->premium_compute_options ? json_decode($endorsement_record->premium_compute_options) : NULL;
 ?>
 <?php echo form_open( $this->uri->uri_string(),
         [
@@ -30,7 +30,7 @@ $premium_computation_table  = $endorsement_record->premium_computation_table ? j
             <?php
             $section_elements           = $form_elements['items'];
             $insured_items_dropdown     = $section_elements[0]['_data'];
-            $item_objects               = $premium_computation_table->items ?? NULL;
+            $item_objects               = $premium_compute_options->items ?? NULL;
             ?>
             <table class="table table-bordered table-condensed no-margin">
                 <thead>
@@ -97,7 +97,7 @@ $premium_computation_table  = $endorsement_record->premium_computation_table ? j
                  */
                 $this->load->view('templates/_common/_form_components_horz', [
                     'form_elements'     => $form_elements['tppl'],
-                    'form_record'       => $premium_computation_table,
+                    'form_record'       => $premium_compute_options,
                     'grid_label'        => 'col-md-4',
                     'grid_form_control' => 'col-md-8'
                 ]);

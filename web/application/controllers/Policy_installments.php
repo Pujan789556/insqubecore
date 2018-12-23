@@ -398,8 +398,8 @@ class Policy_installments extends MY_Controller
 		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
 		 */
 		$installment_record->status 				= IQB_POLICY_INSTALLMENT_STATUS_VOUCHERED;
-		$installment_record->endorsement_status 	= IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED;
-		$endorsement_record->status 				= IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED;
+		$installment_record->endorsement_status 	= IQB_ENDORSEMENT_STATUS_VOUCHERED;
+		$endorsement_record->status 				= IQB_ENDORSEMENT_STATUS_VOUCHERED;
 
 
 		$html_txn_row 	  = $this->load->view('policy_installments/_single_row', ['policy_record' => $policy_record, 'record' => $installment_record], TRUE);
@@ -553,18 +553,18 @@ class Policy_installments extends MY_Controller
 
 				switch ($txn_type)
 				{
-					case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
-					case IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED:
-					case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+					case IQB_ENDORSEMENT_TYPE_FRESH:
+					case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+					case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 						$data = $this->_data_voucher_details_for_premium_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
 						break;
 
-					case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-					case IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE:
+					case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+					case IQB_ENDORSEMENT_TYPE_TERMINATE:
 						$data = $this->_data_voucher_details_for_credit_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
 						break;
 
-					case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+					case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
 						$data = $this->_data_voucher_details_for_transfer_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
 						break;
 
@@ -1151,18 +1151,18 @@ class Policy_installments extends MY_Controller
 
 			switch ($txn_type)
 			{
-				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
-				case IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED:
-				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+				case IQB_ENDORSEMENT_TYPE_FRESH:
+				case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+				case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 					$voucher_type_id = IQB_AC_VOUCHER_TYPE_PRI; // Premium Voucher
 					break;
 
-				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-				case IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE:
+				case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+				case IQB_ENDORSEMENT_TYPE_TERMINATE:
 					$voucher_type_id = IQB_AC_VOUCHER_TYPE_CRDN; // Credit Voucher
 					break;
 
-				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+				case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
 					$voucher_type_id = IQB_AC_VOUCHER_TYPE_GINV; // General Invoice
 					break;
 
@@ -1216,7 +1216,7 @@ class Policy_installments extends MY_Controller
 		 * Get the transaction record. Valid? Type must be invoicable
 		 */
 		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if( !$endorsement_record || !_ENDORSEMENT_is_invoicable_by_type($endorsement_record->txn_type) )
+		if( !$endorsement_record || !$this->endorsement_model->is_invoicable($endorsement_record->txn_type) )
 		{
 			return $this->template->json([
 				'title' 	=> 'Invalid Action!',
@@ -1476,8 +1476,8 @@ class Policy_installments extends MY_Controller
 		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
 		 */
 		$installment_record->status 			= IQB_POLICY_INSTALLMENT_STATUS_INVOICED;
-		$installment_record->endorsement_status = IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
-		$endorsement_record->status 			= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
+		$installment_record->endorsement_status = IQB_ENDORSEMENT_STATUS_INVOICED;
+		$endorsement_record->status 			= IQB_ENDORSEMENT_STATUS_INVOICED;
 
 
 		$voucher_record->flag_invoiced = IQB_FLAG_INVOICED__YES;
@@ -1512,9 +1512,9 @@ class Policy_installments extends MY_Controller
 	        $txn_type 		= (int)$endorsement_record->txn_type;
 			switch ($txn_type)
 			{
-				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
-				case IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED:
-				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+				case IQB_ENDORSEMENT_TYPE_FRESH:
+				case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+				case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 					$amount = 	ac_bcsum(
 									[
 										floatval($installment_record->net_amt_basic_premium),
@@ -1530,7 +1530,7 @@ class Policy_installments extends MY_Controller
 					break;
 
 
-				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+				case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
 					$amount = 	ac_bcsum(
 									[
 										floatval($installment_record->net_amt_transfer_fee	),
@@ -1574,9 +1574,9 @@ class Policy_installments extends MY_Controller
 
 			switch ($txn_type)
 			{
-				case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
-				case IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED:
-				case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+				case IQB_ENDORSEMENT_TYPE_FRESH:
+				case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+				case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 					$amount = bcadd(
 								floatval($installment_record->net_amt_basic_premium),
 								floatval($installment_record->net_amt_pool_premium),
@@ -1586,7 +1586,7 @@ class Policy_installments extends MY_Controller
 					break;
 
 
-				case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+				case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
 					$amount = 	bcadd(
 									floatval($installment_record->net_amt_transfer_fee	),
 									floatval($installment_record->net_amt_transfer_ncd	),
@@ -1679,7 +1679,7 @@ class Policy_installments extends MY_Controller
 		 * Get the endorsement record, Valid Type?
 		 */
 		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if(!$endorsement_record || !in_array($endorsement_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND, IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE]) )
+		if(!$endorsement_record || !$this->endorsement_model->is_refundable($endorsement_record->txn_type) )
 		{
 			return $this->template->json([
 				'title' 	=> 'Invalid Action!',
@@ -1983,8 +1983,8 @@ class Policy_installments extends MY_Controller
 		 * Reload the Policy Overview Tab, Update Installment Row (Replace)
 		 */
 		$installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_INVOICED;
-		$installment_record->endorsement_status 		= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
-		$endorsement_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_INVOICED;
+		$installment_record->endorsement_status 		= IQB_ENDORSEMENT_STATUS_INVOICED;
+		$endorsement_record->status 					= IQB_ENDORSEMENT_STATUS_INVOICED;
 
 		$voucher_record->flag_invoiced = IQB_FLAG_INVOICED__YES;
 		$html_voucher_row 	= $this->load->view('accounting/vouchers/_single_row', ['record' => $voucher_record], TRUE);
@@ -2040,7 +2040,7 @@ class Policy_installments extends MY_Controller
 		 * Get the transaction record
 		 */
 		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if(!$endorsement_record || !_ENDORSEMENT_is_invoicable_by_type($endorsement_record->txn_type))
+		if(!$endorsement_record || !$this->endorsement_model->is_invoicable($endorsement_record->txn_type))
 		{
 			return $this->template->json([
 				'title' 	=> 'Invalid Action!',
@@ -2411,8 +2411,8 @@ class Policy_installments extends MY_Controller
          * Reload the Policy Overview Tab, Update Installment Row (Replace)
          */
         $installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_PAID;
-		$installment_record->endorsement_status 	= IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
-        $endorsement_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
+		$installment_record->endorsement_status 	= IQB_ENDORSEMENT_STATUS_ACTIVE;
+        $endorsement_record->status 					= IQB_ENDORSEMENT_STATUS_ACTIVE;
         $policy_record->status      					= IQB_POLICY_STATUS_ACTIVE;
         $invoice_record->flag_paid  					= IQB_FLAG_ON;
 
@@ -2555,7 +2555,9 @@ class Policy_installments extends MY_Controller
 		 * Get the endorsement record, Valid Type?
 		 */
 		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if(!$endorsement_record || !in_array($endorsement_record->txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND, IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE]) )
+
+
+		if(!$endorsement_record || !$this->endorsement_model->is_refundable($endorsement_record->txn_type) )
 		{
 			return $this->template->json([
 				'title' 	=> 'Invalid Action!',
@@ -2833,8 +2835,8 @@ class Policy_installments extends MY_Controller
          * Reload the Policy Overview Tab, Update Installment Row (Replace)
          */
         $installment_record->status 					= IQB_POLICY_INSTALLMENT_STATUS_PAID;
-		$installment_record->endorsement_status 		= IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
-        $endorsement_record->status 					= IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
+		$installment_record->endorsement_status 		= IQB_ENDORSEMENT_STATUS_ACTIVE;
+        $endorsement_record->status 					= IQB_ENDORSEMENT_STATUS_ACTIVE;
         $policy_record->status      					= IQB_POLICY_STATUS_ACTIVE;
         $credit_note_record->flag_paid  				= IQB_FLAG_ON;
 
@@ -2940,7 +2942,7 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Premium Upgrade or Ownership Transfer ( Customer pays the Premium)
 		 */
-		else if( in_array($txn_type, [IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER]) )
+		else if( in_array($txn_type, [IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE, IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER]) )
 		{
 			$message .= "Your Policy endorsement has been issued." . PHP_EOL .
         					"Policy No: " . $policy_record->code . PHP_EOL .
@@ -2950,7 +2952,7 @@ class Policy_installments extends MY_Controller
 		/**
 		 * Premium Refund ( Customer gets the refund amount)
 		 */
-		else if( $txn_type == IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND )
+		else if( $txn_type == IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND )
 		{
 
 			if($endorsement_record->flag_refund_on_terminate == IQB_FLAG_YES )

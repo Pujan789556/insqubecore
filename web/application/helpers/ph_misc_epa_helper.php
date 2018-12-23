@@ -1027,11 +1027,11 @@ if ( ! function_exists('__save_premium_MISC_EPA'))
 					 * Prepare Premium Data
 					 */
 					$premium_data = [
-						'gross_amt_basic_premium' 	=> $PREMIUM_TOTAL,
-						'gross_amt_commissionable'	=> $commissionable_premium,
-						'gross_amt_agent_commission'  => $agent_commission,
-						'gross_amt_direct_discount' 	=> $direct_discount,
-						'gross_amt_pool_premium' 		=> $POOL_PREMIUM,
+						'gross_full_amt_basic_premium' 	=> $PREMIUM_TOTAL,
+						'gross_full_amt_commissionable'	=> $commissionable_premium,
+						'gross_full_amt_agent_commission'  => $agent_commission,
+						'gross_full_amt_direct_discount' 	=> $direct_discount,
+						'gross_full_amt_pool_premium' 		=> $POOL_PREMIUM,
 					];
 
 

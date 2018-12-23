@@ -19,7 +19,7 @@ if(isset($record))
                         $hidden_fields); ?>
     <div class="box box-solid box-bordered">
         <div class="box-header with-border">
-          <h4 class="box-title">Supply Basic Information</h4>
+          <h4 class="box-title">Basic Information</h4>
         </div>
         <div class="box-body">
             <?php
@@ -34,10 +34,14 @@ if(isset($record))
         </div>
     </div>
 
-    <?php if(isset($form_elements['updown_compute_reference'])): ?>
+    <?php
+    /**
+     * Endorsement Dates
+     */
+    if(isset($form_elements['dates'])): ?>
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
-              <h4 class="box-title">Premium Computation Basis</h4>
+              <h4 class="box-title">Endorsement Dates</h4>
             </div>
             <div class="box-body">
                 <?php
@@ -45,7 +49,7 @@ if(isset($record))
                  * Load Form Components
                  */
                 $this->load->view('templates/_common/_form_components_horz', [
-                    'form_elements' => $form_elements['updown_compute_reference'],
+                    'form_elements' => $form_elements['dates'],
                     'form_record'   => $record
                 ]);
                 ?>
@@ -53,7 +57,58 @@ if(isset($record))
         </div>
     <?php endif ?>
 
-    <?php if(isset($form_elements['customer'])): ?>
+
+    <?php
+    /**
+     * Premium Compute References
+     */
+    if(isset($form_elements['compute_references'])): ?>
+        <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+              <h4 class="box-title">Premium Computation References</h4>
+            </div>
+            <div class="box-body">
+                <?php
+                /**
+                 * Load Form Components
+                 */
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $form_elements['compute_references'],
+                    'form_record'   => $record
+                ]);
+                ?>
+            </div>
+        </div>
+    <?php endif ?>
+
+    <?php
+    /**
+     * Premium/Charge Fee
+     */
+    if(isset($form_elements['fee'])): ?>
+        <!-- <div class="box box-solid box-bordered">
+            <div class="box-header with-border">
+              <h4 class="box-title">Premium/Charge Information</h4>
+            </div>
+            <div class="box-body">
+                <?php
+                /**
+                 * Load Form Components
+                 */
+                $this->load->view('templates/_common/_form_components_horz', [
+                    'form_elements' => $form_elements['fee'],
+                    'form_record'   => $record
+                ]);
+                ?>
+            </div>
+        </div> -->
+    <?php endif ?>
+
+    <?php
+    /**
+     * Type Specific - Cusotmer
+     */
+    if(isset($form_elements['customer'])): ?>
 
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
@@ -85,44 +140,6 @@ if(isset($record))
                       </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    <?php endif ?>
-
-    <?php if(isset($form_elements['fees'])): ?>
-        <div class="box box-solid box-bordered">
-            <div class="box-header with-border">
-              <h4 class="box-title">Transfer Fee</h4>
-            </div>
-            <div class="box-body">
-                <?php
-                /**
-                 * Load Form Components
-                 */
-                $this->load->view('templates/_common/_form_components_horz', [
-                    'form_elements' => $form_elements['fees'],
-                    'form_record'   => $record
-                ]);
-                ?>
-            </div>
-        </div>
-    <?php endif ?>
-
-    <?php if(isset($form_elements['terminate'])): ?>
-        <div class="box box-solid box-bordered">
-            <div class="box-header with-border">
-              <h4 class="box-title">Refund on Termination?</h4>
-            </div>
-            <div class="box-body">
-                <?php
-                /**
-                 * Load Form Components
-                 */
-                $this->load->view('templates/_common/_form_components_horz', [
-                    'form_elements' => $form_elements['terminate'],
-                    'form_record'   => $record
-                ]);
-                ?>
             </div>
         </div>
     <?php endif ?>

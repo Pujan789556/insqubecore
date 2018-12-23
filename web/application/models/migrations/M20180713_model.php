@@ -49,7 +49,7 @@ class M20180713_model extends MY_Model
 
             try {
 
-                $endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id);
+                $endorsement_record = $this->endorsement_model->get_first( $record->id);
 
                 /**
                  * Save a Fresh PDF copy
@@ -72,7 +72,7 @@ class M20180713_model extends MY_Model
          echo "Successfully migrated records: {$success}." . PHP_EOL;
 
         // $record     = $this->get($record->id);
-        // $endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id );
+        // $endorsement_record = $this->endorsement_model->get_first( $record->id );
 
         // /**
         //  * Save a Fresh PDF copy

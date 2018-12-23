@@ -11,7 +11,7 @@ $policy_object      = get_object_from_policy_record($record);
 $premium_goodies    = _TXN_MOTOR_premium_goodies($record, $policy_object);
 $tariff_record      = $premium_goodies['tariff_record'];
 
-$premium_computation_table = json_decode($endorsement_record->premium_computation_table);
+$premium_compute_options = json_decode($endorsement_record->premium_compute_options);
 
 
 /**
@@ -148,7 +148,7 @@ switch ($record->portfolio_id)
                     <td>
                         <?php
                         $dd_voluntary_excess = _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '');
-                        $voluntary_excess_key = $premium_computation_table->dr_voluntary_excess  ?? NULL;
+                        $voluntary_excess_key = $premium_compute_options->dr_voluntary_excess  ?? NULL;
                         ?>
                         <table class="table no-border">
                             <tr>

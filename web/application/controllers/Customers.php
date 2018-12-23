@@ -613,7 +613,7 @@ class Customers extends MY_Controller
 		/**
 		 * Endorsement Type Allows Customer to Edit?
 		 */
-		if( !_ENDORSEMENT_is_customer_editable_by_type($endorsement_record->txn_type) )
+		if( !_ENDORSEMENT_is_customer_editable($endorsement_record->txn_type) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',

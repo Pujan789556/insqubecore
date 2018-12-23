@@ -4,8 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Premium Form : FIRE - HOUSEHOLDER
  */
 $object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-$premium_computation_table      = json_decode($endorsement_record->premium_computation_table ?? NULL);
-$premium_computation_table_arr  = json_decode($endorsement_record->premium_computation_table ?? NULL, TRUE);
+$premium_compute_options      = json_decode($endorsement_record->premium_compute_options ?? NULL);
+$premium_computation_table_arr  = json_decode($endorsement_record->premium_compute_options ?? NULL, TRUE);
 ?>
 <?php echo form_open( $this->uri->uri_string(),
         [
@@ -60,7 +60,7 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
 
 
                             /**
-                             * Apply Rate if We have $premium_computation_table
+                             * Apply Rate if We have $premium_compute_options
                              */
                             if($premium_computation_table_arr)
                             {

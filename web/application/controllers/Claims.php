@@ -433,7 +433,7 @@ class Claims extends MY_Controller
 		{
 			$policy_status = $this->policy_model->get_status($policy_id);
 
-			return $policy_status === IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE;
+			return $policy_status === IQB_ENDORSEMENT_STATUS_ACTIVE;
 		}
 
 	// --------------------------------------------------------------------

@@ -181,7 +181,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 		$object_attributes  = json_decode($policy_object->attributes);
 
 		// Form Posted Data - Extra Fields Required to Perform Cost Calculation
-		$premium_computation_table = $post_data['premium'] ?? NULL;
+		$premium_compute_options = $post_data['premium'] ?? NULL;
 
 		// Tariff Extracts
 		$default_tariff = json_decode($tariff_record->tariff);
@@ -225,7 +225,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
         }
 
         // No Claim Discount - Years & Rate
-  		$year_no_claim_discount = $premium_computation_table['no_claim_discount'] ?? 0;
+  		$year_no_claim_discount = $premium_compute_options['no_claim_discount'] ?? 0;
 		$no_claim_discount_rate = _PO_MOTOR_no_claim_discount_rate($year_no_claim_discount, $tariff_record->no_claim_discount);
 		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np', FALSE)[$year_no_claim_discount] ?? '';
 
@@ -283,7 +283,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 
 			// Discount on Voluntary Excess : discount_KHA
 			$__premium_A_row_4 				= 0.00;
-			$dr_voluntary_excess 		= $premium_computation_table['dr_voluntary_excess'] ?? 0.00;
+			$dr_voluntary_excess 		= $premium_compute_options['dr_voluntary_excess'] ?? 0.00;
 			$amount_voluntary_excess 	= $dr_voluntary_excess ? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess] : 0.00;
 
 			if($dr_voluntary_excess)
@@ -399,7 +399,7 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 				'title_en' 	=> 'Pool risk insurance amounted to'
 			];
 
-			$flag_risk_pool = $premium_computation_table['flag_risk_pool'] ?? NULL;
+			$flag_risk_pool = $premium_compute_options['flag_risk_pool'] ?? NULL;
 			$premium_risk_mob = 0.00;
 			$premium_risk_terorrism = 0.00;
 			$premium_for_insured_covered_on_terorrism = 0.00;
@@ -615,11 +615,11 @@ if ( ! function_exists('_PO_MOTOR_MCY_premium'))
 		 * Prepare Premium Data
 		 */
 		$premium_data = [
-			'gross_amt_basic_premium' 	=> $BASIC_PREMIUM,
-			'gross_amt_commissionable'	=> $commissionable_premium,
-			'gross_amt_agent_commission'  => $agent_commission,
-			'gross_amt_direct_discount' 	=> $direct_discount,
-			'gross_amt_pool_premium' 		=> $POOL_PREMIUM,
+			'gross_full_amt_basic_premium' 	=> $BASIC_PREMIUM,
+			'gross_full_amt_commissionable'	=> $commissionable_premium,
+			'gross_full_amt_agent_commission'  => $agent_commission,
+			'gross_full_amt_direct_discount' 	=> $direct_discount,
+			'gross_full_amt_pool_premium' 		=> $POOL_PREMIUM,
 		];
 
 
@@ -670,7 +670,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		$object_attributes  = json_decode($policy_object->attributes);
 
 		// Form Posted Data - Extra Fields Required to Perform Cost Calculation
-		$premium_computation_table = $post_data['premium'] ?? NULL;
+		$premium_compute_options = $post_data['premium'] ?? NULL;
 
 
 		// Tariff Extracts
@@ -743,7 +743,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
         }
 
         // No Claim Discount - Years & Rate
-        $year_no_claim_discount = $premium_computation_table['no_claim_discount'] ?? 0;
+        $year_no_claim_discount = $premium_compute_options['no_claim_discount'] ?? 0;
 		$no_claim_discount_rate = _PO_MOTOR_no_claim_discount_rate($year_no_claim_discount, $tariff_record->no_claim_discount);
 		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np', FALSE)[$year_no_claim_discount] ?? '';
 
@@ -845,7 +845,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 
 
 			// Private on Hire (Commercial Use)
-			$flag_commercial_use = $premium_computation_table['flag_commercial_use'] ?? FALSE;
+			$flag_commercial_use = $premium_compute_options['flag_commercial_use'] ?? FALSE;
 			$__premium_A_row_8 = 0.00;
 			if( $flag_commercial_use )
 			{
@@ -867,7 +867,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 
 
 			// Discount on Voluntary Excess - GA ko X%
-			$dr_voluntary_excess 		= $premium_computation_table['dr_voluntary_excess'] ?? FALSE;
+			$dr_voluntary_excess 		= $premium_compute_options['dr_voluntary_excess'] ?? FALSE;
 			$amount_voluntary_excess 	= $dr_voluntary_excess
 											? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess]
 											: 0.00;
@@ -940,7 +940,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 
 
 			// Towing
-			$flag_towing = $premium_computation_table['flag_towing'] ?? FALSE;
+			$flag_towing = $premium_compute_options['flag_towing'] ?? FALSE;
 			$__premium_A_row_16 = 0.00;
 			if( $flag_towing )
 			{
@@ -1072,7 +1072,7 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 				'title_en' 	=> 'Pool risk insurance amounted to'
 			];
 
-			$flag_risk_pool = $premium_computation_table['flag_risk_pool'] ?? NULL;
+			$flag_risk_pool = $premium_compute_options['flag_risk_pool'] ?? NULL;
 			$__premium_U_row_1 = 0.00;
 			$__premium_U_row_2 = 0.00;
 			$__premium_U_row_3 = 0.00;
@@ -1268,11 +1268,11 @@ if ( ! function_exists('_PO_MOTOR_PVC_premium'))
 		 * Prepare Premium Data
 		 */
 		$premium_data = [
-			'gross_amt_basic_premium' 	=> $BASIC_PREMIUM,
-			'gross_amt_commissionable'	=> $commissionable_premium,
-			'gross_amt_agent_commission'  => $agent_commission,
-			'gross_amt_direct_discount' 	=> $direct_discount,
-			'gross_amt_pool_premium' 		=> $POOL_PREMIUM,
+			'gross_full_amt_basic_premium' 	=> $BASIC_PREMIUM,
+			'gross_full_amt_commissionable'	=> $commissionable_premium,
+			'gross_full_amt_agent_commission'  => $agent_commission,
+			'gross_full_amt_direct_discount' 	=> $direct_discount,
+			'gross_full_amt_pool_premium' 		=> $POOL_PREMIUM,
 		];
 
 
@@ -1323,7 +1323,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 		$object_attributes  = json_decode($policy_object->attributes);
 
         // Form Posted Data - Extra Fields Required to Perform Cost Calculation
-        $premium_computation_table = $post_data['premium'] ?? NULL;
+        $premium_compute_options = $post_data['premium'] ?? NULL;
 
 
         // Tariff Extracts
@@ -1384,7 +1384,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
         $primary_tariff_vehicle = _PO_MOTOR_CVC_primary_tariff_vehicle($object_attributes, $default_tariff, $vehicle_age_in_yrs);
 
         // No Claim Discount - Years & Rate
-        $year_no_claim_discount = $premium_computation_table['no_claim_discount'] ?? 0;
+        $year_no_claim_discount = $premium_compute_options['no_claim_discount'] ?? 0;
 		$no_claim_discount_rate = _PO_MOTOR_no_claim_discount_rate($year_no_claim_discount, $tariff_record->no_claim_discount);
 		$text_ncd_prefix 		= _PO_MOTOR_no_claim_discount_dropdown($tariff_record->no_claim_discount, 'np', FALSE)[$year_no_claim_discount] ?? '';
 
@@ -1564,7 +1564,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
             // ----------------------------------------------------------------------------------
 
             // Discount on Voluntary Excess - GA ko X%
-            $dr_voluntary_excess        = $premium_computation_table['dr_voluntary_excess'] ?? FALSE;
+            $dr_voluntary_excess        = $premium_compute_options['dr_voluntary_excess'] ?? FALSE;
             $amount_voluntary_excess    = $dr_voluntary_excess
                                             ? _PO_MOTOR_voluntary_excess_dropdown($tariff_record->dr_voluntary_excess, false, '')[$dr_voluntary_excess]
                                             : 0.00;
@@ -1631,7 +1631,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
                     case IQB_MOTOR_CVC_TYPE_TRACTOR_POWER_TRILLER:
                     case IQB_MOTOR_CVC_TYPE_TEMPO:
                     case IQB_MOTOR_CVC_TYPE_PASSENGER_CARRIER:
-                        $flag_private_use = $premium_computation_table['flag_private_use'] ?? FALSE;
+                        $flag_private_use = $premium_compute_options['flag_private_use'] ?? FALSE;
                         if( $flag_private_use )
                         {
                             $__discount_A_row_on_personal_use = $__premium_A_row_GHA * ($tariff_record->dr_cvc_on_personal_use/100.00);
@@ -1679,7 +1679,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
             }
 
             // Towing
-            $flag_towing = $premium_computation_table['flag_towing'] ?? FALSE;
+            $flag_towing = $premium_compute_options['flag_towing'] ?? FALSE;
             $__premium_A_row_towing = 0.00;
             if( $flag_towing )
             {
@@ -1840,8 +1840,8 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
                 'title_en'  => 'Pool risk insurance amounted to'
             ];
 
-            $flag_risk_mob          = $premium_computation_table['flag_risk_mob'] ?? NULL;
-            $flag_risk_terorrism    = $premium_computation_table['flag_risk_terorrism'] ?? NULL;
+            $flag_risk_mob          = $premium_compute_options['flag_risk_mob'] ?? NULL;
+            $flag_risk_terorrism    = $premium_compute_options['flag_risk_terorrism'] ?? NULL;
 
             // Mob/Strike
             $__premium_OO_row_1 = 0.00;
@@ -1849,7 +1849,7 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
             $__premium_OO_row_3 = 0.00;
             $__premium_OO_row_4 = 0.00;
             $__premium_OO_row_5 = 0.00;
-            $flag_risk_pool = $premium_computation_table['flag_risk_pool'] ?? NULL;
+            $flag_risk_pool = $premium_compute_options['flag_risk_pool'] ?? NULL;
             if($flag_risk_pool)
             {
             	// Mob/Strike
@@ -2044,11 +2044,11 @@ if ( ! function_exists('_PO_MOTOR_CVC_premium'))
 		 * Prepare Premium Data
 		 */
 		$premium_data = [
-			'gross_amt_basic_premium' 	=> $BASIC_PREMIUM,
-			'gross_amt_commissionable'	=> $commissionable_premium,
-			'gross_amt_agent_commission'  => $agent_commission,
-			'gross_amt_direct_discount' 	=> $direct_discount,
-			'gross_amt_pool_premium' 		=> $POOL_PREMIUM,
+			'gross_full_amt_basic_premium' 	=> $BASIC_PREMIUM,
+			'gross_full_amt_commissionable'	=> $commissionable_premium,
+			'gross_full_amt_agent_commission'  => $agent_commission,
+			'gross_full_amt_direct_discount' 	=> $direct_discount,
+			'gross_full_amt_pool_premium' 		=> $POOL_PREMIUM,
 		];
 
 

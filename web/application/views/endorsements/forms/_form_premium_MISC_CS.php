@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form - Premium : MISCELLANEOUS - CASH IN SAFE
  */
 $object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-$premium_computation_table = $endorsement_record->premium_computation_table ? json_decode($endorsement_record->premium_computation_table, TRUE) : NULL;
+$premium_compute_options = $endorsement_record->premium_compute_options ? json_decode($endorsement_record->premium_compute_options, TRUE) : NULL;
 ?>
 <?php echo form_open( $this->uri->uri_string(),
         [
@@ -60,12 +60,12 @@ $premium_computation_table = $endorsement_record->premium_computation_table ? js
 
 
                             /**
-                             * Apply Rate and Rate Base if We have $premium_computation_table
+                             * Apply Rate and Rate Base if We have $premium_compute_options
                              */
-                            if($premium_computation_table)
+                            if($premium_compute_options)
                             {
                                 // Rate
-                                $rate = $premium_computation_table['rate'][$risk_id];
+                                $rate = $premium_compute_options['rate'][$risk_id];
                                 $formatted_premium_elements[1]['_default'] = $rate;
                             }
 

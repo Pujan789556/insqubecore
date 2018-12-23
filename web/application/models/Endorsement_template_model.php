@@ -53,7 +53,7 @@ class Endorsement_template_model extends MY_Model
 
     public function validation_rules()
     {
-        $e_type_dropdown = _ENDORSEMENT_type_dropdown(false);
+        $e_type_dropdown = _ENDORSEMENT_type_dropdown(TRUE, FALSE);
         $this->validation_rules = [
             [
                 'field' => 'portfolio_id',

@@ -598,7 +598,7 @@ class Policies extends MY_Controller
 						 */
 						try {
 
-							$endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id);
+							$endorsement_record = $this->endorsement_model->get_first( $record->id);
 
 						} catch (Exception $e) {
 
@@ -840,7 +840,7 @@ class Policies extends MY_Controller
 		/**
 		 * Endorsement Type Allows Policy to Edit?
 		 */
-		if( !_ENDORSEMENT_is_policy_editable_by_type($endorsement_record->txn_type) )
+		if( !_ENDORSEMENT_is_policy_editable($endorsement_record->txn_type) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
@@ -1745,7 +1745,7 @@ class Policies extends MY_Controller
 		 */
 		try {
 
-			$endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id );
+			$endorsement_record = $this->endorsement_model->get_first( $record->id );
 
 		} catch (Exception $e) {
 
@@ -1856,7 +1856,7 @@ class Policies extends MY_Controller
 		}
 		try {
 
-			$endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id );
+			$endorsement_record = $this->endorsement_model->get_first( $record->id );
 
 		} catch (Exception $e) {
 
@@ -1958,7 +1958,7 @@ class Policies extends MY_Controller
 			}
 			try {
 
-				$endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id);
+				$endorsement_record = $this->endorsement_model->get_first( $record->id);
 
 			} catch (Exception $e) {
 
@@ -2084,7 +2084,7 @@ class Policies extends MY_Controller
 				 */
 				try {
 
-					$endorsement_record = $this->endorsement_model->get_first_by_policy( $record->id);
+					$endorsement_record = $this->endorsement_model->get_first( $record->id);
 				} catch (Exception $e) {
 
 					return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage() ], 404);
@@ -2248,7 +2248,7 @@ class Policies extends MY_Controller
 			 * Get the Current Txn Record
 			 */
 			$endorsement_record = $__flag_passed === TRUE
-									? $this->endorsement_model->get_first_by_policy($record->id) : NULL;
+									? $this->endorsement_model->get_first($record->id) : NULL;
 
 			/**
 			 * Premium Must be Updated Before Verifying
@@ -2331,7 +2331,7 @@ class Policies extends MY_Controller
 					&&
 				( $record->status === IQB_POLICY_STATUS_VERIFIED  && $to_updown_status === IQB_POLICY_STATUS_DRAFT )
 					&&
-				in_array($endorsement_record->status, [IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED, IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED] )
+				in_array($endorsement_record->status, [IQB_ENDORSEMENT_STATUS_RI_APPROVED, IQB_ENDORSEMENT_STATUS_VOUCHERED] )
 			)
 			{
 				$__flag_passed 		= FALSE;

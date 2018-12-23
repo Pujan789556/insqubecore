@@ -162,7 +162,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
          * Details Premium Distribution
          */
 
-        $premium_computation_table  = json_decode($endorsement_record->premium_computation_table ?? '[]', TRUE);
+        $premium_compute_options  = json_decode($endorsement_record->premium_compute_options ?? '[]', TRUE);
         $portfolio_risks            = portfolio_risks($record->portfolio_id);
         $items                      = $object_attributes->items ?? [];
 
@@ -172,7 +172,7 @@ $schedule_table_title   = 'अग्नि बीमालेखको ताल
             $risk_dropdown[$pr->code] = $pr->name_en;
         }
 
-        $manual_rate_table = $premium_computation_table['manual']['rate'] ?? [];
+        $manual_rate_table = $premium_compute_options['manual']['rate'] ?? [];
 
         if($manual_rate_table && $object_attributes->item_attached == IQB_FLAG_NO):
             $risk_reference = [];

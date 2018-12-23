@@ -1260,12 +1260,12 @@ if ( ! function_exists('_ENDORSEMENT_status_dropdown'))
 	function _ENDORSEMENT_status_dropdown( $flag_blank_select = true )
 	{
 		$dropdown = [
-			IQB_POLICY_ENDORSEMENT_STATUS_DRAFT			=> 'Draft',
-			IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED		=> 'Verified',
-			IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED	=> 'RI Approved',
-			IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED		=> 'Vouchered',
-			IQB_POLICY_ENDORSEMENT_STATUS_INVOICED		=> 'Invoiced',
-			IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE		=> 'Active'
+			IQB_ENDORSEMENT_STATUS_DRAFT			=> 'Draft',
+			IQB_ENDORSEMENT_STATUS_VERIFIED		=> 'Verified',
+			IQB_ENDORSEMENT_STATUS_RI_APPROVED	=> 'RI Approved',
+			IQB_ENDORSEMENT_STATUS_VOUCHERED		=> 'Vouchered',
+			IQB_ENDORSEMENT_STATUS_INVOICED		=> 'Invoiced',
+			IQB_ENDORSEMENT_STATUS_ACTIVE		=> 'Active'
 		];
 
 		if($flag_blank_select)
@@ -1292,7 +1292,7 @@ if ( ! function_exists('_ENDORSEMENT_status_text'))
 
 		if($formatted && $text != '')
 		{
-			if( in_array($key, [IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED, IQB_POLICY_ENDORSEMENT_STATUS_VOUCHERED, IQB_POLICY_ENDORSEMENT_STATUS_INVOICED, IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE]) )
+			if( in_array($key, [IQB_ENDORSEMENT_STATUS_RI_APPROVED, IQB_ENDORSEMENT_STATUS_VOUCHERED, IQB_ENDORSEMENT_STATUS_INVOICED, IQB_ENDORSEMENT_STATUS_ACTIVE]) )
 			{
 				// Green
 				$css_class = 'text-green';
@@ -1349,14 +1349,14 @@ if ( ! function_exists('_ENDORSEMENT_is_editable'))
 		 */
 
 		// Editable Permissions ?
-		if( $__flag_authorized && $status === IQB_POLICY_ENDORSEMENT_STATUS_DRAFT )
+		if( $__flag_authorized && $status === IQB_ENDORSEMENT_STATUS_DRAFT )
 		{
 			if(
 				$CI->dx_auth->is_admin()
 
 				||
 
-				( $status === IQB_POLICY_ENDORSEMENT_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('endorsements', 'edit.draft.endorsement') )
+				( $status === IQB_ENDORSEMENT_STATUS_DRAFT &&  $CI->dx_auth->is_authorized('endorsements', 'edit.draft.endorsement') )
 
 			)
 			{
@@ -1388,83 +1388,13 @@ if ( ! function_exists('_ENDORSEMENT_type_dropdown'))
 	 *
 	 * @return	array
 	 */
-	function _ENDORSEMENT_type_dropdown( $flag_blank_select = true )
+	function _ENDORSEMENT_type_dropdown( $exclude_fresh=FALSE, $flag_blank_select = true )
 	{
-		$dropdown = [
-			IQB_POLICY_ENDORSEMENT_TYPE_FRESH 		         => 'Fresh',
-			IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED 	      => 'Time Extended',
+		$CI =& get_instance();
+        $CI->load->model('endorsement_model');
 
-			IQB_POLICY_ENDORSEMENT_TYPE_GENERAL 			=> 'General (Nil)',
-			IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER 	=> 'Ownership Transfer',
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE 	=> 'Premium Upgrade',
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND 		=> 'Premium Refund',
-			IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE 			=> 'Terminate'
-		];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
+        return $CI->endorsement_model->type_dropdown($exclude_fresh, $flag_blank_select);
 	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_type_eonly_dropdown'))
-{
-	/**
-	 * Get Endorsement Type (Endorsement Only) Dropdown
-	 *
-	 * @return	array
-	 */
-	function _ENDORSEMENT_type_eonly_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = [
-			IQB_POLICY_ENDORSEMENT_TYPE_GENERAL 			=> 'General (Nil)',
-			IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER 	=> 'Ownership Transfer',
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE 	=> 'Premium Upgrade',
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND 		=> 'Premium Refund',
-            IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED       => 'Time Extended',
-			IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE 			=> 'Terminate'
-		];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_is_transactional_by_type'))
-{
-    /**
-     * Check if given Endorsement type is Transactional.
-     *
-     * Allowed Transaction Types
-     *  - Fresh
-     *  - Renewal
-     *  - Ownership Transfer
-     *  - Premium Upgrade
-     *  - Premium Refund
-     *
-     * @param   int     Transaction Type
-     * @return  array
-     */
-    function _ENDORSEMENT_is_transactional_by_type( $txn_type )
-    {
-        $txn_type       = (int)$txn_type;
-        $allowed_types  = [
-            IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-            IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED,
-            IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER,
-            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
-            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
-        ];
-
-        return in_array($txn_type, $allowed_types);
-    }
 }
 
 // ------------------------------------------------------------------------
@@ -1474,24 +1404,18 @@ if ( ! function_exists('_ENDORSEMENT_is_refundable'))
      * Check if given Endorsement type is Transactional.
      *
      * Allowed Transaction Types
-     *  - Fresh
-     *  - Renewal
-     *  - Ownership Transfer
-     *  - Premium Upgrade
      *  - Premium Refund
+     *  - Terminate & Refund
      *
      * @param   int     Transaction Type
      * @return  array
      */
     function _ENDORSEMENT_is_refundable( $txn_type )
     {
-        $txn_type       = (int)$txn_type;
-        $allowed_types  = [
-            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
-            IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE // In case of Terminate and Refund
-        ];
+        $CI =& get_instance();
+        $CI->load->model('endorsement_model');
 
-        return in_array($txn_type, $allowed_types);
+        return $CI->endorsement_model->is_refundable($record->txn_type);
     }
 }
 
@@ -1505,45 +1429,15 @@ if ( ! function_exists('_ENDORSEMENT_is_transactional'))
      * Either its type must be transactional
      * OR Termination type with Refund Premium
      *
-     * @param   object  $record Endorsement Record
+     * @param   int  $txn_type Endorsement Type
      * @return  array
      */
-    function _ENDORSEMENT_is_transactional( $record )
+    function _ENDORSEMENT_is_transactional( $txn_type )
     {
-        $allowed = _ENDORSEMENT_is_transactional_by_type( $record->txn_type )
-                        ||
-                    (
-                        $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE
-                            &&
-                        $record->flag_refund_on_terminate === IQB_FLAG_YES
-                    );
+        $CI =& get_instance();
+        $CI->load->model('endorsement_model');
 
-        return $allowed;
-    }
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_premium_only_types'))
-{
-    /**
-     *  Get the list of all premium types constants
-     *
-     *  - Fresh
-     *  - Renewal
-     *  - Premium Upgrade
-     *  - Premium Downgrade
-     *
-     * @param   int     Transaction Type
-     * @return  array
-     */
-    function _ENDORSEMENT_premium_only_types(  )
-    {
-        return [
-            IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-            IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED,
-            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
-            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
-        ];
+        return $CI->endorsement_model->is_transactional($txn_type);
     }
 }
 
@@ -1567,84 +1461,28 @@ if ( ! function_exists('_ENDORSEMENT_is_first'))
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_is_deletable_by_type'))
+if ( ! function_exists('_ENDORSEMENT_is_deletable'))
 {
 	/**
 	 * Get Endorsement Type - Deletable only
 	 *
 	 * Endorsement Only Transaction Types are deletable from transactions tab.
 	 *
-	 * @param 	int 	Transaction Type
+     * @param   int     Endorsement Type
+	 * @param 	char 	Endorsement Status
 	 * @return	array
 	 */
-	function _ENDORSEMENT_is_deletable_by_type( $txn_type )
+	function _ENDORSEMENT_is_deletable( $txn_type, $status )
 	{
-		$txn_type 		= (int)$txn_type;
-		$allowed_types =  array_keys( _ENDORSEMENT_type_eonly_dropdown(FALSE) );
+        $CI =& get_instance();
+        $CI->load->model('endorsement_model');
 
-		return in_array($txn_type, $allowed_types);
+        return $CI->endorsement_model->is_deletable($txn_type, $status);
 	}
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_is_premium_computable_by_type'))
-{
-	/**
-	 * Check if given Endorsement type is Premium Computable.
-	 *
-	 * Allowed Transaction Types
-	 * 	- Fresh
-	 * 	- Renewal
-	 * 	- Premium Upgrade
-	 * 	- Premium Refund
-	 *
-	 * @param 	int 	Transaction Type
-	 * @return	array
-	 */
-	function _ENDORSEMENT_is_premium_computable_by_type( $txn_type )
-	{
-		$txn_type 		= (int)$txn_type;
-		$allowed_types 	= [
-			IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-			IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED,
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
-		];
-
-		return in_array($txn_type, $allowed_types);
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_is_invoicable_by_type'))
-{
-    /**
-     * Check if given Endorsement type is Invoicable.
-     *
-     * Allowed Transaction Types
-     *  - Fresh
-     *  - Renewal
-     *  - Premium Upgrade
-     *
-     * @param   int     Transaction Type
-     * @return  array
-     */
-    function _ENDORSEMENT_is_invoicable_by_type( $txn_type )
-    {
-        $txn_type       = (int)$txn_type;
-        $allowed_types  = [
-            IQB_POLICY_ENDORSEMENT_TYPE_FRESH,
-            IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED,
-            IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
-            IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER,
-        ];
-
-        return in_array($txn_type, $allowed_types);
-    }
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_is_policy_editable_by_type'))
+if ( ! function_exists('_ENDORSEMENT_is_policy_editable'))
 {
 	/**
 	 * Check if given Endorsement type allows policy to edit.
@@ -1657,21 +1495,17 @@ if ( ! function_exists('_ENDORSEMENT_is_policy_editable_by_type'))
 	 * @param 	int 	Transaction Type
 	 * @return	array
 	 */
-	function _ENDORSEMENT_is_policy_editable_by_type( $txn_type )
+	function _ENDORSEMENT_is_policy_editable( $txn_type )
 	{
-		$txn_type 		= (int)$txn_type;
-		$allowed_types 	= [
-			IQB_POLICY_ENDORSEMENT_TYPE_GENERAL,
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
-		];
+        $CI =& get_instance();
+        $CI->load->model('endorsement_model');
 
-		return in_array($txn_type, $allowed_types);
+        return $CI->endorsement_model->is_policy_editable($txn_type);
 	}
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_is_object_editable_by_type'))
+if ( ! function_exists('_ENDORSEMENT_is_object_editable'))
 {
 	/**
 	 * Check if given Endorsement type allows policy object to edit.
@@ -1684,21 +1518,17 @@ if ( ! function_exists('_ENDORSEMENT_is_object_editable_by_type'))
 	 * @param 	int 	Transaction Type
 	 * @return	array
 	 */
-	function _ENDORSEMENT_is_object_editable_by_type( $txn_type )
+	function _ENDORSEMENT_is_object_editable( $txn_type )
 	{
-		$txn_type 		= (int)$txn_type;
-		$allowed_types 	= [
-			IQB_POLICY_ENDORSEMENT_TYPE_GENERAL,
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
-		];
+        $CI =& get_instance();
+        $CI->load->model('endorsement_model');
 
-		return in_array($txn_type, $allowed_types);
+        return $CI->endorsement_model->is_object_editable($txn_type);
 	}
 }
 
 // ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_is_customer_editable_by_type'))
+if ( ! function_exists('_ENDORSEMENT_is_customer_editable'))
 {
 	/**
 	 * Check if given Endorsement type allows policy customer to edit.
@@ -1711,40 +1541,12 @@ if ( ! function_exists('_ENDORSEMENT_is_customer_editable_by_type'))
 	 * @param 	int 	Transaction Type
 	 * @return	array
 	 */
-	function _ENDORSEMENT_is_customer_editable_by_type( $txn_type )
+	function _ENDORSEMENT_is_customer_editable( $txn_type )
 	{
-		$txn_type 		= (int)$txn_type;
-		$allowed_types 	= [
-			IQB_POLICY_ENDORSEMENT_TYPE_GENERAL,
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
-			IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND,
-		];
+        $CI =& get_instance();
+        $CI->load->model('endorsement_model');
 
-		return in_array($txn_type, $allowed_types);
-	}
-}
-
-// ------------------------------------------------------------------------
-if ( ! function_exists('_ENDORSEMENT_compute_reference_dropdown'))
-{
-	/**
-	 * Get Endorsement Computation Basis Dropdown
-	 *
-	 * @return	array
-	 */
-	function _ENDORSEMENT_compute_reference_dropdown( $flag_blank_select = true )
-	{
-		$dropdown = [
-			IQB_POLICY_ENDORSEMENT_CB_ANNUAL     => 'Annual/Complete',
-			IQB_POLICY_ENDORSEMENT_CB_STR        => 'Short Term Rate',
-			IQB_POLICY_ENDORSEMENT_CB_PRORATA 	  => 'Prorata',
-		];
-
-		if($flag_blank_select)
-		{
-			$dropdown = IQB_BLANK_SELECT + $dropdown;
-		}
-		return $dropdown;
+        return $CI->endorsement_model->is_customer_editable($txn_type);
 	}
 }
 
@@ -1758,7 +1560,7 @@ if ( ! function_exists('_ENDORSEMENT_type_text'))
 	 */
 	function _ENDORSEMENT_type_text( $key, $formatted = FALSE, $sentence = FALSE )
 	{
-		$list = _ENDORSEMENT_type_dropdown();
+		$list = _ENDORSEMENT_type_dropdown(FALSE, FALSE);
 
 		$text = $list[$key] ?? '';
 
@@ -1791,7 +1593,7 @@ if ( ! function_exists('_ENDORSEMENT__ri_approval_constraint'))
         if( (int)$flag_ri_approval === IQB_FLAG_ON )
         {
             // Transaction status must be "RI Approved"
-            $constraint = $status !== IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED;
+            $constraint = $status !== IQB_ENDORSEMENT_STATUS_RI_APPROVED;
         }
 
         return $constraint;
@@ -1823,7 +1625,7 @@ if ( ! function_exists('_ENDORSEMENT_endorsement_pdf'))
 			// check if this is not fresh/renewal transaction
 			$record = $records[0] ?? NULL;
 
-			if($record && $record->txn_type == IQB_POLICY_ENDORSEMENT_TYPE_FRESH )
+			if($record && $record->txn_type == IQB_ENDORSEMENT_TYPE_FRESH )
 			{
 				throw new Exception("Exception [Helper: policy_helper][Method: _ENDORSEMENT_endorsement_pdf()]: You can not have endrosement print of FRESH/RENEWAL Transaction/endorsement.");
 			}
@@ -1854,7 +1656,7 @@ if ( ! function_exists('_ENDORSEMENT_endorsement_pdf'))
 	        /**
 	         * Only Active Endorsement Does not have watermark!!!
 	         */
-	        if( $record->status !== IQB_POLICY_ENDORSEMENT_STATUS_ACTIVE )
+	        if( $record->status !== IQB_ENDORSEMENT_STATUS_ACTIVE )
 	        {
 	        	$mpdf->SetWatermarkText( 'ENDORSEMENT - ' . strtoupper(_ENDORSEMENT_status_text($record->status)) );
 	        }
@@ -1998,14 +1800,14 @@ if ( ! function_exists('_ENDORSEMENT__tariff_premium_defaults'))
         $default_basic  = $defaults['basic'];
         $default_pool   = $defaults['pool'];
 
-        $data['gross_amt_basic_premium']  = $data['gross_amt_basic_premium'] < $default_basic ? $default_basic : $data['gross_amt_basic_premium'];
+        $data['gross_full_amt_basic_premium']  = $data['gross_full_amt_basic_premium'] < $default_basic ? $default_basic : $data['gross_full_amt_basic_premium'];
 
         /**
          * This gives a option to compute pool premium only if it is not zero
          */
-        if( !$skip_pool_on_zero || $data['gross_amt_pool_premium'] > 0.00 )
+        if( !$skip_pool_on_zero || $data['gross_full_amt_pool_premium'] > 0.00 )
         {
-            $data['gross_amt_pool_premium'] = $data['gross_amt_pool_premium'] < $default_pool ? $default_pool : $data['gross_amt_pool_premium'];
+            $data['gross_full_amt_pool_premium'] = $data['gross_full_amt_pool_premium'] < $default_pool ? $default_pool : $data['gross_full_amt_pool_premium'];
         }
 
 
@@ -2141,15 +1943,15 @@ if ( ! function_exists('_POLICY_INSTALLMENT_type_by_endorsement_type'))
         $installment_type   = NULL;
         switch($txn_type)
         {
-            case IQB_POLICY_ENDORSEMENT_TYPE_FRESH:
-            case IQB_POLICY_ENDORSEMENT_TYPE_TIME_EXTENDED:
-            case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
-            case IQB_POLICY_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+            case IQB_ENDORSEMENT_TYPE_FRESH:
+            case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+            case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+            case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
                 $installment_type = IQB_POLICY_INSTALLMENT_TYPE_INVOICE_TO_CUSTOMER;
                 break;
 
-            case IQB_POLICY_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-            case IQB_POLICY_ENDORSEMENT_TYPE_TERMINATE:
+            case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+            case IQB_ENDORSEMENT_TYPE_TERMINATE:
                 $installment_type = IQB_POLICY_INSTALLMENT_TYPE_REFUND_TO_CUSTOMER;
                 break;
 
@@ -2200,9 +2002,9 @@ if ( ! function_exists('_POLICY_INSTALLMENT__voucher_constraint'))
 		{
 			$ri_approval_constraint = _ENDORSEMENT__ri_approval_constraint($record->endorsement_status, $record->endorsement_flag_ri_approval);
 
-			$passed = 	($record->endorsement_status === IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED)
+			$passed = 	($record->endorsement_status === IQB_ENDORSEMENT_STATUS_RI_APPROVED)
 					        ||
-				    	(	$record->endorsement_status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED
+				    	(	$record->endorsement_status === IQB_ENDORSEMENT_STATUS_VERIFIED
 				    			&&
 		    				$ri_approval_constraint == FALSE
 		    			);

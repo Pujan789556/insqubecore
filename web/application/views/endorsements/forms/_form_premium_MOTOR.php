@@ -30,14 +30,14 @@ $object_attributes = $policy_object->attributes ? json_decode($policy_object->at
                 /**
                  * Comprehensive Premium Information
                  */
-                $premium_computation_table = $endorsement_record->premium_computation_table ? json_decode($endorsement_record->premium_computation_table) : NULL;
+                $premium_compute_options = $endorsement_record->premium_compute_options ? json_decode($endorsement_record->premium_compute_options) : NULL;
 
                 /**
                  * Load Form Components
                  */
                 $this->load->view('templates/_common/_form_components_horz', [
                     'form_elements'     => $form_elements['premium'],
-                    'form_record'       => $premium_computation_table
+                    'form_record'       => $premium_compute_options
                 ]);
                 ?>
             </div>

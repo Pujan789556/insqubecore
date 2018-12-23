@@ -42,7 +42,7 @@ if(
         &&
     $this->dx_auth->is_authorized('policies', 'status.to.draft')
         &&
-    $endorsement_record->status === IQB_POLICY_ENDORSEMENT_STATUS_VERIFIED
+    $endorsement_record->status === IQB_ENDORSEMENT_STATUS_VERIFIED
 ): ?>
     <a href="#"
         title="Back to Draft"
@@ -82,7 +82,7 @@ endif;
  * If this policy needs to be approved by RI, here it is.
  * The following tasks are carried out:
  *
- *  1. Update Txn Status to IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED
+ *  1. Update Txn Status to IQB_ENDORSEMENT_STATUS_RI_APPROVED
  */
 $__flag_ri_approval_constraint = _ENDORSEMENT__ri_approval_constraint($endorsement_record->status, $endorsement_record->flag_ri_approval);
 if( $record->status === IQB_POLICY_STATUS_VERIFIED && $__flag_ri_approval_constraint == TRUE && $this->dx_auth->is_authorized('endorsements', 'status.to.ri.approved') ):
@@ -93,7 +93,7 @@ if( $record->status === IQB_POLICY_STATUS_VERIFIED && $__flag_ri_approval_constr
         data-confirm="true"
         class="btn btn-danger btn-round trg-dialog-action"
         data-message="Are you sure you want to APPROVE the RI-Constraints?"
-        data-url="<?php echo site_url('endorsements/status/' . $endorsement_record->id . '/' . IQB_POLICY_ENDORSEMENT_STATUS_RI_APPROVED . '/tab-policy-overview' );?>"
+        data-url="<?php echo site_url('endorsements/status/' . $endorsement_record->id . '/' . IQB_ENDORSEMENT_STATUS_RI_APPROVED . '/tab-policy-overview' );?>"
     ><i class="fa fa-check-square-o"></i> RI-Approve</a>
 <?php
 endif;
