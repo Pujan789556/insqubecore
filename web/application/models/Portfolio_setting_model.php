@@ -18,7 +18,7 @@ class Portfolio_setting_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ['id', 'fiscal_yr_id', 'portfolio_id', 'agent_commission', 'bs_service_charge', 'direct_discount', 'pool_premium', 'stamp_duty', 'amt_default_basic_premium', 'amt_default_pool_premium', 'flag_default_duration', 'default_duration', 'flag_short_term', 'short_term_policy_rate', 'flag_apply_vat_on_premium', 'flag_installment', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'fiscal_yr_id', 'portfolio_id', 'agent_commission', 'bs_service_charge', 'direct_discount', 'pool_premium', 'stamp_duty', 'amt_default_basic_premium', 'amt_default_pool_premium', 'flag_default_duration', 'default_duration', 'flag_short_term', 'flag_short_term_apply_for', 'short_term_policy_rate', 'flag_apply_vat_on_premium', 'flag_installment', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -140,6 +140,15 @@ class Portfolio_setting_model extends MY_Model
                     'label' => 'Has short term Policy?',
                     'rules' => 'trim|required|alpha|exact_length[1]|in_list['.implode(',', array_keys(_FLAG_yes_no_dropdown(FALSE))).']',
                     '_data' => _FLAG_yes_no_dropdown(),
+                    '_type'     => 'dropdown',
+                    '_key'      => 'flag_short_term',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'flag_short_term_apply_for',
+                    'label' => 'Short term apply for?',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list['.implode(',', array_keys(IQB_PFS_FLAG_SHORT_TERM_APPLY_FOR__LIST)).']',
+                    '_data' => IQB_BLANK_SELECT + IQB_PFS_FLAG_SHORT_TERM_APPLY_FOR__LIST,
                     '_type'     => 'dropdown',
                     '_key'      => 'flag_short_term',
                     '_required' => true
