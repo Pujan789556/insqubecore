@@ -4,6 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy: Details - Policy Premium Overview Card - MISCELLANEOUS - CASH IN COUNTER
 */
 $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);
+$total_premium          = _ENDORSEMENT__total_premium($endorsement_record);
+$grand_total            = _ENDORSEMENT__grand_total($endorsement_record);
 
 $cost_table   = NULL;
 $risk_table   = NULL;
@@ -12,8 +14,6 @@ if($cost_calculation_table)
     $cost_table     = $cost_calculation_table->cost_table;
     $risk_table     = $cost_calculation_table->risk_table;
 }
-$total_premium  = (float)$endorsement_record->net_amt_basic_premium + (float)$endorsement_record->net_amt_pool_premium;
-$grand_total  = $total_premium + $endorsement_record->net_amt_stamp_duty + $endorsement_record->net_amt_vat;
 ?>
 <div class="box-body">
     <table class="table no-margin table-bordered">

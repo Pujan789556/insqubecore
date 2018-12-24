@@ -4,8 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Policy: Details - Policy Premium Overview Card - CONTRACTOR ALL RISK (ENG)
 */
 $cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);
-$total_premium = (float)$endorsement_record->net_amt_basic_premium + (float)$endorsement_record->net_amt_pool_premium;
-$grand_total = $total_premium + $endorsement_record->net_amt_stamp_duty + $endorsement_record->net_amt_vat;
+$total_premium          = _ENDORSEMENT__total_premium($endorsement_record);
+$grand_total            = _ENDORSEMENT__grand_total($endorsement_record);
 ?>
 <div class="box-body">
 	<table class="table no-margin table-bordered">

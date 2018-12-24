@@ -3,8 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Policy: Details - Policy Premium Overview Card - FIRE
 */
-$cost_calculation_table = $endorsement_record->cost_calculation_table ? json_decode($endorsement_record->cost_calculation_table) : NULL;
-$risk_table     = NULL;
+$cost_calculation_table = json_decode($endorsement_record->cost_calculation_table ?? NULL);
+$risk_table             = NULL;
 if($cost_calculation_table)
 {
     $risk_table       = $cost_calculation_table->risk_table ?? NULL;

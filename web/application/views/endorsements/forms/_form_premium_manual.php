@@ -4,12 +4,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form : Endorsement - Manual Premium Form
  */
 $hidden_fields = ['policy_id' => $policy_record->id];
-if(isset($endorsement_record))
+if(isset($record))
 {
-    $hidden_fields['id'] = $endorsement_record->id;
+    $hidden_fields['id'] = $record->id;
 }
-?>
-<?php echo form_open( $this->uri->uri_string(),
+
+echo form_open( $this->uri->uri_string(),
                         [
                             'class'     => 'form-iqb-general',
                             'data-pc'   => '.bootbox-body', // parent container ID
@@ -29,11 +29,11 @@ if(isset($endorsement_record))
                     <tbody>
                         <tr>
                             <th width="30%">Gross Sum Insured (Rs.)</th>
-                            <td><?php echo number_format($endorsement_record->amt_sum_insured_object, 2) ?></td>
+                            <td><?php echo number_format($record->amt_sum_insured_object, 2) ?></td>
                         </tr>
                         <tr>
                             <th>Net Sum Insured (Changed) (Rs.)</th>
-                            <td><?php echo ac_format_number($endorsement_record->amt_sum_insured_net, 2) ?></td>
+                            <td><?php echo ac_format_number($record->amt_sum_insured_net, 2) ?></td>
                         </tr>
                     </tbody>
                 </table>
@@ -48,7 +48,7 @@ if(isset($endorsement_record))
                  */
                 $this->load->view('templates/_common/_form_components_horz', [
                     'form_elements' => $form_elements,
-                    'form_record'   => $endorsement_record
+                    'form_record'   => $record
                 ]);
                 ?>
             </div>

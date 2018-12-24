@@ -4,17 +4,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Premium Form : FIRE - HOUSEHOLDER
  */
 $object_attributes  = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-$premium_compute_options      = json_decode($endorsement_record->premium_compute_options ?? NULL);
-$premium_computation_table_arr  = json_decode($endorsement_record->premium_compute_options ?? NULL, TRUE);
-?>
-<?php echo form_open( $this->uri->uri_string(),
+$premium_compute_options      = json_decode($record->premium_compute_options ?? NULL);
+$premium_computation_table_arr  = json_decode($record->premium_compute_options ?? NULL, TRUE);
+
+echo form_open( $this->uri->uri_string(),
         [
             'class' => 'form-iqb-general',
             'id'    => '_form-premium',
             'data-pc' => '.bootbox-body' // parent container ID
         ],
         // Hidden Fields
-        isset($policy_record) ? ['id' => $policy_record->id] : []);
+        ['id' => $record->id]);
 
     /**
      * Premium Summary Table
@@ -91,7 +91,7 @@ $premium_computation_table_arr  = json_decode($endorsement_record->premium_compu
          * Load TXN Common Elements
          */
         $this->load->view('endorsements/forms/_form_txn_common', [
-            'endorsement_record'        => $endorsement_record,
+            'record'        => $record,
             'form_elements'     => $form_elements['basic']
         ]);
 

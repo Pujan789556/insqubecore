@@ -1818,22 +1818,42 @@ if ( ! function_exists('_ENDORSEMENT__tariff_premium_defaults'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('_ENDORSEMENT__compute_total_amount'))
+if ( ! function_exists('_ENDORSEMENT__grand_total'))
 {
     /**
-     * Compute the Total Amount for this Endorsement
+     * Compute the Grand Total Amount for this Endorsement
      *
      * @param integer $record   Policy Endorsement Record
+     * @param bool $with_vat
      * @return  float
      */
-    function _ENDORSEMENT__compute_total_amount( $record )
+    function _ENDORSEMENT__grand_total( $record, $with_vat = TRUE)
     {
         $CI =& get_instance();
         $CI->load->model('endorsement_model');
-        return $CI->endorsement_model->total_amount($record);
+        return $CI->endorsement_model->grand_total($record, $with_vat);
     }
 }
 
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_ENDORSEMENT__total_premium'))
+{
+    /**
+     * Compute the Total Premium for this Endorsement
+     *
+     * @param integer $record   Policy Endorsement Record
+     * @param bool $with_vat
+     * @return  float
+     */
+    function _ENDORSEMENT__total_premium( $record )
+    {
+        $CI =& get_instance();
+        $CI->load->model('endorsement_model');
+        return $CI->endorsement_model->total_premium($record);
+    }
+}
 
 
 

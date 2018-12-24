@@ -4,16 +4,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Form - Premium : MISCELLANEOUS - BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
  */
 $object_attributes          = $policy_object->attributes ? json_decode($policy_object->attributes) : NULL;
-$premium_compute_options  = $endorsement_record->premium_compute_options ? json_decode($endorsement_record->premium_compute_options) : NULL;
-?>
-<?php echo form_open( $this->uri->uri_string(),
+$premium_compute_options  = $record->premium_compute_options ? json_decode($record->premium_compute_options) : NULL;
+
+echo form_open( $this->uri->uri_string(),
         [
             'class' => 'form-iqb-general',
             'id'    => '_form-premium',
             'data-pc' => '.bootbox-body' // parent container ID
         ],
         // Hidden Fields
-        isset($policy_record) ? ['id' => $policy_record->id] : []);
+        ['id' => $record->id]);
 
     /**
      * Premium Summary Table
@@ -46,7 +46,7 @@ $premium_compute_options  = $endorsement_record->premium_compute_options ? json_
          * Load TXN Common Elements
          */
         $this->load->view('endorsements/forms/_form_txn_common', [
-            'endorsement_record'        => $endorsement_record,
+            'record'        => $record,
             'form_elements'     => $form_elements['basic']
         ]);
 

@@ -2279,7 +2279,7 @@ class Endorsement_model extends MY_Model
 
                 case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
                 case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-                    # code...
+                    $premium_data = $this->_build_updowngrade_premium_data( $premium_data, $record, $policy_record );
                     break;
 
                 case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
@@ -2395,7 +2395,7 @@ class Endorsement_model extends MY_Model
              * NET Total +ve ???
              */
             $premium_data['txn_type'] = $record->txn_type;
-            $total_amount = $this->total_amount((object)$premium_data);
+            $total_amount = $this->grand_total((object)$premium_data);
             if( $total_amount > 0 )
             {
                 throw new Exception("Exception [Model: Endorsement_model][Method: _build_terminate_premium_data()]: NET REFUND AMOUNT is positive.");
@@ -2819,6 +2819,32 @@ class Endorsement_model extends MY_Model
         // --------------------------------------------------------------------
 
         /**
+         * Copy Gross Full Data into Gross Computed
+         *
+         * @param array $premium_data
+         * @return array
+         */
+        private function _copy_gross_full_to_gross_computed( $premium_data )
+        {
+            $keys  = [ 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount'];
+
+            $full_prefix     = 'gross_full_';
+            $computed_prefix = 'gross_computed_';
+
+            foreach($keys as $key)
+            {
+                $full_key       = $full_prefix . $key;
+                $computed_key   = $computed_prefix . $key;
+
+                $premium_data[$computed_key] = $premium_data[$full_key] ?? NULL;
+            }
+
+            return $premium_data;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
          * Rebuild Premium Data Applying - Short Term Rate or Prorata Rate on REFUND Premium Data
          *
          *
@@ -3019,12 +3045,21 @@ class Endorsement_model extends MY_Model
                 );
 
                 $rate           = $rate_percent / 100.00;
-                $premium_data   = $this->_apply_rates_on_gross_data( $premium_data, $rate, TRUE);
+                $rates      = [
+                    'basic_rate'    => $rate,
+                    'pool_rate'     => $rate,
+                ];
+                $premium_data   = $this->_apply_rates_on_gross_data( $premium_data, $rates);
 
                 // Update Short Term Related Info on Endorsement as well
                 $premium_data['flag_short_term']    = IQB_FLAG_YES;
                 $premium_data['short_term_config']  = IQB_ENDORSEMENT_SPR_CONFIG_BOTH;
                 $premium_data['short_term_rate']    = $rate_percent;
+            }
+            else
+            {
+                // COPY GROSS_FULL -> GROSS_COMPUTED
+                $premium_data = $this->_copy_gross_full_to_gross_computed( $premium_data );
             }
 
             /**
@@ -3326,7 +3361,7 @@ class Endorsement_model extends MY_Model
         }
 
         $flag    = IQB_FLAG_NO;
-        $premium = $this->total_amount($record);
+        $premium = $this->grand_total($record);
         if($premium != 0)
         {
             $flag = IQB_FLAG_YES;
@@ -3767,9 +3802,10 @@ class Endorsement_model extends MY_Model
      * Get the Total Amount of an Endorsement
      *
      * @param int|object $record Endorsement Record or ID
+     * @param bool $with_vat
      * @return float
      */
-    public function total_amount($record)
+    public function grand_total($record, $with_vat = TRUE)
     {
         $record         = is_numeric($record) ? $this->get( (int)$record ) : $record;
         $total_amount   = 0.00;
@@ -3784,9 +3820,11 @@ class Endorsement_model extends MY_Model
                 $total_amount = ac_bcsum([
                     floatval($record->net_amt_basic_premium ?? 0.00),
                     floatval($record->net_amt_pool_premium ?? 0.00),
-                    floatval($record->net_amt_stamp_duty ?? 0.00),
-                    floatval($record->net_amt_vat ?? 0.00)
+                    floatval($record->net_amt_stamp_duty ?? 0.00)
                 ],IQB_AC_DECIMAL_PRECISION);
+
+
+
                 break;
 
 
@@ -3795,8 +3833,7 @@ class Endorsement_model extends MY_Model
                 $total_amount = ac_bcsum([
                     floatval($record->net_amt_stamp_duty ?? 0.00),
                     floatval($record->net_amt_transfer_fee ?? 0.00),
-                    floatval($record->net_amt_transfer_ncd ?? 0.00),
-                    floatval($record->net_amt_vat ?? 0.00)
+                    floatval($record->net_amt_transfer_ncd ?? 0.00)
                 ],IQB_AC_DECIMAL_PRECISION);
                 break;
 
@@ -3806,8 +3843,7 @@ class Endorsement_model extends MY_Model
                     floatval($record->net_amt_basic_premium ?? 0.00),
                     floatval($record->net_amt_pool_premium ?? 0.00),
                     floatval($record->net_amt_stamp_duty ?? 0.00),
-                    floatval($record->net_amt_cancellation_fee ?? 0.00),
-                    floatval($record->net_amt_vat ?? 0.00)
+                    floatval($record->net_amt_cancellation_fee ?? 0.00)
                 ],IQB_AC_DECIMAL_PRECISION);
                 break;
 
@@ -3816,7 +3852,31 @@ class Endorsement_model extends MY_Model
                 break;
         }
 
+        if($total_amount != 0 && $with_vat == TRUE )
+        {
+            $total_amount = bcadd($total_amount, floatval($record->net_amt_vat ?? 0.00), IQB_AC_DECIMAL_PRECISION);
+        }
+
         return $total_amount;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get the Total Premium Excluding VAT and Stamp Duty
+     *
+     * @param int|object $record Endorsement Record or ID
+     * @param bool $with_vat
+     * @return float
+     */
+    public function total_premium($record)
+    {
+        $total   = $this->grand_total($record, FALSE);
+        $total = bcsub($total, floatval($record->net_amt_stamp_duty ?? 0.00), IQB_AC_DECIMAL_PRECISION );
+
+        return $total;
+        $record         = is_numeric($record) ? $this->get( (int)$record ) : $record;
+
     }
 
     // --------------------------------------------------------------------

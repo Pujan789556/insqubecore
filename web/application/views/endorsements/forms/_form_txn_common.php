@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : Policy TXN - Common TXN Fields
+ * Form : Endorsement - Common TXN Fields
  */
 ?>
 <div class="box box-solid box-bordered form-horizontal">
@@ -14,13 +14,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         /**
          * Default Stamp Duty if NULL
          */
-        if($endorsement_record->net_amt_stamp_duty === NULL )
+        if($record->net_amt_stamp_duty === NULL )
         {
             foreach($form_elements as $elem)
             {
                 if($elem['field'] === 'net_amt_stamp_duty')
                 {
-                    $endorsement_record->net_amt_stamp_duty = $elem['_default'];
+                    $record->net_amt_stamp_duty = $elem['_default'];
                 }
             }
         }
@@ -31,7 +31,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         $this->load->view('templates/_common/_form_components_horz', [
             'form_elements'     => $form_elements,
-            'form_record'       => $endorsement_record,
+            'form_record'       => $record,
             'grid_label'        => 'col-sm-4',
             'grid_form_control' => 'col-sm-8'
         ]);

@@ -14,7 +14,8 @@ if( !_ENDORSEMENT_is_first( $record->txn_type) )
     // $refund_compute_text    = $compute_ref_dd[$record->rc_ref_basic] ?? '';
 }
 
-$grand_total = _ENDORSEMENT__compute_total_amount($record);
+$total_premium  = _ENDORSEMENT__total_premium($record);
+$grand_total    = _ENDORSEMENT__grand_total($record);
 
 
 /**
@@ -110,10 +111,6 @@ else
                                 <td class="text-right"><?php echo ac_format_number($record->net_amt_pool_premium, 2);?></td>
                             </tr>
                             <tr>
-                                <td colspan="4">Stamp Duty (Rs.)</td>
-                                <td class="text-right"><?php echo ac_format_number($record->net_amt_stamp_duty, 2);?></td>
-                            </tr>
-                            <tr>
                                 <td colspan="4">Cancellation Fee (Rs.)</td>
                                 <td class="text-right"><?php echo ac_format_number($record->net_amt_cancellation_fee, 2);?></td>
                             </tr>
@@ -125,12 +122,20 @@ else
                                 <td colspan="4">No Claim Discount Fee (Rs.)</td>
                                 <td class="text-right"><?php echo ac_format_number($record->net_amt_transfer_ncd, 2);?></td>
                             </tr>
-                            <tr>
-                                <td colspan="4">VAT (Rs.)</td>
-                                <td class="text-right"><?php echo ac_format_number($record->net_amt_vat, 2);?></td>
-                            </tr>
                         </tbody>
                         <tfoot>
+                            <tr>
+                                <th colspan="4">Gross Total (Rs.)</th>
+                                <th class="text-right"><?php echo ac_format_number($total_premium, 2);?></th>
+                            </tr>
+                            <tr>
+                                <th colspan="4">Stamp Duty (Rs.)</th>
+                                <th class="text-right"><?php echo ac_format_number($record->net_amt_stamp_duty, 2);?></th>
+                            </tr>
+                            <tr>
+                                <th colspan="4">VAT (Rs.)</th>
+                                <th class="text-right"><?php echo ac_format_number($record->net_amt_vat, 2);?></th>
+                            </tr>
                             <tr>
                                 <th colspan="4">Grand Total (Rs.)</th>
                                 <th class="text-right"><?php echo ac_format_number($grand_total, 2);?></th>

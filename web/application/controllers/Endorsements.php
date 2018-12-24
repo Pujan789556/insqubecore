@@ -820,6 +820,7 @@ class Endorsements extends MY_Controller
 		{
 			if( $this->input->post() )
 			{
+
 				$portfolio_id = (int)$policy_record->portfolio_id;
 				load_portfolio_helper($portfolio_id);
 
@@ -828,43 +829,35 @@ class Endorsements extends MY_Controller
 				$done = FALSE;
 
 				/**
-				 * FAC-Inward Policy???
-				 * ----------------------
-				 * IF Policy is FAC-Inward, Regardless of Portfolio - Common to all portfolio
+				 * Save Premium Based on Type
 				 */
-				if($policy_record->category == IQB_POLICY_CATEGORY_FAC_IN )
+				$txn_type = (int)$record->txn_type;
+				switch ($txn_type)
 				{
-					$done = $this->__save_premium_FAC_IN($policy_record, $record);
-				}
-				else
-				{
-					/**
-					 * Save Premium Based on Type
-					 */
-					$txn_type = (int)$record->txn_type;
-					switch ($txn_type)
-					{
-						case IQB_ENDORSEMENT_TYPE_FRESH:
-						case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
-						case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-							# code...
-							break;
+					case IQB_ENDORSEMENT_TYPE_FRESH:
+						$done = $this->__save_premium_fresh($policy_record, $record);
+						break;
 
-						case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
-							$done = $this->__save_premium_ownership_transfer($policy_record, $record);
-							break;
+					case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+					case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+						$done = $this->__save_premium_updwongrade($policy_record, $record);
+						break;
+
+					case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+						$done = $this->__save_premium_ownership_transfer($policy_record, $record);
+						break;
 
 
-						case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
-							$done = $this->__save_premium_terminate_and_refund($policy_record, $record);
-							break;
+					case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
+						$done = $this->__save_premium_terminate_and_refund($policy_record, $record);
+						break;
 
-						default:
-							# code...
-							break;
-					}
+					default:
+						# code...
+						break;
 				}
 
+				// --------------------------------------------------------------------
 
 
 				if($done)
@@ -920,6 +913,308 @@ class Endorsements extends MY_Controller
 				}
 			}
 		}
+			// --------------------------------------------------------------------
+
+			/**
+			 * Save Premium - FRESH
+			 *
+			 * @param object $policy_record
+			 * @param object $record
+			 * @return boolean
+			 */
+			private function __save_premium_fresh($policy_record, $record)
+			{
+				$portfolio_id 	= (int)$policy_record->portfolio_id;
+				$done 			= FALSE;
+
+				/**
+				 * FAC-Inward Policy???
+				 * ----------------------
+				 * IF Policy is FAC-Inward, Regardless of Portfolio - Common to all portfolio
+				 */
+				if($policy_record->category == IQB_POLICY_CATEGORY_FAC_IN )
+				{
+					$done = $this->__save_premium_FAC_IN($policy_record, $record);
+				}
+
+
+				/**
+		         * AGRICULTURE - CROP SUB-PORTFOLIO
+		         * ---------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
+		        {
+		            $done = __save_premium_AGR_CROP($policy_record, $record);
+		        }
+
+		        /**
+		         * AGRICULTURE - CATTLE SUB-PORTFOLIOS
+		         * ---------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
+		        {
+		            $done = __save_premium_AGR_CATTLE($policy_record, $record);
+		        }
+
+		        /**
+		         * AGRICULTURE - POULTRY SUB-PORTFOLIO
+		         * -----------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
+		        {
+		            $done = __save_premium_AGR_POULTRY($policy_record, $record);
+		        }
+
+		        /**
+		         * AGRICULTURE - FISH(Pisciculture) SUB-PORTFOLIO
+		         * ----------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
+		        {
+		            $done = __save_premium_AGR_FISH($policy_record, $record);
+		        }
+
+		        /**
+		         * AGRICULTURE - BEE(Apiculture) SUB-PORTFOLIO
+		         * -------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
+		        {
+		            $done = __save_premium_AGR_BEE($policy_record, $record);
+		        }
+
+				/**
+				 * MOTOR PORTFOLIOS
+				 * ----------------
+				 */
+				else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
+				{
+					$done = __save_premium_MOTOR( $policy_record, $record );
+				}
+
+				/**
+		         * FIRE - FIRE
+		         * -------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+		        {
+		            $done = __save_premium_FIRE_FIRE( $policy_record, $record );
+		        }
+
+		        /**
+		         * FIRE - HOUSEHOLDER
+		         * -------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+		        {
+		            $done = __save_premium_FIRE_HHP( $policy_record, $record );
+		        }
+
+		        /**
+		         * FIRE - LOSS OF PROFIT
+		         * ----------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+		        {
+		            $done = __save_premium_FIRE_LOP( $policy_record, $record );
+		        }
+
+				/**
+		         * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
+		         * --------------------------------------------------
+		         */
+		        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
+		        {
+		            $done = __save_premium_MISC_BRG( $policy_record, $record );
+		        }
+
+				/**
+				 * MARINE PORTFOLIOS
+				 * ---------------
+				 */
+				else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
+				{
+					$done = __save_premium_MARINE( $policy_record, $record );
+				}
+
+				/**
+		         * ENGINEERING - BOILER EXPLOSION
+		         * ------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
+		        {
+		            $done = __save_premium_ENG_BL( $policy_record, $record );
+		        }
+
+		        /**
+		         * ENGINEERING - CONTRACTOR ALL RISK
+		         * ---------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
+		        {
+		            $done = __save_premium_ENG_CAR( $policy_record, $record );
+		        }
+
+		        /**
+		         * ENGINEERING - CONTRACTOR PLANT & MACHINARY
+		         * ------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
+		        {
+		            $done = __save_premium_ENG_CPM( $policy_record, $record );
+		        }
+
+		        /**
+		         * ENGINEERING - ELECTRONIC EQUIPMENT INSURANCE
+		         * ---------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
+		        {
+		            $done = __save_premium_ENG_EEI( $policy_record, $record );
+		        }
+
+		        /**
+		         * ENGINEERING - ERECTION ALL RISKS
+		         * ---------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
+		        {
+					$done = __save_premium_ENG_EAR( $policy_record, $record );
+		        }
+
+		        /**
+		         * ENGINEERING - MACHINE BREAKDOWN
+		         * ---------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
+		        {
+		            $done = __save_premium_ENG_MB( $policy_record, $record );
+		        }
+
+		        /**
+		         * MISCELLANEOUS - BANKER'S BLANKET(BB)
+		         * -------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
+		        {
+		            $done = __save_premium_MISC_BB( $policy_record, $record );
+		        }
+
+		        /**
+		         * MISCELLANEOUS - GROUP PERSONNEL ACCIDENT(GPA)
+		         * ---------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
+		        {
+		            $done = __save_premium_MISC_GPA( $policy_record, $record );
+		        }
+
+		        /**
+		         * MISCELLANEOUS - PERSONNEL ACCIDENT(PA)
+		         * ---------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
+		        {
+		            $done = __save_premium_MISC_PA( $policy_record, $record );
+		        }
+
+		        /**
+		         * MISCELLANEOUS - PUBLIC LIABILITY(PL)
+		         * ----------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
+		        {
+		            $done = __save_premium_MISC_PL( $policy_record, $record );
+		        }
+
+		        /**
+		         * MISCELLANEOUS - CASH IN TRANSIT
+		         * -------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
+		        {
+		            $done = __save_premium_MISC_CT( $policy_record, $record );
+		        }
+
+		        /**
+		         * MISCELLANEOUS - CASH IN SAFE
+		         * -------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
+		        {
+		            $done = __save_premium_MISC_CS( $policy_record, $record );
+		        }
+
+		        /**
+		         * MISCELLANEOUS - CASH IN COUNTER
+		         * -------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
+		        {
+		            $done = __save_premium_MISC_CC( $policy_record, $record );
+		        }
+
+		        /**
+		         * MISCELLANEOUS - EXPEDITION PERSONNEL ACCIDENT(EPA)
+		         * --------------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
+		        {
+		            $done = __save_premium_MISC_EPA( $policy_record, $record );
+		        }
+
+		        /**
+		         * MISCELLANEOUS - TRAVEL MEDICAL INSURANCE(TMI)
+		         * --------------------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
+		        {
+		            $done = __save_premium_MISC_TMI( $policy_record, $record );
+		        }
+
+		        /**
+		         * MISCELLANEOUS - FIDELITY GUARANTEE (FG)
+		         * ----------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
+		        {
+		            $done = __save_premium_MISC_FG( $policy_record, $record );
+		        }
+
+		        /**
+		         * MISCELLANEOUS - HEALTH INSURANCE (HI)
+		         * ----------------------------------------
+		         */
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
+		        {
+		            $done = __save_premium_MISC_HI( $policy_record, $record );
+		        }
+
+				else
+				{
+					return $this->template->json([
+						'status' 	=> 'error',
+						'message' 	=> 'Endorsements::__save_premium() - No method defined for supplied portfolio!'
+					], 400);
+				}
+
+				return $done;
+			}
+
+			// --------------------------------------------------------------------
+
+			/**
+			 * Save Premium - UP/DOWNGRADE
+			 *
+			 * @param object $policy_record
+			 * @param object $record
+			 * @return boolean
+			 */
+			private function __save_premium_updwongrade($policy_record, $record)
+			{
+				// Same Process as Fresh
+				return $this->__save_premium_fresh($policy_record, $record);
+			}
 
 			// --------------------------------------------------------------------
 
@@ -1712,8 +2007,8 @@ class Endorsements extends MY_Controller
         if($pfs_record->flag_installment === IQB_FLAG_YES )
 		{
 	        $common_components = $this->load->view('endorsements/forms/_form_txn_installments', [
-	            'endorsement_record'    => $record,
-	            'form_elements'     	=> $premium_goodies['validation_rules']['installments']
+	            'record'    		=> $record,
+	            'form_elements'     => $premium_goodies['validation_rules']['installments']
 	        ], TRUE);
 	    }
 
@@ -1728,7 +2023,7 @@ class Endorsements extends MY_Controller
 			$json_data['form'] = $this->load->view('endorsements/forms/_form_premium_manual', [
 								                'form_elements'         => $this->endorsement_model->manual_premium_v_rules(),
 								                'policy_record'         => $policy_record,
-								                'endorsement_record'    => $record,
+								                'record'    			=> $record,
 								                'common_components' 	=> $common_components
 								            ], TRUE);
 			$json_data = array_merge($json_data, $json_extra);
@@ -1750,17 +2045,14 @@ class Endorsements extends MY_Controller
 
 		// Let's render the form
         $json_data['form'] = $this->load->view($form_view, [
-								                'form_elements'         => $premium_goodies['validation_rules'],
-								                'portfolio_risks' 		=> $portfolio_risks,
-								                'policy_record'         => $policy_record,
-								                'endorsement_record'    => $record,
-								                'policy_object' 		=> $policy_object,
-								                'tariff_record' 		=> $premium_goodies['tariff_record'],
-								                'common_components' 	=> $common_components
-								            ], TRUE);
-
-
-
+            'form_elements'         => $premium_goodies['validation_rules'],
+            'portfolio_risks' 		=> $portfolio_risks,
+            'policy_record'         => $policy_record,
+            'record'    			=> $record,
+            'policy_object' 		=> $policy_object,
+            'tariff_record' 		=> $premium_goodies['tariff_record'],
+            'common_components' 	=> $common_components
+        ], TRUE);
 
 
         $json_data = array_merge($json_data, $json_extra);
@@ -1783,9 +2075,9 @@ class Endorsements extends MY_Controller
 		{
 			$json_data['form'] = $this->load->view('endorsements/forms/_form_premium_fee', [
                 'form_elements'     => $this->endorsement_model->get_fee_validation_rules(
-            									$record->txn_type,
-            									$record->portfolio_id
-            								),
+        									$record->txn_type,
+        									$record->portfolio_id
+        								),
                 'policy_record'     => $policy_record,
                 'record'    		=> $record
             ], TRUE);
@@ -1798,10 +2090,10 @@ class Endorsements extends MY_Controller
 	private function __render_premium_form_FAC_IN($policy_record, $record, $json_extra=[])
 	{
 		$json_data['form'] = $this->load->view('endorsements/forms/_form_premium_fac_in', [
-								                'form_elements'         => $this->endorsement_model->fac_in_premium_v_rules(),
-								                'policy_record'         => $policy_record,
-								                'endorsement_record'    => $record
-								            ], TRUE);
+            'form_elements'     => $this->endorsement_model->fac_in_premium_v_rules(),
+            'policy_record'     => $policy_record,
+            'record'    		=> $record
+        ], TRUE);
 		$json_data = array_merge($json_data, $json_extra);
 		$this->template->json($json_data);
 	}

@@ -8,8 +8,8 @@ if(isset($record))
 {
     $hidden_fields['id'] = $record->id;
 }
-?>
-<?php echo form_open( $this->uri->uri_string(),
+
+echo form_open( $this->uri->uri_string(),
                         [
                             'class'     => 'form-horizontal form-iqb-general',
                             'data-pc'   => '.bootbox-body', // parent container ID
