@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : Endorsement - Fac-In Premium Form
+ * Form : Endorsement - FEE Form
  */
 $hidden_fields = ['policy_id' => $policy_record->id];
 if(isset($record))
@@ -11,7 +11,7 @@ if(isset($record))
 ?>
 <?php echo form_open( $this->uri->uri_string(),
                         [
-                            'class'     => 'form-iqb-general',
+                            'class'     => 'form-horizontal form-iqb-general',
                             'data-pc'   => '.bootbox-body', // parent container ID
                             'id'        => '_form-premium'
                         ],
@@ -21,7 +21,7 @@ if(isset($record))
     <div class="col-md-6">
         <div class="box box-solid box-bordered">
             <div class="box-header with-border">
-              <h4 class="box-title">Supply Premium Information</h4>
+              <h4 class="box-title">Supply Premium, Fee Information</h4>
             </div>
             <div class="box-body form-horizontal">
                 <?php
@@ -29,8 +29,8 @@ if(isset($record))
                  * Load Form Components
                  */
                 $this->load->view('templates/_common/_form_components_horz', [
-                    'form_elements' => $form_elements,
-                    'form_record'   => $endorsement_record
+                    'form_elements' => $form_elements['fee'],
+                    'form_record'   => $record
                 ]);
                 ?>
             </div>

@@ -560,12 +560,12 @@ class Policy_installments extends MY_Controller
 						break;
 
 					case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-					case IQB_ENDORSEMENT_TYPE_TERMINATE:
+					case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
 						$data = $this->_data_voucher_details_for_credit_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
 						break;
 
 					case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
-						$data = $this->_data_voucher_details_for_transfer_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
+						$data = $this->_data_voucher_details__ownership_transfer($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record);
 						break;
 
 
@@ -1059,7 +1059,7 @@ class Policy_installments extends MY_Controller
 	        return $data;
 		}
 
-		private function _data_voucher_details_for_transfer_voucher($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record)
+		private function _data_voucher_details__ownership_transfer($installment_record, $endorsement_record, $policy_record, $pfs_record, $portfolio_record)
 		{
 			// --------------------------------------------------------------------
 
@@ -1115,15 +1115,7 @@ class Policy_installments extends MY_Controller
 					'amount' 	 => $vat_payable_amount
 	        	],
 
-	        	// Stamp Income
-	        	[
-	        		'account_id' => IQB_AC_ACCOUNT_ID_STAMP_INCOME,
-					'party_type' => NULL,
-					'party_id'   => NULL,
-					'amount' 	 => $stamp_income_amount
-	        	],
-
-	        	// Stamp Income
+	        	// Ownership Transfer Charge
 	        	[
 	        		'account_id' => IQB_AC_ACCOUNT_ID_OWNERSHIP_TRANSFER_CHARGE,
 					'party_type' => NULL,
@@ -1131,6 +1123,17 @@ class Policy_installments extends MY_Controller
 					'amount' 	 => $ownership_transfer_charge
 	        	]
 	        ];
+
+	        // Stamp Income
+	        if($stamp_income_amount)
+	        {
+	        	$cr_rows[] = [
+	        		'account_id' => IQB_AC_ACCOUNT_ID_STAMP_INCOME,
+					'party_type' => NULL,
+					'party_id'   => NULL,
+					'amount' 	 => $stamp_income_amount
+	        	];
+	        }
 
 	        // --------------------------------------------------------------------
 
@@ -1158,7 +1161,7 @@ class Policy_installments extends MY_Controller
 					break;
 
 				case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-				case IQB_ENDORSEMENT_TYPE_TERMINATE:
+				case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
 					$voucher_type_id = IQB_AC_VOUCHER_TYPE_CRDN; // Credit Voucher
 					break;
 

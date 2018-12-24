@@ -174,7 +174,7 @@ class Endorsements extends MY_Controller
 		/**
 		 * Only Endorsement are editable
 		 */
-		if( _ENDORSEMENT_is_first($record->txn_type) )
+		if( $this->endorsement_model->is_first($record->txn_type) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
@@ -416,6 +416,15 @@ class Endorsements extends MY_Controller
 				$field = $single['field'];
 				$data[$field] = $post_data[$field] ?? NULL;
 			}
+
+			/**
+			 * Nullify Agent if Blank
+			 */
+			if(!$data['agent_id'])
+			{
+				$data['agent_id'] = NULL;
+			}
+
 
 			/**
 			 * Customer ID
@@ -765,19 +774,9 @@ class Endorsements extends MY_Controller
 
 
 		/**
-		 * Policy Record
+		 * Valid Endorsement Type for Premium?
 		 */
-		$policy_record = $this->policy_model->get($record->policy_id);
-		if(!$policy_record)
-		{
-			$this->template->render_404();
-		}
-
-
-		/**
-		 * Valid Transaction Type for Premium Computation?
-		 */
-		if( !_ENDORSEMENT_is_transactional($record->txn_type) )
+		if( !$this->endorsement_model->is_transactional($record->txn_type) )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
@@ -785,12 +784,25 @@ class Endorsements extends MY_Controller
 			], 400);
 		}
 
+		/**
+		 * Policy Record
+		 */
+		$policy_record = $this->policy_model->get($record->policy_id);
+		if(!$policy_record)
+		{
+			return $this->template->json([
+				'status' 	=> 'error',
+				'message' 	=> 'Corresponding policy record could not be found!'
+			], 404);
+		}
+
+
 		// Post? Save Premium
-		$this->__save_premium($policy_record, $record);
+		$this->_save_premium($policy_record, $record);
 
 
 		// Render Form
-		$this->__render_premium_form($policy_record, $record);
+		$this->_render_premium_form($policy_record, $record);
 	}
 
 	// --------------------------------------------------------------------
@@ -801,10 +813,200 @@ class Endorsements extends MY_Controller
 		 * !!! Important: Fresh/Renewal Only
 		 *
 		 * @param object $policy_record 	Policy Record
-		 * @param object $endorsement_record 		Endorsement Record
+		 * @param object $record 		Endorsement Record
 		 * @return mixed
 		 */
-		private function __save_premium($policy_record, $endorsement_record)
+		private function _save_premium($policy_record, $record)
+		{
+			if( $this->input->post() )
+			{
+				$portfolio_id = (int)$policy_record->portfolio_id;
+				load_portfolio_helper($portfolio_id);
+
+				// --------------------------------------------------------------------
+
+				$done = FALSE;
+
+				/**
+				 * FAC-Inward Policy???
+				 * ----------------------
+				 * IF Policy is FAC-Inward, Regardless of Portfolio - Common to all portfolio
+				 */
+				if($policy_record->category == IQB_POLICY_CATEGORY_FAC_IN )
+				{
+					$done = $this->__save_premium_FAC_IN($policy_record, $record);
+				}
+				else
+				{
+					/**
+					 * Save Premium Based on Type
+					 */
+					$txn_type = (int)$record->txn_type;
+					switch ($txn_type)
+					{
+						case IQB_ENDORSEMENT_TYPE_FRESH:
+						case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+						case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+							# code...
+							break;
+
+						case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+							$done = $this->__save_premium_ownership_transfer($policy_record, $record);
+							break;
+
+
+						case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
+							$done = $this->__save_premium_terminate_and_refund($policy_record, $record);
+							break;
+
+						default:
+							# code...
+							break;
+					}
+				}
+
+
+
+				if($done)
+				{
+
+					/**
+					 * Build and Update Installments
+					 */
+					$record = $this->endorsement_model->get($record->id);
+					try {
+
+						$this->_save_installments($policy_record, $record);
+
+					} catch (Exception $e) {
+						return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
+					}
+
+
+
+					// Get Updated Record or Premium Box
+					if( !$this->endorsement_model->is_first( $record->txn_type) )
+					{
+						return $this->template->json([
+							'message' 		=> 'Successfully Updated.',
+							'status'  			=> 'success',
+							'reloadForm' 	=> false,
+							'hideBootbox' 	=> true,
+							'updateSection' => true,
+							'updateSectionData' => [
+								'box' 		=> '#_data-row-endorsements-' . $record->id,
+								'method' 	=> 'replaceWith',
+								'html'		=> $this->load->view('endorsements/_single_row', ['record' => $record], TRUE)
+							]
+						]);
+					}
+					else
+					{
+						return $this->template->json([
+							'message' 		=> 'Successfully Updated.',
+							'status'  		=> 'success',
+							'updateSection' => true,
+							'hideBootbox' 	=> true,
+							'updateSectionData' => [
+								/**
+								 * Policy Cost Calculation Table
+								 */
+								'box' 		=> '#_premium-card',
+								'method' 	=> 'replaceWith',
+								'html'		=> $this->load->view('endorsements/_cost_calculation_table', ['endorsement_record' => $record, 'policy_record' => $policy_record], TRUE)
+							]
+						]);
+					}
+				}
+			}
+		}
+
+			// --------------------------------------------------------------------
+
+			/**
+			 * Save Ownership Transfer - Premium
+			 *
+			 * @param object $policy_record
+			 * @param object $record
+			 * @return boolean
+			 */
+			private function __save_premium_ownership_transfer($policy_record, $record)
+			{
+
+				$v_rules =  $this->endorsement_model->get_fee_validation_rules(
+								$record->txn_type,
+								$record->portfolio_id,
+								TRUE
+							);
+				$this->form_validation->set_rules($v_rules);
+				if($this->form_validation->run() === TRUE )
+	        	{
+	        		$post_data 		= $this->input->post();
+	        		$premium_data 	= [];
+
+	        		foreach($v_rules as $single)
+	        		{
+	        			$field = $single['field'];
+	        			$premium_data[$field] = $post_data[$field] ?? NULL;
+	        		}
+	        		return $this->endorsement_model->save_premium($record, $policy_record, $premium_data, $post_data);
+	        	}
+	        	else
+	        	{
+	        		return $this->template->json([
+						'status' 	=> 'error',
+						'title' 	=> 'Validation Error!',
+						'message' 	=> validation_errors()
+					]);
+	        	}
+			}
+
+			// --------------------------------------------------------------------
+
+			/**
+			 * Save Ownership Transfer - Premium
+			 *
+			 * @param object $policy_record
+			 * @param object $record
+			 * @return boolean
+			 */
+			private function __save_premium_terminate_and_refund($policy_record, $record)
+			{
+
+				$v_rules =  $this->endorsement_model->get_fee_validation_rules(
+								$record->txn_type,
+								$record->portfolio_id,
+								TRUE
+							);
+				$this->form_validation->set_rules($v_rules);
+				if($this->form_validation->run() === TRUE )
+	        	{
+	        		$post_data 		= $this->input->post();
+	        		$premium_data 	= [];
+
+	        		foreach($v_rules as $single)
+	        		{
+	        			$field = $single['field'];
+	        			$premium_data[$field] = $post_data[$field] ?? NULL;
+	        		}
+	        		return $this->endorsement_model->save_premium($record, $policy_record, $premium_data, $post_data);
+	        	}
+	        	else
+	        	{
+	        		return $this->template->json([
+						'status' 	=> 'error',
+						'title' 	=> 'Validation Error!',
+						'message' 	=> validation_errors()
+					]);
+	        	}
+			}
+
+			// --------------------------------------------------------------------
+
+
+
+
+		private function _save_premium_OLD($policy_record, $record)
 		{
 			if( $this->input->post() )
 			{
@@ -820,7 +1022,7 @@ class Endorsements extends MY_Controller
 				 */
 				if($policy_record->category == IQB_POLICY_CATEGORY_FAC_IN )
 				{
-					$done = $this->__save_premium_FAC_IN($policy_record, $endorsement_record);
+					$done = $this->__save_premium_FAC_IN($policy_record, $record);
 				}
 
 
@@ -830,7 +1032,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
 		        {
-		            $done = __save_premium_AGR_CROP($policy_record, $endorsement_record);
+		            $done = __save_premium_AGR_CROP($policy_record, $record);
 		        }
 
 		        /**
@@ -839,7 +1041,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
 		        {
-		            $done = __save_premium_AGR_CATTLE($policy_record, $endorsement_record);
+		            $done = __save_premium_AGR_CATTLE($policy_record, $record);
 		        }
 
 		        /**
@@ -848,7 +1050,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
 		        {
-		            $done = __save_premium_AGR_POULTRY($policy_record, $endorsement_record);
+		            $done = __save_premium_AGR_POULTRY($policy_record, $record);
 		        }
 
 		        /**
@@ -857,7 +1059,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
 		        {
-		            $done = __save_premium_AGR_FISH($policy_record, $endorsement_record);
+		            $done = __save_premium_AGR_FISH($policy_record, $record);
 		        }
 
 		        /**
@@ -866,7 +1068,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
 		        {
-		            $done = __save_premium_AGR_BEE($policy_record, $endorsement_record);
+		            $done = __save_premium_AGR_BEE($policy_record, $record);
 		        }
 
 				/**
@@ -875,7 +1077,7 @@ class Endorsements extends MY_Controller
 				 */
 				else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 				{
-					$done = __save_premium_MOTOR( $policy_record, $endorsement_record );
+					$done = __save_premium_MOTOR( $policy_record, $record );
 				}
 
 				/**
@@ -884,7 +1086,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
 		        {
-		            $done = __save_premium_FIRE_FIRE( $policy_record, $endorsement_record );
+		            $done = __save_premium_FIRE_FIRE( $policy_record, $record );
 		        }
 
 		        /**
@@ -893,7 +1095,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
 		        {
-		            $done = __save_premium_FIRE_HHP( $policy_record, $endorsement_record );
+		            $done = __save_premium_FIRE_HHP( $policy_record, $record );
 		        }
 
 		        /**
@@ -902,7 +1104,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
 		        {
-		            $done = __save_premium_FIRE_LOP( $policy_record, $endorsement_record );
+		            $done = __save_premium_FIRE_LOP( $policy_record, $record );
 		        }
 
 				/**
@@ -911,7 +1113,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
 		        {
-		            $done = __save_premium_MISC_BRG( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_BRG( $policy_record, $record );
 		        }
 
 				/**
@@ -920,7 +1122,7 @@ class Endorsements extends MY_Controller
 				 */
 				else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 				{
-					$done = __save_premium_MARINE( $policy_record, $endorsement_record );
+					$done = __save_premium_MARINE( $policy_record, $record );
 				}
 
 				/**
@@ -929,7 +1131,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
 		        {
-		            $done = __save_premium_ENG_BL( $policy_record, $endorsement_record );
+		            $done = __save_premium_ENG_BL( $policy_record, $record );
 		        }
 
 		        /**
@@ -938,7 +1140,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
 		        {
-		            $done = __save_premium_ENG_CAR( $policy_record, $endorsement_record );
+		            $done = __save_premium_ENG_CAR( $policy_record, $record );
 		        }
 
 		        /**
@@ -947,7 +1149,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
 		        {
-		            $done = __save_premium_ENG_CPM( $policy_record, $endorsement_record );
+		            $done = __save_premium_ENG_CPM( $policy_record, $record );
 		        }
 
 		        /**
@@ -956,7 +1158,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
 		        {
-		            $done = __save_premium_ENG_EEI( $policy_record, $endorsement_record );
+		            $done = __save_premium_ENG_EEI( $policy_record, $record );
 		        }
 
 		        /**
@@ -965,7 +1167,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
 		        {
-					$done = __save_premium_ENG_EAR( $policy_record, $endorsement_record );
+					$done = __save_premium_ENG_EAR( $policy_record, $record );
 		        }
 
 		        /**
@@ -974,7 +1176,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
 		        {
-		            $done = __save_premium_ENG_MB( $policy_record, $endorsement_record );
+		            $done = __save_premium_ENG_MB( $policy_record, $record );
 		        }
 
 		        /**
@@ -983,7 +1185,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
 		        {
-		            $done = __save_premium_MISC_BB( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_BB( $policy_record, $record );
 		        }
 
 		        /**
@@ -992,7 +1194,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
 		        {
-		            $done = __save_premium_MISC_GPA( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_GPA( $policy_record, $record );
 		        }
 
 		        /**
@@ -1001,7 +1203,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
 		        {
-		            $done = __save_premium_MISC_PA( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_PA( $policy_record, $record );
 		        }
 
 		        /**
@@ -1010,7 +1212,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
 		        {
-		            $done = __save_premium_MISC_PL( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_PL( $policy_record, $record );
 		        }
 
 		        /**
@@ -1019,7 +1221,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
 		        {
-		            $done = __save_premium_MISC_CT( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_CT( $policy_record, $record );
 		        }
 
 		        /**
@@ -1028,7 +1230,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
 		        {
-		            $done = __save_premium_MISC_CS( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_CS( $policy_record, $record );
 		        }
 
 		        /**
@@ -1037,7 +1239,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
 		        {
-		            $done = __save_premium_MISC_CC( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_CC( $policy_record, $record );
 		        }
 
 		        /**
@@ -1046,7 +1248,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
 		        {
-		            $done = __save_premium_MISC_EPA( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_EPA( $policy_record, $record );
 		        }
 
 		        /**
@@ -1055,7 +1257,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
 		        {
-		            $done = __save_premium_MISC_TMI( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_TMI( $policy_record, $record );
 		        }
 
 		        /**
@@ -1064,7 +1266,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
 		        {
-		            $done = __save_premium_MISC_FG( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_FG( $policy_record, $record );
 		        }
 
 		        /**
@@ -1073,7 +1275,7 @@ class Endorsements extends MY_Controller
 		         */
 		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
 		        {
-		            $done = __save_premium_MISC_HI( $policy_record, $endorsement_record );
+		            $done = __save_premium_MISC_HI( $policy_record, $record );
 		        }
 
 				else
@@ -1091,10 +1293,10 @@ class Endorsements extends MY_Controller
 					/**
 					 * Build and Update Installments
 					 */
-					$endorsement_record = $this->endorsement_model->get($endorsement_record->id);
+					$record = $this->endorsement_model->get($record->id);
 					try {
 
-						$this->_save_installments_PREMIUM($policy_record, $endorsement_record);
+						$this->_save_installments($policy_record, $record);
 
 					} catch (Exception $e) {
 						return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
@@ -1103,7 +1305,7 @@ class Endorsements extends MY_Controller
 
 
 					// Get Updated Record or Premium Box
-					if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+					if( !$this->endorsement_model->is_first( $record->txn_type) )
 					{
 						return $this->template->json([
 							'message' 		=> 'Successfully Updated.',
@@ -1112,9 +1314,9 @@ class Endorsements extends MY_Controller
 							'hideBootbox' 	=> true,
 							'updateSection' => true,
 							'updateSectionData' => [
-								'box' 		=> '#_data-row-endorsements-' . $endorsement_record->id,
+								'box' 		=> '#_data-row-endorsements-' . $record->id,
 								'method' 	=> 'replaceWith',
-								'html'		=> $this->load->view('endorsements/_single_row', ['record' => $endorsement_record], TRUE)
+								'html'		=> $this->load->view('endorsements/_single_row', ['record' => $record], TRUE)
 							]
 						]);
 					}
@@ -1131,7 +1333,7 @@ class Endorsements extends MY_Controller
 								 */
 								'box' 		=> '#_premium-card',
 								'method' 	=> 'replaceWith',
-								'html'		=> $this->load->view('endorsements/_cost_calculation_table', ['endorsement_record' => $endorsement_record, 'policy_record' => $policy_record], TRUE)
+								'html'		=> $this->load->view('endorsements/_cost_calculation_table', ['endorsement_record' => $record, 'policy_record' => $policy_record], TRUE)
 							]
 						]);
 					}
@@ -1143,10 +1345,10 @@ class Endorsements extends MY_Controller
 		 * Save FAC-Inward Policy premium
 		 *
 		 * @param object $policy_record
-		 * @param object $endorsement_record
+		 * @param object $record
 		 * @return boolean
 		 */
-		private function __save_premium_FAC_IN($policy_record, $endorsement_record)
+		private function __save_premium_FAC_IN($policy_record, $record)
 		{
 			$v_rules = $this->endorsement_model->fac_in_premium_v_rules();
 
@@ -1231,7 +1433,7 @@ class Endorsements extends MY_Controller
 					'cost_calculation_table' 	=> json_encode($cost_calculation_table),
 				];
 
-				return $this->endorsement_model->save($endorsement_record->id, $premium_data);
+				return $this->endorsement_model->save($record->id, $premium_data);
         	}
         	else
         	{
@@ -1257,10 +1459,10 @@ class Endorsements extends MY_Controller
 		 * 	Master Setup >> Portfolio >> Portfolio Settings
 		 *
 		 * @param object $policy_record
-		 * @param object $endorsement_record
+		 * @param object $record
 		 * @return mixed
 		 */
-		private function _save_installments_PREMIUM($policy_record, $endorsement_record)
+		private function _save_installments($policy_record, $record)
 		{
 			$this->load->model('policy_installment_model');
 
@@ -1283,7 +1485,7 @@ class Endorsements extends MY_Controller
 
 				if(empty($dates) OR empty($percents))
 				{
-					throw new Exception("Exception [Controller:Endorsements][Method: _save_installments_PREMIUM()]: No installment data found. <br/>You integrate and supply installment information on premium for of this PORTFOLIO.");
+					throw new Exception("Exception [Controller:Endorsements][Method: _save_installments()]: No installment data found. <br/>You integrate and supply installment information on premium for of this PORTFOLIO.");
 				}
 
 				$installment_data = [
@@ -1303,9 +1505,9 @@ class Endorsements extends MY_Controller
 			/**
 			 * Set Installment Type
 			 */
-			$installment_data['installment_type'] = _POLICY_INSTALLMENT_type_by_endorsement_type( $endorsement_record->txn_type );
+			$installment_data['installment_type'] = $this->policy_installment_model->get_type( $record->txn_type );
 
-			return $this->policy_installment_model->build($endorsement_record, $installment_data);
+			return $this->policy_installment_model->build($record, $installment_data);
 		}
 
 		// --------------------------------------------------------------------
@@ -1322,10 +1524,10 @@ class Endorsements extends MY_Controller
 		 * 	Master Setup >> Portfolio >> Portfolio Settings
 		 *
 		 * @param object $policy_record
-		 * @param object $endorsement_record
+		 * @param object $record
 		 * @return mixed
 		 */
-		private function _save_installment_OT($policy_record, $endorsement_record)
+		private function _save_installment_OT($policy_record, $record)
 		{
 			$this->load->model('policy_installment_model');
 
@@ -1333,10 +1535,10 @@ class Endorsements extends MY_Controller
 			$installment_data = [
 				'dates' 			=> [date('Y-m-d')], // Today
 				'percents' 			=> [100],
-				'installment_type' 	=> _POLICY_INSTALLMENT_type_by_endorsement_type( $endorsement_record->txn_type )
+				'installment_type' 	=> $this->policy_installment_model->get_type( $record->txn_type )
 			];
 
-			return $this->policy_installment_model->build($endorsement_record, $installment_data);
+			return $this->policy_installment_model->build($record, $installment_data);
 		}
 
 		// --------------------------------------------------------------------
@@ -1413,11 +1615,11 @@ class Endorsements extends MY_Controller
 	 * 	2. Transactional Endorsement
 	 *
 	 * @param object 	$policy_record 	Policy Record
-	 * @param object 	$endorsement_record Endorsement Record
+	 * @param object 	$record Endorsement Record
 	 * @param array 	$json_extra 	Extra Data to Pass as JSON
 	 * @return type
 	 */
-	private function __render_premium_form($policy_record, $endorsement_record, $json_extra=[])
+	private function _render_premium_form($policy_record, $record, $json_extra=[])
 	{
 
 		/**
@@ -1425,8 +1627,40 @@ class Endorsements extends MY_Controller
 		 */
 		if($policy_record->category == IQB_POLICY_CATEGORY_FAC_IN )
 		{
-			return $this->__render_premium_form_FAC_IN($policy_record, $endorsement_record, $json_extra);
+			return $this->__render_premium_form_FAC_IN($policy_record, $record, $json_extra);
 		}
+
+		// --------------------------------------------------------------------
+
+		/**
+		 * Return the premium form based on type
+		 */
+		$txn_type = (int)$record->txn_type;
+		switch ($txn_type)
+		{
+			case IQB_ENDORSEMENT_TYPE_FRESH:
+			case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+			case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+				# code...
+				break;
+
+			case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+				return $this->__premium_form_fee($policy_record, $record, $json_extra);
+				break;
+
+
+			case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
+				return $this->__premium_form_fee($policy_record, $record, $json_extra);
+				break;
+
+			default:
+				# code...
+				break;
+		}
+
+
+
+
 
 		/**
 		 *  Let's Load The Endorsement Form For this Record
@@ -1462,7 +1696,7 @@ class Endorsements extends MY_Controller
         if($pfs_record->flag_installment === IQB_FLAG_YES )
 		{
 	        $common_components = $this->load->view('endorsements/forms/_form_txn_installments', [
-	            'endorsement_record'    => $endorsement_record,
+	            'endorsement_record'    => $record,
 	            'form_elements'     	=> $premium_goodies['validation_rules']['installments']
 	        ], TRUE);
 	    }
@@ -1473,12 +1707,12 @@ class Endorsements extends MY_Controller
 		 *
 		 * If so, let's render manual premium form
 		 */
-		if( $this->endorsement_model->is_endorsement_manual($endorsement_record->portfolio_id, $endorsement_record->txn_type) )
+		if( $this->endorsement_model->is_endorsement_manual($record->portfolio_id, $record->txn_type) )
 		{
 			$json_data['form'] = $this->load->view('endorsements/forms/_form_premium_manual', [
 								                'form_elements'         => $this->endorsement_model->manual_premium_v_rules(),
 								                'policy_record'         => $policy_record,
-								                'endorsement_record'    => $endorsement_record,
+								                'endorsement_record'    => $record,
 								                'common_components' 	=> $common_components
 								            ], TRUE);
 			$json_data = array_merge($json_data, $json_extra);
@@ -1503,7 +1737,7 @@ class Endorsements extends MY_Controller
 								                'form_elements'         => $premium_goodies['validation_rules'],
 								                'portfolio_risks' 		=> $portfolio_risks,
 								                'policy_record'         => $policy_record,
-								                'endorsement_record'    => $endorsement_record,
+								                'endorsement_record'    => $record,
 								                'policy_object' 		=> $policy_object,
 								                'tariff_record' 		=> $premium_goodies['tariff_record'],
 								                'common_components' 	=> $common_components
@@ -1519,13 +1753,38 @@ class Endorsements extends MY_Controller
         $this->template->json($json_data);
 	}
 
+		// --------------------------------------------------------------------
 
-	private function __render_premium_form_FAC_IN($policy_record, $endorsement_record, $json_extra=[])
+		/**
+		 * Render Ownership Transfer Premium Form
+		 *
+		 * @param object $policy_record
+		 * @param object $record
+		 * @param type|array $json_extra
+		 * @return void
+		 */
+		private function __premium_form_fee($policy_record, $record, $json_extra = [])
+		{
+			$json_data['form'] = $this->load->view('endorsements/forms/_form_premium_fee', [
+                'form_elements'     => $this->endorsement_model->get_fee_validation_rules(
+            									$record->txn_type,
+            									$record->portfolio_id
+            								),
+                'policy_record'     => $policy_record,
+                'record'    		=> $record
+            ], TRUE);
+			$json_data = array_merge($json_data, $json_extra);
+			return $this->template->json($json_data);
+		}
+
+	// --------------------------------------------------------------------
+
+	private function __render_premium_form_FAC_IN($policy_record, $record, $json_extra=[])
 	{
 		$json_data['form'] = $this->load->view('endorsements/forms/_form_premium_fac_in', [
 								                'form_elements'         => $this->endorsement_model->fac_in_premium_v_rules(),
 								                'policy_record'         => $policy_record,
-								                'endorsement_record'    => $endorsement_record
+								                'endorsement_record'    => $record
 								            ], TRUE);
 		$json_data = array_merge($json_data, $json_extra);
 		$this->template->json($json_data);
@@ -1958,14 +2217,14 @@ class Endorsements extends MY_Controller
 	public function status($id, $to_status_code, $ref='tab-endorsements')
 	{
 		$id = (int)$id;
-		$endorsement_record = $this->endorsement_model->get($id);
-		if(!$endorsement_record)
+		$record = $this->endorsement_model->get($id);
+		if(!$record)
 		{
 			$this->template->render_404();
 		}
 
 		// is This Current Transaction?
-		if( $endorsement_record->flag_current != IQB_FLAG_ON  )
+		if( $record->flag_current != IQB_FLAG_ON  )
 		{
 			return $this->template->json([
 				'status' 	=> 'error',
@@ -1978,13 +2237,13 @@ class Endorsements extends MY_Controller
 		 * -----------------
 		 * You need to have permission to modify the given status.
 		 */
-		$this->__check_status_permission($to_status_code, $endorsement_record);
+		$this->__check_status_permission($to_status_code, $record);
 
 
 		/**
 		 * Meet the Status Pre-Requisite ?
 		 */
-		$this->__status_qualifies($to_status_code, $endorsement_record);
+		$this->__status_qualifies($to_status_code, $record);
 
 
 		/**
@@ -1992,13 +2251,13 @@ class Endorsements extends MY_Controller
 		 */
 		try {
 
-			if( $this->endorsement_model->update_status($endorsement_record, $to_status_code) )
+			if( $this->endorsement_model->update_status($record, $to_status_code) )
 			{
 				/**
 				 * Updated Transaction & Policy Record
 				 */
-				$endorsement_record = $this->endorsement_model->get($endorsement_record->id);
-				$policy_record 		= $this->policy_model->get($endorsement_record->policy_id);
+				$record = $this->endorsement_model->get($record->id);
+				$policy_record 		= $this->policy_model->get($record->policy_id);
 
 
 
@@ -2008,10 +2267,10 @@ class Endorsements extends MY_Controller
 				 * 1. Save Installment Record on Ownership transfer
 				 * 		Since this type does not have premium update function. So we have to do this while we verify it
 				 */
-				$txn_type = (int)$endorsement_record->txn_type;
+				$txn_type = (int)$record->txn_type;
 				if( $to_status_code == IQB_ENDORSEMENT_STATUS_VERIFIED && $txn_type == IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER )
 				{
-					try { $this->_save_installment_OT($policy_record, $endorsement_record); } catch (Exception $e) {
+					try { $this->_save_installment_OT($policy_record, $record); } catch (Exception $e) {
 						return $this->template->json([ 'status' => 'error', 'message' => $e->getMessage()], 404);
 					}
 				}
@@ -2029,7 +2288,7 @@ class Endorsements extends MY_Controller
 				// Replace the Row
 				$html = $this->load->view(
 											'endorsements/_single_row',
-											['record' => $endorsement_record, 'policy_record' => $policy_record],
+											['record' => $record, 'policy_record' => $policy_record],
 										TRUE);
 
 				return $this->template->json([
@@ -2037,7 +2296,7 @@ class Endorsements extends MY_Controller
 					'status'  	=> 'success',
 					'multipleUpdate' => [
 						[
-							'box' 		=> '#_data-row-endorsements-' . $endorsement_record->id,
+							'box' 		=> '#_data-row-endorsements-' . $record->id,
 							'method' 	=> 'replaceWith',
 							'html' 		=> $html
 						]
@@ -2151,13 +2410,13 @@ class Endorsements extends MY_Controller
 		 * follow the logic accordingly.
 		 *
 		 * @param alpha $to_updown_status Status Code to UP/DOWN
-		 * @param object $endorsement_record Endorsement Record
+		 * @param object $record Endorsement Record
 		 * @param bool $terminate_on_fail Terminate right here on fails
 		 * @return mixed
 		 */
-		private function __status_qualifies($to_updown_status, $endorsement_record, $terminate_on_fail = TRUE)
+		private function __status_qualifies($to_updown_status, $record, $terminate_on_fail = TRUE)
 		{
-			$__flag_passed = $this->endorsement_model->status_qualifies($endorsement_record->status, $to_updown_status);
+			$__flag_passed = $this->endorsement_model->status_qualifies($record->status, $to_updown_status);
 
 			if( $__flag_passed )
 			{
@@ -2166,7 +2425,7 @@ class Endorsements extends MY_Controller
 				 * 	Draft/Verified are automatically triggered from
 				 * 	Policy Status Update Method
 				 */
-				if( _ENDORSEMENT_is_first($endorsement_record->txn_type) )
+				if( $this->endorsement_model->is_first($record->txn_type) )
 				{
 					$__flag_passed = !in_array($to_updown_status, [
 						IQB_ENDORSEMENT_STATUS_DRAFT,
@@ -2181,15 +2440,15 @@ class Endorsements extends MY_Controller
 			 * Premium Must be Updated Before Verifying
 			 */
 			if(
-				$__flag_passed && _ENDORSEMENT_is_transactional($endorsement_record->txn_type)
-				&&
+				$__flag_passed
+					&&
+				$this->endorsement_model->is_premium_computed($record) === IQB_FLAG_NO
+					&&
 				$to_updown_status === IQB_ENDORSEMENT_STATUS_VERIFIED
-				&&
-				!$endorsement_record->net_amt_basic_premium
 			)
 			{
 				$__flag_passed 		= FALSE;
-				$failed_message 	= 'Please Update Policy Premium First!';
+				$failed_message 	= 'Please Update Premium Information First!';
 			}
 
 
@@ -2211,15 +2470,15 @@ class Endorsements extends MY_Controller
 			 *
 			 * !!! If RI-Approval Constraint Required, It should Come from That Status else from Verified
 			 */
-			if( $__flag_passed && $to_updown_status === IQB_ENDORSEMENT_STATUS_ACTIVE && $endorsement_record->txn_type == IQB_ENDORSEMENT_TYPE_GENERAL )
+			if( $__flag_passed && $to_updown_status === IQB_ENDORSEMENT_STATUS_ACTIVE && $record->txn_type == IQB_ENDORSEMENT_TYPE_GENERAL )
 			{
-				if( (int)$endorsement_record->flag_ri_approval === IQB_FLAG_ON )
+				if( (int)$record->flag_ri_approval === IQB_FLAG_ON )
 				{
-					$__flag_passed = $endorsement_record->status === IQB_ENDORSEMENT_STATUS_RI_APPROVED;
+					$__flag_passed = $record->status === IQB_ENDORSEMENT_STATUS_RI_APPROVED;
 				}
 				else
 				{
-					$__flag_passed = $endorsement_record->status === IQB_ENDORSEMENT_STATUS_VERIFIED;
+					$__flag_passed = $record->status === IQB_ENDORSEMENT_STATUS_VERIFIED;
 				}
 			}
 

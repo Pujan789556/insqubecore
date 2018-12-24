@@ -49,9 +49,7 @@ $labels = [
     'vat' => ['en' => 'VAT', 'np' => 'मु अ कर (रु)'],
     'total_premium' => ['en' => 'Total (Rs)', 'np' => 'जम्मा (रु)'],
 ];
-
 ?>
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -245,12 +243,9 @@ $labels = [
                                 $total_premium = bcadd($total_premium, $vat, IQB_AC_DECIMAL_PRECISION);
                             }
 
-
-
-                            if(_ENDORSEMENT_is_transactional($record) ):
+                            if(_ENDORSEMENT_is_transactional($record->txn_type) ):
                             ?>
                                 <h3 style="margin:0"><?php echo $labels['additional_premium'][$lang]; ?></h3>
-
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -259,41 +254,31 @@ $labels = [
                                             <td><?php echo $labels['refund'][$lang]; ?></td>
                                         </tr>
                                     </thead>
-                                    <?php
-                                    foreach($premium_table as $title => $value):
-                                        if( _ENDORSEMENT_is_refundable($record->txn_type) )
-                                        {
-                                            $row = '<td>'.$title . '</td>' .
-                                                    '<td class="text-right">0.00</td>' .
-                                                    '<td class="text-right">' . ac_format_number($value, 2) . '</td>';
-                                        }
-                                        else
-                                        {
-                                            $row = '<td>'.$title . '</td>' .
-                                                    '<td class="text-right">' . ac_format_number($value, 2) . '</td>'.
-                                                    '<td class="text-right">0.00</td>';
-                                        }
-                                        $row = "<tr>{$row}</tr>";
-                                        echo $row;
-                                        ?>
-                                    <?php
-                                    endforeach;
+                                    <tbody>
+                                        <?php foreach($premium_table as $title => $value): ?>
+                                            <tr>
+                                                <td><?php echo $title ?></td>
+                                                <?php if( _ENDORSEMENT_is_refundable($record->txn_type) ): ?>
+                                                    <td class="text-right">0.00</td>
+                                                    <td class="text-right"><?php echo ac_format_number($value, 2) ?></td>
+                                                <?php else: ?>
+                                                    <td class="text-right"><?php echo ac_format_number($value, 2) ?></td>
+                                                    <td class="text-right">0.00</td>
+                                                <?php endif ?>
+                                            </tr>
+                                        <?php endforeach; ?>
 
-
-                                    $total_row = '<td class="text-right text-bold">'. $labels['total_premium'][$lang] .'</td>';
-                                    if( _ENDORSEMENT_is_refundable($record->txn_type) )
-                                    {
-                                        $total_row .=   '<td class="text-right text-bold">0.00</td>' .
-                                                        '<td class="text-right text-bold">' . ac_format_number($total_premium, 2) . '</td>';
-                                    }
-                                    else
-                                    {
-                                        $total_row .=   '<td class="text-right text-bold">' . ac_format_number($total_premium, 2) . '</td>'.
-                                                        '<td class="text-right text-bold">0.00</td>';
-                                    }
-                                    $total_row = "<tr>{$total_row}</tr>";
-                                    echo $total_row;
-                                    ?>
+                                        <tr>
+                                            <td class="text-right text-bold"><?php echo $labels['total_premium'][$lang] ?></td>
+                                            <?php if( _ENDORSEMENT_is_refundable($record->txn_type) ): ?>
+                                                <td class="text-right text-bold">0.00</td>
+                                                <td class="text-right text-bold"><?php echo ac_format_number($total_premium, 2) ?></td>
+                                            <?php else: ?>
+                                                <td class="text-right text-bold"><?php echo ac_format_number($total_premium, 2) ?></td>
+                                                <td class="text-right text-bold">0.00</td>
+                                            <?php endif ?>
+                                        </tr>
+                                    </tbody>
                                 </table>
                             <?php endif; ?>
                         </td>

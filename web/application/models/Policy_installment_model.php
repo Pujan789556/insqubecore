@@ -674,6 +674,44 @@ class Policy_installment_model extends MY_Model
 
     // --------------------------------------------------------------------
 
+    /**
+     * Get Installment Type by Endorsement Type
+     *
+     * @param int $txn_type
+     * @return int
+     */
+    public function get_type($txn_type)
+    {
+        $txn_type           = (int)$txn_type;
+        $installment_type   = NULL;
+        switch($txn_type)
+        {
+            case IQB_ENDORSEMENT_TYPE_FRESH:
+            case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+            case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+            case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+                $installment_type = IQB_POLICY_INSTALLMENT_TYPE_INVOICE_TO_CUSTOMER;
+                break;
+
+            case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+            case IQB_ENDORSEMENT_TYPE_TERMINATE:
+                $installment_type = IQB_POLICY_INSTALLMENT_TYPE_REFUND_TO_CUSTOMER;
+                break;
+
+            default:
+                break;
+        }
+
+        if( !$installment_type )
+        {
+            throw new Exception("Exception [Model: Policy_installment_model][Method: get_type()]: Invalid Installment Type.");
+        }
+
+        return $installment_type;
+    }
+
+    // --------------------------------------------------------------------
+
 
     /**
      * Delete Cache on Update/Delete Records

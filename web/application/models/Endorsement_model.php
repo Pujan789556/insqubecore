@@ -208,15 +208,8 @@ class Endorsement_model extends MY_Model
          */
         $_rules_premium_compute_references = $this->_v_rules_premium_compute_references( $txn_type, $portfolio_id, $policy_record );
 
-
         /**
-         * 4. Premium/Fee Related Fields - Stamp Duty, Ownership Transfer Fee, NCD FEE etc based on types
-         */
-        //  $_rules_fee = $this->_v_rules_fee( $txn_type, $portfolio_id, $policy_record );
-        $_rules_fee = [];
-
-        /**
-         * 5. Other Validation Rules
+         * 4. Other Validation Rules
          *
          *     Example: If ownership transfer - Customer Info
          */
@@ -230,7 +223,6 @@ class Endorsement_model extends MY_Model
             $_rules_basic,
             $_rules_dates,
             $_rules_premium_compute_references,
-            $_rules_fee,
             $_rules_other_specific
         ));
 
@@ -507,13 +499,6 @@ class Endorsement_model extends MY_Model
                     case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
                         $v_rules = [
                             [
-                                'field' => 'net_amt_cancellation_fee',
-                                'label' => 'Cancellation Charge (Rs.)',
-                                'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                                '_type'     => 'text',
-                                '_required' => true
-                            ],
-                            [
                                 'field' => 'rc_ref_basic',
                                 'label' => 'Basic Premium Refund Reference',
                                 'rules' => 'trim|required|integer|exact_length[1]|in_list['. implode( ',', array_keys( $ref_dd ) ) .']',
@@ -538,6 +523,7 @@ class Endorsement_model extends MY_Model
                                 '_type'     => 'radio',
                                 '_default'  => IQB_ENDORSEMENT_CB_UPDOWN_PRORATA,
                                 '_data'     => _FLAG_yes_no_dropdown(FALSE),
+                                '_show_label' => true,
                                 '_required' => true
                             ],
                         ];
@@ -573,194 +559,6 @@ class Endorsement_model extends MY_Model
 
             return ['compute_references' => $v_rules];
         }
-
-        // ----------------------------------------------------------------
-
-        /**
-         * Get Fee Validation Rules - Fee Elements
-         *
-         *
-         * @param type $txn_type
-         * @param type $portfolio_id
-         * @param object $policy_record
-         * @return array
-         */
-        private function _v_rules_fee( $txn_type, $portfolio_id, $policy_record )
-        {
-            $txn_type   = (int)$txn_type;
-            $v_rules    = [];
-
-            /**
-             * Is endorsement Transactional?
-             */
-            if( !$this->is_transactional( $txn_type ) )
-            {
-                return $v_rules;
-            }
-
-
-            switch ($txn_type)
-            {
-                case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
-                case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-                case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
-                    $v_rules = $this->_v_rules_fee_updown( $txn_type, $portfolio_id );
-                    break;
-
-
-                case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
-                    $v_rules = $this->_v_rules_fee_ownership_transfer($portfolio_id);
-                    break;
-
-                case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
-                    $v_rules = $this->_v_rules_fee_terminate($txn_type, $portfolio_id);
-                    break;
-
-                default:
-                    # code...
-                    break;
-            }
-
-            return ['fee' => $v_rules];
-        }
-
-            // ----------------------------------------------------------------
-
-            private function _v_rules_fee_updown( $txn_type, $portfolio_id )
-            {
-                $v_rules = [
-                    [
-                        'field' => 'net_amt_stamp_duty',
-                        'label' => 'Stamp Duty (Rs.)',
-                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-                        '_type'     => 'text',
-                        '_default'  => 0,
-                        '_required' => true
-                    ]
-                ];
-
-                if( $this-> is_endorsement_manual( $portfolio_id, $txn_type ) )
-                {
-                    $v_rules = array_merge($v_rules, [
-                        [
-                            'field' => 'net_amt_basic_premium',
-                            'label' => 'Net Basic Premium (Rs.)',
-                            'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                            '_type'     => 'text',
-                            '_default'  => 0,
-                            '_required' => true
-                        ],
-                        [
-                            'field' => 'net_amt_pool_premium',
-                            'label' => 'Net Pool Premium (Rs.)',
-                            'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                            '_type'     => 'text',
-                            '_default'  => 0,
-                            '_required' => true
-                        ],
-                        [
-                            'field' => 'net_amt_stamp_duty',
-                            'label' => 'Stamp Duty (Rs.)',
-                            'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-                            '_type'     => 'text',
-                            '_default'  => 0,
-                            '_required' => true
-                        ]
-                    ]);
-                }
-
-                return $v_rules;
-            }
-
-            // ----------------------------------------------------------------
-
-
-            private function _v_rules_fee_ownership_transfer($portfolio_id)
-            {
-
-                $motor_portfolio_ids = array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR);
-
-                $v_rules = [
-                    [
-                        'field' => 'net_amt_transfer_fee',
-                        'label' => 'Transfer Fee (Rs.)',
-                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                        '_type'     => 'text',
-                        '_default'  => 100,
-                        '_required' => true
-                    ],
-                    [
-                        'field' => 'net_amt_stamp_duty',
-                        'label' => 'Stamp Duty (Rs.)',
-                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-                        '_type'     => 'text',
-                        '_default'  => 0,
-                        '_required' => true
-                    ]
-                ];
-
-                if(in_array($portfolio_id, $motor_portfolio_ids))
-                {
-                    $v_rules[] = [
-                        'field' => 'net_amt_transfer_ncd',
-                        'label' => 'NCD Return (Rs.)',
-                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                        '_type'     => 'text',
-                        '_default'  => 0.00,
-                        '_help_text' => '<strong>No Claim Discount Return:</strong> This applies only in <strong class="text-red">MOTOR</strong> portfoliios.',
-                        '_required' => true
-                    ];
-                }
-
-                return $v_rules;
-            }
-
-            // ----------------------------------------------------------------
-
-            private function _v_rules_fee_terminate( $txn_type, $portfolio_id )
-            {
-                $v_rules = [
-                    [
-                        'field' => 'net_amt_stamp_duty',
-                        'label' => 'Stamp Duty (Rs.)',
-                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
-                        '_type'     => 'text',
-                        '_default'  => 0,
-                        '_required' => true
-                    ],
-                    [
-                        'field' => 'net_amt_cancellation_fee',
-                        'label' => 'Cancellation Charge (Rs.)',
-                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                        '_type'     => 'text',
-                        '_required' => true
-                    ],
-                ];
-
-                if( $this-> is_endorsement_manual( $portfolio_id, $txn_type ) )
-                {
-                    $v_rules = array_merge($v_rules, [
-                        [
-                            'field' => 'net_amt_basic_premium',
-                            'label' => 'Net Basic Premium (Rs.)',
-                            'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                            '_type'     => 'text',
-                            '_default'  => 0,
-                            '_required' => true
-                        ],
-                        [
-                            'field' => 'net_amt_pool_premium',
-                            'label' => 'Net Pool Premium (Rs.)',
-                            'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
-                            '_type'     => 'text',
-                            '_default'  => 0,
-                            '_required' => true
-                        ]
-                    ]);
-                }
-
-                return $v_rules;
-            }
 
         // ----------------------------------------------------------------
 
@@ -821,6 +619,198 @@ class Endorsement_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get Premium Validation Rules - Fee Elements
+     *
+     *
+     * @param type $txn_type
+     * @param type $portfolio_id
+     * @param bool $formatted
+     * @return array
+     */
+    public function get_fee_validation_rules( $txn_type, $portfolio_id, $formatted = FALSE)
+    {
+        $txn_type   = (int)$txn_type;
+        $v_rules    = [];
+
+        /**
+         * Is endorsement Transactional?
+         */
+        if( !$this->is_transactional( $txn_type ) )
+        {
+            return $v_rules;
+        }
+
+        switch ($txn_type)
+        {
+            case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+            case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+            case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+                $v_rules = $this->_v_rules_fee_updown( $txn_type, $portfolio_id );
+                break;
+
+
+            case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+                $v_rules = $this->_v_rules_fee_ownership_transfer($portfolio_id);
+                break;
+
+            case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
+                $v_rules = $this->_v_rules_fee_terminate($txn_type, $portfolio_id);
+                break;
+
+            default:
+                # code...
+                break;
+        }
+
+        if( $formatted )
+        {
+            return $v_rules;
+        }
+
+        return ['fee' => $v_rules];
+    }
+
+        // ----------------------------------------------------------------
+
+        private function _v_rules_fee_updown( $txn_type, $portfolio_id )
+        {
+            $v_rules = [
+                [
+                    'field' => 'net_amt_stamp_duty',
+                    'label' => 'Stamp Duty (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_default'  => 0,
+                    '_required' => true
+                ]
+            ];
+
+            if( $this-> is_endorsement_manual( $portfolio_id, $txn_type ) )
+            {
+                $v_rules = array_merge($v_rules, [
+                    [
+                        'field' => 'net_amt_basic_premium',
+                        'label' => 'Net Basic Premium (Rs.)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_type'     => 'text',
+                        '_default'  => 0,
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'net_amt_pool_premium',
+                        'label' => 'Net Pool Premium (Rs.)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_type'     => 'text',
+                        '_default'  => 0,
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'net_amt_stamp_duty',
+                        'label' => 'Stamp Duty (Rs.)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        '_type'     => 'text',
+                        '_default'  => 0,
+                        '_required' => true
+                    ]
+                ]);
+            }
+
+            return $v_rules;
+        }
+
+        // ----------------------------------------------------------------
+
+
+        private function _v_rules_fee_ownership_transfer($portfolio_id)
+        {
+
+            $motor_portfolio_ids = array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR);
+
+            $v_rules = [
+                [
+                    'field' => 'net_amt_transfer_fee',
+                    'label' => 'Transfer Fee (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_default'  => 100,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'net_amt_stamp_duty',
+                    'label' => 'Stamp Duty (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_default'  => 0,
+                    '_required' => true
+                ]
+            ];
+
+            if(in_array($portfolio_id, $motor_portfolio_ids))
+            {
+                $v_rules[] = [
+                    'field' => 'net_amt_transfer_ncd',
+                    'label' => 'NCD Return (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_default'  => 0.00,
+                    '_help_text' => '<strong>No Claim Discount Return:</strong> This applies only in <strong class="text-red">MOTOR</strong> portfoliios.',
+                    '_required' => true
+                ];
+            }
+
+            return $v_rules;
+        }
+
+        // ----------------------------------------------------------------
+
+        private function _v_rules_fee_terminate( $txn_type, $portfolio_id )
+        {
+            $v_rules = [
+                [
+                    'field' => 'net_amt_stamp_duty',
+                    'label' => 'Stamp Duty (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    '_type'     => 'text',
+                    '_default'  => 0,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'net_amt_cancellation_fee',
+                    'label' => 'Cancellation Charge (Rs.)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+            ];
+
+            if( $this-> is_endorsement_manual( $portfolio_id, $txn_type ) )
+            {
+                $v_rules = array_merge($v_rules, [
+                    [
+                        'field' => 'net_amt_basic_premium',
+                        'label' => 'Net Basic Premium (Rs.)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_type'     => 'text',
+                        '_default'  => 0,
+                        '_required' => true
+                    ],
+                    [
+                        'field' => 'net_amt_pool_premium',
+                        'label' => 'Net Pool Premium (Rs.)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_type'     => 'text',
+                        '_default'  => 0,
+                        '_required' => true
+                    ]
+                ]);
+            }
+
+            return $v_rules;
+        }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Get the Compute Reference Dropdown based on Endorsement Type
      *
      * @param int $txn_type
@@ -835,7 +825,7 @@ class Endorsement_model extends MY_Model
         {
             case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
             case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-            case IQB_ENDORSEMENT_TYPE_TERMINATE:
+            case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
                 $dropdown = [
                     IQB_ENDORSEMENT_CB_UPDOWN_FULL      => 'Full/Complete',
                     IQB_ENDORSEMENT_CB_UPDOWN_STR       => 'Short Term',
@@ -1435,7 +1425,7 @@ class Endorsement_model extends MY_Model
                     IQB_ENDORSEMENT_TYPE_TIME_EXTENDED,
                     IQB_ENDORSEMENT_TYPE_TERMINATE,
                     IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE
-                ])
+                ]) )
                 {
                     $this->policy_model->update_end_date($record->policy_id, $record->end_date);
                 }
@@ -1843,22 +1833,41 @@ class Endorsement_model extends MY_Model
          * @param array $data
          * @return bool
          */
-        private function __draft_prepare_data($action, $data, $policy_record)
+        private function __draft_prepare_data($action, $data, $policy_record, $id = NULL)
         {
+
+
             if($action == 'add' )
             {
                 /**
                  * Last Premium Compute Options
                  */
                 $data['premium_compute_options'] = $this->_last_premium_compute_options($data['txn_type'], $data['policy_id']);
+
             }
 
             // --------------------------------------------------------------------
 
             /**
-             * Reset Data by Type
+             * Nullify Premium Data on Edit
+             *
+             * We need to nullify only on the following types
+             *
+             *      - Time Extended
+             *      - Premium Upgrade
+             *      - Premium Downgrade
+             *
              */
-            $data = $this->_nullify_premium_data($data);
+            $txn_type = (int)$data['txn_type'];
+            if( $action == 'edit' && in_array($txn_type, [
+                IQB_ENDORSEMENT_TYPE_TIME_EXTENDED,
+                IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE,
+                IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND
+            ]))
+            {
+                $data = $this->_nullify_premium_data($data);
+            }
+
 
 
             // --------------------------------------------------------------------
@@ -2246,7 +2255,7 @@ class Endorsement_model extends MY_Model
         // Get the Endorsement Record
         $record         = is_numeric($record) ? $this->get( (int)$record ) : $record;
         $policy_record  = is_numeric($policy_record) ? $this->policy_model->get( (int)$policy_record ) : $policy_record;
-
+        $txn_type       = (int)$record->txn_type;
         /**
          * ==================== BUILD DATA =========================
          */
@@ -2255,19 +2264,48 @@ class Endorsement_model extends MY_Model
          * NON-FIRST ENDORSEMENT
          * ---------------------
          */
-        if( !$this->is_first( $record->txn_type) )
+        if( !$this->is_first( $txn_type) )
         {
+
+            /**
+             * Save Premium Based on Type
+             */
+
+            switch ($txn_type)
+            {
+                case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+                    break;
+
+                case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+                case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+                    # code...
+                    break;
+
+                case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+                    // Nothing is required
+                    break;
+
+
+                case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
+                    $premium_data = $this->_build_terminate_premium_data( $premium_data, $record, $policy_record );
+                    break;
+
+                default:
+                    throw new Exception("Exception [Model: Endorsement_model][Method: save_premium()]: Invalid Endorsement Type.");
+                    break;
+            }
+
             /**
              * Manual or Automatic ???
              */
-            if( $this->is_endorsement_manual( $record->portfolio_id, $record->txn_type ) )
-            {
-                $premium_data = $this->_build_updowngrade_premium_data_manual( $premium_data, $record, $policy_record );
-            }
-            else
-            {
-                $premium_data = $this->_build_updowngrade_premium_data( $premium_data, $record, $policy_record );
-            }
+            // if( $this->is_endorsement_manual( $record->portfolio_id, $record->txn_type ) )
+            // {
+            //     $premium_data = $this->_build_updowngrade_premium_data_manual( $premium_data, $record, $policy_record );
+            // }
+            // else
+            // {
+            //     $premium_data = $this->_build_updowngrade_premium_data( $premium_data, $record, $policy_record );
+            // }
         }
 
         /**
@@ -2293,7 +2331,7 @@ class Endorsement_model extends MY_Model
          * Compute VAT
          */
         $premium_data['net_amt_stamp_duty'] = $post_data['net_amt_stamp_duty'] ?? 0.00;
-        $premium_data = $this->_update_vat_on_net_premium_data( $premium_data, $policy_record->fiscal_yr_id, $policy_record->portfolio_id );
+        $premium_data = $this->_update_vat_on_premium_data( $txn_type, $premium_data, $policy_record->fiscal_yr_id, $policy_record->portfolio_id );
 
         // --------------------------------------------------------------------------
 
@@ -2301,7 +2339,7 @@ class Endorsement_model extends MY_Model
          * Prepare Other Data
          */
         $premium_data = array_merge($premium_data, [
-            'premium_compute_options' => json_encode($post_data['premium'] ?? NULL),
+            'premium_compute_options'   => json_encode($post_data['premium'] ?? NULL),
             'cost_calculation_table'    => json_encode($cc_table)
         ]);
 
@@ -3008,26 +3046,27 @@ class Endorsement_model extends MY_Model
         /**
          * Update Endorsement VAT on Premium data
          *
+         * @param int $txn_type
          * @param array $premium_data
          * @param int $fiscal_yr_id
          * @param int $portfolio_id
          * @return array
          */
-        private function _update_vat_on_net_premium_data( $premium_data, $fiscal_yr_id, $portfolio_id )
+        private function _update_vat_on_premium_data( $txn_type, $premium_data, $fiscal_yr_id, $portfolio_id )
         {
             $this->load->model('portfolio_setting_model');
             $pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($fiscal_yr_id, $portfolio_id);
 
             if( $pfs_record->flag_apply_vat_on_premium === NULL )
             {
-                throw new Exception("Exception [Model: Endorsement_model][Method: _update_vat_on_net_premium_data()]: No VAT configuration (Apply Vat on Premium) found on portfolio settings for this portfolio. Please contact administrator to update the portfolio settings.");
+                throw new Exception("Exception [Model: Endorsement_model][Method: _update_vat_on_premium_data()]: No VAT configuration (Apply Vat on Premium) found on portfolio settings for this portfolio. Please contact administrator to update the portfolio settings.");
             }
 
             $net_amt_vat = 0.00;
             if( $pfs_record->flag_apply_vat_on_premium === IQB_FLAG_YES )
             {
                 $this->load->helper('account');
-                $taxable_amount = $this->_compute_taxable_amount($premium_data);
+                $taxable_amount = $this->_compute_taxable_amount($txn_type, $premium_data);
                 $net_amt_vat     = ac_compute_tax(IQB_AC_DNT_ID_VAT, $taxable_amount);
             }
             $premium_data['net_amt_vat'] = $net_amt_vat;
@@ -3037,16 +3076,52 @@ class Endorsement_model extends MY_Model
 
         // --------------------------------------------------------------------
 
-        private function _compute_taxable_amount($premium_data)
+        private function _compute_taxable_amount($txn_type, $premium_data)
         {
-            return  ac_bcsum([
-                floatval($premium_data['net_amt_basic_premium'] ?? 0.00),
-                floatval($premium_data['net_amt_pool_premium'] ?? 0.00),
-                floatval($premium_data['net_amt_stamp_duty'] ?? 0.00),
-                floatval($premium_data['net_amt_transfer_fee'] ?? 0.00),
-                floatval($premium_data['net_amt_transfer_ncd'] ?? 0.00),
-                floatval($premium_data['net_amt_cancellation_fee'] ?? 0.00)
-            ],IQB_AC_DECIMAL_PRECISION);
+            $taxable_amount = 0.00;
+            $txn_type       = (int)$txn_type;
+            switch ($txn_type)
+            {
+                case IQB_ENDORSEMENT_TYPE_FRESH:
+                case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+                case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+                case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+                    $taxable_amount = ac_bcsum([
+                        floatval($premium_data['net_amt_basic_premium'] ?? 0.00),
+                        floatval($premium_data['net_amt_pool_premium'] ?? 0.00),
+                        floatval($premium_data['net_amt_stamp_duty'] ?? 0.00),
+                    ],IQB_AC_DECIMAL_PRECISION);
+                    break;
+
+
+
+                case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+                    $taxable_amount = ac_bcsum([
+                        floatval($premium_data['net_amt_basic_premium'] ?? 0.00),
+                        floatval($premium_data['net_amt_pool_premium'] ?? 0.00),
+                        floatval($premium_data['net_amt_stamp_duty'] ?? 0.00),
+                        floatval($premium_data['net_amt_transfer_fee'] ?? 0.00),
+                        floatval($premium_data['net_amt_transfer_ncd'] ?? 0.00),
+                        floatval($premium_data['net_amt_cancellation_fee'] ?? 0.00)
+                    ],IQB_AC_DECIMAL_PRECISION);
+                    break;
+
+
+                case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
+                    $taxable_amount = ac_bcsum([
+                        floatval($premium_data['net_amt_basic_premium'] ?? 0.00),
+                        floatval($premium_data['net_amt_pool_premium'] ?? 0.00),
+                        floatval($premium_data['net_amt_stamp_duty'] ?? 0.00),
+                        floatval($premium_data['net_amt_cancellation_fee'] ?? 0.00)
+                    ],IQB_AC_DECIMAL_PRECISION);
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+
+            return $taxable_amount;
         }
 
 
@@ -3133,7 +3208,7 @@ class Endorsement_model extends MY_Model
          */
         $premium_data['net_amt_stamp_duty'] = 0.00;
         $premium_data['net_amt_cancellation_fee'] = $record->net_amt_cancellation_fee;
-        $premium_data = $this->_update_vat_on_net_premium_data( $premium_data, $policy_record->fiscal_yr_id, $policy_record->portfolio_id );
+        $premium_data = $this->_update_vat_on_premium_data( $premium_data, $policy_record->fiscal_yr_id, $policy_record->portfolio_id );
 
 
         // --------------------------------------------------------------------------
@@ -3153,7 +3228,7 @@ class Endorsement_model extends MY_Model
         $installment_data = [
             'dates'             => [date('Y-m-d')], // Today
             'percents'          => [100],
-            'installment_type'  => _POLICY_INSTALLMENT_type_by_endorsement_type( $record->txn_type )
+            'installment_type'  => $this->policy_installment_model->get_type( $record->txn_type )
         ];
         $this->policy_installment_model->build($record, $installment_data);
     }
@@ -3273,6 +3348,58 @@ class Endorsement_model extends MY_Model
     {
         $txn_type  = (int)$txn_type;
         return in_array( $txn_type, $this->transactional_only_types() );
+    }
+
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Is Premium Already Computed in this Endorsement?
+     *
+     * If endorsement is not transactional, it returns NOT_REQUIRED FLAG
+     * Else FLAG YES/NO
+     *
+     * @param int|object $record
+     * @return char
+     */
+    public function is_premium_computed( $record )
+    {
+        $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
+        $txn_type  = (int)$record->txn_type;
+
+        if( !$this->is_transactional($txn_type) )
+        {
+            return IQB_FLAG_NOT_REQUIRED;
+        }
+
+        $flag       = IQB_FLAG_NO;
+        $premium    = 0;
+        switch ($txn_type)
+        {
+            case IQB_ENDORSEMENT_TYPE_FRESH:
+            case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+            case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+            case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+            case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
+                $premium = floatval($record->net_amt_basic_premium);
+                break;
+
+            case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+                $premium = floatval($record->net_amt_transfer_fee);
+                break;
+
+
+            default:
+                # code...
+                break;
+        }
+
+        if($premium != 0)
+        {
+            $flag = IQB_FLAG_YES;
+        }
+
+        return $flag;
     }
 
 

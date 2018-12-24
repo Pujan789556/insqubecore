@@ -9,9 +9,9 @@ $premium_compute_text = '';
 $refund_compute_text = '';
 if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 {
-    $compute_ref_dd = _ENDORSEMENT_compute_reference_dropdown(FALSE);
-    $premium_compute_text   = $compute_ref_dd[$endorsement_record->pc_ref_basic] ?? '';
-    $refund_compute_text    = $compute_ref_dd[$endorsement_record->rc_ref_basic] ?? '';
+    // $compute_ref_dd = _ENDORSEMENT_compute_reference_dropdown(FALSE);
+    // $premium_compute_text   = $compute_ref_dd[$endorsement_record->pc_ref_basic] ?? '';
+    // $refund_compute_text    = $compute_ref_dd[$endorsement_record->rc_ref_basic] ?? '';
 }
 
 $grand_total = _ENDORSEMENT__compute_total_amount($endorsement_record);
@@ -69,11 +69,11 @@ else
                             </tr>
                             <tr>
                                 <th>Premium Computation Basis</th>
-                                <td class="text-right"><?php echo $premium_compute_text;?></td>
+                                <td class="text-right"><?php //echo $premium_compute_text;?></td>
                             </tr>
                             <tr>
                                 <th>Refund Computation Basis</th>
-                                <td class="text-right"><?php echo $refund_compute_text;?></td>
+                                <td class="text-right"><?php // echo $refund_compute_text;?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -132,7 +132,7 @@ else
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="3">Grand Total (Rs.)</th>
+                                <th colspan="4">Grand Total (Rs.)</th>
                                 <th class="text-right"><?php echo ac_format_number($grand_total, 2);?></th>
                             </tr>
                         </tfoot>
