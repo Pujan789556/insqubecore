@@ -694,7 +694,7 @@ class Policy_installment_model extends MY_Model
                 break;
 
             case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
-            case IQB_ENDORSEMENT_TYPE_TERMINATE:
+            case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
                 $installment_type = IQB_POLICY_INSTALLMENT_TYPE_REFUND_TO_CUSTOMER;
                 break;
 

@@ -7,30 +7,30 @@ $old_object = get_object_from_policy_record($policy_record);
 $new_object = NULL;
 $premium_compute_text = '';
 $refund_compute_text = '';
-if( !_ENDORSEMENT_is_first( $endorsement_record->txn_type) )
+if( !_ENDORSEMENT_is_first( $record->txn_type) )
 {
     // $compute_ref_dd = _ENDORSEMENT_compute_reference_dropdown(FALSE);
-    // $premium_compute_text   = $compute_ref_dd[$endorsement_record->pc_ref_basic] ?? '';
-    // $refund_compute_text    = $compute_ref_dd[$endorsement_record->rc_ref_basic] ?? '';
+    // $premium_compute_text   = $compute_ref_dd[$record->pc_ref_basic] ?? '';
+    // $refund_compute_text    = $compute_ref_dd[$record->rc_ref_basic] ?? '';
 }
 
-$grand_total = _ENDORSEMENT__compute_total_amount($endorsement_record);
+$grand_total = _ENDORSEMENT__compute_total_amount($record);
 
 
 /**
  * If active, use endorsement record else from object information
  */
-if($endorsement_record->status == IQB_ENDORSEMENT_STATUS_ACTIVE )
+if($record->status == IQB_ENDORSEMENT_STATUS_ACTIVE )
 {
-    $gross_si   = $endorsement_record->amt_sum_insured_object;
-    $net_si     = $endorsement_record->amt_sum_insured_net;
+    $gross_si   = $record->amt_sum_insured_object;
+    $net_si     = $record->amt_sum_insured_net;
 }
 else
 {
     $policy_object  =   _OBJ__get_latest(
                             $policy_record->object_id,
-                            $endorsement_record->txn_type,
-                            $endorsement_record->audit_object
+                            $record->txn_type,
+                            $record->audit_object
                         );
     $old_object = get_object_from_policy_record($policy_record);
 
@@ -97,37 +97,37 @@ else
                         <tbody>
                             <tr>
                                 <td>Basic Premium (Rs.)</td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->gross_full_amt_basic_premium, 2);?></td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->gross_computed_amt_basic_premium, 2);?></td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->refund_amt_basic_premium, 2);?></td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->net_amt_basic_premium, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->gross_full_amt_basic_premium, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->gross_computed_amt_basic_premium, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->refund_amt_basic_premium, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->net_amt_basic_premium, 2);?></td>
                             </tr>
                             <tr>
                                 <td>Pool Premium (Rs.)</td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->gross_full_amt_pool_premium, 2);?></td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->gross_computed_amt_pool_premium, 2);?></td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->refund_amt_pool_premium, 2);?></td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->net_amt_pool_premium, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->gross_full_amt_pool_premium, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->gross_computed_amt_pool_premium, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->refund_amt_pool_premium, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->net_amt_pool_premium, 2);?></td>
                             </tr>
                             <tr>
                                 <td colspan="4">Stamp Duty (Rs.)</td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->net_amt_stamp_duty, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->net_amt_stamp_duty, 2);?></td>
                             </tr>
                             <tr>
                                 <td colspan="4">Cancellation Fee (Rs.)</td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->net_amt_cancellation_fee, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->net_amt_cancellation_fee, 2);?></td>
                             </tr>
                             <tr>
                                 <td colspan="4">Ownership Transfer Fee (Rs.)</td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->net_amt_transfer_fee, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->net_amt_transfer_fee, 2);?></td>
                             </tr>
                             <tr>
                                 <td colspan="4">No Claim Discount Fee (Rs.)</td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->net_amt_transfer_ncd, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->net_amt_transfer_ncd, 2);?></td>
                             </tr>
                             <tr>
                                 <td colspan="4">VAT (Rs.)</td>
-                                <td class="text-right"><?php echo ac_format_number($endorsement_record->net_amt_vat, 2);?></td>
+                                <td class="text-right"><?php echo ac_format_number($record->net_amt_vat, 2);?></td>
                             </tr>
                         </tbody>
                         <tfoot>

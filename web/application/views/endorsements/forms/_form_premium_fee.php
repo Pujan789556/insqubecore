@@ -16,27 +16,33 @@ if(isset($record))
                             'id'        => '_form-premium'
                         ],
                         // Hidden Fields
-                        $hidden_fields); ?>
-<div class="row">
-    <div class="col-md-6">
-        <div class="box box-solid box-bordered">
-            <div class="box-header with-border">
-              <h4 class="box-title">Supply Premium, Fee Information</h4>
-            </div>
-            <div class="box-body form-horizontal">
-                <?php
-                /**
-                 * Load Form Components
-                 */
-                $this->load->view('templates/_common/_form_components_horz', [
-                    'form_elements' => $form_elements['fee'],
-                    'form_record'   => $record
-                ]);
-                ?>
-            </div>
-        </div>
+                        $hidden_fields);
 
-        <button type="submit" class="hide">Submit</button>
+    /**
+     * Premium Summary Table
+     */
+    $this->load->view('endorsements/snippets/_premium_summary');?>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-solid box-bordered">
+                <div class="box-header with-border">
+                  <h4 class="box-title">Supply Premium, Fee Information</h4>
+                </div>
+                <div class="box-body form-horizontal">
+                    <?php
+                    /**
+                     * Load Form Components
+                     */
+                    $this->load->view('templates/_common/_form_components_horz', [
+                        'form_elements' => $form_elements['fee'],
+                        'form_record'   => $record
+                    ]);
+                    ?>
+                </div>
+            </div>
+
+            <button type="submit" class="hide">Submit</button>
+        </div>
     </div>
-</div>
 <?php echo form_close();?>

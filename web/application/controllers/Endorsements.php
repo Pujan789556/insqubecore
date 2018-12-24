@@ -653,8 +653,8 @@ class Endorsements extends MY_Controller
 
 
 		$data = [
-			'endorsement_record' 	=> $record,
-			'policy_record' 		=> $policy_record
+			'record' 			=> $record,
+			'policy_record' 	=> $policy_record
 		];
 
 		$this->template->json([
@@ -949,7 +949,15 @@ class Endorsements extends MY_Controller
 	        			$field = $single['field'];
 	        			$premium_data[$field] = $post_data[$field] ?? NULL;
 	        		}
-	        		return $this->endorsement_model->save_premium($record, $policy_record, $premium_data, $post_data);
+
+	        		try {
+
+						$transaction_status = $this->endorsement_model->save_premium($record, $policy_record, $premium_data, $post_data);
+
+					} catch (Exception $e) {
+						return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
+					}
+					return $transaction_status;
 	        	}
 	        	else
 	        	{
@@ -989,7 +997,15 @@ class Endorsements extends MY_Controller
 	        			$field = $single['field'];
 	        			$premium_data[$field] = $post_data[$field] ?? NULL;
 	        		}
-	        		return $this->endorsement_model->save_premium($record, $policy_record, $premium_data, $post_data);
+
+	        		try {
+
+						$transaction_status = $this->endorsement_model->save_premium($record, $policy_record, $premium_data, $post_data);
+
+					} catch (Exception $e) {
+						return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
+					}
+					return $transaction_status;
 	        	}
 	        	else
 	        	{
