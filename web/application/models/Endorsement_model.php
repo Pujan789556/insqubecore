@@ -163,6 +163,14 @@ class Endorsement_model extends MY_Model
                 'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
                 '_type'     => 'text',
                 '_required' => true
+            ],
+            [
+                'field' => 'net_amt_stamp_duty',
+                'label' => 'Stamp Duty (Rs.)',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                '_type'     => 'text',
+                '_default'  => 0,
+                '_required' => true
             ]
         ];
 
@@ -1773,51 +1781,13 @@ class Endorsement_model extends MY_Model
         private function __draft_post_save_tasks($id, $action)
         {
             $record = $this->get( $id );
-            $this->load->model('object_model');
 
-             /**
-             * Object Sum Insured, Net Sum Insured
-             *
-             * FRESH EDNORSEMENT:
-             *      GROSS SI = OBJECT'S SI
-             *      NET SI = GROSS SI
-             *
-             * ENDORSEMENT
-             *      GROSS SI = Latest Object SI
-             *      NET SI = (Latest Object SI) - (OLD Object SI)
-             *
+            // --------------------------------------------------------------------
+
+            /**
+             * Update Sum Insured
              */
-            $policy_object  = $this->object_model->get($record->object_id);
-            if( $this->is_first($record->txn_type) )
-            {
-                $gross_si  = $policy_object->amt_sum_insured;
-                $net_si    = $policy_object->amt_sum_insured;
-            }
-            else
-            {
-                // Object Changed?
-                if($record->audit_object)
-                {
-                    // Get Policy Object from Endorsement's Object's Audit data
-                    $audit_object   = _OBJ__get_from_audit($record->audit_object, 'new');
-                    $gross_si       = $audit_object->amt_sum_insured;
-                    $net_si         = bcsub($gross_si, $policy_object->amt_sum_insured, IQB_AC_DECIMAL_PRECISION);
-                }
-                else
-                {
-                    // NO Audit Object - SUM Insured Unchanged
-                    $gross_si  = $policy_object->amt_sum_insured;
-                    $net_si    = 0.00;
-                }
-
-            }
-
-            $data = [
-                'amt_sum_insured_object'    => $gross_si,
-                'amt_sum_insured_net'       => $net_si,
-            ];
-
-            parent::update($id, $data, TRUE);
+            $this->__update_sum_inured($record);
 
             // --------------------------------------------------------------------
 
@@ -1930,6 +1900,65 @@ class Endorsement_model extends MY_Model
                 }
 
                 return $data;
+            }
+
+            // --------------------------------------------------------------------
+
+            /**
+             * Draft Pre Save Task - Sum Insured (Object, NET)
+             *
+             * @param int|object $record
+             * @param array $data
+             * @return array
+             */
+            private function __update_sum_inured($record)
+            {
+                $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
+                $this->load->model('object_model');
+
+                 /**
+                 * Object Sum Insured, Net Sum Insured
+                 *
+                 * FRESH EDNORSEMENT:
+                 *      GROSS SI = OBJECT'S SI
+                 *      NET SI = GROSS SI
+                 *
+                 * ENDORSEMENT
+                 *      GROSS SI = Latest Object SI
+                 *      NET SI = (Latest Object SI) - (OLD Object SI)
+                 *
+                 */
+                $policy_object  = $this->object_model->get($record->object_id);
+                if( $this->is_first($record->txn_type) )
+                {
+                    $gross_si  = $policy_object->amt_sum_insured;
+                    $net_si    = $policy_object->amt_sum_insured;
+                }
+                else
+                {
+                    // Object Changed?
+                    if($record->audit_object)
+                    {
+                        // Get Policy Object from Endorsement's Object's Audit data
+                        $audit_object   = _OBJ__get_from_audit($record->audit_object, 'new');
+                        $gross_si       = $audit_object->amt_sum_insured;
+                        $net_si         = bcsub($gross_si, $policy_object->amt_sum_insured, IQB_AC_DECIMAL_PRECISION);
+                    }
+                    else
+                    {
+                        // NO Audit Object - SUM Insured Unchanged
+                        $gross_si  = $policy_object->amt_sum_insured;
+                        $net_si    = 0.00;
+                    }
+
+                }
+
+                $data = [
+                    'amt_sum_insured_object'    => $gross_si,
+                    'amt_sum_insured_net'       => $net_si,
+                ];
+
+                parent::update($record->id, $data, TRUE);
             }
 
             // --------------------------------------------------------------------
