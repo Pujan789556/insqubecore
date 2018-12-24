@@ -2750,11 +2750,8 @@ class Policy_installments extends MY_Controller
 							 * If this endorsement is "Refund & Terminate" or "Terminate"
 							 * we have to terminate the policy.
 							 */
-							$terminate_policy = FALSE;
-							if($endorsement_record->flag_refund_on_terminate == IQB_FLAG_YES )
-							{
-								$terminate_policy = TRUE;
-							}
+							$terminate_policy = (int)$endorsement_record->txn_type == IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE;
+
 
 							// Activate endorsement and cancel policy if needed.
 							$this->endorsement_model->to_activated($endorsement_record, $terminate_policy);
@@ -2954,16 +2951,14 @@ class Policy_installments extends MY_Controller
 		 */
 		else if( $txn_type == IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND )
 		{
+			$message .= "Your Policy endorsement has been issued." . PHP_EOL ;
+			$message .= "Policy No: " . $policy_record->code . PHP_EOL .
+        				"Premium Refunded(Rs): " . $amount . PHP_EOL;
+		}
 
-			if($endorsement_record->flag_refund_on_terminate == IQB_FLAG_YES )
-			{
-				$message .= "Your Policy endorsement has been issued and policy has been terminated." . PHP_EOL;
-			}
-			else
-			{
-				$message .= "Your Policy endorsement has been issued." . PHP_EOL ;
-			}
-
+		else if( $txn_type == IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE )
+		{
+			$message .= "Your Policy endorsement has been issued and policy has been terminated." . PHP_EOL;
 			$message .= "Policy No: " . $policy_record->code . PHP_EOL .
         				"Premium Refunded(Rs): " . $amount . PHP_EOL;
 		}

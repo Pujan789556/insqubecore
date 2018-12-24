@@ -604,7 +604,7 @@ class Endorsements extends MY_Controller
 		 */
 		private function _can_add_endorsement($policy_id)
 		{
-			$current_txn = $this->endorsement_model->get_current_endorsement_by_policy($policy_id);
+			$current_txn = $this->endorsement_model->get_current_endorsement($policy_id);
 
 			/**
 			 * Valid Status

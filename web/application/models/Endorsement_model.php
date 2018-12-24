@@ -935,7 +935,7 @@ class Endorsement_model extends MY_Model
      */
     public function reset_by_policy($policy_id)
     {
-        $record = $this->get_current_endorsement_by_policy($policy_id);
+        $record = $this->get_current_endorsement($policy_id);
 
         if(!$record)
         {
@@ -1010,7 +1010,7 @@ class Endorsement_model extends MY_Model
     public function update_status($policy_id_or_endorsement_record, $to_status_flag, $terminate_policy=FALSE)
     {
         // Get the Endorsement Record
-        $record = is_numeric($policy_id_or_endorsement_record) ? $this->get_current_endorsement_by_policy( (int)$policy_id_or_endorsement_record ) : $policy_id_or_endorsement_record;
+        $record = is_numeric($policy_id_or_endorsement_record) ? $this->get_current_endorsement( (int)$policy_id_or_endorsement_record ) : $policy_id_or_endorsement_record;
 
         if(!$record)
         {
@@ -1120,7 +1120,6 @@ class Endorsement_model extends MY_Model
         }
 
         // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
         $transaction_status = TRUE;
 
         // Use automatic transaction
@@ -1136,10 +1135,6 @@ class Endorsement_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $transaction_status = FALSE;
         }
-
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
 
         // Throw Exception on ERROR
@@ -1181,7 +1176,7 @@ class Endorsement_model extends MY_Model
             /**
              * Task 1: FRESH/RENEWAL - RI Approval Constraint
              */
-            if( _ENDORSEMENT_is_first($record->txn_type) )
+            if( $this->is_first($record->txn_type) )
             {
                 /**
                  * RI Approval Constraint
@@ -1294,7 +1289,7 @@ class Endorsement_model extends MY_Model
             /**
              * Generate Policy Number if Endorsement FRESH/Renewal
              */
-            if( _ENDORSEMENT_is_first($record->txn_type) )
+            if( $this->is_first($record->txn_type) )
             {
                 $this->policy_model->generate_policy_number( $record->policy_id );
             }
@@ -1396,7 +1391,7 @@ class Endorsement_model extends MY_Model
             // Update Endorsement Status
             $this->_do_status_transaction($record, IQB_ENDORSEMENT_STATUS_ACTIVE);
 
-            if( !_ENDORSEMENT_is_first($record->txn_type) )
+            if( !$this->is_first($record->txn_type) )
             {
 
                 /**
@@ -1409,7 +1404,13 @@ class Endorsement_model extends MY_Model
                  *  - Refund and Terminate
                  *  - Simply Terminate
                  */
-                $terminate_policy = $terminate_policy || $record->txn_type == IQB_ENDORSEMENT_TYPE_TERMINATE;
+                $terminate_policy = $terminate_policy
+                                        ||
+                                    in_array( $record->txn_type, [
+                                        IQB_ENDORSEMENT_TYPE_TERMINATE,
+                                        IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE
+                                    ]);
+
                 if($terminate_policy)
                 {
                     $policy_record = $this->policy_model->get($record->policy_id);
@@ -1420,15 +1421,24 @@ class Endorsement_model extends MY_Model
                 /**
                  * Policy Ownership Transfer
                  */
-                else if($record->txn_type == IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER )
+                elseif($record->txn_type == IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER )
                 {
                     $this->transfer_ownership($record);
                 }
 
                 /**
                  * Update Policy "END DATE"
+                 *
+                 * TERMINATE, TIME EXTEND
                  */
-                $this->policy_model->update_end_date($record->policy_id, $record->end_date);
+                if( in_array( $record->txn_type, [
+                    IQB_ENDORSEMENT_TYPE_TIME_EXTENDED,
+                    IQB_ENDORSEMENT_TYPE_TERMINATE,
+                    IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE
+                ])
+                {
+                    $this->policy_model->update_end_date($record->policy_id, $record->end_date);
+                }
             }
 
             /**
@@ -1465,6 +1475,47 @@ class Endorsement_model extends MY_Model
         return $transaction_status;
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Update First Endorsement Dates
+     *
+     * This function is called to update first endorsement's dates so that
+     *
+     *      Policy Start Date   = First Endorsement Start Date
+     *      Policy Issued Date  = First Endorsement Issued Date
+     *      Policy END Date     = First Endorsement END Date
+     *
+     * @param int|obj $policy_record  Policy Record or Policy ID
+     * @param int|NULL $endorsement_id Endorsement ID
+     * @return bool
+     */
+    public function update_first_endorsement_dates($policy_record, $endorsement_id = NULL)
+    {
+        $policy_record = is_numeric($policy_record) ? $this->policy_model->get( (int)$policy_record ) : $policy_record;
+
+        // First Endorsement ID
+        $endorsement_id     = $endorsement_id ? $endorsement_id : $this->first_endorsement_id($policy_record->id);
+        $endorsement_data   = [
+            'issued_date'   => $policy_record->issued_date,
+            'start_date'    => $policy_record->start_date,
+            'end_date'      => $policy_record->end_date,
+        ];
+
+        /**
+         * Task 1: Update TXN Data
+         */
+        $done = parent::update($endorsement_id, $data, TRUE);
+
+
+        /**
+         * Task2: Clear Cache for This Policy
+         */
+        $this->_clean_cache_by_policy($policy_record->id);
+
+        return $done;
+    }
+
         // ----------------------------------------------------------------
 
         private function _do_status_transaction($record, $status)
@@ -1485,7 +1536,7 @@ class Endorsement_model extends MY_Model
              *
              * This is required because you might have verified/vouchered yesterday and today you are invoicing
              */
-            $data  = $this->_backdate($record, $data);
+            $data  = $this->_refactor_dates($record, $data);
 
             return $this->_to_status($record->id, $data);
         }
@@ -1558,7 +1609,7 @@ class Endorsement_model extends MY_Model
     // --------------------------------------------------------------------
 
         /**
-         * Validate and process Back-date
+         * Validate and process Dates on Status Update
          *
          * If user has supplied backdate, please make sure that :
          *      1. The user is allowed to enter Backdate
@@ -1568,25 +1619,82 @@ class Endorsement_model extends MY_Model
          * @param array     $data
          * @return array
          */
-        public function _backdate($record, $data)
+        public function _refactor_dates($record, $data)
         {
+            $txn_type = (int)$record->txn_type;
+            /**
+             * First Endorsement's Dates are Updated by Policy Tasks
+             *  on
+             *      - add/edit policy draft
+             *      - policy status change
+             *
+             *  So, we do not do anything here.
+             *
+             *
+             */
+            if( $this->is_first($txn_type) )
+            {
+                return $data;
+            }
 
-            $old_issued_date = $record->issued_date;
-            $old_start_date  = $record->start_date;
-            $old_end_date    = $record->end_date;
-
-            $new_issued_date    = backdate_process($old_issued_date);
-            $new_start_date     = backdate_process($old_start_date);
+            // --------------------------------------------------------------------
 
             /**
-             * If backdate is not allowed, we have to recompute the end date as per new start date
+             * Backdate On Issued Date
              */
-            if( strtotime($old_start_date) != strtotime($new_start_date))
+            $old_issued_date = $record->issued_date;
+            $new_issued_date = backdate_process($old_issued_date);
+
+            /**
+             * On Termination
+             *      Issued Date can be past date,
+             *      But Start and End Date can not be past date
+             */
+            if( in_array($txn_type, [IQB_ENDORSEMENT_TYPE_TERMINATE, IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE]) )
             {
-                $days               = date_difference($old_start_date, $new_start_date, 'd');
-                $new_end_date       = date('Y-m-d', strtotime($old_end_date. " + {$days} days"));
-                $data['end_date']   = $new_end_date;
+                $start_date = $record->start_date;
+                $end_date   = date('Y-m-d');
+                if( strtotime($start_date) >= strtotime($end_date) )
+                {
+                    $end_date = $start_date; // Future Dates - Start and End Date but same
+                }
+                else
+                {
+                    $data['start_date'] = $end_date; // Start and End on Today
+                }
+
+                $data['issued_date']    = $new_issued_date; // may be past date
+                $data['end_date']       = $end_date;
+
+                return $data;
             }
+
+            // --------------------------------------------------------------------
+
+
+            /**
+             * On Time Extended
+             *
+             * Both start and end dates are after policy end date, so we only need to
+             * check issued date
+             */
+            if( $txn_type == IQB_ENDORSEMENT_TYPE_TIME_EXTENDED )
+            {
+                $data['issued_date']    = $new_issued_date;
+                return $data;
+            }
+
+            // --------------------------------------------------------------------
+
+            /**
+             * For Rest of the Types
+             *
+             * Let's Get Start and Issued Date.
+             * NOTE: END Date is automatically assigned.
+             */
+
+            $old_start_date  = $record->start_date;
+            $new_start_date     = backdate_process($old_start_date);
 
             // Start and Issued Date
             $data['issued_date']    = $new_issued_date;
@@ -1759,7 +1867,7 @@ class Endorsement_model extends MY_Model
             /**
              * END DATE
              */
-            $data = $this->__refactor_dates($data, $policy_record->end_date);
+            $data = $this->__draft_dates($data, $policy_record->end_date);
 
             return $data;
 
@@ -1851,7 +1959,7 @@ class Endorsement_model extends MY_Model
              * @param date $policy_end_date
              * @return array
              */
-            private function __refactor_dates($data, $policy_end_date)
+            private function __draft_dates($data, $policy_end_date)
             {
                 $txn_type   = (int)$data['txn_type'];
 
@@ -1887,9 +1995,13 @@ class Endorsement_model extends MY_Model
                     {
                         $start_date = $data['start_date'];
                         $end_date   = date('Y-m-d');
-                        if( strtotime($start_date) > strtotime($end_date) )
+                        if( strtotime($start_date) >= strtotime($end_date) )
                         {
                             $end_date = $start_date;
+                        }
+                        else
+                        {
+                            $data['start_date'] = $end_date; // must be today
                         }
                     }
                     else
@@ -3319,7 +3431,7 @@ class Endorsement_model extends MY_Model
      * @param int $policy_id
      * @return object
      */
-    public function get_current_endorsement_by_policy($policy_id)
+    public function get_current_endorsement($policy_id)
     {
         $where = [
             'E.policy_id'    => $policy_id,
@@ -3352,6 +3464,26 @@ class Endorsement_model extends MY_Model
         return $this->db->where($where)
                         ->order_by('E.id', 'desc') // latest active
                         ->get()->row();
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get First Endorsement's ID by Policy
+     *
+     * @param int $policy_id
+     * @return int
+     */
+    public function first_endorsement_id($policy_id)
+    {
+        $where = [
+            'E.policy_id' => $policy_id,
+            'E.txn_type' => IQB_ENDORSEMENT_TYPE_FRESH
+        ];
+        return $this->db->select('E.id')
+                        ->from($this->table_name . ' E')
+                        ->where($where)
+                        ->get()->row()->id;
     }
 
     // --------------------------------------------------------------------

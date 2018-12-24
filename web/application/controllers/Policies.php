@@ -452,7 +452,7 @@ class Policies extends MY_Controller
 		$form_data = [
 			'form_elements' 		=> $v_rules,
 			'record' 				=> $record,
-			'endorsement_record' 	=> $this->endorsement_model->get_current_endorsement_by_policy($record->id)
+			'endorsement_record' 	=> $this->endorsement_model->get_first($record->id)
 		];
 
 		// Form Submitted? Save the data
@@ -816,7 +816,7 @@ class Policies extends MY_Controller
 			],404);
 		}
 
-		$endorsement_record = $this->endorsement_model->get_current_endorsement_by_policy($record->id);
+		$endorsement_record = $this->endorsement_model->get_current_endorsement($record->id);
 		if(!$endorsement_record)
 		{
 			return $this->template->json([

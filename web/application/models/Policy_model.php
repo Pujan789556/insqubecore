@@ -1103,7 +1103,7 @@ class Policy_model extends MY_Model
          * REMARKS
          *
          */
-        $endorsement_record = $this->endorsement_model->get_current_endorsement_by_policy($id);
+        $endorsement_record = $this->endorsement_model->get_current_endorsement($id);
         $endorsement_data = [
             'customer_id'   => $data['customer_id'],
             'issued_date'   => $data['issued_date'],
@@ -1118,6 +1118,26 @@ class Policy_model extends MY_Model
         // echo '<pre>'; print_r($endorsement_data);exit;
 
         return $this->endorsement_model->save($endorsement_record->id, $endorsement_data);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Update First Endorsement Dates
+     *
+     * This function is called to update first endorsement's dates so that
+     *
+     *      Policy Start Date   = First Endorsement Start Date
+     *      Policy Issued Date  = First Endorsement Issued Date
+     *      Policy END Date     = First Endorsement END Date
+     *
+     * @param int|obj $record  Policy Record or Policy ID
+     * @param int|NULL $endorsement_id Endorsement ID
+     * @return bool
+     */
+    public function _update_first_endorsement_dates($record, $endorsement_id = NULL)
+    {
+         return $this->endorsement_model->update_first_endorsement_dates($record, $endorsement_id);
     }
 
     // ----------------------------------------------------------------
@@ -1399,6 +1419,9 @@ class Policy_model extends MY_Model
             // Update Endorsement Status
             $this->_do_status_transaction($record, IQB_POLICY_STATUS_ACTIVE);
 
+            // Update First/Fresh Endorsement Dates to Policy Dates
+            $this->endorsement_model->_update_first_endorsement_dates($record);
+
 
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
@@ -1445,8 +1468,12 @@ class Policy_model extends MY_Model
             /**
              * Update Transaction Status, Lock Object, Customer
              */
-            $endorsement_record = $this->endorsement_model->get_current_endorsement_by_policy($record->id);
+            $endorsement_record = $this->endorsement_model->get_current_endorsement($record->id);
             $this->endorsement_model->to_verified($endorsement_record);
+
+            // Update First/Fresh Endorsement Dates to Policy Dates
+            $this->endorsement_model->_update_first_endorsement_dates($record, $endorsement_record->id);
+
             $this->object_model->update_lock($record->object_id, IQB_FLAG_LOCKED);
             $this->customer_model->update_lock($record->customer_id, IQB_FLAG_LOCKED);
 
@@ -1494,8 +1521,12 @@ class Policy_model extends MY_Model
             $this->_do_status_transaction($record, IQB_POLICY_STATUS_DRAFT);
 
             // Txn Status to draft, Editable Object & Customer
-            $endorsement_record = $this->endorsement_model->get_current_endorsement_by_policy($record->id);
+            $endorsement_record = $this->endorsement_model->get_current_endorsement($record->id);
             $this->endorsement_model->to_draft($endorsement_record);
+
+            // Update First/Fresh Endorsement Dates to Policy Dates
+            $this->endorsement_model->_update_first_endorsement_dates($record, $endorsement_record->id);
+
             $this->object_model->update_lock($record->object_id, IQB_FLAG_UNLOCKED);
             $this->customer_model->update_lock($record->customer_id, IQB_FLAG_UNLOCKED);
 
@@ -1524,9 +1555,6 @@ class Policy_model extends MY_Model
         private function _do_status_transaction($record, $status)
         {
             $data = [
-                'issued_date'   => $record->issued_date,
-                'start_date'    => $record->start_date,
-                'end_date'      => $record->end_date,
                 'status'        => $status,
                 'updated_by'    => $this->dx_auth->get_user_id(),
                 'updated_at'    => $this->set_date()
@@ -1542,9 +1570,30 @@ class Policy_model extends MY_Model
              *
              * This is required because you might have verified/vouchered yesterday and today you are invoicing
              */
-            $data = $this->_backdate($data);
+            if( $this->_is_backdatable_status($status) )
+            {
+                $data = array_merge($data, [
+                    'issued_date'   => $record->issued_date,
+                    'start_date'    => $record->start_date,
+                    'end_date'      => $record->end_date
+                ]);
+                $data = $this->_backdate($data);
+            }
 
             return $this->_to_status($record->id, $data);
+        }
+
+        // ----------------------------------------------------------------
+
+        private function _is_backdatable_status($status)
+        {
+            /**
+             * DRAFT, VERIFIED, ACTIVATED - are back datable
+             *
+             * CANCELED - Endorsement will update it's end date
+             * EXPIRED - Nothing Required, Will be done automatically
+             */
+            return in_array($status, [IQB_POLICY_STATUS_DRAFT, IQB_POLICY_STATUS_VERIFIED, IQB_POLICY_STATUS_ACTIVE]);
         }
 
         // ----------------------------------------------------------------
