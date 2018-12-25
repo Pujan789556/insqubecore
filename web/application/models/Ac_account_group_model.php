@@ -327,7 +327,7 @@ class Ac_account_group_model extends MY_Model
         $cache_name = $start_at ? 'ac_ag_dd_tree_' . $start_at : 'ac_ag_dd_tree_full';
         if($path_formatted == true)
         {
-            $$cache_name = $cache_name . $path_separator ;
+            $cache_name = $cache_name . $path_separator ;
         }
 
         /**

@@ -614,8 +614,10 @@ if ( ! function_exists('__save_premium_MISC_TMI'))
 
 					/**
 					 * Compute Age in Years and Rate (in NRS which is Premium)
+					 *
+					 * Duration - It's always Endorsement's Start and End Date
 					 */
-					$policy_duration = _POLICY_duration($policy_record->start_date, $policy_record->end_date, 'd');
+					$policy_duration = _POLICY_duration($endorsement_record->start_date, $endorsement_record->end_date, 'd');
 
 					$age 		= date_difference($object_attributes->dob, date('Y-m-d'), 'y');
 					$forex_date = $post_data['premium']['forex_date'];

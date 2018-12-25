@@ -258,7 +258,7 @@ $labels = [
                                         <?php foreach($premium_table as $title => $value): ?>
                                             <tr>
                                                 <td><?php echo $title ?></td>
-                                                <?php if( _ENDORSEMENT_is_refundable($record->txn_type) ): ?>
+                                                <?php if( _ENDORSEMENT_is_refundable($record) ): ?>
                                                     <td class="text-right">0.00</td>
                                                     <td class="text-right"><?php echo ac_format_number($value, 2) ?></td>
                                                 <?php else: ?>
@@ -270,7 +270,7 @@ $labels = [
 
                                         <tr>
                                             <td class="text-right text-bold"><?php echo $labels['total_premium'][$lang] ?></td>
-                                            <?php if( _ENDORSEMENT_is_refundable($record->txn_type) ): ?>
+                                            <?php if( _ENDORSEMENT_is_refundable($record) ): ?>
                                                 <td class="text-right text-bold">0.00</td>
                                                 <td class="text-right text-bold"><?php echo ac_format_number($total_premium, 2) ?></td>
                                             <?php else: ?>

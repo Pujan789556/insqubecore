@@ -914,12 +914,16 @@ if ( ! function_exists('RI__distribute__QT'))
 		/**
 		 * Quota Share Distribution
 		 */
-		$si_treaty_retaintion 	= ( $si_treaty_total * $treaty_record->qs_retention_percent ) / 100.00;
-		$si_treaty_quota		= ( $si_treaty_total * $treaty_record->qs_quota_percent ) / 100.00;
+		if($si_treaty_total)
+		{
+			$si_treaty_retaintion 	= ( $si_treaty_total * $treaty_record->qs_retention_percent ) / 100.00;
+			$si_treaty_quota		= ( $si_treaty_total * $treaty_record->qs_quota_percent ) / 100.00;
 
-		// Premium
-		$premium_treaty_retaintion 	= ( $si_treaty_retaintion / $si_treaty_total ) * $premium_treaty_total;
-		$premium_treaty_quota 		= ( $si_treaty_quota / $si_treaty_total ) * $premium_treaty_total;
+			// Premium
+			$premium_treaty_retaintion 	= ( $si_treaty_retaintion / $si_treaty_total ) * $premium_treaty_total;
+			$premium_treaty_quota 		= ( $si_treaty_quota / $si_treaty_total ) * $premium_treaty_total;
+		}
+
 
 
 

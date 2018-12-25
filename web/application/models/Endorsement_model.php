@@ -353,28 +353,80 @@ class Endorsement_model extends MY_Model
                 ]
             ];
 
-
-            if( $txn_type == IQB_ENDORSEMENT_TYPE_TIME_EXTENDED )
+            switch ($txn_type)
             {
-                $st_date_obj = new DateTime($policy_record->end_date);
-                $st_date_obj->modify('+1 day');
-                $start_date = $st_date_obj->format('Y-m-d');
+                case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+                    $v_rules = array_merge($v_rules, $this->_v_rules_dates_time_extended( $txn_type, $portfolio_id, $policy_record ));
+                    break;
 
+                default:
+                    $v_rules = array_merge($v_rules, $this->_v_rules_dates_others( $txn_type, $portfolio_id, $policy_record ));
+                    break;
+            }
+
+            return ['dates' => $v_rules];
+        }
+
+            private function _v_rules_dates_time_extended( $txn_type, $portfolio_id, $policy_record )
+            {
+                $v_rules = [];
+
+                /**
+                 * IF Compute Reference is IQB_ENDORSEMENT_CB_TE_DURATION_PRORATA
+                 *      - Only End Date Required
+                 * Else
+                 *      - Both start and end date required
+                 */
+                $te_compute_ref = $this->input->post('te_compute_ref');
+                $_extra_html_below = '';
+                if( empty($te_compute_ref) || $te_compute_ref == IQB_ENDORSEMENT_CB_TE_NET_DIFF )
+                {
+                    $v_rules = [
+                        [
+                            'field' => 'start_date',
+                            'label' => 'Endorsement Start Date',
+                            'rules' => 'trim|required|valid_date|callback__cb_valid_start_date_te', // Cannot be earlier than Policy Start date
+                            '_type'             => 'date',
+                            '_default'          => date('Y-m-d'),
+                            '_id'               => 'start_date',
+                            '_extra_attributes' => 'data-provide="datepicker-inline"',
+                            '_required' => true
+                        ]
+                    ];
+                }
+                else
+                {
+                    $st_date_obj = new DateTime($policy_record->end_date);
+                    $st_date_obj->modify('+1 day');
+                    $start_date = $st_date_obj->format('Y-m-d');
+
+                    // Start date is Polidy END date + 1 Day,
+                    // Show this in END date's extra html
+                    $_extra_html_below = '<div class="text-warning"><strong>Endorsement Start Date</strong>: ' . $start_date . '</div>';
+                }
+                $_extra_html_below .= '<div class="text-warning"><strong>Policy End Date</strong>: ' . $policy_record->end_date . '</div>';
                 $v_rules = array_merge($v_rules, [
                     [
                         'field' => 'end_date',
                         'label' => 'Endorsement End Date',
-                        'rules' => 'trim|required|valid_date|callback__cb_valid_end_date',
+                        'rules' => 'trim|required|valid_date|callback__cb_valid_end_date_te',
                         '_type'             => 'date',
                         '_default'          => '',
+                        '_id'               => 'end_date',
                         '_extra_attributes' => 'data-provide="datepicker-inline"',
-                        '_extra_html_below' => '<div class="text-warning"><strong>Endorsement Start Date</strong>:' . $start_date . '</div>',
+                        '_extra_html_below' => $_extra_html_below,
                         '_required' => true
                     ]
                 ]);
+
+                return $v_rules;
+
             }
-            else
+
+            private function _v_rules_dates_others( $txn_type, $portfolio_id, $policy_record )
             {
+                $v_rules = [];
+
                 // Show End date right after startdate
                 if( in_array($txn_type, [IQB_ENDORSEMENT_TYPE_TERMINATE, IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE]) )
                 {
@@ -384,7 +436,9 @@ class Endorsement_model extends MY_Model
                 {
                     $end_date = $policy_record->end_date;
                 }
-                $v_rules = array_merge($v_rules, [
+
+
+                $v_rules = [
                     [
                         'field' => 'start_date',
                         'label' => 'Endorsement Start Date',
@@ -392,14 +446,13 @@ class Endorsement_model extends MY_Model
                         '_type'             => 'date',
                         '_default'          => date('Y-m-d'),
                         '_extra_attributes' => 'data-provide="datepicker-inline"',
-                        '_extra_html_below' => '<div class="text-warning"><strong>Endorsement End Date</strong>:' . $end_date . '</div>',
+                        '_extra_html_below' => '<div class="text-warning"><strong>Endorsement End Date</strong>: ' . $end_date . '</div>',
                         '_required' => true
                     ]
-                ]);
-            }
+                ];
 
-            return ['dates' => $v_rules];
-        }
+                return $v_rules;
+            }
 
         // ----------------------------------------------------------------
 
@@ -538,6 +591,7 @@ class Endorsement_model extends MY_Model
                                 'label' => 'Time Extension Reference',
                                 'rules' => 'trim|required|integer|exact_length[1]|in_list['. implode( ',', array_keys( $ref_dd ) ) .']',
                                 '_type'     => 'dropdown',
+                                '_id'       => 'te_compute_ref',
                                 '_data'     => IQB_BLANK_SELECT + $ref_dd,
                                 '_required' => true
                             ],
@@ -1941,7 +1995,7 @@ class Endorsement_model extends MY_Model
             private function _last_premium_compute_options($txn_type, $policy_id)
             {
                 $pct        = NULL;
-                $$txn_type  = (int)$txn_type;
+                $txn_type  = (int)$txn_type;
                 if( $this->is_transactional($txn_type) )
                 {
                     $where_in = $this->transactional_only_types();
@@ -1986,9 +2040,13 @@ class Endorsement_model extends MY_Model
                  *      START DATE = DYNAMIC (Form Input)
                  *      END DATE = START DATE
                  *
-                 * 3. FOR Time Extended (EDITABLE)
-                 *      START DATE = POLIY END DATE + 1 DAY
-                 *      END DATE =  DYNAMIC (Form Input) > POLICY END DATE
+                 * 3. FOR Time Extended
+                 *      if(Duration Prorata)
+                 *          Start Date = Policy End Date + 1
+                 *          End Date = Form Input > Policy End Date
+                 *      else
+                 *          Start Date  = Form Input
+                 *          End Date    = Form Input
                  *
                  */
                 if( $txn_type == IQB_ENDORSEMENT_TYPE_TIME_EXTENDED )
@@ -1997,7 +2055,11 @@ class Endorsement_model extends MY_Model
                     $st_date_obj->modify('+1 day');
                     $start_date = $st_date_obj->format('Y-m-d');
 
-                    $data['start_date'] = $start_date;
+                    $te_compute_ref = $data['te_compute_ref'];
+                    if($te_compute_ref == IQB_ENDORSEMENT_CB_TE_DURATION_PRORATA )
+                    {
+                        $data['start_date'] = $start_date;
+                    }
                 }
                 else
                 {
@@ -2275,6 +2337,7 @@ class Endorsement_model extends MY_Model
             switch ($txn_type)
             {
                 case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+                    $premium_data = $this->_build_time_extended_premium_data( $premium_data, $record, $policy_record );
                     break;
 
                 case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
@@ -2315,7 +2378,20 @@ class Endorsement_model extends MY_Model
          */
         else
         {
-            $premium_data   = $this->_build_fresh_premium_data( $premium_data, $policy_record );
+            /**
+             * FAC-Inward Policy???
+             * ----------------------
+             * IF Policy is FAC-Inward, Regardless of Portfolio - Common to all portfolio
+             */
+            if($policy_record->category == IQB_POLICY_CATEGORY_FAC_IN )
+            {
+                $premium_data = $this->_build_fac_in_premium_data($premium_data, $policy_record);
+            }
+            else
+            {
+                $premium_data   = $this->_build_fresh_premium_data( $premium_data, $policy_record );
+            }
+
         }
 
         // --------------------------------------------------------------------------
@@ -2354,12 +2430,225 @@ class Endorsement_model extends MY_Model
          */
         return $this->save($record, $premium_data);
     }
+        // --------------------------------------------------------------------
+
+        /**
+         * Build Premium Data - Time Extended
+         *
+         * @param array $premium_data
+         * @param object $record Current Endorsement Record
+         * @param object $policy_record Policy Record
+         * @return array
+         */
+        private function _build_time_extended_premium_data( $premium_data, $record, $policy_record )
+        {
+            /**
+             * CASE 1: DURATION PRORATA
+             * ----------------------------
+             *
+             *  A. Get Latest FRESH/UP/DOWN/TIME EXTENDED
+             *
+             *  B. Copy GROSS FULL OF "A"  to CURRENT GROSS FULL
+             *
+             *  C. CURRENT GROSS COMPUTED
+             *      p1 = ( "A" GROSS Computed ) X Duration Prorata
+             *      p2 = p1 X Loading %
+             *      GROSS Computed = p1 + p2
+             *
+             *  D. CURRENT REFUND = ALL NULL
+             *
+             *  E. CURRENT NET = "C"
+             *
+             *
+             * CASE 2: NET DIFFERENCE (CAN BE REFUND)
+             * --------------------------------------
+             *
+             *  A. Get Latest FRESH/UP/DOWN/TIME EXTENDED
+             *
+             *  B. CURRENT GROSS FULL = CURRENT PREMIUM COMPUTE FROM PREMIUM FORM
+             *
+             *  C. CURRENT GROSS COMPUTED = "B"
+             *
+             *  D. CURRENT REFUND = "A" GROSS COMPUTED
+             *
+             *  E. CURRENT NET = "C" - "D"
+             *
+             */
+            if( $record->te_compute_ref == IQB_ENDORSEMENT_CB_TE_DURATION_PRORATA )
+            {
+                $premium_data = $this->__time_extended_premium_data_DP( $premium_data, $record, $policy_record );
+            }
+            else
+            {
+                $premium_data = $this->__time_extended_premium_data_ND( $premium_data, $record, $policy_record );
+            }
+
+            return $premium_data;
+        }
+
+            /**
+             * Build Premium Data - Time Extended - Duration Prorata
+             *
+             * @param array $premium_data
+             * @param object $record Current Endorsement Record
+             * @param object $policy_record Policy Record
+             * @return array
+             */
+            private function __time_extended_premium_data_DP( $premium_data, $record, $policy_record )
+            {
+                /**
+                 * CASE 1: DURATION PRORATA
+                 * ----------------------------
+                 *
+                 *  A. Get Latest FRESH/UP/DOWN/TIME EXTENDED
+                 *
+                 *  B. Copy GROSS FULL OF "A"  to CURRENT GROSS FULL
+                 *
+                 *  C. CURRENT GROSS COMPUTED
+                 *      p1 = ( "A" GROSS Computed ) X Duration Prorata
+                 *      p2 = p1 X Loading %
+                 *      GROSS Computed = p1 + p2
+                 *
+                 *  D. CURRENT REFUND = ALL NULL
+                 *
+                 *  E. CURRENT NET = "C"
+                 *
+                 */
+                $keys = [ 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount'];
+
+                $p_endorsement  = $this->get_prev_premium_record_by_policy($policy_record->id, $record->id);
+                if( !$p_endorsement )
+                {
+                    throw new Exception("Exception [Model: Endorsement_model][Method: __time_extended_premium_data_DP()]: Previous Endorsement Record not found!");
+                }
+
+
+                // COPY GROSS_FULL_* of Previous to  GROSS_FULL_* of Current
+                foreach($keys as $col)
+                {
+                    $gross_col                  = 'gross_full_' . $col;
+                    $premium_data[$gross_col]   = $p_endorsement->{$gross_col};
+                }
+
+                /**
+                 *  C. CURRENT GROSS COMPUTED
+                 *      p1 = ( "A" GROSS Computed ) X Duration Prorata
+                 *      p2 = p1 X Loading %
+                 *      GROSS Computed = p1 + p2
+                 */
+                $old_duration   = _POLICY_duration($p_endorsement->start_date, $p_endorsement->end_date, 'd');
+                $new_duration   = _POLICY_duration($record->start_date, $record->end_date, 'd');
+                $prorata        = $new_duration / $old_duration;
+                $loading        = floatval($record->te_loading_percent ?? 0.00) / 100.00;
+
+
+                $P1 = [];
+                foreach($keys as $col)
+                {
+                    $gross_col  = 'gross_computed_'.$col;
+                    $old_value  = floatval( $p_endorsement->{$gross_col} ?? 0.00 );
+                    $p1         = bcmul( $old_value, $prorata, IQB_AC_DECIMAL_PRECISION );
+                    $p2         = bcmul( $p1, $loading, IQB_AC_DECIMAL_PRECISION );
+                    $total      = bcadd( $p1, $p2, IQB_AC_DECIMAL_PRECISION );
+
+                    // Assign to GROSS_COMPUTED
+                    $premium_data[$gross_col] = $total;
+                }
+
+
+
+                /**
+                 * REFUND on FRESH is ALL ZERO/NULL
+                 */
+                $premium_data = $this->_reset_refund_premium_data($premium_data);
+
+
+                /**
+                 * Compute NET Premium Data = GROSS - REFUND
+                 */
+                $premium_data = $this->_compute_net_premium_data($premium_data);
+
+
+                // --------------------------------------------------------------------
+
+                return $premium_data;
+            }
+
+            // --------------------------------------------------------------------
+
+
+            /**
+             * Build Premium Data - Time Extended - Net Difference
+             *
+             * @param array $premium_data
+             * @param object $record Current Endorsement Record
+             * @param object $policy_record Policy Record
+             * @return array
+             */
+            private function __time_extended_premium_data_ND( $premium_data, $record, $policy_record )
+            {
+                /**
+                 * CASE 2: NET DIFFERENCE (CAN BE REFUND)
+                 * --------------------------------------
+                 *
+                 *  A. Get Latest FRESH/UP/DOWN/TIME EXTENDED
+                 *
+                 *  B. CURRENT GROSS FULL = CURRENT PREMIUM COMPUTE FROM PREMIUM FORM
+                 *
+                 *  C. CURRENT GROSS COMPUTED = "B"
+                 *
+                 *  D. CURRENT REFUND = "A" GROSS COMPUTED
+                 *
+                 *  E. CURRENT NET = "C" - "D"
+                 */
+                $keys = [ 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount'];
+
+                $p_endorsement  = $this->get_prev_premium_record_by_policy($policy_record->id, $record->id);
+                if( !$p_endorsement )
+                {
+                    throw new Exception("Exception [Model: Endorsement_model][Method: __time_extended_premium_data_ND()]: Previous Endorsement Record not found!");
+                }
+
+
+                foreach($keys as $col)
+                {
+                    $gross_full_col         = 'gross_full_' . $col;
+                    $gross_computed_col     = 'gross_computed_' . $col;
+                    $refund_col             = 'refund_' . $col;
+
+                    // C. CURRENT GROSS COMPUTED = "B"
+                    $premium_data[$gross_computed_col]  = $premium_data[$gross_full_col] ?? NULL;
+
+                    // D. CURRENT REFUND = "A" GROSS COMPUTED
+                    $premium_data[$refund_col] = $p_endorsement->{$gross_computed_col};
+                }
+
+
+                /**
+                 * Compute NET Premium Data = GROSS - REFUND
+                 */
+                $premium_data = $this->_compute_net_premium_data($premium_data);
+
+
+                // --------------------------------------------------------------------
+
+                return $premium_data;
+            }
 
         // --------------------------------------------------------------------
 
+        /**
+         * Build Fresh Premium Data - Terminate & Refund
+         *
+         *
+         * @param array $premium_data
+         * @param object $record Current Endorsement Record
+         * @param object $policy_record Policy Record
+         * @return array
+         */
         private function _build_terminate_premium_data( $premium_data, $record, $policy_record )
         {
-            if( $this->is_refund_allowed($record->txn_type, $record->policy_id) )
+            if( $this->is_refund_allowed($record->policy_id) )
             {
                 throw new Exception("Exception [Model: Endorsement_model][Method: _build_terminate_premium_data()]: The premium can not be refund on a policy having CLAIM.");
             }
@@ -2484,7 +2773,7 @@ class Endorsement_model extends MY_Model
              * We can not refund a claimed policy!
              */
             $txn_type = $premium_data['txn_type'];
-            if( !$this->is_refund_allowed($txn_type, $record->policy_id) )
+            if( $this->is_txn_type_refundable($txn_type) && !$this->is_refund_allowed($record->policy_id) )
             {
                 throw new Exception("Exception [Model: Endorsement_model][Method: _build_updowngrade_premium_data()]: The premium can not be refund on a policy having CLAIM.");
             }
@@ -2495,7 +2784,105 @@ class Endorsement_model extends MY_Model
 
         // --------------------------------------------------------------------
 
+        /**
+         * Build Fresh Premium Data - FAC IN
+         *
+         *
+         * @param array $premium_data
+         * @param object $policy_record
+         * @return array
+         */
+        private function _build_fac_in_premium_data( $premium_data, $policy_record )
+        {
+            $gross_full_amt_basic_premium   = $premium_data['gross_full_amt_basic_premium'];
+            $percent_ri_commission          = $premium_data['percent_ri_commission'];
 
+            // Compute amt_ri_commission
+            $comm_percent                   = bcdiv($percent_ri_commission, 100.00, IQB_AC_DECIMAL_PRECISION);
+            $gross_full_amt_ri_commission   = bcmul( $gross_full_amt_basic_premium, $comm_percent, IQB_AC_DECIMAL_PRECISION);
+
+            // RI COMMISSIONs
+            $premium_data = array_merge($premium_data,[
+                'gross_full_amt_ri_commission'      => $gross_full_amt_ri_commission,
+                'gross_computed_amt_ri_commission'  => $gross_full_amt_ri_commission,
+                'refund_amt_ri_commission'          => NULL,
+                'net_amt_ri_commission'             => $gross_full_amt_ri_commission,
+            ]);
+
+
+            // COPY GROSS_FULL -> GROSS_COMPUTED
+            $premium_data = $this->_copy_gross_full_to_gross_computed( $premium_data );
+
+            /**
+             * REFUND on FRESH is ALL ZERO/NULL
+             */
+            $premium_data = $this->_reset_refund_premium_data($premium_data);
+
+            /**
+             * Compute NET Premium Data = GROSS - REFUND
+             */
+            $premium_data = $this->_compute_net_premium_data($premium_data);
+
+
+            return $premium_data;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Build Fresh/Renewal Premium Data
+         *
+         * If short term Policy, apply short term rate.
+         *
+         * @param array $premium_data
+         * @param object $policy_record
+         * @return array
+         */
+        private function _build_fresh_premium_data( $premium_data, $policy_record )
+        {
+            /**
+             * Short-Term Policy???
+             */
+            if($policy_record->flag_short_term == IQB_FLAG_YES)
+            {
+                $rate_percent = $this->portfolio_setting_model->compute_short_term_rate(
+                    $policy_record->fiscal_yr_id,
+                    $policy_record->portfolio_id,
+                    $policy_record->start_date,
+                    $policy_record->end_date
+                );
+
+                $rate           = $rate_percent / 100.00;
+                $rates      = [
+                    'basic_rate'    => $rate,
+                    'pool_rate'     => $rate,
+                ];
+                $premium_data   = $this->_apply_rates_on_gross_data( $premium_data, $rates);
+
+                // Update Short Term Related Info on Endorsement as well
+                $premium_data['flag_short_term']    = IQB_FLAG_YES;
+                $premium_data['short_term_config']  = IQB_ENDORSEMENT_SPR_CONFIG_BOTH;
+                $premium_data['short_term_rate']    = $rate_percent;
+            }
+            else
+            {
+                // COPY GROSS_FULL -> GROSS_COMPUTED
+                $premium_data = $this->_copy_gross_full_to_gross_computed( $premium_data );
+            }
+
+            /**
+             * REFUND on FRESH is ALL ZERO/NULL
+             */
+            $premium_data = $this->_reset_refund_premium_data($premium_data);
+
+
+            /**
+             * Compute NET Premium Data = GROSS - REFUND
+             */
+            $premium_data = $this->_compute_net_premium_data($premium_data);
+
+            return $premium_data;
+        }
 
         // --------------------------------------------------------------------
 
@@ -3019,62 +3406,7 @@ class Endorsement_model extends MY_Model
             return $premium_data;
         }
 
-        // --------------------------------------------------------------------
 
-        /**
-         * Build Fresh/Renewal Premium Data
-         *
-         * If short term Policy, apply short term rate.
-         *
-         * @param array $premium_data
-         * @param object $policy_record
-         * @return array
-         */
-        private function _build_fresh_premium_data( $premium_data, $policy_record )
-        {
-            /**
-             * Short-Term Policy???
-             */
-            if($policy_record->flag_short_term == IQB_FLAG_YES)
-            {
-                $rate_percent = $this->portfolio_setting_model->compute_short_term_rate(
-                    $policy_record->fiscal_yr_id,
-                    $policy_record->portfolio_id,
-                    $policy_record->start_date,
-                    $policy_record->end_date
-                );
-
-                $rate           = $rate_percent / 100.00;
-                $rates      = [
-                    'basic_rate'    => $rate,
-                    'pool_rate'     => $rate,
-                ];
-                $premium_data   = $this->_apply_rates_on_gross_data( $premium_data, $rates);
-
-                // Update Short Term Related Info on Endorsement as well
-                $premium_data['flag_short_term']    = IQB_FLAG_YES;
-                $premium_data['short_term_config']  = IQB_ENDORSEMENT_SPR_CONFIG_BOTH;
-                $premium_data['short_term_rate']    = $rate_percent;
-            }
-            else
-            {
-                // COPY GROSS_FULL -> GROSS_COMPUTED
-                $premium_data = $this->_copy_gross_full_to_gross_computed( $premium_data );
-            }
-
-            /**
-             * REFUND on FRESH is ALL ZERO/NULL
-             */
-            $premium_data = $this->_reset_refund_premium_data($premium_data);
-
-
-            /**
-             * Compute NET Premium Data = GROSS - REFUND
-             */
-            $premium_data = $this->_compute_net_premium_data($premium_data);
-
-            return $premium_data;
-        }
 
         // --------------------------------------------------------------------
 
@@ -3419,18 +3751,76 @@ class Endorsement_model extends MY_Model
     /**
      * Is this Endorsement Refundable?
      *
-     * @param int $txn_type
+     * @param int|object $record or ID
      * @return bool
      */
-    public function is_refundable( $txn_type )
+    public function is_refundable( $record )
     {
-        $txn_type       = (int)$txn_type;
-        $allowed_types  = [
+        $record             = is_numeric($record) ? $this->get( (int)$record ) : $record;
+        $txn_type           = (int)$record->txn_type;
+        $flag_refundable    = FALSE;
+
+        if( $this->is_txn_type_refundable($txn_type) )
+        {
+            $flag_refundable = TRUE;
+        }
+
+        /**
+         * Time Extended
+         * In NET DIFFERENCE type, it can be refundable
+         */
+        else if( $txn_type == IQB_ENDORSEMENT_TYPE_TIME_EXTENDED )
+        {
+            $flag_refundable = $this->is_time_extended_refundable($record);
+        }
+
+        return $flag_refundable;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Is Endorsement Type Refundable?
+     *
+     * @param type $txn_type
+     * @return type
+     */
+    public function is_txn_type_refundable($txn_type)
+    {
+        $txn_type           = (int)$txn_type;
+        $allowed_types      = [
             IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND,
             IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE
         ];
 
         return in_array($txn_type, $allowed_types);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Is Time Extended Endorsement Refundable?
+     *
+     * @param int|object $record or ID
+     * @return bool
+     */
+    public function is_time_extended_refundable($record)
+    {
+        $record     = is_numeric($record) ? $this->get( (int)$record ) : $record;
+        $txn_type   = (int)$record->txn_type;
+
+        if( $txn_type != IQB_ENDORSEMENT_TYPE_TIME_EXTENDED )
+        {
+            throw new Exception("Exception [Model:Endorsement_model][Method: is_time_extended_refundable()]: Invalid 'Endorsement Type'.");
+        }
+
+        $total_premium      = $this->total_premium($record);
+        if($total_premium < 0 )
+        {
+            return TRUE;
+        }
+
+        return FALSE;
     }
 
 
@@ -3441,21 +3831,14 @@ class Endorsement_model extends MY_Model
      *
      * If policy has been claimed, NO REFUND AT ALL!!!
      *
-     * @param int $txn_type
      * @param int $policy_id
      * @return bool
      */
-    public function is_refund_allowed($txn_type, $policy_id)
+    public function is_refund_allowed($policy_id)
     {
+        $allowed = TRUE;
         $this->load->model('claim_model');
-
-        $txn_type   = (int)$txn_type;
-        $allowed    = TRUE;
-        if(
-            $this->is_refundable($txn_type )
-                &&
-            $this->claim_model->has_policy_claim($policy_id)
-        )
+        if( $this->claim_model->has_policy_claim($policy_id) )
         {
             $allowed = FALSE;
         }
@@ -3875,8 +4258,6 @@ class Endorsement_model extends MY_Model
         $total = bcsub($total, floatval($record->net_amt_stamp_duty ?? 0.00), IQB_AC_DECIMAL_PRECISION );
 
         return $total;
-        $record         = is_numeric($record) ? $this->get( (int)$record ) : $record;
-
     }
 
     // --------------------------------------------------------------------
@@ -3919,7 +4300,7 @@ class Endorsement_model extends MY_Model
             // Data Selection
             $this->db->select(
                             // Endorsement
-                            "E.id, E.policy_id, E.txn_type, E.issued_date, E.start_date, E.end_date, E.flag_ri_approval, E.flag_current, E.status, " .
+                            "E.id, E.policy_id, E.txn_type, E.issued_date, E.start_date, E.end_date, E.flag_ri_approval, E.flag_current, E.status, E.te_compute_ref, " .
 
                             // Branch and Portfolio
                             "P.category as policy_category, P.insurance_company_id, P.code as policy_code, P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, " .

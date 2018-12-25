@@ -580,7 +580,7 @@ if ( ! function_exists('number_to_words'))
 	/**
 	 * Convert number to words
 	 *
-	 * @param numeric $$number
+	 * @param numeric $number
 	 * @return	string
 	 */
 	function number_to_words( $number  )

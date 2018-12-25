@@ -1407,15 +1407,15 @@ if ( ! function_exists('_ENDORSEMENT_is_refundable'))
      *  - Premium Refund
      *  - Terminate & Refund
      *
-     * @param   int     Transaction Type
+     * @param   int|object Endorsement Record OR ID
      * @return  array
      */
-    function _ENDORSEMENT_is_refundable( $txn_type )
+    function _ENDORSEMENT_is_refundable( $record )
     {
         $CI =& get_instance();
         $CI->load->model('endorsement_model');
 
-        return $CI->endorsement_model->is_refundable($record->txn_type);
+        return $CI->endorsement_model->is_refundable($record);
     }
 }
 
@@ -1515,10 +1515,10 @@ if ( ! function_exists('_ENDORSEMENT_is_object_editable'))
 	 * 	- Premium Upgrade
 	 * 	- Premium Refund
 	 *
-	 * @param 	int 	Transaction Type
+     * @param       int     Transaction Type
 	 * @return	array
 	 */
-	function _ENDORSEMENT_is_object_editable( $txn_type )
+    function _ENDORSEMENT_is_object_editable( $txn_type )
 	{
         $CI =& get_instance();
         $CI->load->model('endorsement_model');

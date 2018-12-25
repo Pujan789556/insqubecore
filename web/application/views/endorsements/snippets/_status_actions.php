@@ -10,8 +10,8 @@ $is_deletable           = _ENDORSEMENT_is_deletable($record->txn_type, $record->
 $is_policy_editable     = _ENDORSEMENT_is_policy_editable($record->txn_type);
 $is_object_editable     = _ENDORSEMENT_is_object_editable($record->txn_type);
 $is_customer_editable   = _ENDORSEMENT_is_customer_editable($record->txn_type);
-?>
-<?php
+
+
 /**
  * Update Premium
  * ---------------

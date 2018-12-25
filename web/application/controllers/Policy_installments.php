@@ -298,7 +298,7 @@ class Policy_installments extends MY_Controller
 		 * Voucher Master Data
 		 */
 		try{
-			$voucher_data['master'] = $this->_data_voucher_master($policy_record->code, $endorsement_record->txn_type);
+			$voucher_data['master'] = $this->_data_voucher_master($endorsement_record);
 		}
 		catch (Exception $e) {
 			return $this->template->json([ 'status' => 'error', 'title' => 'Exception Occured.','message' => $e->getMessage()], 400);
@@ -517,16 +517,16 @@ class Policy_installments extends MY_Controller
 		// --------------------------------------------------------------------
 
 
-		private function _data_voucher_master($policy_code, $txn_type)
+		private function _data_voucher_master($endorsement_record)
 		{
 			/**
 			 * Let's Build Policy Voucher
 			 */
-			$narration = 'POLICY VOUCHER - POLICY CODE : ' . $policy_code;
+			$narration = 'POLICY VOUCHER - POLICY CODE : ' . $endorsement_record->policy_code;
 
 			$voucher_data = [
 	            'voucher_date'      => date('Y-m-d'),
-	            'voucher_type_id'   => $this->_voucher_type_by_txn_type($txn_type),
+	            'voucher_type_id'   => $this->_voucher_type($endorsement_record),
 	            'narration'         => $narration,
 	            'flag_internal'     => IQB_FLAG_ON
 	        ];
@@ -1146,18 +1146,33 @@ class Policy_installments extends MY_Controller
 		}
 
 
-		private function _voucher_type_by_txn_type($txn_type)
+		private function _voucher_type($endorsement_record)
 		{
-			$txn_type = (int)$txn_type;
+			$txn_type = (int)$endorsement_record->txn_type;
 			$voucher_type_id = NULL;
 
 
 			switch ($txn_type)
 			{
 				case IQB_ENDORSEMENT_TYPE_FRESH:
-				case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
 				case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
 					$voucher_type_id = IQB_AC_VOUCHER_TYPE_PRI; // Premium Voucher
+					break;
+
+				/**
+				 * If NET Amount is +ve > Premium
+				 * Else Refund
+				 */
+				case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+					$total_premium 		= $this->endorsement_model->total_premium($endorsement_record);
+					if($total_premium > 0 )
+					{
+						$voucher_type_id 	= IQB_AC_VOUCHER_TYPE_PRI; // Premium Voucher
+					}
+					else
+					{
+						$voucher_type_id = IQB_AC_VOUCHER_TYPE_CRDN; // Credit Voucher
+					}
 					break;
 
 				case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
@@ -1177,7 +1192,7 @@ class Policy_installments extends MY_Controller
 
 			if( !$voucher_type_id )
 			{
-				throw new Exception("Exception [Controller:Policy_installments][Method: _voucher_type_by_txn_type()]: No voucher type found for supplied 'Endorsement Type'.");
+				throw new Exception("Exception [Controller:Policy_installments][Method: _voucher_type()]: No voucher type found for supplied 'Endorsement Type'.");
 			}
 
 			return $voucher_type_id;
@@ -1679,10 +1694,10 @@ class Policy_installments extends MY_Controller
 		}
 
 		/**
-		 * Get the endorsement record, Valid Type?
+		 * Get the endorsement record, Validate Refundable?
 		 */
 		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
-		if(!$endorsement_record || !$this->endorsement_model->is_refundable($endorsement_record->txn_type) )
+		if(!$endorsement_record || !$this->endorsement_model->is_refundable($endorsement_record) )
 		{
 			return $this->template->json([
 				'title' 	=> 'Invalid Action!',
@@ -2555,12 +2570,12 @@ class Policy_installments extends MY_Controller
 		// --------------------------------------------------------------------
 
         /**
-		 * Get the endorsement record, Valid Type?
+		 * Get the endorsement record, Validate Refundable?
 		 */
 		$endorsement_record = $this->endorsement_model->get( $installment_record->endorsement_id );
 
 
-		if(!$endorsement_record || !$this->endorsement_model->is_refundable($endorsement_record->txn_type) )
+		if(!$endorsement_record || !$this->endorsement_model->is_refundable($endorsement_record) )
 		{
 			return $this->template->json([
 				'title' 	=> 'Invalid Action!',

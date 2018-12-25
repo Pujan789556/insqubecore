@@ -16,7 +16,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</td>
 	<td>
 		<?php echo $record->start_date, ' - ', $record->end_date;?>
-		<?php echo '<br>', _POLICY_duration_formatted($record->start_date, $record->end_date); ?>
+		<?php echo '<br>', _POLICY_duration_days_formatted($record->start_date, $record->end_date); ?>
 	</td>
 	<td><?php echo $record->sold_by_username; ?></td>
 	<td><?php echo $record->agent_name; ?></td>

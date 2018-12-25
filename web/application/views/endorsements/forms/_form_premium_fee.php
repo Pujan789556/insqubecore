@@ -11,7 +11,7 @@ if(isset($record))
 
 echo form_open( $this->uri->uri_string(),
                         [
-                            'class'     => 'form-horizontal form-iqb-general',
+                            'class'     => 'form-iqb-general',
                             'data-pc'   => '.bootbox-body', // parent container ID
                             'id'        => '_form-premium'
                         ],
@@ -41,6 +41,14 @@ echo form_open( $this->uri->uri_string(),
                     ?>
                 </div>
             </div>
+
+            <?php
+            /**
+             * Other Common Components
+             *  1. Premium Installments
+             */
+            echo $common_components ?? '';
+            ?>
 
             <button type="submit" class="hide">Submit</button>
         </div>

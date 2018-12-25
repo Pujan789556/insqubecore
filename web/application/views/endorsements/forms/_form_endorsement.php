@@ -34,28 +34,7 @@ if(isset($record))
         </div>
     </div>
 
-    <?php
-    /**
-     * Endorsement Dates
-     */
-    if(isset($form_elements['dates'])): ?>
-        <div class="box box-solid box-bordered">
-            <div class="box-header with-border">
-              <h4 class="box-title">Endorsement Dates</h4>
-            </div>
-            <div class="box-body">
-                <?php
-                /**
-                 * Load Form Components
-                 */
-                $this->load->view('templates/_common/_form_components_horz', [
-                    'form_elements' => $form_elements['dates'],
-                    'form_record'   => $record
-                ]);
-                ?>
-            </div>
-        </div>
-    <?php endif ?>
+
 
 
     <?php
@@ -83,25 +62,25 @@ if(isset($record))
 
     <?php
     /**
-     * Premium/Charge Fee
+     * Endorsement Dates
      */
-    if(isset($form_elements['fee'])): ?>
-        <!-- <div class="box box-solid box-bordered">
+    if(isset($form_elements['dates'])): ?>
+        <div class="box box-solid box-bordered">
             <div class="box-header with-border">
-              <h4 class="box-title">Premium/Charge Information</h4>
+              <h4 class="box-title">Endorsement Dates</h4>
             </div>
-            <div class="box-body">
+            <div class="box-body" id="endorsment-dates">
                 <?php
                 /**
                  * Load Form Components
                  */
                 $this->load->view('templates/_common/_form_components_horz', [
-                    'form_elements' => $form_elements['fee'],
+                    'form_elements' => $form_elements['dates'],
                     'form_record'   => $record
                 ]);
                 ?>
             </div>
-        </div> -->
+        </div>
     <?php endif ?>
 
     <?php
@@ -212,6 +191,32 @@ $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", func
     $("#_agent-id").select2();
     $('.bootbox.modal').removeAttr('tabindex'); // modal workaround
 });
+
+
+// Toggler of Dates for Time Extended
+function __toggle_dates_on_time_extended(v)
+{
+    // Hide Start Date if Duration Prorata
+    var $st_dt = $('#start_date');
+    if(v == 1)
+    {
+        $st_dt.closest('.form-group ').hide(200);
+    }else{
+        $st_dt.closest('.form-group ').show(200);
+    }
+}
+
+// Time Extended Field Toggler
+if(('#te_compute_ref').length){
+    __toggle_dates_on_time_extended(parseInt($('#te_compute_ref').val()));
+}
+
+// Time Extended - Date Toggle
+$('#te_compute_ref').on('change', function(){
+    __toggle_dates_on_time_extended(parseInt(this.value));
+});
+
+
 
 // Load Txn Details from Endorsement Template
 $('#template-reference').on('change', function(){
