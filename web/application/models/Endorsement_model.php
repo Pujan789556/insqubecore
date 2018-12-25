@@ -1689,6 +1689,8 @@ class Endorsement_model extends MY_Model
             $old_issued_date = $record->issued_date;
             $new_issued_date = backdate_process($old_issued_date);
 
+            // --------------------------------------------------------------------
+
             /**
              * On Termination
              *      Issued Date can be past date,
@@ -1715,16 +1717,25 @@ class Endorsement_model extends MY_Model
 
             // --------------------------------------------------------------------
 
+            /**
+             * Process Start Date
+             */
+
+            $old_start_date  = $record->start_date;
+            $new_start_date  = backdate_process($old_start_date);
+
+            // -------------------------------------------------------------------
+
 
             /**
              * On Time Extended
              *
-             * Both start and end dates are after policy end date, so we only need to
-             * check issued date
+             * Start and Issued Date Can not be past dates
              */
             if( $txn_type == IQB_ENDORSEMENT_TYPE_TIME_EXTENDED )
             {
                 $data['issued_date']    = $new_issued_date;
+                $data['start_date']     = $new_start_date;
                 return $data;
             }
 
@@ -1734,7 +1745,7 @@ class Endorsement_model extends MY_Model
              * For Rest of the Types
              *
              * Let's Get Start and Issued Date.
-             * NOTE: END Date is automatically assigned.
+             * END Date = Policy END Date
              */
 
             $old_start_date  = $record->start_date;
@@ -4044,7 +4055,7 @@ class Endorsement_model extends MY_Model
         $select =   "E.*, " .
 
                     // Branch and Portfolio
-                    "P.category as policy_category, P.insurance_company_id, P.code as policy_code, P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, " .
+                    "P.category as policy_category, P.insurance_company_id, P.code as policy_code, P.branch_id, P.portfolio_id, P.customer_id, P.object_id, P.status AS policy_status, P.start_date as policy_start_date, P.end_date as policy_end_date, " .
 
                     // Transfer Customer Name
                     "C.full_name_en as transfer_customer_name_en, C.full_name_np as transfer_customer_name_np, " .
