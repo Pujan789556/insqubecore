@@ -199,7 +199,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                                         ?>
                                     </td>
                                     <td align="right">
-                                        <?php  echo number_format($goods->sum_insured, 2);?>
+                                        <?php  echo number_format($goods->sum_insured ?? NULL, 2);?>
                                     </td>
                                 </tr>
                                 <tr>
