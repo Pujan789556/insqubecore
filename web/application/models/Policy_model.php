@@ -1174,17 +1174,21 @@ class Policy_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Update Policy End Date
+     * Update Policy's Information From Endorsement Activation
      *
-     * This is when an endorsement has different end date
+     *  This function is triggered right after Endorsement Activation
+     *  to update the policy's
+     *      - agent info
+     *      - sold by info
+     *      - end date (if applies)
+     *
      *
      * @param int $id
-     * @param date $end_date
+     * @param array $data
      * @return bool
      */
-    public function update_end_date($id, $end_date)
+    public function update_on_endorsement_activation($id, $data)
     {
-        $data = ['end_date' => $end_date];
         return $this->db->where('id', $id)
                         ->update($this->table_name, $data);
     }

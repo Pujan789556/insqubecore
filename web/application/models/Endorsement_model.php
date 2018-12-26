@@ -257,35 +257,14 @@ class Endorsement_model extends MY_Model
          */
         private function _v_rules_basic( $txn_type, $portfolio_id, $policy_record )
         {
-            $txn_type                   = (int)$txn_type;
+            $txn_type  = (int)$txn_type;
 
             $this->load->model('endorsement_template_model');
             $this->load->model('agent_model');
             $template_dropdown = $this->endorsement_template_model->dropdown( $portfolio_id, $txn_type );
 
-            $v_rules = [
-                [
-                    'field' => 'sold_by',
-                    'label' => 'Sales Staff',
-                    'rules' => 'trim|required|integer|max_length[11]',
-                    '_id'       => '_marketing-staff',
-                    '_extra_attributes' => 'style="width:100%; display:block"',
-                    '_type'     => 'dropdown',
-                    '_default'  => $policy_record->sold_by ?? '',
-                    '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown(),
-                    '_required' => true
-                ],
-                [
-                    'field' => 'agent_id',
-                    'label' => 'Agent Name',
-                    'rules' => 'trim|integer|max_length[11]',
-                    '_id'       => '_agent-id',
-                    '_extra_attributes' => 'style="width:100%; display:block"',
-                    '_type'     => 'dropdown',
-                    '_default'  => $policy_record->agent_id ?? '',
-                    '_data'     => IQB_BLANK_SELECT + $this->agent_model->dropdown(true),
-                    '_required' => false
-                ],
+            $v_rules        = [];
+            $v_rules_common = [
                 [
                     'field' => 'template_reference',
                     'label' => 'Template Reference',
@@ -312,6 +291,68 @@ class Endorsement_model extends MY_Model
                     '_required' => false
                 ]
             ];
+
+
+
+            switch ($txn_type)
+            {
+                case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+                case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
+                case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
+                    $v_rules = [
+                        [
+                            'field' => 'sold_by',
+                            'label' => 'Sales Staff',
+                            'rules' => 'trim|required|integer|max_length[11]',
+                            '_id'       => '_marketing-staff',
+                            '_extra_attributes' => 'style="width:100%; display:block"',
+                            '_type'     => 'dropdown',
+                            '_default'  => $policy_record->sold_by ?? '',
+                            '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown(),
+                            '_required' => true
+                        ],
+                        [
+                            'field' => 'agent_id',
+                            'label' => 'Agent Name',
+                            'rules' => 'trim|integer|max_length[11]',
+                            '_id'       => '_agent-id',
+                            '_extra_attributes' => 'style="width:100%; display:block"',
+                            '_type'     => 'dropdown',
+                            '_default'  => $policy_record->agent_id ?? '',
+                            '_data'     => IQB_BLANK_SELECT + $this->agent_model->dropdown(true),
+                            '_required' => false
+                        ]
+                    ];
+                    break;
+
+                case IQB_ENDORSEMENT_TYPE_OWNERSHIP_TRANSFER:
+                case IQB_ENDORSEMENT_TYPE_TERMINATE:
+                case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
+                    // NOTHING REQUIRED
+                    break;
+
+                case IQB_ENDORSEMENT_TYPE_GENERAL:
+                    $v_rules = [
+                        [
+                            'field' => 'sold_by',
+                            'label' => 'Sales Staff',
+                            'rules' => 'trim|required|integer|max_length[11]',
+                            '_id'       => '_marketing-staff',
+                            '_extra_attributes' => 'style="width:100%; display:block"',
+                            '_type'     => 'dropdown',
+                            '_default'  => $policy_record->sold_by ?? '',
+                            '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown(),
+                            '_required' => true
+                        ],
+                    ];
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+
+            $v_rules = array_merge($v_rules, $v_rules_common);
 
             return ['basic' => $v_rules];
         }
@@ -1437,6 +1478,7 @@ class Endorsement_model extends MY_Model
 
             if( !$this->is_first($record->txn_type) )
             {
+                $policy_update_data = [];
 
                 /**
                  * Update Endorsement Changes to Object, Policy, Customer - If any
@@ -1481,8 +1523,14 @@ class Endorsement_model extends MY_Model
                     IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE
                 ]) )
                 {
-                    $this->policy_model->update_end_date($record->policy_id, $record->end_date);
+                    $policy_update_data['end_date'] = $record->end_date;
                 }
+
+
+                /**
+                 * Update Policy's Data on Endorsement Activation
+                 */
+                $this->__update_policy_on_activation($record, $policy_update_data);
             }
 
             /**
@@ -1519,6 +1567,40 @@ class Endorsement_model extends MY_Model
         return $transaction_status;
     }
 
+    // ----------------------------------------------------------------
+
+        /**
+         * Update Policy Information after Endorsement Activation
+         *
+         *      - Agent Info
+         *      - Sales Info
+         *      - End Date (if applies)
+         *
+         *  These information are updated so Policy has the latest updated values
+         *
+         * @param object $record
+         * @return bool
+         */
+        private function __update_policy_on_activation($record, $data = [])
+        {
+            if($record->agent_id)
+            {
+                $data['agent_id'] = $record->agent_id;
+            }
+
+            if($record->sold_by)
+            {
+                $data['sold_by'] = $record->sold_by;
+            }
+
+
+            if($data)
+            {
+                return $this->policy_model->update_on_endorsement_activation($record->policy_id, $data);
+            }
+
+            return TRUE;
+        }
     // ----------------------------------------------------------------
 
     /**

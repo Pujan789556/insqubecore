@@ -360,9 +360,12 @@ class Endorsements extends MY_Controller
 			}
 
 			/**
-			 * Nullify Agent if Blank
+			 * Agent ID Blank?
+			 *
+			 * NOTE: Form Input Blank Does not mean NULL
+			 * 		 So, you must set to NULL
 			 */
-			if(!$data['agent_id'])
+			if(isset($data['agent_id']) && empty($data['agent_id']))
 			{
 				$data['agent_id'] = NULL;
 			}
