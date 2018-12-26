@@ -181,6 +181,7 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                                          * SUM Insured of Goods must be Mentioned in order to have goods information.
                                          */
                                         $goods = $object_attributes->goods;
+                                        // echo '<pre>'; print_r($goods);exit;
                                         if($goods->sum_insured)
                                         {
                                             echo nl2br(htmlspecialchars($goods->description));
@@ -194,12 +195,17 @@ $schedule_table_title   = 'गार्हस्थ बीमालेख';
                                             {
                                                 $attached_text .= "छैन ।";
                                             }
-                                            echo $attached_text;
+
                                         }
+                                        else
+                                        {
+                                            $attached_text = "छैन ।";
+                                        }
+                                        echo $attached_text;
                                         ?>
                                     </td>
                                     <td align="right">
-                                        <?php  echo number_format($goods->sum_insured ?? NULL, 2);?>
+                                        <?php  echo number_format( floatval($goods->sum_insured ?? 0.00), 2);?>
                                     </td>
                                 </tr>
                                 <tr>
