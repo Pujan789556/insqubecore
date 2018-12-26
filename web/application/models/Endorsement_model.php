@@ -297,6 +297,7 @@ class Endorsement_model extends MY_Model
             switch ($txn_type)
             {
                 case IQB_ENDORSEMENT_TYPE_TIME_EXTENDED:
+                case IQB_ENDORSEMENT_TYPE_GENERAL:
                 case IQB_ENDORSEMENT_TYPE_PREMIUM_UPGRADE:
                 case IQB_ENDORSEMENT_TYPE_PREMIUM_REFUND:
                     $v_rules = [
@@ -329,22 +330,6 @@ class Endorsement_model extends MY_Model
                 case IQB_ENDORSEMENT_TYPE_TERMINATE:
                 case IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE:
                     // NOTHING REQUIRED
-                    break;
-
-                case IQB_ENDORSEMENT_TYPE_GENERAL:
-                    $v_rules = [
-                        [
-                            'field' => 'sold_by',
-                            'label' => 'Sales Staff',
-                            'rules' => 'trim|required|integer|max_length[11]',
-                            '_id'       => '_marketing-staff',
-                            '_extra_attributes' => 'style="width:100%; display:block"',
-                            '_type'     => 'dropdown',
-                            '_default'  => $policy_record->sold_by ?? '',
-                            '_data'     => IQB_BLANK_SELECT + $this->user_model->dropdown(),
-                            '_required' => true
-                        ],
-                    ];
                     break;
 
                 default:
