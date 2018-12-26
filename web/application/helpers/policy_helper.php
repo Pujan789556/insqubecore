@@ -1233,7 +1233,8 @@ if ( ! function_exists('_POLICY_schedule_header_footer'))
                                     <td align="right" class="border-b"> Verified By: ' . $verifier_text . ' </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="3" class="border-t">'. address_widget_two_lines( parse_address_record($record, 'addr_branch_'), $branch_contact_prefix) .'</td>
+                                    <td colspan="2" class="border-t">'. address_widget_two_lines( parse_address_record($record, 'addr_branch_'), $branch_contact_prefix) .'</td>
+                                    <td>Page {PAGENO} of {nb}</td>
                                 </tr>
                             </table>
                         </htmlpagefooter>
