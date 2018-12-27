@@ -104,9 +104,7 @@ class Branch_model extends MY_Model
             $data[$col] = $post_data[$col] ?? NULL;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $done               = FALSE;
+        $done  = FALSE;
 
         // Use automatic transaction
         $this->db->trans_start();
@@ -132,9 +130,6 @@ class Branch_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $done = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $done;
@@ -173,10 +168,7 @@ class Branch_model extends MY_Model
             $data['is_head_office'] = IQB_FLAG_ON;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
         $done               = FALSE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -201,9 +193,6 @@ class Branch_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $done = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $done;

@@ -198,6 +198,9 @@ class Branches extends MY_Controller
 			{
 				$data = $this->input->post();
 
+				// is_head_office Can not be NULL
+				$data['is_head_office'] = $data['is_head_office'] ?? IQB_FLAG_OFF;
+
 				// Insert or Update?
 				if($action === 'add')
 				{
