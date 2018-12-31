@@ -899,7 +899,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
 
         // echo $html;exit;
         $mpdf->WriteHTML($html);
-        $filename = "policy-{$record->code}.pdf";
+        $filename = _POLICY__schedule_filename( $record->code );
         if( $action === 'save' )
         {
             $save_full_path = rtrim(Policies::$data_upload_path, '/') . '/' . $filename;
@@ -911,10 +911,29 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
         }
         else
         {
-            $mpdf->Output();
+            $mpdf->Output($filename, 'I');
         }
     }
 }
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__schedule_filename'))
+{
+    /**
+     * Get the Schedule PDF FileName
+     *
+     * [INSQUBE-APP-ID]-[POLICY]-[POLICY CODE].pdf
+     *
+     * @param string $policy_code
+     * @return  string
+     */
+    function _POLICY__schedule_filename( $policy_code )
+    {
+        return INSQUBE_APP_ID . "-POLICY-{$policy_code}.pdf";
+    }
+}
+
 
 // ------------------------------------------------------------------------
 
@@ -1670,9 +1689,10 @@ if ( ! function_exists('_ENDORSEMENT_endorsement_pdf'))
 	        $html = $CI->load->view( $schedule_view, $data, TRUE);
 	        $mpdf->WriteHTML($html);
 
-	        $filename = "endorsement-all-{$record->policy_code}.pdf";
+	        // $filename = "endorsement-all-{$record->policy_code}.pdf";
+            $filename = _ENDORSEMENT__filename( $record->policy_code );
 	        // $mpdf->Output($filename,'D');      // make it to DOWNLOAD
-	        $mpdf->Output();      // make it to DOWNLOAD
+	        $mpdf->Output($filename, 'I');      // make it to DOWNLOAD
 		}
 		else
 		{
@@ -1694,6 +1714,24 @@ if ( ! function_exists('_ENDORSEMENT_endorsement_pdf'))
         // {
         // 	$mpdf->Output();
         // }
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_ENDORSEMENT__filename'))
+{
+    /**
+     * Get the Endorsemenf FileName
+     *
+     * [INSQUBE-APP-ID]-[ENDORSEMENT]-[POLICY CODE].pdf
+     *
+     * @param string $policy_code
+     * @return  string
+     */
+    function _ENDORSEMENT__filename( $policy_code )
+    {
+        return INSQUBE_APP_ID . "-ENDORSEMENT-ALL-{$policy_code}.pdf";
     }
 }
 

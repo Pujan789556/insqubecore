@@ -890,10 +890,9 @@ if ( ! function_exists('_INVOICE__pdf'))
 
         $html = $CI->load->view( 'accounting/invoices/print/invoice', $data, TRUE);
         $mpdf->WriteHTML($html);
-        $filename =  "invoice-{$record->invoice_code}.pdf";
+        $filename = _INVOICE__filename( $record->invoice_code );
         if( $action === 'save' )
         {
-
         	$filepath = Ac_invoices::$data_upload_path;
         	if( !file_exists($filepath) )
         	{
@@ -908,9 +907,25 @@ if ( ! function_exists('_INVOICE__pdf'))
         }
         else
         {
-            $mpdf->Output();
+            $mpdf->Output($filename, 'I');
         }
     }
+}
+
+if ( ! function_exists('_INVOICE__filename'))
+{
+    /**
+     * Get the Invoide PDF FileName
+     *
+     * [INSQUBE-APP-ID]-[INVOICE]-[INVOICE CODE].pdf
+     *
+     * @param string $invoice_code
+     * @return  string
+     */
+    function _INVOICE__filename( $invoice_code )
+    {
+    	return INSQUBE_APP_ID . "-INVOICE-{$invoice_code}.pdf";
+	}
 }
 
 // ------------------------------------------------------------------------
@@ -957,10 +972,9 @@ if ( ! function_exists('_RECEIPT__pdf'))
 
         $html = $CI->load->view( 'accounting/invoices/print/receipt', $data, TRUE);
         $mpdf->WriteHTML($html);
-        $filename =  "receipt-{$record->receipt_code}.pdf";
+       	$filename = _RECEIPT__filename( $record->receipt_code );
         if( $action === 'save' )
         {
-
         	$filepath = Ac_invoices::$data_upload_path_receipts;
         	if( !file_exists($filepath) )
         	{
@@ -975,9 +989,25 @@ if ( ! function_exists('_RECEIPT__pdf'))
         }
         else
         {
-            $mpdf->Output();
+            $mpdf->Output($filename, 'I');
         }
     }
+}
+
+if ( ! function_exists('_RECEIPT__filename'))
+{
+    /**
+     * Get the Invoide PDF FileName
+     *
+     * [INSQUBE-APP-ID]-[RECEIPT]-[RECEIPT CODE].pdf
+     *
+     * @param string $receipt_code
+     * @return  string
+     */
+    function _RECEIPT__filename( $receipt_code )
+    {
+    	return INSQUBE_APP_ID . "-RECEIPT-{$receipt_code}.pdf";
+	}
 }
 
 

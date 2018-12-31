@@ -1936,7 +1936,7 @@ class Policies extends MY_Controller
 		 */
 
 		$this->load->helper('file');
-		$filename 		= "policy-{$record->code}.pdf";
+		$filename 		= _POLICY__schedule_filename( $record->code );
 		$file_full_path = rtrim(self::$data_upload_path, '/') . '/' . $filename;
 		if( file_exists($file_full_path) )
 		{

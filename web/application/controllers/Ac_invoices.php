@@ -684,7 +684,7 @@ class Ac_invoices extends MY_Controller
 			/**
 			 * Download the physical copy if already exist
 			 */
-			$filename 	=  "invoice-{$record->invoice_code}.pdf";
+			$filename 	= _INVOICE__filename( $record->invoice_code );
 			$file 		= rtrim(self::$data_upload_path, '/') . '/' . $filename;
 			if( file_exists($file) )
 			{
@@ -740,7 +740,7 @@ class Ac_invoices extends MY_Controller
 			/**
 			 * Download the physical copy if already exist
 			 */
-			$filename 	=  "receipt-{$record->receipt_code}.pdf";
+			$filename 	= _RECEIPT__filename( $record->receipt_code );
 			$file 		= rtrim(self::$data_upload_path_receipts, '/') . '/' . $filename;
 			if( file_exists($file) )
 			{
