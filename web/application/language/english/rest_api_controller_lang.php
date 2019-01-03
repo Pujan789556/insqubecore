@@ -17,4 +17,6 @@ $lang['text_rest_unknown_method'] = 'Unknown method';
 $lang['text_rest_unsupported'] = 'Unsupported protocol';
 $lang['text_rest_not_found'] = 'Not Found';
 $lang['text_rest_forbidden'] = 'The resource is unabailable.';
+$lang['text_rest_token_invalid_expired'] = 'The api token seems to be invalid or expired. Please login to renew token.';
+$lang['text_rest_token_invalid_nbf'] = 'The request to server made too early. Please wait a while and try again.';
 

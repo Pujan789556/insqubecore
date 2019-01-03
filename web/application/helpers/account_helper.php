@@ -924,7 +924,7 @@ if ( ! function_exists('_INVOICE__filename'))
      */
     function _INVOICE__filename( $invoice_code )
     {
-    	return INSQUBE_APP_ID . "-INVOICE-{$invoice_code}.pdf";
+    	return APP_ID . "-INVOICE-{$invoice_code}.pdf";
 	}
 }
 
@@ -1006,7 +1006,7 @@ if ( ! function_exists('_RECEIPT__filename'))
      */
     function _RECEIPT__filename( $receipt_code )
     {
-    	return INSQUBE_APP_ID . "-RECEIPT-{$receipt_code}.pdf";
+    	return APP_ID . "-RECEIPT-{$receipt_code}.pdf";
 	}
 }
 

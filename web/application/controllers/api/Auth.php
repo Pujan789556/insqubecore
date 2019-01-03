@@ -18,6 +18,8 @@ class Auth extends Base_API_Controller
 	{
 		parent::__construct();
 
+		// $this->check_authorized();
+
 	}
 
 	// --------------------------------------------------------------------
@@ -31,32 +33,24 @@ class Auth extends Base_API_Controller
 	 */
 	function index()
 	{
+		$data = [
+			'id' => 1,
+			'auth_type' => 2,
+			'auth_type_id' => 3
+		];
 
-		$this->response([
-					$this->config->item('rest_status_field_name') => FALSE,
-                    $this->config->item('rest_message_field_name') => $this->lang->line('text_rest_forbidden')
-                ], self::HTTP_FORBIDDEN);
+		// This is your id token
+		// $jwt = JWT::encode($token_payload, base64_decode(strtr($key, '-_', '+/')), 'HS256');
+	 	$jwt = $this->api_auth->build_token($data);
+		print "<pre>";
+		print "JWT:\n";
+		print_r($jwt);
+		// $decoded = JWT::decode($jwt, base64_decode(strtr($key, '-_', '+/')), ['HS256']);
+		$decoded = $this->api_auth->validated_token($jwt);
+		print "\n\n";
+		print "Decoded:\n";
+		print_r($decoded);
 
-
-		// eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXlsb2FkIjp7ImlkIjoxLCJhdXRoX3R5cGUiOjEsImF1dGhfdHlwZV9pZCI6M319.HSjqjU1XKWifbQdmPo3RLE13Fwjn8aPGWsf2ShYAuLQ
-
-
-		// // Create TOKEN
-		// $tokenData = array();
-  //       $tokenData['payload'] = [
-  //       	'id' => 1,
-  //       	'auth_type' => 1,
-  //       	'auth_type_id' => 3
-  //       ];
-  //       $output['token'] = AUTHORIZATION::generateToken($tokenData);
-
-
-  //       // Verify Token
-  //       $jwt_token = AUTHORIZATION::validateToken($output['token']);
-  //       if ($jwt_token != false)
-  //       {
-  //       	$this->response($output, self::HTTP_OK);
-  //       }
 
 	}
 

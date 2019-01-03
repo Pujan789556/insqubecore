@@ -12,7 +12,8 @@
 	},
 	"require": {
 		"php": ">=5.2.4",
-		"mpdf/mpdf": "^7.0"
+		"mpdf/mpdf": "^7.0",
+		"firebase/php-jwt": "^5.0"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"

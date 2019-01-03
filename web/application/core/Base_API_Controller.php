@@ -13,6 +13,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @link       	http://www.insqube.com
  */
 
+
+
+// --------------------------------------------------------------------
+
 class Base_API_Controller extends CI_Controller
 {
 	// Note: Only the widely used HTTP status codes are documented
@@ -268,21 +272,73 @@ class Base_API_Controller extends CI_Controller
 
 
         /**
-         * Load REST Configs
+         * Libraries
          */
-        $this->load->config('rest');
-        $this->load->config('jwt');
-
-		// --------------------------------------------------------------------
+        $this->load->library('api_auth');
+        $this->load->library('format');
 
         /**
          * Format Support
          */
-        // At present the library is bundled with REST_Controller 2.5+, but will eventually be part of CodeIgniter (no citation)
-        $this->load->library('format');
+        $this->_supported_formats();
 
+		// --------------------------------------------------------------------
+
+        // Initialise the response, request and rest objects
+        $this->request = new stdClass();
+        $this->response = new stdClass();
+
+        // Which format should the data be returned in?
+        $this->response->format = $this->_detect_output_format();
+
+        // Determine whether the connection is HTTPS
+        $this->request->ssl = is_https();
+
+        // Should we answer if not over SSL?
+        $this->_https_check();
+
+		// --------------------------------------------------------------------
+        /**
+         * App Settings
+         */
+        $this->_app_settings();
+
+
+        /**
+         * Check if system if offline
+         */
+        $this->_check_offline();
+
+
+		/**
+		 * Other App Settings
+         *  - Fiscal Year
+         *  - App User
+		 */
+        $this->_app_fiscal_year();
+		$this->_app_user();
+	}
+
+    // --------------------------------------------------------------------
+
+    private function _https_check()
+    {
+        // Should we answer if not over SSL?
+        if ($this->config->item('force_https') && $this->request->ssl === FALSE)
+        {
+            $this->response([
+                    $this->config->item('rest_status_field') => FALSE,
+                    $this->config->item('rest_message_field') => $this->lang->line('text_rest_unsupported')
+                ], self::HTTP_FORBIDDEN);
+        }
+    }
+
+    // --------------------------------------------------------------------
+
+    private function _supported_formats()
+    {
         // Determine supported output formats from configuration
-        $supported_formats = $this->config->item('rest_supported_formats');
+        $supported_formats = $this->config->item('api_supported_formats');
 
         // Validate the configuration setting output formats
         if (empty($supported_formats))
@@ -304,65 +360,7 @@ class Base_API_Controller extends CI_Controller
 
         // Now update $this->_supported_formats
         $this->_supported_formats = array_intersect_key($this->_supported_formats, array_flip($supported_formats));
-
-        // Get the language
-        $language = $this->config->item('rest_language');
-        if ($language === NULL)
-        {
-            $language = 'english';
-        }
-
-        // Load the language file
-        $this->lang->load('rest_api_controller', $language);
-
-		// --------------------------------------------------------------------
-
-        // Initialise the response, request and rest objects
-        $this->request = new stdClass();
-        $this->response = new stdClass();
-
-        // Which format should the data be returned in?
-        $this->response->format = $this->_detect_output_format();
-
-        // Determine whether the connection is HTTPS
-        $this->request->ssl = is_https();
-
-
-        // Should we answer if not over SSL?
-        if ($this->config->item('force_https') && $this->request->ssl === FALSE)
-        {
-            $this->response([
-                    $this->config->item('rest_status_field_name') => FALSE,
-                    $this->config->item('rest_message_field_name') => $this->lang->line('text_rest_unsupported')
-                ], self::HTTP_FORBIDDEN);
-        }
-
-		// --------------------------------------------------------------------
-
-        /**
-         * Helpers:
-         * 	- JWT helper
-         *  - Authorization Helper
-         */
-        $this->load->helper('jwt');
-        $this->load->helper('authorization');
-
-        /**
-		 * App Settings
-		 */
-		$this->_app_settings();
-		$this->_app_fiscal_year();
-
-		/**
-		 * Check if system if offline
-		 */
-		$this->_check_offline();
-
-		/**
-		 * Set App User
-		 */
-		$this->_app_user();
-	}
+    }
 
 	// --------------------------------------------------------------------
 
@@ -388,57 +386,41 @@ class Base_API_Controller extends CI_Controller
 	 */
 	private function _app_user()
 	{
-
 		$this->app_user = new stdClass();
 
-		if( $this->is_authorized() )
+		if( $this->api_auth->is_authorized() )
 		{
-			$auth_token = $this->_auth_token();
-			$this->app_user->id 			= $auth_token->payload->id;
-            $this->app_user->auth_type 		= $auth_token->payload->auth_type;
-            $this->app_user->auth_type_id 	= $auth_token->payload->auth_type_id;
+            $payload = $this->api_auth->validated_token();
+
+			$this->app_user->id 			= $payload->data->id;
+            $this->app_user->auth_type 		= $payload->data->auth_type;
+            $this->app_user->auth_type_id 	= $payload->data->auth_type_id;
 		}
 	}
 
-	// --------------------------------------------------------------------
+    // --------------------------------------------------------------------
 
-	/**
-	 * Is this request authorized?
-	 *
-	 * @return bool
-	 */
-	public function is_authorized()
-	{
-		$authorized = FALSE;
-		$auth_token = $this->_auth_token();
-		return $auth_token != FALSE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Is this request authorized?
-	 *
-	 * @return bool
-	 */
-	public function _auth_token()
-	{
-		$auth_token = FALSE;
-		$headers 	= $this->input->request_headers();
-		if (array_key_exists('Authorization', $headers) && !empty($headers['Authorization']))
-		{
-			try {
-				$auth_token = AUTHORIZATION::validateToken($headers['Authorization']);
-			} catch (Exception $e) {
-				$this->response([
-                    $this->config->item('rest_status_field_name') => FALSE,
-                    $this->config->item('rest_message_field_name') => $e->getMessage()
-                ], self::HTTP_INTERNAL_SERVER_ERROR);
-			}
-
+    /**
+     * Validate Token
+     *
+     * @return bool
+     */
+    public function check_authorized()
+    {
+        $result = $this->api_auth->validated_token();
+        $status = $result[$this->api_auth->status_field] ?? NULL;
+        if( $status === FALSE )
+        {
+            $this->response($result, self::HTTP_UNAUTHORIZED);
         }
-        return $auth_token;
-	}
+
+        return TRUE;
+    }
+
+
+
+
+
 
 	// --------------------------------------------------------------------
 
@@ -478,12 +460,11 @@ class Base_API_Controller extends CI_Controller
 	 */
 	private function _check_offline()
 	{
-		$controller = $this->router->fetch_class();
 		if( $this->settings->flag_offline == IQB_FLAG_ON )
 		{
 			$this->response([
-                    $this->config->item('rest_status_field_name') => FALSE,
-                    $this->config->item('rest_message_field_name') => $this->settings->offline_message
+                    $this->config->item('rest_status_field') => FALSE,
+                    $this->config->item('rest_message_field') => $this->settings->offline_message
                 ], self::HTTP_SERVICE_UNAVAILABLE);
 		}
 	}

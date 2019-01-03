@@ -911,7 +911,7 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
         }
         else
         {
-            $mpdf->Output($filename, 'I');
+            $mpdf->Output($filename,'I');
         }
     }
 }
@@ -930,7 +930,7 @@ if ( ! function_exists('_POLICY__schedule_filename'))
      */
     function _POLICY__schedule_filename( $policy_code )
     {
-        return INSQUBE_APP_ID . "-POLICY-{$policy_code}.pdf";
+        return APP_ID . "-POLICY-{$policy_code}.pdf";
     }
 }
 
@@ -1731,7 +1731,7 @@ if ( ! function_exists('_ENDORSEMENT__filename'))
      */
     function _ENDORSEMENT__filename( $policy_code )
     {
-        return INSQUBE_APP_ID . "-ENDORSEMENT-ALL-{$policy_code}.pdf";
+        return APP_ID . "-ENDORSEMENT-ALL-{$policy_code}.pdf";
     }
 }
 

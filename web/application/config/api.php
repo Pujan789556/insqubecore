@@ -29,7 +29,7 @@ $config['force_https'] = FALSE;
 | 'xml':        Uses simplexml_load_string()
 |
 */
-$config['rest_default_format'] = 'json';
+$config['api_default_format'] = 'json';
 
 /*
 |--------------------------------------------------------------------------
@@ -38,12 +38,12 @@ $config['rest_default_format'] = 'json';
 |
 | The following setting contains a list of the supported/allowed formats.
 | You may remove those formats that you don't want to use.
-| If the default format $config['rest_default_format'] is missing within
-| $config['rest_supported_formats'], it will be added silently during
+| If the default format $config['api_default_format'] is missing within
+| $config['api_supported_formats'], it will be added silently during
 | REST_Controller initialization.
 |
 */
-$config['rest_supported_formats'] = [
+$config['api_supported_formats'] = [
     'json',
     'array',
     'csv',
@@ -56,13 +56,23 @@ $config['rest_supported_formats'] = [
 
 /*
 |--------------------------------------------------------------------------
+| REST Token Field Name
+|--------------------------------------------------------------------------
+|
+| The field name for the token inside the response
+|
+*/
+$config['api_token_field'] = 'token';
+
+/*
+|--------------------------------------------------------------------------
 | REST Status Field Name
 |--------------------------------------------------------------------------
 |
 | The field name for the status inside the response
 |
 */
-$config['rest_status_field_name'] = 'status';
+$config['api_status_field'] = 'status';
 
 /*
 |--------------------------------------------------------------------------
@@ -72,7 +82,39 @@ $config['rest_status_field_name'] = 'status';
 | The field name for the message inside the response
 |
 */
-$config['rest_message_field_name'] = 'message';
+$config['api_message_field'] = 'message';
+
+/*
+|--------------------------------------------------------------------------
+| REST Error Code Field Name
+|--------------------------------------------------------------------------
+|
+| The field name for the error code inside the response
+|
+*/
+$config['api_err_code_field'] = 'error_code';
+
+/*
+|--------------------------------------------------------------------------
+| REST Error Code Lists
+|--------------------------------------------------------------------------
+|
+| List of Error Code for API Response
+|
+*/
+$config['api_error_codes'] = [
+
+	// Token Expired or Invalid - Prompt Login for new token
+	'token_expired' => 1,
+
+	// Invalid Token - Prompt Login for new token
+	'token_invalid' => 2,
+
+	// Token nbf Exception - Wait a while and try again
+	'token_too_early' => 3,
+
+	// @TODO : as other error code as needed
+];
 
 /*
 |--------------------------------------------------------------------------
@@ -94,7 +136,7 @@ $config['enable_emulate_request'] = TRUE;
 | e.g: My Secret REST API
 |
 */
-$config['rest_realm'] = 'REST API';
+$config['api_realm'] = 'REST API';
 
 /*
 |--------------------------------------------------------------------------
@@ -110,7 +152,7 @@ $config['rest_realm'] = 'REST API';
 |           authorization key
 |
 */
-$config['rest_auth'] = FALSE;
+$config['api_auth'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
@@ -123,7 +165,7 @@ $config['rest_auth'] = FALSE;
 | 'ldap'    Use LDAP authentication
 | 'library' Use a authentication library
 |
-| Note: If 'rest_auth' is set to 'session' then change 'auth_source' to the name of the session variable
+| Note: If 'api_auth' is set to 'session' then change 'auth_source' to the name of the session variable
 |
 */
 $config['auth_source'] = 'ldap';
@@ -165,7 +207,7 @@ $config['auth_library_function'] = '';
 |
 | Set specific authentication types for methods within a class (controller)
 |
-| Set as many config entries as needed.  Any methods not set will use the default 'rest_auth' config value.
+| Set as many config entries as needed.  Any methods not set will use the default 'api_auth' config value.
 |
 | e.g:
 |
@@ -210,7 +252,7 @@ $config['auth_library_function'] = '';
 | Array of usernames and passwords for login, if ldap is configured this is ignored
 |
 */
-$config['rest_valid_logins'] = ['admin' => '1234'];
+$config['api_valid_logins'] = ['admin' => '1234'];
 
 /*
 |--------------------------------------------------------------------------
@@ -227,7 +269,7 @@ $config['rest_valid_logins'] = ['admin' => '1234'];
 |    restrict certain methods to IPs in your whitelist
 |
 */
-$config['rest_ip_whitelist_enabled'] = FALSE;
+$config['api_ip_whitelist_enabled'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
@@ -242,7 +284,7 @@ $config['rest_ip_whitelist_enabled'] = FALSE;
 | 127.0.0.1 and 0.0.0.0 are allowed by default
 |
 */
-$config['rest_ip_whitelist'] = '';
+$config['api_ip_whitelist'] = '';
 
 /*
 |--------------------------------------------------------------------------
@@ -252,10 +294,10 @@ $config['rest_ip_whitelist'] = '';
 | Prevent connections to the REST server from blacklisted IP addresses
 |
 | Usage:
-| 1. Set to TRUE and add any IP address to 'rest_ip_blacklist'
+| 1. Set to TRUE and add any IP address to 'api_ip_blacklist'
 |
 */
-$config['rest_ip_blacklist_enabled'] = FALSE;
+$config['api_ip_blacklist_enabled'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
@@ -267,7 +309,7 @@ $config['rest_ip_blacklist_enabled'] = FALSE;
 | e.g: '123.456.789.0, 987.654.32.1'
 |
 */
-$config['rest_ip_blacklist'] = '';
+$config['api_ip_blacklist'] = '';
 
 /*
 |--------------------------------------------------------------------------
@@ -278,7 +320,7 @@ $config['rest_ip_blacklist'] = '';
 | if you have any of these features enabled
 |
 */
-$config['rest_database_group'] = 'default';
+$config['api_database_group'] = 'default';
 
 /*
 |--------------------------------------------------------------------------
@@ -288,7 +330,7 @@ $config['rest_database_group'] = 'default';
 | The table name in your database that stores API keys
 |
 */
-$config['rest_keys_table'] = 'keys';
+$config['api_keys_table'] = 'keys';
 
 /*
 |--------------------------------------------------------------------------
@@ -297,7 +339,7 @@ $config['rest_keys_table'] = 'keys';
 |
 | When set to TRUE, the REST API will look for a column name called 'key'.
 | If no key is provided, the request will result in an error. To override the
-| column name see 'rest_key_column'
+| column name see 'api_key_column'
 |
 | Default table schema:
 |   CREATE TABLE `keys` (
@@ -313,18 +355,18 @@ $config['rest_keys_table'] = 'keys';
 |   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 |
 */
-$config['rest_enable_keys'] = FALSE;
+$config['api_enable_keys'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
 | REST Table Key Column Name
 |--------------------------------------------------------------------------
 |
-| If not using the default table schema in 'rest_enable_keys', specify the
+| If not using the default table schema in 'api_enable_keys', specify the
 | column name to match e.g. my_key
 |
 */
-$config['rest_key_column'] = 'key';
+$config['api_key_column'] = 'key';
 
 /*
 |--------------------------------------------------------------------------
@@ -334,12 +376,12 @@ $config['rest_key_column'] = 'key';
 | Specify the method used to limit the API calls
 |
 | Available methods are :
-| $config['rest_limits_method'] = 'API_KEY'; // Put a limit per api key
-| $config['rest_limits_method'] = 'METHOD_NAME'; // Put a limit on method calls
-| $config['rest_limits_method'] = 'ROUTED_URL';  // Put a limit on the routed URL
+| $config['api_limits_method'] = 'API_KEY'; // Put a limit per api key
+| $config['api_limits_method'] = 'METHOD_NAME'; // Put a limit on method calls
+| $config['api_limits_method'] = 'ROUTED_URL';  // Put a limit on the routed URL
 |
 */
-$config['rest_limits_method'] = 'ROUTED_URL';
+$config['api_limits_method'] = 'ROUTED_URL';
 
 /*
 |--------------------------------------------------------------------------
@@ -352,7 +394,7 @@ $config['rest_limits_method'] = 'ROUTED_URL';
 | Note: The maximum length is 40
 |
 */
-$config['rest_key_length'] = 40;
+$config['api_key_length'] = 40;
 
 /*
 |--------------------------------------------------------------------------
@@ -365,7 +407,7 @@ $config['rest_key_length'] = 40;
 | 2012/06/12. See RFC 6648 specification for more details
 |
 */
-$config['rest_key_name'] = 'X-API-KEY';
+$config['api_key_name'] = 'X-API-KEY';
 
 /*
 |--------------------------------------------------------------------------
@@ -392,25 +434,25 @@ $config['rest_key_name'] = 'X-API-KEY';
 |   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 |
 */
-$config['rest_enable_logging'] = FALSE;
+$config['api_enable_logging'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
 | REST API Logs Table Name
 |--------------------------------------------------------------------------
 |
-| If not using the default table schema in 'rest_enable_logging', specify the
+| If not using the default table schema in 'api_enable_logging', specify the
 | table name to match e.g. my_logs
 |
 */
-$config['rest_logs_table'] = 'logs';
+$config['api_logs_table'] = 'logs';
 
 /*
 |--------------------------------------------------------------------------
 | REST Method Access Control
 |--------------------------------------------------------------------------
 | When set to TRUE, the REST API will check the access table to see if
-| the API key can access that controller. 'rest_enable_keys' must be enabled
+| the API key can access that controller. 'api_enable_keys' must be enabled
 | to use this
 |
 | Default table schema:
@@ -424,18 +466,18 @@ $config['rest_logs_table'] = 'logs';
 |    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 |
 */
-$config['rest_enable_access'] = FALSE;
+$config['api_enable_access'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
 | REST API Access Table Name
 |--------------------------------------------------------------------------
 |
-| If not using the default table schema in 'rest_enable_access', specify the
+| If not using the default table schema in 'api_enable_access', specify the
 | table name to match e.g. my_access
 |
 */
-$config['rest_access_table'] = 'access';
+$config['api_access_table'] = 'access';
 
 /*
 |--------------------------------------------------------------------------
@@ -446,7 +488,7 @@ $config['rest_access_table'] = 'access';
 | Set to FALSE to log as serialized PHP
 |
 */
-$config['rest_logs_json_params'] = FALSE;
+$config['api_logs_json_params'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
@@ -474,18 +516,18 @@ $config['rest_logs_json_params'] = FALSE;
 |
 | See application/controllers/api/example.php for examples
 */
-$config['rest_enable_limits'] = FALSE;
+$config['api_enable_limits'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
 | REST API Limits Table Name
 |--------------------------------------------------------------------------
 |
-| If not using the default table schema in 'rest_enable_limits', specify the
+| If not using the default table schema in 'api_enable_limits', specify the
 | table name to match e.g. my_limits
 |
 */
-$config['rest_limits_table'] = 'limits';
+$config['api_limits_table'] = 'limits';
 
 /*
 |--------------------------------------------------------------------------
@@ -493,10 +535,10 @@ $config['rest_limits_table'] = 'limits';
 |--------------------------------------------------------------------------
 |
 | Set to TRUE to ignore the HTTP Accept and speed up each request a little.
-| Only do this if you are using the $this->rest_format or /format/xml in URLs
+| Only do this if you are using the $this->api_format or /format/xml in URLs
 |
 */
-$config['rest_ignore_http_accept'] = FALSE;
+$config['api_ignore_http_accept'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
@@ -511,7 +553,7 @@ $config['rest_ignore_http_accept'] = FALSE;
 | Hint: This is good for production environments
 |
 */
-$config['rest_ajax_only'] = FALSE;
+$config['api_ajax_only'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
@@ -521,7 +563,7 @@ $config['rest_ajax_only'] = FALSE;
 | Language file to load from the language directory
 |
 */
-$config['rest_language'] = 'english';
+$config['api_language'] = 'english';
 
 /*
 |--------------------------------------------------------------------------
@@ -591,3 +633,15 @@ $config['allow_any_cors_domain'] = FALSE;
 |
 */
 $config['allowed_cors_origins'] = [];
+
+
+/*
+|--------------------------------------------------------------------------
+| Forgot password settings
+|--------------------------------------------------------------------------
+|
+| 'DX_forgot_password_expire' = Time before forgot password key become invalid. Default is 15 minutes (900 seconds).
+|
+*/
+
+$config['forgot_password_expire'] = 900;
