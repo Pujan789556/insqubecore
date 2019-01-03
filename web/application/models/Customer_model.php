@@ -286,11 +286,8 @@ class Customer_model extends MY_Model
         $data['fts'] = $this->prepare_customer_fts_data($post_data);
 
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $done               = FALSE;
-
         // Use automatic transaction
+        $done = FALSE;
         $this->db->trans_start();
 
             // Insert Primary Record
@@ -303,15 +300,11 @@ class Customer_model extends MY_Model
             }
 
         $this->db->trans_complete();
-
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
             $done = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $done;
@@ -345,11 +338,8 @@ class Customer_model extends MY_Model
          */
         $data['fts'] = $this->prepare_customer_fts_data($post_data);
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $done               = FALSE;
-
         // Use automatic transaction
+        $done = FALSE;
         $this->db->trans_start();
 
             // Insert Primary Record
@@ -362,15 +352,11 @@ class Customer_model extends MY_Model
             }
 
         $this->db->trans_complete();
-
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
             $done = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $done;

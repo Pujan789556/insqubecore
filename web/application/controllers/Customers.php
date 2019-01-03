@@ -344,7 +344,8 @@ class Customers extends MY_Controller
 				'form_elements' 	=> $this->customer_model->v_rules(),
 				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
 				'record' 			=> $record,
-				'address_record' 	=> $address_record
+				'address_record' 	=> $address_record,
+				'action' 			=> 'edit'
 			], TRUE);
 
 		// Return HTML
@@ -379,7 +380,8 @@ class Customers extends MY_Controller
 			[
 				'form_elements' 	=> $this->customer_model->v_rules(),
 				'address_elements' 	=> $this->address_model->v_rules_add(),
-				'record' 			=> $record
+				'record' 			=> $record,
+				'action' 			=> 'add'
 			], TRUE);
 
 		// Return HTML
@@ -517,7 +519,8 @@ class Customers extends MY_Controller
 									[
 										'form_elements' 	=> $this->customer_model->v_rules(),
 										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
-										'record' 			=> $record
+										'record' 			=> $record,
+										'action' 			=> $action
 									], TRUE)
 			]);
 		}
@@ -668,7 +671,8 @@ class Customers extends MY_Controller
 			'form_elements' 	=> $v_rules,
 			'address_elements' 	=> $this->address_model->v_rules_edit($edit_address_record),
 			'record' 			=> $edit_record,
-			'address_record' 	=> $edit_address_record
+			'address_record' 	=> $edit_address_record,
+			'action'			=> 'edit'
 		];
 
 		// Form Submitted? Save the data

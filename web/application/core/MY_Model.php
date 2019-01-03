@@ -1376,7 +1376,7 @@ class MY_Model
     //--------------------------------------------------------------------
 
     /**
-     * Delete Cache
+     * Retrieve Cache
      *
      * @param string $key
      * @return this

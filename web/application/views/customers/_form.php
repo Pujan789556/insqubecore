@@ -96,3 +96,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 })(jQuery);
 </script>
+
+<?php if($action == 'add'): ?>
+  <script type="text/javascript">
+      (function($){
+          $('#mobile-identity').on('keyup', function(){
+            $('#address-mobile').val($(this).val());
+          });
+      })(jQuery);
+  </script>
+<?php endif ?>
