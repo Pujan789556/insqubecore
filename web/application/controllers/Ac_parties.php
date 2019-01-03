@@ -460,7 +460,7 @@ class Ac_parties extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = array_merge($this->ac_party_model->validation_rules, $this->address_model->v_rules_on_submit(TRUE));
+			$rules = array_merge($this->ac_party_model->validation_rules, $this->address_model->v_rules_on_submit([], TRUE));
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{

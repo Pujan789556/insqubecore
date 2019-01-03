@@ -382,7 +382,7 @@ class Companies extends MY_Controller
 			// Extract Old Profile Picture if any
 			$picture = $record->picture ?? NULL;
 
-			$rules = array_merge($this->company_model->validation_rules, $this->address_model->v_rules_on_submit(TRUE));
+			$rules = array_merge($this->company_model->validation_rules, $this->address_model->v_rules_on_submit([], TRUE));
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -673,7 +673,7 @@ class Companies extends MY_Controller
     	// Form Posted? Let's save the damn thing!
     	if($this->input->post())
     	{
-    		$rules = array_merge($this->company_branch_model->validation_rules, $this->address_model->v_rules_on_submit(TRUE));
+    		$rules = array_merge($this->company_branch_model->validation_rules, $this->address_model->v_rules_on_submit([], TRUE));
             $this->form_validation->set_rules($rules);
             $status = 'error';
 			if($this->form_validation->run() === TRUE )

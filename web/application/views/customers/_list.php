@@ -12,6 +12,7 @@ $_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 				<th>ID</th>
 			<?php endif?>
 			<th>Customer Name</th>
+			<th>Mobile Identity</th>
 			<th>Contact</th>
 			<th>Type</th>
 			<th>Profession/Expertise</th>

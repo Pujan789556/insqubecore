@@ -44,7 +44,7 @@ class Address_model extends MY_Model
         $this->load->model('local_body_model');
 
         // Build Validation Rules
-        $this->validation_rules();
+        // $this->validation_rules();
     }
 
     // --------------------------------------------------------------------
@@ -52,12 +52,22 @@ class Address_model extends MY_Model
     /**
      * Set the Validation Rules
      *
+     * @param array $options  rules options e.g. mobile compulsory?
      * @return void
      */
-    public function validation_rules()
+    public function _v_rules(array $options = [])
     {
         $country_dropdown = $this->country_model->dropdown('id');
-        $this->validation_rules = [
+
+        $mobile_rules    = 'trim|valid_mobile|max_length[10]';
+        $mobile_required = $options['required']['mobile'] ?? FALSE;
+        if($mobile_required)
+        {
+            $mobile_rules = 'trim|required|valid_mobile|max_length[10]';
+        }
+
+
+        $v_rules = [
 
             'country' => [
                 [
@@ -139,9 +149,10 @@ class Address_model extends MY_Model
                 [
                     'field' => 'mobile',
                     'label' => 'Mobile',
-                    'rules' => 'trim|valid_mobile|max_length[10]',
+                    'rules' => $mobile_rules,
                     '_type' => 'text',
-                    '_required' => false
+                    '_id'   => 'address-mobile',
+                    '_required' => $mobile_required
                 ],
                 [
                     'field' => 'email',
@@ -202,18 +213,20 @@ class Address_model extends MY_Model
                 ],
             ],
         ];
+
+        return $v_rules;
     }
 
     // --------------------------------------------------------------------
 
-    public function v_rules_add()
+    public function v_rules_add(array $options = [])
     {
-        return $this->validation_rules;
+        return $this->_v_rules($options);
     }
 
-    public function v_rules_edit($record)
+    public function v_rules_edit($record, array $options = [])
     {
-        $v_rules = $this->validation_rules;
+        $v_rules = $this->_v_rules($options);
 
         // Get the Dropdowns
         $state_dropdown = $this->state_model->dropdown($record->country_id);
@@ -247,9 +260,9 @@ class Address_model extends MY_Model
         return $v_rules;
     }
 
-    public function v_rules_on_submit($formatted = FALSE)
+    public function v_rules_on_submit(array $options = [], $formatted = FALSE)
     {
-        $v_rules = $this->validation_rules;
+        $v_rules = $this->_v_rules($options);
 
         $country_id = (int)$this->input->post('country_id');
         $state_id   = (int)$this->input->post('state_id');

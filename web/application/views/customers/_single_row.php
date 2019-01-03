@@ -20,13 +20,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		Code: <strong><?php echo $record->code;?></strong><br/>
 		PAN: <strong><?php echo $record->pan;?></strong>
 	</td>
+	<td width="10%">
+		<i class="fa fa-phone-square margin-r-5"></i><a href="tel:<?php echo $record->mobile_identity ?>"><?php echo $record->mobile_identity ?></a>
+	</td>
 	<td ><?php echo address_widget( parse_address_record($record), true)?></td>
 	<td>
 		<?php echo $record->type == 'I' ? 'Individual' : 'Company';?>
 		<?php if($record->type == 'C'):?>
 			<br/>Company Reg. No. <strong><?php echo $record->company_reg_no?></strong>
 		<?php else:?>
-			<br/>Citizenship/Passport No.: <strong><?php echo $record->identification_no?></strong><br/>
+			<br/>ID No.: <strong><?php echo $record->identification_no?></strong><br/>
 			DOB: <strong><?php echo $record->dob?></strong>
 		<?php endif?>
 	</td>

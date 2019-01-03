@@ -429,8 +429,8 @@ $('#_find-customer').on('click', function(e){
     $.getJSON('<?php echo base_url()?>customers/page/f/y/0/_customer-box:policy', function(r){
         if( typeof r.html !== 'undefined' && r.html != '' ){
             bootbox.dialog({
-                className: 'modal-default',
-                size: 'large',
+                className: 'modal-default modal-full-width',
+                size: '',
                 title: 'Find Customer',
                 closeButton: true,
                 message: r.html,

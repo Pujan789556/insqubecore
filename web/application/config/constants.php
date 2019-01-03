@@ -843,3 +843,31 @@ defined('IQB_REPORT_TYPES')    	OR define('IQB_REPORT_TYPES', 	[
 	IQB_REPORT_TYPE_QUARTELRY	=> 'Quarterly',
 ]);
 
+
+/*
+|--------------------------------------------------------------------------
+| INSQUBE API AUTHENTICATION TYPE
+|--------------------------------------------------------------------------
+|
+| This is to define the type of API consumers.
+| Since, the mobile app will be offered to different user types
+| for different purpose, we need to seggregate the user type.
+|
+| This type separation will be used to assign role/permission as per type.
+| This is role at the highest level.
+|
+*/
+define('IQB_API_AUTH_TYPE_USER',        	1);
+define('IQB_API_AUTH_TYPE_CUSTOMER',        2);
+define('IQB_API_AUTH_TYPE_AGENT',        	3);
+define('IQB_API_AUTH_TYPE_SURVEYOR',        4);
+define('IQB_API_AUTH_TYPES',  [
+	IQB_API_AUTH_TYPE_USER 		=> 'Core User',
+	IQB_API_AUTH_TYPE_CUSTOMER 	=> 'Customer',
+	IQB_API_AUTH_TYPE_AGENT 	=> 'Agent',
+	IQB_API_AUTH_TYPE_SURVEYOR 	=> 'Surveyor'
+]);
+
+
+
+

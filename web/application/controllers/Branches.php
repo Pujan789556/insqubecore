@@ -187,7 +187,7 @@ class Branches extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = array_merge($this->branch_model->validation_rules, $this->address_model->v_rules_on_submit(TRUE));
+			$rules = array_merge($this->branch_model->validation_rules, $this->address_model->v_rules_on_submit([], TRUE));
 			// if($action === 'edit')
 			// {
 			// 	// Update Validation Rule on Update

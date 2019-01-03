@@ -394,7 +394,7 @@ class Surveyors extends MY_Controller
 			}
 
 
-			$rules = array_merge($v_rules, $this->address_model->v_rules_on_submit(TRUE));
+			$rules = array_merge($v_rules, $this->address_model->v_rules_on_submit([], TRUE));
 			$this->form_validation->set_rules($rules);
 
 			if( $this->form_validation->run() === TRUE )

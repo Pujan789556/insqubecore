@@ -20,7 +20,7 @@ class Customer_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'branch_id', 'code', 'type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'fts', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'branch_id', 'code', 'mobile_identity', 'type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'fts', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $endorsement_fields = [
         'customer' =>  ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'],
@@ -51,13 +51,58 @@ class Customer_model extends MY_Model
         $this->load->model('address_model');
 
         // Validation rules
-        $this->validation_rules();
+        // $this->validation_rules();
     }
 
 
     // ----------------------------------------------------------------
 
-    public function validation_rules()
+    /**
+     * Validation Rules for Customer ADD/EDIT
+     *
+     * @return array
+     */
+    public function v_rules()
+    {
+        $v_rules = $this->_v_rules_common();
+
+        // Append Mobile Identity Rules
+        // NOTE: This can not be changed via endorsement
+        $mobile_identity_rules = [
+            [
+                'field' => 'mobile_identity',
+                'label' => 'Mobile Identity',
+                'rules' => 'trim|required|valid_mobile|max_length[10]|callback__cb_valid_mobile_identity',
+                '_type' => 'text',
+                '_id'   => 'mobile-identity',
+                '_help_text' => 'This mobile number is used by customer to access Mobile App',
+                '_required' => true
+            ]
+        ];
+
+        return array_merge($mobile_identity_rules, $v_rules);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Validation Rules for Endorsement
+     *
+     * @return array
+     */
+    public function v_rules_endorsement()
+    {
+        return $this->_v_rules_common();
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Common Validation Rules
+     *
+     * @return array
+     */
+    public function _v_rules_common()
     {
         $this->load->model('country_model');
         $countries = $this->country_model->dropdown();
@@ -77,7 +122,7 @@ class Customer_model extends MY_Model
         $nationality_rules = 'trim' . $individual_requird . '|alpha|exact_length[2]';
         $father_name_rules = 'trim' . $individual_requird . '|max_length[150]';
 
-        $this->validation_rules = [
+        $v_rules = [
             [
                 'field' => 'type',
                 'label' => 'Customer Type',
@@ -190,6 +235,21 @@ class Customer_model extends MY_Model
                 '_required' => false
             ]
         ];
+
+        return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function check_duplicate($where, $id=NULL)
+    {
+        if( $id )
+        {
+            $this->db->where('id !=', $id);
+        }
+        // $where is array ['key' => $value]
+        return $this->db->where($where)
+                        ->count_all_results($this->table_name);
     }
 
     // ----------------------------------------------------------------
@@ -203,7 +263,7 @@ class Customer_model extends MY_Model
     public function add($post_data)
     {
 
-        $cols = ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
+        $cols = ['mobile_identity', 'type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
         $data = [];
 
         /**
@@ -269,7 +329,7 @@ class Customer_model extends MY_Model
      */
     public function edit($id, $address_id, $post_data)
     {
-        $cols = ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
+        $cols = ['mobile_identity', 'type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
         $data = [];
 
         /**

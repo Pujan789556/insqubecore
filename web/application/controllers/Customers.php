@@ -341,7 +341,7 @@ class Customers extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('customers/_form_box',
 			[
-				'form_elements' 	=> $this->customer_model->validation_rules,
+				'form_elements' 	=> $this->customer_model->v_rules(),
 				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
 				'record' 			=> $record,
 				'address_record' 	=> $address_record
@@ -377,7 +377,7 @@ class Customers extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('customers/_form_box',
 			[
-				'form_elements' 	=> $this->customer_model->validation_rules,
+				'form_elements' 	=> $this->customer_model->v_rules(),
 				'address_elements' 	=> $this->address_model->v_rules_add(),
 				'record' 			=> $record
 			], TRUE);
@@ -422,7 +422,7 @@ class Customers extends MY_Controller
 			// Extract Old Profile Picture if any
 			$picture = $record->picture ?? NULL;
 
-			$rules = array_merge($this->customer_model->validation_rules, $this->address_model->v_rules_on_submit(TRUE));
+			$rules = array_merge($this->customer_model->v_rules(), $this->address_model->v_rules_on_submit([],TRUE));
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -515,7 +515,7 @@ class Customers extends MY_Controller
 				'reloadForm' 	=> true,
 				'form' 			=> $this->load->view('customers/_form',
 									[
-										'form_elements' 	=> $this->customer_model->validation_rules,
+										'form_elements' 	=> $this->customer_model->v_rules(),
 										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
 										'record' 			=> $record
 									], TRUE)
@@ -524,6 +524,17 @@ class Customers extends MY_Controller
 
 		return $return_data;
 	}
+
+		public function _cb_valid_mobile_identity($mobile_identity)
+		{
+	    	$id   = (int)$this->input->post('id');
+	        if( $this->customer_model->check_duplicate(['mobile_identity' => $mobile_identity], $id))
+	        {
+	            $this->form_validation->set_message('_cb_valid_mobile_identity', 'The %s already exists. The %s must be unique to all customer.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
 
 		/**
 		 * Sub-function: Upload Customer Profile Picture
@@ -652,7 +663,7 @@ class Customers extends MY_Controller
 		/**
 		 * Prepare Common Form Data to pass to form view
 		 */
-		$v_rules 	= $this->customer_model->validation_rules;
+		$v_rules 	= $this->customer_model->v_rules_endorsement();
 		$form_data = [
 			'form_elements' 	=> $v_rules,
 			'address_elements' 	=> $this->address_model->v_rules_edit($edit_address_record),
@@ -684,7 +695,7 @@ class Customers extends MY_Controller
 			$picture = $edit_record->picture ?? NULL;
 
 			// $v_rules = array_merge($v_rules, get_contact_form_validation_rules());
-			$v_rules = array_merge($v_rules, $this->address_model->v_rules_on_submit(TRUE));
+			$v_rules = array_merge($v_rules, $this->address_model->v_rules_on_submit([],TRUE));
 			$this->form_validation->set_rules($v_rules);
 			if($this->form_validation->run() === TRUE )
         	{
