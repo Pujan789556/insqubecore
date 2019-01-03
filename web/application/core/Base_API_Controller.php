@@ -417,11 +417,6 @@ class Base_API_Controller extends CI_Controller
         return TRUE;
     }
 
-
-
-
-
-
 	// --------------------------------------------------------------------
 
 	/**
@@ -661,8 +656,6 @@ class Base_API_Controller extends CI_Controller
         // Obtain the default format from the configuration
         return $this->_get_default_output_format();
     }
-
-
 }
 
 /* End of file Base_API_Controller.php */
