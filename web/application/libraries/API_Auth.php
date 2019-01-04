@@ -209,6 +209,13 @@ class API_Auth
 
             $decoded_token = JWT::decode($token, base64_decode(INSQUBE_API_KEY), ['HS256']);
 
+
+            /**
+             * Token might be valid, but app user might have been deleted?
+             */
+
+
+
         } catch (\ExpiredException $e) {
             /**
              * Token Has Expired

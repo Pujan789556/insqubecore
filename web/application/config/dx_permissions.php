@@ -141,6 +141,7 @@ $config['DX_permissions'] = [
 			'explore.customer',
 			'add.customer',
 			'edit.customer',
+			'edit.customer.api.identity', // Mobile Identity for APP/API access
 			'delete.customer'
 		],
 	],

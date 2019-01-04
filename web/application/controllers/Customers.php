@@ -293,6 +293,42 @@ class Customers extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
+	 * Add a new Record
+	 *
+	 * @return void
+	 */
+	public function add( $from_widget='n', $widget_reference = '' )
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('customers', 'add.customer') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		$record 		= NULL;
+		$address_record = NULL;
+
+		// Form Submitted? Save the data
+		$json_data = $this->_save('add', $record, $address_record, $from_widget, $widget_reference);
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('customers/_form_box',
+			[
+				'form_elements' 	=> $this->customer_model->v_rules('add'),
+				'address_elements' 	=> $this->address_model->v_rules_add(),
+				'record' 			=> $record,
+				'action' 			=> 'add'
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Edit a Recrod
 	 *
 	 *
@@ -341,7 +377,7 @@ class Customers extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('customers/_form_box',
 			[
-				'form_elements' 	=> $this->customer_model->v_rules(),
+				'form_elements' 	=> $this->customer_model->v_rules('edit'),
 				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
 				'record' 			=> $record,
 				'address_record' 	=> $address_record,
@@ -352,36 +388,118 @@ class Customers extends MY_Controller
 		$this->template->json($json_data);
 	}
 
+
+
 	// --------------------------------------------------------------------
 
 	/**
-	 * Add a new Record
+	 * Edit a Customer App Identity
 	 *
+	 * @param integer $id
 	 * @return void
 	 */
-	public function add( $from_widget='n', $widget_reference = '' )
+	public function edit_app_identity($id)
 	{
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_authorized('customers', 'add.customer') )
+		if( !$this->dx_auth->is_authorized('customers', 'edit.customer.api.identity') )
 		{
 			$this->dx_auth->deny_access();
 		}
 
-		$record 		= NULL;
-		$address_record = NULL;
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->customer_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+
+		/**
+		 * Locked Customer???
+		 *
+		 * NOTE: Admin Can Edit Locked Customer Information
+		 */
+		if(!$this->dx_auth->is_admin() && $record->flag_locked == IQB_FLAG_ON )
+		{
+			return $this->template->json([
+				'status' 	=> 'error',
+				'title' 	=> 'Unauthorized Action!',
+				'message' 	=> 'You can not edit locked Customer.'
+			], 403);
+		}
 
 		// Form Submitted? Save the data
-		$json_data = $this->_save('add', $record, $address_record, $from_widget, $widget_reference);
+		if( $this->input->post() )
+		{
+			$done = FALSE;
+
+			$rules = $this->customer_model->v_rules('app_identity');
+            $this->form_validation->set_rules($rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		// Now Update Data
+        		$mobile_identity = $this->input->post('mobile_identity');
+				$done = $this->customer_model->change_app_identity($record->id, $mobile_identity);
+
+	        	if(!$done)
+				{
+					$status = 'error';
+					$message = 'Could not update.';
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+				}
+
+				if($status === 'success' )
+				{
+					$ajax_data = [
+						'message' => $message,
+						'status'  => $status,
+						'updateSection' => true,
+						'hideBootbox' => true
+					];
+
+					$record 	= $this->customer_model->row( $record->id );
+					$single_row =  'customers/_single_row';
+					$view_data 	= [
+						'record' 			=> $record,
+						'address_record' 	=> $this->address_model->parse_address_record($record),
+						'widget_reference' 	=> ''
+					];
+
+					$html = $this->load->view($single_row, $view_data, TRUE);
+					$ajax_data['updateSectionData'] = [
+						'box' 		=> '#_data-row-customer-' . $record->id,
+						'method' 	=> 'replaceWith',
+						'html'		=> $html
+					];
+
+					return $this->template->json($ajax_data);
+				}
+        	}
+        	else
+        	{
+        		$status = 'error';
+				$message = 'Validation Error.';
+        	}
+
+			$json_data = [
+				'status' 	=> $status,
+				'message' 	=> $message
+			];
+		}
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('customers/_form_box',
+		$json_data['form'] = $this->load->view('customers/_form_app_identity',
 			[
-				'form_elements' 	=> $this->customer_model->v_rules(),
-				'address_elements' 	=> $this->address_model->v_rules_add(),
+				'form_elements' 	=> $this->customer_model->v_rules('app_identity'),
 				'record' 			=> $record,
-				'action' 			=> 'add'
+				'action' 			=> 'app_identity'
 			], TRUE);
 
 		// Return HTML
@@ -403,7 +521,7 @@ class Customers extends MY_Controller
 	{
 
 		// Valid action?
-		if( !in_array($action, array('add', 'edit')) || !in_array($from_widget, array('y', 'n')))
+		if( !in_array($action, array('add', 'edit', 'app_identity')) || !in_array($from_widget, array('y', 'n')))
 		{
 			return $this->template->json([
 				'status' => 'error',
@@ -424,7 +542,7 @@ class Customers extends MY_Controller
 			// Extract Old Profile Picture if any
 			$picture = $record->picture ?? NULL;
 
-			$rules = array_merge($this->customer_model->v_rules(), $this->address_model->v_rules_on_submit([],TRUE));
+			$rules = array_merge($this->customer_model->v_rules($action), $this->address_model->v_rules_on_submit([],TRUE));
             $this->form_validation->set_rules($rules);
 			if($this->form_validation->run() === TRUE )
         	{
@@ -517,7 +635,7 @@ class Customers extends MY_Controller
 				'reloadForm' 	=> true,
 				'form' 			=> $this->load->view('customers/_form',
 									[
-										'form_elements' 	=> $this->customer_model->v_rules(),
+										'form_elements' 	=> $this->customer_model->v_rules($action),
 										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
 										'record' 			=> $record,
 										'action' 			=> $action
@@ -530,12 +648,41 @@ class Customers extends MY_Controller
 
 		public function _cb_valid_mobile_identity($mobile_identity)
 		{
-	    	$id   = (int)$this->input->post('id');
+			$id   = (int)$this->input->post('id');
+
+			/**
+			 * Already exists on Mobile App User Databae?
+			 */
+	        $this->load->model('api/app_user_model', 'app_user_model');
+	        if($id)
+	        {
+	        	$where = [
+		        	'mobile'    		=> $mobile_identity,
+	                'auth_type' 		=> IQB_API_AUTH_TYPE_CUSTOMER,
+	                'auth_type_id !=' 	=> $id,
+		        ];
+	        }
+	        else
+	        {
+	        	$where = [
+		        	'mobile'    	=> $mobile_identity
+		        ];
+	        }
+	        if( $this->app_user_model->check_duplicate($where) )
+	        {
+	            $this->form_validation->set_message('_cb_valid_mobile_identity', 'The %s already exists in Mobile App User. The %s must be unique to all mobile User.');
+	            return FALSE;
+	        }
+
+			/**
+			 * Already exists on Customer Databae?
+			 */
 	        if( $this->customer_model->check_duplicate(['mobile_identity' => $mobile_identity], $id))
 	        {
 	            $this->form_validation->set_message('_cb_valid_mobile_identity', 'The %s already exists. The %s must be unique to all customer.');
 	            return FALSE;
 	        }
+
 	        return TRUE;
 		}
 
@@ -666,7 +813,7 @@ class Customers extends MY_Controller
 		/**
 		 * Prepare Common Form Data to pass to form view
 		 */
-		$v_rules 	= $this->customer_model->v_rules_endorsement();
+		$v_rules 	= $this->customer_model->v_rules('endorsement');
 		$form_data = [
 			'form_elements' 	=> $v_rules,
 			'address_elements' 	=> $this->address_model->v_rules_edit($edit_address_record),

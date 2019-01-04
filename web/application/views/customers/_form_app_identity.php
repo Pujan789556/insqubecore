@@ -1,12 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * Form : Department
+ * Form : Customer : Mobile Identity Update
  */
 ?>
 <?php echo form_open( $this->uri->uri_string(),
                         [
-                            'class' => 'form-horizontal form-iqb-general',
+                            'class'   => 'form-horizontal form-iqb-general',
+                            'id'      => '_form-customer',
                             'data-pc' => '.bootbox-body' // parent container ID
                         ],
                         // Hidden Fields

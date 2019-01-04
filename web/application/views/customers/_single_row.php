@@ -54,6 +54,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					</li><li class="divider"></li>
 				<?php endif;?>
 
+				<?php if( $this->dx_auth->is_authorized('customers', 'edit.customer.mobile.identity') ): ?>
+					<li>
+						<a href="#"
+							title="Edit Mobile APP Identity"
+							class="trg-dialog-edit"
+							data-box-size="medium"
+							data-title='<i class="fa fa-pencil-square-o"></i> Edit Mobile APP Identity - <?php echo $record->full_name_en ?>'
+							data-url="<?php echo site_url('customers/edit_app_identity/' . $record->id);?>"
+							data-form="#_form-customer">
+							<i class="fa fa-pencil-square-o"></i>
+							<span>Edit Mobile Identity</span></a>
+					</li><li class="divider"></li>
+				<?php endif;?>
+
 				<?php if( ($this->dx_auth->is_authorized('customers', 'delete.customer')) && safe_to_delete( 'Customer_model', $record->id )):?>
 					<li>
 						<a href="#"

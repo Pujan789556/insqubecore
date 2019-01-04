@@ -33,6 +33,9 @@ class Auth extends Base_API_Controller
 	 */
 	function index()
 	{
+		print date('YmdHis');
+		print "\r\n";
+
 		$data = [
 			'id' => 1,
 			'auth_type' => 2,

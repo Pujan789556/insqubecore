@@ -62,37 +62,33 @@ class Customer_model extends MY_Model
      *
      * @return array
      */
-    public function v_rules()
+    public function v_rules($action)
     {
-        $v_rules = $this->_v_rules_common();
+        $v_rules_api_identity    = $this->_v_rules_api_identity();
+        $v_rules_common          = $this->_v_rules_common();
 
-        // Append Mobile Identity Rules
-        // NOTE: This can not be changed via endorsement
-        $mobile_identity_rules = [
-            [
-                'field' => 'mobile_identity',
-                'label' => 'Mobile Identity',
-                'rules' => 'trim|required|valid_mobile|max_length[10]|callback__cb_valid_mobile_identity',
-                '_type' => 'text',
-                '_id'   => 'mobile-identity',
-                '_help_text' => 'This mobile number is used by customer to access Mobile App',
-                '_required' => true
-            ]
-        ];
+        $v_rules = [];
 
-        return array_merge($mobile_identity_rules, $v_rules);
-    }
+        switch ($action)
+        {
+            case 'add':
+                $v_rules = array_merge($v_rules_api_identity, $v_rules_common);
+                break;
 
-    // ----------------------------------------------------------------
+            case 'edit':
+            case 'endorsement':
+                $v_rules = $v_rules_common;
+                break;
 
-    /**
-     * Validation Rules for Endorsement
-     *
-     * @return array
-     */
-    public function v_rules_endorsement()
-    {
-        return $this->_v_rules_common();
+            case 'app_identity':
+                $v_rules = $v_rules_api_identity;
+
+            default:
+                # code...
+                break;
+        }
+
+        return $v_rules;
     }
 
     // ----------------------------------------------------------------
@@ -241,6 +237,30 @@ class Customer_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    /**
+     * Validation Rules - API/APP Identity
+     *
+     * @return array
+     */
+    public function _v_rules_api_identity()
+    {
+        $v_rules = [
+            [
+                'field' => 'mobile_identity',
+                'label' => 'Mobile Identity',
+                'rules' => 'trim|required|valid_mobile|max_length[10]|callback__cb_valid_mobile_identity',
+                '_type' => 'text',
+                '_id'   => 'mobile-identity',
+                '_help_text' => 'This mobile number is used by customer to access Mobile App',
+                '_required' => true
+            ]
+        ];
+
+        return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
     public function check_duplicate($where, $id=NULL)
     {
         if( $id )
@@ -293,10 +313,10 @@ class Customer_model extends MY_Model
             // Insert Primary Record
             $done = parent::insert($data, TRUE);
 
-            // Insert Address
+            // Post ADD Tasks
             if($done)
             {
-                $this->address_model->add(IQB_ADDRESS_TYPE_CUSTOMER, $done ,$post_data);
+                $this->__post_add_tasks($done, $post_data);
             }
 
         $this->db->trans_complete();
@@ -310,6 +330,39 @@ class Customer_model extends MY_Model
         return $done;
     }
 
+        // ----------------------------------------------------------------
+        /**
+         * Perform Post-Customer-Add Tasks
+         *
+         * @param int $id
+         * @param array $post_data
+         * @return bool
+         */
+        private function __post_add_tasks($id, $post_data)
+        {
+            $customer = parent::find($id);
+
+            /**
+             * Task 1: Add Customer Address
+             */
+            $this->address_model->add(IQB_ADDRESS_TYPE_CUSTOMER, $customer->id ,$post_data);
+
+            /**
+             * Task 2: Create a Mobile App User
+             */
+            $this->load->model('api/app_user_model', 'app_user_model');
+            $app_user_data = [
+                'mobile'        => $customer->mobile_identity,
+                'auth_type'     => IQB_API_AUTH_TYPE_CUSTOMER,
+                'auth_type_id'  => $customer->id,
+                'password'      => NULL
+            ];
+
+            $this->app_user_model->register($app_user_data, FALSE);
+
+            return TRUE;
+        }
+
     // ----------------------------------------------------------------
 
     /**
@@ -322,7 +375,7 @@ class Customer_model extends MY_Model
      */
     public function edit($id, $address_id, $post_data)
     {
-        $cols = ['mobile_identity', 'type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
+        $cols = ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
         $data = [];
 
         /**
@@ -345,10 +398,10 @@ class Customer_model extends MY_Model
             // Insert Primary Record
             $done = parent::update($id, $data, TRUE);
 
-            // Insert Address
+            // Post Update Tasks
             if($done)
             {
-                $this->address_model->edit($address_id ,$post_data);
+                $this->__post_edit_tasks($id, $address_id, $post_data);
             }
 
         $this->db->trans_complete();
@@ -362,7 +415,58 @@ class Customer_model extends MY_Model
         return $done;
     }
 
+        // ----------------------------------------------------------------
+        /**
+         * Perform Post-Customer-Add Tasks
+         *
+         * @param int $id
+         * @param array $post_data
+         * @return bool
+         */
+        private function __post_edit_tasks($id, $address_id, $post_data)
+        {
+            $customer = parent::find($id);
+
+            /**
+             * Task 1: Update Customer Address
+             */
+            $this->address_model->edit($address_id ,$post_data);
+
+            return TRUE;
+        }
+
     // ----------------------------------------------------------------
+    public function change_app_identity($id, $mobile_identity)
+    {
+        $data = [
+            'mobile_identity' => $mobile_identity
+        ];
+        // Use automatic transaction
+        $done = FALSE;
+        $this->db->trans_start();
+
+            // Update Customer Record
+            $done = parent::update($id, $data, TRUE);
+
+            // Post Update Tasks
+            if($done)
+            {
+                /**
+                 * Task 2: Update Mobile if Change
+                 */
+                $this->load->model('api/app_user_model', 'app_user_model');
+                $this->app_user_model->change_mobile_by(IQB_API_AUTH_TYPE_CUSTOMER, $id, $mobile_identity, FALSE);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            $done = FALSE;
+        }
+
+        // return result/status
+        return $done;
+    }
 
     /**
      * Prepare Customer Defaults
@@ -379,7 +483,7 @@ class Customer_model extends MY_Model
     {
         $this->load->library('Token');
 
-        $data['code']       = $this->token->generate(12);
+        $data['code']       = TOKEN::v2(12);
         $data['branch_id']  = $this->dx_auth->get_branch_id();
 
         return $data;
@@ -713,6 +817,10 @@ class Customer_model extends MY_Model
 
             // Delete Address Record
             $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_CUSTOMER, 'type_id' => $id]);
+
+            // Delete Mobile App User
+            $this->load->model('api/app_user_model', 'app_user_model');
+            $this->app_user_model->delete_user(IQB_API_AUTH_TYPE_CUSTOMER, $id);
 
         $this->db->trans_complete();
 
