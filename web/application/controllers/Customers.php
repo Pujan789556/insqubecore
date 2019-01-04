@@ -489,8 +489,9 @@ class Customers extends MY_Controller
         	}
 
 			$json_data = [
-				'status' 	=> $status,
-				'message' 	=> $message
+				'status' 	 => $status,
+				'message' 	 => $message,
+				'reloadForm' => true
 			];
 		}
 
