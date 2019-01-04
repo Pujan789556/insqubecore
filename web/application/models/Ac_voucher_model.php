@@ -568,7 +568,7 @@ class Ac_voucher_model extends MY_Model
         }
 
         // Voucher Code
-        $data['voucher_code']      = strtoupper($this->token->generate(10));
+        $data['voucher_code']      = strtoupper(TOKEN::v2(10));
 
         // Branch ID
         $data['branch_id']      = $this->dx_auth->get_branch_id();

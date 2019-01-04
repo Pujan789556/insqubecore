@@ -76,7 +76,7 @@ class Ac_receipt_model extends MY_Model
         $this->load->library('Token');
 
         // Receipt Code
-        $data['receipt_code']      = strtoupper($this->token->generate(10));
+        $data['receipt_code']      = strtoupper(TOKEN::v2(10));
 
         return $data;
     }

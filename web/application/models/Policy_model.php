@@ -688,7 +688,7 @@ class Policy_model extends MY_Model
         $portfolio_code = $this->portfolio_model->get_code($portfolio_id);
         $fy_code_np     = $fy_record->code_np;
 
-        $policy_no = strtoupper($this->token->generate(10));
+        $policy_no = strtoupper(TOKEN::v2(10));
 
         /**
          * Construct Policy Code

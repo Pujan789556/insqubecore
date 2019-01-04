@@ -50,22 +50,6 @@ class Token
     }
 
     /**
-     * @param int $length
-     * @return string
-     */
-    public function generate($length)
-    {
-        $token = '';
-
-        for ($i = 0; $i < $length; $i++) {
-            $randomKey = $this->getRandomInteger(0, $this->alphabetLength);
-            $token .= $this->alphabet[$randomKey];
-        }
-
-        return $token;
-    }
-
-    /**
      * @param int $min
      * @param int $max
      * @return int
@@ -99,5 +83,52 @@ class Token
         } while ($rnd >= $range);
 
         return ($min + $rnd);
+    }
+
+    /**
+     * Generate Unique ID of supplied length
+     *
+     * @version 2
+     * @param int $length
+     * @return string
+     */
+    public static function v1($length)
+    {
+        $token = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $randomKey = $this->getRandomInteger(0, $this->alphabetLength);
+            $token .= $this->alphabet[$randomKey];
+        }
+
+        return $token;
+    }
+
+
+    /**
+     * Generate Unique ID of supplied length
+     * without repeated ID
+     *
+     *
+     * @version 2
+     * @param int $lenght
+     * @return string
+     */
+    public static function v2($lenght = 13)
+    {
+        // uniqid gives 13 chars, but you could adjust it to your needs.
+        if (function_exists("random_bytes"))
+        {
+            $bytes = random_bytes(ceil($lenght / 2));
+        }
+        elseif (function_exists("openssl_random_pseudo_bytes"))
+        {
+            $bytes = openssl_random_pseudo_bytes(ceil($lenght / 2));
+        }
+        else
+        {
+            throw new Exception("no cryptographically secure random function available");
+        }
+        return substr(bin2hex($bytes), 0, $lenght);
     }
 }

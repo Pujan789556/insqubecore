@@ -192,7 +192,7 @@ class Ac_invoice_model extends MY_Model
         $fy_quarter = $this->fy_quarter_model->get_quarter_by_date($data['invoice_date']);
 
         // Invoice Code
-        $data['invoice_code']      = strtoupper($this->token->generate(10));
+        $data['invoice_code']      = strtoupper(TOKEN::v2(10));
 
         // Branch ID
         $data['branch_id']      = $this->dx_auth->get_branch_id();

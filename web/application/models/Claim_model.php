@@ -560,7 +560,7 @@ class Claim_model extends MY_Model
          *
          * Format: DRAFT-<RANDOMCHARS>
          */
-        $draft_data['claim_code'] = 'DRAFT-' . $this->token->generate(10);
+        $draft_data['claim_code'] = 'DRAFT-' . TOKEN::v2(10);
 
 
         // Fiscal Year ID
