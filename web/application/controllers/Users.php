@@ -1426,7 +1426,7 @@ class Users extends MY_Controller
     		if($record->id == 1) continue;
 
 
-    		$password 	= $this->token->generate(20);
+    		$password 		= TOKEN::v2(20);
     		$hasher 		= new PasswordHash(
 									$this->config->item('phpass_hash_strength'),
 									$this->config->item('phpass_hash_portable'));
