@@ -33,26 +33,28 @@ class Auth extends Base_API_Controller
 	 */
 	function index()
 	{
-		print date('YmdHis');
-		print "\r\n";
+		// print date('YmdHis');
+		// print "\r\n";
 
 		$data = [
-			'id' => 1,
-			'auth_type' => 2,
-			'auth_type_id' => 3
+			'id' => 'test',
+			'auth_type' => 'test',
+			'auth_type_id' => 'test'
 		];
 
 		// This is your id token
 		// $jwt = JWT::encode($token_payload, base64_decode(strtr($key, '-_', '+/')), 'HS256');
 	 	$jwt = $this->api_auth->build_token($data);
-		print "<pre>";
-		print "JWT:\n";
-		print_r($jwt);
-		// $decoded = JWT::decode($jwt, base64_decode(strtr($key, '-_', '+/')), ['HS256']);
-		$decoded = $this->api_auth->validated_token($jwt);
-		print "\n\n";
-		print "Decoded:\n";
-		print_r($decoded);
+		// print "<pre>";
+		// print "JWT:\n";
+		// print_r($jwt);
+		// // $decoded = JWT::decode($jwt, base64_decode(strtr($key, '-_', '+/')), ['HS256']);
+		// $decoded = $this->api_auth->validated_token($jwt);
+		// print "\n\n";
+		// print "Decoded:\n";
+		// print_r($decoded);
+
+		$this->response(['token' => $jwt]);
 
 
 	}
