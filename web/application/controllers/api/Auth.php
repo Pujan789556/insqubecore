@@ -36,6 +36,12 @@ class Auth extends Base_API_Controller
 		// print date('YmdHis');
 		// print "\r\n";
 
+		$this->response([
+			'status' => FALSE,
+			'message' => 'Resource Not Found!'
+		], 403);
+
+
 		$data = [
 			'id' => 'test',
 			'auth_type' => 'test',
