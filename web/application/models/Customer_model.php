@@ -360,6 +360,13 @@ class Customer_model extends MY_Model
 
             $this->app_user_model->register($app_user_data, FALSE);
 
+
+            /**
+             * @TODO : Send SMS regarding this???
+             *
+             * Send sms with a pin so user can directly verity and setup their password
+             */
+
             return TRUE;
         }
 
