@@ -327,8 +327,8 @@ class Base_API_Controller extends CI_Controller
         if ($this->config->item('force_https') && $this->request->ssl === FALSE)
         {
             $this->response([
-                    $this->config->item('rest_status_field') => FALSE,
-                    $this->config->item('rest_message_field') => $this->lang->line('text_rest_unsupported')
+                    $this->config->item('api_status_field') => FALSE,
+                    $this->config->item('api_message_field') => $this->lang->line('text_rest_unsupported')
                 ], self::HTTP_FORBIDDEN);
         }
     }
@@ -458,8 +458,8 @@ class Base_API_Controller extends CI_Controller
 		if( $this->settings->flag_offline == IQB_FLAG_ON )
 		{
 			$this->response([
-                    $this->config->item('rest_status_field') => FALSE,
-                    $this->config->item('rest_message_field') => $this->settings->offline_message
+                    $this->config->item('api_status_field') => FALSE,
+                    $this->config->item('api_message_field') => $this->settings->offline_message
                 ], self::HTTP_SERVICE_UNAVAILABLE);
 		}
 	}
@@ -565,6 +565,21 @@ class Base_API_Controller extends CI_Controller
     public function set_response($data = NULL, $http_code = NULL)
     {
         $this->response($data, $http_code, TRUE);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Show 404 Error
+     *
+     * @return void
+     */
+    public function response_404()
+    {
+        $this->response([
+                    $this->config->item('api_status_field') => FALSE,
+                    $this->config->item('api_message_field') => $this->lang->line('api_text_resource_not_found')
+                ], self::HTTP_NOT_FOUND);
     }
 
 	// --------------------------------------------------------------------

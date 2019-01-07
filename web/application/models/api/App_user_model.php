@@ -15,7 +15,7 @@ class App_user_model extends MY_Model
     protected $after_update  = [];
     protected $after_delete  = [];
 
-    protected $fields = ['id', 'mobile', 'auth_type', 'auth_type_id', 'password', 'api_key', 'last_ip', 'last_device', 'last_login', 'is_activated', 'pincode', 'pincode_expires_at', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'mobile', 'auth_type', 'auth_type_id', 'password', 'api_key', 'last_ip', 'last_device', 'last_login', 'is_activated', 'pincode', 'pincode_resend_count', 'pincode_expires_at', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [
     ];
@@ -39,6 +39,41 @@ class App_user_model extends MY_Model
         parent::__construct();
     }
 
+
+    // ----------------------------------------------------------------
+
+    public function v_rules($action)
+    {
+        $v_rules = [];
+
+        switch ($action)
+        {
+            case 'verify':
+                $v_rules = $this->_v_rules_verify();
+                break;
+
+            default:
+                # code...
+                break;
+        }
+
+        return $v_rules;
+    }
+
+    private function _v_rules_verify()
+    {
+        $v_rules = [
+            [
+                'field' => 'mobile',
+                'label' => 'Mobile',
+                'rules' => 'trim|required|valid_mobile|max_length[10]',
+                '_type' => 'text',
+                '_required'     => true
+            ]
+        ];
+
+        return $v_rules;
+    }
 
     // ----------------------------------------------------------------
 
@@ -102,6 +137,19 @@ class App_user_model extends MY_Model
             $this->write_cache($record, $cache_var, CACHE_DURATION_DAY);
         }
         return $record;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get App User by Mobile
+     *
+     * @param integer $mobile
+     * @return object
+     */
+    public function get_by_mobile($mobile)
+    {
+        return parent::find_by(['mobile' => $mobile]);
     }
 
     // ----------------------------------------------------------------
@@ -221,13 +269,9 @@ class App_user_model extends MY_Model
     // --------------------------------------------------------------------
 
     // UPDATE PIN CODE
-    public function pin_code($id, $pin_code, $transaction = TRUE)
+    public function pincode($id, $data, $transaction = TRUE)
     {
         $id = intval($id);
-        $data = array(
-            'pin_code' => $pin_code
-        );
-
         return $this->save($id, $data, $transaction);
     }
 
@@ -427,7 +471,7 @@ class App_user_model extends MY_Model
     {
         $user = is_numeric($user) ? parent::find(intval($user)) : $user;
         $keys = [
-            'app_user_ak_' . $user->api_key
+            'app_user_ak_' . $user->api_key,
         ];
 
         return $this->clear_cache($keys);

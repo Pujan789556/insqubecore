@@ -18,9 +18,11 @@ use \Firebase\JWT\JWT;
  * List of API Error Codes
  *
  */
-define('IQB_API_ERR_CODE__TOKEN_EXPIRED',   1); // Token Expired or Invalid - Prompt Login for new token
-define('IQB_API_ERR_CODE__TOKEN_INVALID',   2); // Invalid Token - Prompt Login for new token
-define('IQB_API_ERR_CODE__TOKEN_TOO_EARLY', 3); // Token nbf Exception - Wait a while and try again
+define('IQB_API_ERR_CODE__TOKEN_EXPIRED',   	1); // Token Expired or Invalid - Prompt Login for new token
+define('IQB_API_ERR_CODE__TOKEN_INVALID',   	2); // Invalid Token - Prompt Login for new token
+define('IQB_API_ERR_CODE__TOKEN_TOO_EARLY', 	3); // Token nbf Exception - Wait a while and try again
+define('IQB_API_ERR_CODE__VALIDATION_ERROR', 	4); // Form Validation Error
+define('IQB_API_ERR_CODE__USER_NOT_FOUND', 		5); // User Not Found
 
 // --------------------------------------------------------------------
 
