@@ -443,7 +443,7 @@ $config['csrf_token_name'] = CSRF_TOKEN_NAME;
 $config['csrf_cookie_name'] = CSRF_COOKIE_NAME;
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = FALSE;
-$config['csrf_exclude_uris'] = array();
+$config['csrf_exclude_uris'] = array('api/.*'); // Exclude all api URLs
 
 /*
 |--------------------------------------------------------------------------
