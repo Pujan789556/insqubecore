@@ -49,6 +49,13 @@ if ( ! function_exists('send_sms'))
             $receivers = build_sms_receivers($receivers);
         }
 
+
+        /**
+         * Append SMS Signature
+         */
+        $message = $message . "\n" . SMS_SIGNATURE;
+
+
         /**
          * Let's Fire SMS
          */
