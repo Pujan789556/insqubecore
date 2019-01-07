@@ -1,5 +1,25 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * Error From API/* ??
+ *
+ * Check if Error was generated on /api/*
+ */
+$url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+$uris = explode( '/', parse_url($url, PHP_URL_PATH) ); // returns /uri1/uri2/...
+
+// If first segment is "api", simply return JSON
+if( $uris[1] === 'api')
+{
+	echo json_encode([
+		'status'  => FALSE,
+		'message' => 'Resource Not Found'
+	]);
+	exit(0);
+}
+
+
 $funny_headings = [
 	// 'कुरो अलि मिलेन जस्तो छ !',
 	'हैट कता पो आइपुगिएछ ?',
