@@ -28,9 +28,10 @@ if ( ! function_exists('send_sms'))
      *
      * @param string $receivers
      * @param string $message
+     * @param string $origin    main|api source of origin of SMS trigger
      * @return array
      */
-	function send_sms( $receivers, $message )
+	function send_sms( $receivers, $message, $origin = "main" )
 	{
         $result = [
             "response_code" => 1007,
@@ -46,7 +47,7 @@ if ( ! function_exists('send_sms'))
          */
         if( in_array(SMS_MODE, ['sms', 'both']) )
         {
-            $receivers = build_sms_receivers($receivers);
+            $receivers = build_sms_receivers($receivers, $origin);
         }
 
 
@@ -116,14 +117,22 @@ if ( ! function_exists('build_sms_receiver'))
      * If development/stage/test environment, we put test number,
      * else return the original numbers
      *
-     * @param string $receivers    comma separated mobile number
+     * @param string $receivers     comma separated mobile number
+     * @param string $origin        [main|api] source of origin of SMS trigger
      * @return bool
      */
-    function build_sms_receivers( $receivers )
+    function build_sms_receivers( $receivers, $origin = "main" )
     {
         if(APP_ENV !== 'production')
         {
-            $receivers = SMS_DEV_TEST_MOBILE;
+            if($origin == 'api')
+            {
+                $receivers = SMS_DEV_TEST_MOBILE_API;
+            }
+            else
+            {
+                $receivers = SMS_DEV_TEST_MOBILE_MAIN;
+            }
         }
 
         $valid_receivers    = [];
