@@ -8,6 +8,9 @@ $lang['api_text_login_failed'] 	= 'Login Failed.';
 
 $lang['api_text_resource_not_found'] 	= 'Resource Not Found.';
 $lang['api_text_user_not_found'] 		= 'User does not exists.';
+$lang['api_text_user_found'] 			= 'User exists.';
+$lang['api_text_valid_pincode'] 		= 'User pincode valid.';
+$lang['api_text_invalid_pincode'] 		= 'User pincode invalid.';
 
 $lang['api_text_sms_resend_quota_exceeded'] = 'Apologies! You have reached to maximum resend limit. Please try again later.';
 $lang['api_text_sms_api_error'] 			= 'Apologies! Our SMS API seems to be not working. Please try again later.';

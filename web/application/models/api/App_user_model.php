@@ -48,8 +48,16 @@ class App_user_model extends MY_Model
 
         switch ($action)
         {
-            case 'verify':
-                $v_rules = $this->_v_rules_verify();
+            case 'verify_mobile':
+                $v_rules = $this->_v_rules_verify_mobile();
+                break;
+
+            case 'verify_pincode':
+                $v_rules = $this->_v_rules_verify_pincode();
+                break;
+
+            case 'pincode':
+                $v_rules = $this->_v_rules_pincode();
                 break;
 
             default:
@@ -60,7 +68,7 @@ class App_user_model extends MY_Model
         return $v_rules;
     }
 
-    private function _v_rules_verify()
+    private function _v_rules_verify_mobile()
     {
         $v_rules = [
             [
@@ -69,10 +77,51 @@ class App_user_model extends MY_Model
                 'rules' => 'trim|required|valid_mobile|max_length[10]',
                 '_type' => 'text',
                 '_required'     => true
+            ],
+            [
+                'field' => 'action',
+                'label' => 'Action',
+                'rules' => 'trim|required|alpha_dash|max_length[50]',
+                '_type' => 'text',
+                '_required'     => true
             ]
         ];
 
         return $v_rules;
+    }
+
+    private function _v_rules_verify_pincode()
+    {
+        $v_rules = [
+            [
+                'field' => 'mobile',
+                'label' => 'Mobile',
+                'rules' => 'trim|required|valid_mobile|max_length[10]',
+                '_type' => 'text',
+                '_required'     => true
+            ],
+            [
+                'field' => 'pincode',
+                'label' => 'Pincode',
+                'rules' => 'trim|required|integer|exact_length[6]',
+                '_type' => 'text',
+                '_required'     => true
+            ],
+            [
+                'field' => 'action',
+                'label' => 'Action',
+                'rules' => 'trim|required|alpha_dash|max_length[50]',
+                '_type' => 'text',
+                '_required'     => true
+            ]
+        ];
+
+        return $v_rules;
+    }
+
+    private function _v_rules_pincode()
+    {
+        return $this->_v_rules_verify_mobile();
     }
 
     // ----------------------------------------------------------------
@@ -93,6 +142,29 @@ class App_user_model extends MY_Model
         // $where is array ['key' => $value]
         return $this->db->where($where)
                         ->count_all_results($this->table_name);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Is User's PINCODE valid?
+     *
+     * @param int $mobile
+     * @param int $pincode
+     * @return bool
+     */
+    public function is_valid_pincode($mobile, $pincode)
+    {
+        $user = $this->get_by_mobile($mobile);
+        if( !$user )
+        {
+            return FALSE;
+        }
+
+        $pincode = intval($pincode);
+        $user_pincode = intval($user->pincode);
+
+        return $pincode === $user_pincode;
     }
 
     // ----------------------------------------------------------------

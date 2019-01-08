@@ -71,21 +71,154 @@ class Auth extends Base_API_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Verify Existing User
-	 *
-	 * 	Vefity Existing User for First time login using mobile number.
-	 *  If user exists, it will automatically send pin code as SMS to
-	 * 	user's mobile number
+	 * Verify Resources
+	 * 	- Existing User
+	 * 	- Pincode
 	 *
 	 * @return type
 	 */
 	function verify()
 	{
+		/**
+		 * Ask for User Mobiel and Validate Against Our Database
+		 */
+		if($this->input->post())
+		{
+			$action = $this->input->post('action');
+			switch($action)
+			{
+				/**
+				 * Verify Mobile
+				 */
+				case 'mobile':
+					$this->_verify_mobile();
+					break;
 
-		return $this->pincode();
+				/**
+				 * Verify Pincode
+				 */
+				case 'pincode':
+					$this->_verify_pincode();
+					break;
+
+				default:
+					$this->response_404();
+					break;
+			}
+		}
+		$this->response_404();
 	}
 
+	// --------------------------------------------------------------------
 
+	/**
+	 * Verify Mobile
+	 *
+	 * @return void
+	 */
+	private function _verify_mobile()
+	{
+		/**
+		 * Ask for User Mobiel and Validate Against Our Database
+		 */
+		if($this->input->post())
+		{
+			$rules = $this->app_user_model->v_rules('verify_mobile');
+
+			$this->form_validation->set_rules($rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		/**
+        		 * If Mobile Exists - SEND SMS for Next Step (To create Password)
+        		 */
+        		$mobile = $this->input->post('mobile');
+        		if( $this->app_user_model->check_duplicate(['mobile' => $mobile]) )
+        		{
+        			$this->response([
+	                    $this->config->item('api_status_field') 	=> TRUE,
+	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_user_found'),
+	                ], self::HTTP_OK);
+        		}
+        		else
+        		{
+        			$this->__err_user_not_found();
+        		}
+        	}
+        	else
+        	{
+        		$this->__err_validation();
+        	}
+		}
+		$this->response_404();
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Verify Pincode
+	 *
+	 * @return void
+	 */
+	private function _verify_pincode()
+	{
+		/**
+		 * Ask for User Mobiel and Validate Against Our Database
+		 */
+		if($this->input->post())
+		{
+			$rules = $this->app_user_model->v_rules('verify_pincode');
+			$this->form_validation->set_rules($rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		/**
+        		 * If Mobile Exists - SEND SMS for Next Step (To create Password)
+        		 */
+        		$mobile  = $this->input->post('mobile');
+        		$pincode = $this->input->post('pincode');
+        		if( $this->app_user_model->is_valid_pincode($mobile, $pincode) )
+        		{
+        			$this->response([
+	                    $this->config->item('api_status_field') 	=> TRUE,
+	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_valid_pincode'),
+	                ], self::HTTP_OK);
+        		}
+        		else
+        		{
+        			$this->response([
+	                    $this->config->item('api_status_field') 	=> TRUE,
+	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_invalid_pincode'),
+	                ], self::HTTP_BAD_REQUEST);
+        		}
+        	}
+        	else
+        	{
+        		$this->__err_validation();
+        	}
+		}
+		$this->response_404();
+	}
+
+	// --------------------------------------------------------------------
+
+	private function __err_validation()
+	{
+		$this->response([
+                    $this->config->item('api_status_field') 	=> FALSE,
+                    $this->api_auth->err_code_field 			=> IQB_API_ERR_CODE__VALIDATION_ERROR,
+                    $this->config->item('api_message_field') 	=> strip_tags( validation_errors() ),
+                ], self::HTTP_BAD_REQUEST);
+	}
+
+	// --------------------------------------------------------------------
+
+	private function __err_user_not_found()
+	{
+		$this->response([
+	                    $this->config->item('api_status_field') 	=> FALSE,
+	                    $this->api_auth->err_code_field 			=> IQB_API_ERR_CODE__USER_NOT_FOUND,
+	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_user_not_found'),
+	                ], self::HTTP_BAD_REQUEST);
+	}
 
 	// --------------------------------------------------------------------
 
@@ -104,40 +237,23 @@ class Auth extends Base_API_Controller
 		 */
 		if($this->input->post())
 		{
-			$rules = $this->app_user_model->v_rules('verify');
+			$action = $this->input->post('action');
+			switch($action)
+			{
+				/**
+				 * For Password Creatiion
+				 * For Password Change
+				 */
+				case 'pwd_create':
+				case 'pwd_change':
+					$this->_pincode();
+					break;
 
-			$this->form_validation->set_rules($rules);
-			if($this->form_validation->run() === TRUE )
-        	{
-        		/**
-        		 * If Mobile Exists - SEND SMS for Next Step (To create Password)
-        		 */
-        		$mobile = $this->input->post('mobile');
-        		if( $this->app_user_model->check_duplicate(['mobile' => $mobile]) )
-        		{
-        			// Send Verification Code
-        			return $this->_pincode($mobile);
-        		}
-        		else
-        		{
-        			/**
-        			 * User NOT FOUND!
-        			 */
-        			$this->response([
-	                    $this->config->item('api_status_field') 	=> FALSE,
-	                    $this->api_auth->err_code_field 			=> IQB_API_ERR_CODE__USER_NOT_FOUND,
-	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_user_not_found'),
-	                ], self::HTTP_BAD_REQUEST);
-        		}
-        	}
-        	else
-        	{
-        		$this->response([
-                    $this->config->item('api_status_field') 	=> FALSE,
-                    $this->api_auth->err_code_field 			=> IQB_API_ERR_CODE__VALIDATION_ERROR,
-                    $this->config->item('api_message_field') 	=> strip_tags( validation_errors() ),
-                ], self::HTTP_BAD_REQUEST);
-        	}
+
+				default:
+					$this->response_404();
+					break;
+			}
 		}
 		$this->response_404();
 	}
@@ -152,64 +268,67 @@ class Auth extends Base_API_Controller
 	 *
 	 * @return void
 	 */
-	private function _pincode($mobile)
+	private function _pincode()
 	{
-		$mobile = intval($mobile);
-		$user 	= $this->app_user_model->get_by_mobile($mobile);
-		if( $user )
-		{
-			/**
-			 * Reached Maximum Resend Count???
-			 */
-			if( $this->_pincode_quota_exceeded($user) )
-			{
-				$this->response([
-                    $this->config->item('api_status_field') 	=> FALSE,
-                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_resend_quota_exceeded'),
-                ], self::HTTP_SERVICE_UNAVAILABLE);
-			}
+		$rules = $this->app_user_model->v_rules('pincode');
+		$this->form_validation->set_rules($rules);
+		if($this->form_validation->run() === TRUE )
+    	{
+    		$mobile = intval($this->input->post('mobile'));
+			$user 	= $this->app_user_model->get_by_mobile($mobile);
 
-			/**
-			 * SEND SMS
-			 */
-			try {
-				$status = $this->_send_code($user);
-			} catch (Exception $e) {
-				// this will throw error if api validation period is not configured properly
-				$this->response([
-                    $this->config->item('api_status_field') 	=> FALSE,
-                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_api_error'),
-                ], self::HTTP_INTERNAL_SERVER_ERROR);
-			}
-
-			if($status)
+			if(!$user)
 			{
-				$this->response([
-                    $this->config->item('api_status_field') 	=> TRUE,
-                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_send_ok'),
-                ], self::HTTP_OK);
+				$this->__err_user_not_found();
 			}
 			else
 			{
-				$this->response([
-                    $this->config->item('api_status_field') 	=> FALSE,
-                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_api_error'),
-                ], self::HTTP_SERVICE_UNAVAILABLE);
-			}
+				/**
+				 * Reached Maximum Resend Count???
+				 */
+				if( $this->_pincode_quota_exceeded($user) )
+				{
+					$this->response([
+	                    $this->config->item('api_status_field') 	=> FALSE,
+	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_resend_quota_exceeded'),
+	                ], self::HTTP_SERVICE_UNAVAILABLE);
+				}
 
-		}
-		else
-		{
-			/**
-			 * User NOT FOUND!
-			 */
-			$this->response([
-                $this->config->item('api_status_field') 	=> FALSE,
-                $this->api_auth->err_code_field 			=> IQB_API_ERR_CODE__USER_NOT_FOUND,
-                $this->config->item('api_message_field') 	=> $this->lang->line('api_text_user_not_found'),
-            ], self::HTTP_BAD_REQUEST);
-		}
+				/**
+				 * SEND SMS
+				 */
+				try {
+					$status = $this->_send_code($user);
+				} catch (Exception $e) {
+					// this will throw error if api validation period is not configured properly
+					$this->response([
+	                    $this->config->item('api_status_field') 	=> FALSE,
+	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_api_error'),
+	                ], self::HTTP_INTERNAL_SERVER_ERROR);
+				}
+
+				if($status)
+				{
+					$this->response([
+	                    $this->config->item('api_status_field') 	=> TRUE,
+	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_send_ok'),
+	                ], self::HTTP_OK);
+				}
+				else
+				{
+					$this->response([
+	                    $this->config->item('api_status_field') 	=> FALSE,
+	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_api_error'),
+	                ], self::HTTP_SERVICE_UNAVAILABLE);
+				}
+			}
+    	}
+    	else
+    	{
+    		$this->__err_validation();
+    	}
 	}
+
 
 	// --------------------------------------------------------------------
 
@@ -339,22 +458,6 @@ class Auth extends Base_API_Controller
 		}
 		return date('Y-m-d H:i:s', now() +  $validation_period );
 	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Verify Mobile User Pin
-	 * 	- Singup
-	 * 	- Forgot Password
-	 * 	- Vefity Existing User for First time login
-	 *
-	 * @return type
-	 */
-	function verify_pin()
-	{
-
-	}
-
 
 
 	// --------------------------------------------------------------------
