@@ -278,7 +278,7 @@ class Auth extends Base_API_Controller
 							"Expires at: " . $expires_at;
 
 			// Fire SMS
-			$result = send_sms($user->mobile, $message);
+			$result = send_sms($user->mobile, $message, 'api');
 
 			/**
 			 *
