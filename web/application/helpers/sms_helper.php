@@ -47,7 +47,16 @@ if ( ! function_exists('send_sms'))
          */
         if( in_array(SMS_MODE, ['sms', 'both']) )
         {
-            $receivers = build_sms_receivers($receivers, $origin);
+            try {
+              $receivers = build_sms_receivers($receivers, $origin);
+            }
+            //catch exception
+            catch(Exception $e) {
+                return [
+                    "response_code" => 'unknown',
+                    "response"      => $e->getMessage()
+                ];
+            }
         }
 
 
@@ -123,16 +132,24 @@ if ( ! function_exists('build_sms_receiver'))
      */
     function build_sms_receivers( $receivers, $origin = "main" )
     {
+        $CI =& get_instance();
+
         if(APP_ENV !== 'production')
         {
             if($origin == 'api')
             {
-                $receivers = SMS_DEV_TEST_MOBILE_API;
+                $receivers = $CI->settings->sms_test_mobile_api;
             }
             else
             {
-                $receivers = SMS_DEV_TEST_MOBILE_MAIN;
+                $receivers = $CI->settings->sms_test_mobile_main;
             }
+
+            if( !$receivers )
+            {
+                throw new Exception('Exception Occured - [Helper: sms_helper][Method: build_sms_receivers()]: Test Receivers not configured.');
+            }
+
         }
 
         $valid_receivers    = [];
@@ -147,6 +164,12 @@ if ( ! function_exists('build_sms_receiver'))
         }
 
         $valid_receivers_str = $valid_receivers ? implode(',', $valid_receivers) : '';
+
+        if(!$valid_receivers_str)
+        {
+            throw new Exception('Exception Occured - [Helper: sms_helper][Method: build_sms_receivers()]: No valid SMS receiver found.');
+        }
+
         return $valid_receivers_str;
     }
 }

@@ -116,7 +116,7 @@ class Settings extends MY_Controller
 									? $this->setting_model->get(['id' => 1])
 									: $this->settings;
 
-			$view = $this->load->view('settings/_form_general', [
+			$view = $this->load->view('setup/settings/_form_general', [
 								'form_elements' => $rules,
 								'record' 		=> $record
 							], TRUE);
@@ -141,7 +141,7 @@ class Settings extends MY_Controller
 								'content_header' => 'Settings',
 								'breadcrumbs' => ['Settings' => NULL]
 						])
-						->partial('content', 'settings/_index',
+						->partial('content', 'setup/settings/_index',
 							[
 								'rules' 	=> $this->setting_model->validation_rules,
 								'record'	=> $this->settings
@@ -259,7 +259,7 @@ class Settings extends MY_Controller
              */
             $action_url             = site_url("settings/section/{$section}");
             $dom_parent_container   = "#tab-{$section}-settings";
-            $view = $this->load->view('settings/_form_section', [
+            $view = $this->load->view('setup/settings/_form_section', [
                                 'form_elements'         => $rules,
                                 'record'                => $record,
                                 'action_url'            => $action_url,

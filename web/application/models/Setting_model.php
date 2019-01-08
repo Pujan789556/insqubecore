@@ -15,11 +15,11 @@ class Setting_model extends MY_Model
 
     protected $after_update  = ['clear_cache'];
 
-    protected $fields = ['id', 'orgn_name_en', 'orgn_name_np', 'address', 'pan_no', 'logo', 'per_page', 'flag_offline', 'offline_message', 'admin_email', 'from_email', 'replyto_email', 'noreply_email', 'website', 'back_date_limit', 'bs_company_id', 'bs_company_code', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'orgn_name_en', 'orgn_name_np', 'address', 'pan_no', 'logo', 'per_page', 'flag_offline', 'offline_message', 'admin_email', 'from_email', 'replyto_email', 'noreply_email', 'website', 'back_date_limit', 'bs_company_id', 'bs_company_code', 'sms_test_mobile_main', 'sms_test_mobile_api', 'api_sms_quota_limit', 'api_sms_validation_period', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
-    protected $sections = ['general', 'dates', 'others'];
+    protected $sections = ['general', 'dates', 'sms', 'api', 'others'];
 
 
 	// --------------------------------------------------------------------
@@ -151,6 +151,50 @@ class Setting_model extends MY_Model
                     '_extra_attributes' => 'data-provide="datepicker-inline"',
                     '_required' => false
                 ]
+            ],
+
+            /**
+             * SMS Tab
+             */
+            'sms' => [
+                [
+                    'field' => 'sms_test_mobile_main',
+                    'label' => 'SMS Test Mobile(s) - Main Application',
+                    'rules' => 'trim|max_length[100]',
+                    '_type' => 'text',
+                    '_help_text'    => 'Comma Separated Mobile Numbers. Example: 9841222222,9841888888',
+                    '_required'     => true
+                ],
+                [
+                    'field' => 'sms_test_mobile_api',
+                    'label' => 'Test Mobile(s) - API',
+                    'rules' => 'trim|max_length[100]',
+                    '_type' => 'text',
+                    '_help_text'    => 'Comma Separated Mobile Numbers. Example: 9841222222,9841888888',
+                    '_required'     => true
+                ],
+            ],
+
+            /**
+             * SMS Tab
+             */
+            'api' => [
+                [
+                    'field' => 'api_sms_quota_limit',
+                    'label' => 'SMS Quota Limit',
+                    'rules' => 'trim|integer|max_length[5]',
+                    '_type' => 'text',
+                    '_help_text'    => 'API SMS quota limit for given validation period for a mobile app user.',
+                    '_required'     => true
+                ],
+                [
+                    'field' => 'api_sms_validation_period',
+                    'label' => 'SMS Quota Validation Period',
+                    'rules' => 'trim|integer|max_length[8]',
+                    '_type' => 'text',
+                    '_help_text'    => 'API SMS Quota Validation Period (in seconds). E.g. 1 Day = 86400',
+                    '_required'     => true
+                ],
             ],
 
             /**
