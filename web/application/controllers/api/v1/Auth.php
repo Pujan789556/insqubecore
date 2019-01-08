@@ -14,25 +14,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Auth extends Base_API_Controller
 {
-	/**
-	 * Maximum Number that a user can resend sms verification code
-	 *
-	 * @var int
-	 */
-	private $_max_sms_resend = 4;
-
-	/**
-	 * SMS Quota Validity Period (seconds)
-	 *
-	 * 1 Day = 24 X 60 X 60 = 86400 seconds
-	 *
-	 * @var int
-	 */
-	private $_sms_validation_period = 86400;
-
-
-	// --------------------------------------------------------------------
-
 
 	function __construct()
 	{
@@ -191,7 +172,16 @@ class Auth extends Base_API_Controller
 			/**
 			 * SEND SMS
 			 */
-			$status = $this->_send_code($user);
+			try {
+				$status = $this->_send_code($user);
+			} catch (Exception $e) {
+				// this will throw error if api validation period is not configured properly
+				$this->response([
+                    $this->config->item('api_status_field') 	=> FALSE,
+                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_api_error'),
+                ], self::HTTP_INTERNAL_SERVER_ERROR);
+			}
+
 			if($status)
 			{
 				$this->response([
@@ -234,7 +224,7 @@ class Auth extends Base_API_Controller
 	private function _pincode_quota_exceeded($user)
 	{
 		$now = now();
-		if( $user->pincode_resend_count == $this->_max_sms_resend )
+		if( $user->pincode_resend_count == $this->settings->api_sms_quota_limit )
 		{
 
 			// with in expiry limit? quota exceeded
@@ -326,7 +316,7 @@ class Auth extends Base_API_Controller
 	private function _pincode_resend_count($user)
 	{
 		$count = intval($user->pincode_resend_count);
-		if( $user->pincode_resend_count >= $this->_max_sms_resend )
+		if( $user->pincode_resend_count >= $this->settings->api_sms_quota_limit )
 		{
 			$count = 1;
 		}
@@ -341,7 +331,13 @@ class Auth extends Base_API_Controller
 
 	private function _pincode_expires_at()
 	{
-		return date('Y-m-d H:i:s', now() + $this->_sms_validation_period );
+		$validation_period = intval($this->settings->api_sms_validation_period);
+		if( !$validation_period )
+		{
+			throw new Exception('Exception Occured - [Controller: api/v1/Auth][Method: _pincode_expires_at()]: API settings for SMS validation period not configured.');
+
+		}
+		return date('Y-m-d H:i:s', now() +  $validation_period );
 	}
 
 	// --------------------------------------------------------------------
