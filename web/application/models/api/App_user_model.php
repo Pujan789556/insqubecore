@@ -213,6 +213,31 @@ class App_user_model extends MY_Model
         return $v_rules;
     }
 
+    // ----------------------------------------------------------------
+
+    private function _v_rules_signup()
+    {
+        $v_rules = [
+            [
+                'field' => 'mobile',
+                'label' => 'Mobile',
+                'rules' => 'trim|required|valid_mobile|max_length[10]|callback__cb_valid_mobile_identity',
+                '_type' => 'text',
+                '_required'     => true
+            ],
+            [
+                'field' => 'full_name_en',
+                'label' => 'Full Name (EN)',
+                'rules' => 'trim|required|max_length[150]',
+                '_type'     => 'text',
+                '_required' => true
+            ],
+
+        ];
+
+        return $v_rules;
+    }
+
 
     // ----------------------------------------------------------------
 
@@ -237,24 +262,45 @@ class App_user_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Is User's PINCODE valid?
+     * Verify Pincode
      *
      * @param int $mobile
      * @param int $pincode
      * @return bool
      */
-    public function is_valid_pincode($mobile, $pincode)
+    public function verify_pincode($mobile, $pincode, $transaction = TRUE)
     {
         $user = $this->get_by_mobile($mobile);
-        if( !$user )
+        if( !$user || !$this->is_valid_pincode($user, $pincode) )
         {
             return FALSE;
         }
 
-        $pincode = intval($pincode);
-        $user_pincode = intval($user->pincode);
+        // Need User Activation?
+        if($user->is_activated == IQB_FLAG_ON )
+        {
+            return TRUE;
+        }
 
-        return $pincode === $user_pincode;
+        // Activate User
+        $data = array(
+            'is_activated' => IQB_FLAG_ON
+        );
+        return $this->save($user, $data, $transaction);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Is User's PINCODE valid?
+     *
+     * @param object $user
+     * @param int $pincode
+     * @return bool
+     */
+    public function is_valid_pincode($user, $pincode)
+    {
+        return $pincode == $user->pincode;
     }
 
     // ----------------------------------------------------------------

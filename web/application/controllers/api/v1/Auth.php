@@ -175,7 +175,7 @@ class Auth extends Base_API_Controller
         		 */
         		$mobile  = $this->input->post('mobile');
         		$pincode = $this->input->post('pincode');
-        		if( $this->app_user_model->is_valid_pincode($mobile, $pincode) )
+        		if( $this->app_user_model->verify_pincode($mobile, $pincode) )
         		{
         			$this->response([
 	                    $this->config->item('api_status_field') 	=> TRUE,
@@ -185,7 +185,7 @@ class Auth extends Base_API_Controller
         		else
         		{
         			$this->response([
-	                    $this->config->item('api_status_field') 	=> TRUE,
+	                    $this->config->item('api_status_field') 	=> FALSE,
 	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_invalid_pincode'),
 	                ], self::HTTP_BAD_REQUEST);
         		}
@@ -522,12 +522,12 @@ class Auth extends Base_API_Controller
     		 */
     		$mobile  = $this->input->post('mobile');
     		$pincode = $this->input->post('pincode');
-    		if( $this->app_user_model->is_valid_pincode($mobile, $pincode) )
+    		$user 	 = $this->app_user_model->get_by_mobile($mobile);
+    		if( $this->app_user_model->is_valid_pincode($user, $pincode) )
     		{
     			/**
     			 * Let's Create Password, Generate TOKEN and retrun to user
     			 */
-    			$user 		= $this->app_user_model->get_by_mobile($mobile);
     			$new_pass 	= $this->input->post('password');
     			$status 	= $this->app_user_model->change_password($user, $new_pass);
     			if($status)
@@ -660,15 +660,29 @@ class Auth extends Base_API_Controller
 	 */
 	function signup()
 	{
+		// if($this->input->post())
+		// {
+		// 	$rules = $this->app_user_model->v_rules('login');
+		// 	$this->form_validation->set_rules($rules);
+		// 	if($this->form_validation->run() === TRUE )
+	 //    	{
 
+	 //    		$mobile = $this->input->post('mobile');
+	 //    		$password = $this->input->post('password');
+
+	 //    		// Do login
+	 //    		$result = $this->api_auth->login($mobile, $password);
+	 //    		$this->response($result, $result['status'] == FALSE ? self::HTTP_BAD_REQUEST : self::HTTP_OK);
+
+	 //    	}
+	 //    	else
+	 //    	{
+	 //    		$this->__err_validation();
+	 //    	}
+
+		// }
+		// $this->response_404();
 	}
-
-
-	// public function test()
-	// {
-	// 	// echo 'hello';exit;
-	// 	$this->response($this->app_user, self::HTTP_OK);
-	// }
 
 
 }
