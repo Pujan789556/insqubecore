@@ -56,6 +56,10 @@ class App_user_model extends MY_Model
                 $v_rules = $this->_v_rules_verify_pincode();
                 break;
 
+            case 'verify_signup':
+                $v_rules = $this->_v_rules_verify_signup();
+                break;
+
             case 'pincode':
                 $v_rules = $this->_v_rules_pincode();
                 break;
@@ -70,6 +74,10 @@ class App_user_model extends MY_Model
 
             case 'login':
                 $v_rules = $this->_v_rules_login();
+                break;
+
+            case 'register':
+                $v_rules = $this->_v_rules_register();
                 break;
 
 
@@ -130,6 +138,11 @@ class App_user_model extends MY_Model
         ];
 
         return $v_rules;
+    }
+
+    private function _v_rules_verify_signup()
+    {
+        return $this->_v_rules_verify_pincode();
     }
 
     // ----------------------------------------------------------------
@@ -215,15 +228,15 @@ class App_user_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    private function _v_rules_signup()
+    private function _v_rules_register()
     {
         $v_rules = [
             [
-                'field' => 'mobile',
-                'label' => 'Mobile',
-                'rules' => 'trim|required|valid_mobile|max_length[10]|callback__cb_valid_mobile_identity',
-                '_type' => 'text',
-                '_required'     => true
+                'field' => 'auth_type',
+                'label' => 'Auth Type',
+                'rules' => 'trim|required|integer|exact_length[1]|in_list['.implode(',', array_keys(IQB_API_AUTH_TYPES)).']',
+                '_type'     => 'number',
+                '_required' => true
             ],
             [
                 'field' => 'full_name_en',
@@ -232,7 +245,27 @@ class App_user_model extends MY_Model
                 '_type'     => 'text',
                 '_required' => true
             ],
-
+            [
+                'field' => 'mobile',
+                'label' => 'Mobile',
+                'rules' => 'trim|required|valid_mobile|max_length[10]|callback__cb_mobile_identity_duplicate',
+                '_type' => 'number',
+                '_required'     => true
+            ],
+            [
+                'field' => 'password',
+                'label' => 'Password',
+                'rules' => 'required|max_length[50]',
+                '_type' => 'text',
+                '_required'     => true
+            ],
+            [
+                'field' => 'confirm_password',
+                'label' => 'Confirm Password',
+                'rules' => 'required|matches[password]',
+                '_type' => 'text',
+                '_required'     => true
+            ]
         ];
 
         return $v_rules;

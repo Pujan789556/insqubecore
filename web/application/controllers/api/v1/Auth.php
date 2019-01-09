@@ -200,25 +200,7 @@ class Auth extends Base_API_Controller
 
 	// --------------------------------------------------------------------
 
-	private function __err_validation()
-	{
-		$this->response([
-                    $this->config->item('api_status_field') 	=> FALSE,
-                    $this->api_auth->err_code_field 			=> IQB_API_ERR_CODE__VALIDATION_ERROR,
-                    $this->config->item('api_message_field') 	=> strip_tags( validation_errors() ),
-                ], self::HTTP_BAD_REQUEST);
-	}
 
-	// --------------------------------------------------------------------
-
-	private function __err_user_not_found()
-	{
-		$this->response([
-	                    $this->config->item('api_status_field') 	=> FALSE,
-	                    $this->api_auth->err_code_field 			=> IQB_API_ERR_CODE__USER_NOT_FOUND,
-	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_user_not_found'),
-	                ], self::HTTP_BAD_REQUEST);
-	}
 
 	// --------------------------------------------------------------------
 
@@ -294,6 +276,7 @@ class Auth extends Base_API_Controller
 	                ], self::HTTP_SERVICE_UNAVAILABLE);
 				}
 
+
 				/**
 				 * SEND SMS
 				 */
@@ -301,25 +284,16 @@ class Auth extends Base_API_Controller
 					$status = $this->_send_code($user);
 				} catch (Exception $e) {
 					// this will throw error if api validation period is not configured properly
-					$this->response([
-	                    $this->config->item('api_status_field') 	=> FALSE,
-	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_api_error'),
-	                ], self::HTTP_INTERNAL_SERVER_ERROR);
+					$this->__err_sms_api(self::HTTP_INTERNAL_SERVER_ERROR);
 				}
 
 				if($status)
 				{
-					$this->response([
-	                    $this->config->item('api_status_field') 	=> TRUE,
-	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_send_ok'),
-	                ], self::HTTP_OK);
+					$this->__ok_sms_api();
 				}
 				else
 				{
-					$this->response([
-	                    $this->config->item('api_status_field') 	=> FALSE,
-	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_api_error'),
-	                ], self::HTTP_SERVICE_UNAVAILABLE);
+					$this->__err_sms_api(self::HTTP_SERVICE_UNAVAILABLE);
 				}
 			}
     	}
@@ -655,34 +629,168 @@ class Auth extends Base_API_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Signup Mobile User
+	 * Signup/Register Mobile User
+	 *
 	 * @return type
 	 */
-	function signup()
+	function register()
 	{
-		// if($this->input->post())
-		// {
-		// 	$rules = $this->app_user_model->v_rules('login');
-		// 	$this->form_validation->set_rules($rules);
-		// 	if($this->form_validation->run() === TRUE )
-	 //    	{
+		if($this->input->post())
+		{
+			$rules = $this->app_user_model->v_rules('register');
+			$this->form_validation->set_rules($rules);
+			if($this->form_validation->run() === TRUE )
+	    	{
+	    		/**
+	    		 * Create Mobile User Based on Auth Types
+	    		 */
+	    		$auth_type = intval( $this->input->post('auth_type') );
+	    		switch ($auth_type)
+	    		{
+	    			/**
+	    			 * Core User
+	    			 *
+	    			 * @TODO: Can We signup from Mbile for Core User????
+	    			 * Let's do NOTHING now.
+	    			 */
+	    			case IQB_API_AUTH_TYPE_USER:
+	    				# code...
+	    				break;
 
-	 //    		$mobile = $this->input->post('mobile');
-	 //    		$password = $this->input->post('password');
+    				case IQB_API_AUTH_TYPE_CUSTOMER:
+	    				return $this->_signup_customer();
+	    				break;
 
-	 //    		// Do login
-	 //    		$result = $this->api_auth->login($mobile, $password);
-	 //    		$this->response($result, $result['status'] == FALSE ? self::HTTP_BAD_REQUEST : self::HTTP_OK);
+	    			default:
+	    				# code...
+	    				break;
+	    		}
+	    	}
+	    	else
+	    	{
+	    		$this->__err_validation();
+	    	}
 
-	 //    	}
-	 //    	else
-	 //    	{
-	 //    		$this->__err_validation();
-	 //    	}
-
-		// }
-		// $this->response_404();
+		}
+		$this->response_404();
 	}
 
+	// --------------------------------------------------------------------
+
+	/**
+	 * Signup Validation Callback - Check Mobile Duplication
+	 *
+	 * @param integer $mobile
+	 * @return bool
+	 */
+	public function _cb_mobile_identity_duplicate($mobile)
+	{
+		if( $this->app_user_model->check_duplicate(['mobile' => $mobile]) )
+        {
+            $this->form_validation->set_message('_cb_mobile_identity_duplicate', 'The %s already exists.');
+            return FALSE;
+        }
+        return TRUE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Signup Mobile User - Customer
+	 * @return type
+	 */
+	private function _signup_customer()
+	{
+		$this->load->model('customer_model');
+		$post_data = $this->input->post();
+		$data = [
+			'full_name_en' 		=> $post_data['full_name_en'],
+			'mobile_identity' 	=> $post_data['mobile'],
+			'password' 			=> $post_data['password'],
+			'nationality' 		=> 'NP',
+			'flag_kyc_verified' => IQB_FLAG_OFF
+		];
+
+
+		if( $this->customer_model->add($data, 'api') )
+		{
+			$user = $this->app_user_model->get_by_mobile($data['mobile_identity']);
+			/**
+			 * SEND SMS
+			 */
+			try {
+				$status = $this->_send_code($user);
+			} catch (Exception $e) {
+				// this will throw error if api validation period is not configured properly
+				$this->__err_sms_api(self::HTTP_INTERNAL_SERVER_ERROR);
+			}
+
+			if($status)
+			{
+				$this->__ok_sms_api();
+			}
+			else
+			{
+				$this->__err_sms_api(self::HTTP_SERVICE_UNAVAILABLE);
+			}
+		}
+		else
+		{
+			$this->__err_user_can_not_add();
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	private function __ok_sms_api()
+	{
+		$this->response([
+                    $this->config->item('api_status_field') 	=> TRUE,
+                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_send_ok'),
+                ], self::HTTP_OK);
+	}
+
+	// --------------------------------------------------------------------
+
+	private function __err_sms_api($http_code)
+	{
+		$this->response([
+                    $this->config->item('api_status_field') 	=> FALSE,
+                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_sms_api_error'),
+                ], $http_code);
+	}
+
+	// --------------------------------------------------------------------
+
+	private function __err_user_can_not_add()
+	{
+		$this->response([
+                    $this->config->item('api_status_field') 	=> FALSE,
+                    $this->api_auth->err_code_field 			=> IQB_API_ERR_CODE__USER_CAN_NOT_ADD,
+                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_user_can_not_add'),
+                ], self::HTTP_INTERNAL_SERVER_ERROR);
+	}
+
+	// --------------------------------------------------------------------
+
+	private function __err_validation()
+	{
+		$this->response([
+                    $this->config->item('api_status_field') 	=> FALSE,
+                    $this->api_auth->err_code_field 			=> IQB_API_ERR_CODE__VALIDATION_ERROR,
+                    $this->config->item('api_message_field') 	=> strip_tags( validation_errors() ),
+                ], self::HTTP_BAD_REQUEST);
+	}
+
+	// --------------------------------------------------------------------
+
+	private function __err_user_not_found()
+	{
+		$this->response([
+	                    $this->config->item('api_status_field') 	=> FALSE,
+	                    $this->api_auth->err_code_field 			=> IQB_API_ERR_CODE__USER_NOT_FOUND,
+	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_user_not_found'),
+	                ], self::HTTP_BAD_REQUEST);
+	}
 
 }

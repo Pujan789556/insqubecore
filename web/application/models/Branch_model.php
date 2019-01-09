@@ -212,6 +212,17 @@ class Branch_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function head_office_id()
+    {
+        $where = [
+            'is_head_office' => IQB_FLAG_ON,
+        ];
+        $row = parent::find_by($where);
+        return $row->id;
+    }
+
+    // ----------------------------------------------------------------
+
     public function reset_head_office($id)
     {
         $data = [

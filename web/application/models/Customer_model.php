@@ -13,14 +13,14 @@ class Customer_model extends MY_Model
 
     protected $protected_attributes = ['id'];
 
-    // protected $before_insert = ['prepare_contact_data', 'prepare_customer_defaults', 'prepare_customer_fts_data'];
-    // protected $before_update = ['prepare_contact_data', 'prepare_customer_fts_data'];
+    // protected $before_insert = [];
+    // protected $before_update = [];
 
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'branch_id', 'code', 'mobile_identity', 'type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'fts', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'branch_id', 'code', 'mobile_identity', 'type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'fts', 'flag_locked', 'flag_kyc_verified', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $endorsement_fields = [
         'customer' =>  ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'],
@@ -278,33 +278,15 @@ class Customer_model extends MY_Model
      * Add New Customer
      *
      * @param array $post_data Form Post Data
+     * @param string $origin [main|api] Where it came from?
      * @return mixed
      */
-    public function add($post_data)
+    public function add($post_data, $origin = 'main')
     {
-
-        $cols = ['mobile_identity', 'type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
-        $data = [];
-
         /**
-         * Task1: Prepare Basic Data
+         * Prepare Data
          */
-        foreach($cols as $col)
-        {
-            $data[$col] = $post_data[$col] ?? NULL;
-        }
-
-        /**
-         * Task 2: Branch ID and Customer Code
-         */
-        $data = $this->prepare_customer_defaults($data);
-
-
-        /**
-         * Task 3: Get Fulltext Search Field
-         */
-        $data['fts'] = $this->prepare_customer_fts_data($post_data);
-
+        $data = $this->__prepare_add_data($post_data, $origin);
 
         // Use automatic transaction
         $done = FALSE;
@@ -316,7 +298,7 @@ class Customer_model extends MY_Model
             // Post ADD Tasks
             if($done)
             {
-                $this->__post_add_tasks($done, $post_data);
+                $this->__post_add_tasks($done, $post_data, $origin);
             }
 
         $this->db->trans_complete();
@@ -330,15 +312,65 @@ class Customer_model extends MY_Model
         return $done;
     }
 
+        /**
+         * Perform Pre-Customer-Add Tasks
+         *
+         *  - ADD Columns
+         * - Code
+         * - Branch ID
+         * - FTS
+         *
+         * @param array $data
+         * @param string $origin [main|api] Where it came from?
+         * @return array
+         */
+        public function __prepare_add_data($post_data, $origin = 'main')
+        {
+            $this->load->library('Token');
+
+            $cols = ['mobile_identity', 'type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'flag_kyc_verified'];
+            $data = [];
+
+            /**
+             * Task1: Prepare Basic Data
+             */
+            foreach($cols as $col)
+            {
+                $data[$col] = $post_data[$col] ?? NULL;
+            }
+
+            // Code
+            $data['code']       = TOKEN::v2(12);
+
+            // Branch ID
+            if($origin == 'main')
+            {
+                $data['branch_id']  = $this->dx_auth->get_branch_id();
+            }
+            else
+            {
+                // Headquarter ID
+                $this->load->model('branch_model');
+                $data['branch_id']  = $this->branch_model->head_office_id();
+            }
+
+
+           // FTS
+            $data['fts'] = $this->_prepare_fts_data($data);
+
+            return $data;
+        }
+
         // ----------------------------------------------------------------
         /**
          * Perform Post-Customer-Add Tasks
          *
          * @param int $id
          * @param array $post_data
+         * @param string $origin [main|api] Where it came from?
          * @return bool
          */
-        private function __post_add_tasks($id, $post_data)
+        private function __post_add_tasks($id, $post_data, $origin = 'main')
         {
             $customer = parent::find($id);
 
@@ -355,17 +387,10 @@ class Customer_model extends MY_Model
                 'mobile'        => $customer->mobile_identity,
                 'auth_type'     => IQB_API_AUTH_TYPE_CUSTOMER,
                 'auth_type_id'  => $customer->id,
-                'password'      => NULL
+                'password'      => $post_data['password'] ?? NULL, // Set password if sent
             ];
 
             $this->app_user_model->register($app_user_data, FALSE);
-
-
-            /**
-             * @TODO : Send SMS regarding this???
-             *
-             * Send sms with a pin so user can directly verity and setup their password
-             */
 
             return TRUE;
         }
@@ -382,21 +407,10 @@ class Customer_model extends MY_Model
      */
     public function edit($id, $address_id, $post_data)
     {
-        $cols = ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
-        $data = [];
-
         /**
-         * Task1: Prepare Basic Data
+         * Prepare Data
          */
-        foreach($cols as $col)
-        {
-            $data[$col] = $post_data[$col] ?? NULL;
-        }
-
-        /**
-         * Task 2: Get Fulltext Search Field
-         */
-        $data['fts'] = $this->prepare_customer_fts_data($post_data);
+        $data = $this->__prepare_edit_data($post_data);
 
         // Use automatic transaction
         $done = FALSE;
@@ -421,6 +435,36 @@ class Customer_model extends MY_Model
         // return result/status
         return $done;
     }
+
+        /**
+         * Perform Pre-Customer-Add Tasks
+         *
+         *  - Edit Columns
+         *  - FTS
+         *
+         * @param array $data
+         * @return array
+         */
+        public function __prepare_edit_data($post_data)
+        {
+            $cols = ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
+            $data = [];
+
+            /**
+             * Task1: Prepare Basic Data
+             */
+            foreach($cols as $col)
+            {
+                $data[$col] = $post_data[$col] ?? NULL;
+            }
+
+            /**
+             * Task 2: Get Fulltext Search Field
+             */
+            $data['fts'] = $this->_prepare_fts_data($post_data);
+
+            return $data;
+        }
 
         // ----------------------------------------------------------------
         /**
@@ -475,26 +519,7 @@ class Customer_model extends MY_Model
         return $done;
     }
 
-    /**
-     * Prepare Customer Defaults
-     *
-     * Generate customer code and branch id before inserting.
-     * These are non changable values.
-     *
-     * Before Insert Trigger to generate customer code and branch_id
-     *
-     * @param array $data
-     * @return array
-     */
-    public function prepare_customer_defaults($data)
-    {
-        $this->load->library('Token');
 
-        $data['code']       = TOKEN::v2(12);
-        $data['branch_id']  = $this->dx_auth->get_branch_id();
-
-        return $data;
-    }
 
     // ----------------------------------------------------------------
 
@@ -508,28 +533,22 @@ class Customer_model extends MY_Model
      * @param array $data
      * @return array
      */
-    public function prepare_customer_fts_data($data)
+    public function _prepare_fts_data($data)
     {
-        // $contact_arr = $data['contacts'];
-
-        $dt = $data;
-        unset($dt['code']); // we have  separate field to filter
-        unset($dt['contacts']);
-        unset($dt['contact']);
-        unset($dt['updated_at']);
-        unset($dt['updated_by']);
-        unset($dt['created_at']);
-        unset($dt['created_by']);
+        $fts_keys = ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'profession', 'nationality', 'dob', 'identification_no', 'company_reg_no'];
 
         $fts_data = [];
-        foreach($dt as $key=>$val)
+        foreach($fts_keys as $key)
         {
-            if($val){
+            $val = $data[$key] ?? '';
+            if($val)
+            {
                 if($key == 'type')
                 {
-                    $fts_data []= $val == 'C' ? 'Company' : 'Individual';
+                    $fts_data[] = $val == 'C' ? 'Company' : 'Individual';
                 }else{
-                    $fts_data [] =  $val;
+
+                    $fts_data[] =  $val;
                 }
             }
         }
@@ -758,7 +777,7 @@ class Customer_model extends MY_Model
             // Type/Module Table Alias
             'module' => 'C'
         ];
-        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases);
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_', FALSE);
     }
 
     // ----------------------------------------------------------------

@@ -24,6 +24,7 @@ define('IQB_API_ERR_CODE__TOKEN_TOO_EARLY', 		3); // Token nbf Exception - Wait 
 define('IQB_API_ERR_CODE__VALIDATION_ERROR', 		4); // Form Validation Error
 define('IQB_API_ERR_CODE__USER_NOT_FOUND', 			5); // User Not Found
 define('IQB_API_ERR_CODE__USER_API_KEY_EXPIRED', 	6); // User's API Key Expired
+define('IQB_API_ERR_CODE__USER_CAN_NOT_ADD', 		7); // User can not add
 
 // --------------------------------------------------------------------
 

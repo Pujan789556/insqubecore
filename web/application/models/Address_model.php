@@ -229,8 +229,8 @@ class Address_model extends MY_Model
         $v_rules = $this->_v_rules($options);
 
         // Get the Dropdowns
-        $state_dropdown = $this->state_model->dropdown($record->country_id);
-        $address1_dropdown = $record->state_id ? $this->local_body_model->dropdown_by_state($record->state_id) : NULL;
+        $state_dropdown     = $record->country_id ? $this->state_model->dropdown($record->country_id) : [];
+        $address1_dropdown  = $record->state_id ? $this->local_body_model->dropdown_by_state($record->state_id) : NULL;
 
         if($state_dropdown)
         {
@@ -571,7 +571,7 @@ class Address_model extends MY_Model
     {
         return $this->db->select('A.*, C.name AS country_name, S.name_en AS state_name_en, S.name_np AS state_name_np, LB.name_en AS address1_en, LB.name_np AS address1_np')
                          ->from($this->table_name . ' A')
-                         ->join('master_countries C', 'C.id = A.country_id')
+                         ->join('master_countries C', 'C.id = A.country_id', 'left')
                          ->join('master_states S', 'S.id = A.state_id', 'left')
                          ->join('master_localbodies LB', 'LB.id = A.address1_id', 'left')
                          ->where('A.id', $id)
@@ -590,7 +590,7 @@ class Address_model extends MY_Model
     {
         return $this->db->select('A.*, C.name AS country_name, S.name_en AS state_name_en, S.name_np AS state_name_np, LB.name_en AS address1_en, LB.name_np AS address1_np')
                          ->from($this->table_name . ' A')
-                         ->join('master_countries C', 'C.id = A.country_id')
+                         ->join('master_countries C', 'C.id = A.country_id', 'left')
                          ->join('master_states S', 'S.id = A.state_id', 'left')
                          ->join('master_localbodies LB', 'LB.id = A.address1_id', 'left')
                          ->where(['A.type' => $type, 'A.type_id' => $type_id])

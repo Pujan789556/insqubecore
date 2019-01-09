@@ -565,6 +565,8 @@ class Customers extends MY_Controller
             		// Insert or Update?
 					if($action === 'add')
 					{
+						// Add KYC Verfied Flag
+						$data['flag_kyc_verified'] = IQB_FLAG_ON;
 						$done = $this->customer_model->add($data);
 					}
 					else
