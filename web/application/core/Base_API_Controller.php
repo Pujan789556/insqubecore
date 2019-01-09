@@ -390,8 +390,9 @@ class Base_API_Controller extends CI_Controller
 
 		if( $this->api_auth->is_authorized() )
 		{
-            $payload = $this->api_auth->validated_token();
+            $payload = $this->api_auth->get_token_data();
 
+            $this->app_user->id             = $payload->data->id;
 			$this->app_user->api_key 	    = $payload->data->api_key;
             $this->app_user->auth_type 		= $payload->data->auth_type;
             $this->app_user->auth_type_id 	= $payload->data->auth_type_id;

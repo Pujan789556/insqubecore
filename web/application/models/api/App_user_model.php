@@ -60,6 +60,19 @@ class App_user_model extends MY_Model
                 $v_rules = $this->_v_rules_pincode();
                 break;
 
+            case 'pwd_create':
+                $v_rules = $this->_v_rules_pwd_create();
+                break;
+
+            case 'pwd_change':
+                $v_rules = $this->_v_rules_pwd_change();
+                break;
+
+            case 'login':
+                $v_rules = $this->_v_rules_login();
+                break;
+
+
             default:
                 # code...
                 break;
@@ -119,10 +132,87 @@ class App_user_model extends MY_Model
         return $v_rules;
     }
 
+    // ----------------------------------------------------------------
+
     private function _v_rules_pincode()
     {
         return $this->_v_rules_verify_mobile();
     }
+
+    // ----------------------------------------------------------------
+
+    // pincode, mobile, action required
+    private function _v_rules_pwd_create()
+    {
+        $v_rules = array_merge( $this->_v_rules_verify_pincode(),[
+            [
+                'field' => 'password',
+                'label' => 'Password',
+                'rules' => 'trim|required|max_length[50]',
+                '_type' => 'text',
+                '_required'     => true
+            ],
+            [
+                'field' => 'confirm_password',
+                'label' => 'Confirm Password',
+                'rules' => 'trim|required|matches[password]',
+                '_type' => 'text',
+                '_required'     => true
+            ]
+        ]);
+
+        return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    // is performed by logged in user, so token will be there for validation
+    private function _v_rules_pwd_change()
+    {
+        $v_rules = [
+            [
+                'field' => 'password',
+                'label' => 'Password',
+                'rules' => 'required|max_length[50]',
+                '_type' => 'text',
+                '_required'     => true
+            ],
+            [
+                'field' => 'confirm_password',
+                'label' => 'Confirm Password',
+                'rules' => 'required|matches[password]',
+                '_type' => 'text',
+                '_required'     => true
+            ]
+        ];
+
+        return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    private function _v_rules_login()
+    {
+        $v_rules = [
+            [
+                'field' => 'mobile',
+                'label' => 'Mobile',
+                'rules' => 'trim|required|valid_mobile|max_length[10]',
+                '_type' => 'text',
+                '_required'     => true
+            ],
+            [
+                'field' => 'password',
+                'label' => 'Password',
+                'rules' => 'required|max_length[50]',
+                '_type' => 'text',
+                '_required'     => true
+            ]
+        ];
+
+        return $v_rules;
+    }
+
 
     // ----------------------------------------------------------------
 
@@ -175,40 +265,15 @@ class App_user_model extends MY_Model
      * @param string $api_key
      * @return bool
      */
-    public function is_valid_api_key($api_key)
+    public function is_valid_api_key($mobile, $api_key)
     {
-        $valid  = IQB_FLAG_YES;
-        $record = $this->get_by_api_key($api_key);
-        if( !$record )
+        $valid  = TRUE;
+        $user = $this->get_by_mobile($mobile);
+        if( !$user || $user->api_key !== $api_key)
         {
-            $valid  = IQB_FLAG_NO;
+            $valid  = FALSE;
         }
-
         return $valid;
-    }
-
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Get App User by Api Key
-     *
-     * @param string $api_key
-     * @return object
-     */
-    public function get_by_api_key($api_key)
-    {
-        /**
-         * Get Cached Result, If no, cache the query result
-         */
-        $cache_var  = 'app_user_ak_' . $api_key;
-        $record     = $this->get_cache($cache_var);
-        if(!$record)
-        {
-            $record = parent::find_by(['api_key' => $api_key]);
-            $this->write_cache($record, $cache_var, CACHE_DURATION_DAY);
-        }
-        return $record;
     }
 
     // ----------------------------------------------------------------
@@ -221,7 +286,17 @@ class App_user_model extends MY_Model
      */
     public function get_by_mobile($mobile)
     {
-        return parent::find_by(['mobile' => $mobile]);
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var  = 'app_user_mb_' . $mobile;
+        $record     = $this->get_cache($cache_var);
+        if(!$record)
+        {
+            $record = parent::find_by(['mobile' => $mobile]);
+            $this->write_cache($record, $cache_var, CACHE_DURATION_HR);
+        }
+        return $record;
     }
 
     // ----------------------------------------------------------------
@@ -418,7 +493,10 @@ class App_user_model extends MY_Model
         $password_hash  = password_hash($new_pass, PASSWORD_BCRYPT);
         $data           = array(
             'password'  => $password_hash,
-            'api_key'   => TOKEN::v2(12)
+            'api_key'   => TOKEN::v2(12),
+            'pincode'               => NULL,
+            'pincode_resend_count'  => 0,
+            'pincode_expires_at'    => NULL
         );
 
         return $this->save($user, $data, $transaction);
@@ -481,21 +559,17 @@ class App_user_model extends MY_Model
     // Perform App Login
     public function login($mobile, $password)
     {
-        $user = $this->db->select('*')
-                             ->from($this->table_name)
-                             ->where('mobile', $mobile)
-                             ->get()->row();
-
+        $user = $this->get_by_mobile($mobile);
         if($user)
         {
             $hash = $user->password;
             if( password_verify ( $password , $hash ) )
             {
                 return [
-                    'id'            => $user->id,
                     'auth_type'     => $user->auth_type,
                     'auth_type_id'  => $user->auth_type_id,
-                    'api_key'       => $user->api_key
+                    'api_key'       => $user->api_key,
+                    'mobile'        => $user->mobile
                 ];
             }
         }
@@ -517,7 +591,7 @@ class App_user_model extends MY_Model
         {
             $cache_names = [
                 // User By API KEY
-                'app_user_ak_*'
+                'app_user_mb_*'
             ];
         }
         else
@@ -543,7 +617,7 @@ class App_user_model extends MY_Model
     {
         $user = is_numeric($user) ? parent::find(intval($user)) : $user;
         $keys = [
-            'app_user_ak_' . $user->api_key,
+            'app_user_mb_' . $user->mobile,
         ];
 
         return $this->clear_cache($keys);

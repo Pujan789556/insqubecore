@@ -472,19 +472,151 @@ class Auth extends Base_API_Controller
 	 */
 	function password()
 	{
+		/**
+		 * Ask for User Mobiel and Validate Against Our Database
+		 */
+		if($this->input->post())
+		{
+			$action = $this->input->post('action');
+			switch($action)
+			{
+				/**
+				 * For Password Creatiion
+				 * For Password Change
+				 */
+				case 'pwd_create':
+					$this->_password_create();
+					break;
 
+				case 'pwd_change':
+					$this->_password_change();
+					break;
+
+
+				default:
+					$this->response_404();
+					break;
+			}
+		}
+		$this->response_404();
 	}
-
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Signup Mobile User
-	 * @return type
+	 * Create Password
+	 * 	- From Signup or Forget Password
+	 *
+	 * @return void
 	 */
-	function signup()
+	private function _password_create()
 	{
+		$rules = $this->app_user_model->v_rules('pwd_create');
+		$this->form_validation->set_rules($rules);
+		if($this->form_validation->run() === TRUE )
+    	{
+    		/**
+    		 * Must Send pincode along with password.
+    		 *
+    		 * Valid Pincode?
+    		 */
+    		$mobile  = $this->input->post('mobile');
+    		$pincode = $this->input->post('pincode');
+    		if( $this->app_user_model->is_valid_pincode($mobile, $pincode) )
+    		{
+    			/**
+    			 * Let's Create Password, Generate TOKEN and retrun to user
+    			 */
+    			$user 		= $this->app_user_model->get_by_mobile($mobile);
+    			$new_pass 	= $this->input->post('password');
+    			$status 	= $this->app_user_model->change_password($user, $new_pass);
+    			if($status)
+				{
+					$this->response([
+	                    $this->config->item('api_status_field') 	=> TRUE,
+	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_password_create_ok'),
+	                ], self::HTTP_OK);
+				}
+				else
+				{
+					$this->response([
+	                    $this->config->item('api_status_field') 	=> FALSE,
+	                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_password_create_fail'),
+	                ], self::HTTP_SERVICE_UNAVAILABLE);
+				}
+    		}
+    		else
+    		{
+    			$this->response([
+                    $this->config->item('api_status_field') 	=> TRUE,
+                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_invalid_pincode'),
+                ], self::HTTP_BAD_REQUEST);
+    		}
+    	}
+    	else
+    	{
+    		$this->__err_validation();
+    	}
+	}
 
+	// --------------------------------------------------------------------
+
+	/**
+	 * Change Password
+	 * 	- From Logged in State
+	 * i.e. A Valid Token Must be Passed
+	 *
+	 * @return void
+	 */
+	private function _password_change()
+	{
+		/**
+		 * AUTHORIZED REQUEST?
+		 */
+		if( !$this->api_auth->is_authorized() )
+		{
+			$this->response($this->api_auth->token_error, self::HTTP_UNAUTHORIZED);
+		}
+
+
+		$rules = $this->app_user_model->v_rules('pwd_change');
+		$this->form_validation->set_rules($rules);
+		if($this->form_validation->run() === TRUE )
+    	{
+
+    		/**
+    		 * User ID from Token
+    		 */
+    		$mobile 	= intval($this->api_auth->get_token_data('mobile'));
+    		$user 		= $this->app_user_model->get_by_mobile($mobile);
+    		if( !$user )
+    		{
+    			$this->__err_user_not_found();
+    		}
+
+    		// Let's change the password
+    		$new_pass 	= $this->input->post('password');
+    		$status 	= $this->app_user_model->change_password($user, $new_pass);
+			if($status)
+			{
+				$this->response([
+                    $this->config->item('api_status_field') 	=> TRUE,
+                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_password_create_ok'),
+                ], self::HTTP_OK);
+			}
+			else
+			{
+				$this->response([
+                    $this->config->item('api_status_field') 	=> FALSE,
+                    $this->config->item('api_message_field') 	=> $this->lang->line('api_text_password_create_fail'),
+                ], self::HTTP_SERVICE_UNAVAILABLE);
+			}
+
+    	}
+    	else
+    	{
+    		$this->__err_validation();
+    	}
 	}
 
 	// --------------------------------------------------------------------
@@ -495,6 +627,38 @@ class Auth extends Base_API_Controller
 	 * @return type
 	 */
 	function login()
+	{
+		if($this->input->post())
+		{
+			$rules = $this->app_user_model->v_rules('login');
+			$this->form_validation->set_rules($rules);
+			if($this->form_validation->run() === TRUE )
+	    	{
+
+	    		$mobile = $this->input->post('mobile');
+	    		$password = $this->input->post('password');
+
+	    		// Do login
+	    		$result = $this->api_auth->login($mobile, $password);
+	    		$this->response($result, $result['status'] == FALSE ? self::HTTP_BAD_REQUEST : self::HTTP_OK);
+
+	    	}
+	    	else
+	    	{
+	    		$this->__err_validation();
+	    	}
+
+		}
+		$this->response_404();
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Signup Mobile User
+	 * @return type
+	 */
+	function signup()
 	{
 
 	}

@@ -18,11 +18,12 @@ use \Firebase\JWT\JWT;
  * List of API Error Codes
  *
  */
-define('IQB_API_ERR_CODE__TOKEN_EXPIRED',   	1); // Token Expired or Invalid - Prompt Login for new token
-define('IQB_API_ERR_CODE__TOKEN_INVALID',   	2); // Invalid Token - Prompt Login for new token
-define('IQB_API_ERR_CODE__TOKEN_TOO_EARLY', 	3); // Token nbf Exception - Wait a while and try again
-define('IQB_API_ERR_CODE__VALIDATION_ERROR', 	4); // Form Validation Error
-define('IQB_API_ERR_CODE__USER_NOT_FOUND', 		5); // User Not Found
+define('IQB_API_ERR_CODE__TOKEN_EXPIRED',   		1); // Token Expired or Invalid - Prompt Login for new token
+define('IQB_API_ERR_CODE__TOKEN_INVALID',   		2); // Invalid Token - Prompt Login for new token
+define('IQB_API_ERR_CODE__TOKEN_TOO_EARLY', 		3); // Token nbf Exception - Wait a while and try again
+define('IQB_API_ERR_CODE__VALIDATION_ERROR', 		4); // Form Validation Error
+define('IQB_API_ERR_CODE__USER_NOT_FOUND', 			5); // User Not Found
+define('IQB_API_ERR_CODE__USER_API_KEY_EXPIRED', 	6); // User's API Key Expired
 
 // --------------------------------------------------------------------
 
@@ -34,6 +35,7 @@ class Api_auth
 	public $message_field;
 	public $err_code_field;
 	public $token_field;
+	public $token_error;
 
 	function __construct()
 	{
@@ -118,20 +120,6 @@ class Api_auth
 		return $this->_get_token();
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Decode a Token and Return
-	 *
-	 * On exception, it returns array with status, message and error_code
-	 *
-	 * @param string|null $token JWT
-	 * @return array|object
-	 */
-	public function validated_token( $token = NULL )
-	{
-		return $this->_validated_token($token);
-	}
 
 	// --------------------------------------------------------------------
 
@@ -199,7 +187,7 @@ class Api_auth
 	 * @param string|null $token JWT
 	 * @return array|object
 	 */
-    private function _validated_token( $token = NULL )
+    private function _decode_token( $token = NULL )
     {
         // Fetch Token if Not Supplied
         if(!$token)
@@ -207,16 +195,31 @@ class Api_auth
             $token = $this->_get_token();
         }
 
+        $decoded_token = FALSE;
         try {
 
             $decoded_token = JWT::decode($token, base64_decode(INSQUBE_API_KEY), ['HS256']);
 
-
             /**
-             * Token might be valid, but app user might have been deleted?
+             * User's api_key change on every password change or mobile change
              */
+            $mobile 	= $decoded_token->data->mobile;
+            $api_key 	= $decoded_token->data->api_key;
+            $user 	 	= $this->ci->app_user_model->get_by_mobile($mobile);
 
+            // User Exists?
+            if( !$user )
+            {
+            	$this->token_error = $this->_err_user_not_found();
+            	return FALSE;
+            }
 
+            // Valid API KEY??
+            if( $user->api_key !== $api_key )
+            {
+            	$this->token_error = $this->_err_user_api_key_expired();
+            	return FALSE;
+            }
 
         } catch (\ExpiredException $e) {
             /**
@@ -224,7 +227,7 @@ class Api_auth
              *
              * Action: Prompt Login to Generate New Token
              */
-            return $this->_err_token_expired();
+            $this->token_error = $this->_err_token_expired();
         }
         catch (\BeforeValidException $e) {
             /**
@@ -240,7 +243,7 @@ class Api_auth
              *
              * Action: Prompt Login to Generate New Token
              */
-            return $this->_err_token_invalid();
+            $this->token_error = $this->_err_token_invalid();
         }
 
         return $decoded_token;
@@ -249,6 +252,38 @@ class Api_auth
     // --------------------------------------------------------------------
 
     	/**
+    	 * Error on API KEY Expired
+    	 *
+    	 * @return array
+    	 */
+        private function _err_user_api_key_expired()
+        {
+            return [
+                $this->status_field     => FALSE,
+                $this->message_field    => $this->ci->lang->line('api_text_err_user_api_key_expired'),
+                $this->err_code_field    => IQB_API_ERR_CODE__USER_API_KEY_EXPIRED
+            ];
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+    	 * Error on User NOT FOUND
+    	 *
+    	 * @return array
+    	 */
+        private function _err_user_not_found()
+        {
+            return [
+                $this->status_field     => FALSE,
+                $this->message_field    => $this->ci->lang->line('api_text_user_not_found'),
+                $this->err_code_field    => IQB_API_ERR_CODE__USER_NOT_FOUND
+            ];
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
     	 * Error on Token Expired
     	 *
     	 * @return array
@@ -333,6 +368,7 @@ class Api_auth
 	// --------------------------------------------------------------------
 
 
+
 	/**
 	 * Is Authorized?
 	 *
@@ -342,13 +378,35 @@ class Api_auth
 	 */
 	function is_authorized( )
 	{
-		$result = $this->_validated_token();
-		$status = $result[$this->status_field] ?? NULL;
-        if( $status === FALSE )
-        {
-            return FALSE;
-        }
-        return TRUE;
+		$result = $this->_decode_token();
+		return $result !== FALSE;
+	}
+
+	// --------------------------------------------------------------------
+
+
+	/**
+	 * Get Token Data
+	 * If no key supplied, return the whole payload
+	 * If invalid token, return NULL
+	 *
+	 * @return bool
+	 */
+	function get_token_data( $key = NULL )
+	{
+		if( $this->is_authorized() )
+		{
+			$payload = $this->_decode_token();
+
+			if($key)
+			{
+				return $payload->data->{$key} ?? NULL;
+			}
+			return $payload;
+		}
+
+		// Invalid Token, return NULL
+		return NULL;
 	}
 
 
@@ -363,269 +421,10 @@ class Api_auth
 
 	function logout()
 	{
-		// Trigger event
-		$this->user_logging_out($this->ci->session->userdata('DX_user_id'));
 
-		// Delete auto login
-		if ($this->ci->input->cookie($this->ci->config->item('DX_autologin_cookie_name'))) {
-			$this->_delete_autologin();
-		}
 
-		// Destroy session
-		$this->ci->session->sess_destroy();
 	}
 
-	function register($username, $password, $email, $extra_data = [])
-	{
-		// Load Models
-		$this->ci->load->model('user_model');
-		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
-
-		$this->ci->load->helper('url');
-
-		// Default return value
-		$insert = FALSE;
-
-		// Hash password using phpass
-		$hasher = new PasswordHash(
-				$this->ci->config->item('phpass_hash_strength'),
-				$this->ci->config->item('phpass_hash_portable'));
-		$hashed_password = $hasher->HashPassword($password);
-
-		// New user array
-		$new_user = array(
-			'username'					=> $username,
-			'password'					=> $hashed_password,
-			'email'						=> $email,
-			'last_ip'					=> $this->ci->input->ip_address()
-		);
-
-		// Do we have extra data?
-		if( !empty( $extra_data) )
-		{
-			// Remove Vitals
-			unset($extra_data['username'], $extra_data['password'], $extra_data['email']);
-			$new_user = !empty( $extra_data) ? array_merge($new_user, $extra_data) : $new_user;
-		}
-
-		// Do we need to send email to activate user
-		if ($this->ci->config->item('DX_email_activation'))
-		{
-			// Add activation key to user array
-			$new_user['activation_key'] = md5(rand().microtime());
-
-			// Create temporary user in database which means the user still unactivated.
-			$insert = $this->ci->user_temp->create_temp($new_user);
-		}
-		else
-		{
-			// Create user
-			$insert = $this->ci->user_model->create_user($new_user);
-
-			// Trigger event
-			// 		This event is not needed as we are creating profile as JSON data in same table
-			// 		with Next Wizard Call
-			// $this->user_activated($this->ci->db->insert_id());
-		}
-
-		if ($insert)
-		{
-			// Replace password with blank text for email.
-			$new_user['password'] = $password;
-
-			// $result = $new_user;
-
-			// Send email based on config
-
-			// Check if user need to activate it's account using email
-			if ($this->ci->config->item('DX_email_activation'))
-			{
-				// Create email
-				$from = $this->ci->config->item('DX_webmaster_email');
-				$subject = sprintf($this->ci->lang->line('auth_activate_subject'), $this->ci->settings->orgn_name_en);
-
-				// Activation Link
-				$new_user['activate_url'] = site_url($this->ci->config->item('DX_activate_uri')."{$new_user['username']}/{$new_user['activation_key']}");
-
-				// Trigger event and get email content
-				$this->sending_activation_email($new_user, $message);
-
-				// Send email with activation link
-				$this->_email($email, $from, $subject, $message);
-			}
-			else
-			{
-				// Check if need to email account details
-				if ($this->ci->config->item('DX_email_account_details'))
-				{
-					// Create email
-					$from = $this->ci->config->item('DX_webmaster_email');
-					$subject = sprintf($this->ci->lang->line('auth_account_subject'), $this->ci->settings->orgn_name_en);
-
-					// Trigger event and get email content
-					$this->sending_account_email($new_user, $message);
-
-					// Send email with account details
-					$this->_email($email, $from, $subject, $message);
-				}
-			}
-		}
-
-		return $insert; // newly created user ID or False
-	}
-
-	function forgot_password($login)
-	{
-		// Default return value
-		$result = FALSE;
-
-		if ($login)
-		{
-			// Load Model
-			$this->ci->load->model('user_model');
-			// Load Helper
-			$this->ci->load->helper('url');
-
-			// Get login and check if it's exist
-			if ($query = $this->ci->user_model->get_login($login) AND $query->num_rows() == 1)
-			{
-				// Get User data
-				$row = $query->row();
-
-				// Check if there is already new password created but waiting to be activated for this login
-				if ( ! $row->newpass_key)
-				{
-					// Appearantly there is no password created yet for this login, so we create new password
-					$data['password'] = $this->_gen_pass();
-
-					// Generate password hash
-					$hasher = new PasswordHash(
-						$this->ci->config->item('phpass_hash_strength'),
-						$this->ci->config->item('phpass_hash_portable'));
-
-					$encode = $hasher->HashPassword($data['password']);
-
-					// Create key
-					$data['key'] = md5(rand().microtime());
-
-					// Create new password (but it haven't activated yet)
-					$this->ci->user_model->newpass($row->id, $encode, $data['key']);
-
-					// Create reset password link to be included in email
-					$data['reset_password_uri'] = site_url($this->ci->config->item('DX_reset_password_uri')."{$row->username}/{$data['key']}");
-
-					// Create email
-					$from = $this->ci->config->item('DX_webmaster_email');
-					$subject = $this->ci->lang->line('auth_forgot_password_subject');
-
-					// Trigger event and get email content
-					$this->sending_forgot_password_email($data, $message);
-
-					// Send instruction email
-					$this->_email($row->email, $from, $subject, $message);
-
-					$result = TRUE;
-				}
-				else
-				{
-					// There is already new password waiting to be activated
-					$this->_auth_error = $this->ci->lang->line('auth_request_sent');
-				}
-			}
-			else
-			{
-				$this->_auth_error = $this->ci->lang->line('auth_username_or_email_not_exist');
-			}
-		}
-
-		return $result;
-	}
-
-	function activate($username, $key = '')
-	{
-		// Load Models
-		$this->ci->load->model('user_model');
-		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
-
-		// Default return value
-		$result = FALSE;
-
-		if ($this->ci->config->item('DX_email_activation'))
-		{
-			// Delete user whose account expired (not activated until expired time)
-			$this->ci->user_temp->prune_temp();
-		}
-
-		// Activate user
-		if ($query = $this->ci->user_temp->activate_user($username, $key) AND $query->num_rows() > 0)
-		{
-			// Get user
-			$row = $query->row_array();
-
-			$del = $row['id'];
-
-			// Unset any unwanted fields
-			unset($row['id']); // We don't want to copy the id across
-			unset($row['activation_key']);
-
-			// Create user
-			if ($this->ci->user_model->create_user($row))
-			{
-				// Trigger event
-				// $this->user_activated($this->ci->db->insert_id());
-
-				// Delete user from temp
-				$this->ci->user_temp->delete_user($del);
-
-				$result = TRUE;
-			}
-		}
-
-		return $result;
-	}
-
-	function change_password($old_pass, $new_pass)
-	{
-		// Load Models
-		$this->ci->load->model('user_model');
-
-		// Default return value
-		$result = FAlSE;
-
-		// Search current logged in user in database
-		if ($query = $this->ci->user_model->get_user_by_id($this->ci->session->userdata('DX_user_id')) AND $query->num_rows() > 0)
-		{
-			// Get current logged in user
-			$row = $query->row();
-
-			// Check if old password correct
-			$hasher = new PasswordHash(
-					$this->ci->config->item('phpass_hash_strength'),
-					$this->ci->config->item('phpass_hash_portable'));
-
-			if ($hasher->CheckPassword($old_pass, $row->password))
-			{
-				// Success
-
-				// Hash new password using phpass
-				$hashed_password = $hasher->HashPassword($new_pass);
-
-				// Replace old password with new password
-				$this->ci->user_model->change_password($this->ci->session->userdata('DX_user_id'), $hashed_password);
-
-				// Trigger event
-				$this->user_changed_password($this->ci->session->userdata('DX_user_id'), $hashed_password);
-
-				$result = TRUE;
-			}
-			else
-			{
-				$this->_auth_error = $this->ci->lang->line('auth_incorrect_old_password');
-			}
-		}
-
-		return $result;
-	}
 
 
 	/* End of main function */
