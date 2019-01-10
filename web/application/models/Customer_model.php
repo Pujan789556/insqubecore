@@ -22,10 +22,15 @@ class Customer_model extends MY_Model
 
     protected $fields = ['id', 'branch_id', 'code', 'mobile_identity', 'type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no', 'fts', 'flag_locked', 'flag_kyc_verified', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
+    // Columns on Edit (NOT ENDORSEMENT)
+    public static $editable_fields = ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
+
     protected $endorsement_fields = [
         'customer' =>  ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'],
         'address' => ['country_id', 'state_id', 'address1_id', 'alt_state_text', 'alt_address1_text', 'address2', 'city', 'zip_postal_code', 'phones', 'faxes', 'mobile', 'email', 'web']
     ];
+
+
 
     protected $validation_rules = [];
 
@@ -447,13 +452,12 @@ class Customer_model extends MY_Model
          */
         public function __prepare_edit_data($post_data)
         {
-            $cols = ['type', 'pan', 'full_name_en', 'full_name_np', 'grandfather_name', 'father_name', 'mother_name', 'spouse_name', 'picture', 'profession', 'nationality', 'dob', 'identification_no', 'identification_doc', 'company_reg_no'];
             $data = [];
 
             /**
              * Task1: Prepare Basic Data
              */
-            foreach($cols as $col)
+            foreach(self::$editable_fields as $col)
             {
                 $data[$col] = $post_data[$col] ?? NULL;
             }

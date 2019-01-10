@@ -19,6 +19,10 @@ class Address_model extends MY_Model
 
     protected $fields = ['id', 'type', 'type_id', 'country_id', 'state_id', 'address1_id', 'alt_state_text', 'alt_address1_text', 'address2', 'city', 'zip_postal_code', 'phones', 'faxes', 'mobile', 'email', 'web', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
+
+    // Columns on Edit
+    public static $editable_fields = ['country_id', 'state_id', 'address1_id', 'alt_state_text', 'alt_address1_text', 'address2', 'city', 'zip_postal_code', 'phones', 'faxes', 'mobile', 'email', 'web'];
+
     /**
      * These are the fields selected while joining and getting the address data.
      * Each column is prefixed with certain identifier to later extract address record
