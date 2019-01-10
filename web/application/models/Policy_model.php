@@ -1993,7 +1993,7 @@ class Policy_model extends MY_Model
             // Type/Module Table Alias
             'module' => 'B'
         ];
-        $this->address_model->module_select(IQB_ADDRESS_TYPE_BRANCH, NULL, $table_aliases, 'addr_branch_');
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_BRANCH, NULL, $table_aliases, 'addr_branch_', FALSE);
 
 
         /**
@@ -2015,7 +2015,7 @@ class Policy_model extends MY_Model
             // Type/Module Table Alias
             'module' => 'C'
         ];
-        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_');
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_', FALSE);
 
 
         $record = $this->db->where('P.id', $id)

@@ -184,6 +184,13 @@ class App_user_model extends MY_Model
     {
         $v_rules = [
             [
+                'field' => 'action',
+                'label' => 'Action',
+                'rules' => 'trim|required|alpha_dash|max_length[50]',
+                '_type' => 'text',
+                '_required'     => true
+            ],
+            [
                 'field' => 'password',
                 'label' => 'Password',
                 'rules' => 'required|max_length[50]',
