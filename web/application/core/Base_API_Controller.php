@@ -392,7 +392,6 @@ class Base_API_Controller extends CI_Controller
 		{
             $payload = $this->api_auth->get_token_data();
 
-            $this->app_user->id             = $payload->data->id;
 			$this->app_user->api_key 	    = $payload->data->api_key;
             $this->app_user->auth_type 		= $payload->data->auth_type;
             $this->app_user->auth_type_id 	= $payload->data->auth_type_id;
@@ -402,17 +401,17 @@ class Base_API_Controller extends CI_Controller
     // --------------------------------------------------------------------
 
     /**
-     * Validate Token
+     * Is Request Authorized?
+     *
+     * Check if a reqest has a valid token
      *
      * @return bool
      */
     public function check_authorized()
     {
-        $result = $this->api_auth->validated_token();
-        $status = $result[$this->api_auth->status_field] ?? NULL;
-        if( $status === FALSE )
+        if( !$this->api_auth->is_authorized() )
         {
-            $this->response($result, self::HTTP_UNAUTHORIZED);
+            $this->response($this->api_auth->token_error, self::HTTP_UNAUTHORIZED);
         }
 
         return TRUE;

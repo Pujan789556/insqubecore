@@ -2,12 +2,10 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Accounts Controller
+ * Auth API Controller
  *
- * This controller falls under "Master Setup" category.
- *
- * @category 	Master Setup
- * @sub-category Account
+ * @category 	API
+ * @version 	v1
  */
 
 // --------------------------------------------------------------------
@@ -19,10 +17,7 @@ class Auth extends Base_API_Controller
 	{
 		parent::__construct();
 
-		// $this->check_authorized();
-
 		$this->load->library('form_validation');
-
 	}
 
 	// --------------------------------------------------------------------
@@ -36,36 +31,7 @@ class Auth extends Base_API_Controller
 	 */
 	function index()
 	{
-		// print date('YmdHis');
-		// print "\r\n";
-
-		$this->response([
-			'status' => FALSE,
-			'message' => 'Resource Not Found!'
-		], 403);
-
-
-		$data = [
-			'id' => 'test',
-			'auth_type' => 'test',
-			'auth_type_id' => 'test'
-		];
-
-		// This is your id token
-		// $jwt = JWT::encode($token_payload, base64_decode(strtr($key, '-_', '+/')), 'HS256');
-	 	$jwt = $this->api_auth->build_token($data);
-		// print "<pre>";
-		// print "JWT:\n";
-		// print_r($jwt);
-		// // $decoded = JWT::decode($jwt, base64_decode(strtr($key, '-_', '+/')), ['HS256']);
-		// $decoded = $this->api_auth->validated_token($jwt);
-		// print "\n\n";
-		// print "Decoded:\n";
-		// print_r($decoded);
-
-		$this->response(['token' => $jwt]);
-
-
+		$this->response_404();
 	}
 
 	// --------------------------------------------------------------------
