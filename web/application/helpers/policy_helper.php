@@ -1161,12 +1161,12 @@ if ( ! function_exists('_POLICY__schedule_exists'))
     /**
      * Check if Policy Schedule PDF Exists
      *
-     * @param   string $code    Policy Code
+     * @param   string $policy_code    Policy Code
      * @return  bool
      */
-    function _POLICY__schedule_exists( $code )
+    function _POLICY__schedule_exists( $policy_code )
     {
-        $filename = "policy-{$code}.pdf";
+        $filename = _POLICY__schedule_filename( $policy_code );
         $schedule_full_path = rtrim(INSQUBE_DATA_ROOT, '/') . '/policies/' . $filename;
 
         return file_exists($schedule_full_path);
