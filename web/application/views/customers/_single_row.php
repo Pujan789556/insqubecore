@@ -33,8 +33,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			DOB: <strong><?php echo $record->dob?></strong>
 		<?php endif?>
 	</td>
-	<td><?php echo $record->profession;?></td>
 	<td><?php echo locked_unlocked_text($record->flag_locked);?></td>
+	<td>
+		<?php
+		if( $record->flag_kyc_verified == IQB_FLAG_ON )
+		{
+			$text = '<i class="fa fa-check text-green pointer", title="Verified" data-toggle="tooltip"></i>';
+		}
+		else
+		{
+			$text = '<i class="fa fa-minus text-muted pointer", title="Not Verified" data-toggle="tooltip"></i>';
+		}
+		echo $text;
+		?>
+	</td>
 	<td class="ins-action">
 		<div class="btn-group">
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
@@ -54,7 +66,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					</li><li class="divider"></li>
 				<?php endif;?>
 
-				<?php if( $this->dx_auth->is_authorized('customers', 'edit.customer.mobile.identity') ): ?>
+				<?php if( $this->dx_auth->is_authorized('customers', 'edit.customer.api.identity') ): ?>
 					<li>
 						<a href="#"
 							title="Edit Mobile APP Identity"
@@ -65,6 +77,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							data-form="#_form-customer">
 							<i class="fa fa-pencil-square-o"></i>
 							<span>Edit Mobile Identity</span></a>
+					</li><li class="divider"></li>
+				<?php endif;?>
+
+				<?php if( $this->dx_auth->is_authorized('customers', 'verify.customer.kyc') ): ?>
+					<li>
+						<a href="#"
+							title="Verify KYC"
+							class="trg-dialog-edit text-orange"
+							data-box-size="medium"
+							data-title='<i class="fa fa-pencil-square-o"></i> Verify KYC - <?php echo $record->full_name_en ?>'
+							data-url="<?php echo site_url('customers/verify_kyc/' . $record->id);?>"
+							data-form="#_form-customer">
+							<i class="fa fa-pencil-square-o"></i>
+							<span>Verify KYC</span></a>
 					</li><li class="divider"></li>
 				<?php endif;?>
 

@@ -142,6 +142,7 @@ $config['DX_permissions'] = [
 			'add.customer',
 			'edit.customer',
 			'edit.customer.api.identity', // Mobile Identity for APP/API access
+			'verify.customer.kyc', // Verify Customer's KYC
 			'delete.customer'
 		],
 	],

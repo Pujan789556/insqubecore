@@ -510,6 +510,123 @@ class Customers extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
+	 * Verify Customr KYC
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function verify_kyc($id)
+	{
+		/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('customers', 'verify.customer.kyc') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->customer_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+
+		/**
+		 * Locked Customer???
+		 *
+		 * NOTE: Admin Can Edit Locked Customer Information
+		 */
+		if(!$this->dx_auth->is_admin() && $record->flag_locked == IQB_FLAG_ON )
+		{
+			return $this->template->json([
+				'status' 	=> 'error',
+				'title' 	=> 'Unauthorized Action!',
+				'message' 	=> 'You can not edit locked Customer.'
+			], 403);
+		}
+
+		// Form Submitted? Save the data
+		if( $this->input->post() )
+		{
+			$done = FALSE;
+
+			$rules = $this->customer_model->v_rules('verify_kyc');
+            $this->form_validation->set_rules($rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		// Now Update Data
+        		$flag_kyc_verified = $this->input->post('flag_kyc_verified');
+				$done = $this->customer_model->verify_kyc($record->id, $flag_kyc_verified);
+
+	        	if(!$done)
+				{
+					$status = 'error';
+					$message = 'Could not update.';
+				}
+				else
+				{
+					$status = 'success';
+					$message = 'Successfully Updated.';
+				}
+
+				if($status === 'success' )
+				{
+					$ajax_data = [
+						'message' => $message,
+						'status'  => $status,
+						'updateSection' => true,
+						'hideBootbox' => true
+					];
+
+					$record 	= $this->customer_model->row( $record->id );
+					$single_row =  'customers/_single_row';
+					$view_data 	= [
+						'record' 			=> $record,
+						'address_record' 	=> $this->address_model->parse_address_record($record),
+						'widget_reference' 	=> ''
+					];
+
+					$html = $this->load->view($single_row, $view_data, TRUE);
+					$ajax_data['updateSectionData'] = [
+						'box' 		=> '#_data-row-customer-' . $record->id,
+						'method' 	=> 'replaceWith',
+						'html'		=> $html
+					];
+
+					return $this->template->json($ajax_data);
+				}
+        	}
+        	else
+        	{
+        		$status = 'error';
+				$message = 'Validation Error.';
+        	}
+
+			$json_data = [
+				'status' 	 => $status,
+				'message' 	 => $message,
+				'reloadForm' => true
+			];
+		}
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('customers/_form_verify_kyc',
+			[
+				'form_elements' 	=> $this->customer_model->v_rules('app_identity'),
+				'record' 			=> $record,
+				'action' 			=> 'app_identity'
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Save a Record
 	 *
 	 * @param string $action [add|edit]

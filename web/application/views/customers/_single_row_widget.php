@@ -79,6 +79,18 @@ else if( $widget_type === 'policy' )
 			DOB: <strong><?php echo $record->dob?></strong>
 		<?php endif?>
 	</td>
-	<td><?php echo $record->profession;?></td>
 	<td><?php echo locked_unlocked_text($record->flag_locked);?></td>
+	<td>
+		<?php
+		if( $record->flag_kyc_verified == IQB_FLAG_ON )
+		{
+			$text = '<i class="fa fa-check text-green pointer", title="Verified" data-toggle="tooltip"></i>';
+		}
+		else
+		{
+			$text = '<i class="fa fa-minus text-muted pointer", title="Not Verified" data-toggle="tooltip"></i>';
+		}
+		echo $text;
+		?>
+	</td>
 </tr>

@@ -1012,11 +1012,11 @@ if ( ! function_exists('locked_unlocked_text'))
 
         if( (int)$flag === IQB_FLAG_LOCKED )
         {
-            $text = $formatted ? '<i class="fa fa-lock text-muted" title="Locked" data-toggle="tooltip"></i>' : 'Locked';
+            $text = $formatted ? '<i class="fa fa-lock text-muted pointer" title="Locked" data-toggle="tooltip"></i>' : 'Locked';
         }
         else if( (int)$flag === IQB_FLAG_UNLOCKED )
         {
-            $text = $formatted ? '<i class="fa fa-unlock" title="Unlocked" data-toggle="tooltip"></i>': 'Unlocked';
+            $text = $formatted ? '<i class="fa fa-unlock pointer" title="Unlocked" data-toggle="tooltip"></i>': 'Unlocked';
         }
         return $text;
     }

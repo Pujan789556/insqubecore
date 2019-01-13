@@ -88,6 +88,9 @@ class Customer_model extends MY_Model
             case 'app_identity':
                 $v_rules = $v_rules_api_identity;
 
+            case 'verify_kyc':
+                $v_rules = $this->_v_rules_verify_kyc();
+
             default:
                 # code...
                 break;
@@ -258,6 +261,31 @@ class Customer_model extends MY_Model
                 '_id'   => 'mobile-identity',
                 '_help_text' => 'This mobile number is used by customer to access Mobile App',
                 '_required' => true
+            ]
+        ];
+
+        return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Validation Rules - API/APP Identity
+     *
+     * @return array
+     */
+    public function _v_rules_verify_kyc()
+    {
+        $dropdown = _FLAG_on_off_dropdown(FALSE);
+        $v_rules = [
+            [
+                'field' => 'flag_kyc_verified',
+                'label' => 'Verify KYC',
+                'rules' => 'trim|required|integer|exact_length[1]|in_list['.implode(',', array_keys($dropdown)).']',
+                '_type' => 'dropdown',
+                '_data' => IQB_BLANK_SELECT + $dropdown,
+                '_help_text'    => 'You have to verify KYC coming directly from customer. Only after you verify, they will able to proceed further.',
+                '_required'     => true
             ]
         ];
 
@@ -491,6 +519,7 @@ class Customer_model extends MY_Model
         }
 
     // ----------------------------------------------------------------
+
     public function change_app_identity($id, $mobile_identity)
     {
         $data = [
@@ -512,6 +541,30 @@ class Customer_model extends MY_Model
                 $this->load->model('api/app_user_model', 'app_user_model');
                 $this->app_user_model->change_mobile_by(IQB_API_AUTH_TYPE_CUSTOMER, $id, $mobile_identity, FALSE);
             }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            $done = FALSE;
+        }
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function verify_kyc($id, $flag_kyc_verified)
+    {
+        $data = [
+            'flag_kyc_verified' => $flag_kyc_verified
+        ];
+        // Use automatic transaction
+        $done = FALSE;
+        $this->db->trans_start();
+
+            // Update Customer Record
+            $done = parent::update($id, $data, TRUE);
 
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
