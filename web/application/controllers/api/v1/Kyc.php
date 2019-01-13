@@ -57,7 +57,8 @@ class Kyc extends Base_API_Controller
 		$address 		= $this->address_model->get_by_type(IQB_ADDRESS_TYPE_CUSTOMER, $customer->id);
 		$data = [
 			'customer' => $this->_trim_customer($customer),
-			'address'  => $this->_trim_address($address)
+			'address'  => $this->_trim_address($address),
+			'flag_kyc_verified' => $customer->flag_kyc_verified == IQB_FLAG_ON ? TRUE : FALSE
 		];
 		$this->response([
                     $this->config->item('api_status_field') 	=> TRUE,
