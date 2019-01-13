@@ -2726,7 +2726,7 @@ class Endorsement_model extends MY_Model
          */
         private function _build_terminate_premium_data( $premium_data, $record, $policy_record )
         {
-            if( $this->is_refund_allowed($record->policy_id) )
+            if( !$this->is_refund_allowed($record->policy_id) )
             {
                 throw new Exception("Exception [Model: Endorsement_model][Method: _build_terminate_premium_data()]: The premium can not be refund on a policy having CLAIM.");
             }
