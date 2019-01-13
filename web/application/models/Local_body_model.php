@@ -71,9 +71,12 @@ class Local_body_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Get Dropdown List
+     * Get Dropdown List - By State
+     *
+     * @param int $state_id State ID
+     * @param string $origin  Source of Request [main|api]
      */
-    public function dropdown_by_state($state_id)
+    public function dropdown_by_state($state_id, $origin = "main")
     {
         /**
          * Get Cached Result, If no, cache the query result
@@ -101,15 +104,35 @@ class Local_body_model extends MY_Model
                 $this->write_cache($dropdown, $cache_name, CACHE_DURATION_DAY);
             }
         }
+
+        // build {key:xxx, value:xxx}
+        if($origin == 'api')
+        {
+            $dropdown_api = [];
+            foreach($dropdown as $key=>$value)
+            {
+                $single = new stdClass;
+                $single->key = $key;
+                $single->value = $value;
+                $dropdown_api[] = $single;
+            }
+            return $dropdown_api;
+        }
+
+
         return $dropdown;
     }
 
     // --------------------------------------------------------------------
 
     /**
-     * Get Dropdown List
+     * Get Dropdown List - By District
+     *
+     * @param int $state_id District ID
+     * @param string $lang Language
+     * @param string $origin  Source of Request [main|api]
      */
-    public function dropdown_by_district($district_id, $lang="both")
+    public function dropdown_by_district($district_id, $lang="both", $origin = "main")
     {
         /**
          * Get Cached Result, If no, cache the query result
@@ -139,6 +162,21 @@ class Local_body_model extends MY_Model
                 $this->write_cache($dropdown, $cache_name, CACHE_DURATION_DAY);
             }
         }
+
+        // build {key:xxx, value:xxx}
+        if($origin == 'api')
+        {
+            $dropdown_api = [];
+            foreach($dropdown as $key=>$value)
+            {
+                $single = new stdClass;
+                $single->key = $key;
+                $single->value = $value;
+                $dropdown_api[] = $single;
+            }
+            return $dropdown_api;
+        }
+
         return $dropdown;
     }
 

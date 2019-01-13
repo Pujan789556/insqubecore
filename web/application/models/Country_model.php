@@ -116,18 +116,40 @@ class Country_model extends MY_Model
                         ->count_all_results($this->table_name);
     }
 
-    // --------------------------------------------------------------------
+    // ------------ --------------------------------------------------------
 
-    public function dropdown( $column='alpha2' )
+    /**
+     * Get Dropdwon
+     *
+     * @param string $column
+     * @param string $origin Source of Request [main|api]
+     * @return array
+     */
+    public function dropdown( $column='alpha2', $origin = "main" )
     {
         $records = $this->get_all();
         $list = [];
         if( in_array($column, array('id', 'alpha2', 'alpha3')))
         {
-            foreach($records as $record)
+            if($origin == "main")
             {
-                $list[$record->{$column}] = $record->name;
+                foreach($records as $record)
+                {
+                    $list[$record->{$column}] = $record->name;
+                }
             }
+            else
+            {
+                // Build {key:xx, value:xxx} objects
+                foreach($records as $record)
+                {
+                    $single         = new stdClass;
+                    $single->key    = $record->{$column};
+                    $single->value  = $record->name;
+                    $list[]         = $single;
+                }
+            }
+
         }
         return $list;
     }

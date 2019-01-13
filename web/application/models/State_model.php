@@ -173,16 +173,32 @@ class State_model extends MY_Model
     /**
      * Get Dropdown List
      *
+     * @param int $country_id
+     * @param string $origin  Source of Request [main|api]
      * @return array
      */
-    public function dropdown($country_id)
+    public function dropdown($country_id, $origin = "main")
     {
         $records = $this->get_by_country($country_id);
         $dropdown = [];
-        foreach($records as $record)
+        if($origin == "main")
         {
-            $column = $record->id;
-            $dropdown["{$column}"] = $record->name_en . ' (' . $record->name_np . ')';
+            foreach($records as $record)
+            {
+                $column = $record->id;
+                $dropdown["{$column}"] = $record->name_en . ' (' . $record->name_np . ')';
+            }
+        }
+        else
+        {
+            // Build {key:xx, value:xxx} objects
+            foreach($records as $record)
+            {
+                $single         = new stdClass;
+                $single->key    = $record->id;
+                $single->value  = $record->name_en . ' (' . $record->name_np . ')';
+                $dropdown[]     = $single;
+            }
         }
         return $dropdown;
     }
