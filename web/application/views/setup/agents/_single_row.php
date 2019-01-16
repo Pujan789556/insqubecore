@@ -12,13 +12,13 @@ $_detail_url 	= $this->data['_url_base'] . '/details/' . $record->id;
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
 	<td>
-		<a href="<?php echo site_url('agents/details/' . $record->id);?>"
+		<a href="<?php echo site_url($_detail_url);?>"
 						title="View agent details.">
 						<?php echo $record->name;?></a>
 	</td>
+	<td><?php echo $record->type == '1' ? 'Individual' : 'Company';?></td>
 	<td><?php echo $record->ud_code;?></td>
 	<td><?php echo $record->bs_code;?></td>
-	<td><?php echo $record->type;?></td>
 	<td>
 		<?php
 		if($record->active)

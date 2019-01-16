@@ -41,9 +41,9 @@ if($widget_type === 'party')
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
 	<td><?php echo $record->name;?></td>
+	<td><?php echo $record->type == '1' ? 'Individual' : 'Company';?></td>
 	<td><?php echo $record->ud_code;?></td>
 	<td><?php echo $record->bs_code;?></td>
-	<td><?php echo $record->type;?></td>
 	<td>
 		<?php
 		if($record->active)

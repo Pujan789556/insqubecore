@@ -11,9 +11,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<th>ID</th>
 			<?php endif?>
 			<th>Name</th>
+			<th>Type</th>
 			<th>UD Code</th>
 			<th>BS Code</th>
-			<th>Type</th>
 			<th>Active</th>
 			<?php if( !$_flag__show_widget_row ):?>
 				<th>Actions</th>

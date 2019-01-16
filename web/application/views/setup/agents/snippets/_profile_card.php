@@ -42,11 +42,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <?php
                         if($record->active)
                         {
-                        $active_str = '<i class="fa fa-circle text-green" title="Active" data-toggle="tooltip"></i>';
+                            $active_str = '<i class="fa fa-circle text-green" title="Active" data-toggle="tooltip"></i>';
                         }
                         else
                         {
-                        $active_str = '<i class="fa fa-circle-thin" title="Not Active" data-toggle="tooltip"></i>';
+                            $active_str = '<i class="fa fa-circle-thin" title="Not Active" data-toggle="tooltip"></i>';
                         }
                         echo $active_str;
                         ?>
