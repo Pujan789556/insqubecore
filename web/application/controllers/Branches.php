@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Branches Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -32,7 +32,7 @@ class Branches extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Branches';
+        $this->data['site_title'] = 'Application Settings | Branches';
 
         // Setup Navigation
         $this->_navigation = [
@@ -68,7 +68,7 @@ class Branches extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Branches',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Branches' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Branches' => NULL]
 						])
 						->partial('content', 'setup/branches/_index', compact('records'))
 						->render($this->data);
@@ -404,7 +404,7 @@ class Branches extends MY_Controller
     public function targets()
     {
     	// Site Meta
-    	$this->data['site_title'] = 'Master Setup | Branch Targets';
+    	$this->data['site_title'] = 'Application Settings | Branch Targets';
 
     	$this->load->model('branch_target_model');
 
@@ -422,7 +422,7 @@ class Branches extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Branch Targets',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Branches' => 'branches', 'Targets' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Branches' => 'branches', 'Targets' => NULL]
 						])
 						->partial('content', 'setup/branches/_targets', compact('records'))
 						->render($this->data);
@@ -773,7 +773,7 @@ class Branches extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Branch Target Details <small> Fiscal Year ' . $record->code_np . '</small>',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Branch Targets' => 'branches/targets', 'Target Details' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Branch Targets' => 'branches/targets', 'Target Details' => NULL]
 						])
 						->partial('content', 'setup/branches/_target_details', $partial_data)
 						->partial('dynamic_js', 'setup/branches/_target_js')

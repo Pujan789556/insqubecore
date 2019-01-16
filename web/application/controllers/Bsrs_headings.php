@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Bsrs_headings Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Bsrs_headings extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Beema Samiti Report Setup - Headings';
+        $this->data['site_title'] = 'Application Settings | Beema Samiti Report Setup - Headings';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -85,7 +85,7 @@ class Bsrs_headings extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Beema Samiti Report Setup - Headings',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Beema Samiti Report Setup - Headings' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Beema Samiti Report Setup - Headings' => NULL]
 						])
 						->partial('content', 'setup/bsrs_headings/_index', $data)
 						->render($this->data);
@@ -325,7 +325,7 @@ class Bsrs_headings extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => $page_header,
-								'breadcrumbs' => ['Master Setup' => NULL, 'BS Report Setup - Headings' => 'bsrs_headings', 'Details' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'BS Report Setup - Headings' => 'bsrs_headings', 'Details' => NULL]
 						])
 						->partial('content', 'setup/bsrs_headings/_details', $data)
 						->render($this->data);

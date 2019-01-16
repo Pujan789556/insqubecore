@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Account Groups Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  * @sub-category Account
  */
 
@@ -31,7 +31,7 @@ class Ac_account_groups extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Account Groups';
+        $this->data['site_title'] = 'Application Settings | Account Groups';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -67,7 +67,7 @@ class Ac_account_groups extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Account Groups',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Account Groups' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Account Groups' => NULL]
 						])
 						->partial('content', 'setup/ac/groups/_index', compact('records'))
 						->render($this->data);
@@ -97,7 +97,7 @@ class Ac_account_groups extends MY_Controller
 								'templates/_common/_content_header',
 								[
 									'content_header' => 'Chart of Accounts',
-									'breadcrumbs' => ['Master Setup' => NULL, 'Account Groups' => 'ac_account_groups']
+									'breadcrumbs' => ['Application Settings' => NULL, 'Account Groups' => 'ac_account_groups']
 							])
 							->partial('content', 'setup/ac/groups/_chart', compact('records'))
 							->render($this->data);

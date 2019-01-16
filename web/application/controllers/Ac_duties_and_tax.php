@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Account Duties and Tax Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  * @sub-category Account
  */
 
@@ -31,7 +31,7 @@ class Ac_duties_and_tax extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Account Duties & Tax';
+        $this->data['site_title'] = 'Application Settings | Account Duties & Tax';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -66,7 +66,7 @@ class Ac_duties_and_tax extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Account Duties & Tax',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Account Duties & Tax' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Account Duties & Tax' => NULL]
 						])
 						->partial('content', 'setup/ac/duties_and_tax/_index', compact('records'))
 						->render($this->data);

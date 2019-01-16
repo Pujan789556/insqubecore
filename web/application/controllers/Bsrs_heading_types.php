@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Bsrs_heading_types Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Bsrs_heading_types extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Beema Samiti Report Setup - Heading Types';
+        $this->data['site_title'] = 'Application Settings | Beema Samiti Report Setup - Heading Types';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -65,7 +65,7 @@ class Bsrs_heading_types extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Beema Samiti Report Setup - Heading Types',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Beema Samiti Report Setup - Heading Types' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Beema Samiti Report Setup - Heading Types' => NULL]
 						])
 						->partial('content', 'setup/bsrs_heading_types/_index', compact('records'))
 						->render($this->data);

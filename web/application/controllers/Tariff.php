@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Master Portfoliio Tariff Controller
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Tariff extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Tariff';
+        $this->data['site_title'] = 'Application Settings | Tariff';
 
         // Setup Navigation
         $this->_navigation = [
@@ -102,7 +102,7 @@ class Tariff extends MY_Controller
 
 
         // Site Meta
-        $this->data['site_title'] = 'Master Setup | Tariff - Agriculture';
+        $this->data['site_title'] = 'Application Settings | Tariff - Agriculture';
 
         $this->load->model('tariff_agriculture_model');
 
@@ -120,7 +120,7 @@ class Tariff extends MY_Controller
                             'templates/_common/_content_header',
                             [
                                 'content_header' => 'Tariff - Agriculture',
-                                'breadcrumbs' => ['Master Setup' => NULL, 'Tariff' => NULL, 'Agriculture' => NULL]
+                                'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Agriculture' => NULL]
                         ])
                         ->partial('content', 'setup/tariff/agriculture/_index', compact('records'))
                         ->render($this->data);
@@ -149,7 +149,7 @@ class Tariff extends MY_Controller
         $fiscal_year_text = $single->fy_code_np . "({$single->fy_code_en})";
 
         // Site Meta
-        $this->data['site_title'] = 'Master Setup | Agriculture Tariff - FY ' . $fiscal_year_text;
+        $this->data['site_title'] = 'Application Settings | Agriculture Tariff - FY ' . $fiscal_year_text;
 
         $this->load->model('tariff_agriculture_model');
 
@@ -167,7 +167,7 @@ class Tariff extends MY_Controller
                             'templates/_common/_content_header',
                             [
                                 'content_header' => 'Agriculture Tariff - FY - ' . $fiscal_year_text,
-                                'breadcrumbs' => ['Master Setup' => NULL, 'Tariff' => NULL, 'Agriculture' => 'tariff/agriculture', 'Details' => NULL]
+                                'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Agriculture' => 'tariff/agriculture', 'Details' => NULL]
                         ])
                         ->partial('content', 'setup/tariff/agriculture/_index_by_fiscal_year', compact('records'))
                         ->render($this->data);
@@ -434,7 +434,7 @@ class Tariff extends MY_Controller
                 'status' => 'error',
                 'title'     => 'Data has not been setup yet.',
                 'message'   =>  'Please add the "Beema Samiti Agriculture Category & Breeds" for this portfolio first.<br><br>' .
-                                'Master Setup >> Beema Samiti >> Agriculture Categories >> Details >> Manage Breeds'
+                                'Application Settings >> Beema Samiti >> Agriculture Categories >> Details >> Manage Breeds'
             ], 422);
         }
 
@@ -631,7 +631,7 @@ class Tariff extends MY_Controller
 
 
         // Site Meta
-        $this->data['site_title'] = 'Master Setup | Tariff - Misc (Banker\'s Blanket)';
+        $this->data['site_title'] = 'Application Settings | Tariff - Misc (Banker\'s Blanket)';
 
         $this->load->model('tariff_misc_bb_model');
 
@@ -649,7 +649,7 @@ class Tariff extends MY_Controller
                             'templates/_common/_content_header',
                             [
                                 'content_header' => 'Tariff - Misc (Banker\'s Blanket)',
-                                'breadcrumbs' => ['Master Setup' => NULL, 'Tariff' => NULL, 'Misc (Banker\'s Blanket)' => NULL]
+                                'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Misc (Banker\'s Blanket)' => NULL]
                         ])
                         ->partial('content', 'setup/tariff/misc_bb/_index', compact('records'))
                         ->render($this->data);
@@ -1023,7 +1023,7 @@ class Tariff extends MY_Controller
 
 
         // Site Meta
-        $this->data['site_title'] = 'Master Setup | Tariff - Misc (Expedition Personnel Accident)';
+        $this->data['site_title'] = 'Application Settings | Tariff - Misc (Expedition Personnel Accident)';
 
         $this->load->model('tariff_misc_epa_model');
 
@@ -1041,7 +1041,7 @@ class Tariff extends MY_Controller
                             'templates/_common/_content_header',
                             [
                                 'content_header' => 'Tariff - Misc (Expedition Personnel Accident)',
-                                'breadcrumbs' => ['Master Setup' => NULL, 'Tariff' => NULL, 'Misc (Expedition Personnel Accident)' => NULL]
+                                'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Misc (Expedition Personnel Accident)' => NULL]
                         ])
                         ->partial('content', 'setup/tariff/misc_epa/_index', compact('records'))
                         ->render($this->data);
@@ -1420,7 +1420,7 @@ class Tariff extends MY_Controller
 
 
         // Site Meta
-        $this->data['site_title'] = 'Master Setup | Tariff - Motor';
+        $this->data['site_title'] = 'Application Settings | Tariff - Motor';
 
         $this->load->model('tariff_motor_model');
 
@@ -1438,7 +1438,7 @@ class Tariff extends MY_Controller
                             'templates/_common/_content_header',
                             [
                                 'content_header' => 'Tariff - Motor',
-                                'breadcrumbs' => ['Master Setup' => NULL, 'Tariff' => 'tariff', 'Motor' => NULL]
+                                'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => 'tariff', 'Motor' => NULL]
                         ])
                         ->partial('content', 'setup/tariff/motor/_index', compact('records'))
                         ->render($this->data);
@@ -1467,7 +1467,7 @@ class Tariff extends MY_Controller
         $fiscal_year_text = $single->fy_code_np . "({$single->fy_code_en})";
 
         // Site Meta
-        $this->data['site_title'] = 'Master Setup | Motor Tariff - FY ' . $fiscal_year_text;
+        $this->data['site_title'] = 'Application Settings | Motor Tariff - FY ' . $fiscal_year_text;
 
         $this->load->model('tariff_motor_model');
 
@@ -1484,7 +1484,7 @@ class Tariff extends MY_Controller
                             'templates/_common/_content_header',
                             [
                                 'content_header' => 'Motor Tariff - FY - ' . $fiscal_year_text,
-                                'breadcrumbs' => ['Master Setup' => NULL, 'Tariff' => 'tariff', 'Motor' => 'tariff/motor', 'Details' => NULL]
+                                'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => 'tariff', 'Motor' => 'tariff/motor', 'Details' => NULL]
                         ])
                         ->partial('content', 'setup/tariff/motor/_index_by_fiscal_year', compact('records'))
                         ->render($this->data);

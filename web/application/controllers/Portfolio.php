@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Portfolio Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -37,7 +37,7 @@ class Portfolio extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Portfolio';
+        $this->data['site_title'] = 'Application Settings | Portfolio';
 
         // Setup Navigation
         $this->_navigation = [
@@ -75,7 +75,7 @@ class Portfolio extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Portfolio',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Portfolio' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Portfolio' => NULL]
 						])
 						->partial('content', 'setup/portfolio/_index', compact('records'))
 						->render($this->data);
@@ -854,7 +854,7 @@ class Portfolio extends MY_Controller
   		private function _settings_default()
   		{
   			// Site Meta
-	    	$this->data['site_title'] = 'Master Setup | Portfolio Settings';
+	    	$this->data['site_title'] = 'Application Settings | Portfolio Settings';
 
 
 	    	$records = $this->portfolio_setting_model->get_row_list();
@@ -863,7 +863,7 @@ class Portfolio extends MY_Controller
 								'templates/_common/_content_header',
 								[
 									'content_header' => 'Manage Portfolio Settings',
-									'breadcrumbs' => ['Master Setup' => NULL, 'Portfolio' => 'portfolio', 'Settings' => NULL]
+									'breadcrumbs' => ['Application Settings' => NULL, 'Portfolio' => 'portfolio', 'Settings' => NULL]
 							])
 							->partial('content', 'setup/portfolio/_settings_default', compact('records'))
 							->render($this->data);
@@ -881,7 +881,7 @@ class Portfolio extends MY_Controller
   		private function _settings_fy($fiscal_yr_id)
   		{
   			// Site Meta
-	    	$this->data['site_title'] = 'Master Setup | List of Portfolio Settings By Fiscal Year';
+	    	$this->data['site_title'] = 'Application Settings | List of Portfolio Settings By Fiscal Year';
 
 	    	$fiscal_yr_id 	= (int)$fiscal_yr_id;
 	    	$records 		= $this->portfolio_setting_model->get_list_by_fiscal_year($fiscal_yr_id);
@@ -894,7 +894,7 @@ class Portfolio extends MY_Controller
 								'templates/_common/_content_header',
 								[
 									'content_header' => $content_header,
-									'breadcrumbs' => ['Master Setup' => NULL, 'Portfolio' => 'portfolio', 'Settings' => NULL]
+									'breadcrumbs' => ['Application Settings' => NULL, 'Portfolio' => 'portfolio', 'Settings' => NULL]
 							])
 							->partial('content', 'setup/portfolio/_settings_fy', compact('records'))
 							->render($this->data);

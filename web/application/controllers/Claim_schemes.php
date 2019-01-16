@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Claim Schemes Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Claim_schemes extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Claim Schemes';
+        $this->data['site_title'] = 'Application Settings | Claim Schemes';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -65,7 +65,7 @@ class Claim_schemes extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Claim Schemes',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Claim Schemes' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Claim Schemes' => NULL]
 						])
 						->partial('content', 'setup/claim_schemes/_index', compact('records'))
 						->render($this->data);

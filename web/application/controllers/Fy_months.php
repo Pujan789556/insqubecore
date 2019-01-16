@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Fy_months Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Fy_months extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Fiscal Year Months';
+        $this->data['site_title'] = 'Application Settings | Fiscal Year Months';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -66,7 +66,7 @@ class Fy_months extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Fiscal Year Months',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Fiscal Year Months' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Fiscal Year Months' => NULL]
 						])
 						->partial('content', 'setup/fy_months/_index', $data)
 						->render($this->data);

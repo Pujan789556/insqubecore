@@ -108,7 +108,7 @@ class Activities extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Explore Activities',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Activities' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Activities' => NULL]
 						])
 						->partial('content', 'activities/_index', $data)
 						->render($this->data);

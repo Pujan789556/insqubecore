@@ -1385,7 +1385,7 @@ class Endorsements extends MY_Controller
 		 * If you want to have multiple installments allowed for particular portoflio,
 		 * you can do so by allowing multiple installments via settings:
 		 *
-		 * 	Master Setup >> Portfolio >> Portfolio Settings
+		 * 	Application Settings >> Portfolio >> Portfolio Settings
 		 *
 		 * @param object $policy_record
 		 * @param object $record
@@ -1450,7 +1450,7 @@ class Endorsements extends MY_Controller
 		 * If you want to have multiple installments allowed for particular portoflio,
 		 * you can do so by allowing multiple installments via settings:
 		 *
-		 * 	Master Setup >> Portfolio >> Portfolio Settings
+		 * 	Application Settings >> Portfolio >> Portfolio Settings
 		 *
 		 * @param object $policy_record
 		 * @param object $record

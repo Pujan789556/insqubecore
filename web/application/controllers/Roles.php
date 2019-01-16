@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Roles Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Roles extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Roles & Permissions';
+        $this->data['site_title'] = 'Application Settings | Roles & Permissions';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -65,7 +65,7 @@ class Roles extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Roles & Permissions',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Roles' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Roles' => NULL]
 						])
 						->partial('content', 'setup/roles/_index', compact('records'))
 						->render($this->data);

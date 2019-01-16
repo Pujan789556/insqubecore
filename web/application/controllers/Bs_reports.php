@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * This controller falls under "Reports" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------

@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Surveyor Expertise Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Surveyor_expertise extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Surveyor Expertise';
+        $this->data['site_title'] = 'Application Settings | Surveyor Expertise';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -64,7 +64,7 @@ class Surveyor_expertise extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Surveyor Expertise',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Surveyor Expertise' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Surveyor Expertise' => NULL]
 						])
 						->partial('content', 'setup/surveyor_expertise/_index', compact('records'))
 						->render($this->data);

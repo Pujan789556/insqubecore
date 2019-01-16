@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * RI Setup - Treaty Type Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -39,7 +39,7 @@ class Ri_setup_treaty_types extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | RI Setup | Treaty Types';
+        $this->data['site_title'] = 'Application Settings | RI Setup | Treaty Types';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -77,7 +77,7 @@ class Ri_setup_treaty_types extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Treaty Types',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Treaty Types' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Treaty Types' => NULL]
 						])
 						->partial('content', 'setup/ri/treaty_types/_index', compact('records'))
 						->render($this->data);

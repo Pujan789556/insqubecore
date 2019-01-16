@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * RI Setup - Pools Pool Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  * @sub-category RI
  */
 
@@ -41,7 +41,7 @@ class Ri_setup_pools extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | RI | Pools';
+        $this->data['site_title'] = 'Application Settings | RI | Pools';
 
         // Setup Navigation
 		$this->active_nav_primary([

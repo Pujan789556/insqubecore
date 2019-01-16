@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Vehicle_reg_prefix Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Vehicle_reg_prefix extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Vehicle Registration Prefixes';
+        $this->data['site_title'] = 'Application Settings | Vehicle Registration Prefixes';
 
         // Setup Navigation
 		$this->active_nav_primary([

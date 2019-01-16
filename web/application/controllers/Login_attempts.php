@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Login_attempts Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Login_attempts extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Login Attempts';
+        $this->data['site_title'] = 'Application Settings | Login Attempts';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -64,7 +64,7 @@ class Login_attempts extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Login Attempts',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Login Attempts' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Login Attempts' => NULL]
 						])
 						->partial('content', 'setup/login_attempts/_index', compact('records'))
 						->render($this->data);

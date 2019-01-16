@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * TMI Plans Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Tmi_plans extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | TMI Plans';
+        $this->data['site_title'] = 'Application Settings | TMI Plans';
 
         // Setup Navigation
         $this->_navigation = [
@@ -69,7 +69,7 @@ class Tmi_plans extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage TMI Plans',
-								'breadcrumbs' => ['Master Setup' => NULL, 'TMI Plans' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'TMI Plans' => NULL]
 						])
 						->partial('content', $this->_module_view_path . '_index', compact('records'))
 						->render($this->data);

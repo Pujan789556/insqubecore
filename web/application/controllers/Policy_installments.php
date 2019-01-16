@@ -610,7 +610,7 @@ class Policy_installments extends MY_Controller
 	         */
 	        if( !$portfolio_record->account_id_fpi || !$portfolio_record->account_id_fce )
 	        {
-	        	throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details_for_premium_voucher_fac_in()]: No 'FAC Premium Income Account' OR 'FAC Commission Expense Account' for this Portfolio (({$portfolio_record->name_en})).<br/>Please add portfolio 'FAC Premium Income Account' and 'FAC Commission Expense Account' for portfolio ({$portfolio_record->name_en}) from Master Setup > Portfolio.");
+	        	throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details_for_premium_voucher_fac_in()]: No 'FAC Premium Income Account' OR 'FAC Commission Expense Account' for this Portfolio (({$portfolio_record->name_en})).<br/>Please add portfolio 'FAC Premium Income Account' and 'FAC Commission Expense Account' for portfolio ({$portfolio_record->name_en}) from Application Settings > Portfolio.");
 	        }
 
 			// --------------------------------------------------------------------
@@ -760,7 +760,7 @@ class Policy_installments extends MY_Controller
 	         */
 	        if( !$portfolio_record->account_id_dpi )
 	        {
-	        	throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details_for_premium_voucher()]: No 'Direct Premium Income Account' for this Portfolio (({$portfolio_record->name_en})).<br/>Please add portfolio 'Direct Premium Income Account' for portfolio ({$portfolio_record->name_en}) from Master Setup > Portfolio.");
+	        	throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details_for_premium_voucher()]: No 'Direct Premium Income Account' for this Portfolio (({$portfolio_record->name_en})).<br/>Please add portfolio 'Direct Premium Income Account' for portfolio ({$portfolio_record->name_en}) from Application Settings > Portfolio.");
 	        }
 
 	        /**
@@ -956,7 +956,7 @@ class Policy_installments extends MY_Controller
 	         */
 	        if( !$portfolio_record->account_id_dpi )
 	        {
-	        	throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details_for_premium_voucher()]: No 'Direct Premium Income Account' for this Portfolio (({$portfolio_record->name_en})).<br/>Please add portfolio 'Direct Premium Income Account' for portfolio ({$portfolio_record->name_en}) from Master Setup > Portfolio.");
+	        	throw new Exception("Exception [Controller:Policy_installments][Method: _data_voucher_details_for_premium_voucher()]: No 'Direct Premium Income Account' for this Portfolio (({$portfolio_record->name_en})).<br/>Please add portfolio 'Direct Premium Income Account' for portfolio ({$portfolio_record->name_en}) from Application Settings > Portfolio.");
 	        }
 
 	        /**

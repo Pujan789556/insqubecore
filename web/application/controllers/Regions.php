@@ -6,9 +6,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * NOTE: The regions are area provisioned by the Beema Samiti.
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -32,7 +32,7 @@ class Regions extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Regions';
+        $this->data['site_title'] = 'Application Settings | Regions';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -66,7 +66,7 @@ class Regions extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Regions',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Regions' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Regions' => NULL]
 						])
 						->partial('content', 'setup/regions/_index', compact('records'))
 						->render($this->data);

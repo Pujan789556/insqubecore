@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Fiscal_years Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -39,7 +39,7 @@ class Fiscal_years extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Fiscal year';
+        $this->data['site_title'] = 'Application Settings | Fiscal year';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -74,7 +74,7 @@ class Fiscal_years extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Fiscal year',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Fiscal year' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Fiscal year' => NULL]
 						])
 						->partial('content', 'setup/fiscal_years/_index', compact('records'))
 						->render($this->data);

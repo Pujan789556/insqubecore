@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Endorsement_templates Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -31,7 +31,7 @@ class Endorsement_templates extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Endorsement Templates';
+        $this->data['site_title'] = 'Application Settings | Endorsement Templates';
 
         // Setup Navigation
 		$this->active_nav_primary([

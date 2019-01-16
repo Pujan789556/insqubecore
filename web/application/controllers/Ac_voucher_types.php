@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Voucher Type Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  * @sub-category Account
  */
 
@@ -31,7 +31,7 @@ class Ac_voucher_types extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Account Transaction Type References';
+        $this->data['site_title'] = 'Application Settings | Account Transaction Type References';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -66,7 +66,7 @@ class Ac_voucher_types extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Account Transaction Type References',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Account Transaction Type References' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Account Transaction Type References' => NULL]
 						])
 						->partial('content', 'setup/ac/voucher_types/_index', compact('records'))
 						->render($this->data);

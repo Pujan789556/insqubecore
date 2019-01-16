@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Bs_agro_categories Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Bs_agro_categories extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Beema Samiti - Agriculture Categories';
+        $this->data['site_title'] = 'Application Settings | Beema Samiti - Agriculture Categories';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -69,7 +69,7 @@ class Bs_agro_categories extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Beema Samiti - Agriculture Categories',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Beema Samiti - Agriculture Categories' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Beema Samiti - Agriculture Categories' => NULL]
 						])
 						->partial('content', 'setup/bs_agro_categories/_index', $data)
 						->render($this->data);
@@ -423,7 +423,7 @@ class Bs_agro_categories extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => $page_header,
-								'breadcrumbs' => ['Master Setup' => NULL, 'BS Agriculture - Categories' => 'bs_agro_categories', 'Details' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'BS Agriculture - Categories' => 'bs_agro_categories', 'Details' => NULL]
 						])
 						->partial('content', 'setup/bs_agro_categories/_details', $data)
 						->render($this->data);

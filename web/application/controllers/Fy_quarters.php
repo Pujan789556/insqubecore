@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Fy_quarters Controller
  *
- * This controller falls under "Master Setup" category.
+ * This controller falls under "Application Settings" category.
  *
- * @category 	Master Setup
+ * @category 	Application Settings
  */
 
 // --------------------------------------------------------------------
@@ -39,7 +39,7 @@ class Fy_quarters extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Master Setup | Fiscal Year Quarters';
+        $this->data['site_title'] = 'Application Settings | Fiscal Year Quarters';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -73,7 +73,7 @@ class Fy_quarters extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Fiscal Year Quarters',
-								'breadcrumbs' => ['Master Setup' => NULL, 'Fiscal Year Quarters' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Fiscal Year Quarters' => NULL]
 						])
 						->partial('content', 'setup/fy_quarters/_index', compact('records'))
 						->render($this->data);
