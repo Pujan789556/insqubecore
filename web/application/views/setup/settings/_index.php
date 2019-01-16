@@ -34,7 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					/**
 					 * Load Section Form : Dates
 					 */
-					$action_url             = site_url("settings/section/dates");
+					$action_url             = site_url("admin/settings/section/dates");
 		            $dom_parent_container   = "#tab-dates-settings";
 		            $this->load->view('setup/settings/_form_section', [
 		                                'form_elements'         => $rules['dates'],
@@ -51,7 +51,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					/**
 					 * Load Section Form : Dates
 					 */
-					$action_url             = site_url("settings/section/sms");
+					$action_url             = site_url("admin/settings/section/sms");
 		            $dom_parent_container   = "#tab-sms-settings";
 		            $this->load->view('setup/settings/_form_section', [
 		                                'form_elements'         => $rules['sms'],
@@ -68,7 +68,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					/**
 					 * Load Section Form : Dates
 					 */
-					$action_url             = site_url("settings/section/api");
+					$action_url             = site_url("admin/settings/section/api");
 		            $dom_parent_container   = "#tab-api-settings";
 		            $this->load->view('setup/settings/_form_section', [
 		                                'form_elements'         => $rules['api'],
@@ -86,7 +86,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					/**
 					 * Load Section Form : Dates
 					 */
-					$action_url             = site_url("settings/section/others");
+					$action_url             = site_url("admin/settings/section/others");
 		            $dom_parent_container   = "#tab-others-settings";
 		            $this->load->view('setup/settings/_form_section', [
 		                                'form_elements'         => $rules['others'],

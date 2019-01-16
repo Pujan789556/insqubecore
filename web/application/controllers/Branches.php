@@ -36,7 +36,7 @@ class Branches extends MY_Controller
 
         // Setup Navigation
         $this->_navigation = [
-			'level_0' => 'master_setup',
+			'level_0' => 'application_setup',
 			'level_1' => 'general',
 			'level_2' => $this->router->class,
 			'level_3' => 'index'

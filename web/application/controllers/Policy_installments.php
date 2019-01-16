@@ -2823,7 +2823,7 @@ class Policy_installments extends MY_Controller
                     $this->ri_transaction_model->clear_cache($cache_var);
 
                     // Send SMS
-                    $this->_sms_activation($endorsement_record, $policy_record, $credit_note_record, $installment_record);
+                    // $this->_sms_activation($endorsement_record, $policy_record, $credit_note_record, $installment_record);
             }
 
             /**

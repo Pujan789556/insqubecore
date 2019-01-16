@@ -20,6 +20,13 @@ class Agents extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -35,7 +42,7 @@ class Agents extends MY_Controller
 
         // Setup Navigation
 		$this->active_nav_primary([
-			'level_0' => 'master_setup',
+			'level_0' => 'application_setup',
 			'level_1' => 'general',
 			'level_2' => $this->router->class
 		]);
@@ -43,6 +50,10 @@ class Agents extends MY_Controller
 		// Load Model
 		$this->load->model('agent_model');
 		$this->load->model('address_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -78,7 +89,7 @@ class Agents extends MY_Controller
 
 		// If request is coming from refresh method, reset nextid
 		$next_id 		= (int)$next_id;
-		$next_url_base 	= $this->router->class . '/page/r/' . $from_widget;
+		$next_url_base 	= $this->_url_base . '/page/r/' . $from_widget;
 
 		// DOM Data
 		$dom_data = [
@@ -107,7 +118,7 @@ class Agents extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/0/' . $widget_reference)
+				'filter_url' 	=> site_url($this->_url_base . '/page/l/' . $from_widget . '/0/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')
@@ -594,7 +605,7 @@ class Agents extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Agent Details <small>' . $record->name . '</small>',
-								'breadcrumbs' => ['Agents' => 'agents', 'Details' => NULL]
+								'breadcrumbs' => ['Agents' => $this->_url_base, 'Details' => NULL]
 						])
 						->partial('content', 'setup/agents/_details', $view_data)
 						->render($this->data);

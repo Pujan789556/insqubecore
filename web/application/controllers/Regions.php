@@ -36,7 +36,7 @@ class Regions extends MY_Controller
 
         // Setup Navigation
 		$this->active_nav_primary([
-			'level_0' => 'master_setup',
+			'level_0' => 'application_setup',
 			'level_1' => 'general',
 			'level_2' => $this->router->class
 		]);

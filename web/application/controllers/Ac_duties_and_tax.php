@@ -35,7 +35,7 @@ class Ac_duties_and_tax extends MY_Controller
 
         // Setup Navigation
 		$this->active_nav_primary([
-			'level_0' => 'master_setup',
+			'level_0' => 'application_setup',
 			'level_1' => 'account',
 			'level_2' => $this->router->class
 		]);

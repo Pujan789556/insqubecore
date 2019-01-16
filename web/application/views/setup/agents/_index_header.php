@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					class="btn btn-success btn-round trg-dialog-edit"
 					data-size="large"
 					data-title='<i class="fa fa-pencil-square-o"></i> Add New Agent'
-					data-url="<?php echo site_url('agents/add/');?>"
+					data-url="<?php echo site_url( $this->data['_url_base']. '/add/' );?>"
 					data-form=".form-iqb-general"
 				><i class="ion-plus-circled"></i> Add</a>
 
@@ -26,7 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					id="btn-refresh"
 					data-toggle="tooltip"
 					class="btn btn-primary btn-round"
-					data-url="<?php echo site_url($this->router->class);?>/refresh"
+					data-url="<?php echo site_url($this->data['_url_base'] . '/refresh/');?>"
 					data-method="html"
 					data-box="#<?php echo $DOM_DataListBoxId?>"
 					data-self-destruct="false"

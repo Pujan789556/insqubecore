@@ -48,21 +48,21 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
 
             <?php if( $this->dx_auth->is_admin() ):?>
 
-                  <li class="<?php echo set_menu_active($nav_level_0, 'settings');?>">
-                        <a href="<?php echo site_url('settings');?>">
-                              <i class="fa fa-cog"></i> <span>Application Settings</span>
-                        </a>
-                  </li>
-
-                  <li class="treeview <?php echo set_menu_active($nav_level_0, 'master_setup');?>">
+                  <li class="treeview <?php echo set_menu_active($nav_level_0, 'application_setup');?>">
                         <a href="#">
                               <i class="fa fa-server"></i>
-                              <span>Master Setup</span>
+                              <span>Application Setup</span>
                               <span class="pull-right-container">
                                     <i class="fa fa-angle-left pull-right"></i>
                               </span>
                         </a>
                         <ul class="treeview-menu">
+                              <li class="<?php echo set_menu_active($nav_level_1, 'settings');?>">
+                                    <a href="<?php echo site_url('admin/settings');?>">
+                                          <i class="fa fa-cog"></i> <span>Application Settings</span>
+                                    </a>
+                              </li>
+
                               <li class="<?php echo set_menu_active($nav_level_1, 'general');?>">
                                     <a href="#"><i class="fa fa-arrow-circle-o-down"></i> General
                                           <span class="pull-right-container">
@@ -70,7 +70,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           </span>
                                     </a>
                                     <ul class="treeview-menu">
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'agents');?>"><a href="<?php echo site_url('agents');?>"><i class="fa fa-circle-o"></i> Agents</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'agents');?>"><a href="<?php echo site_url('admin/agents');?>"><i class="fa fa-circle-o"></i> Agents</a></li>
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'branches');?>">
                                                 <a href="#"><i class="fa fa-arrow-circle-o-down"></i> Branches

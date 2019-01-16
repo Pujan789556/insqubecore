@@ -45,7 +45,7 @@ class Ri_setup_pools extends MY_Controller
 
         // Setup Navigation
 		$this->active_nav_primary([
-			'level_0' => 'master_setup',
+			'level_0' => 'application_setup',
 			'level_1' => 'ri',
 			'level_2' => $this->router->class
 		]);

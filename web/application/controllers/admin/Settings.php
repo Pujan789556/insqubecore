@@ -26,6 +26,12 @@ class Settings extends MY_Controller
 		// Set Template for this controller
         $this->template->set_template('dashboard');
 
+        // Setup Navigation
+		$this->active_nav_primary([
+			'level_0' => 'application_setup',
+			'level_1' => $this->router->class,
+		]);
+
         // Basic Data
         $this->data['site_title'] = 'Settings';
 	}
@@ -257,7 +263,7 @@ class Settings extends MY_Controller
              *  $action_url             = "settings/section/{$section}"
              *  $dom_parent_container   = "tab-{$section}-settings"
              */
-            $action_url             = site_url("settings/section/{$section}");
+            $action_url             = site_url("admin/settings/section/{$section}");
             $dom_parent_container   = "#tab-{$section}-settings";
             $view = $this->load->view('setup/settings/_form_section', [
                                 'form_elements'         => $rules,

@@ -34,7 +34,7 @@ class Tmi_plans extends MY_Controller
 
         // Setup Navigation
         $this->_navigation = [
-			'level_0' => 'master_setup',
+			'level_0' => 'application_setup',
 			'level_1' => 'portfolio',
 			'level_2' => 'tariff',
 			'level_3' => $this->router->class
