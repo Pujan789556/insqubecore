@@ -66,7 +66,7 @@ class Branch_model extends MY_Model
      * Protect Default Records?
      */
     public static $protect_default = TRUE;
-    public static $protect_max_id = 28; // Prevent first 28 records from deletion.
+    public static $protect_max_id = 1000; // Prevent first 28 records from deletion.
 
 	// --------------------------------------------------------------------
 

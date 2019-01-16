@@ -80,11 +80,11 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                                 </a>
                                                 <ul class="treeview-menu">
                                                       <li class="<?php echo set_menu_active($nav_level_3, 'index');?>">
-                                                            <a href="<?php echo site_url('branches');?>" title="Manage Branches">
+                                                            <a href="<?php echo site_url('admin/branches');?>" title="Manage Branches">
                                                                   <i class="fa fa-circle-o"></i> Manage Branches</a>
                                                       </li>
                                                       <li class="<?php echo set_menu_active($nav_level_3, 'targets');?>">
-                                                            <a href="<?php echo site_url('branches/targets');?>" title="Manage branch-wise targets"><i class="fa fa-circle-o"></i> Branch Targets</a>
+                                                            <a href="<?php echo site_url('admin/branches/targets');?>" title="Manage branch-wise targets"><i class="fa fa-circle-o"></i> Branch Targets</a>
                                                       </li>
                                                 </ul>
                                           </li>

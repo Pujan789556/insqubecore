@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<!-- /.box-tools -->
 			</div>
 			<!-- /.box-header -->
-			<?php echo form_open( 'branches/save_target_details/'. $target->id,
+			<?php echo form_open( $this->data['_url_base'] . '/save_target_details/'. $target->id,
                     [
                         'class' => 'form-iqb-general form-horizontal',
                         'id' 	=> 'target-form-' . $target->id,

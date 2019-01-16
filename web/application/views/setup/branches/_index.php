@@ -21,11 +21,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						<a href="#" title="Add new role"
 							class="btn btn-success btn-round trg-dialog-edit"
 							data-title='<i class="fa fa-pencil-square-o"></i> Add New Branch'
-							data-url="<?php echo site_url('branches/add/');?>"
+							data-url="<?php echo site_url( $this->data['_url_base'] . '/add/');?>"
 							data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
 
-						<a href="<?php echo site_url( $this->router->class . '/flush/' );?>" title="Flush Cache"
+						<a href="<?php echo site_url( $this->data['_url_base'] . '/flush/' );?>" title="Flush Cache"
 							class="btn btn-warning btn-round"
 							data-toggle="tooltip"
 						><i class="fa fa-trash-o"></i> Flush Cache</a>

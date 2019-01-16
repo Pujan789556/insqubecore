@@ -13,7 +13,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Branches extends MY_Controller
 {
+	// --------------------------------------------------------------------
+
+	/**
+	 * Dynamic Navigation
+	 */
 	private $_navigation = [];
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 
 	function __construct()
 	{
@@ -45,6 +60,10 @@ class Branches extends MY_Controller
 
 		// Load Model
 		$this->load->model('branch_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -84,7 +103,7 @@ class Branches extends MY_Controller
     public function flush()
     {
         $this->branch_model->clear_cache();
-        redirect($this->router->class);
+        redirect($this->_url_base);
     }
 
 	// --------------------------------------------------------------------
@@ -389,7 +408,7 @@ class Branches extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Branch Details <small>' . $record->name_en . '</small>',
-								'breadcrumbs' => ['Branches' => 'branches', 'Details' => NULL]
+								'breadcrumbs' => ['Branches' => $this->_url_base, 'Details' => NULL]
 						])
 						->partial('content', 'setup/branches/_details', $view_data)
 						->render($this->data);
@@ -422,7 +441,7 @@ class Branches extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Branch Targets',
-								'breadcrumbs' => ['Application Settings' => NULL, 'Branches' => 'branches', 'Targets' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Branches' => $this->_url_base, 'Targets' => NULL]
 						])
 						->partial('content', 'setup/branches/_targets', compact('records'))
 						->render($this->data);
@@ -773,7 +792,7 @@ class Branches extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Branch Target Details <small> Fiscal Year ' . $record->code_np . '</small>',
-								'breadcrumbs' => ['Application Settings' => NULL, 'Branch Targets' => 'branches/targets', 'Target Details' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Branch Targets' => $this->_url_base . '/targets', 'Target Details' => NULL]
 						])
 						->partial('content', 'setup/branches/_target_details', $partial_data)
 						->partial('dynamic_js', 'setup/branches/_target_js')
@@ -928,9 +947,8 @@ class Branches extends MY_Controller
 				$portfolio_total = $t['target'];
 				foreach($children as $c)
 				{
-					$child_total += $c['target'];
+					$child_total += floatval($c['target'] ?? 0.00);
 				}
-
 				if( !empty($children) && $child_total != $portfolio_total)
 				{
 					$this->form_validation->set_message('check_target_math', 'The target distribution is invalid (portfolio total != sum(children_portfolio) ).');
