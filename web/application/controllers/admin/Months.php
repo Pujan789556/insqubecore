@@ -14,6 +14,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Months extends MY_Controller
 {
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -42,6 +49,10 @@ class Months extends MY_Controller
 
 		// Load Model
 		$this->load->model('month_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -82,7 +93,7 @@ class Months extends MY_Controller
     public function flush()
     {
         $this->month_model->clear_cache();
-        redirect($this->router->class);
+        redirect($this->_url_base);
     }
 
 }
