@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					class="btn btn-success btn-round trg-dialog-edit"
 					data-size="large"
 					data-title='<i class="fa fa-pencil-square-o"></i> Add New User'
-					data-url="<?php echo site_url('users/add/');?>"
+					data-url="<?php echo site_url( $this->data['_url_base'] . '/add/');?>"
 					data-form=".form-iqb-general"><i class="ion-plus-circled"></i> Add</a>
 
 				<a href="javascript:;"
@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					id="btn-refresh"
 					data-toggle="tooltip"
 					class="btn btn-primary btn-round"
-					data-url="<?php echo site_url($this->router->class);?>/refresh"
+					data-url="<?php echo site_url($this->data['_url_base'] . '/refresh');?>"
 					data-method="html"
 					data-box="#<?php echo $DOM_DataListBoxId?>"
 					data-self-destruct="false"
@@ -33,7 +33,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					onclick="return InsQube.load(event, this)">
 						<i class="ion-refresh"></i> Refresh</a>
 
-				<a href="<?php echo site_url( $this->router->class . '/flush/');?>" title="Flush Cache"
+				<a href="<?php echo site_url( $this->data['_url_base'] . '/flush/');?>" title="Flush Cache"
 						class="btn btn-warning btn-round"
 						data-toggle="tooltip"
 					><i class="fa fa-trash-o"></i> Flush Cache</a>
@@ -45,7 +45,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					data-confirm="true"
 					class="btn btn-danger btn-round trg-dialog-action"
 					data-message="Are you sure you want to do this?<br/>Users having back date settings will be reset."
-					data-url="<?php echo site_url('users/revoke_all_backdate/');?>">
+					data-url="<?php echo site_url( $this->data['_url_base'] . '/revoke_all_backdate/');?>">
 						<i class="fa fa-undo"></i> Back Date</a>
 
 				<a href="#"
@@ -55,7 +55,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					data-confirm="true"
 					class="btn btn-danger btn-round trg-dialog-action"
 					data-message="Are you sure you want to do this?<br/>This will force all users to re-login."
-					data-url="<?php echo site_url('users/force_relogin_all/');?>">
+					data-url="<?php echo site_url($this->data['_url_base'] . '/force_relogin_all/');?>">
 						<i class="fa fa-lock"></i> Re-login All</a>
 
 				<a href="#"
@@ -65,7 +65,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					data-confirm="true"
 					class="btn btn-danger btn-round trg-dialog-action"
 					data-message="Are you sure you want to do this?<br/>This will regenerate new passwords for all users and apply force-relogin."
-					data-url="<?php echo site_url('users/renew_passwords/');?>">
+					data-url="<?php echo site_url($this->data['_url_base'] . '/renew_passwords/');?>">
 						<i class="fa fa-lock"></i> Renew Passwords</a>
 
 

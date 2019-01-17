@@ -13,6 +13,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Roles extends MY_Controller
 {
+	/**
+     * Controller URL
+     */
+    private $_url_base;
+
+    // --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -41,6 +48,10 @@ class Roles extends MY_Controller
 
 		// Load Model
 		$this->load->model('role_model');
+
+		// URL Base
+        $this->_url_base         = 'admin/' . $this->router->class;
+        $this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -272,7 +283,7 @@ class Roles extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-        if($id === 2) // Can not edit Admin Role
+        if($id === 2) // Can not Delete Admin Role
         {
             $this->template->render_404('', 'You can not delete Admin Role.');
         }

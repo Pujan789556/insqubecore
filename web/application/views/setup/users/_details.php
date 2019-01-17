@@ -77,7 +77,7 @@ $profile = $record->profile ? json_decode($record->profile) : new class($record)
 				<a href="#"
 					class="btn btn-primary btn-block trg-dialog-edit"
 					data-title='<i class="fa fa-pencil-square-o"></i> Edit Profile'
-					data-url="<?php echo site_url('users/update_profile/' . $record->id);?>"
+					data-url="<?php echo site_url($this->data['_url_base'] . '/update_profile/' . $record->id);?>"
 					data-form=".form-iqb-general"><i class="fa fa-pencil-square-o margin-r-5"></i><b>Edit Profile</b></a>
 			</div>
 		</div>

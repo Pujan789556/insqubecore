@@ -21,6 +21,13 @@ class Users extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
+     * Controller URL
+     */
+    private $_url_base;
+
+    // --------------------------------------------------------------------
+
+	/**
 	 * Validation Rules
 	 *
 	 * @var array
@@ -246,6 +253,10 @@ class Users extends MY_Controller
 
 		// Load Model
 		$this->load->model('user_model');
+
+		// URL Base
+        $this->_url_base         = 'admin/' . $this->router->class;
+        $this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -314,7 +325,7 @@ class Users extends MY_Controller
 		$data = [
 			'records' => $records,
 			'next_id' => $next_id,
-			'next_url' => $next_id ? site_url( 'users/page/r/' . $next_id ) : NULL
+			'next_url' => $next_id ? site_url( $this->_url_base . '/page/r/' . $next_id ) : NULL
 		] + $dom_data;
 
 		/**
@@ -326,7 +337,7 @@ class Users extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('users/page/l/' )
+				'filter_url' 	=> site_url( $this->_url_base . '/page/l/' )
 			]);
 		}
 		else if($layout === 'l')
@@ -555,7 +566,7 @@ class Users extends MY_Controller
 		$json_data['form'] = $this->load->view('setup/users/_form',
 			[
 				'form_title' 	=> 'Basic Information',
-				'action_url'	=> site_url('users/edit/'. $record->id),
+				'action_url'	=> site_url($this->_url_base . '/edit/'. $record->id),
 				'form_elements' => $rules,
 				'record' 		=> $record,
 				'form_record'   => $record,
@@ -654,7 +665,7 @@ class Users extends MY_Controller
 		$json_data['form'] = $this->load->view('setup/users/_form',
 			[
 				'form_title' 	=> 'Change Password - ' . $record->username,
-				'action_url'	=> site_url('users/change_password/'. $record->id),
+				'action_url'	=> site_url($this->_url_base . '/change_password/'. $record->id),
 				'form_elements' => $rules,
 				'record' 		=> $record,
 				'form_record'   => $record
@@ -746,7 +757,7 @@ class Users extends MY_Controller
 		$json_data['form'] = $this->load->view('setup/users/_form',
 			[
 				'form_title' 	=> 'Basic Information',
-				'action_url'	=> site_url('users/add/'),
+				'action_url'	=> site_url( $this->_url_base . '/add/'),
 				'form_elements' => $this->_rules['basic'],
 				'record' 		=> $record,
 				'form_record'   => NULL,
@@ -873,7 +884,7 @@ class Users extends MY_Controller
 				'reloadForm' => true,
 				'form' => $this->load->view('setup/users/_form_contact',
 											[
-												'action_url'	=> site_url('users/update_contact/' . $record->id),
+												'action_url'	=> site_url( $this->_url_base . '/update_contact/' . $record->id),
 												'record' => $record,
 												'next_wizard' 	=> $next_wizard
 											], TRUE)
@@ -1011,7 +1022,7 @@ class Users extends MY_Controller
 				'form' => $this->load->view('setup/users/_form_profile',
 											[
 												'form_title' 	=> 'User Profile',
-												'action_url'	=> site_url('users/update_profile/' . $record->id),
+												'action_url'	=> site_url( $this->_url_base . '/update_profile/' . $record->id),
 												'form_elements' => $this->_rules['profile'],
 												'record' 		=> $record,
 												'form_record'   => $profile_record,
@@ -1251,7 +1262,7 @@ class Users extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'User Details <small>' . $record->username . '</small>',
-								'breadcrumbs' => ['Users' => 'users', 'Details' => NULL]
+								'breadcrumbs' => ['Users' => $this->_url_base, 'Details' => NULL]
 						])
 						->partial('content', 'setup/users/_details', compact('record'))
 						->render($this->data);
@@ -1529,6 +1540,6 @@ class Users extends MY_Controller
     public function flush()
     {
         $this->user_model->clear_cache();
-        redirect($this->router->class);
+        redirect($this->_url_base);
     }
 }

@@ -1,8 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Departments:  Single Row
+* Login Attempts:  Single Row
 */
+$_del_url 		= $this->data['_url_base'] . '/delete/'  . $record->ip_address;
 ?>
 <tr data-name="<?php echo $record->ip_address;?>" class="searchable" data-id="<?php echo $record->ip_address; ?>" id="_data-row-<?php echo ip2long($record->ip_address);?>">
 
@@ -14,7 +15,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				data-toggle="tooltip"
 				class="trg-row-action action"
 				data-confirm="true"
-				data-url="<?php echo site_url('login_attempts/delete/' . $record->ip_address);?>">
+				data-url="<?php echo site_url($_del_url);?>">
 					<i class="fa fa-trash-o"></i>
 					<span class="hidden-xs">Delete</span>
 			</a>
