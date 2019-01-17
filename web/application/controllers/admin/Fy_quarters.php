@@ -14,11 +14,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Fy_quarters extends MY_Controller
 {
 	/**
-	 * Validation Rules
-	 *
-	 * @var array
+	 * Controller URL
 	 */
-	private $form_elements = [];
+	private $_url_base;
 
 	// --------------------------------------------------------------------
 
@@ -50,6 +48,10 @@ class Fy_quarters extends MY_Controller
 
 		// Load Activitis Library
 		$this->load->library('activity');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -338,7 +340,7 @@ class Fy_quarters extends MY_Controller
     public function flush()
     {
         $this->fy_quarter_model->clear_cache();
-        redirect($this->router->class);
+        redirect($this->_url_base);
     }
 
 

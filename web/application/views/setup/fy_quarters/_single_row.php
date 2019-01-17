@@ -13,6 +13,8 @@ $flag_current_fiscal_year = $this->current_fiscal_year->starts_at_en == $record-
 
 $current_class = $flag_current_fiscal_year ? 'text-success text-bold' : '';
 $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
+
+$_edit_url 		= $this->data['_url_base'] . '/edit/'  . $record->id;
 ?>
 <tr class="searchable <?php echo $current_class;?>"
 	title="<?php echo $current_title?>"
@@ -30,7 +32,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 			title="Edit Quarter"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Edit Quarter'
-			data-url="<?php echo site_url('fy_quarters/edit/' . $record->id);?>"
+			data-url="<?php echo site_url($_edit_url);?>"
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>

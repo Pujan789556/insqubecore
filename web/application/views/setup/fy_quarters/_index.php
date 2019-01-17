@@ -19,9 +19,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					</div>
 					<div class="col-sm-6 master-actions text-right">
 						<a href="#" title="Add New Quarter"
-							class="btn btn-success btn-round trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New Quarter' data-url="<?php echo site_url('fy_quarters/add/');?>" data-form=".form-iqb-general"
+							class="btn btn-success btn-round trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New Quarter' data-url="<?php echo site_url( $this->data['_url_base'] . '/add/' );?>" data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
-						<a href="<?php echo site_url( $this->router->class . '/flush/' );?>" title="Flush Cache"
+						<a href="<?php echo site_url( $this->data['_url_base'] . '/flush/' );?>" title="Flush Cache"
 							class="btn btn-warning btn-round"
 							data-toggle="tooltip"
 						><i class="fa fa-trash-o"></i> Flush Cache</a>
