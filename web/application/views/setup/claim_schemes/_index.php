@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					</div>
 					<div class="col-sm-6 master-actions">
 						<a href="#" title="Add New Claim Scheme"
-							class="btn btn-success btn-round pull-right trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New Claim Scheme' data-url="<?php echo site_url($this->router->class . '/add/');?>" data-form=".form-iqb-general"
+							class="btn btn-success btn-round pull-right trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New Claim Scheme' data-url="<?php echo site_url($this->data['_url_base'] . '/add/');?>" data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
 					</div>
 				</div>

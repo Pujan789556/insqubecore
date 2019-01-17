@@ -175,7 +175,7 @@ class Claim_scheme_model extends MY_Model
         $action = is_string($action) ? $action : 'C';
         // Save Activity Log
         $activity_log = [
-            'module' => 'claim_scheme',
+            'module' => 'claim_schemes',
             'module_id' => $id,
             'action' => $action
         ];
