@@ -51,7 +51,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                   <li class="treeview <?php echo set_menu_active($nav_level_0, 'application_setup');?>">
                         <a href="#">
                               <i class="fa fa-server"></i>
-                              <span>Application Setup</span>
+                              <span>Application Settings</span>
                               <span class="pull-right-container">
                                     <i class="fa fa-angle-left pull-right"></i>
                               </span>
@@ -59,7 +59,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                         <ul class="treeview-menu">
                               <li class="<?php echo set_menu_active($nav_level_1, 'settings');?>">
                                     <a href="<?php echo site_url('admin/settings');?>">
-                                          <i class="fa fa-cog"></i> <span>Application Settings</span>
+                                          <i class="fa fa-cog"></i> <span>Core Settings</span>
                                     </a>
                               </li>
 
@@ -91,7 +91,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'companies');?>"><a href="<?php echo site_url('admin/companies');?>"><i class="fa fa-circle-o"></i> Companies</a></li>
 
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'countries');?>"><a href="<?php echo site_url('countries');?>"><i class="fa fa-globe"></i> Countries</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'countries');?>"><a href="<?php echo site_url('admin/countries');?>"><i class="fa fa-globe"></i> Countries</a></li>
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'departments');?>"><a href="<?php echo site_url('departments');?>"><i class="fa fa-circle-o"></i> Departments</a></li>
 
