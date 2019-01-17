@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Departments:  Single Row
 */
+$_edit_url = $this->data['_url_base'] . '/motor/edit/'  . $record->id;
 ?>
 <tr data-name="<?php echo $record->id;?>" class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->fy_code_np . " ({$record->fy_code_en})";?></td>
@@ -21,7 +22,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-box-size="full-width"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Edit Single Tariff'
-			data-url="<?php echo site_url('tariff/motor/edit/' . $record->id);?>"
+			data-url="<?php echo site_url($_edit_url);?>"
 			data-form=".form-iqb-general">
 			<i class="fa fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>

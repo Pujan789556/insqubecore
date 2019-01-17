@@ -12,6 +12,8 @@ $flag_current_fiscal_year = $this->current_fiscal_year->id == $record->fiscal_yr
 $current_class = $flag_current_fiscal_year ? 'text-success text-bold' : '';
 $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 
+$_edit_url 			= $this->data['_url_base'] . '/misc_bb/edit/'  . $record->id;
+$_duplicate_url 	= $this->data['_url_base'] . '/misc_bb/duplicate/'  . $record->id;
 ?>
 <tr data-name="<?php echo $record->id;?>"
 	class="searchable <?php echo $current_class;?>"
@@ -28,7 +30,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 			data-box-size="large"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Edit Tariff'
-			data-url="<?php echo site_url('tariff/misc_bb/edit/' . $record->id);?>"
+			data-url="<?php echo site_url($_edit_url);?>"
 			data-form=".form-iqb-general">
 			<i class="fa fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
@@ -39,7 +41,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 			data-box-size="large"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Duplicate Tarrif'
-			data-url="<?php echo site_url('tariff/misc_bb/duplicate/' . $record->id);?>"
+			data-url="<?php echo site_url($_duplicate_url);?>"
 			data-form=".form-iqb-general">
 			<i class="fa fa-copy"></i>
 			<span class="hidden-xs">Duplicate</span>

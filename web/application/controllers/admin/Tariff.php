@@ -13,6 +13,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Tariff extends MY_Controller
 {
+    /**
+     * Controller URL
+     */
+    private $_url_base;
+
+    // --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -45,6 +52,10 @@ class Tariff extends MY_Controller
 
 		// Helper
 		$this->load->helper('object');
+
+        // URL Base
+        $this->_url_base         = 'admin/' . $this->router->class;
+        $this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -167,7 +178,7 @@ class Tariff extends MY_Controller
                             'templates/_common/_content_header',
                             [
                                 'content_header' => 'Agriculture Tariff - FY - ' . $fiscal_year_text,
-                                'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Agriculture' => 'tariff/agriculture', 'Details' => NULL]
+                                'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Agriculture' => $this->_url_base . '/agriculture', 'Details' => NULL]
                         ])
                         ->partial('content', 'setup/tariff/agriculture/_index_by_fiscal_year', compact('records'))
                         ->render($this->data);
@@ -566,7 +577,7 @@ class Tariff extends MY_Controller
         $this->load->model('tariff_agriculture_model');
 
         $this->tariff_agriculture_model->clear_cache();
-        redirect('tariff/agriculture');
+        redirect($this->_url_base . '/agriculture');
     }
 
     // --------------------------------------------------------------------
@@ -667,7 +678,7 @@ class Tariff extends MY_Controller
         $this->load->model('tariff_misc_bb_model');
 
         $this->tariff_misc_bb_model->clear_cache();
-        redirect('tariff/misc_bb');
+        redirect($this->_url_base . '/misc_bb');
     }
 
      // --------------------------------------------------------------------
@@ -1059,7 +1070,7 @@ class Tariff extends MY_Controller
         $this->load->model('tariff_misc_epa_model');
 
         $this->tariff_misc_epa_model->clear_cache();
-        redirect('tariff/misc_epa');
+        redirect($this->_url_base . '/misc_epa');
     }
 
      // --------------------------------------------------------------------
@@ -1484,7 +1495,7 @@ class Tariff extends MY_Controller
                             'templates/_common/_content_header',
                             [
                                 'content_header' => 'Motor Tariff - FY - ' . $fiscal_year_text,
-                                'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => 'tariff', 'Motor' => 'tariff/motor', 'Details' => NULL]
+                                'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Motor' => $this->_url_base . '/motor', 'Details' => NULL]
                         ])
                         ->partial('content', 'setup/tariff/motor/_index_by_fiscal_year', compact('records'))
                         ->render($this->data);
@@ -2021,7 +2032,7 @@ class Tariff extends MY_Controller
         $this->load->model('tariff_motor_model');
 
         $this->tariff_motor_model->clear_cache();
-        redirect('tariff/motor');
+        redirect($this->_url_base . '/motor');
     }
 
     // --------------------------------------------------------------------

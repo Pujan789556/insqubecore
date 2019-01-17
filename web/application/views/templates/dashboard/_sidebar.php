@@ -207,31 +207,31 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                                 </a>
                                                 <ul class="treeview-menu">
                                                       <li class="<?php echo set_menu_active($nav_level_3, 'agriculture');?>">
-                                                            <a href="<?php echo site_url('tariff/agriculture');?>">
+                                                            <a href="<?php echo site_url('admin/tariff/agriculture');?>">
                                                                   <i class="fa fa-circle-o"></i> Agriculture
                                                             </a>
                                                       </li>
 
                                                       <li class="<?php echo set_menu_active($nav_level_3, 'misc_bb');?>">
-                                                            <a href="<?php echo site_url('tariff/misc_bb');?>">
+                                                            <a href="<?php echo site_url('admin/tariff/misc_bb');?>">
                                                                   <i class="fa fa-circle-o"></i> MISC - Banker's Blanket
                                                             </a>
                                                       </li>
 
                                                       <li class="<?php echo set_menu_active($nav_level_3, 'misc_epa');?>">
-                                                            <a href="<?php echo site_url('tariff/misc_epa');?>">
+                                                            <a href="<?php echo site_url('admin/tariff/misc_epa');?>">
                                                                   <i class="fa fa-circle-o"></i> MISC - Expedition Personnel Accident
                                                             </a>
                                                       </li>
 
                                                       <li class="<?php echo set_menu_active($nav_level_3, 'tmi_plans');?>">
-                                                            <a href="<?php echo site_url('tmi_plans');?>" title="Manage Travel Medical Insurance Plans & Tariff">
+                                                            <a href="<?php echo site_url('admin/tmi_plans');?>" title="Manage Travel Medical Insurance Plans & Tariff">
                                                                   <i class="fa fa-circle-o"></i> TMI Plans/Tariff
                                                             </a>
                                                       </li>
 
                                                       <li class="<?php echo set_menu_active($nav_level_3, 'motor');?>">
-                                                            <a href="<?php echo site_url('tariff/motor');?>">
+                                                            <a href="<?php echo site_url('admin/tariff/motor');?>">
                                                                   <i class="fa fa-circle-o"></i> Motor
                                                             </a>
                                                       </li>

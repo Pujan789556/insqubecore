@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						?>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
-						<a href="<?php echo site_url('tariff/agriculture/flush/');?>" title="Flush Cache"
+						<a href="<?php echo site_url( $this->data['_url_base'] . '/agriculture/flush/');?>" title="Flush Cache"
 							class="btn btn-warning btn-round"
 							data-toggle="tooltip"
 						><i class="fa fa-trash-o"></i> Flush Cache</a>
@@ -28,7 +28,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							data-box-size="large"
 							data-toggle="tooltip"
 							data-title='<i class="fa fa-pencil-square-o"></i> Add New Agriculture Tarrif'
-							data-url="<?php echo site_url('tariff/agriculture/add/');?>"
+							data-url="<?php echo site_url($this->data['_url_base'] . '/agriculture/add/');?>"
 							data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
 					</div>
