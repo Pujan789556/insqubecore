@@ -13,6 +13,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class States extends MY_Controller
 {
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -42,7 +49,9 @@ class States extends MY_Controller
 		// Load Model
 		$this->load->model('state_model');
 
-
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -74,7 +83,7 @@ class States extends MY_Controller
 	{
 		// If request is coming from refresh method, reset nextid
 		$next_id 		= (int)$next_id;
-		$next_url_base 	= $this->router->class . '/page/r/';
+		$next_url_base 	= $this->_url_base . '/page/r/';
 
 		// DOM Data
 		$dom_data = [
@@ -97,7 +106,7 @@ class States extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url($this->router->class . '/page/l/0')
+				'filter_url' 	=> site_url($this->_url_base . '/page/l/0')
 			]);
 		}
 		else if($layout === 'l')
@@ -261,7 +270,7 @@ class States extends MY_Controller
     public function flush()
     {
         $this->state_model->clear_cache();
-        redirect($this->router->class);
+        redirect($this->_url_base);
     }
 
 
@@ -464,6 +473,12 @@ class States extends MY_Controller
 	 */
 	public function delete($id)
 	{
+		// !!! NOTE !!! DO NOT ALLOW TO DELETE FOR NOW
+		return $this->template->json([
+			'status' 	=> 'error',
+			'message' 	=> 'You cannot delete the state records.'
+		]);
+
 		// Valid Record ?
 		$id = (int)$id;
 		$record = $this->state_model->find($id);

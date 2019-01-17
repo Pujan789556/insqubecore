@@ -23,6 +23,15 @@ class State_model extends MY_Model
 
 	// --------------------------------------------------------------------
 
+    /**
+     * Protect Default Records?
+     */
+    public static $protect_default = FALSE;
+    public static $protect_max_id = 0; // Prevent first 12 records from deletion.
+
+    // --------------------------------------------------------------------
+
+
 	/**
 	 * Constructor
 	 *
@@ -221,6 +230,9 @@ class State_model extends MY_Model
 
     public function delete($id = NULL)
     {
+        // !!! NOTE !!! DO NOT ALLOW TO DELETE FOR NOW
+        return FALSE;
+
         $id = intval($id);
         if( !safe_to_delete( get_class(), $id ) )
         {
