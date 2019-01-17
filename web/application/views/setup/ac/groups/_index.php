@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						?>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
-						<a href="<?php echo site_url('ac_account_groups/chart/');?>"
+						<a href="<?php echo site_url($this->data['_url_base'] . '/chart/');?>"
 								title="View Chart of Accounts"
 								data-toggle="tooltip"
 								class="btn btn-primary btn-round"
@@ -29,7 +29,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							class="btn btn-success btn-round trg-dialog-edit"
 							data-size="large"
 							data-title='<i class="fa fa-pencil-square-o"></i> Add New Account Group'
-							data-url="<?php echo site_url('ac_account_groups/add/');?>"
+							data-url="<?php echo site_url($this->data['_url_base'] . '/add/');?>"
 							data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
 					</div>

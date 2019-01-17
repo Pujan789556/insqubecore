@@ -149,13 +149,13 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                     </a>
                                     <ul class="treeview-menu">
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ac_account_groups');?>">
-                                                <a href="<?php echo site_url('ac_account_groups');?>"><i class="fa fa-circle-o"></i> Account Groups</a>
+                                                <a href="<?php echo site_url('admin/ac_account_groups');?>"><i class="fa fa-circle-o"></i> Account Groups</a>
                                           </li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ac_voucher_types');?>">
-                                                <a href="<?php echo site_url('ac_voucher_types');?>"><i class="fa fa-circle-o"></i> Voucher Types</a>
+                                                <a href="<?php echo site_url('admin/ac_voucher_types');?>"><i class="fa fa-circle-o"></i> Voucher Types</a>
                                           </li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ac_duties_and_tax');?>">
-                                                <a href="<?php echo site_url('ac_duties_and_tax');?>"><i class="fa fa-circle-o"></i> Duties &amp; Tax</a>
+                                                <a href="<?php echo site_url('admin/ac_duties_and_tax');?>"><i class="fa fa-circle-o"></i> Duties &amp; Tax</a>
                                           </li>
                                     </ul>
                               </li>

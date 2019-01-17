@@ -3,6 +3,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Account Group:  Single Row
 */
+$_edit_url 		= $this->data['_url_base'] . '/edit/'  . $record->id;
+$_move_url 		= $this->data['_url_base'] . '/move/'  . $record->id;
+$_del_node_url 		= $this->data['_url_base'] . '/delete/node/'  . $record->id;
+$_del_subtree_url 	= $this->data['_url_base'] . '/delete/subtree/'  . $record->id;
 ?>
 <tr data-name="<?php echo $record->name;?>" class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
@@ -12,7 +16,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		title="Edit Account Group"
 		class="trg-dialog-edit"
 		data-title='<i class="fa fa-pencil-square-o"></i> Edit Account Group'
-		data-url="<?php echo site_url('ac_account_groups/edit/' . $record->id);?>"
+		data-url="<?php echo site_url($_edit_url);?>"
 		data-form=".form-iqb-general"><?php echo $record->name;?></a></td>
 	<td><?php echo $record->lft;?></td>
 	<td><?php echo $record->rgt;?></td>
@@ -22,7 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			title="Edit Account Group"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Edit Account Group'
-			data-url="<?php echo site_url('ac_account_groups/edit/' . $record->id);?>"
+			data-url="<?php echo site_url($_edit_url);?>"
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
@@ -33,7 +37,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			title="Move Account Group"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Move Account Group - <?php echo $record->name?>'
-			data-url="<?php echo site_url('ac_account_groups/move/' . $record->id);?>"
+			data-url="<?php echo site_url($_move_url);?>"
 			data-form=".form-iqb-general">
 			<i class="fa fa-long-arrow-up"></i>
 			<i class="fa fa-long-arrow-down"></i>
@@ -58,7 +62,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				data-toggle="tooltip"
 				class="trg-row-action action"
 				data-confirm="true"
-				data-url="<?php echo site_url('ac_account_groups/delete/node/' . $record->id);?>">
+				data-url="<?php echo site_url($_del_node_url);?>">
 					<i class="fa fa-trash-o"></i>
 					<span class="hidden-xs">Delete Node</span>
 			</a>
@@ -67,7 +71,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				data-toggle="tooltip"
 				class="trg-row-action action"
 				data-confirm="true"
-				data-url="<?php echo site_url('ac_account_groups/delete/subtree/' . $record->id);?>">
+				data-url="<?php echo site_url($_del_subtree_url);?>">
 					<i class="fa fa-trash"></i>
 					<span class="hidden-xs">Delete Sub-tree</span>
 			</a>

@@ -14,6 +14,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Ac_account_groups extends MY_Controller
 {
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -42,6 +49,10 @@ class Ac_account_groups extends MY_Controller
 
 		// Load Model
 		$this->load->model('ac_account_group_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 
 	}
 
@@ -97,7 +108,7 @@ class Ac_account_groups extends MY_Controller
 								'templates/_common/_content_header',
 								[
 									'content_header' => 'Chart of Accounts',
-									'breadcrumbs' => ['Application Settings' => NULL, 'Account Groups' => 'ac_account_groups']
+									'breadcrumbs' => ['Application Settings' => NULL, 'Account Groups' => $this->_url_base]
 							])
 							->partial('content', 'setup/ac/groups/_chart', compact('records'))
 							->render($this->data);

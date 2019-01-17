@@ -10,14 +10,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<div class="box-header with-border gray">
 				<div class="row">
 					<div class="col-sm-12 master-actions text-right">
-						<a href="<?php echo site_url('ac_account_groups/chart/print/');?>"
+						<a href="<?php echo site_url($this->data['_url_base'] . '/chart/print/');?>"
 							title="Print Chart of Accounts"
 							data-toggle="tooltip"
 							class="btn bg-navy btn-round"
 							target="_blank"
 							download="chart-of-accounts.pdf"
 						><i class="fa fa-print"></i> Print</a>
-						<a href="<?php echo site_url('ac_account_groups');?>"
+						<a href="<?php echo site_url($this->data['_url_base']);?>"
 							title="Back to Account Groups"
 							data-toggle="tooltip"
 							class="btn btn-primary btn-round"

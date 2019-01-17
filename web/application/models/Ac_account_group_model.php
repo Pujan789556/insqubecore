@@ -29,7 +29,7 @@ class Ac_account_group_model extends MY_Model
      * Protect Default Records?
      */
     public static $protect_default = TRUE;
-    public static $protect_max_id = 200; // Prevent first 500 records from deletion.
+    public static $protect_max_id = 500; // Prevent first 500 records from deletion.
 
 	// --------------------------------------------------------------------
 
@@ -191,10 +191,6 @@ class Ac_account_group_model extends MY_Model
         $bind_params = [$task_type, $user_id, $id, $parent_id, $name ];
         $sql = "CALL `r_acg_tree_traversal`(?, ?, ?, ?, ?)";
 
-
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -209,16 +205,12 @@ class Ac_account_group_model extends MY_Model
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
-
-        // Check Transaction Status
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
             $id = FALSE;
         }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $id;

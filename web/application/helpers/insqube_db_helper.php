@@ -69,8 +69,10 @@ if ( ! function_exists('mysqli_store_procedure'))
         }
 
         // Free the Result
-        $query->free_result();
-
+        if ( is_object($query) )
+        {
+            $query->free_result();
+        }
 
 
         return $result;
