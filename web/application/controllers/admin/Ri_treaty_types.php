@@ -11,16 +11,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Ri_setup_treaty_types extends MY_Controller
+class Ri_treaty_types extends MY_Controller
 {
 	/**
-	 * Validation Rules
-	 *
-	 * @var array
-	 */
-	private $form_elements = [];
+     * Controller URL
+     */
+    private $_url_base;
 
-	// --------------------------------------------------------------------
+    // --------------------------------------------------------------------
 
 	function __construct()
 	{
@@ -53,6 +51,10 @@ class Ri_setup_treaty_types extends MY_Controller
 
 		// Load Activitis Library
 		$this->load->library('activity');
+
+		// URL Base
+        $this->_url_base         = 'admin/' . $this->router->class;
+        $this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -77,7 +79,7 @@ class Ri_setup_treaty_types extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Manage Treaty Types',
-								'breadcrumbs' => ['Application Settings' => NULL, 'Treaty Types' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'Re-Insurance' => NULL, 'Treaty Types' => NULL]
 						])
 						->partial('content', 'setup/ri/treaty_types/_index', compact('records'))
 						->render($this->data);

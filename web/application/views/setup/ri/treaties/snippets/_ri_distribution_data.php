@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<td><?php echo $sn++;?>.</td>
 				<td>
 					<?php if($distrib->broker_id): ?>
-						<a href="<?php echo site_url('companies/details/' . $distrib->broker_id)?>" target="_blank">
+						<a href="<?php echo site_url('admin/companies/details/' . $distrib->broker_id)?>" target="_blank">
 							<?php echo $distrib->broker_name?>
 						</a>
 					<?php else: ?>
@@ -31,7 +31,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<?php endif ?>
 				</td>
 				<td>
-					<a href="<?php echo site_url('companies/details/' . $distrib->company_id)?>" target="_blank">
+					<a href="<?php echo site_url('admin/companies/details/' . $distrib->company_id)?>" target="_blank">
 						<?php echo $distrib->reinsurer_name?>
 					</a>
 				</td>

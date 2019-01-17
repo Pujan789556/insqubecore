@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Setup - RI - Treaty : RI Commission Scale View
 */
+$_edit_url 		= $this->data['_url_base'] . '/commission_scales/'  . $record->id;
 ?>
 <div class="box box-success">
 	<div class="box-header with-border">
@@ -13,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             	data-toggle="tooltip"
             	data-box-size="large"
             	data-title="<i class='fa fa-pencil-square-o'></i> Edit Treaty Commission Scale"
-            	data-url="<?php echo site_url('ri_setup_treaties/commission_scales/'. $record->id)?>"
+            	data-url="<?php echo site_url($_edit_url)?>"
             	data-form="#__form-treaty-setup-commission-scale">
                 <i class="fa fa-pencil-square-o"></i> Manage
             </a>

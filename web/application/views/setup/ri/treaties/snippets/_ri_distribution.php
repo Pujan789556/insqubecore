@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Setup - RI - Treaty : RI Distribution View
 */
+$_edit_url 		= $this->data['_url_base'] . '/distribution/'  . $record->id;
 ?>
 <div class="box box-success">
 	<div class="box-header with-border">
@@ -13,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             	data-toggle="tooltip"
             	data-box-size="full-width"
             	data-title="<i class='fa fa-pencil-square-o'></i> Edit RI Distribution"
-            	data-url="<?php echo site_url('ri_setup_treaties/distribution/'. $record->id)?>"
+            	data-url="<?php echo site_url($_edit_url)?>"
             	data-form="#__form-treaty-setup-distribution">
                 <i class="fa fa-pencil-square-o"></i> Manage
             </a>

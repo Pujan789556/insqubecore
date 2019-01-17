@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<tr>
 					<td><?php echo $broker_sn++;?>.</td>
 					<td>
-						<a href="<?php echo site_url('companies/details/' . $broker->company_id)?>" target="_blank">
+						<a href="<?php echo site_url('admin/companies/details/' . $broker->company_id)?>" target="_blank">
 							<?php echo $broker->name_en?>
 						</a>
 					</td>

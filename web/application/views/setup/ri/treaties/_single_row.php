@@ -10,6 +10,10 @@ $flag_current_fiscal_year = $this->current_fiscal_year->id == $record->fiscal_yr
 
 $current_class = $flag_current_fiscal_year ? 'text-success text-bold' : '';
 $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
+
+$_edit_url 		= $this->data['_url_base'] . '/edit/'  . $record->id;
+$_del_url 		= $this->data['_url_base'] . '/delete/' . $record->id;
+$_detail_url 	= $this->data['_url_base'] . '/details/' . $record->id;
 ?>
 <tr class="searchable <?php echo $current_class;?>"
 	title="<?php echo $current_title?>"
@@ -18,7 +22,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 	id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
 	<td>
-		<a href="<?php echo site_url('ri_setup_treaties/details/' . $record->id);?>" title="View Treaty Details">
+		<a href="<?php echo site_url($_detail_url);?>" title="View Treaty Details">
 			<?php echo $record->name;?>
 		</a>
 	</td>
@@ -36,7 +40,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 						class="trg-dialog-edit"
 						data-box-size="large"
 						data-title='<i class="fa fa-pencil-square-o"></i> Edit Treaty - <?php echo $record->name ?>'
-						data-url="<?php echo site_url('ri_setup_treaties/edit/' . $record->id);?>"
+						data-url="<?php echo site_url($_edit_url);?>"
 						data-form=".form-iqb-general">
 						<i class="fa fa-pencil-square-o"></i>
 						<span>Edit Treaty</span></a>
@@ -49,7 +53,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 							title="Delete"
 							class="trg-row-action"
 							data-confirm="true"
-							data-url="<?php echo site_url('ri_setup_treaties/delete/' . $record->id);?>">
+							data-url="<?php echo site_url($_del_url);?>">
 								<i class="fa fa-trash-o"></i>
 								<span>Delete</span></a>
 					</li>
@@ -57,7 +61,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 				<?php endif?>
 
 				<li>
-					<a href="<?php echo site_url('ri_setup_treaties/details/' . $record->id);?>"
+					<a href="<?php echo site_url($_detail_url);?>"
 						title="View details.">
 						<i class="fa fa-list-alt"></i>
 						<span>View Details</span></a>

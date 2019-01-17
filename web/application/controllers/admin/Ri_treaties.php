@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Ri_setup_treaties extends MY_Controller
+class Ri_treaties extends MY_Controller
 {
 	/**
 	 * Files Upload Path - Data (Treaties Document)
@@ -20,6 +20,13 @@ class Ri_setup_treaties extends MY_Controller
 	public static $data_upload_path = INSQUBE_DATA_ROOT . 'treaties/';
 
 	// --------------------------------------------------------------------
+
+	/**
+     * Controller URL
+     */
+    private $_url_base;
+
+    // --------------------------------------------------------------------
 
 	function __construct()
 	{
@@ -52,6 +59,10 @@ class Ri_setup_treaties extends MY_Controller
 
 		// Load Model
 		$this->load->model('ri_setup_treaty_model');
+
+		// URL Base
+        $this->_url_base         = 'admin/' . $this->router->class;
+        $this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -123,7 +134,7 @@ class Ri_setup_treaties extends MY_Controller
 		$data = [
 			'records' => $records,
 			'next_id' => $next_id,
-			'next_url' => $next_id ? site_url( 'ri_setup_treaties/page/r/' . $next_id ) : NULL
+			'next_url' => $next_id ? site_url( $this->_url_base . '/page/r/' . $next_id ) : NULL
 		] + $dom_data;
 
 		/**
@@ -138,7 +149,7 @@ class Ri_setup_treaties extends MY_Controller
 			 */
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('ri_setup_treaties/page/l/' )
+				'filter_url' 	=> site_url( $this->_url_base . '/page/l/' )
 			]);
 		}
 		else if($layout === 'l')

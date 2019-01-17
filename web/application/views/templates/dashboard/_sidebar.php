@@ -248,11 +248,11 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           </span>
                                     </a>
                                     <ul class="treeview-menu">
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'ri_setup_treaty_types');?>">
-                                                <a href="<?php echo site_url('ri_setup_treaty_types');?>"><i class="fa fa-circle-o"></i> Treaty Types</a>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'ri_treaty_types');?>">
+                                                <a href="<?php echo site_url('admin/ri_treaty_types');?>"><i class="fa fa-circle-o"></i> Treaty Types</a>
                                           </li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'ri_setup_treaties');?>">
-                                                <a href="<?php echo site_url('ri_setup_treaties');?>"><i class="fa fa-circle-o"></i> Treaties</a>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'ri_treaties');?>">
+                                                <a href="<?php echo site_url('admin/ri_treaties');?>"><i class="fa fa-circle-o"></i> Treaties</a>
                                           </li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'ri_setup_pools');?>">
                                                 <a href="<?php echo site_url('ri_setup_pools');?>"><i class="fa fa-circle-o"></i> Pools</a>
