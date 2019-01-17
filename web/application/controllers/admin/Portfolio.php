@@ -20,6 +20,13 @@ class Portfolio extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -52,6 +59,10 @@ class Portfolio extends MY_Controller
 
 		// Helper
 		$this->load->helper('object');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -599,7 +610,7 @@ class Portfolio extends MY_Controller
     public function flush()
     {
         $this->portfolio_model->clear_cache();
-        redirect($this->router->class);
+        redirect($this->_url_base);
     }
 
     // --------------------------------------------------------------------
@@ -863,7 +874,7 @@ class Portfolio extends MY_Controller
 								'templates/_common/_content_header',
 								[
 									'content_header' => 'Manage Portfolio Settings',
-									'breadcrumbs' => ['Application Settings' => NULL, 'Portfolio' => 'portfolio', 'Settings' => NULL]
+									'breadcrumbs' => ['Application Settings' => NULL, 'Portfolio' => $this->_url_base, 'Settings' => NULL]
 							])
 							->partial('content', 'setup/portfolio/_settings_default', compact('records'))
 							->render($this->data);
@@ -894,7 +905,7 @@ class Portfolio extends MY_Controller
 								'templates/_common/_content_header',
 								[
 									'content_header' => $content_header,
-									'breadcrumbs' => ['Application Settings' => NULL, 'Portfolio' => 'portfolio', 'Settings' => NULL]
+									'breadcrumbs' => ['Application Settings' => NULL, 'Portfolio' => $this->_url_base . '/settings', 'Settings' => NULL]
 							])
 							->partial('content', 'setup/portfolio/_settings_fy', compact('records'))
 							->render($this->data);
@@ -911,7 +922,7 @@ class Portfolio extends MY_Controller
     {
     	$this->load->model('portfolio_setting_model');
         $this->portfolio_setting_model->clear_cache();
-        redirect($this->router->class . '/settings' );
+        redirect($this->_url_base . '/settings' );
     }
 
   	// --------------------------------------------------------------------

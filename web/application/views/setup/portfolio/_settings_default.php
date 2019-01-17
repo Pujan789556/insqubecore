@@ -22,10 +22,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							class="btn btn-success btn-round trg-dialog-edit"
 							data-box-size="large"
 							data-title='<i class="fa fa-pencil-square-o"></i> Add New Portfolio Settings'
-							data-url="<?php echo site_url('portfolio/add_settings/');?>"
+							data-url="<?php echo site_url( $this->data['_url_base'] . '/add_settings/');?>"
 							data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
-						<a href="<?php echo site_url( $this->router->class . '/flush_settings/' );?>" title="Flush Cache"
+						<a href="<?php echo site_url( $this->data['_url_base'] . '/flush_settings/' );?>" title="Flush Cache"
 							class="btn btn-warning btn-round"
 							data-toggle="tooltip"
 						><i class="fa fa-trash-o"></i> Flush Cache</a>

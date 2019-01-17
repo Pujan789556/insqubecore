@@ -11,6 +11,10 @@ $flag_current_fiscal_year = $this->current_fiscal_year->id == $record->fiscal_yr
 
 $current_class = $flag_current_fiscal_year ? 'text-success text-bold' : '';
 $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
+
+$_import_url 		= $this->data['_url_base'] . '/import_missing_settings/'  . $record->fiscal_yr_id;
+$_duplicate_url 	= $this->data['_url_base'] . '/duplicate_settings/'  . $record->fiscal_yr_id;
+$_detail_url 		= $this->data['_url_base'] . '/settings/fy/'  . $record->fiscal_yr_id;
 ?>
 
 <tr
@@ -27,7 +31,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 			title="Import Missing Portfolio Settings for This Fiscal Year"
 			data-box-size="large"
 			class="trg-row-action action"
-			data-url="<?php echo site_url('portfolio/import_missing_settings/' . $record->fiscal_yr_id);?>">
+			data-url="<?php echo site_url($_import_url);?>">
 			<i class="fa fa-plus-square-o"></i>
 			<span class="hidden-xs">Import Missing</span>
 		</a>
@@ -37,12 +41,12 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 			data-box-size="large"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Duplicate Portfolio Settings'
-			data-url="<?php echo site_url('portfolio/duplicate_settings/' . $record->fiscal_yr_id);?>"
+			data-url="<?php echo site_url($_duplicate_url);?>"
 			data-form=".form-iqb-general">
 			<i class="fa fa-copy"></i>
 			<span class="hidden-xs">Duplicate</span>
 		</a>
-		<a href="<?php echo site_url('portfolio/settings/fy/' . $record->fiscal_yr_id);?>"
+		<a href="<?php echo site_url($_detail_url);?>"
 			class="action"
 			data-toggle="tooltip"
 			title="List all Portfolio Settings for this Fiscal Year">

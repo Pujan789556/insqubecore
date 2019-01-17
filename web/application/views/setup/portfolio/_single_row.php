@@ -3,6 +3,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Portfolio:  Single Row
 */
+$_edit_url 		= $this->data['_url_base'] . '/edit/'  . $record->id;
+$_del_url 		= $this->data['_url_base'] . '/delete/' . $record->id;
+$_download_url 	= $this->data['_url_base'] . '/download/file_toc/' . $record->id;
+$_ac_url 		= $this->data['_url_base'] . '/accounts/' . $record->id;
+$_risk_url 		= $this->data['_url_base'] . '/risks/' . $record->id;
+$_claim_docs_url	= $this->data['_url_base'] . '/claim_docs/' . $record->id;
+$_bsrs_hd_url	 	= $this->data['_url_base'] . '/bsrs_headings/' . $record->id;
+
+$_enable_url 		= $this->data['_url_base'] . '/enable/'  . $record->id;
+$_disable_url 		= $this->data['_url_base'] . '/disable/'  . $record->id;
+
+
 ?>
 <tr data-name="<?php echo $record->name_en;?>" class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
@@ -14,7 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<?php
 		if( $record->file_toc )
 		{
-			echo anchor('portfolio/download/file_toc/' . $record->id, '<i class="fa fa-fw fa-download"></i>', 'target="_blank" title="Download terms & conditions document"');
+			echo anchor($_download_url, '<i class="fa fa-fw fa-download"></i>', 'target="_blank" title="Download terms & conditions document"');
 		}
 		else
 		{
@@ -28,7 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			data-toggle="tooltip"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio'
-			data-url="<?php echo site_url('portfolio/edit/' . $record->id);?>"
+			data-url="<?php echo site_url($_edit_url);?>"
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
@@ -40,7 +52,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				data-box-size="large"
 				class="trg-dialog-edit action"
 				data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio Specific Internal Accounts - <?php echo $record->name_en?>'
-				data-url="<?php echo site_url('portfolio/accounts/' . $record->id);?>"
+				data-url="<?php echo site_url($_ac_url);?>"
 				data-form=".form-iqb-general">
 				<i class="fa fa-dollar"></i>
 				<span class="hidden-xs">Accounts</span>
@@ -52,7 +64,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				data-box-size="large"
 				class="trg-dialog-edit action"
 				data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio Specific Risks - <?php echo $record->name_en?>'
-				data-url="<?php echo site_url('portfolio/risks/' . $record->id);?>"
+				data-url="<?php echo site_url($_risk_url);?>"
 				data-form=".form-iqb-general">
 				<i class="fa fa-flag"></i>
 				<span class="hidden-xs">Risks</span>
@@ -64,7 +76,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				data-box-size="large"
 				class="trg-dialog-edit action"
 				data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio Specific Claim Documents - <?php echo $record->name_en?>'
-				data-url="<?php echo site_url('portfolio/claim_docs/' . $record->id);?>"
+				data-url="<?php echo site_url($_claim_docs_url);?>"
 				data-form=".form-iqb-general">
 				<i class="fa fa-files-o"></i>
 				<span class="hidden-xs">Claim Docs</span>
@@ -76,7 +88,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				data-box-size="large"
 				class="trg-dialog-edit action"
 				data-title='<i class="fa fa-pencil-square-o"></i> Edit Portfolio Specific Beema Samiti Report Heading Type - <?php echo $record->name_en?>'
-				data-url="<?php echo site_url('portfolio/bsrs_headings/' . $record->id);?>"
+				data-url="<?php echo site_url($_bsrs_hd_url);?>"
 				data-form=".form-iqb-general">
 				<i class="fa fa-th-large"></i>
 				<span class="hidden-xs">BS Headings</span>
@@ -88,7 +100,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				$title 				= "Disable";
 				$a_title 			= $title . ' Portfolio?';
 				$confirm_message 	= "Are you sure you want to Disable this Portfolio?<br/>You will not be able to issue policy after disabling this portfolio.";
-				$url 				= site_url('portfolio/disable/'.$record->id);
+				$url 				= site_url($_disable_url);
 				$btn_class 			= 'btn-danger';
 				$icon 				= 'fa-ban';
 			}
@@ -97,7 +109,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				$title 				= "Enable";
 				$a_title 			= $title . ' Portfolio?';
 				$confirm_message 	= "Are you sure you want to Enable this Portfolio?";
-				$url 				= site_url('portfolio/enable/'.$record->id);
+				$url 				= site_url($_enable_url);
 				$btn_class 			= 'btn-success';
 				$icon 				= 'fa-check';
 			}
@@ -119,7 +131,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				data-toggle="tooltip"
 				class="trg-row-action action"
 				data-confirm="true"
-				data-url="<?php echo site_url('portfolio/delete/' . $record->id);?>">
+				data-url="<?php echo site_url($_del_url);?>">
 					<i class="fa fa-trash-o"></i>
 					<span class="hidden-xs">Delete</span>
 			</a>

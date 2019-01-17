@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<div class="col-sm-6 master-actions text-right">
 						<a
 							data-toggle="tooltip"
-							href="<?php echo site_url('portfolio/settings/');?>" title="Back to Portfolio Settings"
+							href="<?php echo site_url( $this->data['_url_base'] . '/settings/');?>" title="Back to Portfolio Settings"
 							class="btn btn-warning btn-round" >
 							<i class="fa fa-chevron-left"></i> Back</a>
 					</div>
