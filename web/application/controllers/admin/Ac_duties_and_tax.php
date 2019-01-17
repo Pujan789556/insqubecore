@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Voucher Type Controller
+ * Account Duties and Tax Controller
  *
  * This controller falls under "Application Settings" category.
  *
@@ -12,8 +12,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Ac_voucher_types extends MY_Controller
+class Ac_duties_and_tax extends MY_Controller
 {
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -31,7 +38,7 @@ class Ac_voucher_types extends MY_Controller
         $this->template->set_template('dashboard');
 
         // Basic Data
-        $this->data['site_title'] = 'Application Settings | Account Transaction Type References';
+        $this->data['site_title'] = 'Application Settings | Account Duties & Tax';
 
         // Setup Navigation
 		$this->active_nav_primary([
@@ -41,7 +48,11 @@ class Ac_voucher_types extends MY_Controller
 		]);
 
 		// Load Model
-		$this->load->model('ac_voucher_type_model');
+		$this->load->model('ac_duties_and_tax_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -59,16 +70,16 @@ class Ac_voucher_types extends MY_Controller
 		 * Normal Form Render
 		 */
 		// this will generate cache name: mc_master_departments_all
-		$records = $this->ac_voucher_type_model->get_all();
+		$records = $this->ac_duties_and_tax_model->get_all();
 
 		$this->template->partial(
 							'content_header',
 							'templates/_common/_content_header',
 							[
-								'content_header' => 'Manage Account Transaction Type References',
-								'breadcrumbs' => ['Application Settings' => NULL, 'Account Transaction Type References' => NULL]
+								'content_header' => 'Manage Account Duties & Tax',
+								'breadcrumbs' => ['Application Settings' => NULL, 'Account Duties & Tax' => NULL]
 						])
-						->partial('content', 'setup/ac/voucher_types/_index', compact('records'))
+						->partial('content', 'setup/ac/duties_and_tax/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -85,7 +96,7 @@ class Ac_voucher_types extends MY_Controller
 	{
 		// Valid Record ?
 		$id = (int)$id;
-		$record = $this->ac_voucher_type_model->find($id);
+		$record = $this->ac_duties_and_tax_model->find($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -96,9 +107,9 @@ class Ac_voucher_types extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac/voucher_types/_form',
+		$json_data['form'] = $this->load->view('setup/ac/duties_and_tax/_form',
 			[
-				'form_elements' => $this->ac_voucher_type_model->validation_rules,
+				'form_elements' => $this->ac_duties_and_tax_model->validation_rules,
 				'record' 		=> $record
 			], TRUE);
 
@@ -135,7 +146,7 @@ class Ac_voucher_types extends MY_Controller
 		{
 			$done = FALSE;
 
-			$rules = $this->ac_voucher_type_model->validation_rules;
+			$rules = $this->ac_duties_and_tax_model->validation_rules;
 			$this->form_validation->set_rules($rules);
 			if( $this->form_validation->run() === TRUE )
 			{
@@ -145,12 +156,14 @@ class Ac_voucher_types extends MY_Controller
 				if($action === 'add')
 				{
 					// // @NOTE: Activity Log will be automatically inserted
-					// $done = $this->ac_voucher_type_model->insert($data, TRUE); // No Validation on Model
+					// $done = $this->ac_duties_and_tax_model->insert($data, TRUE); // No Validation on Model
+
+
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->ac_voucher_type_model->update($record->id, $data, TRUE);
+					$done = $this->ac_duties_and_tax_model->update($record->id, $data, TRUE);
 				}
 
 				if(!$done)
@@ -176,14 +189,14 @@ class Ac_voucher_types extends MY_Controller
 			{
 				if($action === 'add')
 				{
-					$records = $this->ac_voucher_type_model->get_all();
-					$success_html = $this->load->view('setup/ac/voucher_types/_list', ['records' => $records], TRUE);
+					$records = $this->ac_duties_and_tax_model->get_all();
+					$success_html = $this->load->view('setup/ac/duties_and_tax/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
-					$record = $this->ac_voucher_type_model->find($record->id);
-					$success_html = $this->load->view('setup/ac/voucher_types/_single_row', ['record' => $record], TRUE);
+					$record = $this->ac_duties_and_tax_model->find($record->id);
+					$success_html = $this->load->view('setup/ac/duties_and_tax/_single_row', ['record' => $record], TRUE);
 				}
 			}
 
@@ -208,9 +221,9 @@ class Ac_voucher_types extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/ac/voucher_types/_form',
+									? 	$this->load->view('setup/ac/duties_and_tax/_form',
 											[
-												'form_elements' => $this->ac_voucher_type_model->validation_rules,
+												'form_elements' => $this->ac_duties_and_tax_model->validation_rules,
 												'record' 		=> $record
 											], TRUE)
 									: 	null
@@ -222,5 +235,18 @@ class Ac_voucher_types extends MY_Controller
 	}
 
     // --------------------------------------------------------------------
+
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        $this->ac_duties_and_tax_model->clear_cache();
+        redirect($this->_url_base);
+    }
+
+	// --------------------------------------------------------------------
 
 }
