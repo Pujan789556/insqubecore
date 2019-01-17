@@ -13,6 +13,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Endorsement_templates extends MY_Controller
 {
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
 
 	function __construct()
 	{
@@ -44,6 +50,10 @@ class Endorsement_templates extends MY_Controller
 		$this->load->model('endorsement_template_model');
 		$this->load->model('portfolio_model');
         $this->load->helper('policy');
+
+        // URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -112,7 +122,7 @@ class Endorsement_templates extends MY_Controller
 		$data = [
 			'records' => $records,
 			'next_id' => $next_id,
-			'next_url' => $next_id ? site_url( 'endorsement_templates/page/r/' . $next_id ) : NULL
+			'next_url' => $next_id ? site_url( $this->_url_base . '/page/r/' . $next_id ) : NULL
 		] + $dom_data;
 
 		/**
@@ -124,7 +134,7 @@ class Endorsement_templates extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('endorsement_templates/page/l/' )
+				'filter_url' 	=> site_url( $this->_url_base . '/page/l/' )
 			]);
 		}
 		else if($layout === 'l')
