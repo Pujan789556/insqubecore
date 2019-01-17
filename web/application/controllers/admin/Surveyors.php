@@ -18,10 +18,19 @@ class Surveyors extends MY_Controller
 	 */
 	public static $media_upload_path = INSQUBE_MEDIA_ROOT . 'media/surveyors/';
 
+	// --------------------------------------------------------------------
+
 	/**
 	 * Files Upload Path - Data
 	 */
 	public static $data_upload_path = INSQUBE_DATA_ROOT . 'surveyors/';
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
 
 	// --------------------------------------------------------------------
 
@@ -47,6 +56,10 @@ class Surveyors extends MY_Controller
 
 		// Load Model
 		$this->load->model('surveyor_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -74,7 +87,7 @@ class Surveyors extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('surveyors', 'explore.surveyor') )
+		if( !$this->dx_auth->is_authorized('surveyors', 'explore.surveyor') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -82,7 +95,7 @@ class Surveyors extends MY_Controller
 
 		// If request is coming from refresh method, reset nextid
 		$next_id 		= (int)$next_id;
-		$next_url_base 	= $this->router->class . '/page/r/' . $from_widget;
+		$next_url_base 	= $this->_url_base . '/page/r/' . $from_widget;
 
 		// DOM Data
 		$dom_data = [
@@ -111,7 +124,7 @@ class Surveyors extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/0/' . $widget_reference)
+				'filter_url' 	=> site_url($this->_url_base . '/page/l/' . $from_widget . '/0/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')
@@ -271,9 +284,9 @@ class Surveyors extends MY_Controller
 	public function edit($id, $from_widget = 'n', $widget_reference = '')
 	{
 		/**
-		 * Check Permissions
+		 * Check Permissions : Admin Only
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('surveyors', 'edit.surveyor') )
+		if( !$this->dx_auth->is_admin() )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -320,9 +333,9 @@ class Surveyors extends MY_Controller
 	public function add( $from_widget='n', $widget_reference = '' )
 	{
 		/**
-		 * Check Permissions
+		 * Check Permissions : Admin Only
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('surveyors', 'add.surveyor') )
+		if( !$this->dx_auth->is_admin() )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -580,9 +593,9 @@ class Surveyors extends MY_Controller
 	public function delete($id)
 	{
 		/**
-		 * Check Permissions
+		 * Check Permissions : Admin Only
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('surveyors', 'delete.surveyor') )
+		if( !$this->dx_auth->is_admin() )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -654,6 +667,14 @@ class Surveyors extends MY_Controller
      */
     public function details($id)
     {
+    	/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('surveyors', 'explore.surveyor') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
     	$id = (int)$id;
 		$record = $this->surveyor_model->find($id);
 		if(!$record)
@@ -680,7 +701,7 @@ class Surveyors extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Surveyor Details <small>' . $record->name . '</small>',
-								'breadcrumbs' => ['Surveyors' => 'surveyors', 'Details' => NULL]
+								'breadcrumbs' => ['Surveyors' => $this->_url_base, 'Details' => NULL]
 						])
 						->partial('content', 'setup/surveyors/_details', $view_data)
 						->render($this->data);
@@ -698,6 +719,14 @@ class Surveyors extends MY_Controller
      */
     public function download($doc_key, $id)
     {
+    	/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('surveyors', 'explore.surveyor') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
     	$id = (int)$id;
 		$record = $this->surveyor_model->find($id);
 		if(!$record || !in_array($doc_key, ['resume']))
@@ -710,9 +739,10 @@ class Surveyors extends MY_Controller
 		 */
 		$this->load->helper('download');
 		$filename = $record->{$doc_key} ?? NULL;
-		if($filename)
+		$download_path = $filename ? self::$data_upload_path . $filename : NULL;
+		if( $filename && file_exists($download_path) )
 		{
-			force_download( self::$data_upload_path . $filename, NULL, TRUE);
+			force_download($download_path, NULL, TRUE);
 		}
 		exit(1);
 

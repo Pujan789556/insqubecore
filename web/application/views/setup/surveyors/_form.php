@@ -44,8 +44,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <div class="col-sm-10 col-md-6">
                 <input type="file" id="resume" name="resume">
                 <p class="help-block">Only PDF, DOC or DOCX files supported.</p>
-                <?php if(isset($record->resume)  && !empty($record->resume) ):?>
-                      <p><a href="<?php echo site_url('surveyors/download/resume/' . $record->id)?>" target="_blank"><i class="fa fa-download"></i> Download Existing Document</a></p>
+                <?php
+                if(isset($record->resume)  && !empty($record->resume) ):
+                    $_download_url  = $this->data['_url_base'] . '/download/resume/' . $record->id;?>
+                      <p><a href="<?php echo site_url($_download_url)?>" target="_blank"><i class="fa fa-download"></i> Download Existing Document</a></p>
                   <?php endif?>
 
             </div>

@@ -3,19 +3,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Surveyors:  Single Row
 */
+$_edit_url 		= $this->data['_url_base'] . '/edit/'  . $record->id;
+$_del_url 		= $this->data['_url_base'] . '/delete/' . $record->id;
+$_detail_url 	= $this->data['_url_base'] . '/details/' . $record->id;
+$_download_url 	= $this->data['_url_base'] . '/download/resume/' . $record->id;
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<?php if( $this->dx_auth->is_admin() ): ?>
 		<td><?php echo $record->id;?></td>
 	<?php endif?>
 	<td>
-		<a href="<?php echo site_url('surveyors/details/' . $record->id);?>"
+		<a href="<?php echo site_url($_detail_url);?>"
 						title="View agent details.">
 						<?php echo $record->name;?></a>
 	</td>
 	<td>
 		<?php if(isset($record->resume)  && !empty($record->resume) ):?>
-          <a data-toggle="tooltip" title="Download Sureveyor's Resume/Bio-data/Profile" href="<?php echo site_url('surveyors/download/resume/' . $record->id)?>" target="_blank"><i class="fa fa-file-pdf-o"></i></a>
+          <a data-toggle="tooltip" title="Download Sureveyor's Resume/Bio-data/Profile" href="<?php echo site_url($_download_url)?>" target="_blank"><i class="fa fa-file-pdf-o"></i></a>
       	<?php else: ?>
       		<i class="fa fa-minus text-muted" title="Not Available" data-toggle="tooltip"></i>
       	<?php endif?>
@@ -57,7 +61,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						title="Edit Basic Information"
 						class="trg-dialog-edit"
 						data-title='<i class="fa fa-pencil-square-o"></i> Edit Basic Information'
-						data-url="<?php echo site_url('surveyors/edit/' . $record->id);?>"
+						data-url="<?php echo site_url($_edit_url);?>"
 						data-form=".form-iqb-general">
 						<i class="fa fa-pencil-square-o"></i>
 						<span>Edit Surveyor Info</span></a>
@@ -70,14 +74,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							title="Delete"
 							class="trg-row-action"
 							data-confirm="true"
-							data-url="<?php echo site_url('surveyors/delete/' . $record->id);?>">
+							data-url="<?php echo site_url($_del_url);?>">
 								<i class="fa fa-trash-o"></i>
 								<span>Delete</span></a>
 					</li><li class="divider"></li>
 				<?php endif?>
 
 				<li>
-					<a href="<?php echo site_url('surveyors/details/' . $record->id);?>"
+					<a href="<?php echo site_url($_detail_url);?>"
 						title="View surveyor details.">
 						<i class="fa fa-user"></i>
 						<span>View Details</span></a>

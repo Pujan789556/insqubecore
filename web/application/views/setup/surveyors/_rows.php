@@ -21,7 +21,7 @@ if($next_id):
 	$loader_box_id = '__next-loader-surveyor-'.$next_id;
 ?>
 	<tr id="<?php echo $loader_box_id;?>">
-		<td colspan="5" class="text-center pointer filter-next-page-trigger"
+		<td colspan="7" class="text-center pointer filter-next-page-trigger"
 			data-loading-text="Loading ..."
 			data-url="<?php echo $next_url;?>"
 			data-method="append"

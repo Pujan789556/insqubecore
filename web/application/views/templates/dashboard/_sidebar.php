@@ -112,7 +112,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           <li class="<?php echo set_menu_active($nav_level_2, 'states');?>"><a href="<?php echo site_url('admin/states');?>"><i class="fa fa-circle-o"></i> States</a></li>
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'surveyor_expertise');?>"><a href="<?php echo site_url('admin/surveyor_expertise');?>"><i class="fa fa-circle-o"></i> Surveyor Expertise</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'surveyors');?>"><a href="<?php echo site_url('surveyors');?>"><i class="fa fa-circle-o"></i> Surveyors</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'surveyors');?>"><a href="<?php echo site_url('admin/surveyors');?>"><i class="fa fa-circle-o"></i> Surveyors</a></li>
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'tags');?>"><a href="<?php echo site_url('tags');?>"><i class="fa fa-circle-o"></i> Tags</a></li>
 
