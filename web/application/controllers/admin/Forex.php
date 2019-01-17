@@ -13,6 +13,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Forex extends MY_Controller
 {
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
 
 	function __construct()
 	{
@@ -42,6 +48,10 @@ class Forex extends MY_Controller
 
 		// Load Model
 		$this->load->model('forex_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -110,7 +120,7 @@ class Forex extends MY_Controller
 		$data = [
 			'records' => $records,
 			'next_id' => $next_id,
-			'next_url' => $next_id ? site_url( 'forex/page/r/' . $next_id ) : NULL
+			'next_url' => $next_id ? site_url( $this->_url_base . '/page/r/' . $next_id ) : NULL
 		] + $dom_data;
 
 		/**
@@ -122,7 +132,7 @@ class Forex extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('forex/page/l/' )
+				'filter_url' 	=> site_url( $this->_url_base . '/page/l/' )
 			]);
 		}
 		else if($layout === 'l')

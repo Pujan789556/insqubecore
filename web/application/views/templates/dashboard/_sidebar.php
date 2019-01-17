@@ -103,7 +103,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'local_bodies');?>"><a href="<?php echo site_url('admin/local_bodies');?>"><i class="fa fa-circle-o"></i> Local Bodies</a></li>
 
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'forex');?>"><a href="<?php echo site_url('forex');?>"><i class="fa fa-circle-o"></i> Forex</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'forex');?>"><a href="<?php echo site_url('admin/forex');?>"><i class="fa fa-circle-o"></i> Forex</a></li>
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'months');?>"><a href="<?php echo site_url('months');?>"><i class="fa fa-circle-o"></i> Nepali Months</a></li>
 
