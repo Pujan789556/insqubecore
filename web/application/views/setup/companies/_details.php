@@ -82,7 +82,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					$this->load->view('setup/company_branches/_index', [
 						'records' 			=> $branches,
 						'company_record' 	=> $record,
-						'add_url' 			=> 'companies/branch/add/' . $record->id
+						'add_url' 			=> $this->data['_url_base'] . '/branch/add/' . $record->id
 					]);
 					?>
 				</div>

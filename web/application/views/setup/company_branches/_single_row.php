@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Customer Branch:  Single Row
 */
+$_edit_url 		= $this->data['_url_base'] . '/branch/edit/'  . $record->company_id . '/' . $record->id;
+$_del_url 		= $this->data['_url_base'] . '/branch/delete/' . $record->company_id . '/' . $record->id;
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-company-branch-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
@@ -23,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				class="trg-dialog-edit action"
 				data-box-size="large"
 				data-title='<i class="fa fa-pencil-square-o"></i> Edit Branch Information'
-				data-url="<?php echo site_url('companies/branch/edit/' . $record->company_id . '/' . $record->id);?>"
+				data-url="<?php echo site_url($_edit_url);?>"
 				data-form="#_form-company-branch">
 				<i class="fa fa-pencil-square-o"></i>
 				<span>Edit</span></a>
@@ -34,7 +36,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					title="Delete"
 					class="trg-row-action action"
 					data-confirm="true"
-					data-url="<?php echo site_url('companies/branch/delete/' . $record->company_id . '/' . $record->id);?>">
+					data-url="<?php echo site_url($_del_url);?>">
 						<i class="fa fa-trash-o"></i>
 						<span>Delete</span></a>
 		<?php endif?>

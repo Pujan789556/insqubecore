@@ -81,7 +81,7 @@ class Agents extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('agents', 'explore.agent') )
+		if( !$this->dx_auth->is_authorized('agents', 'explore.agent') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -287,9 +287,9 @@ class Agents extends MY_Controller
 	public function edit($id, $from_widget = 'n', $widget_reference = '')
 	{
 		/**
-		 * Check Permissions
+		 * Check Permissions : Admin Only
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('agents', 'edit.agent') )
+		if( !$this->dx_auth->is_admin() )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -332,9 +332,9 @@ class Agents extends MY_Controller
 	public function add($from_widget='n', $widget_reference = '')
 	{
 		/**
-		 * Check Permissions
+		 * Check Permissions : Admin Only
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('agents', 'add.agent') )
+		if( !$this->dx_auth->is_admin() )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -518,9 +518,9 @@ class Agents extends MY_Controller
 	public function delete($id)
 	{
 		/**
-		 * Check Permissions
+		 * Check Permissions : Admin Only
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('agents', 'delete.agent') )
+		if( !$this->dx_auth->is_admin() )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -584,6 +584,14 @@ class Agents extends MY_Controller
      */
     public function details($id)
     {
+    	/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('agents', 'explore.agent') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
     	$id = (int)$id;
 		$record = $this->agent_model->find($id);
 		if(!$record)

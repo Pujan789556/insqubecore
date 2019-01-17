@@ -89,7 +89,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                                 </ul>
                                           </li>
 
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'companies');?>"><a href="<?php echo site_url('companies');?>"><i class="fa fa-circle-o"></i> Companies</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'companies');?>"><a href="<?php echo site_url('admin/companies');?>"><i class="fa fa-circle-o"></i> Companies</a></li>
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'countries');?>"><a href="<?php echo site_url('countries');?>"><i class="fa fa-globe"></i> Countries</a></li>
 

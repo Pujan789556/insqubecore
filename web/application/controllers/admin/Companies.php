@@ -20,6 +20,14 @@ class Companies extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -43,6 +51,10 @@ class Companies extends MY_Controller
 		// Load Model
 		$this->load->model('company_model');
 		$this->load->model('company_branch_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -70,7 +82,7 @@ class Companies extends MY_Controller
 		/**
 		 * Check Permissions
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('companies', 'explore.company') )
+		if( !$this->dx_auth->is_authorized('companies', 'explore.company') )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -78,7 +90,7 @@ class Companies extends MY_Controller
 
 		// If request is coming from refresh method, reset nextid
 		$next_id 		= (int)$next_id;
-		$next_url_base 	= $this->router->class . '/page/r/' . $from_widget;
+		$next_url_base 	= $this->_url_base . '/page/r/' . $from_widget;
 
 		// DOM Data
 		$dom_data = [
@@ -107,7 +119,7 @@ class Companies extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/0/' . $widget_reference)
+				'filter_url' 	=> site_url($this->_url_base . '/page/l/' . $from_widget . '/0/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')
@@ -277,9 +289,9 @@ class Companies extends MY_Controller
 	public function edit($id, $from_widget = 'n', $widget_reference = '')
 	{
 		/**
-		 * Check Permissions
+		 * Check Permissions : Admin Only
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('companies', 'edit.company') )
+		if( !$this->dx_auth->is_admin() )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -322,9 +334,9 @@ class Companies extends MY_Controller
 	public function add( $from_widget='n', $widget_reference = '' )
 	{
 		/**
-		 * Check Permissions
+		 * Check Permissions : Admin Only
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('companies', 'add.company') )
+		if( !$this->dx_auth->is_admin() )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -511,9 +523,9 @@ class Companies extends MY_Controller
 	public function delete($id)
 	{
 		/**
-		 * Check Permissions
+		 * Check Permissions : Admin Only
 		 */
-		if( !$this->dx_auth->is_admin() && !$this->dx_auth->is_authorized('companies', 'delete.company') )
+		if( !$this->dx_auth->is_admin() )
 		{
 			$this->dx_auth->deny_access();
 		}
@@ -577,6 +589,14 @@ class Companies extends MY_Controller
      */
     public function details($id)
     {
+    	/**
+		 * Check Permissions
+		 */
+		if( !$this->dx_auth->is_authorized('companies', 'explore.company') )
+		{
+			$this->dx_auth->deny_access();
+		}
+
     	$id = (int)$id;
 		$record = $this->company_model->get($id);
 		if(!$record)
@@ -597,7 +617,7 @@ class Companies extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => 'Company Details <small>' . $record->name_en . '</small>',
-								'breadcrumbs' => ['Companies' => 'companies', 'Details' => NULL]
+								'breadcrumbs' => ['Companies' => $this->_url_base, 'Details' => NULL]
 						])
 						->partial('content', 'setup/companies/_details', $data)
 						->render($this->data);
@@ -619,14 +639,25 @@ class Companies extends MY_Controller
     	}
 
     	// Permission?
-    	$permission = $action . '.company.branch';
-    	if( !$this->dx_auth->is_authorized('companies', $permission) )
-    	{
-    		$this->template->json([
+		//  	$permission = $action . '.company.branch';
+		//  	if( !$this->dx_auth->is_authorized('companies', $permission) )
+		//  	{
+		//  		$this->template->json([
+		//  			'status' 	=> 'error',
+		//  			'message' 	=> 'Permission Denied!'
+				// ], 403);
+		//  	}
+
+    	/**
+		 * Check Permissions : Admin Only
+		 */
+		if( !$this->dx_auth->is_admin() )
+		{
+			$this->template->json([
     			'status' 	=> 'error',
     			'message' 	=> 'Permission Denied!'
 			], 403);
-    	}
+		}
 
     	switch ($action)
     	{
@@ -847,7 +878,7 @@ class Companies extends MY_Controller
     {
         $this->company_model->clear_cache();
         $this->company_branch_model->clear_cache();
-        redirect($this->router->class);
+        redirect($this->_url_base);
     }
 
 	// --------------------------------------------------------------------

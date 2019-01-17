@@ -312,14 +312,14 @@ class Ac_parties extends MY_Controller
 			 * Agent Party
 			 */
 			case IQB_AC_PARTY_TYPE_AGENT:
-				redirect('agents/page/f/y/0/' . $widget_reference);
+				redirect('admin/agents/page/f/y/0/' . $widget_reference);
 				break;
 
 			/**
 			 * Companies
 			 */
 			case IQB_AC_PARTY_TYPE_COMPANY:
-				redirect('companies/page/f/y/0/' . $widget_reference);
+				redirect('admin/companies/page/f/y/0/' . $widget_reference);
 				break;
 
 			/**
@@ -333,7 +333,7 @@ class Ac_parties extends MY_Controller
 			 * Surveyors
 			 */
 			case IQB_AC_PARTY_TYPE_SURVEYOR:
-				redirect('surveyors/page/f/y/0/' . $widget_reference);
+				redirect('admin/surveyors/page/f/y/0/' . $widget_reference);
 				break;
 
 			default:

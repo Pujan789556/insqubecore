@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						class="btn btn-success btn-round trg-dialog-edit"
 						data-box-size="large"
 						data-title='<i class="fa fa-pencil-square-o"></i> Add New Agent'
-						data-url="<?php echo site_url('agents/add/y/' . $widget_reference);?>"
+						data-url="<?php echo site_url( $this->data['_url_base']. '/add/y/' . $widget_reference);?>"
 						data-form="#_form-agent"
 					><i class="ion-plus-circled"></i> Add</a>
 				<?php endif?>
