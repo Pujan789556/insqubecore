@@ -13,6 +13,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Bs_agro_categories extends MY_Controller
 {
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -43,6 +50,10 @@ class Bs_agro_categories extends MY_Controller
 		$this->load->model('bs_agro_category_model');
 		$this->load->model('bs_agro_breed_model');
 		$this->load->model('portfolio_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -423,7 +434,7 @@ class Bs_agro_categories extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => $page_header,
-								'breadcrumbs' => ['Application Settings' => NULL, 'BS Agriculture - Categories' => 'bs_agro_categories', 'Details' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'BS Agriculture - Categories' => $this->_url_base, 'Details' => NULL]
 						])
 						->partial('content', 'setup/bs_agro_categories/_details', $data)
 						->render($this->data);
@@ -483,7 +494,7 @@ class Bs_agro_categories extends MY_Controller
     public function flush()
     {
         $this->bs_agro_category_model->clear_cache();
-        redirect($this->router->class);
+        redirect($this->_url_base);
     }
 
     /**
@@ -494,7 +505,7 @@ class Bs_agro_categories extends MY_Controller
     public function flush_breed($portoflio_id)
     {
         $this->bs_agro_breed_model->clear_cache();
-        redirect($this->router->class . '/details/' . $portoflio_id);
+        redirect($this->_url_base . '/details/' . $portoflio_id);
     }
 
 

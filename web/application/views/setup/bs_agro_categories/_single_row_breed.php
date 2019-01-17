@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Beema Samiti - Agro Categories:  Single Row By Portfolio
 */
+$_edit_url 		= $this->data['_url_base'] . '/edit_breed/'  . $record->id;
+$_detail_url 	= $this->data['_url_base'] . '/breeds/' . $record->id;
 ?>
 <tr data-name="<?php echo $record->name_en;?>" class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<td><?php echo $record->id;?></td>
@@ -19,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						title="Manage Breeds"
 						class="trg-dialog-edit"
 						data-title='<i class="fa fa-pencil-square-o"></i> Manage Breeds - <?php echo $record->name_en, '(', $record->code, ')'; ?>'
-						data-url="<?php echo site_url('bs_agro_categories/edit_breed/' . $record->id);?>"
+						data-url="<?php echo site_url($_edit_url);?>"
 						data-form=".form-iqb-general">
 						<i class="fa fa-pencil-square-o"></i>
 						<span>Manage Breeds</span></a>
@@ -30,7 +32,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						class="action trg-dialog-popup"
 						data-toggle="tooltip"
 						data-box-size="large"
-						data-url="<?php echo site_url('bs_agro_categories/breeds/' . $record->id); ?>"
+						data-url="<?php echo site_url($_detail_url); ?>"
 						title="View Breed Details"><i class="fa fa-search"></i> <span>View Breed Details</span></a>
 				</li>
 			</ul>
