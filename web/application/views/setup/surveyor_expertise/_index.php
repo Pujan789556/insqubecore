@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					</div>
 					<div class="col-sm-6 master-actions">
 						<a href="#" title="Add new department"
-							class="btn btn-success btn-round pull-right trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New Surveyor Expertise' data-url="<?php echo site_url('surveyor_expertise/add/');?>" data-form=".form-iqb-general"
+							class="btn btn-success btn-round pull-right trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Add New Surveyor Expertise' data-url="<?php echo site_url( $this->data['_url_base'] . '/add/');?>" data-form=".form-iqb-general"
 						><i class="ion-plus-circled"></i> Add</a>
 					</div>
 				</div>

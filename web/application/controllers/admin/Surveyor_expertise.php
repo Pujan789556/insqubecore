@@ -13,6 +13,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Surveyor_expertise extends MY_Controller
 {
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -41,6 +48,10 @@ class Surveyor_expertise extends MY_Controller
 
 		// Load Model
 		$this->load->model('surveyor_expertise_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
