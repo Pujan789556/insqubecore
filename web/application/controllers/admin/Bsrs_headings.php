@@ -13,6 +13,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Bsrs_headings extends MY_Controller
 {
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -43,6 +50,10 @@ class Bsrs_headings extends MY_Controller
 		$this->load->model('bsrs_heading_model');
 		$this->load->model('bsrs_heading_type_model');
 		$this->load->model('portfolio_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -325,7 +336,7 @@ class Bsrs_headings extends MY_Controller
 							'templates/_common/_content_header',
 							[
 								'content_header' => $page_header,
-								'breadcrumbs' => ['Application Settings' => NULL, 'BS Report Setup - Headings' => 'bsrs_headings', 'Details' => NULL]
+								'breadcrumbs' => ['Application Settings' => NULL, 'BS Report Setup - Headings' => $this->_url_base, 'Details' => NULL]
 						])
 						->partial('content', 'setup/bsrs_headings/_details', $data)
 						->render($this->data);
@@ -342,7 +353,7 @@ class Bsrs_headings extends MY_Controller
     public function flush()
     {
         $this->bsrs_heading_type_model->clear_cache();
-        redirect($this->router->class);
+        redirect($this->_url_base);
     }
 
 }

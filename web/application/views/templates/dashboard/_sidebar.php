@@ -131,7 +131,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                                 <a href="<?php echo site_url('admin/bsrs_heading_types');?>"><i class="fa fa-circle-o"></i> Report Heading Types</a>
                                           </li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'bsrs_headings');?>">
-                                                <a href="<?php echo site_url('bsrs_headings');?>"><i class="fa fa-circle-o"></i> Report Headings</a>
+                                                <a href="<?php echo site_url('admin/bsrs_headings');?>"><i class="fa fa-circle-o"></i> Report Headings</a>
                                           </li>
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'bs_agro_categories');?>">
