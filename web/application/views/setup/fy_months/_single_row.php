@@ -13,6 +13,9 @@ $flag_current_fiscal_year = $this->current_fiscal_year->id == $fy_record->id;
 
 $current_class = $flag_current_fiscal_year ? 'text-success text-bold' : '';
 $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
+
+$_edit_url 		= $this->data['_url_base'] . '/edit/'  . $fy_record->id;
+$_detail_url 	= $this->data['_url_base'] . '/details/' . $fy_record->id;
 ?>
 <tr data-name="<?php echo $fy_record->code_np;?>"
 	class="searchable <?php echo $current_class;?>"
@@ -32,7 +35,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 						title="Fiscal Year Months"
 						class="trg-dialog-edit"
 						data-title='<i class="fa fa-pencil-square-o"></i> Fiscal Year Months - <?php echo $fy_record->code_np ?>'
-						data-url="<?php echo site_url('fy_months/edit/' . $fy_record->id);?>"
+						data-url="<?php echo site_url($_edit_url);?>"
 						data-form=".form-iqb-general">
 						<i class="fa fa-pencil-square-o"></i>
 						<span>Manage Months</span></a>
@@ -43,7 +46,7 @@ $current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
 						class="action trg-dialog-popup"
 						data-toggle="tooltip"
 						data-box-size="large"
-						data-url="<?php echo site_url('fy_months/details/' . $fy_record->id); ?>"
+						data-url="<?php echo site_url($_detail_url); ?>"
 						title="View FAC Distribution"><i class="fa fa-search"></i> <span>View Details</span></a>
 				</li>
 			</ul>

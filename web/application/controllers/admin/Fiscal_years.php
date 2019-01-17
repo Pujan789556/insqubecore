@@ -13,8 +13,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Fiscal_years extends MY_Controller
 {
-	// --------------------------------------------------------------------
-
 	/**
 	 * Controller URL
 	 */

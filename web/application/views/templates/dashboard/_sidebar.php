@@ -98,7 +98,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                           <li class="<?php echo set_menu_active($nav_level_2, 'districts');?>"><a href="<?php echo site_url('admin/districts');?>"><i class="fa fa-circle-o"></i> Districts</a></li>
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'fiscal_years');?>"><a href="<?php echo site_url('admin/fiscal_years');?>"><i class="fa fa-circle-o"></i> Fiscal Years</a></li>
-                                          <li class="<?php echo set_menu_active($nav_level_2, 'fy_months');?>"><a href="<?php echo site_url('fy_months');?>"><i class="fa fa-circle-o"></i> Fiscal Year Months</a></li>
+                                          <li class="<?php echo set_menu_active($nav_level_2, 'fy_months');?>"><a href="<?php echo site_url('admin/fy_months');?>"><i class="fa fa-circle-o"></i> Fiscal Year Months</a></li>
                                           <li class="<?php echo set_menu_active($nav_level_2, 'fy_quarters');?>"><a href="<?php echo site_url('fy_quarters');?>"><i class="fa fa-circle-o"></i> Fiscal Year Quarters</a></li>
 
                                           <li class="<?php echo set_menu_active($nav_level_2, 'local_bodies');?>"><a href="<?php echo site_url('local_bodies');?>"><i class="fa fa-circle-o"></i> Local Bodies</a></li>
