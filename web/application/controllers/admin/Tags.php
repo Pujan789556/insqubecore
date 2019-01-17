@@ -13,6 +13,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Tags extends MY_Controller
 {
+	/**
+	 * Controller URL
+	 */
+	private $_url_base;
+
+	// --------------------------------------------------------------------
+
 	function __construct()
 	{
 		parent::__construct();
@@ -41,6 +48,10 @@ class Tags extends MY_Controller
 
 		// Load Model
 		$this->load->model('tag_model');
+
+		// URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->data['_url_base'] = $this->_url_base; // for view to access
 	}
 
 	// --------------------------------------------------------------------
@@ -325,7 +336,7 @@ class Tags extends MY_Controller
     public function flush()
     {
         $this->tag_model->clear_cache();
-        redirect($this->router->class);
+        redirect($this->_url_base);
     }
 
 }
