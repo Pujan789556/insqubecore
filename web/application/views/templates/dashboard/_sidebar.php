@@ -235,6 +235,12 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                                                   <i class="fa fa-circle-o"></i> Motor
                                                             </a>
                                                       </li>
+
+                                                      <li class="<?php echo set_menu_active($nav_level_3, 'tariff_property');?>">
+                                                            <a href="<?php echo site_url('admin/tariff_property');?>">
+                                                                  <i class="fa fa-circle-o"></i> Property
+                                                            </a>
+                                                      </li>
                                                 </ul>
                                           </li>
 
