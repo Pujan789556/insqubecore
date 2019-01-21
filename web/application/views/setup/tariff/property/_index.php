@@ -31,7 +31,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/tariff_property/_list');
+				$this->load->view('setup/tariff/property/_list');
 				?>
 			</div>
 			<!-- /.box-body -->

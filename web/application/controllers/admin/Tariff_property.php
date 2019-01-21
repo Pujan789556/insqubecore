@@ -81,7 +81,7 @@ class Tariff_property extends MY_Controller
 								'content_header' => 'Manage Property Tariff',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Property Tariff' => NULL]
 						])
-						->partial('content', 'setup/tariff_property/_index', compact('records'))
+						->partial('content', 'setup/tariff/property/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -110,7 +110,7 @@ class Tariff_property extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/tariff_property/_form',
+		$json_data['form'] = $this->load->view('setup/tariff/property/_form',
 			[
 				'form_elements' => $rules,
 				'record' 		=> $record
@@ -145,11 +145,50 @@ class Tariff_property extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/tariff_property/_form_risks',
+		$json_data['form'] = $this->load->view('setup/tariff/property/_form_risks',
 			[
 				'form_elements' => $rules,
 				'record' 		=> $record,
 				'risks' 		=> json_decode($record->risks ?? NULL)
+			], TRUE);
+
+		// Return HTML
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Edit a Tariff
+	 *
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
+	public function tariff($id)
+	{
+		// Valid Record ?
+		$id = (int)$id;
+		$record = $this->tariff_property_model->find($id);
+		if(!$record)
+		{
+			$this->template->render_404();
+		}
+
+		$this->load->model('portfolio_model');
+
+		// Form Submitted? Save the data
+		$rules = $this->tariff_property_model->v_rules_tariff();
+		$json_data = $this->_save('tariff', $record, $rules);
+
+
+		// No form Submitted?
+		$json_data['form'] = $this->load->view('setup/tariff/property/_form_tariff',
+			[
+				'form_elements' => $rules,
+				'record' 		=> $record,
+				'tariff' 		=> json_decode($record->tariff ?? NULL),
+				'portfolios' 	=> $this->portfolio_model->dropdown_children(IQB_MASTER_PORTFOLIO_PROPERTY_ID)
 			], TRUE);
 
 		// Return HTML
@@ -168,7 +207,7 @@ class Tariff_property extends MY_Controller
 	private function _save($action, $record = NULL, $rules)
 	{
 		// Valid action?
-		if( !in_array($action, array('add', 'edit', 'risks')))
+		if( !in_array($action, array('add', 'edit', 'risks', 'tariff')))
 		{
 			$this->template->json([
 				'status' => 'error',
@@ -205,6 +244,10 @@ class Tariff_property extends MY_Controller
 						$done = $this->_save_risks($record->id, $data);
 						break;
 
+					case 'tariff':
+						$done = $this->_save_tariff($record->id, $data);
+						break;
+
 					default:
 						# code...
 						break;
@@ -238,13 +281,13 @@ class Tariff_property extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->tariff_property_model->get_all();
-					$success_html = $this->load->view('setup/tariff_property/_list', ['records' => $records], TRUE);
+					$success_html = $this->load->view('setup/tariff/property/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->tariff_property_model->find($record->id);
-					$success_html = $this->load->view('setup/tariff_property/_single_row', ['record' => $record], TRUE);
+					$success_html = $this->load->view('setup/tariff/property/_single_row', ['record' => $record], TRUE);
 				}
 			}
 
@@ -289,13 +332,38 @@ class Tariff_property extends MY_Controller
 			$risk = [];
 			foreach($rules as $single)
 			{
-				$key = $single['_field'];
+				$key = $single['_key'];
 				$risk[$key] = $post_data['risks'][$key][$i];
 			}
 			$risk_data[] = $risk;
 		}
 
 		$data = ['risks' => json_encode($risk_data)];
+
+		return $this->tariff_property_model->update($id, $data, TRUE);
+	}
+
+	// --------------------------------------------------------------------
+
+	private function _save_tariff($id, $post_data)
+	{
+		// Format Risks
+		$rules = $this->tariff_property_model->v_rules_tariff();
+		$count = count($post_data['tariff']['portfolio_id']);
+
+		$risk_data = [];
+		for($i = 0; $i < $count; $i++)
+		{
+			$risk = [];
+			foreach($rules as $single)
+			{
+				$key = $single['_key'];
+				$risk[$key] = $post_data['tariff'][$key][$i];
+			}
+			$risk_data[] = $risk;
+		}
+
+		$data = ['tariff' => json_encode($risk_data)];
 
 		return $this->tariff_property_model->update($id, $data, TRUE);
 	}

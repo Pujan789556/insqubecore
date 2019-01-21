@@ -71,7 +71,7 @@ class Tariff_property_model extends MY_Model
         return [
             [
                 'field' => 'risks[code][]',
-                '_field'  => 'code',
+                '_key'  => 'code',
                 'label' => 'Risk Code',
                 'rules' => 'trim|required|max_length[20]|callback__cb_risk_duplicate',
                 '_type'     => 'text',
@@ -80,7 +80,7 @@ class Tariff_property_model extends MY_Model
             ],
             [
                 'field' => 'risks[name_en][]',
-                '_field'  => 'name_en',
+                '_key'  => 'name_en',
                 'label' => 'Name (EN)',
                 'rules' => 'trim|required|max_length[500]',
                 '_type'     => 'text',
@@ -89,13 +89,131 @@ class Tariff_property_model extends MY_Model
             ],
             [
                 'field' => 'risks[name_np][]',
-                '_field'  => 'name_np',
+                '_key'  => 'name_np',
                 'label' => 'Name (NP)',
                 'rules' => 'trim|required|max_length[500]',
                 '_type'     => 'text',
                 '_show_label' => false,
                 '_required' => true
             ]
+        ];
+    }
+
+    // ----------------------------------------------------------------
+
+    public function v_rules_tariff()
+    {
+        $portfolios = $this->portfolio_model->dropdown_children(IQB_MASTER_PORTFOLIO_PROPERTY_ID);
+        return [
+            [
+                'field' => 'tariff[portfolio_id][]',
+                '_key'  => 'portfolio_id',
+                'label' => 'Portfolio',
+                'rules' => 'trim|required|integer|max_length[11]|in_list['.implode(',', array_keys($portfolios)).']',
+                '_type'     => 'hidden',
+                '_show_label' => false,
+                '_required' => true
+            ],
+
+            /**
+             * Basic Premium Computation Options
+             */
+            [
+                'field' => 'tariff[basic_apply_si_range][]',
+                '_key'    => 'basic_apply_si_range',
+                'label'     => 'Apply SI Range (Basic)',
+                'rules'     => 'trim|required|alpha|exact_length[1]',
+                '_type'     => 'dropdown',
+                '_data'     => _FLAG_yes_no_dropdown(),
+                '_show_label' => false,
+                '_required' => true
+            ],
+            [
+                'field' => 'tariff[basic_si_min][]',
+                '_key'    => 'basic_si_min',
+                'label'     => 'SI Minimum (Basic)',
+                'rules'     => 'trim|required|prep_decimal|decimal|max_length[20]',
+                '_type'     => 'text',
+                '_show_label' => false,
+                '_required' => true
+            ],
+            [
+                'field' => 'tariff[basic_si_min_rate][]',
+                '_key'    => 'basic_si_min_rate',
+                'label'     => 'Rate on SI Minimum (Basic)',
+                'rules'     => 'trim|required|prep_decimal|decimal|max_length[6]',
+                '_type'     => 'text',
+                '_show_label' => false,
+                '_required' => true
+            ],
+            [
+                'field' => 'tariff[basic_si_overflow_rate][]',
+                '_key'    => 'basic_si_overflow_rate',
+                'label'     => 'Rate on SI Exceeding Min (Basic)',
+                'rules'     => 'trim|required|prep_decimal|decimal|max_length[6]',
+                '_type'     => 'text',
+                '_show_label' => false,
+                '_required' => true
+            ],
+            [
+                'field' => 'tariff[basic_default_rate][]',
+                '_key'    => 'basic_default_rate',
+                'label'     => 'Default Rate (Basic)',
+                'rules'     => 'trim|required|prep_decimal|decimal|max_length[6]',
+                '_type'     => 'text',
+                '_show_label' => false,
+                '_required' => true
+            ],
+
+            /**
+             * Pool Premium Computation Options
+             */
+            [
+                'field' => 'tariff[pool_apply_si_range][]',
+                '_key'    => 'pool_apply_si_range',
+                'label'     => 'Apply SI Range (Pool)',
+                'rules'     => 'trim|required|alpha|exact_length[1]',
+                '_type'     => 'dropdown',
+                '_data'     => _FLAG_yes_no_dropdown(),
+                '_show_label' => false,
+                '_required' => true
+            ],
+            [
+                'field' => 'tariff[pool_si_min][]',
+                '_key'    => 'pool_si_min',
+                'label'     => 'SI Minimum (Pool)',
+                'rules'     => 'trim|required|prep_decimal|decimal|max_length[20]',
+                '_type'     => 'text',
+                '_show_label' => false,
+                '_required' => true
+            ],
+            [
+                'field' => 'tariff[pool_si_min_rate][]',
+                '_key'    => 'pool_si_min_rate',
+                'label'     => 'Rate on SI Minimum (Pool)',
+                'rules'     => 'trim|required|prep_decimal|decimal|max_length[6]',
+                '_type'     => 'text',
+                '_show_label' => false,
+                '_required' => true
+            ],
+            [
+                'field' => 'tariff[pool_si_overflow_rate][]',
+                '_key'    => 'pool_si_overflow_rate',
+                'label'     => 'Rate on SI Exceeding Min (Pool)',
+                'rules'     => 'trim|required|prep_decimal|decimal|max_length[6]',
+                '_type'     => 'text',
+                '_show_label' => false,
+                '_required' => true
+            ],
+            [
+                'field' => 'tariff[pool_default_rate][]',
+                '_key'    => 'pool_default_rate',
+                'label'     => 'Default Rate (Pool)',
+                'rules'     => 'trim|required|prep_decimal|decimal|max_length[6]',
+                '_type'     => 'text',
+                '_show_label' => false,
+                '_required' => true
+            ],
         ];
     }
 

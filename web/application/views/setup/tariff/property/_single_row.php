@@ -33,7 +33,7 @@ $_risk_url 		= $this->data['_url_base'] . '/risks/'  . $record->id;
 		<a href="#"
 			title="Edit Tariff"
 			data-toggle="tooltip"
-			data-box-size="large"
+			data-box-size="full-width"
 			class="trg-dialog-edit action"
 			data-title='<i class="fa fa-pencil-square-o"></i> Edit Tariff - <?php echo $record->name_en?> (<?php echo $record->name_np ?>)'
 			data-url="<?php echo site_url($_tariff_url);?>"

@@ -44,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     /**
                                      * Load Single Element
                                      */
-                                    $element['_default']    = $single->{$element['_field']} ?? '';
+                                    $element['_default']    = $single->{$element['_key']} ?? '';
                                     $element['_value']      = $element['_default'];
                                     $this->load->view('templates/_common/_form_components_inline', [
                                         'form_elements' => [$element],
