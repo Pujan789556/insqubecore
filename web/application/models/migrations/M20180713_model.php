@@ -582,10 +582,10 @@ class M20180713_model extends MY_Model
 
         $list = $this->db->select('id, portfolio_id, attributes, amt_sum_insured, si_breakdown')
                         ->from('dt_objects')
-                        ->where('portfolio_id', IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID)
+                        ->where('portfolio_id', IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID)
                         ->get()->result();
 
-        $item_rules = _OBJ_FIRE_HHP_validation_rules(IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID)['items'];
+        $item_rules = _OBJ_FIRE_HHP_validation_rules(IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID)['items'];
 
         $total_success = 0;
 
@@ -654,7 +654,7 @@ class M20180713_model extends MY_Model
 
         $list = $this->db->select('id, portfolio_id, attributes, amt_sum_insured, si_breakdown')
                         ->from('dt_objects')
-                        ->where('portfolio_id', IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID)
+                        ->where('portfolio_id', IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID)
                         ->get()->result();
 
         $item_rules = _OBJ_FIRE_FIRE_manual_item_v_rules();

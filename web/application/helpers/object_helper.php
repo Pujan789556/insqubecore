@@ -348,7 +348,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
          * FIRE - FIRE
          * -------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
         {
             $snippet = _OBJ_FIRE_FIRE_row_snippet($record, $_flag__show_widget_row);
         }
@@ -357,7 +357,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
          * FIRE - HOUSEHOLDER
          * -------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
         {
             $snippet = _OBJ_FIRE_HHP_row_snippet($record, $_flag__show_widget_row);
         }
@@ -366,7 +366,7 @@ if ( ! function_exists('_OBJ_row_snippet'))
          * FIRE - LOSS OF PROFIT
          * ----------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
         {
             $snippet = _OBJ_FIRE_LOP_row_snippet($record, $_flag__show_widget_row);
         }
@@ -627,7 +627,7 @@ if ( ! function_exists('OBJECT__popup_view'))
          * FIRE - FIRE
          * -------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
         {
             $attribute_form = 'objects/snippets/_popup_fire_fire';
         }
@@ -636,7 +636,7 @@ if ( ! function_exists('OBJECT__popup_view'))
          * FIRE - HOUSEHOLDER
          * -------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
         {
             $attribute_form = 'objects/snippets/_popup_fire_hhp';
         }
@@ -645,7 +645,7 @@ if ( ! function_exists('OBJECT__popup_view'))
          * FIRE - LOSS OF PROFIT
          * ----------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
         {
             $attribute_form = 'objects/snippets/_popup_fire_lop';
         }
@@ -917,7 +917,7 @@ if ( ! function_exists('_OBJ_select_text'))
          * FIRE - FIRE
          * -------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
         {
             $snippet = _OBJ_FIRE_FIRE_select_text($record);
         }
@@ -926,7 +926,7 @@ if ( ! function_exists('_OBJ_select_text'))
          * FIRE - HOUSEHOLDER
          * -------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
         {
             $snippet = _OBJ_FIRE_HHP_select_text($record);
         }
@@ -935,7 +935,7 @@ if ( ! function_exists('_OBJ_select_text'))
          * FIRE - LOSS OF PROFIT
          * ----------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
         {
             $snippet = _OBJ_FIRE_LOP_select_text($record);
         }
@@ -1202,7 +1202,7 @@ if ( ! function_exists('_OBJ_validation_rules'))
          * FIRE - FIRE
          * -------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
         {
             $v_rules = _OBJ_FIRE_FIRE_validation_rules( $portfolio_id, $formatted );
         }
@@ -1211,7 +1211,7 @@ if ( ! function_exists('_OBJ_validation_rules'))
          * FIRE - HOUSEHOLDER
          * -------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
         {
             $v_rules = _OBJ_FIRE_HHP_validation_rules( $portfolio_id, $formatted );
         }
@@ -1220,7 +1220,7 @@ if ( ! function_exists('_OBJ_validation_rules'))
          * FIRE - LOSS OF PROFIT
          * ----------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
         {
             $v_rules = _OBJ_FIRE_LOP_validation_rules( $portfolio_id, $formatted );
         }
@@ -1486,7 +1486,7 @@ if ( ! function_exists('_OBJ_attribute_form'))
          * FIRE - FIRE
          * -------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
         {
             $attribute_form = 'objects/forms/_form_object_fire_fire';
         }
@@ -1495,7 +1495,7 @@ if ( ! function_exists('_OBJ_attribute_form'))
          * FIRE - HOUSEHOLDER
          * -------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
         {
             $attribute_form = 'objects/forms/_form_object_fire_hhp';
         }
@@ -1504,7 +1504,7 @@ if ( ! function_exists('_OBJ_attribute_form'))
          * FIRE - LOSS OF PROFIT
          * ----------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
         {
             $attribute_form = 'objects/forms/_form_object_fire_lop';
         }
@@ -1837,7 +1837,7 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
              * FIRE - FIRE
              * -------------
              */
-            case IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID:
                 $method = '_OBJ_FIRE_FIRE_pre_save_tasks';
                 break;
 
@@ -1845,7 +1845,7 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
              * FIRE - HOUSEHOLDER
              * -------------------
              */
-            case IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID:
                 $method = '_OBJ_FIRE_HHP_pre_save_tasks';
                 break;
 
@@ -2035,7 +2035,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          * FIRE - FIRE
          * -------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
         {
             $si_data = _OBJ_FIRE_FIRE_compute_sum_insured_amount($portfolio_id, $data);
         }
@@ -2044,7 +2044,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          * FIRE - HOUSEHOLDER
          * -------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
         {
             $si_data = _OBJ_FIRE_HHP_compute_sum_insured_amount($portfolio_id, $data);
         }
@@ -2053,7 +2053,7 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
          * FIRE - LOSS OF PROFIT
          * ----------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
         {
             $si_data = _OBJ_FIRE_LOP_compute_sum_insured_amount($portfolio_id, $data);
         }

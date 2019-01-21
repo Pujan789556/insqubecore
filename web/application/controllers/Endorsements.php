@@ -985,7 +985,7 @@ class Endorsements extends MY_Controller
 		         * FIRE - FIRE
 		         * -------------
 		         */
-		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
 		        {
 		            $done = __save_premium_FIRE_FIRE( $policy_record, $record );
 		        }
@@ -994,7 +994,7 @@ class Endorsements extends MY_Controller
 		         * FIRE - HOUSEHOLDER
 		         * -------------------
 		         */
-		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
 		        {
 		            $done = __save_premium_FIRE_HHP( $policy_record, $record );
 		        }
@@ -1003,7 +1003,7 @@ class Endorsements extends MY_Controller
 		         * FIRE - LOSS OF PROFIT
 		         * ----------------------
 		         */
-		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+		        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
 		        {
 		            $done = __save_premium_FIRE_LOP( $policy_record, $record );
 		        }
@@ -1870,7 +1870,7 @@ class Endorsements extends MY_Controller
 	         * FIRE - FIRE
 	         * -------------
 	         */
-	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
 	        {
 	            $goodies = _TXN_FIRE_FIRE_premium_goodies($policy_record, $policy_object, $portfolio_risks);
 	        }
@@ -1879,7 +1879,7 @@ class Endorsements extends MY_Controller
 	         * FIRE - HOUSEHOLDER
 	         * -------------------
 	         */
-	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
 	        {
 	            $goodies = _TXN_FIRE_HHP_premium_goodies($policy_record, $policy_object, $portfolio_risks);
 	        }
@@ -1888,7 +1888,7 @@ class Endorsements extends MY_Controller
 	         * FIRE - LOSS OF PROFIT
 	         * ----------------------
 	         */
-	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+	        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
 	        {
 	            $goodies = _TXN_FIRE_LOP_premium_goodies($policy_record, $policy_object);
 	        }

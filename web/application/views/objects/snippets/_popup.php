@@ -66,7 +66,7 @@ else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__M
  * FIRE - FIRE
  * -------------
  */
-else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
 {
     $this->load->view('objects/snippets/_popup_fire_fire', $data);
 }
@@ -75,7 +75,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
  * FIRE - HOUSEHOLDER
  * -------------------
  */
-else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
 {
     $this->load->view('objects/snippets/_popup_fire_hhp', $data);
 }
@@ -84,7 +84,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
  * FIRE - LOSS OF PROFIT
  * ----------------------
  */
-else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
 {
     $this->load->view('objects/snippets/_popup_fire_lop', $data);
 }

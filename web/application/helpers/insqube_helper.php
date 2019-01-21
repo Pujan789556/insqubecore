@@ -1095,7 +1095,7 @@ if ( ! function_exists('load_portfolio_helper'))
          * FIRE - FIRE
          * -------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
         {
             $CI->load->helper('ph_fire_fire');
         }
@@ -1104,7 +1104,7 @@ if ( ! function_exists('load_portfolio_helper'))
          * FIRE - HOUSEHOLDER
          * -------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
         {
             $CI->load->helper('ph_fire_hhp');
         }
@@ -1113,7 +1113,7 @@ if ( ! function_exists('load_portfolio_helper'))
          * FIRE - LOSS OF PROFIT
          * ----------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_FIRE_LOP_ID )
+        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
         {
             $CI->load->helper('ph_fire_lop');
         }

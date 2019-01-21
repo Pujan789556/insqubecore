@@ -256,7 +256,7 @@ define('IQB_PFS_FLAG_SHORT_TERM_APPLY_FOR__LIST',  [
 define('IQB_MASTER_PORTFOLIO_AGR_ID',  		1);
 define('IQB_MASTER_PORTFOLIO_AVIATION_ID',  2);
 define('IQB_MASTER_PORTFOLIO_ENG_ID',  		3);
-define('IQB_MASTER_PORTFOLIO_FIRE_ID',      4);
+define('IQB_MASTER_PORTFOLIO_PROPERTY_ID',  4);
 define('IQB_MASTER_PORTFOLIO_MARINE_ID',    5);
 define('IQB_MASTER_PORTFOLIO_MICRO_ID',     6);
 define('IQB_MASTER_PORTFOLIO_MISC_ID',      7);
@@ -320,21 +320,31 @@ define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__ENG',  [
 
 /*
 |--------------------------------------------------------------------------
-| FIRE PORTFOLIO - SUB-PORTFOLIOS ID
+| PROPERTY PORTFOLIO - SUB-PORTFOLIOS ID
 |--------------------------------------------------------------------------
 |
 | WARNING: Should be exactly same as in database, add here if you add in db
 |
 */
-define('IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID', 		401); 	// Fire General
-define('IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID', 	402);	// Householder Policy
-define('IQB_SUB_PORTFOLIO_FIRE_LOP_ID', 			403); 	// Loss of Profit - Fire
+define('IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID', 			401); 	// House
+define('IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID', 		402);	// General Property
+define('IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID', 		403); 	// Short Term Property
+define('IQB_SUB_PORTFOLIO_PROPERTY_AGREED_VALUED_ID',	404); 	// Agreed Valued Property
+define('IQB_SUB_PORTFOLIO_PROPERTY_FLOATING_ID',		405); 	// Floating Property
+define('IQB_SUB_PORTFOLIO_PROPERTY_DECLARATION_ID',		406); 	// Declaration Property
+define('IQB_SUB_PORTFOLIO_PROPERTY_FLOATING_DECLARATION_ID', 	407); 	// Floating Declaration Property
+define('IQB_SUB_PORTFOLIO_PROPERTY_REINSTATE_ID', 				408); 	// Reinstate Property
 
 // SUB PORTFOLIO LIST
-define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__FIRE',  [
-	IQB_SUB_PORTFOLIO_FIRE_GENERAL_ID 				=> 'Fire General',
-	IQB_SUB_PORTFOLIO_FIRE_HOUSEHOLDER_ID 			=> "Householder's Policy (FIRE)",
-	IQB_SUB_PORTFOLIO_FIRE_LOP_ID 					=> "Loss of Profit (FIRE)"
+define('IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY',  [
+	IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID 				=> 'House',
+	IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID 				=> 'General Property',
+	IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID 			=> 'Short Term Property',
+	IQB_SUB_PORTFOLIO_PROPERTY_AGREED_VALUED_ID 		=> 'Agreed Valued Property',
+	IQB_SUB_PORTFOLIO_PROPERTY_FLOATING_ID 				=> 'Floating Property',
+	IQB_SUB_PORTFOLIO_PROPERTY_DECLARATION_ID 			=> 'Declaration Property',
+	IQB_SUB_PORTFOLIO_PROPERTY_FLOATING_DECLARATION_ID 	=> 'Floating Declaration Property',
+	IQB_SUB_PORTFOLIO_PROPERTY_REINSTATE_ID 			=> 'Reinstate Property',
 ]);
 
 
