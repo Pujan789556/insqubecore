@@ -101,6 +101,28 @@ class District_model extends MY_Model
                             ->get()->row();
     }
 
+    // ----------------------------------------------------------------
+
+    public function state_by_district($id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var = 'districts_st_' . $id;
+        $row = $this->get_cache($cache_var);
+        if(!$row)
+        {
+            $row = $this->db->select('S.*')
+                            ->from($this->table_name . ' D')
+                            ->join('master_states S', 'S.id = D.state_id')
+                            ->where('D.id', $id)
+                            ->get()->row();
+
+            $this->write_cache($row, $cache_var, CACHE_DURATION_DAY);
+        }
+        return $row;
+    }
+
     // --------------------------------------------------------------------
 
     public function check_duplicate($where, $id=NULL)
@@ -121,7 +143,15 @@ class District_model extends MY_Model
      */
     public function clear_cache()
     {
+        $cache_names = [
+            'districts_all',
+            'districts_st_*'
+        ];
         // cache name without prefix
-        return $this->delete_cache('districts_all');
+        foreach($cache_names as $cache)
+        {
+            $this->delete_cache($cache);
+        }
+        return TRUE;
     }
 }
