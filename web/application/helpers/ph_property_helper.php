@@ -1147,7 +1147,6 @@ if ( ! function_exists('_TXN_PROPERTY_compute_premium_per_property'))
 	 */
 	function _TXN_PROPERTY_compute_premium_per_property($single_property, $tariff)
 	{
-
 		// SI Per Property
 		$si = _TXN_PROPERTY_compute_si_per_property($single_property);
 
@@ -1162,7 +1161,7 @@ if ( ! function_exists('_TXN_PROPERTY_compute_premium_per_property'))
 
 		// Basic Premium
 		// Rate on Different SI Range???
-		if($tariff->basic_apply_si_range)
+		if($tariff->basic_apply_si_range == IQB_FLAG_YES)
 		{
 			$basic_si_min 		= $tariff->basic_si_min;
 			$basic_si_min_rate 	= $tariff->basic_si_min_rate;
@@ -1190,7 +1189,7 @@ if ( ! function_exists('_TXN_PROPERTY_compute_premium_per_property'))
 
 		// Pool Premium
 		// Rate on Different SI Range???
-		if($tariff->pool_apply_si_range)
+		if($tariff->pool_apply_si_range == IQB_FLAG_YES)
 		{
 			$pool_si_min 		= $tariff->pool_si_min;
 			$pool_si_min_rate 	= $tariff->pool_si_min_rate;
