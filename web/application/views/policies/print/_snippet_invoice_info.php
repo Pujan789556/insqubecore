@@ -22,7 +22,7 @@ $invoice_info = [
 <table class="table no-border" width="100%">
     <?php foreach($invoice_info as $label=>$value): ?>
         <tr>
-            <td width="30%" class="no-padding"><strong><?php echo $label?>:</strong></td>
+            <td width="30%" class="no-padding"><?php echo $label?>:</td>
             <td class="no-padding"><?php echo $value?></td>
         </tr>
     <?php endforeach ?>

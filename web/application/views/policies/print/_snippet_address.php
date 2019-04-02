@@ -36,6 +36,28 @@ if($address_record)
 
     $contact_data[] = implode(', ', $ct_state_zip);
 
+    // Phone, Fax, Email
+    // फोन फ्यक्स ईमेल मोबाईल
+    if($address_record->phones){
+        $label = $lang == 'np' ? 'फोन' : 'Phone';
+        $contact_data[] = "{$label}: {$address_record->phones}";
+    }
+
+    if($address_record->faxes){
+        $label = $lang == 'np' ? 'फ्यक्स' : 'Fax';
+        $contact_data[] = "{$label}: {$address_record->faxes}";
+    }
+
+    if($address_record->mobile){
+        $label = $lang == 'np' ? 'मोबाईल' : 'Mobile';
+        $contact_data[] = "{$label}: {$address_record->mobile}";
+    }
+
+    if($address_record->email){
+        $label = $lang == 'np' ? 'ईमेल' : 'Email';
+        $contact_data[] = "{$label}: {$address_record->email}";
+    }
+
     // Country
     // $contact_data[] = $address_record->country_name;
 

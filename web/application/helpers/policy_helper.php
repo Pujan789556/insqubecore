@@ -375,32 +375,15 @@ if ( ! function_exists('_POLICY__partial_view__cost_calculation_table'))
 			$partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_MOTOR";
 		}
 
-		/**
-         * FIRE - FIRE
-         * -------------
+        /**
+         * PROPERTY - ALL PORTFOLIOS
+         * -------------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
+        else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY) ) )
         {
-            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_FIRE_FIRE";
+            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_PROPERTY";
         }
 
-        /**
-         * FIRE - HOUSEHOLDER
-         * -------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
-        {
-            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_FIRE_HHP";
-        }
-
-        /**
-         * FIRE - LOSS OF PROFIT
-         * ----------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
-        {
-            $partial_view = "endorsements/snippets/{$view_prefix}_cost_calculation_table_FIRE_LOP";
-        }
 
 		/**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
@@ -627,32 +610,15 @@ if ( ! function_exists('_POLICY__partial_view__premium_form'))
 			$form_view = 'endorsements/forms/_form_premium_MOTOR';
 		}
 
-		/**
-         * FIRE - FIRE
-         * -------------
+        /**
+         * PROPERTY - ALL PORTFOLIOS
+         * -------------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
+        else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY) ) )
         {
-            $form_view = 'endorsements/forms/_form_premium_FIRE_FIRE';
+            $form_view = 'endorsements/forms/_form_premium_PROPERTY';
         }
 
-        /**
-         * FIRE - HOUSEHOLDER
-         * -------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
-        {
-            $form_view = 'endorsements/forms/_form_premium_FIRE_HHP';
-        }
-
-        /**
-         * FIRE - LOSS OF PROFIT
-         * ----------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
-        {
-            $form_view = 'endorsements/forms/_form_premium_FIRE_LOP';
-        }
 
 		/**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
@@ -984,20 +950,20 @@ if ( ! function_exists('_POLICY__get_schedule_view'))
 					$schedule_view = 'policies/print/schedule_MOTOR';
 				break;
 
-			// FIRE - FIRE
-			case IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID:
-					$schedule_view = 'policies/print/schedule_FIRE_FIRE';
-				break;
-
-			// FIRE - HOUSEHOLDER
-			case IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID:
-					$schedule_view = 'policies/print/schedule_FIRE_HHP';
-				break;
-
-			// FIRE - LOSS OF PROFIT
-			case IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID:
-					$schedule_view = 'policies/print/schedule_FIRE_LOP';
-				break;
+            /**
+             * PROPERTY - ALL PORTFOLIOS
+             * -------------------------
+             */
+            case IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_AGREED_VALUED_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_FLOATING_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_DECLARATION_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_FLOATING_DECLARATION_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_REINSTATE_ID:
+                $schedule_view = 'policies/print/schedule_PROPERTY';
+                break;
 
 
 			// Burglary

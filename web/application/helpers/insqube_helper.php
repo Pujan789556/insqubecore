@@ -777,6 +777,24 @@ if ( ! function_exists('district_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('state_by_district'))
+{
+    /**
+     * Get State Dropdown
+     *
+     *
+     * @param int $id   District ID
+     * @return  array
+     */
+    function state_by_district($id)
+    {
+        $CI =& get_instance();
+        $CI->load->model('district_model');
+        return $CI->district_model->state_by_district($id);
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('local_body_dropdown_by_district'))
 {
     /**
@@ -1092,30 +1110,12 @@ if ( ! function_exists('load_portfolio_helper'))
         }
 
         /**
-         * FIRE - FIRE
-         * -------------
+         * PROPERTY - ALL PORTFOLIOS
+         * -------------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
+        else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY) ) )
         {
-            $CI->load->helper('ph_fire_fire');
-        }
-
-        /**
-         * FIRE - HOUSEHOLDER
-         * -------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
-        {
-            $CI->load->helper('ph_fire_hhp');
-        }
-
-        /**
-         * FIRE - LOSS OF PROFIT
-         * ----------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
-        {
-            $CI->load->helper('ph_fire_lop');
+            $CI->load->helper('ph_property');
         }
 
         /**

@@ -345,31 +345,14 @@ if ( ! function_exists('_OBJ_row_snippet'))
 		}
 
         /**
-         * FIRE - FIRE
-         * -------------
+         * PROPERTY - ALL PORTFOLIOS
+         * -------------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
+        else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY) ) )
         {
-            $snippet = _OBJ_FIRE_FIRE_row_snippet($record, $_flag__show_widget_row);
+            $snippet = _OBJ_PROPERTY_row_snippet($record, $_flag__show_widget_row);
         }
 
-        /**
-         * FIRE - HOUSEHOLDER
-         * -------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
-        {
-            $snippet = _OBJ_FIRE_HHP_row_snippet($record, $_flag__show_widget_row);
-        }
-
-        /**
-         * FIRE - LOSS OF PROFIT
-         * ----------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
-        {
-            $snippet = _OBJ_FIRE_LOP_row_snippet($record, $_flag__show_widget_row);
-        }
 
         /**
          * BURGLARY - JEWELRY, HOUSEBREAKING, CASH IN SAFE
@@ -624,30 +607,12 @@ if ( ! function_exists('OBJECT__popup_view'))
         }
 
         /**
-         * FIRE - FIRE
-         * -------------
+         * PROPERTY - ALL PORTFOLIOS
+         * -------------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
+        else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY) ) )
         {
-            $attribute_form = 'objects/snippets/_popup_fire_fire';
-        }
-
-        /**
-         * FIRE - HOUSEHOLDER
-         * -------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
-        {
-            $attribute_form = 'objects/snippets/_popup_fire_hhp';
-        }
-
-        /**
-         * FIRE - LOSS OF PROFIT
-         * ----------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
-        {
-            $attribute_form = 'objects/snippets/_popup_fire_lop';
+            $attribute_form = 'objects/snippets/_popup_property';
         }
 
         /**
@@ -914,30 +879,12 @@ if ( ! function_exists('_OBJ_select_text'))
 		}
 
         /**
-         * FIRE - FIRE
-         * -------------
+         * PROPERTY - ALL PORTFOLIOS
+         * -------------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
+        else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY) ) )
         {
-            $snippet = _OBJ_FIRE_FIRE_select_text($record);
-        }
-
-        /**
-         * FIRE - HOUSEHOLDER
-         * -------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
-        {
-            $snippet = _OBJ_FIRE_HHP_select_text($record);
-        }
-
-        /**
-         * FIRE - LOSS OF PROFIT
-         * ----------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
-        {
-            $snippet = _OBJ_FIRE_LOP_select_text($record);
+            $snippet = _OBJ_PROPERTY_select_text($record);
         }
 
         /**
@@ -1199,30 +1146,12 @@ if ( ! function_exists('_OBJ_validation_rules'))
 		}
 
         /**
-         * FIRE - FIRE
-         * -------------
+         * PROPERTY - ALL PORTFOLIOS
+         * -------------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
+        else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY) ) )
         {
-            $v_rules = _OBJ_FIRE_FIRE_validation_rules( $portfolio_id, $formatted );
-        }
-
-        /**
-         * FIRE - HOUSEHOLDER
-         * -------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
-        {
-            $v_rules = _OBJ_FIRE_HHP_validation_rules( $portfolio_id, $formatted );
-        }
-
-        /**
-         * FIRE - LOSS OF PROFIT
-         * ----------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
-        {
-            $v_rules = _OBJ_FIRE_LOP_validation_rules( $portfolio_id, $formatted );
+            $v_rules = _OBJ_PROPERTY_validation_rules( $portfolio_id, $formatted );
         }
 
         /**
@@ -1483,30 +1412,12 @@ if ( ! function_exists('_OBJ_attribute_form'))
 		}
 
         /**
-         * FIRE - FIRE
-         * -------------
+         * PROPERTY - ALL PORTFOLIOS
+         * -------------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
+        else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY) ) )
         {
-            $attribute_form = 'objects/forms/_form_object_fire_fire';
-        }
-
-        /**
-         * FIRE - HOUSEHOLDER
-         * -------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
-        {
-            $attribute_form = 'objects/forms/_form_object_fire_hhp';
-        }
-
-        /**
-         * FIRE - LOSS OF PROFIT
-         * ----------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
-        {
-            $attribute_form = 'objects/forms/_form_object_fire_lop';
+            $attribute_form = 'objects/forms/_form_object_property';
         }
 
         /**
@@ -1832,22 +1743,21 @@ if ( ! function_exists('_OBJ_pre_save_tasks'))
                 $method = '_OBJ_AGR_BEE_pre_save_tasks';
                 break;
 
-
             /**
-             * FIRE - FIRE
-             * -------------
+             * PROPERTY - ALL PORTFOLIOS
+             * -------------------------
              */
             case IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID:
-                $method = '_OBJ_FIRE_FIRE_pre_save_tasks';
+            case IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_AGREED_VALUED_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_FLOATING_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_DECLARATION_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_FLOATING_DECLARATION_ID:
+            case IQB_SUB_PORTFOLIO_PROPERTY_REINSTATE_ID:
+                $method = '_OBJ_PROPERTY_pre_save_tasks';
                 break;
 
-            /**
-             * FIRE - HOUSEHOLDER
-             * -------------------
-             */
-            case IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID:
-                $method = '_OBJ_FIRE_HHP_pre_save_tasks';
-                break;
 
 			/**
 	         * ENGINEERING - BOILER EXPLOSION
@@ -2032,30 +1942,12 @@ if ( ! function_exists('_OBJ_compute_sum_insured_amount'))
         }
 
         /**
-         * FIRE - FIRE
-         * -------------
+         * PROPERTY - ALL PORTFOLIOS
+         * -------------------------
          */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
+        else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY) ) )
         {
-            $si_data = _OBJ_FIRE_FIRE_compute_sum_insured_amount($portfolio_id, $data);
-        }
-
-        /**
-         * FIRE - HOUSEHOLDER
-         * -------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
-        {
-            $si_data = _OBJ_FIRE_HHP_compute_sum_insured_amount($portfolio_id, $data);
-        }
-
-        /**
-         * FIRE - LOSS OF PROFIT
-         * ----------------------
-         */
-        else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
-        {
-            $si_data = _OBJ_FIRE_LOP_compute_sum_insured_amount($portfolio_id, $data);
+            $si_data = _OBJ_PROPERTY_compute_sum_insured_amount($portfolio_id, $data);
         }
 
         /**

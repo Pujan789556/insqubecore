@@ -82,7 +82,7 @@ $portfolio_name_col = 'portfolio_name_'.$lang;
          */
         $agent_text = implode(' ', array_filter([$record->agent_bs_code, $record->agent_ud_code]));
         ?>
-        <td><?php echo $labels['agent_label'][$lang]; ?>: <?php echo $agent_text;?></td>
+        <td><?php echo $labels['agent_label'][$lang]; ?>: <?php echo $agent_text ? $agent_text : 'n/a';?></td>
     </tr>
 
     <tr>

@@ -232,6 +232,23 @@ class Tariff_property_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function get($id)
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $cache_var = 'property_risk_cat_' . $id;
+        $record = $this->get_cache($cache_var);
+        if(!$record)
+        {
+            $record = parent::find($id);
+            $this->write_cache($record, $cache_var, CACHE_DURATION_DAY);
+        }
+        return $record;
+    }
+
+    // ----------------------------------------------------------------
+
     public function get_all()
     {
         /**
@@ -253,7 +270,7 @@ class Tariff_property_model extends MY_Model
     /**
      * Get Dropdown List
      */
-    public function dropdown()
+    public function risk_category_dropdown($lang = 'both')
     {
         /**
          * Get Cached Result, If no, cache the query result
@@ -262,8 +279,56 @@ class Tariff_property_model extends MY_Model
         $list = [];
         foreach($records as $record)
         {
-            $list["{$record->id}"] =  $record->code . ' - ' . $record->name_en . '(' . $record->name_np . ')';
+            if($lang == 'both')
+            {
+                $label = $record->code . ' - ' . $record->name_en . '(' . $record->name_np . ')';
+            }
+            elseif ($lang == 'np')
+            {
+                $label = $record->code . ' - ' . $record->name_np;
+            }
+            else
+            {
+                $label = $record->code . ' - ' . $record->name_en;
+            }
+            $list["{$record->id}"] =  $label;
         }
+        return $list;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Dropdown List - Risks
+     */
+    public function risk_dropdown($id, $lang = 'both')
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $record = $this->get($id);
+        $risks = json_decode($record->risks ?? NULL);
+        $list = [];
+        if($risks)
+        {
+            foreach($risks as $single)
+            {
+                if($lang == 'both')
+                {
+                    $label = $single->name_en . '(' . $single->name_np . ')';
+                }
+                elseif ($lang == 'np')
+                {
+                    $label = $single->name_np;
+                }
+                else
+                {
+                    $label = $single->name_en;
+                }
+                $list["{$single->code}"] =  $label;
+            }
+        }
+
         return $list;
     }
 
@@ -275,7 +340,8 @@ class Tariff_property_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'property_risk_cat_all'
+            'property_risk_cat_all',
+            'property_risk_cat_*'
         ];
         // cache name without prefix
         foreach($cache_names as $cache)

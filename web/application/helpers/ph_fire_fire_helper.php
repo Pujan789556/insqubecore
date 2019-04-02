@@ -77,6 +77,10 @@ if ( ! function_exists('_OBJ_FIRE_FIRE_validation_rules'))
 	{
 		$CI =& get_instance();
 
+		return _OBJ_PROPERTY_validation_rules($portfolio_id, $formatted);
+
+
+
 
 		$conscat_dropdown 	= _OBJ_FIRE_FIRE_item_building_category_dropdown( FALSE );
 		$district_dropdown 	= district_dropdown( 'both', FALSE );
@@ -1590,5 +1594,467 @@ if ( ! function_exists('__save_premium_FIRE_FIRE'))
 				]);
         	}
 		}
+	}
+}
+
+
+
+
+// ------------------------------------------------------------------------
+// PORTFOLIO OBJECT HELPERS
+// ------------------------------------------------------------------------
+
+
+if ( ! function_exists('_OBJ_PROPERTY_row_snippet'))
+{
+	/**
+	 * Row Snippent
+	 *
+	 * @param object $record Policy Object
+	 * @param bool $_flag__show_widget_row 	is this Widget Row? or Regular List Row?
+	 * @return	html
+	 */
+	function _OBJ_PROPERTY_row_snippet( $record, $_flag__show_widget_row = FALSE )
+	{
+		$CI =& get_instance();
+		return $CI->load->view('objects/snippets/_row_property', ['record' => $record, '_flag__show_widget_row' => $_flag__show_widget_row], TRUE);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_PROPERTY_select_text'))
+{
+	/**
+	 * Get Policy Object - PROPERTY - Selection Text or Summary Text
+	 *
+	 * Useful while add/edit-ing a policy or whenever we need to
+	 * show the object summary from object attribute
+	 *
+	 * @param bool $record 	Object Record
+	 * @return	html
+	 */
+	function _OBJ_PROPERTY_select_text( $record )
+	{
+		$snippet = [
+			'Sum Insured(NRS): ' . '<strong>' . $record->amt_sum_insured . '</strong>'
+		];
+		$snippet = implode('<br/>', $snippet);
+
+		return $snippet;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_PROPERTY_validation_rules'))
+{
+	/**
+	 * Get Policy Object - PROPERTY - Validation Rules
+	 *
+	 * @param integer $portfolio_id  Portfolio ID
+	 * @param bool $formatted  Should Return the Formatted Validation Rule ( if multi senction rules )
+	 * @return	bool
+	 */
+	function _OBJ_PROPERTY_validation_rules( $portfolio_id, $formatted = FALSE )
+	{
+		$CI =& get_instance();
+
+		$usage_type_dropdwon 	= _OBJ_PROPERTY_usage_type_dropdown(FALSE);
+		$risk_class_dropdwon 	= _OBJ_PROPERTY_risk_class_dropdown(FALSE);
+		$district_dropdown 		= district_dropdown( 'both', FALSE );
+
+		$risk_category_dropdown = _PROPERTY_risk_category_dropdown(FALSE);
+		$item_type_dropdwon 	= _OBJ_PROPERTY_item_type_dropdown(FALSE);
+
+		$v_rules = [
+
+			/**
+		     * Location Details
+		     */
+		    'property_location' => [
+
+			    /**
+			     * Address
+			     */
+		    	[
+			        'field' => 'object[property_location][plot_no][]',
+			        '_key' => 'plot_no',
+			        'label' => 'Land Plot No.',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_location][house_no][]',
+			        '_key' => 'house_no',
+			        'label' => 'House No.',
+			        'rules' => 'trim|max_length[50]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_location][tole][]',
+			        '_key' => 'tole',
+			        'label' => 'Tole/Street Address',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_location][district][]',
+			        '_key' => 'district',
+			        'label' => 'District',
+			        'rules' => 'trim|numeric|max_length[2]|in_list['. implode(',', array_keys($district_dropdown)) .']',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> IQB_BLANK_SELECT + $district_dropdown,
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_location][vdc][]',
+			        '_key' => 'vdc',
+			        'label' => 'VDC/Municipality',
+			        'rules' => 'trim|max_length[100]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_location][ward_no][]',
+			        '_key' => 'ward_no',
+			        'label' => 'Ward No.',
+			        'rules' => 'trim|max_length[20]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+
+			    // ------------------------------------------------------
+			    [
+			        'field' => 'object[property_location][location_nature][]',
+			        '_key' => 'location_nature',
+			        'label' => 'Location Nature',
+			        'rules' => 'trim|max_length[200]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_location][property_nature][]',
+			        '_key' => 'property_nature',
+			        'label' => 'Property Nature',
+			        'rules' => 'trim|max_length[200]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_location][usage_type][]',
+			        '_key' => 'usage_type',
+			        'label' => 'Usage Type',
+			        'rules' => 'trim|alpha|max_length[20]|in_list['. implode(',', array_keys($usage_type_dropdwon)) .']',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> IQB_BLANK_SELECT + $usage_type_dropdwon,
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_location][storey_no][]',
+			        '_key' => 'storey_no',
+			        'label' => 'No. of Stories',
+			        'rules' => 'trim|max_length[10]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_location][owner_name][]',
+			        '_key' => 'owner_name',
+			        'label' => 'Owner Name',
+			        'rules' => 'trim|max_length[300]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_location][risk_class][]',
+			        '_key' => 'risk_class',
+			        'label' => 'Risk Class',
+			        'rules' => 'trim|integer|exact_length[1]|in_list['. implode(',', array_keys($risk_class_dropdwon)) .']',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> IQB_BLANK_SELECT + $risk_class_dropdwon,
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ]
+		    ],
+
+		    /**
+		     * Property Details
+		     */
+		    'property_details' => [
+		    	[
+			        'field' => 'object[property_details][risk_category]',
+			        '_key' => 'risk_category',
+			        'label' => 'Risk Category',
+			        'rules' => 'trim|required|integer|max_length[11]|in_list['. implode(',', array_keys($risk_category_dropdown)) .']',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> IQB_BLANK_SELECT + $risk_category_dropdown,
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ],
+
+			    // This should be re-filled per item via ajax call on form load.
+			    [
+			        'field' => 'object[property_details][tariff_risk_code]',
+			        '_key' => 'tariff_risk_code',
+			        'label' => 'Tariff Risk Code',
+			        'rules' => 'trim|required|max_length[20]',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> IQB_BLANK_SELECT,
+			        '_show_label' 	=> true,
+			        '_required' => true
+			    ]
+		    ],
+
+		    /**
+		     * Property List with Individual Sum Insurance
+		     */
+		    'property_items' => [
+		    	[
+			        'field' => 'object[property_items][item_type]',
+			        '_key' => 'item_type',
+			        'label' => 'Item Type',
+			        'rules' => 'trim|required|max_length[20]|in_list['. implode(',', array_keys($item_type_dropdwon)) .']',
+			        '_type'     => 'hidden',
+			        '_data' 	=> $item_type_dropdwon,
+			        '_show_label' 	=> false,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_items][usage_type]',
+			        '_key' => 'usage_type',
+			        'label' => 'Usage Type',
+			        'rules' => 'trim|alpha|max_length[20]|in_list['. implode(',', array_keys($usage_type_dropdwon)) .']',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> IQB_BLANK_SELECT + $usage_type_dropdwon,
+			        '_show_label' 	=> false,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_items][sum_insured]',
+			        '_key' => 'sum_insured',
+			        'label' => 'Sum Insured',
+			        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> false,
+			        '_required' => true
+			    ],
+			    [
+			        'field' => 'object[property_items][remarks]',
+			        '_key' => 'remarks',
+			        'label' => 'Remarks',
+			        'rules' => 'trim|max_length[500]',
+			        '_type'     => 'text',
+			        '_show_label' 	=> false,
+			        '_required' => true
+			    ],
+		    ]
+		];
+
+		// return formatted?
+		$fromatted_v_rules = [];
+		if($formatted === TRUE)
+		{
+			$count_property = 0;
+			if( $CI->input->post() )
+			{
+				$object = $CI->input->post('object');
+				$count_property = count($object['property_location']['plot_no']);
+
+				$property_location 	= $v_rules['property_location'];
+				$property_details 	= $v_rules['property_details'];
+				$property_items 	= $v_rules['property_items'];
+
+				if( $count_property > 1 )
+				{
+					$indexed_rules = [];
+					for($i=0; $i < $count_property; $i++)
+					{
+						foreach($property_details as $single )
+						{
+							$single['field'] = $single['field'] . "[{$i}]";
+							$indexed_rules[] = $single;
+						}
+
+						// Items will be multiple per property location
+						foreach($property_items as $single )
+						{
+							$single['field'] = $single['field'] . "[{$i}][]";
+							$indexed_rules[] = $single;
+						}
+					}
+					$fromatted_v_rules = array_merge($property_location, $indexed_rules);
+				}
+				else{
+					$fromatted_v_rules = array_merge($property_location, $property_details, $property_items);
+				}
+
+			}
+			else
+			{
+				foreach ($v_rules as $key=>$section)
+				{
+					$fromatted_v_rules = array_merge($fromatted_v_rules, $section);
+				}
+			}
+
+
+			return $fromatted_v_rules;
+		}
+
+		return $v_rules;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+
+if ( ! function_exists('_PROPERTY_risk_category_dropdown'))
+{
+	/**
+	 * Risk Category Dropdown
+	 *
+	 * @param string $lang 	both|en|np
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	array
+	 */
+	function _PROPERTY_risk_category_dropdown($lang = 'both', $flag_blank_select = true )
+	{
+		$CI =& get_instance();
+		$CI->load->model('tariff_property_model');
+		$dropdown = $CI->tariff_property_model->risk_category_dropdown($lang);
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_PROPERTY_risk_dropdown'))
+{
+	/**
+	 * Risk Dropdown
+	 *
+	 * @param int $risk_category Risk Category (Property Tariff ID)
+	 * @param string $lang 	both|en|np
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	array
+	 */
+	function _PROPERTY_risk_dropdown($risk_category, $lang='both', $flag_blank_select = true )
+	{
+		$CI =& get_instance();
+		$CI->load->model('tariff_property_model');
+		$dropdown = $CI->tariff_property_model->risk_dropdown($risk_category, $lang);
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_PROPERTY_usage_type_dropdown'))
+{
+	/**
+	 *  Object's Usage Type dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	array
+	 */
+	function _OBJ_PROPERTY_usage_type_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			'BLDNG' 	=> 'भवन (आवासीय वा अन्य)',
+			'BIZ' 		=> 'ब्यापार, ब्यवसाय, पसल',
+			'IND'		=> 'उद्योग',
+			'OUTIND' 	=> 'उद्योग परिसर बाहिर रहेका सम्पति',
+			'OUTINDSTR' => 'उद्योग परिसर भन्दा बाहिर गरिएको भण्डारण',
+			'OTH' 		=> 'अन्य'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_PROPERTY_item_type_dropdown'))
+{
+	/**
+	 *  Object's Property Item Type dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	array
+	 */
+	function _OBJ_PROPERTY_item_type_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			'१.०' 	=> 'भवन परिसर (कम्पाउन्ड वाल सहित)',
+			'२.अ' 		=> 'भवन',
+			'२.आ' 		=> 'यन्त्र तथा उपकरण (उधोगको बीमाको हकमा प्रत्येक एक लाख रूपैंया भन्दा बढी रकमको यन्त्र तथा उपरकरणको खरिद तथा जडान मिति सहितको विवरण खुलाउने)',
+			'२.इ' 		=> 'कच्चा पदार्थ',
+			'२.ई' 		=> 'प्रक्रियाको क्रममा रहेको मौज्दात (वर्क इन प्रोग्रेस)',
+			'२.उ' 		=> 'तयारी बस्तु',
+			'२.ऊ' 		=> 'अर्ध तयारी बस्तु',
+			'२.ऋ' 		=> 'फर्निचर फिक्चर्स तथा फिटिङ्ग्स',
+			'२.ए' 		=> 'नगद, सुनचाँदी, गरगहना तथा हिरा जवाहरत',
+			'२.ऐ' 		=> 'नक्सा, ढलाईको साँचो, पाण्डुलिपि, चित्रकला, कलात्मक बस्तु तथा दुर्भल सामग्री',
+			'२.ओ' 		=> 'अन्य सरसामान (प्रत्येक एक लाख रूपैंया भन्दा बढी रकमको सामानको विवरण खुलाउने)',
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_OBJ_PROPERTY_risk_class_dropdown'))
+{
+	/**
+	 * Object's Risk Class dropdown
+	 *
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	array
+	 */
+	function _OBJ_PROPERTY_risk_class_dropdown( $flag_blank_select = true )
+	{
+		$dropdown = [
+			'1' => 'पहिलो श्रेणी',
+			'2' => 'दोस्रो श्रेणी'
+		];
+
+		if($flag_blank_select)
+		{
+			$dropdown = IQB_BLANK_SELECT + $dropdown;
+		}
+		return $dropdown;
 	}
 }

@@ -1,10 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Object Snippet: FIRE - FIRE Row
+* Object Snippet: Property Row
 */
 $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
-$snippet 	= _OBJ_FIRE_FIRE_select_text($record);
+$snippet 	= _OBJ_PROPERTY_select_text($record);
 ?>
 <td>
 	<?php if($attributes):?>
@@ -14,7 +14,7 @@ $snippet 	= _OBJ_FIRE_FIRE_select_text($record);
 			/**
 			 * Popover Content
 			 */
-			$this->load->view('objects/snippets/_popup_fire_fire',['record' => $record]);
+			$this->load->view('objects/snippets/_popup_property',['record' => $record]);
 			?>
 		</span>
 	<?php endif;?>

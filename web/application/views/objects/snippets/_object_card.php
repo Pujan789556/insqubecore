@@ -26,7 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </span>
         </h3>
     </div>
-    <div class="box-body bg-gray-light">
+    <div class="box-body bg-gray-light" style="overflow-x: scroll; width: 100%">
         <?php
         /**
         * Policy Object Details

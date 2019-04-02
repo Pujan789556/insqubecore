@@ -63,30 +63,12 @@ else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__M
 }
 
 /**
- * FIRE - FIRE
- * -------------
+ * PROPERTY - ALL PORTFOLIOS
+ * -------------------------
  */
-else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
+else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY) ) )
 {
-    $this->load->view('objects/snippets/_popup_fire_fire', $data);
-}
-
-/**
- * FIRE - HOUSEHOLDER
- * -------------------
- */
-else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_GENERAL_ID )
-{
-    $this->load->view('objects/snippets/_popup_fire_hhp', $data);
-}
-
-/**
- * FIRE - LOSS OF PROFIT
- * ----------------------
- */
-else if( $portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_SHORT_TERM_ID )
-{
-    $this->load->view('objects/snippets/_popup_fire_lop', $data);
+    $this->load->view('objects/snippets/_popup_property', $data);
 }
 
 

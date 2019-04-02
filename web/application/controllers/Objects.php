@@ -1429,4 +1429,38 @@ class Objects extends MY_Controller
 				], 404);
 			}
 		}
+
+	// --------------------------------------------------------------------
+	// PORTFOLIO - PROPERTY - CRUD HELPER FUNCTIONS
+	// --------------------------------------------------------------------
+
+		/**
+		 * Property Object Callback - Valid Sum Insured?
+		 *
+		 * @param type $str
+		 * @return boolean
+		 */
+		public function _cb_property_valid_sum_insured($str)
+		{
+			$si_all = $this->input->post('object[items][item_sum_insured]');
+			$item_type_dropdwon 	= _OBJ_PROPERTY_item_type_dropdown(FALSE);
+	    	$si_total = 0;
+
+	    	foreach($item_type_dropdwon as $key => $label)
+	    	{
+	    		$si_per_type = $si_all[$key];
+	    		foreach($si_per_type as $single)
+		    	{
+		    		$si_total += floatval($single);
+		    	}
+	    	}
+
+
+	        if( $si_total <= 0 )
+	        {
+	            $this->form_validation->set_message('_cb_property_valid_sum_insured', 'The %s is invalid or not specified or empty.');
+	            return FALSE;
+	        }
+	        return TRUE;
+		}
 }
