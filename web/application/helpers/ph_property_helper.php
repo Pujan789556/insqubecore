@@ -697,6 +697,35 @@ if ( ! function_exists('_OBJ_PROPERTY_format_items'))
 }
 
 // ------------------------------------------------------------------------
+
+
+if ( ! function_exists('_PROPERTY_schedule_title'))
+{
+	/**
+	 * Schedule Title
+	 *
+	 * @param int $portfolio_id Portfolio ID
+	 * @param bool $flag_blank_select 	Whether to append blank select
+	 * @return	string
+	 */
+	function _PROPERTY_schedule_title($portfolio_id)
+	{
+		$portfolio_id = (int)$portfolio_id;
+
+		if($portfolio_id == IQB_SUB_PORTFOLIO_PROPERTY_HOUSE_ID )
+		{
+			$title = 'घर बीमालेख तालिका';
+		}
+		else
+		{
+			$title = 'सम्पत्ति बीमालेख तालिका';
+		}
+
+		return $title;
+	}
+}
+
+// ------------------------------------------------------------------------
 // POLICY TRANSACTION HELPER FUNCTIONS
 // ------------------------------------------------------------------------
 
@@ -886,6 +915,7 @@ if ( ! function_exists('__save_premium_PROPERTY'))
 					$index 			= 0;
 					$cc_table_main 	= [];
 					$cc_table_other = [];
+					$cc_info 		= [];
 					foreach($items as $single_property)
 					{
 						$risk_category = $single_property->risk_category;
@@ -936,6 +966,9 @@ if ( ! function_exists('__save_premium_PROPERTY'))
 							'label' => "सम्पुष्टीद्वारा घटाइएको (बीमितको इच्छा अनुसार) बीमशुल्क",
 							'value' => $POOL_PREMIUM
 						];
+
+						// Save Excluded premium on cc table
+						$cc_info['excluded_pool_premium'] = $POOL_PREMIUM;
 
 						// Now zero the pool premium
 						$POOL_PREMIUM 	= 0.00;
@@ -1033,8 +1066,9 @@ if ( ! function_exists('__save_premium_PROPERTY'))
 					}
 
 					$cost_calculation_table = [
-						'cc_table_main' => $cc_table_main,
-						'cc_table_other' => $cc_table_other,
+						'cc_table_main' 	=> $cc_table_main,
+						'cc_table_other' 	=> $cc_table_other,
+						'cc_info' 		 	=> $cc_info
 					];
 
 

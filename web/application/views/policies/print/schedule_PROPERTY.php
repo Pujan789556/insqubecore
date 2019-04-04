@@ -4,7 +4,6 @@
  */
 $this->load->helper('ph_fire_fire');
 $object_attributes      = json_decode($record->object_attributes);
-$schedule_table_title   = 'सम्पत्ति बीमालेख तालिका';
 ?>
 
 <!DOCTYPE html>
@@ -34,7 +33,7 @@ $schedule_table_title   = 'सम्पत्ति बीमालेख ता
         ?>
         <!-- <pre><?php print_r($record); ?></pre> -->
         <table class="table" width="100%" style="margin-bottom: 8pt;">
-            <thead><tr><td colspan="2" align="center"><h3><?php echo $schedule_table_title?></h3></td></tr></thead>
+            <thead><tr><td colspan="2" align="center"><h3><?php echo _PROPERTY_schedule_title($record->portfolio_id)?></h3></td></tr></thead>
             <tbody>
                 <tr>
                     <td colspan="2">
@@ -217,5 +216,63 @@ $schedule_table_title   = 'सम्पत्ति बीमालेख ता
             </table>
         <?php endif ?>
         <p style="text-align: center; font-size: 8pt">यस तालिकामा उल्लेख भएको प्रयोगको सीमा उल्लघंन भएमा बीमकले बीमितलाई क्षतिपूर्ति दिनेछैन ।</p>
+
+
+        <?php
+        /**
+         * Endorsement Template if Pool is Excluded
+         */
+        $premium_compute_options    = json_decode($endorsement_record->premium_compute_options ?? NULL);
+        $flag_exclude_pool_risk     = $premium_compute_options->flag_exclude_pool_risk ?? NULL;
+
+        if($flag_exclude_pool_risk == IQB_FLAG_ON):
+
+            $cc_table   = json_decode($endorsement_record->cost_calculation_table ?? NULL);
+            $cc_info    = $cc_table->cc_info ?? NULL;
+            $excluded_pool_premium = $cc_info->excluded_pool_premium ?? 0.00;
+        ?>
+            <pagebreak>
+            <table class="table no-border" width="100%" style="margin-bottom: 20pt">
+                <tr>
+                    <td align="center">
+                        <p style="font-size: 9pt">अनुसूची - ५</p>
+                        <h3 style="text-decoration: underline;">सम्पुष्टी</h3>
+                        <p style="font-size: 9pt">(दफा २३ संग सम्बान्धित)</p>
+                    </td>
+                </tr>
+            </table>
+            <table class="table no-border" width="100%" style="margin-bottom: 20pt">
+                <tr>
+                    <td align="left"><?php echo _POLICY_schedule_title_prefix($record->status)?>: <?php echo $record->code;?></td>
+                    <td align="right">बीमितको नााम: <?php echo htmlspecialchars($record->customer_name_np) ?></td>
+                </tr>
+            </table>
+            <table class="table no-border" width="100%">
+                <tr>
+                    <td align="center">
+                        <h4 style="text-decoration: underline;">सम्पुष्टीबाट हटाइएको जोखिम</h4>
+                        <p style="font-size: 9pt">हुलदंगा तथा आतंकबाद जोखिम समूह</p>
+                        <p style="font-size: 9pt">(हुलदंगा, हड्ताल, रिसइवीपूर्ण कार्य, आतंककारी तथा विध्वंशात्मक कृयाकलाप र प्रतिघात [स्यावोटेज])</p><br><br>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center">
+                        बीमा गरिएको सम्पत्तिमा हुलदंगा तथा आतंकबाद जोखिम समूहबाट हुने क्षतिको क्षतिपूर्ति नलिने गरी बीमितको इच्छानुसार बीमालेखबाट जोखिम हटाइएको छ। यस सम्पुष्टीको लागि सम्पत्ति बीमा निदेर्शिका, २०७५ अनुसार लाग्ने बीमशुल्क रकम रु <strong><?php echo number_format($excluded_pool_premium, 2); ?></strong> लिइएको छैन ।
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <br><br>
+                        <p><strong>अधिकार प्राप्त अधिकारीको हस्ताक्षर:</strong></p><br>
+                        <p><strong>मिति:</strong></p><br>
+                        <p><strong>बीमकको छाप:</strong></p>
+                    </td>
+                </tr>
+            </table>
+
+            <table class="table" width="100%">
+
+            </table>
+        <?php endif ?>
     </body>
 </html>
