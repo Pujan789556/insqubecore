@@ -3514,11 +3514,12 @@ class Endorsement_model extends MY_Model
          * NET = GROSS - REFUND
          *
          * @param array $premium_data MUST have gross_* and refund_* fields
-         * @param bool $refund_pool
+         * @param bool $exclude_pool Exclude Pool Premium
          * @return array
          */
-        private function _compute_net_premium_data($premium_data, $refund_pool = FALSE)
+        private function _compute_net_premium_data($premium_data, $exclude_pool = FALSE)
         {
+
             $keys = [ 'amt_basic_premium', 'amt_pool_premium', 'amt_commissionable', 'amt_agent_commission', 'amt_direct_discount'];
 
             foreach($keys as $key)
@@ -3538,13 +3539,12 @@ class Endorsement_model extends MY_Model
             }
 
             /**
-             * Pool Refund ??
+             * Exclude Pool Premium
              */
-            if( !$refund_pool )
+            if( $exclude_pool )
             {
                 $premium_data['net_amt_pool_premium'] = 0.00;
             }
-
             return $premium_data;
         }
 
