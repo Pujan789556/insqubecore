@@ -985,7 +985,7 @@ if ( ! function_exists('__save_premium_PROPERTY'))
 					if( _ENDORSEMENT_is_first( $endorsement_record->txn_type) )
 					{
 						$txn_data_defaults = [
-							'gross_full_amt_basic_premium' 		=> $BASIC_PREMIUM,
+							'gross_full_amt_basic_premium' 		=> $NET_BASIC_PREMIUM,
 							'gross_full_amt_pool_premium' 		=> $POOL_PREMIUM,
 						];
 						$defaults = [
@@ -996,12 +996,12 @@ if ( ! function_exists('__save_premium_PROPERTY'))
 
 
 						if(
-							$txn_data_defaults['gross_full_amt_basic_premium'] != $BASIC_PREMIUM
+							$txn_data_defaults['gross_full_amt_basic_premium'] != $NET_BASIC_PREMIUM
 							||
 							$txn_data_defaults['gross_full_amt_pool_premium'] != $POOL_PREMIUM )
 						{
 
-							$txt_basic_premium = $txn_data_defaults['gross_full_amt_basic_premium'] != $BASIC_PREMIUM
+							$txt_basic_premium = $txn_data_defaults['gross_full_amt_basic_premium'] != $NET_BASIC_PREMIUM
 													? 'BASIC PREMIUM (minimum)' : 'BASIC PREMIUM';
 							$txt_pool_premium = $txn_data_defaults['gross_full_amt_pool_premium'] != $POOL_PREMIUM
 													? 'POOL PREMIUM (minimum)' : 'POOL PREMIUM';
@@ -1020,13 +1020,12 @@ if ( ! function_exists('__save_premium_PROPERTY'))
 						}
 
 						// Update basic, pool for further computation
-						$BASIC_PREMIUM 		= $txn_data_defaults['gross_full_amt_basic_premium'];
-						$POOL_PREMIUM 		= $txn_data_defaults['gross_full_amt_pool_premium'];
+						$NET_BASIC_PREMIUM 		= $txn_data_defaults['gross_full_amt_basic_premium'];
+						$POOL_PREMIUM 			= $txn_data_defaults['gross_full_amt_pool_premium'];
 
 						if($flag_exclude_pool_risk)
 						{
-							$commissionable_premium = bcsub($BASIC_PREMIUM, $POOL_PREMIUM, IQB_AC_DECIMAL_PRECISION);
-							$BASIC_PREMIUM 			= $commissionable_premium;
+							$commissionable_premium = $NET_BASIC_PREMIUM;
 							$POOL_PREMIUM 			= 0.00;
 
 							// @TODO : DO we still give direct discount and agent commision? If so on which value?
