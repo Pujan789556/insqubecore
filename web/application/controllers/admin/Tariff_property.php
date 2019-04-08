@@ -62,7 +62,7 @@ class Tariff_property extends MY_Controller
 	/**
 	 * Default Method
 	 *
-	 * Render the settings
+	 * List Fiscal-year wise
 	 *
 	 * @return type
 	 */
@@ -72,7 +72,7 @@ class Tariff_property extends MY_Controller
 		 * Normal Form Render
 		 */
 		// this will generate cache name: mc_master_departments_all
-		$records = $this->tariff_property_model->get_all();
+		$records = $this->tariff_property_model->get_index_rows();
 
 		$this->template->partial(
 							'content_header',
@@ -84,6 +84,392 @@ class Tariff_property extends MY_Controller
 						->partial('content', 'setup/tariff/property/_index', compact('records'))
 						->render($this->data);
 	}
+
+	// --------------------------------------------------------------------
+
+    /**
+     * List all tariff belonging to a single fiscal year
+     *
+     * @param integer $fiscal_year_id
+     * @return void
+     */
+    public function details($fiscal_year_id)
+    {
+
+        $fiscal_year_id = (int)$fiscal_year_id;
+        $records   = $this->tariff_property_model->get_list_by_fiscal_year_rows($fiscal_year_id);
+        if(!$records)
+        {
+            $this->template->render_404();
+        }
+
+        $single = $records[0];
+        $fiscal_year_text = $single->fy_code_np . "({$single->fy_code_en})";
+
+        // Site Meta
+        $this->data['site_title'] = 'Application Settings | Property Tariff - FY ' . $fiscal_year_text;
+
+
+
+        $this->template->partial(
+                            'content_header',
+                            'templates/_common/_content_header',
+                            [
+                                'content_header' => 'Property Tariff - FY - ' . $fiscal_year_text,
+                                'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Property' => $this->_url_base, 'Details' => NULL]
+                        ])
+                        ->partial('content', 'setup/tariff/property/_index_by_fiscal_year', compact('records'))
+                        ->render($this->data);
+    }
+
+    // --------------------------------------------------------------------
+
+
+    /**
+     * Add Risk Categories - For This Fiscal Year
+     *
+     * @return void
+     */
+    public function add_fy()
+    {
+        if( $this->input->post() )
+        {
+        	$rules = $this->tariff_property_model->v_rules_add_fy(TRUE);
+            $this->form_validation->set_rules($rules);
+            if( $this->form_validation->run() === TRUE )
+            {
+                $data = $this->input->post();
+
+                $fiscal_yr_id = $this->input->post('fiscal_yr_id');
+                $codes = $data['code'];
+                $count_categories = count($codes);
+                $batch_data = [];
+                for($i=0; $i< $count_categories; $i++)
+                {
+                	$batch_data[] = [
+                		'fiscal_yr_id' 	=> $fiscal_yr_id,
+                		'code' 			=> $data['code'][$i],
+                		'name_en' 		=> $data['name_en'][$i],
+                		'name_np' 		=> $data['name_np'][$i]
+                	];
+                }
+
+                $batch_data = array_filter($batch_data);
+                $done = $this->tariff_property_model->insert_batch($batch_data, TRUE);
+
+                if(!$done)
+                {
+                    $this->template->json([
+						'status' => 'error',
+						'message' => 'Could not update.'
+					]);
+                }
+                else
+                {
+                    // Clear Cache
+                    $this->tariff_property_model->clear_cache();
+
+                    $status = 'success';
+                    $message = 'Successfully Updated.';
+                    $ajax_data = [
+	                    'message' => $message,
+	                    'status'  => $status,
+	                    'updateSection' => true,
+	                    'hideBootbox' => true
+	                ];
+
+	                $records    = $this->tariff_property_model->get_index_rows();
+	                $html       = $this->load->view('setup/tariff/property/_list', ['records' => $records], TRUE);
+	                $ajax_data['updateSectionData'] = [
+	                    'box'       => '#iqb-data-list',
+	                    'method'    => 'html',
+	                    'html'      => $html
+	                ];
+	                return $this->template->json($ajax_data);
+                }
+            }
+            else
+            {
+                $this->template->json([
+					'status' => 'error',
+					'title' => 'Validation Error!',
+					'message' => validation_errors()
+				]);
+            }
+        }
+
+        // Let's render the form
+        $json_data['form'] = $this->load->view('setup/tariff/property/_form_add',
+            [
+                'form_elements'         => $this->tariff_property_model->v_rules_add_fy(),
+                'record'                => null
+            ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+    }
+
+    // --------------------------------------------------------------------
+
+
+    /**
+     * Add Default Tarrif Data
+     *
+     * @return void
+     */
+    public function edit_fy($fiscal_yr_id)
+    {
+    	$fiscal_yr_id = (int)$fiscal_yr_id;
+        if( $this->input->post() )
+        {
+        	$rules = $this->tariff_property_model->v_rules_add_fy(TRUE);
+
+        	// Fiscal Year validation is not required
+        	array_shift($rules);
+            $this->form_validation->set_rules($rules);
+            if( $this->form_validation->run() === TRUE )
+            {
+                $data = $this->input->post();
+                $codes 				= $data['code'];
+                $count_categories 	= count($codes);
+                $batch_data 		= [];
+
+                // OLD Records
+                $old_records = $this->tariff_property_model->get_list_by_fiscal_year_rows($fiscal_yr_id);
+                $old_ids = [];
+                foreach ($old_records as $r) {
+                	$old_ids[] = $r->id;
+                }
+                sort($old_ids);
+
+            	// Current Records
+                $current_ids = [];
+                for($i=0; $i< $count_categories; $i++)
+                {
+                	if($data['ids'][$i])
+                	{
+                		$current_ids[] = $data['ids'][$i];
+                	}
+                }
+                sort($current_ids);
+
+                // To Dell IDS
+                $to_del_ids = array_diff($old_ids, $current_ids);
+                if($to_del_ids)
+                {
+                	$status = $this->tariff_property_model->delete_many($to_del_ids);
+                	if(!$status)
+                	{
+                		$this->template->json([
+							'status' => 'error',
+							'title' 	=> 'Foreign key constraint',
+							'message' => 'Some of removed record could not be delted.'
+						]);
+                	}
+                }
+
+                // Let's Update and Batch Insert
+                $flag_updated = TRUE;
+                for($i=0; $i< $count_categories; $i++)
+                {
+                	$id = (int)$data['ids'][$i];
+                	if($id)
+                	{
+                		$update_data = [
+	                		'code' 			=> $data['code'][$i],
+	                		'name_en' 		=> $data['name_en'][$i],
+	                		'name_np' 		=> $data['name_np'][$i]
+	                	];
+	                	$flag_updated = $this->tariff_property_model->update($id, $update_data, TRUE);
+	                	if(!$flag_updated) break;
+                	}
+                	else
+                	{
+                		$batch_data[] = [
+	                		'fiscal_yr_id' 	=> $fiscal_yr_id,
+	                		'code' 			=> $data['code'][$i],
+	                		'name_en' 		=> $data['name_en'][$i],
+	                		'name_np' 		=> $data['name_np'][$i]
+	                	];
+                	}
+                }
+
+                if(!$flag_updated)
+                {
+                	$this->template->json([
+						'status' => 'error',
+						'title'  => 'Update Error',
+						'message' => 'Some DB error occured while updated old records.'
+					]);
+                }
+
+                $batch_data = array_filter($batch_data);
+                $flag_insert = TRUE;
+                if( $flag_updated && count($batch_data) > 0 )
+                {
+                	$flag_insert = $this->tariff_property_model->insert_batch($batch_data, TRUE);
+                }
+
+
+                if(!$flag_insert)
+                {
+                    $this->template->json([
+						'status' => 'error',
+						'title'  => 'Insert Error',
+						'message' => 'Could not batch insert new records.'
+					]);
+                }
+                else
+                {
+                    // Clear Cache
+                    $this->tariff_property_model->clear_cache();
+
+                    $status = 'success';
+                    $message = 'Successfully Updated.';
+                    $ajax_data = [
+	                    'message' => $message,
+	                    'status'  => $status,
+	                    'updateSection' => true,
+	                    'hideBootbox' => true
+	                ];
+
+	                $records    = $this->tariff_property_model->get_index_rows();
+	                $html       = $this->load->view('setup/tariff/property/_list', ['records' => $records], TRUE);
+	                $ajax_data['updateSectionData'] = [
+	                    'box'       => '#iqb-data-list',
+	                    'method'    => 'html',
+	                    'html'      => $html
+	                ];
+	                return $this->template->json($ajax_data);
+                }
+            }
+            else
+            {
+                $this->template->json([
+					'status' => 'error',
+					'title' => 'Validation Error!',
+					'message' => validation_errors()
+				]);
+            }
+        }
+
+        // Let's render the form
+        $json_data['form'] = $this->load->view('setup/tariff/property/_form_add',
+            [
+                'form_elements'         => $this->tariff_property_model->v_rules_add_fy(),
+                'record'                => (object)['fiscal_yr_id' => $fiscal_yr_id],
+                'risk_categories' 		=> $this->tariff_property_model->get_list_by_fiscal_year_rows($fiscal_yr_id)
+            ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Duplicate  form Old Fiscal Year
+     *
+     * @return void
+     */
+    public function duplicate($source_fiscal_year_id)
+    {
+        // Valid Record ?
+        $source_fiscal_year_id   = (int)$source_fiscal_year_id;
+        $source_record             = $this->tariff_property_model->get_fiscal_year_row($source_fiscal_year_id);
+
+        if(!$source_record)
+        {
+            $this->template->render_404();
+        }
+
+        $rules = $this->tariff_property_model->v_rules_duplicate_fy();
+        if( $this->input->post() )
+        {
+            $this->form_validation->set_rules($rules);
+            if( $this->form_validation->run() === TRUE )
+            {
+                $data = $this->input->post();
+
+                $batch_data                 = [];
+                $source_tarrif              = $this->tariff_property_model->get_list_by_fiscal_year($source_fiscal_year_id);
+                $destination_fiscal_year_id = $this->input->post('fiscal_yr_id');
+
+                foreach($source_tarrif as $src)
+                {
+                    $source_record =(array)$src;
+
+                    // Set Fiscal Year
+                    $source_record['fiscal_yr_id'] = $destination_fiscal_year_id;
+
+                    // Remoe Unnecessary Fields
+                    unset($source_record['id']);
+                    unset($source_record['created_at']);
+                    unset($source_record['created_by']);
+                    unset($source_record['updated_at']);
+                    unset($source_record['updated_by']);
+
+                    $batch_data[] = $source_record;
+                }
+
+                $batch_data = array_filter($batch_data);
+                $done = $this->tariff_property_model->insert_batch($batch_data, TRUE);
+
+                if(!$done)
+                {
+                    $this->template->json([
+						'status' => 'error',
+						'title'  => 'Insert Error',
+						'message' => 'Could not batch insert new records.'
+					]);
+                }
+                else
+                {
+                    // Clear Cache
+                    $this->tariff_property_model->clear_cache();
+
+                    $status = 'success';
+                    $message = 'Successfully Updated.';
+                    $ajax_data = [
+	                    'message' => $message,
+	                    'status'  => $status,
+	                    'updateSection' => true,
+	                    'hideBootbox' => true
+	                ];
+
+	                $records    = $this->tariff_property_model->get_index_rows();
+	                $html       = $this->load->view('setup/tariff/property/_list', ['records' => $records], TRUE);
+	                $ajax_data['updateSectionData'] = [
+	                    'box'       => '#iqb-data-list',
+	                    'method'    => 'html',
+	                    'html'      => $html
+	                ];
+	                return $this->template->json($ajax_data);
+                }
+            }
+            else
+            {
+                $this->template->json([
+					'status' => 'error',
+					'title' => 'Validation Error!',
+					'message' => validation_errors()
+				]);
+            }
+
+
+        }
+
+        // Let's render the form
+        $json_data['form'] = $this->load->view('setup/tariff/property/_form_duplicate',
+            [
+                'form_elements'         => $rules,
+                'record'                => null,
+                'source_record'         => $source_record
+            ], TRUE);
+
+        // Return HTML
+        $this->template->json($json_data);
+    }
 
 	// --------------------------------------------------------------------
 
@@ -286,8 +672,8 @@ class Tariff_property extends MY_Controller
 				else
 				{
 					// Get Updated Record
-					$record = $this->tariff_property_model->find($record->id);
-					$success_html = $this->load->view('setup/tariff/property/_single_row', ['record' => $record], TRUE);
+					$record = $this->tariff_property_model->get($record->id);
+					$success_html = $this->load->view('setup/tariff/property/_single_row_by_fiscal_year', ['record' => $record], TRUE);
 				}
 			}
 
@@ -401,20 +787,51 @@ class Tariff_property extends MY_Controller
     // --------------------------------------------------------------------
 
 	/**
+     * Check Duplicate Callback - Fiscal Year
+     *
+     * @param string $fiscal_yr_id
+     * @param integer|null $id
+     * @return bool
+     */
+    public function check_duplicate_fiscal_year($fiscal_yr_id, $ids = NULL)
+    {
+    	$fiscal_yr_id 	= (int)$fiscal_yr_id;
+    	$ids 			= $ids ? (int)$ids : $this->input->post('ids');
+    	$ids 			= is_array($ids) ? array_values($ids) : [];
+    	$ids  			= array_filter($ids);
+    	// echo '<pre>'; print_r($ids); echo '</pre>'; exit;
+	   	if( $this->tariff_property_model->check_duplicate_fiscal_year($fiscal_yr_id, $ids) )
+        {
+            $this->form_validation->set_message('check_duplicate_fiscal_year', 'The %s already exists.');
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    // --------------------------------------------------------------------
+
+	/**
      * Check Duplicate Callback
      *
      * @param string $code
      * @param integer|null $id
      * @return bool
      */
-    public function check_duplicate($code, $id=NULL){
+    public function check_duplicate_codes($code)
+    {
+    	$codes 		 = $this->input->post('code');
+    	foreach ($codes as &$single)
+    	{
+    		$single = strtoupper($single);
+    	}
+    	$count_total = count($codes);
 
-    	$code = strtoupper( $code ? $code : $this->input->post('code') );
-    	$id   = $id ? (int)$id : (int)$this->input->post('id');
+    	// remove duplicate
+    	$unique 	 = array_unique($codes);
 
-        if( $this->tariff_property_model->check_duplicate(['code' => $code], $id))
+        if( $count_total != count($unique) )
         {
-            $this->form_validation->set_message('check_duplicate', 'The %s already exists.');
+            $this->form_validation->set_message('check_duplicate_codes', 'The %s can not be duplicate for given fiscal year.');
             return FALSE;
         }
         return TRUE;

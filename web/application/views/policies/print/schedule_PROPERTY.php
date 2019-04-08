@@ -2,8 +2,8 @@
 /**
  * Schedule Print : FIRE
  */
-$this->load->helper('ph_fire_fire');
-$object_attributes      = json_decode($record->object_attributes);
+$this->load->helper('ph_property');
+$object_attributes = json_decode($record->object_attributes);
 ?>
 
 <!DOCTYPE html>

@@ -6,28 +6,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // echo '<pre>'; print_r($item_record);exit;
 ?>
 <div class="box-body">
-    <table class="table table-bordered table-condensed margin-b-10">
-        <tbody>
-            <tr>
-                <td class="form-inline">
-                    <?php
-                    $section_elements = $form_elements['property_risk'];
-                    $risk_codes = $section_elements[1]['_risk_codes'];
-                    $risk_category = $item_record->risk_category ?? NULL;
-                    if($risk_category)
-                    {
-                        $_risk_codes = $risk_codes[$risk_category];
-                        $section_elements[1]['_data'] = $_risk_codes;
-                    }
-                    $this->load->view('templates/_common/_form_components_inline', [
-                        'form_elements' => $section_elements,
-                        'form_record'   => $item_record ?? NULL
-                    ]);
-                    ?>
-                </td>
-            </tr>
-        </tbody>
-    </table>
     <div class="row">
         <div class="col-md-5">
             <div class="form-horizontal">

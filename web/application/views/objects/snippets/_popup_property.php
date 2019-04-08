@@ -14,27 +14,13 @@ $location_rules = $v_rules['property_location'];
 $item_types 	= _OBJ_PROPERTY_item_type_dropdown(FALSE);
 $single_item_rule = $v_rules['property_item_list'][array_keys($item_types)[0]];
 
-$risk_category_dropdown = _PROPERTY_risk_category_dropdown();
+// $risk_category_dropdown = _PROPERTY_risk_category_dropdown();
 $item_type_indices 		= _OBJ_PROPERTY_item_type_index();
 
 $index = 1;;
 foreach($items as $item):
 ?>
 	<h4>Property - <?php echo  $index++;?></h4>
-	<table class="table table-bordered table-condensed no-margin">
-	    <tr>
-	        <th>Risk Category</th>
-	        <td>
-	            <?php echo $risk_category_dropdown[$item->risk_category] ?? $item->risk_category; ?>
-	        </td>
-	        <th>Risk Code</th>
-	        <td>
-	            <?php echo $item->risk_code; ?>
-	        </td>
-	    </tr>
-	</table>
-
-
 	<table class="table table-bordered table-condensed no-margin">
 	    <tr>
 	    	<?php foreach($location_rules as $elem): ?>

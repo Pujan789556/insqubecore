@@ -162,8 +162,6 @@ class Tariff extends MY_Controller
         // Site Meta
         $this->data['site_title'] = 'Application Settings | Agriculture Tariff - FY ' . $fiscal_year_text;
 
-        $this->load->model('tariff_agriculture_model');
-
 
         /**
          * Update Nav Data

@@ -1,57 +1,57 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Tariff Property:  Single Row
+* Tariff - Property Single Row
 */
-$_edit_url 		= $this->data['_url_base'] . '/edit/'  . $record->id;
-$_tariff_url 	= $this->data['_url_base'] . '/tariff/'  . $record->id;
-$_risk_url 		= $this->data['_url_base'] . '/risks/'  . $record->id;
+
+/**
+ * Check if this is Current Fiscal Year
+ */
+$flag_current_fiscal_year = $this->current_fiscal_year->id == $record->fiscal_yr_id;
+
+$current_class = $flag_current_fiscal_year ? 'text-success text-bold' : '';
+$current_title = $flag_current_fiscal_year ? 'Current Fiscal Year' : '';
+
+$_edit_url 			= $this->data['_url_base'] . '/edit_fy/'  . $record->fiscal_yr_id;
+$_duplicate_url 	= $this->data['_url_base'] . '/duplicate/'  . $record->fiscal_yr_id;
+$_detail_url 		= $this->data['_url_base'] . '/details/' . $record->fiscal_yr_id;
 ?>
-<tr data-name="<?php echo $record->name_en;?>" class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
-	<td><?php echo $record->id;?></td>
-	<td><?php echo $record->code;?></td>
-	<td><a href="#"
-		data-toggle="tooltip"
-		title="Edit Property Risk Category"
-		class="trg-dialog-edit"
-		data-title='<i class="fa fa-pencil-square-o"></i> Edit Property Risk Category'
-		data-url="<?php echo site_url($_edit_url);?>"
-		data-form=".form-iqb-general"><?php echo $record->name_en;?></a></td>
-	<td><?php echo $record->name_np;?></td>
+<tr data-name="<?php echo $record->fiscal_yr_id;?>"
+	class="searchable <?php echo $current_class;?>"
+	title="<?php echo $current_title?>"
+	<?php echo $flag_current_fiscal_year ? 'data-toggle="tooltip"' : ''?>
+	data-id="<?php echo $record->fiscal_yr_id; ?>"
+	id="_data-row-<?php echo $record->fiscal_yr_id;?>">
+	<td><?php echo $record->code_np . " ({$record->code_en})";?></td>
 	<td class="ins-action">
 		<a href="#"
 			data-toggle="tooltip"
-			title="Edit Property Risk Category"
+			title="Edit Risk Categories for this Fiscal Year"
 			class="trg-dialog-edit action"
-			data-title='<i class="fa fa-pencil-square-o"></i> Edit Property Risk Category'
+			data-title='<i class="fa fa-pencil-square-o"></i> Edit Risk Categories - <?php echo $record->code_np . " ({$record->code_en})" ?>'
 			data-url="<?php echo site_url($_edit_url);?>"
 			data-form=".form-iqb-general">
 			<i class="fa fa-pencil-square-o"></i>
 			<span class="hidden-xs">Edit</span>
 		</a>
 
-		<a href="#"
-			title="Edit Tariff"
+		<a href="<?php echo site_url($_detail_url);?>"
 			data-toggle="tooltip"
-			data-box-size="full-width"
-			class="trg-dialog-edit action"
-			data-title='<i class="fa fa-pencil-square-o"></i> Edit Tariff - <?php echo $record->name_en?> (<?php echo $record->name_np ?>)'
-			data-url="<?php echo site_url($_tariff_url);?>"
-			data-form=".form-iqb-general">
-			<i class="fa fa-list"></i>
-			<span class="hidden-xs">Tariff</span>
+			title="Details"
+			class="action">
+			<i class="fa fa-th-list"></i>
+			<span class="hidden-xs">Details</span>
 		</a>
-
 		<a href="#"
-			title="Edit Risks"
 			data-toggle="tooltip"
+			title="Duplicate Property Tarrif"
 			data-box-size="large"
 			class="trg-dialog-edit action"
-			data-title='<i class="fa fa-pencil-square-o"></i> Edit Risks - <?php echo $record->name_en?> (<?php echo $record->name_np ?>)'
-			data-url="<?php echo site_url($_risk_url);?>"
+			data-title='<i class="fa fa-pencil-square-o"></i> Duplicate Property Tarrif'
+			data-url="<?php echo site_url($_duplicate_url);?>"
 			data-form=".form-iqb-general">
-			<i class="fa fa-list"></i>
-			<span class="hidden-xs">Risks</span>
+			<i class="fa fa-copy"></i>
+			<span class="hidden-xs">Duplicate</span>
 		</a>
 	</td>
 </tr>

@@ -47,42 +47,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </div>
     </div>
 </div>
-
-<?php
-$risk_codes     = $form_elements['property_risk'][1]['_risk_codes'];
- ?>
 <script type="text/javascript">
-    /**
-     * Risk Codes for all Categories
-     */
-     var __risk_codes = <?php echo json_encode($risk_codes) ?>;
-
-     // Risk code change on risk category change
-     $(document).on('change', '.risk_category', function(e){
-        e.preventDefault();
-
-        var v = $(this).val(),
-            $risk_code = $(this).closest('.property-row').find('.risk_code');
-
-        // Empty risk code options
-        $risk_code
-                .find('option')
-                .remove();
-
-        if(v)
-        {
-            var codes = __risk_codes[v];
-            if(codes){
-                $.each(codes, function (key, value) {
-                     $risk_code
-                            .append($("<option></option>")
-                            .attr("value",key)
-                            .text(value));
-                 });
-            }
-        }
-     });
-
     function __duplicate_tr(src, a)
     {
         var $src = $(src),

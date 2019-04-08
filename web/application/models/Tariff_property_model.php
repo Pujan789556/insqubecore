@@ -19,7 +19,7 @@ class Tariff_property_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'code', 'name_en', 'name_np', 'risks', 'tariff', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'fiscal_yr_id', 'code', 'name_en', 'name_np', 'risks', 'tariff', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [
         [
@@ -62,6 +62,93 @@ class Tariff_property_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+    }
+
+    // ----------------------------------------------------------------
+
+    public function v_rules_add_fy( $for_validation = FALSE)
+    {
+        $v_rules = [
+            'fiscal_year' => [
+                [
+                    'field' => 'fiscal_yr_id',
+                    'label' => 'Fiscal Year',
+                    'rules' => 'trim|required|integer|max_length[3]|callback_check_duplicate_fiscal_year',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown(),
+                    '_default'  => '',
+                    '_required' => true
+                ]
+            ],
+            'risk_categories' => [
+                [
+                    'field' => 'ids[]',
+                    '_key'  => 'id',
+                    'label' => 'ID',
+                    'rules' => 'trim|integer|max_length[11]',
+                    '_type'     => 'hidden',
+                    '_show_label' => false,
+                    '_required' => false
+                ],
+                [
+                    'field' => 'code[]',
+                    '_key'  => 'code',
+                    'label' => 'Risk Code',
+                    'rules' => 'trim|required|max_length[20]|strtoupper|callback_check_duplicate_codes',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'name_en[]',
+                    '_key'  => 'name_en',
+                    'label' => 'Name (EN)',
+                    'rules' => 'trim|required|max_length[150]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+                [
+                    'field' => 'name_np[]',
+                    '_key'  => 'name_np',
+                    'label' => 'Name (NP)',
+                    'rules' => 'trim|required|max_length[150]',
+                    '_type'     => 'text',
+                    '_show_label' => false,
+                    '_required' => true
+                ],
+            ]
+        ];
+
+        // return formatted?
+        $fromatted_v_rules = [];
+        if($for_validation === TRUE)
+        {
+            foreach($v_rules as $section=>$rules)
+            {
+                $fromatted_v_rules = array_merge($fromatted_v_rules, $rules);
+            }
+            return $fromatted_v_rules;
+        }
+
+        return $v_rules;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function v_rules_duplicate_fy()
+    {
+        return [
+            [
+                'field' => 'fiscal_yr_id',
+                'label' => 'Fiscal Year',
+                'rules' => 'trim|required|integer|max_length[3]|callback_check_duplicate_fiscal_year',
+                '_type'     => 'dropdown',
+                '_data'     => IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown(),
+                '_default'  => '',
+                '_required' => true
+            ]
+        ];
     }
 
     // ----------------------------------------------------------------
@@ -232,6 +319,79 @@ class Tariff_property_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function check_duplicate_fiscal_year($fiscal_yr_id, $ids = NULL)
+    {
+        if( $ids )
+        {
+            $this->db->where_not_in('id', $ids);
+        }
+        // $where is array ['key' => $value]
+        return $this->db->where(['fiscal_yr_id' => $fiscal_yr_id])
+                        ->count_all_results($this->table_name);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Get Index Rows
+     *
+     * List of Fiscal Years for which data have been created
+     *
+     * @return array
+     */
+    public function get_index_rows()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $list = $this->get_cache('property_index_list');
+        if(!$list)
+        {
+            $list = $this->db->select('PRPTTRF.fiscal_yr_id, FY.code_en, FY.code_np')
+                                ->from($this->table_name . ' PRPTTRF')
+                                ->join('master_fiscal_yrs FY', 'FY.id = PRPTTRF.fiscal_yr_id')
+                                ->group_by('PRPTTRF.fiscal_yr_id')
+                                ->order_by('PRPTTRF.fiscal_yr_id', 'DESC')
+                                ->get()->result();
+            $this->write_cache($list, 'trfagr_index_list', CACHE_DURATION_DAY);
+        }
+        return $list;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function get_list_by_fiscal_year_rows($fiscal_yr_id)
+    {
+        return $this->db->select('PRPTTRF.*, FY.code_en as fy_code_en, FY.code_np as fy_code_np')
+                        ->from($this->table_name . ' PRPTTRF')
+                        ->join('master_fiscal_yrs FY', 'FY.id = PRPTTRF.fiscal_yr_id')
+                        ->where('PRPTTRF.fiscal_yr_id', $fiscal_yr_id)
+                        ->get()->result();
+    }
+
+    // ----------------------------------------------------------------
+
+    public function get_fiscal_year_row($fiscal_yr_id)
+    {
+        return $this->db->select('PTAGR.fiscal_yr_id, FY.code_en, FY.code_np')
+                                ->from($this->table_name . ' PTAGR')
+                                ->join('master_fiscal_yrs FY', 'FY.id = PTAGR.fiscal_yr_id')
+                                ->where('PTAGR.fiscal_yr_id', $fiscal_yr_id)
+                                ->get()->row();
+    }
+
+    // ----------------------------------------------------------------
+
+    public function get_list_by_fiscal_year($fiscal_yr_id)
+    {
+        return $this->db->select('PTAGR.*')
+                        ->from($this->table_name . ' PTAGR')
+                        ->where('PTAGR.fiscal_yr_id', $fiscal_yr_id)
+                        ->get()->result();
+    }
+
+    // ----------------------------------------------------------------
+
     public function get($id)
     {
         /**
@@ -241,7 +401,11 @@ class Tariff_property_model extends MY_Model
         $record = $this->get_cache($cache_var);
         if(!$record)
         {
-            $record = parent::find($id);
+            $record = $this->db->select('PRPTTRF.*, FY.code_en as fy_code_en, FY.code_np as fy_code_np')
+                        ->from($this->table_name . ' PRPTTRF')
+                        ->join('master_fiscal_yrs FY', 'FY.id = PRPTTRF.fiscal_yr_id')
+                        ->where('PRPTTRF.id', $id)
+                        ->get()->row();
             $this->write_cache($record, $cache_var, CACHE_DURATION_DAY);
         }
         return $record;
@@ -249,18 +413,20 @@ class Tariff_property_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function get_all()
+    public function get_all_fy($fiscal_yr_id)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $list = $this->get_cache('property_risk_cat_all');
+        $cache_var = 'property_risk_cat_fy_' . $fiscal_yr_id;
+        $list = $this->get_cache($cache_var);
         if(!$list)
         {
             $list = $this->db->select('`id`, `code`, `name_en`, `name_np`')
                         ->from($this->table_name)
+                        ->where('fiscal_yr_id', $fiscal_yr_id)
                         ->get()->result();
-            $this->write_cache($list, 'property_risk_cat_all', CACHE_DURATION_DAY);
+            $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
         }
         return $list;
     }
@@ -270,12 +436,12 @@ class Tariff_property_model extends MY_Model
     /**
      * Get Dropdown List
      */
-    public function risk_category_dropdown($lang = 'both')
+    public function risk_category_dropdown($fiscal_yr_id, $lang = 'both')
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $records = $this->get_all();
+        $records = $this->get_all_fy($fiscal_yr_id);
         $list = [];
         foreach($records as $record)
         {
@@ -340,7 +506,8 @@ class Tariff_property_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'property_risk_cat_all',
+            'property_index_list',
+            'property_risk_cat_fy_*',
             'property_risk_cat_*'
         ];
         // cache name without prefix

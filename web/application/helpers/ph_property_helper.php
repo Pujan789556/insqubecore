@@ -126,44 +126,10 @@ if ( ! function_exists('_OBJ_PROPERTY_validation_rules'))
 		$usage_type_dropdwon 	= _OBJ_PROPERTY_usage_type_dropdown(FALSE);
 		$risk_class_dropdwon 	= _OBJ_PROPERTY_risk_class_dropdown(FALSE);
 		$district_dropdown 		= district_dropdown( 'both', FALSE );
-
-		$risk_category_dropdown = _PROPERTY_risk_category_dropdown(FALSE);
 		$item_type_dropdwon 	= _OBJ_PROPERTY_item_type_dropdown(FALSE);
 
-		$risk_codes 			= _OBJ_PROPERTY_risk_codes();
 
 		$v_rules = [
-
-			/**
-		     * Property Details
-		     */
-		    'property_risk' => [
-		    	[
-			        'field' => 'object[items][risk_category][]',
-			        '_key' => 'risk_category',
-			        '_class' 	=> 'form-control risk_category',
-			        'label' => 'Risk Category',
-			        'rules' => 'trim|required|integer|max_length[11]|in_list['. implode(',', array_keys($risk_category_dropdown)) .']',
-			        '_type'     => 'dropdown',
-			        '_data' 	=> IQB_BLANK_SELECT + $risk_category_dropdown,
-			        '_show_label' 	=> true,
-			        '_required' => true
-			    ],
-
-			    // This should be re-filled per item via ajax call on form load.
-			    [
-			        'field' => 'object[items][risk_code][]',
-			        '_key' => 'risk_code',
-			        '_class' 	=> 'form-control risk_code',
-			        'label' => 'Risk Code',
-			        'rules' => 'trim|required|max_length[20]',
-			        '_type'     => 'dropdown',
-			        '_data' 	=> IQB_BLANK_SELECT,
-			        '_risk_codes' 	=> $risk_codes, // Required in Form
-			        '_show_label' 	=> true,
-			        '_required' => true
-			    ]
-		    ],
 
 			/**
 		     * Location Details
@@ -346,7 +312,7 @@ if ( ! function_exists('_OBJ_PROPERTY_validation_rules'))
 		$fromatted_v_rules = [];
 		if($formatted === TRUE)
 		{
-			$fromatted_v_rules = array_merge($v_rules['property_risk'], $v_rules['property_location']);
+			$fromatted_v_rules = $v_rules['property_location'];
 			foreach($item_type_dropdwon as $key=>$label)
 			{
 				$fromatted_v_rules = array_merge($fromatted_v_rules, $items_v_rules[$key]);
@@ -366,22 +332,28 @@ if ( ! function_exists('_OBJ_PROPERTY_risk_codes'))
 	/**
 	 * Object's Tariff Risks for all Risk Category
 	 *
+	 * @param int $fiscal_yr_id 	Fiscal Year ID
 	 * @param bool $risk_category 	Risk Category
 	 * @return	array
 	 */
-	function _OBJ_PROPERTY_risk_codes( $risk_category = NULL )
+	function _OBJ_PROPERTY_risk_codes( $risk_category = NULL, $fiscal_yr_id = NULL)
 	{
 		$CI =& get_instance();
 		$CI->load->model('tariff_property_model');
 
 		$risk_codes = [];
+		if(!$risk_category && !$fiscal_yr_id) // Empty on nothing supplied
+		{
+			return $risk_codes;
+		}
+
 		if($risk_category)
 		{
-			$risk_codes[$risk_codes] = _PROPERTY_risk_dropdown($risk_category);
+			$risk_codes[$risk_category] = _PROPERTY_risk_dropdown($risk_category);
 		}
 		else
 		{
-			$risk_categories = $CI->tariff_property_model->get_all();
+			$risk_categories = $CI->tariff_property_model->get_all_fy($fiscal_yr_id);
 			foreach($risk_categories as $single)
 			{
 				$risk_codes[$single->id] = _PROPERTY_risk_dropdown($single->id);
@@ -399,15 +371,16 @@ if ( ! function_exists('_PROPERTY_risk_category_dropdown'))
 	/**
 	 * Risk Category Dropdown
 	 *
+	 * @param int $fiscal_yr_id 	Fiscal Year ID
 	 * @param string $lang 	both|en|np
 	 * @param bool $flag_blank_select 	Whether to append blank select
 	 * @return	array
 	 */
-	function _PROPERTY_risk_category_dropdown($lang = 'both', $flag_blank_select = true )
+	function _PROPERTY_risk_category_dropdown($fiscal_yr_id, $lang = 'both', $flag_blank_select = true )
 	{
 		$CI =& get_instance();
 		$CI->load->model('tariff_property_model');
-		$dropdown = $CI->tariff_property_model->risk_category_dropdown($lang);
+		$dropdown = $CI->tariff_property_model->risk_category_dropdown($fiscal_yr_id, $lang);
 		if($flag_blank_select)
 		{
 			$dropdown = IQB_BLANK_SELECT + $dropdown;
@@ -654,19 +627,11 @@ if ( ! function_exists('_OBJ_PROPERTY_format_items'))
 
 		$item_list_fields 	= ['item_type', 'item_usage_type', 'item_sum_insured', 'item_remarks'];
 		$items_formatted 	= [];
-		$property_count 	= count($items['risk_category']);
+		$property_count 	= count($items['location_plot_no']);
 
 		for($i=0; $i < $property_count; $i++)
 		{
 			$single_item_per_property = [];
-
-			// property_risk
-			$risk_rules = _OBJ_PROPERTY_validation_rules(NULL)['property_risk'];
-			foreach($risk_rules as $rule)
-			{
-				$key = $rule['_key'];
-				$single_item_per_property[$key] = $items[$key][$i];
-			}
 
 			// property_location
 			$location_rules = _OBJ_PROPERTY_validation_rules(NULL)['property_location'];
@@ -742,6 +707,11 @@ if ( ! function_exists('_TXN_PROPERTY_premium_validation_rules'))
 	 */
 	function _TXN_PROPERTY_premium_validation_rules($policy_record, $pfs_record, $policy_object, $for_form_processing = FALSE )
 	{
+		$CI =& get_instance();
+
+		$risk_codes 			= _OBJ_PROPERTY_risk_codes(NULL, $CI->current_fiscal_year->id);
+		$risk_category_dropdown = _PROPERTY_risk_category_dropdown($CI->current_fiscal_year->id, FALSE);
+
 		$validation_rules = [
 
 			/**
@@ -758,6 +728,37 @@ if ( ! function_exists('_TXN_PROPERTY_premium_validation_rules'))
                     '_required' => false,
                 ]
 			],
+
+			/**
+		     * Risk Table - Per Item - Required for premium computation
+		     */
+		    'property_risk' => [
+		    	[
+			        'field' => 'premium[risk_category][]',
+			        '_key' => 'risk_category',
+			        '_class' 	=> 'form-control risk_category',
+			        'label' => 'Risk Category',
+			        'rules' => 'trim|required|integer|max_length[11]|in_list['. implode(',', array_keys($risk_category_dropdown)) .']',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> IQB_BLANK_SELECT + $risk_category_dropdown,
+			        '_show_label' 	=> false,
+			        '_required' => true
+			    ],
+
+			    // This should be re-filled per item via ajax call on form load.
+			    [
+			        'field' => 'premium[risk_code][]',
+			        '_key' => 'risk_code',
+			        '_class' 	=> 'form-control risk_code',
+			        'label' => 'Risk Code',
+			        'rules' => 'trim|required|max_length[20]',
+			        '_type'     => 'dropdown',
+			        '_data' 	=> IQB_BLANK_SELECT,
+			        '_risk_codes' 	=> $risk_codes, // Required in Form
+			        '_show_label' 	=> false,
+			        '_required' => true
+			    ]
+		    ],
 
 			/**
 			 * Common to All Package Type
@@ -918,11 +919,13 @@ if ( ! function_exists('__save_premium_PROPERTY'))
 					$cc_info 		= [];
 					foreach($items as $single_property)
 					{
-						$risk_category = $single_property->risk_category;
+						// $risk_category = $single_property->risk_category;
+
+						$risk_category 	= $post_premium['risk_category'][$index];
+						$risk_code 		= $post_premium['risk_code'][$index];
 
 						// Get the Tariff For This Risk Category, This Portfolio
-						$tariff 		= _TXN_PROPERTY_get_tariff($single_property->risk_category, $policy_record->portfolio_id);
-
+						$tariff 			  = _TXN_PROPERTY_get_tariff($risk_category, $policy_record->portfolio_id);
 						$premium_per_property = _TXN_PROPERTY_compute_premium_per_property($single_property, $tariff);
 
 						/**
@@ -934,7 +937,7 @@ if ( ! function_exists('__save_premium_PROPERTY'))
 							'sn' 					=> $sn[$index],
 							'description' 			=> $cc_table_desc[$index],
 							'risk_category_code' 	=> $tariff->risk_category_code,
-							'risk_code' 			=> $single_property->risk_code,
+							'risk_code' 			=> $risk_code,
 							'si_per_property' 		=> _TXN_PROPERTY_compute_si_per_property($single_property),
 							'applied_rate_basic' 	=> $premium_per_property['applied_rate_basic'],
 							'premium_per_property'  => $premium_per_property['basic_premium']
@@ -942,6 +945,8 @@ if ( ! function_exists('__save_premium_PROPERTY'))
 
 						// Add to array
 						$premium_arr[] = $premium_per_property;
+
+						$index++;
 					}
 
 

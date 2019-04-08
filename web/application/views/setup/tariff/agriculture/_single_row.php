@@ -32,10 +32,10 @@ $_detail_url 		= $this->data['_url_base'] . '/agriculture/details/' . $record->f
 		</a>
 		<a href="#"
 			data-toggle="tooltip"
-			title="Duplicate Motor Tarrif"
+			title="Duplicate Tarrif"
 			data-box-size="large"
 			class="trg-dialog-edit action"
-			data-title='<i class="fa fa-pencil-square-o"></i> Duplicate Motor Tarrif'
+			data-title='<i class="fa fa-pencil-square-o"></i> Duplicate Agriculture Tarrif'
 			data-url="<?php echo site_url($_duplicate_url);?>"
 			data-form=".form-iqb-general">
 			<i class="fa fa-copy"></i>
