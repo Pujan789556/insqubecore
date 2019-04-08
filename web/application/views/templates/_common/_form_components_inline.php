@@ -70,7 +70,7 @@ foreach($form_elements as $element):?>
              * NOTE: set_value() does not return array. This is specially for multiselect
              */
             $post_value = $this->input->post($element['field']);
-            if(is_array($post_value) && $element['field'] == 'dropdown')
+            if(is_array($post_value) && $element['_type'] == 'dropdown')
             {
                 $value = $post_value;
             }
