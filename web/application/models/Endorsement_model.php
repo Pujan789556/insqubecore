@@ -2753,8 +2753,8 @@ class Endorsement_model extends MY_Model
             /**
              * Task 4: Compute NET Premium Data = GROSS - REFUND, DO not refund POOL
              */
-            $flag_refund_pool = $record->flag_refund_pool == IQB_FLAG_YES;
-            $premium_data = $this->_compute_net_premium_data($premium_data, $flag_refund_pool);
+            $exclude_pool = $record->flag_refund_pool == IQB_FLAG_NO;
+            $premium_data = $this->_compute_net_premium_data($premium_data, $exclude_pool);
             // echo 'GROSS, REFUND, NET : <pre>'; print_r($premium_data); exit;
             // --------------------------------------------------------------------
 
@@ -2829,8 +2829,8 @@ class Endorsement_model extends MY_Model
             /**
              * Task 4: Compute NET Premium Data = GROSS - REFUND, DO not refund POOL
              */
-            $flag_refund_pool = $record->flag_refund_pool == IQB_FLAG_YES;
-            $premium_data = $this->_compute_net_premium_data($premium_data, $flag_refund_pool);
+            $exclude_pool = $record->flag_refund_pool == IQB_FLAG_NO;
+            $premium_data = $this->_compute_net_premium_data($premium_data, $exclude_pool);
             // echo 'GROSS, REFUND, NET : <pre>'; print_r($premium_data); exit;
             // --------------------------------------------------------------------
 
