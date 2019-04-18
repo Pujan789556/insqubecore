@@ -442,6 +442,10 @@ class Customers extends MY_Controller
         	{
         		// Now Update Data
         		$mobile_identity = $this->input->post('mobile_identity');
+        		if(!$mobile_identity)
+        		{
+        			$mobile_identity = NULL; // You can remove mobile identity too.
+        		}
 				$done = $this->customer_model->change_app_identity($record->id, $mobile_identity);
 
 	        	if(!$done)
@@ -615,9 +619,9 @@ class Customers extends MY_Controller
 		// No form Submitted?
 		$json_data['form'] = $this->load->view('customers/_form_verify_kyc',
 			[
-				'form_elements' 	=> $this->customer_model->v_rules('app_identity'),
+				'form_elements' 	=> $this->customer_model->v_rules('verify_kyc'),
 				'record' 			=> $record,
-				'action' 			=> 'app_identity'
+				'action' 			=> 'verify_kyc'
 			], TRUE);
 
 		// Return HTML

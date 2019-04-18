@@ -87,9 +87,11 @@ class Customer_model extends MY_Model
 
             case 'app_identity':
                 $v_rules = $v_rules_api_identity;
+                break;
 
             case 'verify_kyc':
                 $v_rules = $this->_v_rules_verify_kyc();
+                break;
 
             default:
                 # code...
@@ -372,10 +374,10 @@ class Customer_model extends MY_Model
                 $data[$col] = $post_data[$col] ?? NULL;
             }
 
-            // Nullify mobile_identity if blank
+            // Dummy Characters if Mobile Identity is Blank
             if(!$data['mobile_identity'])
             {
-                $data['mobile_identity'] = NULL;
+                $data['mobile_identity'] = TOKEN::v2(12);
             }
 
             // Code
@@ -420,21 +422,16 @@ class Customer_model extends MY_Model
 
             /**
              * Task 2: Create a Mobile App User
-             *
-             * NOTE: If customer has mobile identity
              */
-            if($customer->mobile_identity)
-            {
-                $this->load->model('api/app_user_model', 'app_user_model');
-                $app_user_data = [
-                    'mobile'        => $customer->mobile_identity,
-                    'auth_type'     => IQB_API_AUTH_TYPE_CUSTOMER,
-                    'auth_type_id'  => $customer->id,
-                    'password'      => $post_data['password'] ?? NULL, // Set password if sent
-                ];
+            $this->load->model('api/app_user_model', 'app_user_model');
+            $app_user_data = [
+                'mobile'        => $customer->mobile_identity,
+                'auth_type'     => IQB_API_AUTH_TYPE_CUSTOMER,
+                'auth_type_id'  => $customer->id,
+                'password'      => $post_data['password'] ?? NULL, // Set password if sent
+            ];
+            $this->app_user_model->register($app_user_data, FALSE);
 
-                $this->app_user_model->register($app_user_data, FALSE);
-            }
 
 
             return TRUE;
