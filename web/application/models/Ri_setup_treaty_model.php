@@ -95,7 +95,7 @@ class Ri_setup_treaty_model extends MY_Model
                 [
                     'field' => 'treaty_type_id',
                     'label' => 'Treaty Type',
-                    'rules' => 'trim|required|integer|exact_length[1]|callback__cb_treaty_type__check_duplicate',
+                    'rules' => 'trim|required|integer|exact_length[1]',
                     '_type'     => 'dropdown',
                     '_data'     => IQB_BLANK_SELECT + $this->ri_setup_treaty_type_model->dropdown(),
                     '_required' => true
@@ -1204,14 +1204,16 @@ class Ri_setup_treaty_model extends MY_Model
      * @param integernull $id
      * @return bool
      */
-    public function _cb_portfolio__check_duplicate($category, $fiscal_yr_id, $portfolio_id, $id=NULL)
+    public function _cb_portfolio__check_duplicate($treaty_type_id, $category, $fiscal_yr_id, $portfolio_id, $id=NULL)
     {
         $this->db
                 ->from($this->table_name . ' AS T')
                 ->join(self::$table_treaty_portfolios . ' TP', 'T.id = TP.treaty_id')
                 ->where('T.category', $category)
                 ->where('T.fiscal_yr_id', $fiscal_yr_id)
+                ->where('T.treaty_type_id', $treaty_type_id)
                 ->where('TP.portfolio_id', $portfolio_id);
+
 
         if( $id )
         {
