@@ -256,11 +256,11 @@ class Customer_model extends MY_Model
             [
                 'field' => 'mobile_identity',
                 'label' => 'Mobile Identity',
-                'rules' => 'trim|required|valid_mobile|max_length[10]|callback__cb_valid_mobile_identity',
+                'rules' => 'trim|valid_mobile|max_length[10]|callback__cb_valid_mobile_identity',
                 '_type' => 'text',
                 '_id'   => 'mobile-identity',
                 '_help_text' => 'This mobile number is used by customer to access Mobile App',
-                '_required' => true
+                '_required' => false
             ]
         ];
 
@@ -372,6 +372,12 @@ class Customer_model extends MY_Model
                 $data[$col] = $post_data[$col] ?? NULL;
             }
 
+            // Nullify mobile_identity if blank
+            if(!$data['mobile_identity'])
+            {
+                $data['mobile_identity'] = NULL;
+            }
+
             // Code
             $data['code']       = TOKEN::v2(12);
 
@@ -414,16 +420,22 @@ class Customer_model extends MY_Model
 
             /**
              * Task 2: Create a Mobile App User
+             *
+             * NOTE: If customer has mobile identity
              */
-            $this->load->model('api/app_user_model', 'app_user_model');
-            $app_user_data = [
-                'mobile'        => $customer->mobile_identity,
-                'auth_type'     => IQB_API_AUTH_TYPE_CUSTOMER,
-                'auth_type_id'  => $customer->id,
-                'password'      => $post_data['password'] ?? NULL, // Set password if sent
-            ];
+            if($customer->mobile_identity)
+            {
+                $this->load->model('api/app_user_model', 'app_user_model');
+                $app_user_data = [
+                    'mobile'        => $customer->mobile_identity,
+                    'auth_type'     => IQB_API_AUTH_TYPE_CUSTOMER,
+                    'auth_type_id'  => $customer->id,
+                    'password'      => $post_data['password'] ?? NULL, // Set password if sent
+                ];
 
-            $this->app_user_model->register($app_user_data, FALSE);
+                $this->app_user_model->register($app_user_data, FALSE);
+            }
+
 
             return TRUE;
         }
