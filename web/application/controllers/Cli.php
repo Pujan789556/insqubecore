@@ -38,6 +38,38 @@ class Cli extends Base_Controller
 
 	// -------------------------------------------------------------------------------------
 
+    /**
+     * RI - Regeneration Test
+     *
+     * Usage(dev/production):
+     * 		$ php index.php cli ri_rebuild > err.log
+     * 		$ CI_ENV=production php index.php cli ri_rebuild
+     *
+     * @return void
+     */
+	public function ri_rebuild()
+    {
+        $this->load->helper('ri');
+        $paid_installments = $this->db->select('id')
+                                      ->from('dt_policy_installments')
+                                      ->where('status', IQB_POLICY_INSTALLMENT_STATUS_PAID)
+                                      ->get()->result();
+
+
+        foreach($paid_installments as $single )
+        {
+            try {
+                $data = RI__distribute( $single->id );
+            } catch (Exception $e) {
+                print "Installment: {$single->id}, " . $e->getMessage() . "\n\r";
+            }
+
+            print "Installment: {$single->id}, RI-Basic:  {$data['ri_transaction_id_basic']}, RI-Pool:  {$data['ri_transaction_id_pool']} \n\r";
+        }
+    }
+
+	// -------------------------------------------------------------------------------------
+
 	/**
 	 * Import Today's Forex Rate from NRB
 	 *
