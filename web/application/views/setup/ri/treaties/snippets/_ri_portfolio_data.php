@@ -15,6 +15,9 @@ $treaty_type_id =  (int)$portfolios[0]->treaty_type_id;
 			<th>Compulsory Cession Apply?</th>
 			<th>Compulsory Cession(%)</th>
 			<th>Compulsory Cession(Max Amount)</th>
+			<th>Compulsory Cession RI Commission(%)</th>
+			<th>Compulsory Cession RI Tax(%)</th>
+			<th>Compulsory Cession IB Tax(%)</th>
 			<th>Treaty Maximum Capacity</th>
 			<th>Maximum Retention Amount</th>
 			<th>Defnied Retention Amount</th>
@@ -53,6 +56,10 @@ $treaty_type_id =  (int)$portfolios[0]->treaty_type_id;
 				<td><?php echo yes_no_text($portfolio->flag_comp_cession_apply, '-')?></td>
 				<td><?php echo $portfolio->comp_cession_percent;?></td>
 				<td><?php echo $portfolio->comp_cession_max_amt;?></td>
+				<td><?php echo $portfolio->comp_cession_comm_ri;?></td>
+				<td><?php echo $portfolio->comp_cession_tax_ri;?></td>
+				<td><?php echo $portfolio->comp_cession_tax_ib;?></td>
+
 				<td><?php echo $portfolio->treaty_max_capacity_amt;?></td>
 				<td><?php echo $portfolio->qs_max_ret_amt;?></td>
 				<td><?php echo $portfolio->qs_def_ret_amt;?></td>

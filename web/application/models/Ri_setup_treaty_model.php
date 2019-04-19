@@ -283,6 +283,33 @@ class Ri_setup_treaty_model extends MY_Model
                     '_required'         => true
                 ],
                 [
+                    'field' => 'comp_cession_comm_ri[]',
+                    'label' => 'Compulsory Cession RI Commission (%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+                    '_field'            => 'comp_cession_comm_ri',
+                    '_type'             => 'text',
+                    '_show_label'       => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'comp_cession_tax_ri[]',
+                    'label' => 'Compulsory Cession RI Tax (%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+                    '_field'            => 'comp_cession_tax_ri',
+                    '_type'             => 'text',
+                    '_show_label'       => false,
+                    '_required'         => true
+                ],
+                [
+                    'field' => 'comp_cession_tax_ib[]',
+                    'label' => 'Compulsory Cession IB Tax (%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+                    '_field'            => 'comp_cession_tax_ib',
+                    '_type'             => 'text',
+                    '_show_label'       => false,
+                    '_required'         => true
+                ],
+                [
                     'field' => 'treaty_max_capacity_amt[]',
                     'label' => 'Treaty Maximum Capacity',
                     'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
@@ -1090,7 +1117,7 @@ class Ri_setup_treaty_model extends MY_Model
     public function save_treaty_portfolios($id, $data)
     {
         $status                     = TRUE;
-        $treaty_portfolio_fillables = ['ac_basic','flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'treaty_max_capacity_amt', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
+        $treaty_portfolio_fillables = ['ac_basic','flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'comp_cession_comm_ri', 'comp_cession_tax_ri', 'comp_cession_tax_ib', 'treaty_max_capacity_amt', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
 
         $total_portfolios           = count($data['portfolio_ids']);
         $treaty_id                  = $id;
@@ -1426,7 +1453,7 @@ class Ri_setup_treaty_model extends MY_Model
                             'T.id, T.name as treaty_name, T.category, T.fiscal_yr_id, T.treaty_type_id, T.treaty_effective_date, ' .
 
                             // Treaty Portfolio Config
-                            'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amt, TP.treaty_max_capacity_amt, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_def_ret_apply, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
+                            'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amt, TP.comp_cession_comm_ri, TP.comp_cession_tax_ri, TP.comp_cession_tax_ib, TP.treaty_max_capacity_amt, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_def_ret_apply, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
 
                             // Portfolio Detail
                             'P.code as portfolio_code, P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np, ' .
