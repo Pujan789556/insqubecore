@@ -217,7 +217,7 @@ class Ri_fac_registration_model extends MY_Model
 
     public function get_fac_by_ri_transaction($ri_transaction_id)
     {
-        return $this->db->select('FAC.*, C.name AS company_name')
+        return $this->db->select('FAC.*, C.name_en AS company_name')
                         ->from($this->table_name . ' FAC')
                         ->join('master_companies C', 'C.id = FAC.company_id')
                         ->where('FAC.ri_transaction_id', $ri_transaction_id)
