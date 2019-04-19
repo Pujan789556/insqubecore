@@ -1447,6 +1447,25 @@ if ( ! function_exists('_ENDORSEMENT_is_first'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('_ENDORSEMENT_is_ri_distributable'))
+{
+    /**
+     * Check if given Endorsement is first (Fresh/Renewal).
+     *
+     *
+     * @param   int     Transaction Type
+     * @return  array
+     */
+    function _ENDORSEMENT_is_ri_distributable( $txn_type )
+    {
+        $CI =& get_instance();
+        $CI->load->model('endorsement_model');
+
+        return $CI->endorsement_model->is_ri_distributable($txn_type);
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('_ENDORSEMENT_is_deletable'))
 {
 	/**

@@ -11,6 +11,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<h1 style="margin:0; font-size:24px;"><?php echo $content_header; ?></h1>
 			</div>
 			<div class="col-sm-4 master-actions text-right">
+				<a href="<?php echo site_url( $this->data['_url_base'] . '/flush/' );?>" title="Flush Cache"
+						class="btn btn-warning btn-round"
+						data-toggle="tooltip"
+				><i class="fa fa-trash-o"></i> Flush Cache</a>
 				<a href="#"
 					title="Add Treaty"
 					data-toggle="tooltip"

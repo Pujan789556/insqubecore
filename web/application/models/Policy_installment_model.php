@@ -302,35 +302,12 @@ class Policy_installment_model extends MY_Model
          */
         if( $this->_update($record->id, $data) )
         {
-
             /**
              * DO RI Distribution on Paid
              */
             $this->load->helper('ri');
+            RI__distribute( $record->id );
 
-            /**
-             * RI__distribute - Fresh/Renewal Transaction's First Installment
-             * RI__distribute_endorsement - All other transaction or installments
-             */
-            if(
-                _ENDORSEMENT_is_first($record->txn_type)
-                    &&
-                $record->flag_first == IQB_FLAG_ON
-            )
-            {
-                RI__distribute( $record->id );
-            }
-
-            /**
-             * Only Premium Computable Endorsement has RI Distribution
-             * i.e.
-             *  - Premium Upgrade
-             *  - Premium Refund
-             */
-            else if( $this->endorsement_model->is_ri_distributable($record->txn_type) )
-            {
-                RI__distribute_endorsement($record->id);
-            }
 
             /**
              * Delete Caches

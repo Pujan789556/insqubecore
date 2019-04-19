@@ -1204,14 +1204,13 @@ class Ri_setup_treaty_model extends MY_Model
      * @param integernull $id
      * @return bool
      */
-    public function _cb_portfolio__check_duplicate($treaty_type_id, $category, $fiscal_yr_id, $portfolio_id, $id=NULL)
+    public function _cb_portfolio__check_duplicate($category, $fiscal_yr_id, $portfolio_id, $id=NULL)
     {
         $this->db
                 ->from($this->table_name . ' AS T')
                 ->join(self::$table_treaty_portfolios . ' TP', 'T.id = TP.treaty_id')
                 ->where('T.category', $category)
                 ->where('T.fiscal_yr_id', $fiscal_yr_id)
-                ->where('T.treaty_type_id', $treaty_type_id)
                 ->where('TP.portfolio_id', $portfolio_id);
 
 
@@ -1387,17 +1386,27 @@ class Ri_setup_treaty_model extends MY_Model
 
     // --------------------------------------------------------------------
 
-    public function get_treaty_by_portfolio($portfolio_id)
+    /**
+     * Get Portfolio Treaty for Given Fiscal Year for Given Category
+     *
+     * @param int $portfolio_id
+     * @param int $fiscal_yr_id
+     * @param int $category
+     * @return object
+     */
+    public function get_portfolio_treaty($portfolio_id, $fiscal_yr_id, $category)
     {
         /**
          * Get Cached Result, If no, cache the query result
          */
-        $cache_var  = 'ri_tbp_' . $portfolio_id;
+        $cache_var  = 'ri_pt_' . $portfolio_id . '_' . $fiscal_yr_id . '_' . $category;
         $row       = $this->get_cache($cache_var);
         if(!$row)
         {
             $this->_treaty_portfolios_select();
             $row = $this->db
+                            ->where('T.category', $category)
+                            ->where('T.fiscal_yr_id', $fiscal_yr_id)
                             ->where('P.id', $portfolio_id)
                             ->get()->row();
             if($row)
@@ -1414,7 +1423,7 @@ class Ri_setup_treaty_model extends MY_Model
     {
         $this->db->select(
                             // Treaty Details
-                            'T.id, T.name as treaty_name, T.fiscal_yr_id, T.treaty_type_id, T.treaty_effective_date, ' .
+                            'T.id, T.name as treaty_name, T.category, T.fiscal_yr_id, T.treaty_type_id, T.treaty_effective_date, ' .
 
                             // Treaty Portfolio Config
                             'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amt, TP.treaty_max_capacity_amt, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_def_ret_apply, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
@@ -1467,7 +1476,7 @@ class Ri_setup_treaty_model extends MY_Model
     public function clear_cache($data=null)
     {
         $cache_names = [
-            'ri_tbp_*'
+            'ri_pt_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)
@@ -1481,10 +1490,6 @@ class Ri_setup_treaty_model extends MY_Model
 
     public function delete($id = NULL)
     {
-        // Let's not delete now
-        return FALSE;
-
-
         $id = intval($id);
         if( !safe_to_delete( get_class(), $id ) )
         {

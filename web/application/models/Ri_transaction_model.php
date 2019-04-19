@@ -81,9 +81,9 @@ class Ri_transaction_model extends MY_Model
          */
         $where = [
             'policy_id'             => $data['policy_id'],
-            'endorsement_id' => $data['endorsement_id'],
+            'endorsement_id'        => $data['endorsement_id'],
             'policy_installment_id' => $data['policy_installment_id'],
-            'ri_txn_for'          => $data['ri_txn_for']
+            'ri_txn_for'            => $data['ri_txn_for']
         ];
         $duplicate = $this->check_duplicate($where);
         if( $duplicate )
