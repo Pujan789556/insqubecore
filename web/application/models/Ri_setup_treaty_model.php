@@ -175,7 +175,7 @@ class Ri_setup_treaty_model extends MY_Model
                 [
                     'field' => 'distribution_percent[]',
                     'label' => 'Distribution %',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]|callback__cb_distribution__complete',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[6]|callback__cb_distribution__complete',
                     '_field'        => 'distribution_percent',
                     '_type'         => 'text',
                     '_show_label'   => false,
