@@ -12,6 +12,7 @@ class Ri_setup_treaty_model extends MY_Model
     protected static $table_treaty_brokers                  = 'ri_setup_treaty_brokers';
     protected static $table_treaty_distribution             = 'ri_setup_treaty_distribution';
     protected static $table_treaty_portfolios               = 'ri_setup_treaty_portfolios';
+    protected static $table_comp_cession_distribution       = 'ri_setup_comp_cession_distribution';
     protected static $table_treaty_tax_and_commission       = 'ri_setup_treaty_tax_and_commission';
     protected static $table_treaty_commission_scale         = 'ri_setup_commission_scale';
 
@@ -1006,10 +1007,10 @@ class Ri_setup_treaty_model extends MY_Model
         $this->db->trans_start();
 
             // Delete Old Distribution
-            $this->delete_distribution_by_treaty($id);
+            $this->_delete_distribution_by_treaty($id);
 
             // Batch Insert distribution data
-            $this->batch_insert_treaty_distribution($id, $data);
+            $this->_batch_insert_treaty_distribution($id, $data);
 
 
         // Commit all transactions on success, rollback else
@@ -1031,47 +1032,141 @@ class Ri_setup_treaty_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function batch_insert_treaty_distribution($id, $data)
-    {
-        // Extract All Data
-        $broker_ids             = $data['broker_ids'];
-        $reinsurer_ids          = $data['reinsurer_ids'];
-        $distribution_percent   = $data['distribution_percent'];
-
-        $batch_distribution_data = [];
-
-        if( !empty($reinsurer_ids) && count($reinsurer_ids) === count($distribution_percent) )
+        private function _batch_insert_treaty_distribution($id, $data)
         {
-            for($i=0; $i < count($reinsurer_ids); $i++)
+            // Extract All Data
+            $broker_ids             = $data['broker_ids'];
+            $reinsurer_ids          = $data['reinsurer_ids'];
+            $distribution_percent   = $data['distribution_percent'];
+
+            $batch_distribution_data = [];
+
+            if( !empty($reinsurer_ids) && count($reinsurer_ids) === count($distribution_percent) )
             {
-                $batch_distribution_data[] = [
-                    'treaty_id'             => $id,
-                    'broker_id'             => $broker_ids[$i] ? $broker_ids[$i] : NULL,
-                    'company_id'            => $reinsurer_ids[$i],
-                    'distribution_percent'  => $distribution_percent[$i],
-                    'flag_leader'           => IQB_FLAG_OFF
-                ];
+                for($i=0; $i < count($reinsurer_ids); $i++)
+                {
+                    $batch_distribution_data[] = [
+                        'treaty_id'             => $id,
+                        'broker_id'             => $broker_ids[$i] ? $broker_ids[$i] : NULL,
+                        'company_id'            => $reinsurer_ids[$i],
+                        'distribution_percent'  => $distribution_percent[$i],
+                        'flag_leader'           => IQB_FLAG_OFF
+                    ];
+                }
+
+                // Set First Row as Leader
+                $batch_distribution_data[0]['flag_leader'] = IQB_FLAG_ON;
             }
 
-            // Set First Row as Leader
-            $batch_distribution_data[0]['flag_leader'] = IQB_FLAG_ON;
+            // Insert Batch Broker Data
+            if( $batch_distribution_data )
+            {
+                return $this->db->insert_batch(self::$table_treaty_distribution, $batch_distribution_data);
+            }
+            return FALSE;
         }
 
-        // Insert Batch Broker Data
-        if( $batch_distribution_data )
+        // ----------------------------------------------------------------
+
+        private function _delete_distribution_by_treaty($id)
         {
-            return $this->db->insert_batch(self::$table_treaty_distribution, $batch_distribution_data);
+            return $this->db->where('treaty_id', $id)
+                            ->delete(self::$table_treaty_distribution);
         }
-        return FALSE;
-    }
+
 
     // ----------------------------------------------------------------
 
-    public function delete_distribution_by_treaty($id)
+    /**
+     * Save Compulsory Cession Distribution on a Portfolio for a Treaty
+     *
+     * All transactions must be carried out, else rollback.
+     * The following tasks are carried during Treaty Setup:
+     *      a. Delete old distribution
+     *      b. Update New distribution
+     *
+     * @param array $data
+     * @return mixed
+     */
+    public function save_comp_cession_distribution($id, $portfolio_id, $data)
     {
-        return $this->db->where('treaty_id', $id)
-                        ->delete(self::$table_treaty_distribution);
+        // Disable DB Debug for transaction to work
+        $this->db->db_debug = FALSE;
+        $status             = TRUE;
+
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Delete Old Distribution
+            $this->_delete_comp_cession_distribution($id, $portfolio_id);
+
+            // Batch Insert distribution data
+            $this->_batch_insert_comp_cession_distribution($id, $portfolio_id, $data);
+
+
+        // Commit all transactions on success, rollback else
+        $this->db->trans_complete();
+
+        // Check Transaction Status
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+
+        // Enable db_debug if on development environment
+        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+
+        // return result/status
+        return $status;
     }
+
+        // ----------------------------------------------------------------
+
+        private function _batch_insert_comp_cession_distribution($id, $portfolio_id, $data)
+        {
+            // Extract All Data
+            $broker_ids             = $data['broker_ids'];
+            $reinsurer_ids          = $data['reinsurer_ids'];
+            $distribution_percent   = $data['distribution_percent'];
+
+            $batch_distribution_data = [];
+
+            if( !empty($reinsurer_ids) && count($reinsurer_ids) === count($distribution_percent) )
+            {
+                for($i=0; $i < count($reinsurer_ids); $i++)
+                {
+                    $batch_distribution_data[] = [
+                        'treaty_id'             => $id,
+                        'portfolio_id'          => $portfolio_id,
+                        'broker_id'             => $broker_ids[$i] ? $broker_ids[$i] : NULL,
+                        'company_id'            => $reinsurer_ids[$i],
+                        'distribution_percent'  => $distribution_percent[$i],
+                        'flag_leader'           => IQB_FLAG_OFF
+                    ];
+                }
+
+                // Set First Row as Leader
+                $batch_distribution_data[0]['flag_leader'] = IQB_FLAG_ON;
+            }
+
+            // Insert Batch Broker Data
+            if( $batch_distribution_data )
+            {
+                return $this->db->insert_batch(self::$table_comp_cession_distribution, $batch_distribution_data);
+            }
+            return FALSE;
+        }
+
+        // ----------------------------------------------------------------
+
+        private function _delete_comp_cession_distribution($id, $portfolio_id)
+        {
+            return $this->db->where('treaty_id', $id)
+                            ->where('portfolio_id', $portfolio_id)
+                            ->delete(self::$table_comp_cession_distribution);
+        }
+
 
     // ----------------------------------------------------------------
 
@@ -1491,6 +1586,32 @@ class Ri_setup_treaty_model extends MY_Model
                         ->join('master_companies C', 'C.id = TD.company_id')
                         ->join('master_companies B', 'B.id = TD.broker_id', 'left')
                         ->where('TD.treaty_id', $id)
+                        ->order_by('TD.flag_leader', 'DESC')
+                        ->get()->result();
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Compulsory Cession Distribution on a Portfolio in a Treaty
+     * @param type $id
+     * @param type $portfolio_id
+     * @return type
+     */
+    public function get_comp_cession_distribution($id, $portfolio_id)
+    {
+        return $this->db->select(
+                        'TD.treaty_id, TD.portfolio_id, TD.broker_id, TD.company_id, TD.distribution_percent, TD.flag_leader, '.
+                        'P.name_en as portfolio_name, ' .
+                        'C.name_en as reinsurer_name, ' .
+                        'B.name_en as broker_name'
+                    )
+                        ->from(self::$table_comp_cession_distribution . ' TD')
+                        ->join('master_portfolio P', 'P.id = TD.portfolio_id')
+                        ->join('master_companies C', 'C.id = TD.company_id')
+                        ->join('master_companies B', 'B.id = TD.broker_id', 'left')
+                        ->where('TD.treaty_id', $id)
+                        ->where('TD.portfolio_id', $portfolio_id)
                         ->order_by('TD.flag_leader', 'DESC')
                         ->get()->result();
     }

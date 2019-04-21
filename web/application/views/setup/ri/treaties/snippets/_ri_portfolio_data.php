@@ -15,6 +15,7 @@ $treaty_type_id =  (int)$portfolios[0]->treaty_type_id;
 			<th>Compulsory Cession Apply?</th>
 			<th>Compulsory Cession(%)</th>
 			<th>Compulsory Cession(Max Amount)</th>
+			<th>Compulsory Cession(Distribution)</th>
 			<th>Compulsory Cession RI Commission(%)</th>
 			<th>Compulsory Cession RI Tax(%)</th>
 			<th>Compulsory Cession IB Tax(%)</th>
@@ -56,6 +57,29 @@ $treaty_type_id =  (int)$portfolios[0]->treaty_type_id;
 				<td><?php echo yes_no_text($portfolio->flag_comp_cession_apply, '-')?></td>
 				<td><?php echo $portfolio->comp_cession_percent;?></td>
 				<td><?php echo $portfolio->comp_cession_max_amt;?></td>
+				<td class="ins-action">
+					<?php
+					$_edit_url = $this->data['_url_base'] . '/comp_cession_distribution/' . $portfolio->treaty_id . '/' . $portfolio->portfolio_id ;
+					$_preview_url = $this->data['_url_base'] . '/prev_comp_cession_distribution/' . $portfolio->treaty_id . '/' . $portfolio->portfolio_id ;
+					?>
+					<a href="#"
+		            	class="action trg-dialog-edit"
+		            	title="Edit Compulsory Cession Distribution"
+		            	data-toggle="tooltip"
+		            	data-box-size="full-width"
+		            	data-title="<i class='fa fa-pencil-square-o'></i> Edit Compulsory Cession Distribution - <?php echo $portfolio->portfolio_name_en ?>"
+		            	data-url="<?php echo site_url($_edit_url)?>"
+		            	data-form="#__form-treaty-setup-distribution">
+		                <i class="fa fa-pencil-square-o"></i>
+		            </a>
+
+		            <a href="#"
+						class="action trg-dialog-popup"
+						data-toggle="tooltip"
+						data-box-size="large"
+						data-url="<?php echo site_url($_preview_url); ?>"
+						title="View Compulsory Cession Distribution for this Portfolio"><i class="fa fa-search"></i></a>
+				</td>
 				<td><?php echo $portfolio->comp_cession_comm_ri;?></td>
 				<td><?php echo $portfolio->comp_cession_tax_ri;?></td>
 				<td><?php echo $portfolio->comp_cession_tax_ib;?></td>

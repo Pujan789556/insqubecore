@@ -664,7 +664,7 @@ class Ri_treaties extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Manage Distribution
+	 * Manage Treaty Distribution
 	 *
 	 * @param integer $id Treaty ID
 	 * @return void
@@ -757,6 +757,145 @@ class Ri_treaties extends MY_Controller
 	}
 
 	// --------------------------------------------------------------------
+
+	/**
+	 * Manage Compulsory Cession Distribution on a Portfolio in a Treaty
+	 *
+	 * @param integer $id Treaty ID
+	 * @param integer $portfolio_id Portfolio ID
+	 * @return void
+	 */
+	public function comp_cession_distribution($id, $portfolio_id)
+	{
+		$this->load->model('portfolio_model');
+
+		// Valid Record ?
+		$id = (int)$id;
+		$portfolio_id = (int)$portfolio_id;
+		$record = $this->ri_setup_treaty_model->find($id);
+		$portfolio_record = $this->portfolio_model->find($portfolio_id);
+		if(!$record || !$portfolio_record)
+		{
+			$this->template->render_404();
+		}
+
+		/**
+		 * Treaty Distribution
+		 */
+		$treaty_distribution = $this->ri_setup_treaty_model->get_comp_cession_distribution($id, $portfolio_id);
+
+		/**
+		 * Prepare Form Data
+		 */
+		$form_data = [
+			'form_elements' 	=> $this->ri_setup_treaty_model->get_validation_rules(['reinsurers']),
+			'record' 			=> $record,
+
+			// Treaty Distribution
+			'reinsurers' 			=> $this->company_model->dropdown_reinsurers(),
+			'treaty_distribution' 	=> $treaty_distribution,
+		];
+
+		$return_data = [];
+		if( $this->input->post() )
+		{
+			$done 	= FALSE;
+			$rules 	= $this->ri_setup_treaty_model->get_validation_rules_formatted(['reinsurers']);
+
+            $this->form_validation->set_rules($rules);
+			if($this->form_validation->run() === TRUE )
+        	{
+        		$data = $this->input->post();
+        		$done = $this->ri_setup_treaty_model->save_comp_cession_distribution($id, $portfolio_id,  $data);
+
+        		if($done)
+        		{
+        			// Update the Distribution Table
+					$treaty_distribution = $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id);
+					$success_html = $this->load->view('setup/ri/treaties/snippets/_ri_distribution_data', ['treaty_distribution' => $treaty_distribution], TRUE);
+
+					$ajax_data = [
+						'message' => 'Successfully Updated',
+						'status'  => 'success',
+						'updateSection' => false,
+						'hideBootbox' => true
+					];
+					return $this->template->json($ajax_data);
+        		}
+        		else
+        		{
+        			// Simply return could not update message. Might be some logical error or db error.
+	        		return $this->template->json([
+	                    'status'        => 'error',
+	                    'message'       => 'Could not update!'
+	                ]);
+        		}
+        	}
+        	else
+        	{
+    			// Simply Return Validation Error
+        		return $this->template->json([
+                    'status'        => 'error',
+                    'message'       => validation_errors()
+                ]);
+        	}
+		}
+
+		// Prepare HTML Form
+		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_distribution', $form_data, TRUE);
+
+		// Merge Return Data with Form Data
+		$json_data = array_merge($json_data, $return_data);
+
+		// Return JSON
+		$this->template->json($json_data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+     * Manage Compulsory Cession Distribution on a Portfolio in a Treaty
+     *
+     * @param integer $id
+     * @return void
+     */
+    public function prev_comp_cession_distribution($id, $portfolio_id)
+    {
+    	$this->load->model('portfolio_model');
+
+		// Valid Record ?
+		$id = (int)$id;
+		$portfolio_id = (int)$portfolio_id;
+		$record = $this->ri_setup_treaty_model->find($id);
+		$portfolio_record = $this->portfolio_model->find($portfolio_id);
+		if(!$record || !$portfolio_record)
+		{
+			$this->template->render_404();
+		}
+
+
+		/**
+		 * Treaty Distribution
+		 */
+		$treaty_distribution = $this->ri_setup_treaty_model->get_comp_cession_distribution($id, $portfolio_id);
+
+
+		/**
+		 * Distribution Details
+		 */
+		$data = [
+			'treaty_distribution' 	=> $treaty_distribution,
+			'record' 				=> $record,
+			'portfolio_record' 		=> $portfolio_record
+		];
+
+		$this->template->json([
+			'html' 	=> $this->load->view('setup/ri/treaties/snippets/_ri_comp_cession_distribution', $data, TRUE),
+			'title' => 'Compulsory Cession Distribution - ' . $portfolio_record->name_en
+		]);
+    }
+
+		// --------------------------------------------------------------------
 
 		/**
 		 * Callback Validation Function - Check if RI Distribution is 100%
