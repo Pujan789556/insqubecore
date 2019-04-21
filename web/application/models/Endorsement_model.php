@@ -17,7 +17,7 @@ class Endorsement_model extends MY_Model
     // protected $after_update  = ['clear_cache'];
     // protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'policy_id', 'customer_id', 'agent_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'amt_sum_insured_object', 'amt_sum_insured_net', 'gross_full_amt_basic_premium', 'gross_full_amt_pool_premium', 'gross_full_amt_commissionable', 'gross_full_amt_agent_commission', 'gross_full_amt_ri_commission', 'gross_full_amt_direct_discount', 'gross_computed_amt_basic_premium', 'gross_computed_amt_pool_premium', 'gross_computed_amt_commissionable', 'gross_computed_amt_agent_commission', 'gross_computed_amt_ri_commission', 'gross_computed_amt_direct_discount', 'refund_amt_basic_premium', 'refund_amt_pool_premium', 'refund_amt_commissionable', 'refund_amt_agent_commission', 'refund_amt_ri_commission', 'refund_amt_direct_discount', 'net_amt_basic_premium', 'net_amt_pool_premium', 'net_amt_commissionable', 'net_amt_agent_commission', 'net_amt_ri_commission', 'net_amt_direct_discount', 'net_amt_stamp_duty', 'net_amt_transfer_fee', 'net_amt_transfer_ncd', 'net_amt_cancellation_fee', 'net_amt_vat', 'percent_ri_commission', 'rc_ref_basic', 'pc_ref_basic', 'rc_ref_pool', 'pc_ref_pool', 'flag_refund_pool', 'te_compute_ref', 'te_loading_percent', 'premium_compute_options', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_short_term', 'short_term_config', 'short_term_rate', 'status', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'policy_id', 'customer_id', 'agent_id', 'sold_by', 'start_date', 'end_date', 'txn_type', 'issued_date', 'amt_sum_insured_object', 'amt_sum_insured_net', 'gross_full_amt_basic_premium', 'gross_full_amt_pool_premium', 'gross_full_amt_commissionable', 'gross_full_amt_agent_commission', 'gross_full_amt_ri_commission', 'gross_full_amt_direct_discount', 'gross_computed_amt_basic_premium', 'gross_computed_amt_pool_premium', 'gross_computed_amt_commissionable', 'gross_computed_amt_agent_commission', 'gross_computed_amt_ri_commission', 'gross_computed_amt_direct_discount', 'refund_amt_basic_premium', 'refund_amt_pool_premium', 'refund_amt_commissionable', 'refund_amt_agent_commission', 'refund_amt_ri_commission', 'refund_amt_direct_discount', 'net_amt_basic_premium', 'net_amt_pool_premium', 'net_amt_commissionable', 'net_amt_agent_commission', 'net_amt_ri_commission', 'net_amt_direct_discount', 'net_amt_stamp_duty', 'net_amt_transfer_fee', 'net_amt_transfer_ncd', 'net_amt_cancellation_fee', 'net_amt_vat', 'percent_ri_commission', 'rc_ref_basic', 'pc_ref_basic', 'rc_ref_pool', 'pc_ref_pool', 'flag_compute_pool', 'te_compute_ref', 'te_loading_percent', 'premium_compute_options', 'cost_calculation_table', 'txn_details', 'remarks', 'transfer_customer_id', 'flag_ri_approval', 'flag_current', 'flag_short_term', 'short_term_config', 'short_term_rate', 'status', 'ri_approved_at', 'ri_approved_by', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by'];
 
     // Resetable Fields on Policy/Object Edit, Endorsement Edit
     protected static $nullable_fields = [
@@ -487,10 +487,10 @@ class Endorsement_model extends MY_Model
          *
          *  CASE 1: ENDORSEMENT - UP/DOWN
          *      rc_ref_basic, pc_ref_basic
-         *      rc_ref_pool, pc_ref_pool, flag_refund_pool
+         *      rc_ref_pool, pc_ref_pool, flag_compute_pool
          *
          *  CASE 2: TERMINATE (Refund)
-         *      net_amt_cancellation_fee, rc_ref_basic, rc_ref_pool, flag_refund_pool
+         *      net_amt_cancellation_fee, rc_ref_basic, rc_ref_pool, flag_compute_pool
          *
          *  CASE 2: ENDORSEMENT - TIME EXTENSION
          *      te_compute_ref, te_loading_percent
@@ -563,8 +563,8 @@ class Endorsement_model extends MY_Model
                                 '_required' => true
                             ],
                             [
-                                'field' => 'flag_refund_pool',
-                                'label' => 'Refund Pool Premium?',
+                                'field' => 'flag_compute_pool',
+                                'label' => 'Refund/Upgrade Pool Premium?',
                                 'rules' => 'trim|required|alpha|exact_length[1]|in_list['. implode( ',', array_keys( _FLAG_yes_no_dropdown(FALSE) ) ) .']',
                                 '_type'     => 'radio',
                                 '_default'  => IQB_ENDORSEMENT_CB_UPDOWN_PRORATA,
@@ -596,8 +596,8 @@ class Endorsement_model extends MY_Model
                                 '_required' => true
                             ],
                             [
-                                'field' => 'flag_refund_pool',
-                                'label' => 'Refund Pool Premium?',
+                                'field' => 'flag_compute_pool',
+                                'label' => 'Refund/Upgrade Pool Premium?',
                                 'rules' => 'trim|required|alpha|exact_length[1]|in_list['. implode( ',', array_keys( _FLAG_yes_no_dropdown(FALSE) ) ) .']',
                                 '_type'     => 'radio',
                                 '_default'  => IQB_ENDORSEMENT_CB_UPDOWN_PRORATA,
@@ -2753,7 +2753,7 @@ class Endorsement_model extends MY_Model
             /**
              * Task 4: Compute NET Premium Data = GROSS - REFUND, DO not refund POOL
              */
-            $exclude_pool = $record->flag_refund_pool == IQB_FLAG_NO;
+            $exclude_pool = $record->flag_compute_pool == IQB_FLAG_NO;
             $premium_data = $this->_compute_net_premium_data($premium_data, $exclude_pool);
             // echo 'GROSS, REFUND, NET : <pre>'; print_r($premium_data); exit;
             // --------------------------------------------------------------------
@@ -2827,9 +2827,9 @@ class Endorsement_model extends MY_Model
             // --------------------------------------------------------------------
 
             /**
-             * Task 4: Compute NET Premium Data = GROSS - REFUND, DO not refund POOL
+             * Task 4: Compute NET Premium Data = GROSS - REFUND, DO not refund/upgrade POOL
              */
-            $exclude_pool = $record->flag_refund_pool == IQB_FLAG_NO;
+            $exclude_pool = $record->flag_compute_pool == IQB_FLAG_NO;
             $premium_data = $this->_compute_net_premium_data($premium_data, $exclude_pool);
             // echo 'GROSS, REFUND, NET : <pre>'; print_r($premium_data); exit;
             // --------------------------------------------------------------------
@@ -3017,9 +3017,9 @@ class Endorsement_model extends MY_Model
             // --------------------------------------------------------------------
 
             /**
-             * Pool Refund ??
+             * Pool Refund/Upgrade ??
              */
-            if( $record->flag_refund_pool == IQB_FLAG_NO )
+            if( $record->flag_compute_pool == IQB_FLAG_NO )
             {
                 $premium_data['net_amt_pool_premium'] = 0.00;
             }
