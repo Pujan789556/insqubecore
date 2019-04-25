@@ -889,18 +889,13 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 		$premium_treaty_fac 		= NULL;
 
 
-		// Compulsory Cession
-		if( $treaty_record->flag_comp_cession_apply == IQB_FLAG_ON )
-		{
-			// SI = Percent or default max
-			$percent_amount 	= ( $si_gross * $treaty_record->comp_cession_percent ) / 100.00;
-			$default_max_amount = $treaty_record->comp_cession_max_amt;
-			$si_comp_cession 	= $percent_amount < $default_max_amount ? $percent_amount : $default_max_amount;
+		/**
+		 * Compulsory Cession - SI and Premium
+		 */
+		$comp_cessions 			= RI__compute_compulsory_cession( $treaty_record, $si_gross,  $premium_net);
+		$si_comp_cession 		= $comp_cessions['si_comp_cession'];
+		$premium_comp_cession 	= $comp_cessions['premium_comp_cession'];
 
-			// Premium
-			$premium_comp_cession = ( $si_comp_cession / $si_gross ) * $premium_net;
-
-		}
 
 		// SI Treaty Total (95%), Premium Treaty Total
 		$si_treaty_total 		= $si_gross - floatval($si_comp_cession);
@@ -927,28 +922,32 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 		 * 	- retention
 		 */
 		$si_qs = $si_treaty_retaintion;
-		if((int)$treaty_record->treaty_type_id === IQB_RI_TREATY_TYPE_QS )
+		if(abs($si_treaty_total) != 0)
 		{
-			// Sum Insured
-			$si_treaty_retaintion 	= ( $si_qs * $treaty_record->qs_retention_percent ) / 100.00;
-			$si_treaty_quota		= ( $si_qs * $treaty_record->qs_quota_percent ) / 100.00;
+			if((int)$treaty_record->treaty_type_id === IQB_RI_TREATY_TYPE_QS )
+			{
+				// Sum Insured
+				$si_treaty_retaintion 	= ( $si_qs * $treaty_record->qs_retention_percent ) / 100.00;
+				$si_treaty_quota		= ( $si_qs * $treaty_record->qs_quota_percent ) / 100.00;
 
-			// Premium
-			$premium_treaty_retaintion 	= ( $si_treaty_retaintion / $si_treaty_total ) * $premium_treaty_total;
-			$premium_treaty_quota 		= ( $si_treaty_quota / $si_treaty_total ) * $premium_treaty_total;
-		}
-		else
-		{
-			// Sum Inusred
-			$si_treaty_retaintion = $si_qs;
+				// Premium
+				$premium_treaty_retaintion 	= ( $si_treaty_retaintion / $si_treaty_total ) * $premium_treaty_total;
+				$premium_treaty_quota 		= ( $si_treaty_quota / $si_treaty_total ) * $premium_treaty_total;
+			}
+			else
+			{
+				// Sum Inusred
+				$si_treaty_retaintion = $si_qs;
 
-			// Premium
-			$premium_treaty_retaintion 	= ( $si_treaty_retaintion / $si_treaty_total ) * $premium_treaty_total;
+				// Premium
+				$premium_treaty_retaintion 	= ( $si_treaty_retaintion / $si_treaty_total ) * $premium_treaty_total;
+			}
 		}
+
 
 		// Compute 1st surplus
 		$remained_si = $si_treaty_total - $si_qs;
-		if( $remained_si > 0 )
+		if( abs($remained_si) != 0 )
 		{
 			$max_1st_surplus_amount = $treaty_record->qs_lines_1 * $qs_retention_amount;
 			if( $remained_si > $max_1st_surplus_amount )
@@ -968,7 +967,7 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 		}
 
 		// Compute 2nd surplus
-		if( $remained_si > 0 )
+		if( abs($remained_si) != 0 )
 		{
 			$max_2nd_surplus_amount = $treaty_record->qs_lines_2 * $qs_retention_amount;
 			if( $remained_si > $max_2nd_surplus_amount )
@@ -988,7 +987,7 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 		}
 
 		// Compute 3rd surplus
-		if( $remained_si > 0 )
+		if( abs($remained_si) != 0 )
 		{
 			$max_3rd_surplus_amount = $treaty_record->qs_lines_3 * $qs_retention_amount;
 			if( $remained_si > $max_3rd_surplus_amount )
@@ -1008,7 +1007,7 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 		}
 
 		// Compute FAC
-		if( $remained_si > 0 )
+		if( abs($remained_si) != 0 )
 		{
 			$si_treaty_fac = $remained_si;
 
@@ -1091,18 +1090,13 @@ if ( ! function_exists('RI__distribute__QT'))
 		$premium_treaty_quota 		= NULL;
 
 
-		// Compulsory Cession
-		if( $treaty_record->flag_comp_cession_apply == IQB_FLAG_ON )
-		{
-			// SI = Percent or default max
-			$percent_amount 	= ( $si_gross * $treaty_record->comp_cession_percent ) / 100.00;
-			$default_max_amount = $treaty_record->comp_cession_max_amt;
-			$si_comp_cession 	= $percent_amount < $default_max_amount ? $percent_amount : $default_max_amount;
+		/**
+		 * Compulsory Cession - SI and Premium
+		 */
+		$comp_cessions 			= RI__compute_compulsory_cession( $treaty_record, $si_gross,  $premium_net);
+		$si_comp_cession 		= $comp_cessions['si_comp_cession'];
+		$premium_comp_cession 	= $comp_cessions['premium_comp_cession'];
 
-			// Premium
-			$premium_comp_cession = ( $si_comp_cession / $si_gross ) * $premium_net;
-
-		}
 
 		// SI Treaty Total (95%), Premium Treaty Total
 		$si_treaty_total 		= $si_gross - floatval($si_comp_cession);
@@ -1177,9 +1171,8 @@ if ( ! function_exists('RI__distribute__EOL'))
 		 * SI & Premium Variables
 		 */
 		$si_gross 				= floatval($policy_installment_record->endorsement_amt_sum_insured);
-		$si_comp_cession 		= NULL;
 		$si_treaty_retaintion 	= NULL;
-
+		$premium_treaty_retaintion 	= NULL;
 
 		/**
 		 * Based on Treaty Category (Pool or Normal), we have to
@@ -1188,39 +1181,14 @@ if ( ! function_exists('RI__distribute__EOL'))
 		$premium_net = RI__get_net_premium_for_distribution( $treaty_record->category,  $policy_installment_record);
 
 
-		$premium_comp_cession 		= NULL;
-		$premium_treaty_retaintion 	= NULL;
+		/**
+		 * Compulsory Cession - SI and Premium
+		 */
+		$comp_cessions 			= RI__compute_compulsory_cession( $treaty_record, $si_gross,  $premium_net);
+		$si_comp_cession 		= $comp_cessions['si_comp_cession'];
+		$premium_comp_cession 	= $comp_cessions['premium_comp_cession'];
 
 
-		// Compulsory Cession
-		if( $treaty_record->flag_comp_cession_apply == IQB_FLAG_ON )
-		{
-			// SI = Percent or default max
-			$percent_amount 	= ( $si_gross * $treaty_record->comp_cession_percent ) / 100.00;
-			$default_max_amount = $treaty_record->comp_cession_max_amt;
-
-			// New Comp Cession Percent
-			if( $percent_amount >= $default_max_amount && $si_gross > 0 )
-			{
-				$si_comp_cession = $default_max_amount;
-
-				// What is the comp_cession percent
-				$treaty_record->comp_cession_percent = ( $default_max_amount / $si_gross ) * 100.00;
-			}
-
-
-			// Premium
-			// NOTE: Thirdparty Motor - No SI Info is supplied.
-			// 			So let's use comp cession percent to divide premium
-			// $premium_comp_cession = ( $si_comp_cession / $si_gross ) * $premium_net;
-
-
-			/**
-			 * Let's Compute Compulsory Cession Only at this moment.
-			 */
-			$premium_comp_cession =  $premium_net * $treaty_record->comp_cession_percent / 100.00;
-
-		}
 
 		// SI Treaty Total (95%), Premium Treaty Total (Both are retaintaion in this case)
 		$si_treaty_retaintion 		= $si_gross - floatval($si_comp_cession);
@@ -1248,6 +1216,42 @@ if ( ! function_exists('RI__distribute__EOL'))
 	}
 }
 
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('RI__compute_compulsory_cession'))
+{
+	/**
+	 * Compute Compulsory Cession - SI and Premium
+	 * @param object $treaty_record
+	 * @param float $si 	Total Sum Insured
+	 * @param float $premium 	Total Premium (Basic or Pool)
+	 * @return type
+	 */
+	function RI__compute_compulsory_cession( $treaty_record, $si, $premium )
+	{
+		$si_comp_cession 		= NULL;
+		$premium_comp_cession 	= NULL;
+
+		// Compulsory Cession
+		if( $treaty_record->flag_comp_cession_apply == IQB_FLAG_ON && abs($si) != 0 )
+		{
+			// SI = Percent or default max
+			$percent_amount 	= ( $si * $treaty_record->comp_cession_percent ) / 100.00;
+			$default_max_amount = $treaty_record->comp_cession_max_amt;
+			$si_comp_cession 	= abs($percent_amount) < $default_max_amount ? $percent_amount : $default_max_amount;
+
+			// Premium
+			$premium_comp_cession = ( $si_comp_cession / $si ) * $premium;
+
+		}
+
+		return [
+			'si_comp_cession' 		=> $si_comp_cession,
+			'premium_comp_cession' 	=> $premium_comp_cession
+		];
+	}
+}
 
 // ------------------------------------------------------------------------
 
