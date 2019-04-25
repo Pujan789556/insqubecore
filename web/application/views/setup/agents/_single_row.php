@@ -34,7 +34,7 @@ $_detail_url 	= $this->data['_url_base'] . '/details/' . $record->id;
 	</td>
 	<td class="ins-action">
 		<div class="btn-group">
-			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit User" data-toggle="dropdown" aria-expanded="true">
+			<button type="button" class="btn btn-default btn-sm dropdown-toggle" title="Edit Agent" data-toggle="dropdown" aria-expanded="true">
 			<i class="fa fa-pencil-square-o margin-r-5"></i><i class="fa fa-caret-down"></i></button>
 			<ul class="dropdown-menu pull-right" role="menu">
 				<li>

@@ -57,6 +57,11 @@ class Address_model extends MY_Model
      * Set the Validation Rules
      *
      * @param array $options  rules options e.g. mobile compulsory?
+     *          [
+     *              'required' => [
+     *                  'mobile' => true
+     *               ]
+     *          ]
      * @return void
      */
     public function _v_rules(array $options = [])
@@ -97,6 +102,7 @@ class Address_model extends MY_Model
                 ]
             ],
 
+            // LOCAL BODY/VDC/MUNICIPALITY - NAME
             'address1' => [
                 [
                     'field' => 'address1_id',

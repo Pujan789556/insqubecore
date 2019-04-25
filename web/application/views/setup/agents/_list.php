@@ -20,12 +20,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<?php endif?>
 		</tr>
 	</thead>
-	<tbody id="search-result-agent">
+	<tbody id="<?php echo $DOM_RowBoxId ?>">
 		<?php
 		/**
 		 * Load Rows & Next Link (if any)
 		 */
-		$this->load->view('setup/agents/_rows');
+		$this->load->view( $this->data['_view_base'] . '/_rows' );
 		?>
 	</tbody>
 </table>

@@ -103,9 +103,7 @@ class Agent_model extends MY_Model
         }
 
         // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
         $done               = FALSE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -124,9 +122,6 @@ class Agent_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $done = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $done;
@@ -156,9 +151,7 @@ class Agent_model extends MY_Model
         }
 
         // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
         $done               = FALSE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -177,10 +170,6 @@ class Agent_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $done = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
         // return result/status
         return $done;
     }
@@ -317,11 +306,7 @@ class Agent_model extends MY_Model
             return FALSE;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-
         $status = TRUE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -338,10 +323,6 @@ class Agent_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;

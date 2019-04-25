@@ -49,11 +49,14 @@ class Agents extends MY_Controller
 
 		// Load Model
 		$this->load->model('agent_model');
-		$this->load->model('address_model');
+		// $this->load->model('address_model');
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
-		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -65,18 +68,22 @@ class Agents extends MY_Controller
 	 *
 	 * @return type
 	 */
-	function index()
+	public function index()
 	{
 		$this->page();
 	}
 
+
 	/**
-	 * Paginate Data List
+	 * List Agents
 	 *
-	 * @param integer $next_id
+	 * @param string $layout [f|l|r] Which layout to render  f: Full, l: List, r:rows
+	 * @param string $from_widget [y|n] Is the request coming from Widget?
+	 * @param int $next_id Next ID
+	 * @param string $widget_reference
 	 * @return void
 	 */
-	function page( $layout='f', $from_widget='n', $next_id = 0, $widget_reference = '' )
+	public function page( $layout='f', $from_widget='n', $next_id = 0, $widget_reference = '' )
 	{
 		/**
 		 * Check Permissions
@@ -93,8 +100,9 @@ class Agents extends MY_Controller
 
 		// DOM Data
 		$dom_data = [
-			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-agent', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-agent' 			// Filter Form ID
+			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-agents', 		// List box ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-agents',		// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-agents-rows' 				// Row Box ID
 		];
 
 		/**
@@ -114,7 +122,7 @@ class Agents extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = $from_widget === 'y' ? 'setup/agents/_find_widget' : 'setup/agents/_index';
+			$view = $from_widget === 'y' ? $this->_view_base . '/_find_widget' : $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
@@ -123,11 +131,11 @@ class Agents extends MY_Controller
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/agents/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'setup/agents/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 		if ( $this->input->is_ajax_request() )
@@ -145,9 +153,9 @@ class Agents extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/agents/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Manage Agent'] + $dom_data)
-						->partial('content', 'setup/agents/_index', $data)
+						->partial('content', $this->_view_base . '/_index', $data)
 						->render($this->data);
 	}
 
