@@ -138,7 +138,7 @@ if ( ! function_exists('field_compulsary_text'))
 	 */
 	function field_compulsary_text( $flag = false )
 	{
-		return $flag ? '<span class="text-red text-comp" data-toggle="tooltip" title="This field is compulsory.">*</span>' : '';
+		return $flag ? '<span class="text-red text-comp pointer" data-toggle="tooltip" title="This field is compulsory.">*</span>' : '';
 	}
 }
 
