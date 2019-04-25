@@ -194,6 +194,10 @@ class Auth extends Base_API_Controller
 				 */
 				case 'pwd_create':
 				case 'pwd_change':
+
+				// If one after registration, do not verify mobile and directly tries to login,
+				// the customer need to verify mobile first
+				case 'verify_mobile':
 					$this->_pincode();
 					break;
 
