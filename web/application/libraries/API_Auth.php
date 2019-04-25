@@ -89,7 +89,7 @@ class Api_auth
 		/**
 		 * Valid User? Only activated user can login.
 		 */
-		$user = $this->app_user_model->get_by_mobile($mobile);
+		$user = $this->ci->app_user_model->get_by_mobile($mobile);
 		if(!$user)
 		{
 			// Build and Return Token
