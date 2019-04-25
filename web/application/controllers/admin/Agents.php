@@ -318,7 +318,7 @@ class Agents extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/agents/_form_box',
+		$json_data['form'] = $this->load->view( $this->_view_base . '/_form_box',
 			[
 				'form_elements' 	=> $this->agent_model->validation_rules,
 				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
@@ -355,7 +355,7 @@ class Agents extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/agents/_form_box',
+		$json_data['form'] = $this->load->view( $this->_view_base . '/_form_box',
 			[
 				'form_elements' 	=> $this->agent_model->validation_rules,
 				'address_elements' 	=> $this->address_model->v_rules_add(),
@@ -458,14 +458,14 @@ class Agents extends MY_Controller
 				];
 
 				$record 			= $this->agent_model->find( $action === 'add' ? $done : $record->id );
-				$single_row 		=  'setup/agents/_single_row';
+				$single_row 		=  $this->_view_base . '/_single_row';
 				if($action === 'add' && $from_widget === 'y' )
 				{
-					$single_row = 'setup/agents/_single_row_widget';
+					$single_row = $this->_view_base . '/_single_row_widget';
 				}
 				$html = $this->load->view($single_row, ['record' => $record, 'widget_reference' => $widget_reference], TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add' ? '#search-result-agent' : '#_data-row-' . $record->id,
+					'box' 		=> $action === 'add' ? '#box-agents-rows' : '#_data-row-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
 				];
@@ -478,7 +478,7 @@ class Agents extends MY_Controller
 				'status' 		=> $status,
 				'message' 		=> $message,
 				'reloadForm' 	=> true,
-				'form' 			=> $this->load->view('setup/agents/_form',
+				'form' 			=> $this->load->view( $this->_view_base . '/_form',
 									[
 										'form_elements' 	=> $this->agent_model->validation_rules,
 										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
@@ -623,7 +623,7 @@ class Agents extends MY_Controller
 								'content_header' => 'Agent Details <small>' . $record->name . '</small>',
 								'breadcrumbs' => ['Agents' => $this->_url_base, 'Details' => NULL]
 						])
-						->partial('content', 'setup/agents/_details', $view_data)
+						->partial('content', $this->_view_base . '/_details', $view_data)
 						->render($this->data);
 
     }
