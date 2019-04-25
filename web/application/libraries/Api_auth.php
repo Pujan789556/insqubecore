@@ -25,6 +25,7 @@ define('IQB_API_ERR_CODE__VALIDATION_ERROR', 		4); // Form Validation Error
 define('IQB_API_ERR_CODE__USER_NOT_FOUND', 			5); // User Not Found
 define('IQB_API_ERR_CODE__USER_API_KEY_EXPIRED', 	6); // User's API Key Expired
 define('IQB_API_ERR_CODE__USER_CAN_NOT_ADD', 		7); // User can not add
+define('IQB_API_ERR_CODE__USER_NOT_ACTIVATED', 		8); // User not activated/verified
 
 // --------------------------------------------------------------------
 
@@ -79,14 +80,39 @@ class Api_auth
 	 *
 	 * On successfull lgoin, it will return JWT Token along with status and message
 	 *
-	 * @param int $login Mobile
+	 * @param int $mobile Mobile
 	 * @param string $password User Password
 	 * @return array
 	 */
-	function login($login, $password)
+	function login($mobile, $password)
 	{
-		$result = $this->ci->app_user_model->login($login, $password);
+		/**
+		 * Valid User? Only activated user can login.
+		 */
+		$user = $this->app_user_model->get_by_mobile($mobile);
+		if(!$user)
+		{
+			// Build and Return Token
+			return [
+                $this->status_field  	=> FALSE,
+                $this->message_field 	=> $this->ci->lang->line('api_text_user_not_found'),
+                $this->err_code_field 	=> IQB_API_ERR_CODE__USER_NOT_FOUND
+            ];
+		}
+		else if( $user->is_activated == IQB_FLAG_OFF )
+		{
+			// Build and Return Token
+			return [
+                $this->status_field  	=> FALSE,
+                $this->message_field 	=> $this->ci->lang->line('api_text_user_not_activated'),
+                $this->err_code_field 	=> IQB_API_ERR_CODE__USER_NOT_ACTIVATED
+            ];
+		}
 
+		/**
+		 * Let's Login
+		 */
+		$result = $this->ci->app_user_model->login($user, $password);
 		if( $result !== FALSE )
 		{
 			// Update history

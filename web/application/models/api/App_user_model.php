@@ -643,8 +643,9 @@ class App_user_model extends MY_Model
     // ----------------------------------------------------------------
 
     // Perform App Login
-    public function login($mobile, $password)
+    public function login($user, $password)
     {
+        $user = is_object($user) ? $user : $this->get_by_mobile($user);
         $user = $this->get_by_mobile($mobile);
         if($user)
         {

@@ -11,6 +11,7 @@ $lang['api_text_login_failed'] 	= 'Login Failed.';
 $lang['api_text_resource_not_found'] 	= 'Resource Not Found.';
 $lang['api_text_user_not_found'] 		= 'User does not exists.';
 $lang['api_text_user_can_not_add'] 		= 'User could not be registered.';
+$lang['api_text_user_not_activated'] 	= 'User not activated/verified.';
 $lang['api_text_user_found'] 			= 'User exists.';
 
 
