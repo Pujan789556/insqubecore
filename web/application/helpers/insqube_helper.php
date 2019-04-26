@@ -50,6 +50,36 @@ if ( ! function_exists('safe_to_delete'))
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('is_watermark_required'))
+{
+    /**
+     * Check if watermark is required based APP_MODE config
+     *
+     * @return bool
+     */
+    function is_watermark_required( )
+    {
+        return strtolower(APP_MODE) === 'demo';
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('watermark_text'))
+{
+    /**
+     * Get Watermark text
+     *
+     * @return string
+     */
+    function watermark_text( )
+    {
+        return 'INSQUBE DEMO';
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists('logo_url'))
 {
     /**

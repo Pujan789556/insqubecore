@@ -846,22 +846,21 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
         $mpdf->SetProtection(array('print'));
         $mpdf->SetTitle("Policy Schedule - {$record->code}");
         $mpdf->SetAuthor($CI->settings->orgn_name_en);
+        $mpdf->SetDisplayMode('fullpage');
 
         /**
          * Only Active Policy Does not have watermark!!!
+         *
+         * NOTE: Has watermark, if APP_MODE=demo
          */
-        if( $action === 'print' ||  $action === 'download')
+        if( _POLICY__is_schedule_watermark_required( $record->status ) )
         {
-            if( !in_array($record->status, [IQB_POLICY_STATUS_ACTIVE, IQB_POLICY_STATUS_CANCELED, IQB_POLICY_STATUS_EXPIRED]))
-            {
-                $mpdf->SetWatermarkText( 'DEBIT NOTE - ' . strtoupper(_POLICY_status_text($record->status)) );
-            }
+            $mpdf->SetWatermarkText( 'DEBIT NOTE - ' . strtoupper(_POLICY_status_text($record->status)) );
+            $mpdf->showWatermarkText = true;
+            $mpdf->watermark_font = 'DejaVuSansCondensed';
+            $mpdf->watermarkTextAlpha = 0.1;
         }
 
-        $mpdf->showWatermarkText = true;
-        $mpdf->watermark_font = 'DejaVuSansCondensed';
-        $mpdf->watermarkTextAlpha = 0.1;
-        $mpdf->SetDisplayMode('fullpage');
 
         // echo $html;exit;
         $mpdf->WriteHTML($html);
@@ -881,6 +880,42 @@ if ( ! function_exists('_POLICY__schedule_pdf'))
         }
     }
 }
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('_POLICY__is_schedule_watermark_required'))
+{
+    /**
+     * Check if the policy schedule requires watermark.
+     *
+     * If policy is not active or APP_MODE=demo, we need to set the watermarks
+     *
+     * @param char $status Policy Status
+     * @return bool
+     */
+    function _POLICY__is_schedule_watermark_required( $status )
+    {
+        $required = FALSE;
+
+        /**
+         * ACTIVE/CANCELED/EXPIRED POLICY - Check APP_MODE
+         */
+        if( in_array($status, [IQB_POLICY_STATUS_ACTIVE, IQB_POLICY_STATUS_CANCELED, IQB_POLICY_STATUS_EXPIRED]) )
+        {
+            if( is_watermark_required() )
+            {
+                $required = TRUE;
+            }
+        }
+        else
+        {
+            $required = TRUE;
+        }
+
+        return $required;
+    }
+}
+
 
 // ------------------------------------------------------------------------
 

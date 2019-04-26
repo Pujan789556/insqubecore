@@ -882,11 +882,20 @@ if ( ! function_exists('_INVOICE__pdf'))
         $mpdf->SetProtection(array('print'));
         $mpdf->SetTitle("Policy Invoice - {$record->invoice_code}");
         $mpdf->SetAuthor($CI->settings->orgn_name_en);
-
-        $mpdf->showWatermarkText = true;
-        $mpdf->watermark_font = 'DejaVuSansCondensed';
-        $mpdf->watermarkTextAlpha = 0.1;
         $mpdf->SetDisplayMode('fullpage');
+
+        /**
+         * Watermark???
+         * Has watermark, if APP_MODE=demo
+         */
+        if( is_watermark_required() )
+        {
+            $mpdf->SetWatermarkText( watermark_text( ) );
+
+            $mpdf->showWatermarkText = true;
+	        $mpdf->watermark_font = 'DejaVuSansCondensed';
+	        $mpdf->watermarkTextAlpha = 0.1;
+        }
 
         $html = $CI->load->view( 'accounting/invoices/print/invoice', $data, TRUE);
         $mpdf->WriteHTML($html);
@@ -911,6 +920,8 @@ if ( ! function_exists('_INVOICE__pdf'))
         }
     }
 }
+
+// ------------------------------------------------------------------------
 
 if ( ! function_exists('_INVOICE__filename'))
 {
@@ -964,11 +975,20 @@ if ( ! function_exists('_RECEIPT__pdf'))
         $mpdf->SetProtection(array('print'));
         $mpdf->SetTitle("Invoice Receipt - {$record->receipt_code}");
         $mpdf->SetAuthor($CI->settings->orgn_name_en);
-
-        $mpdf->showWatermarkText = true;
-        $mpdf->watermark_font = 'DejaVuSansCondensed';
-        $mpdf->watermarkTextAlpha = 0.1;
         $mpdf->SetDisplayMode('fullpage');
+
+        /**
+         * Watermark???
+         * Has watermark, if APP_MODE=demo
+         */
+        if( is_watermark_required() )
+        {
+            $mpdf->SetWatermarkText( watermark_text( ) );
+
+            $mpdf->showWatermarkText = true;
+	        $mpdf->watermark_font = 'DejaVuSansCondensed';
+	        $mpdf->watermarkTextAlpha = 0.1;
+        }
 
         $html = $CI->load->view( 'accounting/invoices/print/receipt', $data, TRUE);
         $mpdf->WriteHTML($html);
