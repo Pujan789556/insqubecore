@@ -51,7 +51,10 @@ class Countries extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 
 	}
 
@@ -79,7 +82,7 @@ class Countries extends MY_Controller
 								'content_header' => 'Manage Countries',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Countries' => NULL]
 						])
-						->partial('content', 'setup/countries/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -134,7 +137,7 @@ class Countries extends MY_Controller
 			}
 
 			$row = $status === 'success'
-						? $this->load->view('setup/countries/_single_row', compact('record'), TRUE)
+						? $this->load->view($this->_view_base . '/_single_row', compact('record'), TRUE)
 						: '';
 
 			$this->template->json([
@@ -152,7 +155,7 @@ class Countries extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/countries/_form',
+									? 	$this->load->view($this->_view_base . '/_form',
 											[
 												'form_elements' => $this->country_model->validation_rules,
 												'record' 		=> $record
@@ -163,7 +166,7 @@ class Countries extends MY_Controller
 		}
 
 
-		$form = $this->load->view('setup/countries/_form',
+		$form = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->country_model->validation_rules,
 				'record' 		=> $record
