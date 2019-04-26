@@ -28,7 +28,7 @@ $this->load->view('templates/_common/_advanced_search_filter_general');
 		/**
 		 * Load Rows from View
 		 */
-		$this->load->view('setup/companies/_list');
+		$this->load->view( $this->data['_view_base'] . '/_list');
 		?>
 	</div>
 	<!-- /.box-body -->

@@ -63,7 +63,10 @@ class Branches extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] = $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -89,7 +92,7 @@ class Branches extends MY_Controller
 								'content_header' => 'Manage Branches',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Branches' => NULL]
 						])
-						->partial('content', 'setup/branches/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -136,7 +139,7 @@ class Branches extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/branches/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' 	=> $this->branch_model->validation_rules,
 				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
@@ -165,7 +168,7 @@ class Branches extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/branches/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' 	=> $this->branch_model->validation_rules,
 				'address_elements' 	=> $this->address_model->v_rules_add(),
@@ -256,13 +259,13 @@ class Branches extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->branch_model->get_all();
-					$success_html = $this->load->view('setup/branches/_list', ['records' => $records], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->branch_model->find($record->id);
-					$success_html = $this->load->view('setup/branches/_single_row', ['record' => $record], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 				}
 			}
 
@@ -287,7 +290,7 @@ class Branches extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/branches/_form',
+									? 	$this->load->view($this->_view_base . '/_form',
 											[
 												'form_elements' 	=> $this->branch_model->validation_rules,
 												'address_elements' 	=> $this->address_model->v_rules_on_submit(),
@@ -410,7 +413,7 @@ class Branches extends MY_Controller
 								'content_header' => 'Branch Details <small>' . $record->name_en . '</small>',
 								'breadcrumbs' => ['Branches' => $this->_url_base, 'Details' => NULL]
 						])
-						->partial('content', 'setup/branches/_details', $view_data)
+						->partial('content',$this->_view_base . '/_details', $view_data)
 						->render($this->data);
 
     }
@@ -443,7 +446,7 @@ class Branches extends MY_Controller
 								'content_header' => 'Manage Branch Targets',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Branches' => $this->_url_base, 'Targets' => NULL]
 						])
-						->partial('content', 'setup/branches/_targets', compact('records'))
+						->partial('content',$this->_view_base . '/_targets', compact('records'))
 						->render($this->data);
   	}
 
@@ -470,7 +473,7 @@ class Branches extends MY_Controller
 
 		$branches = $this->branch_model->dropdown();
 
-		$json_data['form'] = $this->load->view('setup/branches/_form_targets',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_targets',
 			[
 				'form_elements' => $rules,
 				'branches' 		=> $branches,
@@ -513,7 +516,7 @@ class Branches extends MY_Controller
 
 		$rules = $this->branch_target_model->validation_rules;
 		$rules[0]['_data'] = ['' => 'Select...'] + $this->fiscal_year_model->dropdown();
-		$json_data['form'] = $this->load->view('setup/branches/_form_targets',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_targets',
 			[
 				'form_elements' => $rules,
 				'action' 		=> 'edit',
@@ -643,13 +646,13 @@ class Branches extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->branch_target_model->get_row_list();
-					$success_html = $this->load->view('setup/branches/_list_targets', ['records' => $records], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_list_targets', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->branch_target_model->get_row_single($fiscal_yr_id);
-					$success_html = $this->load->view('setup/branches/_single_row_targets', ['record' => $record], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_single_row_targets', ['record' => $record], TRUE);
 				}
 			}
 
@@ -678,7 +681,7 @@ class Branches extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/branches/_form_targets',
+									? 	$this->load->view($this->_view_base . '/_form_targets',
 											[
 												'form_elements' => $rules,
 												'record' 		=> $record,
@@ -794,8 +797,8 @@ class Branches extends MY_Controller
 								'content_header' => 'Branch Target Details <small> Fiscal Year ' . $record->code_np . '</small>',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Branch Targets' => $this->_url_base . '/targets', 'Target Details' => NULL]
 						])
-						->partial('content', 'setup/branches/_target_details', $partial_data)
-						->partial('dynamic_js', 'setup/branches/_target_js')
+						->partial('content', $this->_view_base . '/_target_details', $partial_data)
+						->partial('dynamic_js', $this->_view_base . '/_target_js')
 						->render($this->data);
 	}
 

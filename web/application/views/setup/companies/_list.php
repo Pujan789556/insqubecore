@@ -21,12 +21,12 @@ $_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 		</tr>
 	</thead>
 
-	<tbody id="search-result-company">
+	<tbody id="<?php echo $DOM_RowBoxId ?>">
 		<?php
 		/**
 		 * Load Rows & Next Link (if any)
 		 */
-		$this->load->view('setup/companies/_rows');
+		$this->load->view($this->data['_view_base'] . '/_rows');
 		?>
 	</tbody>
 </table>
