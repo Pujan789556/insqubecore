@@ -35,6 +35,8 @@ class Ri_transactions extends MY_Controller
 		$this->load->model('ri_transaction_model');
 		$this->load->model('ri_fac_registration_model');
 
+		// Helpers
+		$this->load->helper('policy');
 	}
 
 	// --------------------------------------------------------------------
@@ -159,7 +161,34 @@ class Ri_transactions extends MY_Controller
 
 		private function _get_filter_elements()
 		{
+			$this->load->model('portfolio_model');
+
+			$admin_filters = [];
+			if( $this->dx_auth->is_admin() )
+			{
+				$branch_dropdown = branch_dropdown('en', false);
+				$admin_filters = [
+					[
+		                'field' => 'filter_branch_id',
+		                'label' => 'Branch',
+		                'rules' => 'trim|integer|in_list['.implode(',',array_keys($branch_dropdown)).']',
+		                '_id'       => 'filter-branch',
+		                '_type'     => 'dropdown',
+		                '_data'     => IQB_BLANK_SELECT + $branch_dropdown,
+		            ]
+		        ];
+			}
+
 			$filters = [
+				[
+	                'field' => 'filter_portfolio_id',
+	                'label' => 'Portfolio',
+	                'rules' => 'trim|integer|max_length[11]',
+	                '_id'       => 'filter-portfolio',
+	                '_type'     => 'dropdown',
+	                '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_children_tree(),
+	            ],
+
 				[
 					'field' => 'filter_policy_id',
 			        'label' => 'Policy ID',
@@ -181,9 +210,39 @@ class Ri_transactions extends MY_Controller
 	                '_type'     => 'dropdown',
 	                '_data'     => IQB_BLANK_SELECT + IQB_RI_TXN_FOR_TYPES,
 	                '_required' => false
-	            ]
+	            ],
+	            [
+	                'field' => 'filter_endorsement_type',
+	                'label' => 'Endorsement Type',
+	                'rules' => 'trim|alpha|exact_length[1]|in_list[F,E]',
+	                '_type'     => 'dropdown',
+	                '_data'     => IQB_BLANK_SELECT + ['F' => 'Fresh', 'E' => 'Endorsement'],
+	                '_required' => false
+	            ],
+	            [
+	                'field' => 'filter_flag_fac_registered',
+	                'label' => 'FAC Registered?',
+	                'rules' => 'trim|integer|max_length[1]',
+	                '_type'     => 'dropdown',
+	                '_data'     => _FLAG_on_off_dropdown(),
+	                '_required' => false
+	            ],
+	            [
+		            'field' => 'filter_issued_from',
+		            'label' => 'Issued Date (From)',
+		            'rules' => 'trim|valid_date',
+		            '_type'     => 'date',
+		            '_required' => false
+		        ],
+		        [
+		            'field' => 'filter_issued_to',
+		            'label' => 'Issued Date (To)',
+		            'rules' => 'trim|valid_date',
+		            '_type'     => 'date',
+		            '_required' => false
+		        ]
 			];
-			return $filters;
+			return array_merge($admin_filters, $filters);
 		}
 
 		private function _get_filter_data( $do_filter=TRUE )
@@ -202,9 +261,15 @@ class Ri_transactions extends MY_Controller
 				if( $this->form_validation->run() )
 				{
 					$data['data'] = [
+						'branch_id' 	=> $this->input->post('filter_branch_id') ?? NULL,
+						'portfolio_id' 	=> $this->input->post('filter_portfolio_id') ?? NULL,
 						'policy_id' 	=> $this->input->post('filter_policy_id') ?? NULL,
 						'policy_code' 	=> $this->input->post('filter_policy_code') ?? NULL,
-						'ri_txn_for' 	=> $this->input->post('filter_ri_txn_for') ?? NULL
+						'ri_txn_for' 	=> $this->input->post('filter_ri_txn_for') ?? NULL,
+						'endorsement_type' 		=> $this->input->post('filter_endorsement_type') ?? NULL,
+						'flag_fac_registered' 	=> $this->input->post('filter_flag_fac_registered') ?? NULL,
+						'issued_from' 	=> $this->input->post('filter_issued_from') ?? NULL,
+						'issued_to' 	=> $this->input->post('filter_issued_to') ?? NULL
 					];
 					$data['status'] = 'success';
 				}

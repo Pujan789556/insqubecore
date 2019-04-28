@@ -11,6 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<th>ID</th>
 			<?php endif;?>
 			<th>Policy Code</th>
+			<th>Endorsement Type</th>
 			<th>Treaty Type</th>
 			<th>Distribution Type</th>
 			<th>FAC</th>

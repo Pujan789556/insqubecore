@@ -120,7 +120,6 @@ class Ri_transaction_model extends MY_Model
      */
     public function rows($params = array())
     {
-
         $this->_row_select();
 
         /**
@@ -134,22 +133,78 @@ class Ri_transaction_model extends MY_Model
                 $this->db->where(['RTXN.id <=' => $next_id]);
             }
 
+            // Policy Issued Branch
+            $branch_id = $params['branch_id'] ?? NULL;
+            if( $branch_id )
+            {
+                $this->db->where(['P.branch_id' => $branch_id]);
+            }
+
+            // Policy Portfolio
+            $portfolio_id = $params['portfolio_id'] ?? NULL;
+            if( $portfolio_id )
+            {
+                $this->db->where(['P.portfolio_id' => $portfolio_id]);
+            }
+
+            // Policy ID
             $policy_id = $params['policy_id'] ?? NULL;
             if( $policy_id )
             {
                 $this->db->where(['P.id' =>  $policy_id]);
             }
 
+            // Policy Code
             $policy_code = $params['policy_code'] ?? NULL;
             if( $policy_code )
             {
                 $this->db->where(['P.code' =>  $policy_code]);
             }
 
+            // Ri Distribution Type - Basic or Pool
             $ri_txn_for = $params['ri_txn_for'] ?? NULL;
             if( $ri_txn_for )
             {
                 $this->db->where(['RTXN.ri_txn_for' =>  $ri_txn_for]);
+            }
+
+            // FAC REGISTERED
+            $flag_fac_registered = $params['flag_fac_registered'] ?? NULL;
+            if( $flag_fac_registered !== NULL )
+            {
+                $this->db->where(['RTXN.flag_fac_registered' =>  $flag_fac_registered]);
+            }
+
+            // Endorsement Type
+            $endorsement_type = $params['endorsement_type'] ?? NULL;
+            if( $endorsement_type  )
+            {
+                // FRESH
+                if($endorsement_type == 'F')
+                {
+                    $this->db->where(['E.txn_type' =>  IQB_ENDORSEMENT_TYPE_FRESH]);
+                }
+                // ENDORSEMENTS ONLY
+                else
+                {
+                    $this->load->model('endorsement_model');
+                    $txn_types = array_values($this->endorsement_model->ri_distributable_types(TRUE));
+                    $this->db->where_in('E.txn_type', $txn_types);
+                }
+            }
+
+            // POLICY ISSUE DATE FROM
+            $issued_from = $params['issued_from'] ?? NULL;
+            if( $issued_from )
+            {
+                $this->db->where(['P.issued_date >=' =>  $issued_from]);
+            }
+
+            // POLICY ISSUE DATE TO
+            $issued_to = $params['issued_to'] ?? NULL;
+            if( $issued_to )
+            {
+                $this->db->where(['P.issued_date <=' =>  $issued_to]);
             }
         }
 
@@ -169,11 +224,15 @@ class Ri_transaction_model extends MY_Model
                             // Policy Table Data
                             'P.code as policy_code, ' .
 
+                            // Endorsement Table Data
+                            'E.txn_type, ' .
+
                             // Treaty Type table
                             'TT.name AS treaty_type_name'
                         )
                 ->from($this->table_name . ' AS RTXN')
                 ->join('dt_policies P', 'P.id = RTXN.policy_id')
+                ->join('dt_endorsements E', 'E.id = RTXN.endorsement_id')
                 ->join('ri_setup_treaties T', 'T.id = RTXN.treaty_id')
                 ->join('ri_setup_treaty_types TT', 'TT.id = T.treaty_type_id');
     }

@@ -9,6 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<td><?php echo $record->id ;?></td>
 		<?php endif;?>
 	<td><?php echo anchor('policies/details/' . $record->policy_id, $record->policy_code, ['target' => '_blank']);?></td>
+	<td><?php echo _ENDORSEMENT_type_dropdown(false, false)[$record->txn_type];?></td>
 	<td><?php echo $record->treaty_type_name;?></td>
 	<td><?php echo IQB_RI_TXN_FOR_TYPES[$record->ri_txn_for];?></td>
 	<td class="ins-action">

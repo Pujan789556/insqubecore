@@ -3791,6 +3791,21 @@ class Endorsement_model extends MY_Model
     public function is_ri_distributable( $txn_type )
     {
         $txn_type       = (int)$txn_type;
+        $allowed_types = $this->ri_distributable_types();
+
+        return in_array($txn_type, $allowed_types);
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get the list of RI Distributable Type of Endorsements
+     *
+     * @param bool $exclude_fresh Exclude Fresh Endorsement Type?
+     * @return array
+     */
+    public function ri_distributable_types( $exclude_fresh = FALSE )
+    {
         $allowed_types  = [
             IQB_ENDORSEMENT_TYPE_FRESH,
             IQB_ENDORSEMENT_TYPE_TIME_EXTENDED,
@@ -3799,7 +3814,13 @@ class Endorsement_model extends MY_Model
             IQB_ENDORSEMENT_TYPE_REFUND_AND_TERMINATE
         ];
 
-        return in_array($txn_type, $allowed_types);
+        if($exclude_fresh)
+        {
+            // Remove Fresh Type
+            array_shift($allowed_types);
+        }
+
+        return $allowed_types;
     }
 
 
