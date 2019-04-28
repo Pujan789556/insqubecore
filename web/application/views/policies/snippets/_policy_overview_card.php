@@ -128,6 +128,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <td class="text-bold">Status</td>
                             <td><?php echo _POLICY_status_text($record->status, true);?></td>
                         </tr>
+                        <tr>
+                            <td class="text-bold">Branch</td>
+                            <td><?php echo branch_dropdown()[$record->branch_id];?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
