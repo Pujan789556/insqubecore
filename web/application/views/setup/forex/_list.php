@@ -14,6 +14,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	/**
 	 * Load Rows & Next Link (if any)
 	 */
-	$this->load->view('setup/forex/_rows');
+	$this->load->view($this->data['_view_base'] . '/_rows');
 	?>
 </table>

@@ -51,7 +51,10 @@ class Local_bodies extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 
 	}
 
@@ -81,7 +84,7 @@ class Local_bodies extends MY_Controller
 								'content_header' => 'Manage Local Bodies',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Local Bodies' => NULL]
 						])
-						->partial('content', 'setup/local_bodies/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -120,7 +123,7 @@ class Local_bodies extends MY_Controller
 
 
 			$row = $status === 'success'
-						? $this->load->view('setup/local_bodies/_single_row', compact('record'), TRUE)
+						? $this->load->view($this->_view_base . '/_single_row', compact('record'), TRUE)
 						: '';
 
 			$this->template->json([
@@ -138,7 +141,7 @@ class Local_bodies extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/local_bodies/_form',
+									? 	$this->load->view($this->_view_base . '/_form',
 											[
 												'form_elements' => $this->local_body_model->validation_rules,
 												'record' 		=> $record
@@ -149,7 +152,7 @@ class Local_bodies extends MY_Controller
 		}
 
 
-		$form = $this->load->view('setup/local_bodies/_form',
+		$form = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->local_body_model->validation_rules,
 				'record' 		=> $record

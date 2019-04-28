@@ -51,7 +51,10 @@ class Fy_months extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -79,7 +82,7 @@ class Fy_months extends MY_Controller
 								'content_header' => 'Manage Fiscal Year Months',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Fiscal Year Months' => NULL]
 						])
-						->partial('content', 'setup/fy_months/_index', $data)
+						->partial('content', $this->_view_base . '/_index', $data)
 						->render($this->data);
 	}
 
@@ -171,7 +174,7 @@ class Fy_months extends MY_Controller
 		}
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/fy_months/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->fy_month_model->validation_rules,
 				'fy_record' 	=> $fy_record,
@@ -303,7 +306,7 @@ class Fy_months extends MY_Controller
 		$page_header = "Fiscal Year Months - {$fy_record->code_np}";
 
 		$this->template->json([
-			'html' 	=> $this->load->view('setup/fy_months/_details', $data, TRUE),
+			'html' 	=> $this->load->view($this->_view_base . '/_details', $data, TRUE),
 			'title' => "Fiscal Year Months - {$fy_record->code_np}({$fy_record->code_en})"
 		]);
     }
