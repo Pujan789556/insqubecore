@@ -52,7 +52,10 @@ class Months extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -79,7 +82,7 @@ class Months extends MY_Controller
 								'content_header' => 'Manage Nepali Months',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Months' => NULL]
 						])
-						->partial('content', 'setup/months/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 

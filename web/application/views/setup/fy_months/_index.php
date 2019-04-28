@@ -47,7 +47,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						 */
 						foreach($fy_records as $single)
 						{
-							$this->load->view('setup/fy_months/_single_row', ['fy_record' => $single]);
+							$this->load->view($this->data['_view_base'] . '/_single_row', ['fy_record' => $single]);
 						}
 						?>
 					</tbody>

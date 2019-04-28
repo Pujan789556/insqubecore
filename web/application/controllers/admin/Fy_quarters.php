@@ -51,7 +51,10 @@ class Fy_quarters extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -77,7 +80,7 @@ class Fy_quarters extends MY_Controller
 								'content_header' => 'Manage Fiscal Year Quarters',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Fiscal Year Quarters' => NULL]
 						])
-						->partial('content', 'setup/fy_quarters/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -97,7 +100,7 @@ class Fy_quarters extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/fy_quarters/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->fy_quarter_model->validation_rules,
 				'record' 		=> $record
@@ -131,7 +134,7 @@ class Fy_quarters extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/fy_quarters/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->fy_quarter_model->validation_rules,
 				'record' 		=> $record
@@ -212,13 +215,13 @@ class Fy_quarters extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->fy_quarter_model->get_all();
-					$success_html = $this->load->view('setup/fy_quarters/_list', ['records' => $records], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->fy_quarter_model->get($record->id);
-					$success_html = $this->load->view('setup/fy_quarters/_single_row', ['record' => $record], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 				}
 			}
 
@@ -243,7 +246,7 @@ class Fy_quarters extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/fy_quarters/_form',
+									? 	$this->load->view($this->_view_base . '/_form',
 											[
 												'form_elements' => $this->fy_quarter_model->validation_rules,
 												'record' 		=> $record

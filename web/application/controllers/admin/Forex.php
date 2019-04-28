@@ -51,7 +51,10 @@ class Forex extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -114,7 +117,8 @@ class Forex extends MY_Controller
 		// DOM Data
 		$dom_data = [
 			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-forex', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-forex' 			// Filter Form ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-forex', 			// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-forex-rows' 				// Row Box ID
 		];
 
 		$data = [
@@ -128,7 +132,7 @@ class Forex extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'setup/forex/_index';
+			$view = $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
@@ -137,11 +141,11 @@ class Forex extends MY_Controller
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/forex/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'setup/forex/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 
@@ -165,9 +169,9 @@ class Forex extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/forex/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Manage Forex'] + $dom_data)
-						->partial('content', 'setup/forex/_index', $data)
+						->partial('content', $this->_view_base . '/_index', $data)
 						->render($this->data);
 	}
 
@@ -312,13 +316,13 @@ class Forex extends MY_Controller
                     'status'        => $status,
                     'message'       => $message,
                     'reloadForm'    => true,
-                    'form'          => $this->load->view('setup/forex/_form_duplicate', $form_data, TRUE)
+                    'form'          => $this->load->view($this->_view_base . '/_form_duplicate', $form_data, TRUE)
                 ]);
             }
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/forex/_form_duplicate',
+        $json_data['form'] = $this->load->view($this->_view_base . '/_form_duplicate',
             [
                 'form_elements'         => $rules,
                 'record'                => null,
@@ -439,9 +443,9 @@ class Forex extends MY_Controller
 			'record' 	=> $record
 		];
 
-		$html = $this->load->view('setup/forex/_details', $data, TRUE);
+		$html = $this->load->view($this->_view_base . '/_details', $data, TRUE);
 		$this->template->json([
-			'html' 	=> $this->load->view('setup/forex/_details', $data, TRUE),
+			'html' 	=> $this->load->view($this->_view_base . '/_details', $data, TRUE),
 			'title' => 'Forex Details - ' .  $record->exchange_date
 		]);
     }
