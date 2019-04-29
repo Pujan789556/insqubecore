@@ -638,19 +638,19 @@ class Ri_setup_treaty_model extends MY_Model
                 ],
                 'eol_min_rate'    => [
                     'label' => 'Minimum Rate(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 'eol_max_rate'    => [
                     'label' => 'Maximum Rate(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 'eol_fixed_rate'    => [
                     'label' => 'Fixed Rate(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
@@ -662,13 +662,13 @@ class Ri_setup_treaty_model extends MY_Model
                 ],
                 'eol_tax_ri'    => [
                     'label' => 'RI Tax(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 'eol_comm_ib'    => [
                     'label' => 'IB Commission(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
@@ -688,19 +688,19 @@ class Ri_setup_treaty_model extends MY_Model
             $tnc_val_prefix = [
                 'qs_comm_ri'    => [
                     'label' => 'RI Commission(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 'qs_tax_ri'    => [
                     'label' => 'RI Tax(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
                 'qs_tax_ib'    => [
                     'label' => 'IB Tax(%)',
-                    'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
                     '_type'     => 'text',
                     '_required' => true
                 ],
