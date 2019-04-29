@@ -138,7 +138,7 @@ class Bs_reports extends MY_Controller
 
 		private function _get_filter_elements()
 		{
-			$fy_dropdown = $this->fiscal_year_model->dropdown();
+			$fy_dropdown = $this->fiscal_year_model->dropdown('till_now');
 			$filters = [
 	            [
 	                'field' => 'filter_category',

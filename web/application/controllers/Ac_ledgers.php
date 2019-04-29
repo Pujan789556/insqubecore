@@ -455,7 +455,7 @@ class Ac_ledgers extends MY_Controller
 		                'rules' => 'trim|required|integer|max_length[3]',
 		                '_type'     => 'dropdown',
 		                '_default' 	=> $this->current_fiscal_year->id,
-		                '_data'     => $this->fiscal_year_model->dropdown(),
+		                '_data'     => $this->fiscal_year_model->dropdown('till_now'),
 		                '_required' => false
 		            ],
 					[

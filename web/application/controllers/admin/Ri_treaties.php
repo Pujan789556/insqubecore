@@ -200,7 +200,7 @@ class Ri_treaties extends MY_Controller
 	                'label' => 'Fiscal Year',
 	                'rules' => 'trim|integer|max_length[3]',
 	                '_type'     => 'dropdown',
-	                '_data'     => IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown(),
+	                '_data'     => IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown('till_now'),
 	                '_required' => false
 	            ],
 	            [
