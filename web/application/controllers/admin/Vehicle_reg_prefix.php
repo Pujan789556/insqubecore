@@ -51,7 +51,10 @@ class Vehicle_reg_prefix extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -83,7 +86,8 @@ class Vehicle_reg_prefix extends MY_Controller
 		// DOM Data
 		$dom_data = [
 			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-vehicle_reg_prefix', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-vehicle_reg_prefix' 			// Filter Form ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-vehicle_reg_prefix',		// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-vehicle_reg_prefix-rows' 				// Row Box ID
 		];
 
 		/**
@@ -98,7 +102,7 @@ class Vehicle_reg_prefix extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'setup/vehicle_reg_prefix/_index';
+			$view = $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
@@ -107,11 +111,11 @@ class Vehicle_reg_prefix extends MY_Controller
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/vehicle_reg_prefix/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'setup/vehicle_reg_prefix/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 		if ( $this->input->is_ajax_request() )
@@ -129,9 +133,9 @@ class Vehicle_reg_prefix extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/vehicle_reg_prefix/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Manage Vehicle Registration Prefixes'] + $dom_data)
-						->partial('content', 'setup/vehicle_reg_prefix/_index', $data)
+						->partial('content', $this->_view_base . '/_index', $data)
 						->render($this->data);
 	}
 
@@ -257,7 +261,7 @@ class Vehicle_reg_prefix extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/vehicle_reg_prefix/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' 	=> $this->vehicle_reg_prefix_model->validation_rules,
 				'record' 			=> $record
@@ -291,7 +295,7 @@ class Vehicle_reg_prefix extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/vehicle_reg_prefix/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' 	=> $this->vehicle_reg_prefix_model->validation_rules,
 				'record' 			=> $record,
@@ -383,10 +387,10 @@ class Vehicle_reg_prefix extends MY_Controller
 				];
 
 				$record 			= $this->vehicle_reg_prefix_model->find( $action === 'add' ? $done : $record->id );
-				$single_row 		=  'setup/vehicle_reg_prefix/_single_row';
+				$single_row 		=  $this->_view_base . '/_single_row';
 				$html = $this->load->view($single_row, ['record' => $record], TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add' ? '#search-result-vehicle_reg_prefix' : '#_data-row-' . $record->id,
+					'box' 		=> $action === 'add' ? '#box-vehicle_reg_prefix-rows' : '#_data-row-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
 				];
@@ -399,7 +403,7 @@ class Vehicle_reg_prefix extends MY_Controller
 				'status' 		=> $status,
 				'message' 		=> $message,
 				'reloadForm' 	=> true,
-				'form' 			=> $this->load->view('setup/vehicle_reg_prefix/_form',
+				'form' 			=> $this->load->view($this->_view_base . '/_form',
 									[
 										'form_elements' 	=> $this->vehicle_reg_prefix_model->validation_rules,
 										'record' 			=> $record

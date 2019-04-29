@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		/**
 		 * Load Rows & Next Link (if any)
 		 */
-		$this->load->view('setup/states/_rows');
+		$this->load->view($this->data['_view_base'] . '/_rows');
 		?>
 	</tbody>
 </table>

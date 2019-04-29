@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 foreach($records as $record)
 {
-	$single_row = $_flag__show_widget_row ? 'setup/surveyors/_single_row_widget' : 'setup/surveyors/_single_row';
+	$single_row = $_flag__show_widget_row ? $this->data['_view_base'] . '/_single_row_widget' : $this->data['_view_base'] . '/_single_row';
 	$this->load->view($single_row, compact('record'));
 }
 
@@ -25,7 +25,7 @@ if($next_id):
 			data-loading-text="Loading ..."
 			data-url="<?php echo $next_url;?>"
 			data-method="append"
-			data-box="#search-result-surveyor"
+			data-box="#<?php echo $DOM_RowBoxId ?>"
 			data-self-destruct="true"
 			data-loader-box="#<?php echo $loader_box_id;?>"
 			data-load-method="post"
