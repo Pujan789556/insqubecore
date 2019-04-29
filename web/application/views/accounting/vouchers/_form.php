@@ -386,12 +386,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         $drBox.closest('tfoot').toggleClass('text-red', d != c);
         $drBox.closest('tfoot').toggleClass('text-green', d == c);
-
     }
-
-    // Initialize Select2 Elements
-    // $.getScript( "<?php echo THEME_URL; ?>plugins/select2/select2.full.min.js", function( data, textStatus, jqxhr ) {
-    //     $(".table-voucher select").select2();
-    //     $('.bootbox.modal').removeAttr('tabindex'); // modal workaround
-    // });
 </script>

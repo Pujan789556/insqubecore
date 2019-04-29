@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // ------------------------------------------------------------------------------
 
 $group_path_str = ac_account_group_path_formatted($record->acg_path);
-$selectable_path_str = ac_account_group_path_formatted($record->acg_path, $record->name);
+$selectable_path_str = ac_account_group_path_formatted($record->acg_path, $record->name, '');
 
 // ------------------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ if($widget_type === 'account')
 			['ref' => 'account_id', 'val' => $record->id],
 		],
 		'html' => [
-			['ref' => '_text-ref-account', 'val' => $selectable_path_str]
+			['ref' => '_text-ref-account', 'val' => htmlentities($selectable_path_str, ENT_QUOTES)]
 		]
 	];
 }
