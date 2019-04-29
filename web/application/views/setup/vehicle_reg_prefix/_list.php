@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		/**
 		 * Load Rows & Next Link (if any)
 		 */
-		$this->load->view('setup/vehicle_reg_prefix/_rows');
+		$this->load->view($this->data['_view_base'] . '/_rows');
 		?>
 	</tbody>
 </table>

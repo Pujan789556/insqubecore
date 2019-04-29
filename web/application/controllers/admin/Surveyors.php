@@ -59,7 +59,10 @@ class Surveyors extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -100,7 +103,8 @@ class Surveyors extends MY_Controller
 		// DOM Data
 		$dom_data = [
 			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-surveyor', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-surveyor' 			// Filter Form ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-surveyor',		// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-surveyors-rows' 				// Row Box ID
 		];
 
 		/**
@@ -120,7 +124,7 @@ class Surveyors extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = $from_widget === 'y' ? 'setup/surveyors/_find_widget' : 'setup/surveyors/_index';
+			$view = $from_widget === 'y' ? $this->_view_base . '/_find_widget' : $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
@@ -129,11 +133,11 @@ class Surveyors extends MY_Controller
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/surveyors/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'setup/surveyors/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 		if ( $this->input->is_ajax_request() )
@@ -151,9 +155,9 @@ class Surveyors extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/surveyors/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Manage Surveyor'] + $dom_data)
-						->partial('content', 'setup/surveyors/_index', $data)
+						->partial('content', $this->_view_base . '/_index', $data)
 						->render($this->data);
 	}
 
@@ -311,7 +315,7 @@ class Surveyors extends MY_Controller
 		$json_data = $this->_save('edit', $record, $address_record, $from_widget, $widget_reference);
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/surveyors/_form_box',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_box',
 			[
 				'form_elements' 	=> $this->surveyor_model->validation_rules,
 				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
@@ -348,7 +352,7 @@ class Surveyors extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/surveyors/_form_box',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_box',
 			[
 				'form_elements' => $this->surveyor_model->validation_rules,
 				'address_elements' 	=> $this->address_model->v_rules_add(),
@@ -496,14 +500,14 @@ class Surveyors extends MY_Controller
 				];
 
 				$record 			= $this->surveyor_model->find( $action === 'add' ? $done : $record->id );
-				$single_row 		=  'setup/surveyors/_single_row';
+				$single_row 		=  $this->_view_base . '/_single_row';
 				if($action === 'add' && $from_widget === 'y' )
 				{
-					$single_row = 'setup/surveyors/_single_row_widget';
+					$single_row = $this->_view_base . '/_single_row_widget';
 				}
 				$html = $this->load->view($single_row, ['record' => $record, 'widget_reference' => $widget_reference], TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add' ? '#search-result-surveyor' : '#_data-row-' . $record->id,
+					'box' 		=> $action === 'add' ? '#box-surveyors-rows' : '#_data-row-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
 				];
@@ -516,7 +520,7 @@ class Surveyors extends MY_Controller
 				'status' 		=> $status,
 				'message' 		=> $message,
 				'reloadForm' 	=> true,
-				'form' 			=> $this->load->view('setup/surveyors/_form',
+				'form' 			=> $this->load->view($this->_view_base . '/_form',
 									[
 										'form_elements' 	=> $this->surveyor_model->validation_rules,
 										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
@@ -703,7 +707,7 @@ class Surveyors extends MY_Controller
 								'content_header' => 'Surveyor Details <small>' . $record->name . '</small>',
 								'breadcrumbs' => ['Surveyors' => $this->_url_base, 'Details' => NULL]
 						])
-						->partial('content', 'setup/surveyors/_details', $view_data)
+						->partial('content', $this->_view_base . '/_details', $view_data)
 						->render($this->data);
 
     }
