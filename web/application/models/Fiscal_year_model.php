@@ -110,14 +110,49 @@ class Fiscal_year_model extends MY_Model
         return $list;
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Get all the fiscal years till current fiscal year
+     * @return type
+     */
+    public function get_till_current_fy()
+    {
+        /**
+         * Get Cached Result, If no, cache the query result
+         */
+        $date = date('Y-m-d');
+        $cache_var = 'fy_till_' . date('Ymd');
+        $list = $this->get_cache($cache_var);
+        if(!$list)
+        {
+            $list = $this->db->select('FY.*')
+                             ->from($this->table_name . ' FY')
+                             ->where('FY.starts_at_en <=', $date)
+                             ->get()->result();
+            $this->write_cache($list, $cache_var, CACHE_DURATION_DAY);
+        }
+        return $list;
+    }
+
     // --------------------------------------------------------------------
 
     /**
      * Get Dropdown List
+     *
+     * @param string $mode all|till_now   till_now: list till current fiscal year
      */
-    public function dropdown()
+    public function dropdown($mode = 'all')
     {
-        $records = $this->get_all();
+        if($mode == 'all')
+        {
+            $records = $this->get_all();
+        }
+        else
+        {
+            $records = $this->get_till_current_fy();
+        }
+
         $list = [];
         foreach($records as $record)
         {
