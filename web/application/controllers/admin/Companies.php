@@ -808,7 +808,7 @@ class Companies extends MY_Controller
 	 * @param integer $id
 	 * @return json
 	 */
-	public function __branch_delete($company_id, $branch_id)
+	private function __branch_delete($company_id, $branch_id)
 	{
 		// Valid Record?
 		$branch_id 	= (int)$branch_id;
