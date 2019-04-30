@@ -280,6 +280,13 @@ class MY_Model
     protected $fields = array();
 
 
+    /**
+     * InsQube Audit Log Implementation
+     */
+    protected $audit_log        = FALSE;
+    protected $audit_log_table  = 'audit_logger';
+    protected $audit_old_record = NULL; // Record Before Update or Delete
+
 
     /**
      * Cache Implementation
@@ -309,6 +316,17 @@ class MY_Model
         if ($this->set_created === true) array_unshift($this->before_insert, 'created_on');
         if ($this->set_modified === true) array_unshift($this->before_update, 'modified_on');
 
+        // Audit Log Enable? If Yes, Set Before update trigger
+        if ($this->audit_log === TRUE)
+        {
+                array_unshift($this->before_update, 'pre_audit_log');
+                array_unshift($this->before_delete, 'pre_audit_log');
+
+                array_unshift($this->after_insert, 'save_audit_log');
+                array_unshift($this->after_update, 'save_audit_log');
+                array_unshift($this->after_delete, 'save_audit_log');
+        }
+
         // Make sure our temp return type is correct.
         $this->temp_return_type = $this->return_type;
 
@@ -331,6 +349,145 @@ class MY_Model
 
         log_message('debug', 'MY_Model Class Initialized');
     }
+
+    //--------------------------------------------------------------------
+
+
+    //--------------------------------------------------------------------
+    // AUDIT LOG Methods
+    //--------------------------------------------------------------------
+
+    /**
+     * Before Update/Delete Trigger for Audit Logging
+     *
+     * Before update or delete, this will set "audit_old_record" from
+     * database
+     *
+     * @param array $data The array of Data to be updated ['id' => xxx, 'method' => 'insert|update|delete', 'fields'=>[key=>val]]
+     * @return array
+     */
+    public function pre_audit_log($data)
+    {
+        $method = $data['method'] ?? '';
+        switch($method)
+        {
+            case 'update':
+            case 'delete':
+                $this->audit_old_record = $this->find($data['id']);
+                break;
+
+            default:
+                break;
+        }
+        return $data;
+    }
+
+    /**
+     * Save Audit Log into Audit Log Table.
+     *
+     * This is a post insert/update/delete trigger to save audit log
+     *
+     * @param array $data ['method' => 'insert|update|delete', 'id' => xxx, 'fields' => ['key' => 'val', ...]]
+     * @return array
+     */
+    public function save_audit_log($data)
+    {
+        $method = $data['method'] ?? '';
+        $id     = $data['id'] ?? NULL;
+
+        $audit_data = [];
+        switch($method)
+        {
+            case 'insert':
+                $audit_data = $this->_prep_insert_audit_data($data['fields']);
+                break;
+
+            case 'update':
+                $audit_data = $this->_prep_update_audit_data($data['fields']);
+                break;
+
+            case 'delete':
+                $audit_data = $this->_prep_delete_audit_data();
+                break;
+
+            default:
+                break;
+        }
+
+        /**
+         * Save to Database only if We have Audit Database
+         * In Update if nothing changed, no audit log will be created
+         */
+        if($audit_data)
+        {
+            // Other Data
+            $audit_data = array_merge([
+                    'table_name' => $this->table_name,
+                    'table_id'   => $id,
+                    'user_id'   => (int )$this->dx_auth->get_user_id(),
+                    'action_at' => $this->set_date()
+            ], $audit_data);
+
+
+            // Save into Database
+            $this->db->insert($this->audit_log_table, $audit_data );
+        }
+
+        // Return The Data as it is
+        return $data;
+    }
+
+    //--------------------------------------------------------------------
+
+        private function _prep_insert_audit_data($data)
+        {
+            return [
+                'action'     => 'C',
+                'new_data'   => json_encode($data)
+            ];
+        }
+
+        private function _prep_update_audit_data($data)
+        {
+            // Get Changed Data
+            $audit_new_data = [];
+            $audit_old_data = [];
+            $old_data = (array)$this->audit_old_record;
+            foreach($data as $key=>$val)
+            {
+                if($val != $old_data[$key])
+                {
+                    $audit_new_data[$key] = $val;
+                    $audit_old_data[$key] = $old_data[$key];
+                }
+
+                // If it has only "updated_on" fields, we have to discard the audit log
+                if( count($audit_new_data) == 1 && array_key_exists($this->modified_field, $audit_new_data) )
+                {
+                    $audit_new_data = [];
+                    $audit_old_data = [];
+                }
+            }
+
+            if( empty($audit_new_data))
+            {
+                return FALSE;
+            }
+
+            return [
+                'action'   => 'U',
+                'old_data' => json_encode($audit_old_data),
+                'new_data' => json_encode($audit_new_data),
+            ];
+        }
+
+        private function _prep_delete_audit_data()
+        {
+            return [
+                'action'   => 'D',
+                'old_data' => json_encode((array)$this->audit_old_record),
+            ];
+        }
 
     //--------------------------------------------------------------------
 
