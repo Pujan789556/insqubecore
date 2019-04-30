@@ -11,6 +11,8 @@ class Branch_target_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     protected $after_insert  = ['clear_cache'];

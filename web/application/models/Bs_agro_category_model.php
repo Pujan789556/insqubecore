@@ -11,6 +11,8 @@ class Bs_agro_category_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     protected $before_insert = [];

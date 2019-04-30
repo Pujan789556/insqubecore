@@ -8,6 +8,7 @@ class Fy_month_model extends MY_Model
     protected $set_created  = true;
     protected $set_modified = true;
     protected $log_user     = true;
+    protected $audit_log = TRUE;
     protected $skip_validation = TRUE;
     protected $protected_attributes = ['id'];
 
@@ -114,9 +115,10 @@ class Fy_month_model extends MY_Model
                     'month_id'      => $single['month_id']
                 ];
 
-                if($this->check_duplicate($where))
+                $record = parent::find_by($where); // Required to call update function - for audit log, update function need to be called
+                if($record)
                 {
-                    parent::update_by($single, $where);
+                    parent::update($record->id, $single, FALSE);
                 }
                 else
                 {

@@ -11,13 +11,15 @@ class Country_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     protected $before_insert = ['capitalize_codes'];
     protected $before_update = ['capitalize_codes'];
     protected $after_update  = ['clear_cache'];
 
-    protected $fields = ["id", "name", "picture", "ud_code", "bs_code", "commission_group", "active", "type", "contact", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ['id', 'name', 'alpha2', 'alpha3', 'dial_code', 'currency_code', 'currency_name', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [
         [

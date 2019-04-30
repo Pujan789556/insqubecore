@@ -11,6 +11,8 @@ class Company_branch_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     // protected $before_insert = ['prepare_contact_data'];
