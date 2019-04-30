@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	 */
 	foreach($records as $record)
 	{
-		$this->load->view('setup/tariff/motor/_single_row_by_fiscal_year', compact('record'));
+		$this->load->view($this->data['_view_base'] . '/motor/_single_row_by_fiscal_year', compact('record'));
 	}
 	?>
 </table>

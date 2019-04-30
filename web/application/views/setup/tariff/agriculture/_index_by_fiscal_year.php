@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/tariff/agriculture/_list_by_fiscal_year');
+				$this->load->view($this->data['_view_base'] . '/agriculture/_list_by_fiscal_year');
 				?>
 			</div>
 			<!-- /.box-body -->

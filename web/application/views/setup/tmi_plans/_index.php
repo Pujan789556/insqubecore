@@ -34,7 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view( 'setup/' . $this->router->class . '/_list');
+				$this->load->view( $this->data['_module_view_path'] . '_list');
 				?>
 			</div>
 			<!-- /.box-body -->
