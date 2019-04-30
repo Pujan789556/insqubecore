@@ -51,7 +51,10 @@ class Login_attempts extends MY_Controller
 
 		// URL Base
         $this->_url_base         = 'admin/' . $this->router->class;
+        $this->_view_base 		 = 'setup/' . $this->router->class;
+
         $this->data['_url_base'] = $this->_url_base; // for view to access
+        $this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -77,7 +80,7 @@ class Login_attempts extends MY_Controller
 								'content_header' => 'Manage Login Attempts',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Login Attempts' => NULL]
 						])
-						->partial('content', 'setup/login_attempts/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
