@@ -53,7 +53,10 @@ class Bsrs_headings extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -98,7 +101,7 @@ class Bsrs_headings extends MY_Controller
 								'content_header' => 'Manage Beema Samiti Report Setup - Headings',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Beema Samiti Report Setup - Headings' => NULL]
 						])
-						->partial('content', 'setup/bsrs_headings/_index', $data)
+						->partial('content', $this->data['_view_base'] . '/_index', $data)
 						->render($this->data);
 	}
 
@@ -250,7 +253,7 @@ class Bsrs_headings extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/bsrs_headings/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->bsrs_heading_model->validation_rules,
 				'portfolio' 	=> $portfolio,
@@ -328,7 +331,7 @@ class Bsrs_headings extends MY_Controller
 								'content_header' => $page_header,
 								'breadcrumbs' => ['Application Settings' => NULL, 'BS Report Setup - Headings' => $this->_url_base, 'Details' => NULL]
 						])
-						->partial('content', 'setup/bsrs_headings/_details', $data)
+						->partial('content', $this->_view_base . '/_details', $data)
 						->render($this->data);
     }
 

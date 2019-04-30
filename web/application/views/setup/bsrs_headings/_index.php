@@ -51,7 +51,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 						foreach($children as $single)
 						{
-							$this->load->view('setup/bsrs_headings/_single_row', ['portfolio' => $single, 'heading_types' => $heading_types]);
+							$this->load->view($this->_view_base . '/_single_row', ['portfolio' => $single, 'heading_types' => $heading_types]);
 						}
 					}
 					?>
