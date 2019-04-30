@@ -11,6 +11,8 @@ class Setting_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = true;
+
     protected $protected_attributes = ['id'];
 
     protected $after_update  = ['clear_cache'];
