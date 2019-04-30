@@ -50,7 +50,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                          */
                         foreach($records as $single)
                         {
-                            $this->load->view($this->_view_base . '/_single_row_breed', ['record' => $single]);
+                            $this->load->view($this->data['_view_base'] . '/_single_row_breed', ['record' => $single]);
                         }
                         ?>
                     </tbody>
