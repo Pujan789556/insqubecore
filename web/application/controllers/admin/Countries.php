@@ -115,6 +115,8 @@ class Countries extends MY_Controller
 			{
 				$data = $this->input->post();
 
+				// echo '<pre>'; print_r($data);exit;
+
 				// Now Update Data & Log Activity
 	        	$done = $this->country_model->update($id, $data, TRUE);
 
@@ -218,5 +220,19 @@ class Countries extends MY_Controller
             return FALSE;
         }
         return TRUE;
+    }
+
+    // --------------------------------------------------------------------
+
+
+    /**
+     * Flush Cache Data
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        $this->country_model->clear_cache();
+        redirect($this->_url_base);
     }
 }
