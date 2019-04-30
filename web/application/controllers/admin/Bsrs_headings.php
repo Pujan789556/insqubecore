@@ -177,12 +177,15 @@ class Bsrs_headings extends MY_Controller
 					$heading_id = $data['heading_id'][$i];
 					if( !$heading_id )
 					{
-						$batch_data[] = [
+						$single_data = [
 							'portfolio_id' => $portfolio_id,
 							'heading_type_id' => $heading_type_id,
 							'code' 	=> $data['code'][$i],
 							'name' 	=> $data['name'][$i]
 						];
+
+						$done = $this->bsrs_heading_model->insert($single_data, TRUE);
+						$done ? $total_insert++ : '';
 					}
 					else if( in_array($heading_id, $old_heading_ids))
 					{
@@ -200,16 +203,6 @@ class Bsrs_headings extends MY_Controller
 					}
 				}
 
-				/**
-				 * Batch Insert New
-				 */
-				if( $batch_data )
-				{
-					$done = $this->bsrs_heading_model->insert_batch($batch_data, TRUE);
-
-					$done ? $total_insert = count($batch_data) : '';
-				}
-
 
 				/**
 				 * Delete If any
@@ -220,9 +213,6 @@ class Bsrs_headings extends MY_Controller
 					$done = $this->bsrs_heading_model->delete($heading_id);
 					$done ? $total_delete++ : '';
 				}
-
-
-
 
 				$success = $total_insert || $total_update || $total_delete;
 

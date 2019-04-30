@@ -148,12 +148,14 @@ class Bs_agro_categories extends MY_Controller
 					$category_id = $data['category_id'][$i];
 					if( !$category_id )
 					{
-						$batch_data[] = [
+						$single_data = [
 							'portfolio_id' => $portfolio_id,
 							'code' 		=> $data['code'][$i],
 							'name_en' 	=> $data['name_en'][$i],
 							'name_np' 	=> $data['name_np'][$i]
 						];
+						$done = $this->bs_agro_category_model->insert($single_data, TRUE);
+						$done ? $total_insert++ : '';
 					}
 					else if( in_array($category_id, $existing_ids))
 					{
@@ -170,16 +172,6 @@ class Bs_agro_categories extends MY_Controller
 						$to_update_ids[] = $category_id;
 
 					}
-				}
-
-				/**
-				 * Batch Insert New
-				 */
-				if( $batch_data )
-				{
-					$done = $this->bs_agro_category_model->insert_batch($batch_data, TRUE);
-
-					$done ? $total_insert = count($batch_data) : '';
 				}
 
 
@@ -297,18 +289,20 @@ class Bs_agro_categories extends MY_Controller
 				$to_update_ids  = [];
 
 				$data = $this->input->post();
-				$batch_data = [];
 				for($i = 0; $i < count($data['code']); $i++ )
 				{
 					$breed_id = $data['breed_id'][$i];
 					if( !$breed_id )
 					{
-						$batch_data[] = [
+						$single_data = [
 							'category_id' 	=> $category_id,
 							'code' 			=> $data['code'][$i],
 							'name_en' 		=> $data['name_en'][$i],
 							'name_np' 		=> $data['name_np'][$i]
 						];
+
+						$done = $this->bs_agro_breed_model->insert($single_data, TRUE);
+						$done ? $total_insert++ : '';
 					}
 					else if( in_array($breed_id, $existing_ids))
 					{
@@ -325,16 +319,6 @@ class Bs_agro_categories extends MY_Controller
 						$to_update_ids[] = $breed_id;
 
 					}
-				}
-
-				/**
-				 * Batch Insert New
-				 */
-				if( $batch_data )
-				{
-					$done = $this->bs_agro_breed_model->insert_batch($batch_data, TRUE);
-
-					$done ? $total_insert = count($batch_data) : '';
 				}
 
 
