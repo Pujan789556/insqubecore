@@ -32,7 +32,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/portfolio/_list_settings_fy');
+				$this->load->view($this->data['_view_base'] . '/_list_settings_fy');
 				?>
 			</div>
 			<!-- /.box-body -->
