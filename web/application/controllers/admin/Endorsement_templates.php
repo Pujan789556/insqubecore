@@ -53,7 +53,10 @@ class Endorsement_templates extends MY_Controller
 
         // URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -116,7 +119,8 @@ class Endorsement_templates extends MY_Controller
 		// DOM Data
 		$dom_data = [
 			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-endorsement_template', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-endorsement_template' 			// Filter Form ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-endorsement_template', 			// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-form-endorsement-rows' 							// Row Box ID
 		];
 
 		$data = [
@@ -130,7 +134,7 @@ class Endorsement_templates extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'setup/endorsement_templates/_index';
+			$view = $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
@@ -139,11 +143,11 @@ class Endorsement_templates extends MY_Controller
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/endorsement_templates/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'setup/endorsement_templates/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 
@@ -174,9 +178,9 @@ class Endorsement_templates extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/endorsement_templates/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Manage Endorsement Templates'] + $dom_data)
-						->partial('content', 'setup/endorsement_templates/_index', $data)
+						->partial('content', $this->_view_base . '/_index', $data)
 						->render($this->data);
 	}
 
@@ -282,7 +286,7 @@ class Endorsement_templates extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/endorsement_templates/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->endorsement_template_model->validation_rules,
 				'record' 		=> $record
@@ -308,7 +312,7 @@ class Endorsement_templates extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/endorsement_templates/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->endorsement_template_model->validation_rules,
 				'record' 		=> $record
@@ -385,7 +389,7 @@ class Endorsement_templates extends MY_Controller
 					{
 						// Get Updated Record
 						$record = $this->endorsement_template_model->row($record->id);
-						$success_html = $this->load->view('setup/endorsement_templates/_single_row', ['record' => $record], TRUE);
+						$success_html = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 
 						return $this->template->json([
 							'status' 		=> $status,
@@ -478,7 +482,7 @@ class Endorsement_templates extends MY_Controller
 		}
 
 		$this->template->json([
-			'html' 	=> $this->load->view('setup/endorsement_templates/_details', ['record' => $record], TRUE),
+			'html' 	=> $this->load->view($this->_view_base . '/_details', ['record' => $record], TRUE),
 			'title' => 'Endorsement Templates Details - ' .  $record->portfolio_name_en . '</small> - <small>' . _ENDORSEMENT_type_text($record->endorsement_type) . '</small>'
 		]);
     }
