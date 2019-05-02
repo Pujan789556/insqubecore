@@ -47,7 +47,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						 */
 						foreach($portfolios as $single)
 						{
-							$this->load->view('setup/bs_agro_categories/_single_row', ['portfolio' => $single]);
+							$this->load->view($this->data['_view_base'] . '/_single_row', ['portfolio' => $single]);
 						}
 						?>
 					</tbody>

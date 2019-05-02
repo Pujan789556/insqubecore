@@ -53,7 +53,10 @@ class Bs_agro_categories extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -82,7 +85,7 @@ class Bs_agro_categories extends MY_Controller
 								'content_header' => 'Manage Beema Samiti - Agriculture Categories',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Beema Samiti - Agriculture Categories' => NULL]
 						])
-						->partial('content', 'setup/bs_agro_categories/_index', $data)
+						->partial('content', $this->_view_base . '/_index', $data)
 						->render($this->data);
 	}
 
@@ -222,7 +225,7 @@ class Bs_agro_categories extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/bs_agro_categories/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->bs_agro_category_model->validation_rules,
 				'portfolio' 	=> $portfolio,
@@ -369,7 +372,7 @@ class Bs_agro_categories extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/bs_agro_categories/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->bs_agro_breed_model->validation_rules,
 				'category' 		=> $category,
@@ -420,7 +423,7 @@ class Bs_agro_categories extends MY_Controller
 								'content_header' => $page_header,
 								'breadcrumbs' => ['Application Settings' => NULL, 'BS Agriculture - Categories' => $this->_url_base, 'Details' => NULL]
 						])
-						->partial('content', 'setup/bs_agro_categories/_details', $data)
+						->partial('content', $this->_view_base . '/_details', $data)
 						->render($this->data);
     }
 
@@ -462,7 +465,7 @@ class Bs_agro_categories extends MY_Controller
 		];
 
 		$this->template->json([
-			'html' 	=> $this->load->view('setup/bs_agro_categories/_breed_preview', $data, TRUE),
+			'html' 	=> $this->load->view($this->_view_base . '/_breed_preview', $data, TRUE),
 			'title' => "Breed List of {$category->name_np}({$category->name_en})"
 		]);
     }
