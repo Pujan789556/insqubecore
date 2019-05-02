@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		/**
 		 * Profile Card
 		 */
-		$this->load->view('customers/snippets/_profile_card', ['record' => $record]);
+		$this->load->view($this->data['_view_base'] . '/snippets/_profile_card', ['record' => $record]);
 
 		/**
 		 * Contact Widget

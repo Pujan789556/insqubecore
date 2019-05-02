@@ -59,7 +59,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							class="trg-dialog-edit"
 							data-box-size="large"
 							data-title='<i class="fa fa-pencil-square-o"></i> Edit Basic Information'
-							data-url="<?php echo site_url('customers/edit/' . $record->id);?>"
+							data-url="<?php echo site_url($this->data['_url_base'] . '/edit/' . $record->id);?>"
 							data-form="#_form-customer">
 							<i class="fa fa-pencil-square-o"></i>
 							<span>Edit Customer Info</span></a>
@@ -73,7 +73,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							class="trg-dialog-edit"
 							data-box-size="medium"
 							data-title='<i class="fa fa-pencil-square-o"></i> Edit Mobile APP Identity - <?php echo $record->full_name_en ?>'
-							data-url="<?php echo site_url('customers/edit_app_identity/' . $record->id);?>"
+							data-url="<?php echo site_url($this->data['_url_base'] . '/edit_app_identity/' . $record->id);?>"
 							data-form="#_form-customer">
 							<i class="fa fa-pencil-square-o"></i>
 							<span>Edit Mobile Identity</span></a>
@@ -87,7 +87,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							class="trg-dialog-edit text-orange"
 							data-box-size="medium"
 							data-title='<i class="fa fa-pencil-square-o"></i> Verify KYC - <?php echo $record->full_name_en ?>'
-							data-url="<?php echo site_url('customers/verify_kyc/' . $record->id);?>"
+							data-url="<?php echo site_url($this->data['_url_base'] . '/verify_kyc/' . $record->id);?>"
 							data-form="#_form-customer">
 							<i class="fa fa-pencil-square-o"></i>
 							<span>Verify KYC</span></a>
@@ -100,14 +100,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							title="Delete"
 							class="trg-row-action"
 							data-confirm="true"
-							data-url="<?php echo site_url('customers/delete/' . $record->id);?>">
+							data-url="<?php echo site_url($this->data['_url_base'] . '/delete/' . $record->id);?>">
 								<i class="fa fa-trash-o"></i>
 								<span>Delete</span></a>
 					</li><li class="divider"></li>
 
 				<?php endif?>
 				<li>
-					<a href="<?php echo site_url('customers/details/' . $record->id);?>"
+					<a href="<?php echo site_url($this->data['_url_base'] . '/details/' . $record->id);?>"
 						title="View customer details.">
 						<i class="fa fa-user"></i>
 						<span>View Details</span></a>
