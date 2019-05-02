@@ -51,7 +51,10 @@ class Bsrs_heading_types extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -78,7 +81,7 @@ class Bsrs_heading_types extends MY_Controller
 								'content_header' => 'Manage Beema Samiti Report Setup - Heading Types',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Beema Samiti Report Setup - Heading Types' => NULL]
 						])
-						->partial('content', 'setup/bsrs_heading_types/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -106,7 +109,7 @@ class Bsrs_heading_types extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/bsrs_heading_types/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->bsrs_heading_type_model->validation_rules,
 				'record' 		=> $record
@@ -132,7 +135,7 @@ class Bsrs_heading_types extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/bsrs_heading_types/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->bsrs_heading_type_model->validation_rules,
 				'record' 		=> $record
@@ -214,13 +217,13 @@ class Bsrs_heading_types extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->bsrs_heading_type_model->get_all();
-					$success_html = $this->load->view('setup/bsrs_heading_types/_list', ['records' => $records], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->bsrs_heading_type_model->find($record->id);
-					$success_html = $this->load->view('setup/bsrs_heading_types/_single_row', ['record' => $record], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 				}
 			}
 
@@ -245,7 +248,7 @@ class Bsrs_heading_types extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/bsrs_heading_types/_form',
+									? 	$this->load->view($this->_view_base . '/_form',
 											[
 												'form_elements' => $this->bsrs_heading_type_model->validation_rules,
 												'record' 		=> $record
