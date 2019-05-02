@@ -39,6 +39,13 @@ class Ac_accounts extends MY_Controller
 
 		// Helper
 		$this->load->helper('account');
+
+		// URL Base
+		$this->_url_base 		 = $this->router->class;
+		$this->_view_base 		 = 'accounting/' . $this->router->class;
+
+		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -78,7 +85,8 @@ class Ac_accounts extends MY_Controller
 		// DOM Data
 		$dom_data = [
 			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-ac-account', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-ac-account' 			// Filter Form ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-ac-account', 			// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-ac_accounts-rows' 				// Row Box ID
 		];
 
 
@@ -99,7 +107,7 @@ class Ac_accounts extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = $from_widget === 'y' ? 'setup/ac/accounts/_find_widget' : 'setup/ac/accounts/_index';
+			$view = $from_widget === 'y' ? $this->_view_base . '/_find_widget' : $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
@@ -108,11 +116,11 @@ class Ac_accounts extends MY_Controller
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/ac/accounts/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'setup/ac/accounts/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 		if ( $this->input->is_ajax_request() )
@@ -131,10 +139,10 @@ class Ac_accounts extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/ac/accounts/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Manage Accounts'] + $dom_data)
-						->partial('content', 'setup/ac/accounts/_index', $data)
-						->partial('dynamic_js', 'setup/ac/accounts/_script_list')
+						->partial('content', $this->_view_base . '/_index', $data)
+						->partial('dynamic_js', $this->_view_base . '/_script_list')
 						->render($this->data);
 	}
 
@@ -290,7 +298,7 @@ class Ac_accounts extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac/accounts/_form_box',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_box',
 			[
 				'form_elements' => $this->ac_account_model->validation_rules,
 				'record' 		=> $record
@@ -323,7 +331,7 @@ class Ac_accounts extends MY_Controller
 		$json_data = $this->_save('add', $record, $from_widget, $widget_reference);
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac/accounts/_form_box',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_box',
 			[
 				'form_elements' => $this->ac_account_model->validation_rules,
 				'record' 		=> $record
@@ -412,10 +420,10 @@ class Ac_accounts extends MY_Controller
 
 				$record 			= $this->ac_account_model->row( $action === 'add' ? $done : $record->id );
 				$record->acg_path 	= $this->ac_account_group_model->get_path($record->account_group_id);
-				$single_row 		=  'setup/ac/accounts/_single_row';
+				$single_row 		=  $this->_view_base . '/_single_row';
 				if($action === 'add' && $from_widget === 'y' )
 				{
-					$single_row = 'setup/ac/accounts/_single_row_widget';
+					$single_row = $this->_view_base . '/_single_row_widget';
 				}
 				$html = $this->load->view($single_row, ['record' => $record, 'widget_reference' => $widget_reference], TRUE);
 				$ajax_data['updateSectionData'] = [
@@ -432,7 +440,7 @@ class Ac_accounts extends MY_Controller
 				'status' 		=> $status,
 				'message' 		=> $message,
 				'reloadForm' 	=> true,
-				'form' 			=> $this->load->view('setup/ac/accounts/_form',
+				'form' 			=> $this->load->view($this->_view_base . '/_form',
 									[
 										'form_elements' => $rules,
 										'record' 		=> $record

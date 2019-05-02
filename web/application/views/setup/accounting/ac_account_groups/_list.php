@@ -1,14 +1,16 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Duties & Tax:  Data List
+* Account Groups:  Data List
 */
 ?>
 <table class="table table-hover" id="live-searchable">
 	<tr>
 		<th>ID</th>
+		<th>Parent</th>
 		<th>Name</th>
-		<th>Rate</th>
+		<th>Left</th>
+		<th>Right</th>
 		<th>Actions</th>
 	</tr>
 	<?php
@@ -17,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	 */
 	foreach($records as $record)
 	{
-		$this->load->view('setup/ac/duties_and_tax/_single_row', compact('record'));
+		$this->load->view($this->data['_view_base'] . '/_single_row', compact('record'));
 	}
 	?>
 </table>

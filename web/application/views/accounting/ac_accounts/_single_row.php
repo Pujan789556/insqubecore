@@ -1,8 +1,11 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Chart of Account:  Single Row
+* Accounts:  Single Row
 */
+
+$_edit_url 		= $this->data['_url_base'] . '/edit/'  . $record->id;
+$_del_url 		= $this->data['_url_base'] . '/delete/' . $record->id;
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-<?php echo $record->id;?>">
 	<?php if( $this->dx_auth->is_admin() ): ?>
@@ -23,7 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							title="Edit Account"
 							class="trg-dialog-edit"
 							data-title='<i class="fa fa-pencil-square-o"></i> Edit Account'
-							data-url="<?php echo site_url('ac_accounts/edit/' . $record->id);?>"
+							data-url="<?php echo site_url($_edit_url);?>"
 							data-form=".form-iqb-general">
 							<i class="fa fa-pencil-square-o"></i>
 							<span>Edit Account</span></a>
@@ -37,7 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							title="Delete"
 							class="trg-row-action"
 							data-confirm="true"
-							data-url="<?php echo site_url('ac_accounts/delete/' . $record->id);?>">
+							data-url="<?php echo site_url($_del_url);?>">
 								<i class="fa fa-trash-o"></i>
 								<span>Delete</span></a>
 					</li>

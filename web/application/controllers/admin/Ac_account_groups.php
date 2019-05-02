@@ -52,7 +52,10 @@ class Ac_account_groups extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/accounting/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 
 	}
 
@@ -80,7 +83,7 @@ class Ac_account_groups extends MY_Controller
 								'content_header' => 'Manage Account Groups',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Account Groups' => NULL]
 						])
-						->partial('content', 'setup/ac/groups/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -110,7 +113,7 @@ class Ac_account_groups extends MY_Controller
 									'content_header' => 'Chart of Accounts',
 									'breadcrumbs' => ['Application Settings' => NULL, 'Account Groups' => $this->_url_base]
 							])
-							->partial('content', 'setup/ac/groups/_chart', compact('records'))
+							->partial('content', $this->_view_base . '/_chart', compact('records'))
 							->render($this->data);
 		}
 		else if($action == 'print')
@@ -133,7 +136,7 @@ class Ac_account_groups extends MY_Controller
 		        $mpdf->watermarkTextAlpha = 0.1;
 		        $mpdf->SetDisplayMode('fullpage');
 
-		        $html = $this->load->view('setup/ac/groups/_chart_data', compact('records'), TRUE);
+		        $html = $this->load->view($this->_view_base . '/_chart_data', compact('records'), TRUE);
 		        $mpdf->WriteHTML($html);
 
 		        $mpdf->Output('chart-of-accounts.pdf', 'I');
@@ -318,13 +321,13 @@ class Ac_account_groups extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->ac_account_group_model->rows();
-					$success_html = $this->load->view('setup/ac/groups/_list', ['records' => $records], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->ac_account_group_model->row($record->id);
-					$success_html = $this->load->view('setup/ac/groups/_single_row', ['record' => $record], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 				}
 
 
@@ -361,7 +364,7 @@ class Ac_account_groups extends MY_Controller
 		}
 
 		// Render Form
-		$json_data['form'] = $this->load->view('setup/ac/groups/_form', $form_data, TRUE);
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form', $form_data, TRUE);
 
 		// Return HTML
 		$this->template->json($json_data);
@@ -423,7 +426,7 @@ class Ac_account_groups extends MY_Controller
 		if($done)
 		{
 			$records = $this->ac_account_group_model->rows();
-			$success_html = $this->load->view('setup/ac/groups/_list', ['records' => $records], TRUE);
+			$success_html = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 
 			// Reload the view
 			$data = [

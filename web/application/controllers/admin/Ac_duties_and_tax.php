@@ -52,7 +52,10 @@ class Ac_duties_and_tax extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/accounting/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -79,7 +82,7 @@ class Ac_duties_and_tax extends MY_Controller
 								'content_header' => 'Manage Account Duties & Tax',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Account Duties & Tax' => NULL]
 						])
-						->partial('content', 'setup/ac/duties_and_tax/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -107,7 +110,7 @@ class Ac_duties_and_tax extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/ac/duties_and_tax/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->ac_duties_and_tax_model->validation_rules,
 				'record' 		=> $record
@@ -190,13 +193,13 @@ class Ac_duties_and_tax extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->ac_duties_and_tax_model->get_all();
-					$success_html = $this->load->view('setup/ac/duties_and_tax/_list', ['records' => $records], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->ac_duties_and_tax_model->find($record->id);
-					$success_html = $this->load->view('setup/ac/duties_and_tax/_single_row', ['record' => $record], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 				}
 			}
 
@@ -221,7 +224,7 @@ class Ac_duties_and_tax extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/ac/duties_and_tax/_form',
+									? 	$this->load->view($this->_view_base . '/_form',
 											[
 												'form_elements' => $this->ac_duties_and_tax_model->validation_rules,
 												'record' 		=> $record

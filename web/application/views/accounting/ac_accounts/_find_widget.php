@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						class="btn btn-success btn-round trg-dialog-edit"
 						data-box-size="large"
 						data-title='<i class="fa fa-pencil-square-o"></i> Add New Account'
-						data-url="<?php echo site_url('ac_accounts/add/y/' . $widget_reference);?>"
+						data-url="<?php echo site_url($this->data['_url_base'] . '/add/y/' . $widget_reference);?>"
 						data-form="#__form-ac-chart-of-account"
 					><i class="ion-plus-circled"></i> Add</a>
 				<?php endif?>
@@ -40,7 +40,7 @@ $this->load->view('templates/_common/_advanced_search_filter_general');
 		/**
 		 * Load Rows from View
 		 */
-		$this->load->view('setup/ac/accounts/_list');
+		$this->load->view($this->data['_view_base'] . '/_list');
 		?>
 	</div>
 </div>

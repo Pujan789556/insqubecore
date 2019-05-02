@@ -9,6 +9,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     /**
      * Load customer form
      */
-    $this->load->view('setup/ac/accounts/_form');
+    $this->load->view($this->data['_view_base'] . '/_form');
     ?>
 </div>

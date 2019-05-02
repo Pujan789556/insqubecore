@@ -31,7 +31,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/ac/groups/_chart_data');
+				$this->load->view($this->data['_view_base'] . '/_chart_data');
 				?>
 			</div>
 			<!-- /.box-body -->
