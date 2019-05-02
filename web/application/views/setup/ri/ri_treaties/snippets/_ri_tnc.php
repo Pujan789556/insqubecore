@@ -24,7 +24,7 @@ $_edit_url 		= $this->data['_url_base'] . '/tnc/'  . $record->id;
 		/**
 		 * Load tax data
 		 */
-		$this->load->view('setup/ri/treaties/snippets/_ri_tnc_data');
+		$this->load->view($this->data['_view_base'] . '/snippets/_ri_tnc_data');
 		?>
 	</div>
 </div>

@@ -23,7 +23,7 @@ if($next_id):
 			data-loading-text="Loading ..."
 			data-url="<?php echo $next_url;?>"
 			data-method="append"
-			data-box="#search-result-ri-setup-treaty"
+			data-box="#<?php echo $DOM_RowBoxId ?>"
 			data-self-destruct="true"
 			data-loader-box="#<?php echo $loader_box_id;?>"
 			data-load-method="post"
