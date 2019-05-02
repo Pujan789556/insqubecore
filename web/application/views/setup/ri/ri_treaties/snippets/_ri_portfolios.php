@@ -24,7 +24,7 @@ $_edit_url 		= $this->data['_url_base'] . '/portfolios/'  . $record->id;
 		/**
 		 * Load portfolio data
 		 */
-		$this->load->view('setup/ri/treaties/snippets/_ri_portfolio_data');
+		$this->load->view($this->data['_view_base'] . '/snippets/_ri_portfolio_data');
 		?>
 	</div>
 </div>

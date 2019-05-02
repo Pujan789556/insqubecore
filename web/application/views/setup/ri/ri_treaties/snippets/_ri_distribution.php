@@ -25,7 +25,7 @@ $_edit_url 		= $this->data['_url_base'] . '/distribution/'  . $record->id;
 		/**
 		 * Load distribution data
 		 */
-		$this->load->view('setup/ri/treaties/snippets/_ri_distribution_data');
+		$this->load->view($this->data['_view_base'] . '/snippets/_ri_distribution_data');
 		?>
 	</div>
 </div>

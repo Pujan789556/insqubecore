@@ -61,8 +61,11 @@ class Ri_treaties extends MY_Controller
 		$this->load->model('ri_setup_treaty_model');
 
 		// URL Base
-        $this->_url_base         = 'admin/' . $this->router->class;
-        $this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/ri/' . $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -128,7 +131,8 @@ class Ri_treaties extends MY_Controller
 		// DOM Data
 		$dom_data = [
 			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-ri-setup-treaty', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-ri-setup-treaty' 			// Filter Form ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-ri-setup-treaty', 			// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-ri-treaties-rows' 				// Row Box ID
 		];
 
 		$data = [
@@ -142,7 +146,7 @@ class Ri_treaties extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'setup/ri/treaties/_index';
+			$view = $this->_view_base . '/_index';
 
 			/**
 			 * Filter Configurations
@@ -154,11 +158,11 @@ class Ri_treaties extends MY_Controller
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/ri/treaties/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'setup/ri/treaties/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 
@@ -166,7 +170,7 @@ class Ri_treaties extends MY_Controller
 		{
 
 
-			// $view = $refresh === FALSE ? 'setup/ri/treaties/_rows' : 'setup/ri/treaties/_list';
+			// $view = $refresh === FALSE ? $this->_view_base . '/_rows' : $this->_view_base . '/_list';
 			$html = $this->load->view($view, $data, TRUE);
 			$ajax_data = [
 				'status' => 'success',
@@ -184,9 +188,9 @@ class Ri_treaties extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/ri/treaties/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Manage Treaties'] + $dom_data)
-						->partial('content', 'setup/ri/treaties/_index', $data)
+						->partial('content', $this->_view_base . '/_index', $data)
 						->render($this->data);
 	}
 
@@ -464,7 +468,7 @@ class Ri_treaties extends MY_Controller
 						{
 							// Get Updated Record
 							$record = $this->ri_setup_treaty_model->row($record->id);
-							$success_html = $this->load->view('setup/ri/treaties/_single_row', ['record' => $record], TRUE);
+							$success_html = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 							$ajax_data = [
 								'message' => $message,
 								'status'  => $status,
@@ -492,7 +496,7 @@ class Ri_treaties extends MY_Controller
 		}
 
 		// Prepare HTML Form
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form', $form_data, TRUE);
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form', $form_data, TRUE);
 
 		// Return JSON
 		$this->template->json($json_data);
@@ -530,7 +534,7 @@ class Ri_treaties extends MY_Controller
         		{
         			// Update the Portfolio Table
 					$record = $this->ri_setup_treaty_model->get($id);
-					$success_html = $this->load->view('setup/ri/treaties/snippets/_ri_tnc_data', ['record' => $record], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/snippets/_ri_tnc_data', ['record' => $record], TRUE);
 
 					$ajax_data = [
 						'message' => 'Successfully Updated',
@@ -573,7 +577,7 @@ class Ri_treaties extends MY_Controller
 		];
 
 		// Prepare HTML Form
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_tnc', $form_data, TRUE);
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_tnc', $form_data, TRUE);
 
 
 		// Return JSON
@@ -612,7 +616,7 @@ class Ri_treaties extends MY_Controller
         		{
         			// Update the Portfolio Table
 					$record 		= $this->ri_setup_treaty_model->get($id);
-					$success_html 	= $this->load->view('setup/ri/treaties/snippets/_ri_commission_scale_data', ['record' => $record], TRUE);
+					$success_html 	= $this->load->view($this->_view_base . '/snippets/_ri_commission_scale_data', ['record' => $record], TRUE);
 
 					$ajax_data = [
 						'message' => 'Successfully Updated',
@@ -655,7 +659,7 @@ class Ri_treaties extends MY_Controller
 		];
 
 		// Prepare HTML Form
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_commission_scale', $form_data, TRUE);
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_commission_scale', $form_data, TRUE);
 
 		// Return JSON
 		$this->template->json($json_data);
@@ -712,7 +716,7 @@ class Ri_treaties extends MY_Controller
         		{
         			// Update the Distribution Table
 					$treaty_distribution = $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id);
-					$success_html = $this->load->view('setup/ri/treaties/snippets/_ri_distribution_data', ['treaty_distribution' => $treaty_distribution], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/snippets/_ri_distribution_data', ['treaty_distribution' => $treaty_distribution], TRUE);
 
 					$ajax_data = [
 						'message' => 'Successfully Updated',
@@ -747,7 +751,7 @@ class Ri_treaties extends MY_Controller
 		}
 
 		// Prepare HTML Form
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_distribution', $form_data, TRUE);
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_distribution', $form_data, TRUE);
 
 		// Merge Return Data with Form Data
 		$json_data = array_merge($json_data, $return_data);
@@ -812,7 +816,7 @@ class Ri_treaties extends MY_Controller
         		{
         			// Update the Distribution Table
 					$treaty_distribution = $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id);
-					$success_html = $this->load->view('setup/ri/treaties/snippets/_ri_distribution_data', ['treaty_distribution' => $treaty_distribution], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/snippets/_ri_distribution_data', ['treaty_distribution' => $treaty_distribution], TRUE);
 
 					$ajax_data = [
 						'message' => 'Successfully Updated',
@@ -842,7 +846,7 @@ class Ri_treaties extends MY_Controller
 		}
 
 		// Prepare HTML Form
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_distribution', $form_data, TRUE);
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_distribution', $form_data, TRUE);
 
 		// Merge Return Data with Form Data
 		$json_data = array_merge($json_data, $return_data);
@@ -890,7 +894,7 @@ class Ri_treaties extends MY_Controller
 		];
 
 		$this->template->json([
-			'html' 	=> $this->load->view('setup/ri/treaties/snippets/_ri_comp_cession_distribution', $data, TRUE),
+			'html' 	=> $this->load->view($this->_view_base . '/snippets/_ri_comp_cession_distribution', $data, TRUE),
 			'title' => 'Compulsory Cession Distribution - ' . $portfolio_record->name_en
 		]);
     }
@@ -996,7 +1000,7 @@ class Ri_treaties extends MY_Controller
         		{
         			// Update the Portfolio Table
 					$portfolios = $this->ri_setup_treaty_model->get_portfolios_by_treaty($id);
-					$success_html = $this->load->view('setup/ri/treaties/snippets/_ri_portfolio_data', ['portfolios' => $portfolios], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/snippets/_ri_portfolio_data', ['portfolios' => $portfolios], TRUE);
 
 					$ajax_data = [
 						'message' => 'Successfully Updated',
@@ -1031,7 +1035,7 @@ class Ri_treaties extends MY_Controller
 		}
 
 		// Prepare HTML Form
-		$json_data['form'] = $this->load->view('setup/ri/treaties/_form_portfolios', $form_data, TRUE);
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_portfolios', $form_data, TRUE);
 
 		// Merge Return Data with Form Data
 		$json_data = array_merge($json_data, $return_data);
@@ -1210,7 +1214,7 @@ class Ri_treaties extends MY_Controller
 								'content_header' => 'Treaty Details <small>' . $record->name . '</small>',
 								'breadcrumbs' => ['Treaty Setup' => 'ri_setup_treaties', 'Details' => NULL]
 						])
-						->partial('content', 'setup/ri/treaties/_details', $data)
+						->partial('content', $this->_view_base . '/_details', $data)
 						->render($this->data);
 
     }

@@ -21,7 +21,7 @@ input.form-control, select.form-control{height:24px; max-width: 120px;}
             /**
              * Basic Overview
              */
-            $this->load->view('setup/ri/treaties/snippets/_ri_basic');
+            $this->load->view($this->data['_view_base'] . '/snippets/_ri_basic');
             ?>
         </div>
     </div>
