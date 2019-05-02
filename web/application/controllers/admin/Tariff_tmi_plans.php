@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * TMI Plans Controller
+ * Tariff TMI Plans Controller
  *
  * This controller falls under "Application Settings" category.
  *
@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // --------------------------------------------------------------------
 
-class Tmi_plans extends MY_Controller
+class Tariff_tmi_plans extends MY_Controller
 {
 	/**
      * Controller URL
