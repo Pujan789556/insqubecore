@@ -11,6 +11,8 @@ class Ac_account_group_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     // protected $protected_attributes = ['id', 'parent_id', 'range_min', 'range_max'];
     protected $protected_attributes = ['id'];
 
@@ -29,7 +31,7 @@ class Ac_account_group_model extends MY_Model
      * Protect Default Records?
      */
     public static $protect_default = TRUE;
-    public static $protect_max_id = 500; // Prevent first 500 records from deletion.
+    public static $protect_max_id = 11; // Prevent first 500 records from deletion.
 
 	// --------------------------------------------------------------------
 
@@ -133,10 +135,7 @@ class Ac_account_group_model extends MY_Model
         $sql = "CALL `r_acg_tree_traversal`(?, ?, ?, ?, ?)";
 
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $id                 = FALSE;
-
+        $id = FALSE;
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -149,6 +148,23 @@ class Ac_account_group_model extends MY_Model
 
             if($id)
             {
+
+                /**
+                 * Save Audit Log Manually
+                 *
+                 * This is required as it does not call parent::insert().
+                 * Instead, the data is inserted using store procedure
+                 */
+                $row = (array)parent::find($id);
+                unset($row['id']); // remove id field on insert
+                $audit_data = [
+                    'id'     => $id,
+                    'fields' => $row,
+                    'method' => 'insert'
+                ];
+                parent::save_audit_log($audit_data);
+
+
                 // Clear Cache
                 $this->clear_cache();
             }
@@ -162,9 +178,6 @@ class Ac_account_group_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $id = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $id;
@@ -191,6 +204,9 @@ class Ac_account_group_model extends MY_Model
         $bind_params = [$task_type, $user_id, $id, $parent_id, $name ];
         $sql = "CALL `r_acg_tree_traversal`(?, ?, ?, ?, ?)";
 
+        // For Audit Log
+        $this->audit_old_record = parent::find($id);
+
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -198,6 +214,19 @@ class Ac_account_group_model extends MY_Model
 
             if($result)
             {
+                /**
+                 * Save Audit Log Manually
+                 *
+                 * This is required as it does not call parent::update().
+                 * Instead, the data is updated using store procedure
+                 */
+                $row = (array)parent::find($id);
+                $audit_data = [
+                    'id'     => $id,
+                    'fields' => $row,
+                    'method' => 'update'
+                ];
+                parent::save_audit_log($audit_data);
 
                 // Clear Cache
                 $this->clear_cache();
@@ -210,7 +239,6 @@ class Ac_account_group_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $id = FALSE;
         }
-
 
         // return result/status
         return $id;
@@ -237,9 +265,9 @@ class Ac_account_group_model extends MY_Model
         $bind_params = [$task_type, $user_id, $id, $parent_id, $name ];
         $sql = "CALL `r_acg_tree_traversal`(?, ?, ?, ?, ?)";
 
+        // For Audit Log
+        $this->audit_old_record = parent::find($id);
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
 
         // Use automatic transaction
         $this->db->trans_start();
@@ -248,22 +276,33 @@ class Ac_account_group_model extends MY_Model
 
             if($result)
             {
+
+                /**
+                 * Save Audit Log Manually
+                 *
+                 * This is required as it does not call parent::update().
+                 * Instead, the data is updated using store procedure
+                 */
+                $row = (array)parent::find($id);
+                $audit_data = [
+                    'id'     => $id,
+                    'fields' => $row,
+                    'method' => 'update'
+                ];
+                parent::save_audit_log($audit_data);
+
                 // Clear Cache
                 $this->clear_cache();
             }
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
-
         // Check Transaction Status
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
             $id = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $id;
@@ -366,6 +405,24 @@ class Ac_account_group_model extends MY_Model
         return $result;
     }
 
+    // --------------------------------------------------------------------
+
+    public function sub_tree($id)
+    {
+        /**
+         * Step 1: Prepare Bind Query & Params
+         */
+        $id = (int)$id;
+        $bind_params  = [$id];
+        $sql = "CALL `r_acg_return_subtree`(?)";
+
+        /**
+         * Step 2: Call procedure to get Result
+         */
+        $result = mysqli_store_procedure('select', $sql, $bind_params);
+        return $result;
+    }
+
 
     // ----------------------------------------------------------------
 
@@ -456,8 +513,34 @@ class Ac_account_group_model extends MY_Model
         $bind_params = [$task_type, $user_id, $id, $parent_id, $name ];
         $sql = "CALL `r_acg_tree_traversal`(?, ?, ?, ?, ?)";
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
+        // -----------------------------------------------------------------
+
+        /**
+         * Build Audit Log Data
+         */
+        $old_record = parent::find($id);
+        $sub_tree = $this->sub_tree($id);
+        $group_ids = [];
+        $sub_tree_records = [];
+        foreach ($sub_tree as $single)
+        {
+            // Only subtree, excluding this node
+            if($single->id != $id)
+            {
+                $group_ids[] = $single->id;
+            }
+        }
+        if(!empty($group_ids))
+        {
+            $sub_tree_records = $this->db->from($this->table_name)
+                                    ->where_in('id', $group_ids)
+                                    ->get()->result();
+        }
+
+
+        // -----------------------------------------------------------------
+
+
         $status = TRUE;
 
         // Use automatic transaction
@@ -466,6 +549,10 @@ class Ac_account_group_model extends MY_Model
             // Let's delete the record(s)
             $result = mysqli_store_procedure('delete', $sql, $bind_params);
 
+            /**
+             * Save Audit Log Manually
+             */
+            $this->_audit_log_on_delete($task_type, $old_record, $sub_tree_records);
 
             // Clear Cache
             $this->clear_cache();
@@ -479,11 +566,71 @@ class Ac_account_group_model extends MY_Model
             $status = FALSE;
         }
 
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
         // return result/status
         return $status;
     }
+
+        /**
+         * Save audit log on Node or Sub-tree Deletion
+         *
+         * @param string $task_type [delete-node|delete-subtree]
+         * @param object $old_record Top Node of the Sub-tree
+         * @param array $old_sub_tree Subtree except Selected node
+         * @return void
+         */
+        private function _audit_log_on_delete($task_type, $old_record, $old_sub_tree)
+        {
+            // Only Selected node is deleted, its children are re-arranged to its parent node
+            if($task_type == 'delete-node')
+            {
+                // Audit Log - Deletion of Node
+                $this->audit_old_record = $old_record;
+                $audit_data = [
+                    'id'     => $old_record->id,
+                    'method' => 'delete'
+                ];
+                parent::save_audit_log($audit_data);
+                $this->audit_old_record = NULL;
+
+                // Audit Log - Updation of Position on subtree
+                if($old_sub_tree)
+                {
+                    foreach($old_sub_tree as $single)
+                    {
+                        $this->audit_old_record = $single; // Old Record
+                        $row = (array)parent::find($single->id); // Updated Record
+                        $audit_data = [
+                            'id'     => $single->id,
+                            'fields' => $row,
+                            'method' => 'update'
+                        ];
+                        parent::save_audit_log($audit_data);
+                    }
+                }
+            }
+            else
+            {
+                // Audit Log of all Deleted sub-tree
+                if($old_sub_tree)
+                {
+                    // Include the top node of the tree
+                    $old_sub_tree[] = $old_record;
+                }
+                else
+                {
+                    $old_sub_tree = [$old_record]; // No leafs
+                }
+                foreach($old_sub_tree as $single)
+                {
+                    // Audit Log - Deletion of Node
+                    $this->audit_old_record = $single;
+                    $audit_data = [
+                        'id'     => $single->id,
+                        'method' => 'delete'
+                    ];
+                    parent::save_audit_log($audit_data);
+                    $this->audit_old_record = NULL;
+                }
+            }
+        }
 }
