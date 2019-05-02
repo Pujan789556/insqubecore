@@ -80,7 +80,7 @@ class Ac_accounts extends MY_Controller
 
 		// If request is coming from refresh method, reset nextid
 		$next_id 		= (int)$next_id;
-		$next_url_base 	= $this->router->class . '/page/r/' . $from_widget;
+		$next_url_base 	= $this->_url_base . '/page/r/' . $from_widget;
 
 		// DOM Data
 		$dom_data = [
@@ -111,7 +111,7 @@ class Ac_accounts extends MY_Controller
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/0/' . $widget_reference)
+				'filter_url' 	=> site_url($this->_url_base . '/page/l/' . $from_widget . '/0/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')
@@ -461,7 +461,7 @@ class Ac_accounts extends MY_Controller
     public function flush()
     {
         $this->ac_account_model->clear_cache();
-        redirect($this->router->class);
+        redirect($this->_url_base);
     }
 
 	// --------------------------------------------------------------------
