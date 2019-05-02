@@ -62,7 +62,7 @@ class Ri_treaties extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
-		$this->_view_base 		 = 'setup/ri' . $this->router->class;
+		$this->_view_base 		 = 'setup/ri/' . $this->router->class;
 
 		$this->data['_url_base'] 	= $this->_url_base; // for view to access
 		$this->data['_view_base'] 	= $this->_view_base;
