@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-* Tariff List By Fiscal Year : Property
+* Tariff Property- Index View
 */
 ?>
 <div class="row">
@@ -18,10 +18,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						?>
 					</div>
 					<div class="col-sm-6 master-actions text-right">
-						<a href="<?php echo site_url( $this->data['_url_base']);?>" title="Go Back"
+						<a href="<?php echo site_url( $this->data['_url_base'] . '/flush/' );?>" title="Flush Cache"
 							class="btn btn-warning btn-round"
 							data-toggle="tooltip"
-						><i class="fa fa-arrow-left"></i> Back</a>
+						><i class="fa fa-trash-o"></i> Flush Cache</a>
+
+						<a href="#" title="Add New Property Tarrif"
+							class="btn btn-success btn-round trg-dialog-edit"
+							data-box-size="large"
+							data-toggle="tooltip"
+							data-title='<i class="fa fa-pencil-square-o"></i> Add New Property Tarrif'
+							data-url="<?php echo site_url($this->data['_url_base'] . '/add_fy/');?>"
+							data-form=".form-iqb-general"
+						><i class="ion-plus-circled"></i> Add</a>
 					</div>
 				</div>
 			</div>
@@ -31,7 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/tariff/property/_list_by_fiscal_year');
+				$this->load->view($this->data['_view_base'] . '/_list');
 				?>
 			</div>
 			<!-- /.box-body -->

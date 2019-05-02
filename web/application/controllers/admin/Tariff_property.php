@@ -53,8 +53,11 @@ class Tariff_property extends MY_Controller
 		$this->load->model('tariff_property_model');
 
 		// URL Base
-		$this->_url_base 		 = 'admin/' . $this->router->class;
-		$this->data['_url_base'] = $this->_url_base; // for view to access
+        $this->_url_base        = 'admin/' . $this->router->class;
+        $this->_view_base       = 'setup/tariff/' . $this->router->class;
+
+        $this->data['_url_base']    = $this->_url_base; // for view to access
+        $this->data['_view_base']   = $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -81,7 +84,7 @@ class Tariff_property extends MY_Controller
 								'content_header' => 'Manage Property Tariff',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Property Tariff' => NULL]
 						])
-						->partial('content', 'setup/tariff/property/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -118,7 +121,7 @@ class Tariff_property extends MY_Controller
                                 'content_header' => 'Property Tariff - FY - ' . $fiscal_year_text,
                                 'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Property' => $this->_url_base, 'Details' => NULL]
                         ])
-                        ->partial('content', 'setup/tariff/property/_index_by_fiscal_year', compact('records'))
+                        ->partial('content', $this->_view_base . '/_index_by_fiscal_year', compact('records'))
                         ->render($this->data);
     }
 
@@ -179,7 +182,7 @@ class Tariff_property extends MY_Controller
 	                ];
 
 	                $records    = $this->tariff_property_model->get_index_rows();
-	                $html       = $this->load->view('setup/tariff/property/_list', ['records' => $records], TRUE);
+	                $html       = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 	                $ajax_data['updateSectionData'] = [
 	                    'box'       => '#iqb-data-list',
 	                    'method'    => 'html',
@@ -199,7 +202,7 @@ class Tariff_property extends MY_Controller
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/property/_form_add',
+        $json_data['form'] = $this->load->view($this->_view_base . '/_form_add',
             [
                 'form_elements'         => $this->tariff_property_model->v_rules_add_fy(),
                 'record'                => null
@@ -334,7 +337,7 @@ class Tariff_property extends MY_Controller
 	                ];
 
 	                $records    = $this->tariff_property_model->get_index_rows();
-	                $html       = $this->load->view('setup/tariff/property/_list', ['records' => $records], TRUE);
+	                $html       = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 	                $ajax_data['updateSectionData'] = [
 	                    'box'       => '#iqb-data-list',
 	                    'method'    => 'html',
@@ -354,7 +357,7 @@ class Tariff_property extends MY_Controller
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/property/_form_add',
+        $json_data['form'] = $this->load->view($this->_view_base . '/_form_add',
             [
                 'form_elements'         => $this->tariff_property_model->v_rules_add_fy(),
                 'record'                => (object)['fiscal_yr_id' => $fiscal_yr_id],
@@ -438,7 +441,7 @@ class Tariff_property extends MY_Controller
 	                ];
 
 	                $records    = $this->tariff_property_model->get_index_rows();
-	                $html       = $this->load->view('setup/tariff/property/_list', ['records' => $records], TRUE);
+	                $html       = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 	                $ajax_data['updateSectionData'] = [
 	                    'box'       => '#iqb-data-list',
 	                    'method'    => 'html',
@@ -460,7 +463,7 @@ class Tariff_property extends MY_Controller
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/property/_form_duplicate',
+        $json_data['form'] = $this->load->view($this->_view_base . '/_form_duplicate',
             [
                 'form_elements'         => $rules,
                 'record'                => null,
@@ -474,7 +477,7 @@ class Tariff_property extends MY_Controller
 	// --------------------------------------------------------------------
 
 	/**
-	 * Edit a Role
+	 * Edit a Record
 	 *
 	 *
 	 * @param integer $id
@@ -496,7 +499,7 @@ class Tariff_property extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/tariff/property/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $rules,
 				'record' 		=> $record
@@ -531,7 +534,7 @@ class Tariff_property extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/tariff/property/_form_risks',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_risks',
 			[
 				'form_elements' => $rules,
 				'record' 		=> $record,
@@ -569,7 +572,7 @@ class Tariff_property extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/tariff/property/_form_tariff',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_tariff',
 			[
 				'form_elements' => $rules,
 				'record' 		=> $record,
@@ -667,13 +670,13 @@ class Tariff_property extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->tariff_property_model->get_all();
-					$success_html = $this->load->view('setup/tariff/property/_list', ['records' => $records], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->tariff_property_model->get($record->id);
-					$success_html = $this->load->view('setup/tariff/property/_single_row_by_fiscal_year', ['record' => $record], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_single_row_by_fiscal_year', ['record' => $record], TRUE);
 				}
 			}
 
