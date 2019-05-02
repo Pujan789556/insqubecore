@@ -8,6 +8,7 @@ class Claim_scheme_model extends MY_Model
     protected $set_created  = true;
     protected $set_modified = true;
     protected $log_user     = true;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = ['id'];
 
@@ -129,9 +130,6 @@ class Claim_scheme_model extends MY_Model
             return FALSE;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-
         $status = TRUE;
 
         // Use automatic transaction
@@ -146,39 +144,8 @@ class Claim_scheme_model extends MY_Model
             // get_allenerate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-        else
-        {
-            $this->log_activity($id, 'D');
-        }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module' => 'claim_schemes',
-            'module_id' => $id,
-            'action' => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 }

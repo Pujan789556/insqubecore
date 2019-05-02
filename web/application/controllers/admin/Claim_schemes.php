@@ -187,13 +187,11 @@ class Claim_schemes extends MY_Controller
 					// @NOTE: Activity Log will be automatically inserted
 					$done = $this->claim_scheme_model->insert($data, TRUE); // No Validation on Model
 
-					// Activity Log
-					$done ? $this->claim_scheme_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->claim_scheme_model->update($record->id, $data, TRUE) && $this->claim_scheme_model->log_activity($record->id, 'E');
+					$done = $this->claim_scheme_model->update($record->id, $data, TRUE);
 				}
 
 				if(!$done)
