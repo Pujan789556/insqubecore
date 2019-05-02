@@ -27,7 +27,7 @@ $_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 	/**
 	 * Load Rows & Next Link (if any)
 	 */
-	$this->load->view('customers/_rows');
+	$this->load->view($this->data['_view_base'] . '/_rows');
 	?>
 	</tbody>
 </table>

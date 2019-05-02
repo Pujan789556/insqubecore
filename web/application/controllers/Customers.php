@@ -40,6 +40,13 @@ class Customers extends MY_Controller
 
 		// Load Model
 		$this->load->model('customer_model');
+
+		// URL Base
+		$this->_url_base 		 = 	$this->router->class;
+		$this->_view_base 		 =  $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -81,12 +88,13 @@ class Customers extends MY_Controller
 
 		// If request is coming from refresh method, reset nextid
 		$next_id 		= (int)$next_id;
-		$next_url_base 	= $this->router->class . '/page/r/' . $from_widget;
+		$next_url_base 	= $this->_url_base . '/page/r/' . $from_widget;
 
 		// DOM Data
 		$dom_data = [
 			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-customer', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-customer' 			// Filter Form ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-customer',		// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-customer-rows' 				// Row Box ID
 		];
 
 		/**
@@ -106,20 +114,20 @@ class Customers extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = $from_widget === 'y' ? 'customers/_find_widget' : 'customers/_index';
+			$view = $from_widget === 'y' ? $this->_view_base . '/_find_widget' : $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/0/' . $widget_reference)
+				'filter_url' 	=> site_url($this->_url_base . '/page/l/' . $from_widget . '/0/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')
 		{
-			$view = 'customers/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'customers/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 		if ( $this->input->is_ajax_request() )
@@ -137,10 +145,10 @@ class Customers extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'customers/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Manage Customers'] + $dom_data)
-						->partial('content', 'customers/_index', $data)
-						->partial('dynamic_js', 'customers/_customer_js')
+						->partial('content', $this->_view_base . '/_index', $data)
+						->partial('dynamic_js', $this->_view_base . '/_customer_js')
 						->render($this->data);
 	}
 
@@ -314,7 +322,7 @@ class Customers extends MY_Controller
 		$json_data = $this->_save('add', $record, $address_record, $from_widget, $widget_reference);
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('customers/_form_box',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_box',
 			[
 				'form_elements' 	=> $this->customer_model->v_rules('add'),
 				'address_elements' 	=> $this->address_model->v_rules_add(),
@@ -375,7 +383,7 @@ class Customers extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('customers/_form_box',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_box',
 			[
 				'form_elements' 	=> $this->customer_model->v_rules('edit'),
 				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
@@ -469,7 +477,7 @@ class Customers extends MY_Controller
 					];
 
 					$record 	= $this->customer_model->row( $record->id );
-					$single_row =  'customers/_single_row';
+					$single_row =  $this->_view_base . '/_single_row';
 					$view_data 	= [
 						'record' 			=> $record,
 						'address_record' 	=> $this->address_model->parse_address_record($record),
@@ -500,7 +508,7 @@ class Customers extends MY_Controller
 		}
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('customers/_form_app_identity',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_app_identity',
 			[
 				'form_elements' 	=> $this->customer_model->v_rules('app_identity'),
 				'record' 			=> $record,
@@ -586,7 +594,7 @@ class Customers extends MY_Controller
 					];
 
 					$record 	= $this->customer_model->row( $record->id );
-					$single_row =  'customers/_single_row';
+					$single_row =  $this->_view_base . '/_single_row';
 					$view_data 	= [
 						'record' 			=> $record,
 						'address_record' 	=> $this->address_model->parse_address_record($record),
@@ -617,7 +625,7 @@ class Customers extends MY_Controller
 		}
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('customers/_form_verify_kyc',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_verify_kyc',
 			[
 				'form_elements' 	=> $this->customer_model->v_rules('verify_kyc'),
 				'record' 			=> $record,
@@ -724,14 +732,14 @@ class Customers extends MY_Controller
 				];
 
 				$record 			= $this->customer_model->row( $action === 'add' ? $done : $record->id );
-				$single_row 		=  'customers/_single_row';
+				$single_row 		=  $this->_view_base . '/_single_row';
 				if($action === 'add' && $from_widget === 'y' )
 				{
-					$single_row = 'customers/_single_row_widget';
+					$single_row = $this->_view_base . '/_single_row_widget';
 				}
 				else if($action === 'edit' && $from_widget === 'y' )
 				{
-					$single_row = 'customers/snippets/_widget_profile';
+					$single_row = $this->_view_base . '/snippets/_widget_profile';
 				}
 
 				$view_data = [
@@ -743,7 +751,7 @@ class Customers extends MY_Controller
 				$html = $this->load->view($single_row, $view_data, TRUE);
 				$ajax_data['updateSectionData'] = [
 					'box' 		=> $action === 'add'
-										? '#search-result-customer'
+										? '#box-customer-rows'
 										: ( $from_widget === 'n' ? '#_data-row-customer-' . $record->id : '#iqb-widget-customer-profile' ),
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
@@ -757,7 +765,7 @@ class Customers extends MY_Controller
 				'status' 		=> $status,
 				'message' 		=> $message,
 				'reloadForm' 	=> true,
-				'form' 			=> $this->load->view('customers/_form',
+				'form' 			=> $this->load->view($this->_view_base . '/_form',
 									[
 										'form_elements' 	=> $this->customer_model->v_rules($action),
 										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
@@ -1040,7 +1048,7 @@ class Customers extends MY_Controller
 		 * Render The Form
 		 */
 		$json_data = [
-			'form' => $this->load->view('customers/_form_box', $form_data, TRUE)
+			'form' => $this->load->view($this->_view_base . '/_form_box', $form_data, TRUE)
 		];
 		$this->template->json($json_data);
 	}
@@ -1191,8 +1199,8 @@ class Customers extends MY_Controller
 								'content_header' => 'Customer Details <small>' . $record->full_name_en . '</small>',
 								'breadcrumbs' => ['Customers' => 'customers', 'Details' => NULL]
 						])
-						->partial('content', 'customers/_details', $data)
-						->partial('dynamic_js', 'customers/_customer_js')
+						->partial('content', $this->_view_base . '/_details', $data)
+						->partial('dynamic_js', $this->_view_base . '/_customer_js')
 						->render($this->data);
 
     }
