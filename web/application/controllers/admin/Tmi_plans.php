@@ -57,6 +57,7 @@ class Tmi_plans extends MY_Controller
 		// URL Base
         $this->_url_base         = 'admin/' . $this->router->class;
         $this->data['_url_base'] = $this->_url_base; // for view to access
+        $this->data['_module_view_path'] = $this->_module_view_path; 
 	}
 
 	// --------------------------------------------------------------------

@@ -16,7 +16,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	 */
 	foreach($records as $record)
 	{
-		$this->load->view('setup/tariff/misc_bb/_single_row', compact('record'));
+		$this->load->view($this->data['_view_base'] . '/misc_bb/_single_row', compact('record'));
 	}
 	?>
 </table>

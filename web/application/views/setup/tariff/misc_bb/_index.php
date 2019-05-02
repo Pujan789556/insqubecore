@@ -40,7 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/tariff/misc_bb/_list');
+				$this->load->view($this->data['_view_base'] . '/misc_bb/_list');
 				?>
 			</div>
 			<!-- /.box-body -->

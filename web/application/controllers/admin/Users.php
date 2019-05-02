@@ -256,7 +256,10 @@ class Users extends MY_Controller
 
 		// URL Base
         $this->_url_base         = 'admin/' . $this->router->class;
+        $this->_view_base 		 = 'setup/' . $this->router->class;
+
         $this->data['_url_base'] = $this->_url_base; // for view to access
+        $this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -319,7 +322,8 @@ class Users extends MY_Controller
 		// DOM Data
 		$dom_data = [
 			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-user', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-user' 			// Filter Form ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-user',		// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-users-rows' 				// Row Box ID
 		];
 
 		$data = [
@@ -333,7 +337,7 @@ class Users extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'setup/users/_index';
+			$view = $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
@@ -342,11 +346,11 @@ class Users extends MY_Controller
 		}
 		else if($layout === 'l')
 		{
-			$view = 'setup/users/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'setup/users/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 
@@ -364,9 +368,9 @@ class Users extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'setup/users/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Manage Users'] + $dom_data)
-						->partial('content', 'setup/users/_index', $data)
+						->partial('content', $this->_view_base . '/_index', $data)
 						->render($this->data);
 	}
 
@@ -531,7 +535,7 @@ class Users extends MY_Controller
 					'updateSection' => true,
 					'updateSectionData'	=> [
 						'box' 	=> '#_data-row-' . $record->id,
-						'html' 	=> $this->load->view('setup/users/_single_row', ['record' => $record], TRUE),
+						'html' 	=> $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE),
 						//
 						// How to Work with success html?
 						// Jquery Method 	html|replaceWith|append|prepend etc.
@@ -563,7 +567,7 @@ class Users extends MY_Controller
 		$json_data = [
 			'reloadForm' => true
 		];
-		$json_data['form'] = $this->load->view('setup/users/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_title' 	=> 'Basic Information',
 				'action_url'	=> site_url($this->_url_base . '/edit/'. $record->id),
@@ -662,7 +666,7 @@ class Users extends MY_Controller
 		$json_data = [
 			'reloadForm' => true
 		];
-		$json_data['form'] = $this->load->view('setup/users/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_title' 	=> 'Change Password - ' . $record->username,
 				'action_url'	=> site_url($this->_url_base . '/change_password/'. $record->id),
@@ -754,7 +758,7 @@ class Users extends MY_Controller
 		$this->load->model('role_model');
 		$this->load->model('branch_model');
 		$this->load->model('department_model');
-		$json_data['form'] = $this->load->view('setup/users/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_title' 	=> 'Basic Information',
 				'action_url'	=> site_url( $this->_url_base . '/add/'),
@@ -863,7 +867,7 @@ class Users extends MY_Controller
 			if($first_time)
 			{
 				$records = $this->user_model->rows();
-				$list_html = $this->load->view('setup/users/_list',
+				$list_html = $this->load->view($this->_view_base . '/_list',
 					['records' => $records, 'next_id' => NULL], TRUE);
 
 				$first_time_data = [
@@ -882,7 +886,7 @@ class Users extends MY_Controller
 
 			$json_data = $first_time_data + [
 				'reloadForm' => true,
-				'form' => $this->load->view('setup/users/_form_contact',
+				'form' => $this->load->view($this->_view_base . '/_form_contact',
 											[
 												'action_url'	=> site_url( $this->_url_base . '/update_contact/' . $record->id),
 												'record' => $record,
@@ -1019,7 +1023,7 @@ class Users extends MY_Controller
 
 			$json_data = [
 				'reloadForm' => true,
-				'form' => $this->load->view('setup/users/_form_profile',
+				'form' => $this->load->view($this->_view_base . '/_form_profile',
 											[
 												'form_title' 	=> 'User Profile',
 												'action_url'	=> site_url( $this->_url_base . '/update_profile/' . $record->id),
@@ -1224,7 +1228,7 @@ class Users extends MY_Controller
 					'status' 	=> 'success',
 					'message' 	=> "Successfully performed the action ($action)!",
 					'reloadRow' => true,
-					'row' 		=> $this->load->view('setup/users/_single_row', ['record' => $record], TRUE),
+					'row' 		=> $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE),
 					'rowId'		=> '#_data-row-'.$record->id
 				];
 			}
@@ -1264,7 +1268,7 @@ class Users extends MY_Controller
 								'content_header' => 'User Details <small>' . $record->username . '</small>',
 								'breadcrumbs' => ['Users' => $this->_url_base, 'Details' => NULL]
 						])
-						->partial('content', 'setup/users/_details', compact('record'))
+						->partial('content', $this->_view_base . '/_details', compact('record'))
 						->render($this->data);
 
     }
@@ -1342,7 +1346,7 @@ class Users extends MY_Controller
         }
 
         // Let's load the form
-        $json_data['form'] = $this->load->view('setup/users/_form_user_setting',
+        $json_data['form'] = $this->load->view($this->_view_base . '/_form_user_setting',
         [
             'record'        => $record,
             'form_elements' => $this->user_setting_model->validation_rules

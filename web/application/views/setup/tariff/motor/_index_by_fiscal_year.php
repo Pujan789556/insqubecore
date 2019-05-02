@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/tariff/motor/_list_by_fiscal_year');
+				$this->load->view($this->data['_view_base'] . '/motor/_list_by_fiscal_year');
 				?>
 			</div>
 			<!-- /.box-body -->

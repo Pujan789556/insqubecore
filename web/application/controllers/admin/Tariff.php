@@ -55,7 +55,10 @@ class Tariff extends MY_Controller
 
         // URL Base
         $this->_url_base         = 'admin/' . $this->router->class;
+        $this->_view_base        = 'setup/' . $this->router->class;
+
         $this->data['_url_base'] = $this->_url_base; // for view to access
+        $this->data['_view_base']   = $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -133,7 +136,7 @@ class Tariff extends MY_Controller
                                 'content_header' => 'Tariff - Agriculture',
                                 'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Agriculture' => NULL]
                         ])
-                        ->partial('content', 'setup/tariff/agriculture/_index', compact('records'))
+                        ->partial('content', $this->_view_base . '/agriculture/_index', compact('records'))
                         ->render($this->data);
     }
 
@@ -178,7 +181,7 @@ class Tariff extends MY_Controller
                                 'content_header' => 'Agriculture Tariff - FY - ' . $fiscal_year_text,
                                 'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Agriculture' => $this->_url_base . '/agriculture', 'Details' => NULL]
                         ])
-                        ->partial('content', 'setup/tariff/agriculture/_index_by_fiscal_year', compact('records'))
+                        ->partial('content', $this->_view_base . '/agriculture/_index_by_fiscal_year', compact('records'))
                         ->render($this->data);
     }
 
@@ -256,7 +259,7 @@ class Tariff extends MY_Controller
                 ];
 
                 $records    = $this->tariff_agriculture_model->get_index_rows();
-                $html       = $this->load->view('setup/tariff/agriculture/_list', ['records' => $records], TRUE);
+                $html       = $this->load->view($this->_view_base . '/agriculture/_list', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -275,13 +278,13 @@ class Tariff extends MY_Controller
                     'status'        => $status,
                     'message'       => $message,
                     'reloadForm'    => true,
-                    'form'          => $this->load->view('setup/tariff/agriculture/_form_add', $form_data, TRUE)
+                    'form'          => $this->load->view($this->_view_base . '/agriculture/_form_add', $form_data, TRUE)
                 ]);
             }
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/agriculture/_form_add',
+        $json_data['form'] = $this->load->view($this->_view_base . '/agriculture/_form_add',
             [
                 'form_elements'         => $rules,
                 'record'                => null
@@ -375,7 +378,7 @@ class Tariff extends MY_Controller
                 ];
 
                 $records    = $this->tariff_agriculture_model->get_index_rows();
-                $html       = $this->load->view('setup/tariff/agriculture/_list', ['records' => $records], TRUE);
+                $html       = $this->load->view($this->_view_base . '/agriculture/_list', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -395,13 +398,13 @@ class Tariff extends MY_Controller
                     'status'        => $status,
                     'message'       => $message,
                     'reloadForm'    => true,
-                    'form'          => $this->load->view('setup/tariff/agriculture/_form_duplicate', $form_data, TRUE)
+                    'form'          => $this->load->view($this->_view_base . '/agriculture/_form_duplicate', $form_data, TRUE)
                 ]);
             }
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/agriculture/_form_duplicate',
+        $json_data['form'] = $this->load->view($this->_view_base . '/agriculture/_form_duplicate',
             [
                 'form_elements'         => $rules,
                 'record'                => null,
@@ -526,7 +529,7 @@ class Tariff extends MY_Controller
                 ];
 
                 $records   = $this->tariff_agriculture_model->get_list_by_fiscal_year_rows($record->fiscal_yr_id);
-                $html       = $this->load->view('setup/tariff/agriculture/_list_by_fiscal_year', ['records' => $records], TRUE);
+                $html       = $this->load->view($this->_view_base . '/agriculture/_list_by_fiscal_year', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -552,7 +555,7 @@ class Tariff extends MY_Controller
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/agriculture/_form_edit',
+        $json_data['form'] = $this->load->view($this->_view_base . '/agriculture/_form_edit',
             [
                 'form_elements'         => $rules,
                 'record'                => $record,
@@ -660,7 +663,7 @@ class Tariff extends MY_Controller
                                 'content_header' => 'Tariff - Misc (Banker\'s Blanket)',
                                 'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Misc (Banker\'s Blanket)' => NULL]
                         ])
-                        ->partial('content', 'setup/tariff/misc_bb/_index', compact('records'))
+                        ->partial('content', $this->_view_base . '/misc_bb/_index', compact('records'))
                         ->render($this->data);
     }
 
@@ -700,7 +703,7 @@ class Tariff extends MY_Controller
         $this->__misc_bb__save('add');
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/misc_bb/_form',
+        $json_data['form'] = $this->load->view($this->_view_base . '/misc_bb/_form',
             [
                 'form_elements'         => $this->tariff_misc_bb_model->validation_rules('add'),
                 'record'                => NULL,
@@ -740,7 +743,7 @@ class Tariff extends MY_Controller
         $this->__misc_bb__save('edit', $record);
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/misc_bb/_form',
+        $json_data['form'] = $this->load->view($this->_view_base . '/misc_bb/_form',
             [
                 'form_elements'         => $this->tariff_misc_bb_model->validation_rules('edit'),
                 'record'                => $record,
@@ -832,7 +835,7 @@ class Tariff extends MY_Controller
                 ];
 
                 $records   = $this->tariff_misc_bb_model->get_index_rows();
-                $html       = $this->load->view('setup/tariff/misc_bb/_list', ['records' => $records], TRUE);
+                $html       = $this->load->view($this->_view_base . '/misc_bb/_list', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -930,7 +933,7 @@ class Tariff extends MY_Controller
                 ];
 
                 $records    = $this->tariff_misc_bb_model->get_index_rows();
-                $html       = $this->load->view('setup/tariff/misc_bb/_list', ['records' => $records], TRUE);
+                $html       = $this->load->view($this->_view_base . '/misc_bb/_list', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -950,13 +953,13 @@ class Tariff extends MY_Controller
                     'status'        => $status,
                     'message'       => $message,
                     'reloadForm'    => true,
-                    'form'          => $this->load->view('setup/tariff/misc_bb/_form_duplicate', $form_data, TRUE)
+                    'form'          => $this->load->view($this->_view_base . '/misc_bb/_form_duplicate', $form_data, TRUE)
                 ]);
             }
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/misc_bb/_form_duplicate',
+        $json_data['form'] = $this->load->view($this->_view_base . '/misc_bb/_form_duplicate',
             [
                 'form_elements'         => $rules,
                 'record'                => null,
@@ -1052,7 +1055,7 @@ class Tariff extends MY_Controller
                                 'content_header' => 'Tariff - Misc (Expedition Personnel Accident)',
                                 'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Misc (Expedition Personnel Accident)' => NULL]
                         ])
-                        ->partial('content', 'setup/tariff/misc_epa/_index', compact('records'))
+                        ->partial('content', $this->_view_base . '/misc_epa/_index', compact('records'))
                         ->render($this->data);
     }
 
@@ -1092,7 +1095,7 @@ class Tariff extends MY_Controller
         $this->__misc_epa__save('add');
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/misc_epa/_form',
+        $json_data['form'] = $this->load->view($this->_view_base . '/misc_epa/_form',
             [
                 'form_elements'         => $this->tariff_misc_epa_model->validation_rules('add'),
                 'record'                => NULL,
@@ -1132,7 +1135,7 @@ class Tariff extends MY_Controller
         $this->__misc_epa__save('edit', $record);
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/misc_epa/_form',
+        $json_data['form'] = $this->load->view($this->_view_base . '/misc_epa/_form',
             [
                 'form_elements'         => $this->tariff_misc_epa_model->validation_rules('edit'),
                 'record'                => $record,
@@ -1223,7 +1226,7 @@ class Tariff extends MY_Controller
                 ];
 
                 $records   = $this->tariff_misc_epa_model->get_index_rows();
-                $html       = $this->load->view('setup/tariff/misc_epa/_list', ['records' => $records], TRUE);
+                $html       = $this->load->view($this->_view_base . '/misc_epa/_list', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -1321,7 +1324,7 @@ class Tariff extends MY_Controller
                 ];
 
                 $records    = $this->tariff_misc_epa_model->get_index_rows();
-                $html       = $this->load->view('setup/tariff/misc_epa/_list', ['records' => $records], TRUE);
+                $html       = $this->load->view($this->_view_base . '/misc_epa/_list', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -1341,13 +1344,13 @@ class Tariff extends MY_Controller
                     'status'        => $status,
                     'message'       => $message,
                     'reloadForm'    => true,
-                    'form'          => $this->load->view('setup/tariff/misc_epa/_form_duplicate', $form_data, TRUE)
+                    'form'          => $this->load->view($this->_view_base . '/misc_epa/_form_duplicate', $form_data, TRUE)
                 ]);
             }
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/misc_epa/_form_duplicate',
+        $json_data['form'] = $this->load->view($this->_view_base . '/misc_epa/_form_duplicate',
             [
                 'form_elements'         => $rules,
                 'record'                => null,
@@ -1449,7 +1452,7 @@ class Tariff extends MY_Controller
                                 'content_header' => 'Tariff - Motor',
                                 'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => 'tariff', 'Motor' => NULL]
                         ])
-                        ->partial('content', 'setup/tariff/motor/_index', compact('records'))
+                        ->partial('content', $this->_view_base . '/motor/_index', compact('records'))
                         ->render($this->data);
     }
 
@@ -1495,7 +1498,7 @@ class Tariff extends MY_Controller
                                 'content_header' => 'Motor Tariff - FY - ' . $fiscal_year_text,
                                 'breadcrumbs' => ['Application Settings' => NULL, 'Tariff' => NULL, 'Motor' => $this->_url_base . '/motor', 'Details' => NULL]
                         ])
-                        ->partial('content', 'setup/tariff/motor/_index_by_fiscal_year', compact('records'))
+                        ->partial('content', $this->_view_base . '/motor/_index_by_fiscal_year', compact('records'))
                         ->render($this->data);
     }
 
@@ -1598,7 +1601,7 @@ class Tariff extends MY_Controller
                 ];
 
                 $records    = $this->tariff_motor_model->get_index_rows();
-                $html       = $this->load->view('setup/tariff/motor/_list', ['records' => $records], TRUE);
+                $html       = $this->load->view($this->_view_base . '/motor/_list', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -1617,13 +1620,13 @@ class Tariff extends MY_Controller
                     'status'        => $status,
                     'message'       => $message,
                     'reloadForm'    => true,
-                    'form'          => $this->load->view('setup/tariff/motor/_form_add', $form_data, TRUE)
+                    'form'          => $this->load->view($this->_view_base . '/motor/_form_add', $form_data, TRUE)
                 ]);
             }
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/motor/_form_add',
+        $json_data['form'] = $this->load->view($this->_view_base . '/motor/_form_add',
             [
                 'form_elements'         => $rules,
                 'record'                => null
@@ -1717,7 +1720,7 @@ class Tariff extends MY_Controller
                 ];
 
                 $records    = $this->tariff_motor_model->get_index_rows();
-                $html       = $this->load->view('setup/tariff/motor/_list', ['records' => $records], TRUE);
+                $html       = $this->load->view($this->_view_base . '/motor/_list', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -1737,13 +1740,13 @@ class Tariff extends MY_Controller
                     'status'        => $status,
                     'message'       => $message,
                     'reloadForm'    => true,
-                    'form'          => $this->load->view('setup/tariff/motor/_form_duplicate', $form_data, TRUE)
+                    'form'          => $this->load->view($this->_view_base . '/motor/_form_duplicate', $form_data, TRUE)
                 ]);
             }
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/motor/_form_duplicate',
+        $json_data['form'] = $this->load->view($this->_view_base . '/motor/_form_duplicate',
             [
                 'form_elements'         => $rules,
                 'record'                => null,
@@ -1960,7 +1963,7 @@ class Tariff extends MY_Controller
                 ];
 
                 $records   = $this->tariff_motor_model->get_list_by_fiscal_year_rows($record->fiscal_yr_id);
-                $html       = $this->load->view('setup/tariff/motor/_list_by_fiscal_year', ['records' => $records], TRUE);
+                $html       = $this->load->view($this->_view_base . '/motor/_list_by_fiscal_year', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -1979,7 +1982,7 @@ class Tariff extends MY_Controller
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/tariff/motor/_form_edit',
+        $json_data['form'] = $this->load->view($this->_view_base . '/motor/_form_edit',
             [
                 'form_elements'         => $this->__motor_v_rules($record),
                 'record'                => $record

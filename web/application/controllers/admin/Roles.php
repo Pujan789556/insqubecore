@@ -39,7 +39,7 @@ class Roles extends MY_Controller
         // Basic Data
         $this->data['site_title'] = 'Application Settings | Roles & Permissions';
 
-        // Setup Navigation
+        // Setup Navigationsetup/
 		$this->active_nav_primary([
 			'level_0' => 'application_setup',
 			'level_1' => 'security',
@@ -51,7 +51,10 @@ class Roles extends MY_Controller
 
 		// URL Base
         $this->_url_base         = 'admin/' . $this->router->class;
+        $this->_view_base 		 = 'setup/' . $this->router->class;
+
         $this->data['_url_base'] = $this->_url_base; // for view to access
+        $this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -78,7 +81,7 @@ class Roles extends MY_Controller
 								'content_header' => 'Manage Roles & Permissions',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Roles' => NULL]
 						])
-						->partial('content', 'setup/roles/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -111,7 +114,7 @@ class Roles extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/roles/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->role_model->validation_rules,
 				'record' 		=> $record
@@ -136,7 +139,7 @@ class Roles extends MY_Controller
 		$json_data = $this->_save('add');
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/roles/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->role_model->validation_rules,
 				'record' 		=> $record
@@ -225,13 +228,13 @@ class Roles extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->role_model->get_all();
-					$success_html = $this->load->view('setup/roles/_list', ['records' => $records], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->role_model->find($record->id);
-					$success_html = $this->load->view('setup/roles/_single_row', ['record' => $record], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 				}
 			}
 
@@ -256,7 +259,7 @@ class Roles extends MY_Controller
 											]
 										: NULL,
 				'form' 	  		=> $status === 'error'
-									? 	$this->load->view('setup/roles/_form',
+									? 	$this->load->view($this->_view_base . '/_form',
 											[
 												'form_elements' => $this->role_model->validation_rules,
 												'record' 		=> $record
@@ -451,7 +454,7 @@ class Roles extends MY_Controller
 
     	// Let's load the form
     	$permission_configs = $this->config->item('DX_permissions');
-		$json_data['form'] = $this->load->view('setup/roles/_form_permissions',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_permissions',
 			[
 				'record' 			=> $record,
 				'permission_configs' 	=> $permission_configs

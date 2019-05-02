@@ -40,7 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('setup/tariff/agriculture/_list');
+				$this->load->view($this->data['_view_base'] . '/agriculture/_list');
 				?>
 			</div>
 			<!-- /.box-body -->

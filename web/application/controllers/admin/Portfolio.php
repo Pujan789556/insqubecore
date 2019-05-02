@@ -62,7 +62,10 @@ class Portfolio extends MY_Controller
 
 		// URL Base
 		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
 		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -88,7 +91,7 @@ class Portfolio extends MY_Controller
 								'content_header' => 'Manage Portfolio',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Portfolio' => NULL]
 						])
-						->partial('content', 'setup/portfolio/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -116,7 +119,7 @@ class Portfolio extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/portfolio/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->portfolio_model->validation_rules['basic'],
 				'record' 		=> $record
@@ -150,7 +153,7 @@ class Portfolio extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/portfolio/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->portfolio_model->validation_rules['accounts'],
 				'record' 		=> $record
@@ -187,7 +190,7 @@ class Portfolio extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/portfolio/_form_risks',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_risks',
 			[
 				'form_elements' => $rules,
 				'record' 		=> $record
@@ -224,7 +227,7 @@ class Portfolio extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/portfolio/_form_claim_docs',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_claim_docs',
 			[
 				'form_elements' => $rules,
 				'record' 		=> $record
@@ -261,7 +264,7 @@ class Portfolio extends MY_Controller
 		$rules[0]['_checkbox_value'] = $record->bsrs_heading_type_ids ? explode(',', $record->bsrs_heading_type_ids) : [];
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('setup/portfolio/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $rules,
 				'record' 		=> $record
@@ -407,13 +410,13 @@ class Portfolio extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->portfolio_model->get_all();
-					$success_html = $this->load->view('setup/portfolio/_list', ['records' => $records], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->portfolio_model->find($record->id);
-					$success_html = $this->load->view('setup/portfolio/_single_row', ['record' => $record], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 				}
 			}
 
@@ -636,7 +639,7 @@ class Portfolio extends MY_Controller
 		if($done)
 		{
 			$record->active = IQB_FLAG_ON;
-			$row = $this->load->view('setup/portfolio/_single_row', ['record' => $record], TRUE);
+			$row = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 			$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
@@ -678,7 +681,7 @@ class Portfolio extends MY_Controller
 		if($done)
 		{
 			$record->active = IQB_FLAG_OFF;
-			$row = $this->load->view('setup/portfolio/_single_row', ['record' => $record], TRUE);
+			$row = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 			$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
@@ -876,7 +879,7 @@ class Portfolio extends MY_Controller
 									'content_header' => 'Manage Portfolio Settings',
 									'breadcrumbs' => ['Application Settings' => NULL, 'Portfolio' => $this->_url_base, 'Settings' => NULL]
 							])
-							->partial('content', 'setup/portfolio/_settings_default', compact('records'))
+							->partial('content', $this->_view_base . '/_settings_default', compact('records'))
 							->render($this->data);
   		}
 
@@ -907,7 +910,7 @@ class Portfolio extends MY_Controller
 									'content_header' => $content_header,
 									'breadcrumbs' => ['Application Settings' => NULL, 'Portfolio' => $this->_url_base . '/settings', 'Settings' => NULL]
 							])
-							->partial('content', 'setup/portfolio/_settings_fy', compact('records'))
+							->partial('content', $this->_view_base . '/_settings_fy', compact('records'))
 							->render($this->data);
   		}
 
@@ -945,7 +948,7 @@ class Portfolio extends MY_Controller
 		$portfolios_tree 		= $this->portfolio_model->dropdown_children_tree();
 		$children_portfolios 	= $this->portfolio_model->dropdown_children();
 
-		$json_data['form'] 	= $this->load->view('setup/portfolio/_form_settings',
+		$json_data['form'] 	= $this->load->view($this->_view_base . '/_form_settings',
 			[
 				'form_elements' 		=> $this->portfolio_setting_model->get_validation_rules('add'),
 				'record' 				=> $record
@@ -977,7 +980,7 @@ class Portfolio extends MY_Controller
 		// Form Submitted? Save the data
 		$json_data = $this->_save_settings('edit', $record);
 
-		$json_data['form'] = $this->load->view('setup/portfolio/_form_settings',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_settings',
 			[
 				'form_elements' 	=> $this->portfolio_setting_model->get_validation_rules('edit'),
 				'record' 			=> $record
@@ -1071,7 +1074,7 @@ class Portfolio extends MY_Controller
 				if($action === 'add')
 				{
 					$records 		= $this->portfolio_setting_model->get_row_list();
-					$success_html 	= $this->load->view('setup/portfolio/_list_settings_default', ['records' => $records], TRUE);
+					$success_html 	= $this->load->view($this->_view_base . '/_list_settings_default', ['records' => $records], TRUE);
 					$success_return = array_merge($success_return, [
 						'updateSectionData'	=> [
 							'box' 		=> '#iqb-data-list',
@@ -1268,7 +1271,7 @@ class Portfolio extends MY_Controller
                 ];
 
                 $records = $this->portfolio_setting_model->get_row_list();
-				$html = $this->load->view('setup/portfolio/_list_settings_default', ['records' => $records], TRUE);
+				$html = $this->load->view($this->_view_base . '/_list_settings_default', ['records' => $records], TRUE);
 
                 $ajax_data['updateSectionData'] = [
                     'box'       => '#iqb-data-list',
@@ -1288,13 +1291,13 @@ class Portfolio extends MY_Controller
                     'status'        => $status,
                     'message'       => $message,
                     'reloadForm'    => true,
-                    'form'          => $this->load->view('setup/portfolio/_form_duplicate', $form_data, TRUE)
+                    'form'          => $this->load->view($this->_view_base . '/_form_duplicate', $form_data, TRUE)
                 ]);
             }
         }
 
         // Let's render the form
-        $json_data['form'] = $this->load->view('setup/portfolio/_form_duplicate',
+        $json_data['form'] = $this->load->view($this->_view_base . '/_form_duplicate',
             [
                 'form_elements'         => $rules,
                 'record'                => null,
@@ -1378,7 +1381,7 @@ class Portfolio extends MY_Controller
 			return $this->template->json($return_data);
 		}
 
-		$json_data['form'] = $this->load->view('setup/portfolio/_form_settings_spr',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_settings_spr',
 								[
 									'form_elements' 	=> $v_rules,
 									'record' 			=> $record
