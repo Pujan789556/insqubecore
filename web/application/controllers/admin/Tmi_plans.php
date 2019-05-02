@@ -48,16 +48,15 @@ class Tmi_plans extends MY_Controller
 		];
 		$this->active_nav_primary($this->_navigation);
 
-		// Module View Folder (with trailing slash)
-		$this->_view_base = 'setup/' . $this->router->class;
-
 		// Load Model
 		$this->load->model('tmi_plan_model');
 
 		// URL Base
-        $this->_url_base         = 'admin/' . $this->router->class;
-        $this->data['_url_base'] = $this->_url_base; // for view to access
-        $this->data['_view_base'] = $this->_view_base;
+        $this->_url_base        = 'admin/' . $this->router->class;
+        $this->_view_base 		= 'setup/tariff/' . $this->router->class;
+
+        $this->data['_url_base'] 	= $this->_url_base; // for view to access
+        $this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------

@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Tmi_plan_model extends MY_Model
 {
-    protected $table_name = 'master_tmi_plans';
+    protected $table_name = 'master_tariff_tmi_plans';
 
     protected $set_created = true;
 
