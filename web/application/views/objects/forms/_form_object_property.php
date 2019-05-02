@@ -21,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             $row_start = $row_count++ == 1 ? '<div class="box box-solid box-bordered property-row" id="__property_row">' : '<div class="box box-solid box-bordered property-row">';
 
                             echo $row_start;
-                            $this->load->view('objects/forms/_form_row_property_item', [
+                            $this->load->view($this->data['_view_base'] . '/forms/_form_row_property_item', [
                                 'item_record'   => $item_record,
                                 'form_elements' => $form_elements
                             ]);
@@ -33,7 +33,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <div class="box box-solid box-bordered property-row" id="__property_row">
                             <div class="box-body">
                                 <?php
-                                $this->load->view('objects/forms/_form_row_property_item', [
+                                $this->load->view($this->data['_view_base'] . '/forms/_form_row_property_item', [
                                     'item_record'   => NULL
                                 ]);
                                 ?>

@@ -14,7 +14,7 @@ $snippet 	= _OBJ_PROPERTY_select_text($record);
 			/**
 			 * Popover Content
 			 */
-			$this->load->view('objects/snippets/_popup_property',['record' => $record]);
+			$this->load->view($this->data['_view_base'] . '/snippets/_popup_property',['record' => $record]);
 			?>
 		</span>
 	<?php endif;?>

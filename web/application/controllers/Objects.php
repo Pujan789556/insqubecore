@@ -47,6 +47,13 @@ class Objects extends MY_Controller
 		$this->load->model('object_model');
 		$this->load->model('portfolio_model');
 
+		// URL Base
+		$this->_url_base 		 = $this->router->class;
+		$this->_view_base 		 = $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
+
 	}
 
 	// --------------------------------------------------------------------
@@ -91,12 +98,13 @@ class Objects extends MY_Controller
 		// If request is coming from refresh method, reset nextid
 		$customer_id = (int)$customer_id; // Required if request is coming from find widget
 		$next_id = (int)$next_id;
-		$next_url_base = 'objects/page/r/'.$from_widget . '/' . $customer_id;
+		$next_url_base = $this->_url_base . '/page/r/'.$from_widget . '/' . $customer_id;
 
 		// DOM Data
 		$dom_data = [
 			'DOM_DataListBoxId' 		=> '_iqb-data-list-box-object', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-object' 			// Filter Form ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-object',		// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-objects-rows' 				// Row Box ID
 		];
 
 		/**
@@ -124,7 +132,7 @@ class Objects extends MY_Controller
 			$customer_record = null;
 			if($from_widget === 'y')
 			{
-				$view = 'objects/_find_widget';
+				$view = $this->_view_base . '/_find_widget';
 
 				$this->load->model('customer_model');
 				$customer_record = $this->customer_model->find($customer_id);
@@ -135,22 +143,22 @@ class Objects extends MY_Controller
 			}
 			else
 			{
-				$view = 'objects/_index';
+				$view = $this->_view_base . '/_index';
 			}
 
 			$data = array_merge($data, [
 				'filters' 			=> $this->_get_filter_elements(),
-				'filter_url' 		=> site_url('objects/page/l/' . $from_widget . '/' . $customer_id),
+				'filter_url' 		=> site_url($this->_url_base . '/page/l/' . $from_widget . '/' . $customer_id),
 				'customer_record' 	=> $customer_record
 			]);
 		}
 		else if($layout === 'l')
 		{
-			$view = 'objects/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'objects/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 		if ( $this->input->is_ajax_request() )
@@ -173,9 +181,9 @@ class Objects extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'objects/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Manage Objects'] + $dom_data)
-						->partial('content', 'objects/_index', $data)
+						->partial('content', $this->_view_base . '/_index', $data)
 						->render($this->data);
 	}
 
@@ -210,10 +218,10 @@ class Objects extends MY_Controller
 			'records' 					=> $this->object_model->get_by_customer($customer_record->id, $portfolio_id),
 			'customer_record' 			=> $customer_record,
 			'portfolio_record' 		 	=> $portfolio_record,
-			'add_url' 					=> 'objects/add/' . $customer_id . '/y/' . $portfolio_id,
+			'add_url' 					=> $this->_url_base . '/add/' . $customer_id . '/y/' . $portfolio_id,
 			'_flag__show_widget_row' 	=> TRUE
 		];
-		$html = $this->load->view('objects/_find_widget', $data, TRUE);
+		$html = $this->load->view($this->_view_base . '/_find_widget', $data, TRUE);
 		$ajax_data = [
 			'status' => 'success',
 			'html'   => $html
@@ -376,9 +384,10 @@ class Objects extends MY_Controller
 			'records' 					=> $records,
 			'customer_id' 				=> $customer_id,
 			'next_id' 					=> NULL,
-			'add_url' 					=> 'objects/add/' . $customer_id
+			'add_url' 					=> $this->_url_base . '/add/' . $customer_id,
+			'DOM_RowBoxId'				=> 'box-objects-rows'
 		];
-		$html = $this->load->view('objects/_customer/_list_widget', $data, TRUE);
+		$html = $this->load->view($this->_view_base . '/_customer/_list_widget', $data, TRUE);
 		$ajax_data = [
 			'status' => 'success',
 			'html'   => $html
@@ -458,7 +467,7 @@ class Objects extends MY_Controller
 		/**
 		 * Prepare Common Form Data to pass to form view
 		 */
-		$action_url = 'objects/edit/' . $record->id . '/' . $from_widget;
+		$action_url = $this->_url_base . '/edit/' . $record->id . '/' . $from_widget;
 		$v_rules = $this->object_model->validation_rules['edit'];
 		$form_data = [
 			'form_elements' 	=> $v_rules,
@@ -545,7 +554,7 @@ class Objects extends MY_Controller
 		/**
 		 * Prepare Common Form Data to pass to form view
 		 */
-		$action_url = 'objects/add/' . $customer_id . '/' . $from_widget . '/' . $portfolio_id;
+		$action_url = $this->_url_base . '/add/' . $customer_id . '/' . $from_widget . '/' . $portfolio_id;
 		$v_rules = $this->object_model->validation_rules[$from_widget === 'n' ? 'add' : 'add_widget'];
 		$form_data = [
 			'form_elements' 	=> $v_rules,
@@ -715,12 +724,12 @@ class Objects extends MY_Controller
 				$record 	= $this->object_model->row($action === 'add' ? $done : $record->id);
 				if($action === 'add')
 				{
-					$single_row = $from_widget === 'y' ? 'objects/_single_row_widget' : 'objects/_single_row';
+					$single_row = $from_widget === 'y' ? $this->_view_base . '/_single_row_widget' : $this->_view_base . '/_single_row';
 					$html = $this->load->view($single_row, ['record' => $record], TRUE);
 
 					$ajax_data['updateSection'] = true;
 					$ajax_data['updateSectionData'] = [
-						'box' 		=> '#search-result-object',
+						'box' 		=> '#box-objects-rows',
 						'method' 	=> 'prepend',
 						'html'		=> $html
 					];
@@ -730,7 +739,7 @@ class Objects extends MY_Controller
 					/**
 					 * From Widget or List
 					 */
-					$single_row = $from_widget === 'y' ? 'objects/snippets/_object_card' : 'objects/_single_row';
+					$single_row = $from_widget === 'y' ? $this->_view_base . '/snippets/_object_card' : $this->_view_base . '/_single_row';
 					$html = $this->load->view($single_row, ['record' => $record, '__flag_object_editable' => TRUE], TRUE);
 
 					$ajax_data['multipleUpdate'] =[
@@ -760,7 +769,7 @@ class Objects extends MY_Controller
 					'status' 		=> $status,
 					'message' 		=> $message,
 					'reloadForm' 	=> true,
-					'form' 			=> $this->load->view('objects/_form', $form_data, TRUE)
+					'form' 			=> $this->load->view($this->_view_base . '/_form', $form_data, TRUE)
 				]);
 			}
 		}
@@ -770,7 +779,7 @@ class Objects extends MY_Controller
 		 * Render The Form
 		 */
 		$json_data = [
-			'form' => $this->load->view('objects/_form_box', $form_data, TRUE)
+			'form' => $this->load->view($this->_view_base . '/_form_box', $form_data, TRUE)
 		];
 		$this->template->json($json_data);
 	}
@@ -1024,7 +1033,7 @@ class Objects extends MY_Controller
 		 * Render The Form
 		 */
 		$json_data = [
-			'form' => $this->load->view('objects/_form_box', $form_data, TRUE)
+			'form' => $this->load->view($this->_view_base . '/_form_box', $form_data, TRUE)
 		];
 		$this->template->json($json_data);
 	}
@@ -1254,8 +1263,8 @@ class Objects extends MY_Controller
 		// 						'content_header' => 'Customer Details <small>' . $record->full_name . '</small>',
 		// 						'breadcrumbs' => ['Objects' => 'objects', 'Details' => NULL]
 		// 				])
-		// 				->partial('content', 'objects/_details', compact('record'))
-		// 				->partial('dynamic_js', 'objects/_object_js')
+		// 				->partial('content', $this->_view_base . '/_details', compact('record'))
+		// 				->partial('dynamic_js', $this->_view_base . '/_object_js')
 		// 				->render($this->data);
 
     }

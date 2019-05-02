@@ -14,7 +14,7 @@ $snippet 	= _OBJ_AGR_POULTRY_select_text($record);
 			/**
 			 * Popover Content
 			 */
-			$this->load->view('objects/snippets/_popup_agr_poultry',['record' => $record]);
+			$this->load->view($this->data['_view_base'] . '/snippets/_popup_agr_poultry',['record' => $record]);
 			?>
 		</span>
 	<?php endif;?>

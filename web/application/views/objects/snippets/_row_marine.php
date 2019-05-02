@@ -14,7 +14,7 @@ $snippet 	= _OBJ_MARINE_select_text($record);
 			/**
 			 * Popover Content
 			 */
-			$this->load->view('objects/snippets/_popup_marine',['record' => $record]);
+			$this->load->view($this->data['_view_base'] . '/snippets/_popup_marine',['record' => $record]);
 			?>
 		</span>
 	<?php endif;?>

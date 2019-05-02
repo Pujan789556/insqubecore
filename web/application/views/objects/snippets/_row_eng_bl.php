@@ -14,7 +14,7 @@ $snippet 	= _OBJ_ENG_BL_select_text($record);
 			/**
 			 * Popover Content
 			 */
-			$this->load->view('objects/snippets/_popup_eng_bl',['record' => $record]);
+			$this->load->view($this->data['_view_base'] . '/snippets/_popup_eng_bl',['record' => $record]);
 			?>
 		</span>
 	<?php endif;?>

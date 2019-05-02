@@ -231,7 +231,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         var $target = $('select.breed-dropdown');
             $target.empty();
 
-        $.getJSON('<?php echo base_url()?>objects/dd_agro_breed/'+category, function(r){
+        $.getJSON('<?php echo site_url($this->data['_url_base'] . '/dd_agro_breed/')?>' +category, function(r){
             // Update dropdown
             if(r.status == 'success' && typeof r.options !== 'undefined'){
                 $target.append($('<option>', {

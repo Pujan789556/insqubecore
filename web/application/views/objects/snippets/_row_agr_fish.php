@@ -14,7 +14,7 @@ $snippet 	= _OBJ_AGR_FISH_select_text($record);
 			/**
 			 * Popover Content
 			 */
-			$this->load->view('objects/snippets/_popup_agr_fish',['record' => $record]);
+			$this->load->view($this->data['_view_base'] . '/snippets/_popup_agr_fish',['record' => $record]);
 			?>
 		</span>
 	<?php endif;?>
