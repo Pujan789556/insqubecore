@@ -6,10 +6,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 if($record->treaty_type_id == IQB_RI_TREATY_TYPE_EOL)
 {
-	$this->load->view('setup/ri/treaties/snippets/_ri_tnc_data_eol');
+	$this->load->view($this->data['_view_base'] . '/snippets/_ri_tnc_data_eol');
 }
 else
 {
-	$this->load->view('setup/ri/treaties/snippets/_ri_tnc_data_qs');
+	$this->load->view($this->data['_view_base'] . '/snippets/_ri_tnc_data_qs');
 }
 ?>

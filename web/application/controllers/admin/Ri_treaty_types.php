@@ -53,8 +53,11 @@ class Ri_treaty_types extends MY_Controller
 		$this->load->library('activity');
 
 		// URL Base
-        $this->_url_base         = 'admin/' . $this->router->class;
-        $this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/ri/' . $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -81,7 +84,7 @@ class Ri_treaty_types extends MY_Controller
 								'content_header' => 'Manage Treaty Types',
 								'breadcrumbs' => ['Application Settings' => NULL, 'Re-Insurance' => NULL, 'Treaty Types' => NULL]
 						])
-						->partial('content', 'setup/ri/treaty_types/_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 

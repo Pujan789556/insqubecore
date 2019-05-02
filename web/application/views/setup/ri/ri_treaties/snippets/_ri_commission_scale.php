@@ -25,7 +25,7 @@ $_edit_url 		= $this->data['_url_base'] . '/commission_scales/'  . $record->id;
 		/**
 		 * Load commission_scale data
 		 */
-		$this->load->view('setup/ri/treaties/snippets/_ri_commission_scale_data');
+		$this->load->view($this->data['_view_base'] . '/snippets/_ri_commission_scale_data');
 		?>
 	</div>
 </div>
