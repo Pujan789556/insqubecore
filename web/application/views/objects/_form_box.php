@@ -9,6 +9,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     /**
      * Load object form
      */
-    $this->load->view('objects/_form');
+    $this->load->view($this->data['_view_base'] . '/_form');
     ?>
 </div>

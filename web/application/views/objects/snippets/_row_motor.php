@@ -21,7 +21,7 @@ $attributes = $record->attributes ? json_decode($record->attributes) : NULL;
 			/**
 			 * Popover Content
 			 */
-			$this->load->view('objects/snippets/_popup_motor',['record' => $record]);
+			$this->load->view($this->data['_view_base'] . '/snippets/_popup_motor',['record' => $record]);
 			?>
 		</span>
 	<?php endif;?>

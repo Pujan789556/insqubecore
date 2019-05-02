@@ -14,7 +14,7 @@ $snippet 	= _OBJ_AGR_CROP_select_text($record);
 			/**
 			 * Popover Content
 			 */
-			$this->load->view('objects/snippets/_popup_agr_crop',['record' => $record]);
+			$this->load->view($this->data['_view_base'] . '/snippets/_popup_agr_crop',['record' => $record]);
 			?>
 		</span>
 	<?php endif;?>

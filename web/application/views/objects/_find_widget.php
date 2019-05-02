@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * List Widget
  */
-$this->load->view('objects/_list_widget');
+$this->load->view($this->data['_view_base'] . '/_list_widget');
 ?>
 
 <!-- /.box -->
