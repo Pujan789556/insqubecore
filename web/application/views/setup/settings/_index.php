@@ -21,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					/**
 					 * Load General Form
 					 */
-					$this->load->view('setup/settings/_form_general', [
+					$this->load->view($this->data['_view_base'] . '/_form_general', [
 						'record' 		=> $record,
 						'form_elements' => $rules['general']
 					]);
@@ -34,9 +34,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					/**
 					 * Load Section Form : Dates
 					 */
-					$action_url             = site_url("admin/settings/section/dates");
+					$action_url             = site_url($this->data['_url_base'] . "/section/dates");
 		            $dom_parent_container   = "#tab-dates-settings";
-		            $this->load->view('setup/settings/_form_section', [
+		            $this->load->view($this->data['_view_base'] . '/_form_section', [
 		                                'form_elements'         => $rules['dates'],
 		                                'record'                => $record,
 		                                'action_url'            => $action_url,
@@ -51,9 +51,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					/**
 					 * Load Section Form : Dates
 					 */
-					$action_url             = site_url("admin/settings/section/sms");
+					$action_url             = site_url($this->data['_url_base'] . "/section/sms");
 		            $dom_parent_container   = "#tab-sms-settings";
-		            $this->load->view('setup/settings/_form_section', [
+		            $this->load->view($this->data['_view_base'] . '/_form_section', [
 		                                'form_elements'         => $rules['sms'],
 		                                'record'                => $record,
 		                                'action_url'            => $action_url,
@@ -68,9 +68,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					/**
 					 * Load Section Form : Dates
 					 */
-					$action_url             = site_url("admin/settings/section/api");
+					$action_url             = site_url($this->data['_url_base'] . "/section/api");
 		            $dom_parent_container   = "#tab-api-settings";
-		            $this->load->view('setup/settings/_form_section', [
+		            $this->load->view($this->data['_view_base'] . '/_form_section', [
 		                                'form_elements'         => $rules['api'],
 		                                'record'                => $record,
 		                                'action_url'            => $action_url,
@@ -86,9 +86,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					/**
 					 * Load Section Form : Dates
 					 */
-					$action_url             = site_url("admin/settings/section/others");
+					$action_url             = site_url($this->data['_url_base'] . "/section/others");
 		            $dom_parent_container   = "#tab-others-settings";
-		            $this->load->view('setup/settings/_form_section', [
+		            $this->load->view($this->data['_view_base'] . '/_form_section', [
 		                                'form_elements'         => $rules['others'],
 		                                'record'                => $record,
 		                                'action_url'            => $action_url,

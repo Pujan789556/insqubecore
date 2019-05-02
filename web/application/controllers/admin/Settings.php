@@ -34,6 +34,13 @@ class Settings extends MY_Controller
 
         // Basic Data
         $this->data['site_title'] = 'Settings';
+
+        // URL Base
+		$this->_url_base 		 = 'admin/' . $this->router->class;
+		$this->_view_base 		 = 'setup/' . $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
     // --------------------------------------------------------------------
@@ -122,7 +129,7 @@ class Settings extends MY_Controller
 									? $this->setting_model->get(['id' => 1])
 									: $this->settings;
 
-			$view = $this->load->view('setup/settings/_form_general', [
+			$view = $this->load->view($this->_view_base . '/_form_general', [
 								'form_elements' => $rules,
 								'record' 		=> $record
 							], TRUE);
@@ -147,7 +154,7 @@ class Settings extends MY_Controller
 								'content_header' => 'Settings',
 								'breadcrumbs' => ['Settings' => NULL]
 						])
-						->partial('content', 'setup/settings/_index',
+						->partial('content', $this->_view_base . '/_index',
 							[
 								'rules' 	=> $this->setting_model->validation_rules,
 								'record'	=> $this->settings
@@ -265,7 +272,7 @@ class Settings extends MY_Controller
              */
             $action_url             = site_url("admin/settings/section/{$section}");
             $dom_parent_container   = "#tab-{$section}-settings";
-            $view = $this->load->view('setup/settings/_form_section', [
+            $view = $this->load->view($this->_view_base . '/_form_section', [
                                 'form_elements'         => $rules,
                                 'record'                => $record,
                                 'action_url'            => $action_url,
