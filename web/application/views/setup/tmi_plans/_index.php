@@ -34,7 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view( $this->data['_module_view_path'] . '_list');
+				$this->load->view( $this->data['_view_base'] . '/_list');
 				?>
 			</div>
 			<!-- /.box-body -->

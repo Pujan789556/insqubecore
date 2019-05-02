@@ -49,7 +49,7 @@ class Tmi_plans extends MY_Controller
 		$this->active_nav_primary($this->_navigation);
 
 		// Module View Folder (with trailing slash)
-		$this->_module_view_path = 'setup/' . $this->router->class . '/';
+		$this->_view_base = 'setup/' . $this->router->class;
 
 		// Load Model
 		$this->load->model('tmi_plan_model');
@@ -57,7 +57,7 @@ class Tmi_plans extends MY_Controller
 		// URL Base
         $this->_url_base         = 'admin/' . $this->router->class;
         $this->data['_url_base'] = $this->_url_base; // for view to access
-        $this->data['_module_view_path'] = $this->_module_view_path; 
+        $this->data['_view_base'] = $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -83,7 +83,7 @@ class Tmi_plans extends MY_Controller
 								'content_header' => 'Manage TMI Plans',
 								'breadcrumbs' => ['Application Settings' => NULL, 'TMI Plans' => NULL]
 						])
-						->partial('content', $this->_module_view_path . '_index', compact('records'))
+						->partial('content', $this->_view_base . '/_index', compact('records'))
 						->render($this->data);
 	}
 
@@ -111,7 +111,7 @@ class Tmi_plans extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view( $this->_module_view_path . '_form',
+		$json_data['form'] = $this->load->view( $this->_view_base . '/_form',
 			[
 				'form_elements' => $this->tmi_plan_model->validation_rules['basic'],
 				'record' 		=> $record
@@ -137,7 +137,7 @@ class Tmi_plans extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view($this->_module_view_path . '_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' => $this->tmi_plan_model->validation_rules['basic'],
 				'record' 		=> $record
@@ -171,7 +171,7 @@ class Tmi_plans extends MY_Controller
 		$json_data = $this->_save('tariff', $record, $type);
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view($this->_module_view_path . '_form_tariff',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_tariff',
 			[
 				'form_elements' => $this->tmi_plan_model->validation_rules['tariff'],
 				'record' 		=> $record,
@@ -205,7 +205,7 @@ class Tmi_plans extends MY_Controller
 		$json_data = $this->_save('benefits', $record);
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view($this->_module_view_path . '_form_benefits',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_benefits',
 			[
 				'form_elements' => $this->tmi_plan_model->validation_rules['benefits'],
 				'record' 		=> $record
@@ -324,13 +324,13 @@ class Tmi_plans extends MY_Controller
 				if($action === 'add')
 				{
 					$records = $this->tmi_plan_model->get_all();
-					$success_html = $this->load->view($this->_module_view_path . '_list', ['records' => $records], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_list', ['records' => $records], TRUE);
 				}
 				else
 				{
 					// Get Updated Record
 					$record = $this->tmi_plan_model->find($record->id);
-					$success_html = $this->load->view($this->_module_view_path . '_single_row', ['record' => $record], TRUE);
+					$success_html = $this->load->view($this->_view_base . '/_single_row', ['record' => $record], TRUE);
 				}
 			}
 
