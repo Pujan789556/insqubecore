@@ -11,6 +11,8 @@ class Portfolio_setting_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     protected $after_insert  = ['clear_cache'];
@@ -196,21 +198,153 @@ class Portfolio_setting_model extends MY_Model
         $this->load->model('portfolio_model');
         $children_portfolios = $this->portfolio_model->dropdown_children();
 
-        $batch_data = [];
-        foreach($children_portfolios as $portfolio_id => $portfolio_name)
+
+        $done  = TRUE;
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Individual - No batch-insert - because of Audit Log Requirement
+            foreach($children_portfolios as $portfolio_id => $portfolio_name)
+            {
+                $single_data = [
+                    'fiscal_yr_id'              => $fiscal_yr_id,
+                    'portfolio_id'              => $portfolio_id
+                ];
+                parent::insert($single_data, TRUE);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
         {
-            $batch_data[] = [
-                'fiscal_yr_id'              => $fiscal_yr_id,
-                'portfolio_id'              => $portfolio_id
-            ];
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
         }
-        $done = FALSE;
-        if($batch_data)
+        else
         {
-            $done = $this->portfolio_setting_model->insert_batch($batch_data, TRUE);
             $this->clear_cache();
         }
 
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Duplicate all Records of Given Fiscal Year to New Fiscal Year
+     *
+     * @param int $source_fiscal_year_id
+     * @param int $destination_fiscal_year_id
+     * @return bool
+     */
+    public function duplicate($source_fiscal_year_id, $destination_fiscal_year_id)
+    {
+        $source_settings = $this->get_src_list_by_fiscal_year($source_fiscal_year_id);
+
+
+        $done  = TRUE;
+        if($source_settings)
+        {
+            // Use automatic transaction
+            $this->db->trans_start();
+
+                foreach($source_settings as $src)
+                {
+                    $single_data =(array)$src;
+
+                    // Set Fiscal Year
+                    $single_data['fiscal_yr_id'] = $destination_fiscal_year_id;
+
+                    // Remoe Unnecessary Fields
+                    unset($single_data['id']);
+                    unset($single_data['created_at']);
+                    unset($single_data['created_by']);
+                    unset($single_data['updated_at']);
+                    unset($single_data['updated_by']);
+
+                    parent::insert($single_data, TRUE);
+                }
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                // generate an error... or use the log_message() function to log your error
+                $done = FALSE;
+            }
+            else
+            {
+                $this->clear_cache();
+            }
+        }
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Import Missing Portfolios for given Fiscal Year
+     *
+     * @param int $fiscal_yr_id
+     * @return bool
+     */
+    public function import_missing($fiscal_yr_id)
+    {
+        $this->load->model('portfolio_model');
+
+        // Valid Record ?
+        $fiscal_yr_id   = (int)$fiscal_yr_id;
+        $existing_child_portfolios  = $this->get_portfolios_by_fiscal_year($fiscal_yr_id);
+        $all_child_portfolios       = $this->portfolio_model->get_children();
+
+        $existing = [];
+        $all = [];
+        foreach($existing_child_portfolios as $e)
+        {
+            $existing[] = $e->portfolio_id;
+        }
+        foreach($all_child_portfolios as $a)
+        {
+            $all[] = $a->id;
+        }
+
+        $existing   = array_values($existing);
+        $all        = array_values($all);
+
+        asort($existing);
+        asort($all);
+
+        $missing = array_diff($all, $existing);
+
+        $done  = TRUE;
+        if( count($missing) )
+        {
+            // Use automatic transaction
+            $this->db->trans_start();
+
+                foreach($missing as $portfolio_id)
+                {
+                    $single_data = [
+                        'fiscal_yr_id' => $fiscal_yr_id,
+                        'portfolio_id' => $portfolio_id,
+                    ];
+                    parent::insert($single_data, TRUE);
+                }
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                // generate an error... or use the log_message() function to log your error
+                $done = FALSE;
+            }
+            else
+            {
+                $this->clear_cache();
+            }
+        }
+
+        // return result/status
         return $done;
     }
 

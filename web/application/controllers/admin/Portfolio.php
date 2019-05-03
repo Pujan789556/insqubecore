@@ -1126,54 +1126,17 @@ class Portfolio extends MY_Controller
 	public function import_missing_settings($fiscal_yr_id)
 	{
 		$this->load->model('portfolio_setting_model');
-
-		// Valid Record ?
-		$fiscal_yr_id 	= (int)$fiscal_yr_id;
-		$existing_child_portfolios 	= $this->portfolio_setting_model->get_portfolios_by_fiscal_year($fiscal_yr_id);
-		$all_child_portfolios 		= $this->portfolio_model->get_children();
-
-		$existing = [];
-		$all = [];
-		foreach($existing_child_portfolios as $e)
+		if ( !$this->portfolio_setting_model->import_missing($fiscal_yr_id) )
 		{
-			$existing[] = $e->portfolio_id;
-		}
-		foreach($all_child_portfolios as $a)
-		{
-			$all[] = $a->id;
+			return $this->template->json([
+				'status' => 'error',
+				'message' => 'Could not import missing portfolios.'
+			]);
 		}
 
-		$existing = array_values($existing);
-		$all = array_values($all);
-
-		asort($existing);
-		asort($all);
-
-		$missing = array_diff($all, $existing);
-		$count = count($missing);
-		if( count($missing) )
-		{
-			$batch_data = [];
-
-			foreach($missing as $portfolio_id)
-			{
-				$batch_data[] = [
-					'fiscal_yr_id' => $fiscal_yr_id,
-					'portfolio_id' => $portfolio_id,
-				];
-			}
-
-			if ( !$this->portfolio_setting_model->insert_batch($batch_data, TRUE) )
-			{
-				return $this->template->json([
-					'status' => 'error',
-					'message' => 'Could not import missing portfolios.'
-				]);
-			}
-		}
 		return $this->template->json([
 			'status' => 'success',
-			'message' => "Successfully imported {$count} portfolios."
+			'message' => "Successfully imported missing portfolios."
 		]);
 
 	}
@@ -1214,31 +1177,8 @@ class Portfolio extends MY_Controller
             $this->form_validation->set_rules($rules);
             if( $this->form_validation->run() === TRUE )
             {
-                $data = $this->input->post();
-
-                $batch_data                 = [];
-                $source_settings 			= $this->portfolio_setting_model->get_src_list_by_fiscal_year($source_fiscal_year_id);
-                $destination_fiscal_year_id = $this->input->post('fiscal_yr_id');
-
-                foreach($source_settings as $src)
-                {
-                    $source_record =(array)$src;
-
-                    // Set Fiscal Year
-                    $source_record['fiscal_yr_id'] = $destination_fiscal_year_id;
-
-                    // Remoe Unnecessary Fields
-                    unset($source_record['id']);
-                    unset($source_record['created_at']);
-                    unset($source_record['created_by']);
-                    unset($source_record['updated_at']);
-                    unset($source_record['updated_by']);
-
-                    $batch_data[] = $source_record;
-                }
-
-                $batch_data = array_filter($batch_data);
-                $done = $this->portfolio_setting_model->insert_batch($batch_data, TRUE);
+                $destination_fiscal_year_id = (int)$this->input->post('fiscal_yr_id');
+                $done = $this->portfolio_setting_model->duplicate($source_fiscal_year_id, $destination_fiscal_year_id);
 
                 if(!$done)
                 {

@@ -11,6 +11,8 @@ class Portfolio_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     protected $before_insert = ['before_insert_update__defaults'];
