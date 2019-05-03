@@ -41,7 +41,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						/**
 						 * Load Live Search UI
 						 */
-						$this->load->view('templates/_common/_live_search',['options' => json_encode(['rows'=>'#search-result-object tr.searchable'])]);
+						$this->load->view('templates/_common/_live_search',['options' => json_encode(['rows'=>"#{$DOM_RowBoxId} tr.searchable"])]);
 						?>
 					</div>
 				</div>
