@@ -11,10 +11,10 @@ class Tmi_plan_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['before_insert_update__defaults'];
-    protected $before_update = ['before_insert_update__defaults'];
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
@@ -275,53 +275,6 @@ class Tmi_plan_model extends MY_Model
             }
         }
         return $record;
-    }
-
-    // ----------------------------------------------------------------
-
-    public function update_tariff_benefits($id, $data)
-    {
-        // add modified details
-        $data = $this->modified_on(['fields' => $data]);
-
-        $result = $this->db->set($data)
-                        ->where('id', $id)
-                        ->update($this->table_name);
-
-        // Clean Cache
-        $this->clear_cache();
-
-        return $result;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Trigger - Before Insert/Update
-     *
-     * The following tasks are carried out before inserting/updating the record:
-     *  1. Capitalize Code
-     *  2. Nullify Parent ID if empty supplied
-     *
-     * @param array $data
-     * @return array
-     */
-    public function before_insert_update__defaults($data)
-    {
-        $code_cols = array('code');
-        foreach($code_cols as $col)
-        {
-            if( isset($data[$col]) && !empty($data[$col]) )
-            {
-                $data[$col] = strtoupper($data[$col]);
-            }
-        }
-
-        if( !$data['parent_id'])
-        {
-            $data['parent_id'] = NULL;
-        }
-        return $data;
     }
 
     // ----------------------------------------------------------------

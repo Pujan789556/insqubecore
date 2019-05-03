@@ -250,8 +250,12 @@ class Tariff_tmi_plans extends MY_Controller
 			{
 				$data = $this->input->post();
 
-				// Activat?
-				$data['active'] = $data['active'] ?? 0;
+				if( in_array($action, ['add', 'edit']))
+				{
+					// Prepare Data
+					$data['active'] 	= $data['active'] ?? 0; // If not set, set active to zero
+					$data['parent_id'] 	= $data['parent_id'] ? $data['parent_id'] : NULL; // if not supplied, set to NULL
+				}
 
 				// Insert or Update?
 				if($action === 'add')
@@ -277,7 +281,7 @@ class Tariff_tmi_plans extends MY_Controller
 					$tariff_data[ $tariff_type == 'm' ? 'tariff_medical' : 'tariff_package' ] = json_encode($structured_tariff);
 
 					// Basic Information Edit Mode
-					$done = $this->tmi_plan_model->update_tariff_benefits($record->id, $tariff_data);
+					$done = $this->tmi_plan_model->update($record->id, $tariff_data, TRUE);
 				}
 
 				/**
@@ -293,7 +297,7 @@ class Tariff_tmi_plans extends MY_Controller
 						'benefits' => json_encode($structured_benefits)
 					];
 					// Basic Information Edit Mode
-					$done = $this->tmi_plan_model->update_tariff_benefits($record->id, $benefit_data);
+					$done = $this->tmi_plan_model->update($record->id, $benefit_data, TRUE);
 				}
 
 				if(!$done)
