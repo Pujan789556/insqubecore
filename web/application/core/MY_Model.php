@@ -388,12 +388,13 @@ class MY_Model
      * This is a post insert/update/delete trigger to save audit log
      *
      * @param array $data ['method' => 'insert|update|delete', 'id' => xxx, 'fields' => ['key' => 'val', ...]]
+     * @param array $table_reference ['key' => 'value']. Passed this from Individual Model for a table without having PK as ID
      * @return array
      */
-    public function save_audit_log($data)
+    public function save_audit_log($data, $table_reference = NULL)
     {
         $method = $data['method'] ?? '';
-        $id     = $data['id'] ? $data['id'] : NULL;
+        $id     = isset($data['id']) && !empty($data['id']) ? $data['id'] : NULL;
 
         $audit_data = [];
         switch($method)
@@ -420,12 +421,16 @@ class MY_Model
          */
         if($audit_data)
         {
+            // Table Reference Passed?
+            $table_reference = is_array($table_reference) ? json_encode($table_reference) : NULL;
+
             // Other Data
             $audit_data = array_merge([
-                    'table_name' => $this->table_name,
-                    'table_id'   => $id,
-                    'user_id'   => (int )$this->dx_auth->get_user_id(),
-                    'action_at' => $this->set_date()
+                    'table_name'        => $this->table_name,
+                    'table_id'          => $id,
+                    'table_reference'   => $table_reference,
+                    'user_id'           => (int )$this->dx_auth->get_user_id(),
+                    'action_at'         => $this->set_date()
             ], $audit_data);
 
 
