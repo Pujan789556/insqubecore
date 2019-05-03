@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		</tr>
 	</thead>
 
-	<tbody id="search-result-surveyor">
+	<tbody id="<?php echo $DOM_RowBoxId ?>">
 		<?php
 		/**
 		 * Load Rows & Next Link (if any)
