@@ -113,8 +113,8 @@ if ( ! function_exists('RI__compute_flag_ri_approval'))
 	{
 		$CI =& get_instance();
 
-		$CI->load->model('ri_setup_treaty_model');
-		$treaty_record = $CI->ri_setup_treaty_model->get_portfolio_treaty($portfolio_id, $CI->current_fiscal_year->id, IQB_RI_TREATY_CATEGORY_NORMAL);
+		$CI->load->model('ri_setup_treaty_portfolio_model');
+		$treaty_record = $CI->ri_setup_treaty_portfolio_model->get_portfolio_treaty($portfolio_id, $CI->current_fiscal_year->id, IQB_RI_TREATY_CATEGORY_NORMAL);
 
 		if( !$treaty_record )
 		{
@@ -687,13 +687,13 @@ if ( ! function_exists('RI__get_portfolio_treaty'))
 		/**
 		 * Load models
 		 */
-		$CI->load->model('ri_setup_treaty_model');
+		$CI->load->model('ri_setup_treaty_portfolio_model');
 
 
 		/**
 		 * Portfolio Treaty for "Normal Risks" or "Pool Risk" which defined by $category variable
 		 */
-		$treaty_record = $CI->ri_setup_treaty_model->get_portfolio_treaty($portfolio_id, $fiscal_yr_id, $category);
+		$treaty_record = $CI->ri_setup_treaty_portfolio_model->get_portfolio_treaty($portfolio_id, $fiscal_yr_id, $category);
 		if(!$treaty_record )
 		{
 			// NO Treaty Setup for this portfolio!

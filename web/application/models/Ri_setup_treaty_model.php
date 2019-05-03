@@ -14,24 +14,20 @@ class Ri_setup_treaty_model extends MY_Model
     protected static $table_treaty_portfolios               = 'ri_setup_treaty_portfolios';
     protected static $table_comp_cession_distribution       = 'ri_setup_comp_cession_distribution';
     protected static $table_treaty_tax_and_commission       = 'ri_setup_treaty_tax_and_commission';
-    protected static $table_treaty_commission_scale         = 'ri_setup_commission_scale';
 
-    /**
-     * Other table Fillables
-     */
-    // Tax and Commission Tables
-    protected static $tnc_fillables = ['qs_comm_ri_quota', 'qs_comm_ri_surplus_1', 'qs_comm_ri_surplus_2', 'qs_comm_ri_surplus_3', 'qs_tax_ri_quota', 'qs_tax_ri_surplus_1', 'qs_tax_ri_surplus_2', 'qs_tax_ri_surplus_3', 'qs_tax_ib_quota', 'qs_tax_ib_surplus_1', 'qs_tax_ib_surplus_2', 'qs_tax_ib_surplus_3', 'flag_qs_comm_scale_quota', 'flag_qs_comm_scale_surplus_1', 'flag_qs_comm_scale_surplus_2', 'flag_qs_comm_scale_surplus_3', 'eol_min_n_deposit_amt_l1', 'eol_min_n_deposit_amt_l2', 'eol_min_n_deposit_amt_l3', 'eol_min_n_deposit_amt_l4', 'eol_premium_mode_l1', 'eol_premium_mode_l2', 'eol_premium_mode_l3', 'eol_premium_mode_l4', 'eol_min_rate_l1', 'eol_min_rate_l2', 'eol_min_rate_l3', 'eol_min_rate_l4', 'eol_max_rate_l1', 'eol_max_rate_l2', 'eol_max_rate_l3', 'eol_max_rate_l4', 'eol_fixed_rate_l1', 'eol_fixed_rate_l2', 'eol_fixed_rate_l3', 'eol_fixed_rate_l4', 'eol_loading_factor_l1', 'eol_loading_factor_l2', 'eol_loading_factor_l3', 'eol_loading_factor_l4', 'eol_tax_ri_l1', 'eol_tax_ri_l2', 'eol_tax_ri_l3', 'eol_tax_ri_l4', 'eol_comm_ib_l1', 'eol_comm_ib_l2', 'eol_comm_ib_l3', 'eol_comm_ib_l4', 'flag_eol_rr_l1', 'flag_eol_rr_l2', 'flag_eol_rr_l3', 'flag_eol_rr_l4'];
 
     protected $set_created = true;
     protected $set_modified = true;
     protected $log_user = true;
+
+    protected $audit_log = TRUE;
 
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
-    protected $fields = ['id', 'name', 'category', 'fiscal_yr_id', 'treaty_type_id', 'estimated_premium_income', 'treaty_effective_date', 'file', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'name', 'category', 'fiscal_yr_id', 'treaty_type_id', 'estimated_premium_income', 'treaty_effective_date', 'file', 'commission_scales', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -53,6 +49,10 @@ class Ri_setup_treaty_model extends MY_Model
         parent::__construct();
 
         $this->load->model('ri_setup_treaty_type_model');
+        $this->load->model('ri_setup_treaty_broker_model');
+        $this->load->model('ri_setup_treaty_portfolio_model');
+        $this->load->model('ri_setup_treaty_tax_and_commission_model');
+
         $this->load->model('company_model');
         $this->load->model('portfolio_model');
 
@@ -763,8 +763,6 @@ class Ri_setup_treaty_model extends MY_Model
         unset($data['portfolio_ids']);
 
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
         $id                 = FALSE;
 
         // Use automatic transaction
@@ -776,26 +774,24 @@ class Ri_setup_treaty_model extends MY_Model
             // Task b. Insert Broker Relations
             if($id)
             {
-                // Insert Batch Broker Data
-                $this->batch_insert_treaty_brokers($id, $broker_ids);
+                // Add Brokers
+                $this->ri_setup_treaty_broker_model->add_brokers($id, $broker_ids);
 
                 // Insert Batch Portfolio Data
-                $this->batch_insert_treaty_portfolios($id, $portfolio_ids);
+                $this->ri_setup_treaty_portfolio_model->add_portfolios($id, $portfolio_ids);
+
+                // Insert Default Tax and Commission Record
+                $this->ri_setup_treaty_tax_and_commission_model->insert(['treaty_id' => $id], TRUE);
 
             }
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
-
-        // Check Transaction Status
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
             $id = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $id;
@@ -833,6 +829,10 @@ class Ri_setup_treaty_model extends MY_Model
         $to_delete_portfolios = array_diff($old_data['old_portfolios'], $portfolio_ids);
 
 
+        // Find To Insert/Delete Brokers
+        $to_insert_brokers = array_diff($broker_ids, $old_data['old_brokers']);
+        $to_delete_brokers = array_diff($old_data['old_brokers'], $broker_ids);
+
         // Disable DB Debug for transaction to work
         $this->db->db_debug = FALSE;
         $status             = FALSE;
@@ -846,17 +846,19 @@ class Ri_setup_treaty_model extends MY_Model
             // Task b. Update Broker Relations
             if($status)
             {
-                // Delete Old Brokers Relation
-                $this->delete_brokers_by_treaty($id);
+                // Delete Unselected Brokers
+                $this->ri_setup_treaty_broker_model->delete_brokers($id, $to_delete_brokers);
 
-                // Insert Batch Broker Data
-                $this->batch_insert_treaty_brokers($id, $broker_ids);
+                // Add New Brokers
+                $this->ri_setup_treaty_broker_model->add_brokers($id, $to_insert_brokers);
 
-                // Delete Old Portfolio Relation
-                $this->delete_specific_portfolios_by_treaty($id, $to_delete_portfolios);
 
-                // Insert Batch Portfolio Data
-                $this->batch_insert_treaty_portfolios($id, $to_insert_portfolios);
+                // Delete Unselected Portfolios
+                $this->ri_setup_treaty_portfolio_model->delete_portfolios($id, $to_delete_portfolios);
+
+                // Add New Portfolios
+                $this->ri_setup_treaty_portfolio_model->add_portfolios($id, $to_insert_portfolios);
+
             }
 
         // Commit all transactions on success, rollback else
@@ -876,55 +878,6 @@ class Ri_setup_treaty_model extends MY_Model
         return $status;
     }
 
-    // ----------------------------------------------------------------
-
-    /**
-     * Save Tax & Commission Configuration of a Treaty
-     *
-     * @param integer $id Treaty ID
-     * @param array $data
-     * @return bool
-     */
-    public function save_treaty_tnc($id, $data)
-    {
-        // Get only fillable fields
-        $fillable_data = [];
-        foreach( self::$tnc_fillables as $col )
-        {
-            $fillable_data[$col] = $data[$col] ?? NULL;
-        }
-
-
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $status             = TRUE;
-
-        // Use automatic transaction
-        $this->db->trans_start();
-
-            // Update Data
-            $this->db->where('treaty_id', $id)
-                     ->set($fillable_data)
-                     ->update(self::$table_treaty_tax_and_commission);
-
-
-        // Commit all transactions on success, rollback else
-        $this->db->trans_complete();
-
-        // Check Transaction Status
-        if ($this->db->trans_status() === FALSE)
-        {
-            // generate an error... or use the log_message() function to log your error
-            $status = FALSE;
-        }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-        // return result/status
-        return $status;
-
-    }
 
     // ----------------------------------------------------------------
 
@@ -935,7 +888,7 @@ class Ri_setup_treaty_model extends MY_Model
      * @param array $data
      * @return bool
      */
-    public function save_treaty_commission_scale($id, $data)
+    public function save_commission_scales($id, $data)
     {
         // Prepare JSON for commission scale
         $total_count = count($data['name']);
@@ -950,34 +903,22 @@ class Ri_setup_treaty_model extends MY_Model
                 'rate'      => $data['rate'][$i],
             ];
         }
-        $scale_data['scales'] = $json ? json_encode($json) : NULL;
+        $scale_data['commission_scales'] = $json ? json_encode($json) : NULL;
 
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
         $status             = TRUE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
-            // Update Data
-            $this->db->where('treaty_id', $id)
-                     ->set($scale_data)
-                     ->update(self::$table_treaty_commission_scale);
-
+            parent::update($id, $scale_data, TRUE);
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
-
-        // Check Transaction Status
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;
@@ -1170,140 +1111,6 @@ class Ri_setup_treaty_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function batch_insert_treaty_brokers($id, $broker_ids)
-    {
-        $batch_broker_data = [];
-        foreach($broker_ids as $company_id)
-        {
-            $batch_broker_data[] = [
-                'treaty_id'     => $id,
-                'company_id'    => $company_id
-            ];
-        }
-
-        // Insert Batch Broker Data
-        if( $batch_broker_data )
-        {
-            return $this->db->insert_batch(self::$table_treaty_brokers, $batch_broker_data);
-        }
-        return FALSE;
-    }
-
-    // ----------------------------------------------------------------
-
-    public function delete_brokers_by_treaty($id)
-    {
-        return $this->db->where('treaty_id', $id)
-                        ->delete(self::$table_treaty_brokers);
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Save Treaty Portfolios
-     *
-     * All transactions must be carried out, else rollback.
-     * Since the number of portfolios are fixed (which are added during treaty add/edit),
-     * we will only update the configuration for existing portfolios
-     *
-     * @param array $data
-     * @return mixed
-     */
-    public function save_treaty_portfolios($id, $data)
-    {
-        $status                     = TRUE;
-        $treaty_portfolio_fillables = ['ac_basic','flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'comp_cession_comm_ri', 'comp_cession_tax_ri', 'comp_cession_tax_ib', 'treaty_max_capacity_amt', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
-
-        $total_portfolios           = count($data['portfolio_ids']);
-        $treaty_id                  = $id;
-
-         // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-
-        // Use automatic transaction
-        $this->db->trans_start();
-
-            for($i = 0; $i < $total_portfolios; $i++)
-            {
-                $portfolio_id = $data['portfolio_ids'][$i];
-                $treaty_portfolio_data = [];
-
-                foreach($treaty_portfolio_fillables as $column)
-                {
-                    $treaty_portfolio_data[$column] = $data[$column][$i] ?? NULL; // Reset to Default
-                }
-
-                // Update Treaty Portfolio Configuration
-                $this->db->where('treaty_id', $treaty_id)
-                         ->where('portfolio_id', $portfolio_id)
-                         ->set($treaty_portfolio_data)
-                         ->update(self::$table_treaty_portfolios);
-            }
-
-        // Commit all transactions on success, rollback else
-        $this->db->trans_complete();
-
-        // Check Transaction Status
-        if ($this->db->trans_status() === FALSE)
-        {
-            // generate an error... or use the log_message() function to log your error
-            $status = FALSE;
-        }
-        else
-        {
-            /**
-             * Clear Cache for all portfolios
-             */
-            $cache_vars = [];
-            foreach($data['portfolio_ids'] as $portfolio_id )
-            {
-                $this->delete_cache('ri_tbp_' . $portfolio_id);
-            }
-        }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-        // return result/status
-        return $status;
-    }
-    // ----------------------------------------------------------------
-
-    public function batch_insert_treaty_portfolios($id, $portfolio_ids)
-    {
-        $batch_portfolio_data = [];
-        foreach($portfolio_ids as $portfolio_id)
-        {
-            $batch_portfolio_data[] = [
-                'treaty_id'         => $id,
-                'portfolio_id'      => $portfolio_id
-            ];
-        }
-
-        // Insert Batch Broker Data
-        if( $batch_portfolio_data )
-        {
-            return $this->db->insert_batch(self::$table_treaty_portfolios, $batch_portfolio_data);
-        }
-        return FALSE;
-    }
-
-    // ----------------------------------------------------------------
-
-    public function delete_specific_portfolios_by_treaty($id, $portfolio_ids)
-    {
-        if( !empty($portfolio_ids) && is_array($portfolio_ids))
-        {
-            return $this->db
-                            ->where('treaty_id', $id)
-                            ->where_in('portfolio_id', $portfolio_ids)
-                            ->delete(self::$table_treaty_portfolios);
-        }
-        return FALSE;
-    }
-
-    // ----------------------------------------------------------------
-
     public function check_duplicate($where, $id=NULL)
     {
         if( $id )
@@ -1432,9 +1239,6 @@ class Ri_setup_treaty_model extends MY_Model
                         // Treaty Tax and Commission - all fields except treaty_id
                         'TTNC.*, ' .
 
-                        // Treaty Commission Scale
-                        'TCS.scales as commission_scales, ' .
-
                         // Fiscal year table
                         'FY.code_en AS fy_code_en, FY.code_np AS fy_code_np, ' .
 
@@ -1443,134 +1247,10 @@ class Ri_setup_treaty_model extends MY_Model
                         )
                 ->from($this->table_name . ' AS T')
                 ->join(self::$table_treaty_tax_and_commission . ' TTNC', 'TTNC.treaty_id = T.id')
-                ->join(self::$table_treaty_commission_scale . ' TCS', 'TCS.treaty_id = T.id')
                 ->join('master_fiscal_yrs FY', 'FY.id = T.fiscal_yr_id')
                 ->join(self::$table_treaty_types . ' TT', 'TT.id = T.treaty_type_id')
                 ->where('T.id', $id)
                 ->get()->row();
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Get Details of a Treaty Tax and Commission
-     *
-     * @param integer $id
-     * @return object
-     */
-    public function get_treaty_tax_commission($treaty_id)
-    {
-        return $this->db->select(
-
-                        // Treaty Tax and Commission - all fields except treaty_id
-                        'TTNC.*'
-                        )
-                ->from(self::$table_treaty_tax_and_commission . ' AS TTNC')
-                ->where('TTNC.treaty_id', $treaty_id)
-                ->get()->row();
-    }
-
-	// --------------------------------------------------------------------
-
-    public function get_brokers_by_treaty($id)
-    {
-        return $this->db->select('TB.treaty_id, TB.company_id, C.name_en, C.picture, C.pan_no, C.active, C.type')
-                        ->from(self::$table_treaty_brokers . ' AS TB')
-                        ->join('master_companies C', 'C.id = TB.company_id')
-                        ->where('TB.treaty_id', $id)
-                        ->get()->result();
-    }
-
-    // --------------------------------------------------------------------
-
-    public function get_brokers_by_treaty_dropdown($id)
-    {
-        $list = $this->get_brokers_by_treaty($id);
-        $brokers = [];
-        foreach($list as $record)
-        {
-            $brokers["{$record->company_id}"] = $record->name_en;
-        }
-        return $brokers;
-    }
-
-    // --------------------------------------------------------------------
-
-    public function get_portfolios_by_treaty($id)
-    {
-
-        $this->_treaty_portfolios_select();
-
-        return $this->db
-                        ->where('T.id', $id)
-                        ->get()->result();
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Get Portfolio Treaty for Given Fiscal Year for Given Category
-     *
-     * @param int $portfolio_id
-     * @param int $fiscal_yr_id
-     * @param int $category
-     * @return object
-     */
-    public function get_portfolio_treaty($portfolio_id, $fiscal_yr_id, $category)
-    {
-        /**
-         * Get Cached Result, If no, cache the query result
-         */
-        $cache_var  = 'ri_pt_' . $portfolio_id . '_' . $fiscal_yr_id . '_' . $category;
-        $row       = $this->get_cache($cache_var);
-        if(!$row)
-        {
-            $this->_treaty_portfolios_select();
-            $row = $this->db
-                            ->where('T.category', $category)
-                            ->where('T.fiscal_yr_id', $fiscal_yr_id)
-                            ->where('P.id', $portfolio_id)
-                            ->get()->row();
-            if($row)
-            {
-                $this->write_cache($row, $cache_var, CACHE_DURATION_HR);
-            }
-        }
-        return $row;
-    }
-
-    // --------------------------------------------------------------------
-
-    private function _treaty_portfolios_select()
-    {
-        $this->db->select(
-                            // Treaty Details
-                            'T.id, T.name as treaty_name, T.category, T.fiscal_yr_id, T.treaty_type_id, T.treaty_effective_date, ' .
-
-                            // Treaty Portfolio Config
-                            'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amt, TP.comp_cession_comm_ri, TP.comp_cession_tax_ri, TP.comp_cession_tax_ib, TP.treaty_max_capacity_amt, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_def_ret_apply, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
-
-                            // Portfolio Detail
-                            'P.code as portfolio_code, P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np, ' .
-                            'PP.code as protfolio_parent_code, PP.name_en as portfolio_parent_name_en, PP.name_np as portfolio_parent_name_np'
-                            )
-                        ->from($this->table_name . ' AS T')
-                        ->join(self::$table_treaty_portfolios . ' TP', 'T.id = TP.treaty_id' )
-                        ->join('master_portfolio P', 'P.id = TP.portfolio_id')
-                        ->join('master_portfolio PP', 'P.parent_id = PP.id', 'left');
-    }
-
-    // --------------------------------------------------------------------
-
-    public function get_portfolios_by_treaty_dropdown($id)
-    {
-        $list = $this->get_portfolios_by_treaty($id);
-        $portfolios = [];
-        foreach($list as $record)
-        {
-            $portfolios["{$record->portfolio_id}"] = $record->portfolio_name_en;
-        }
-        return $portfolios;
     }
 
     // --------------------------------------------------------------------

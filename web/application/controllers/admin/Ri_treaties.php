@@ -311,10 +311,6 @@ class Ri_treaties extends MY_Controller
 			// Portfolios
 			'portfolios' 		=> $this->portfolio_model->dropdown_children(),
 			'treaty_portfolios' => [],
-
-			// // Reinsurer Companies
-			// 'reinsurers' 			=> $this->company_model->dropdown_reinsurers(),
-			// 'treaty_distribution' 	=> [],
 		];
 
 		// Form Submitted? Save the data
@@ -343,12 +339,12 @@ class Ri_treaties extends MY_Controller
 		/**
 		 * Existing Brokers
 		 */
-		$treaty_borkers = $this->ri_setup_treaty_model->get_brokers_by_treaty_dropdown($id);
+		$treaty_borkers = $this->ri_setup_treaty_broker_model->broker_dropdown($id);
 
 		/**
 		 * Existing Portfolios
 		 */
-		$treaty_portfolios = $this->ri_setup_treaty_model->get_portfolios_by_treaty_dropdown($id);
+		$treaty_portfolios = $this->ri_setup_treaty_portfolio_model->portfolio_dropdown($id);
 
 
 		/**
@@ -434,6 +430,8 @@ class Ri_treaties extends MY_Controller
 						// Now Update Data
 						// Get old treaty portfolio
 						$old_data['old_portfolios'] = $form_data['treaty_portfolios'];
+						$old_data['old_brokers'] 	= $form_data['treaty_borkers'];
+
 						$done = $this->ri_setup_treaty_model->edit($record->id, $data, $old_data);
 					}
 
@@ -528,7 +526,7 @@ class Ri_treaties extends MY_Controller
 			if($this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
-        		$done = $this->ri_setup_treaty_model->save_treaty_tnc($record->id, $data);
+        		$done = $this->ri_setup_treaty_tax_and_commission_model->save($record->id, $data);
 
         		if($done)
         		{
@@ -610,7 +608,7 @@ class Ri_treaties extends MY_Controller
             if( $this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
-        		$done = $this->ri_setup_treaty_model->save_treaty_commission_scale($record->id, $data);
+        		$done = $this->ri_setup_treaty_model->save_commission_scales($record->id, $data);
 
         		if($done)
         		{
@@ -966,7 +964,7 @@ class Ri_treaties extends MY_Controller
 		/**
 		 * Treaty Portfolios
 		 */
-		$portfolios = $this->ri_setup_treaty_model->get_portfolios_by_treaty($id);
+		$portfolios = $this->ri_setup_treaty_portfolio_model->get_many_by_treaty($id);
 
 		/**
 		 * Validation Rules/Form Elements Based on the Treaty Type
@@ -994,12 +992,12 @@ class Ri_treaties extends MY_Controller
 			if($this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
-        		$done = $this->ri_setup_treaty_model->save_treaty_portfolios($record->id, $data);
+        		$done = $this->ri_setup_treaty_portfolio_model->save_portfolio_config($record->id, $data);
 
         		if($done)
         		{
         			// Update the Portfolio Table
-					$portfolios = $this->ri_setup_treaty_model->get_portfolios_by_treaty($id);
+					$portfolios = $this->ri_setup_treaty_portfolio_model->get_many_by_treaty($id);
 					$success_html = $this->load->view($this->_view_base . '/snippets/_ri_portfolio_data', ['portfolios' => $portfolios], TRUE);
 
 					$ajax_data = [
@@ -1049,7 +1047,7 @@ class Ri_treaties extends MY_Controller
 		private function _portfolio_validation_rules_by_treaty_type($record)
 		{
 
-			$portfolio_dropdown = $this->ri_setup_treaty_model->get_portfolios_by_treaty_dropdown($record->id);
+			$portfolio_dropdown = $this->ri_setup_treaty_portfolio_model->portfolio_dropdown($record->id);
 			$v_rules = $this->ri_setup_treaty_model->get_validation_rules_formatted(['portfolios_common']);
 
 			// First rule is 'portfolio_ids[]', update validation rule
@@ -1201,8 +1199,8 @@ class Ri_treaties extends MY_Controller
 		 */
 		$data = [
 			'record' 				=> $record,
-			'brokers' 				=> $this->ri_setup_treaty_model->get_brokers_by_treaty($id),
-			'portfolios' 			=> $this->ri_setup_treaty_model->get_portfolios_by_treaty($id),
+			'brokers' 				=> $this->ri_setup_treaty_broker_model->get_many_by_treaty($id),
+			'portfolios' 			=> $this->ri_setup_treaty_portfolio_model->get_many_by_treaty($id),
 			'treaty_distribution' 	=> $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id),
 		];
 

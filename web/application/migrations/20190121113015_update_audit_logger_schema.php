@@ -15,7 +15,7 @@ class Migration_Update_audit_logger_schema extends CI_Migration {
             // Use automatic transaction
             $this->db->trans_start();
 
-                echo "Running Migration down()... " . PHP_EOL .
+                echo "Running Migration up()... " . PHP_EOL .
                    "QUERY: $sql ... ";
 
                 echo $this->db->query($sql) ? "OK" : "FAIL";
