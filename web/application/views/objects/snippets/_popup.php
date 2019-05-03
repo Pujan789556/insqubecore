@@ -13,7 +13,7 @@ $portfolio_id   = (int)$record->portfolio_id;
  */
 if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_agr_crop', $data);
+    $this->load->view('objects/snippets/_popup_agr_crop', $data);
 }
 
 /**
@@ -22,7 +22,7 @@ if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CROP_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_agr_cattle', $data);
+    $this->load->view('objects/snippets/_popup_agr_cattle', $data);
 }
 
 /**
@@ -31,7 +31,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_CATTLE_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_agr_poultry', $data);
+    $this->load->view('objects/snippets/_popup_agr_poultry', $data);
 }
 
 /**
@@ -40,7 +40,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_POULTRY_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_agr_fish', $data);
+    $this->load->view('objects/snippets/_popup_agr_fish', $data);
 }
 
 /**
@@ -49,7 +49,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_FISH_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_agr_bee', $data);
+    $this->load->view('objects/snippets/_popup_agr_bee', $data);
 }
 
 /**
@@ -59,7 +59,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_AGR_BEE_ID )
  */
 else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MOTOR)) )
 {
-	$this->load->view($this->data['_view_base'] . '/snippets/_popup_motor', $data);
+	$this->load->view('objects/snippets/_popup_motor', $data);
 }
 
 /**
@@ -68,7 +68,7 @@ else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__M
  */
 else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__PROPERTY) ) )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_property', $data);
+    $this->load->view('objects/snippets/_popup_property', $data);
 }
 
 
@@ -78,7 +78,7 @@ else if( in_array($portfolio_id,  array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__
  */
 else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MISC_BRG)) )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_brg', $data);
+    $this->load->view('objects/snippets/_popup_misc_brg', $data);
 }
 
 /**
@@ -87,7 +87,7 @@ else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__M
  */
 else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__MARINE)) )
 {
-	$this->load->view($this->data['_view_base'] . '/snippets/_popup_marine', $data);
+	$this->load->view('objects/snippets/_popup_marine', $data);
 }
 
 /**
@@ -96,7 +96,7 @@ else if( in_array($portfolio_id, array_keys(IQB_PORTFOLIO__SUB_PORTFOLIO_LIST__M
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_eng_bl', $data);
+    $this->load->view('objects/snippets/_popup_eng_bl', $data);
 }
 
 /**
@@ -105,7 +105,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_BL_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_eng_car', $data);
+    $this->load->view('objects/snippets/_popup_eng_car', $data);
 }
 
 /**
@@ -114,7 +114,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CAR_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_eng_cpm', $data);
+    $this->load->view('objects/snippets/_popup_eng_cpm', $data);
 }
 
 /**
@@ -123,7 +123,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_CPM_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_eng_eei', $data);
+    $this->load->view('objects/snippets/_popup_eng_eei', $data);
 }
 
 /**
@@ -132,7 +132,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EEI_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_eng_ear', $data);
+    $this->load->view('objects/snippets/_popup_eng_ear', $data);
 }
 
 /**
@@ -141,7 +141,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_EAR_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_eng_mb', $data);
+    $this->load->view('objects/snippets/_popup_eng_mb', $data);
 }
 
 /**
@@ -150,7 +150,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_ENG_MB_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_bb', $data);
+    $this->load->view('objects/snippets/_popup_misc_bb', $data);
 }
 
 /**
@@ -159,7 +159,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_BB_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_gpa', $data);
+    $this->load->view('objects/snippets/_popup_misc_gpa', $data);
 }
 
 /**
@@ -168,7 +168,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_GPA_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_pa', $data);
+    $this->load->view('objects/snippets/_popup_misc_pa', $data);
 }
 
 /**
@@ -177,7 +177,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PA_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_pl', $data);
+    $this->load->view('objects/snippets/_popup_misc_pl', $data);
 }
 
 /**
@@ -186,7 +186,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_PL_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_ct', $data);
+    $this->load->view('objects/snippets/_popup_misc_ct', $data);
 }
 
 /**
@@ -195,7 +195,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CT_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_cs', $data);
+    $this->load->view('objects/snippets/_popup_misc_cs', $data);
 }
 
 /**
@@ -204,7 +204,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CS_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_cc', $data);
+    $this->load->view('objects/snippets/_popup_misc_cc', $data);
 }
 
 /**
@@ -213,7 +213,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_CC_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_epa', $data);
+    $this->load->view('objects/snippets/_popup_misc_epa', $data);
 }
 
 /**
@@ -222,7 +222,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_EPA_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_tmi', $data);
+    $this->load->view('objects/snippets/_popup_misc_tmi', $data);
 }
 
 /**
@@ -231,7 +231,7 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_TMI_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_fg', $data);
+    $this->load->view('objects/snippets/_popup_misc_fg', $data);
 }
 
 /**
@@ -240,6 +240,6 @@ else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_FG_ID )
  */
 else if( $portfolio_id == IQB_SUB_PORTFOLIO_MISC_HI_ID )
 {
-    $this->load->view($this->data['_view_base'] . '/snippets/_popup_misc_hi', $data);
+    $this->load->view('objects/snippets/_popup_misc_hi', $data);
 }
 

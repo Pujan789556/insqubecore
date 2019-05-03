@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 * Object - Policy Object Card
 */
 ?>
-<div class="box box-bordered box-warning" id="iqb-object-card"">
+<div class="box box-bordered box-warning" id="iqb-object-card">
     <div class="box-header with-border border-dark">
         <h3 class="no-margin">
         <span class="pull-left">Policy Object Details</span>
@@ -31,7 +31,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         /**
         * Policy Object Details
         */
-        $this->load->view($this->data['_view_base'] . '/snippets/_popup', ['record' => $record, 'ref' => 'policy_overview_tab']);
+        $this->load->view('objects/snippets/_popup', ['record' => $record, 'ref' => 'policy_overview_tab']);
         ?>
     </div>
 </div>
