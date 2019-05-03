@@ -11,6 +11,8 @@ class tariff_agriculture_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     protected $after_insert  = ['clear_cache'];
@@ -121,6 +123,103 @@ class tariff_agriculture_model extends MY_Model
     }
 
     // ----------------------------------------------------------------
+
+
+    /**
+     * Add Blank Tariff Records for given fiscal year
+     *
+     * @param int $fiscal_yr_id
+     * @return bool
+     */
+    public function add($fiscal_yr_id)
+    {
+        $this->load->model('portfolio_model');
+        $children_portfolios = $this->portfolio_model->dropdown_children(IQB_MASTER_PORTFOLIO_AGR_ID, 'id');
+
+
+        $done  = TRUE;
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Individual - No batch-insert - because of Audit Log Requirement
+            foreach($children_portfolios as $portfolio_id => $portfolio_name)
+            {
+                $single_data = [
+                    'fiscal_yr_id'              => $fiscal_yr_id,
+                    'portfolio_id'              => $portfolio_id
+                ];
+                parent::insert($single_data, TRUE);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+        else
+        {
+            $this->clear_cache();
+        }
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Duplicate all Records of Given Fiscal Year to New Fiscal Year
+     *
+     * @param int $source_fiscal_year_id
+     * @param int $destination_fiscal_year_id
+     * @return bool
+     */
+    public function duplicate($source_fiscal_year_id, $destination_fiscal_year_id)
+    {
+        $source_tariffs = $this->get_list_by_fiscal_year($source_fiscal_year_id);
+
+        $done  = TRUE;
+        if($source_tariffs)
+        {
+            // Use automatic transaction
+            $this->db->trans_start();
+
+                foreach($source_tariffs as $src)
+                {
+                    $single_data =(array)$src;
+
+                    // Set Fiscal Year
+                    $single_data['fiscal_yr_id'] = $destination_fiscal_year_id;
+
+                    // Remoe Unnecessary Fields
+                    unset($single_data['id']);
+                    unset($single_data['created_at']);
+                    unset($single_data['created_by']);
+                    unset($single_data['updated_at']);
+                    unset($single_data['updated_by']);
+
+                    parent::insert($single_data, TRUE);
+                }
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                // generate an error... or use the log_message() function to log your error
+                $done = FALSE;
+            }
+            else
+            {
+                $this->clear_cache();
+            }
+        }
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
 
     /**
      * Get Index Rows
