@@ -1467,54 +1467,8 @@ class Tariff extends MY_Controller
             $this->form_validation->set_rules($rules);
             if( $this->form_validation->run() === TRUE )
             {
-                $data = $this->input->post();
-
-                $fiscal_yr_id = $this->input->post('fiscal_yr_id');
-
-                /**
-                 * Insert Default Batch
-                 */
-                $ownership_list     = _OBJ_MOTOR_ownership_dropdown(FALSE);
-                $sub_portfolio_list = _OBJ_MOTOR_sub_portfolio_dropdown(FALSE);
-                $cvc_type_list      = _OBJ_MOTOR_CVC_type_dropdown(FALSE);
-
-                $batch_data = [];
-
-                // For all Motor Portfolios
-                foreach ($sub_portfolio_list as $portfolio_id=>$ptext)
-                {
-                    // CVC Types on Commercial Vehicle
-                    if( (int)$portfolio_id === IQB_SUB_PORTFOLIO_COMMERCIAL_VEHICLE_ID )
-                    {
-                        foreach($cvc_type_list as $cvc_type=>$ctext)
-                        {
-                            foreach($ownership_list as $ownership=>$otext)
-                            {
-                                $batch_data[] = [
-                                    'fiscal_yr_id'      => $fiscal_yr_id,
-                                    'portfolio_id'      => $portfolio_id,
-                                    'ownership'         => $ownership,
-                                    'cvc_type'          => $cvc_type
-                                ];
-                            }
-                        }
-                    }
-                    else
-                    {
-                        foreach($ownership_list as $ownership=>$otext)
-                        {
-                            $batch_data[] = [
-                                'fiscal_yr_id'      => $fiscal_yr_id,
-                                'portfolio_id'      => $portfolio_id,
-                                'ownership'         => $ownership,
-                                'cvc_type'          => NULL
-                            ];
-                        }
-                    }
-                }
-
-                $batch_data = array_filter($batch_data);
-                $done = $this->tariff_motor_model->insert_batch($batch_data, TRUE);
+                $fiscal_yr_id   = (int)$this->input->post('fiscal_yr_id');
+                $done           = $this->tariff_motor_model->add($fiscal_yr_id);
 
                 if(!$done)
                 {
@@ -1609,43 +1563,15 @@ class Tariff extends MY_Controller
             $this->form_validation->set_rules($rules);
             if( $this->form_validation->run() === TRUE )
             {
-                $data = $this->input->post();
-
-                $batch_data                 = [];
-                $source_tarrif              = $this->tariff_motor_model->get_list_by_fiscal_year($source_fiscal_year_id);
-                $destination_fiscal_year_id = $this->input->post('fiscal_yr_id');
-
-                foreach($source_tarrif as $src)
-                {
-                    $source_record =(array)$src;
-
-                    // Set Fiscal Year
-                    $source_record['fiscal_yr_id'] = $destination_fiscal_year_id;
-
-                    // Remoe Unnecessary Fields
-                    unset($source_record['id']);
-                    unset($source_record['created_at']);
-                    unset($source_record['created_by']);
-                    unset($source_record['updated_at']);
-                    unset($source_record['updated_by']);
-
-                    $batch_data[] = $source_record;
-                }
-
-                $batch_data = array_filter($batch_data);
-                $done = $this->tariff_motor_model->insert_batch($batch_data, TRUE);
-
+                $destination_fiscal_year_id = (int)$this->input->post('fiscal_yr_id');
+                $done = $this->tariff_motor_model->duplicate($source_fiscal_year_id, $destination_fiscal_year_id);
                 if(!$done)
                 {
-
                     $status = 'error';
                     $message = 'Could not update.';
                 }
                 else
                 {
-                    // Clear Cache
-                    $this->tariff_motor_model->clear_cache();
-
                     $status = 'success';
                     $message = 'Successfully Updated.';
                 }
