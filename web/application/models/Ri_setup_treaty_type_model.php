@@ -12,6 +12,8 @@ class Ri_setup_treaty_type_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id', 'name'];
 
     protected $after_update  = ['clear_cache'];
