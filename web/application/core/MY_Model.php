@@ -393,7 +393,7 @@ class MY_Model
     public function save_audit_log($data)
     {
         $method = $data['method'] ?? '';
-        $id     = $data['id'] ?? NULL;
+        $id     = $data['id'] ? $data['id'] : NULL;
 
         $audit_data = [];
         switch($method)
