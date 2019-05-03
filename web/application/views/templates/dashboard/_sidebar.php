@@ -224,7 +224,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                                                             </a>
                                                       </li>
 
-                                                      <li class="<?php echo set_menu_active($nav_level_3, 'tmi_plans');?>">
+                                                      <li class="<?php echo set_menu_active($nav_level_3, 'tariff_tmi_plans');?>">
                                                             <a href="<?php echo site_url('admin/tariff_tmi_plans');?>" title="Manage Travel Medical Insurance Plans & Tariff">
                                                                   <i class="fa fa-circle-o"></i> TMI Plans/Tariff
                                                             </a>
