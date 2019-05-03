@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<th>Actions</th>
 		</tr>
 	</thead>
-	<tbody id="search-result-vehicle_reg_prefix">
+	<tbody id="<?php echo $DOM_RowBoxId ?>">
 		<?php
 		/**
 		 * Load Rows & Next Link (if any)
