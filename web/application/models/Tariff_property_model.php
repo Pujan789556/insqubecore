@@ -11,6 +11,8 @@ class Tariff_property_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     // protected $before_insert = ['capitalize_code'];
@@ -25,7 +27,7 @@ class Tariff_property_model extends MY_Model
         [
             'field' => 'code',
             'label' => 'Risk Code',
-            'rules' => 'trim|required|max_length[20]|callback_check_duplicate',
+            'rules' => 'trim|required|max_length[20]|callback_check_duplicate_code',
             '_type'     => 'text',
             '_required' => true
         ],
@@ -306,6 +308,94 @@ class Tariff_property_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+
+    /**
+     * Add Tariff Records for given fiscal year
+     *
+     * @param array $batch_data Multiple Data Sets
+     * @return bool
+     */
+    public function add($batch_data)
+    {
+        $done  = TRUE;
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Individual - No batch-insert - because of Audit Log Requirement
+            foreach($batch_data as $single_data)
+            {
+                parent::insert($single_data, TRUE);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+        else
+        {
+            $this->clear_cache();
+        }
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Duplicate all Records of Given Fiscal Year to New Fiscal Year
+     *
+     * @param int $source_fiscal_year_id
+     * @param int $destination_fiscal_year_id
+     * @return bool
+     */
+    public function duplicate($source_fiscal_year_id, $destination_fiscal_year_id)
+    {
+        $source_tariffs = $this->get_list_by_fiscal_year($source_fiscal_year_id);
+
+        $done  = TRUE;
+        if($source_tariffs)
+        {
+            // Use automatic transaction
+            $this->db->trans_start();
+
+                foreach($source_tariffs as $src)
+                {
+                    $single_data =(array)$src;
+
+                    // Set Fiscal Year
+                    $single_data['fiscal_yr_id'] = $destination_fiscal_year_id;
+
+                    // Remoe Unnecessary Fields
+                    unset($single_data['id']);
+                    unset($single_data['created_at']);
+                    unset($single_data['created_by']);
+                    unset($single_data['updated_at']);
+                    unset($single_data['updated_by']);
+
+                    parent::insert($single_data, TRUE);
+                }
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                // generate an error... or use the log_message() function to log your error
+                $done = FALSE;
+            }
+            else
+            {
+                $this->clear_cache();
+            }
+        }
+
+        // return result/status
+        return $done;
+    }
+
+    // ----------------------------------------------------------------
+
     public function check_duplicate($where, $id=NULL)
     {
         if( $id )
@@ -520,8 +610,37 @@ class Tariff_property_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function delete($id = NULL)
+
+    /**
+     * Delete Multiple Records
+     *
+     * @param array $ids Multiple IDs
+     * @return bool
+     */
+    public function delete_multiple($ids)
     {
-        return FALSE;
+        $done  = TRUE;
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            // Insert Individual - No batch-insert - because of Audit Log Requirement
+            foreach($ids as $id)
+            {
+                parent::delete($id);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $done = FALSE;
+        }
+        else
+        {
+            $this->clear_cache();
+        }
+
+        // return result/status
+        return $done;
     }
 }

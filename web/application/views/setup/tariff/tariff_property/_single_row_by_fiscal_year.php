@@ -16,6 +16,16 @@ $_risk_url 		= $this->data['_url_base'] . '/risks/'  . $record->id;
 
 	<td class="ins-action">
 		<a href="#"
+			data-toggle="tooltip"
+			title="Edit Risk Category"
+			class="trg-dialog-edit action"
+			data-title='<i class="fa fa-pencil-square-o"></i> Edit Risk Category - <?php echo $record->name_en . " ({$record->name_np})" ?>'
+			data-url="<?php echo site_url($_edit_url);?>"
+			data-form=".form-iqb-general">
+			<i class="fa fa-pencil-square-o"></i>
+			<span class="hidden-xs">Edit</span>
+		</a>
+		<a href="#"
 			title="Edit Tariff"
 			data-toggle="tooltip"
 			data-box-size="full-width"

@@ -129,7 +129,7 @@ class Tariff_property extends MY_Controller
 
 
     /**
-     * Add Risk Categories - For This Fiscal Year
+     * Add Risk Categories - For Supplied Fiscal Year
      *
      * @return void
      */
@@ -158,7 +158,7 @@ class Tariff_property extends MY_Controller
                 }
 
                 $batch_data = array_filter($batch_data);
-                $done = $this->tariff_property_model->insert_batch($batch_data, TRUE);
+                $done = $this->tariff_property_model->add($batch_data);
 
                 if(!$done)
                 {
@@ -169,9 +169,6 @@ class Tariff_property extends MY_Controller
                 }
                 else
                 {
-                    // Clear Cache
-                    $this->tariff_property_model->clear_cache();
-
                     $status = 'success';
                     $message = 'Successfully Updated.';
                     $ajax_data = [
@@ -216,7 +213,7 @@ class Tariff_property extends MY_Controller
 
 
     /**
-     * Add Default Tarrif Data
+     * Edit Tariff - By Fiscal Year
      *
      * @return void
      */
@@ -260,7 +257,7 @@ class Tariff_property extends MY_Controller
                 $to_del_ids = array_diff($old_ids, $current_ids);
                 if($to_del_ids)
                 {
-                	$status = $this->tariff_property_model->delete_many($to_del_ids);
+                	$status = $this->tariff_property_model->delete_multiple($to_del_ids);
                 	if(!$status)
                 	{
                 		$this->template->json([
@@ -310,7 +307,7 @@ class Tariff_property extends MY_Controller
                 $flag_insert = TRUE;
                 if( $flag_updated && count($batch_data) > 0 )
                 {
-                	$flag_insert = $this->tariff_property_model->insert_batch($batch_data, TRUE);
+                	$flag_insert = $this->tariff_property_model->add($batch_data);
                 }
 
 
@@ -324,9 +321,6 @@ class Tariff_property extends MY_Controller
                 }
                 else
                 {
-                    // Clear Cache
-                    $this->tariff_property_model->clear_cache();
-
                     $status = 'success';
                     $message = 'Successfully Updated.';
                     $ajax_data = [
@@ -392,31 +386,8 @@ class Tariff_property extends MY_Controller
             $this->form_validation->set_rules($rules);
             if( $this->form_validation->run() === TRUE )
             {
-                $data = $this->input->post();
-
-                $batch_data                 = [];
-                $source_tarrif              = $this->tariff_property_model->get_list_by_fiscal_year($source_fiscal_year_id);
-                $destination_fiscal_year_id = $this->input->post('fiscal_yr_id');
-
-                foreach($source_tarrif as $src)
-                {
-                    $source_record =(array)$src;
-
-                    // Set Fiscal Year
-                    $source_record['fiscal_yr_id'] = $destination_fiscal_year_id;
-
-                    // Remoe Unnecessary Fields
-                    unset($source_record['id']);
-                    unset($source_record['created_at']);
-                    unset($source_record['created_by']);
-                    unset($source_record['updated_at']);
-                    unset($source_record['updated_by']);
-
-                    $batch_data[] = $source_record;
-                }
-
-                $batch_data = array_filter($batch_data);
-                $done = $this->tariff_property_model->insert_batch($batch_data, TRUE);
+                $destination_fiscal_year_id = (int)$this->input->post('fiscal_yr_id');
+                $done = $this->tariff_property_model->duplicate($source_fiscal_year_id, $destination_fiscal_year_id);
 
                 if(!$done)
                 {
@@ -428,9 +399,6 @@ class Tariff_property extends MY_Controller
                 }
                 else
                 {
-                    // Clear Cache
-                    $this->tariff_property_model->clear_cache();
-
                     $status = 'success';
                     $message = 'Successfully Updated.';
                     $ajax_data = [
@@ -596,7 +564,7 @@ class Tariff_property extends MY_Controller
 	private function _save($action, $record = NULL, $rules)
 	{
 		// Valid action?
-		if( !in_array($action, array('add', 'edit', 'risks', 'tariff')))
+		if( !in_array($action, array('edit', 'risks', 'tariff')))
 		{
 			$this->template->json([
 				'status' => 'error',
@@ -621,10 +589,6 @@ class Tariff_property extends MY_Controller
 
 				switch ($action)
 				{
-					case 'add':
-						# code...
-						break;
-
 					case 'edit':
 						$done = $this->tariff_property_model->update($record->id, $data, TRUE);
 						break;
@@ -756,6 +720,39 @@ class Tariff_property extends MY_Controller
 
 		return $this->tariff_property_model->update($id, $data, TRUE);
 	}
+    // --------------------------------------------------------------------
+
+    /**
+     * Check Duplicate Callback
+     *
+     * Check Duplicate Code on Single Record Edit
+     *
+     * @param string $code
+     * @param integer|null $id
+     * @return bool
+     */
+    public function check_duplicate_code($code)
+    {
+        $id             = (int)$this->input->post('id');
+        $fiscal_yr_id   = (int)$this->input->post('fiscal_yr_id');
+
+        if( !$id || !$fiscal_yr_id )
+        {
+            $this->form_validation->set_message('check_duplicate_code', 'No dependend parameters supplied.');
+            return FALSE;
+        }
+
+        $where = [
+            'code'          => $code,
+            'fiscal_yr_id' => $fiscal_yr_id
+        ];
+        if( $this->tariff_property_model->check_duplicate($where, $id) )
+        {
+            $this->form_validation->set_message('check_duplicate_code', 'The %s can not be duplicate for given fiscal year.');
+            return FALSE;
+        }
+        return TRUE;
+    }
 
 	// --------------------------------------------------------------------
 
@@ -814,7 +811,9 @@ class Tariff_property extends MY_Controller
     // --------------------------------------------------------------------
 
 	/**
-     * Check Duplicate Callback
+     * Check Duplicate Callback - add_fy()
+     *
+     * Check duplicate codes if any on add_fy() or edit_fy() method
      *
      * @param string $code
      * @param integer|null $id
