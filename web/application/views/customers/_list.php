@@ -22,7 +22,7 @@ $_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 			<?php endif?>
 		</tr>
 	</thead>
-	<tbody id="search-result-customer">
+	<tbody id="<?php echo $DOM_RowBoxId ?>">
 	<?php
 	/**
 	 * Load Rows & Next Link (if any)
