@@ -16,7 +16,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					id="btn-refresh"
 					data-toggle="tooltip"
 					class="btn btn-primary btn-round"
-					data-url="<?php echo site_url($this->router->class);?>/refresh"
+					data-url="<?php echo site_url($this->data['_url_base']);?>/refresh"
 					data-method="html"
 					data-box="#<?php echo $DOM_DataListBoxId?>"
 					data-self-destruct="false"

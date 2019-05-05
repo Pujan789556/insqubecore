@@ -40,7 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						'<i class="fa fa-search"></i> Details',
 						[
 							'class' 		=> 'trg-dialog-popup action',
-							'data-url' 		=> site_url('ri_transactions/details/'.$record->id),
+							'data-url' 		=> site_url($this->data['_url_base'] . '/details/'.$record->id),
 							'data-box-size' => 'large',
 						]);?>
 	</td>
