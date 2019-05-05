@@ -44,7 +44,7 @@ class Ac_accounts extends MY_Controller
 		$this->_url_base 		 = $this->router->class;
 		$this->_view_base 		 = 'accounting/' . $this->router->class;
 
-		$this->data['_url_base'] = $this->_url_base; // for view to access
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
 		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
@@ -427,7 +427,7 @@ class Ac_accounts extends MY_Controller
 				}
 				$html = $this->load->view($single_row, ['record' => $record, 'widget_reference' => $widget_reference], TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add' ? '#search-result-ac-account' : '#_data-row-' . $record->id,
+					'box' 		=> $action === 'add' ? '#box-ac_accounts-rows' : '#_data-row-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
 				];

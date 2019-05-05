@@ -38,6 +38,13 @@ class Ac_ledgers extends MY_Controller
 		$this->load->model('ac_voucher_model');
 		$this->load->model('ac_opening_balance_model');
 		$this->load->model('branch_model');
+
+		// URL Base
+		$this->_url_base 		 = $this->router->class;
+		$this->_view_base 		 = 'accounting/' . $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -60,18 +67,18 @@ class Ac_ledgers extends MY_Controller
 			'DOM_DataListBoxId'	=> '_iqb-data-list-box-ac_ledgers', 	// List box ID
 			'DOM_FilterFormId'	=> '_iqb-filter-form-ac_ledgers', 		// Filter Form ID
 			'filters' 			=> $this->_get_filter_elements(),
-			'filter_url' 		=> site_url($this->router->class . '/filter/'),
-			'print_url' 		=> site_url($this->router->class . '/filter/1/')
+			'filter_url' 		=> site_url($this->_url_base . '/filter/'),
+			'print_url' 		=> site_url($this->_url_base . '/filter/1/')
 		];
 
 		$this->template
 					->set_layout('layout-advanced-filters')
 					->partial(
 						'content_header',
-						'accounting/ledgers/_index_header',
+						$this->_view_base . '/_index_header',
 						['content_header' => 'Manage Ledgers'] + $data)
-					->partial('content', 'accounting/ledgers/_index', $data)
-					->partial('dynamic_js', 'accounting/ledgers/_js')
+					->partial('content', $this->_view_base . '/_index', $data)
+					->partial('dynamic_js', $this->_view_base . '/_js')
 					->render($this->data);
 	}
 
@@ -135,7 +142,7 @@ class Ac_ledgers extends MY_Controller
 		}
 
 
-		$view = 'accounting/ledgers/_list';
+		$view = $this->_view_base . '/_list';
 		$html = $this->load->view($view, $data, TRUE);
 		$ajax_data = [
 			'status' => 'success',
@@ -158,7 +165,7 @@ class Ac_ledgers extends MY_Controller
 		 * 	cache the file
 		 * 	if exists, render output
 		 */
-		$view = 'accounting/ledgers/print/ledger';
+		$view = $this->_view_base . '/print/ledger';
 		$data['mode'] = 'print';
 		$html = $this->load->view($view, $data, TRUE);
 

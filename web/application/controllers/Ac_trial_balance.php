@@ -37,6 +37,14 @@ class Ac_trial_balance extends MY_Controller
 		$this->load->model('ac_account_model');
 		$this->load->model('ac_voucher_model');
 		$this->load->model('ac_opening_balance_model');
+
+		// URL Base
+		$this->_url_base 		 = $this->router->class;
+		$this->_view_base 		 = 'accounting/' . $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
+
 	}
 
 	// --------------------------------------------------------------------
@@ -59,18 +67,18 @@ class Ac_trial_balance extends MY_Controller
 			'DOM_DataListBoxId'	=> '_iqb-data-list-box-ac_trial_balance', 	// List box ID
 			'DOM_FilterFormId'	=> '_iqb-filter-form-ac_trial_balance', 		// Filter Form ID
 			'filters' 			=> $this->_get_filter_elements(),
-			'filter_url' 		=> site_url($this->router->class . '/filter/'),
-			'print_url' 		=> site_url($this->router->class . '/filter/1/')
+			'filter_url' 		=> site_url($this->_url_base . '/filter/'),
+			'print_url' 		=> site_url($this->_url_base . '/filter/1/')
 		];
 
 		$this->template
 					->set_layout('layout-advanced-filters')
 					->partial(
 						'content_header',
-						'accounting/trial_balance/_index_header',
+						$this->_view_base . '/_index_header',
 						['content_header' => 'Manage Trial Balance'] + $data)
-					->partial('content', 'accounting/trial_balance/_index', $data)
-					->partial('dynamic_js', 'accounting/trial_balance/_js')
+					->partial('content', $this->_view_base . '/_index', $data)
+					->partial('dynamic_js', $this->_view_base . '/_js')
 					->render($this->data);
 	}
 
@@ -125,7 +133,7 @@ class Ac_trial_balance extends MY_Controller
 		}
 
 
-		$view = 'accounting/trial_balance/_list';
+		$view = $this->_view_base . '/_list';
 		$html = $this->load->view($view, $data, TRUE);
 		$ajax_data = [
 			'status' => 'success',
@@ -148,7 +156,7 @@ class Ac_trial_balance extends MY_Controller
 		 * 	cache the file
 		 * 	if exists, render output
 		 */
-		$view = 'accounting/trial_balance/print/trial_balance';
+		$view = $this->_view_base . '/print/trial_balance';
 		$data['mode'] = 'print';
 		$html = $this->load->view($view, $data, TRUE);
 
