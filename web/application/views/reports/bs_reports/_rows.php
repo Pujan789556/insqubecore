@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 foreach($records as $record)
 {
-	$single_row = 'reports/bs/_single_row';
+	$single_row = $this->data['_view_base'] . '/_single_row';
 	$this->load->view($single_row, compact('record'));
 }
 
@@ -24,7 +24,7 @@ if($next_id):
 			data-loading-text="Loading ..."
 			data-url="<?php echo $next_url;?>"
 			data-method="append"
-			data-box="#search-result-reports"
+			data-box="#<?php echo $DOM_RowBoxId ?>"
 			data-self-destruct="true"
 			data-loader-box="#<?php echo $loader_box_id;?>"
 			data-load-method="post"

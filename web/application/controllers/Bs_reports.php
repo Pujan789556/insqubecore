@@ -41,6 +41,13 @@ class Bs_reports extends MY_Controller
 
 		// Load Model
 		$this->load->model('bs_report_model');
+
+			// URL Base
+		$this->_url_base 		 = 	$this->router->class;
+		$this->_view_base 		 =  'reports/' . $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -78,12 +85,13 @@ class Bs_reports extends MY_Controller
 
 		// If request is coming from refresh method, reset nextid
 		$next_id 		= (int)$next_id;
-		$next_url_base 	= $this->router->class . '/page/r/';
+		$next_url_base 	= $this->_url_base . '/page/r/';
 
 		// DOM Data
 		$dom_data = [
 			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-reports', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-reports' 			// Filter Form ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-reports',		// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-bs_reports-rows' 				// Row Box ID
 		];
 
 		/**
@@ -98,20 +106,20 @@ class Bs_reports extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'reports/bs/_index';
+			$view = $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url($this->router->class . '/page/l/0')
+				'filter_url' 	=> site_url($this->_url_base . '/page/l/0')
 			]);
 		}
 		else if($layout === 'l')
 		{
-			$view = 'reports/bs/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'reports/bs/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 		if ( $this->input->is_ajax_request() )
@@ -129,10 +137,10 @@ class Bs_reports extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'reports/bs/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Beema Samiti Reports'] + $dom_data)
-						->partial('content', 'reports/bs/_index', $data)
-						->partial('dynamic_js', 'reports/bs/_js')
+						->partial('content', $this->_view_base . '/_index', $data)
+						->partial('dynamic_js', $this->_view_base . '/_js')
 						->render($this->data);
 	}
 
@@ -345,7 +353,7 @@ class Bs_reports extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('reports/bs/_form_box',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_box',
 			[
 				'form_elements' => $rules,
 				'record' 		=> $record
@@ -384,7 +392,7 @@ class Bs_reports extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('reports/bs/_form_box',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_box',
 			[
 				'form_elements' => $this->bs_report_model->validation_rules,
 				'record' 		=> $record
@@ -478,11 +486,11 @@ class Bs_reports extends MY_Controller
 				];
 
 				$record 			= $this->bs_report_model->get( $action === 'add' ? $done : $record->id );
-				$single_row 		=  'reports/bs/_single_row';
+				$single_row 		=  $this->_view_base . '/_single_row';
 
 				$html = $this->load->view($single_row, ['record' => $record], TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add' ? '#search-result-reports' : '#_data-row-' . $record->id,
+					'box' 		=> $action === 'add' ? '#box-bs_reports-row' : '#_data-row-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
 				];

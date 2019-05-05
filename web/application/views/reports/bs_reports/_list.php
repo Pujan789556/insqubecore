@@ -20,12 +20,12 @@ $_flag__show_widget_row = $_flag__show_widget_row ?? FALSE;
 		</tr>
 	</thead>
 
-	<tbody id="search-result-reports">
+	<tbody id="box-bs_reports-rows">
 		<?php
 		/**
 		 * Load Rows & Next Link (if any)
 		 */
-		$this->load->view('reports/bs/_rows');
+		$this->load->view($this->data['_view_base'] .'/_rows');
 		?>
 	</tbody>
 </table>
