@@ -424,12 +424,15 @@ class MY_Model
             // Table Reference Passed?
             $table_reference = is_array($table_reference) ? json_encode($table_reference) : NULL;
 
+
+            // User ID - If no User ID set, must be NULL (e.g. forgot password, or Customer Using APP)
+
             // Other Data
             $audit_data = array_merge([
                     'table_name'        => $this->table_name,
                     'table_id'          => $id,
                     'table_reference'   => $table_reference,
-                    'user_id'           => (int )$this->dx_auth->get_user_id(),
+                    'user_id'           => $this->dx_auth->get_user_id() ?? NULL,
                     'action_at'         => $this->set_date()
             ], $audit_data);
 
