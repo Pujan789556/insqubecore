@@ -278,6 +278,7 @@ class Auth extends MY_Controller
 		// Validate rules and call forgot password function
 		if ($val->run() AND $this->dx_auth->forgot_password($val->set_value('login')))
 		{
+			$data['title'] 		  = 'Please check your inbox!';
 			$data['auth_message'] = 'An email has been sent to your email with instructions with how to activate your new password.';
 
 			// $this->load->view($this->dx_auth->forgot_password_success_view, $data);
@@ -290,7 +291,7 @@ class Auth extends MY_Controller
 							)
 	        				->render([
 					        	'site_title' => 'Account Recovery',
-					        	'page_title' => 'Check your email'
+					        	'page_title' => 'Recovery Email Sent'
 					    	]);
 
 		}
