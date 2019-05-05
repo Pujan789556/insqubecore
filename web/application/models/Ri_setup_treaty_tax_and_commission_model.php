@@ -50,6 +50,132 @@ class Ri_setup_treaty_tax_and_commission_model extends MY_Model
 
     // ----------------------------------------------------------------
 
+    public function v_rules($treaty_type_id, $formatted = false)
+    {
+        $treaty_type_id = intval($treaty_type_id);
+
+        if( $treaty_type_id == IQB_RI_TREATY_TYPE_EOL )
+        {
+            $col_headings = ['Title', 'Layer 1', 'Layer 2', 'Layer 3', 'Layer 4'];
+            $tnc_col_postfix = ['l1','l2', 'l3', 'l4'];
+            $tnc_val_prefix = [
+                'eol_min_n_deposit_amt'    => [
+                    'label' => 'Minimum & Deposit Premium',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_premium_mode'    => [
+                    'label' => 'Premium Mode',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[0,1]',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + [0 => 'Fixed', 1 => 'Range'],
+                    '_required' => true
+                ],
+                'eol_min_rate'    => [
+                    'label' => 'Minimum Rate(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_max_rate'    => [
+                    'label' => 'Maximum Rate(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_fixed_rate'    => [
+                    'label' => 'Fixed Rate(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_loading_factor'    => [
+                    'label' => 'Loading Factor',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[10]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_tax_ri'    => [
+                    'label' => 'RI Tax(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'eol_comm_ib'    => [
+                    'label' => 'IB Commission(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'flag_eol_rr'    => [
+                    'label' => 'Reinstatement Required',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[0,1]',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + [0 => 'No', 1 => 'Yes'],
+                    '_required' => true
+                ]
+            ];
+        }
+        else
+        {
+            $col_headings = ['Title', 'Quota', '1st Surplus', '2nd Surplus', '3rd Surplus'];
+            $tnc_col_postfix = ['quota','surplus_1', 'surplus_2', 'surplus_3'];
+            $tnc_val_prefix = [
+                'qs_comm_ri'    => [
+                    'label' => 'RI Commission(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'qs_tax_ri'    => [
+                    'label' => 'RI Tax(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'qs_tax_ib'    => [
+                    'label' => 'IB Tax(%)',
+                    'rules' => 'trim|required|prep_decimal|decimal|max_length[8]',
+                    '_type'     => 'text',
+                    '_required' => true
+                ],
+                'flag_qs_comm_scale' => [
+                    'label' => 'Apply Sliding Scale Commission',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list[0,1]',
+                    '_type'     => 'dropdown',
+                    '_data'     => IQB_BLANK_SELECT + [0 => 'No', 1 => 'Yes'],
+                    '_required' => true
+                ]
+            ];
+        }
+
+        if($formatted)
+        {
+            $v_rules = [];
+            foreach($tnc_val_prefix as $col_prefix => $rule_single)
+            {
+                foreach($tnc_col_postfix as $col_postfix)
+                {
+                    $rule_single['field'] = $col_prefix . '_' . $col_postfix;
+                    $v_rules[] = $rule_single;
+                }
+            }
+
+            return $v_rules;
+        }
+        else
+        {
+            return [
+                'col_headings'      => $col_headings,
+                'tnc_val_prefix'    => $tnc_val_prefix,
+                'tnc_col_postfix'   => $tnc_col_postfix
+            ];
+        }
+    }
+
+    // ----------------------------------------------------------------
+
     public function get($treaty_id)
     {
         return parent::find_by(['treaty_id' => $treaty_id]);
@@ -72,6 +198,8 @@ class Ri_setup_treaty_tax_and_commission_model extends MY_Model
         {
             $fillable_data[$col] = $data[$col] ?? NULL;
         }
+
+        // ----------------------------------------------------------------
 
         $status             = TRUE;
 

@@ -47,6 +47,403 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
+     * Validation Rules
+     *
+     * @param int $treaty_id
+     * @param int $treaty_type_id
+     * @return array
+     */
+    public function v_rules($treaty_id, $treaty_type_id)
+    {
+        $treaty_type_id = (int)$treaty_type_id;
+
+        $v_rules = $this->_v_rules();
+
+        // Format Rules
+        $portfolio_dropdown = $this->portfolio_dropdown($treaty_id);
+        $v_rules_formatted  = $v_rules['portfolios_common'];
+
+        // First rule is 'portfolio_ids[]', update validation rule
+        $v_rules_formatted[0]['rules'] = 'trim|required|integer|max_length[8]|in_list['.implode(',',array_keys($portfolio_dropdown)).']';
+
+
+        if( $treaty_type_id === IQB_RI_TREATY_TYPE_SP )
+        {
+            $v_rules_formatted = array_merge($v_rules_formatted, $v_rules['portfolios_sp']);
+        }
+        else if( $treaty_type_id === IQB_RI_TREATY_TYPE_QT )
+        {
+            $v_rules_formatted = array_merge($v_rules_formatted, $v_rules['portfolios_qt']);
+        }
+        else if( $treaty_type_id === IQB_RI_TREATY_TYPE_QS )
+        {
+            $v_rules_formatted = array_merge($v_rules_formatted, $v_rules['portfolios_qs']);
+        }
+        else if( $treaty_type_id === IQB_RI_TREATY_TYPE_EOL )
+        {
+            $v_rules_formatted = array_merge($v_rules_formatted, $v_rules['portfolios_eol']);
+        }
+
+        return $v_rules_formatted;
+    }
+
+        private function _v_rules()
+        {
+            return $v_rules = [
+                // Treaty Portfolios: Common Fields
+                'portfolios_common' => [
+                    [
+                        'field' => 'portfolio_ids[]',
+                        'label' => 'Portfolio',
+                        'rules' => 'trim|required|integer|max_length[8]',
+                        '_field'        => 'portfolio_id',
+                        '_type'         => 'hidden',
+                        '_show_label'   => false,
+                        '_required'     => true
+                    ],
+                    [
+                        'field' => 'ac_basic[]',
+                        'label' => 'Account Basic',
+                        'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(IQB_RI_SETUP_AC_BASIC_TYPES) ) . ']',
+                        '_field'        => 'ac_basic',
+                        '_type'         => 'dropdown',
+                        '_show_label'   => false,
+                        '_data'         => IQB_BLANK_SELECT + IQB_RI_SETUP_AC_BASIC_TYPES,
+                        '_required'     => true
+                    ],
+                    [
+                        'field' => 'flag_claim_recover_from_ri[]',
+                        'label' => 'Claim Recover From RI',
+                        'rules' => 'trim|required|integer|in_list[0,1]',
+                        '_field'            => 'flag_claim_recover_from_ri',
+                        '_type'             => 'dropdown',
+                        '_show_label'       => false,
+                        '_data'             => IQB_BLANK_SELECT + _FLAG_on_off_dropdown(),
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'flag_comp_cession_apply[]',
+                        'label' => 'Apply Compulsory Cession',
+                        'rules' => 'trim|required|integer|in_list[0,1]',
+                        '_field'            => 'flag_comp_cession_apply',
+                        '_type'             => 'dropdown',
+                        '_show_label'       => false,
+                        '_data'             => IQB_BLANK_SELECT + _FLAG_on_off_dropdown(),
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'comp_cession_percent[]',
+                        'label' => 'Compulsory Cession(%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        '_field'            => 'comp_cession_percent',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'comp_cession_max_amt[]',
+                        'label' => 'Compulsory Max Amount',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_field'            => 'comp_cession_max_amt',
+                        '_type'             => 'text',
+                        '_show_label'       => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'comp_cession_comm_ri[]',
+                        'label' => 'Compulsory Cession RI Commission (%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+                        '_field'            => 'comp_cession_comm_ri',
+                        '_type'             => 'text',
+                        '_show_label'       => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'comp_cession_tax_ri[]',
+                        'label' => 'Compulsory Cession RI Tax (%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+                        '_field'            => 'comp_cession_tax_ri',
+                        '_type'             => 'text',
+                        '_show_label'       => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'comp_cession_tax_ib[]',
+                        'label' => 'Compulsory Cession IB Tax (%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
+                        '_field'            => 'comp_cession_tax_ib',
+                        '_type'             => 'text',
+                        '_show_label'       => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'treaty_max_capacity_amt[]',
+                        'label' => 'Treaty Maximum Capacity',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_field'            => 'treaty_max_capacity_amt',
+                        '_type'             => 'text',
+                        '_show_label'       => false,
+                        '_required'         => true
+                    ],
+                ],
+
+                // Treaty Portfolios: "Quota" Only Fields
+                'portfolios_qt' => [
+
+                    [
+                        'field' => 'qs_retention_percent[]',
+                        'label' => 'Quota Retention(%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        '_field'            => 'qs_retention_percent',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'qs_quota_percent[]',
+                        'label' => 'Quota Distribution(%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        '_field'            => 'qs_quota_percent',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                ],
+
+                // Treaty Portfolios: "Surplus" Only Fields
+                'portfolios_sp' => [
+                    [
+                        'field' => 'qs_max_ret_amt[]',
+                        'label' => 'Maximum Retention Amount',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_field'            => 'qs_max_ret_amt',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'qs_def_ret_amt[]',
+                        'label' => 'Defined Retention Amount',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]|less_than[qs_max_ret_amt[]]',
+                        '_field'            => 'qs_def_ret_amt',
+                        '_type'             => 'text',
+                        '_show_label'       => false,
+                        '_required'         => true
+                    ],
+                    /**
+                     * Apply flat retention ?
+                     */
+                    [
+                        'field' => 'flag_qs_def_ret_apply[]',
+                        'label' => 'Apply defined retention?',
+                        'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdown(false)) ) . ']',
+                        '_field'        => 'flag_qs_def_ret_apply',
+                        '_type'         => 'dropdown',
+                        '_show_label'   => false,
+                        '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdown(),
+                        '_required'     => true
+                    ],
+                    [
+                        'field' => 'qs_lines_1[]',
+                        'label' => '1st Surplus Lines',
+                        'rules' => 'trim|required|integer|max_length[4]',
+                        '_field'            => 'qs_lines_1',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'qs_lines_2[]',
+                        'label' => '2nd Surplus Lines',
+                        'rules' => 'trim|required|integer|max_length[4]',
+                        '_field'            => 'qs_lines_2',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'qs_lines_3[]',
+                        'label' => '3rd Surplus Lines',
+                        'rules' => 'trim|required|integer|max_length[4]',
+                        '_field'            => 'qs_lines_3',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                ],
+
+                // Treaty Portfolios: "Quota & Surplus" Only Fields
+                // @NOTE: You have to merge [common, qt, qs, sp] together to get full validation list
+                'portfolios_qs' => [
+
+                    /**
+                     * Quota Share & Surplus Common Part
+                     */
+                    [
+                        'field' => 'qs_max_ret_amt[]',
+                        'label' => 'Maximum Quota/Retention Amount',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_field'            => 'qs_max_ret_amt',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'qs_def_ret_amt[]',
+                        'label' => 'Defined Quota/Retention Amount',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]|less_than[qs_max_ret_amt[]]',
+                        '_field'            => 'qs_def_ret_amt',
+                        '_type'             => 'text',
+                        '_show_label'       => false,
+                        '_required'         => true
+                    ],
+
+                    /**
+                     * Apply flat retention ?
+                     */
+                    [
+                        'field' => 'flag_qs_def_ret_apply[]',
+                        'label' => 'Apply defined retention?',
+                        'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdown(false)) ) . ']',
+                        '_field'        => 'flag_qs_def_ret_apply',
+                        '_type'         => 'dropdown',
+                        '_show_label'   => false,
+                        '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdown(),
+                        '_required'     => true
+                    ],
+
+                    /**
+                     * Quota Share  Part
+                     */
+                    [
+                        'field' => 'qs_retention_percent[]',
+                        'label' => 'Quota Retention(%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        '_field'            => 'qs_retention_percent',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'qs_quota_percent[]',
+                        'label' => 'Quota Distribution(%)',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        '_field'            => 'qs_quota_percent',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+
+
+
+                    /**
+                     * Surplus Part
+                     */
+                    [
+                        'field' => 'qs_lines_1[]',
+                        'label' => '1st Surplus Lines',
+                        'rules' => 'trim|required|integer|max_length[4]',
+                        '_field'            => 'qs_lines_1',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'qs_lines_2[]',
+                        'label' => '2nd Surplus Lines',
+                        'rules' => 'trim|required|integer|max_length[4]',
+                        '_field'            => 'qs_lines_2',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'qs_lines_3[]',
+                        'label' => '3rd Surplus Lines',
+                        'rules' => 'trim|required|integer|max_length[4]',
+                        '_field'            => 'qs_lines_3',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                ],
+
+                // Treaty Portfolios: "Excell of Loss" only Fields
+                'portfolios_eol' => [
+                    [
+                        'field' => 'qs_max_ret_amt[]',
+                        'label' => 'Maximum Retention Amount',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_field'            => 'qs_max_ret_amt',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'qs_def_ret_amt[]',
+                        'label' => 'Defined Retention Amount',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]|less_than[qs_max_ret_amt[]]',
+                        '_field'            => 'qs_def_ret_amt',
+                        '_type'             => 'text',
+                        '_show_label'       => false,
+                        '_required'         => true
+                    ],
+                    /**
+                     * Apply flat retention ?
+                     */
+                    [
+                        'field' => 'flag_qs_def_ret_apply[]',
+                        'label' => 'Apply defined retention?',
+                        'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(_FLAG_on_off_dropdown(false)) ) . ']',
+                        '_field'        => 'flag_qs_def_ret_apply',
+                        '_type'         => 'dropdown',
+                        '_show_label'   => false,
+                        '_data'         => IQB_BLANK_SELECT + _FLAG_on_off_dropdown(),
+                        '_required'     => true
+                    ],
+                    [
+                        'field' => 'eol_layer_amount_1[]',
+                        'label' => 'EOL Amount Layer 1',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_field'            => 'eol_layer_amount_1',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'eol_layer_amount_2[]',
+                        'label' => 'EOL Amount Layer 2',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_field'            => 'eol_layer_amount_2',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'eol_layer_amount_3[]',
+                        'label' => 'EOL Amount Layer 3',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_field'            => 'eol_layer_amount_3',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ],
+                    [
+                        'field' => 'eol_layer_amount_4[]',
+                        'label' => 'EOL Amount Layer 4',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[20]',
+                        '_field'            => 'eol_layer_amount_4',
+                        '_type'             => 'text',
+                        '_show_label'   => false,
+                        '_required'         => true
+                    ]
+                ],
+            ];
+        }
+
+    // --------------------------------------------------------------------
+
+    /**
      * Add Portfolio for a Treaty
      *
      * @param int $treaty_id Treaty ID

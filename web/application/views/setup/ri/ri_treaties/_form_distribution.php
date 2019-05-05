@@ -29,7 +29,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </thead>
 
                 <?php
-                $treaty_distribution_form_elements = $form_elements['reinsurers'];
                 $total_percentage = 0.00;
                 ?>
                 <tbody class="form-inline">
@@ -40,7 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             $total_percentage += $distrib->distribution_percent;
                             ?>
                         <tr <?php echo $i == 0 ? 'id="__treaty_distribution_row"' : '' ?>>
-                            <?php foreach($treaty_distribution_form_elements as $element):?>
+                            <?php foreach($form_elements as $element):?>
                                 <td>
                                     <?php
                                     /**
@@ -67,7 +66,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         endforeach;
                     else:?>
                         <tr id="__treaty_distribution_row">
-                            <?php foreach($treaty_distribution_form_elements as $single_element):?>
+                            <?php foreach($form_elements as $single_element):?>
                                 <td>
                                     <?php
                                     /**
@@ -145,6 +144,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         // Add Remover Column
         $row.append('<td width="10%" align="right"><a href="#" class="btn btn-danger btn-sm" onclick=\'$(this).closest("tr").remove();__compute_sum();\'>Remove</a></td>');
+
+        // Reset Form Elements
+        $('input, select, textarea', $row).val('');
 
         // Append to table body
         $box.append($row);

@@ -522,7 +522,7 @@ class Ri_treaties extends MY_Controller
 		{
 			$done 	= FALSE;
 
-            $this->form_validation->set_rules($this->ri_setup_treaty_model->get_tnc_validation_rules($record->treaty_type_id, true));
+            $this->form_validation->set_rules($this->ri_setup_treaty_tax_and_commission_model->v_rules($record->treaty_type_id, true));
 			if($this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
@@ -570,7 +570,7 @@ class Ri_treaties extends MY_Controller
 		 * Prepare Form Data
 		 */
 		$form_data = [
-			'form_elements' 	=> $this->ri_setup_treaty_model->get_tnc_validation_rules($record->treaty_type_id),
+			'form_elements' 	=> $this->ri_setup_treaty_tax_and_commission_model->v_rules($record->treaty_type_id),
 			'record' 			=> $record
 		];
 
@@ -681,16 +681,19 @@ class Ri_treaties extends MY_Controller
 			$this->template->render_404();
 		}
 
+		// Form Elements
+		$v_rules 		= $this->ri_setup_treaty_distribution_model->v_rules();
+
 		/**
 		 * Treaty Distribution
 		 */
-		$treaty_distribution = $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id);
+		$treaty_distribution = $this->ri_setup_treaty_distribution_model->get_distribution_by_treaty($id);
 
 		/**
 		 * Prepare Form Data
 		 */
 		$form_data = [
-			'form_elements' 	=> $this->ri_setup_treaty_model->get_validation_rules(['reinsurers']),
+			'form_elements' 	=> $v_rules,
 			'record' 			=> $record,
 
 			// Treaty Distribution
@@ -698,22 +701,22 @@ class Ri_treaties extends MY_Controller
 			'treaty_distribution' 	=> $treaty_distribution,
 		];
 
-		$return_data = [];
+		$return_data 	= [];
+
 		if( $this->input->post() )
 		{
 			$done 	= FALSE;
-			$rules 	= $this->ri_setup_treaty_model->get_validation_rules_formatted(['reinsurers']);
 
-            $this->form_validation->set_rules($rules);
+            $this->form_validation->set_rules($v_rules);
 			if($this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
-        		$done = $this->ri_setup_treaty_model->save_treaty_distribution($record->id, $data);
+        		$done = $this->ri_setup_treaty_distribution_model->save_distribution($record->id, $data, $treaty_distribution);
 
         		if($done)
         		{
         			// Update the Distribution Table
-					$treaty_distribution = $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id);
+					$treaty_distribution = $this->ri_setup_treaty_distribution_model->get_distribution_by_treaty($id);
 					$success_html = $this->load->view($this->_view_base . '/snippets/_ri_distribution_data', ['treaty_distribution' => $treaty_distribution], TRUE);
 
 					$ajax_data = [
@@ -781,16 +784,19 @@ class Ri_treaties extends MY_Controller
 			$this->template->render_404();
 		}
 
+		// Form Elements
+		$v_rules = $this->ri_setup_comp_cession_distribution_model->v_rules();
+
 		/**
 		 * Treaty Distribution
 		 */
-		$treaty_distribution = $this->ri_setup_treaty_model->get_comp_cession_distribution($id, $portfolio_id);
+		$treaty_distribution = $this->ri_setup_comp_cession_distribution_model->get_distribution_by_treaty_portfolio($id, $portfolio_id);
 
 		/**
 		 * Prepare Form Data
 		 */
 		$form_data = [
-			'form_elements' 	=> $this->ri_setup_treaty_model->get_validation_rules(['reinsurers']),
+			'form_elements' 	=> $v_rules,
 			'record' 			=> $record,
 
 			// Treaty Distribution
@@ -802,21 +808,16 @@ class Ri_treaties extends MY_Controller
 		if( $this->input->post() )
 		{
 			$done 	= FALSE;
-			$rules 	= $this->ri_setup_treaty_model->get_validation_rules_formatted(['reinsurers']);
 
-            $this->form_validation->set_rules($rules);
+            $this->form_validation->set_rules($v_rules);
 			if($this->form_validation->run() === TRUE )
         	{
         		$data = $this->input->post();
-        		$done = $this->ri_setup_treaty_model->save_comp_cession_distribution($id, $portfolio_id,  $data);
+        		$done = $this->ri_setup_comp_cession_distribution_model->save_distribution($id, $portfolio_id, $data, $treaty_distribution);
 
         		if($done)
         		{
-        			// Update the Distribution Table
-					$treaty_distribution = $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id);
-					$success_html = $this->load->view($this->_view_base . '/snippets/_ri_distribution_data', ['treaty_distribution' => $treaty_distribution], TRUE);
-
-					$ajax_data = [
+        			$ajax_data = [
 						'message' => 'Successfully Updated',
 						'status'  => 'success',
 						'updateSection' => false,
@@ -879,7 +880,7 @@ class Ri_treaties extends MY_Controller
 		/**
 		 * Treaty Distribution
 		 */
-		$treaty_distribution = $this->ri_setup_treaty_model->get_comp_cession_distribution($id, $portfolio_id);
+		$treaty_distribution = $this->ri_setup_comp_cession_distribution_model->get_distribution_by_treaty_portfolio($id, $portfolio_id);
 
 
 		/**
@@ -969,7 +970,7 @@ class Ri_treaties extends MY_Controller
 		/**
 		 * Validation Rules/Form Elements Based on the Treaty Type
 		 */
-		$v_rules = $this->_portfolio_validation_rules_by_treaty_type($record);
+		$v_rules = $this->ri_setup_treaty_portfolio_model->v_rules($record->id, $record->treaty_type_id);
 
 
 		/**
@@ -1044,7 +1045,7 @@ class Ri_treaties extends MY_Controller
 
 	// --------------------------------------------------------------------
 
-		private function _portfolio_validation_rules_by_treaty_type($record)
+		private function _portfolio_validation_rules_by_treaty_type_OLD($record)
 		{
 
 			$portfolio_dropdown = $this->ri_setup_treaty_portfolio_model->portfolio_dropdown($record->id);
@@ -1201,7 +1202,7 @@ class Ri_treaties extends MY_Controller
 			'record' 				=> $record,
 			'brokers' 				=> $this->ri_setup_treaty_broker_model->get_many_by_treaty($id),
 			'portfolios' 			=> $this->ri_setup_treaty_portfolio_model->get_many_by_treaty($id),
-			'treaty_distribution' 	=> $this->ri_setup_treaty_model->get_treaty_distribution_by_treaty($id),
+			'treaty_distribution' 	=> $this->ri_setup_treaty_distribution_model->get_distribution_by_treaty($id),
 		];
 
 		$this->data['site_title'] = 'Treaty Details | ' . $record->name;
