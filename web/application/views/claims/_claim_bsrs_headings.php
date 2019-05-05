@@ -23,7 +23,7 @@ foreach( $bsrs_headings_claim as $single )
                             data-toggle="tooltip"
                             data-box-size="large"
                             data-title='<i class="fa fa-pencil-square-o"></i> Beema Samiti Report Information - <?php echo $record->claim_code?>'
-                            data-url="<?php echo site_url('claims/bs_tags/' . $record->id . '/d');?>"
+                            data-url="<?php echo site_url($this->data['_url_base'] . '/bs_tags/' . $record->id . '/d');?>"
                             data-form="#_form-claims">
                             <i class="fa fa-pencil-square-o"></i>
                         </a>
