@@ -21,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		 * Editable, Status Action
 		 * ----------------------------
 		 */
-		$this->load->view('claims/_status_actions', ['record' => $record, 'ref' => 'l']);
+		$this->load->view($this->data['_view_base'] . '/_status_actions', ['record' => $record, 'ref' => 'l']);
 		?>
 	</td>
 </tr>

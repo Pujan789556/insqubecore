@@ -94,7 +94,7 @@ class Customers extends MY_Controller
 		$dom_data = [
 			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-customer', 		// List box ID
 			'DOM_FilterFormId'		=> '_iqb-filter-form-customer',		// Filter Form ID
-			'DOM_RowBoxId'			=> 'box-customer-rows' 				// Row Box ID
+			'DOM_RowBoxId'			=> 'box-customers-rows' 				// Row Box ID
 		];
 
 		/**
@@ -751,7 +751,7 @@ class Customers extends MY_Controller
 				$html = $this->load->view($single_row, $view_data, TRUE);
 				$ajax_data['updateSectionData'] = [
 					'box' 		=> $action === 'add'
-										? '#box-customer-rows'
+										? '#box-customers-rows'
 										: ( $from_widget === 'n' ? '#_data-row-customer-' . $record->id : '#iqb-widget-customer-profile' ),
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html

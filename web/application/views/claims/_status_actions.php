@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     class="trg-dialog-edit"
                     data-box-size="full-width"
                     data-title='<i class="fa fa-pencil-square-o"></i> Edit Claim Draft - <?php echo $record->claim_code?>'
-                    data-url="<?php echo site_url('claims/edit_draft/' . $record->id . '/' . $ref);?>"
+                    data-url="<?php echo site_url($this->data['_url_base'] . '/edit_draft/' . $record->id . '/' . $ref);?>"
                     data-form="#_form-claims">
                     <i class="fa fa-pencil-square-o"></i> Edit Claim Draft</a>
             </li><li class="divider"></li>
@@ -35,7 +35,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         data-toggle="tooltip"
                         class="trg-row-action"
                         data-confirm="true"
-                        data-url="<?php echo site_url('claims/delete/' . $record->id . '/' . $ref);?>">
+                        data-url="<?php echo site_url($this->data['_url_base'] . '/delete/' . $record->id . '/' . $ref);?>">
                             <i class="fa fa-trash-o"></i>
                             <span>Delete Claim Draft</span></a>
                 </li><li class="divider"></li>
@@ -44,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         <?php if($ref === 'l'): ?>
             <li>
-                <a href="<?php echo site_url('claims/details/' . $record->id);?>"
+                <a href="<?php echo site_url($this->data['_url_base'] . '/details/' . $record->id);?>"
                     title="View Details"
                     data-toggle="tooltip">
                     <i class="fa fa-list-alt"></i> View Details</a>
@@ -68,7 +68,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     data-confirm="true"
                     class="text-orange trg-dialog-action"
                     data-message="Are you sure you want to do this?<br/>You can not modify this claim anymore."
-                    data-url="<?php echo site_url('claims/verify/' . $record->id . '/' . $ref );?>"
+                    data-url="<?php echo site_url($this->data['_view_base'] . '/verify/' . $record->id . '/' . $ref );?>"
                 ><i class="fa fa-check-square-o"></i> Verify Draft</a>
             </li>
         <?php
@@ -88,7 +88,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         data-confirm="true"
                         class="text-maroon trg-dialog-action"
                         data-message="Are you sure you want to do this?<br/>Staff having lower level permission will be able to <strong>edit/delete</strong> this transaction."
-                        data-url="<?php echo site_url('claims/to_draft/' . $record->id . '/' . $ref);?>">
+                        data-url="<?php echo site_url($this->data['_view_base'] . '/to_draft/' . $record->id . '/' . $ref);?>">
                         <i class="fa fa-level-down"></i> Back To Draft</a>
                 </li>
             <?php
@@ -104,7 +104,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         data-toggle="tooltip"
                         class="text-green trg-dialog-edit"
                         data-title='<i class="fa fa-pencil-square-o"></i> Assign Surveyors - <?php echo $record->claim_code?>'
-                        data-url="<?php echo site_url('claims/surveyors/' . $record->id . '/' . $ref);?>"
+                        data-url="<?php echo site_url($this->data['_view_base'] . '/surveyors/' . $record->id . '/' . $ref);?>"
                         data-box-size="full-width"
                         data-form="#_form-claims">
                         <i class="fa fa-pencil-square-o"></i> Assign Surveyors</a>
@@ -122,7 +122,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         data-toggle="tooltip"
                         class="text-green trg-dialog-edit"
                         data-title='<i class="fa fa-pencil-square-o"></i> Assign Claim Scheme - <?php echo $record->claim_code?>'
-                        data-url="<?php echo site_url('claims/scheme/' . $record->id . '/' . $ref);?>"
+                        data-url="<?php echo site_url($this->data['_view_base'] . '/scheme/' . $record->id . '/' . $ref);?>"
                         data-box-size="large"
                         data-form="#_form-claims">
                         <i class="fa fa-pencil-square-o"></i> Assign Claim Scheme</a>
@@ -140,7 +140,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     data-toggle="tooltip"
                     class="text-green trg-dialog-edit"
                     data-title='<i class="fa fa-pencil-square-o"></i> Update Claim Assessment - <?php echo $record->claim_code?>'
-                    data-url="<?php echo site_url('claims/assessment/' . $record->id . '/' . $ref);?>"
+                    data-url="<?php echo site_url($this->data['_view_base'] . '/assessment/' . $record->id . '/' . $ref);?>"
                     data-box-size="large"
                     data-form="#_form-claims">
                     <i class="fa fa-pencil-square-o"></i> Update Claim Assessment</a>
@@ -158,7 +158,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     data-toggle="tooltip"
                     class="text-green trg-dialog-edit"
                     data-title='<i class="fa fa-pencil-square-o"></i> Update Beema Samiti Report Information - <?php echo $record->claim_code?>'
-                    data-url="<?php echo site_url('claims/bs_tags/' . $record->id . '/' . $ref);?>"
+                    data-url="<?php echo site_url($this->data['_view_base'] . '/bs_tags/' . $record->id . '/' . $ref);?>"
                     data-box-size="large"
                     data-form="#_form-claims">
                     <i class="fa fa-pencil-square-o"></i> BS Report Info</a>
@@ -186,7 +186,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         data-confirm="true"
                         class="text-green trg-dialog-action"
                         data-message="Are you sure you want to APPROVE this claim?"
-                        data-url="<?php echo site_url('claims/approve/' . $record->id . '/' . $ref );?>"
+                        data-url="<?php echo site_url($this->data['_view_base'] . '/approve/' . $record->id . '/' . $ref );?>"
                     ><i class="fa fa-check-square-o"></i> Approve</a>
                 </li>
             <?php
@@ -205,7 +205,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             data-toggle="tooltip"
                             class="text-red trg-dialog-edit"
                             data-title='<i class="fa fa-ban"></i> Close Claim - <?php echo $record->claim_code?>'
-                            data-url="<?php echo site_url('claims/close/' . $record->id . '/' . $ref);?>"
+                            data-url="<?php echo site_url($this->data['_view_base'] . '/close/' . $record->id . '/' . $ref);?>"
                             data-form="#_form-claims">
                             <i class="fa fa-ban"></i> Close Claim</a>
                     </li>
@@ -222,7 +222,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             data-toggle="tooltip"
                             class="text-red trg-dialog-edit"
                             data-title='<i class="fa fa-ban"></i> Withdraw Claim - <?php echo $record->claim_code?>'
-                            data-url="<?php echo site_url('claims/withdraw/' . $record->id . '/' . $ref);?>"
+                            data-url="<?php echo site_url($this->data['_view_base'] . '/withdraw/' . $record->id . '/' . $ref);?>"
                             data-form="#_form-claims">
                             <i class="fa fa-ban"></i> Withdraw Claim</a>
                     </li>
@@ -249,7 +249,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         data-toggle="tooltip"
                         class="text-yellow trg-dialog-edit"
                         data-title='<i class="fa fa-pencil-square-o"></i> Update Claim Progress - <?php echo $record->claim_code?>'
-                        data-url="<?php echo site_url('claims/progress/' . $record->id . '/' . $ref);?>"
+                        data-url="<?php echo site_url($this->data['_view_base'] . '/progress/' . $record->id . '/' . $ref);?>"
                         data-box-size="large"
                         data-form="#_form-claims">
                         <i class="fa fa-pencil-square-o"></i> Update Claim Progress</a>
@@ -266,7 +266,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         data-confirm="true"
                         class="text-green trg-dialog-action"
                         data-message="Are you sure you want to do this?<br/>This will generate the claim voucher and set status to 'SETTLED'. The action can not be <strong>UNDONE</strong>."
-                        data-url="<?php echo site_url('claims/settle/' . $record->id . '/' . $ref);?>">
+                        data-url="<?php echo site_url($this->data['_view_base'] . '/settle/' . $record->id . '/' . $ref);?>">
                         <i class="fa fa-dollar"></i> Settle</a>
                 </li>
         <?php endif;?>
@@ -293,7 +293,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         data-confirm="true"
                         class="text-green trg-dialog-action"
                         data-message="Are you sure you want to do this?<br/>This will generate the claim voucher for surveyor settlement. The action can not be <strong>UNDONE</strong>."
-                        data-url="<?php echo site_url('claims/voucher_surveyor/' . $record->id . '/' . $ref);?>">
+                        data-url="<?php echo site_url($this->data['_view_base'] . '/voucher_surveyor/' . $record->id . '/' . $ref);?>">
                         <i class="fa fa-dollar"></i> Surveyor Voucher</a>
                 </li>
         <?php endif;?>

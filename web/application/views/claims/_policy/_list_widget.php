@@ -28,7 +28,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						<a href="#"
 							title="Flush Cache"
 							data-confirm="false"
-							data-url="<?php echo site_url( 'claims/flush_by_policy/' . $policy_id );?>"
+							data-url="<?php echo site_url( $this->data['_url_base'] . '/flush_by_policy/' . $policy_id );?>"
 							class="btn btn-warning btn-round trg-dialog-action"
 							data-toggle="tooltip"
 						><i class="fa fa-trash-o"></i> Flush Cache</a>
@@ -51,7 +51,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				/**
 				 * Load Rows from View
 				 */
-				$this->load->view('claims/_list');
+				$this->load->view($this->data['_view_base'] . '/_list');
 				?>
 			</div>
 		</div>

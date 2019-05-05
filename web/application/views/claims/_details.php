@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <?php if($record->status != IQB_CLAIM_STATUS_DRAFT): ?>
                         <?php if($this->dx_auth->is_authorized('claims', 'generate.claim.discharge.voucher')): ?>
                             <a
-                                href="<?php echo site_url('claims/discharge_voucher/' . $record->id );?>"
+                                href="<?php echo site_url($this->data['_url_base'] . '/discharge_voucher/' . $record->id );?>"
                                 title="Print Discharge Voucher"
                                 target="_blank"
                                 class="btn btn-sm bg-navy btn-round action"
@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <?php if($this->dx_auth->is_authorized('claims', 'generate.claim.note')): ?>
 
                             <a
-                                href="<?php echo site_url('claims/note/' . $record->id );?>"
+                                href="<?php echo site_url($this->data['_url_base'] . '/note/' . $record->id );?>"
                                 title="Print Claim Note"
                                 target="_blank"
                                 class="btn btn-sm bg-navy btn-round action narrow"
@@ -34,7 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                      * Editable, Status Action
                      * ----------------------------
                      */
-                    $this->load->view('claims/_status_actions', ['record' => $record, 'ref' => 'd']);
+                    $this->load->view($this->data['_view_base'] . '/_status_actions', ['record' => $record, 'ref' => 'd']);
                     ?>
                 </span>
             </h3>
@@ -138,7 +138,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                         <?php
                                         if($record->file_intimation)
                                         {
-                                            echo anchor('claims/download/'.$record->file_intimation, '<i class="fa fa-download"></i> Download', ['target' => '_blank']);
+                                            echo anchor($this->data['_url_base'] . '/download/'.$record->file_intimation, '<i class="fa fa-download"></i> Download', ['target' => '_blank']);
                                         }
                                          ?>
                                     </td>
@@ -224,7 +224,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             /**
              * Claim Recovery
              */
-            $this->load->view('claims/_snippet_claim_recovery_estimated');
+            $this->load->view($this->data['_view_base'] . '/_snippet_claim_recovery_estimated');
             ?>
         </div>
     </div>
@@ -285,7 +285,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                         data-toggle="tooltip"
                                         class="trg-dialog-edit btn btn-primary btn-sm"
                                         data-title='<i class="fa fa-pencil-square-o"></i> Update Claim Assessment - <?php echo $record->claim_code?>'
-                                        data-url="<?php echo site_url('claims/assessment/' . $record->id . '/d');?>"
+                                        data-url="<?php echo site_url($this->data['_url_base'] . ' /assessment/' . $record->id . '/d');?>"
                                         data-box-size="large"
                                         data-form="#_form-claims">
                                         <i class="fa fa-pencil-square-o"></i></a>
@@ -320,12 +320,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             /**
              * Beema Samit Report Information
              */
-            $this->load->view('claims/_claim_bsrs_headings');
+            $this->load->view($this->data['_view_base'] . '/_claim_bsrs_headings');
 
             /**
              * Claim Recovery
              */
-            $this->load->view('claims/_snippet_claim_recovery');
+            $this->load->view($this->data['_view_base'] . '/_snippet_claim_recovery');
              ?>
         </div>
     </div>
@@ -341,7 +341,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 data-toggle="tooltip"
                                 class="trg-dialog-edit btn btn-primary btn-sm"
                                 data-title='<i class="fa fa-pencil-square-o"></i> Manage Surveyors - <?php echo $record->claim_code?>'
-                                data-url="<?php echo site_url('claims/surveyors/' . $record->id . '/d');?>"
+                                data-url="<?php echo site_url($this->data['_url_base'] . '/surveyors/' . $record->id . '/d');?>"
                                 data-box-size="full-width"
                                 data-form="#_form-claims">
                                 <i class="fa fa-pencil-square-o"></i></a>
@@ -354,7 +354,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         /**
          * Load Rows & Next Link (if any)
          */
-        $this->load->view('claims/_list_surveyors', ['records' => $surveyors]);
+        $this->load->view($this->data['_view_base'] . '/_list_surveyors', ['records' => $surveyors]);
         ?>
 
     </div>
@@ -370,7 +370,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 data-toggle="tooltip"
                                 class="trg-dialog-edit btn btn-primary btn-sm"
                                 data-title='<i class="fa fa-pencil-square-o"></i> Update Claim Settlement - <?php echo $record->claim_code?>'
-                                data-url="<?php echo site_url('claims/settlement/' . $record->id . '/d');?>"
+                                data-url="<?php echo site_url($this->data['_view_base'] . '/settlement/' . $record->id . '/d');?>"
                                 data-box-size="full-width"
                                 data-form="#_form-claims">
                                 <i class="fa fa-pencil-square-o"></i></a>

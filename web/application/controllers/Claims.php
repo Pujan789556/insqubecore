@@ -48,6 +48,13 @@ class Claims extends MY_Controller
 		// Helper
 		$this->load->helper('claim');
 
+		// URL Base
+		$this->_url_base 		 = 	$this->router->class;
+		$this->_view_base 		 =  $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
+
 	}
 
 	// --------------------------------------------------------------------
@@ -82,7 +89,8 @@ class Claims extends MY_Controller
 		// dom data
 		$dom_data = [
 			'DOM_DataListBoxId'	=> '_iqb-data-list-box-claims', 	// List box ID
-			'DOM_FilterFormId'	=> '_iqb-filter-form-claims', 		// Filter Form ID
+			'DOM_FilterFormId'	=> '_iqb-filter-form-claims',		// Filter Form ID
+			'DOM_RowBoxId'		=> 'box-claims-rows' 				// Row Box ID
 		];
 
 		// If request is coming from refresh method, reset nextid
@@ -125,7 +133,7 @@ class Claims extends MY_Controller
 			'policy_id' => NULL,
 			'records' => $records,
 			'next_id' => $next_id,
-			'next_url' => $next_id ? site_url( 'claims/page/r/' . $next_id ) : NULL
+			'next_url' => $next_id ? site_url( $this->_url_base . '/page/r/' . $next_id ) : NULL
 		] + $dom_data;
 
 		/**
@@ -133,20 +141,20 @@ class Claims extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'claims/_index';
+			$view = $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('claims/page/l/' )
+				'filter_url' 	=> site_url($this->_url_base . '/page/l/' )
 			]);
 		}
 		else if($layout === 'l')
 		{
-			$view = 'claims/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'claims/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 		if ( $this->input->is_ajax_request() )
@@ -163,9 +171,9 @@ class Claims extends MY_Controller
 					->set_layout('layout-advanced-filters')
 					->partial(
 						'content_header',
-						'claims/_index_header',
+						$this->_view_base . '/_index_header',
 						['content_header' => 'Manage Claims'] + $data)
-					->partial('content', 'claims/_index', $data)
+					->partial('content', $this->_view_base . '/_index', $data)
 					->render($this->data);
 	}
 
@@ -271,13 +279,14 @@ class Claims extends MY_Controller
 		$policy_id 	= (int)$policy_id;
 		$records = $this->claim_model->rows_by_policy($policy_id);
 		$data = [
-			'add_url' 					=> 'claims/add/' . $policy_id,
+			'add_url' 					=> $this->_url_base . '/add/' . $policy_id,
 			'records' 					=> $records,
 			'policy_id' 				=> $policy_id,
-			'next_id' 					=> NULL
+			'next_id' 					=> NULL,
+			'DOM_RowBoxId'				=> 'box-claims-rows' 				// Row Box ID
 		];
 
-		$html = $this->load->view('claims/_policy/_list_widget', $data, TRUE);
+		$html = $this->load->view($this->_view_base . '/_policy/_list_widget', $data, TRUE);
 		$ajax_data = [
 			'status' => 'success',
 			'html'   => $html
@@ -355,7 +364,7 @@ class Claims extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('claims/forms/_form_draft',
+		$json_data['form'] = $this->load->view($this->_view_base . '/forms/_form_draft',
 			[
 				'form_elements' 		=> $this->_v_rules('add_draft'),
 				'record' 				=> NULL,
@@ -411,7 +420,7 @@ class Claims extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('claims/forms/_form_draft',
+		$json_data['form'] = $this->load->view($this->_view_base . '/forms/_form_draft',
 			[
 				'form_elements' 		=> $this->_v_rules('add_draft'),
 				'record' 				=> $record,
@@ -484,7 +493,7 @@ class Claims extends MY_Controller
 
 
 		// // No form Submitted?
-		// $json_data['form'] = $this->load->view('claims/forms/_form_surveyors',
+		// $json_data['form'] = $this->load->view($this->_view_base . '/forms/_form_surveyors',
 		// 	[
 		// 		'form_elements' => $this->claim_surveyor_model->validation_rules,
 		// 		'record' 		=> $record,
@@ -514,7 +523,7 @@ class Claims extends MY_Controller
 		 * Render The Form
 		 */
 		$json_data = [
-			'form' => $this->load->view('claims/forms/_form_bs_tags', $form_data, TRUE)
+			'form' => $this->load->view($this->_view_base . '/forms/_form_bs_tags', $form_data, TRUE)
 		];
 		$this->template->json($json_data);
 	}
@@ -703,12 +712,12 @@ class Claims extends MY_Controller
 				$record 		= $this->claim_model->row($action === 'add_draft' ? $done : $record->id);
 
 				$view_data 	= ['record' => $record];
-				$partial_view =  'claims/_single_row';
+				$partial_view =  $this->_view_base . '/_single_row';
 
 				// If Reference is from Details Page
 				if($ref == 'd')
 				{
-					$partial_view 	=  'claims/_details';
+					$partial_view 	=  $this->_view_base . '/_details';
 					$view_data = array_merge( $view_data,
 									[
 										'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
@@ -722,7 +731,7 @@ class Claims extends MY_Controller
 				$method = 'replaceWith';
 				if($action === 'add_draft')
 				{
-					$box = '#search-result-claims';
+					$box = '#box-customers-rows';
 					$method = 'prepend';
 				}
 				else if($ref == 'l')
@@ -1012,12 +1021,12 @@ class Claims extends MY_Controller
 		{
 			$record 		= $this->claim_model->get($record->id);
 			$view_data 		= ['record' => $record];
-			$partial_view 	=  'claims/_single_row';
+			$partial_view 	=  $this->_view_base . '/_single_row';
 
 			// If Reference is from Details Page
 			if($ref == 'd')
 			{
-				$partial_view 	=  'claims/_details';
+				$partial_view 	=  $this->_view_base . '/_details';
 				$view_data = array_merge( $view_data,
 								[
 									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
@@ -1111,12 +1120,12 @@ class Claims extends MY_Controller
 		{
 			$record 		= $this->claim_model->get($record->id);
 			$view_data 		= ['record' => $record];
-			$partial_view 	=  'claims/_single_row';
+			$partial_view 	=  $this->_view_base . '/_single_row';
 
 			// If Reference is from Details Page
 			if($ref == 'd')
 			{
-				$partial_view 	=  'claims/_details';
+				$partial_view 	=  $this->_view_base . '/_details';
 				$view_data = array_merge( $view_data,
 								[
 									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
@@ -1215,12 +1224,12 @@ class Claims extends MY_Controller
 		{
 			$record 		= $this->claim_model->get($record->id);
 			$view_data 		= ['record' => $record];
-			$partial_view 	=  'claims/_single_row';
+			$partial_view 	=  $this->_view_base . '/_single_row';
 
 			// If Reference is from Details Page
 			if($ref == 'd')
 			{
-				$partial_view 	=  'claims/_details';
+				$partial_view 	=  $this->_view_base . '/_details';
 				$view_data = array_merge( $view_data,
 								[
 									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
@@ -1431,12 +1440,12 @@ class Claims extends MY_Controller
 		{
 			$record 		= $this->claim_model->get($record->id);
 			$view_data 		= ['record' => $record];
-			$partial_view 	=  'claims/_single_row';
+			$partial_view 	=  $this->_view_base . '/_single_row';
 
 			// If Reference is from Details Page
 			if($ref == 'd')
 			{
-				$partial_view 	=  'claims/_details';
+				$partial_view 	=  $this->_view_base . '/_details';
 				$view_data = array_merge( $view_data,
 								[
 									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
@@ -1639,12 +1648,12 @@ class Claims extends MY_Controller
 		{
 			$record 		= $this->claim_model->get($record->id);
 			$view_data 		= ['record' => $record];
-			$partial_view 	=  'claims/_single_row';
+			$partial_view 	=  $this->_view_base . '/_single_row';
 
 			// If Reference is from Details Page
 			if($ref == 'd')
 			{
-				$partial_view 	=  'claims/_details';
+				$partial_view 	=  $this->_view_base . '/_details';
 				$view_data = array_merge( $view_data,
 								[
 									'surveyors' 		=> $this->claim_surveyor_model->get_many_by_claim($record->id),
@@ -1728,7 +1737,7 @@ class Claims extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('claims/forms/_form_close_withdraw',
+		$json_data['form'] = $this->load->view($this->_view_base . '/forms/_form_close_withdraw',
 			[
 				'form_elements' 		=> $this->_v_rules('close_claim'),
 				'record' 				=> $record,
@@ -1784,7 +1793,7 @@ class Claims extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('claims/forms/_form_close_withdraw',
+		$json_data['form'] = $this->load->view($this->_view_base . '/forms/_form_close_withdraw',
 			[
 				'form_elements' 		=> $this->_v_rules('withdraw_claim'),
 				'record' 				=> $record,
@@ -1963,7 +1972,7 @@ class Claims extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('claims/forms/_form_surveyors',
+		$json_data['form'] = $this->load->view($this->_view_base . '/forms/_form_surveyors',
 			[
 				'form_elements' => $this->claim_surveyor_model->validation_rules,
 				'record' 		=> $record,
@@ -2047,7 +2056,7 @@ class Claims extends MY_Controller
 		$form_elements[2]['_checkbox_value'] = $supporting_docs;
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('claims/forms/_form_assessment',
+		$json_data['form'] = $this->load->view($this->_view_base . '/forms/_form_assessment',
 			[
 				'form_elements' => $form_elements,
 				'record' 		=> $record
@@ -2101,7 +2110,7 @@ class Claims extends MY_Controller
 		$json_data = $this->_save('update_settlement', $record->policy_id, $record, $ref);
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('claims/forms/_form_settlement',
+		$json_data['form'] = $this->load->view($this->_view_base . '/forms/_form_settlement',
 			[
 				'form_elements' => $this->_v_rules('update_settlement'),
 				'record' 		=> $record,
@@ -2156,7 +2165,7 @@ class Claims extends MY_Controller
 		$json_data = $this->_save('update_scheme', $record->policy_id, $record, $ref);
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('claims/forms/_form_scheme',
+		$json_data['form'] = $this->load->view($this->_view_base . '/forms/_form_scheme',
 			[
 				'form_elements' => $this->_v_rules('update_scheme'),
 				'record' 		=> $record
@@ -2212,7 +2221,7 @@ class Claims extends MY_Controller
 		$json_data = $this->_save('update_progress', $record->policy_id, $record, $ref);
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('claims/forms/_form_progress',
+		$json_data['form'] = $this->load->view($this->_view_base . '/forms/_form_progress',
 			[
 				'form_elements' => $this->_v_rules('update_progress'),
 				'record' 		=> $record
@@ -2282,7 +2291,7 @@ class Claims extends MY_Controller
 								'content_header' => $page_header,
 								'breadcrumbs' => ['Claims' => 'claims', 'Details' => NULL]
 						])
-						->partial('content', 'claims/_details', $data)
+						->partial('content', $this->_view_base . '/_details', $data)
 						->render($this->data);
     }
 

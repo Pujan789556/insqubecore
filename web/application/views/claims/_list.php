@@ -19,12 +19,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<th>Action</th>
 		</tr>
 	</thead>
-	<tbody id="search-result-claims">
+	<tbody id="<?php echo $DOM_RowBoxId ?>">
 		<?php
 		/**
 		 * Load Rows & Next Link (if any)
 		 */
-		$this->load->view('claims/_rows');
+		$this->load->view($this->data['_view_base'] . '/_rows');
 		?>
 	</tbody>
 </table>
