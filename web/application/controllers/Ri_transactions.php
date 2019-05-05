@@ -37,6 +37,13 @@ class Ri_transactions extends MY_Controller
 
 		// Helpers
 		$this->load->helper('policy');
+
+		// URL Base
+		$this->_url_base 		 = 	$this->router->class;
+		$this->_view_base 		 =  'ri/' . $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -71,7 +78,8 @@ class Ri_transactions extends MY_Controller
 		// dom data
 		$dom_data = [
 			'DOM_DataListBoxId'	=> '_iqb-data-list-box-ri_transactions', 	// List box ID
-			'DOM_FilterFormId'	=> '_iqb-filter-form-ri_transactions', 		// Filter Form ID
+			'DOM_FilterFormId'	=> '_iqb-filter-form-ri_transactions',		// Filter Form ID
+			'DOM_RowBoxId'		=> 'box-ri_transactions-rows' 				// Row Box ID
 		];
 
 		// If request is coming from refresh method, reset nextid
@@ -114,7 +122,7 @@ class Ri_transactions extends MY_Controller
 			'policy_id' => NULL,
 			'records' => $records,
 			'next_id' => $next_id,
-			'next_url' => $next_id ? site_url( 'ri_transactions/page/r/' . $next_id ) : NULL
+			'next_url' => $next_id ? site_url( $this->_url_base . '/page/r/' . $next_id ) : NULL
 		] + $dom_data;
 
 		/**
@@ -122,20 +130,20 @@ class Ri_transactions extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'ri/transactions/_index';
+			$view = $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('ri_transactions/page/l/' )
+				'filter_url' 	=> site_url($this->_url_base . '/page/l/' )
 			]);
 		}
 		else if($layout === 'l')
 		{
-			$view = 'ri/transactions/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'ri/transactions/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 		if ( $this->input->is_ajax_request() )
@@ -152,9 +160,9 @@ class Ri_transactions extends MY_Controller
 					->set_layout('layout-advanced-filters')
 					->partial(
 						'content_header',
-						'ri/transactions/_index_header',
+						$this->_view_base . '/_index_header',
 						['content_header' => 'Manage RI Transactions'] + $data)
-					->partial('content', 'ri/transactions/_index', $data)
+					->partial('content', $this->_view_base . '/_index', $data)
 					->render($this->data);
 	}
 
@@ -334,10 +342,11 @@ class Ri_transactions extends MY_Controller
 		$data = [
 			'records' 					=> $records,
 			'policy_id' 				=> $policy_id,
-			'next_id' 					=> NULL
+			'next_id' 					=> NULL,
+			'DOM_RowBoxId'				=> 'box-ri_transactions-rows' 				// Row Box ID
 		];
 		// echo '<pre>'; print_r($data);exit;
-		$html = $this->load->view('ri/transactions/_policy/_list_widget', $data, TRUE);
+		$html = $this->load->view($this->_view_base . '/_policy/_list_widget', $data, TRUE);
 		$ajax_data = [
 			'status' => 'success',
 			'html'   => $html
@@ -411,7 +420,7 @@ class Ri_transactions extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('ri/transactions/_form',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form',
 			[
 				'form_elements' 		=> $this->ri_transaction_model->validation_rules,
 				'record' 				=> $record,
@@ -513,10 +522,10 @@ class Ri_transactions extends MY_Controller
 				];
 
 				$record 		= $this->ri_transaction_model->row($action === 'add' ? $done : $record->id);
-				$single_row 	=  'ri/transactions/_single_row';
+				$single_row 	=  $this->_view_base . '/_single_row';
 				$html = $this->load->view($single_row, ['record' => $record], TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add' ? '#search-result-invoice' : '#_data-row-invoice-' . $record->id,
+					'box' 		=> $action === 'add' ? 'box-ri_transactions-rows' : '#_data-row-invoice-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
 				];
@@ -596,7 +605,7 @@ class Ri_transactions extends MY_Controller
 		];
 
 		$this->template->json([
-			'html' 	=> $this->load->view('ri/transactions/_details', $data, TRUE),
+			'html' 	=> $this->load->view($this->_view_base . '/_details', $data, TRUE),
 			'title' => 'RI Transaction Details - ' .  $record->id
 		]);
     }
