@@ -35,6 +35,13 @@ class Ac_parties extends MY_Controller
 
 		// Load Model
 		$this->load->model('ac_party_model');
+
+		// URL Base
+		$this->_url_base 		 = $this->router->class;
+		$this->_view_base 		 = 'accounting/' . $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
 	}
 
 	// --------------------------------------------------------------------
@@ -76,12 +83,13 @@ class Ac_parties extends MY_Controller
 
 		// If request is coming from refresh method, reset nextid
 		$next_id 		= (int)$next_id;
-		$next_url_base 	= $this->router->class . '/page/r/' . $from_widget;
+		$next_url_base 	= $this->_url_base . '/page/r/' . $from_widget;
 
 		// DOM Data
 		$dom_data = [
 			'DOM_DataListBoxId' 	=> '_iqb-data-list-box-ac_party', 		// List box ID
-			'DOM_FilterFormId'		=> '_iqb-filter-form-ac_party' 			// Filter Form ID
+			'DOM_FilterFormId'		=> '_iqb-filter-form-ac_party', 			// Filter Form ID
+			'DOM_RowBoxId'			=> 'box-ac_parties-rows' 				// Row Box ID
 		];
 
 		/**
@@ -101,20 +109,20 @@ class Ac_parties extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = $from_widget === 'y' ? 'accounting/parties/_find_widget' : 'accounting/parties/_index';
+			$view = $from_widget === 'y' ? $this->_view_base . '/_find_widget' : $this->_view_base . '/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url($this->router->class . '/page/l/' . $from_widget . '/0/' . $widget_reference)
+				'filter_url' 	=> site_url($this->_url_base . '/page/l/' . $from_widget . '/0/' . $widget_reference)
 			]);
 		}
 		else if($layout === 'l')
 		{
-			$view = 'accounting/parties/_list';
+			$view = $this->_view_base . '/_list';
 		}
 		else
 		{
-			$view = 'accounting/parties/_rows';
+			$view = $this->_view_base . '/_rows';
 		}
 
 		if ( $this->input->is_ajax_request() )
@@ -132,10 +140,10 @@ class Ac_parties extends MY_Controller
 						->set_layout('layout-advanced-filters')
 						->partial(
 							'content_header',
-							'accounting/parties/_index_header',
+							$this->_view_base . '/_index_header',
 							['content_header' => 'Manage Accounting Parties'] + $dom_data)
-						->partial('content', 'accounting/parties/_index', $data)
-						->partial('dynamic_js', 'accounting/parties/_party_js')
+						->partial('content', $this->_view_base . '/_index', $data)
+						->partial('dynamic_js', $this->_view_base . '/_party_js')
 						->render($this->data);
 	}
 
@@ -381,7 +389,7 @@ class Ac_parties extends MY_Controller
 		$json_data = $this->_save('edit', $record, $address_record, $from_widget, $widget_reference);
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('accounting/parties/_form_box',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_box',
 			[
 				'form_elements' => $this->ac_party_model->validation_rules,
 				'address_elements' 	=> $this->address_model->v_rules_edit($address_record),
@@ -418,7 +426,7 @@ class Ac_parties extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('accounting/parties/_form_box',
+		$json_data['form'] = $this->load->view($this->_view_base . '/_form_box',
 			[
 				'form_elements' => $this->ac_party_model->validation_rules,
 				'address_elements' 	=> $this->address_model->v_rules_add(),
@@ -505,14 +513,14 @@ class Ac_parties extends MY_Controller
 				];
 
 				$record 			= $this->ac_party_model->row( $action === 'add' ? $done : $record->id );
-				$single_row 		=  'accounting/parties/_single_row';
+				$single_row 		=  $this->_view_base . '/_single_row';
 				if($action === 'add' && $from_widget === 'y' )
 				{
-					$single_row = 'accounting/parties/_single_row_widget';
+					$single_row = $this->_view_base . '/_single_row_widget';
 				}
 				$html = $this->load->view($single_row, ['record' => $record, 'widget_reference' => $widget_reference], TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add' ? '#search-result-ac_party' : '#_data-row-ac_party-' . $record->id,
+					'box' 		=> $action === 'add' ? '#box-ac_parties-rows' : '#_data-row-ac_party-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
 				];
@@ -525,7 +533,7 @@ class Ac_parties extends MY_Controller
 				'status' 		=> $status,
 				'message' 		=> $message,
 				'reloadForm' 	=> true,
-				'form' 			=> $this->load->view('accounting/parties/_form',
+				'form' 			=> $this->load->view($this->_view_base . '/_form',
 									[
 										'form_elements' => $this->ac_party_model->validation_rules,
 										'address_elements' 	=> $this->address_model->v_rules_on_submit(),
@@ -647,7 +655,7 @@ class Ac_parties extends MY_Controller
 								'breadcrumbs' => ['Accounting Parties' => 'ac_parties', 'Details' => NULL
 							]
 						])
-						->partial('content', 'accounting/parties/_details', $data)
+						->partial('content', $this->_view_base . '/_details', $data)
 						->render($this->data);
 
     }

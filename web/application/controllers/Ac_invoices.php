@@ -47,6 +47,13 @@ class Ac_invoices extends MY_Controller
 		$this->load->model('ac_invoice_model');
 		$this->load->model('ac_invoice_detail_model');
 
+		// URL Base
+		$this->_url_base 		 = $this->router->class;
+		$this->_view_base 		 = 'accounting/' . $this->router->class;
+
+		$this->data['_url_base'] 	= $this->_url_base; // for view to access
+		$this->data['_view_base'] 	= $this->_view_base;
+
 	}
 
 	// --------------------------------------------------------------------
@@ -82,6 +89,7 @@ class Ac_invoices extends MY_Controller
 		$dom_data = [
 			'DOM_DataListBoxId'	=> '_iqb-data-list-box-ac-invoice', 	// List box ID
 			'DOM_FilterFormId'	=> '_iqb-filter-form-ac-invoice', 		// Filter Form ID
+			'DOM_RowBoxId'		=> 'box-ac-invoices-rows' 				// Row Box ID
 		];
 
 		// If request is coming from refresh method, reset nextid
@@ -123,7 +131,7 @@ class Ac_invoices extends MY_Controller
 			'policy_id' => NULL,
 			'records' => $records,
 			'next_id' => $next_id,
-			'next_url' => $next_id ? site_url( 'ac_invoices/page/r/' . $next_id ) : NULL
+			'next_url' => $next_id ? site_url( $this->_url_base . '/page/r/' . $next_id ) : NULL
 		] + $dom_data;
 
 		/**
@@ -131,20 +139,20 @@ class Ac_invoices extends MY_Controller
 		 */
 		if($layout === 'f') // Full Layout
 		{
-			$view = 'accounting/invoices/_index';
+			$view = $this->_view_base .'/_index';
 
 			$data = array_merge($data, [
 				'filters' 		=> $this->_get_filter_elements(),
-				'filter_url' 	=> site_url('ac_invoices/page/l/' )
+				'filter_url' 	=> site_url($this->_url_base . '/page/l/' )
 			]);
 		}
 		else if($layout === 'l')
 		{
-			$view = 'accounting/invoices/_list';
+			$view = $this->_view_base .'/_list';
 		}
 		else
 		{
-			$view = 'accounting/invoices/_rows';
+			$view = $this->_view_base .'/_rows';
 		}
 
 		if ( $this->input->is_ajax_request() )
@@ -161,9 +169,9 @@ class Ac_invoices extends MY_Controller
 					->set_layout('layout-advanced-filters')
 					->partial(
 						'content_header',
-						'accounting/invoices/_index_header',
+						$this->_view_base .'/_index_header',
 						['content_header' => 'Manage Invoices'] + $data)
-					->partial('content', 'accounting/invoices/_index', $data)
+					->partial('content', $this->_view_base .'/_index', $data)
 					->render($this->data);
 	}
 
@@ -309,10 +317,11 @@ class Ac_invoices extends MY_Controller
 		$data = [
 			'records' 					=> $records,
 			'policy_id' 				=> $policy_id,
-			'next_id' 					=> NULL
+			'next_id' 					=> NULL,
+			'DOM_RowBoxId'				=> 'box-ac-invoices-rows' 				// Row Box ID
 		];
 		// echo '<pre>'; print_r($data);exit;
-		$html = $this->load->view('accounting/invoices/_policy/_list_widget', $data, TRUE);
+		$html = $this->load->view($this->_view_base .'/_policy/_list_widget', $data, TRUE);
 		$ajax_data = [
 			'status' => 'success',
 			'html'   => $html
@@ -386,7 +395,7 @@ class Ac_invoices extends MY_Controller
 
 
 		// No form Submitted?
-		$json_data['form'] = $this->load->view('accounting/invoices/_form',
+		$json_data['form'] = $this->load->view($this->_view_base .'/_form',
 			[
 				'form_elements' 		=> $this->ac_invoice_model->validation_rules,
 				'record' 				=> $record,
@@ -488,10 +497,10 @@ class Ac_invoices extends MY_Controller
 				];
 
 				$record 		= $this->ac_invoice_model->row($action === 'add' ? $done : $record->id);
-				$single_row 	=  'accounting/invoices/_single_row';
+				$single_row 	=  $this->_view_base .'/_single_row';
 				$html = $this->load->view($single_row, ['record' => $record], TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add' ? '#search-result-invoice' : '#_data-row-invoice-' . $record->id,
+					'box' 		=> $action === 'add' ? '#box-ac-invoices-rows' : '#_data-row-invoice-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
 				];
@@ -579,7 +588,7 @@ class Ac_invoices extends MY_Controller
 								'content_header' => 'Invoice -' . $record->invoice_code,
 								'breadcrumbs' => ['Invoices' => $this->router->class, 'Details' => NULL]
 						])
-						->partial('content', 'accounting/invoices/_details', $data)
+						->partial('content', $this->_view_base .'/_details', $data)
 						->render($this->data);
 
     }
@@ -839,7 +848,7 @@ class Ac_invoices extends MY_Controller
 		/**
 		 * Update The Row
 		 */
-		$row_html = $this->load->view('accounting/invoices/_single_row', ['record' => $record, 'policy_id' => $policy_id], TRUE);
+		$row_html = $this->load->view($this->_view_base .'/_single_row', ['record' => $record, 'policy_id' => $policy_id], TRUE);
 		$ajax_data = [
 			'message' => 'Successfully Updated',
 			'status'  => 'success',
@@ -959,7 +968,7 @@ class Ac_invoices extends MY_Controller
 		/**
 		 * Update The Row
 		 */
-		$row_html = $this->load->view('accounting/invoices/_single_row', ['record' => $record, 'policy_id' => $policy_id], TRUE);
+		$row_html = $this->load->view($this->_view_base .'/_single_row', ['record' => $record, 'policy_id' => $policy_id], TRUE);
 		$ajax_data = [
 			'message' => 'Successfully Updated',
 			'status'  => 'success',

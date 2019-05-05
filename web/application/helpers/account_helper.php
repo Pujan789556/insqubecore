@@ -897,7 +897,7 @@ if ( ! function_exists('_INVOICE__pdf'))
 	        $mpdf->watermarkTextAlpha = 0.1;
         }
 
-        $html = $CI->load->view( 'accounting/invoices/print/invoice', $data, TRUE);
+        $html = $CI->load->view( 'accounting/ac_invoices/print/invoice', $data, TRUE);
         $mpdf->WriteHTML($html);
         $filename = _INVOICE__filename( $record->invoice_code );
         if( $action === 'save' )
@@ -990,7 +990,7 @@ if ( ! function_exists('_RECEIPT__pdf'))
 	        $mpdf->watermarkTextAlpha = 0.1;
         }
 
-        $html = $CI->load->view( 'accounting/invoices/print/receipt', $data, TRUE);
+        $html = $CI->load->view( 'accounting/ac_invoices/print/receipt', $data, TRUE);
         $mpdf->WriteHTML($html);
        	$filename = _RECEIPT__filename( $record->receipt_code );
         if( $action === 'save' )
@@ -1079,7 +1079,7 @@ if ( ! function_exists('_CREDIT_NOTE__pdf'))
         $mpdf->watermarkTextAlpha = 0.1;
         $mpdf->SetDisplayMode('fullpage');
 
-        $html = $CI->load->view( 'accounting/credit_notes/print/credit_note', $data, TRUE);
+        $html = $CI->load->view( 'accounting/ac_credit_notes/print/credit_note', $data, TRUE);
         $mpdf->WriteHTML($html);
         $filename =  "credit_note-{$record->id}.pdf";
         if( $action === 'save' )
