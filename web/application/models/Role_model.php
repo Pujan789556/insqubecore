@@ -9,6 +9,8 @@ class Role_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     protected $after_insert  = ['clear_cache'];
@@ -60,6 +62,41 @@ class Role_model extends MY_Model
 	}
 
 	// ----------------------------------------------------------------
+
+    /**
+     * Revoke all permissions from all roles
+     *
+     * @return bool
+     */
+    public function revoke_all_permissions()
+    {
+        // Get all IDs
+        $all_roles = $this->db->select('id')->from($this->table_name)->get()->result();
+
+        // ----------------------------------------------------------------
+
+        $status = TRUE;
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            foreach($all_roles as $single)
+            {
+                parent::update($single->id, ['permissions' => NULL], TRUE);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // generate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+
+        // return result/status
+        return $status;
+    }
+
+    // ----------------------------------------------------------------
+
 
     public function get_all()
     {
@@ -114,11 +151,7 @@ class Role_model extends MY_Model
             return FALSE;
         }
 
-		// Disable DB Debug for transaction to work
-		$this->db->db_debug = FALSE;
-
 		$status = TRUE;
-
 		// Use automatic transaction
 		$this->db->trans_start();
 
@@ -131,14 +164,6 @@ class Role_model extends MY_Model
 	        // get_allenerate an error... or use the log_message() function to log your error
 			$status = FALSE;
 		}
-		else
-		{
-			$this->log_activity($id, 'D');
-		}
-
-		// Enable db_debug if on development environment
-		$this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
 		// return result/status
 		return $status;
 	}
@@ -159,30 +184,6 @@ class Role_model extends MY_Model
             $this->delete_cache($cache);
         }
         return TRUE;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete|Assign
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id=NULL, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module' => 'roles',
-            'module_id' => $id,
-            'action' => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 
 

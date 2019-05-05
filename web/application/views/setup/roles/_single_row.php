@@ -14,7 +14,7 @@ $_del_url 		= $this->data['_url_base'] . '/delete/'  . $record->id;
 		<?php if($record->id != 2):?>
 			<a 	href="#"
 				title="Edit"
-				class="trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Edit Role' data-url="<?php echo site_url('roles/edit/' . $record->id);?>" data-form=".form-iqb-general"><?php echo $record->name;?></a>
+				class="trg-dialog-edit" data-title='<i class="fa fa-pencil-square-o"></i> Edit Role' data-url="<?php echo site_url($_edit_url);?>" data-form=".form-iqb-general"><?php echo $record->name;?></a>
 		<?php else:?>
 			<?php echo $record->name;?>
 		<?php endif;?>

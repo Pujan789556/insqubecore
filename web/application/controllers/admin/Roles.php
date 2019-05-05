@@ -194,13 +194,11 @@ class Roles extends MY_Controller
 				{
 					$done = $this->role_model->insert($data, TRUE); // No Validation on Model
 
-					// Activity Log
-					$done ? $this->role_model->log_activity($done, 'C'): '';
 				}
 				else
 				{
 					// Now Update Data
-					$done = $this->role_model->update($record->id, $data, TRUE) && $this->role_model->log_activity($record->id, 'U');
+					$done = $this->role_model->update($record->id, $data, TRUE);
 				}
 
 	        	if(!$done)
@@ -417,7 +415,7 @@ class Roles extends MY_Controller
 				$json_permissions = $post_data ? json_encode($post_data) : NULL;
 
 				// Let's Update the Permissions
-				if( $this->role_model->update($record->id, ['permissions' => $json_permissions], TRUE) && $this->role_model->log_activity($record->id, 'P'))
+				if( $this->role_model->update($record->id, ['permissions' => $json_permissions], TRUE) )
 				{
 
 					// Let's check the permission difference
@@ -588,18 +586,17 @@ class Roles extends MY_Controller
      */
     public function revoke_all_permissions()
     {
-    	if($this->role_model->update_all(['permissions' => NULL], TRUE) && $this->role_model->log_activity(NULL, 'R'))
+    	if( $this->role_model->revoke_all_permissions() )
     	{
     		$data = [
 				'status' 	=> 'success',
-				'message' 	=> 'Successfully revoked all role-permissions!'
+				'message' 	=> 'Successfully revoked all role-permissions!',
+				'reloadPage' => true, // Re-login required
 			];
 
 			// Update relogin flag of all users
 			$this->load->model('dx_auth/user_setting_model', 'user_setting_model');
 			$this->user_setting_model->update_flag_all('flag_re_login', IQB_STATUS_ACTIVE);
-
-			// @TODO: Log activity
     	}
     	else
     	{
