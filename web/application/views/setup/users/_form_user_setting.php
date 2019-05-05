@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             'data-pc' => '.bootbox-body' // parent container ID
                         ],
                         // Hidden Fields
-                        isset($record) ? ['user_id' => $record->user_id] : []); ?>
+                        isset($record) ? ['id' => $record->id] : []); ?>
 
     <?php
     /**

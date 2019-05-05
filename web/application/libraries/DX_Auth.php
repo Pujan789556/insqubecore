@@ -393,8 +393,7 @@ class DX_Auth
 
 	function _reset_relogin($user_id)
 	{
-		$this->ci->load->model('dx_auth/user_setting_model', 'user_setting_model');
-		$this->ci->user_setting_model->update_flag_by_user($user_id, 'flag_re_login', IQB_STATUS_INACTIVE);
+		$this->ci->user_model->reset_relogin($user_id);
 	}
 
 
@@ -850,11 +849,7 @@ class DX_Auth
 		if( $flag_logged_in === TRUE )
 		{
 			// Check if user's relogin flag has been set by Administrator?
-			$user_id = $this->get_user_id();
-			$this->ci->load->model('dx_auth/user_setting_model', 'user_setting_model');
-			$record = $this->ci->user_setting_model->get($user_id);
-
-			if( $record && $record->flag_re_login == IQB_STATUS_ACTIVE )
+			if( $this->ci->user_model->flag_enabled($this->get_user_id(), 'flag_re_login') )
 			{
 				$this->logout();
 				return false;
@@ -874,8 +869,7 @@ class DX_Auth
 	function is_backdate_allowed( $module='' )
 	{
 		// Get User Settings
-		$this->ci->load->model('dx_auth/user_setting_model', 'user_setting_model');
-		return $this->ci->user_setting_model->flag_enabled( $this->get_user_id(), 'flag_back_date' );
+		return $this->ci->user_model->flag_enabled( $this->get_user_id(), 'flag_back_date' );
 	}
 
 	// Check if user has the permission?
@@ -1212,7 +1206,8 @@ class DX_Auth
 					$encode = $hasher->HashPassword($data['password']);
 
 					// Create key
-					$data['key'] = md5(rand().microtime());
+					$this->ci->load->library('Token');
+					$data['key'] = TOKEN::v2(32);
 
 					// Create new password (but it haven't activated yet)
 					$this->ci->user_model->newpass($row->id, $encode, $data['key']);

@@ -1294,9 +1294,8 @@ class Users extends MY_Controller
     public function settings($user_id)
     {
         // Valid Record ?
-        $this->load->model('dx_auth/user_setting_model', 'user_setting_model');
         $user_id = (int)$user_id;
-        $record = $this->user_setting_model->get($user_id);
+        $record = $this->user_model->find($user_id);
         if(!$record)
         {
             return $this->template->json([
@@ -1305,9 +1304,10 @@ class Users extends MY_Controller
             ],404);
         }
 
+        $v_rules = $this->user_model->settings_v_rules();
+
         if( $this->input->post() )
         {
-            $v_rules = $this->user_setting_model->validation_rules;
             $this->form_validation->set_rules($v_rules);
             if( $this->form_validation->run() )
             {
@@ -1321,7 +1321,7 @@ class Users extends MY_Controller
                 ];
 
                 // Let's Update the Permissions
-                if( $this->user_setting_model->update_settings($user_id, $data ) )
+                if( $this->user_model->update_settings($user_id, $data ) )
                 {
                     $status = 'success';
                     $message = 'Successfully updated.';
@@ -1349,7 +1349,7 @@ class Users extends MY_Controller
         $json_data['form'] = $this->load->view($this->_view_base . '/_form_user_setting',
         [
             'record'        => $record,
-            'form_elements' => $this->user_setting_model->validation_rules
+            'form_elements' => $v_rules
         ], TRUE);
 
         // Return HTML
@@ -1367,16 +1367,13 @@ class Users extends MY_Controller
      */
     public function force_relogin_all()
     {
-    	$this->load->model('dx_auth/user_setting_model', 'user_setting_model');
-    	if( $this->user_setting_model->update_flag_all('flag_re_login', IQB_FLAG_ON) )
+    	if( $this->user_model->force_relogin_all() )
     	{
     		$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully forced re-login to all Users!',
 				'reloadPage' => true // reload the page
 			];
-
-			// @TODO: Log activity
     	}
     	else
     	{
@@ -1399,15 +1396,12 @@ class Users extends MY_Controller
      */
     public function revoke_all_backdate()
     {
-    	$this->load->model('dx_auth/user_setting_model', 'user_setting_model');
-    	if( $this->user_setting_model->update_flag_all('flag_back_date', IQB_FLAG_OFF) )
+    	if( $this->user_model->revoke_all_backdate() )
     	{
     		$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully revoked all back-date settings!'
 			];
-
-			// @TODO: Log activity
     	}
     	else
     	{
@@ -1450,8 +1444,8 @@ class Users extends MY_Controller
 			$hashed_password = $hasher->HashPassword($password);
 
 
-			$profile = $record->profile ? json_decode($record->profile) : NULL;
-			$profile_name = isset($profile) ? $profile->name : $record->username;
+			$profile 		= $record->profile ? json_decode($record->profile) : NULL;
+			$profile_name 	= isset($profile) ? $profile->name : $record->username;
 
 			// Replace old password with new password
 			if($this->user_model->change_password($record->id, $hashed_password))
@@ -1478,7 +1472,6 @@ class Users extends MY_Controller
 
 				$this->_email($record->email, $from, $subject, $message);
 			}
-
     	}
 
     	if( $success )
@@ -1487,8 +1480,6 @@ class Users extends MY_Controller
 				'status' 	=> 'success',
 				'message' 	=> "{$success} out of {$total} user's password updated successfully."
 			];
-
-			// @TODO: Log activity
     	}
     	else
     	{

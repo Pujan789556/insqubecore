@@ -11,27 +11,27 @@ class User_temp extends CI_Model
 		$this->_prefix = $this->config->item('DX_table_prefix');
 		$this->_table = $this->_prefix.$this->config->item('DX_user_temp_table');
 	}
-	
+
 	function get_all($offset = 0, $row_count = 0)
 	{
 		if ($offset >= 0 AND $row_count > 0)
 		{
-			$query = $this->db->get($this->_table, $row_count, $offset); 
+			$query = $this->db->get($this->_table, $row_count, $offset);
 		}
 		else
 		{
 			$query = $this->db->get($this->_table);
 		}
-		
+
 		return $query;
-	}		
-	
+	}
+
 	function get_user_by_username($username)
 	{
 		$this->db->where('username', $username);
 		return $this->db->get($this->_table);
 	}
-	
+
 	function get_user_by_email($email)
 	{
 		$this->db->where('email', $email);

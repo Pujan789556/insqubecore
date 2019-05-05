@@ -61,6 +61,95 @@ class Role_model extends MY_Model
 		parent::__construct();
 	}
 
+    // ----------------------------------------------------------------
+
+    public function update_permissions($id, $permissions)
+    {
+        $record = parent::find($id);
+
+        // ----------------------------------------------------------------
+        $status = TRUE;
+        // Use automatic transaction
+        $this->db->trans_start();
+
+            $done = parent::update($id, ['permissions' => $permissions], TRUE);
+            if( $done && $this->_permissions_changed($record->permissions, $permissions) )
+            {
+                // Force Relogin to all users belonging to this Role
+                $this->load->model('dx_auth/user_model', 'user_model');
+                $this->user_model->force_relogin_by_role($record->id, FALSE);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
+        {
+            // get_allenerate an error... or use the log_message() function to log your error
+            $status = FALSE;
+        }
+
+        // return result/status
+        return $status;
+    }
+
+        /**
+         * Permission Changed?
+         *
+         * Check if the permission on edit is changed ?
+         *
+         * @param array $old
+         * @param array $new
+         * @return bool
+         */
+        private function _permissions_changed($old_json, $new_json)
+        {
+            $old = $old_json ? json_decode($old_json, true) : [];
+            $new = $new_json ? json_decode($new_json, true) : [];
+
+
+            $count_old = count($old);
+            $count_new = count($new);
+
+            if($count_old !== $count_new)
+            {
+                return TRUE;
+            }
+
+            // now compare one by one
+            $flag_changed = FALSE;
+
+            if($count_old !== 0)
+            {
+                asort($old);
+                asort($new);
+
+                foreach($old as $module=>$old_permissions)
+                {
+                    $new_permissions = $new[$module];
+
+                    asort($new_permissions);
+                    asort($old_permissions);
+
+                    $new_permissions = array_values($new_permissions);
+                    $old_permissions = array_values($old_permissions);
+
+                    if( count($new_permissions) !== count($old_permissions) )
+                    {
+                        $flag_changed = TRUE;
+                        break;
+                    }
+
+                    $match = $old_permissions === $new_permissions;
+                    if( !$match )
+                    {
+                        $flag_changed = TRUE;
+                        break;
+                    }
+                }
+            }
+
+            return $flag_changed;
+        }
+
 	// ----------------------------------------------------------------
 
     /**
@@ -70,6 +159,8 @@ class Role_model extends MY_Model
      */
     public function revoke_all_permissions()
     {
+        $this->load->model('dx_auth/user_model', 'user_model');
+
         // Get all IDs
         $all_roles = $this->db->select('id')->from($this->table_name)->get()->result();
 
@@ -83,6 +174,9 @@ class Role_model extends MY_Model
             {
                 parent::update($single->id, ['permissions' => NULL], TRUE);
             }
+
+            // Update relogin flag of all users
+            $this->user_model->force_relogin_all(FALSE);
 
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)

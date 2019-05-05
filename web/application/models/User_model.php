@@ -12,6 +12,8 @@ class User_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     protected $after_insert  = ['clear_cache'];
@@ -19,7 +21,7 @@ class User_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ["id", "code", "role_id", "branch_id", "department_id", "username", "password", "email", "scope", "contact", "profile", "docs", "banned", "ban_reason", "newpass", "newpass_key", "newpass_time", "last_ip", "last_login", "created_at", "created_by", "updated_at", "updated_by"];
+    protected $fields = ['id', 'code', 'role_id', 'branch_id', 'department_id', 'username', 'password', 'email', 'scope', 'contact', 'profile', 'docs', 'banned', 'ban_reason', 'newpass', 'newpass_key', 'newpass_time', 'last_ip', 'last_login', 'flag_re_login', 'flag_back_date', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
 
     /**
@@ -42,6 +44,28 @@ class User_model extends MY_Model
 
 		// Dependant Model
 		$this->load->model('address_model');
+	}
+
+	public function settings_v_rules()
+	{
+		return [
+	        [
+	            'field' => 'flag_re_login',
+	            'label' => 'Force Relogin',
+	            'rules' => 'trim|integer|in_list[1]',
+	            '_type' => 'switch',
+	            '_checkbox_value' => '1',
+	            '_help_text' => 'If you want this user to re-login immediately, please set this flag ON.'
+	        ],
+	        [
+	            'field' => 'flag_back_date',
+	            'label' => 'Enable Back Date',
+	            'rules' => 'trim|integer|in_list[1]',
+	            '_type' => 'switch',
+	            '_checkbox_value' => '1',
+	            '_help_text' => 'This will enable user to select back date.'
+	        ]
+	    ];
 	}
 
 	// ----------------------------------------------------------------
@@ -247,9 +271,6 @@ class User_model extends MY_Model
     	$record = $this->get_cache($cache_name);
         if(!$record)
         {
-
-
-
             $this->db->select('U.id, U.code, U.username, U.email, U.banned, U.profile, U.contact, R.name AS role_name, B.name_en AS branch_name_en, B.name_np AS branch_name_np, D.name AS department_name')
 						->from($this->table_name . ' AS U')
 						->join('auth_roles R', 'U.role_id = R.id')
@@ -289,6 +310,55 @@ class User_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
+     * Get User Flags
+     *
+     * @param integer $id
+     * @return object
+     */
+    public function get_flags($id)
+    {
+    	/**
+         * Get Cached Result, If no, cache the query result
+         */
+    	$cache_name = 'auth_users_flags_' . $id;
+
+    	$record = $this->get_cache($cache_name);
+        if(!$record)
+        {
+            $record = $this->db->select('U.flag_re_login, U.flag_back_date')
+								->from($this->table_name . ' AS U')
+								->where('U.id', $id)
+								->get()->row();
+
+            $this->write_cache($record, $cache_name, CACHE_DURATION_HR);
+        }
+        return $record;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get Flag Value
+     *
+     * @param integer $id
+     * @param string $flag_name
+     * @return mixed
+     */
+    public function flag_enabled($id, $flag_name)
+    {
+        $enabled = FALSE;
+
+        $record = $this->get_flags($id);
+        if($record && isset($record->{$flag_name}) )
+        {
+            $enabled = (int)$record->{$flag_name} === IQB_FLAG_ON;
+        }
+        return $enabled;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
      * Get Details of a Single Record
      *
      * @param int $id
@@ -315,7 +385,8 @@ class User_model extends MY_Model
     {
     	$cache_names = [
             'auth_users_dd*',
-            'auth_users_l_*'
+            'auth_users_l_*',
+            'auth_users_flags_*'
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)
@@ -327,30 +398,6 @@ class User_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-
-	// General function
-
-	// function get_all($offset = 0, $row_count = 0)
-	// {
-	// 	$users_table = $this->table_name;
-	// 	$roles_table = $this->_roles_table;
-
-	// 	if ($offset >= 0 AND $row_count > 0)
-	// 	{
-	// 		$this->db->select("$users_table.*", FALSE);
-	// 		$this->db->select("$roles_table.name AS role_name", FALSE);
-	// 		$this->db->join($roles_table, "$roles_table.id = $users_table.role_id");
-	// 		$this->db->order_by("$users_table.id", "ASC");
-
-	// 		$query = $this->db->get($this->table_name, $row_count, $offset);
-	// 	}
-	// 	else
-	// 	{
-	// 		$query = $this->db->get($this->table_name);
-	// 	}
-
-	// 	return $query;
-	// }
 
 	function get_user_by_id($user_id)
 	{
@@ -448,7 +495,7 @@ class User_model extends MY_Model
 			'banned' 			=> 1,
 			'ban_reason' 	=> $reason
 		);
-		return $this->update($id, $data, TRUE) && $this->log_activity($id, 'X');
+		return parent::update($id, $data, TRUE);
 	}
 
 	function unban_user($id)
@@ -460,26 +507,25 @@ class User_model extends MY_Model
         }
 
 		$data = array(
-			'banned' 			=> 0,
+			'banned' 		=> 0,
 			'ban_reason' 	=> NULL
 		);
-		return $this->update($id, $data, TRUE) && $this->log_activity($id, 'Y');
-		// return $this->set_user($user_id, $data);
+		return parent::update($id, $data, TRUE);
 	}
 
-	function set_role($user_id, $role_id)
+	function set_role($id, $role_id)
 	{
 		$data = array(
 			'role_id' => $role_id
 		);
-		return $this->set_user($user_id, $data);
+		return parent::update($id, $data, TRUE);
 	}
 
 	// User table function
 
 	function create_user($data)
 	{
-		return $this->insert($data, TRUE);
+		return parent::insert($data, TRUE);
 	}
 
 	function get_user_field($user_id, $fields)
@@ -498,79 +544,116 @@ class User_model extends MY_Model
 
 	// Forgot password function
 
-	function newpass($user_id, $pass, $key)
+	function newpass($id, $pass, $key)
 	{
 		$data = array(
-			'newpass' 			=> $pass,
+			'newpass' 		=> $pass,
 			'newpass_key' 	=> $key,
 			'newpass_time' 	=> date('Y-m-d h:i:s', time() + $this->config->item('DX_forgot_password_expire'))
 		);
-		return $this->set_user($user_id, $data);
+		return parent::update($id, $data, TRUE);
 	}
 
-	function activate_newpass($user_id, $key)
+	function activate_newpass($id, $key)
 	{
-		$this->db->set('password', 'newpass', FALSE);
-		$this->db->set('newpass', NULL);
-		$this->db->set('newpass_key', NULL);
-		$this->db->set('newpass_time', NULL);
-		$this->db->where('id', $user_id);
-		$this->db->where('newpass_key', $key);
+		$user = parent::find_by(['id' => $id, 'newpass_key' => $key]);
+		if( !$user )
+		{
+			return FALSE;
+		}
 
-		return $this->db->update($this->table_name);
+		$data = [
+			'password' 		=> $user->newpass, // Set new password as The Password
+			'newpass' 		=> NULL,
+			'newpass_key' 	=> NULL,
+			'newpass_time' 	=> NULL
+		];
+		return parent::update($id, $data, TRUE);
 	}
 
-	function clear_newpass($user_id)
+	function clear_newpass($id)
 	{
 		$data = array(
-			'newpass' 			=> NULL,
+			'newpass' 		=> NULL,
 			'newpass_key' 	=> NULL,
 			'newpass_time' 	=> NULL
 		);
-		return $this->set_user($user_id, $data);
+		return parent::update($id, $data, TRUE);
 	}
 
 	// Change password function
-
-	function change_password($user_id, $new_pass)
+	function change_password($id, $new_pass)
 	{
-		$this->db->set('password', $new_pass);
-		$this->db->where('id', $user_id);
-		$done = $this->db->update($this->table_name) && $this->log_activity($user_id, 'H');
+		$data = [
+			'password' 		=> $new_pass,
+			'flag_re_login' => IQB_FLAG_ON
+		];
 
-		// The user need to re-login if he/she is currently logged in
-		if($done)
-		{
-			$this->load->model('dx_auth/user_setting_model', 'user_setting_model');
-			$this->user_setting_model->update_flag_by_user($user_id, 'flag_re_login', IQB_FLAG_ON);
-		}
+		return parent::update($id, $data, TRUE);
+	}
 
-		return $done;
+    // ----------------------------------------------------------------
+
+	function force_relogin($id)
+	{
+		$data = [
+			'flag_re_login' => IQB_FLAG_ON
+		];
+
+		return parent::update($id, $data, TRUE);
 	}
 
 	// ----------------------------------------------------------------
 
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module' => 'users',
-            'module_id' => $id,
-            'action' => $action
-        ];
-        return $this->activity->save($activity_log);
-    }
+	function force_relogin_by_role($role_id, $use_automatic_transaction = TRUE)
+	{
+		$result = $this->db->select('id')
+							->from($this->table_name)
+							->where('role_id', $role_id)
+							->get();
+
+		$users = $result ? $result->result() : [];
+		$data = [
+			'flag_re_login' => IQB_FLAG_ON
+		];
+
+		// ----------------------------------------------------------------
+
+		$status = TRUE;
+		// Use automatic transaction
+		if($use_automatic_transaction)
+		{
+			$this->db->trans_start();
+		}
+			foreach($users as $user)
+			{
+				parent::update($user->id, $data, TRUE);
+			}
+
+		if($use_automatic_transaction)
+		{
+			$this->db->trans_complete();
+			if ($this->db->trans_status() === FALSE)
+			{
+		        // get_allenerate an error... or use the log_message() function to log your error
+				$status = FALSE;
+			}
+		}
+
+		// return result/status
+		return $status;
+	}
+
+	// ----------------------------------------------------------------
+
+	function reset_relogin($id)
+	{
+		$data = [
+			'flag_re_login' => IQB_FLAG_OFF
+		];
+
+		return parent::update($id, $data, TRUE);
+	}
 
     // ----------------------------------------------------------------
 
@@ -588,11 +671,7 @@ class User_model extends MY_Model
             return FALSE;
         }
 
-		// Disable DB Debug for transaction to work
-		$this->db->db_debug = FALSE;
-
 		$status = TRUE;
-
 		// Use automatic transaction
 		$this->db->trans_start();
 
@@ -605,13 +684,6 @@ class User_model extends MY_Model
 	        // get_allenerate an error... or use the log_message() function to log your error
 			$status = FALSE;
 		}
-		else
-		{
-			$this->log_activity($id, 'D');
-		}
-
-		// Enable db_debug if on development environment
-		$this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
 		// return result/status
 		return $status;
@@ -628,7 +700,7 @@ class User_model extends MY_Model
      */
     public function update_basic($id, $data, $skip_validation=TRUE)
     {
-    	return $this->update($id, $data,  $skip_validation) && $this->log_activity($id, 'B');
+    	return parent::update($id, $data,  $skip_validation);
     }
 
     // ----------------------------------------------------------------
@@ -642,7 +714,7 @@ class User_model extends MY_Model
      */
     public function update_contact($id, $data, $skip_validation=TRUE)
     {
-    	return $this->update($id, $data, $skip_validation) && $this->log_activity($id, 'T');
+    	return parent::update($id, $data, $skip_validation);
     }
 
     // ----------------------------------------------------------------
@@ -656,7 +728,103 @@ class User_model extends MY_Model
      */
     public function update_profile($id, $data, $skip_validation=TRUE)
     {
-    	return $this->update($id, $data, $skip_validation) && $this->log_activity($id, 'P');
+    	return parent::update($id, $data, $skip_validation);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Update User's Settings
+     *
+     * @param integer $id
+     * @param array $data
+     * @return bool
+     */
+    public function update_settings($id, $data, $skip_validation=TRUE)
+    {
+    	return parent::update($id, $data, $skip_validation);
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Force all user to re-login
+     *
+     * @return bool
+     */
+    public function force_relogin_all($use_automatic_transaction = TRUE)
+    {
+        // Get all IDs
+        $all_users = $this->db->select('id')->from($this->table_name)->get()->result();
+
+        // ----------------------------------------------------------------
+
+        $status = TRUE;
+
+        if($use_automatic_transaction)
+        {
+        	// Use automatic transaction
+	        $this->db->trans_start();
+        }
+        	// Update one by one
+            foreach($all_users as $single)
+            {
+                parent::update($single->id, ['flag_re_login' => IQB_FLAG_ON], TRUE);
+            }
+
+        if($use_automatic_transaction)
+        {
+	        $this->db->trans_complete();
+	        if ($this->db->trans_status() === FALSE)
+	        {
+	            // generate an error... or use the log_message() function to log your error
+	            $status = FALSE;
+	        }
+	    }
+
+        // return result/status
+        return $status;
+    }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Revoke all Backdate
+     *
+     * @return bool
+     */
+    public function revoke_all_backdate($use_automatic_transaction = TRUE)
+    {
+        // Get all IDs
+        $all_users = $this->db->select('id')->from($this->table_name)->get()->result();
+
+        // ----------------------------------------------------------------
+
+        $status = TRUE;
+
+        if($use_automatic_transaction)
+        {
+        	// Use automatic transaction
+	        $this->db->trans_start();
+        }
+        	// Update one by one
+            foreach($all_users as $single)
+            {
+                parent::update($single->id, ['flag_back_date' => IQB_FLAG_OFF], TRUE);
+            }
+
+        if($use_automatic_transaction)
+        {
+	        $this->db->trans_complete();
+	        if ($this->db->trans_status() === FALSE)
+	        {
+	            // generate an error... or use the log_message() function to log your error
+	            $status = FALSE;
+	        }
+	    }
+
+        // return result/status
+        return $status;
     }
 
 }
