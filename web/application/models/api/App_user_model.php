@@ -8,6 +8,7 @@ class App_user_model extends MY_Model
     protected $set_created  = true;
     protected $set_modified = true;
     protected $log_user     = true;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = ['id'];
 

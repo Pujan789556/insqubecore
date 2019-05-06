@@ -11,6 +11,8 @@ class Customer_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     // protected $before_insert = [];
@@ -696,9 +698,7 @@ class Customer_model extends MY_Model
         $address  = (array)$data->address;
 
         // Update Customer Data
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, $customer)
-
+        return parent::update($id, $customer, TRUE)
                         &&
             // Update Address Data
             $this->address_model->commit_endorsement(IQB_ADDRESS_TYPE_CUSTOMER, $id, $address);

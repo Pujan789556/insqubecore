@@ -520,8 +520,17 @@ class Address_model extends MY_Model
      */
     public function commit_endorsement($type, $type_id, $data)
     {
-        return $this->db->where(['type' => $type, 'type_id' => $type_id])
-                        ->update($this->table_name, $data);
+        $record = $this->db->select('id')
+                           ->from($this->table_name)
+                           ->where(['type' => $type, 'type_id' => $type_id])
+                           ->get()->row();
+
+       if($record)
+       {
+            return parent::update($record->id, $data, TRUE);
+       }
+
+        return TRUE;
     }
 
     // --------------------------------------------------------------------
@@ -648,16 +657,11 @@ class Address_model extends MY_Model
             return FALSE;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
         $status             = TRUE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
-
             parent::delete($id);
-
 
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
@@ -665,8 +669,6 @@ class Address_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;
