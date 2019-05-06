@@ -44,6 +44,9 @@ class DX_Auth
 		// Load DX Auth event
 		//$this->ci->load->library('DX_Auth_Event');
 
+		// Load User Model
+		$this->ci->load->model('user_model');
+
 		// Initialize
 		$this->_init();
 	}
@@ -235,7 +238,6 @@ class DX_Auth
 		{
 			// Load model
 			// $this->ci->load->model('dx_auth/users', 'users');
-			$this->ci->load->model('user_model');
 			// Update record
 			$this->ci->user_model->set_user($user_id, $data);
 		}
@@ -917,7 +919,6 @@ class DX_Auth
 	function is_username_available($username, $id = NULL)
 	{
 		// Load Models
-		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 
 		$users = $this->ci->user_model->check_username($username, $id);
@@ -930,7 +931,6 @@ class DX_Auth
 	function is_email_available($email, $id = NULL)
 	{
 		// Load Models
-		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 
 		$users = $this->ci->user_model->check_email($email, $id);
@@ -960,7 +960,6 @@ class DX_Auth
 	function login($login, $password, $remember = TRUE)
 	{
 		// Load Models
-		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 		$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');
 
@@ -1078,7 +1077,6 @@ class DX_Auth
 	function register($username, $password, $email, $extra_data = [])
 	{
 		// Load Models
-		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 
 		$this->ci->load->helper('url');
@@ -1181,8 +1179,6 @@ class DX_Auth
 
 		if ($login)
 		{
-			// Load Model
-			$this->ci->load->model('user_model');
 			// Load Helper
 			$this->ci->load->helper('url');
 
@@ -1245,7 +1241,6 @@ class DX_Auth
 	function reset_password($username, $key = '')
 	{
 		// Load Models
-		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_autologin', 'user_autologin');
 
 		// Default return value
@@ -1274,7 +1269,6 @@ class DX_Auth
 	function activate($username, $key = '')
 	{
 		// Load Models
-		$this->ci->load->model('user_model');
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
 
 		// Default return value
@@ -1316,9 +1310,6 @@ class DX_Auth
 
 	function change_password($old_pass, $new_pass)
 	{
-		// Load Models
-		$this->ci->load->model('user_model');
-
 		// Default return value
 		$result = FAlSE;
 
@@ -1359,9 +1350,6 @@ class DX_Auth
 
 	function cancel_account($password)
 	{
-		// Load Models
-		$this->ci->load->model('user_model');
-
 		// Default return value
 		$result = FAlSE;
 
