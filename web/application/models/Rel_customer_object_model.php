@@ -10,6 +10,7 @@ class Rel_customer_object_model extends MY_Model
     protected $set_created  = false;
     protected $set_modified = false;
     protected $log_user     = false;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = [];
 
@@ -49,8 +50,23 @@ class Rel_customer_object_model extends MY_Model
             'customer_id'   => $customer_id
         ];
         $data = ['flag_current' => IQB_FLAG_OFF];
-        return $this->db->where($where)
-                        ->update($this->table_name, $data);
+
+
+        // Set Old Audit Record - Manually
+        $this->audit_old_record = parent::find_by($where);
+
+        // Update Data - Manually
+        $this->db->where($where)
+                 ->set($data)
+                 ->update($this->table_name);
+
+         // Save Audit Log - Manually
+         $this->save_audit_log([
+            'method' => 'update',
+            'id'     => NULL,
+            'fields' => $data
+        ],$where);
+        $this->audit_old_record = NULL;
     }
 
     // --------------------------------------------------------------------
@@ -59,48 +75,10 @@ class Rel_customer_object_model extends MY_Model
     {
         return parent::insert([
             'object_id'     => $object_id,
-            'customer_id'   => $customer_id
+            'customer_id'   => $customer_id,
+            'flag_current'  => IQB_FLAG_ON
         ]);
     }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Save (Insert or Update) customer relation on debit note add/edit
-     *
-     * @param array $data
-     * @return mixed
-     */
-    // public function save_on_debit_note($data)
-    // {
-    //     $object_id  = $data['object_id'];
-    //     $customer_id = $data['customer_id'] ?? NULL;
-
-    //     if($customer_id)
-    //     {
-    //         // Do we have exisiting record? Simply update agent id
-    //         $where = [
-    //             'object_id' => $object_id
-    //         ];
-    //         $row = $this->find_by($where);
-
-    //         if( !$row )
-    //         {
-    //             // No Record, Insert
-    //             return $this->insert($data);
-    //         }
-    //         else if( $row && $row->customer_id != $customer_id )
-    //         {
-    //             // Has record and Different customer ID
-    //             return $this->update_by($where, ['customer_id' => $customer_id]);
-    //         }
-    //         else
-    //         {
-    //             return TRUE;
-    //         }
-    //     }
-    //     return FALSE;
-    // }
 
 	// --------------------------------------------------------------------
 
@@ -129,11 +107,7 @@ class Rel_customer_object_model extends MY_Model
             return FALSE;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-
         $status = TRUE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -146,9 +120,6 @@ class Rel_customer_object_model extends MY_Model
             // get_allenerate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;

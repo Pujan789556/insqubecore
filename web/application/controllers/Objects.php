@@ -685,7 +685,7 @@ class Objects extends MY_Controller
         		// Insert or Update?
 				if($action === 'add')
 				{
-					$done = $this->object_model->insert($object_data, TRUE); // No Validation on Model
+					$done = $this->object_model->add($object_data); // No Validation on Model
 				}
 				else
 				{

@@ -11,6 +11,8 @@ class Object_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
     protected $before_insert = [];
@@ -84,40 +86,56 @@ class Object_model extends MY_Model
             'edit' => []
         ];
     }
-    // --------------------------------------------------------------------
+
+    // ----------------------------------------------------------------
 
     /**
-     * After Insert Trigger
+     * Add New object
      *
-     * Tasks that are to be performed after an object is created
-     *      1. Save Customer-Object Relation
-     *
-     *
-     * @param array $arr_record
-     * @return array
+     * @param array $post_data Form Post Data
+     * @return mixed
      */
-    public function after_insert__defaults($arr_record)
+    public function add($post_data)
     {
-        /**
-         *
-         * Data Structure
-                Array
-                (
-                    [id] => 10
-                    [fields] => Array
-                        (
-                            [attributes] => ...
-                        )
+        // Use automatic transaction
+        $id = FALSE;
+        $this->db->trans_start();
 
-                    [result] => 1
-                    [method] => insert
-                )
-        */
+            // Insert Primary Record
+            $id = parent::insert($post_data, TRUE);
 
-        $id = $arr_record['id'] ?? NULL;
-        $customer_id = $arr_record['fields']['customer_id'];
-        if($id !== NULL)
+            // Post ADD Tasks
+            if($id)
+            {
+                $this->__post_add_tasks($id, $post_data);
+            }
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE)
         {
+            // generate an error... or use the log_message() function to log your error
+            $id = FALSE;
+        }
+
+        // return result/status
+        return $id;
+    }
+
+        // ----------------------------------------------------------------
+        /**
+         * Perform Post-Object-Add Tasks
+         *
+         * @param int $id
+         * @param array $post_data
+         * @return bool
+         */
+        private function __post_add_tasks($id, $post_data)
+        {
+            $customer_id = $post_data['customer_id'];
+
+            /**
+             * Add Object Customer Relation
+             */
             $this->load->model('rel_customer_object_model');
             $this->rel_customer_object_model->add_new_object_owner($id, $customer_id);
 
@@ -130,9 +148,9 @@ class Object_model extends MY_Model
                 'object_cst_' . $customer_id . '_*'
             ];
             $this->clear_cache($cache_vars);
+
+            return $post_data;
         }
-        return FALSE;
-    }
 
 
     // --------------------------------------------------------------------
@@ -205,7 +223,8 @@ class Object_model extends MY_Model
             ];
             $this->clear_cache($cache_vars);
         }
-        return FALSE;
+
+        return $arr_record;
     }
 
     // ----------------------------------------------------------------
