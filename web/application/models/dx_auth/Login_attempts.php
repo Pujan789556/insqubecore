@@ -18,7 +18,7 @@ class Login_attempts extends CI_Model
 		$this->db->where('ip_address', $ip_address);
 		return $this->db->get($this->_table);
 	}
-	
+
 	// Increase attempts count
 	function increase_attempt($ip_address)
 	{
@@ -27,13 +27,13 @@ class Login_attempts extends CI_Model
 			'ip_address' => $ip_address
 		);
 
-		$this->db->insert($this->_table, $data); 
+		$this->db->insert($this->_table, $data);
 	}
-	
+
 	function clear_attempts($ip_address)
-	{		
+	{
 		$this->db->where('ip_address', $ip_address);
 		$this->db->delete($this->_table);
-	}	
-	
+	}
+
 }

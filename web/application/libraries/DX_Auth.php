@@ -249,9 +249,9 @@ class DX_Auth
 		if ($this->ci->config->item('DX_count_login_attempts') AND ! $this->is_max_login_attempts_exceeded())
 		{
 			// Load model
-			$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');
+			$this->ci->load->model('login_attempt_model');
 			// Increase login attempts for current IP
-			$this->ci->login_attempts->increase_attempt($this->ci->input->ip_address());
+			$this->ci->login_attempt_model->increase_attempt($this->ci->input->ip_address());
 		}
 	}
 
@@ -261,9 +261,10 @@ class DX_Auth
 		if ($this->ci->config->item('DX_count_login_attempts'))
 		{
 			// Load model
-			$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');
+			$this->ci->load->model('login_attempt_model');
+
 			// Clear login attempts for current IP
-			$this->ci->login_attempts->clear_attempts($this->ci->input->ip_address());
+			$this->ci->login_attempt_model->clear_attempts($this->ci->input->ip_address());
 		}
 	}
 
@@ -942,9 +943,8 @@ class DX_Auth
 	// Check if login attempts bigger than max login attempts specified in config
 	function is_max_login_attempts_exceeded()
 	{
-		$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');
-
-		return ($this->ci->login_attempts->check_attempts($this->ci->input->ip_address())->num_rows() >= $this->ci->config->item('DX_max_login_attempts'));
+		$this->ci->load->model('login_attempt_model');
+		return ($this->ci->login_attempt_model->check_attempts($this->ci->input->ip_address())->num_rows() >= $this->ci->config->item('DX_max_login_attempts'));
 	}
 
 	function get_auth_error()
@@ -961,7 +961,6 @@ class DX_Auth
 	{
 		// Load Models
 		$this->ci->load->model('dx_auth/user_temp', 'user_temp');
-		$this->ci->load->model('dx_auth/login_attempts', 'login_attempts');
 
 		// Default return value
 		$result = FALSE;

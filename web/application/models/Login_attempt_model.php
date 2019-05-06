@@ -5,11 +5,13 @@ class Login_attempt_model extends MY_Model
 {
     protected $table_name = 'auth_login_attempts';
 
-    protected $set_created = true;
+    protected $set_created = false;
 
-    protected $set_modified = true;
+    protected $set_modified = false;
 
-    protected $log_user = true;
+    protected $log_user = false;
+
+    protected $audit_log = TRUE;
 
     protected $protected_attributes = ['id'];
 
@@ -40,6 +42,37 @@ class Login_attempt_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
+    }
+
+    // ----------------------------------------------------------------
+
+    function check_attempts($ip_address)
+    {
+        $this->db->select('1', FALSE);
+        $this->db->where('ip_address', $ip_address);
+        return $this->db->get($this->table_name);
+    }
+
+    // ----------------------------------------------------------------
+
+    // Increase attempts count
+    function increase_attempt($ip_address)
+    {
+        // Insert new record
+        $data = array(
+            'ip_address' => $ip_address
+        );
+
+        return parent::insert($data, TRUE);
+    }
+
+    // ----------------------------------------------------------------
+
+
+    // Clear Login attempts
+    public function clear_attempts($ip_address)
+    {
+        return $this->delete_by_ip($ip_address);
     }
 
     // ----------------------------------------------------------------
@@ -91,33 +124,38 @@ class Login_attempt_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function delete_by_ip($ip_address = NULL)
+    public function delete_by_ip($ip_address)
     {
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
+
+        $records = $this->db->select('id')
+                            ->from($this->table_name)
+                            ->where('ip_address', $ip_address)
+                            ->get()->result();
+        // ----------------------------------------------------------------
 
         $status = TRUE;
-
-        // Use automatic transaction
-        $this->db->trans_start();
-
-            parent::delete_by(['ip_address' => $ip_address]);
-
-        $this->db->trans_complete();
-
-        if ($this->db->trans_status() === FALSE)
+        if($records)
         {
-            // get_allenerate an error... or use the log_message() function to log your error
-            $status = FALSE;
-        }
-        else
-        {
-            $this->clear_cache();
+            // Use automatic transaction
+            $this->db->trans_start();
+
+                foreach($records as $single)
+                {
+                    parent::delete($single->id); // For Audit Log, we delete one by one
+                }
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                // get_allenerate an error... or use the log_message() function to log your error
+                $status = FALSE;
+            }
+            else
+            {
+                $this->clear_cache();
+            }
         }
 
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;
