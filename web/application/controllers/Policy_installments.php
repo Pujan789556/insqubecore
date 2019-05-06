@@ -1499,7 +1499,7 @@ class Policy_installments extends MY_Controller
 
 
 		$voucher_record->flag_invoiced = IQB_FLAG_INVOICED__YES;
-		$html_voucher_row 	= $this->load->view('accounting/vouchers/_single_row', ['record' => $voucher_record], TRUE);
+		$html_voucher_row 	= $this->load->view('accounting/ac_vouchers/_single_row', ['record' => $voucher_record], TRUE);
 
 		$ajax_data = [
 			'message' 	=> 'Successfully Updated!',
@@ -2005,7 +2005,7 @@ class Policy_installments extends MY_Controller
 		$endorsement_record->status 					= IQB_ENDORSEMENT_STATUS_INVOICED;
 
 		$voucher_record->flag_invoiced = IQB_FLAG_INVOICED__YES;
-		$html_voucher_row 	= $this->load->view('accounting/vouchers/_single_row', ['record' => $voucher_record], TRUE);
+		$html_voucher_row 	= $this->load->view('accounting/ac_vouchers/_single_row', ['record' => $voucher_record], TRUE);
 
 		$ajax_data = [
 			'message' 	=> 'Successfully Updated!',
@@ -2434,7 +2434,7 @@ class Policy_installments extends MY_Controller
         $policy_record->status      					= IQB_POLICY_STATUS_ACTIVE;
         $invoice_record->flag_paid  					= IQB_FLAG_ON;
 
-        $html_invoice_row 	= $this->load->view('accounting/invoices/_single_row', ['record' => $invoice_record], TRUE);
+        $html_invoice_row 	= $this->load->view('accounting/ac_invoices/_single_row', ['record' => $invoice_record], TRUE);
         $ajax_data = [
             'message'   => 'Successfully Updated!',
             'status'    => 'success',
@@ -2464,7 +2464,7 @@ class Policy_installments extends MY_Controller
 	         * Render The Form
 	         */
 	        $json_data = [
-	            'form' => $this->load->view('accounting/invoices/_form_payment', $form_data, TRUE)
+	            'form' => $this->load->view('accounting/ac_invoices/_form_payment', $form_data, TRUE)
 	        ];
 	        $this->template->json($json_data);
 	    }
@@ -2855,7 +2855,7 @@ class Policy_installments extends MY_Controller
         $policy_record->status      					= IQB_POLICY_STATUS_ACTIVE;
         $credit_note_record->flag_paid  				= IQB_FLAG_ON;
 
-        $html_credit_note_row 	= $this->load->view('accounting/credit_notes/_single_row', ['record' => $credit_note_record], TRUE);
+        $html_credit_note_row 	= $this->load->view('accounting/ac_credit_notes/_single_row', ['record' => $credit_note_record], TRUE);
         $ajax_data = [
             'message'   => 'Successfully Updated!',
             'status'    => 'success',
@@ -2883,7 +2883,7 @@ class Policy_installments extends MY_Controller
 	         * Render The Form
 	         */
 	        $json_data = [
-	            'form' => $this->load->view('accounting/credit_notes/_form_refund', $form_data, TRUE)
+	            'form' => $this->load->view('accounting/ac_credit_notes/_form_refund', $form_data, TRUE)
 	        ];
 	        $this->template->json($json_data);
 	    }

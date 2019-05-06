@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     /**
      * Invoice Preview
      */
-    $this->load->view($this->data['_view_base'] .'/snippets/_invoice_card', $invoice_data);
+    $this->load->view('accounting/ac_invoices/snippets/_invoice_card', $invoice_data);
 
     /**
      * Load Form Components
