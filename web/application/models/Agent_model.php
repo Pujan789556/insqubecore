@@ -105,28 +105,28 @@ class Agent_model extends MY_Model
         }
 
         // Disable DB Debug for transaction to work
-        $done               = FALSE;
+        $id               = FALSE;
         // Use automatic transaction
         $this->db->trans_start();
 
             // Insert Primary Record
-            $done = parent::insert($data, TRUE);
+            $id = parent::insert($data, TRUE);
 
             // Insert Address
-            if($done)
+            if($id)
             {
-                $this->address_model->add(IQB_ADDRESS_TYPE_AGENT, $done ,$post_data);
+                $this->address_model->add(IQB_ADDRESS_TYPE_AGENT, $id ,$post_data);
             }
 
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
-            $done = FALSE;
+            $id = FALSE;
         }
 
         // return result/status
-        return $done;
+        return $id;
     }
 
     // ----------------------------------------------------------------
