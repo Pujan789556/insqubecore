@@ -632,7 +632,16 @@ if ( ! function_exists('RI__save'))
 				'ri_txn_for' 			=> IQB_RI_TXN_FOR_BASIC
 			];
 
-			$ri_data 					= array_merge($ri_data_basic['data'], $relation_data);
+			/**
+			 * Flag Data
+			 */
+			$flag_data = [
+				'flag_has_fac' 			=> RI__flag_has_fac( $ri_data_basic['data']['si_treaty_fac'] ?? 0 ),
+				'flag_fac_registered' 	=> IQB_FLAG_OFF
+			];
+
+
+			$ri_data 					= array_merge($ri_data_basic['data'], $relation_data, $flag_data);
 			$ri_transaction_id_basic 	= $CI->ri_transaction_model->add($ri_data);
 		}
 
@@ -651,7 +660,15 @@ if ( ! function_exists('RI__save'))
 				'ri_txn_for' 			=> IQB_RI_TXN_FOR_POOL
 			];
 
-			$ri_data 					= array_merge($ri_data_pool['data'], $relation_data);
+			/**
+			 * Flag Data
+			 */
+			$flag_data = [
+				'flag_has_fac' 			=> RI__flag_has_fac( $ri_data_pool['data']['si_treaty_fac'] ?? 0 ),
+				'flag_fac_registered' 	=> IQB_FLAG_OFF
+			];
+
+			$ri_data 					= array_merge($ri_data_pool['data'], $relation_data, $flag_data);
 			$ri_transaction_id_pool 	= $CI->ri_transaction_model->add($ri_data);
 		}
 
@@ -1031,6 +1048,7 @@ if ( ! function_exists('RI__distribute__QS_SP'))
 			'si_treaty_3rd_surplus' => $si_treaty_3rd_surplus,
 			'si_treaty_fac' 		=> $si_treaty_fac,
 
+
 			/**
 			 * Distribution Data - Premium
 			 */
@@ -1250,6 +1268,22 @@ if ( ! function_exists('RI__compute_compulsory_cession'))
 			'si_comp_cession' 		=> $si_comp_cession,
 			'premium_comp_cession' 	=> $premium_comp_cession
 		];
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('RI__flag_has_fac'))
+{
+	/**
+	 * Get the Value of flag_has_fac based on if SI FAC is present
+	 *
+	 * @param float $si_treaty_fac FAC SI
+	 * @return int
+	 */
+	function RI__flag_has_fac( $si_treaty_fac )
+	{
+		return abs( floatval($si_treaty_fac) ) != 0.00 ? IQB_FLAG_ON : IQB_FLAG_OFF;
 	}
 }
 

@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<td><?php echo $record->treaty_type_name;?></td>
 	<td><?php echo IQB_RI_TXN_FOR_TYPES[$record->ri_txn_for];?></td>
 	<td class="ins-action">
-		<?php if($record->si_treaty_fac): ?>
+		<?php if($record->flag_has_fac): ?>
 
 			<?php if( $this->dx_auth->is_authorized('ri_transactions', 'register.fac') && belong_to_current_fy_quarter($record->fiscal_yr_id, $record->fy_quarter)):?>
 				<a href="#"
@@ -21,7 +21,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					data-title='<i class="fa fa-pencil-square-o"></i> Edit FAC Registration'
 					data-box-size="large"
 					data-form="#__form-fac-registration"
-					data-url="<?php echo site_url('ri_transactions/register_fac/'.$record->id); ?>"
+					data-url="<?php echo site_url($this->data['_url_base'] . '/register_fac/'.$record->id); ?>"
 					data-toggle="tooltip"
 					title="Register FAC"><i class="fa fa-pencil-square-o"></i></a>
 			<?php endif ?>
@@ -30,7 +30,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				class="action trg-dialog-popup"
 				data-toggle="tooltip"
 				data-box-size="large"
-				data-url="<?php echo site_url('ri_transactions/preview_fac/'.$record->id); ?>"
+				data-url="<?php echo site_url($this->data['_url_base'] . '/preview_fac/'.$record->id); ?>"
 				title="View FAC Distribution"><i class="fa fa-search"></i></a>
 		<?php endif ?>
 	</td>

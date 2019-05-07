@@ -228,6 +228,14 @@ class Ri_transactions extends MY_Controller
 	                '_required' => false
 	            ],
 	            [
+	                'field' => 'filter_flag_has_fac',
+	                'label' => 'Has FAC?',
+	                'rules' => 'trim|integer|max_length[1]',
+	                '_type'     => 'dropdown',
+	                '_data'     => _FLAG_on_off_dropdown(),
+	                '_required' => false
+	            ],
+	            [
 	                'field' => 'filter_flag_fac_registered',
 	                'label' => 'FAC Registered?',
 	                'rules' => 'trim|integer|max_length[1]',
@@ -276,6 +284,7 @@ class Ri_transactions extends MY_Controller
 						'ri_txn_for' 	=> $this->input->post('filter_ri_txn_for') ?? NULL,
 						'endorsement_type' 		=> $this->input->post('filter_endorsement_type') ?? NULL,
 						'flag_fac_registered' 	=> $this->input->post('filter_flag_fac_registered') ?? NULL,
+						'flag_has_fac' 			=> $this->input->post('filter_flag_has_fac') ?? NULL,
 						'issued_from' 	=> $this->input->post('filter_issued_from') ?? NULL,
 						'issued_to' 	=> $this->input->post('filter_issued_to') ?? NULL
 					];
