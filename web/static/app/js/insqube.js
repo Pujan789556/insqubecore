@@ -660,8 +660,17 @@ $(document).on('click', '.trg-row-action, .trg-dialog-action', function(e){
 
                 // Do we want to reload the whole page
                 if(typeof r.reloadPage !== 'undefined' && r.reloadPage == true){
-                    window.location.reload();
+
+                    // Same Page or another page
+                    if(typeof r.reloadUrl !== 'undefined' && r.reloadUrl !== 'string'){
+                        $(location).attr('href',r.reloadUrl);
+                    }
+                    else{
+                        window.location.reload();
+                    }
                 }
+
+
             }
         });
     };
