@@ -5,9 +5,10 @@ class Claim_surveyor_model extends MY_Model
 {
     protected $table_name = 'dt_claim_surveyors';
 
-    protected $set_created  = true;
-    protected $set_modified = true;
-    protected $log_user     = true;
+    protected $set_created  = TRUE;
+    protected $set_modified = TRUE;
+    protected $log_user     = TRUE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = ['id'];
 
@@ -51,6 +52,15 @@ class Claim_surveyor_model extends MY_Model
         $surveyor_type_dropdown = CLAIM__surveyor_type_dropdown(FALSE);
 
         $this->validation_rules = [
+            [
+                'field' => 'id[]',
+                '_key' => 'id',
+                'label' => 'ID',
+                'rules' => 'trim|integer|max_length[11]',
+                '_type' => 'hidden',
+                '_show_label'   => false,
+                '_required'     => false
+            ],
             [
                 'field' => 'surveyor_id[]',
                 '_key' => 'surveyor_id',
@@ -117,20 +127,38 @@ class Claim_surveyor_model extends MY_Model
         $this->load->model('claim_model');
         $this->load->model('surveyor_model');
 
+        // OLD Surveyors
+        $old_records  = $this->get_many_by_claim($claim_id);
+        $old_ids        = [];
+        foreach($old_records as $single)
+        {
+            $old_ids[] = $single->id;
+        }
+        asort($old_ids);
+
+        /**
+         * Find to Del IDs
+         */
+        $to_update_ids = $data['id'];
+        asort($to_update_ids);
+        $to_del_ids = array_diff($old_ids, $to_update_ids);
 
 
-        $gross_amt_surveyor_fee = 0.00;
-        $vat_amt_surveyor_fee   = 0.00;
         /**
          * Prepare Data
          */
-        $batch_data = [];
-        $count = count($data['surveyor_id']);
+        $gross_amt_surveyor_fee = 0.00;
+        $vat_amt_surveyor_fee   = 0.00;
+        $batch_insert_data      = [];
+        $batch_update_data      = [];
+        $count                  = count($data['surveyor_id']);
+
         for($index =0; $index < $count; $index++ )
         {
             // index of this sid
-            $surveyor_id = $data['surveyor_id'][$index];
-            $surveyor = $this->surveyor_model->find($surveyor_id);
+            $id             = $data['id'][$index];
+            $surveyor_id    = $data['surveyor_id'][$index];
+            $surveyor       = $this->surveyor_model->find($surveyor_id);
 
             // Individual Surveyor Fee and Other Fee
             $surveyor_fee       = floatval($data['surveyor_fee'][$index] ?? 0.00);
@@ -152,9 +180,15 @@ class Claim_surveyor_model extends MY_Model
                 'tds_amount'    => $taxes['tds_amount']
             ];
 
-            // Add to Batch Insert
-            $batch_data[] = $single_data;
-
+            if($id && in_array($id, $old_ids))
+            {
+                $batch_update_data["{$id}"] = $single_data;
+            }
+            else
+            {
+                // Add to Batch Insert
+                $batch_insert_data[] = $single_data;
+            }
 
             // Update Grand Total Surveyor Fee
             $gross_amt_surveyor_fee = ac_bcsum([
@@ -175,16 +209,30 @@ class Claim_surveyor_model extends MY_Model
         $this->db->trans_start();
 
             /**
-             * Task 1: Delete Old Surveyors
+             * Task 1: Delete removed Surveyors
              */
-            parent::delete_by(['claim_id' => $claim_id]);
+            foreach($to_del_ids as $id)
+            {
+                if(in_array($id, $old_ids))
+                {
+                    parent::delete($id);
+                }
+            }
 
             /**
-             * Task 3: Batch insert new data (if any)
+             * Task 2: Update Old Records (if any)
              */
-            if($batch_data)
+            foreach($batch_update_data as $id=>$single_data)
             {
-                parent::insert_batch($batch_data, TRUE);
+                parent::update($id, $single_data, TRUE);
+            }
+
+            /**
+             * Task 3: Insert new data (if any) - One by One
+             */
+            foreach($batch_insert_data as $single_data)
+            {
+                parent::insert($single_data, TRUE);
             }
 
             /**
@@ -477,9 +525,6 @@ class Claim_surveyor_model extends MY_Model
             return FALSE;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-
         $status = TRUE;
 
         // Use automatic transaction
@@ -488,7 +533,6 @@ class Claim_surveyor_model extends MY_Model
             parent::delete($id);
 
         $this->db->trans_complete();
-
         if ($this->db->trans_status() === FALSE)
         {
             // get_allenerate an error... or use the log_message() function to log your error
@@ -499,36 +543,7 @@ class Claim_surveyor_model extends MY_Model
             $this->log_activity($id, 'D');
         }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
         // return result/status
         return $status;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        return true;
-
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module' => 'claim_surveyor',
-            'module_id' => $id,
-            'action' => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 }

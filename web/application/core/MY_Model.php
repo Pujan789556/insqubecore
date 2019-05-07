@@ -468,13 +468,6 @@ class MY_Model
                     $audit_new_data[$key] = $val;
                     $audit_old_data[$key] = $old_data[$key];
                 }
-
-                // If it has only "updated_on" fields, we have to discard the audit log
-                if( count($audit_new_data) == 1 && array_key_exists($this->modified_field, $audit_new_data) )
-                {
-                    $audit_new_data = [];
-                    $audit_old_data = [];
-                }
             }
 
             if( empty($audit_new_data))

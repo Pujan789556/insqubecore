@@ -5,9 +5,10 @@ class Claim_settlement_model extends MY_Model
 {
     protected $table_name = 'dt_claim_settlements';
 
-    protected $set_created  = true;
-    protected $set_modified = true;
-    protected $log_user     = true;
+    protected $set_created  = TRUE;
+    protected $set_modified = TRUE;
+    protected $log_user     = TRUE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = ['id'];
 
@@ -50,6 +51,15 @@ class Claim_settlement_model extends MY_Model
         $subcategory_dropdown   = CLAIM__settlement_subcategory_dropdown(FALSE);
 
         $this->validation_rules = [
+            [
+                'field' => 'id[]',
+                '_key' => 'id',
+                'label' => 'ID',
+                'rules' => 'trim|integer|max_length[11]',
+                '_type' => 'hidden',
+                '_show_label'   => false,
+                '_required'     => false
+            ],
             [
                 'field' => 'category[]',
                 '_key' => 'category',
@@ -123,36 +133,62 @@ class Claim_settlement_model extends MY_Model
     {
         $this->load->model('claim_model');
 
+        // OLD Settlements
+        $old_records  = $this->get_many_by_claim($claim_id);
+        $old_ids        = [];
+        foreach($old_records as $single)
+        {
+            $old_ids[] = $single->id;
+        }
+        asort($old_ids);
+
         /**
-         * Variables
+         * Find to Del IDs
          */
-        $net_amt_payable_insured = 0.00;
+        $to_update_ids = $data['id'];
+        asort($to_update_ids);
+        $to_del_ids = array_diff($old_ids, $to_update_ids);
 
 
         /**
          * Prepare Batch Data
          */
-        $batch_data = [];
-        $columns    = ['category', 'sub_category', 'title', 'claimed_amount', 'assessed_amount', 'recommended_amount'];
-        $count      = count($data['category']);
+        $net_amt_payable_insured    = 0.00;
+        $batch_insert_data          = [];
+        $batch_update_data          = [];
+        $columns                    = ['category', 'sub_category', 'title', 'claimed_amount', 'assessed_amount', 'recommended_amount'];
+        $count                      = count($data['category']);
         for($index=0; $index < $count; $index++)
         {
-            $single = [
+            $id = $data['id'][$index];
+
+            $single_data = [
                 'claim_id'      => $claim_id,
             ];
             foreach($columns as $key)
             {
-                $single[$key] = $data[$key][$index];
+                $single_data[$key] = $data[$key][$index];
             }
-            $batch_data[] = $single;
+
+            // Insert or Update
+            if($id && in_array($id, $old_ids))
+            {
+                $batch_update_data["{$id}"] = $single_data;
+            }
+            else
+            {
+                // Add to Batch Insert
+                $batch_insert_data[] = $single_data;
+            }
+
 
             /**
              * Total Claim Settlement Amount
              *
              * NOTE: Excess Deductible is Subtracted from Total
              */
-            $category           = $single['category'];
-            $recommended_amount = $single['recommended_amount'];
+            $category           = $single_data['category'];
+            $recommended_amount = $single_data['recommended_amount'];
             if($category == 'ED')
             {
                 $net_amt_payable_insured = bcsub($net_amt_payable_insured, $recommended_amount, IQB_AC_DECIMAL_PRECISION);
@@ -163,32 +199,41 @@ class Claim_settlement_model extends MY_Model
             }
         }
 
+        // ----------------------------------------------------------------
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $done               = TRUE;
-
+        $status = TRUE;
         // Use automatic transaction
         $this->db->trans_start();
 
             /**
-             * Task 1: Delete old Records
+             * Task 1: Delete removed Surveyors
              */
-            parent::delete_by(['claim_id' => $claim_id]);
-            $this->db->where('claim_id', $claim_id)
-                        ->delete($this->table_name);
-
-
-            /**
-             * Task 2: Batch insert new data (if any)
-             */
-            if($batch_data)
+            foreach($to_del_ids as $id)
             {
-                parent::insert_batch($batch_data, TRUE);
+                if(in_array($id, $old_ids))
+                {
+                    parent::delete($id);
+                }
             }
 
             /**
-             * Task 3: Update Total Surveyor Fee On Claim Table
+             * Task 2: Update Old Records (if any)
+             */
+            foreach($batch_update_data as $id=>$single_data)
+            {
+                parent::update($id, $single_data, TRUE);
+            }
+
+            /**
+             * Task 3: Insert new data (if any) - One by One
+             */
+            foreach($batch_insert_data as $single_data)
+            {
+                parent::insert($single_data, TRUE);
+            }
+
+            /**
+             * Task 4: Update Total Surveyor Fee On Claim Table
              */
             $claim_data = [
                 'net_amt_payable_insured' => $net_amt_payable_insured
@@ -197,26 +242,21 @@ class Claim_settlement_model extends MY_Model
 
 
             /**
-             * Task 4: Clear cache for this claim
+             * Task 5: Clear cache for this claim
              */
             $this->clear_cache( 'sttlmnt_lstbyclm_' . $claim_id );
 
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
-
-        // Check Transaction Status
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
-            $done = FALSE;
+            $status = FALSE;
         }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
         // return result/status
-        return $done;
+        return $status;
     }
 
     // ----------------------------------------------------------------
@@ -312,12 +352,7 @@ class Claim_settlement_model extends MY_Model
             return FALSE;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-
         $status = TRUE;
-
-        // Use automatic transaction
         $this->db->trans_start();
 
             parent::delete($id);
@@ -329,13 +364,6 @@ class Claim_settlement_model extends MY_Model
             // get_allenerate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-        else
-        {
-            $this->log_activity($id, 'D');
-        }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;

@@ -5,15 +5,16 @@ class Claim_model extends MY_Model
 {
     protected $table_name = 'dt_claims';
 
-    protected $set_created  = true;
-    protected $set_modified = true;
-    protected $log_user     = true;
+    protected $set_created  = TRUE;
+    protected $set_modified = TRUE;
+    protected $log_user     = TRUE;
+    protected $audit_log    = TRUE;
 
-    protected $before_insert = ['before_insert__defaults'];
-    protected $before_update = ['before_update__defaults'];
-    // protected $after_insert  = ['clear_cache'];
-    // protected $after_update  = ['clear_cache'];
-    // protected $after_delete  = ['clear_cache'];
+    // protected $before_insert = ['before_insert__defaults'];
+    // protected $before_update = ['before_update__defaults'];
+    protected $after_insert  = ['clear_cache'];
+    protected $after_update  = ['clear_cache'];
+    protected $after_delete  = ['clear_cache'];
 
     protected $protected_attributes = ['id'];
     protected $fields = ['id', 'claim_code', 'policy_id', 'claim_scheme_id', 'fiscal_yr_id', 'fy_quarter', 'branch_id', 'category', 'accident_date', 'accident_time', 'accident_location', 'accident_details', 'loss_nature', 'loss_details_ip', 'amt_estimated_loss_ip', 'loss_details_tpp', 'amt_estimated_loss_tpp', 'death_injured', 'intimation_name', 'initimation_address', 'initimation_contact', 'intimation_date', 'assessment_note', 'supporting_docs', 'other_info', 'gross_amt_surveyor_fee', 'vat_amt_surveyor_fee', 'net_amt_payable_insured', 'cl_comp_cession', 'cl_treaty_retaintion', 'cl_treaty_quota', 'cl_treaty_1st_surplus', 'cl_treaty_2nd_surplus', 'cl_treaty_3rd_surplus', 'cl_treaty_fac', 'flag_paid', 'flag_surveyor_voucher', 'settlement_date', 'file_intimation', 'status', 'status_remarks', 'progress_remarks', 'approved_at', 'approved_by', 'created_at', 'created_by', 'updated_at', 'updated_by'];
@@ -495,6 +496,13 @@ class Claim_model extends MY_Model
      */
     public function add_draft( $data )
     {
+        /**
+         * Prepare Data
+         */
+        $data = $this->_pre_add_tasks($data);
+
+        // ----------------------------------------------------------------
+
         // Disable DB Debug for transaction to work
         $id  = FALSE;
 
@@ -528,7 +536,7 @@ class Claim_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Before Insert Trigger
+     * Pre-Add Tasks
      *
      * Tasks carried
      *      1. Add Random Claim Number
@@ -541,7 +549,7 @@ class Claim_model extends MY_Model
      * @param array $data
      * @return array
      */
-    public function before_insert__defaults($data)
+    private function _pre_add_tasks($data)
     {
         $this->load->library('Token');
 
@@ -575,9 +583,6 @@ class Claim_model extends MY_Model
         // Status
         $draft_data['status'] = IQB_CLAIM_STATUS_DRAFT;
 
-        // Creator Info
-        $draft_data['created_at'] = $data['created_at'];
-        $draft_data['created_by'] = $data['created_by'];
 
         return $draft_data;
     }
@@ -593,37 +598,44 @@ class Claim_model extends MY_Model
      */
     public function edit_draft( $id, $data )
     {
+        /**
+         * Prepare Data
+         */
+        $policy_id  = $data['policy_id'];
+        $data       = $this->_pre_edit_tasks($data);
+
+        // ----------------------------------------------------------------
+
+        $status = TRUE;
         // Use automatic transaction
         $this->db->trans_start();
 
-            // Task a: Insert Claim Data
-            $done = parent::update($id, $data, TRUE);
+            // Update Data
+            $status = parent::update($id, $data, TRUE);
 
             // Task b. Insert Broker Relations
-            if($done)
+            if($status)
             {
                 // Clean Cache by this Policy
-                $this->clear_cache( 'claim_list_by_policy_' . $data['policy_id'] );
+                $this->clear_cache( 'claim_list_by_policy_' . $policy_id );
             }
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
-
-        // Check Transaction Status
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
-            $done = FALSE;
+            $status = FALSE;
         }
 
         // return result/status
-        return $done;
+        return $status;
     }
 
     // ----------------------------------------------------------------
 
     /**
-     * Before Update Trigger
+     * Pre-Edit Tasks
      *
      *  Tasks Carried:
      *      1. Build JSON Data - Death Injured
@@ -633,16 +645,12 @@ class Claim_model extends MY_Model
      * @param array $data
      * @return array
      */
-    public function before_update__defaults($data)
+    public function _pre_edit_tasks($data)
     {
         /**
          * Build Draft Data
          */
         $draft_data = $this->__build_draft_data($data);
-
-        // Creator Info
-        $draft_data['updated_at'] = $data['updated_at'];
-        $draft_data['updated_by'] = $data['updated_by'];
 
         return $draft_data;
     }
@@ -736,21 +744,16 @@ class Claim_model extends MY_Model
      */
     public function update_data($id, $data, $policy_id = NULL)
     {
-        // Updated by/at
-        $data = $this->modified_on(['fields' => $data]);
-
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
+        $status = TRUE;
 
         // Use automatic transaction
         $this->db->trans_start();
 
             // Task a: Update Data
-            $done = $this->db->where('id', $id)
-                        ->update($this->table_name, $data);
+            $status = parent::update($id, $data, TRUE);
 
-            // Task b. Insert Broker Relations
-            if($done)
+            // Task b. Clear cache
+            if($status)
             {
                 // Clean Cache by policy belonging to this policy
                 if( !$policy_id )
@@ -762,19 +765,14 @@ class Claim_model extends MY_Model
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
-
-        // Check Transaction Status
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
-            $done = FALSE;
+            $status = FALSE;
         }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
         // return result/status
-        return $done;
+        return $status;
     }
 
 
@@ -791,29 +789,36 @@ class Claim_model extends MY_Model
         $data = [
             'status' => IQB_CLAIM_STATUS_VERIFIED
         ];
+        // ----------------------------------------------------------------
 
-        // Updated by/at
-        $data = $this->modified_on(['fields' => $data]);
-
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = TRUE;
-
+        $status = TRUE;
         // Use automatic transaction
         $this->db->trans_start();
 
             // Task a: Update Status
-            $done = $this->db->where('id', $record->id)
-                        ->update($this->table_name, $data);
+            $status = parent::update($record->id, $data, TRUE);
 
-            // Task b: Generate Claim Code
+            // Task b: Generate Claim Code and Manuall Save Audit Log
             $code_prefix = strtoupper(substr($record->claim_code, 0, 5));
             if( $code_prefix === 'DRAFT')
             {
+                // Old Record
+                $this->audit_old_record = parent::find($record->id);
+
+                // Generate and Update Claim Code
                 $this->generate_claim_number($record->id);
+
+                // Save Audit Log - Manually
+                 $this->save_audit_log([
+                    'method' => 'update',
+                    'id'     => $record->id,
+                    'fields' => (array)parent::find($record->id)
+                ]);
+                $this->audit_old_record = NULL;
             }
 
-            // Task b. Insert Broker Relations
-            if($done)
+            // Task b. Clear Cache
+            if($status)
             {
                 // Clean Cache by policy belonging to this policy
                 $this->clear_cache( 'claim_list_by_policy_' . $record->policy_id );
@@ -821,19 +826,14 @@ class Claim_model extends MY_Model
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
-
-        // Check Transaction Status
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
-            $done = FALSE;
+            $status = FALSE;
         }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
         // return result/status
-        return $done;
+        return $status;
     }
 
     // ----------------------------------------------------------------
