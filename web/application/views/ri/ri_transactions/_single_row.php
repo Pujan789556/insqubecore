@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<a href="#"
 					class="action trg-dialog-edit"
 					data-title='<i class="fa fa-pencil-square-o"></i> Edit FAC Registration'
-					data-box-size="large"
+					data-box-size="full-width"
 					data-form="#__form-fac-registration"
 					data-url="<?php echo site_url($this->data['_url_base'] . '/register_fac/'.$record->id); ?>"
 					data-toggle="tooltip"

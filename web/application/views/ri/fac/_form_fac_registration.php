@@ -39,6 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <table class="table table-bordered table-condensed">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Re-Insurance Company<?php echo field_compulsary_text( TRUE )?></th>
                         <th>Distribution(%)<?php echo field_compulsary_text( TRUE )?></th>
                         <th>Commission(%)<?php echo field_compulsary_text( TRUE )?></th>
@@ -160,6 +161,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         // remove last blank td
         $row.find('td:last').remove();
+
+        // Reset/empty form input
+        $('input, select, textarea', $row).val('');
 
         // Add Remover Column
         $row.append('<td width="10%" align="right"><a href="#" class="btn btn-danger btn-sm" onclick=\'$(this).closest("tr").remove();__compute_sum();\'>Remove</a></td>');

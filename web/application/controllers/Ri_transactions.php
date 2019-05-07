@@ -689,7 +689,7 @@ class Ri_transactions extends MY_Controller
         	{
         		$data = $this->input->post();
         		// echo '<pre>'; print_r($data);exit;
-        		$done = $this->ri_fac_registration_model->register_fac($record, $data);
+        		$done = $this->ri_fac_registration_model->register_fac($record, $data, $fac_distribution);
 
         		if($done)
         		{

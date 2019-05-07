@@ -5,9 +5,10 @@ class Ri_fac_registration_model extends MY_Model
 {
     protected $table_name   = 'dt_ri_fac_registrations';
 
-    protected $set_created  = true;
-    protected $set_modified = true;
-    protected $log_user     = true;
+    protected $set_created  = TRUE;
+    protected $set_modified = TRUE;
+    protected $log_user     = TRUE;
+    protected $audit_log    = TRUE;
 
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
@@ -55,6 +56,15 @@ class Ri_fac_registration_model extends MY_Model
 
        $this->validation_rules = [
             [
+                'field' => 'id[]',
+                '_key' => 'id',
+                'label' => 'ID',
+                'rules' => 'trim|integer|max_length[11]',
+                '_type' => 'hidden',
+                '_show_label'   => false,
+                '_required'     => false
+            ],
+            [
                 'field' => 'company_id[]',
                 'label' => 'Reinsurer',
                 'rules' => 'trim|required|integer|max_length[8]|in_list[' . implode( ',', array_keys($reinsurer_dropdown) ) . ']',
@@ -67,7 +77,7 @@ class Ri_fac_registration_model extends MY_Model
             [
                 'field' => 'fac_percent[]',
                 'label' => 'Distribution %',
-                'rules' => 'trim|required|prep_decimal|decimal|max_length[5]|callback__cb_fac_distribution__complete',
+                'rules' => 'trim|required|prep_decimal|decimal|max_length[6]|callback__cb_fac_distribution__complete',
                 '_key'        => 'fac_percent',
                 '_type'         => 'text',
                 '_show_label'   => false,
@@ -115,38 +125,82 @@ class Ri_fac_registration_model extends MY_Model
      *
      * @param object $ri_transaction_record
      * @param array $data
+     * @param array $old_records OLD Distribution Records of this RI-Transaction
      * @return mixed
      */
-    public function register_fac($ri_transaction_record, $data)
+    public function register_fac($ri_transaction_record, $data, $old_records)
     {
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = TRUE;
-        $status             = TRUE;
 
+        $old_ids        = [];
+        foreach($old_records as $single)
+        {
+            $old_ids[] = $single->id;
+        }
+        asort($old_ids);
+
+        /**
+         * Find to Del IDs
+         */
+        $to_update_ids = $data['id'];
+        asort($to_update_ids);
+        $to_del_ids = array_diff($old_ids, $to_update_ids);
+
+
+        // Insert and Update Data
+        $prepared_data = $this->_prepare_data($ri_transaction_record, $data, $old_ids);
+
+        $batch_insert_data      = $prepared_data['batch_insert_data'];
+        $batch_update_data      = $prepared_data['batch_update_data'];
+
+
+
+        // ----------------------------------------------------------------
+
+        $status             = TRUE;
         // Use automatic transaction
         $this->db->trans_start();
 
-            // Delete Old Distribution
-            $this->delete_fac_by_ri_transaction($ri_transaction_record->id);
+            /**
+             * Task 1: Delete removed Surveyors
+             */
+            foreach($to_del_ids as $id)
+            {
+                if(in_array($id, $old_ids))
+                {
+                    parent::delete($id);
+                }
+            }
 
-            // Batch Insert distribution data
-            $this->batch_insert_fac($ri_transaction_record, $data);
+            /**
+             * Task 2: Update Old Records (if any)
+             */
+            foreach($batch_update_data as $id=>$single_data)
+            {
+                parent::update($id, $single_data, TRUE);
+            }
 
-            // Update FAC Registered Flag of RI Transaction Record
+            /**
+             * Task 3: Insert new data (if any) - One by One
+             */
+            foreach($batch_insert_data as $single_data)
+            {
+                parent::insert($single_data, TRUE);
+            }
+
+
+            /**
+             * Task 4: Update FAC Registered Flag
+             */
             $this->ri_transaction_model->update_flag_fac_registered($ri_transaction_record->id, IQB_FLAG_ON);
+
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
-
-        // Check Transaction Status
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;
@@ -154,54 +208,65 @@ class Ri_fac_registration_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function batch_insert_fac($ri_transaction_record, $data)
+    private function _prepare_data($ri_transaction_record, $data, $old_ids)
     {
-        // Extract All Data
-        $company_id   = $data['company_id'];
+        $batch_update_data = [];
+        $batch_insert_data = [];
 
-        $batch_data = [];
-
-        if( !empty($company_id) )
+        $count  = count($data['company_id']);
+        for($index =0; $index < $count; $index++ )
         {
-            for($i=0; $i < count($company_id); $i++)
+            // index of this sid
+            $id             = $data['id'][$index];
+            $company_id     = $data['company_id'][$index];
+
+            // Compute Data
+            $fac_percent        = $data['fac_percent'][$index];
+            $fac_si_amount      = ( floatval($ri_transaction_record->si_treaty_fac) * $fac_percent ) / 100.00;
+            $fac_premium_amount = ( floatval($ri_transaction_record->premium_treaty_fac) * $fac_percent ) / 100.00;
+
+            $fac_commission_percent = $data['fac_commission_percent'][$index];
+            $fac_commission_amount  = ( $fac_premium_amount * $fac_commission_percent ) / 100.00;
+
+            $fac_ri_tax_percent     = $data['fac_ri_tax_percent'][$index];
+            $fac_ri_tax_amount      = ( $fac_premium_amount * $fac_ri_tax_percent ) / 100.00;
+
+            $fac_ib_tax_percent     = $data['fac_ib_tax_percent'][$index];
+            $fac_ib_tax_amount      = ( $fac_premium_amount * $fac_ib_tax_percent ) / 100.00;
+
+
+            $single_data = [
+                'ri_transaction_id'        => $ri_transaction_record->id,
+                'company_id'               => $company_id,
+                'fac_percent'              => $fac_percent,
+                'fac_si_amount'            => $fac_si_amount,
+                'fac_premium_amount'       => $fac_premium_amount,
+                'fac_commission_percent'   => $fac_commission_percent,
+                'fac_commission_amount'    => $fac_commission_amount,
+                'fac_ri_tax_percent'       => $fac_ri_tax_percent,
+                'fac_ri_tax_amount'        => $fac_ri_tax_amount,
+                'fac_ib_tax_percent'       => $fac_ib_tax_percent,
+                'fac_ib_tax_amount'        => $fac_ib_tax_amount
+            ];
+
+
+            if($id && in_array($id, $old_ids))
             {
-                // Compute Data
-                $fac_percent        = $data['fac_percent'][$i];
-                $fac_si_amount      = ( floatval($ri_transaction_record->si_treaty_fac) * $fac_percent ) / 100.00;
-                $fac_premium_amount = ( floatval($ri_transaction_record->premium_treaty_fac) * $fac_percent ) / 100.00;
-
-                $fac_commission_percent = $data['fac_commission_percent'][$i];
-                $fac_commission_amount  = ( $fac_premium_amount * $fac_commission_percent ) / 100.00;
-
-                $fac_ri_tax_percent     = $data['fac_ri_tax_percent'][$i];
-                $fac_ri_tax_amount      = ( $fac_premium_amount * $fac_ri_tax_percent ) / 100.00;
-
-                $fac_ib_tax_percent     = $data['fac_ib_tax_percent'][$i];
-                $fac_ib_tax_amount      = ( $fac_premium_amount * $fac_ib_tax_percent ) / 100.00;
-
-
-                $batch_data[] = [
-                    'ri_transaction_id'         => $ri_transaction_record->id,
-                    'company_id'                => $data['company_id'][$i],
-                     'fac_percent'              => $fac_percent,
-                     'fac_si_amount'            => $fac_si_amount,
-                     'fac_premium_amount'       => $fac_premium_amount,
-                     'fac_commission_percent'   => $fac_commission_percent,
-                     'fac_commission_amount'    => $fac_commission_amount,
-                     'fac_ri_tax_percent'       => $fac_ri_tax_percent,
-                     'fac_ri_tax_amount'        => $fac_ri_tax_amount,
-                     'fac_ib_tax_percent'       => $fac_ib_tax_percent,
-                     'fac_ib_tax_amount'        => $fac_ib_tax_amount
-                ];
+                $batch_update_data["{$id}"] = $single_data;
+            }
+            else
+            {
+                // Add to Batch Insert
+                $batch_insert_data[] = $single_data;
             }
         }
 
-        // Insert Batch Broker Data
-        if( $batch_data )
-        {
-            return parent::insert_batch($batch_data, TRUE);
-        }
-        return FALSE;
+
+        return [
+            'batch_update_data' => $batch_update_data,
+            'batch_insert_data' => $batch_insert_data,
+        ];
+
     }
 
     // ----------------------------------------------------------------
@@ -222,25 +287,6 @@ class Ri_fac_registration_model extends MY_Model
                         ->join('master_companies C', 'C.id = FAC.company_id')
                         ->where('FAC.ri_transaction_id', $ri_transaction_id)
                         ->get()->result();
-    }
-
-    // --------------------------------------------------------------------
-
-
-    /**
-     * Add Blank Configuration record for this Policy if not already exists.
-     *
-     * @param int $ri_transaction_id
-     * @return mixed
-     */
-    public function add_blank( $ri_transaction_id )
-    {
-        $duplicate = $this->check_duplicate($ri_transaction_id);
-        if(! $duplicate )
-        {
-            return parent::insert( ['ri_transaction_id' => $ri_transaction_id], TRUE );
-        }
-        return FALSE;
     }
 
     // ----------------------------------------------------------------
@@ -374,39 +420,47 @@ class Ri_fac_registration_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function delete($id = NULL)
+    public function delete_by_ri_transaction($ri_transaction_id, $use_auto_transaction = FALSE)
     {
-        // Let's not delete now
-        return FALSE;
+        $records = $this->db->select('id')->where('ri_transaction_id', $ri_transaction_id)->get($this->table_name)->result();
+        if($records)
+        {
+            foreach($records as $single)
+            {
+                $this->delete_single($single->id, $use_auto_transaction);
+            }
+        }
+    }
 
+    // ----------------------------------------------------------------
 
+    public function delete_single($id, $use_auto_transaction = TRUE)
+    {
         $id = intval($id);
         if( !safe_to_delete( get_class(), $id ) )
         {
             return FALSE;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-
         $status = TRUE;
-
-        // Use automatic transaction
-        $this->db->trans_start();
-
-            parent::delete($id);
-
-        $this->db->trans_complete();
-
-        if ($this->db->trans_status() === FALSE)
+        if($use_auto_transaction )
         {
-            // generate an error... or use the log_message() function to log your error
-            $status = FALSE;
+            // Use automatic transaction
+            $this->db->trans_start();
+
+                parent::delete($id);
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                // get_allenerate an error... or use the log_message() function to log your error
+                $status = FALSE;
+            }
         }
-
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+        else
+        {
+            $status = parent::delete($id);
+        }
 
         // return result/status
         return $status;
