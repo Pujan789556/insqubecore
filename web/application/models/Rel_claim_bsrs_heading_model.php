@@ -7,9 +7,10 @@ class Rel_claim_bsrs_heading_model extends MY_Model
 
     protected $skip_validation = TRUE;
 
-    protected $set_created  = false;
-    protected $set_modified = false;
-    protected $log_user     = false;
+    protected $set_created  = FALSE;
+    protected $set_modified = FALSE;
+    protected $log_user     = FALSE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = [];
 
@@ -51,6 +52,19 @@ class Rel_claim_bsrs_heading_model extends MY_Model
      */
     public function save($claim_id, $bsrs_heading_ids)
     {
+        $old_records = $this->by_claim($claim_id);
+        $old_bsrs_heading_ids = [];
+        foreach($old_records as $single)
+        {
+            $old_bsrs_heading_ids[] = $single->bsrs_heading_id;
+        }
+        asort($old_bsrs_heading_ids);
+
+        $new_bsrs_heading_ids = $bsrs_heading_ids;
+        asort($new_bsrs_heading_ids);
+
+        $to_del_bsrs_heading_ids    = array_diff($old_bsrs_heading_ids, $new_bsrs_heading_ids);
+        $to_insert_bsrs_heading_ids = array_diff($new_bsrs_heading_ids, $old_bsrs_heading_ids);
 
         /**
          * Build Relation Data
@@ -68,9 +82,7 @@ class Rel_claim_bsrs_heading_model extends MY_Model
          * ============================= TRANSACTION STARTS ======================================
          */
 
-            // Disable DB Debug for transaction to work
-            $this->db->db_debug = FALSE;
-
+            $status = TRUE;
             // Use automatic transaction
             $this->db->trans_start();
 
@@ -78,14 +90,20 @@ class Rel_claim_bsrs_heading_model extends MY_Model
                 /**
                  * Task 1: Delete Old Relations
                  */
-                parent::delete_by(['claim_id' => $claim_id]);
+                foreach($to_del_bsrs_heading_ids as $bsrs_heading_id)
+                {
+                    $this->_delete($claim_id, $bsrs_heading_id);
+                }
 
 
                 /**
                  * Task 2: Insert New Relation Data
                  */
-                parent::insert_batch($batch_data, TRUE);
-
+                foreach($to_insert_bsrs_heading_ids as $bsrs_heading_id)
+                {
+                    $data = ['claim_id' => $claim_id, 'bsrs_heading_id' => $bsrs_heading_id];
+                    parent::insert($data, TRUE);
+                }
 
             // Commit all transactions on success, rollback else
             $this->db->trans_complete();
@@ -100,7 +118,7 @@ class Rel_claim_bsrs_heading_model extends MY_Model
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
-            $id = FALSE;
+            $status = FALSE;
         }
         else
         {
@@ -110,11 +128,8 @@ class Rel_claim_bsrs_heading_model extends MY_Model
             $this->clear_cache( 'bsrs_hd_byclaim_' . $claim_id );
         }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
         // return result/status
-        return TRUE;
+        return $status;
     }
 
     // --------------------------------------------------------------------
@@ -192,4 +207,73 @@ class Rel_claim_bsrs_heading_model extends MY_Model
     }
 
     // ----------------------------------------------------------------
+
+
+    public function delete_by_claim($claim_id, $use_auto_transaction = FALSE)
+    {
+        $records = $this->db->select('*')->where('claim_id', $claim_id)->get($this->table_name)->result();
+        if($records)
+        {
+            foreach($records as $single)
+            {
+                $this->delete_single($single->claim_id, $single->bsrs_heading_id, $use_auto_transaction);
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------
+
+    public function delete_single($claim_id, $bsrs_heading_id, $use_auto_transaction = TRUE)
+    {
+        $status = TRUE;
+        if($use_auto_transaction )
+        {
+            // Use automatic transaction
+            $this->db->trans_start();
+
+                $this->_delete($claim_id, $bsrs_heading_id);
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                // get_allenerate an error... or use the log_message() function to log your error
+                $status = FALSE;
+            }
+        }
+        else
+        {
+            $status = $this->_delete($claim_id, $bsrs_heading_id);
+        }
+
+        // Clear Cache
+        if($status)
+        {
+            $this->delete_cache('bsrs_hd_byclaim_' . $claim_id);
+        }
+
+        // return result/status
+        return $status;
+    }
+
+        private function _delete($claim_id, $bsrs_heading_id)
+        {
+            // Set Old Audit Record - Manually
+            $where = ['claim_id' => $claim_id, 'bsrs_heading_id' => $bsrs_heading_id];
+            $this->audit_old_record = (object)$where;
+
+            // Delete Manually
+            $this->db->where($where)->delete($this->table_name);
+
+            // Save Audit Log Manually
+            $this->save_audit_log([
+                'method' => 'delete',
+                'id'     => NULL
+            ],$where);
+            $this->audit_old_record = NULL;
+
+            return TRUE;
+        }
+
+    // ----------------------------------------------------------------
+
 }

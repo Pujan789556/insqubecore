@@ -61,6 +61,8 @@ class Claim_model extends MY_Model
 
         $this->load->model('claim_surveyor_model');
         $this->load->model('claim_settlement_model');
+        $this->load->model('claim_settlement_model');
+        $this->load->model('rel_claim_bsrs_heading_model');
     }
 
     // ----------------------------------------------------------------
@@ -1593,21 +1595,29 @@ class Claim_model extends MY_Model
         {
             return FALSE;
         }
-
         $record = $this->get($id);
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
+
 
         $status = TRUE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
+            /**
+             * Delete From Child Tables
+             *
+             * - Claim Surveyors
+             * - Claim Settlements
+             * - Claim BSRS_Heading Relation
+             */
+            $this->claim_surveyor_model->delete_by_claim($record->id);
+            $this->claim_settlement_model->delete_by_claim($record->id);
+            $this->rel_claim_bsrs_heading_model->delete_by_claim($record->id);
+
+            // Delete Main Record
             parent::delete($id);
 
         $this->db->trans_complete();
-
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
@@ -1618,9 +1628,6 @@ class Claim_model extends MY_Model
             // Clear Cache
             $this->clear_cache( 'claim_list_by_policy_' . $record->policy_id );
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;

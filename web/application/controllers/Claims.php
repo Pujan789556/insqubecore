@@ -731,7 +731,7 @@ class Claims extends MY_Controller
 				$method = 'replaceWith';
 				if($action === 'add_draft')
 				{
-					$box = '#box-customers-rows';
+					$box = '#box-claims-rows';
 					$method = 'prepend';
 				}
 				else if($ref == 'l')
@@ -880,7 +880,7 @@ class Claims extends MY_Controller
 	 * @param integer $id
 	 * @return json
 	 */
-	public function delete($id)
+	public function delete($id, $ref)
 	{
 		// Valid Record ?
 		$id = (int)$id;
@@ -952,9 +952,25 @@ class Claims extends MY_Controller
 			$data = [
 				'status' 	=> 'success',
 				'message' 	=> 'Successfully deleted!',
-				'removeRow' => true,
-				'rowId'		=> '#_data-row-claims-'.$record->id
 			];
+
+			// Requrest from List Page
+			if($ref == 'l')
+			{
+				$data['rowId'] = '#_data-row-claims-'.$record->id;
+				$data = array_merge($data, [
+					'removeRow' => true,
+					'rowId'		=> '#_data-row-claims-'.$record->id
+				]);
+			}
+			else
+			{
+				// The record deleted, reload the list view
+				$data = array_merge($data, [
+					'reloadPage' => true,
+					'reloadUrl'  => site_url($this->_url_base)
+				]);
+			}
 		}
 		else
 		{

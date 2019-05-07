@@ -517,7 +517,21 @@ class Claim_surveyor_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function delete($id = NULL)
+    public function delete_by_claim($claim_id, $use_auto_transaction = FALSE)
+    {
+        $records = $this->db->select('id')->where('claim_id', $claim_id)->get($this->table_name)->result();
+        if($records)
+        {
+            foreach($records as $single)
+            {
+                $this->delete_single($single->id, $claim_id, $use_auto_transaction);
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------
+
+    public function delete_single($id, $claim_id, $use_auto_transaction = TRUE)
     {
         $id = intval($id);
         if( !safe_to_delete( get_class(), $id ) )
@@ -526,21 +540,29 @@ class Claim_surveyor_model extends MY_Model
         }
 
         $status = TRUE;
-
-        // Use automatic transaction
-        $this->db->trans_start();
-
-            parent::delete($id);
-
-        $this->db->trans_complete();
-        if ($this->db->trans_status() === FALSE)
+        if($use_auto_transaction )
         {
-            // get_allenerate an error... or use the log_message() function to log your error
-            $status = FALSE;
+            // Use automatic transaction
+            $this->db->trans_start();
+
+                parent::delete($id);
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                // get_allenerate an error... or use the log_message() function to log your error
+                $status = FALSE;
+            }
         }
         else
         {
-            $this->log_activity($id, 'D');
+            $status = parent::delete($id);
+        }
+
+        // Clear Cache
+        if($status)
+        {
+            $this->delete_cache('srv_lstbyclm_' . $claim_id);
         }
 
         // return result/status
