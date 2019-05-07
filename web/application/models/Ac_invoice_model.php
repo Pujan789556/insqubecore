@@ -498,7 +498,7 @@ class Ac_invoice_model extends MY_Model
             // Type/Module Table Alias
             'module' => 'B'
         ];
-        $this->address_model->module_select(IQB_ADDRESS_TYPE_BRANCH, NULL, $table_aliases);
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_BRANCH, NULL, $table_aliases, 'addr_', FALSE);
 
         // Policy, Customer Related JOIN
         $this->db->select(
@@ -534,7 +534,7 @@ class Ac_invoice_model extends MY_Model
             // Type/Module Table Alias
             'module' => 'CST'
         ];
-        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_');
+        $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_', FALSE);
 
         /**
          * Complete/Active Invoice?

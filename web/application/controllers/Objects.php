@@ -219,7 +219,8 @@ class Objects extends MY_Controller
 			'customer_record' 			=> $customer_record,
 			'portfolio_record' 		 	=> $portfolio_record,
 			'add_url' 					=> $this->_url_base . '/add/' . $customer_id . '/y/' . $portfolio_id,
-			'_flag__show_widget_row' 	=> TRUE
+			'_flag__show_widget_row' 	=> TRUE,
+			'DOM_RowBoxId'				=> 'box-objects-rows' 				// Row Box ID
 		];
 		$html = $this->load->view($this->_view_base . '/_find_widget', $data, TRUE);
 		$ajax_data = [
