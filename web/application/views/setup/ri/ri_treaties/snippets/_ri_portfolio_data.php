@@ -87,7 +87,7 @@ $treaty_type_id =  (int)$portfolios[0]->treaty_type_id;
 				<td><?php echo $portfolio->treaty_max_capacity_amt;?></td>
 				<td><?php echo $portfolio->qs_max_ret_amt;?></td>
 				<td><?php echo $portfolio->qs_def_ret_amt;?></td>
-				<td><?php echo $portfolio->flag_qs_def_ret_apply ? yes_no_text(false)[$portfolio->flag_qs_def_ret_apply] : '-';?></td>
+				<td><?php echo yes_no_text($portfolio->flag_qs_def_ret_apply, '-');?></td>
 
 				<?php if( in_array($treaty_type_id, [IQB_RI_TREATY_TYPE_QT, IQB_RI_TREATY_TYPE_QS]) ): ?>
 					<td><?php echo $portfolio->qs_retention_percent;?></td>
