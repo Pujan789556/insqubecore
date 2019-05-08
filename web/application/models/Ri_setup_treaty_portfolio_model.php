@@ -521,6 +521,9 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
                 ],$where);
             }
 
+            // Clear Cache
+            $this->clear_cache();
+
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
