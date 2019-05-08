@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Ac_receipt_model extends MY_Model
 {
     protected $table_name   = 'ac_receipts';
-    protected $set_created  = true;
-    protected $set_modified = true;
-    protected $log_user     = true;
+    protected $set_created  = TRUE;
+    protected $set_modified = TRUE;
+    protected $log_user     = TRUE;
     protected $audit_log    = TRUE;
 
     protected $protected_attributes = ['id'];
@@ -113,11 +113,46 @@ class Ac_receipt_model extends MY_Model
 
         if($id !== NULL)
         {
-            $params     = [$id, $this->dx_auth->get_user_id()];
-            $sql        = "SELECT `f_generate_receipt_number`(?, ?) AS receipt_code";
-            return mysqli_store_procedure('select', $sql, $params);
+
+            // Old Record
+            $this->audit_old_record = parent::find($id);
+
+            // Generate and Update Receipt Number
+            $this->_generate_receipt_number($id);
+
+            // Save Audit Log - Manually
+             $this->save_audit_log([
+                'method' => 'update',
+                'id'     => $id,
+                'fields' => (array)parent::find($id)
+            ]);
+            $this->audit_old_record = NULL;
         }
-        return FALSE;
+
+        return $arr_record;
+    }
+
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Generate Invoice Number
+     *
+     * @param type $id
+     * @return mixed
+     */
+    private function _generate_receipt_number($id)
+    {
+        $params     = [$id, $this->dx_auth->get_user_id()];
+        $sql        = "SELECT `f_generate_receipt_number`(?, ?) AS receipt_code";
+        $result     = mysqli_store_procedure('select', $sql, $params);
+
+        /**
+         * Get the result
+         */
+        $result_row = $result[0];
+
+        return $result_row->receipt_code;
     }
 
     // --------------------------------------------------------------------
@@ -133,8 +168,7 @@ class Ac_receipt_model extends MY_Model
      */
     public function update_flag($id, $flag_name, $flag_value)
     {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, [$flag_name => $flag_value]);
+        return parent::update($id, [$flag_name => $flag_value], TRUE);
     }
 
     // --------------------------------------------------------------------
@@ -377,29 +411,5 @@ class Ac_receipt_model extends MY_Model
     public function delete($id = NULL)
     {
         return FALSE;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        $action = is_string($action) ? $action : 'C';
-        // Save Activity Log
-        $activity_log = [
-            'module'    => 'ac_receipt',
-            'module_id' => $id,
-            'action'    => $action
-        ];
-        return $this->activity->save($activity_log);
     }
 }

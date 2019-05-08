@@ -2300,11 +2300,12 @@ class Policy_installments extends MY_Controller
                 	$this->load->model('ac_receipt_model');
                     try{
 
-                        if( $this->ac_receipt_model->add($receipt_data) )
+                    	$receipt_id = $this->ac_receipt_model->add($receipt_data);
+                        if( $receipt_id )
                         {
                         	// Save Receipt PDF
                         	$receipt_data = [
-								'record' 			=> $this->ac_receipt_model->find_by(['invoice_id' => $invoice_record->id]),
+								'record' 			=> $this->ac_receipt_model->find($receipt_id),
 								'invoice_record' 	=> $invoice_record
 							];
 
