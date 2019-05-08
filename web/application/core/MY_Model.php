@@ -421,6 +421,9 @@ class MY_Model
          */
         if($audit_data)
         {
+            // We have to explicitly load the dx_auth library - else we get autologon() error
+            $this->load->library('dx_auth');
+
             // Table Reference Passed?
             $table_reference = is_array($table_reference) ? json_encode($table_reference) : NULL;
 
@@ -432,7 +435,7 @@ class MY_Model
                     'table_name'        => $this->table_name,
                     'table_id'          => $id,
                     'table_reference'   => $table_reference,
-                    'user_id'           => $this->dx_auth->get_user_id() ?? NULL,
+                    'user_id'           => is_object($this->dx_auth) ? $this->dx_auth->get_user_id() : NULL,
                     'action_at'         => $this->set_date()
             ], $audit_data);
 
@@ -1022,6 +1025,9 @@ class MY_Model
 
         $this->db->where($this->primary_key, $id);
 
+        // We have to explicitly load the dx_auth library - else we get autologon() error
+        $this->load->library('dx_auth');
+
         if ($this->soft_deletes) {
             $sets = $this->log_user && is_object($this->dx_auth)
                 ? array($this->soft_delete_key => 1, $this->deleted_by_field => $this->dx_auth->get_user_id())
@@ -1047,6 +1053,9 @@ class MY_Model
 
         $where = $this->trigger('before_delete', ['method' => 'delete_by', 'fields' => $where]);
 
+        // We have to explicitly load the dx_auth library - else we get autologon() error
+        $this->load->library('dx_auth');
+
         if ($this->soft_deletes) {
             $sets = $this->log_user && is_object($this->dx_auth)
                 ? array($this->soft_delete_key => 1, $this->deleted_by_field => $this->dx_auth->get_user_id())
@@ -1071,6 +1080,9 @@ class MY_Model
         $ids = $this->trigger('before_delete', ['ids' => $ids, 'method' => 'delete_many'] );
 
         $this->db->where_in($this->primary_key, $ids);
+
+        // We have to explicitly load the dx_auth library - else we get autologon() error
+        $this->load->library('dx_auth');
 
         if ($this->soft_deletes) {
             $sets = $this->log_user && is_object($this->dx_auth)
@@ -1455,6 +1467,9 @@ class MY_Model
                 $row[$this->created_field] = $this->set_date();
             }
 
+            // We have to explicitly load the dx_auth library - else we get autologon() error
+            $this->load->library('dx_auth');
+
             // Created by
             if ($this->log_user && ! array_key_exists($this->created_by_field, $row) && is_object($this->dx_auth))
             {
@@ -1490,6 +1505,9 @@ class MY_Model
         {
             $row[$this->modified_field] = $this->set_date();
         }
+
+        // We have to explicitly load the dx_auth library - else we get autologon() error
+        $this->load->library('dx_auth');
 
         // Modified by
         if ($this->log_user && ! array_key_exists($this->modified_by_field, $row) && is_object($this->dx_auth))
