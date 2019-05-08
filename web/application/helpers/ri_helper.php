@@ -711,10 +711,11 @@ if ( ! function_exists('RI__get_portfolio_treaty'))
 		 * Portfolio Treaty for "Normal Risks" or "Pool Risk" which defined by $category variable
 		 */
 		$treaty_record = $CI->ri_setup_treaty_portfolio_model->get_portfolio_treaty($portfolio_id, $fiscal_yr_id, $category);
+		$category_text = IQB_RI_TREATY_CATEGORIES[$category] ?? '';
 		if(!$treaty_record )
 		{
 			// NO Treaty Setup for this portfolio!
-			throw new Exception("Exception [Helper: ri_helper][Method: RI__get_portfolio_treaty()]: No treaty found for supplied portfolio.");
+			throw new Exception("Exception [Helper: ri_helper][Method: RI__get_portfolio_treaty()]: No treaty found for supplied portfolio for '{$category_text}'.");
 		}
 
 		/**
@@ -725,7 +726,7 @@ if ( ! function_exists('RI__get_portfolio_treaty'))
 			if( !RI__valid_treaty_record( $treaty_record ) )
 			{
 				$treaty_type = RI__treaty_types_dropdown(false)[$treaty_record->treaty_type_id];
-				throw new Exception("Exception [Helper: ri_helper][Method: RI__get_portfolio_treaty()][{$treaty_record->treaty_name} - {$treaty_type}]: Treaty for this portfolio is not setup properly. Please contact Administrator for this.");
+				throw new Exception("Exception [Helper: ri_helper][Method: RI__get_portfolio_treaty()][{$treaty_record->treaty_name} - {$treaty_type}]: Treaty for this portfolio for {$category_text} is not setup properly. Please contact Administrator for this.");
 			}
 		}
 
