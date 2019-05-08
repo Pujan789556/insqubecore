@@ -58,6 +58,13 @@ $profile_picture_url = '';
 					</div>
 				</div>
 			</li>
+			<li class="user-body">
+				<div class="row">
+					<div class="col-xs-12">
+						<a href="<?php echo site_url('static/themes/AdminLTE-2.3.6/index.html') ?>" target="_blank">Theme Reference <i class="fa fa-book pull-right"></i></a>
+					</div>
+				</div>
+			</li>
 		<?php endif; ?>
 
 		<li class="user-body">
