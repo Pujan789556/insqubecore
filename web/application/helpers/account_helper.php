@@ -79,7 +79,7 @@ if ( ! function_exists('is_voucher_editable'))
 		/**
 		 * Manual Voucher? Belong to Current Fiscal Year?
 		 */
-		$__flag_editable = $record->flag_internal == IQB_FLAG_OFF && $record->flag_complete == IQB_FLAG_ON && $record->fiscal_yr_id == $CI->current_fiscal_year->id;
+		$__flag_editable = $record->flag_internal == IQB_FLAG_OFF && $record->fiscal_yr_id == $CI->current_fiscal_year->id;
 
 		// Terminate on Exit?
 		if( $__flag_editable === FALSE && $terminate_on_fail == TRUE)
@@ -113,11 +113,6 @@ if ( ! function_exists('is_invoicable_policy_voucher'))
 		if(
 			// Must be Internal
 			$record->flag_internal == IQB_FLAG_ON
-
-				&&
-
-			// Must be Complete
-			$record->flag_complete == IQB_FLAG_ON
 
 				&&
 
@@ -178,10 +173,6 @@ if ( ! function_exists('is_creditable_policy_voucher'))
 			// Must be Internal
 			$record->flag_internal == IQB_FLAG_ON
 
-				&&
-
-			// Must be Complete
-			$record->flag_complete == IQB_FLAG_ON
 
 				&&
 

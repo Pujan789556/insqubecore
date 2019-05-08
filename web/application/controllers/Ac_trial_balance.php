@@ -264,9 +264,7 @@ class Ac_trial_balance extends MY_Controller
 			 * 		To 		= Filter End Date | Quarter End Date | Month End Date
 			 *
 			 */
-			$flag_on = IQB_FLAG_ON;
 			$query_params = [
-				"V.flag_complete = '{$flag_on}'",
 				"V.fiscal_yr_id = '{$fiscal_yr_id}'",
 			];
 

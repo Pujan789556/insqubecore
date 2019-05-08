@@ -678,7 +678,7 @@ class Ac_invoices extends MY_Controller
 			 * Main Record (Complete Invoice)
 			 */
 	    	$id = (int)$id;
-			$record = $this->ac_invoice_model->get($id, IQB_FLAG_ON);
+			$record = $this->ac_invoice_model->get($id);
 			if(!$record)
 			{
 				$this->template->render_404();
@@ -729,7 +729,7 @@ class Ac_invoices extends MY_Controller
 			 * Main Record (Complete Invoice)
 			 */
 	    	$id = (int)$id;
-			$invoice_record = $this->ac_invoice_model->get($id, IQB_FLAG_ON);
+			$invoice_record = $this->ac_invoice_model->get($id);
 			if(!$invoice_record)
 			{
 				$this->template->render_404();
@@ -795,7 +795,7 @@ class Ac_invoices extends MY_Controller
 		 * Main Record (Complete Invoice + Receipt Data)
 		 */
     	$id = (int)$id;
-		$record = $this->ac_invoice_model->get($id, IQB_FLAG_ON);
+		$record = $this->ac_invoice_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -915,7 +915,7 @@ class Ac_invoices extends MY_Controller
 		 * Main Record (Complete Invoice + Receipt Data)
 		 */
     	$id = (int)$id;
-		$record = $this->ac_invoice_model->get($id, IQB_FLAG_ON);
+		$record = $this->ac_invoice_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();

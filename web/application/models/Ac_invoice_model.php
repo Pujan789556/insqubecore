@@ -4,18 +4,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Ac_invoice_model extends MY_Model
 {
     protected $table_name   = 'ac_invoices';
-    protected $set_created  = true;
-    protected $set_modified = true;
-    protected $log_user     = true;
+    protected $set_created  = TRUE;
+    protected $set_modified = TRUE;
+    protected $log_user     = TRUE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['before_insert__defaults'];
-    protected $after_insert  = ['after_insert__defaults', 'clear_cache'];
+    // protected $before_insert = [];
+    protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'invoice_code', 'customer_id', 'voucher_id', 'branch_id', 'fiscal_yr_id', 'fy_quarter', 'invoice_date', 'amount', 'flag_paid', 'flag_printed', 'flag_complete', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'invoice_code', 'customer_id', 'voucher_id', 'branch_id', 'fiscal_yr_id', 'fy_quarter', 'invoice_date', 'amount', 'flag_paid', 'flag_printed', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -48,7 +49,7 @@ class Ac_invoice_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Add New Invoice
+     * Pre-add Tasks
      *
      * The following tasks are carried during Invoice Add:
      *      a. Insert Master Record, Update Invoice Code
@@ -62,82 +63,62 @@ class Ac_invoice_model extends MY_Model
     public function add($master_data, $batch_data_details, $policy_id=NULL)
     {
         /**
-         * !!! IMPORTANT
-         *
-         * We do not use transaction here as we may lost the invoice id autoincrement.
-         * We simply use try catch block.
-         *
-         * If transaction fails, we will have a invoice with complete flag off.
+         * Prepare Data
          */
+        $master_data = $this->_pre_add_tasks($master_data);
 
-        $id = parent::insert($master_data, TRUE);
 
-        if( $id )
-        {
-
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+            $this->db->trans_start();
 
 
                 /**
-                 * Disable DB Debugging
+                 * Task 1: Insert Master Record
                  */
-                $this->db->db_debug = FALSE;
-                $this->db->trans_start();
+                $id = parent::insert($master_data, TRUE);
 
-
-                    // --------------------------------------------------------------------
-
-                    /**
-                     * Task 1: Insert Invoice Details
-                     */
-                    $this->ac_invoice_detail_model->batch_insert($id, $batch_data_details);
-
-                    // --------------------------------------------------------------------
-
-                    /**
-                     * Task 2: Complete Invoice Status
-                     */
-                    $this->enable_invoice($id);
-
-
-                    // --------------------------------------------------------------------
-
-                    /**
-                     * Task 4: Clear Cache (For this Policy)
-                     */
-                    if($policy_id)
-                    {
-                        $cache_var = 'ac_invoice_list_by_policy_'.$policy_id;
-                        $this->clear_cache($cache_var);
-                    }
-
-                    // --------------------------------------------------------------------
-
+                // --------------------------------------------------------------------
 
                 /**
-                 * Complete transactions or Rollback
+                 * Task 2: Insert Invoice Details
                  */
-                $this->db->trans_complete();
-                if ($this->db->trans_status() === FALSE)
+                $this->ac_invoice_detail_model->add($id, $batch_data_details);
+
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 3: Generate Invoice Code
+                 */
+                $this->_post_add_tasks($id);
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 4: Clear Cache (For this Policy)
+                 */
+                if($policy_id)
                 {
-                    throw new Exception("Exception [Model: Ac_invoice_model][Method: add()]: Could not save Invoice details and other details.");
+                    $cache_var = 'ac_invoice_list_by_policy_'.$policy_id;
+                    $this->clear_cache($cache_var);
                 }
 
-                /**
-                 * Restore DB Debug Configuration
-                 */
-                $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+                // --------------------------------------------------------------------
+
 
             /**
-             * ==================== TRANSACTIONS END =========================
+             * Complete transactions or Rollback
              */
-        }
-        else
-        {
-            throw new Exception("Exception [Model: Ac_invoice_model][Method: add()]: Could not insert record.");
-        }
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                throw new Exception("Exception [Model: Ac_invoice_model][Method: add()]: Could not save Invoice details and other details.");
+            }
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
 
         // return result/status
         return $id;
@@ -146,35 +127,7 @@ class Ac_invoice_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Enable Invoice Transaction [Complete Flagg - OFF]
-     *
-     * @param integer $id
-     * @return boolean
-     */
-    public function enable_invoice($id)
-    {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, ['flag_complete' => IQB_FLAG_ON]);
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Disable invoice Transaction [Complete Flagg - OFF]
-     *
-     * @param integer $id
-     * @return boolean
-     */
-    public function disable_invoice($id)
-    {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, ['flag_complete' => IQB_FLAG_OFF]);
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Before Insert Trigger
+     * Before Insert Tasks
      *
      * Tasks carried
      *      2. Add Draft Invoice Code (Random Characters)
@@ -185,7 +138,7 @@ class Ac_invoice_model extends MY_Model
      * @param array $data
      * @return array
      */
-    public function before_insert__defaults($data)
+    private function _pre_add_tasks($data)
     {
         $this->load->library('Token');
         $fy_record  = $this->fiscal_year_model->get_fiscal_year($data['invoice_date']);
@@ -209,42 +162,53 @@ class Ac_invoice_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * After Insert Trigger
+     * After Insert Tasks
      *
      * Tasks that are to be performed after policy is created are
      *      1. Generate and Update Invoice Code
      *
-     * @param array $arr_record
-     * @return array
+     * @param int $id Invoice ID
+     * @return mixed
      */
-    public function after_insert__defaults($arr_record)
+    private function _post_add_tasks($id)
     {
-        /**
-         * Data Structure
-         *
-            Array
-            (
-                [id] => 11
-                [fields] => Array
-                    (
-                        [invoice_code] => 6
-                        [branch_id] => 6
-                        [fiscal_yr_id] => x
-                        ...
-                    )
-                [method] => insert
-            )
-        */
-        $id = $arr_record['id'] ?? NULL;
+        // Old Record
+        $this->audit_old_record = parent::find($id);
 
-        if($id !== NULL)
-        {
-            $params     = [$id, $this->dx_auth->get_user_id()];
-            $sql        = "SELECT `f_generate_invoice_number`(?, ?) AS invoice_code";
-            return mysqli_store_procedure('select', $sql, $params);
-        }
-        return FALSE;
+        // Generate and Update Invoice Number
+        $this->_generate_invoice_number($id);
+
+        // Save Audit Log - Manually
+         $this->save_audit_log([
+            'method' => 'update',
+            'id'     => $id,
+            'fields' => (array)parent::find($id)
+        ]);
+        $this->audit_old_record = NULL;
     }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Generate Invoice Number
+     *
+     * @param type $id
+     * @return mixed
+     */
+    private function _generate_invoice_number($id)
+    {
+        $params     = [$id, $this->dx_auth->get_user_id()];
+        $sql        = "SELECT `f_generate_invoice_number`(?, ?) AS invoice_code";
+        $result     = mysqli_store_procedure('select', $sql, $params);
+
+        /**
+         * Get the result
+         */
+        $result_row = $result[0];
+
+        return $result_row->invoice_code;
+    }
+
 
     // --------------------------------------------------------------------
 
@@ -259,8 +223,7 @@ class Ac_invoice_model extends MY_Model
      */
     public function update_flag($id, $flag_name, $flag_value)
     {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, [$flag_name => $flag_value]);
+        return parent::update($id, [$flag_name => $flag_value], TRUE);
     }
 
     // --------------------------------------------------------------------
@@ -273,7 +236,7 @@ class Ac_invoice_model extends MY_Model
      */
     public function invoice_exists($voucher_id)
     {
-        return $this->check_duplicate(['voucher_id' => $voucher_id, 'flag_complete' => IQB_FLAG_ON]);
+        return $this->check_duplicate(['voucher_id' => $voucher_id]);
     }
 
     // ----------------------------------------------------------------
@@ -433,8 +396,6 @@ class Ac_invoice_model extends MY_Model
 
             // Policy Related JOIN
             return $this->db->where('REL.policy_id', $policy_id)
-                            ->where('I.flag_complete', IQB_FLAG_ON)
-                            ->where('V.flag_complete', IQB_FLAG_ON)
                             ->order_by('I.id', 'DESC')
                             ->get()
                             ->result();
@@ -467,15 +428,13 @@ class Ac_invoice_model extends MY_Model
                     ->join('ac_vouchers V', 'V.id = I.voucher_id')
                     ->join('rel_policy__voucher REL', 'REL.voucher_id = I.voucher_id')
                     ->where('REL.policy_id', $policy_id)
-                    ->where('I.flag_complete', IQB_FLAG_ON)
-                    ->where('V.flag_complete', IQB_FLAG_ON)
                     ->order_by('I.id', 'ASC')
                     ->get()->row();
     }
 
     // --------------------------------------------------------------------
 
-    public function get($id, $flag_complete=NULL)
+    public function get($id)
     {
         // Common Row Select
         $this->_row_select();
@@ -535,14 +494,6 @@ class Ac_invoice_model extends MY_Model
             'module' => 'CST'
         ];
         $this->address_model->module_select(IQB_ADDRESS_TYPE_CUSTOMER, NULL, $table_aliases, 'addr_customer_', FALSE);
-
-        /**
-         * Complete/Active Invoice?
-         */
-        if($flag_complete !== NULL )
-        {
-            $this->db->where('I.flag_complete', (int)$flag_complete);
-        }
 
         return $this->db->where('I.id', $id)
                         ->get()->row();

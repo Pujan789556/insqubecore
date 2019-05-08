@@ -15,7 +15,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<th>Branch</th>
 			<th>Type</th>
 			<th>Date</th>
-			<th>Status</th>
 			<th>Action</th>
 		</tr>
 	</thead>

@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     /**
      * Credit Note Preview
      */
-    $this->load->view($this->data['accounting/ac_credit_notes/snippets/_credit_note_card', $credit_note_data);
+    $this->load->view('accounting/ac_credit_notes/snippets/_credit_note_card', $credit_note_data);
 
     /**
      * Load Form Components

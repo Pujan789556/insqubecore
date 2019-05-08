@@ -7,6 +7,7 @@ class Ac_receipt_model extends MY_Model
     protected $set_created  = true;
     protected $set_modified = true;
     protected $log_user     = true;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = ['id'];
 
@@ -301,8 +302,6 @@ class Ac_receipt_model extends MY_Model
             //             ->join('rel_policy_installment_voucher RELENDRSMNTVHR', 'RELENDRSMNTVHR.voucher_id = I.voucher_id')
             //             ->join('dt_endorsements ENDRSMNT', 'RELENDRSMNTVHR.policy_installment_id = ENDRSMNT.id')
             //             ->where('ENDRSMNT.policy_id', $policy_id)
-            //             ->where('I.flag_complete', IQB_FLAG_ON)
-            //             ->where('V.flag_complete', IQB_FLAG_ON)
             //             ->order_by('I.id', 'DESC')
             //             ->get()
             //             ->result();
@@ -312,7 +311,7 @@ class Ac_receipt_model extends MY_Model
 
     // --------------------------------------------------------------------
 
-    public function get($id, $flag_complete=NULL)
+    public function get($id)
     {
         // // Common Row Select
         // $this->_row_select();
@@ -336,14 +335,6 @@ class Ac_receipt_model extends MY_Model
         //             ->join('dt_endorsements ENDRSMNT', 'RELENDRSMNTVHR.policy_installment_id = ENDRSMNT.id')
         //             ->join('dt_policies POLICY', 'POLICY.id = ENDRSMNT.policy_id')
         //             ->join('dt_customers CST', 'CST.id = I.customer_id');
-
-        // /**
-        //  * Complete/Active Invoice?
-        //  */
-        // if($flag_complete !== NULL )
-        // {
-        //     $this->db->where('I.flag_complete', (int)$flag_complete);
-        // }
 
         // return $this->db->where('I.id', $id)
         //                 ->get()->row();

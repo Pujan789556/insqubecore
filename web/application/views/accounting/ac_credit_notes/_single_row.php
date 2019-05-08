@@ -15,7 +15,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</td>
 	<td><?php echo $record->branch_name_en;?></td>
 	<td><?php echo $record->credit_note_date;?></td>
-	<td><?php echo credit_note_complete_flag_text($record->flag_complete);?></td>
 	<td><?php echo credit_note_flag_on_off_text($record->flag_paid);?></td>
 	<td><?php echo credit_note_flag_on_off_text($record->flag_printed);?></td>
 	<td class="ins-action">
@@ -41,11 +40,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				 * Internal Voucher - Policy Voucher to Generate Credit Note
 				 */
 				if(
-
-					// Must be Complete
-					$record->flag_complete == IQB_FLAG_ON
-
-						&&
 
 					// Must not Be Paid Yet
 					(int)$record->flag_paid === IQB_FLAG_OFF

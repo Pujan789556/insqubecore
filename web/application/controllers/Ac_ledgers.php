@@ -314,12 +314,10 @@ class Ac_ledgers extends MY_Controller
 			 */
 			$query_params['bf'] 	= [
 				'V.fiscal_yr_id'  	=> $fiscal_yr_id,
-				'V.flag_complete' 	=> IQB_FLAG_ON,
 				'VD.account_id' 	=> $account_id
 			];
 			$query_params['txn'] 	= [
 				'V.fiscal_yr_id'  	=> $fiscal_yr_id,
-				'V.flag_complete' 	=> IQB_FLAG_ON,
 				'VD.account_id' 	=> $account_id
 			];
 

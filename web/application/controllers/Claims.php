@@ -1360,6 +1360,15 @@ class Claims extends MY_Controller
 			]);
 		}
 
+		if(!$voucher_id)
+		{
+			return $this->template->json([
+				'title' 	=> 'Oops!',
+				'status' 	=> 'error',
+				'message' 	=> 'Could not add voucher data.'
+			]);
+		}
+
 		$flag_exception = FALSE;
 		$message = '';
 
@@ -1373,8 +1382,7 @@ class Claims extends MY_Controller
 		 * 			- claim ri-distribution and status
 		 *
 		 * 		Please note that, if any of subsequent transaction fails or exception
-		 * 		happens, we rollback and disable voucher. (We can not delete
-		 * 		voucher as we need to maintain sequential order for audit trail)
+		 * 		happens, we rollback and disable voucher.
 		 * --------------------------------------------------------------------
 		 */
 
@@ -1382,11 +1390,6 @@ class Claims extends MY_Controller
 		/**
          * ==================== MANUAL TRANSACTIONS BEGIN =========================
          */
-
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
             $this->db->trans_begin();
 
 
@@ -1425,11 +1428,6 @@ class Claims extends MY_Controller
 			if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
 			{
 		        $this->db->trans_rollback();
-
-		        /**
-            	 * Set Voucher Flag Complete to OFF
-            	 */
-            	$this->ac_voucher_model->disable_voucher($voucher_id);
 
             	return $this->template->json([
 					'title' 	=> 'Something went wrong!',
@@ -1567,6 +1565,15 @@ class Claims extends MY_Controller
 			]);
 		}
 
+		if(!$voucher_id)
+		{
+			return $this->template->json([
+				'title' 	=> 'Oops!',
+				'status' 	=> 'error',
+				'message' 	=> 'Could not add voucher data.'
+			]);
+		}
+
 		$flag_exception = FALSE;
 		$message = '';
 
@@ -1589,11 +1596,6 @@ class Claims extends MY_Controller
 		/**
 	     * ==================== MANUAL TRANSACTIONS BEGIN =========================
 	     */
-
-	        /**
-	         * Disable DB Debugging
-	         */
-	        $this->db->db_debug = FALSE;
 	        $this->db->trans_begin();
 
 
@@ -1633,11 +1635,6 @@ class Claims extends MY_Controller
 			if ($flag_exception === TRUE || $this->db->trans_status() === FALSE)
 			{
 		        $this->db->trans_rollback();
-
-		        /**
-	        	 * Set Voucher Flag Complete to OFF
-	        	 */
-	        	$this->ac_voucher_model->disable_voucher($voucher_id);
 
 	        	return $this->template->json([
 					'title' 	=> 'Something went wrong!',

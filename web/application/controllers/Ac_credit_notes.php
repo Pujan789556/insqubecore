@@ -654,7 +654,7 @@ class Ac_credit_notes extends MY_Controller
 		 * Main Record (Complete Credit Note)
 		 */
     	$id = (int)$id;
-		$record = $this->ac_credit_note_model->get($id, IQB_FLAG_ON);
+		$record = $this->ac_credit_note_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();
@@ -722,7 +722,7 @@ class Ac_credit_notes extends MY_Controller
 		 * Main Record (Complete Credit Note + Receipt Data)
 		 */
     	$id = (int)$id;
-		$record = $this->ac_credit_note_model->get($id, IQB_FLAG_ON);
+		$record = $this->ac_credit_note_model->get($id);
 		if(!$record)
 		{
 			$this->template->render_404();

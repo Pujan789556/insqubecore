@@ -5,9 +5,10 @@ class Ac_voucher_detail_model extends MY_Model
 {
     protected $table_name = 'ac_voucher_details';
 
-    protected $set_created = false;
-    protected $set_modified = false;
-    protected $log_user = false;
+    protected $set_created  = FALSE;
+    protected $set_modified = FALSE;
+    protected $log_user     = FALSE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = [];
 
@@ -38,31 +39,30 @@ class Ac_voucher_detail_model extends MY_Model
         parent::__construct();
     }
 
-	// --------------------------------------------------------------------
+    // --------------------------------------------------------------------
 
     /**
-     * Batch Insert Voucher Details Records
+     * Add Voucher Details Records
      *
-     * @param integer $voucher_id
+     * @param int $voucher_id
      * @param array $batch_data
-     * @return bool
+     * @return array successfully inserted IDs
      */
-    public function batch_insert($voucher_id, $batch_data)
+    public function add($voucher_id, $batch_data)
     {
+        $ids = [];
+
         /**
-         * Update voucher id on Batch Details
+         * Update Voucher id on Batch Details
          */
-        foreach($batch_data as &$single )
+        foreach($batch_data as $single )
         {
             $single['voucher_id'] = $voucher_id;
+
+            $ids[] = parent::insert($single, TRUE);
         }
 
-        // Insert Batch
-        if( $batch_data )
-        {
-            return $this->db->insert_batch( $this->table_name, $batch_data);
-        }
-        return FALSE;
+        return $ids;
     }
 
     // --------------------------------------------------------------------
@@ -109,7 +109,29 @@ class Ac_voucher_detail_model extends MY_Model
 
     public function delete_old( $voucher_id )
     {
-        return parent::delete_by(['voucher_id' => $voucher_id]);
+        $where   = ['voucher_id' => $voucher_id];
+        $records = parent::find_many_by($where);
+
+        /**
+         * Delete and Audit Log Manually
+         */
+        if($records)
+        {
+            // Delete Old Records
+            $this->db->where($where)
+                     ->delete($this->table_name);
+
+            // Audit Log Manually
+            foreach ($records as $record)
+            {
+                $this->audit_old_record = $record;
+                $this->save_audit_log([
+                    'method' => 'delete',
+                    'id'     => NULL
+                ]);
+                $this->audit_old_record = NULL;
+            }
+        }
     }
 
     // ----------------------------------------------------------------
@@ -117,31 +139,5 @@ class Ac_voucher_detail_model extends MY_Model
     public function delete($id = NULL)
     {
         return FALSE;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        return TRUE;
-
-        // $action = is_string($action) ? $action : 'C';
-        // // Save Activity Log
-        // $activity_log = [
-        //     'module'    => 'ac_account',
-        //     'module_id' => $id,
-        //     'action'    => $action
-        // ];
-        // return $this->activity->save($activity_log);
     }
 }

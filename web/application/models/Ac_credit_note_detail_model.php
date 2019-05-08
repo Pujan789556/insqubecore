@@ -5,9 +5,10 @@ class Ac_credit_note_detail_model extends MY_Model
 {
     protected $table_name = 'ac_credit_note_details';
 
-    protected $set_created  = false;
-    protected $set_modified = false;
-    protected $log_user     = false;
+    protected $set_created  = FALSE;
+    protected $set_modified = FALSE;
+    protected $log_user     = FALSE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = [];
 
@@ -41,28 +42,27 @@ class Ac_credit_note_detail_model extends MY_Model
 	// --------------------------------------------------------------------
 
     /**
-     * Batch Insert Invoice Details Records
+     * Add Credit Note Details Records
      *
-     * @param integer $credit_note_id
+     * @param int $credit_note_id
      * @param array $batch_data
-     * @return bool
+     * @return array successfully inserted IDs
      */
-    public function batch_insert($credit_note_id, $batch_data)
+    public function add($credit_note_id, $batch_data)
     {
+        $ids = [];
+
         /**
          * Update Invoice id on Batch Details
          */
-        foreach($batch_data as &$single )
+        foreach($batch_data as $single )
         {
             $single['credit_note_id'] = $credit_note_id;
+
+            $ids[] = parent::insert($single, TRUE);
         }
 
-        // Insert Batch
-        if( $batch_data )
-        {
-            return $this->db->insert_batch( $this->table_name, $batch_data);
-        }
-        return FALSE;
+        return $ids;
     }
 
     // --------------------------------------------------------------------
@@ -101,32 +101,8 @@ class Ac_credit_note_detail_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function delete_old( $credit_note_id )
-    {
-        return parent::delete_by(['credit_note_id' => $credit_note_id]);
-    }
-
-    // ----------------------------------------------------------------
-
     public function delete($id = NULL)
     {
         return FALSE;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * Log activities
-     *      Available Activities: Create|Edit|Delete
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        return TRUE;
     }
 }

@@ -675,8 +675,7 @@ class Ac_vouchers extends MY_Controller
 			$credit_total = bcadd($credit_total, $amount, IQB_AC_DECIMAL_PRECISION);
 		}
 
-		$epsilon = 0.00001;
-		// if( abs($debit_total - $credit_total) < $epsilon )
+		// MUST BE EXACTLY EQUAL
 		if( $credit_total === $debit_total )
 		{
 			return TRUE;

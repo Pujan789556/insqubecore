@@ -14,7 +14,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<th>Reference</th>
 			<th>Branch</th>
 			<th>Date</th>
-			<th>Status</th>
 			<th>Paid</th>
 			<th>Invoice Printed</th>
 			<th>Receipt Printed</th>

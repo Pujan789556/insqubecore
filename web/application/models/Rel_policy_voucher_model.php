@@ -96,7 +96,6 @@ class Rel_policy_voucher_model extends MY_Model
                         ->from($this->table_name . ' AS REL')
                         ->join('ac_vouchers V', 'V.id = REL.voucher_id')
                         ->where($where)
-                        ->where('V.flag_complete', IQB_FLAG_ON)
                         ->count_all_results();
     }
 

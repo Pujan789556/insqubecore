@@ -366,11 +366,6 @@ class Policy_installments extends MY_Controller
 
 		} catch (Exception $e) {
 
-			/**
-			 * Disable Voucher
-			 */
-			$this->ac_voucher_model->disable_voucher($voucher_id);
-
 			// Return Exception Message
 			return $this->template->json([
 				'title' 	=> 'Exception Occured!',
@@ -1379,11 +1374,6 @@ class Policy_installments extends MY_Controller
          */
 
 
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
-            // $this->db->trans_start();
             $this->db->trans_begin();
 
 
@@ -1454,11 +1444,6 @@ class Policy_installments extends MY_Controller
 			{
 		        $this->db->trans_rollback();
 
-		        /**
-            	 * Set Invoice Flag Complete to OFF
-            	 */
-            	$this->ac_invoice_model->disable_invoice($invoice_id);
-
             	return $this->template->json([
 					'title' 	=> 'Something went wrong!',
 					'status' 	=> 'error',
@@ -1469,11 +1454,6 @@ class Policy_installments extends MY_Controller
 			{
 			        $this->db->trans_commit();
 			}
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         /**
          * ==================== MANUAL TRANSACTIONS END =========================
@@ -1887,11 +1867,6 @@ class Policy_installments extends MY_Controller
          */
 
 
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
-            // $this->db->trans_start();
             $this->db->trans_begin();
 
 
@@ -1961,11 +1936,6 @@ class Policy_installments extends MY_Controller
 			{
 		        $this->db->trans_rollback();
 
-		        /**
-            	 * Set Credit Note Flag Complete to OFF
-            	 */
-            	$this->ac_credit_note_model->disable_invoice($credit_note_id);
-
             	return $this->template->json([
 					'title' 	=> 'Something went wrong!',
 					'status' 	=> 'error',
@@ -1976,11 +1946,6 @@ class Policy_installments extends MY_Controller
 			{
 			        $this->db->trans_commit();
 			}
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         /**
          * ==================== MANUAL TRANSACTIONS END =========================
@@ -2246,8 +2211,7 @@ class Policy_installments extends MY_Controller
          *      policy status.
          *
          *      Please note that, if any of installment fails or exception
-         *      happens, we rollback and disable voucher. (We can not delete
-         *      voucher as we need to maintain sequential order for audit trail)
+         *      happens, we rollback and disable voucher.
          * --------------------------------------------------------------------
          */
 
@@ -2255,12 +2219,6 @@ class Policy_installments extends MY_Controller
         /**
          * ==================== MANUAL TRANSACTIONS BEGIN =========================
          */
-
-
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
             $this->db->trans_begin();
 
 
@@ -2371,11 +2329,6 @@ class Policy_installments extends MY_Controller
             {
                 $this->db->trans_rollback();
 
-                /**
-                 * Set Voucher Flag Complete to OFF
-                 */
-                $this->ac_voucher_model->disable_voucher($voucher_id);
-
                 return $this->template->json([
                     'title'     => 'Something went wrong!',
                     'status'    => 'error',
@@ -2404,11 +2357,6 @@ class Policy_installments extends MY_Controller
                     // Send SMS
                     // $this->_sms_activation($endorsement_record, $policy_record, $invoice_record, $installment_record);
             }
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         /**
          * ==================== MANUAL TRANSACTIONS END =========================
@@ -2668,9 +2616,6 @@ class Policy_installments extends MY_Controller
 			// Voucher Record Exists?
 			!$voucher_record
 				||
-			// Voucher Complete
-			$voucher_record->flag_complete != IQB_FLAG_ON
-				||
 			// Valid Voucher Type
 			$voucher_record->voucher_type_id != IQB_AC_VOUCHER_TYPE_PMNT )
         {
@@ -2707,12 +2652,6 @@ class Policy_installments extends MY_Controller
         /**
          * ==================== MANUAL TRANSACTIONS BEGIN =========================
          */
-
-
-            /**
-             * Disable DB Debugging
-             */
-            $this->db->db_debug = FALSE;
             $this->db->trans_begin();
 
 
@@ -2789,11 +2728,6 @@ class Policy_installments extends MY_Controller
             {
                 $this->db->trans_rollback();
 
-                /**
-                 * Set Voucher Flag Complete to OFF
-                 */
-                $this->ac_voucher_model->disable_voucher($voucher_id);
-
                 return $this->template->json([
                     'title'     => 'Something went wrong!',
                     'status'    => 'error',
@@ -2825,11 +2759,6 @@ class Policy_installments extends MY_Controller
                     // Send SMS
                     // $this->_sms_activation($endorsement_record, $policy_record, $credit_note_record, $installment_record);
             }
-
-            /**
-             * Restore DB Debug Configuration
-             */
-            $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         /**
          * ==================== MANUAL TRANSACTIONS END =========================

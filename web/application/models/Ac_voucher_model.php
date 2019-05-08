@@ -4,18 +4,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Ac_voucher_model extends MY_Model
 {
     protected $table_name   = 'ac_vouchers';
-    protected $set_created  = true;
-    protected $set_modified = true;
-    protected $log_user     = true;
+    protected $set_created  = TRUE;
+    protected $set_modified = TRUE;
+    protected $log_user     = TRUE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = ['id'];
 
-    protected $before_insert = ['before_insert__defaults'];
-    protected $after_insert  = ['after_insert__defaults', 'clear_cache'];
+    protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['id', 'voucher_code', 'branch_id', 'fiscal_yr_id', 'fy_quarter', 'voucher_type_id', 'voucher_date', 'narration', 'flag_internal', 'flag_complete', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'voucher_code', 'branch_id', 'fiscal_yr_id', 'fy_quarter', 'voucher_type_id', 'voucher_date', 'narration', 'flag_internal', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -237,65 +237,6 @@ class Ac_voucher_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Edit Voucher
-     *
-     * All transactions must be carried out, else rollback.
-     * The following tasks are carried during Treaty Setup:
-     *      a. Update Master Record
-     *      b. Insert Voucher Details - Debit, Credit (Remove Old Ones)
-     *
-     * @param int $id
-     * @param array $data
-     * @return mixed
-     */
-    public function edit($id, $data)
-    {
-
-        /**
-         * Prepare Master Record Data
-         */
-        $master_data = $data['master'];
-
-        // ----------------------------------------------------------------
-
-        /**
-         * Batch Data - Voucher Details
-         */
-        $batch_data_details = $this->_build_voucher_details_batch_data($data);
-
-        // ----------------------------------------------------------------
-
-        /**
-         * !!! IMPORTANT
-         *
-         * We do not use transaction here as we may lost the voucher id autoincrement.
-         * We simply use try catch block.
-         */
-
-        $done = parent::update($id, $master_data, TRUE);
-
-        if( $done )
-        {
-            // Delete Old Details Data
-            $this->ac_voucher_detail_model->delete_old($id);
-
-
-            // Insert Batch Voucher Details Data
-            $this->ac_voucher_detail_model->batch_insert($id, $batch_data_details);
-
-        }
-        else
-        {
-            throw new Exception("Exception [Model: Ac_voucher_model][Method: add()]: Could not insert record.");
-        }
-
-        // return result/status
-        return $id;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
      * Add New Voucher
      *
      * The following tasks are carried during Voucher Add:
@@ -312,6 +253,8 @@ class Ac_voucher_model extends MY_Model
          * Prepare Master Record Data
          */
         $master_data = $data['master'];
+        $master_data = $this->_pre_add_tasks($master_data);
+
 
         // ----------------------------------------------------------------
 
@@ -320,101 +263,135 @@ class Ac_voucher_model extends MY_Model
          */
         $batch_data_details = $this->_build_voucher_details_batch_data($data);
 
-        // ----------------------------------------------------------------
 
         /**
-         * Internal Voucher
-         * Check DEBIT === CREDIT ???
-         */
-        // if( $data['flag_internal'] == IQB_FLAG_ON && !$this->_valid_voucher_amount($batch_data_details) )
-        // {
-        //     throw new Exception("Exception [Model: Ac_voucher_model][Method: add()]: Computation Error: Debit Total is Not Equal to Credit Total.");
-        // }
-        // ----------------------------------------------------------------
-
-
-
-        /**
-         * !!! IMPORTANT
-         *
-         * We do not use transaction here as we may lost the voucher id autoincrement.
-         * We simply use try catch block.
-         *
-         * If transaction fails, we will have a voucher with complete flag off.
+         * ==================== TRANSACTIONS BEGIN =========================
          */
 
-        $id = parent::insert($master_data, TRUE);
-
-        if( $id )
-        {
-
-            /**
-             * ==================== TRANSACTIONS BEGIN =========================
-             */
-
+            $this->db->trans_start();
 
                 /**
-                 * Disable DB Debugging
+                 * Task 1: Insert Master Record
                  */
-                $this->db->db_debug = FALSE;
-                $this->db->trans_start();
+                $id = parent::insert($master_data, TRUE);
 
-
-                    // --------------------------------------------------------------------
-
-                    /**
-                     * Task 1: Insert Voucher Details
-                     */
-                    $this->ac_voucher_detail_model->batch_insert($id, $batch_data_details);
-
-                    // --------------------------------------------------------------------
-
-                    /**
-                     * Task 2: Complete Voucher Status
-                     */
-                    $this->enable_voucher($id);
-
-
-
-                    // --------------------------------------------------------------------
-
-                    /**
-                     * Task 3: Clear Cache (For this Policy)
-                     */
-                    if($policy_id)
-                    {
-                        $cache_var = 'ac_voucher_list_by_policy_'.$policy_id;
-                        $this->clear_cache($cache_var);
-                    }
-
-                    // --------------------------------------------------------------------
+                // --------------------------------------------------------------------
 
                 /**
-                 * Complete transactions or Rollback
+                 * Task 2: Insert Voucher Details
                  */
-                $this->db->trans_complete();
-                if ($this->db->trans_status() === FALSE)
+                $this->ac_voucher_detail_model->add($id, $batch_data_details);
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 3: Generate Invoice Code
+                 */
+                $this->_post_add_tasks($id);
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 3: Clear Cache (For this Policy)
+                 */
+                if($policy_id)
                 {
-                    throw new Exception("Exception [Model: Ac_voucher_model][Method: add()]: Could not save voucher details and other details.");
+                    $cache_var = 'ac_voucher_list_by_policy_'.$policy_id;
+                    $this->clear_cache($cache_var);
                 }
 
-                /**
-                 * Restore DB Debug Configuration
-                 */
-                $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+                // --------------------------------------------------------------------
 
             /**
-             * ==================== TRANSACTIONS END =========================
+             * Complete transactions or Rollback
              */
-        }
-        else
-        {
-            throw new Exception("Exception [Model: Ac_voucher_model][Method: add()]: Could not insert record.");
-        }
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $id = FALSE;
+            }
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
 
         // return result/status
         return $id;
     }
+
+    // ----------------------------------------------------------------
+
+    /**
+     * Edit Voucher
+     *
+     * All transactions must be carried out, else rollback.
+     * The following tasks are carried during Treaty Setup:
+     *      a. Update Master Record
+     *      b. Insert Voucher Details - Debit, Credit (Remove Old Ones)
+     *
+     * @param int $id
+     * @param array $data
+     * @return mixed
+     */
+    public function edit($id, $data)
+    {
+        /**
+         * Prepare Master Record Data
+         */
+        $master_data = $data['master'];
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Batch Data - Voucher Details
+         */
+        $batch_data_details = $this->_build_voucher_details_batch_data($data);
+
+
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+            $this->db->trans_start();
+
+                /**
+                 * Task 1: Insert Master Record
+                 */
+                $status = parent::update($id, $master_data, TRUE);
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 2: Delete Old Details Records
+                 */
+                $this->ac_voucher_detail_model->delete_old($id);
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 2: Insert New Voucher Details
+                 */
+                $this->ac_voucher_detail_model->add($id, $batch_data_details);
+
+                // --------------------------------------------------------------------
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $status = FALSE;
+            }
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        // return result/status
+        return $status;
+    }
+
+
 
     // --------------------------------------------------------------------
 
@@ -426,8 +403,6 @@ class Ac_voucher_model extends MY_Model
      */
     private function _build_voucher_details_batch_data($data)
     {
-        $dr_total       = 0.00;
-        $cr_total       = 0.00;
         $batch_data = [];
 
         // ----------------------------------------------------------------
@@ -441,7 +416,6 @@ class Ac_voucher_model extends MY_Model
             $row['flag_type']   = IQB_AC_FLAG_DEBIT;
 
             $batch_data[]   = $row;
-            $dr_total       = bcadd($dr_total, $row['amount'], IQB_AC_DECIMAL_PRECISION);
 
             $sno++;
         }
@@ -456,7 +430,6 @@ class Ac_voucher_model extends MY_Model
             $row['flag_type']   = IQB_AC_FLAG_CREDIT;
 
             $batch_data[]   = $row;
-            $cr_total       = bcadd($cr_total, $row['amount'], IQB_AC_DECIMAL_PRECISION);
 
             $sno++;
         }
@@ -466,7 +439,7 @@ class Ac_voucher_model extends MY_Model
         /**
          * DR === CR ???
          */
-        if($dr_total !== $cr_total)
+        if( !$this->is_dr_equals_cr($batch_data) )
         {
             throw new Exception("Exception [Model: Ac_voucher_model][Method: _build_voucher_details_batch_data()]: Debit Total is NOT EXACT equal to Credit Total.");
         }
@@ -477,68 +450,7 @@ class Ac_voucher_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Check if Debit Equals Credit
-     *
-     * @param array $voucher_rows
-     * @return boolean
-     */
-    function _valid_voucher_amount($voucher_rows)
-    {
-        $debit_total    = 0.00;
-        $credit_total   = 0.00;
-
-        // Compute Debit Total
-        foreach($voucher_rows as $row)
-        {
-            if($row['flag_type'] == IQB_AC_FLAG_DEBIT )
-            {
-                $debit_total += $row['amount'];
-            }
-            else
-            {
-                $credit_total += $row['amount'];
-            }
-        }
-
-        $epsilon = 0.00001;
-        if( abs($debit_total - $credit_total) < $epsilon )
-        {
-            return TRUE;
-        }
-        return FALSE;
-    }
-    // --------------------------------------------------------------------
-
-    /**
-     * Enable Voucher Transaction [Complete Flagg - OFF]
-     *
-     * @param integer $id
-     * @return boolean
-     */
-    public function enable_voucher($id)
-    {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, ['flag_complete' => IQB_FLAG_ON]);
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Disable Voucher Transaction [Complete Flagg - OFF]
-     *
-     * @param integer $id
-     * @return boolean
-     */
-    public function disable_voucher($id)
-    {
-        return $this->db->where('id', $id)
-                        ->update($this->table_name, ['flag_complete' => IQB_FLAG_OFF]);
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * Before Insert Trigger
+     * Pre-add Tasks
      *
      * Tasks carried
      *      2. Add Draft Voucher Code (Random Characters)
@@ -549,7 +461,7 @@ class Ac_voucher_model extends MY_Model
      * @param array $data
      * @return array
      */
-    public function before_insert__defaults($data)
+    public function _pre_add_tasks($data)
     {
         $this->load->library('Token');
 
@@ -582,6 +494,7 @@ class Ac_voucher_model extends MY_Model
         return $data;
     }
 
+
     // --------------------------------------------------------------------
 
     /**
@@ -590,35 +503,82 @@ class Ac_voucher_model extends MY_Model
      * Tasks that are to be performed after policy is created are
      *      1. Generate and Update Voucher Code
      *
-     * @param array $arr_record
-     * @return array
+     * @param int $id
+     * @return void
      */
-    public function after_insert__defaults($arr_record)
+    public function _post_add_tasks($id)
     {
-        /**
-         * Data Structure
-         *
-            Array
-            (
-                [id] => 11
-                [fields] => Array
-                    (
-                        [voucher_code] => 6
-                        [branch_id] => 6
-                        [fiscal_yr_id] => x
-                        ...
-                    )
-                [method] => insert
-            )
-        */
-        $id = $arr_record['id'] ?? NULL;
+        // Old Record
+        $this->audit_old_record = parent::find($id);
 
-        if($id !== NULL)
+        // Generate and Update Voucher Number
+        $this->_generate_voucher_number($id);
+
+        // Save Audit Log - Manually
+         $this->save_audit_log([
+            'method' => 'update',
+            'id'     => $id,
+            'fields' => (array)parent::find($id)
+        ]);
+        $this->audit_old_record = NULL;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Generate Invoice Number
+     *
+     * @param type $id
+     * @return mixed
+     */
+    private function _generate_voucher_number($id)
+    {
+        $params     = [$id, $this->dx_auth->get_user_id()];
+        $sql        = "SELECT `f_generate_voucher_number`(?, ?) AS voucher_code";
+        $result     = mysqli_store_procedure('select', $sql, $params);
+
+        /**
+         * Get the result
+         */
+        $result_row = $result[0];
+
+        return $result_row->voucher_code;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Check if Debit Equals Credit
+     *
+     * @param array $voucher_rows
+     * @return boolean
+     */
+    function is_dr_equals_cr($voucher_rows)
+    {
+        $debit_total    = 0.00;
+        $credit_total   = 0.00;
+
+        // Compute Debit Total
+        foreach($voucher_rows as $row)
         {
-            $params     = [$id, $this->dx_auth->get_user_id()];
-            $sql        = "SELECT `f_generate_voucher_number`(?, ?) AS voucher_code";
-            return mysqli_store_procedure('select', $sql, $params);
+            if($row['flag_type'] == IQB_AC_FLAG_DEBIT )
+            {
+                $debit_total += $row['amount'];
+                $debit_total = bcadd($debit_total, $row['amount'], IQB_AC_DECIMAL_PRECISION);
+            }
+            else
+            {
+                $credit_total += $row['amount'];
+
+                $credit_total = bcadd($credit_total, $row['amount'], IQB_AC_DECIMAL_PRECISION);
+            }
         }
+
+        if( $credit_total === $debit_total )
+        {
+            return TRUE;
+        }
+
         return FALSE;
     }
 
@@ -717,7 +677,7 @@ class Ac_voucher_model extends MY_Model
     {
         $this->db->select(
                         // Voucher Table
-                        'V.id, V.voucher_type_id, V.branch_id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.flag_complete, V.voucher_date, ' .
+                        'V.id, V.voucher_type_id, V.branch_id,  V.voucher_code, V.fiscal_yr_id, V.voucher_date, V.flag_internal, V.voucher_date, ' .
 
                         // Voucher Type Table
                         'VT.name AS voucher_type_name, ' .
@@ -778,7 +738,6 @@ class Ac_voucher_model extends MY_Model
             return $this->db->select('REL.policy_id, REL.ref, REL.ref_id, REL.flag_invoiced')
                         ->join('rel_policy__voucher REL', 'REL.voucher_id = V.id')
                         ->where('REL.policy_id', $policy_id)
-                        ->where('V.flag_complete', IQB_FLAG_ON)
                         ->order_by('V.id', 'DESC')
                         ->get()
                         ->result();
