@@ -908,7 +908,7 @@ class Customer_model extends MY_Model
             parent::delete($id);
 
             // Delete Address Record
-            $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_CUSTOMER, 'type_id' => $id]);
+            $this->address_model->delete_by_type(['type' => IQB_ADDRESS_TYPE_CUSTOMER, 'type_id' => $id]);
 
             // Delete Mobile App User
             $this->load->model('api/app_user_model', 'app_user_model');

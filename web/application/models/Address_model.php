@@ -649,7 +649,30 @@ class Address_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function delete($id = NULL)
+    /**
+     * Delete an Address of a Module Record
+     *
+     * @param array $where Address Type and Type ID ['type' => $type, 'type_id' => $type_id]
+     * @return bool
+     */
+    public function delete_by_type($where, $use_automatic_transactin = FALSE)
+    {
+        // GET ID
+        $row = $this->db->select('id')
+                        ->where($where)
+                        ->get($this->table_name)->row();
+
+        if($row)
+        {
+            return $this->delete($row->id, $use_automatic_transactin);
+        }
+
+        return FALSE;
+    }
+
+    // ----------------------------------------------------------------
+
+    public function delete($id, $use_automatic_transactin = TRUE)
     {
         $id = intval($id);
         if( !safe_to_delete( get_class(), $id ) )
@@ -657,17 +680,24 @@ class Address_model extends MY_Model
             return FALSE;
         }
 
-        $status             = TRUE;
-        // Use automatic transaction
-        $this->db->trans_start();
-
-            parent::delete($id);
-
-        $this->db->trans_complete();
-        if ($this->db->trans_status() === FALSE)
+        $status = TRUE;
+        if($use_automatic_transactin)
         {
-            // generate an error... or use the log_message() function to log your error
-            $status = FALSE;
+            // Use automatic transaction
+            $this->db->trans_start();
+
+                parent::delete($id);
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                // generate an error... or use the log_message() function to log your error
+                $status = FALSE;
+            }
+        }
+        else
+        {
+            $status = parent::delete($id);
         }
 
         // return result/status

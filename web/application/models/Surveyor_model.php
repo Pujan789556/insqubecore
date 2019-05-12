@@ -443,7 +443,7 @@ class Surveyor_model extends MY_Model
             parent::delete($id);
 
             // Delete Address Record
-            $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_SURVEYOR, 'type_id' => $id]);
+            $this->address_model->delete_by_type(['type' => IQB_ADDRESS_TYPE_SURVEYOR, 'type_id' => $id]);
 
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)

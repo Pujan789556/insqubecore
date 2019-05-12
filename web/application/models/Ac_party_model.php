@@ -11,10 +11,10 @@ class Ac_party_model extends MY_Model
 
     protected $log_user = true;
 
+    protected $audit_log = TRUE;
+
     protected $protected_attributes = ['id'];
 
-    // protected $before_insert = ['prepare_contact_data', 'prepare_party_defaults', 'prepare_party_fts_data'];
-    // protected $before_update = ['prepare_contact_data', 'prepare_party_fts_data'];
     protected $after_insert  = ['clear_cache'];
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
@@ -118,43 +118,37 @@ class Ac_party_model extends MY_Model
         /**
          * Task 2: Branch ID
          */
-        $data = $this->prepare_party_defaults($data);
+        $data = $this->_pre_add_tasks($data);
 
 
         /**
          * Task 3: Get Fulltext Search Field
          */
-        $data['fts'] = $this->prepare_party_fts_data($post_data);
+        $data['fts'] = $this->_prepare_party_fts($post_data);
 
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $done               = FALSE;
-
+        $id = FALSE;
         // Use automatic transaction
         $this->db->trans_start();
 
             // Insert Primary Record
-            $done = parent::insert($data, TRUE);
+            $id = parent::insert($data, TRUE);
 
             // Insert Address
-            if($done)
+            if($id)
             {
-                $this->address_model->add(IQB_ADDRESS_TYPE_GENERAL_PARTY, $done ,$post_data);
+                $this->address_model->add(IQB_ADDRESS_TYPE_GENERAL_PARTY, $id ,$post_data);
             }
 
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
-            $done = FALSE;
+            $id = FALSE;
         }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
         // return result/status
-        return $done;
+        return $id;
     }
 
     // ----------------------------------------------------------------
@@ -183,20 +177,17 @@ class Ac_party_model extends MY_Model
         /**
          * Task 2: Get Fulltext Search Field
          */
-        $data['fts'] = $this->prepare_party_fts_data($post_data);
+        $data['fts'] = $this->_prepare_party_fts($post_data);
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $done               = FALSE;
-
+        $status  = FALSE;
         // Use automatic transaction
         $this->db->trans_start();
 
             // Insert Primary Record
-            $done = parent::update($id, $data, TRUE);
+            $status = parent::update($id, $data, TRUE);
 
             // Insert Address
-            if($done)
+            if($status)
             {
                 $this->address_model->edit($address_id ,$post_data);
             }
@@ -206,27 +197,24 @@ class Ac_party_model extends MY_Model
         if ($this->db->trans_status() === FALSE)
         {
             // generate an error... or use the log_message() function to log your error
-            $done = FALSE;
+            $status = FALSE;
         }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
         // return result/status
-        return $done;
+        return $status;
     }
 
     // ----------------------------------------------------------------
 
     /**
-     * Prepare Customer Defaults
+     * Pre-add Tasks
      *
-     * Add branch_id Information before insert
+     * Add branch_id
      *
      * @param array $data
      * @return array
      */
-    public function prepare_party_defaults($data)
+    private function _pre_add_tasks($data)
     {
         $data['branch_id']  = $this->dx_auth->get_branch_id();
 
@@ -245,7 +233,7 @@ class Ac_party_model extends MY_Model
      * @param array $data
      * @return array
      */
-    public function prepare_party_fts_data($data)
+    private function _prepare_party_fts($data)
     {
         // $contact_arr = $data['contacts'];
 
@@ -445,11 +433,7 @@ class Ac_party_model extends MY_Model
             return FALSE;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-
         $status = TRUE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -457,7 +441,7 @@ class Ac_party_model extends MY_Model
             parent::delete($id);
 
             // Delete Address Record
-            $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_GENERAL_PARTY, 'type_id' => $id]);
+            $this->address_model->delete_by_type(['type' => IQB_ADDRESS_TYPE_GENERAL_PARTY, 'type_id' => $id]);
 
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
@@ -465,9 +449,6 @@ class Ac_party_model extends MY_Model
             // generate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;

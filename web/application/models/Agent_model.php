@@ -316,7 +316,7 @@ class Agent_model extends MY_Model
             parent::delete($id);
 
             // Delete Address Record
-            $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_AGENT, 'type_id' => $id]);
+            $this->address_model->delete_by_type(['type' => IQB_ADDRESS_TYPE_AGENT, 'type_id' => $id]);
 
         $this->db->trans_complete();
 

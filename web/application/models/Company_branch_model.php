@@ -497,7 +497,7 @@ class Company_branch_model extends MY_Model
             parent::delete($single->id);
 
             // Delete Address Record
-            $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_COMPANY_BRANCH, 'type_id' => $single->id]);
+            $this->address_model->delete_by_type(['type' => IQB_ADDRESS_TYPE_COMPANY_BRANCH, 'type_id' => $single->id]);
         }
 
         // Delete cache for this company
@@ -526,7 +526,7 @@ class Company_branch_model extends MY_Model
             parent::delete($id);
 
             // Delete Address Record
-            $this->address_model->delete_by(['type' => IQB_ADDRESS_TYPE_COMPANY_BRANCH, 'type_id' => $id]);
+            $this->address_model->delete_by_type(['type' => IQB_ADDRESS_TYPE_COMPANY_BRANCH, 'type_id' => $id]);
 
             // Delete cache for this company
             $this->delete_cache('branch_company_'.$record->company_id);
