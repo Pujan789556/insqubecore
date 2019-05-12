@@ -685,6 +685,30 @@ if ( ! function_exists('nepali_month_dropdown'))
 }
 
 // ------------------------------------------------------------------------
+if ( ! function_exists('nepali_month_fy_dropdown'))
+{
+    /**
+     * Get nepali month dropdown - Fiscal Year Order i.e. starting from Shrawan
+     *
+     * @param bool $flag_blank_select   Whether to append blank select
+     * @return  array
+     */
+    function nepali_month_fy_dropdown( $flag_blank_select = true )
+    {
+
+        $CI =& get_instance();
+        $CI->load->model('month_model');
+
+        $dropdown = $CI->month_model->dropdown_fy();
+        if($flag_blank_select)
+        {
+            $dropdown = IQB_BLANK_SELECT + $dropdown;
+        }
+        return $dropdown;
+    }
+}
+
+// ------------------------------------------------------------------------
 if ( ! function_exists('is_valid_fy_quarter'))
 {
     /**
@@ -719,6 +743,36 @@ if ( ! function_exists('is_valid_fy_month'))
         $months = array_keys($CI->month_model->dropdown());
 
         return in_array($month_id, $months);
+    }
+}
+
+// ------------------------------------------------------------------------
+if ( ! function_exists('is_fy_month_in_future'))
+{
+    /**
+     * Is the supplied month_id falls on future date
+     * Nepali Months Cycle in a Fiscal Year is:
+     *  4   5   6   7   8   9   10  11  12  1   2    3
+     *
+     * @param int $month_id   Month ID (Nepali Month ID 1 to 12)
+     * @return  bool
+     */
+    function is_fy_month_in_future( $month_id )
+    {
+        $CI =& get_instance();
+
+        $in_future = FALSE;
+        if($CI->current_fy_month->month_id >= 4  && $CI->current_fy_month->month_id <= 12 )
+        {
+            // Future Months are 1, 2, 3 & 4
+            $in_future = in_array($month_id, [1,2,3]) || $month_id > $CI->current_fy_month->month_id;
+        }
+        else
+        {
+            $in_future = $month_id > $CI->current_fy_month->month_id && in_array($month_id, [1,2,3]);
+        }
+
+        return $in_future;
     }
 }
 

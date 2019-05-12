@@ -40,7 +40,7 @@ class Ac_ledgers extends MY_Controller
 		$this->load->model('branch_model');
 
 		// URL Base
-		$this->_url_base 		 = $this->router->class;
+		$this->_url_base 		 = 'reports/' . $this->router->class;
 		$this->_view_base 		 = 'accounting/' . $this->router->class;
 
 		$this->data['_url_base'] 	= $this->_url_base; // for view to access

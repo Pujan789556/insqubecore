@@ -350,10 +350,10 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                               </a>
                               <ul class="treeview-menu">
                                     <li class="<?php echo set_menu_active($nav_level_2, 'ac_ledgers');?>">
-                                          <a href="<?php echo site_url('ac_ledgers');?>"><i class="fa fa-file-text-o"></i> Ledgers</a>
+                                          <a href="<?php echo site_url('reports/ac_ledgers');?>"><i class="fa fa-file-text-o"></i> Ledgers</a>
                                     </li>
                                     <li class="<?php echo set_menu_active($nav_level_2, 'ac_trial_balance');?>">
-                                          <a href="<?php echo site_url('ac_trial_balance');?>"><i class="fa fa-file-text-o"></i> Trial Balance</a>
+                                          <a href="<?php echo site_url('reports/ac_trial_balance');?>"><i class="fa fa-file-text-o"></i> Trial Balance</a>
                                     </li>
                               </ul>
                         </li>
@@ -372,7 +372,7 @@ $nav_level_3      = $_nav_primary['level_3'] ?? NULL;
                   </a>
                   <ul class="treeview-menu">
                         <li class="<?php echo set_menu_active($nav_level_1, 'bs_reports');?>">
-                              <a href="<?php echo site_url('bs_reports');?>"><i class="fa fa-file-text-o"></i> Beema Samiti</a>
+                              <a href="<?php echo site_url('reports/bs_reports');?>"><i class="fa fa-file-text-o"></i> Beema Samiti</a>
                         </li>
                   </ul>
             </li>

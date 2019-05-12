@@ -9,7 +9,8 @@ class Bs_report_model extends MY_Model
 
     protected $set_created  = TRUE;
     protected $set_modified = TRUE;
-    protected $log_user     = FALSE;
+    protected $log_user     = TRUE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = [];
 
@@ -82,27 +83,6 @@ class Bs_report_model extends MY_Model
                     '_required' => false
                 ]
             ];
-    }
-
-    // --------------------------------------------------------------------
-
-    public function save($data)
-    {
-        $where = [
-            'category'          => $data['category'],
-            'type'              => $data['type'],
-            'fiscal_yr_id'      => $data['fiscal_yr_id'],
-            'fy_quarter_month'  => $data['fy_quarter_month'],
-        ];
-
-        if( !$this->check_duplicate($where) )
-        {
-            return parent::insert($data);
-        }
-        else
-        {
-            return parent::update_by($where, $data);
-        }
     }
 
     // --------------------------------------------------------------------
@@ -227,11 +207,7 @@ class Bs_report_model extends MY_Model
             return FALSE;
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-
         $status = TRUE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -244,10 +220,6 @@ class Bs_report_model extends MY_Model
             // get_allenerate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;

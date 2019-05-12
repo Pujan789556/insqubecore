@@ -29,7 +29,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 <div class="hide data-template">
 	<?php
-	$month_dd 	= nepali_month_dropdown();
+	$month_dd 	= nepali_month_fy_dropdown();
 	$quarter_dd = fiscal_year_quarters_dropdown();
 	echo form_dropdown(['id'=>'month-dropdown-template'],$month_dd);
 	echo form_dropdown(['id'=>'quarter-dropdown-template'],$quarter_dd);

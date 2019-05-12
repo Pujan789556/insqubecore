@@ -8,7 +8,7 @@ class Fy_month_model extends MY_Model
     protected $set_created  = true;
     protected $set_modified = true;
     protected $log_user     = true;
-    protected $audit_log = TRUE;
+    protected $audit_log    = TRUE;
     protected $skip_validation = TRUE;
     protected $protected_attributes = ['id'];
 
@@ -100,13 +100,10 @@ class Fy_month_model extends MY_Model
      */
     public function save($data)
     {
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = TRUE;
         $status = TRUE;
 
         // Use automatic transaction
         $this->db->trans_start();
-
 
             foreach($data as $single)
             {
@@ -132,10 +129,6 @@ class Fy_month_model extends MY_Model
             // get_allenerate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;
@@ -255,14 +248,14 @@ class Fy_month_model extends MY_Model
     // ----------------------------------------------------------------
 
     /**
-     * Dropdown by portfolio.
+     * Dropdown by Fiscal Year.
      *
-     * @param inte $portfolio_id
+     * @param inte $fiscal_yr_id
      * @return array
      */
-    public function dropdown_by_fiscal_year($portfolio_id)
+    public function dropdown_by_fiscal_year($fiscal_yr_id)
     {
-        $records = $this->by_fiscal_year($portfolio_id);
+        $records = $this->by_fiscal_year($fiscal_yr_id);
 
         $list = [];
         foreach($records as $record)

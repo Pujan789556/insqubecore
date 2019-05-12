@@ -43,7 +43,7 @@ class Bs_reports extends MY_Controller
 		$this->load->model('bs_report_model');
 
 			// URL Base
-		$this->_url_base 		 = 	$this->router->class;
+		$this->_url_base 		 = 	'reports/' . $this->router->class;
 		$this->_view_base 		 =  'reports/' . $this->router->class;
 
 		$this->data['_url_base'] 	= $this->_url_base; // for view to access
@@ -249,6 +249,19 @@ class Bs_reports extends MY_Controller
 
 	// --------------------------------------------------------------------
 
+	public function fy_month_dropdown($fiscal_yr_id)
+	{
+		$this->load->model('fy_month_model');
+		$dropdown = $this->fy_month_model->dropdown_by_fiscal_year($fiscal_yr_id);
+
+		$this->template->json([
+			'status' 	=> 'success',
+			'options'   => $dropdown
+		]);
+	}
+
+	// --------------------------------------------------------------------
+
 	public function download($id)
 	{
 		/**
@@ -347,7 +360,7 @@ class Bs_reports extends MY_Controller
 		}
 		else
 		{
-			$fy_quarter_month_dd = nepali_month_dropdown();
+			$fy_quarter_month_dd = nepali_month_fy_dropdown();
 		}
 		$rules[3]['_data'] = $fy_quarter_month_dd;
 
@@ -490,7 +503,7 @@ class Bs_reports extends MY_Controller
 
 				$html = $this->load->view($single_row, ['record' => $record], TRUE);
 				$ajax_data['updateSectionData'] = [
-					'box' 		=> $action === 'add' ? '#box-bs_reports-row' : '#_data-row-' . $record->id,
+					'box' 		=> $action === 'add' ? '#box-bs_reports-rows' : '#_data-row-' . $record->id,
 					'method' 	=> $action === 'add' ? 'prepend' : 'replaceWith',
 					'html'		=> $html
 				];
@@ -548,7 +561,7 @@ class Bs_reports extends MY_Controller
         	return FALSE;
 
         }
-        else if($type == IQB_REPORT_TYPE_MONTHLY && $fy_quarter_month > $this->current_fy_month->month_id )
+        else if($type == IQB_REPORT_TYPE_MONTHLY && is_fy_month_in_future($fy_quarter_month) )
         {
         	$this->form_validation->set_message('check_duplicate', 'You can not generate report for Future Month.');
         	return FALSE;
