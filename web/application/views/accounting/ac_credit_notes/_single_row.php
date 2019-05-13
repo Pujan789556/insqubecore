@@ -3,6 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Credit Note:  Single Row
 */
+
+// Redefine URL Base for this module as it is used by other modules
+$this->data['_url_base'] = 'ac_credit_notes';
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-credit_note-<?php echo $record->id;?>">
 	<td><?php echo anchor($this->data['_url_base'] . '/details/'.$record->id, $record->id, ['target' => '_blank']);?></td>

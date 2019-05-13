@@ -3,6 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
 * Invoice:  Single Row
 */
+
+// Redefine URL Base for this module as it is used by other modules
+$this->data['_url_base'] = 'ac_invoices';
 ?>
 <tr class="searchable" data-id="<?php echo $record->id; ?>" id="_data-row-invoice-<?php echo $record->id;?>">
 	<?php if( $this->dx_auth->is_admin() ): ?>
