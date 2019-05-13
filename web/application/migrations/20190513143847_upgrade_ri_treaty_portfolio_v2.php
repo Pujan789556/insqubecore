@@ -19,23 +19,27 @@ class Migration_Upgrade_ri_treaty_portfolio_v2 extends CI_Migration {
 
         // Use automatic transaction
         $this->db->trans_start();
-            echo "Running Migration up()... " . PHP_EOL;
+            print "Running Migration up()... \n\r";
             foreach($sqls as $sql)
             {
-                echo "QUERY: $sql ... ";
-                echo $this->db->query($sql) ? "OK" : "FAIL";
-                echo PHP_EOL;
+                print "EXECUTING QUERY: \n\r\t" . "$sql" . "\n\r" . "QUERY STATUS: ";
+                print $this->db->query($sql) ? "OK" : "FAIL";
+                print "\n\r";
             }
 
         // Commit all transactions on success, rollback else
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE)
         {
-            echo 'Could not migrate database.' . PHP_EOL;
+            print "Could not migrate database.\n\r";
         }
         else
         {
-            echo 'Successfully migrated.' . PHP_EOL;
+            // Clear Cache
+            $this->load->model('ri_setup_treaty_model');
+            $this->ri_setup_treaty_model->clear_cache();
+
+            print "Successfully migrated.\n\r";
         }
     }
 
