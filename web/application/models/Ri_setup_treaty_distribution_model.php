@@ -193,7 +193,7 @@ class Ri_setup_treaty_distribution_model extends MY_Model
 
                 foreach ($to_del_reinsurers_ids as $company_id)
                 {
-                    $this->audit_old_record = $old_records["{$company_id}"];;
+                    $this->audit_old_record = $old_records["{$company_id}"];
                     $this->save_audit_log([
                         'method' => 'delete',
                         'id'     => NULL
