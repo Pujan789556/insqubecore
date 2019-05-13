@@ -526,7 +526,7 @@ class Policies extends MY_Controller
 						 */
 						if($done)
 						{
-							$this->__reset_premium_on_debitnote_update($record, $data);
+							// $this->__reset_premium_on_debitnote_update($record, $data);
 						}
 					}
         		} catch (Exception $e) {
@@ -1278,7 +1278,7 @@ class Policies extends MY_Controller
 		/**
 		 * Let's Delete the Creditor
 		 */
-		$done = $this->rel_policy_creditor_model->delete_creditor($record);
+		$done = $this->rel_policy_creditor_model->delete_single($record->policy_id, $record->creditor_id, $record->creditor_branch_id);
 		if($done)
 		{
 			$row_id = '_policy-creditor-' . $record->policy_id . '-' . $record->creditor_id . '-' . $record->creditor_branch_id;
@@ -1436,11 +1436,10 @@ class Policies extends MY_Controller
 	    	$this->load->model('rel_policy_creditor_model');
 	    	$policy_id = $this->input->post('policy_id');
 	    	$where = [
-	            'policy_id'             => $policy_id,
+	    		'policy_id' 			=> $policy_id,
 	            'creditor_id'           => $creditor_id,
-	            'creditor_branch_id'    => $creditor_branch_id,
 	        ];
-	        if( $this->rel_policy_creditor_model->check_duplicate($where) )
+	        if( $this->rel_policy_creditor_model->check_duplicate($where, $creditor_branch_id) )
 	    	{
 	    		$this->form_validation->set_message('_cb_valid_creditor_branch', 'The supplied Creditor already exists.');
 	            return FALSE;

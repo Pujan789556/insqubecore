@@ -3,13 +3,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Endorsement_model extends MY_Model
 {
-    protected $table_name = 'dt_endorsements';
-
-    protected $set_created = true;
-
-    protected $set_modified = true;
-
-    protected $log_user = true;
+    protected $table_name   = 'dt_endorsements';
+    protected $set_created  = TRUE;
+    protected $set_modified = TRUE;
+    protected $log_user     = TRUE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = ['id'];
 
@@ -1862,7 +1860,7 @@ class Endorsement_model extends MY_Model
      * @param array $data
      * @return bool
      */
-    public function add($data, $policy_record)
+    public function add($data, $policy_record, $use_automatic_transaction = TRUE)
     {
         /**
          * Prepare Before Save
@@ -1872,8 +1870,11 @@ class Endorsement_model extends MY_Model
         /**
          * ==================== TRANSACTIONS BEGIN =========================
          */
-        $transaction_status = TRUE;
-        $this->db->trans_start();
+        if($use_automatic_transaction)
+        {
+            $this->db->trans_start();
+        }
+
 
 
                 /**
@@ -1889,10 +1890,13 @@ class Endorsement_model extends MY_Model
         /**
          * Complete transactions or Rollback
          */
-        $this->db->trans_complete();
-        if ($this->db->trans_status() === FALSE)
+        if($use_automatic_transaction)
         {
-            return FALSE;
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                return FALSE;
+            }
         }
 
         /**
@@ -1913,7 +1917,7 @@ class Endorsement_model extends MY_Model
      * @param array $data
      * @return bool
      */
-    public function edit($id, $data, $policy_record)
+    public function edit($id, $data, $policy_record, $use_automatic_transaction = TRUE)
     {
         /**
          * Prepare Before Save
@@ -1924,14 +1928,15 @@ class Endorsement_model extends MY_Model
         /**
          * ==================== TRANSACTIONS BEGIN =========================
          */
-        $transaction_status = TRUE;
-        $this->db->trans_start();
-
+        if($use_automatic_transaction)
+        {
+            $this->db->trans_start();
+        }
 
                 /**
                  * Task 1: Update Data
                  */
-                parent::update($id, $data, TRUE);
+                $transaction_status = parent::update($id, $data, TRUE);
 
 
                 /**
@@ -1939,13 +1944,16 @@ class Endorsement_model extends MY_Model
                  */
                 $this->__draft_post_save_tasks($id, 'edit');
 
-        /**
-         * Complete transactions or Rollback
-         */
-        $this->db->trans_complete();
-        if ($this->db->trans_status() === FALSE)
+        if($use_automatic_transaction)
         {
-            $transaction_status = FALSE;
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $transaction_status = FALSE;
+            }
         }
 
         /**
@@ -2341,7 +2349,7 @@ class Endorsement_model extends MY_Model
      * @param array $data
      * @return bool
      */
-    public function save($record, $data)
+    public function save($record, $data, $use_automatic_transaction = TRUE)
     {
         $record = is_numeric($record) ? $this->get( (int)$record ) : $record;
 
@@ -2349,12 +2357,15 @@ class Endorsement_model extends MY_Model
          * ==================== TRANSACTIONS BEGIN =========================
          */
         $transaction_status = TRUE;
-        $this->db->trans_start();
+        if($use_automatic_transaction)
+        {
+            $this->db->trans_start();
+        }
 
                 /**
                  * Task 1: Update TXN Data
                  */
-                parent::update($record->id, $data, TRUE);
+                $transaction_status = parent::update($record->id, $data, TRUE);
 
 
                 /**
@@ -2363,13 +2374,16 @@ class Endorsement_model extends MY_Model
                 $this->_clean_cache_by_policy($record->policy_id);
 
 
-        /**
-         * Complete transactions or Rollback
-         */
-        $this->db->trans_complete();
-        if ($this->db->trans_status() === FALSE)
+        if($use_automatic_transaction)
         {
-            $transaction_status = FALSE;
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $transaction_status = FALSE;
+            }
         }
 
         /**

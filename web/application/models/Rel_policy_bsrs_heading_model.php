@@ -7,9 +7,10 @@ class Rel_policy_bsrs_heading_model extends MY_Model
 
     protected $skip_validation = TRUE;
 
-    protected $set_created  = false;
-    protected $set_modified = false;
-    protected $log_user     = false;
+    protected $set_created  = FALSE;
+    protected $set_modified = FALSE;
+    protected $log_user     = FALSE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = [];
 
@@ -43,78 +44,84 @@ class Rel_policy_bsrs_heading_model extends MY_Model
     // --------------------------------------------------------------------
 
     /**
-     * Save BSRS Heading Relations with Policy
-     *
-     * @param inte $policy_id
-     * @param array $bsrs_heading_ids
-     * @return mixed
+     * Save Relation
+     * @param int $policy_id
+     * @param array $bsrs_heading_ids BSRS Heading IDs
+     * @return bool
      */
     public function save($policy_id, $bsrs_heading_ids)
     {
-
         /**
-         * Build Relation Data
+         * Old List
          */
-        $batch_data = [];
-        foreach($bsrs_heading_ids as $bsrs_heading_id)
-        {
-            $batch_data[] = [
-                'policy_id'         => $policy_id,
-                'bsrs_heading_id'   => $bsrs_heading_id
-            ];
-        }
+        $old_ids = $this->bsrs_heading_ids_by_policy($policy_id, TRUE);
+        asort($old_ids);
+
+        // sort new ids
+        asort($bsrs_heading_ids);
+
+
+        // to del ids
+        $to_del_tags = array_diff($old_ids, $bsrs_heading_ids);
+
+        // to insert ids
+        $to_insert_tags = array_diff($bsrs_heading_ids, $old_ids);
+
+        // --------------------------------------------------------------------
+
+        $status = TRUE;
 
         /*
          * ============================= TRANSACTION STARTS ======================================
          */
-
-            // Disable DB Debug for transaction to work
-            $this->db->db_debug = FALSE;
-
-            // Use automatic transaction
             $this->db->trans_start();
 
+                /**
+                 * Task 1: Insert New
+                 */
+                foreach($to_insert_tags as $bsrs_heading_id)
+                {
+                    $single_data = [
+                        'policy_id'         => $policy_id,
+                        'bsrs_heading_id'   => $bsrs_heading_id
+                    ];
+                    parent::insert($single_data, TRUE);
+                }
+
+                // --------------------------------------------------------------------
+
 
                 /**
-                 * Task 1: Delete Old Relations
+                 * Task 2: Delete unwanted
                  */
-                parent::delete_by(['policy_id' => $policy_id]);
+                foreach($to_del_tags as $bsrs_heading_id)
+                {
+                    $this->delete_single($policy_id, $bsrs_heading_id, FALSE);
+                }
+
+                // --------------------------------------------------------------------
 
 
                 /**
-                 * Task 2: Insert New Relation Data
+                 * Task 3: Delete Cache
                  */
-                parent::insert_batch($batch_data, TRUE);
+                $this->clear_cache( 'bsrs_hd_bypolicy_' . $policy_id );
+                // --------------------------------------------------------------------
 
 
-            // Commit all transactions on success, rollback else
+            /**
+             * Complete transactions or Rollback
+             */
             $this->db->trans_complete();
-
-
+            if ($this->db->trans_status() === FALSE)
+            {
+                $status = FALSE;
+            }
         /*
          * ============================= TRANSACTION ENDS ======================================
          */
 
-
-        // Check Transaction Status
-        if ($this->db->trans_status() === FALSE)
-        {
-            // generate an error... or use the log_message() function to log your error
-            $id = FALSE;
-        }
-        else
-        {
-            /**
-             * Delete Cache
-             */
-            $this->clear_cache( 'bsrs_hd_bypolicy_' . $policy_id );
-        }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-        // return result/status
-        return TRUE;
+        return $status;
     }
 
     // --------------------------------------------------------------------
@@ -145,6 +152,29 @@ class Rel_policy_bsrs_heading_model extends MY_Model
 
             $this->write_cache($list, $cache_var, CACHE_DURATION_6HRS);
         }
+        return $list;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Get list of all bs headings by Policy
+     *
+     * @param inte $policy_id
+     * @return array
+     */
+    public function bsrs_heading_ids_by_policy($policy_id)
+    {
+        $records = $this->by_policy($policy_id);
+        $list = [];
+        if($records)
+        {
+            foreach ($records as $single)
+            {
+                $list[] = $single->bsrs_heading_id;
+            }
+        }
+
         return $list;
     }
 
@@ -191,5 +221,66 @@ class Rel_policy_bsrs_heading_model extends MY_Model
         return TRUE;
     }
 
+    // ----------------------------------------------------------------
+
+    /**
+     * Delete a Single Relation
+     *
+     * @param int $policy_id
+     * @param int $bsrs_heading_id
+     * @param bool $use_automatic_transaction
+     * @return bool
+     */
+    public function delete_single($policy_id, $bsrs_heading_id, $use_automatic_transaction = TRUE)
+    {
+        $status = TRUE;
+
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+        if($use_automatic_transaction)
+        {
+            $this->db->trans_start();
+        }
+
+                /**
+                 * Task 1: Manually Delete Old Relations
+                 */
+                $where = ['policy_id' => $policy_id, 'bsrs_heading_id' => $bsrs_heading_id];
+                $this->db->where($where)
+                         ->delete($this->table_name);
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 2: Manually Audit Log
+                 */
+                $this->audit_old_record = (object)$where;
+                $this->save_audit_log([
+                    'method' => 'delete',
+                    'id'     => NULL
+                ]);
+                $this->audit_old_record = NULL;
+
+                // --------------------------------------------------------------------
+
+        if($use_automatic_transaction)
+        {
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $status = FALSE;
+            }
+        }
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        return $status;
+    }
     // ----------------------------------------------------------------
 }

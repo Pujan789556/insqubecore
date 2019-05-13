@@ -7,9 +7,10 @@ class Rel_policy_creditor_model extends MY_Model
 
     protected $skip_validation = TRUE;
 
-    protected $set_created  = false;
-    protected $set_modified = false;
-    protected $log_user     = false;
+    protected $set_created  = FALSE;
+    protected $set_modified = FALSE;
+    protected $log_user     = FALSE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = [];
 
@@ -54,8 +55,12 @@ class Rel_policy_creditor_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function check_duplicate($where)
+    public function check_duplicate($where, $creditor_branch_id = NULL)
     {
+        if($creditor_branch_id)
+        {
+            $this->db->where('creditor_branch_id !=', $creditor_branch_id);
+        }
         return $this->db->where($where)
                         ->count_all_results($this->table_name);
     }
@@ -81,10 +86,7 @@ class Rel_policy_creditor_model extends MY_Model
             }
         }
 
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = TRUE;
         $status             = TRUE;
-
         // Use automatic transaction
         $this->db->trans_start();
 
@@ -93,12 +95,8 @@ class Rel_policy_creditor_model extends MY_Model
              */
             if($old_record)
             {
-                $where = [
-                    'policy_id'             => $old_record->policy_id,
-                    'creditor_id'           => $old_record->creditor_id,
-                    'creditor_branch_id'    => $old_record->creditor_branch_id,
-                ];
-                parent::delete_by($where);
+                // Delete Old Record
+                $this->delete_single($old_record->policy_id, $old_record->creditor_id, $old_record->creditor_branch_id, FALSE);
             }
 
 
@@ -114,9 +112,6 @@ class Rel_policy_creditor_model extends MY_Model
             // get_allenerate an error... or use the log_message() function to log your error
             $status = FALSE;
         }
-
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
 
         // return result/status
         return $status;
@@ -165,43 +160,71 @@ class Rel_policy_creditor_model extends MY_Model
 
     // ----------------------------------------------------------------
 
-    public function delete_creditor($record)
+    public function delete_by_policy($policy_id, $use_automatic_transaction = TRUE)
     {
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $status = TRUE;
+        $old_records = parent::find_many_by(['policy_id' => $policy_id]);
 
-        // Use automatic transaction
-        $this->db->trans_start();
-
-            $where = [
-                'policy_id'             => $record->policy_id,
-                'creditor_id'           => $record->creditor_id,
-                'creditor_branch_id'    => $record->creditor_branch_id,
-            ];
-            parent::delete_by($where);
-
-        $this->db->trans_complete();
-
-        if ($this->db->trans_status() === FALSE)
+        if($old_records)
         {
-            // get_allenerate an error... or use the log_message() function to log your error
-            $status = FALSE;
+            foreach ($old_records as $single)
+            {
+                $this->delete_single($single->policy_id, $single->creditor_id, $single->creditor_branch_id, $use_automatic_transaction);
+            }
         }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
-
-        // return result/status
-        return $status;
+        return TRUE;
     }
 
-    // ----------------------------------------------------------------
-
-    public function delete_by_policy($policy_id)
+    public function delete_single($policy_id, $creditor_id, $creditor_branch_id, $use_automatic_transaction = TRUE)
     {
-        return parent::delete_by(['policy_id' => $policy_id]);
+        $status = TRUE;
 
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+        if($use_automatic_transaction)
+        {
+            $this->db->trans_start();
+        }
+
+                /**
+                 * Task 1: Manually Delete Old Relations
+                 */
+                $where = ['policy_id' => $policy_id, 'creditor_id' => $creditor_id, 'creditor_branch_id' => $creditor_branch_id];
+                $this->db->where($where)
+                         ->delete($this->table_name);
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 2: Manually Audit Log
+                 */
+                $this->audit_old_record = (object)$where;
+                $this->save_audit_log([
+                    'method' => 'delete',
+                    'id'     => NULL
+                ]);
+                $this->audit_old_record = NULL;
+
+                // --------------------------------------------------------------------
+
+        if($use_automatic_transaction)
+        {
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $status = FALSE;
+            }
+        }
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        return $status;
     }
 
     // ----------------------------------------------------------------

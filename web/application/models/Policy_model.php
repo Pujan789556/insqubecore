@@ -3,21 +3,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Policy_model extends MY_Model
 {
-    protected $table_name = 'dt_policies';
-
-    protected $set_created = true;
-
-    protected $set_modified = true;
-
-    protected $log_user = true;
+    protected $table_name   = 'dt_policies';
+    protected $set_created  = TRUE;
+    protected $set_modified = TRUE;
+    protected $log_user     = TRUE;
+    protected $audit_log    = TRUE;
 
     protected $protected_attributes = ['id'];
-
-    protected $before_insert = ['before_insert__defaults'];
-    protected $before_update = ['before_update__defaults'];
-    protected $after_insert  = ['after_insert__defaults'];
-    protected $after_update  = ['after_update__defaults'];
-    protected $after_delete  = [];
 
 
     protected $fields = [ 'id', 'ancestor_id', 'fiscal_yr_id', 'portfolio_id', 'branch_id', 'district_id', 'category', 'insurance_company_id', 'code', 'proposer', 'proposer_address', 'proposer_profession', 'customer_id', 'object_id', 'care_of', 'policy_package', 'agent_id', 'sold_by', 'proposed_date', 'issued_date', 'issued_time', 'start_date', 'start_time', 'end_date', 'end_time', 'flag_on_credit', 'flag_dc', 'flag_short_term', 'status', 'created_at', 'created_by', 'verified_at', 'verified_by', 'updated_at', 'updated_by' ];
@@ -611,65 +603,358 @@ class Policy_model extends MY_Model
      */
     public function add_debit_note($data)
     {
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $id                 = FALSE;
+        /**
+         * Build Draft Data
+         */
+        $data = $this->_pre_add_tasks($data);
 
-        // Use automatic transaction
-        $this->db->trans_start();
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+            $this->db->trans_start();
 
-            // Task a: Insert Master Record, No Validation Required as it is performed on Controller
-            $id = parent::insert($data, TRUE);
 
 
-        // Commit all transactions on success, rollback else
-        $this->db->trans_complete();
+                /**
+                 * Task 1: Insert Policy Record
+                 */
+                $id = parent::insert($data, TRUE);
 
-        // Check Transaction Status
-        if ($this->db->trans_status() === FALSE)
-        {
-            // generate an error... or use the log_message() function to log your error
-            $id = FALSE;
-        }
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 2: Post Add Tasks
+                 */
+                $this->_post_add_tasks($id, $data);
+
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $id = FALSE;
+            }
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
 
         // return result/status
         return $id;
     }
 
+        // --------------------------------------------------------------------
+
+        /**
+         * Pre-Add Tasks
+         *
+         * Tasks carried
+         *      1. Generate Random Policy Number & add
+         *      2. Add Draft Code
+         *      3. Add Branch ID
+         *      4. Add Short Term Flag
+         *      5. Add Status = Draft
+         *      6. Add Fiscal Year
+         *      7. Policy Duration
+         *
+         * @param array $data
+         * @return array
+         */
+        private function _pre_add_tasks($data)
+        {
+            $this->load->library('Token');
+
+            $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_datetime']);
+
+            /**
+             * Policy Code - Draft One & Policy Number
+             *
+             * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
+             */
+            $data['code']      = $this->_get_draft_policy_code($data['portfolio_id'], $fy_record);
+
+
+            // Branch ID
+            $data['branch_id']      = $this->dx_auth->get_branch_id();
+
+
+            // Status
+            $data['status'] = IQB_POLICY_STATUS_DRAFT;
+
+
+            // Fiscal Year
+            $data['fiscal_yr_id'] = $fy_record->id;
+
+
+            // Refactor Date & time
+            $data = $this->__refactor_datetime_fields($data);
+
+
+            // Category and Insurance Company ID
+            $data = $this->__category_defaults($data);
+
+
+            // Nullify Current Agent ID if Not on Agent Commission
+            if( isset($data['flag_dc']) && $data['flag_dc'] !== IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
+            {
+                $data['agent_id'] = NULL;
+            }
+
+
+            /**
+             * Short Term Flag???
+             * ------------------
+             *
+             *
+             * Find if this start-end date gives a default duration or short term duration
+             */
+            $data['flag_short_term'] = $this->portfolio_setting_model->compute_short_term_flag(
+                $fy_record->id,
+                $data['portfolio_id'],
+                $data['start_date'],
+                $data['end_date']
+            );
+
+            /**
+             * No marketing staff select?
+             */
+            // $data['sold_by'] = $data['sold_by'] ? $data['sold_by'] : NULL;
+
+            return $data;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Post Add Tasks
+         *
+         * @param int $id
+         * @param array $data Data that was inserted
+         * @return void
+         */
+        private function _post_add_tasks($id, $data)
+        {
+            /**
+             * Task 1: Add Endorsement For this Policy
+             * --------------------------------------
+             */
+            $this->_add_default_endorsement($id, $data);
+
+            /**
+             * Task 2: Policy Tags
+             * ---------------------
+             */
+            $this->load->model('rel_policy_tag_model');
+            $tags = $data['tags'] ?? [];
+            $this->rel_policy_tag_model->save($id, $tags);
+
+
+            /**
+             * Task 3: Clear Cache
+             * ---------------------
+             */
+            $customer_id = $data['customer_id'];
+            $this->clear_cache('policy_cst_'.$customer_id);
+        }
+
+            // ----------------------------------------------------------------
+
+            /**
+             * Add Default Endorsement Record
+             * After policy created, insert default endorsement record
+             *
+             * @param int $id
+             * @param array $data Policy Data that was freshly inserted
+             * @return void
+             */
+            private function _add_default_endorsement($id, $data)
+            {
+                /**
+                 * The following fields are saved from policy debit note add/edit
+                 *
+                 * TXN TYPE
+                 * CUSTOMER
+                 * ISSUED DATE
+                 * START DATE
+                 * END DATE
+                 * SOLD BY
+                 * TXN DETAILS
+                 * REMARKS
+                 * FLAG CURRENT
+                 */
+                $endorsement_data = [
+                    'policy_id'     => $id,
+                    'txn_type'      => IQB_ENDORSEMENT_TYPE_FRESH,
+                    'customer_id'   => $data['customer_id'],
+                    'issued_date'   => $data['issued_date'],
+                    'start_date'    => $data['start_date'],
+                    'end_date'      => $data['end_date'],
+                    'agent_id'      => $data['agent_id'],
+                    'sold_by'       => $data['sold_by'],
+                    'txn_details'   => $data['txn_details'],
+                    'remarks'       => $data['remarks'],
+                    'flag_current'  => IQB_FLAG_ON
+                ];
+
+                $record = parent::find($id);
+                return $this->endorsement_model->add($endorsement_data, $record, FALSE);
+            }
+
     // ----------------------------------------------------------------
 
     public function edit_debit_note($id, $data)
     {
-        // Disable DB Debug for transaction to work
-        $this->db->db_debug = FALSE;
-        $status             = FALSE;
-
-        // Use automatic transaction
-        $this->db->trans_start();
-
-            // Task a: Update Master Record, No Validation Required as it is performed on Controller
-            $status = parent::update($id, $data, TRUE);
+        /**
+         * Build Draft Data
+         */
+        $data = $this->_pre_edit_tasks($data);
 
 
-        // Commit all transactions on success, rollback else
-        $this->db->trans_complete();
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+            $this->db->trans_start();
 
-        // Check Transaction Status
-        if ($this->db->trans_status() === FALSE)
-        {
-            // generate an error... or use the log_message() function to log your error
-            $status = FALSE;
-        }
+                /**
+                 * Task 1: Update Policy Record
+                 */
+                $status = parent::update($id, $data, TRUE);
 
-        // Enable db_debug if on development environment
-        $this->db->db_debug = (ENVIRONMENT !== 'production') ? TRUE : FALSE;
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 2: Post Edit Tasks
+                 */
+                $this->_post_edit_tasks($id, $data);
+
+
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $status = FALSE;
+            }
+
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
 
         // return result/status
         return $status;
     }
+
+        // ----------------------------------------------------------------
+
+        /**
+         * Pre-Update Tasks
+         *
+         * Tasks carried
+         *
+         *      1. Issue Date & Time
+         *      2. Start Date & Time
+         *      3. End Date & Time
+         *      4. Short Term Flag
+         *
+         * @param array $data
+         * @return array
+         */
+        public function _pre_edit_tasks($data)
+        {
+
+
+            // Refactor Date & time
+            $data = $this->__refactor_datetime_fields($data);
+
+            // Category and Insurance Company ID
+            $data = $this->__category_defaults($data);
+
+
+            // Status
+            $data['status'] = IQB_POLICY_STATUS_DRAFT;
+
+
+            /**
+             * Short Term Flag???
+             * ------------------
+             * Find if this start-end date gives a default duration or short term duration
+             */
+            $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
+            $data['flag_short_term'] = $this->portfolio_setting_model->compute_short_term_flag(
+                $fy_record->id,
+                $data['portfolio_id'],
+                $data['start_date'],
+                $data['end_date']
+            );
+
+
+            // Fiscal Year
+            $data['fiscal_yr_id'] = $fy_record->id;
+
+
+            /**
+             * No marketing staff select?
+             */
+            // $data['sold_by'] = $data['sold_by'] ? $data['sold_by'] : NULL;
+
+
+            // Nullify Current Agent ID if Not on Agent Commission
+            if( isset($data['flag_dc']) && $data['flag_dc'] !== IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
+            {
+                $data['agent_id'] = NULL;
+            }
+
+
+            return $data;
+        }
+
+        // --------------------------------------------------------------------
+
+        /**
+         * Post Edit Tasks
+         *
+         * @param int $id Policy ID
+         * @param array $data Policy Data that was updated
+         * @return void
+         */
+        private function _post_edit_tasks($id, $data)
+        {
+            /**
+             * Task 1: Fresh/Renewal Endorsement Data
+             * --------------------------------------
+             */
+            $this->_edit_default_endorsement($id, $data);
+
+
+            /**
+             * Task 2: Policy Tags
+             * ---------------------
+             */
+            $this->load->model('rel_policy_tag_model');
+            $tags = $data['tags'] ?? [];
+            $this->rel_policy_tag_model->save($id, $tags);
+
+            /**
+             * Task 3: Delete Creditors if Flag on Credits is NO
+             */
+            if( isset($data['flag_on_credit']) && $data['flag_on_credit'] === IQB_FLAG_NO)
+            {
+                $this->load->model('rel_policy_creditor_model');
+                $this->rel_policy_creditor_model->delete_by_policy($id, FALSE);
+            }
+
+
+            /**
+             * Task 4: Clear Cache
+             * ---------------------
+             */
+            $customer_id = $data['customer_id'];
+            $this->clear_cache('policy_cst_'.$customer_id);
+        }
 
     // ----------------------------------------------------------------
 
@@ -702,150 +987,9 @@ class Policy_model extends MY_Model
         return $policy_code;
     }
 
-    // --------------------------------------------------------------------
-
-    /**
-     * Before Insert Trigger
-     *
-     * Tasks carried
-     *      1. Generate Random Policy Number & add
-     *      2. Add Draft Code
-     *      3. Add Branch ID
-     *      4. Add Short Term Flag
-     *      5. Add Status = Draft
-     *      6. Add Fiscal Year
-     *      7. Policy Duration
-     *
-     * @param array $data
-     * @return array
-     */
-    public function before_insert__defaults($data)
-    {
-        $this->load->library('Token');
-
-        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_datetime']);
-
-        /**
-         * Policy Code - Draft One & Policy Number
-         *
-         * Format: DRAFT-<BRANCH-CODE>-<PORTFOLIO-CODE>-<SERIALNO>-<FY_CODE_NP>
-         */
-        $data['code']      = $this->_get_draft_policy_code($data['portfolio_id'], $fy_record);
 
 
-        // Branch ID
-        $data['branch_id']      = $this->dx_auth->get_branch_id();
 
-
-        // Status
-        $data['status'] = IQB_POLICY_STATUS_DRAFT;
-
-
-        // Fiscal Year
-        $data['fiscal_yr_id'] = $fy_record->id;
-
-
-        // Refactor Date & time
-        $data = $this->__refactor_datetime_fields($data);
-
-
-        // Category and Insurance Company ID
-        $data = $this->__category_defaults($data);
-
-
-        // Nullify Current Agent ID if Not on Agent Commission
-        if( isset($data['flag_dc']) && $data['flag_dc'] !== IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
-        {
-            $data['agent_id'] = NULL;
-        }
-
-
-        /**
-         * Short Term Flag???
-         * ------------------
-         *
-         *
-         * Find if this start-end date gives a default duration or short term duration
-         */
-        $data['flag_short_term'] = $this->portfolio_setting_model->compute_short_term_flag(
-            $fy_record->id,
-            $data['portfolio_id'],
-            $data['start_date'],
-            $data['end_date']
-        );
-
-        /**
-         * No marketing staff select?
-         */
-        // $data['sold_by'] = $data['sold_by'] ? $data['sold_by'] : NULL;
-
-        return $data;
-    }
-
-    // ----------------------------------------------------------------
-
-
-    /**
-     * Before Update Trigger
-     *
-     * Tasks carried
-     *
-     *      1. Issue Date & Time
-     *      2. Start Date & Time
-     *      3. End Date & Time
-     *      4. Short Term Flag
-     *
-     * @param array $data
-     * @return array
-     */
-    public function before_update__defaults($data)
-    {
-
-
-        // Refactor Date & time
-        $data = $this->__refactor_datetime_fields($data);
-
-        // Category and Insurance Company ID
-        $data = $this->__category_defaults($data);
-
-
-        // Status
-        $data['status'] = IQB_POLICY_STATUS_DRAFT;
-
-
-        /**
-         * Short Term Flag???
-         * ------------------
-         * Find if this start-end date gives a default duration or short term duration
-         */
-        $fy_record = $this->fiscal_year_model->get_fiscal_year($data['issued_date']);
-        $data['flag_short_term'] = $this->portfolio_setting_model->compute_short_term_flag(
-            $fy_record->id,
-            $data['portfolio_id'],
-            $data['start_date'],
-            $data['end_date']
-        );
-
-
-        // Fiscal Year
-        $data['fiscal_yr_id'] = $fy_record->id;
-
-
-        /**
-         * No marketing staff select?
-         */
-        // $data['sold_by'] = $data['sold_by'] ? $data['sold_by'] : NULL;
-
-
-        // Nullify Current Agent ID if Not on Agent Commission
-        if( isset($data['flag_dc']) && $data['flag_dc'] !== IQB_POLICY_FLAG_DC_AGENT_COMMISSION)
-        {
-            $data['agent_id'] = NULL;
-        }
-
-
-        return $data;
-    }
 
     // --------------------------------------------------------------------
 
@@ -900,184 +1044,9 @@ class Policy_model extends MY_Model
             return $data;
         }
 
-    // --------------------------------------------------------------------
-
-    /**
-     * After Insert Trigger
-     *
-     * Tasks that are to be performed after policy is created are
-     *      1. Add Agent Policy Relation if supplied
-     *      2. @TODO: Find other tasks
-     *
-     * $arr_record structure
-     *  'fields'  contains the fields and values that were used while inserting
-     *  data.
-     *
-     *  Example
-     *      [
-     *          'id'        => 'xxx',
-     *          'fields'    => [
-     *              'field'  => 'value',
-     *              ...
-     *           ]
-     *      ]
-     *
-     *
-     * @param array $arr_record
-     * @return array
-     */
-    public function after_insert__defaults($arr_record)
-    {
-        /**
-         * Data Structure
-         *
-            Array
-            (
-                [id] => 11
-                [fields] => Array
-                    (
-                        [portfolio_id] => 6
-                        [fiscal_yr_id] => x
-                        [policy_package] => tp
-                        [customer_name_en] => Sonam Singh
-                        [customer_id] => 15
-                        [object_name] => Scooter, Dio, FFF, 9879879, ADSF
-                        [object_id] => 21
-                        [issued_date] => 2016-12-28
-                        [start_date] => 2016-12-28
-                        [duration] => +1 year
-                        [sold_by] => 2
-                        [flag_dc] => C
-                        [agent_id] => 214
-                        [created_at] => 2016-12-28 16:22:46
-                        [created_by] => 1
-                        [code] => DRAFT/BRP/MOTOR/ASARV1VHFA/73-74
-                        [branch_id] => 5
-                        [end_date] => 2017-12-28
-                        [status] => D
-                    )
-
-                [method] => insert
-            )
-        */
-        $id = $arr_record['id'] ?? NULL;
-
-        if($id !== NULL)
-        {
-            $fields = $arr_record['fields'];
-
-            /**
-             * Task 1: Fresh/Renewal Endorsement Data
-             * --------------------------------------
-             */
-            $this->_save_endorsement_basic($id, $fields);
-
-            /**
-             * Task 2: Policy Tags
-             * ---------------------
-             */
-            $this->load->model('rel_policy_tag_model');
-            $tags = $fields['tags'] ?? [];
-            $this->rel_policy_tag_model->save($id, $tags);
 
 
-            /**
-             * Task 3: Clear Cache
-             * ---------------------
-             */
-            $customer_id = $fields['customer_id'];
-            $this->clear_cache('policy_cst_'.$customer_id);
 
-            return TRUE;
-
-        }
-        return FALSE;
-    }
-
-    // --------------------------------------------------------------------
-
-    /**
-     * After Update Trigger
-     *
-     * Tasks that are to be performed after a policy is updated
-     *      1. Update Agent Relation (ADD or DELETE)
-     *
-     *
-     * @param array $arr_record
-     * @return array
-     */
-    public function after_update__defaults($arr_record)
-    {
-        /**
-         *
-         * Data Structure
-                Array
-                (
-                    [id] => 10
-                    [fields] => Array
-                        (
-                            [portfolio_id] => 6
-                            [policy_package] => tp
-                            [customer_name_en] => Bishal Lepcha
-                            [customer_id] => 16
-                            [object_name] => Motorcycle, Pulsar 250, , 98798, 987987
-                            [object_id] => 22
-                            [issued_date] => 2016-12-28
-                            [start_date] => 2016-12-28
-                            [duration] => +1 year
-                            [sold_by] => 2
-                            [flag_dc] => C
-                            [agent_id] => 35
-                            [updated_at] => 2016-12-28 15:51:47
-                            [updated_by] => 1
-                        )
-
-                    [result] => 1
-                    [method] => update
-                )
-        */
-
-        $id = $arr_record['id'] ?? NULL;
-
-        if($id !== NULL)
-        {
-            $fields = $arr_record['fields'];
-
-            /**
-             * Task 1: Fresh/Renewal Endorsement Data
-             * --------------------------------------
-             */
-            $this->_save_endorsement_basic($id, $fields);
-
-
-            /**
-             * Task 2: Policy Tags
-             * ---------------------
-             */
-            $this->load->model('rel_policy_tag_model');
-            $tags = $fields['tags'] ?? [];
-            $this->rel_policy_tag_model->save($id, $tags);
-
-            /**
-             * Task 3: Delete Creditors if Flag on Credits is NO
-             */
-            if( isset($fields['flag_on_credit']) && $fields['flag_on_credit'] === IQB_FLAG_NO)
-            {
-                $this->load->model('rel_policy_creditor_model');
-                $this->rel_policy_creditor_model->delete_by_policy($id);
-            }
-
-
-            /**
-             * Task 4: Clear Cache
-             * ---------------------
-             */
-            $customer_id = $fields['customer_id'];
-            $this->clear_cache('policy_cst_'.$customer_id);
-        }
-
-        return TRUE;
-    }
 
     // ----------------------------------------------------------------
 
@@ -1089,7 +1058,7 @@ class Policy_model extends MY_Model
      * @param array $data
      * @return mixed
      */
-    public function _save_endorsement_basic($id, $data)
+    private function _edit_default_endorsement($id, $data)
     {
         /**
          * The following fields are saved from policy debit note add/edit
@@ -1105,6 +1074,7 @@ class Policy_model extends MY_Model
          */
         $endorsement_record = $this->endorsement_model->get_current_endorsement($id);
         $endorsement_data = [
+            'txn_type'      => IQB_ENDORSEMENT_TYPE_FRESH,
             'customer_id'   => $data['customer_id'],
             'issued_date'   => $data['issued_date'],
             'start_date'    => $data['start_date'],
@@ -1115,9 +1085,9 @@ class Policy_model extends MY_Model
             'remarks'       => $data['remarks']
         ];
 
-        // echo '<pre>'; print_r($endorsement_data);exit;
+        $record = parent::find($id);
 
-        return $this->endorsement_model->save($endorsement_record->id, $endorsement_data);
+        return $this->endorsement_model->edit($endorsement_record->id, $endorsement_data, $record, FALSE);
     }
 
     // ----------------------------------------------------------------

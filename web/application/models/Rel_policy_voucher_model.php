@@ -7,6 +7,8 @@ class Rel_policy_voucher_model extends MY_Model
     protected $set_created  = FALSE;
     protected $set_modified = FALSE;
     protected $log_user     = FALSE;
+    protected $audit_log    = TRUE;
+
     protected $skip_validation      = TRUE;
     protected $protected_attributes = [];
 
@@ -45,22 +47,40 @@ class Rel_policy_voucher_model extends MY_Model
      * @param array $data
      * @return mixed
      */
-    public function add($data)
+    public function add($data, $use_automatic_transaction = FALSE)
     {
-        /**
-         * !!!IMPORTANT
-         *  Can't call parent::insert() because it requires primary key as 'id'
-         *  to return a positive integer. Calling this ( parent::insert() ) simply
-         *  return '0' because it does not find a primary key.
-         */
-        $done = $this->db->insert($this->table_name, $data);
-        if( !$done )
-        {
-            throw new Exception("Exception [Model: Rel_policy_voucher_model][Method: add()]: Could not insert record.");
-        }
+        $status = TRUE;
 
-        // return result/status
-        return $done;
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+        if($use_automatic_transaction)
+        {
+            $this->db->trans_start();
+        }
+                /**
+                 * Save the Relation and Audit Log
+                 */
+                parent::insert($data, TRUE);
+
+                // --------------------------------------------------------------------
+
+        if($use_automatic_transaction)
+        {
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $status = FALSE;
+            }
+        }
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        return $status;
     }
 
     // --------------------------------------------------------------------
@@ -72,10 +92,58 @@ class Rel_policy_voucher_model extends MY_Model
      * @param int $to_status
      * @return bool
      */
-    public function flag_invoiced($where, $to_status)
+    public function flag_invoiced($where, $to_status, $use_automatic_transaction = FALSE)
     {
-        return $this->db->where($where)
-                        ->update($this->table_name, ['flag_invoiced' => $to_status]);
+        $data = ['flag_invoiced' => $to_status];
+        $status = TRUE;
+
+        /**
+         * ==================== TRANSACTIONS BEGIN =========================
+         */
+        if($use_automatic_transaction)
+        {
+            $this->db->trans_start();
+        }
+                // Grab Old Record for Audit Log before Update
+                $this->audit_old_record = parent::find_by($where);
+
+                /**
+                 * Task 1: Manually Update The record
+                 */
+                $this->db->where($where)
+                        ->update($this->table_name, $data);
+
+                // --------------------------------------------------------------------
+
+                /**
+                 * Task 2: Manually Save Audit Log
+                 */
+                $audit_data = [
+                    'id'     => NULL,
+                    'fields' => $data,
+                    'method' => 'update'
+                ];
+                parent::save_audit_log($audit_data, $where);
+                $this->audit_old_record = NULL;
+
+                // --------------------------------------------------------------------
+
+        if($use_automatic_transaction)
+        {
+            /**
+             * Complete transactions or Rollback
+             */
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE)
+            {
+                $status = FALSE;
+            }
+        }
+        /**
+         * ==================== TRANSACTIONS END =========================
+         */
+
+        return $status;
     }
 
 	// --------------------------------------------------------------------
@@ -122,27 +190,5 @@ class Rel_policy_voucher_model extends MY_Model
     public function delete($id = NULL)
     {
         return FALSE;
-    }
-
-    // ----------------------------------------------------------------
-
-    /**
-     * Log Activity
-     *
-     * @param integer $id
-     * @param string $action
-     * @return bool
-     */
-    public function log_activity($id, $action = 'C')
-    {
-        return true;
-        // $action = is_string($action) ? $action : 'C';
-        // // Save Activity Log
-        // $activity_log = [
-        //     'module'    => 'ac_voucher',
-        //     'module_id' => $id,
-        //     'action'    => $action
-        // ];
-        // return $this->activity->save($activity_log);
     }
 }
