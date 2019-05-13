@@ -193,7 +193,7 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
                     [
                         'field' => 'qs_retention_percent[]',
                         'label' => 'Quota Retention(%)',
-                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
                         '_field'            => 'qs_retention_percent',
                         '_type'             => 'text',
                         '_show_label'   => false,
@@ -202,7 +202,7 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
                     [
                         'field' => 'qs_quota_percent[]',
                         'label' => 'Quota Distribution(%)',
-                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
                         '_field'            => 'qs_quota_percent',
                         '_type'             => 'text',
                         '_show_label'   => false,
@@ -318,7 +318,7 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
                     [
                         'field' => 'qs_retention_percent[]',
                         'label' => 'Quota Retention(%)',
-                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
                         '_field'            => 'qs_retention_percent',
                         '_type'             => 'text',
                         '_show_label'   => false,
@@ -327,7 +327,7 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
                     [
                         'field' => 'qs_quota_percent[]',
                         'label' => 'Quota Distribution(%)',
-                        'rules' => 'trim|required|prep_decimal|decimal|max_length[5]',
+                        'rules' => 'trim|required|prep_decimal|decimal|max_length[6]',
                         '_field'            => 'qs_quota_percent',
                         '_type'             => 'text',
                         '_show_label'   => false,
