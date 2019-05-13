@@ -354,7 +354,7 @@ class Ac_voucher_model extends MY_Model
             $this->db->trans_start();
 
                 /**
-                 * Task 1: Insert Master Record
+                 * Task 1: Update Master Record
                  */
                 $status = parent::update($id, $master_data, TRUE);
 
