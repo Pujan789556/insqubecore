@@ -1891,7 +1891,7 @@ class Policy_model extends MY_Model
                         /**
                          * Object Table (attributes, sum insured amount, lock flag)
                          */
-                        "O.portfolio_id AS object_portfolio_id, O.attributes AS object_attributes, O.amt_sum_insured AS object_amt_sum_insured, O.si_breakdown AS object_si_breakdown, O.flag_locked AS object_flag_locked, " .
+                        "O.portfolio_id AS object_portfolio_id, O.attributes AS object_attributes, O.amt_sum_insured AS object_amt_sum_insured, O.amt_max_liability AS object_amt_max_liability, O.amt_third_party_liability AS object_amt_third_party_liability, O.si_breakdown AS object_si_breakdown, O.flag_locked AS object_flag_locked, " .
 
 
                         /**

@@ -1085,7 +1085,7 @@ if ( ! function_exists('_OBJ_validation_rules'))
 	 */
 	function _OBJ_validation_rules( $portfolio_id, $formatted = FALSE )
 	{
-		$v_rules = [];
+        $v_rules = [];
 
 		// Load Portfolio Helper
 		load_portfolio_helper($portfolio_id);
@@ -1336,7 +1336,7 @@ if ( ! function_exists('_OBJ_validation_rules'))
 			throw new Exception("Exception [Helper: object_helper][Method: _OBJ_validation_rules()]: No validation method defined for supplied portfolio.");
 		}
 
-		return $v_rules;
+        return $v_rules;
 	}
 }
 

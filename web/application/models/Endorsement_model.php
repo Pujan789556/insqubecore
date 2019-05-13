@@ -78,6 +78,7 @@ class Endorsement_model extends MY_Model
         $this->load->config('policy');
         $this->load->helper('policy');
         $this->load->helper('object');
+        $this->load->helper('account');
 
         // Models
         $this->load->model('policy_model');

@@ -469,7 +469,7 @@ class Objects extends MY_Controller
 		 * Prepare Common Form Data to pass to form view
 		 */
 		$action_url = $this->_url_base . '/edit/' . $record->id . '/' . $from_widget;
-		$v_rules = $this->object_model->validation_rules['edit'];
+		$v_rules = $this->object_model->validation_rules('edit');
 		$form_data = [
 			'form_elements' 	=> $v_rules,
 			'record' 			=> $record,
@@ -556,7 +556,7 @@ class Objects extends MY_Controller
 		 * Prepare Common Form Data to pass to form view
 		 */
 		$action_url = $this->_url_base . '/add/' . $customer_id . '/' . $from_widget . '/' . $portfolio_id;
-		$v_rules = $this->object_model->validation_rules[$from_widget === 'n' ? 'add' : 'add_widget'];
+		$v_rules = $this->object_model->validation_rules($from_widget === 'n' ? 'add' : 'add_widget');
 		$form_data = [
 			'form_elements' 	=> $v_rules,
 			'record' 			=> $record,
@@ -663,6 +663,12 @@ class Objects extends MY_Controller
 
 					return $this->template->json(['status' => 'error', 'title' => 'Exception Occured!', 'message' => $e->getMessage()], 404);
 				}
+
+				/**
+				 * Max Liability and Third Party Liability If any
+				 */
+				$object_data['amt_max_liability'] 			= $data['amt_max_liability'] ? $data['amt_max_liability'] : NULL;
+				$object_data['amt_third_party_liability'] 	= $data['amt_third_party_liability'] ? $data['amt_third_party_liability'] : NULL;
 
 
 				// Object attributes
@@ -884,7 +890,7 @@ class Objects extends MY_Controller
 		 */
 		$from_widget = 'n';
 		$action_url = current_url();
-		$v_rules = $this->object_model->validation_rules['edit'];
+		$v_rules = $this->object_model->validation_rules('edit');
 		$form_data = [
 			'form_elements' 	=> $v_rules,
 			'record' 			=> $edit_record,
@@ -946,18 +952,25 @@ class Objects extends MY_Controller
 					return $this->template->json(['status' => 'error', 'title' => 'Exception Occured!', 'message' => $e->getMessage()], 404);
 				}
 
+				/**
+				 * Max Liability and Third Party Liability If any
+				 */
+				$object_data['amt_max_liability'] 			= $data['amt_max_liability'] ? $data['amt_max_liability'] : NULL;
+				$object_data['amt_third_party_liability'] 	= $data['amt_third_party_liability'] ? $data['amt_third_party_liability'] : NULL;
+
+
         		/**
         		 * Prepare Post Data
         		 */
-        		$post_data['attributes'] 		= json_encode($data['object']);
+        		$object_data['attributes'] 		= json_encode($data['object']);
 
         		/**
 				 * Compute Sum Insured Amount
 				 */
         		try {
 
-					$si_data 	 = _OBJ_compute_sum_insured_amount($record->portfolio_id, $data['object']);
-					$post_data   = array_merge($post_data, $si_data);
+					$si_data 	 	= _OBJ_compute_sum_insured_amount($record->portfolio_id, $data['object']);
+					$object_data   	= array_merge($object_data, $si_data);
 
 				} catch (Exception $e) {
 
@@ -970,7 +983,7 @@ class Objects extends MY_Controller
 				$audit_data = [
         			'endorsement_id' 	=> $endorsement_record->id,
         			'object_id'  		=> $record->id,
-        			'audit_object' 		=> $this->_get_endorsement_audit_data($record, $post_data)
+        			'audit_object' 		=> $this->_get_endorsement_audit_data($record, $object_data)
         		];
 
 

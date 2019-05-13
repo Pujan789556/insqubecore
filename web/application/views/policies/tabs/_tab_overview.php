@@ -65,8 +65,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	            'portfolio_name_en' => $record->portfolio_name_en,
 	            'customer_name_en' 	=> $record->customer_name_en,
 	            'amt_sum_insured' 	=> $record->object_amt_sum_insured,
-	            'attributes'    	=> $record->object_attributes,
-	            'flag_locked'		=> $record->object_flag_locked,
+	            'amt_max_liability' 		=> $record->object_amt_max_liability,
+	            'amt_third_party_liability' => $record->object_amt_third_party_liability,
+	            'attributes'    			=> $record->object_attributes,
+	            'flag_locked'				=> $record->object_flag_locked,
 	        ];
 			$this->load->view('objects/snippets/_object_card', ['record' => $object_record, '__flag_object_editable' => $__flag_object_editable]);
 

@@ -21,10 +21,10 @@ class Object_model extends MY_Model
     protected $after_update  = ['after_update__defaults'];
     protected $after_delete  = [];
 
-    protected $fields = ['id', 'portfolio_id', 'attributes', 'amt_sum_insured', 'si_breakdown', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'portfolio_id', 'attributes', 'amt_sum_insured', 'amt_max_liability', 'amt_third_party_liability', 'si_breakdown', 'flag_locked', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     // Fields that are edited during endorsement
-    public static $endorsement_fields = ['attributes', 'amt_sum_insured', 'si_breakdown',];
+    public static $endorsement_fields = ['attributes', 'amt_sum_insured', 'amt_max_liability', 'amt_third_party_liability', 'si_breakdown',];
 
     protected $validation_rules = [];
 
@@ -51,8 +51,6 @@ class Object_model extends MY_Model
         $this->load->helper('policy');
         $this->load->helper('object');
 
-        // Set validation rules
-        $this->validation_rules();
     }
 
 
@@ -64,27 +62,54 @@ class Object_model extends MY_Model
      * @param integer $portfolio_id
      * @return array
      */
-    public function validation_rules( $portfolio_id=0 )
+    public function validation_rules( $action )
     {
         $this->load->model('portfolio_model');
 
-        $this->validation_rules = [
-            'add' => [
-                [
-                    'field' => 'portfolio_id',
-                    'label' => 'Portfolio',
-                    'rules' => 'trim|required|integer|max_length[11]',
-                    '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
-                    '_type'     => 'dropdown',
-                    '_id'       => '_object-portfolio-id',
-                    '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_children_tree(),
-                    '_required' => true
-                ],
+        $add_v_rules = [
+            [
+                'field' => 'portfolio_id',
+                'label' => 'Portfolio',
+                'rules' => 'trim|required|integer|max_length[11]',
+                '_extra_attributes' => 'style="width:100%; display:block" data-ddstyle="select"',
+                '_type'     => 'dropdown',
+                '_id'       => '_object-portfolio-id',
+                '_data'     => IQB_BLANK_SELECT + $this->portfolio_model->dropdown_children_tree(),
+                '_required' => true
             ],
-            'add_widget' => [],
-
-            'edit' => []
         ];
+
+        $common_v_rules = [
+            [
+                'field' => 'amt_max_liability',
+                '_key' => 'amt_max_liability',
+                'label' => 'Maximum Liability',
+                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+                '_type' => 'text',
+                '_required'     => false,
+                '_help_text'    => 'Please supply information if "Sum Insured" for this object is Zero and This amount is required for RI Distribution.'
+            ],
+            [
+                'field' => 'amt_third_party_liability',
+                '_key' => 'amt_third_party_liability',
+                'label' => 'Third Party Liability',
+                'rules' => 'trim|prep_decimal|decimal|max_length[20]',
+                '_type' => 'text',
+                '_required'     => false,
+                '_help_text'    => 'Please supply information if it has "Third Party Liability" and is required for RI Distribution.'
+            ],
+        ];
+
+        if($action == 'add')
+        {
+            $v_rules = array_merge($add_v_rules, $common_v_rules);
+        }
+        else
+        {
+            $v_rules = $common_v_rules;
+        }
+
+        return $v_rules;
     }
 
     // ----------------------------------------------------------------
@@ -576,7 +601,7 @@ class Object_model extends MY_Model
     private function _row_select( )
     {
         $this->db->select(
-                            "O.id, O.portfolio_id, O.attributes, O.amt_sum_insured, O.flag_locked,
+                            "O.id, O.portfolio_id, O.attributes, O.amt_sum_insured, O.amt_max_liability, O.amt_third_party_liability, O.flag_locked,
                             P.code AS portfolio_code, P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np,
                             C.id AS customer_id, C.full_name_en AS customer_name_en, C.full_name_np AS customer_name_np")
                  ->from($this->table_name . ' AS O')

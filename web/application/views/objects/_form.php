@@ -15,7 +15,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <div class="box-header with-border">
       <h3 class="no-margin">Portfolio Information</h3>
     </div>
-    <div class="box-body">
+    <div class="box-body form-horizontal">
 
         <?php
         /**

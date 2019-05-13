@@ -6,7 +6,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 $data           = ['record' => $record, 'ref' => $ref ?? ''];
 $portfolio_id   = (int)$record->portfolio_id;
-
+?>
+<div class="box box-solid box-bordered">
+    <div class="box-header with-border">
+        <h4 class="box-title">Object Common Info</h4>
+    </div>
+    <table class="table table-bordered table-condensed no-margin">
+        <tr>
+            <th>Maximum Liability (Rs.)</th>
+            <td><?php echo $record->amt_max_liability ? number_format($record->amt_max_liability, 2) : '-' ?></td>
+        </tr>
+        <tr>
+            <th>Third Party Liability (Rs.)</th>
+            <td><?php echo $record->amt_third_party_liability ? number_format($record->amt_third_party_liability, 2) : '-' ?></td>
+        </tr>
+        <tr>
+            <th>Sum Insured (Rs.)</th>
+            <td><?php echo $record->amt_sum_insured ? number_format($record->amt_sum_insured, 2) : '-' ?></td>
+        </tr>
+    </table>
+</div>
+<?php
 /**
  * AGRICULTURE - CROP SUB-PORTFOLIO
  * ---------------------------------
