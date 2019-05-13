@@ -22,7 +22,7 @@ class Migration_Upgrade_ri_treaty_portfolio_v2 extends CI_Migration {
             print "Running Migration up()... \n\r";
             foreach($sqls as $sql)
             {
-                print "EXECUTING QUERY: \n\r\t" . "$sql" . "\n\r" . "QUERY STATUS: ";
+                print "EXECUTING QUERY: $sql" . "\n\r" . "QUERY STATUS: ";
                 print $this->db->query($sql) ? "OK" : "FAIL";
                 print "\n\r";
             }
