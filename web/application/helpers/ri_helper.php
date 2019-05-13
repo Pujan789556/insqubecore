@@ -774,7 +774,7 @@ if ( ! function_exists('RI__valid_treaty_record'))
 	{
 		$valid = TRUE;
 
-		$comp_fields = ['ac_basic', 'flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'treaty_max_capacity_amt'];
+		$comp_fields = ['ac_basic', 'treaty_distribution_basis', 'flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'treaty_max_capacity_amt'];
 		$treaty_comp_fields = [];
 
 		$treaty_type_id = (int)$treaty_record->treaty_type_id;

@@ -21,7 +21,7 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['treaty_id', 'portfolio_id', 'ac_basic', 'flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'comp_cession_comm_ri', 'comp_cession_tax_ri', 'comp_cession_tax_ib', 'treaty_max_capacity_amt', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
+    protected $fields = ['treaty_id', 'portfolio_id', 'ac_basic', 'treaty_distribution_basis', 'flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'comp_cession_comm_ri', 'comp_cession_tax_ri', 'comp_cession_tax_ib', 'treaty_max_capacity_amt', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
 
     protected $validation_rules = [];
 
@@ -109,6 +109,16 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
                         '_type'         => 'dropdown',
                         '_show_label'   => false,
                         '_data'         => IQB_BLANK_SELECT + IQB_RI_SETUP_AC_BASIC_TYPES,
+                        '_required'     => true
+                    ],
+                    [
+                        'field' => 'treaty_distribution_basis[]',
+                        'label' => 'Treaty Distribution Basis',
+                        'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(IQB_RI_SETUP_TREATY_DISTRIBUTION_BASIS_TYPES) ) . ']',
+                        '_field'        => 'ac_basic',
+                        '_type'         => 'dropdown',
+                        '_show_label'   => false,
+                        '_data'         => IQB_BLANK_SELECT + IQB_RI_SETUP_TREATY_DISTRIBUTION_BASIS_TYPES,
                         '_required'     => true
                     ],
                     [
@@ -556,7 +566,7 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
                                 'T.id, T.name as treaty_name, T.category, T.fiscal_yr_id, T.treaty_type_id, T.treaty_effective_date, ' .
 
                                 // Treaty Portfolio Config
-                                'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amt, TP.comp_cession_comm_ri, TP.comp_cession_tax_ri, TP.comp_cession_tax_ib, TP.treaty_max_capacity_amt, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_def_ret_apply, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
+                                'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.treaty_distribution_basis, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amt, TP.comp_cession_comm_ri, TP.comp_cession_tax_ri, TP.comp_cession_tax_ib, TP.treaty_max_capacity_amt, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_def_ret_apply, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
 
                                 // Portfolio Detail
                                 'P.code as portfolio_code, P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np, ' .

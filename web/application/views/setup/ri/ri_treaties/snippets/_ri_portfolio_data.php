@@ -11,6 +11,7 @@ $treaty_type_id =  (int)$portfolios[0]->treaty_type_id;
 			<th>SN</th>
 			<th>Portfolio</th>
 			<th>A/C Basic</th>
+			<th>Treaty Distribution Basis</th>
 			<th>Claim Recover From RI</th>
 			<th>Compulsory Cession Apply?</th>
 			<th>Compulsory Cession(%)</th>
@@ -53,6 +54,7 @@ $treaty_type_id =  (int)$portfolios[0]->treaty_type_id;
 					<?php echo $portfolio->protfolio_parent_code  . ' - ' . $portfolio->portfolio_name_en . "({$portfolio->portfolio_code})"?>
 				</td>
 				<td><?php echo $portfolio->ac_basic ? RI__ac_basic_dropdown(FALSE)[$portfolio->ac_basic]: '-'?></td>
+				<td><?php echo $portfolio->treaty_distribution_basis ? IQB_RI_SETUP_TREATY_DISTRIBUTION_BASIS_TYPES[$portfolio->treaty_distribution_basis]: '-'?></td>
 				<td><?php echo yes_no_text($portfolio->flag_claim_recover_from_ri, '-')?></td>
 				<td><?php echo yes_no_text($portfolio->flag_comp_cession_apply, '-')?></td>
 				<td><?php echo $portfolio->comp_cession_percent;?></td>
