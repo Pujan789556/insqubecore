@@ -571,13 +571,19 @@ class Ri_setup_treaty_model extends MY_Model
     public function clear_cache($data=null)
     {
         $cache_names = [
-            'ri_pt_*'
+
         ];
     	// cache name without prefix
         foreach($cache_names as $cache)
         {
             $this->delete_cache($cache);
         }
+
+        /**
+         * Clear Cache from other dependent models
+         */
+        $this->ri_setup_treaty_portfolio_model->clear_cache();
+
         return TRUE;
     }
 

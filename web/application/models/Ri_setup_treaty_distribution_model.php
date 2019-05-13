@@ -244,7 +244,7 @@ class Ri_setup_treaty_distribution_model extends MY_Model
     public function clear_cache()
     {
         $cache_names = [
-            'ri_pt_*'
+
         ];
         // cache name without prefix
         foreach($cache_names as $cache)
