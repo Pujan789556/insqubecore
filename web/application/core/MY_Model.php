@@ -466,7 +466,7 @@ class MY_Model
             $old_data = (array)$this->audit_old_record;
             foreach($data as $key=>$val)
             {
-                if($val != $old_data[$key])
+                if(isset($old_data[$key]) && $val != $old_data[$key])
                 {
                     $audit_new_data[$key] = $val;
                     $audit_old_data[$key] = $old_data[$key];
