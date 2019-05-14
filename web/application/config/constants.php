@@ -561,6 +561,23 @@ define('IQB_ENDORSEMENT_SPR_CONFIG_BASIC',      2); 	// Applies only on Basic
 
 /*
 |--------------------------------------------------------------------------
+| POLICY PREMIUM FOR CONSTANTS
+|--------------------------------------------------------------------------
+|
+*/
+define('IQB_PREMIUM_FOR_SI',       1); 	// PREMIUM FOR SUM INSURED
+define('IQB_PREMIUM_FOR_ML',       2); 	// PREMIUM FOR MAXIMUM LIABILITY
+define('IQB_PREMIUM_FOR_TPL',      3); // PREMIUM FOR THIRD PARTY LIABILITY
+define('IQB_PREMIUM_FOR__LIST', 	[
+	IQB_PREMIUM_FOR_SI 	=> 'Sum Insured',
+	IQB_PREMIUM_FOR_ML 	=> 'Maximum Liability',
+	IQB_PREMIUM_FOR_TPL => 'Third Party Liability'
+]);
+
+
+
+/*
+|--------------------------------------------------------------------------
 | POLICY INSTALLMENT STATUS CONSTANTS
 |--------------------------------------------------------------------------
 */
