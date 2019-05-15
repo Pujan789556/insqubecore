@@ -450,6 +450,25 @@ define('IQB_MOTOR_CVC_TYPE_CONSTRUCTION_EQUIPMENT',     'CE');      // Construct
 
 /*
 |--------------------------------------------------------------------------
+| PORTFOLIOS LIABILITIES OPTIONS
+|--------------------------------------------------------------------------
+|
+*/
+define('IQB_PORTFOLIO_LIABILITY_OPTION_SI',       1); 	// PREMIUM FOR SUM INSURED
+define('IQB_PORTFOLIO_LIABILITY_OPTION_ML',       2); 	// PREMIUM FOR MAXIMUM LIABILITY
+define('IQB_PORTFOLIO_LIABILITY_OPTION_TPL',      3);  	// PREMIUM FOR THIRD PARTY LIABILITY
+define('IQB_PORTFOLIO_LIABILITY_OPTION__LIST', 	[
+	IQB_PORTFOLIO_LIABILITY_OPTION_SI 	=> 'Sum Insured',
+	IQB_PORTFOLIO_LIABILITY_OPTION_ML 	=> 'Maximum Liability',
+	IQB_PORTFOLIO_LIABILITY_OPTION_TPL 	=> 'Third Party Liability'
+]);
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
 | POLICY TYPE CONSTANTS
 |--------------------------------------------------------------------------
 |
@@ -559,20 +578,7 @@ define('IQB_ENDORSEMENT_SPR_CONFIG_BOTH',       1); 	// Applies on Basic and Poo
 define('IQB_ENDORSEMENT_SPR_CONFIG_BASIC',      2); 	// Applies only on Basic
 
 
-/*
-|--------------------------------------------------------------------------
-| POLICY PREMIUM FOR CONSTANTS
-|--------------------------------------------------------------------------
-|
-*/
-define('IQB_PREMIUM_FOR_SI',       1); 	// PREMIUM FOR SUM INSURED
-define('IQB_PREMIUM_FOR_ML',       2); 	// PREMIUM FOR MAXIMUM LIABILITY
-define('IQB_PREMIUM_FOR_TPL',      3); // PREMIUM FOR THIRD PARTY LIABILITY
-define('IQB_PREMIUM_FOR__LIST', 	[
-	IQB_PREMIUM_FOR_SI 	=> 'Sum Insured',
-	IQB_PREMIUM_FOR_ML 	=> 'Maximum Liability',
-	IQB_PREMIUM_FOR_TPL => 'Third Party Liability'
-]);
+
 
 
 

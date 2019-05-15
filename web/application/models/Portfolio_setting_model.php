@@ -20,7 +20,7 @@ class Portfolio_setting_model extends MY_Model
     protected $after_delete  = ['clear_cache'];
 
 
-    protected $fields = ['id', 'fiscal_yr_id', 'portfolio_id', 'agent_commission', 'bs_service_charge', 'direct_discount', 'pool_premium', 'stamp_duty', 'amt_default_basic_premium', 'amt_default_pool_premium', 'flag_default_duration', 'default_duration', 'flag_short_term', 'flag_short_term_apply_for', 'short_term_policy_rate', 'flag_apply_vat_on_premium', 'flag_installment', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fields = ['id', 'fiscal_yr_id', 'portfolio_id', 'ri_liability_options', 'agent_commission', 'bs_service_charge', 'direct_discount', 'pool_premium', 'stamp_duty', 'amt_default_basic_premium', 'amt_default_pool_premium', 'flag_default_duration', 'default_duration', 'flag_short_term', 'flag_short_term_apply_for', 'short_term_policy_rate', 'flag_apply_vat_on_premium', 'flag_installment', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     protected $validation_rules = [];
 
@@ -41,17 +41,16 @@ class Portfolio_setting_model extends MY_Model
     public function __construct()
     {
         parent::__construct();
-
-        $this->validation_rules();
     }
 
     // ----------------------------------------------------------------
 
-    public function validation_rules(  )
+    public function get_validation_rules($action, $record = NULL)
     {
-        $this->validation_rules = [
-
-            'add' => [
+        $rules = [];
+        if($action == 'add' || $action == 'duplicate')
+        {
+            $rules = [
                [
                     'field' => 'fiscal_yr_id',
                     'label' => 'Fiscal Year',
@@ -60,15 +59,29 @@ class Portfolio_setting_model extends MY_Model
                     '_data'     => IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown(),
                     '_required' => true
                 ],
-            ],
-
-            'edit' => [
+            ];
+        }
+        else if($action == 'edit')
+        {
+            $existing_ri_liability_options = explode(',', $record->ri_liability_options ?? '');
+            $rules = [
                 [
                     'field' => 'agent_commission',
                     'label' => 'Agent Commission(%)',
                     'rules' => 'trim|required|prep_decimal4|decimal|max_length[8]',
                     '_key'      => 'agent_commission',
                     '_type'     => 'text',
+                    '_required' => true
+                ],
+                [
+                    'field' => 'ri_liability_options[]',
+                    'label' => 'RI Liability Options(%)',
+                    'rules' => 'trim|required|integer|exact_length[1]|in_list['.implode(',',array_keys(IQB_PORTFOLIO_LIABILITY_OPTION__LIST)).']',
+                    '_key'      => 'ri_liability_options',
+                    '_type'     => 'checkbox-group',
+                    '_data'     => IQB_PORTFOLIO_LIABILITY_OPTION__LIST,
+                    '_list_inline' => false,
+                    '_checkbox_value' => $existing_ri_liability_options,
                     '_required' => true
                 ],
                 [
@@ -152,7 +165,7 @@ class Portfolio_setting_model extends MY_Model
                     'rules' => 'trim|required|integer|exact_length[1]|in_list['.implode(',', array_keys(IQB_PFS_FLAG_SHORT_TERM_APPLY_FOR__LIST)).']',
                     '_data' => IQB_BLANK_SELECT + IQB_PFS_FLAG_SHORT_TERM_APPLY_FOR__LIST,
                     '_type'     => 'dropdown',
-                    '_key'      => 'flag_short_term',
+                    '_key'      => 'flag_short_term_apply_for',
                     '_required' => true
                 ],
                 [
@@ -173,16 +186,9 @@ class Portfolio_setting_model extends MY_Model
                     '_key'      => 'flag_installment',
                     '_required' => true
                 ]
-            ]
-        ];
-
-    }
-
-    // ----------------------------------------------------------------
-
-    public function get_validation_rules( $action)
-    {
-        return $this->validation_rules[$action];
+            ];
+        }
+        return $rules;
     }
 
     // ----------------------------------------------------------------

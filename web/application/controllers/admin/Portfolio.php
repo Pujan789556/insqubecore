@@ -982,7 +982,7 @@ class Portfolio extends MY_Controller
 
 		$json_data['form'] = $this->load->view($this->_view_base . '/_form_settings',
 			[
-				'form_elements' 	=> $this->portfolio_setting_model->get_validation_rules('edit'),
+				'form_elements' 	=> $this->portfolio_setting_model->get_validation_rules('edit', $record),
 				'record' 			=> $record
 			], TRUE);
 
@@ -1036,8 +1036,12 @@ class Portfolio extends MY_Controller
 
 					foreach($rules as $r)
 					{
-						$key = $r['field'];
+						$key = $r['_key'];
 						$update_data[$key] = $post_data[$key] ?? NULL;
+						if($key == 'ri_liability_options') // multiple checkbox values
+						{
+							$update_data[$key] = implode(',', $post_data[$key]);
+						}
 					}
 					$done = $this->portfolio_setting_model->update($record->id, $update_data, TRUE);
 				}
@@ -1161,17 +1165,7 @@ class Portfolio extends MY_Controller
             $this->template->render_404();
         }
 
-        $rules = [
-            [
-                'field' => 'fiscal_yr_id',
-                'label' => 'Fiscal Year',
-                'rules' => 'trim|required|integer|max_length[3]|callback__cb_settings_check_duplicate',
-                '_type'     => 'dropdown',
-                '_data'     => IQB_BLANK_SELECT + $this->fiscal_year_model->dropdown(),
-                '_required' => true
-            ]
-        ];
-
+        $rules = $this->portfolio_setting_model->get_validation_rules('duplicate');
         if( $this->input->post() )
         {
             $this->form_validation->set_rules($rules);

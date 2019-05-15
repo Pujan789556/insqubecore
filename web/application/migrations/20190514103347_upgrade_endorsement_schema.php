@@ -154,7 +154,7 @@ class Migration_Upgrade_endorsement_schema extends CI_Migration {
                 {
                     $single[$col] = $row->$col;
                 }
-                $single['premium_for']    = IQB_PREMIUM_FOR_SI;
+                $single['premium_for']    = IQB_PORTFOLIO_LIABILITY_OPTION_SI;
                 $single['endorsement_id'] = $row->id;
 
 
