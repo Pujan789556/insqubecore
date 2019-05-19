@@ -5,15 +5,12 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
 {
     protected $table_name = 'ri_setup_treaty_portfolios';
 
-    protected $set_created = true;
+    protected $set_created  = TRUE;
+    protected $set_modified = TRUE;
+    protected $log_user     = TRUE;
+    protected $audit_log    = TRUE;
 
-    protected $set_modified = true;
-
-    protected $log_user = true;
-
-    protected $audit_log = TRUE;
-
-    protected $protected_attributes = [];
+    protected $protected_attributes = ['id'];
 
     // protected $before_insert = ['capitalize_code'];
     // protected $before_update = ['capitalize_code'];
@@ -21,7 +18,7 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
     protected $after_update  = ['clear_cache'];
     protected $after_delete  = ['clear_cache'];
 
-    protected $fields = ['treaty_id', 'portfolio_id', 'ac_basic', 'treaty_distribution_for', 'flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'comp_cession_comm_ri', 'comp_cession_tax_ri', 'comp_cession_tax_ib', 'treaty_max_capacity_amt', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
+    protected $fields = ['id', 'treaty_id', 'portfolio_id', 'ac_basic', 'treaty_distribution_for', 'flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'comp_cession_comm_ri', 'comp_cession_tax_ri', 'comp_cession_tax_ib', 'treaty_max_capacity_amt', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
 
     protected $validation_rules = [];
 
@@ -64,7 +61,7 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
         $v_rules_formatted  = $v_rules['portfolios_common'];
 
         // First rule is 'portfolio_ids[]', update validation rule
-        $v_rules_formatted[0]['rules'] = 'trim|required|integer|max_length[8]|in_list['.implode(',',array_keys($portfolio_dropdown)).']';
+        $v_rules_formatted[1]['rules'] = 'trim|required|integer|max_length[8]|in_list['.implode(',',array_keys($portfolio_dropdown)).']';
 
 
         if( $treaty_type_id === IQB_RI_TREATY_TYPE_SP )
@@ -93,6 +90,15 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
                 // Treaty Portfolios: Common Fields
                 'portfolios_common' => [
                     [
+                        'field' => 'ids[]',
+                        'label' => 'ID',
+                        'rules' => 'trim|required|integer|max_length[11]',
+                        '_field'        => 'id',
+                        '_type'         => 'hidden',
+                        '_show_label'   => false,
+                        '_required'     => true
+                    ],
+                    [
                         'field' => 'portfolio_ids[]',
                         'label' => 'Portfolio',
                         'rules' => 'trim|required|integer|max_length[8]',
@@ -111,16 +117,16 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
                         '_data'         => IQB_BLANK_SELECT + IQB_RI_SETUP_AC_BASIC_TYPES,
                         '_required'     => true
                     ],
-                    [
-                        'field' => 'treaty_distribution_for[]',
-                        'label' => 'Treaty Distribution For',
-                        'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(IQB_PORTFOLIO_LIABILITY_OPTION__LIST) ) . ']',
-                        '_field'        => 'treaty_distribution_for',
-                        '_type'         => 'dropdown',
-                        '_show_label'   => false,
-                        '_data'         => IQB_BLANK_SELECT + IQB_PORTFOLIO_LIABILITY_OPTION__LIST,
-                        '_required'     => true
-                    ],
+                    // [
+                    //     'field' => 'treaty_distribution_for[]',
+                    //     'label' => 'Treaty Distribution For',
+                    //     'rules' => 'trim|required|integer|exact_length[1]|in_list[' . implode( ',', array_keys(IQB_PORTFOLIO_LIABILITY_OPTION__LIST) ) . ']',
+                    //     '_field'        => 'treaty_distribution_for',
+                    //     '_type'         => 'dropdown',
+                    //     '_show_label'   => false,
+                    //     '_data'         => IQB_BLANK_SELECT + IQB_PORTFOLIO_LIABILITY_OPTION__LIST,
+                    //     '_required'     => true
+                    // ],
                     [
                         'field' => 'flag_claim_recover_from_ri[]',
                         'label' => 'Claim Recover From RI',
@@ -458,20 +464,37 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
      *
      * @param int $treaty_id Treaty ID
      * @param int $portfolio_ids Portfolio IDs
+     * @param int $fiscal_yr_id Treaty's Fiscal Year
      * @return bool
      */
-    public function add_portfolios($treaty_id, $portfolio_ids)
+    public function add_portfolios($treaty_id, $portfolio_ids, $fiscal_yr_id)
     {
         $done  = TRUE;
+
+        $this->load->model('portfolio_setting_model');
 
         // Insert Individual - No batch-insert - because of Audit Log Requirement
         foreach($portfolio_ids as $portfolio_id )
         {
-            $single_data = [
-                'treaty_id'     => $treaty_id,
-                'portfolio_id'  => $portfolio_id
-            ];
-            parent::insert($single_data, TRUE);
+            // Get the portfolio Settings
+            $pfs_record = $this->portfolio_setting_model->get_by_fiscal_yr_portfolio($fiscal_yr_id, $portfolio_id);
+
+            // Find the RI Liability Options for this portfolio
+            $ri_liability_options = explode(',', $pfs_record->ri_liability_options ?? []);
+
+            // Insert Only if RI distribution is set to at least one liability
+            if($ri_liability_options)
+            {
+                foreach($ri_liability_options as $treaty_distribution_for)
+                {
+                    $single_data = [
+                        'treaty_id'                 => $treaty_id,
+                        'portfolio_id'              => $portfolio_id,
+                        'treaty_distribution_for'   => $treaty_distribution_for
+                    ];
+                    parent::insert($single_data, TRUE);
+                }
+            }
         }
 
         // return result/status
@@ -494,19 +517,21 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
     public function save_portfolio_config($treaty_id, $data)
     {
         $status                     = TRUE;
-        $treaty_portfolio_fillables = ['ac_basic', 'treaty_distribution_for', 'flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'comp_cession_comm_ri', 'comp_cession_tax_ri', 'comp_cession_tax_ib', 'treaty_max_capacity_amt', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
+        $treaty_portfolio_fillables = ['ac_basic', 'flag_claim_recover_from_ri', 'flag_comp_cession_apply', 'comp_cession_percent', 'comp_cession_max_amt', 'comp_cession_comm_ri', 'comp_cession_tax_ri', 'comp_cession_tax_ib', 'treaty_max_capacity_amt', 'qs_max_ret_amt', 'qs_def_ret_amt', 'flag_qs_def_ret_apply', 'qs_retention_percent', 'qs_quota_percent', 'qs_lines_1', 'qs_lines_2', 'qs_lines_3', 'eol_layer_amount_1', 'eol_layer_amount_2', 'eol_layer_amount_3', 'eol_layer_amount_4'];
 
-        $total_portfolios           = count($data['portfolio_ids']);
+        $total_rows = count($data['ids']);
 
+        // echo '<pre>'; print_r($total_rows); print_r($data);exit;
         // -----------------------------------------------------------------------------
 
         // Use automatic transaction
         $this->db->trans_start();
 
-            for($i = 0; $i < $total_portfolios; $i++)
+            for($i = 0; $i < $total_rows; $i++)
             {
-                $portfolio_id = $data['portfolio_ids'][$i];
-                $treaty_portfolio_data = [];
+                $id                         = $data['ids'][$i];
+                $portfolio_id               = $data['portfolio_ids'][$i];
+                $treaty_portfolio_data      = [];
 
                 // Prepare Update Data
                 foreach($treaty_portfolio_fillables as $column)
@@ -514,21 +539,24 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
                     $treaty_portfolio_data[$column] = $data[$column][$i] ?? NULL; // Reset to Default
                 }
 
-                // Old Data - For Audit Record
-                $where = ['treaty_id' => $treaty_id, 'portfolio_id' => $portfolio_id];
-                $this->audit_old_record = parent::find_by($where);
 
-                // Save Database without MY Model ( as it can not find audit_old_record where there is no PK as id)
-                $this->db->where($where)
-                         ->set($treaty_portfolio_data)
-                         ->update($this->table_name);
+                parent::update($id, $treaty_portfolio_data, TRUE);
 
-                 // Save Audit Log
-                 $this->save_audit_log([
-                    'method' => 'update',
-                    'id'     => NULL,
-                    'fields' => $treaty_portfolio_data
-                ],$where);
+                // // Old Data - For Audit Record
+                // $where = ['treaty_id' => $treaty_id, 'portfolio_id' => $portfolio_id, 'treaty_distribution_for' => $treaty_distribution_for];
+                // $this->audit_old_record = parent::find_by($where);
+
+                // // Save Database without MY Model ( as it can not find audit_old_record where there is no PK as id)
+                // $this->db->where($where)
+                //          ->set($treaty_portfolio_data)
+                //          ->update($this->table_name);
+
+                //  // Save Audit Log
+                //  $this->save_audit_log([
+                //     'method' => 'update',
+                //     'id'     => NULL,
+                //     'fields' => $treaty_portfolio_data
+                // ],$where);
             }
 
             // Clear Cache
@@ -563,10 +591,10 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
         {
             return $this->db->select(
                                 // Treaty Details
-                                'T.id, T.name as treaty_name, T.category, T.fiscal_yr_id, T.treaty_type_id, T.treaty_effective_date, ' .
+                                'T.name as treaty_name, T.category, T.fiscal_yr_id, T.treaty_type_id, T.treaty_effective_date, ' .
 
                                 // Treaty Portfolio Config
-                                'TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.treaty_distribution_for, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amt, TP.comp_cession_comm_ri, TP.comp_cession_tax_ri, TP.comp_cession_tax_ib, TP.treaty_max_capacity_amt, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_def_ret_apply, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
+                                'TP.id, TP.treaty_id, TP.portfolio_id, TP.ac_basic, TP.treaty_distribution_for, TP.flag_claim_recover_from_ri, TP.flag_comp_cession_apply, TP.comp_cession_percent, TP.comp_cession_max_amt, TP.comp_cession_comm_ri, TP.comp_cession_tax_ri, TP.comp_cession_tax_ib, TP.treaty_max_capacity_amt, TP.qs_max_ret_amt, TP.qs_def_ret_amt, TP.flag_qs_def_ret_apply, TP.qs_retention_percent, TP.qs_quota_percent, TP.qs_lines_1, TP.qs_lines_2, TP.qs_lines_3, TP.eol_layer_amount_1, TP.eol_layer_amount_2, TP.eol_layer_amount_3, TP.eol_layer_amount_4, ' .
 
                                 // Portfolio Detail
                                 'P.code as portfolio_code, P.name_en AS portfolio_name_en, P.name_np AS portfolio_name_np, ' .
@@ -658,31 +686,14 @@ class Ri_setup_treaty_portfolio_model extends MY_Model
     {
         $status         = FALSE;
         $old_records    = [];
-        if($portfolio_ids)
-        {
-            $old_records = $this->db->where('treaty_id', $treaty_id)
+        $old_records    = $this->db->where('treaty_id', $treaty_id)
                                     ->where_in('portfolio_id', $portfolio_ids)
                                     ->get($this->table_name)
                                     ->result();
-        }
 
-        if($old_records)
+        foreach($old_records as $single)
         {
-            // Delete The Records
-            $status = $this->db->where('treaty_id', $treaty_id)
-                             ->where_in('portfolio_id', $portfolio_ids)
-                             ->delete($this->table_name);
-
-            // Manually Audit Log
-            foreach($old_records as $single)
-            {
-                $this->audit_old_record = $single;
-                $this->save_audit_log([
-                    'method' => 'delete',
-                    'id' => NULL
-                ]);
-                $this->audit_old_record = NULL;
-            }
+            parent::delete($single->id);
         }
 
         return $status;

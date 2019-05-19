@@ -16,7 +16,7 @@ input.form-control, select.form-control{height:24px; max-width: 120px;}
                             'data-pc' => '.bootbox-body' // parent container ID
                         ],
                         // Hidden Fields
-                        isset($record) ? ['id' => $record->id] : []); ?>
+                        isset($record) ? ['treaty_id' => $record->id] : []); ?>
     <div class="row">
         <div class="col-md-4">
             <?php
@@ -73,7 +73,7 @@ input.form-control, select.form-control{height:24px; max-width: 120px;}
             <tbody class="form-inline">
                 <?php foreach ($portfolios as $portfolio):?>
                     <tr>
-                        <td><?php echo $portfolio->portfolio_name_en;?></td>
+                        <td><?php echo $portfolio->portfolio_name_en;?> (<?php echo $portfolio->treaty_distribution_for ? IQB_PORTFOLIO_LIABILITY_OPTION__LIST[$portfolio->treaty_distribution_for]: '-'?>)</td>
                         <?php foreach($form_elements as $element):?>
                             <?php if($element['_type'] == 'hidden'):?>
                                 <?php echo form_hidden($element['field'], $portfolio->{$element['_field']});?>

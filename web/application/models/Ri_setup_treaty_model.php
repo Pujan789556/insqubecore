@@ -271,11 +271,14 @@ class Ri_setup_treaty_model extends MY_Model
             // Task b. Insert Broker Relations
             if($id)
             {
+                // Get fiscal year
+                $fiscal_yr_id = $data['fiscal_yr_id'];
+
                 // Add Brokers
                 $this->ri_setup_treaty_broker_model->add_brokers($id, $broker_ids);
 
                 // Insert Batch Portfolio Data
-                $this->ri_setup_treaty_portfolio_model->add_portfolios($id, $portfolio_ids);
+                $this->ri_setup_treaty_portfolio_model->add_portfolios($id, $portfolio_ids, $fiscal_yr_id);
 
                 // Insert Default Tax and Commission Record
                 $this->ri_setup_treaty_tax_and_commission_model->insert(['treaty_id' => $id], TRUE);
@@ -343,6 +346,9 @@ class Ri_setup_treaty_model extends MY_Model
             // Task b. Update Broker Relations
             if($status)
             {
+                // Get fiscal year
+                $fiscal_yr_id = $data['fiscal_yr_id'];
+
                 // Delete Unselected Brokers
                 $this->ri_setup_treaty_broker_model->delete_brokers($id, $to_delete_brokers);
 
@@ -354,7 +360,7 @@ class Ri_setup_treaty_model extends MY_Model
                 $this->ri_setup_treaty_portfolio_model->delete_portfolios($id, $to_delete_portfolios);
 
                 // Add New Portfolios
-                $this->ri_setup_treaty_portfolio_model->add_portfolios($id, $to_insert_portfolios);
+                $this->ri_setup_treaty_portfolio_model->add_portfolios($id, $to_insert_portfolios, $fiscal_yr_id);
             }
 
         // Commit all transactions on success, rollback else

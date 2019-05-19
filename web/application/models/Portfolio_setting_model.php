@@ -82,7 +82,8 @@ class Portfolio_setting_model extends MY_Model
                     '_data'     => IQB_PORTFOLIO_LIABILITY_OPTION__LIST,
                     '_list_inline' => false,
                     '_checkbox_value' => $existing_ri_liability_options,
-                    '_required' => true
+                    '_required' => true,
+                    '_help_text' => "Please select the portfolio liability options. Based on the selection, RI will be distributed for that liability. For example, in Motor, RI will be distributed in Sum Insured and Third Party Liability."
                 ],
                 [
                     'field' => 'bs_service_charge',

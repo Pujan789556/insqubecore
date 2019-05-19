@@ -26,7 +26,25 @@ class Migration_Upgrade_treaty_portfolio_schema_index extends CI_Migration {
             "ALTER TABLE `ri_setup_treaty_portfolios` ADD CONSTRAINT `__fck__ri_setup_treaty__ri_setup_treaty_portfolio` FOREIGN KEY (`treaty_id`) REFERENCES `ri_setup_treaties`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;",
 
             // -- Add Index for treaty distribution for column
-            "ALTER TABLE `ri_setup_treaty_portfolios` ADD INDEX(`treaty_distribution_for`);"
+            "ALTER TABLE `ri_setup_treaty_portfolios` ADD INDEX(`treaty_distribution_for`);",
+
+
+            // -- Add Primary Key Column
+            "ALTER TABLE `ri_setup_treaty_portfolios` ADD `id` INT(11) UNSIGNED NOT NULL FIRST;",
+
+            // -- Insert IDs Manually
+            "SET @pos := 0;",
+            "UPDATE ri_setup_treaty_portfolios SET id = ( SELECT @pos := @pos + 1 );",
+
+            // -- Add Primary Key Index
+            "ALTER TABLE `ri_setup_treaty_portfolios` ADD PRIMARY KEY(`id`);",
+
+            // -- Add Autoincrement
+            "ALTER TABLE `ri_setup_treaty_portfolios` CHANGE `id` `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT;",
+
+
+            // Set default liability options as "Sum Insured" on all portfolio on all fiscal year settings
+            "UPDATE `master_portfolio_settings` SET `ri_liability_options` = '1' WHERE 1;",
         ];
 
         // Use automatic transaction
@@ -47,6 +65,9 @@ class Migration_Upgrade_treaty_portfolio_schema_index extends CI_Migration {
         }
         else
         {
+            // Clear Portfolio Settings cache
+            $this->load->model('portfolio_setting_model');
+            $this->portfolio_setting_model->clear_cache();
 
             print "Successfully migrated.\n\r";
         }
