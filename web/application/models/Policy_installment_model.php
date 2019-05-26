@@ -304,9 +304,11 @@ class Policy_installment_model extends MY_Model
         {
             /**
              * DO RI Distribution on Paid
+             *
+             * NOTE!!! NOT NOW @TODO: RI Distribution
              */
             $this->load->helper('ri');
-            RI__distribute( $record->id );
+            // RI__distribute( $record->id );
 
 
             /**
