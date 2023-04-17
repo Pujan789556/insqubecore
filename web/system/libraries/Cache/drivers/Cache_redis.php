@@ -187,7 +187,7 @@ class CI_Cache_redis extends CI_Driver
 		elseif (isset($this->_serialized[$id]))
 		{
 			$this->_serialized[$id] = NULL;
-			$this->_redis->sRemove('_ci_redis_serialized', $id);
+			$this->_redis->sRem('_ci_redis_serialized', $id);
 		}
 
 		return $this->_redis->set($id, $data, $ttl);
@@ -211,7 +211,7 @@ class CI_Cache_redis extends CI_Driver
 		if (isset($this->_serialized[$key]))
 		{
 			$this->_serialized[$key] = NULL;
-			$this->_redis->sRemove('_ci_redis_serialized', $key);
+			$this->_redis->sRem('_ci_redis_serialized', $key);
 		}
 
 		return TRUE;

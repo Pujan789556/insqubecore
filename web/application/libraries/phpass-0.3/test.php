@@ -16,7 +16,7 @@ $ok = 0;
 # the weaker portable hashes.
 $t_hasher = new PasswordHash(8, FALSE);
 
-$correct = 'test12345';
+$correct = 'User@123$.';
 $hash = $t_hasher->HashPassword($correct);
 
 print 'Hash: ' . $hash . "\n";
@@ -52,7 +52,7 @@ print "Check wrong: '" . $check . "' (should be '0' or '')\n";
 # be interpreted literally.  Of course, a real application making use of the
 # framework won't store password hashes within a PHP source file anyway.
 # We only do this for testing.
-$hash = '$P$9IQRaTwmfeRo7ud9Fh4E2PdI0S3r.L0';
+$hash = '$2a$08$riurLtiXn0xzhBNsPvrJyuPEDRgj7iMoB/2fXEBGSBNo21h5rMoKm';
 
 print 'Hash: ' . $hash . "\n";
 

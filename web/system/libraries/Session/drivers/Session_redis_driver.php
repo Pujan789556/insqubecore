@@ -217,7 +217,7 @@ class CI_Session_redis_driver extends CI_Session_driver implements SessionHandle
 			$this->_session_id = $session_id;
 		}
 
-		$this->_redis->setTimeout($this->_lock_key, 300);
+		$this->_redis->expire($this->_lock_key, 300);
 		if ($this->_fingerprint !== ($fingerprint = md5($session_data)) OR $this->_key_exists === FALSE)
 		{
 			if ($this->_redis->set($this->_key_prefix.$session_id, $session_data, $this->_config['expiration']))
@@ -230,7 +230,7 @@ class CI_Session_redis_driver extends CI_Session_driver implements SessionHandle
 			return $this->_fail();
 		}
 
-		return ($this->_redis->setTimeout($this->_key_prefix.$session_id, $this->_config['expiration']))
+		return ($this->_redis->expire($this->_key_prefix.$session_id, $this->_config['expiration']))
 			? $this->_success
 			: $this->_fail();
 	}
@@ -345,7 +345,7 @@ class CI_Session_redis_driver extends CI_Session_driver implements SessionHandle
 		// correct session ID.
 		if ($this->_lock_key === $this->_key_prefix.$session_id.':lock')
 		{
-			return $this->_redis->setTimeout($this->_lock_key, 300);
+			return $this->_redis->expire($this->_lock_key, 300);
 		}
 
 		// 30 attempts to obtain a lock, in case another request already has it
