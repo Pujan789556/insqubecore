@@ -203,7 +203,7 @@ class CI_Cache_redis extends CI_Driver
 	 */
 	public function delete($key)
 	{
-		if ($this->_redis->delete($key) !== 1)
+		if ($this->_redis->del($key) !== 1)
 		{
 			return FALSE;
 		}
