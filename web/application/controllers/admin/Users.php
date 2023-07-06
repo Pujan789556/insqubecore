@@ -706,6 +706,7 @@ class Users extends MY_Controller
 		 * Update Validation Rule if Scope is branch
 		 */
 		$scope = $this->input->post('scope');
+		var_dump($scope);
 		if($scope['scope'] === 'branch')
 		{
 			$rules[] = [
@@ -716,6 +717,7 @@ class Users extends MY_Controller
 		}
 
 		$this->form_validation->set_rules($rules);
+		
 		if( $this->input->post() && $this->form_validation->run() )
 		{
 			$data = $this->input->post();
